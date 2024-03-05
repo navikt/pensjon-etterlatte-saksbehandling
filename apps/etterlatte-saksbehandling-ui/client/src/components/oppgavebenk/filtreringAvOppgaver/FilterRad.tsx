@@ -1,6 +1,10 @@
 import { Button, Select, TextField } from '@navikt/ds-react'
 import React, { ReactNode, useEffect, useState } from 'react'
-import { initialFilter, oppgavetypefilter } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
+import {
+  initialFilter,
+  minOppgavelisteFiltre,
+  oppgavetypefilter,
+} from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FlexRow } from '~shared/styled'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
@@ -18,6 +22,7 @@ import {
 } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { MultiSelectFilter } from '~components/oppgavebenk/filtreringAvOppgaver/MultiSelectFilter'
 import { ArrowCirclepathIcon, ArrowRedoIcon } from '@navikt/aksel-icons'
+import { oppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/VelgOppgaveliste'
 
 interface Props {
   hentAlleOppgaver: () => void
@@ -25,6 +30,7 @@ interface Props {
   filter: Filter
   setFilter: (filter: Filter) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
+  oppgavelisteValg?: oppgavelisteValg
 }
 
 export const FilterRad = ({
@@ -33,6 +39,7 @@ export const FilterRad = ({
   filter,
   setFilter,
   saksbehandlereIEnhet,
+  oppgavelisteValg,
 }: Props): ReactNode => {
   const [sakEllerFnr, setSakEllerFnr] = useState<string>(filter.sakEllerFnrFilter)
 
@@ -73,20 +80,27 @@ export const FilterRad = ({
               </option>
             ))}
         </Select>
+        {oppgavelisteValg === 'Oppgavelista' && (
+          <>
+            <FiltrerPaaSaksbehandler
+              saksbehandlereIEnhet={saksbehandlereIEnhet}
+              filter={filter}
+              setFilter={setFilter}
+            />
+            <Select
+              label="Enhet"
+              value={filter.enhetsFilter}
+              onChange={(e) => setFilter({ ...filter, enhetsFilter: e.target.value as EnhetFilterKeys })}
+            >
+              {Object.entries(ENHETFILTER).map(([enhetsnummer, enhetBeskrivelse]) => (
+                <option key={enhetsnummer} value={enhetsnummer}>
+                  {enhetBeskrivelse}
+                </option>
+              ))}
+            </Select>
+          </>
+        )}
 
-        <FiltrerPaaSaksbehandler saksbehandlereIEnhet={saksbehandlereIEnhet} filter={filter} setFilter={setFilter} />
-
-        <Select
-          label="Enhet"
-          value={filter.enhetsFilter}
-          onChange={(e) => setFilter({ ...filter, enhetsFilter: e.target.value as EnhetFilterKeys })}
-        >
-          {Object.entries(ENHETFILTER).map(([enhetsnummer, enhetBeskrivelse]) => (
-            <option key={enhetsnummer} value={enhetsnummer}>
-              {enhetBeskrivelse}
-            </option>
-          ))}
-        </Select>
         <Select
           label="Ytelse"
           value={filter.ytelseFilter}
@@ -124,7 +138,7 @@ export const FilterRad = ({
         <Button
           variant="secondary"
           onClick={() => {
-            setFilter(initialFilter())
+            setFilter(oppgavelisteValg === 'Oppgavelista' ? initialFilter() : minOppgavelisteFiltre())
             hentAlleOppgaver()
           }}
           size="small"

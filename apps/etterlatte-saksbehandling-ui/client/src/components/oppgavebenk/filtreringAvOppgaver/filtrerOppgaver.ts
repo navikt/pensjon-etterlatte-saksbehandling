@@ -143,3 +143,15 @@ export const initialFilter = (): Filter => {
     oppgavetypeFilter: [OPPGAVETYPEFILTER.visAlle],
   }
 }
+
+export const minOppgavelisteFiltre = (): Filter => {
+  return {
+    sakEllerFnrFilter: '',
+    enhetsFilter: 'visAlle',
+    fristFilter: 'visAlle',
+    saksbehandlerFilter: SAKSBEHANDLERFILTER.visAlle,
+    ytelseFilter: 'visAlle',
+    oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
+    oppgavetypeFilter: [OPPGAVETYPEFILTER.visAlle],
+  }
+}

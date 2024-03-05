@@ -33,6 +33,7 @@ import {
   leggValgILocalstorage,
 } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 import { oppgavelisteValg, VelgOppgaveliste } from '~components/oppgavebenk/velgOppgaveliste/VelgOppgaveliste'
+import { minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 
 export const Oppgavelista = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
@@ -48,7 +49,7 @@ export const Oppgavelista = () => {
   const [minOppgavelisteOppgaver, setMinOppgavelisteOppgaver] = useState<Array<OppgaveDTO>>([])
 
   const [oppgavelistaFilter, setOppgavelistaFilter] = useState<Filter>(hentFilterFraLocalStorage())
-  const [minOppgavelisteFilter, setMinOppgavelisteFilter] = useState<Filter>(hentFilterFraLocalStorage())
+  const [minOppgavelisteFilter, setMinOppgavelisteFilter] = useState<Filter>(minOppgavelisteFiltre())
 
   const [oppgavelistaOppgaverResult, hentOppgavelistaOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
   const [minOppgavelisteOppgaverResult, hentMinOppgavelisteOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
@@ -207,6 +208,7 @@ export const Oppgavelista = () => {
             filter={oppgavelistaFilter}
             setFilter={setOppgavelistaFilter}
             saksbehandlereIEnhet={saksbehandlereIEnheter}
+            oppgavelisteValg={oppgavelisteValg}
           />
           <OppgaveFeilWrapper oppgaver={oppgavelistaOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
             <Oppgaver

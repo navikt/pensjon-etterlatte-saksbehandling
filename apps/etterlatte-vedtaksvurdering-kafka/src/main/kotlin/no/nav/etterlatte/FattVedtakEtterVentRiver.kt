@@ -6,9 +6,10 @@ import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.behandlingId
-import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
+import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
 import no.nav.etterlatte.rapidsandrivers.migrering.OPPGAVEKILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Ventehendelser
+import no.nav.etterlatte.rapidsandrivers.migrering.migreringKjoringVariant
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.rapidsandrivers.withFeilhaandtering
 import no.nav.etterlatte.vedtaksvurdering.RapidUtsender
@@ -28,6 +29,7 @@ class FattVedtakEtterVentRiver(
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireValue(OPPGAVEKILDE_KEY, OppgaveKilde.GJENOPPRETTING.name) }
+            validate { it.requireKey(MIGRERING_KJORING_VARIANT) }
         }
     }
 
@@ -43,7 +45,7 @@ class FattVedtakEtterVentRiver(
                 vedtakService.opprettVedtakFattOgAttester(
                     packet.sakId,
                     behandlingId,
-                    MigreringKjoringVariant.FULL_KJORING,
+                    packet.migreringKjoringVariant,
                 )
             logger.info("Opprettet vedtak ${respons.vedtak.id} for migrert behandling: $behandlingId")
             RapidUtsender.sendUt(respons, packet, context)

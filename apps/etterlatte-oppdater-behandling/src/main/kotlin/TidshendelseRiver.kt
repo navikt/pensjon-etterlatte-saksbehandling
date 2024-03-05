@@ -71,7 +71,7 @@ class TidshendelseRiver(
                 logger.info("Løpende ytelse: opprette oppgave for sak $sakId, behandlingsmåned=$behandlingsmaaned")
 
                 if (!dryrun) {
-                    val frist = Tidspunkt.ofNorskTidssone(behandlingsmaaned.atDay(20), LocalTime.NOON)
+                    val frist = Tidspunkt.ofNorskTidssone(behandlingsmaaned.atEndOfMonth(), LocalTime.NOON)
                     val oppgaveId =
                         behandlingService.opprettOppgave(
                             sakId,

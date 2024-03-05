@@ -17,6 +17,7 @@ import {
   YtelseFilterKeys,
 } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { MultiSelectFilter } from '~components/oppgavebenk/filtreringAvOppgaver/MultiSelectFilter'
+import { ArrowCirclepathIcon, ArrowRedoIcon } from '@navikt/aksel-icons'
 
 interface Props {
   hentAlleOppgaver: () => void
@@ -125,13 +126,18 @@ export const FilterRad = ({
       </FlexRow>
 
       <FlexRow $spacing>
-        <Button onClick={hentAlleOppgaver}>Hent</Button>
+        <Button onClick={hentAlleOppgaver} size="small" icon={<ArrowCirclepathIcon />} iconPosition="right">
+          Hent
+        </Button>
         <Button
           variant="secondary"
           onClick={() => {
             setFilter(initialFilter())
             hentAlleOppgaver()
           }}
+          size="small"
+          icon={<ArrowRedoIcon />}
+          iconPosition="right"
         >
           Tilbakestill alle filtre
         </Button>

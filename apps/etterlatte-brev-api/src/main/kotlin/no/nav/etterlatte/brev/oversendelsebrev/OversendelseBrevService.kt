@@ -44,6 +44,7 @@ interface OversendelseBrevService {
 
     suspend fun pdf(
         brevId: Long,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Pdf
 
@@ -106,6 +107,7 @@ class OversendelseBrevServiceImpl(
 
     override suspend fun pdf(
         brevId: Long,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Pdf {
         val brev = brevRepository.hentBrev(brevId)
@@ -120,8 +122,11 @@ class OversendelseBrevServiceImpl(
                 "Brevet med id=$brevId er ikke av typen oversendelse klage, og kan ikke hentes som et oversendelse klage-brev",
             )
         }
-        if (brev.behandlingId == null) {
-            throw InternfeilException("Har et oversendelsesbrev for klage som ikke er koblet til klagen, brevId=$brevId")
+        if (brev.behandlingId != behandlingId) {
+            throw UgyldigForespoerselException(
+                "FEIL_BREV_ID",
+                "Brevet med id=$brevId er ikke koblet på behandlingen med id=$behandlingId",
+            )
         }
 
         val klage = brevdataFacade.hentKlage(brev.behandlingId, brukerTokenInfo)

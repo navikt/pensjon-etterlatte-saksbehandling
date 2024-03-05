@@ -50,6 +50,17 @@ fun Route.oversendelseBrevRoute(
                 }
             }
         }
+
+        get("pdf") {
+            withBehandlingId(tilgangssjekker, skrivetilgang = false) { behandlingId ->
+                measureTimedValue {
+                    service.pdf(brevId, behandlingId, brukerTokenInfo)
+                }.let { (brev, varighet) ->
+                    logger.info("Henting av pdf for oversendelsesbrev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    call.respond(brev)
+                }
+            }
+        }
     }
 
     route("brev/{$BREV_ID_CALL_PARAMETER}/oversendelse") {

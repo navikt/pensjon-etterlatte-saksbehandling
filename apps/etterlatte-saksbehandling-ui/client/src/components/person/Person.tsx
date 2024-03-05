@@ -8,20 +8,24 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { Tabs } from '@navikt/ds-react'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
-import { BulletListIcon, EnvelopeClosedIcon, FileTextIcon } from '@navikt/aksel-icons'
+import { BulletListIcon, CogRotationIcon, EnvelopeClosedIcon, FileTextIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
 
-import { mapAllApiResult, mapSuccess } from '~shared/api/apiUtils'
+import { isSuccess, mapAllApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
 import { hentPersonNavn } from '~shared/api/pdltjenester'
+import { SamordningSak } from '~components/person/SamordningSak'
+import { SakMedBehandlinger } from '~components/person/typer'
+import { SakType } from '~shared/types/sak'
 
 enum Fane {
   SAKER = 'SAKER',
   DOKUMENTER = 'DOKUMENTER',
   BREV = 'BREV',
+  SAMORDNING = 'SAMORDNING',
 }
 
 export const Person = () => {
@@ -59,6 +63,10 @@ export const Person = () => {
     return <ApiErrorAlert>Fødselsnummeret {fnr} har et ugyldig format (ikke 11 siffer)</ApiErrorAlert>
   }
 
+  const isOmstillingsstoenad = (sakStatus: Result<SakMedBehandlinger>) => {
+    return isSuccess(sakStatus) && sakStatus.data.sak.sakType === SakType.OMSTILLINGSSTOENAD
+  }
+
   return (
     <>
       {mapSuccess(personStatus, (person) => (
@@ -79,6 +87,9 @@ export const Person = () => {
               <Tabs.Tab value={Fane.SAKER} label="Sak og behandling" icon={<BulletListIcon />} />
               <Tabs.Tab value={Fane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
               <Tabs.Tab value={Fane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
+              {isOmstillingsstoenad(sakStatus) && (
+                <Tabs.Tab value={Fane.SAMORDNING} label="Samordning" icon={<CogRotationIcon />} />
+              )}
             </Tabs.List>
 
             <Tabs.Panel value={Fane.SAKER}>
@@ -89,6 +100,9 @@ export const Person = () => {
             </Tabs.Panel>
             <Tabs.Panel value={Fane.BREV}>
               <BrevOversikt sakStatus={sakStatus} />
+            </Tabs.Panel>
+            <Tabs.Panel value={Fane.SAMORDNING}>
+              <SamordningSak sakStatus={sakStatus} />
             </Tabs.Panel>
           </Tabs>
         )

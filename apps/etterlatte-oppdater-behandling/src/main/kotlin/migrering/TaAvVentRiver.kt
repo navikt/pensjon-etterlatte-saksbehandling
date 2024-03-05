@@ -12,6 +12,7 @@ import no.nav.etterlatte.rapidsandrivers.asUUID
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.migrering.OPPGAVEKILDE_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.OPPGAVETYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Ventehendelser
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -24,6 +25,8 @@ internal class TaAvVentRiver(rapidsConnection: RapidsConnection, private val beh
         initialiserRiver(rapidsConnection, Ventehendelser.TA_AV_VENT) {
             validate { it.interestedIn(OPPGAVE_ID_FLERE_KEY) }
             validate { it.requireKey(DATO_KEY) }
+            validate { it.requireKey(OPPGAVEKILDE_KEY) }
+            validate { it.requireKey(OPPGAVETYPE_KEY) }
         }
     }
 
@@ -35,8 +38,8 @@ internal class TaAvVentRiver(rapidsConnection: RapidsConnection, private val beh
             behandlingService.taAvVent(
                 VentefristGaarUtRequest(
                     dato = packet.dato,
-                    type = OppgaveType.FOERSTEGANGSBEHANDLING,
-                    oppgaveKilde = OppgaveKilde.GJENOPPRETTING,
+                    type = OppgaveType.valueOf(packet[OPPGAVETYPE_KEY].asText()),
+                    oppgaveKilde = OppgaveKilde.valueOf(packet[OPPGAVEKILDE_KEY].asText()),
                     oppgaver = packet[OPPGAVE_ID_FLERE_KEY].map { it.asUUID() },
                 ),
             )

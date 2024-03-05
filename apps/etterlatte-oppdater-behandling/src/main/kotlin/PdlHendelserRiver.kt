@@ -67,8 +67,12 @@ internal class PdlHendelserRiver(
                 "BOSTEDSADRESSE_V1" -> {
                     val bostedsadresse: Bostedsadresse =
                         objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
-                    logger.info("Bostedsadresse mottatt for ${bostedsadresse.fnr.maskerFnr()}")
-                    behandlinger.sendAdresseHendelse(bostedsadresse)
+                    if (bostedsadresse.fnr.maskerFnr().startsWith("230713")) {
+                        logger.info("Hopper over melding for person med fnr ${bostedsadresse.fnr.maskerFnr()}")
+                    } else {
+                        logger.info("Bostedsadresse mottatt for ${bostedsadresse.fnr.maskerFnr()}")
+                        behandlinger.sendAdresseHendelse(bostedsadresse)
+                    }
                 }
 
                 "VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1" -> {

@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -516,10 +517,8 @@ class OppgaveService(
         }
     }
 
-    fun hentFristGaarUt(request: VentefristGaarUtRequest) =
-        request.oppgaver.ifEmpty {
-            oppgaveDao.hentFristGaarUt(request.dato, request.type, request.oppgaveKilde)
-        }
+    fun hentFristGaarUt(request: VentefristGaarUtRequest): List<VentefristGaarUt> =
+        oppgaveDao.hentFristGaarUt(request.dato, request.type, request.oppgaveKilde, request.oppgaver)
 }
 
 class FantIkkeSakException(msg: String) : Exception(msg)

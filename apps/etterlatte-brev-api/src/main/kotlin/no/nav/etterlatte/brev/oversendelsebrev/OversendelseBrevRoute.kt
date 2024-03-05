@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.BREV_ID_CALL_PARAMETER
 import no.nav.etterlatte.brev.brevId
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -52,9 +53,15 @@ fun Route.oversendelseBrevRoute(
         }
 
         get("pdf") {
+            val brevId =
+                call.parameters["brevId"]?.toLong() ?: throw UgyldigForespoerselException(
+                    "MANGLER_BREV_ID",
+                    "Mangler brevId i url parameters",
+                )
+
             withBehandlingId(tilgangssjekker, skrivetilgang = false) { behandlingId ->
                 measureTimedValue {
-                    service.pdf(brevId, behandlingId, brukerTokenInfo)
+                    service.pdf(brevId, behandlingId, brukerTokenInfo).bytes
                 }.let { (brev, varighet) ->
                     logger.info("Henting av pdf for oversendelsesbrev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(brev)

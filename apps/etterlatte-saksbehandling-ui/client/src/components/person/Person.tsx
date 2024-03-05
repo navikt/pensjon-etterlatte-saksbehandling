@@ -66,10 +66,8 @@ export const Person = () => {
     return <ApiErrorAlert>Fødselsnummeret {fnr} har et ugyldig format (ikke 11 siffer)</ApiErrorAlert>
   }
 
-  const isSakOms = (sakStatus: Result<SakMedBehandlinger>) => {
-    if (isSuccess(sakStatus)) {
-      return sakStatus.data.sak.sakType == SakType.OMSTILLINGSSTOENAD
-    }
+  const isOmstillingsstoenad = (sakStatus: Result<SakMedBehandlinger>) => {
+    return isSuccess(sakStatus) && sakStatus.data.sak.sakType === SakType.OMSTILLINGSSTOENAD
   }
 
   return (
@@ -92,7 +90,7 @@ export const Person = () => {
               <Tabs.Tab value={Fane.SAKER} label="Sak og behandling" icon={<BulletListIcon />} />
               <Tabs.Tab value={Fane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
               <Tabs.Tab value={Fane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
-              {isSakOms(sakStatus) && (
+              {isOmstillingsstoenad(sakStatus) && (
                 <Tabs.Tab value={Fane.SAMORDNING} label="Samordning" icon={<CogRotationIcon />} />
               )}
             </Tabs.List>

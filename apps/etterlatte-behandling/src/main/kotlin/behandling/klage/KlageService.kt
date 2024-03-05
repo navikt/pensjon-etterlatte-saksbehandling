@@ -314,7 +314,13 @@ class KlageServiceImpl(
             is KlageUtfallMedData.DelvisOmgjoering -> utfall.innstilling.brev
             is KlageUtfallMedData.StadfesteVedtak -> utfall.innstilling.brev
             else -> {
-                val brev = runBlocking { brevApiKlient.opprettKlageOversendelsesbrevISak(klage.id, saksbehandler) }
+                val brev =
+                    runBlocking {
+                        brevApiKlient.opprettKlageOversendelsesbrevISak(
+                            klage.id,
+                            saksbehandler,
+                        )
+                    }
                 KlageBrevInnstilling(brev.id)
             }
         }

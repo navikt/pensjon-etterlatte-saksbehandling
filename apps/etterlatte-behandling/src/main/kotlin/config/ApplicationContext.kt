@@ -29,6 +29,8 @@ import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
 import no.nav.etterlatte.behandling.klage.KlageServiceImpl
+import no.nav.etterlatte.behandling.klienter.AxsysKlient
+import no.nav.etterlatte.behandling.klienter.AxsysKlientImpl
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlientObo
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
@@ -177,6 +179,14 @@ private fun krrHttKlient(config: Config) =
         azureAppScope = config.getString("krr.scope"),
     )
 
+private fun axsysKlient(config: Config) =
+    httpClientClientCredentials(
+        azureAppClientId = config.getString("azure.app.client.id"),
+        azureAppJwk = config.getString("azure.app.jwk"),
+        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+        azureAppScope = config.getString("axsys.scope"),
+    )
+
 private fun finnBrukerIdent(): String {
     val kontekst = Kontekst.get()
     return when (kontekst) {
@@ -220,6 +230,7 @@ internal class ApplicationContext(
     val migreringHttpClient: HttpClient = migreringHttpClient(config),
     val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
     val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
+    val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -436,7 +447,7 @@ internal class ApplicationContext(
             tilbakekrevinghendelser = tilbakekreving,
         )
 
-    val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient)
+    val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
 
     // Jobs
 
@@ -463,7 +474,7 @@ internal class ApplicationContext(
         SaksbehandlerJob(
             saksbehandlerJobService = saksbehandlerJobService,
             { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+            initialDelay = Duration.of(10, ChronoUnit.SECONDS).toMillis(),
             interval = Duration.of(1, ChronoUnit.HOURS),
         )
     }

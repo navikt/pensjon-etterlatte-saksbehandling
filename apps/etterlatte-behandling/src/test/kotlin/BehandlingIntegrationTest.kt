@@ -20,6 +20,7 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
+import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.BrevStatus
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
@@ -142,6 +143,7 @@ abstract class BehandlingIntegrationTest {
                 migreringHttpClient = migreringHttpClientTest(),
                 pesysKlient = PesysKlientTest(),
                 krrKlient = KrrklientTest(),
+                axsysKlient = AxsysKlientTest(),
             )
     }
 
@@ -682,5 +684,11 @@ class KrrklientTest : KrrKlient {
             mobiltelefonnummer = null,
             sikkerDigitalPostkasse = null,
         )
+    }
+}
+
+class AxsysKlientTest : AxsysKlient {
+    override suspend fun hentEnheterForIdent(ident: String): List<SaksbehandlerEnhet> {
+        return listOf(SaksbehandlerEnhet("12345", "navn saksbehnadlersen"))
     }
 }

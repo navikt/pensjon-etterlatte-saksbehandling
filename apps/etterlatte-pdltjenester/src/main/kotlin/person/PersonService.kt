@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.hentPrioritertGradering
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
@@ -53,6 +54,7 @@ class PersonService(
                     )
                 }
             } else {
+                logger.info(it.data.hentPerson.toJson())
                 PersonMapper.mapOpplysningsperson(
                     ppsKlient = ppsKlient,
                     pdlKlient = pdlKlient,

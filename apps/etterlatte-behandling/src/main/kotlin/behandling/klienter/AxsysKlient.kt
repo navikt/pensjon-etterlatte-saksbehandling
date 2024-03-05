@@ -3,13 +3,11 @@ package no.nav.etterlatte.behandling.klienter
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.http.isSuccess
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import org.slf4j.Logger
@@ -43,13 +41,9 @@ class AxsysKlientImpl(private val client: HttpClient, private val url: String) :
                     contentType(ContentType.Application.Json)
                 }
 
-            if (response.status.isSuccess()) {
-                response.body<EnhetslisteResponse?>()?.enheter
-                    ?.map { SaksbehandlerEnhet(it.enhetId, it.navn) }
-                    .also { enhetCache.put(ident, it) } ?: emptyList()
-            } else {
-                throw ClientRequestException(response, response.toString())
-            }
+            response.body<EnhetslisteResponse?>()?.enheter
+                ?.map { SaksbehandlerEnhet(it.enhetId, it.navn) }
+                .also { enhetCache.put(ident, it) } ?: emptyList()
         } catch (cause: Throwable) {
             logger.warn("Klarte ikke å hente enheter for ident $ident fra axsys.", cause)
             return emptyList()

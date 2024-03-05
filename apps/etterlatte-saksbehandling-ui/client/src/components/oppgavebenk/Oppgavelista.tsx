@@ -5,7 +5,6 @@ import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
-import { useLocation, useNavigate } from 'react-router-dom'
 import {
   hentFilterFraLocalStorage,
   leggFilterILocalStorage,
@@ -32,6 +31,7 @@ import { OppgaveFeilWrapper } from '~components/oppgavebenk/components/OppgaveFe
 import { hentAlleStoettedeRevurderinger } from '~shared/api/revurdering'
 import { RevurderingsaarsakerBySakstype, RevurderingsaarsakerDefault } from '~shared/types/Revurderingaarsak'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import { hentValgFraLocalStorage, leggValgILocalstorage } from '~components/oppgavebenk/utils/oppgavelisteValg'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -41,10 +41,9 @@ export const Oppgavelista = () => {
     return <Tilgangsmelding />
   }
 
-  const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
-
-  const location = useLocation()
-  const navigate = useNavigate()
+  const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>(
+    hentValgFraLocalStorage() as OppgavelisteToggle
+  )
 
   const [oppgavelistaOppgaver, setOppgavelistaOppgaver] = useState<Array<OppgaveDTO>>([])
   const [minOppgavelisteOppgaver, setMinOppgavelisteOppgaver] = useState<Array<OppgaveDTO>>([])
@@ -65,11 +64,6 @@ export const Oppgavelista = () => {
 
   const oppdaterOppgavelisteValg = (oppgaveListeValg: OppgavelisteToggle) => {
     setOppgaveListeValg(oppgaveListeValg)
-    if (oppgaveListeValg === 'MinOppgaveliste') {
-      navigate('/minoppgaveliste')
-    } else {
-      navigate('/')
-    }
   }
 
   const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
@@ -122,16 +116,12 @@ export const Oppgavelista = () => {
   }
 
   useEffect(() => {
-    if (location.pathname.includes('minoppgaveliste')) {
-      if (oppgaveListeValg !== 'MinOppgaveliste') {
-        setOppgaveListeValg('MinOppgaveliste')
-      }
-    }
-  }, [location.pathname])
-
-  useEffect(() => {
     leggFilterILocalStorage({ ...oppgavelistaFilter, fnrFilter: '', sakidFilter: '' })
   }, [oppgavelistaFilter])
+
+  useEffect(() => {
+    leggValgILocalstorage(oppgaveListeValg)
+  }, [oppgaveListeValg])
 
   useEffect(() => {
     hentAlleOppgaver()

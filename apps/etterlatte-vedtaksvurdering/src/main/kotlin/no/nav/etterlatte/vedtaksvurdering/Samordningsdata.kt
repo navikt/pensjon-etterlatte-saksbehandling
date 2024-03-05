@@ -1,6 +1,8 @@
 package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped
 import java.time.LocalDate
+import java.util.UUID
 
 class Samordningsvedtak(
     val samordningVedtakId: Long,
@@ -27,4 +29,10 @@ class Samordningsmelding(
     val purretDato: LocalDate?,
     val refusjonskrav: Boolean,
     val versjon: Long,
+)
+
+class SamordningsvedtakWrapper(
+    @JsonUnwrapped
+    val samordningsvedtak: Samordningsvedtak,
+    val behandlingId: UUID,
 )

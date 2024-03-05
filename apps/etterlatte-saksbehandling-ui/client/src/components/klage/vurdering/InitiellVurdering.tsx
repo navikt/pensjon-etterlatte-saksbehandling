@@ -8,7 +8,7 @@ import { isPending } from '~shared/api/apiUtils'
 import { addKlage } from '~store/reducers/KlageReducer'
 import { useAppDispatch } from '~store/Store'
 import { InitiellVurderingVisningContent } from '~components/klage/vurdering/InitiellVurderingVisning'
-import { VurderingWrapper } from '~components/klage/styled'
+import { BredVurderingWrapper, VurderingWrapper } from '~components/klage/styled'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { FieldOrNull } from '~shared/types/util'
@@ -73,7 +73,7 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
 
   return (
     <>
-      <Heading level="2" size="medium">
+      <Heading level="2" size="medium" spacing={true}>
         Første vurdering
       </Heading>
       <>
@@ -104,19 +104,20 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
             />
             {formUtfall && (
               <>
-                <VurderingWrapper>
+                <BredVurderingWrapper>
                   <Textarea size="medium" label={getTextFromutfall(formUtfall)} {...register('begrunnelse')} />
-                </VurderingWrapper>
-                <VurderingWrapper>
+                </BredVurderingWrapper>
+
+                <BredVurderingWrapper>
                   <Button type="submit" variant="primary" loading={isPending(lagreInitiellStatus)}>
                     Lagre vurdering
                   </Button>
-                </VurderingWrapper>
-                {isFailureHandler({
-                  apiResult: lagreInitiellStatus,
-                  errorMessage:
-                    'Kunne ikke lagre initielt utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
-                })}
+                  {isFailureHandler({
+                    apiResult: lagreInitiellStatus,
+                    errorMessage:
+                      'Kunne ikke lagre initielt utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
+                  })}
+                </BredVurderingWrapper>
               </>
             )}
           </form>

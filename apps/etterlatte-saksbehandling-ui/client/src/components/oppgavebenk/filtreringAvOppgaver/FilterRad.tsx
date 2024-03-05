@@ -127,7 +127,7 @@ export const FilterRad = ({
 
       <FlexRow $spacing>
         <Button onClick={hentAlleOppgaver} size="small" icon={<ArrowCirclepathIcon />} iconPosition="right">
-          Hent
+          Hent oppgaver
         </Button>
         <Button
           variant="secondary"
@@ -139,7 +139,7 @@ export const FilterRad = ({
           icon={<ArrowRedoIcon />}
           iconPosition="right"
         >
-          Tilbakestill alle filtre
+          Tilbakestill filtre
         </Button>
       </FlexRow>
     </>

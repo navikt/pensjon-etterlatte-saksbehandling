@@ -106,6 +106,7 @@ data class DetaljertBeregnetTrygdetidResultat(
     val prorataBroek: IntBroek?,
     val overstyrt: Boolean,
     val yrkesskade: Boolean,
+    val beregnetSamletTrygdetidNorge: Int?,
 ) {
     companion object {
         fun fraSamletTrygdetidNorge(anvendtTrygdetid: Int) =
@@ -119,6 +120,7 @@ data class DetaljertBeregnetTrygdetidResultat(
                 prorataBroek = null,
                 overstyrt = true,
                 yrkesskade = false,
+                beregnetSamletTrygdetidNorge = null,
             )
 
         fun fraSamletTrygdetidProrata(
@@ -134,6 +136,7 @@ data class DetaljertBeregnetTrygdetidResultat(
             prorataBroek = prorataBroek,
             overstyrt = true,
             yrkesskade = false,
+            beregnetSamletTrygdetidNorge = null,
         )
     }
 }

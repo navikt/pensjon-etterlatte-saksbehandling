@@ -583,6 +583,7 @@ class TrygdetidServiceImpl(
                                 prorataBroek = null,
                                 overstyrt = true,
                                 yrkesskade = false,
+                                beregnetSamletTrygdetidNorge = null,
                             ),
                         tidspunkt = Tidspunkt.now(),
                         regelResultat = "".toJsonNode(),

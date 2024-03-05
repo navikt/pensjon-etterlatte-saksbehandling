@@ -485,6 +485,7 @@ val beregnDetaljertBeregnetTrygdetid =
                 prorataBroek = avrundet.second,
                 overstyrt = false,
                 yrkesskade = false,
+                beregnetSamletTrygdetidNorge = null,
             )
         }
 
@@ -496,7 +497,12 @@ val beregnDetaljertBeregnetTrygdetidMedYrkesskade =
     ) benytter beregnDetaljertBeregnetTrygdetid og erYrkesskade med { trygdetid, erYrkesskade ->
         when (erYrkesskade) {
             false -> trygdetid
-            true -> trygdetid.copy(yrkesskade = true, samletTrygdetidNorge = 40)
+            true ->
+                trygdetid.copy(
+                    yrkesskade = true,
+                    beregnetSamletTrygdetidNorge = trygdetid.samletTrygdetidNorge,
+                    samletTrygdetidNorge = 40,
+                )
         }
     }
 

@@ -319,6 +319,7 @@ internal class BeregnTrygdetidTest {
                         prorataBroek = null,
                         overstyrt = false,
                         yrkesskade = false,
+                        beregnetSamletTrygdetidNorge = null,
                     ),
                     null,
                     null,
@@ -357,6 +358,7 @@ internal class BeregnTrygdetidTest {
                         prorataBroek = null,
                         overstyrt = false,
                         yrkesskade = false,
+                        beregnetSamletTrygdetidNorge = null,
                     ),
                     null,
                     null,
@@ -395,6 +397,7 @@ internal class BeregnTrygdetidTest {
                         prorataBroek = null,
                         overstyrt = false,
                         yrkesskade = false,
+                        beregnetSamletTrygdetidNorge = null,
                     ),
                     null,
                     null,
@@ -433,6 +436,7 @@ internal class BeregnTrygdetidTest {
                         prorataBroek = null,
                         overstyrt = false,
                         yrkesskade = false,
+                        beregnetSamletTrygdetidNorge = null,
                     ),
                     null,
                     null,
@@ -516,6 +520,7 @@ internal class BeregnTrygdetidTest {
                         prorataBroek = IntBroek(219, 363),
                         overstyrt = false,
                         yrkesskade = false,
+                        beregnetSamletTrygdetidNorge = null,
                     ),
                     Pair(
                         LocalDate.of(1976, 10, 3),
@@ -591,6 +596,7 @@ internal class BeregnTrygdetidTest {
                         prorataBroek = IntBroek(167, 313),
                         overstyrt = false,
                         yrkesskade = false,
+                        beregnetSamletTrygdetidNorge = null,
                     ),
                     Pair(
                         LocalDate.of(1981, 2, 21),
@@ -651,6 +657,7 @@ internal class BeregnTrygdetidTest {
                         prorataBroek = null,
                         overstyrt = false,
                         yrkesskade = false,
+                        beregnetSamletTrygdetidNorge = null,
                     ),
                     Pair(
                         LocalDate.of(1981, 2, 21),
@@ -714,6 +721,7 @@ internal class BeregnTrygdetidTest {
                         prorataBroek = IntBroek(24, 170),
                         overstyrt = false,
                         yrkesskade = false,
+                        beregnetSamletTrygdetidNorge = null,
                     ),
                     Pair(
                         LocalDate.of(1981, 2, 21),
@@ -780,6 +788,7 @@ internal class BeregnTrygdetidTest {
                         prorataBroek = null,
                         overstyrt = false,
                         yrkesskade = false,
+                        beregnetSamletTrygdetidNorge = null,
                     ),
                     Pair(
                         LocalDate.of(2023, 2, 21).minusYears(36),
@@ -859,6 +868,7 @@ internal class BeregnTrygdetidTest {
                         prorataBroek = IntBroek(241, 480),
                         overstyrt = false,
                         yrkesskade = false,
+                        beregnetSamletTrygdetidNorge = null,
                     ),
                     Pair(
                         LocalDate.of(1958, 11, 12),
@@ -901,6 +911,7 @@ internal class BeregnTrygdetidTest {
                         prorataBroek = null,
                         overstyrt = false,
                         yrkesskade = true,
+                        beregnetSamletTrygdetidNorge = 1,
                     ),
                     null,
                     null,

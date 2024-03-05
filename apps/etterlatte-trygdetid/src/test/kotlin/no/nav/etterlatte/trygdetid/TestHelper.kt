@@ -156,6 +156,7 @@ fun beregnetTrygdetid(
             prorataBroek = null,
             overstyrt = false,
             yrkesskade = yrkesskade,
+            beregnetSamletTrygdetidNorge = null,
         ),
     tidspunkt = tidspunkt,
     regelResultat = "".toJsonNode(),

@@ -93,6 +93,7 @@ internal class TrygdetidServiceTest {
                             prorataBroek = null,
                             overstyrt = false,
                             yrkesskade = false,
+                            beregnetSamletTrygdetidNorge = null,
                         ),
                     tidspunkt = Tidspunkt.now(),
                 ),

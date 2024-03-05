@@ -64,7 +64,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         trygdetid_regelresultat,
                         beregnet_trygdetid_overstyrt,
                         poengaar_overstyrt,
-                        yrkesskade
+                        yrkesskade,
+                        beregnet_samlet_trygdetid_norge
                     FROM trygdetid 
                     WHERE behandling_id = :behandlingId
                     """.trimIndent(),
@@ -576,6 +577,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         ),
                     overstyrt = boolean("beregnet_trygdetid_overstyrt"),
                     yrkesskade = boolean("yrkesskade"),
+                    beregnetSamletTrygdetidNorge = intOrNull("beregnet_samlet_trygdetid_norge"),
                 ),
             tidspunkt = tidspunkt("trygdetid_tidspunkt"),
             regelResultat =

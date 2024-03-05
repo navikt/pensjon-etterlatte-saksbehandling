@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Vergemaal
@@ -40,6 +41,11 @@ interface OversendelseBrevService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev
+
+    suspend fun pdf(
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Pdf
 
     fun ferdigstillOversendelseBrev(
         brevId: Long,
@@ -96,6 +102,37 @@ class OversendelseBrevServiceImpl(
                 ),
             )
         return brev
+    }
+
+    override suspend fun pdf(
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Pdf {
+        val brev = brevRepository.hentBrev(brevId)
+        if (!brev.kanEndres()) {
+            return brevRepository.hentPdf(
+                brevId,
+            ) ?: throw InternfeilException("Har et brev som ikke kan endres men ikke har en pdf, brevId=$brevId")
+        }
+        if (brev.brevtype != Brevtype.OVERSENDELSE_KLAGE) {
+            throw UgyldigForespoerselException(
+                "FEIL_BREVTYPE",
+                "Brevet med id=$brevId er ikke av typen oversendelse klage, og kan ikke hentes som et oversendelse klage-brev",
+            )
+        }
+        if (brev.behandlingId == null) {
+            throw InternfeilException("Har et oversendelsesbrev for klage som ikke er koblet til klagen, brevId=$brevId")
+        }
+
+        val klage = brevdataFacade.hentKlage(brev.behandlingId, brukerTokenInfo)
+        return pdfGenerator.genererPdf(
+            id = brev.id,
+            bruker = brukerTokenInfo,
+            automatiskMigreringRequest = null,
+            avsenderRequest = { bruker, generellData -> AvsenderRequest(bruker.ident(), generellData.sak.enhet) },
+            brevKode = { Brevkoder.OVERSENDELSE_KLAGE },
+            brevData = { req -> OversendelseBrevFerdigstillingData.fra(req, klage) },
+        )
     }
 
     private suspend fun finnMottaker(

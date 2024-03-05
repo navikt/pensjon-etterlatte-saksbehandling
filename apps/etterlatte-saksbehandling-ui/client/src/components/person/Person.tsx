@@ -18,7 +18,7 @@ import { mapAllApiResult, mapSuccess } from '~shared/api/apiUtils'
 import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
 import { hentPersonNavn } from '~shared/api/pdltjenester'
 
-enum Fane {
+export enum PersonOversiktFane {
   SAKER = 'SAKER',
   DOKUMENTER = 'DOKUMENTER',
   BREV = 'BREV',
@@ -29,10 +29,10 @@ export const Person = () => {
 
   const [personStatus, hentPerson] = useApiCall(hentPersonNavn)
   const [sakStatus, hentSak] = useApiCall(hentSakMedBehandlnger)
-  const [fane, setFane] = useState(search.get('fane') || Fane.SAKER)
+  const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
 
   const velgFane = (value: string) => {
-    const valgtFane = value as Fane
+    const valgtFane = value as PersonOversiktFane
 
     setSearch({ fane: valgtFane })
     setFane(valgtFane)
@@ -79,18 +79,18 @@ export const Person = () => {
         (person) => (
           <Tabs value={fane} onChange={velgFane}>
             <Tabs.List>
-              <Tabs.Tab value={Fane.SAKER} label="Sak og behandling" icon={<BulletListIcon />} />
-              <Tabs.Tab value={Fane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
-              <Tabs.Tab value={Fane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
+              <Tabs.Tab value={PersonOversiktFane.SAKER} label="Sak og behandling" icon={<BulletListIcon />} />
+              <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
+              <Tabs.Tab value={PersonOversiktFane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
             </Tabs.List>
 
-            <Tabs.Panel value={Fane.SAKER}>
+            <Tabs.Panel value={PersonOversiktFane.SAKER}>
               <SakOversikt sakStatus={sakStatus} fnr={person.foedselsnummer} />
             </Tabs.Panel>
-            <Tabs.Panel value={Fane.DOKUMENTER}>
+            <Tabs.Panel value={PersonOversiktFane.DOKUMENTER}>
               <Dokumentliste fnr={person.foedselsnummer} />
             </Tabs.Panel>
-            <Tabs.Panel value={Fane.BREV}>
+            <Tabs.Panel value={PersonOversiktFane.BREV}>
               <BrevOversikt sakStatus={sakStatus} />
             </Tabs.Panel>
           </Tabs>

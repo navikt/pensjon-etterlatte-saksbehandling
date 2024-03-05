@@ -58,7 +58,7 @@ class SafKlient(
                 throw IkkeTilgangTilJournalpost()
             } else if (re.response.status == HttpStatusCode.NotFound) {
                 throw IkkeFunnetException(
-                    code = "JOURNALPOST_IKKE_FUNNET",
+                    code = "JOURNALPOST_DOKUMENT_IKKE_FUNNET",
                     detail =
                         "Dokument med journalpostId=$journalpostId, dokumentInfoId=$dokumentInfoId, " +
                             "variantFormat=ARKIV ikke funnet i Joark",

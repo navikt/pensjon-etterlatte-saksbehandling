@@ -51,13 +51,14 @@ class SafService(
     suspend fun hentJournalpost(
         journalpostId: String,
         bruker: BrukerTokenInfo,
-    ): Journalpost? {
+    ): Journalpost {
         logger.info("Henter journalpost (id=$journalpostId)")
 
         val response = safKlient.hentJournalpost(journalpostId, bruker)
 
         return if (response.errors.isNullOrEmpty()) {
             response.data?.journalpost
+                ?: throw JournalpostIkkeFunnet(journalpostId)
         } else {
             throw konverterTilForespoerselException(response.errors)
         }
@@ -91,6 +92,7 @@ class SafService(
 
         return when (error?.extensions?.code) {
             Error.Code.FORBIDDEN -> IkkeTilgangTilJournalpost()
+
             Error.Code.NOT_FOUND ->
                 IkkeFunnetException(
                     code = "IKKE_FUNNET",
@@ -104,10 +106,16 @@ class SafService(
                 )
 
             Error.Code.SERVER_ERROR -> SafServerError()
+
             else -> UkjentFeilSaf()
         }
     }
 }
+
+class JournalpostIkkeFunnet(journalpostId: String) : IkkeFunnetException(
+    code = "JOURNALPOST_IKKE_FUNNET",
+    detail = "Journalpost med journalpostId=$journalpostId ikke funnet i Joark",
+)
 
 class IkkeTilgangTilJournalpost : ForespoerselException(
     status = HttpStatusCode.Forbidden.value,

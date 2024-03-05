@@ -34,7 +34,7 @@ export const JournalpostInnholdSidebarPanel = ({ journalpost }: { journalpost: J
     <Border />
 
     <InfoWrapper>
-      <Info label="Bruker" tekst={<KopierbarVerdi value={journalpost.bruker.id!!} />} />
+      <Info label="Bruker" tekst={journalpost.bruker ? <KopierbarVerdi value={journalpost.bruker.id!!} /> : '-'} />
 
       <Info
         label="Avsender/mottaker"

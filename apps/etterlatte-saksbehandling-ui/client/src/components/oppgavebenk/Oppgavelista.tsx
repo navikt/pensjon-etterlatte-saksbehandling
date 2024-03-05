@@ -40,7 +40,7 @@ export const Oppgavelista = () => {
     return <Tilgangsmelding />
   }
 
-  const [oppgaveListeValg, setOppgaveListeValg] = useState<oppgavelisteValg>(
+  const [oppgavelisteValg, setOppgavelisteValg] = useState<oppgavelisteValg>(
     hentValgFraLocalStorage() as oppgavelisteValg
   )
 
@@ -48,6 +48,7 @@ export const Oppgavelista = () => {
   const [minOppgavelisteOppgaver, setMinOppgavelisteOppgaver] = useState<Array<OppgaveDTO>>([])
 
   const [oppgavelistaFilter, setOppgavelistaFilter] = useState<Filter>(hentFilterFraLocalStorage())
+  const [minOppgavelisteFilter, setMinOppgavelisteFilter] = useState<Filter>(hentFilterFraLocalStorage())
 
   const [oppgavelistaOppgaverResult, hentOppgavelistaOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
   const [minOppgavelisteOppgaverResult, hentMinOppgavelisteOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
@@ -161,46 +162,63 @@ export const Oppgavelista = () => {
   }, [oppgavelistaFilter])
 
   useEffect(() => {
-    leggValgILocalstorage(oppgaveListeValg)
-  }, [oppgaveListeValg])
+    leggValgILocalstorage(oppgavelisteValg)
+  }, [oppgavelisteValg])
 
   return (
     <Container>
       <VelgOppgaveliste
-        oppgavelisteValg={oppgaveListeValg}
-        setOppgavelisteValg={setOppgaveListeValg}
+        oppgavelisteValg={oppgavelisteValg}
+        setOppgavelisteValg={setOppgavelisteValg}
         antallOppgavelistaOppgaver={oppgavelistaOppgaver.length}
         antallMinOppgavelisteOppgaver={minOppgavelisteOppgaver.length}
       />
-
-      <FilterRad
-        hentAlleOppgaver={oppgaveListeValg === 'MinOppgaveliste' ? hentMineOgGosysOppgaver : hentAlleOppgaver}
-        hentOppgaverStatus={(oppgavestatusFilter: Array<string>) => {
-          oppgaveListeValg === 'MinOppgaveliste'
-            ? hentMinOppgavelisteOppgaver(oppgavestatusFilter)
-            : hentOppgavelistaOppgaver(oppgavestatusFilter)
-        }}
-        filter={oppgavelistaFilter}
-        setFilter={setOppgavelistaFilter}
-        saksbehandlereIEnhet={saksbehandlereIEnheter}
-      />
-
-      <OppgaveFeilWrapper
-        oppgaver={oppgaveListeValg === 'MinOppgaveliste' ? minOppgavelisteOppgaverResult : oppgavelistaOppgaverResult}
-        gosysOppgaver={gosysOppgaverResult}
-      >
-        <Oppgaver
-          oppgaver={oppgaveListeValg === 'MinOppgaveliste' ? minOppgavelisteOppgaver : oppgavelistaOppgaver}
-          oppdaterTildeling={oppdaterSaksbehandlerTildeling}
-          oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
-            oppgaveListeValg === 'MinOppgaveliste' &&
-            oppdaterFrist(setMinOppgavelisteOppgaver, minOppgavelisteOppgaver, id, nyfrist, versjon)
-          }
-          saksbehandlereIEnhet={saksbehandlereIEnheter}
-          filter={oppgavelistaFilter}
-          revurderingsaarsaker={revurderingsaarsaker}
-        />
-      </OppgaveFeilWrapper>
+      {oppgavelisteValg === 'MinOppgaveliste' ? (
+        <>
+          <FilterRad
+            hentAlleOppgaver={hentMineOgGosysOppgaver}
+            hentOppgaverStatus={(oppgavestatusFilter: Array<string>) =>
+              hentMinOppgavelisteOppgaver(oppgavestatusFilter)
+            }
+            filter={minOppgavelisteFilter}
+            setFilter={setMinOppgavelisteFilter}
+            saksbehandlereIEnhet={saksbehandlereIEnheter}
+          />
+          <OppgaveFeilWrapper oppgaver={minOppgavelisteOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
+            <Oppgaver
+              oppgaver={minOppgavelisteOppgaver}
+              oppdaterTildeling={oppdaterSaksbehandlerTildeling}
+              oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
+                oppdaterFrist(setMinOppgavelisteOppgaver, minOppgavelisteOppgaver, id, nyfrist, versjon)
+              }
+              filter={minOppgavelisteFilter}
+              saksbehandlereIEnhet={saksbehandlereIEnheter}
+              revurderingsaarsaker={revurderingsaarsaker}
+            />
+          </OppgaveFeilWrapper>
+        </>
+      ) : (
+        <>
+          <FilterRad
+            hentAlleOppgaver={hentAlleOppgaver}
+            hentOppgaverStatus={(oppgavestatusFilter: Array<string>) => {
+              hentOppgavelistaOppgaver(oppgavestatusFilter)
+            }}
+            filter={oppgavelistaFilter}
+            setFilter={setOppgavelistaFilter}
+            saksbehandlereIEnhet={saksbehandlereIEnheter}
+          />
+          <OppgaveFeilWrapper oppgaver={oppgavelistaOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
+            <Oppgaver
+              oppgaver={oppgavelistaOppgaver}
+              oppdaterTildeling={oppdaterSaksbehandlerTildeling}
+              saksbehandlereIEnhet={saksbehandlereIEnheter}
+              filter={oppgavelistaFilter}
+              revurderingsaarsaker={revurderingsaarsaker}
+            />
+          </OppgaveFeilWrapper>
+        </>
+      )}
     </Container>
   )
 }

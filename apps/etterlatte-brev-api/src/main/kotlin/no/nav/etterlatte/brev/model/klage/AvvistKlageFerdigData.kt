@@ -33,7 +33,7 @@ data class AvvistKlageInnholdBrevData(
             val klage = generellBrevData.forenkletVedtak?.klage ?: throw IllegalArgumentException("Vedtak mangler klage")
             return AvvistKlageInnholdBrevData(
                 sakType = klage.sak.sakType,
-                klageDato = klage.opprettet.toLocalDate(),
+                klageDato = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
                 datoForVedtaketKlagenGjelder = klage.formkrav?.formkrav?.vedtaketKlagenGjelder?.datoAttestert?.toLocalDate(),
             )
         }

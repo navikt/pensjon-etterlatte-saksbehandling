@@ -49,6 +49,14 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
+        get("/sak/{$SAKID_CALL_PARAMETER}") {
+            withSakId(behandlingKlient) { sakId ->
+                logger.info("Henter alle vedtak for sak $sakId")
+                val attesterteVedtak = vedtakService.hentVedtakISak(sakId)
+                call.respond(attesterteVedtak.map { it.toVedtakSammendragDto() })
+            }
+        }
+
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")

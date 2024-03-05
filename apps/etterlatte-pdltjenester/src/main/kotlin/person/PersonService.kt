@@ -54,6 +54,7 @@ class PersonService(
                     )
                 }
             } else {
+                logger.info(request.foedselsnummer.value)
                 logger.info(it.data.hentPerson.toJson())
                 PersonMapper.mapOpplysningsperson(
                     ppsKlient = ppsKlient,

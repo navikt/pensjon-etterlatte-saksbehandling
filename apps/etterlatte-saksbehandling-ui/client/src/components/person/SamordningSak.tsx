@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Heading, Table } from '@navikt/ds-react'
+import { Heading, Link, Table } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentSamordningsdataForSak } from '~shared/api/vedtaksvurdering'
 import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
@@ -40,6 +40,7 @@ function SamordningTabell({ samordningsdata }: { samordningsdata: Array<Samordni
       <Table.Header>
         <Table.Row>
           <Table.HeaderCell>VedtaksID</Table.HeaderCell>
+          <Table.HeaderCell>Virkningstidspunkt</Table.HeaderCell>
           <Table.HeaderCell>SamordningsID</Table.HeaderCell>
           <Table.HeaderCell>Tjenestepensjon</Table.HeaderCell>
           <Table.HeaderCell>Status</Table.HeaderCell>
@@ -55,7 +56,10 @@ function SamordningTabell({ samordningsdata }: { samordningsdata: Array<Samordni
           .map((vedtak) =>
             vedtak.samordningsmeldinger.map((mld) => (
               <Table.Row key={mld.samId}>
-                <Table.DataCell>{vedtak.vedtakId}</Table.DataCell>
+                <Table.DataCell>
+                  <Link href={`/behandling/${vedtak.behandlingId}`}>{vedtak.vedtakId}</Link>
+                </Table.DataCell>
+                <Table.DataCell>{vedtak.virkningFom}</Table.DataCell>
                 <Table.DataCell>{mld.samId}</Table.DataCell>
                 <Table.DataCell>
                   {mld.tpNr} {mld.tpNavn}

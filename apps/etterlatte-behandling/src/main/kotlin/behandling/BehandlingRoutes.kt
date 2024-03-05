@@ -13,7 +13,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
@@ -298,7 +297,6 @@ internal fun Route.behandlingRoutes(
         route("/opprettbehandling") {
             post {
                 kunSkrivetilgang {
-                    val harIntransaction = Kontekst.get().databasecontxt.harIntransaction()
                     val behandlingsBehov = call.receive<BehandlingsBehov>()
 
                     when (

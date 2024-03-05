@@ -30,8 +30,6 @@ enum class Enheter(
         fun enheterMedLesetilgang() = entries.filter { it.lesetilgang }.map { it.enhetNr }.toSet()
 
         fun nasjonalTilgangEnheter() = entries.filter { it.inkludertForNasjonalTilgang }.map { it.enhetNr }
-
-        fun finnEnhetForEnhetsnummer(enhetNr: String) = entries.firstOrNull { it.enhetNr == enhetNr }
     }
 }
 

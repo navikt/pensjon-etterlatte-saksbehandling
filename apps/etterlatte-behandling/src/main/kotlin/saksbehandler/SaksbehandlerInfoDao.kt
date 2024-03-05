@@ -1,8 +1,6 @@
 package no.nav.etterlatte.saksbehandler
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
-import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.single
@@ -44,25 +42,6 @@ class SaksbehandlerInfoDao(private val connectionAutoclosing: ConnectionAutoclos
                         getString("id"),
                         getString("navn"),
                     )
-                }
-            }
-        }
-    }
-
-    // TODO: lag test for denne
-    fun hentEnheterIderForSaksbehandler(ident: String): List<String>? {
-        return connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
-                        SELECT enheter from saksbehandler_info
-                        where id = ?
-                        """.trimIndent(),
-                    )
-                statement.setString(1, ident)
-                statement.executeQuery().singleOrNull {
-                    getString("enheter").let { objectMapper.readValue(it) }
                 }
             }
         }

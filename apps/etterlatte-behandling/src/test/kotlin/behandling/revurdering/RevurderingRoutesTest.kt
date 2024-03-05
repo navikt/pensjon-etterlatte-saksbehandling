@@ -9,6 +9,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
@@ -41,7 +42,7 @@ internal class RevurderingRoutesTest {
                 every { harTilgangTilBehandling(any(), any()) } returns true
                 every { harTilgangTilSak(any(), any()) } returns true
             }
-        every { applicationContext.saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
+        coEvery { applicationContext.navAnsattKlient.hentEnheterForSaksbehandler(any()) } returns
             listOf(
                 SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.name),
             )

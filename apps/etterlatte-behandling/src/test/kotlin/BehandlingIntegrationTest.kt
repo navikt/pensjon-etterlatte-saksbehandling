@@ -650,6 +650,13 @@ class Norg2KlientTest : Norg2Klient {
 }
 
 class NavAnsattKlientTest : NavAnsattKlient {
+    override suspend fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet> {
+        return listOf(
+            SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
+            SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
+        )
+    }
+
     override suspend fun hentTemaForSaksbehandler(ident: String): List<SaksbehandlerTema> {
         return listOf(SaksbehandlerTema(SakType.BARNEPENSJON.name), SaksbehandlerTema(SakType.OMSTILLINGSSTOENAD.name))
     }
@@ -682,9 +689,6 @@ class KrrklientTest : KrrKlient {
 
 class AxsysKlientTest : AxsysKlient {
     override suspend fun hentEnheterForIdent(ident: String): List<SaksbehandlerEnhet> {
-        return listOf(
-            SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
-            SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
-        )
+        return listOf(SaksbehandlerEnhet("12345", "navn saksbehnadlersen"))
     }
 }

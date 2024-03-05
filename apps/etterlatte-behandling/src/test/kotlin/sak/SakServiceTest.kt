@@ -22,6 +22,7 @@ import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BrukerServiceImpl
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
+import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.IngenEnhetFunnetException
@@ -31,7 +32,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.Saksbehandler
@@ -42,7 +42,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
 import java.sql.Connection
 import kotlin.random.Random
 
@@ -51,7 +50,7 @@ internal class SakServiceTest {
     private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
     private val norg2Klient = mockk<Norg2Klient>()
     private val brukerService = BrukerServiceImpl(pdltjenesterKlient, norg2Klient)
-    private val saksbehandlerService = mockk<SaksbehandlerService>()
+    private val navansattKlient = mockk<NavAnsattKlient>()
     private val skjermingKlient = mockk<SkjermingKlient>()
 
     private val service = SakServiceImpl(sakDao, skjermingKlient, brukerService)
@@ -90,7 +89,7 @@ internal class SakServiceTest {
             Context(
                 SaksbehandlerMedEnheterOgRoller(
                     tokenValidationContext,
-                    saksbehandlerService,
+                    navansattKlient,
                     SaksbehandlerMedRoller(
                         Saksbehandler("", "Z123456", claims),
                         groups,
@@ -99,10 +98,6 @@ internal class SakServiceTest {
                 object : DatabaseKontekst {
                     override fun activeTx(): Connection {
                         throw IllegalArgumentException()
-                    }
-
-                    override fun harIntransaction(): Boolean {
-                        throw NotImplementedException("not implemented")
                     }
 
                     override fun <T> inTransaction(block: () -> T): T {
@@ -138,10 +133,6 @@ internal class SakServiceTest {
                         throw IllegalArgumentException()
                     }
 
-                    override fun harIntransaction(): Boolean {
-                        throw NotImplementedException("not implemented")
-                    }
-
                     override fun <T> inTransaction(block: () -> T): T {
                         return block()
                     }
@@ -154,9 +145,9 @@ internal class SakServiceTest {
     fun `enhet filtrering skjer hvis vi har en saksbehandler`() {
         saksbehandlerKontekst()
 
-        coEvery { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
+        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
             listOf(
-                SaksbehandlerEnhet(enhetsNummer = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
+                SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
 
         every { sakDao.finnSaker(KONTANT_FOT.value) } returns
@@ -180,9 +171,9 @@ internal class SakServiceTest {
     fun `enhet filtrering skjer hvis vi har en saksbehandler uten riktig enhet`() {
         saksbehandlerKontekst()
 
-        coEvery { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
+        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
             listOf(
-                SaksbehandlerEnhet(enhetsNummer = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
+                SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
 
         every { sakDao.finnSaker(KONTANT_FOT.value) } returns
@@ -206,9 +197,9 @@ internal class SakServiceTest {
     fun `enhet filtrering skjer ikke hvis vi har en system bruker`() {
         systemBrukerKontekst()
 
-        coEvery { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
+        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
             listOf(
-                SaksbehandlerEnhet(enhetsNummer = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
+                SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
 
         every { sakDao.finnSaker(KONTANT_FOT.value) } returns
@@ -373,9 +364,9 @@ internal class SakServiceTest {
     fun `filtrerer for saksbehandler med nasjonal tilgang`() {
         saksbehandlerKontekst(nasjonalTilgang = true)
 
-        coEvery { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
+        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
             listOf(
-                SaksbehandlerEnhet(enhetsNummer = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
+                SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
 
         every { sakDao.finnSaker(KONTANT_FOT.value) } returns
@@ -467,10 +458,10 @@ internal class SakServiceTest {
                     enhet = Enheter.UTLAND.enhetNr,
                 ),
             )
-        coEvery { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
+        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
             listOf(
                 SaksbehandlerEnhet(
-                    enhetsNummer = Enheter.PORSGRUNN.enhetNr,
+                    id = Enheter.PORSGRUNN.enhetNr,
                     navn = Enheter.PORSGRUNN.navn,
                 ),
             )
@@ -480,7 +471,7 @@ internal class SakServiceTest {
         }
 
         verify { sakDao.finnSaker(ident) }
-        coVerify { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) }
+        coVerify { navansattKlient.hentEnheterForSaksbehandler(any()) }
     }
 
     @Test
@@ -499,10 +490,10 @@ internal class SakServiceTest {
 
         every { sakDao.finnSaker(any()) } returns listOf(sak)
 
-        coEvery { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
+        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
             listOf(
                 SaksbehandlerEnhet(
-                    enhetsNummer = enhet.enhetNr,
+                    id = enhet.enhetNr,
                     navn = enhet.navn,
                 ),
             )
@@ -512,6 +503,6 @@ internal class SakServiceTest {
         enkeltsak shouldBe sak
 
         verify { sakDao.finnSaker(ident) }
-        coVerify { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) }
+        coVerify { navansattKlient.hentEnheterForSaksbehandler(any()) }
     }
 }

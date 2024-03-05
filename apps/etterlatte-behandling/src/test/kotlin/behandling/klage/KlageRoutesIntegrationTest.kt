@@ -245,7 +245,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                 client.postAndAssertOk(
                     "/api/klage/${klage.id}/vedtak/underkjenn",
                     tokenAttestant,
-                    KlageUnderkjennRequest("Laissez un commentaire ici, s'il te plait", "VALGT_BEGRUNNELSE"),
+                    KlageUnderkjennRequest("Laissez un commentaire ici", "VALGT_BEGRUNNELSE"),
                 ).body()
 
             coVerifyAll {

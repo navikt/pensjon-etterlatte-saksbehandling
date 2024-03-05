@@ -1,8 +1,9 @@
-package no.nav.etterlatte.behandling.klienter
+package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.shouldBe
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -14,31 +15,38 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
+import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
+import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Test
 
-internal class AxsysKlientTest {
+class BrukerServiceTest {
+    private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+
+    private val saksbehandlerEnheter =
+        listOf(
+            SaksbehandlerEnhet("id1", "navn1"),
+            SaksbehandlerEnhet("id2", "navn2"),
+            SaksbehandlerEnhet("id3", "navn3"),
+        )
+
+    private val testNavIdent = "ident1"
+
+    private fun klient(): NavAnsattKlient =
+        NavAnsattKlientImpl(
+            mockHttpClient(
+                saksbehandlerEnheter,
+                testNavIdent,
+            ),
+            "",
+        )
+
     @Test
     fun `hent enheter skal returnere en liste av enheter`() {
-        val testNavIdent = "ident1"
-
-        val saksbehandlerEnheter =
-            listOf(
-                SaksbehandlerEnhet("id1", "navn1"),
-                SaksbehandlerEnhet("id2", "navn2"),
-                SaksbehandlerEnhet("id3", "navn3"),
-            )
-
-        val klient =
-            mockHttpClient(
-                EnhetslisteResponse(saksbehandlerEnheter.map { Enheter(it.enhetsNummer, null, it.navn) }),
-                testNavIdent,
-            )
-
-        val axsys: AxsysKlient = AxsysKlientImpl(klient, "")
+        val service = klient()
 
         runBlocking {
-            val resultat = axsys.hentEnheterForIdent(testNavIdent)
+            val resultat = service.hentEnheterForSaksbehandler(testNavIdent)
 
             resultat.size shouldBeExactly 3
 
@@ -46,10 +54,35 @@ internal class AxsysKlientTest {
         }
     }
 
-    private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+    fun harTilgangTilEnhet(
+        enheter: List<SaksbehandlerEnhet>,
+        enhetId: String,
+    ) = enheter.any { enhet -> enhet.id == enhetId }
+
+    @Test
+    fun `enhet tilgang skal returnere true naar det er tilgang`() {
+        val service = klient()
+
+        runBlocking {
+            val resultat = harTilgangTilEnhet(service.hentEnheterForSaksbehandler(testNavIdent), "id1")
+
+            resultat shouldBe true
+        }
+    }
+
+    @Test
+    fun `enhet tilgang skal returnere false naar det ikke er tilgang`() {
+        val service = klient()
+
+        runBlocking {
+            val resultat = harTilgangTilEnhet(service.hentEnheterForSaksbehandler(testNavIdent), "id4")
+
+            resultat shouldBe false
+        }
+    }
 
     private fun mockHttpClient(
-        respons: EnhetslisteResponse,
+        respons: Any,
         ident: String,
     ): HttpClient {
         val httpClient =
@@ -57,7 +90,7 @@ internal class AxsysKlientTest {
                 engine {
                     addHandler { request ->
                         when (request.url.fullPath) {
-                            "/api/v2/tilgang/$ident?inkluderAlleEnheter=false" ->
+                            "/navansatt/$ident/enheter" ->
                                 respond(
                                     respons.toJson(),
                                     HttpStatusCode.OK,

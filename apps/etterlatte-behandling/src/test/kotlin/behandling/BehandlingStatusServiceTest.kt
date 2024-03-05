@@ -27,7 +27,6 @@ import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
 import java.sql.Connection
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -42,10 +41,6 @@ internal class BehandlingStatusServiceTest {
                 object : DatabaseKontekst {
                     override fun activeTx(): Connection {
                         throw IllegalArgumentException()
-                    }
-
-                    override fun harIntransaction(): Boolean {
-                        throw NotImplementedException("not implemented")
                     }
 
                     override fun <T> inTransaction(block: () -> T): T {

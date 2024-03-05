@@ -52,7 +52,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
 import java.sql.Connection
 import java.time.Instant
 import java.time.LocalDate
@@ -70,10 +69,6 @@ fun Route.attachMockContext(saksbehandlerMedEnheterOgRoller: SaksbehandlerMedEnh
                 object : DatabaseKontekst {
                     override fun activeTx(): Connection {
                         throw IllegalArgumentException()
-                    }
-
-                    override fun harIntransaction(): Boolean {
-                        throw NotImplementedException("not implemented")
                     }
 
                     override fun <T> inTransaction(block: () -> T): T {

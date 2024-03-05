@@ -51,7 +51,6 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
 import java.sql.Connection
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -74,10 +73,6 @@ class BehandlingServiceImplTest {
                 object : DatabaseKontekst {
                     override fun activeTx(): Connection {
                         throw IllegalArgumentException()
-                    }
-
-                    override fun harIntransaction(): Boolean {
-                        throw NotImplementedException("not implemented")
                     }
 
                     override fun <T> inTransaction(block: () -> T): T {
@@ -240,10 +235,6 @@ class BehandlingServiceImplTest {
                 object : DatabaseKontekst {
                     override fun activeTx(): Connection {
                         throw IllegalArgumentException()
-                    }
-
-                    override fun harIntransaction(): Boolean {
-                        throw NotImplementedException("not implemented")
                     }
 
                     override fun <T> inTransaction(block: () -> T): T {

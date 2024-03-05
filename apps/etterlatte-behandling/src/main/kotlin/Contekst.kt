@@ -1,9 +1,11 @@
 package no.nav.etterlatte
 
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
-import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.tilgangsstyring.saksbehandlereMedTilgangTilAlleEnheter
@@ -59,9 +61,12 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
     override fun harLesetilgang(): Boolean = true
 }
 
+class HentEnhetException(override val detail: String, override val cause: Throwable?) :
+    InternfeilException(detail, cause)
+
 class SaksbehandlerMedEnheterOgRoller(
     identifiedBy: TokenValidationContext,
-    private val saksbehandlerService: SaksbehandlerService,
+    private val navAnsattKlient: NavAnsattKlient,
     val saksbehandlerMedRoller: SaksbehandlerMedRoller,
 ) : ExternalUser(identifiedBy) {
     override fun name(): String {
@@ -74,7 +79,13 @@ class SaksbehandlerMedEnheterOgRoller(
         if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {
             Enheter.nasjonalTilgangEnheter()
         } else {
-            saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(name()).map { it.enhetsNummer }
+            try {
+                runBlocking {
+                    navAnsattKlient.hentEnheterForSaksbehandler(name()).map { it.id }
+                }
+            } catch (e: Exception) {
+                throw HentEnhetException("Henting av enheter feilet. Sjekk on-prem status(fss)", e)
+            }
         }
 
     override fun harSkrivetilgang(): Boolean {
@@ -93,7 +104,7 @@ class SaksbehandlerMedEnheterOgRoller(
 fun decideUser(
     principal: TokenValidationContextPrincipal,
     saksbehandlerGroupIdsByKey: Map<AzureGroup, String>,
-    saksbehandlerService: SaksbehandlerService,
+    navAnsattKlient: NavAnsattKlient,
     brukerTokenInfo: BrukerTokenInfo,
 ): ExternalUser {
     return if (principal.context.issuers.contains(AZURE_ISSUER)) {
@@ -102,7 +113,7 @@ fun decideUser(
         } else {
             SaksbehandlerMedEnheterOgRoller(
                 principal.context,
-                saksbehandlerService,
+                navAnsattKlient,
                 SaksbehandlerMedRoller(brukerTokenInfo as Saksbehandler, saksbehandlerGroupIdsByKey),
             )
         }
@@ -113,8 +124,6 @@ fun decideUser(
 
 interface DatabaseKontekst {
     fun activeTx(): Connection
-
-    fun harIntransaction(): Boolean
 
     fun <T> inTransaction(block: () -> T): T
 }

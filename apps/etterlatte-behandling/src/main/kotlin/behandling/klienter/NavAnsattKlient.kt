@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.PingResult
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 
 private enum class InfoType(val urlSuffix: String) {
+    ENHET("enheter"),
     TEMA("fagomrader"),
 }
 
@@ -23,7 +25,9 @@ data class SaksbehandlerInfo(
 )
 
 interface NavAnsattKlient {
-    suspend fun hentTemaForSaksbehandler(ident: String): List<SaksbehandlerTema> // TODO: slettes?
+    suspend fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet>
+
+    suspend fun hentTemaForSaksbehandler(ident: String): List<SaksbehandlerTema>
 
     suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo?
 }
@@ -33,6 +37,10 @@ class NavAnsattKlientImpl(
     private val url: String,
 ) : NavAnsattKlient, Pingable {
     private val logger = LoggerFactory.getLogger(NavAnsattKlientImpl::class.java)
+    private val enhetCache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(15))
+            .build<String, List<SaksbehandlerEnhet>>()
 
     private val temaCache =
         Caffeine.newBuilder()
@@ -60,6 +68,13 @@ class NavAnsattKlientImpl(
         } catch (exception: Exception) {
             throw RuntimeException("Feil i kall mot navansatt navn med ident: $ident", exception)
         }
+
+    override suspend fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet> =
+        hentSaksbehandler(
+            ident,
+            InfoType.ENHET,
+            enhetCache,
+        )
 
     override suspend fun hentTemaForSaksbehandler(ident: String): List<SaksbehandlerTema> =
         hentSaksbehandler(

@@ -150,16 +150,3 @@ export const initialFilter = (): Filter => {
     fnrFilter: '',
   }
 }
-
-export const minOppgavelisteFiltre = (): Filter => {
-  return {
-    sakidFilter: '',
-    enhetsFilter: 'visAlle',
-    fristFilter: 'visAlle',
-    saksbehandlerFilter: 'visAlle',
-    ytelseFilter: 'visAlle',
-    oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
-    oppgavetypeFilter: [OPPGAVETYPEFILTER.visAlle],
-    fnrFilter: '',
-  }
-}

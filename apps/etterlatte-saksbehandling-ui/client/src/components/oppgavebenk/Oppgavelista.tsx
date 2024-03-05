@@ -111,14 +111,6 @@ export const Oppgavelista = () => {
   }
 
   useEffect(() => {
-    leggFilterILocalStorage({ ...oppgavelistaFilter, fnrFilter: '', sakidFilter: '' })
-  }, [oppgavelistaFilter])
-
-  useEffect(() => {
-    leggValgILocalstorage(oppgaveListeValg)
-  }, [oppgaveListeValg])
-
-  useEffect(() => {
     hentAlleOppgaver()
     if (!!innloggetSaksbehandler.enheter.length) {
       hentSaksbehandlereIEnheterFetch({ enheter: innloggetSaksbehandler.enheter }, (saksbehandlere) => {
@@ -163,6 +155,14 @@ export const Oppgavelista = () => {
       setRevurderingsaarsaker(hentRevurderingsaarsakerStatus.data)
     }
   }, [hentRevurderingsaarsakerStatus])
+
+  useEffect(() => {
+    leggFilterILocalStorage({ ...oppgavelistaFilter, fnrFilter: '', sakidFilter: '' })
+  }, [oppgavelistaFilter])
+
+  useEffect(() => {
+    leggValgILocalstorage(oppgaveListeValg)
+  }, [oppgaveListeValg])
 
   return (
     <Container>

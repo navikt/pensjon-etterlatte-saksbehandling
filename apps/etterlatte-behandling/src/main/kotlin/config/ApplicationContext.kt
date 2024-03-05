@@ -381,7 +381,7 @@ internal class ApplicationContext(
             featureToggleService = featureToggleService,
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
             sakService = sakService,
-            dagerGamleHendelserSomSkalKjoeres = if (isProd()) 2 else 0,
+            dagerGamleHendelserSomSkalKjoeres = if (isProd()) 5 else 0,
             deodshendelserProducer = deodshendelserProducer,
             pdlTjenesterKlient = pdlTjenesterKlient,
             grunnlagService = grunnlagsService,

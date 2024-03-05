@@ -6,10 +6,12 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
+import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -36,6 +38,7 @@ class AxsysKlientImpl(private val client: HttpClient, private val url: String) :
         return try {
             val response =
                 client.get("$url/api/v2/tilgang/$ident?inkluderAlleEnheter=false") {
+                    header(NAV_CONSUMER_ID, "etterlatte-behandling")
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
                 }

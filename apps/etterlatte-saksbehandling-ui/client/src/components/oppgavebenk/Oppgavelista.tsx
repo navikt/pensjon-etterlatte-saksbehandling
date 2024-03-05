@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { Tabs } from '@navikt/ds-react'
-import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
-import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
@@ -31,9 +28,11 @@ import { OppgaveFeilWrapper } from '~components/oppgavebenk/components/OppgaveFe
 import { hentAlleStoettedeRevurderinger } from '~shared/api/revurdering'
 import { RevurderingsaarsakerBySakstype, RevurderingsaarsakerDefault } from '~shared/types/Revurderingaarsak'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
-import { hentValgFraLocalStorage, leggValgILocalstorage } from '~components/oppgavebenk/utils/oppgavelisteValg'
-
-type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
+import {
+  hentValgFraLocalStorage,
+  leggValgILocalstorage,
+} from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
+import { oppgavelisteValg, VelgOppgaveliste } from '~components/oppgavebenk/velgOppgaveliste/VelgOppgaveliste'
 
 export const Oppgavelista = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
@@ -41,8 +40,8 @@ export const Oppgavelista = () => {
     return <Tilgangsmelding />
   }
 
-  const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>(
-    hentValgFraLocalStorage() as OppgavelisteToggle
+  const [oppgaveListeValg, setOppgaveListeValg] = useState<oppgavelisteValg>(
+    hentValgFraLocalStorage() as oppgavelisteValg
   )
 
   const [oppgavelistaOppgaver, setOppgavelistaOppgaver] = useState<Array<OppgaveDTO>>([])
@@ -61,10 +60,6 @@ export const Oppgavelista = () => {
   const [revurderingsaarsaker, setRevurderingsaarsaker] = useState<RevurderingsaarsakerBySakstype>(
     new RevurderingsaarsakerDefault()
   )
-
-  const oppdaterOppgavelisteValg = (oppgaveListeValg: OppgavelisteToggle) => {
-    setOppgaveListeValg(oppgaveListeValg)
-  }
 
   const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
     return oppgaver.filter((o) => o.saksbehandler?.ident === innloggetSaksbehandler.ident)
@@ -171,25 +166,12 @@ export const Oppgavelista = () => {
 
   return (
     <Container>
-      <TabsWidth
-        value={oppgaveListeValg}
-        onChange={(e) => {
-          oppdaterOppgavelisteValg(e as OppgavelisteToggle)
-        }}
-      >
-        <Tabs.List>
-          <Tabs.Tab
-            value="Oppgavelista"
-            label={`Oppgavelisten (${oppgavelistaOppgaver.length})`}
-            icon={<InboxIcon />}
-          />
-          <Tabs.Tab
-            value="MinOppgaveliste"
-            label={`Min oppgaveliste (${minOppgavelisteOppgaver.length})`}
-            icon={<PersonIcon aria-hidden />}
-          />
-        </Tabs.List>
-      </TabsWidth>
+      <VelgOppgaveliste
+        oppgavelisteValg={oppgaveListeValg}
+        setOppgavelisteValg={setOppgaveListeValg}
+        antallOppgavelistaOppgaver={oppgavelistaOppgaver.length}
+        antallMinOppgavelisteOppgaver={minOppgavelisteOppgaver.length}
+      />
 
       <FilterRad
         hentAlleOppgaver={oppgaveListeValg === 'MinOppgaveliste' ? hentMineOgGosysOppgaver : hentAlleOppgaver}
@@ -222,8 +204,3 @@ export const Oppgavelista = () => {
     </Container>
   )
 }
-
-const TabsWidth = styled(Tabs)`
-  max-width: fit-content;
-  margin-bottom: 2rem;
-`

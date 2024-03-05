@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.SamordningsvedtakWrapper
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.grunnlag.GrunnlagVersjonValidering.validerVersjon
@@ -359,15 +360,31 @@ class VedtakBehandlingService(
         return null
     }
 
-    suspend fun samordningsinfo(sakId: Long): List<Samordningsvedtak> {
-        return repository.hentVedtakForSak(sakId).firstOrNull()?.let { vedtak ->
+    suspend fun samordningsinfo(sakId: Long): List<SamordningsvedtakWrapper> {
+        val vedtaksliste = repository.hentVedtakForSak(sakId)
+        return vedtaksliste.firstOrNull()?.let { vedtak ->
             return samKlient.hentSamordningsdata(vedtak, alleVedtak = true)
+                .map { supplementSamordningsinfo(it, vedtaksliste) }
         } ?: emptyList()
     }
 
-    suspend fun samordningsinfo(behandlingId: UUID): List<Samordningsvedtak> {
+    suspend fun samordningsinfo(behandlingId: UUID): List<SamordningsvedtakWrapper> {
         val vedtak = hentVedtakNonNull(behandlingId)
         return samKlient.hentSamordningsdata(vedtak, alleVedtak = false)
+            .map { supplementSamordningsinfo(it, listOf(vedtak)) }
+    }
+
+    private fun supplementSamordningsinfo(
+        samordningsvedtak: Samordningsvedtak,
+        vedtaksliste: List<Vedtak>,
+    ): SamordningsvedtakWrapper {
+        val vedtak =
+            vedtaksliste.find { it.id == samordningsvedtak.vedtakId }
+                ?: throw UgyldigForespoerselException(
+                    code = "VEDTAK_IKKE_FUNNET",
+                    detail = "Fant ikke vedtak med id=${samordningsvedtak.vedtakId}",
+                )
+        return SamordningsvedtakWrapper(samordningsvedtak, vedtak.behandlingId)
     }
 
     suspend fun iverksattVedtak(

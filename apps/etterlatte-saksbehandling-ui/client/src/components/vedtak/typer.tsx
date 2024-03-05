@@ -28,6 +28,7 @@ export interface Samordningsvedtak {
   virkningFom: string
   virkningTom?: string
   samordningsmeldinger: Samordningsmelding[]
+  behandlingId: string
 }
 
 export interface Samordningsmelding {

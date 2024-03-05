@@ -45,8 +45,7 @@ class AxsysKlientImpl(private val client: HttpClient, private val url: String) :
 
             if (response.status.isSuccess()) {
                 response.body<EnhetslisteResponse?>()?.enheter
-                    ?.filter { it.enhetId != null || it.navn != null }
-                    ?.map { SaksbehandlerEnhet(it.enhetId!!, it.navn!!) }
+                    ?.map { SaksbehandlerEnhet(it.enhetId, it.navn) }
                     .also { enhetCache.put(ident, it) } ?: emptyList()
             } else {
                 throw ClientRequestException(response, response.toString())
@@ -59,9 +58,9 @@ class AxsysKlientImpl(private val client: HttpClient, private val url: String) :
 }
 
 data class Enheter(
-    val enhetId: String?, // Enhetsnummer
+    val enhetId: String, // Enhetsnummer
     val temaer: ArrayList<String>?, // EYB EYO
-    val navn: String?,
+    val navn: String,
 )
 
 data class EnhetslisteResponse(

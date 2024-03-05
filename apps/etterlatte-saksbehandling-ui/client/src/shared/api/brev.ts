@@ -59,7 +59,7 @@ export const genererPdf = async (props: {
     return apiClient.get(`/brev/behandling/${props.behandlingId}/vedtak/pdf?brevId=${props.brevId}`)
   } else if (props.brevtype === Brevtype.VARSEL) {
     return apiClient.get(`/brev/behandling/${props.behandlingId}/varsel/pdf?brevId=${props.brevId}`)
-  } else if (props.brevtype) {
+  } else if (props.brevtype === Brevtype.OVERSENDELSE_KLAGE) {
     return apiClient.get(`/brev/behandling/${props.behandlingId}/oversendelse/pdf?brevId=${props.brevId}`)
   } else if (props.sakId && !props.behandlingId) {
     return apiClient.get(`/brev/${props.brevId}/pdf?sakId=${props.sakId}`)

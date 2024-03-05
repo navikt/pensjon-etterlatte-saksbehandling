@@ -189,11 +189,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
     ): OpprettJournalpostDto {
         return post(
             url = "$resourceUrl/api/notat/${klage.sak.id}/journalfoer",
-            postBody =
-                mapOf(
-                    "type" to "KLAGE_BLANKETT",
-                    "klage" to klage,
-                ),
+            postBody = mapOf("data" to KlageNotatRequest(klage)),
             onSuccess = { response -> deserialize(response.response!!.toJson()) },
             brukerTokenInfo = brukerInfoToken,
         )
@@ -250,6 +246,12 @@ enum class BrevStatus {
     fun ikkeDistribuert(): Boolean {
         return this != DISTRIBUERT
     }
+}
+
+data class KlageNotatRequest(
+    val klage: Klage,
+) {
+    val type = "KLAGE_BLANKETT"
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)

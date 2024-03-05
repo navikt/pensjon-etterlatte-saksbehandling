@@ -62,7 +62,7 @@ fun Route.notatRoute(
             withSakId(tilgangsSjekk, skrivetilgang = false) { sakId ->
                 logger.info("Forhåndsviser notatpdf i sak $sakId")
                 medBody<NotatRequest> {
-                    call.respond(notatService.forhaandsvisNotat(it.data, brukerTokenInfo))
+                    call.respond(notatService.forhaandsvisNotat(it.data, brukerTokenInfo).bytes)
                 }
             }
         }
@@ -74,7 +74,7 @@ fun Route.notatRoute(
 
             withSakId(tilgangsSjekk, skrivetilgang = false) {
                 logger.info("Henter pdf for notat med id=$notatId i sak $it")
-                call.respond(notatService.hentPdf(notatId))
+                call.respond(notatService.hentPdf(notatId).bytes)
             }
         }
 

@@ -58,12 +58,12 @@ class AxsysKlientImpl(private val client: HttpClient, private val url: String) :
     }
 }
 
-class Enheter {
-    var enhetId: String? = null // Enhetsnummer
-    var temaer: ArrayList<String>? = null // EYB EYO
-    var navn: String? = null
-}
+data class Enheter(
+    val enhetId: String?, // Enhetsnummer
+    val temaer: ArrayList<String>?, // EYB EYO
+    val navn: String?,
+)
 
-class EnhetslisteResponse {
-    var enheter: List<Enheter>? = null
-}
+data class EnhetslisteResponse(
+    val enheter: List<Enheter>,
+)

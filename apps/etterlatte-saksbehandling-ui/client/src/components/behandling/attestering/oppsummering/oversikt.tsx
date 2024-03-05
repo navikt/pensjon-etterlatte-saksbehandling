@@ -63,7 +63,9 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
     <SidebarPanel border>
       <Heading size="small">
         {formaterBehandlingstype(behandlingsInfo.type)}
-        {behandlingsInfo.nasjonalEllerUtland !== UtlandstilknytningType.NASJONAL && (
+
+        {(behandlingsInfo.nasjonalEllerUtland === UtlandstilknytningType.UTLANDSTILSNITT ||
+          behandlingsInfo.nasjonalEllerUtland === UtlandstilknytningType.BOSATT_UTLAND) && (
           <EessiPensjonLenke
             sakId={behandlingsInfo.sakId}
             behandlingId={behandlingsInfo.behandlingId}

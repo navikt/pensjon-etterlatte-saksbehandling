@@ -89,7 +89,8 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                   <Table.DataCell>
                     <BehandlingstypeWrapper>
                       {formaterBehandlingstype(behandling.behandlingType)}
-                      {sak.utlandstilknytning?.type !== UtlandstilknytningType.NASJONAL && (
+                      {(sak.utlandstilknytning?.type === UtlandstilknytningType.UTLANDSTILSNITT ||
+                        sak.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND) && (
                         <EessiPensjonLenke sakId={sak.id} behandlingId={behandling.id} sakType={sak.sakType} />
                       )}
                     </BehandlingstypeWrapper>

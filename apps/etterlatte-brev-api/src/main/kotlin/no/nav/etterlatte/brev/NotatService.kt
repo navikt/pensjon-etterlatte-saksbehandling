@@ -126,7 +126,6 @@ class NotatService(
 
         val journalpostRequest =
             OpprettNotatJournalpostRequest(
-                behandlingstema = sak.sakType.tema,
                 bruker =
                     Bruker(
                         id = sak.ident,

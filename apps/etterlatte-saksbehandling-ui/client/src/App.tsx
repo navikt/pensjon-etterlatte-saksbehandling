@@ -17,13 +17,11 @@ import { settAppversion } from '~store/reducers/AppconfigReducer'
 import Versioncheck from '~Versioncheck'
 import { Klagebehandling } from '~components/klage/Klagebehandling'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { Tilbakekrevingsbehandling } from '~components/tilbakekreving/Tilbakekrevingsbehandling'
 import GenerellBehandling from '~components/generellbehandling/GenerellBehandling'
 import ManuellBehandling from '~components/manuelbehandling/ManuellBehandling'
 import BehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
-
 import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { FlyttJournalpost } from '~components/person/flyttjournalpost/FlyttJournalpost'
@@ -54,10 +52,7 @@ function App() {
             <ErrorBoundary>
               <ConfigContext.Provider value={hentConfigStatus.data}>
                 <Routes>
-                  <Route path="/" element={<Oppgavelista />}>
-                    <Route path="/minoppgaveliste" element={<Oppgavelista />} />
-                  </Route>
-
+                  <Route path="/" element={<Oppgavelista />} />
                   <Route path="/flyttjournalpost" element={<FlyttJournalpost />} />
                   <Route path="/person/:fnr" element={<Person />} />
                   <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />

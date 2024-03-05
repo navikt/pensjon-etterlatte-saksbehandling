@@ -16,6 +16,7 @@ import ForhaandsvisningBrev, { PdfViewer } from '~components/behandling/brev/For
 import styled from 'styled-components'
 import { useKlage } from '~components/klage/useKlage'
 import { forhaandsvisBlankettKa } from '~shared/api/klage'
+import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
 
 export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId: number; kanRedigere: boolean }) {
   const klage = useKlage()
@@ -152,3 +153,17 @@ const Maksbredde = styled.div`
   max-width: 40rem;
   padding: 1rem 0;
 `
+
+export const ButtonNavigerTilBrev = (props: { klage: Klage }) => {
+  return (
+    <Button
+      as="a"
+      variant="primary"
+      icon={<EnvelopeClosedIcon />}
+      href={`/person/${props.klage.sak.ident}?fane=BREV`}
+      target="_blank"
+    >
+      Opprett brev
+    </Button>
+  )
+}

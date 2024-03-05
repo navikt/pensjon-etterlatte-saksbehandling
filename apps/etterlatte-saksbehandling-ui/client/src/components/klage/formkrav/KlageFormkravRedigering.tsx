@@ -20,7 +20,7 @@ import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
 import { kanVurdereUtfall, nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { isFailure, isPending, isPendingOrInitial, mapSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
+import { ButtonNavigerTilBrev } from '~components/klage/vurdering/KlageVurderingFelles'
 
 // Vi bruker kun id'en til vedtaket i skjemadata, og transformerer fram / tilbake før sending / lasting
 type FilledFormDataFormkrav = Omit<Formkrav, 'vedtaketKlagenGjelder'> & { vedtaketKlagenGjelderId: null | string }
@@ -268,15 +268,7 @@ export function KlageFormkravRedigering() {
             Du må innhente mer informasjon fra klager for å avgjøre om formkravene kan oppfylles. Sett klagebehandlingen
             på vent og opprett et nytt brev til klager.
           </BodyLong>
-          <Button
-            as="a"
-            variant="primary"
-            icon={<EnvelopeClosedIcon />}
-            href={`/person/${klage.sak.ident}?fane=BREV`}
-            target="_blank"
-          >
-            Opprett brev
-          </Button>
+          <ButtonNavigerTilBrev klage={klage} />
         </Alert>
       </VurderingWrapper>
     )

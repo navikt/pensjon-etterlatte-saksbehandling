@@ -58,12 +58,13 @@ class KvitteringMottaker(
                 try {
                     logger.info("Kvittering på utbetaling fra Oppdrag mottatt med id=${message.jmsMessageID}")
                     oppdragXml = message.getBody(String::class.java)
-                    val oppdrag = OppdragJaxb.toOppdrag(oppdragXml)
 
                     sikkerLogg.info(
                         "Kvittering på utbetaling fra Oppdrag mottatt med id=${message.jmsMessageID}",
                         kv("oppdragXml", oppdragXml),
                     )
+
+                    val oppdrag = OppdragJaxb.toOppdrag(oppdragXml)
 
                     when (val resultat = utbetalingService.oppdaterKvittering(oppdrag)) {
                         is KvitteringOppdatert -> {

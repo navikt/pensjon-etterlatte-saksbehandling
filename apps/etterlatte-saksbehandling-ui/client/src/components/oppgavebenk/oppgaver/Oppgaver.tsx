@@ -35,15 +35,14 @@ export const Oppgaver = ({
   const [sortering, setSortering] = useState<OppgaveSortering>(hentSorteringFraLocalStorage())
   const filtrerteOppgaver = filter
     ? filtrerOppgaver(
-        filter.sakidFilter,
+        filter.sakEllerFnrFilter,
         filter.enhetsFilter,
         filter.fristFilter,
         filter.saksbehandlerFilter,
         filter.ytelseFilter,
         filter.oppgavestatusFilter,
         filter.oppgavetypeFilter,
-        [...oppgaver],
-        filter.fnrFilter
+        [...oppgaver]
       )
     : oppgaver
 

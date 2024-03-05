@@ -63,12 +63,11 @@ export const FRISTFILTER = {
 export type FristFilterKeys = keyof typeof FRISTFILTER
 
 export interface Filter {
-  sakidFilter: string
+  sakEllerFnrFilter: string
   enhetsFilter: EnhetFilterKeys
   fristFilter: FristFilterKeys
   saksbehandlerFilter: string
   ytelseFilter: YtelseFilterKeys
   oppgavestatusFilter: Array<string>
   oppgavetypeFilter: Array<string>
-  fnrFilter: string
 }

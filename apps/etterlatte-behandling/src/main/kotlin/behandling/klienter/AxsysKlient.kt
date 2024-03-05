@@ -45,8 +45,9 @@ class AxsysKlientImpl(private val client: HttpClient, private val url: String) :
 
             if (response.status.isSuccess()) {
                 response.body<EnhetslisteResponse?>()?.enheter
-                    ?.filter { it.enhetId == null || it.navn == null }
-                    ?.map { SaksbehandlerEnhet(it.enhetId!!, it.navn!!) } ?: emptyList()
+                    ?.filter { it.enhetId != null || it.navn != null }
+                    ?.map { SaksbehandlerEnhet(it.enhetId!!, it.navn!!) }
+                    .also { enhetCache.put(ident, it) } ?: emptyList()
             } else {
                 throw ClientRequestException(response, response.toString())
             }

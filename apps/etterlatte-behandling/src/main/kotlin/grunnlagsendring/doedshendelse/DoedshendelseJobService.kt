@@ -86,6 +86,12 @@ class DoedshendelseJobService(
         val kontrollpunkter = doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
         if (kontrollpunkter.isEmpty()) {
             logger.info("fant ingen kontrollpunkter for dødshendelse ${doedshendelse.sakId}, avbryter")
+            doedshendelseDao.oppdaterDoedshendelse(
+                doedshendelse.tilAvbrutt(
+                    sakId = doedshendelse.sakId!!,
+                    kontrollpunkter = kontrollpunkter,
+                ),
+            )
             return
         }
         when (kontrollpunkter.any { it.avbryt }) {

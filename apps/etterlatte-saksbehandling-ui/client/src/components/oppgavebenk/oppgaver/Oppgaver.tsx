@@ -8,7 +8,7 @@ import {
   OppgaveSortering,
   sorterFnr,
   sorterFrist,
-} from '~components/oppgavebenk/oppgaverTable/oppgavesortering'
+} from '~components/oppgavebenk/utils/oppgaveSortering'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils/oppgaveutils'
 import { filtrerOppgaver } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'

@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { Tabs } from '@navikt/ds-react'
-import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
-import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
-import { Container, FlexRow } from '~shared/styled'
+import { Container } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import {
   hentFilterFraLocalStorage,
   leggFilterILocalStorage,
@@ -32,21 +27,24 @@ import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/components/OppgaveFeilWrapper'
 import { hentAlleStoettedeRevurderinger } from '~shared/api/revurdering'
 import { RevurderingsaarsakerBySakstype, RevurderingsaarsakerDefault } from '~shared/types/Revurderingaarsak'
-import { Filter, OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
-import { MultiSelectFilter } from '~components/oppgavebenk/filtreringAvOppgaver/MultiSelectFilter'
+import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import {
+  hentValgFraLocalStorage,
+  leggValgILocalstorage,
+  OppgavelisteValg,
+} from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
+import { VelgOppgaveliste } from '~components/oppgavebenk/velgOppgaveliste/VelgOppgaveliste'
+import { minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 
-type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
-
-export const ToggleMinOppgaveliste = () => {
+export const Oppgavelista = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />
   }
 
-  const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
-
-  const location = useLocation()
-  const navigate = useNavigate()
+  const [oppgavelisteValg, setOppgavelisteValg] = useState<OppgavelisteValg>(
+    hentValgFraLocalStorage() as OppgavelisteValg
+  )
 
   const [oppgavelistaOppgaver, setOppgavelistaOppgaver] = useState<Array<OppgaveDTO>>([])
   const [minOppgavelisteOppgaver, setMinOppgavelisteOppgaver] = useState<Array<OppgaveDTO>>([])
@@ -65,39 +63,6 @@ export const ToggleMinOppgaveliste = () => {
   const [revurderingsaarsaker, setRevurderingsaarsaker] = useState<RevurderingsaarsakerBySakstype>(
     new RevurderingsaarsakerDefault()
   )
-
-  const oppdaterOppgavelisteValg = (oppgaveListeValg: OppgavelisteToggle) => {
-    setOppgaveListeValg(oppgaveListeValg)
-    if (oppgaveListeValg === 'MinOppgaveliste') {
-      navigate('/minoppgaveliste')
-    } else {
-      navigate('/')
-    }
-  }
-
-  const hentMinOppgavelisteOppgaver = (oppgavestatusFilter?: Array<string>) =>
-    hentMinOppgavelisteOppgaverFetch({
-      oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : minOppgavelisteFilter.oppgavestatusFilter,
-      minOppgavelisteIdent: true,
-    })
-
-  const hentOppgavelistaOppgaver = (oppgavestatusFilter?: Array<string>) =>
-    hentOppgavelistaOppgaverFetch({
-      oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : oppgavelistaFilter.oppgavestatusFilter,
-      minOppgavelisteIdent: false,
-    })
-
-  const hentAlleMinOppgavelisteOppgaver = () => {
-    hentMinOppgavelisteOppgaver()
-    hentGosysOppgaverFetch({})
-  }
-
-  const hentAlleOppgaver = () => {
-    hentMinOppgavelisteOppgaver()
-    hentOppgavelistaOppgaver()
-    hentGosysOppgaverFetch({})
-    hentRevurderingsaarsaker({})
-  }
 
   const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
     return oppgaver.filter((o) => o.saksbehandler?.ident === innloggetSaksbehandler.ident)
@@ -124,17 +89,29 @@ export const ToggleMinOppgaveliste = () => {
     }, 2000)
   }
 
-  useEffect(() => {
-    if (location.pathname.includes('minoppgaveliste')) {
-      if (oppgaveListeValg !== 'MinOppgaveliste') {
-        setOppgaveListeValg('MinOppgaveliste')
-      }
-    }
-  }, [location.pathname])
+  const hentMinOppgavelisteOppgaver = (oppgavestatusFilter?: Array<string>) =>
+    hentMinOppgavelisteOppgaverFetch({
+      oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : minOppgavelisteFilter.oppgavestatusFilter,
+      minOppgavelisteIdent: true,
+    })
 
-  useEffect(() => {
-    leggFilterILocalStorage({ ...oppgavelistaFilter, sakEllerFnrFilter: '' })
-  }, [oppgavelistaFilter])
+  const hentOppgavelistaOppgaver = (oppgavestatusFilter?: Array<string>) =>
+    hentOppgavelistaOppgaverFetch({
+      oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : oppgavelistaFilter.oppgavestatusFilter,
+      minOppgavelisteIdent: false,
+    })
+
+  const hentMineOgGosysOppgaver = () => {
+    hentMinOppgavelisteOppgaver()
+    hentGosysOppgaverFetch({})
+  }
+
+  const hentAlleOppgaver = () => {
+    hentMinOppgavelisteOppgaver()
+    hentOppgavelistaOppgaver()
+    hentGosysOppgaverFetch({})
+    hentRevurderingsaarsaker({})
+  }
 
   useEffect(() => {
     hentAlleOppgaver()
@@ -182,42 +159,34 @@ export const ToggleMinOppgaveliste = () => {
     }
   }, [hentRevurderingsaarsakerStatus])
 
+  useEffect(() => {
+    leggFilterILocalStorage({ ...oppgavelistaFilter, sakEllerFnrFilter: '' })
+  }, [oppgavelistaFilter])
+
+  useEffect(() => {
+    leggValgILocalstorage(oppgavelisteValg)
+  }, [oppgavelisteValg])
+
   return (
     <Container>
-      <TabsWidth
-        value={oppgaveListeValg}
-        onChange={(e) => {
-          oppdaterOppgavelisteValg(e as OppgavelisteToggle)
-        }}
-      >
-        <Tabs.List>
-          <Tabs.Tab
-            value="Oppgavelista"
-            label={`Oppgavelisten (${oppgavelistaOppgaver.length})`}
-            icon={<InboxIcon />}
-          />
-          <Tabs.Tab
-            value="MinOppgaveliste"
-            label={`Min oppgaveliste (${minOppgavelisteOppgaver.length})`}
-            icon={<PersonIcon aria-hidden />}
-          />
-        </Tabs.List>
-      </TabsWidth>
-
-      {oppgaveListeValg === 'MinOppgaveliste' ? (
+      <VelgOppgaveliste
+        oppgavelisteValg={oppgavelisteValg}
+        setOppgavelisteValg={setOppgavelisteValg}
+        antallOppgavelistaOppgaver={oppgavelistaOppgaver.length}
+        antallMinOppgavelisteOppgaver={minOppgavelisteOppgaver.length}
+      />
+      {oppgavelisteValg === OppgavelisteValg.MIN_OPPGAVELISTE ? (
         <>
-          <FlexRow>
-            <MultiSelectFilter
-              label="Oppgavestatus"
-              options={Object.entries(OPPGAVESTATUSFILTER).map(([, beskrivelse]) => beskrivelse)}
-              values={minOppgavelisteFilter.oppgavestatusFilter}
-              onChange={(statuser) => {
-                hentMinOppgavelisteOppgaver(statuser)
-                setMinOppgavelisteFilter({ ...minOppgavelisteFilter, oppgavestatusFilter: statuser })
-              }}
-            />
-          </FlexRow>
-
+          <FilterRad
+            key={OppgavelisteValg.MIN_OPPGAVELISTE}
+            hentAlleOppgaver={hentMineOgGosysOppgaver}
+            hentOppgaverStatus={(oppgavestatusFilter: Array<string>) =>
+              hentMinOppgavelisteOppgaver(oppgavestatusFilter)
+            }
+            filter={minOppgavelisteFilter}
+            setFilter={setMinOppgavelisteFilter}
+            saksbehandlereIEnhet={saksbehandlereIEnheter}
+          />
           <OppgaveFeilWrapper oppgaver={minOppgavelisteOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
             <Oppgaver
               oppgaver={minOppgavelisteOppgaver}
@@ -225,6 +194,7 @@ export const ToggleMinOppgaveliste = () => {
               oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
                 oppdaterFrist(setMinOppgavelisteOppgaver, minOppgavelisteOppgaver, id, nyfrist, versjon)
               }
+              filter={minOppgavelisteFilter}
               saksbehandlereIEnhet={saksbehandlereIEnheter}
               revurderingsaarsaker={revurderingsaarsaker}
             />
@@ -233,14 +203,17 @@ export const ToggleMinOppgaveliste = () => {
       ) : (
         <>
           <FilterRad
-            hentAlleOppgaver={hentAlleMinOppgavelisteOppgaver}
-            hentOppgaverStatus={(oppgavestatusFilter: Array<string>) => hentOppgavelistaOppgaver(oppgavestatusFilter)}
+            key={OppgavelisteValg.OPPGAVELISTA}
+            hentAlleOppgaver={hentAlleOppgaver}
+            hentOppgaverStatus={(oppgavestatusFilter: Array<string>) => {
+              hentOppgavelistaOppgaver(oppgavestatusFilter)
+            }}
             filter={oppgavelistaFilter}
             setFilter={setOppgavelistaFilter}
             saksbehandlereIEnhet={saksbehandlereIEnheter}
+            oppgavelisteValg={oppgavelisteValg}
           />
-
-          <OppgaveFeilWrapper oppgaver={minOppgavelisteOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
+          <OppgaveFeilWrapper oppgaver={oppgavelistaOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
             <Oppgaver
               oppgaver={oppgavelistaOppgaver}
               oppdaterTildeling={oppdaterSaksbehandlerTildeling}
@@ -254,8 +227,3 @@ export const ToggleMinOppgaveliste = () => {
     </Container>
   )
 }
-
-const TabsWidth = styled(Tabs)`
-  max-width: fit-content;
-  margin-bottom: 2rem;
-`

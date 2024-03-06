@@ -149,7 +149,7 @@ export const minOppgavelisteFiltre = (): Filter => {
     sakEllerFnrFilter: '',
     enhetsFilter: 'visAlle',
     fristFilter: 'visAlle',
-    saksbehandlerFilter: 'visAlle',
+    saksbehandlerFilter: SAKSBEHANDLERFILTER.visAlle,
     ytelseFilter: 'visAlle',
     oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
     oppgavetypeFilter: [OPPGAVETYPEFILTER.visAlle],

@@ -1,6 +1,10 @@
 import { Button, Select, TextField } from '@navikt/ds-react'
 import React, { ReactNode, useEffect, useState } from 'react'
-import { initialFilter, oppgavetypefilter } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
+import {
+  initialFilter,
+  minOppgavelisteFiltre,
+  oppgavetypefilter,
+} from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FlexRow } from '~shared/styled'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
@@ -17,6 +21,8 @@ import {
   YtelseFilterKeys,
 } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { MultiSelectFilter } from '~components/oppgavebenk/filtreringAvOppgaver/MultiSelectFilter'
+import { ArrowCirclepathIcon, ArrowUndoIcon } from '@navikt/aksel-icons'
+import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 
 interface Props {
   hentAlleOppgaver: () => void
@@ -24,6 +30,7 @@ interface Props {
   filter: Filter
   setFilter: (filter: Filter) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
+  oppgavelisteValg?: OppgavelisteValg
 }
 
 export const FilterRad = ({
@@ -32,6 +39,7 @@ export const FilterRad = ({
   filter,
   setFilter,
   saksbehandlereIEnhet,
+  oppgavelisteValg,
 }: Props): ReactNode => {
   const [sakEllerFnr, setSakEllerFnr] = useState<string>(filter.sakEllerFnrFilter)
 
@@ -72,20 +80,27 @@ export const FilterRad = ({
               </option>
             ))}
         </Select>
+        {oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA && (
+          <>
+            <FiltrerPaaSaksbehandler
+              saksbehandlereIEnhet={saksbehandlereIEnhet}
+              filter={filter}
+              setFilter={setFilter}
+            />
+            <Select
+              label="Enhet"
+              value={filter.enhetsFilter}
+              onChange={(e) => setFilter({ ...filter, enhetsFilter: e.target.value as EnhetFilterKeys })}
+            >
+              {Object.entries(ENHETFILTER).map(([enhetsnummer, enhetBeskrivelse]) => (
+                <option key={enhetsnummer} value={enhetsnummer}>
+                  {enhetBeskrivelse}
+                </option>
+              ))}
+            </Select>
+          </>
+        )}
 
-        <FiltrerPaaSaksbehandler saksbehandlereIEnhet={saksbehandlereIEnhet} filter={filter} setFilter={setFilter} />
-
-        <Select
-          label="Enhet"
-          value={filter.enhetsFilter}
-          onChange={(e) => setFilter({ ...filter, enhetsFilter: e.target.value as EnhetFilterKeys })}
-        >
-          {Object.entries(ENHETFILTER).map(([enhetsnummer, enhetBeskrivelse]) => (
-            <option key={enhetsnummer} value={enhetsnummer}>
-              {enhetBeskrivelse}
-            </option>
-          ))}
-        </Select>
         <Select
           label="Ytelse"
           value={filter.ytelseFilter}
@@ -117,15 +132,20 @@ export const FilterRad = ({
       </FlexRow>
 
       <FlexRow $spacing>
-        <Button onClick={hentAlleOppgaver}>Hent</Button>
+        <Button onClick={hentAlleOppgaver} size="small" icon={<ArrowCirclepathIcon />} iconPosition="right">
+          Hent oppgaver
+        </Button>
         <Button
           variant="secondary"
           onClick={() => {
-            setFilter(initialFilter())
+            setFilter(oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA ? initialFilter() : minOppgavelisteFiltre())
             hentAlleOppgaver()
           }}
+          size="small"
+          icon={<ArrowUndoIcon />}
+          iconPosition="right"
         >
-          Tilbakestill alle filtre
+          Tilbakestill filtre
         </Button>
       </FlexRow>
     </>

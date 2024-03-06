@@ -19,8 +19,19 @@ export const BeregnetSamletTrygdetid = ({ beregnetTrygdetid }: Props) => (
       <Table.Body>
         <Table.Row>
           <Table.DataCell>Samlet trygdetid for nasjonal beregning</Table.DataCell>
-          <Table.DataCell>{beregnetTrygdetid.samletTrygdetidNorge}</Table.DataCell>
-          <Table.DataCell />
+          <Table.DataCell colSpan={2}>
+            {beregnetTrygdetid.samletTrygdetidNorge}
+            {beregnetTrygdetid.yrkesskade && (
+              <>
+                {' '}
+                (justert for yrkesskade
+                {beregnetTrygdetid.beregnetSamletTrygdetidNorge && (
+                  <> - opprinnelig beregnet verdi {beregnetTrygdetid.beregnetSamletTrygdetidNorge}</>
+                )}
+                )
+              </>
+            )}
+          </Table.DataCell>
         </Table.Row>
         <Table.Row>
           <Table.DataCell>Samlet trygdetid for beregning av teoretisk beløp</Table.DataCell>
@@ -28,7 +39,7 @@ export const BeregnetSamletTrygdetid = ({ beregnetTrygdetid }: Props) => (
           <Table.DataCell />
         </Table.Row>
         <Table.Row>
-          <Table.DataCell>Pro rata brøk</Table.DataCell>
+          <Table.DataCell>Prorata brøk</Table.DataCell>
           <Table.DataCell>
             {beregnetTrygdetid.prorataBroek ? (
               <span>

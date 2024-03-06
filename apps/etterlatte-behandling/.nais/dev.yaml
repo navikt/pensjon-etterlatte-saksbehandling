@@ -146,6 +146,9 @@ spec:
         - application: etterlatte-tilbakekreving
         - application: skjermede-personer-pip # namespace hører til denne. Ikke legg til ny app i mellom.
           namespace: nom
+        - application: digdir-krr-proxy
+          namespace: team-rocket
+          cluster: dev-gcp
       external:
         - host: skjermede-personer-pip.intern.dev.nav.no
         - host: norg2.dev-fss-pub.nais.io

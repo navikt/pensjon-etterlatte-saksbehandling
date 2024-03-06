@@ -67,8 +67,7 @@ class SaksbehandlerServiceImpl(
 
         return if (enheterForSaksbehandler == null) {
             runBlocking { axsysKlient.hentEnheterForIdent(ident) }
-                .also {
-                        saksbehandlerEnhetList ->
+                .also { saksbehandlerEnhetList ->
                     dao.upsertSaksbehandlerEnheter(Pair(ident, saksbehandlerEnhetList.map { it.enhetsNummer }))
                 }
         } else {
@@ -80,7 +79,7 @@ class SaksbehandlerServiceImpl(
             val ikkeRegistrertEnhet = mapped.any { it.second == null }
             return if (ikkeRegistrertEnhet) {
                 runBlocking { axsysKlient.hentEnheterForIdent(ident) }
-                    .also { dao.upsertSaksbehandlerEnheter(Pair(ident, it.map { it.enhetsNummer })) }
+                // .also { dao.upsertSaksbehandlerEnheter(Pair(ident, it.map { it.enhetsNummer })) }
             } else {
                 mapped.map { SaksbehandlerEnhet(it.first, it.second!!) }
             }

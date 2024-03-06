@@ -15,7 +15,7 @@ import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useParams } from 'react-router-dom'
-import { hentOppgave } from '~shared/api/oppgaver'
+import { hentOppgave, Oppgavestatus } from '~shared/api/oppgaver'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import { FormProvider, useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
@@ -36,26 +36,30 @@ interface ManuellBehandingSkjema extends NyBehandlingSkjema {
 }
 
 export default function ManuellBehandling() {
-  const [status, opprettNyBehandling] = useApiCall(opprettBehandling)
+  const [opprettBehandlingStatus, opprettNyBehandling] = useApiCall(opprettBehandling)
   const [nyBehandlingId, setNyId] = useState('')
   const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)
   const [overstyrTrygdetidStatus, opprettOverstyrtTrygdetidReq] = useApiCall(opprettTrygdetidOverstyrtMigrering)
 
-  const [oppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
+  const [hentOppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
   const { '*': oppgaveId } = useParams()
 
   const [pesysId, setPesysId] = useState<number | undefined>(undefined)
   const [fnrFraOppgave, setFnr] = useState<string | undefined>(undefined)
+  const [oppgaveStatus, setOppgaveStatus] = useState<Oppgavestatus | undefined>(undefined)
   const [vedtaksloesning, setVedtaksloesning] = useState<string>('')
 
   useEffect(() => {
     if (oppgaveId) {
       apiHentOppgave(oppgaveId, (oppgave) => {
+        console.log(oppgave)
+        setOppgaveStatus(oppgave.status)
         oppgave.fnr && setFnr(oppgave.fnr)
         oppgave.referanse && setPesysId(Number(oppgave.referanse))
         if (oppgave.type == 'GJENOPPRETTING_ALDERSOVERGANG') {
           setVedtaksloesning('GJENOPPRETTA')
         }
+        console.log(oppgaveStatus, fnrFraOppgave, pesysId)
       })
     }
   }, [oppgaveId])
@@ -116,7 +120,7 @@ export default function ManuellBehandling() {
     getValues,
   } = methods
 
-  if (isPending(oppgaveStatus)) {
+  if (isPending(hentOppgaveStatus)) {
     return <div>Henter oppgave</div>
   }
   return (
@@ -212,19 +216,27 @@ export default function ManuellBehandling() {
           <Button
             variant="secondary"
             onClick={handleSubmit(ferdigstill)}
-            loading={isPending(status) || isPending(overstyrBeregningStatus) || isPending(overstyrTrygdetidStatus)}
+            loading={
+              isPending(opprettBehandlingStatus) ||
+              isPending(overstyrBeregningStatus) ||
+              isPending(overstyrTrygdetidStatus)
+            }
           >
             Opprett behandling
           </Button>
         </Knapp>
 
-        <Knapp>
-          <GjenopprettingModal />
-        </Knapp>
+        {oppgaveId && oppgaveStatus && isSuccess(hentOppgaveStatus) && (
+          <Knapp>
+            <GjenopprettingModal oppgaveId={oppgaveId} oppgaveStatus={oppgaveStatus} />
+          </Knapp>
+        )}
 
-        {isSuccess(status) && <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>}
+        {isSuccess(opprettBehandlingStatus) && (
+          <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>
+        )}
         {isFailureHandler({
-          apiResult: status,
+          apiResult: opprettBehandlingStatus,
           errorMessage: 'Det oppsto en feil ved oppretting av behandlingen.',
         })}
 

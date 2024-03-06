@@ -4,14 +4,17 @@ import { FlexRow } from '~shared/styled'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { ferdigstillOppgave } from '~shared/api/oppgaver'
+import { erOppgaveRedigerbar, ferdigstillOppgave, Oppgavestatus } from '~shared/api/oppgaver'
+import { useNavigate } from 'react-router-dom'
 
-export default function GjenopprettingModal() {
-  const [status, avsluttOppgave] = useApiCall(ferdigstillOppgave)
+export default function GjenopprettingModal(props: { oppgaveId: string; oppgaveStatus: Oppgavestatus }) {
+  const { oppgaveId, oppgaveStatus } = props
+  const [ferdigstillOppgaveStatus, avsluttOppgave] = useApiCall(ferdigstillOppgave)
   const [isOpen, setIsOpen] = useState(false)
+  const navigate = useNavigate()
 
   const avbryt = () => {
-    avsluttOppgave('', () => {})
+    avsluttOppgave(oppgaveId, () => navigate('/'))
   }
 
   return (
@@ -21,6 +24,7 @@ export default function GjenopprettingModal() {
         onClick={() => {
           setIsOpen(true)
         }}
+        disabled={!erOppgaveRedigerbar(oppgaveStatus)}
       >
         Avslutt oppgave uten behandling
       </Button>
@@ -38,15 +42,15 @@ export default function GjenopprettingModal() {
 
         <Modal.Footer>
           <FlexRow justify="center">
-            <Button variant="secondary" onClick={() => setIsOpen(false)} loading={isPending(status)}>
+            <Button variant="secondary" onClick={() => setIsOpen(false)} loading={isPending(ferdigstillOppgaveStatus)}>
               Nei
             </Button>
-            <Button variant="danger" onClick={avbryt} loading={isPending(status)}>
+            <Button variant="danger" onClick={avbryt} loading={isPending(ferdigstillOppgaveStatus)}>
               Ja, lukke oppgave
             </Button>
           </FlexRow>
           {isFailureHandler({
-            apiResult: status,
+            apiResult: ferdigstillOppgaveStatus,
             errorMessage: 'Det oppsto en feil ved avbryting av behandlingen.',
           })}
         </Modal.Footer>

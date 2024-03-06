@@ -35,8 +35,8 @@ class FristGaarUtJobb(
                 val request =
                     VentefristGaarUtRequest(
                         dato = LocalDate.now(),
-                        type = OppgaveType.entries.filterNot { it == OppgaveType.GJENOPPRETTING_ALDERSOVERGANG }.toSet(),
-                        oppgaveKilde = OppgaveKilde.entries.filterNot { it == OppgaveKilde.GJENOPPRETTING }.toSet(),
+                        type = (OppgaveType.entries - OppgaveType.GJENOPPRETTING_ALDERSOVERGANG),
+                        oppgaveKilde = (OppgaveKilde.entries - OppgaveKilde.GJENOPPRETTING),
                         oppgaver = listOf(),
                     )
                 service.hentFristGaarUt(request).forEach {

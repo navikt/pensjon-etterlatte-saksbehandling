@@ -479,6 +479,15 @@ internal class ApplicationContext(
         )
     }
 
+    val fristGaarUtJobb: FristGaarUtJobb by lazy {
+        FristGaarUtJobb(
+            service = oppgaveService,
+            erLeader = { leaderElectionKlient.isLeader() },
+            periode = Duration.ofDays(1),
+            starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
+        )
+    }
+
     fun close() {
         (dataSource as HikariDataSource).close()
     }

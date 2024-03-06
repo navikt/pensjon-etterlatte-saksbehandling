@@ -77,8 +77,8 @@ interface OppgaveDao {
 
     fun hentFristGaarUt(
         dato: LocalDate,
-        type: OppgaveType,
-        kilde: OppgaveKilde,
+        type: Set<OppgaveType>,
+        kilde: Set<OppgaveKilde>,
         oppgaver: List<UUID>,
     ): List<VentefristGaarUt>
 }
@@ -407,8 +407,8 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
 
     override fun hentFristGaarUt(
         dato: LocalDate,
-        type: OppgaveType,
-        kilde: OppgaveKilde,
+        type: Set<OppgaveType>,
+        kilde: Set<OppgaveKilde>,
         oppgaver: List<UUID>,
     ): List<VentefristGaarUt> =
         connectionAutoclosing.hentConnection {
@@ -416,22 +416,22 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.referanse, o.sak_id
+                        SELECT o.id, o.referanse, o.sak_id, o.kilde
                         FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.frist <= ?
-                        and type = ?
-                        and kilde = ?
+                        and type = ANY(?)
+                        and kilde = ANY(?)
                         """.trimIndent(),
                     )
                 statement.setTidspunkt(1, dato.atTime(LocalTime.NOON).toTidspunkt())
-                statement.setString(2, type.name)
-                statement.setString(3, kilde.name)
+                statement.setArray(2, createArrayOf("text", type.map { i -> i.name }.toTypedArray()))
+                statement.setArray(3, createArrayOf("text", kilde.map { i -> i.name }.toTypedArray()))
                 statement.executeQuery().toList {
                     VentefristGaarUt(
                         oppgaveID = getUUID("id"),
                         sakId = getLong("sak_id"),
                         behandlingId = UUID.fromString(getString("referanse")),
-                        oppgavekilde = kilde,
+                        oppgavekilde = OppgaveKilde.valueOf(getString("kilde")),
                     )
                 }.also { utgaatte ->
                     logger.info("Hentet ${utgaatte.size} oppgaver der fristen går ut for dato $dato og type $type")

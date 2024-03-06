@@ -3,6 +3,7 @@ import { logger } from '~utils/logger'
 export enum OppgavelisteValg {
   OPPGAVELISTA = 'Oppgavelista',
   MIN_OPPGAVELISTE = 'MinOppgaveliste',
+  GOSYS_OPPGAVER = 'GosysOpggaver',
 }
 
 const OPPGAVELISTE_VALG_KEY = 'oppgaveliste'

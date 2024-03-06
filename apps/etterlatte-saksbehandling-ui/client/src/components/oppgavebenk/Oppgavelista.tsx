@@ -7,13 +7,7 @@ import {
   leggFilterILocalStorage,
 } from '~components/oppgavebenk/filtreringAvOppgaver/filterLocalStorage'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import {
-  hentGosysOppgaver,
-  hentOppgaverMedStatus,
-  OppgaveDTO,
-  OppgaveSaksbehandler,
-  saksbehandlereIEnhetApi,
-} from '~shared/api/oppgaver'
+import { hentOppgaverMedStatus, OppgaveDTO, OppgaveSaksbehandler, saksbehandlereIEnhetApi } from '~shared/api/oppgaver'
 import { isSuccess } from '~shared/api/apiUtils'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
@@ -35,6 +29,7 @@ import {
 } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 import { VelgOppgaveliste } from '~components/oppgavebenk/velgOppgaveliste/VelgOppgaveliste'
 import { minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
+import { GosysOppgaveliste } from '~components/oppgavebenk/GosysOppgaveliste'
 
 export const Oppgavelista = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
@@ -54,7 +49,6 @@ export const Oppgavelista = () => {
 
   const [oppgavelistaOppgaverResult, hentOppgavelistaOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
   const [minOppgavelisteOppgaverResult, hentMinOppgavelisteOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
-  const [gosysOppgaverResult, hentGosysOppgaverFetch] = useApiCall(hentGosysOppgaver)
 
   const [, hentSaksbehandlereIEnheterFetch] = useApiCall(saksbehandlereIEnhetApi)
   const [saksbehandlereIEnheter, setSaksbehandlereIEnheter] = useState<Array<Saksbehandler>>([])
@@ -101,15 +95,13 @@ export const Oppgavelista = () => {
       minOppgavelisteIdent: false,
     })
 
-  const hentMineOgGosysOppgaver = () => {
+  const hentMineOppgaver = () => {
     hentMinOppgavelisteOppgaver()
-    hentGosysOppgaverFetch({})
   }
 
   const hentAlleOppgaver = () => {
     hentMinOppgavelisteOppgaver()
     hentOppgavelistaOppgaver()
-    hentGosysOppgaverFetch({})
     hentRevurderingsaarsaker({})
   }
 
@@ -122,36 +114,17 @@ export const Oppgavelista = () => {
     }
   }, [])
 
-  // Denne spaghettien er pga at vi må ha Gosys oppgaver inn i våres oppgave behandling
   useEffect(() => {
-    if (isSuccess(oppgavelistaOppgaverResult) && isSuccess(gosysOppgaverResult)) {
-      const alleOppgaverMerget = sorterOppgaverEtterOpprettet([
-        ...oppgavelistaOppgaverResult.data,
-        ...gosysOppgaverResult.data,
-      ])
-      setOppgavelistaOppgaver(alleOppgaverMerget)
-    } else if (isSuccess(oppgavelistaOppgaverResult) && !isSuccess(gosysOppgaverResult)) {
+    if (isSuccess(oppgavelistaOppgaverResult)) {
       setOppgavelistaOppgaver(sorterOppgaverEtterOpprettet(oppgavelistaOppgaverResult.data))
-    } else if (!isSuccess(oppgavelistaOppgaverResult) && isSuccess(gosysOppgaverResult)) {
-      setOppgavelistaOppgaver(sorterOppgaverEtterOpprettet(gosysOppgaverResult.data))
     }
-  }, [oppgavelistaOppgaverResult, gosysOppgaverResult])
+  }, [oppgavelistaOppgaverResult])
 
   useEffect(() => {
-    if (isSuccess(minOppgavelisteOppgaverResult) && isSuccess(gosysOppgaverResult)) {
-      const alleOppgaverMerget = sorterOppgaverEtterOpprettet([
-        ...minOppgavelisteOppgaverResult.data,
-        ...filtrerKunInnloggetBrukerOppgaver(gosysOppgaverResult.data),
-      ])
-      setMinOppgavelisteOppgaver(alleOppgaverMerget)
-    } else if (isSuccess(minOppgavelisteOppgaverResult) && !isSuccess(gosysOppgaverResult)) {
+    if (isSuccess(minOppgavelisteOppgaverResult)) {
       setMinOppgavelisteOppgaver(sorterOppgaverEtterOpprettet(minOppgavelisteOppgaverResult.data))
-    } else if (!isSuccess(minOppgavelisteOppgaverResult) && isSuccess(gosysOppgaverResult)) {
-      setMinOppgavelisteOppgaver(
-        sorterOppgaverEtterOpprettet(filtrerKunInnloggetBrukerOppgaver(gosysOppgaverResult.data))
-      )
     }
-  }, [gosysOppgaverResult, minOppgavelisteOppgaverResult])
+  }, [minOppgavelisteOppgaverResult])
 
   useEffect(() => {
     if (isSuccess(hentRevurderingsaarsakerStatus)) {
@@ -175,11 +148,11 @@ export const Oppgavelista = () => {
         antallOppgavelistaOppgaver={oppgavelistaOppgaver.length}
         antallMinOppgavelisteOppgaver={minOppgavelisteOppgaver.length}
       />
-      {oppgavelisteValg === OppgavelisteValg.MIN_OPPGAVELISTE ? (
+      {oppgavelisteValg === OppgavelisteValg.MIN_OPPGAVELISTE && (
         <>
           <FilterRad
             key={OppgavelisteValg.MIN_OPPGAVELISTE}
-            hentAlleOppgaver={hentMineOgGosysOppgaver}
+            hentAlleOppgaver={hentMineOppgaver}
             hentOppgaverStatus={(oppgavestatusFilter: Array<string>) =>
               hentMinOppgavelisteOppgaver(oppgavestatusFilter)
             }
@@ -187,7 +160,7 @@ export const Oppgavelista = () => {
             setFilter={setMinOppgavelisteFilter}
             saksbehandlereIEnhet={saksbehandlereIEnheter}
           />
-          <OppgaveFeilWrapper oppgaver={minOppgavelisteOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
+          <OppgaveFeilWrapper oppgaver={minOppgavelisteOppgaverResult}>
             <Oppgaver
               oppgaver={minOppgavelisteOppgaver}
               oppdaterTildeling={oppdaterSaksbehandlerTildeling}
@@ -200,7 +173,8 @@ export const Oppgavelista = () => {
             />
           </OppgaveFeilWrapper>
         </>
-      ) : (
+      )}
+      {oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA && (
         <>
           <FilterRad
             key={OppgavelisteValg.OPPGAVELISTA}
@@ -213,7 +187,7 @@ export const Oppgavelista = () => {
             saksbehandlereIEnhet={saksbehandlereIEnheter}
             oppgavelisteValg={oppgavelisteValg}
           />
-          <OppgaveFeilWrapper oppgaver={oppgavelistaOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
+          <OppgaveFeilWrapper oppgaver={oppgavelistaOppgaverResult}>
             <Oppgaver
               oppgaver={oppgavelistaOppgaver}
               oppdaterTildeling={oppdaterSaksbehandlerTildeling}
@@ -223,6 +197,14 @@ export const Oppgavelista = () => {
             />
           </OppgaveFeilWrapper>
         </>
+      )}
+      {oppgavelisteValg === OppgavelisteValg.GOSYS_OPPGAVER && (
+        <GosysOppgaveliste
+          key={OppgavelisteValg.GOSYS_OPPGAVER}
+          oppdaterTildeling={oppdaterSaksbehandlerTildeling}
+          saksbehandlereIEnhet={saksbehandlereIEnheter}
+          revurderingsaarsaker={revurderingsaarsaker}
+        />
       )}
     </Container>
   )

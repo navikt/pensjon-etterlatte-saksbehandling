@@ -44,22 +44,18 @@ export default function ManuellBehandling() {
   const [hentOppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
   const { '*': oppgaveId } = useParams()
 
-  const [pesysId, setPesysId] = useState<number | undefined>(undefined)
-  const [fnrFraOppgave, setFnr] = useState<string | undefined>(undefined)
   const [oppgaveStatus, setOppgaveStatus] = useState<Oppgavestatus | undefined>(undefined)
-  const [vedtaksloesning, setVedtaksloesning] = useState<string>('')
 
   useEffect(() => {
     if (oppgaveId) {
       apiHentOppgave(oppgaveId, (oppgave) => {
         console.log(oppgave)
         setOppgaveStatus(oppgave.status)
-        oppgave.fnr && setFnr(oppgave.fnr)
-        oppgave.referanse && setPesysId(Number(oppgave.referanse))
+        oppgave.fnr && methods.setValue('persongalleri.soeker', oppgave.fnr)
+        oppgave.referanse && methods.setValue('pesysId', Number(oppgave.referanse))
         if (oppgave.type == 'GJENOPPRETTING_ALDERSOVERGANG') {
-          setVedtaksloesning('GJENOPPRETTA')
+          methods.setValue('kilde', 'GJENOPPRETTA')
         }
-        console.log(oppgaveStatus, fnrFraOppgave, pesysId)
       })
     }
   }, [oppgaveId])
@@ -67,14 +63,10 @@ export default function ManuellBehandling() {
   const methods = useForm<ManuellBehandingSkjema>({
     defaultValues: {
       persongalleri: {
-        innsender: undefined,
-        soeker: fnrFraOppgave,
         gjenlevende: [],
         soesken: [],
         avdoed: [],
       },
-      pesysId: pesysId,
-      kilde: vedtaksloesning,
     },
   })
 

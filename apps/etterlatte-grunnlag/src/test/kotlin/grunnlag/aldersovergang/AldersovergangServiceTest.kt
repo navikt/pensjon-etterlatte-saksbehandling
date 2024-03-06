@@ -20,13 +20,24 @@ class AldersovergangServiceTest(private val dataSource: DataSource) {
     private val service = AldersovergangService(dao)
 
     @Test
-    fun `kan hente alder`() {
+    fun `foedt for 20 aar siden er 20`() {
+        lagSakMedSoekerFoedtPaaGittDato(LocalDate.now().minusYears(20))
+        assertEquals(20, service.hentAlder(1, PersonRolle.BARN))
+    }
+
+    @Test
+    fun `foedt for 20 aar siden i morgen er 19`() {
+        lagSakMedSoekerFoedtPaaGittDato(LocalDate.now().minusYears(20).plusDays(1))
+        assertEquals(19, service.hentAlder(1, PersonRolle.BARN))
+    }
+
+    private fun lagSakMedSoekerFoedtPaaGittDato(foedselsdato: LocalDate) {
         dataSource.insert(
             tabellnavn = "grunnlagshendelse",
             params =
                 mapOf(
                     "opplysning_type" to "SOEKER_PDL_V1",
-                    "opplysning" to "1999-06-04",
+                    "opplysning" to "{}",
                     "sak_id" to 1,
                     "hendelsenummer" to 1,
                     "fnr" to SOEKER_FOEDSELSNUMMER.value,
@@ -37,13 +48,11 @@ class AldersovergangServiceTest(private val dataSource: DataSource) {
             params =
                 mapOf(
                     "opplysning_type" to "FOEDSELSDATO",
-                    "opplysning" to LocalDate.now().minusYears(21),
+                    "opplysning" to foedselsdato,
                     "sak_id" to 1,
                     "hendelsenummer" to 2,
                     "fnr" to SOEKER_FOEDSELSNUMMER.value,
                 ),
         )
-
-        assertEquals(21, service.hentAlder(1, PersonRolle.BARN))
     }
 }

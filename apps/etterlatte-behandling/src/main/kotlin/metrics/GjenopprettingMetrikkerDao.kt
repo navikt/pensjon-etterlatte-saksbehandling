@@ -11,10 +11,14 @@ class GjenopprettingMetrikkerDao(private val dataSource: DataSource) {
             val statement =
                 it.prepareStatement(
                     """
-                    select count(distinct s.id) antall, type, saksbehandler, status, s.enhet sEnhet
+                    select count(distinct s.id) antall, type, status, s.enhet,
+                       case saksbehandler
+                            when 'EY' then 'automatisk'
+                            else 'manuell'
+                        end automatisk
                     from sak s join oppgave o on s.id = o.sak_id
                     where o.kilde = 'GJENOPPRETTING'
-                    group by type, saksbehandler, status, sEnhet
+                    group by type, status, s.enhet, automatisk;
                     """.trimIndent(),
                 )
             return statement.executeQuery().toList {
@@ -46,9 +50,9 @@ class GjenopprettingMetrikkerDao(private val dataSource: DataSource) {
     private fun ResultSet.asBehandling(): Behandlinger {
         return Behandlinger(
             antall = getInt("antall"),
-            automatisk = if (getString("saksbehandler") == "EY") "automatisk" else "manuell",
+            automatisk = getString("automatisk"),
             status = Status.valueOf(getString("status")),
-            enhet = getString("sEnhet"),
+            enhet = getString("enhet"),
             type = getString("type"),
         )
     }

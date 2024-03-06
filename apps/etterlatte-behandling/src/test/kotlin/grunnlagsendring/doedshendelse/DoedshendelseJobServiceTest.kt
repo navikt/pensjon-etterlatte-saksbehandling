@@ -55,7 +55,7 @@ class DoedshendelseJobServiceTest {
                     enhet = "0000",
                 )
         }
-    private val todagergammel = 2
+    private val femDagerGammel = 5
     private val doedshendelserProducer =
         mockk<DoedshendelserKafkaService> {
             every { sendBrevRequest(any()) } just runs
@@ -93,7 +93,7 @@ class DoedshendelseJobServiceTest {
             featureToggleService = toggle,
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
             sakService = sakService,
-            dagerGamleHendelserSomSkalKjoeres = todagergammel,
+            dagerGamleHendelserSomSkalKjoeres = femDagerGammel,
             doedshendelserProducer,
             grunnlagService,
             pdlTjenesterKlient,
@@ -115,7 +115,7 @@ class DoedshendelseJobServiceTest {
                 doedshendelseInternal,
                 doedshendelseInternal.copy(
                     avdoedFnr = AVDOED_FOEDSELSNUMMER.value,
-                    endret = LocalDateTime.now().minusDays(todagergammel.toLong()).toTidspunkt(),
+                    endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt(),
                 ),
             )
         every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns listOf(AvdoedHarDNummer)
@@ -141,7 +141,7 @@ class DoedshendelseJobServiceTest {
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
                 endringstype = Endringstype.OPPRETTET,
-            ).copy(endret = LocalDateTime.now().minusDays(todagergammel.toLong()).toTidspunkt())
+            ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())
 
         every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
@@ -165,7 +165,7 @@ class DoedshendelseJobServiceTest {
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
                 endringstype = Endringstype.OPPRETTET,
-            ).copy(endret = LocalDateTime.now().minusDays(todagergammel.toLong()).toTidspunkt())
+            ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())
 
         every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
@@ -196,7 +196,7 @@ class DoedshendelseJobServiceTest {
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
                 endringstype = Endringstype.OPPRETTET,
-            ).copy(endret = LocalDateTime.now().minusDays(todagergammel.toLong()).toTidspunkt())
+            ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())
 
         every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit

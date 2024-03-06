@@ -1,6 +1,10 @@
 import { Button, Select, TextField } from '@navikt/ds-react'
 import React, { ReactNode, useEffect, useState } from 'react'
-import { initialFilter, oppgavetypefilter } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
+import {
+  initialFilter,
+  minOppgavelisteFiltre,
+  oppgavetypefilter,
+} from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FlexRow } from '~shared/styled'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
@@ -17,6 +21,8 @@ import {
   YtelseFilterKeys,
 } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { MultiSelectFilter } from '~components/oppgavebenk/filtreringAvOppgaver/MultiSelectFilter'
+import { ArrowCirclepathIcon, ArrowUndoIcon } from '@navikt/aksel-icons'
+import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 
 interface Props {
   hentAlleOppgaver: () => void
@@ -24,6 +30,7 @@ interface Props {
   filter: Filter
   setFilter: (filter: Filter) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
+  oppgavelisteValg?: OppgavelisteValg
 }
 
 export const FilterRad = ({
@@ -32,35 +39,28 @@ export const FilterRad = ({
   filter,
   setFilter,
   saksbehandlereIEnhet,
+  oppgavelisteValg,
 }: Props): ReactNode => {
-  const [sakId, setSakId] = useState<string>(filter.sakidFilter)
-  const [fnr, setFnr] = useState<string>(filter.fnrFilter)
+  const [sakEllerFnr, setSakEllerFnr] = useState<string>(filter.sakEllerFnrFilter)
 
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   useEffect(() => {
-    const delay = setTimeout(() => setFilter({ ...filter, sakidFilter: sakId || '', fnrFilter: fnr || '' }), 500)
+    const delay = setTimeout(() => setFilter({ ...filter, sakEllerFnrFilter: sakEllerFnr }), 500)
     return () => clearTimeout(delay)
-  }, [sakId, fnr])
+  }, [sakEllerFnr])
 
   return (
     <>
       <FlexRow $spacing align="start">
         <TextField
-          label="Sak ID"
+          label="Sakid / Fnr."
           width="1rem"
-          value={sakId}
-          onChange={(e) => setSakId(e.target.value?.replace(/[^0-9+]/, ''))}
+          value={sakEllerFnr}
+          onChange={(e) => setSakEllerFnr(e.target.value?.replace(/[^0-9+]/, ''))}
           type="tel"
           min={0}
           placeholder="Søk"
-        />
-        <TextField
-          label="Fødselsnummer"
-          value={fnr}
-          onChange={(e) => setFnr(e.target.value?.replace(/[^0-9+]/, ''))}
-          placeholder="Søk"
-          autoComplete="off"
         />
         <Select
           label="Frist"
@@ -80,20 +80,27 @@ export const FilterRad = ({
               </option>
             ))}
         </Select>
+        {oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA && (
+          <>
+            <FiltrerPaaSaksbehandler
+              saksbehandlereIEnhet={saksbehandlereIEnhet}
+              filter={filter}
+              setFilter={setFilter}
+            />
+            <Select
+              label="Enhet"
+              value={filter.enhetsFilter}
+              onChange={(e) => setFilter({ ...filter, enhetsFilter: e.target.value as EnhetFilterKeys })}
+            >
+              {Object.entries(ENHETFILTER).map(([enhetsnummer, enhetBeskrivelse]) => (
+                <option key={enhetsnummer} value={enhetsnummer}>
+                  {enhetBeskrivelse}
+                </option>
+              ))}
+            </Select>
+          </>
+        )}
 
-        <FiltrerPaaSaksbehandler saksbehandlereIEnhet={saksbehandlereIEnhet} filter={filter} setFilter={setFilter} />
-
-        <Select
-          label="Enhet"
-          value={filter.enhetsFilter}
-          onChange={(e) => setFilter({ ...filter, enhetsFilter: e.target.value as EnhetFilterKeys })}
-        >
-          {Object.entries(ENHETFILTER).map(([enhetsnummer, enhetBeskrivelse]) => (
-            <option key={enhetsnummer} value={enhetsnummer}>
-              {enhetBeskrivelse}
-            </option>
-          ))}
-        </Select>
         <Select
           label="Ytelse"
           value={filter.ytelseFilter}
@@ -125,15 +132,20 @@ export const FilterRad = ({
       </FlexRow>
 
       <FlexRow $spacing>
-        <Button onClick={hentAlleOppgaver}>Hent</Button>
+        <Button onClick={hentAlleOppgaver} size="small" icon={<ArrowCirclepathIcon />} iconPosition="right">
+          Hent oppgaver
+        </Button>
         <Button
           variant="secondary"
           onClick={() => {
-            setFilter(initialFilter())
+            setFilter(oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA ? initialFilter() : minOppgavelisteFiltre())
             hentAlleOppgaver()
           }}
+          size="small"
+          icon={<ArrowUndoIcon />}
+          iconPosition="right"
         >
-          Tilbakestill alle filtre
+          Tilbakestill filtre
         </Button>
       </FlexRow>
     </>

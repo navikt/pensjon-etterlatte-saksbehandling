@@ -45,7 +45,7 @@ data class OpprettJournalpostRequest(
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 data class OpprettNotatJournalpostRequest(
-    val behandlingstema: String,
+    val behandlingstema: String? = null,
     val bruker: Bruker,
     val dokumenter: List<JournalpostDokument>,
     val datoDokument: LocalDateTime? = null,

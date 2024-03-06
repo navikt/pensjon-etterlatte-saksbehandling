@@ -71,6 +71,7 @@ export enum Brevtype {
   OPPLASTET_PDF = 'OPPLASTET_PDF',
   MANUELT = 'MANUELT',
   VEDLEGG = 'VEDLEGG',
+  OVERSENDELSE_KLAGE = 'OVERSENDELSE_KLAGE',
 }
 
 export function formaterBrevtype(brevtype: Brevtype) {
@@ -85,5 +86,7 @@ export function formaterBrevtype(brevtype: Brevtype) {
       return 'Vedtaksbrev'
     case Brevtype.OPPLASTET_PDF:
       return 'Opplastet PDF'
+    case Brevtype.OVERSENDELSE_KLAGE:
+      return 'Oversendelse klage'
   }
 }

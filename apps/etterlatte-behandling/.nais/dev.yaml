@@ -128,6 +128,10 @@ spec:
       value: http://digdir-krr-proxy.team-rocket
     - name: KRR_SCOPE
       value: api://dev-gcp.team-rocket.digdir-krr-proxy/.default
+    - name: AXSYS_URL
+      value: https://axsys.dev-fss-pub.nais.io
+    - name: AXSYS_SCOPE
+      value: api://dev-fss.org.axsys/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -142,6 +146,9 @@ spec:
         - application: etterlatte-tilbakekreving
         - application: skjermede-personer-pip # namespace hører til denne. Ikke legg til ny app i mellom.
           namespace: nom
+        - application: digdir-krr-proxy
+          namespace: team-rocket
+          cluster: dev-gcp
       external:
         - host: skjermede-personer-pip.intern.dev.nav.no
         - host: norg2.dev-fss-pub.nais.io
@@ -149,6 +156,7 @@ spec:
         - host: oppgave.dev-fss-pub.nais.io
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: pensjon-pen-q2.dev-fss-pub.nais.io
+        - host: axsys.dev-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter

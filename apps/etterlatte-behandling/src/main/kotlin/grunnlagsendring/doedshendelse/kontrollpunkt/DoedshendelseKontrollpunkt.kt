@@ -26,6 +26,15 @@ sealed class DoedshendelseKontrollpunkt {
         override val avbryt: Boolean = false
     }
 
+    @JsonTypeName("AVDOED_HAR_IKKE_YTELSE_I_GJENNY")
+    data object AvdoedHarIkkeYtelse : DoedshendelseKontrollpunkt() {
+        override val kode = "AVDOED_HAR_IKKE_YTELSE_I_GJENNY"
+        override val beskrivelse: String = "Avdød har ikke ytelse i gjenny"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = false
+        override val avbryt: Boolean = true
+    }
+
     @JsonTypeName("AVDOED_LEVER_I_PDL")
     data object AvdoedLeverIPDL : DoedshendelseKontrollpunkt() {
         override val kode = "AVDOED_LEVER_I_PDL"
@@ -143,7 +152,7 @@ sealed class DoedshendelseKontrollpunkt {
         override val avbryt: Boolean = true
     }
 
-    @JsonTypeName("ANNULERT_DOEDSHENDELSE_PDL")
+    @JsonTypeName("DUPLIKAT_GRUNNLAGSENDRINGSHENDELSE")
     data class DuplikatGrunnlagsendringsHendelse(
         val grunnlagsendringshendelseId: UUID,
         val oppgaveId: UUID?,
@@ -156,7 +165,7 @@ sealed class DoedshendelseKontrollpunkt {
         override val avbryt: Boolean = true
     }
 
-    @JsonTypeName("DOEDSHENDELSE_ER_ANNULLERT")
+    @JsonTypeName("ANNULERT_DOEDSHENDELSE_PDL")
     data object DoedshendelseErAnnullert : DoedshendelseKontrollpunkt() {
         override val kode = "ANNULERT_DOEDSHENDELSE_PDL"
         override val beskrivelse: String = "Dødshendelsen ble annulert i PDL"

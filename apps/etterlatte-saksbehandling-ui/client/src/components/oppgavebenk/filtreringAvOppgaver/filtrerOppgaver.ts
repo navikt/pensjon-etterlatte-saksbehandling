@@ -87,17 +87,13 @@ export function filtrerOppgaveType(oppgavetypeFilter: Array<string>, oppgaver: O
   }
 }
 
-function finnFnrIOppgaver(fnr: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
-  if (fnr && fnr.length > 0) {
-    return oppgaver.filter((o) => o.fnr?.includes(fnr.trim()))
-  } else {
-    return oppgaver
-  }
-}
-
-function finnSakidIOppgaver(sakid: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
-  if (sakid && sakid.length > 0) {
-    return oppgaver.filter((o) => o.sakId?.toString() === sakid)
+function finnSakEllerFnrIOppgaver(sakEllerFnr: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
+  if (sakEllerFnr && sakEllerFnr.length > 0) {
+    if (sakEllerFnr.length === 11) {
+      return oppgaver.filter(({ fnr }) => fnr === sakEllerFnr.trim())
+    } else {
+      return oppgaver.filter(({ sakId }) => sakId?.toString() === sakEllerFnr.trim())
+    }
   } else {
     return oppgaver
   }
@@ -117,49 +113,45 @@ export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: Oppgave
 }
 
 export function filtrerOppgaver(
-  sakidFilter: string,
+  sakEllerFnrFilter: string,
   enhetsFilter: EnhetFilterKeys,
   fristFilter: FristFilterKeys,
   saksbehandlerFilter: string,
   ytelseFilter: YtelseFilterKeys,
   oppgavestatusFilter: Array<string>,
   oppgavetypeFilter: Array<string>,
-  oppgaver: OppgaveDTO[],
-  fnr: string
+  oppgaver: OppgaveDTO[]
 ): OppgaveDTO[] {
-  const sakidFiltrert = finnSakidIOppgaver(sakidFilter, oppgaver)
-  const enhetFiltrert = filtrerEnhet(enhetsFilter, sakidFiltrert)
+  const enhetFiltrert = filtrerEnhet(enhetsFilter, oppgaver)
   const saksbehandlerFiltrert = filtrerSaksbehandler(saksbehandlerFilter, enhetFiltrert)
   const ytelseFiltrert = filtrerYtelse(ytelseFilter, saksbehandlerFiltrert)
   const oppgaveFiltrert = filtrerOppgaveStatus(oppgavestatusFilter, ytelseFiltrert)
   const oppgaveTypeFiltrert = filtrerOppgaveType(oppgavetypeFilter, oppgaveFiltrert)
   const fristFiltrert = filtrerFrist(fristFilter, oppgaveTypeFiltrert)
 
-  return finnFnrIOppgaver(fnr, fristFiltrert)
+  return finnSakEllerFnrIOppgaver(sakEllerFnrFilter, fristFiltrert)
 }
 
 export const initialFilter = (): Filter => {
   return {
-    sakidFilter: '',
+    sakEllerFnrFilter: '',
     enhetsFilter: 'visAlle',
     fristFilter: 'visAlle',
     saksbehandlerFilter: SAKSBEHANDLERFILTER.visAlle,
     ytelseFilter: 'visAlle',
     oppgavestatusFilter: [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
     oppgavetypeFilter: [OPPGAVETYPEFILTER.visAlle],
-    fnrFilter: '',
   }
 }
 
 export const minOppgavelisteFiltre = (): Filter => {
   return {
-    sakidFilter: '',
+    sakEllerFnrFilter: '',
     enhetsFilter: 'visAlle',
     fristFilter: 'visAlle',
-    saksbehandlerFilter: 'visAlle',
+    saksbehandlerFilter: SAKSBEHANDLERFILTER.visAlle,
     ytelseFilter: 'visAlle',
     oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
     oppgavetypeFilter: [OPPGAVETYPEFILTER.visAlle],
-    fnrFilter: '',
   }
 }

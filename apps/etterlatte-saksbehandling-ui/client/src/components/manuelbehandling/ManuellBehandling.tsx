@@ -128,7 +128,7 @@ export default function ManuellBehandling() {
             required: { value: true, message: 'Du må spesifisere om det er en sak i fra Pesys' },
           })}
           label="Er det sak fra Pesys? (påkrevd)"
-          error={errors.spraak?.message}
+          error={errors.kilde?.message}
         >
           <option>Velg ...</option>
           <option value="PESYS">Løpende i Pesys til 1.1.2024</option>
@@ -138,7 +138,13 @@ export default function ManuellBehandling() {
 
         <InputRow>
           <TextField
-            {...register('pesysId')}
+            {...register('pesysId', {
+              required: {
+                value: ['GJENOPPRETTA', 'PESYS'].includes(methods.getValues().kilde),
+                message: 'Du må legge til sakid i fra Pesys',
+              },
+            })}
+            error={errors.pesysId?.message}
             label="Sakid Pesys"
             placeholder="Sakid Pesys"
             pattern="[0-9]{11}"

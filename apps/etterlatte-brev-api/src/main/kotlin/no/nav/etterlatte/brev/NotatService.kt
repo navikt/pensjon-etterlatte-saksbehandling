@@ -109,7 +109,7 @@ class NotatService(
             brevRequest =
                 BrevbakerRequest.fraStrukturertBrev(
                     strukturertBrev = notatData,
-                    felles = mapFelles(notatData.sak.id, notatData.soekerFnr, bruker),
+                    felles = mapFelles(notatData.sak.id, notatData.sak.enhet, bruker),
                 ),
         )
     }
@@ -126,7 +126,6 @@ class NotatService(
 
         val journalpostRequest =
             OpprettNotatJournalpostRequest(
-                behandlingstema = sak.sakType.tema,
                 bruker =
                     Bruker(
                         id = sak.ident,

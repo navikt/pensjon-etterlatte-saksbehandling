@@ -49,6 +49,14 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
+        get("/sak/{${SAKID_CALL_PARAMETER}}/samordning") {
+            withSakId(behandlingKlient) { sakId ->
+                logger.info("Henter samordningsinfo for sak $sakId")
+                val samordningsinfo = vedtakBehandlingService.samordningsinfo(sakId)
+                call.respond(samordningsinfo)
+            }
+        }
+
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")

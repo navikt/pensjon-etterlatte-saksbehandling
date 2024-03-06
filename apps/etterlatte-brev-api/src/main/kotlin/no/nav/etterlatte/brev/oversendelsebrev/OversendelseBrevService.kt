@@ -10,7 +10,6 @@ import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
@@ -26,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Vergemaal
@@ -39,9 +39,14 @@ interface OversendelseBrevService {
 
     suspend fun opprettOversendelseBrev(
         behandlingId: UUID,
-        sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev
+
+    suspend fun pdf(
+        brevId: Long,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Pdf
 
     fun ferdigstillOversendelseBrev(
         brevId: Long,
@@ -53,7 +58,6 @@ interface OversendelseBrevService {
 class OversendelseBrevServiceImpl(
     private val brevRepository: BrevRepository,
     private val pdfGenerator: PDFGenerator,
-    private val sakService: SakService,
     private val adresseService: AdresseService,
     private val brevdataFacade: BrevdataFacade,
 ) : OversendelseBrevService {
@@ -63,7 +67,6 @@ class OversendelseBrevServiceImpl(
 
     override suspend fun opprettOversendelseBrev(
         behandlingId: UUID,
-        sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
         val eksisterendeBrev =
@@ -72,11 +75,11 @@ class OversendelseBrevServiceImpl(
         if (eksisterendeBrev != null) {
             return eksisterendeBrev
         }
+        val klage = brevdataFacade.hentKlage(behandlingId, brukerTokenInfo)
 
-        val sak = sakService.hentSak(sakId, brukerTokenInfo)
         val generellBrevData =
             brevdataFacade.hentGenerellBrevData(
-                sakId = sakId,
+                sakId = klage.sak.id,
                 // Setter behandlingId som null for å unngå å hente en behandling med klageId'en
                 behandlingId = null,
                 brukerTokenInfo = brukerTokenInfo,
@@ -84,11 +87,11 @@ class OversendelseBrevServiceImpl(
         val brev =
             brevRepository.opprettBrev(
                 OpprettNyttBrev(
-                    sakId = sakId,
+                    sakId = klage.sak.id,
                     behandlingId = behandlingId,
-                    soekerFnr = sak.ident,
+                    soekerFnr = klage.sak.ident,
                     prosessType = BrevProsessType.AUTOMATISK,
-                    mottaker = finnMottaker(sak.sakType, generellBrevData.personerISak),
+                    mottaker = finnMottaker(klage.sak.sakType, generellBrevData.personerISak),
                     opprettet = Tidspunkt.now(),
                     innhold =
                         BrevInnhold(
@@ -100,6 +103,41 @@ class OversendelseBrevServiceImpl(
                 ),
             )
         return brev
+    }
+
+    override suspend fun pdf(
+        brevId: Long,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Pdf {
+        val brev = brevRepository.hentBrev(brevId)
+        if (!brev.kanEndres()) {
+            return brevRepository.hentPdf(
+                brevId,
+            ) ?: throw InternfeilException("Har et brev som ikke kan endres men ikke har en pdf, brevId=$brevId")
+        }
+        if (brev.brevtype != Brevtype.OVERSENDELSE_KLAGE) {
+            throw UgyldigForespoerselException(
+                "FEIL_BREVTYPE",
+                "Brevet med id=$brevId er ikke av typen oversendelse klage, og kan ikke hentes som et oversendelse klage-brev",
+            )
+        }
+        if (brev.behandlingId != behandlingId) {
+            throw UgyldigForespoerselException(
+                "FEIL_BREV_ID",
+                "Brevet med id=$brevId er ikke koblet på behandlingen med id=$behandlingId",
+            )
+        }
+
+        val klage = brevdataFacade.hentKlage(brev.behandlingId, brukerTokenInfo)
+        return pdfGenerator.genererPdf(
+            id = brev.id,
+            bruker = brukerTokenInfo,
+            automatiskMigreringRequest = null,
+            avsenderRequest = { bruker, generellData -> AvsenderRequest(bruker.ident(), generellData.sak.enhet) },
+            brevKode = { Brevkoder.OVERSENDELSE_KLAGE },
+            brevData = { req -> OversendelseBrevFerdigstillingData.fra(req, klage) },
+        )
     }
 
     private suspend fun finnMottaker(

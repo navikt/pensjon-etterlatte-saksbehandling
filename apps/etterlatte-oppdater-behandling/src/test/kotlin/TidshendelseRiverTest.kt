@@ -33,7 +33,7 @@ class TidshendelseRiverTest {
         val hendelseId = UUID.randomUUID()
         val sakId = 321L
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
-        val frist = Tidspunkt.ofNorskTidssone(behandlingsmaaned.atDay(20), LocalTime.NOON)
+        val frist = Tidspunkt.ofNorskTidssone(behandlingsmaaned.atEndOfMonth(), LocalTime.NOON)
         val nyOppgaveID = UUID.randomUUID()
 
         val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, dryRun = false)

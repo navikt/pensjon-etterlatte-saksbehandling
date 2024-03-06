@@ -5,29 +5,52 @@ import {
   TEKSTER_AARSAK_OMGJOERING,
   TEKSTER_LOVHJEMLER,
 } from '~shared/types/Klage'
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrev } from '~shared/api/brev'
-import { isFailure, isInitial, mapApiResult } from '~shared/api/apiUtils'
+import { isFailure, isInitial, mapResult } from '~shared/api/apiUtils'
 import { Alert, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
+import ForhaandsvisningBrev, { PdfViewer } from '~components/behandling/brev/ForhaandsvisningBrev'
 import styled from 'styled-components'
-import { JaNei } from '~shared/types/ISvar'
+import { useKlage } from '~components/klage/useKlage'
+import { forhaandsvisBlankettKa } from '~shared/api/klage'
+import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
 
 export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId: number; kanRedigere: boolean }) {
-  const { innstilling, sakId, kanRedigere } = props
-  const ref = useRef<HTMLDialogElement>(null)
-  const [brev, hentBrevet] = useApiCall(hentBrev)
+  const klage = useKlage()
 
-  function visModal() {
+  const { innstilling, sakId, kanRedigere } = props
+  const oversendelseRef = useRef<HTMLDialogElement>(null)
+  const blankettRef = useRef<HTMLDialogElement>(null)
+  const [oversendelseBrev, hentOversendelseBrev] = useApiCall(hentBrev)
+  const [forhaandsvisningBlankett, hentForhaandsvisning] = useApiCall(forhaandsvisBlankettKa)
+  const [blankettFileUrl, setBlankettFileUrl] = useState<string>()
+
+  function visBlankettModal() {
+    if (!innstilling || !klage) return
+    if (isInitial(forhaandsvisningBlankett) || isFailure(forhaandsvisningBlankett)) {
+      hentForhaandsvisning({ klage }, (bytes) => {
+        const blob = new Blob([bytes], { type: 'application/pdf' })
+        const fileUrl = URL.createObjectURL(blob)
+
+        setBlankettFileUrl(fileUrl)
+        setTimeout(() => {
+          URL.revokeObjectURL(fileUrl)
+        }, 1000)
+      })
+    }
+    blankettRef.current?.showModal()
+  }
+
+  function visOversendelseModal() {
     if (!innstilling) return
 
-    if (isInitial(brev) || isFailure(brev)) {
-      hentBrevet({ sakId: sakId, brevId: innstilling.brev.brevId })
+    if (isInitial(oversendelseBrev) || isFailure(oversendelseBrev)) {
+      hentOversendelseBrev({ sakId: sakId, brevId: innstilling.brev.brevId })
     }
-    ref.current?.showModal()
+    oversendelseRef.current?.showModal()
   }
 
   if (!innstilling) return null
@@ -41,8 +64,14 @@ export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId:
         Vedtak opprettholdes med følgende hovedhjemmel: <strong>{TEKSTER_LOVHJEMLER[innstilling.lovhjemmel]}.</strong>
       </BodyShort>
       <BodyShort spacing>
-        <Button size="small" variant="primary" onClick={visModal}>
+        <Button size="small" variant="primary" onClick={visOversendelseModal}>
           Se innstillingsbrevet
+        </Button>
+      </BodyShort>
+
+      <BodyShort spacing>
+        <Button size="small" variant="primary" onClick={visBlankettModal}>
+          Se blankett til KA
         </Button>
       </BodyShort>
 
@@ -53,18 +82,23 @@ export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId:
         </Alert>
       )}
 
-      <Modal width="medium" ref={ref} header={{ heading: 'Innstillingsbrev' }}>
+      <Modal width="medium" ref={oversendelseRef} header={{ heading: 'Innstillingsbrev' }}>
         <Modal.Body>
-          {mapApiResult(
-            brev,
-            <Spinner visible label="Laster brevet" />,
-            () => (
-              <ApiErrorAlert>Kunne ikke hente brevet, prøv å laste siden på nytt.</ApiErrorAlert>
-            ),
-            (hentetBrev) => (
-              <ForhaandsvisningBrev brev={hentetBrev} />
-            )
-          )}
+          {mapResult(oversendelseBrev, {
+            pending: <Spinner visible label="Laster brevet" />,
+            success: (hentetBrev) => <ForhaandsvisningBrev brev={hentetBrev} />,
+            error: <ApiErrorAlert>Kunne ikke hente brevet, prøv å laste siden på nytt.</ApiErrorAlert>,
+          })}
+        </Modal.Body>
+      </Modal>
+
+      <Modal width="medium" ref={blankettRef} header={{ heading: 'Blankett til KA' }}>
+        <Modal.Body>
+          {mapResult(forhaandsvisningBlankett, {
+            pending: <Spinner visible label="Henter pdf" />,
+            success: () => (blankettFileUrl ? <PdfViewer src={`${blankettFileUrl}#toolbar=0`} /> : null),
+            error: <ApiErrorAlert>Kunne ikke forhåndsvise blanketten. Prøv å laste siden på nytt</ApiErrorAlert>,
+          })}
         </Modal.Body>
       </Modal>
     </Maksbredde>
@@ -100,9 +134,6 @@ export function VisKlageavslag(props: { klage: Klage }) {
 }
 
 export function formaterKlageutfall(klage: Klage) {
-  if (klage.formkrav?.formkrav.erFormkraveneOppfylt === JaNei.NEI) {
-    return 'avvist på grunn av formkrav'
-  }
   switch (klage.utfall?.utfall) {
     case 'DELVIS_OMGJOERING':
       return 'delvis omgjøring'
@@ -122,3 +153,17 @@ const Maksbredde = styled.div`
   max-width: 40rem;
   padding: 1rem 0;
 `
+
+export const ButtonNavigerTilBrev = (props: { klage: Klage }) => {
+  return (
+    <Button
+      as="a"
+      variant="primary"
+      icon={<EnvelopeClosedIcon />}
+      href={`/person/${props.klage.sak.ident}?fane=BREV`}
+      target="_blank"
+    >
+      Opprett brev
+    </Button>
+  )
+}

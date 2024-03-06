@@ -29,8 +29,7 @@ class VentRepository(val dataSource: DataSource) : Transactions<VentRepository> 
                         kjoringVariant = MigreringKjoringVariant.valueOf(it.string(KJOERING)),
                         oppgaver =
                             it.string(OPPGAVER).split(";")
-                                .filter { id -> id.isNotEmpty() }
-                                .map { id -> UUID.fromString(id) },
+                                .filter { id -> id.isNotEmpty() },
                     )
                 }
             }
@@ -63,5 +62,5 @@ data class SkalAvVentDTO(
     val id: UUID,
     val dato: LocalDate,
     val kjoringVariant: MigreringKjoringVariant,
-    val oppgaver: List<UUID>,
+    val oppgaver: List<String>,
 )

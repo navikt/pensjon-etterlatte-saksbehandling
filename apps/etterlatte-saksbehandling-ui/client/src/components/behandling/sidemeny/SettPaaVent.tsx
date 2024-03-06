@@ -1,4 +1,4 @@
-import { Alert, Button, Heading, Label, TextField } from '@navikt/ds-react'
+import { Alert, Button, Heading, Label, Textarea } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
 import { erOppgaveRedigerbar, OppgaveDTO, settOppgavePaaVentApi } from '~shared/api/oppgaver'
@@ -38,7 +38,7 @@ export const SettPaaVent = ({ oppgave, refreshOppgave }: { oppgave: OppgaveDTO; 
       {settPaaVent && (
         <>
           <hr />
-          <TextField label="Merknad" type="text" value={merknad} onChange={(e) => setMerknad(e.target.value)} />
+          <Textarea label="Merknad" value={merknad} onChange={(e) => setMerknad(e.target.value)} />
 
           <br />
           {oppgave.status !== 'PAA_VENT' && (

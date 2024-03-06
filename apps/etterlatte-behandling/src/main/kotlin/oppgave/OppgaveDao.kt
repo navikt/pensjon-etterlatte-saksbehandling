@@ -416,7 +416,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.referanse, o.sak_id, o.kilde
+                        SELECT o.id, o.referanse, o.sak_id, o.kilde, o.merknad
                         FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.frist <= ?
                         and type = ANY(?)
@@ -432,6 +432,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                         sakId = getLong("sak_id"),
                         behandlingId = UUID.fromString(getString("referanse")),
                         oppgavekilde = OppgaveKilde.valueOf(getString("kilde")),
+                        merknad = getString("merknad"),
                     )
                 }.also { utgaatte ->
                     logger.info("Hentet ${utgaatte.size} oppgaver der fristen går ut for dato $dato og type $type")

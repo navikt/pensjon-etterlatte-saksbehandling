@@ -19,4 +19,5 @@ data class VentefristGaarUt(
     val behandlingId: UUID,
     val oppgaveID: UUID,
     val oppgavekilde: OppgaveKilde,
+    val merknad: String?,
 )

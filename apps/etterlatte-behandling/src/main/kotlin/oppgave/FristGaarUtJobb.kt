@@ -42,7 +42,7 @@ class FristGaarUtJobb(
                 service.hentFristGaarUt(request).forEach {
                     service.oppdaterStatusOgMerknad(
                         it.oppgaveID,
-                        "",
+                        it.merknad ?: "",
                         Status.UNDER_BEHANDLING,
                     )
                 }

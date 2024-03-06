@@ -61,7 +61,7 @@ import java.util.UUID
 
 private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
-fun Route.attachMockContext(saksbehandlerMedEnheterOgRoller: SaksbehandlerMedEnheterOgRoller? = null) {
+fun Route.attachMockContext(saksbehandlerMedEnheterOgRoller: User? = null) {
     intercept(ApplicationCallPipeline.Call) {
         val context1 =
             Context(

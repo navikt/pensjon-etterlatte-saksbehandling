@@ -43,16 +43,21 @@ class StartTaAvVentTest(private val dataSource: DataSource) {
             }.let { query -> tx.run(query.asUpdate) }
         }
 
-        StartAaTaAvVent(
-            ventRepository = ventRepository,
-            rapidsConnection = rapid,
-            featureToggleService = DummyFeatureToggleService().also { it.settBryter(VentFeatureToggle.TaAvVent, true) },
-            sleep = {},
-        )
+        val start =
+            StartAaTaAvVent(
+                ventRepository = ventRepository,
+                rapidsConnection = rapid,
+                featureToggleService = DummyFeatureToggleService().also { it.settBryter(VentFeatureToggle.TaAvVent, true) },
+                sleep = {},
+            )
 
         val sendt = rapid.inspektør.message(0)
+        assertEquals(1, rapid.inspektør.size)
         assertEquals(sendt.get(EVENT_NAME_KEY).textValue(), Ventehendelser.TA_AV_VENT.lagEventnameForType())
         assertEquals(sendt.get(OPPGAVEKILDE_KEY).textValue(), OppgaveKilde.GJENOPPRETTING.name)
         assertEquals(sendt.get(OPPGAVE_ID_FLERE_KEY).toList().map { it.asUUID() }, listOf(oppgave1, oppgave2))
+
+        start.taAvVent()
+        assertEquals(1, rapid.inspektør.size)
     }
 }

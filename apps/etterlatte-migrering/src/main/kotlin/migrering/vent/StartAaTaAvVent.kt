@@ -31,7 +31,7 @@ class StartAaTaAvVent(
         }
     }
 
-    private fun taAvVent() {
+    internal fun taAvVent() {
         val avVent: SkalAvVentDTO? = ventRepository.hentSakerSomSkalAvVent()
         if (avVent == null) {
             logger.info("Ingenting å ta av vent. Avbryter")

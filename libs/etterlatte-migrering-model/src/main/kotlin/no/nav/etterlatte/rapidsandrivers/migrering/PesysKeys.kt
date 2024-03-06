@@ -18,6 +18,7 @@ const val LOPENDE_JANUAR_2024_KEY = "lopendeJanuar2024"
 const val MIGRERING_KJORING_VARIANT = "migreringKjoringVariant"
 const val FIKS_BREV_MIGRERING = "fiksBrevMigrering"
 const val OPPGAVEKILDE_KEY = "oppgavekilde"
+const val OPPGAVETYPE_KEY = "oppgavetype"
 
 var JsonMessage.hendelseData: MigreringRequest
     get() = objectMapper.treeToValue(this[HENDELSE_DATA_KEY], MigreringRequest::class.java)

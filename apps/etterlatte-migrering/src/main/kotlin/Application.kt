@@ -17,6 +17,7 @@ import no.nav.etterlatte.migrering.migreringRoute
 import no.nav.etterlatte.migrering.start.MigrerSpesifikkSakRiver
 import no.nav.etterlatte.migrering.start.StartMigrering
 import no.nav.etterlatte.migrering.start.StartMigreringRiver
+import no.nav.etterlatte.migrering.vent.StartAaTaAvVent
 import no.nav.etterlatte.migrering.verge.SjekkVergeadresserJobb
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -59,6 +60,7 @@ internal class Server(private val context: ApplicationContext) {
                     LyttPaaDistribuerBrevRiver(rapidsConnection, pesysRepository)
                     FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)
                     StartMigrering(startMigreringRepository, rapidsConnection, featureToggleService)
+                    StartAaTaAvVent(ventRepository, rapidsConnection, featureToggleService)
                     SjekkVergeadresserJobb(
                         pdlTjenesterKlient,
                         pesysRepository,

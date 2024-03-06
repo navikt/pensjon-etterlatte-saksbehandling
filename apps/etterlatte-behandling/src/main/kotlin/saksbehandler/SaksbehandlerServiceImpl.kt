@@ -79,7 +79,6 @@ class SaksbehandlerServiceImpl(
             val ikkeRegistrertEnhet = mapped.any { it.second == null }
             return if (ikkeRegistrertEnhet) {
                 runBlocking { axsysKlient.hentEnheterForIdent(ident) }
-                // .also { dao.upsertSaksbehandlerEnheter(Pair(ident, it.map { it.enhetsNummer })) }
             } else {
                 mapped.map { SaksbehandlerEnhet(it.first, it.second!!) }
             }

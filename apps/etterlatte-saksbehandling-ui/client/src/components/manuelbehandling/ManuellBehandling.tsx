@@ -49,7 +49,6 @@ export default function ManuellBehandling() {
   useEffect(() => {
     if (oppgaveId) {
       apiHentOppgave(oppgaveId, (oppgave) => {
-        console.log(oppgave)
         setOppgaveStatus(oppgave.status)
         oppgave.fnr && methods.setValue('persongalleri.soeker', oppgave.fnr)
         oppgave.referanse && methods.setValue('pesysId', Number(oppgave.referanse))

@@ -115,7 +115,7 @@ class DoedshendelseKontrollpunktService(
     private fun kontrollerAvdoedHarYtelseIGjenny(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt>? {
         val sakerForAvdoed = sakService.finnSaker(hendelse.avdoedFnr)
         return if (sakerForAvdoed.isEmpty()) {
-            null
+            listOf(DoedshendelseKontrollpunkt.AvdoedHarIkkeYtelse)
         } else {
             val duplikat =
                 sakerForAvdoed.map {

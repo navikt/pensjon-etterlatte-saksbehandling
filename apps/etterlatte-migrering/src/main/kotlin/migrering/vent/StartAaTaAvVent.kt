@@ -20,12 +20,13 @@ class StartAaTaAvVent(
     private val ventRepository: VentRepository,
     private val rapidsConnection: RapidsConnection,
     featureToggleService: FeatureToggleService,
+    sleep: (millis: Duration) -> Unit = { Thread.sleep(it) },
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         if (featureToggleService.isEnabled(VentFeatureToggle.TaAvVent, false)) {
-            Thread.sleep(Duration.ofMinutes(1))
+            sleep(Duration.ofMinutes(1))
             taAvVent()
         }
     }

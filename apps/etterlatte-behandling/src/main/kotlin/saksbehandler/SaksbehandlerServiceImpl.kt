@@ -16,6 +16,11 @@ data class Saksbehandler(
     val skriveTilgang: Boolean,
 )
 
+data class SaksbehandlerEnhet(
+    val enhetsNummer: String,
+    val navn: String,
+)
+
 interface SaksbehandlerService {
     fun hentKomplettSaksbehandler(ident: String): Saksbehandler
 
@@ -57,34 +62,28 @@ class SaksbehandlerServiceImpl(
         }
     }
 
-    // TODO: burde ha noen tester
     private fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet> {
         val enheterForSaksbehandler = dao.hentEnheterIderForSaksbehandler(ident)
 
         return if (enheterForSaksbehandler == null) {
-            val res = runBlocking { axsysKlient.hentEnheterForIdent(ident) }
-            dao.upsertSaksbehandlerEnheter(Pair(ident, res.map { it.enhetsNummer }))
-            res
+            runBlocking { axsysKlient.hentEnheterForIdent(ident) }
+                .also {
+                        saksbehandlerEnhetList ->
+                    dao.upsertSaksbehandlerEnheter(Pair(ident, saksbehandlerEnhetList.map { it.enhetsNummer }))
+                }
         } else {
             val mapped =
                 enheterForSaksbehandler.map {
                     val enhetsnavn = Enheter.finnEnhetForEnhetsnummer(it)?.navn
                     Pair(it, enhetsnavn)
                 }
-            val ikkeVanligEnhet = mapped.any { it.second == null }
-            return if (ikkeVanligEnhet) {
-                val res = runBlocking { axsysKlient.hentEnheterForIdent(ident) }
-                dao.upsertSaksbehandlerEnheter(Pair(ident, res.map { it.enhetsNummer }))
-                res
+            val ikkeRegistrertEnhet = mapped.any { it.second == null }
+            return if (ikkeRegistrertEnhet) {
+                runBlocking { axsysKlient.hentEnheterForIdent(ident) }
+                    .also { dao.upsertSaksbehandlerEnheter(Pair(ident, it.map { it.enhetsNummer })) }
             } else {
                 mapped.map { SaksbehandlerEnhet(it.first, it.second!!) }
             }
         }
     }
 }
-
-// TODO: flytt denne classen
-data class SaksbehandlerEnhet(
-    val enhetsNummer: String,
-    val navn: String,
-)

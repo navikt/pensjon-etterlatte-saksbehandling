@@ -199,7 +199,7 @@ class DoedshendelseJobService(
         sak: Sak,
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
     ): Boolean {
-        val skalSendeBrev = kontrollpunkter.none { !it.sendBrev }
+        val skalSendeBrev = kontrollpunkter.isNotEmpty() && kontrollpunkter.none { !it.sendBrev }
         if (skalSendeBrev) {
             if (featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
                 logger.info("Sender brev for ${doedshendelse.relasjon.name} for sak ${sak.id}")
@@ -218,7 +218,7 @@ class DoedshendelseJobService(
         sak: Sak,
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
     ): Pair<Boolean, OppgaveIntern?> {
-        val skalOppretteOppgave = kontrollpunkter.any { it.opprettOppgave }
+        val skalOppretteOppgave = kontrollpunkter.isNotEmpty() && kontrollpunkter.any { it.opprettOppgave }
 
         if (skalOppretteOppgave) {
             if (featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {

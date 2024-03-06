@@ -7,6 +7,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
@@ -18,6 +19,7 @@ import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
@@ -25,6 +27,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -65,6 +68,36 @@ internal class DoedshendelseRouteTest(val dataSource: DataSource) {
     }
 
     @Test
+    fun `Skal få 404 hvis ikke systembruker`() {
+        val avdoedFnr = "12345678902"
+        val doedshendelseInternal =
+            DoedshendelseInternal.nyHendelse(
+                avdoedFnr = avdoedFnr,
+                avdoedDoedsdato = LocalDate.now(),
+                beroertFnr = "12345678901",
+                relasjon = Relasjon.BARN,
+                endringstype = Endringstype.OPPRETTET,
+            )
+
+        doedshendelseDao.opprettDoedshendelse(doedshendelseInternal)
+        val sakId = 1L
+        doedshendelseDao.oppdaterDoedshendelse(doedshendelseInternal.copy(sakId = sakId))
+        val brevId = 12314L
+        withTestApplication { client ->
+            client.post("/doedshendelse/brevdistribuert") {
+                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+                contentType(ContentType.Application.Json)
+                setBody(DoedshendelseBrevDistribuert(sakId, brevId))
+            }.also {
+                Assertions.assertEquals(HttpStatusCode.NotFound, it.status)
+            }
+        }
+        val hentDoedshendelserForPerson = doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr)
+        hentDoedshendelserForPerson.size shouldBe 1
+        hentDoedshendelserForPerson[0].brevId shouldBe null
+    }
+
+    @Test
     fun `Sjekk at vi kan oppdatere doedshendelse`() {
         val avdoedFnr = "12345678902"
         val doedshendelseInternal =
@@ -85,6 +118,8 @@ internal class DoedshendelseRouteTest(val dataSource: DataSource) {
                 header(HttpHeaders.Authorization, "Bearer $systemBruker")
                 contentType(ContentType.Application.Json)
                 setBody(DoedshendelseBrevDistribuert(sakId, brevId))
+            }.also {
+                Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
         }
         val hentDoedshendelserForPerson = doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr)
@@ -105,4 +140,5 @@ internal class DoedshendelseRouteTest(val dataSource: DataSource) {
     }
 
     private val systemBruker: String by lazy { mockOAuth2Server.issueSystembrukerToken() }
+    private val saksbehandlerToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 }

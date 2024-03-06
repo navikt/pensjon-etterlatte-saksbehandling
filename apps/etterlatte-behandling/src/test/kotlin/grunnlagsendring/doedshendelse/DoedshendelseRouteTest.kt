@@ -59,6 +59,9 @@ internal class DoedshendelseRouteTest(val dataSource: DataSource) {
 
     @AfterEach
     fun afterEach() {
+        dataSource.connection.use {
+            it.prepareStatement("TRUNCATE doedshendelse CASCADE;").execute()
+        }
         clearAllMocks()
     }
 

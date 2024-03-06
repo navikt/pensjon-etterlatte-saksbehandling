@@ -96,7 +96,7 @@ export const Person = () => {
               <SakOversikt sakStatus={sakStatus} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.DOKUMENTER}>
-              <Dokumentliste fnr={person.foedselsnummer} />
+              <Dokumentliste sakStatus={sakStatus} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.BREV}>
               <BrevOversikt sakStatus={sakStatus} />

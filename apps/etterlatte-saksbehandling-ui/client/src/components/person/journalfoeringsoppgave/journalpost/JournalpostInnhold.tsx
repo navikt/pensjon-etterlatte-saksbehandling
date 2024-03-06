@@ -6,7 +6,6 @@ import { Journalpost } from '~shared/types/Journalpost'
 import { formaterJournalpostSakstype, formaterJournalpostStatus, formaterStringDato } from '~utils/formattering'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { FlexRow } from '~shared/styled'
-import { SidebarPanel } from '~shared/components/Sidebar'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
 
 const TemaTag = ({ journalpost }: { journalpost: Journalpost }) => {
@@ -14,8 +13,8 @@ const TemaTag = ({ journalpost }: { journalpost: Journalpost }) => {
   else return <Tag variant="error">{journalpost.tema}</Tag>
 }
 
-export const JournalpostInnholdSidebarPanel = ({ journalpost }: { journalpost: Journalpost }) => (
-  <SidebarPanel border>
+export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }) => (
+  <>
     <Heading size="small" spacing>
       Journalpostdetailjer
     </Heading>
@@ -34,7 +33,7 @@ export const JournalpostInnholdSidebarPanel = ({ journalpost }: { journalpost: J
     <Border />
 
     <InfoWrapper>
-      <Info label="Bruker" tekst={journalpost.bruker ? <KopierbarVerdi value={journalpost.bruker.id!!} /> : '-'} />
+      <Info label="Bruker" tekst={journalpost.bruker?.id ? <KopierbarVerdi value={journalpost.bruker.id} /> : '-'} />
 
       <Info
         label="Avsender/mottaker"
@@ -58,5 +57,5 @@ export const JournalpostInnholdSidebarPanel = ({ journalpost }: { journalpost: J
       />
       <Info label="Fagsystem" tekst={journalpost.sak?.fagsaksystem || '-'} />
     </InfoWrapper>
-  </SidebarPanel>
+  </>
 )

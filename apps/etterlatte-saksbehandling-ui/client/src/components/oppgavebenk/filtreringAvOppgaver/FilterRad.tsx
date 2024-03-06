@@ -21,7 +21,7 @@ import {
   YtelseFilterKeys,
 } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { MultiSelectFilter } from '~components/oppgavebenk/filtreringAvOppgaver/MultiSelectFilter'
-import { ArrowCirclepathIcon, ArrowRedoIcon } from '@navikt/aksel-icons'
+import { ArrowCirclepathIcon, ArrowUndoIcon } from '@navikt/aksel-icons'
 import { oppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/VelgOppgaveliste'
 
 interface Props {
@@ -142,7 +142,7 @@ export const FilterRad = ({
             hentAlleOppgaver()
           }}
           size="small"
-          icon={<ArrowRedoIcon />}
+          icon={<ArrowUndoIcon />}
           iconPosition="right"
         >
           Tilbakestill filtre

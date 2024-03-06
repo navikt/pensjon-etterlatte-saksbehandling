@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
@@ -91,7 +92,11 @@ internal class PdlHendelserRiver(
             }
         } catch (e: Exception) {
             logger.error("Feil oppstod under lesing / sending av hendelse til behandling ", e)
-            throw e
+            if (isProd()) {
+                throw e
+            } else {
+                logger.info("Hopper over melding i DEV for å komme ajour med hendelser.")
+            }
         }
     }
 }

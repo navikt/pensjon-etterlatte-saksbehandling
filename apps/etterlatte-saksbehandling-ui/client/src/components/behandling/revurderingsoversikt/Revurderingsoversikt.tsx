@@ -106,7 +106,9 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
             Revurdering
           </Heading>
         </HeadingWrapper>
-        {revurderingsaarsak != Revurderingaarsak.ANNEN && (
+        {[Revurderingaarsak.ANNEN, Revurderingaarsak.ANNEN_UTEN_BREV].includes(revurderingsaarsak) ? (
+          <BodyShort spacing>Revurdering på grunn av annen årsak (spesifiseres nedenfor).</BodyShort>
+        ) : (
           <BodyShort spacing>
             {erOpphoer(revurderingsaarsak) ? 'Opphør' : 'Revurdering'} på grunn av{' '}
             <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
@@ -133,7 +135,12 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         {behandling.revurderingsaarsak === Revurderingaarsak.SOESKENJUSTERING && (
           <GrunnForSoeskenjustering behandling={behandling} />
         )}
-        {behandling.revurderingsaarsak === Revurderingaarsak.ANNEN && <RevurderingAnnen behandling={behandling} />}
+        {behandling.revurderingsaarsak === Revurderingaarsak.ANNEN && (
+          <RevurderingAnnen type={Revurderingaarsak.ANNEN} behandling={behandling} />
+        )}
+        {behandling.revurderingsaarsak === Revurderingaarsak.ANNEN_UTEN_BREV && (
+          <RevurderingAnnen type={Revurderingaarsak.ANNEN_UTEN_BREV} behandling={behandling} />
+        )}
 
         <Virkningstidspunkt
           erBosattUtland={false}

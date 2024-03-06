@@ -1,9 +1,12 @@
 package no.nav.etterlatte.grunnlag.aldersovergang
 
 import kotliquery.TransactionalSession
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.database.Transactions
+import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.transaction
+import java.time.LocalDate
 import java.time.YearMonth
 import javax.sql.DataSource
 
@@ -82,6 +85,33 @@ class AldersovergangDao(private val datasource: DataSource) : Transactions<Alder
                 },
             ) {
                 it.string("sak_id")
+            }
+        }
+    }
+
+    fun hentAlder(
+        sakId: Long,
+        opplysningType: Opplysningstype,
+        tx: TransactionalSession? = null,
+    ): Alder? {
+        val sql =
+            """
+            select distinct TO_DATE(g.opplysning, '\"YYYY-MM-DD\"') as foedselsdato
+             from grunnlagshendelse g
+                     inner join grunnlagshendelse g2 on g.sak_id = g2.sak_id and g.fnr = g2.fnr and g.hendelsenummer != g2.hendelsenummer
+                     and g.hendelsenummer = (
+                        select max(hendelsenummer) from grunnlagshendelse 
+                        where sak_id = g.sak_id
+                        and opplysning_type = 'FOEDSELSDATO' 
+                        and fnr = g.fnr
+                     )
+            where g.opplysning_type = 'FOEDSELSDATO'
+            and g2.opplysning_type = :opplysningType
+            and g.sak_id = :sak_id
+            """.trimIndent()
+        return tx.session {
+            hent(sql, mapOf("sak_id" to sakId, "opplysningType" to opplysningType.name)) {
+                it.localDate("foedselsdato").until(LocalDate.now()).years
             }
         }
     }

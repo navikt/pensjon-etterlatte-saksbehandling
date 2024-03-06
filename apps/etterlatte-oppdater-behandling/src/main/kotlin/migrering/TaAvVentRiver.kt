@@ -19,7 +19,10 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 
-internal class TaAvVentRiver(rapidsConnection: RapidsConnection, private val behandlingService: BehandlingService) :
+internal class TaAvVentRiver(
+    rapidsConnection: RapidsConnection,
+    private val behandlingService: BehandlingService,
+) :
     ListenerMedLoggingOgFeilhaandtering() {
     init {
         initialiserRiver(rapidsConnection, Ventehendelser.TA_AV_VENT) {

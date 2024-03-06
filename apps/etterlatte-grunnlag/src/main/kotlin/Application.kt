@@ -23,6 +23,7 @@ import no.nav.etterlatte.grunnlag.personRoute
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
 import no.nav.etterlatte.grunnlag.rivers.InitBehandlingVersjonRiver
+import no.nav.etterlatte.grunnlag.rivers.TattAvVentUnder20River
 import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -113,6 +114,7 @@ class ApplicationBuilder {
                 InitBehandlingVersjonRiver(this, behandlingKlient, grunnlagService)
                 GrunnlagHendelserRiver(this, grunnlagService)
                 MigreringGrunnlagHendelserRiver(this, grunnlagService)
+                TattAvVentUnder20River(this, aldersovergangService)
             }
 
     fun start() = setReady().also { rapidsConnection.start() }

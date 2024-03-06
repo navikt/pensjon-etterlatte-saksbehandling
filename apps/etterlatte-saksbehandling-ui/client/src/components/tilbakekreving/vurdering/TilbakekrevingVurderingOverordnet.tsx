@@ -1,4 +1,4 @@
-import { Alert, Button, Radio, RadioGroup, Select, Textarea, VStack } from '@navikt/ds-react'
+import { Button, Radio, RadioGroup, Select, Textarea, VStack } from '@navikt/ds-react'
 import {
   teksterTilbakekrevingAarsak,
   teksterTilbakekrevingAktsomhet,
@@ -10,13 +10,14 @@ import {
   TilbakekrevingVurdering,
 } from '~shared/types/Tilbakekreving'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { lagreTilbakekrevingsvurdering } from '~shared/api/tilbakekreving'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
 
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
+import { Toast } from '~shared/alerts/Toast'
 
 export function TilbakekrevingVurderingOverordnet({
   behandling,
@@ -27,24 +28,14 @@ export function TilbakekrevingVurderingOverordnet({
 }) {
   const dispatch = useAppDispatch()
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
-  const [visLagret, setVisLagret] = useState(false)
   const [vurdering, setVurdering] = useState<TilbakekrevingVurdering>(behandling.tilbakekreving.vurdering)
 
   const lagreVurdering = () => {
     // TODO validering?
     lagreVurderingRequest({ behandlingsId: behandling.id, vurdering }, (lagretTilbakekreving) => {
       dispatch(addTilbakekreving(lagretTilbakekreving))
-      setVisLagret(true)
     })
   }
-
-  useEffect(() => {
-    if (visLagret) {
-      setTimeout(() => {
-        setVisLagret(false)
-      }, 5000)
-    }
-  }, [visLagret])
 
   return (
     <InnholdPadding>
@@ -195,11 +186,7 @@ export function TilbakekrevingVurderingOverordnet({
             >
               Lagre vurdering
             </Button>
-            {visLagret && (
-              <Alert size="small" variant="success" style={{ maxWidth: 'fit-content' }}>
-                Vurdering lagret.
-              </Alert>
-            )}
+            {isSuccess(lagreVurderingStatus) && <Toast melding="Vurdering lagret" />}
           </VStack>
         )}
       </VStack>

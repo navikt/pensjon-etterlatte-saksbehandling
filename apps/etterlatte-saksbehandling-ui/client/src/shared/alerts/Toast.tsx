@@ -31,7 +31,7 @@ export const Toast = ({ melding, ...rest }: ToastProps) => {
 }
 
 const ToastAlert = styled(Alert)`
-  position: absolute;
+  position: fixed;
   right: 3rem;
   top: 3rem;
   box-shadow: -0.3rem 0.3rem 0.6rem 0 rgba(150, 150, 150, 0.5);

@@ -9,13 +9,14 @@ import {
 } from '~shared/types/Tilbakekreving'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreTilbakekrevingsperioder } from '~shared/api/tilbakekreving'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { Alert, Button, Heading, Select, Table, TextField, VStack } from '@navikt/ds-react'
+import { Button, Heading, Select, Table, TextField, VStack } from '@navikt/ds-react'
 
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { Toast } from '~shared/alerts/Toast'
 
 export function TilbakekrevingVurderingPerioder({
   behandling,
@@ -26,7 +27,6 @@ export function TilbakekrevingVurderingPerioder({
 }) {
   const dispatch = useAppDispatch()
   const [lagrePerioderStatus, lagrePerioderRequest] = useApiCall(lagreTilbakekrevingsperioder)
-  const [visLagret, setVisLagret] = useState(false)
   const [perioder, setPerioder] = useState<TilbakekrevingPeriode[]>(behandling.tilbakekreving.perioder)
 
   const updateBeloeper = (index: number, oppdatertBeloep: TilbakekrevingBeloep) => {
@@ -38,17 +38,8 @@ export function TilbakekrevingVurderingPerioder({
     // TODO validering?
     lagrePerioderRequest({ behandlingsId: behandling.id, perioder }, (lagretTilbakekreving) => {
       dispatch(addTilbakekreving(lagretTilbakekreving))
-      setVisLagret(true)
     })
   }
-
-  useEffect(() => {
-    if (visLagret) {
-      setTimeout(() => {
-        setVisLagret(false)
-      }, 5000)
-    }
-  }, [visLagret])
 
   return (
     <InnholdPadding>
@@ -240,11 +231,7 @@ export function TilbakekrevingVurderingPerioder({
           >
             Lagre perioder
           </Button>
-          {visLagret && (
-            <Alert size="small" variant="success" style={{ maxWidth: 'fit-content' }}>
-              Perioder lagret.
-            </Alert>
-          )}
+          {isSuccess(lagrePerioderStatus) && <Toast melding="Perioder lagret" />}
         </VStack>
       )}
     </InnholdPadding>

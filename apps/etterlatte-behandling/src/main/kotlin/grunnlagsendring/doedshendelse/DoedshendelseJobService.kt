@@ -84,7 +84,10 @@ class DoedshendelseJobService(
 
     private fun haandterDoedshendelse(doedshendelse: DoedshendelseInternal) {
         val kontrollpunkter = doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
-
+        if (kontrollpunkter.isEmpty()) {
+            logger.info("fant ingen kontrollpunkter for dødshendelse ${doedshendelse.sakId}, avbryter")
+            return
+        }
         when (kontrollpunkter.any { it.avbryt }) {
             true -> {
                 logger.info(

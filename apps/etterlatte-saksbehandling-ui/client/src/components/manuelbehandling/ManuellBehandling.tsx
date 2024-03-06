@@ -22,6 +22,7 @@ import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDa
 import { formaterDatoStrengTilLocaleDateTime, formaterSpraak, mapRHFArrayToStringArray } from '~utils/formattering'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
 import { GRADERING, GraderingFilterKeys } from '~shared/types/Gradering'
+import GjenopprettingModal from '~components/manuelbehandling/GjenopprettingModal'
 
 interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   kilde: string
@@ -215,6 +216,10 @@ export default function ManuellBehandling() {
           >
             Opprett behandling
           </Button>
+        </Knapp>
+
+        <Knapp>
+          <GjenopprettingModal />
         </Knapp>
 
         {isSuccess(status) && <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>}

@@ -143,8 +143,10 @@ suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.medBody
 }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(onSuccess: () -> Unit) {
+    println("************ sjekker systembruker : ${brukerTokenInfo is Systembruker}")
     when (brukerTokenInfo) {
         is Systembruker -> {
+            println("er systembruker")
             onSuccess()
         }
 

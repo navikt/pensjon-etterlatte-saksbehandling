@@ -1,6 +1,9 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.call
 import io.ktor.server.application.log
+import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.post
@@ -20,6 +23,7 @@ internal fun Route.doedshendelseRoute(doedshendelseService: DoedshendelseService
                     inTransaction {
                         doedshendelseService.settHendelseTilFerdigOgOppdaterBrevId(it)
                     }
+                    call.respond(HttpStatusCode.OK)
                 }
             }
         }

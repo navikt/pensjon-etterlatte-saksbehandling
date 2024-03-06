@@ -4,7 +4,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
-import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.inTransaction
 
 data class Saksbehandler(
@@ -63,25 +62,7 @@ class SaksbehandlerServiceImpl(
     }
 
     private fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet> {
-        val enheterForSaksbehandler = dao.hentEnheterIderForSaksbehandler(ident)
-
-        return if (enheterForSaksbehandler == null) {
-            runBlocking { axsysKlient.hentEnheterForIdent(ident) }
-                .also { saksbehandlerEnhetList ->
-                    dao.upsertSaksbehandlerEnheter(Pair(ident, saksbehandlerEnhetList.map { it.enhetsNummer }))
-                }
-        } else {
-            val mapped =
-                enheterForSaksbehandler.map {
-                    val enhetsnavn = Enheter.finnEnhetForEnhetsnummer(it)?.navn
-                    Pair(it, enhetsnavn)
-                }
-            val ikkeRegistrertEnhet = mapped.any { it.second == null }
-            return if (ikkeRegistrertEnhet) {
-                runBlocking { axsysKlient.hentEnheterForIdent(ident) }
-            } else {
-                mapped.map { SaksbehandlerEnhet(it.first, it.second!!) }
-            }
-        }
+        return dao.hentEnheterIderForSaksbehandler(ident)
+            ?: runBlocking { axsysKlient.hentEnheterForIdent(ident) }
     }
 }

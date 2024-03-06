@@ -83,7 +83,7 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                         try {
                             val enheter = it.second.await()
                             if (enheter.isNotEmpty()) {
-                                it.first to enheter.map { enhet -> enhet.enhetsNummer }
+                                it.first to enheter
                             } else {
                                 logger.info("Saksbehandler med ident ${it.first} har ingen enheter")
                                 null

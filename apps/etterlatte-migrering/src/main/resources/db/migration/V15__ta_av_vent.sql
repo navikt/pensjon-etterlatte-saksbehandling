@@ -1,0 +1,9 @@
+CREATE TABLE ta_av_vent (
+    id UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+    tidspunkt TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    haandtert BOOLEAN DEFAULT FALSE,
+    kjoering VARCHAR NOT NULL DEFAULT 'MED_PAUSE',
+    dato DATE NOT NULL,
+    oppgaver TEXT DEFAULT '',
+    PRIMARY KEY(id)
+)

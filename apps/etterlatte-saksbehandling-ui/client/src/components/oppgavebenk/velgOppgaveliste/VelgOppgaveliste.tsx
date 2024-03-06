@@ -3,11 +3,14 @@ import styled from 'styled-components'
 import { Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 
-export type oppgavelisteValg = 'Oppgavelista' | 'MinOppgaveliste'
+export enum OppgavelisteValg {
+  OPPGAVELISTA = 'Oppgavelista',
+  MIN_OPPGAVELISTE = 'MinOppgaveliste',
+}
 
 interface Props {
-  oppgavelisteValg: oppgavelisteValg
-  setOppgavelisteValg: Dispatch<SetStateAction<oppgavelisteValg>>
+  oppgavelisteValg: OppgavelisteValg
+  setOppgavelisteValg: Dispatch<SetStateAction<OppgavelisteValg>>
   antallOppgavelistaOppgaver: number
   antallMinOppgavelisteOppgaver: number
 }
@@ -19,11 +22,15 @@ export const VelgOppgaveliste = ({
   antallMinOppgavelisteOppgaver,
 }: Props): ReactNode => {
   return (
-    <VelgOppgavelisteTabs value={oppgavelisteValg} onChange={(e) => setOppgavelisteValg(e as oppgavelisteValg)}>
+    <VelgOppgavelisteTabs value={oppgavelisteValg} onChange={(e) => setOppgavelisteValg(e as OppgavelisteValg)}>
       <Tabs.List>
-        <Tabs.Tab value="Oppgavelista" label={`Oppgavelisten (${antallOppgavelistaOppgaver})`} icon={<InboxIcon />} />
         <Tabs.Tab
-          value="MinOppgaveliste"
+          value={OppgavelisteValg.OPPGAVELISTA}
+          label={`Oppgavelisten (${antallOppgavelistaOppgaver})`}
+          icon={<InboxIcon />}
+        />
+        <Tabs.Tab
+          value={OppgavelisteValg.MIN_OPPGAVELISTE}
           label={`Min oppgaveliste (${antallMinOppgavelisteOppgaver})`}
           icon={<PersonIcon aria-hidden />}
         />

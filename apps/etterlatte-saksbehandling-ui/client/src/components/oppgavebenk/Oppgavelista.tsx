@@ -32,7 +32,7 @@ import {
   hentValgFraLocalStorage,
   leggValgILocalstorage,
 } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
-import { oppgavelisteValg, VelgOppgaveliste } from '~components/oppgavebenk/velgOppgaveliste/VelgOppgaveliste'
+import { OppgavelisteValg, VelgOppgaveliste } from '~components/oppgavebenk/velgOppgaveliste/VelgOppgaveliste'
 import { minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 
 export const Oppgavelista = () => {
@@ -41,8 +41,8 @@ export const Oppgavelista = () => {
     return <Tilgangsmelding />
   }
 
-  const [oppgavelisteValg, setOppgavelisteValg] = useState<oppgavelisteValg>(
-    hentValgFraLocalStorage() as oppgavelisteValg
+  const [oppgavelisteValg, setOppgavelisteValg] = useState<OppgavelisteValg>(
+    hentValgFraLocalStorage() as OppgavelisteValg
   )
 
   const [oppgavelistaOppgaver, setOppgavelistaOppgaver] = useState<Array<OppgaveDTO>>([])
@@ -174,7 +174,7 @@ export const Oppgavelista = () => {
         antallOppgavelistaOppgaver={oppgavelistaOppgaver.length}
         antallMinOppgavelisteOppgaver={minOppgavelisteOppgaver.length}
       />
-      {oppgavelisteValg === 'MinOppgaveliste' ? (
+      {oppgavelisteValg === OppgavelisteValg.MIN_OPPGAVELISTE ? (
         <>
           <FilterRad
             hentAlleOppgaver={hentMineOgGosysOppgaver}

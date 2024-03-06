@@ -22,7 +22,7 @@ import {
 } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { MultiSelectFilter } from '~components/oppgavebenk/filtreringAvOppgaver/MultiSelectFilter'
 import { ArrowCirclepathIcon, ArrowUndoIcon } from '@navikt/aksel-icons'
-import { oppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/VelgOppgaveliste'
+import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/VelgOppgaveliste'
 
 interface Props {
   hentAlleOppgaver: () => void
@@ -30,7 +30,7 @@ interface Props {
   filter: Filter
   setFilter: (filter: Filter) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
-  oppgavelisteValg?: oppgavelisteValg
+  oppgavelisteValg?: OppgavelisteValg
 }
 
 export const FilterRad = ({
@@ -80,7 +80,7 @@ export const FilterRad = ({
               </option>
             ))}
         </Select>
-        {oppgavelisteValg === 'Oppgavelista' && (
+        {oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA && (
           <>
             <FiltrerPaaSaksbehandler
               saksbehandlereIEnhet={saksbehandlereIEnhet}
@@ -138,7 +138,7 @@ export const FilterRad = ({
         <Button
           variant="secondary"
           onClick={() => {
-            setFilter(oppgavelisteValg === 'Oppgavelista' ? initialFilter() : minOppgavelisteFiltre())
+            setFilter(oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA ? initialFilter() : minOppgavelisteFiltre())
             hentAlleOppgaver()
           }}
           size="small"

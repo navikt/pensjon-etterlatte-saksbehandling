@@ -89,7 +89,6 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.metrics.BehandlingMetrics
 import no.nav.etterlatte.metrics.BehandlingMetrikkerDao
-import no.nav.etterlatte.metrics.GjenopprettingMetrics
 import no.nav.etterlatte.metrics.GjenopprettingMetrikkerDao
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
@@ -458,18 +457,9 @@ internal class ApplicationContext(
 
     val metrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
-            BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao),
+            BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao, gjenopprettingMetrikkerDao),
             { leaderElectionKlient.isLeader() },
-            Duration.of(10, ChronoUnit.MINUTES).toMillis(),
-            periode = Duration.of(5, ChronoUnit.MINUTES),
-        )
-    }
-
-    val gjenopprettingMetrikkerJob: MetrikkerJob by lazy {
-        MetrikkerJob(
-            GjenopprettingMetrics(gjenopprettingMetrikkerDao),
-            { leaderElectionKlient.isLeader() },
-            Duration.of(10, ChronoUnit.MINUTES).toMillis(),
+            Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(5, ChronoUnit.MINUTES),
         )
     }

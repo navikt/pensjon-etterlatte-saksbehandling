@@ -187,8 +187,8 @@ class OppgaveDaoMedEndringssporingImpl(
 
     override fun hentFristGaarUt(
         dato: LocalDate,
-        type: OppgaveType,
-        kilde: OppgaveKilde,
+        type: Set<OppgaveType>,
+        kilde: Set<OppgaveKilde>,
         oppgaver: List<UUID>,
     ) = oppgaveDao.hentFristGaarUt(dato, type, kilde, oppgaver)
 }

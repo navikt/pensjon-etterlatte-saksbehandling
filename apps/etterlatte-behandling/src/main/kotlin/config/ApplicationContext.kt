@@ -459,7 +459,7 @@ internal class ApplicationContext(
         MetrikkerJob(
             BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao, gjenopprettingMetrikkerDao),
             { leaderElectionKlient.isLeader() },
-            Duration.of(10, ChronoUnit.MINUTES).toMillis(),
+            Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(5, ChronoUnit.MINUTES),
         )
     }

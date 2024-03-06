@@ -48,16 +48,21 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
         Behandle journalføringsoppgave
       </Heading>
 
-      {antallBehandlinger > 0 ? (
-        <Alert variant="info">Bruker har allerede {antallBehandlinger} behandling(er) i Gjenny</Alert>
-      ) : (
-        <Alert variant="info">Bruker har ingen behandlinger i Gjenny</Alert>
-      )}
+      {journalpost ? (
+        <>
+          {antallBehandlinger > 0 ? (
+            <Alert variant="info">Bruker har allerede {antallBehandlinger} behandling(er) i Gjenny</Alert>
+          ) : (
+            <Alert variant="info">Bruker har ingen behandlinger i Gjenny</Alert>
+          )}
 
-      {journalpost && !temaTilhoererGjenny(journalpost) && (
-        <Alert variant="warning">Journalposten tilhører tema {journalpost.tema}</Alert>
+          {journalpost && !temaTilhoererGjenny(journalpost) && (
+            <Alert variant="warning">Journalposten tilhører tema {journalpost.tema}</Alert>
+          )}
+        </>
+      ) : (
+        <Alert variant="warning">Kan ikke behandle oppgaven uten journalpost</Alert>
       )}
-      <br />
 
       <RadioGroup
         legend="Velg handling"
@@ -66,26 +71,25 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
           dispatch(settOppgaveHandling(value as OppgaveHandling))
         }}
         value={oppgaveHandling || ''}
-        disabled={!journalpost}
       >
-        <Radio value={OppgaveHandling.NY_BEHANDLING} description="Oppretter en ny behandling">
+        <Radio value={OppgaveHandling.NY_BEHANDLING} description="Oppretter en ny behandling" disabled={!journalpost}>
           Opprett behandling
         </Radio>
+        {kanBrukeKlage && (
+          <Radio value={OppgaveHandling.NY_KLAGE} description="Opprett ny klagebehandling" disabled={!journalpost}>
+            Opprett klagebehandling
+          </Radio>
+        )}
         <Radio
           value={OppgaveHandling.FERDIGSTILL_OPPGAVE}
           description="Dersom oppgaven ikke er aktuell/relevant kan du ferdigstille den"
         >
           Ferdigstill oppgaven
         </Radio>
-        {kanBrukeKlage && (
-          <Radio value={OppgaveHandling.NY_KLAGE} description="Opprett ny klagebehandling">
-            Opprett klagebehandling
-          </Radio>
-        )}
       </RadioGroup>
 
       <FlexRow justify="center" $spacing>
-        <Button variant="primary" onClick={neste} disabled={!oppgaveHandling || !journalpost}>
+        <Button variant="primary" onClick={neste} disabled={!oppgaveHandling}>
           Neste
         </Button>
       </FlexRow>

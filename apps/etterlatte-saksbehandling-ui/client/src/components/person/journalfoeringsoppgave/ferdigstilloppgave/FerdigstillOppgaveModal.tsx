@@ -8,12 +8,7 @@ import { FlexRow } from '~shared/styled'
 import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
-interface ModalProps {
-  oppgave: OppgaveDTO
-  kanFerdigstilles: boolean
-}
-
-export default function FerdigstillOppgaveModal({ oppgave, kanFerdigstilles }: ModalProps) {
+export default function FerdigstillOppgaveModal({ oppgave }: { oppgave: OppgaveDTO }) {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
 
@@ -29,7 +24,7 @@ export default function FerdigstillOppgaveModal({ oppgave, kanFerdigstilles }: M
 
   return (
     <>
-      <Button variant="primary" onClick={() => setOpen(true)} disabled={!kanFerdigstilles}>
+      <Button variant="primary" onClick={() => setOpen(true)}>
         Ferdigstill
       </Button>
 

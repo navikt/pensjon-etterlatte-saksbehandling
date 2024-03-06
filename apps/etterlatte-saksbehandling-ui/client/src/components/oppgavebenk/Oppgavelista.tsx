@@ -31,8 +31,9 @@ import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import {
   hentValgFraLocalStorage,
   leggValgILocalstorage,
+  OppgavelisteValg,
 } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
-import { OppgavelisteValg, VelgOppgaveliste } from '~components/oppgavebenk/velgOppgaveliste/VelgOppgaveliste'
+import { VelgOppgaveliste } from '~components/oppgavebenk/velgOppgaveliste/VelgOppgaveliste'
 import { minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 
 export const Oppgavelista = () => {
@@ -90,7 +91,7 @@ export const Oppgavelista = () => {
 
   const hentMinOppgavelisteOppgaver = (oppgavestatusFilter?: Array<string>) =>
     hentMinOppgavelisteOppgaverFetch({
-      oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : oppgavelistaFilter.oppgavestatusFilter,
+      oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : minOppgavelisteFilter.oppgavestatusFilter,
       minOppgavelisteIdent: true,
     })
 
@@ -177,6 +178,7 @@ export const Oppgavelista = () => {
       {oppgavelisteValg === OppgavelisteValg.MIN_OPPGAVELISTE ? (
         <>
           <FilterRad
+            key={OppgavelisteValg.MIN_OPPGAVELISTE}
             hentAlleOppgaver={hentMineOgGosysOppgaver}
             hentOppgaverStatus={(oppgavestatusFilter: Array<string>) =>
               hentMinOppgavelisteOppgaver(oppgavestatusFilter)
@@ -201,6 +203,7 @@ export const Oppgavelista = () => {
       ) : (
         <>
           <FilterRad
+            key={OppgavelisteValg.OPPGAVELISTA}
             hentAlleOppgaver={hentAlleOppgaver}
             hentOppgaverStatus={(oppgavestatusFilter: Array<string>) => {
               hentOppgavelistaOppgaver(oppgavestatusFilter)

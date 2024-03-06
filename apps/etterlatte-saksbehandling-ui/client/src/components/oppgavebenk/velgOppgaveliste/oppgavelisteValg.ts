@@ -1,8 +1,13 @@
 import { logger } from '~utils/logger'
 
+export enum OppgavelisteValg {
+  OPPGAVELISTA = 'Oppgavelista',
+  MIN_OPPGAVELISTE = 'MinOppgaveliste',
+}
+
 const OPPGAVELISTE_VALG_KEY = 'oppgaveliste'
 
-const initialValg = 'Oppgavelista'
+const initialValg = OppgavelisteValg.OPPGAVELISTA
 
 export const leggValgILocalstorage = (valg: string) => localStorage.setItem(OPPGAVELISTE_VALG_KEY, valg)
 

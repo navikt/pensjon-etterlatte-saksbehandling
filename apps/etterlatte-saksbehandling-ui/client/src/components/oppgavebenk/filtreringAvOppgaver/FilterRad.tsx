@@ -22,7 +22,7 @@ import {
 } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { MultiSelectFilter } from '~components/oppgavebenk/filtreringAvOppgaver/MultiSelectFilter'
 import { ArrowCirclepathIcon, ArrowUndoIcon } from '@navikt/aksel-icons'
-import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/VelgOppgaveliste'
+import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 
 interface Props {
   hentAlleOppgaver: () => void

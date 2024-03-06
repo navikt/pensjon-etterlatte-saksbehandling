@@ -2,11 +2,7 @@ import React, { Dispatch, ReactNode, SetStateAction } from 'react'
 import styled from 'styled-components'
 import { Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
-
-export enum OppgavelisteValg {
-  OPPGAVELISTA = 'Oppgavelista',
-  MIN_OPPGAVELISTE = 'MinOppgaveliste',
-}
+import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 
 interface Props {
   oppgavelisteValg: OppgavelisteValg

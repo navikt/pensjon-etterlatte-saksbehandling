@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.klienter
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -8,8 +9,9 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
+import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -45,18 +47,24 @@ class AxsysKlientImpl(private val client: HttpClient, private val url: String) :
                 ?.map { SaksbehandlerEnhet(it.enhetId, it.navn) }
                 .also { enhetCache.put(ident, it) } ?: emptyList()
         } catch (cause: Throwable) {
-            logger.warn("Klarte ikke å hente enheter for ident $ident fra axsys.", cause)
-            return emptyList()
+            val feilmelding = "Klarte ikke å hente enheter for ident $ident fra axsys."
+            logger.error(feilmelding, cause)
+            throw HentEnhetException(feilmelding, cause)
         }
     }
 }
 
+class HentEnhetException(override val detail: String, override val cause: Throwable?) :
+    InternfeilException(detail, cause)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class Enheter(
     val enhetId: String, // Enhetsnummer
     val temaer: ArrayList<String>?, // EYB EYO
     val navn: String,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class EnhetslisteResponse(
     val enheter: List<Enheter>,
 )

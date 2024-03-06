@@ -9,10 +9,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
@@ -20,6 +18,7 @@ import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.module
+import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -42,7 +41,7 @@ internal class RevurderingRoutesTest {
                 every { harTilgangTilBehandling(any(), any()) } returns true
                 every { harTilgangTilSak(any(), any()) } returns true
             }
-        coEvery { applicationContext.navAnsattKlient.hentEnheterForSaksbehandler(any()) } returns
+        every { applicationContext.saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
             listOf(
                 SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.name),
             )

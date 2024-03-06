@@ -15,7 +15,7 @@ inline val PipelineContext<*, ApplicationCall>.enheter: List<String>
     get() =
         call.request.queryParameters["enheter"]?.split(",") ?: emptyList()
 
-internal fun Route.saksbehandlerRoutes(saksbehandlerService: SaksbehandlerService) {
+internal fun Route.saksbehandlerRoutes(saksbehandlerService: SaksbehandlerServiceImpl) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
     route("/api") {

@@ -13,6 +13,10 @@ import javax.sql.DataSource
 class DatabaseContextTest(private val ds: DataSource) : DatabaseKontekst {
     override fun activeTx(): Connection = ds.connection
 
+    override fun harIntransaction(): Boolean {
+        return true
+    }
+
     override fun <T> inTransaction(block: () -> T): T {
         // NOOPP
         return block()

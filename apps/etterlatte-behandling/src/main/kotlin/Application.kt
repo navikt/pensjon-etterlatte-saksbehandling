@@ -48,7 +48,6 @@ import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
-import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
@@ -153,7 +152,7 @@ internal fun Application.module(context: ApplicationContext) {
                 requestLogger = behandlingRequestLogger,
             )
             institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(institusjonsoppholdDao))
-            saksbehandlerRoutes(saksbehandlerService = SaksbehandlerService(context.saksbehandlerInfoDao))
+            saksbehandlerRoutes(saksbehandlerService = saksbehandlerService)
 
             tilgangRoutes(tilgangService)
 
@@ -194,7 +193,7 @@ private fun Route.attachContekst(
                     decideUser(
                         call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
                         context.saksbehandlerGroupIdsByKey,
-                        context.navAnsattKlient,
+                        context.saksbehandlerService,
                         brukerTokenInfo,
                     ),
                 databasecontxt = DatabaseContext(ds),

@@ -72,6 +72,12 @@ interface GosysOppgaveKlient {
         id: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave
+
+    suspend fun ferdigstill(
+        id: String,
+        oppgaveVersjon: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave
 }
 
 class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppgaveKlient {
@@ -144,6 +150,20 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
         }
     }
 
+    override suspend fun ferdigstill(
+        id: String,
+        oppgaveVersjon: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave {
+        logger.info("Ferdigstiller Gosys-oppgave med id=$id")
+
+        return patchOppgave(
+            id,
+            brukerTokenInfo,
+            body = FerdigstillRequest(oppgaveVersjon.toString(), "FERDIGSTILT"),
+        )
+    }
+
     override suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
         oppgaveVersjon: Long,
@@ -209,6 +229,11 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
         }
     }
 }
+
+data class FerdigstillRequest(
+    val versjon: String,
+    val status: String,
+)
 
 class GosysTimeout : ForespoerselException(
     status = HttpStatusCode.RequestTimeout.value,

@@ -30,9 +30,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -50,16 +47,13 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class VilkaarsvurderingRoutesTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
+internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
     private val server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
@@ -67,18 +61,10 @@ internal class VilkaarsvurderingRoutesTest {
     private val nyGrunnlagVersjon: Long = 4378
 
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
-    private lateinit var ds: DataSource
 
     @BeforeAll
     fun before() {
         server.start()
-        postgreSQLContainer.start()
-        ds =
-            DataSourceBuilder.createDataSource(
-                postgreSQLContainer.jdbcUrl,
-                postgreSQLContainer.username,
-                postgreSQLContainer.password,
-            ).also { it.migrate() }
 
         vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
@@ -103,15 +89,12 @@ internal class VilkaarsvurderingRoutesTest {
 
     @AfterEach
     fun afterEach() {
-        ds.connection.use {
-            it.prepareStatement("TRUNCATE vilkaarsvurdering CASCADE;").execute()
-        }
+        dbExtension.resetDb()
     }
 
     @AfterAll
     fun after() {
         server.shutdown()
-        postgreSQLContainer.stop()
     }
 
     private val token: String by lazy { server.issueSaksbehandlerToken() }
@@ -826,6 +809,9 @@ internal class VilkaarsvurderingRoutesTest {
     }
 
     private companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
+
         val behandlingId: UUID = UUID.randomUUID()
         val oboToken = BrukerTokenInfo.of("token", "s1", null, null, null)
     }

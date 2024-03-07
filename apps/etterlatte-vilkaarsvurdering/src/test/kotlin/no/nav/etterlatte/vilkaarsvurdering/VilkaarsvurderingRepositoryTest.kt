@@ -10,57 +10,22 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class VilkaarsvurderingRepositoryTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
-    private lateinit var vilkaarsvurderingRepository: VilkaarsvurderingRepository
-    private lateinit var ds: DataSource
-
-    @BeforeAll
-    fun beforeAll() {
-        postgreSQLContainer.start()
-
-        ds =
-            DataSourceBuilder.createDataSource(
-                postgreSQLContainer.jdbcUrl,
-                postgreSQLContainer.username,
-                postgreSQLContainer.password,
-            ).also { it.migrate() }
-
-        vilkaarsvurderingRepository = VilkaarsvurderingRepository(ds, DelvilkaarRepository())
-    }
-
-    private fun cleanDatabase() {
-        ds.connection.use {
-            it.prepareStatement("TRUNCATE vilkaarsvurdering CASCADE").apply { execute() }
-        }
-    }
+internal class VilkaarsvurderingRepositoryTest(ds: DataSource) {
+    private val vilkaarsvurderingRepository = VilkaarsvurderingRepository(ds, DelvilkaarRepository())
 
     @AfterEach
     fun afterEach() {
-        cleanDatabase()
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
+        dbExtension.resetDb()
     }
 
     @Test
@@ -304,6 +269,9 @@ internal class VilkaarsvurderingRepositoryTest {
     }
 
     companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
+
         val vilkaarsvurdering =
             Vilkaarsvurdering(
                 behandlingId = UUID.randomUUID(),

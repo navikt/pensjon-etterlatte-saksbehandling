@@ -11,7 +11,6 @@ import { hentOppgaverMedStatus, OppgaveDTO, OppgaveSaksbehandler, saksbehandlere
 import { isSuccess } from '~shared/api/apiUtils'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
-  leggTilOppgavenIMinliste,
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveutils'
 import { Saksbehandler } from '~shared/types/saksbehandler'
@@ -41,7 +40,6 @@ export const Oppgavelistene = () => {
   )
 
   const [oppgavelistaOppgaver, setOppgavelistaOppgaver] = useState<Array<OppgaveDTO>>([])
-  const [minOppgavelisteOppgaver, setMinOppgavelisteOppgaver] = useState<Array<OppgaveDTO>>([])
 
   const [oppgavelistaFilter, setOppgavelistaFilter] = useState<Filter>(hentFilterFraLocalStorage())
 
@@ -55,10 +53,6 @@ export const Oppgavelistene = () => {
     new RevurderingsaarsakerDefault()
   )
 
-  const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
-    return oppgaver.filter((o) => o.saksbehandler?.ident === innloggetSaksbehandler.ident)
-  }
-
   const oppdaterSaksbehandlerTildeling = (
     oppgave: OppgaveDTO,
     saksbehandler: OppgaveSaksbehandler | null,
@@ -68,15 +62,6 @@ export const Oppgavelistene = () => {
       setOppgavelistaOppgaver(
         finnOgOppdaterSaksbehandlerTildeling(oppgavelistaOppgaver, oppgave.id, saksbehandler, versjon)
       )
-      if (innloggetSaksbehandler.ident === saksbehandler?.ident) {
-        setMinOppgavelisteOppgaver(leggTilOppgavenIMinliste(minOppgavelisteOppgaver, oppgave, saksbehandler, versjon))
-      } else {
-        setMinOppgavelisteOppgaver(
-          filtrerKunInnloggetBrukerOppgaver(
-            finnOgOppdaterSaksbehandlerTildeling(minOppgavelisteOppgaver, oppgave.id, saksbehandler, versjon)
-          )
-        )
-      }
     }, 2000)
   }
 
@@ -126,7 +111,7 @@ export const Oppgavelistene = () => {
         oppgavelisteValg={oppgavelisteValg}
         setOppgavelisteValg={setOppgavelisteValg}
         antallOppgavelistaOppgaver={oppgavelistaOppgaver.length}
-        antallMinOppgavelisteOppgaver={minOppgavelisteOppgaver.length}
+        antallMinOppgavelisteOppgaver={0}
       />
       {oppgavelisteValg === OppgavelisteValg.MIN_OPPGAVELISTE && (
         <MinOppgaveliste saksbehandlereIEnhet={saksbehandlereIEnheter} revurderingsaarsaker={revurderingsaarsaker} />

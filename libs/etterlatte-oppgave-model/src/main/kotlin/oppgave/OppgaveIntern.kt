@@ -138,6 +138,10 @@ data class SettPaaVentRequest(
     val status: Status,
 )
 
+data class FerdigstillRequest(
+    val merknad: String?,
+)
+
 data class RedigerFristGosysRequest(
     val frist: Tidspunkt,
     val versjon: Long,

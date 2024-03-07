@@ -1,20 +1,21 @@
-import { BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
+import { BodyLong, Button, Heading, Modal, TextField } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { FlexRow } from '~shared/styled'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { erOppgaveRedigerbar, ferdigstillOppgave, Oppgavestatus } from '~shared/api/oppgaver'
+import { erOppgaveRedigerbar, ferdigstillOppgaveMedMerknad, Oppgavestatus } from '~shared/api/oppgaver'
 import { useNavigate } from 'react-router-dom'
 
 export default function GjenopprettingModal(props: { oppgaveId: string; oppgaveStatus: Oppgavestatus }) {
   const { oppgaveId, oppgaveStatus } = props
-  const [ferdigstillOppgaveStatus, avsluttOppgave] = useApiCall(ferdigstillOppgave)
+  const [ferdigstillOppgaveStatus, avsluttOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
   const [isOpen, setIsOpen] = useState(false)
+  const [begrunnelse, setBegrunnelse] = useState<string | null>(null)
   const navigate = useNavigate()
 
   const avbryt = () => {
-    avsluttOppgave(oppgaveId, () => navigate('/'))
+    avsluttOppgave({ id: oppgaveId, merknad: begrunnelse }, () => navigate('/'))
   }
 
   return (
@@ -38,6 +39,17 @@ export default function GjenopprettingModal(props: { oppgaveId: string; oppgaveS
 
         <Modal.Body>
           <BodyLong>Dette er kun nødvendig hvis du skal lukke oppgave uten å lage behandling.</BodyLong>
+          <TextField
+            onChange={(e) => {
+              if (e.target.value === '') {
+                setBegrunnelse(null)
+              } else {
+                setBegrunnelse(e.target.value)
+              }
+            }}
+            label=""
+            placeholder="Begrunnelse"
+          />
         </Modal.Body>
 
         <Modal.Footer>

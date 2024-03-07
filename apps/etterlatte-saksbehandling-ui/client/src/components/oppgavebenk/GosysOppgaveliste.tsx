@@ -40,8 +40,8 @@ export const GosysOppgaveliste = ({ oppdaterTildeling, saksbehandlereIEnhet }: P
   }, [])
 
   return mapResult(gosysOppgaverResult, {
-    pending: <Spinner visible={true} label="Henter nye Gosys oppgaver" />,
-    error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente Gosys oppgaver'}</ApiErrorAlert>,
+    pending: <Spinner visible={true} label="Henter nye Gosys-oppgaver" />,
+    error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente Gosys-oppgaver'}</ApiErrorAlert>,
     success: (oppgaver) => (
       <>
         <VisKunMineGosysOppgaverSwitch
@@ -53,7 +53,7 @@ export const GosysOppgaveliste = ({ oppdaterTildeling, saksbehandlereIEnhet }: P
             })
           }
         >
-          Vis mine Gosys oppgaver
+          Vis mine Gosys-oppgaver
         </VisKunMineGosysOppgaverSwitch>
         <FilterRad
           hentAlleOppgaver={hentAlleGosysOppgaver}

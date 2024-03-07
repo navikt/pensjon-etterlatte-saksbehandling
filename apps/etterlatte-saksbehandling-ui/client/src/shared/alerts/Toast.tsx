@@ -34,5 +34,6 @@ const ToastAlert = styled(Alert)`
   position: fixed;
   right: 3rem;
   top: 3rem;
+  z-index: 1;
   box-shadow: -0.3rem 0.3rem 0.6rem 0 rgba(150, 150, 150, 0.5);
 `

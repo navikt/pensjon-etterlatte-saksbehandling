@@ -12,7 +12,6 @@ import { isSuccess } from '~shared/api/apiUtils'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
   leggTilOppgavenIMinliste,
-  oppdaterFrist,
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveutils'
 import { Saksbehandler } from '~shared/types/saksbehandler'
@@ -28,10 +27,10 @@ import {
   OppgavelisteValg,
 } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 import { VelgOppgaveliste } from '~components/oppgavebenk/velgOppgaveliste/VelgOppgaveliste'
-import { minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { GosysOppgaveliste } from '~components/oppgavebenk/GosysOppgaveliste'
+import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
 
-export const Oppgavelista = () => {
+export const Oppgavelistene = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />
@@ -45,10 +44,8 @@ export const Oppgavelista = () => {
   const [minOppgavelisteOppgaver, setMinOppgavelisteOppgaver] = useState<Array<OppgaveDTO>>([])
 
   const [oppgavelistaFilter, setOppgavelistaFilter] = useState<Filter>(hentFilterFraLocalStorage())
-  const [minOppgavelisteFilter, setMinOppgavelisteFilter] = useState<Filter>(minOppgavelisteFiltre())
 
   const [oppgavelistaOppgaverResult, hentOppgavelistaOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
-  const [minOppgavelisteOppgaverResult, hentMinOppgavelisteOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
 
   const [, hentSaksbehandlereIEnheterFetch] = useApiCall(saksbehandlereIEnhetApi)
   const [saksbehandlereIEnheter, setSaksbehandlereIEnheter] = useState<Array<Saksbehandler>>([])
@@ -83,24 +80,13 @@ export const Oppgavelista = () => {
     }, 2000)
   }
 
-  const hentMinOppgavelisteOppgaver = (oppgavestatusFilter?: Array<string>) =>
-    hentMinOppgavelisteOppgaverFetch({
-      oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : minOppgavelisteFilter.oppgavestatusFilter,
-      minOppgavelisteIdent: true,
-    })
-
   const hentOppgavelistaOppgaver = (oppgavestatusFilter?: Array<string>) =>
     hentOppgavelistaOppgaverFetch({
       oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : oppgavelistaFilter.oppgavestatusFilter,
       minOppgavelisteIdent: false,
     })
 
-  const hentMineOppgaver = () => {
-    hentMinOppgavelisteOppgaver()
-  }
-
   const hentAlleOppgaver = () => {
-    hentMinOppgavelisteOppgaver()
     hentOppgavelistaOppgaver()
     hentRevurderingsaarsaker({})
   }
@@ -119,12 +105,6 @@ export const Oppgavelista = () => {
       setOppgavelistaOppgaver(sorterOppgaverEtterOpprettet(oppgavelistaOppgaverResult.data))
     }
   }, [oppgavelistaOppgaverResult])
-
-  useEffect(() => {
-    if (isSuccess(minOppgavelisteOppgaverResult)) {
-      setMinOppgavelisteOppgaver(sorterOppgaverEtterOpprettet(minOppgavelisteOppgaverResult.data))
-    }
-  }, [minOppgavelisteOppgaverResult])
 
   useEffect(() => {
     if (isSuccess(hentRevurderingsaarsakerStatus)) {
@@ -149,30 +129,7 @@ export const Oppgavelista = () => {
         antallMinOppgavelisteOppgaver={minOppgavelisteOppgaver.length}
       />
       {oppgavelisteValg === OppgavelisteValg.MIN_OPPGAVELISTE && (
-        <>
-          <FilterRad
-            key={OppgavelisteValg.MIN_OPPGAVELISTE}
-            hentAlleOppgaver={hentMineOppgaver}
-            hentOppgaverStatus={(oppgavestatusFilter: Array<string>) =>
-              hentMinOppgavelisteOppgaver(oppgavestatusFilter)
-            }
-            filter={minOppgavelisteFilter}
-            setFilter={setMinOppgavelisteFilter}
-            saksbehandlereIEnhet={saksbehandlereIEnheter}
-          />
-          <OppgaveFeilWrapper oppgaver={minOppgavelisteOppgaverResult}>
-            <Oppgaver
-              oppgaver={minOppgavelisteOppgaver}
-              oppdaterTildeling={oppdaterSaksbehandlerTildeling}
-              oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
-                oppdaterFrist(setMinOppgavelisteOppgaver, minOppgavelisteOppgaver, id, nyfrist, versjon)
-              }
-              filter={minOppgavelisteFilter}
-              saksbehandlereIEnhet={saksbehandlereIEnheter}
-              revurderingsaarsaker={revurderingsaarsaker}
-            />
-          </OppgaveFeilWrapper>
-        </>
+        <MinOppgaveliste saksbehandlereIEnhet={saksbehandlereIEnheter} revurderingsaarsaker={revurderingsaarsaker} />
       )}
       {oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA && (
         <>

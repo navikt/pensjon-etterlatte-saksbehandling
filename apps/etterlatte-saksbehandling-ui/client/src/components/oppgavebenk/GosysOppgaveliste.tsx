@@ -31,12 +31,8 @@ export const GosysOppgaveliste = ({ oppdaterTildeling, saksbehandlereIEnhet }: P
 
   const [gosysOppgaverResult, hentGosysOppgaverFetch] = useApiCall(hentGosysOppgaver)
 
-  const hentAlleGosysOppgaver = () => {
-    hentGosysOppgaverFetch({})
-  }
-
   useEffect(() => {
-    hentAlleGosysOppgaver()
+    hentGosysOppgaverFetch({})
   }, [])
 
   return mapResult(gosysOppgaverResult, {
@@ -56,7 +52,7 @@ export const GosysOppgaveliste = ({ oppdaterTildeling, saksbehandlereIEnhet }: P
           Vis mine Gosys-oppgaver
         </VisKunMineGosysOppgaverSwitch>
         <FilterRad
-          hentAlleOppgaver={hentAlleGosysOppgaver}
+          hentAlleOppgaver={() => hentGosysOppgaverFetch({})}
           hentOppgaverStatus={() => {}}
           filter={filter}
           setFilter={setFilter}

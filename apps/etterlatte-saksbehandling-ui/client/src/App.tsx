@@ -17,7 +17,7 @@ import { settAppversion } from '~store/reducers/AppconfigReducer'
 import Versioncheck from '~Versioncheck'
 import { Klagebehandling } from '~components/klage/Klagebehandling'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
+import { Oppgavelistene } from '~components/oppgavebenk/Oppgavelistene'
 import { Tilbakekrevingsbehandling } from '~components/tilbakekreving/Tilbakekrevingsbehandling'
 import GenerellBehandling from '~components/generellbehandling/GenerellBehandling'
 import ManuellBehandling from '~components/manuelbehandling/ManuellBehandling'
@@ -52,7 +52,7 @@ function App() {
             <ErrorBoundary>
               <ConfigContext.Provider value={hentConfigStatus.data}>
                 <Routes>
-                  <Route path="/" element={<Oppgavelista />} />
+                  <Route path="/" element={<Oppgavelistene />} />
                   <Route path="/flyttjournalpost" element={<FlyttJournalpost />} />
                   <Route path="/person/:fnr" element={<Person />} />
                   <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />

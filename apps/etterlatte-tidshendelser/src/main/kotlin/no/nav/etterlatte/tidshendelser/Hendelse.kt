@@ -26,6 +26,7 @@ data class Hendelse(
     val versjon: Int,
     val status: HendelseStatus,
     val steg: String,
+    val loependeYtelse: Boolean?,
     val info: Any?,
 )
 

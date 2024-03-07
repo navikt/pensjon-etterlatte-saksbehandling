@@ -2,6 +2,7 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { SakType } from '~shared/types/sak'
 import { konverterOppgavestatusFilterValuesTilKeys } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
+import { OppgavelisteneStats } from '~components/oppgavebenk/utils/oppgaveutils'
 
 export interface OppgaveDTO {
   id: string
@@ -86,6 +87,9 @@ export const hentOppgave = async (id: string): Promise<ApiResponse<OppgaveDTO>> 
 export const hentOppgaverMedReferanse = async (referanse: string): Promise<ApiResponse<OppgaveDTO[]>> =>
   apiClient.get(`/oppgaver/referanse/${referanse}`)
 export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver/gosys')
+
+export const hentOppgavelisteneStats = async (): Promise<ApiResponse<OppgavelisteneStats>> =>
+  apiClient.get('/oppgaver/stats')
 
 export const opprettOppgave = async (args: {
   sakId: number

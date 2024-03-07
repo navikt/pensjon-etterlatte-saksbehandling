@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useAppSelector } from '~store/Store'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { isSuccess, mapResult } from '~shared/api/apiUtils'
@@ -12,7 +12,6 @@ import {
   finnOgOppdaterSaksbehandlerTildeling,
   leggTilOppgavenIMinliste,
   oppdaterFrist,
-  OppgavelisteneStats,
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveutils'
 import { FilterRad } from '~components/oppgavebenk/filtreringAvOppgaver/FilterRad'
@@ -24,16 +23,9 @@ import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
   revurderingsaarsaker: RevurderingsaarsakerBySakstype
-  oppgavelisteneStats: OppgavelisteneStats
-  setOppgavelisteneStats: Dispatch<SetStateAction<OppgavelisteneStats>>
 }
 
-export const MinOppgaveliste = ({
-  saksbehandlereIEnhet,
-  revurderingsaarsaker,
-  oppgavelisteneStats,
-  setOppgavelisteneStats,
-}: Props) => {
+export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />
@@ -80,10 +72,6 @@ export const MinOppgaveliste = ({
   useEffect(() => {
     if (isSuccess(minOppgavelisteOppgaverResult)) {
       setOppgaver(sorterOppgaverEtterOpprettet(minOppgavelisteOppgaverResult.data))
-      setOppgavelisteneStats({
-        ...oppgavelisteneStats,
-        antallMinOppgavelisteOppgaver: minOppgavelisteOppgaverResult.data.length,
-      })
     }
   }, [minOppgavelisteOppgaverResult])
 

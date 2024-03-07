@@ -17,15 +17,12 @@ import { VelgOppgaveliste } from '~components/oppgavebenk/velgOppgaveliste/VelgO
 import { GosysOppgaveliste } from '~components/oppgavebenk/GosysOppgaveliste'
 import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
-import { initalOppgavelisteneStats, OppgavelisteneStats } from '~components/oppgavebenk/utils/oppgaveutils'
 
 export const Oppgavelistene = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />
   }
-
-  const [oppgavelisteneStats, setOppgavelisteneStats] = useState<OppgavelisteneStats>(initalOppgavelisteneStats)
 
   const [oppgavelisteValg, setOppgavelisteValg] = useState<OppgavelisteValg>(
     hentValgFraLocalStorage() as OppgavelisteValg
@@ -66,8 +63,6 @@ export const Oppgavelistene = () => {
             key={OppgavelisteValg.OPPGAVELISTA}
             saksbehandlereIEnhet={saksbehandlereIEnheter}
             revurderingsaarsaker={revurderingsaarsaker}
-            oppgavelisteneStats={oppgavelisteneStats}
-            setOppgavelisteneStats={setOppgavelisteneStats}
           />
         )
       case OppgavelisteValg.MIN_OPPGAVELISTE:
@@ -76,29 +71,16 @@ export const Oppgavelistene = () => {
             key={OppgavelisteValg.MIN_OPPGAVELISTE}
             saksbehandlereIEnhet={saksbehandlereIEnheter}
             revurderingsaarsaker={revurderingsaarsaker}
-            oppgavelisteneStats={oppgavelisteneStats}
-            setOppgavelisteneStats={setOppgavelisteneStats}
           />
         )
       case OppgavelisteValg.GOSYS_OPPGAVER:
-        return (
-          <GosysOppgaveliste
-            key={OppgavelisteValg.GOSYS_OPPGAVER}
-            saksbehandlereIEnhet={saksbehandlereIEnheter}
-            oppgavelisteneStats={oppgavelisteneStats}
-            setOppgavelisteneStats={setOppgavelisteneStats}
-          />
-        )
+        return <GosysOppgaveliste key={OppgavelisteValg.GOSYS_OPPGAVER} saksbehandlereIEnhet={saksbehandlereIEnheter} />
     }
   }
 
   return (
     <Container>
-      <VelgOppgaveliste
-        oppgavelisteValg={oppgavelisteValg}
-        setOppgavelisteValg={setOppgavelisteValg}
-        oppgavelisteneStats={oppgavelisteneStats}
-      />
+      <VelgOppgaveliste oppgavelisteValg={oppgavelisteValg} setOppgavelisteValg={setOppgavelisteValg} />
       {rendreValgtOppgaveliste()}
     </Container>
   )

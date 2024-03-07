@@ -77,11 +77,9 @@ function isNumeric(value: string) {
 export interface OppgavelisteneStats {
   antallOppgavelistaOppgaver: number
   antallMinOppgavelisteOppgaver: number
-  antallGosysOppgaver: number
 }
 
 export const initalOppgavelisteneStats: OppgavelisteneStats = {
   antallOppgavelistaOppgaver: 0,
   antallMinOppgavelisteOppgaver: 0,
-  antallGosysOppgaver: 0,
 }

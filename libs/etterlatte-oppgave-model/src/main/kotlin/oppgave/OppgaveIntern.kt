@@ -51,6 +51,8 @@ data class OppgaveIntern(
     }
 }
 
+data class OppgavelisteneStats(val antallOppgavelistaOppgaver: Long, val antallMinOppgavelisteOppgaver: Long)
+
 data class OppgaveListe(val sak: Sak, val oppgaver: List<OppgaveIntern>)
 
 data class GosysOppgave(

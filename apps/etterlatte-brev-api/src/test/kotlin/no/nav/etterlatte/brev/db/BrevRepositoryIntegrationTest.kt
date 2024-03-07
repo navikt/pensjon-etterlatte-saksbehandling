@@ -9,6 +9,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.brev.Brevtype
+import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
@@ -25,61 +26,27 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.postgresql.util.PSQLException
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
 import java.util.UUID
 import javax.sql.DataSource
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BrevRepositoryIntegrationTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
-    private lateinit var db: BrevRepository
-    private lateinit var dataSource: DataSource
-
-    @BeforeAll
-    fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            )
-        dataSource.migrate()
-
-        db = BrevRepository(dataSource)
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
-    }
+internal class BrevRepositoryIntegrationTest(private val dataSource: DataSource) {
+    private val db = BrevRepository(dataSource)
 
     @AfterEach
     fun resetTablesAfterEachTest() {
-        using(sessionOf(dataSource)) {
-            it.run(queryOf("TRUNCATE brev RESTART IDENTITY CASCADE;").asExecute)
-        }
+        dbExtension.resetDb()
     }
 
     @Test
@@ -487,6 +454,9 @@ internal class BrevRepositoryIntegrationTest {
         )
 
     companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
+
         private val PDF_BYTES = "Hello world!".toByteArray()
         private val STOR_SNERK = Foedselsnummer("11057523044")
     }

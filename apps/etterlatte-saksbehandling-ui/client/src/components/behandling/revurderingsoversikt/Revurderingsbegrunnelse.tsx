@@ -4,12 +4,11 @@ import styled from 'styled-components'
 type BegrunnelseProps = {
   begrunnelse: string
   setBegrunnelse: (b: string) => void
-  feilmelding?: string | null
   redigerbar: boolean
 }
 
 export const Revurderingsbegrunnelse = (props: BegrunnelseProps) => {
-  const { begrunnelse, setBegrunnelse, feilmelding, redigerbar } = props
+  const { begrunnelse, setBegrunnelse, redigerbar } = props
   return redigerbar ? (
     <BegrunnelseWrapper>
       <Heading size="medium" level="3">
@@ -21,13 +20,13 @@ export const Revurderingsbegrunnelse = (props: BegrunnelseProps) => {
           setBegrunnelse(e.target.value)
         }}
         placeholder="Begrunnelse"
-        error={feilmelding && !begrunnelse && 'Begrunnelse kan ikke være tom'}
+        error={!begrunnelse && 'Begrunnelse kan ikke være tom'}
         label=""
       />
     </BegrunnelseWrapper>
   ) : (
     <BegrunnelseWrapper>
-      <Heading size="medium" level="3" spacing>
+      <Heading size="medium" level="3">
         Begrunnelse
       </Heading>
       {begrunnelse}

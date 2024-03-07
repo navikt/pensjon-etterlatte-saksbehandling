@@ -6,13 +6,12 @@ import {
   RevurderingInfo,
 } from '~shared/types/RevurderingInfo'
 import { FormEvent, useState } from 'react'
-import { BodyShort, Button, Heading, TextField, VStack } from '@navikt/ds-react'
+import { BodyLong, BodyShort, Button, Heading, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import styled from 'styled-components'
-import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsoversikt/Revurderingsbegrunnelse'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -45,10 +44,12 @@ export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; beh
       setFeilmelding('Begrunnelse mangler')
       return
     }
+
     const revurderingInfo: RevurderingInfo = {
       type: type,
       aarsak: revurderingsaarsak,
     }
+
     lagre(
       {
         behandlingId: behandling.id,
@@ -61,50 +62,53 @@ export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; beh
 
   return (
     <>
-      {redigerbar ? (
-        <SkjemaWrapper onSubmit={handlesubmit}>
-          <AarsakWrapper>
-            <Heading size="medium" level="3">
-              Årsak til revurdering
-            </Heading>
-            <TextField
-              value={revurderingsaarsak ?? ''}
-              onChange={(e) => setRevurderingsaarsak(e.target.value)}
-              error={feilmelding && !revurderingsaarsak && 'Årsak kan ikke være tom'}
-              label=""
-            />
-          </AarsakWrapper>
-          <Revurderingsbegrunnelse
-            begrunnelse={begrunnelse}
-            setBegrunnelse={setBegrunnelse}
-            feilmelding={feilmelding}
-            redigerbar={true}
-          />
-          <Button loading={isPending(lagrestatus)} variant="primary" size="small">
-            Lagre
-          </Button>
-          {isSuccess(lagrestatus) && <Toast melding="Lagret" />}
-          {isFailureHandler({
-            apiResult: lagrestatus,
-            errorMessage: 'Kunne ikke lagre',
-          })}
-        </SkjemaWrapper>
-      ) : (
-        <VStack gap="10" style={{ marginTop: '3rem', maxWidth: '40rem' }}>
+      <SkjemaWrapper onSubmit={handlesubmit}>
+        <VStack gap="10">
           <VStack gap="2">
             <Heading size="medium" level="3">
               Årsak til revurdering
             </Heading>
-            <BodyShort>{revurderingsaarsak}</BodyShort>
+            {redigerbar ? (
+              <TextField
+                value={revurderingsaarsak ?? ''}
+                onChange={(e) => setRevurderingsaarsak(e.target.value)}
+                error={feilmelding && !revurderingsaarsak && 'Årsak kan ikke være tom'}
+                label=""
+              />
+            ) : (
+              <BodyShort>{revurderingsaarsak}</BodyShort>
+            )}
           </VStack>
           <VStack gap="2">
             <Heading size="medium" level="3">
               Begrunnelse
             </Heading>
-            <BodyShort>{begrunnelse}</BodyShort>
+            {redigerbar ? (
+              <VStack gap="5">
+                <Textarea
+                  value={begrunnelse}
+                  onChange={(e) => {
+                    setBegrunnelse(e.target.value)
+                  }}
+                  placeholder="Begrunnelse"
+                  error={feilmelding && !begrunnelse && 'Begrunnelse kan ikke være tom'}
+                  label=""
+                />
+                <Button loading={isPending(lagrestatus)} variant="primary" size="small" style={{ maxWidth: '5em' }}>
+                  Lagre
+                </Button>
+                {isSuccess(lagrestatus) && <Toast melding="Lagret" />}
+                {isFailureHandler({
+                  apiResult: lagrestatus,
+                  errorMessage: 'Kunne ikke lagre',
+                })}
+              </VStack>
+            ) : (
+              <BodyLong>{begrunnelse}</BodyLong>
+            )}
           </VStack>
         </VStack>
-      )}
+      </SkjemaWrapper>
     </>
   )
 }
@@ -112,14 +116,4 @@ export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; beh
 const SkjemaWrapper = styled.form`
   max-width: 40rem;
   margin-top: 3rem;
-
-  & > *:not(:first-child) {
-    margin-top: 1rem;
-  }
-`
-
-const AarsakWrapper = styled.div`
-  gap: 1rem;
-  padding-right: 1rem;
-  padding-bottom: 1rem;
 `

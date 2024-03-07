@@ -1,4 +1,6 @@
 import {
+  teksterTilbakekrevingResultat,
+  teksterTilbakekrevingSkyld,
   TilbakekrevingBehandling,
   TilbakekrevingBeloep,
   TilbakekrevingPeriode,
@@ -11,10 +13,10 @@ import React, { useState } from 'react'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { Button, Heading, Select, Table, TextField } from '@navikt/ds-react'
-import styled from 'styled-components'
+import { Button, Heading, Select, Table, TextField, VStack } from '@navikt/ds-react'
 
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { Toast } from '~shared/alerts/Toast'
 
 export function TilbakekrevingVurderingPerioder({
   behandling,
@@ -49,7 +51,7 @@ export function TilbakekrevingVurderingPerioder({
       <Table className="table" zebraStripes>
         <Table.Header>
           <Table.Row>
-            <Table.HeaderCell>Måned</Table.HeaderCell>
+            <Table.HeaderCell style={{ width: '5em' }}>Måned</Table.HeaderCell>
             <Table.HeaderCell>Brutto utbetaling</Table.HeaderCell>
             <Table.HeaderCell>Ny brutto utbetaling</Table.HeaderCell>
             <Table.HeaderCell>Beregnet feilutbetaling</Table.HeaderCell>
@@ -67,18 +69,17 @@ export function TilbakekrevingVurderingPerioder({
           {perioder.map((periode, index) => {
             const beloeper = periode.ytelse
             return (
-              <Table.Row key={'beloeperRad' + index}>
+              <Table.Row key={'beloeperRad' + index} style={{ alignItems: 'start' }}>
                 <Table.DataCell key="maaned">{periode.maaned.toString()}</Table.DataCell>
-                <Table.DataCell key="bruttoUtbetaling">{beloeper.bruttoUtbetaling}</Table.DataCell>
-                <Table.DataCell key="nyBruttoUtbetaling">{beloeper.nyBruttoUtbetaling}</Table.DataCell>
+                <Table.DataCell key="bruttoUtbetaling">{beloeper.bruttoUtbetaling} kr</Table.DataCell>
+                <Table.DataCell key="nyBruttoUtbetaling">{beloeper.nyBruttoUtbetaling} kr</Table.DataCell>
                 <Table.DataCell key="beregnetFeilutbetaling">
                   <TextField
                     label=""
-                    placeholder="Beregnet feilutbetaling"
+                    hideLabel={true}
                     value={beloeper.beregnetFeilutbetaling ?? ''}
                     pattern="[0-9]{11}"
                     maxLength={10}
-                    readOnly={!redigerbar}
                     onChange={(e) =>
                       onChangeNumber(e, (value) => {
                         updateBeloeper(index, {
@@ -89,14 +90,13 @@ export function TilbakekrevingVurderingPerioder({
                     }
                   />
                 </Table.DataCell>
-                <Table.DataCell key="skatteprosent">{beloeper.skatteprosent}</Table.DataCell>
+                <Table.DataCell key="skatteprosent">{beloeper.skatteprosent} %</Table.DataCell>
                 <Table.DataCell key="bruttoTilbakekreving">
                   <TextField
                     label=""
-                    placeholder="Brutto tilbakekreving"
+                    hideLabel={true}
                     value={beloeper.bruttoTilbakekreving ?? ''}
                     pattern="[0-9]"
-                    readOnly={!redigerbar}
                     onChange={(e) =>
                       onChangeNumber(e, (value) => {
                         updateBeloeper(index, {
@@ -110,7 +110,7 @@ export function TilbakekrevingVurderingPerioder({
                 <Table.DataCell key="nettoTilbakekreving">
                   <TextField
                     label=""
-                    placeholder="Netto tilbakekreving"
+                    hideLabel={true}
                     value={beloeper.nettoTilbakekreving ?? ''}
                     pattern="[0-9]"
                     readOnly={!redigerbar}
@@ -127,10 +127,9 @@ export function TilbakekrevingVurderingPerioder({
                 <Table.DataCell key="skatt">
                   <TextField
                     label=""
-                    placeholder="Skatt"
+                    hideLabel={true}
                     value={beloeper.skatt ?? ''}
                     pattern="[0-9]"
-                    readOnly={!redigerbar}
                     onChange={(e) =>
                       onChangeNumber(e, (value) => {
                         updateBeloeper(index, {
@@ -146,7 +145,6 @@ export function TilbakekrevingVurderingPerioder({
                     label="Skyld"
                     hideLabel={true}
                     value={beloeper.skyld ?? ''}
-                    readOnly={!redigerbar}
                     onChange={(e) => {
                       if (e.target.value === '') return
                       updateBeloeper(index, {
@@ -156,10 +154,11 @@ export function TilbakekrevingVurderingPerioder({
                     }}
                   >
                     <option value="">Velg..</option>
-                    <option value={TilbakekrevingSkyld.IKKE_FORDELT}>Ikke fordelt</option>
-                    <option value={TilbakekrevingSkyld.BRUKER}>Bruker</option>
-                    <option value={TilbakekrevingSkyld.NAV}>Nav</option>
-                    <option value={TilbakekrevingSkyld.SKYLDDELING}>Skylddeling</option>
+                    {Object.values(TilbakekrevingSkyld).map((skyld) => (
+                      <option key={skyld} value={skyld}>
+                        {teksterTilbakekrevingSkyld[skyld]}
+                      </option>
+                    ))}
                   </Select>
                 </Table.DataCell>
                 <Table.DataCell key="resultat">
@@ -167,7 +166,6 @@ export function TilbakekrevingVurderingPerioder({
                     label="Resultat"
                     hideLabel={true}
                     value={beloeper.resultat ?? ''}
-                    readOnly={!redigerbar}
                     onChange={(e) => {
                       if (e.target.value === '') return
                       updateBeloeper(index, {
@@ -177,20 +175,20 @@ export function TilbakekrevingVurderingPerioder({
                     }}
                   >
                     <option value="">Velg..</option>
-                    <option value={TilbakekrevingResultat.FORELDET}>Foreldet</option>
-                    <option value={TilbakekrevingResultat.INGEN_TILBAKEKREV}>Ingen tilbakekreving</option>
-                    <option value={TilbakekrevingResultat.DELVIS_TILBAKEKREV}>Delvis tilbakekreving</option>
-                    <option value={TilbakekrevingResultat.FULL_TILBAKEKREV}>Full tilbakekreving</option>
+                    {Object.values(TilbakekrevingResultat).map((resultat) => (
+                      <option key={resultat} value={resultat}>
+                        {teksterTilbakekrevingResultat[resultat]}
+                      </option>
+                    ))}
                   </Select>
                 </Table.DataCell>
                 <Table.DataCell key="tilbakekrevingsprosent">
                   <TextField
                     label=""
-                    placeholder="Tilbakekrevingsprosent"
+                    hideLabel={true}
                     value={beloeper.tilbakekrevingsprosent ?? ''}
                     pattern="[0-9]"
                     maxLength={3}
-                    readOnly={!redigerbar}
                     onChange={(e) =>
                       onChangeNumber(e, (value) => {
                         updateBeloeper(index, {
@@ -204,10 +202,9 @@ export function TilbakekrevingVurderingPerioder({
                 <Table.DataCell key="rentetillegg">
                   <TextField
                     label=""
-                    placeholder="Rentetillegg"
+                    hideLabel={true}
                     value={beloeper.rentetillegg ?? ''}
                     pattern="[0-9]"
-                    readOnly={!redigerbar}
                     onChange={(e) =>
                       onChangeNumber(e, (value) => {
                         updateBeloeper(index, {
@@ -224,11 +221,18 @@ export function TilbakekrevingVurderingPerioder({
         </Table.Body>
       </Table>
       {redigerbar && (
-        <ButtonWrapper>
-          <Button variant="primary" onClick={lagrePerioder} loading={isPending(lagrePerioderStatus)}>
-            Lagre
+        <VStack gap="5">
+          <Button
+            style={{ marginTop: '1em', maxWidth: '8em' }}
+            variant="primary"
+            size="small"
+            onClick={lagrePerioder}
+            loading={isPending(lagrePerioderStatus)}
+          >
+            Lagre perioder
           </Button>
-        </ButtonWrapper>
+          {isSuccess(lagrePerioderStatus) && <Toast melding="Perioder lagret" />}
+        </VStack>
       )}
     </InnholdPadding>
   )
@@ -237,7 +241,3 @@ export function TilbakekrevingVurderingPerioder({
 const onChangeNumber = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: number | null) => void) => {
   onChange(isNaN(parseInt(e.target.value)) ? null : parseInt(e.target.value))
 }
-
-const ButtonWrapper = styled.div`
-  margin-top: 1em;
-`

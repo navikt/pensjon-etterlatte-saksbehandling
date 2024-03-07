@@ -103,6 +103,7 @@ enum class OppgaveKilde {
     EKSTERN,
     TILBAKEKREVING,
     GJENOPPRETTING,
+    SAKSBEHANDLER,
 }
 
 enum class OppgaveType {

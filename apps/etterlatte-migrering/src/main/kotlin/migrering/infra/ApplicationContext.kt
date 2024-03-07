@@ -60,7 +60,6 @@ internal class ApplicationContext {
             gjenlevendeForelderPatcher = gjenlevendeForelderPatcher,
             utenlandstilknytningsjekker = utenlandstilknytningsjekker,
             personHenter = personHenter,
-            featureToggleService = featureToggleService,
             grunnlagKlient = grunnlagKlient,
             penKlient = penklient,
         )

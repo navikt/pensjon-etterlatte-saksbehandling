@@ -19,7 +19,6 @@ import Spinner from '~shared/Spinner'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
 import { isPending, isPendingOrInitial, isSuccess, mapSuccess } from '~shared/api/apiUtils'
 import { OppdaterJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/OppdaterJournalpost'
-import { JournalpostInnholdSidebarPanel } from '~components/person/journalfoeringsoppgave/journalpost/JournalpostInnholdSidebarPanel'
 import StartOppgavebehandling, {
   OppgaveDetaljer,
 } from '~components/person/journalfoeringsoppgave/handling/StartOppgavebehandling'
@@ -31,8 +30,9 @@ import OpprettKlagebehandling from '~components/person/journalfoeringsoppgave/op
 import OppsummeringKlagebehandling from '~components/person/journalfoeringsoppgave/oppretteklage/OppsummeringKlagebehandling'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
-import { Sidebar } from '~shared/components/Sidebar'
+import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { hentJournalpost } from '~shared/api/dokument'
+import { JournalpostInnhold } from './journalpost/JournalpostInnhold'
 
 export default function BehandleJournalfoeringOppgave() {
   const { nyBehandlingRequest, oppgave, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -128,7 +128,9 @@ export default function BehandleJournalfoeringOppgave() {
               <Sidebar>
                 {oppgave && <OppgaveDetaljer oppgave={oppgave} />}
 
-                <JournalpostInnholdSidebarPanel journalpost={journalpost} />
+                <SidebarPanel border>
+                  <JournalpostInnhold journalpost={journalpost} />
+                </SidebarPanel>
               </Sidebar>
             )
         )}

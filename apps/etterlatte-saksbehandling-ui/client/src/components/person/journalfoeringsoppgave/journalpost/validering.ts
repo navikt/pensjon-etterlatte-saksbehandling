@@ -43,9 +43,5 @@ export const temaTilhoererGjenny = (journalpost: Journalpost) => {
 }
 
 export const kanEndreJournalpost = (journalpost: Journalpost | undefined) => {
-  return (
-    !!journalpost &&
-    [Journalstatus.MOTTATT, Journalstatus.UNDER_ARBEID].includes(journalpost.journalstatus) &&
-    temaTilhoererGjenny(journalpost)
-  )
+  return !!journalpost && [Journalstatus.MOTTATT, Journalstatus.UNDER_ARBEID].includes(journalpost.journalstatus)
 }

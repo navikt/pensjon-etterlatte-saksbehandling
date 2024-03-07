@@ -89,6 +89,16 @@ internal fun Route.oppgaveRoutes(
             }
         }
 
+        get("/referanse/{referanse}") {
+            kunSaksbehandler {
+                call.respond(
+                    inTransaction {
+                        service.hentOppgaverForReferanse(referanse)
+                    },
+                )
+            }
+        }
+
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get("/oppgaver") {
                 kunSystembruker {

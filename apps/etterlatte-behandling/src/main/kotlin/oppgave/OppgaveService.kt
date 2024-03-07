@@ -292,23 +292,28 @@ class OppgaveService(
     fun hentOgFerdigstillOppgaveById(
         id: UUID,
         saksbehandler: BrukerTokenInfo,
+        merknad: String? = null,
     ) {
         val oppgave =
             checkNotNull(oppgaveDao.hentOppgave(id)) {
                 "Oppgave med id=$id finnes ikke – avbryter ferdigstilling av oppgaven"
             }
-        ferdigstillOppgaveById(oppgave, saksbehandler)
+        ferdigstillOppgaveById(oppgave, saksbehandler, merknad)
     }
 
     private fun ferdigstillOppgaveById(
         oppgave: OppgaveIntern,
         saksbehandler: BrukerTokenInfo,
+        merknad: String? = null,
     ) {
         logger.info("Ferdigstiller oppgave=${oppgave.id}")
 
         sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgave, saksbehandler)
 
-        oppgaveDao.endreStatusPaaOppgave(oppgave.id, Status.FERDIGSTILT)
+        when (merknad) {
+            null -> oppgaveDao.endreStatusPaaOppgave(oppgave.id, Status.FERDIGSTILT)
+            else -> oppgaveDao.oppdaterStatusOgMerknad(oppgave.id, merknad, Status.FERDIGSTILT)
+        }
         logger.info("Oppgave med id=${oppgave.id} ferdigstilt av ${saksbehandler.ident()}")
     }
 

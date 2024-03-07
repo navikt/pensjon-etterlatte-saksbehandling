@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentGosysOppgaver, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import { isSuccess, mapResult } from '~shared/api/apiUtils'
@@ -17,14 +17,17 @@ import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmeld
 import styled from 'styled-components'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
+  OppgavelisteneStats,
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveutils'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
+  oppgavelisteneStats: OppgavelisteneStats
+  setOppgavelisteneStats: Dispatch<SetStateAction<OppgavelisteneStats>>
 }
 
-export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
+export const GosysOppgaveliste = ({ saksbehandlereIEnhet, oppgavelisteneStats, setOppgavelisteneStats }: Props) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />
@@ -49,6 +52,10 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   useEffect(() => {
     if (isSuccess(gosysOppgaverResult)) {
       setOppgaver(sorterOppgaverEtterOpprettet(gosysOppgaverResult.data))
+      setOppgavelisteneStats({
+        ...oppgavelisteneStats,
+        antallGosysOppgaver: gosysOppgaverResult.data.length,
+      })
     }
   }, [gosysOppgaverResult])
 

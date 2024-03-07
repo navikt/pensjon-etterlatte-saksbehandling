@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { isSuccess, mapResult } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentOppgaverMedStatus, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
+  OppgavelisteneStats,
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveutils'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
@@ -22,9 +23,16 @@ import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
   revurderingsaarsaker: RevurderingsaarsakerBySakstype
+  oppgavelisteneStats: OppgavelisteneStats
+  setOppgavelisteneStats: Dispatch<SetStateAction<OppgavelisteneStats>>
 }
 
-export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
+export const Oppgavelista = ({
+  saksbehandlereIEnhet,
+  revurderingsaarsaker,
+  oppgavelisteneStats,
+  setOppgavelisteneStats,
+}: Props) => {
   const [filter, setFilter] = useState<Filter>(hentFilterFraLocalStorage())
 
   const [oppgaver, setOppgaver] = useState<Array<OppgaveDTO>>([])
@@ -50,6 +58,10 @@ export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Pro
   useEffect(() => {
     if (isSuccess(oppgavelistaOppgaverResult)) {
       setOppgaver(sorterOppgaverEtterOpprettet(oppgavelistaOppgaverResult.data))
+      setOppgavelisteneStats({
+        ...oppgavelisteneStats,
+        antallOppgavelistaOppgaver: oppgavelistaOppgaverResult.data.length,
+      })
     }
   }, [oppgavelistaOppgaverResult])
 

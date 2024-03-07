@@ -7,6 +7,10 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
+import { FilterRad } from '~components/oppgavebenk/filtreringAvOppgaver/FilterRad'
+import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import { defaultFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
+import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 
 interface Props {
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null, versjon: number | null) => void
@@ -15,6 +19,8 @@ interface Props {
 }
 
 export const GosysOppgaveliste = ({ oppdaterTildeling, saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
+  const [filter, setFilter] = useState<Filter>(defaultFiltre)
+
   const [gosysOppgaver, setGosysOppgaver] = useState<Array<OppgaveDTO>>([])
 
   const [gosysOppgaverResult, hentGosysOppgaverFetch] = useApiCall(hentGosysOppgaver)
@@ -40,12 +46,23 @@ export const GosysOppgaveliste = ({ oppdaterTildeling, saksbehandlereIEnhet, rev
           <ApiErrorAlert>{error.detail || 'Kunne ikke hente Gosys oppgaver'}</ApiErrorAlert>
         ),
         () => (
-          <Oppgaver
-            oppgaver={gosysOppgaver}
-            oppdaterTildeling={oppdaterTildeling}
-            saksbehandlereIEnhet={saksbehandlereIEnhet}
-            revurderingsaarsaker={revurderingsaarsaker}
-          />
+          <>
+            <FilterRad
+              hentAlleOppgaver={hentAlleGosysOppgaver}
+              hentOppgaverStatus={() => {}}
+              filter={filter}
+              setFilter={setFilter}
+              saksbehandlereIEnhet={saksbehandlereIEnhet}
+              oppgavelisteValg={OppgavelisteValg.GOSYS_OPPGAVER}
+            />
+            <Oppgaver
+              oppgaver={gosysOppgaver}
+              oppdaterTildeling={oppdaterTildeling}
+              saksbehandlereIEnhet={saksbehandlereIEnhet}
+              revurderingsaarsaker={revurderingsaarsaker}
+              filter={filter}
+            />
+          </>
         )
       )}
     </>

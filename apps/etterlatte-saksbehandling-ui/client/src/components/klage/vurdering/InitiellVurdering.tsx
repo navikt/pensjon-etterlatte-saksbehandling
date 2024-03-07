@@ -73,7 +73,7 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
 
   return (
     <>
-      <Heading level="2" size="medium" spacing={true}>
+      <Heading level="2" size="medium" spacing>
         Første vurdering
       </Heading>
       <>

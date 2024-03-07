@@ -50,8 +50,8 @@ class SaksbehandlerInfoDao(private val connectionAutoclosing: ConnectionAutoclos
     }
 
     fun hentEnheterIderForSaksbehandler(ident: String): List<SaksbehandlerEnhet>? {
-        return connectionAutoclosing.hentConnection {
-            with(it) {
+        return connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
                 val statement =
                     prepareStatement(
                         """
@@ -61,7 +61,7 @@ class SaksbehandlerInfoDao(private val connectionAutoclosing: ConnectionAutoclos
                     )
                 statement.setString(1, ident)
                 statement.executeQuery().singleOrNull {
-                    getString("enheter").let { objectMapper.readValue(it) }
+                    getString("enheter")?.let { objectMapper.readValue(it) }
                 }
             }
         }

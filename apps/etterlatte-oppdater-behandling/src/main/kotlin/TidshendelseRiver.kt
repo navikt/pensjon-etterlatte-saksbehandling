@@ -10,6 +10,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.DRYRUN
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -89,8 +91,8 @@ class TidshendelseRiver(
                         ).let {
                             logger.info("Opprettet omregning ${it.behandlingId} [sak=$sakId]")
                             packet[ALDERSOVERGANG_STEG_KEY] = "BEHANDLING_OPPRETTET"
-                            hendelseData["opprettetBehandlingId"] = it.behandlingId
-                            hendelseData["forrigeBehandlingId"] = it.forrigeBehandlingId
+                            packet[BEHANDLING_ID_KEY] = it.behandlingId
+                            packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = it.forrigeBehandlingId
                         }
                     } catch (e: Exception) {
                         logger.error("Kunne ikke opprette omregning [sak=$sakId]", e)

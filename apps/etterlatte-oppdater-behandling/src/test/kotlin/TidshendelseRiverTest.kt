@@ -16,11 +16,14 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.DRYRUN
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.asUUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
@@ -62,10 +65,10 @@ class TidshendelseRiverTest {
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
             field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "OPPGAVE_OPPRETTET"
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "AO_BP20"
-            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, ALDERSOVERGANG_ID_KEY).asUUID() shouldBe hendelseId
             field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 1
-            field(0, HENDELSE_DATA_KEY)["opprettetOppgaveId"].asText() shouldBe nyOppgaveID.toString()
+            field(0, HENDELSE_DATA_KEY)["opprettetOppgaveId"].asUUID() shouldBe nyOppgaveID
         }
 
         verify { behandlingService.opprettOmregning(any()) }
@@ -106,11 +109,11 @@ class TidshendelseRiverTest {
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
             field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "BEHANDLING_OPPRETTET"
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "AO_BP20"
-            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, ALDERSOVERGANG_ID_KEY).asUUID() shouldBe hendelseId
             field(0, DRYRUN).asBoolean() shouldBe false
-            field(0, HENDELSE_DATA_KEY) shouldHaveSize 2
-            field(0, HENDELSE_DATA_KEY)["opprettetBehandlingId"].asText() shouldBe nyBehandlingID.toString()
-            field(0, HENDELSE_DATA_KEY)["forrigeBehandlingId"].asText() shouldBe forrigeBehandlingID.toString()
+            field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
+            field(0, BEHANDLING_ID_KEY).asUUID() shouldBe nyBehandlingID
+            field(0, BEHANDLING_VI_OMREGNER_FRA_KEY).asUUID() shouldBe forrigeBehandlingID
         }
 
         verify { behandlingService.opprettOmregning(omregningshendelse) }
@@ -129,7 +132,7 @@ class TidshendelseRiverTest {
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
             field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "OPPGAVE_OPPRETTET"
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "AO_BP20"
-            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, ALDERSOVERGANG_ID_KEY).asUUID() shouldBe hendelseId
             field(0, DRYRUN).asBoolean() shouldBe true
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
         }
@@ -151,7 +154,7 @@ class TidshendelseRiverTest {
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
             field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "OPPGAVE_OPPRETTET"
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "AO_BP20"
-            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, ALDERSOVERGANG_ID_KEY).asUUID() shouldBe hendelseId
             field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
         }
@@ -174,7 +177,7 @@ class TidshendelseRiverTest {
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
             field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "OPPGAVE_OPPRETTET"
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "OMS_DOED_3AAR"
-            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, ALDERSOVERGANG_ID_KEY).asUUID() shouldBe hendelseId
             field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
         }

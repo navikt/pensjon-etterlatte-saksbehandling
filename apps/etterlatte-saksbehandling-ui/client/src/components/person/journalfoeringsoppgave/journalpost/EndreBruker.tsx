@@ -14,7 +14,7 @@ const formaterType = (type: BrukerIdType) => {
   }
 }
 
-export const EndreBruker = ({ bruker }: { bruker: Bruker }) => {
+export const EndreBruker = ({ bruker }: { bruker?: Bruker }) => {
   // TODO:
   //  - Hente navn fra PDL (ikke grunnlag siden det ikke nødvendigvis finnes)
   //  - Gjøre det mulig å endre bruker på journalposten
@@ -27,12 +27,12 @@ export const EndreBruker = ({ bruker }: { bruker: Bruker }) => {
       </Heading>
 
       <BodyShort as="div" spacing>
-        {!!bruker.type && bruker.type !== BrukerIdType.FNR && (
+        {!!bruker?.type && bruker.type !== BrukerIdType.FNR && (
           <Alert variant="info" inline>
             {formaterType(bruker.type)}
           </Alert>
         )}
-        <KopierbarVerdi value={bruker.id!!} />
+        {bruker?.id && <KopierbarVerdi value={bruker.id} />}
       </BodyShort>
     </div>
   )

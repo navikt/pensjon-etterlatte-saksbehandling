@@ -37,7 +37,14 @@ export interface NyOppgaveDto {
 }
 
 export type Oppgavestatus = 'NY' | 'UNDER_BEHANDLING' | 'PAA_VENT' | 'FERDIGSTILT' | 'FEILREGISTRERT' | 'AVBRUTT'
-export type OppgaveKilde = 'HENDELSE' | 'BEHANDLING' | 'EKSTERN' | 'GENERELL_BEHANDLING' | 'TILBAKEKREVING'
+export type OppgaveKilde =
+  | 'HENDELSE'
+  | 'BEHANDLING'
+  | 'EKSTERN'
+  | 'GENERELL_BEHANDLING'
+  | 'TILBAKEKREVING'
+  | 'SAKSBEHANDLER'
+
 export type Oppgavetype =
   | 'FOERSTEGANGSBEHANDLING'
   | 'REVURDERING'
@@ -76,6 +83,8 @@ export const hentOppgaverMedStatus = async (args: {
 }
 
 export const hentOppgave = async (id: string): Promise<ApiResponse<OppgaveDTO>> => apiClient.get(`/oppgaver/${id}`)
+export const hentOppgaverMedReferanse = async (referanse: string): Promise<ApiResponse<OppgaveDTO[]>> =>
+  apiClient.get(`/oppgaver/referanse/${referanse}`)
 export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver/gosys')
 
 export const opprettOppgave = async (args: {

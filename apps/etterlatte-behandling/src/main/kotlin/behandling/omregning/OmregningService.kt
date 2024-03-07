@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.UUID
 
@@ -28,9 +29,11 @@ class OmregningService(
     fun opprettOmregning(
         sakId: Long,
         fraDato: LocalDate,
+        revurderingAarsak: Revurderingaarsak,
         prosessType: Prosesstype,
         forrigeBehandling: Behandling,
         persongalleri: Persongalleri,
+        oppgavefrist: Tidspunkt?,
     ): RevurderingOgOppfoelging {
         if (prosessType == Prosesstype.MANUELL) {
             throw StoetterIkkeProsesstypeManuell()
@@ -39,10 +42,11 @@ class OmregningService(
             revurderingService.opprettAutomatiskRevurdering(
                 sakId = sakId,
                 forrigeBehandling = forrigeBehandling,
-                revurderingAarsak = Revurderingaarsak.REGULERING,
+                revurderingAarsak = revurderingAarsak,
                 virkningstidspunkt = fraDato,
                 kilde = Vedtaksloesning.GJENNY,
                 persongalleri = persongalleri,
+                frist = oppgavefrist,
             ),
         ) { "Opprettelse av revurdering feilet for $sakId" }
     }

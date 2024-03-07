@@ -10,7 +10,9 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+import java.time.LocalTime
 import java.util.UUID
 
 fun Route.omregningRoutes(omregningService: OmregningService) {
@@ -25,9 +27,11 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
                         omregningService.opprettOmregning(
                             sakId = request.sakId,
                             fraDato = request.fradato,
+                            revurderingAarsak = request.revurderingaarsak,
                             prosessType = request.prosesstype,
                             forrigeBehandling = forrigeBehandling,
                             persongalleri = persongalleri,
+                            oppgavefrist = request.oppgavefrist?.let { Tidspunkt.ofNorskTidssone(it, LocalTime.NOON) },
                         )
                     }
                 retryOgPakkUt { revurderingOgOppfoelging.leggInnGrunnlag() }

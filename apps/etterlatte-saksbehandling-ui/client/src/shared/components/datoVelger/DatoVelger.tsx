@@ -9,6 +9,7 @@ export const DatoVelger = ({
   description,
   error,
   disabled = false,
+  readOnly = false,
   fromDate = undefined,
   toDate = undefined,
 }: {
@@ -18,6 +19,7 @@ export const DatoVelger = ({
   description?: ReactNode
   error?: ReactNode
   disabled?: boolean
+  readOnly?: boolean
   fromDate?: Date | undefined
   toDate?: Date | undefined
 }) => {
@@ -28,11 +30,19 @@ export const DatoVelger = ({
     defaultSelected: value,
     fromDate: fromDate,
     toDate: toDate,
+    readOnly: readOnly,
   } as UseDatepickerOptions)
 
   return (
     <DatePicker {...datepickerProps}>
-      <DatePicker.Input {...inputProps} label={label} description={description} error={error} disabled={disabled} />
+      <DatePicker.Input
+        {...inputProps}
+        label={label}
+        description={description}
+        error={error}
+        disabled={disabled}
+        readOnly={readOnly}
+      />
     </DatePicker>
   )
 }

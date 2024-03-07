@@ -6,17 +6,59 @@ import java.time.YearMonth
 import java.util.UUID
 
 data class Tilbakekreving(
-    val vurdering: TilbakekrevingVurdering,
+    val vurdering: TilbakekrevingVurdering?,
     val perioder: List<TilbakekrevingPeriode>,
     val kravgrunnlag: Kravgrunnlag,
 )
 
 data class TilbakekrevingVurdering(
-    val beskrivelse: String?,
-    val konklusjon: String?,
     val aarsak: TilbakekrevingAarsak?,
-    val aktsomhet: TilbakekrevingVurderingUaktsomhet,
-    val hjemmel: TilbakekrevingHjemmel?,
+    val beskrivelse: String?,
+    val forhaandsvarsel: TilbakekrevingVarsel?,
+    val forhaandsvarselDato: LocalDate?,
+    val doedsbosak: JaNei?,
+    val foraarsaketAv: String?,
+    val tilsvar: TilbakekrevingTilsvar?,
+    val rettsligGrunnlag: TilbakekrevingRettsligGrunnlag?,
+    val objektivtVilkaarOppfylt: String?,
+    val subjektivtVilkaarOppfylt: String?,
+    val uaktsomtForaarsaketFeilutbetaling: String?,
+    val burdeBrukerForstaatt: String?,
+    val burdeBrukerForstaattEllerUaktsomtForaarsaket: String?,
+    val vilkaarsresultat: TilbakekrevingVilkaar?,
+    val beloepBehold: TilbakekrevingBeloepBehold?,
+    val reduseringAvKravet: String?,
+    val foreldet: String?,
+    val rentevurdering: String?,
+    val vedtak: String?,
+    val vurderesForPaatale: String?,
+)
+
+enum class TilbakekrevingVarsel {
+    EGET_BREV,
+    MED_I_ENDRINGSBREV,
+}
+
+enum class JaNei {
+    JA,
+    NEI,
+}
+
+enum class TilbakekrevingVilkaar {
+    OPPFYLT,
+    DELVIS_OPPFYLT,
+    IKKE_OPPFYLT,
+}
+
+data class TilbakekrevingTilsvar(
+    val tilsvar: JaNei?,
+    val dato: LocalDate?,
+    val beskrivelse: String?,
+)
+
+data class TilbakekrevingBeloepBehold(
+    val behold: JaNei?,
+    val beskrivelse: String?,
 )
 
 data class TilbakekrevingVurderingUaktsomhet(
@@ -128,18 +170,11 @@ fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPe
 }
 
 enum class TilbakekrevingAarsak {
-    ANNET,
-    ARBHOYINNT,
-    BEREGNFEIL,
-    DODSFALL,
-    EKTESKAP,
-    FEILREGEL,
-    FEILUFOREG,
-    FLYTTUTLAND,
-    IKKESJEKKYTELSE,
-    OVERSETTMLD,
-    SAMLIV,
+    OMGJOERING,
+    OPPHOER,
+    REVURDERING,
     UTBFEILMOT,
+    ANNET,
 }
 
 enum class TilbakekrevingAktsomhet {
@@ -148,14 +183,11 @@ enum class TilbakekrevingAktsomhet {
     GROV_UAKTSOMHET,
 }
 
-enum class TilbakekrevingHjemmel(val kode: String) {
-    ULOVFESTET("ULOVFESTET,"),
-    TJUETO_FEMTEN_EN_LEDD_EN("22-15-1-1"),
-    TJUETO_FEMTEN_EN_LEDD_TO_FORSETT("22-15-1-2f"),
-    TJUETO_FEMTEN_EN_LEDD_TO_UAKTSOMT("22-15-1-2u"),
-    TJUETO_FEMTEN_FEM("22-15-5"),
-    TJUETO_FEMTEN_SEKS("22-15-6"),
-    TJUETO_SEKSTEN("22-16"),
+enum class TilbakekrevingRettsligGrunnlag(val kode: String) {
+    TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM("22-15-1-1"),
+    TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM("22-15-1-2"),
+    TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM("22-15-1-1/22-15-1-2"),
+    TJUETO_FEMTEN_FEMTE_LEDD("22-15-5"),
 }
 
 enum class TilbakekrevingSkyld {
@@ -180,7 +212,7 @@ data class TilbakekrevingVedtak(
     val vedtakId: Long,
     val fattetVedtak: FattetVedtak,
     val aarsak: TilbakekrevingAarsak,
-    val hjemmel: TilbakekrevingHjemmel,
+    val rettsligGrunnlag: TilbakekrevingRettsligGrunnlag,
     val kravgrunnlagId: String,
     val kontrollfelt: String,
     val perioder: List<TilbakekrevingPeriodeVedtak>,

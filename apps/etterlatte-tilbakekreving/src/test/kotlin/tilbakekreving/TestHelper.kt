@@ -2,9 +2,9 @@ package no.nav.etterlatte.tilbakekreving
 
 import no.nav.etterlatte.libs.common.tilbakekreving.FattetVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriodeVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingRettsligGrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopFeilkontoVedtak
@@ -56,7 +56,7 @@ fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
                 ),
             ),
         aarsak = TilbakekrevingAarsak.DODSFALL,
-        hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_SEKS,
+        rettsligGrunnlag = TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_SEKS,
         kravgrunnlagId = "1",
         kontrollfelt = "2023-09-19-10.01.03.842916",
     )

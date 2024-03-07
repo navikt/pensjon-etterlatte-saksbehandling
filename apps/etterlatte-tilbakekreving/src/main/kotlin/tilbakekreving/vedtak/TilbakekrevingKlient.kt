@@ -82,7 +82,7 @@ class TilbakekrevingKlient(
 
                     // Skal være satt som statisk enhet 4819
                     enhetAnsvarlig = ANSVARLIG_ENHET
-                    kodeHjemmel = vedtak.hjemmel.kode
+                    kodeHjemmel = vedtak.rettsligGrunnlag.kode
 
                     // Dette skal være likt kontrollfeltet i mottatt kravgrunnlag, hvis forskjellig er grunnlag utdatert
                     kontrollfelt = vedtak.kontrollfelt

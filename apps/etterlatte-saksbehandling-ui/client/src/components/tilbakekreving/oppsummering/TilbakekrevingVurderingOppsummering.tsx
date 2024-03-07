@@ -1,6 +1,6 @@
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import React from 'react'
-import { Heading, Table } from '@navikt/ds-react'
+import { Table } from '@navikt/ds-react'
 import { NOK } from '~utils/formattering'
 import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 
@@ -19,9 +19,6 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
 
   return (
     <InnholdPadding>
-      <Heading level="3" size="medium">
-        Oppsummering
-      </Heading>
       <Table className="table" zebraStripes style={{ width: '40%' }}>
         <Table.Header>
           <Table.Row>

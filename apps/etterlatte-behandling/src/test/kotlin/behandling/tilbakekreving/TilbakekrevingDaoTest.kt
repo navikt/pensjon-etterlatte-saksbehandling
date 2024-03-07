@@ -24,7 +24,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAktsomhet
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingRettsligGrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurderingUaktsomhet
@@ -92,7 +92,7 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
                         vurdering =
                             TilbakekrevingVurdering(
                                 beskrivelse = "beskrivelse",
-                                konklusjon = "konklusjon",
+                                vedtak = "konklusjon",
                                 aarsak = TilbakekrevingAarsak.ANNET,
                                 aktsomhet =
                                     TilbakekrevingVurderingUaktsomhet(
@@ -101,7 +101,7 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
                                         strafferettsligVurdering = "Strafferettslig",
                                         rentevurdering = "Rentevurdering",
                                     ),
-                                hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_EN_LEDD_EN,
+                                hjemmel = TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_EN_LEDD_EN,
                             ),
                         perioder =
                             lagret.tilbakekreving.perioder.map {

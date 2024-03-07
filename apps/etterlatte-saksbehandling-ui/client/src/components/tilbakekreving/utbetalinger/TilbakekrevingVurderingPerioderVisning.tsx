@@ -5,23 +5,18 @@ import {
   TilbakekrevingPeriode,
 } from '~shared/types/Tilbakekreving'
 import React, { useState } from 'react'
-import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { Heading, Table } from '@navikt/ds-react'
+import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
+import { Table } from '@navikt/ds-react'
 
 export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const [perioder] = useState<TilbakekrevingPeriode[]>(behandling.tilbakekreving.perioder)
 
   return (
     <InnholdPadding>
-      <HeadingWrapper>
-        <Heading level="2" size="medium" spacing>
-          Utbetalinger
-        </Heading>
-      </HeadingWrapper>
       <Table className="table" zebraStripes>
         <Table.Header>
           <Table.Row>
-            <Table.HeaderCell>Måned</Table.HeaderCell>
+            <Table.HeaderCell style={{ width: '5em' }}>Måned</Table.HeaderCell>
             <Table.HeaderCell>Brutto utbetaling</Table.HeaderCell>
             <Table.HeaderCell>Ny brutto utbetaling</Table.HeaderCell>
             <Table.HeaderCell>Beregnet feilutbetaling</Table.HeaderCell>

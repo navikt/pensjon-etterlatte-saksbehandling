@@ -24,6 +24,7 @@ class StartMigrering(
     val repository: StartMigreringRepository,
     val rapidsConnection: RapidsConnection,
     private val featureToggleService: FeatureToggleService,
+    private val iTraad: (handling: () -> Unit) -> Unit = { thread { it() } },
     private val sleep: (duration: Duration) -> Unit = { Thread.sleep(it) },
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -38,11 +39,12 @@ class StartMigrering(
             repository.hentSakerTilMigrering().distinct().also { logger.info("Migrerer ${it.size} saker") }
         repository.settSakerMigrert(sakerTilMigrering)
         if (sakerTilMigrering.isNotEmpty()) {
-            thread {
+            iTraad {
                 sleep(Duration.ofMinutes(1))
                 val sendTilMigrering = featureToggleService.isEnabled(MigreringFeatureToggle.SendSakTilMigrering, false)
                 sakerTilMigrering.forEach {
-                    rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
+                    val message = lagMelding(it)
+                    rapidsConnection.publish(message = message, key = UUID.randomUUID().toString())
                     if (sendTilMigrering) {
                         sleep(Duration.ofSeconds(3))
                     }

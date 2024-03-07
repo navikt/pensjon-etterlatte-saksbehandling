@@ -12,6 +12,7 @@ import kotlinx.coroutines.runBlocking
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.insert
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
@@ -34,7 +35,8 @@ import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.start.MigrerSpesifikkSakRiver
 import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
-import no.nav.etterlatte.migrering.start.StartMigreringRiver
+import no.nav.etterlatte.migrering.start.StartMigrering
+import no.nav.etterlatte.migrering.start.StartMigreringRepository
 import no.nav.etterlatte.migrering.verifisering.GjenlevendeForelderPatcher
 import no.nav.etterlatte.migrering.verifisering.PdlTjenesterKlient
 import no.nav.etterlatte.migrering.verifisering.PersonHenter
@@ -42,7 +44,6 @@ import no.nav.etterlatte.migrering.verifisering.Verifiserer
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
-import no.nav.etterlatte.rapidsandrivers.SAK_ID_FLERE_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.LOPENDE_JANUAR_2024_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
@@ -68,10 +69,11 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class StartMigreringRiverIntegrationTest(private val datasource: DataSource) {
+internal class StartMigreringIntegrationTest(private val datasource: DataSource) {
     companion object {
+        @JvmField
         @RegisterExtension
-        private val dbExtension = DatabaseExtension()
+        val dbExtension = DatabaseExtension()
     }
 
     @AfterEach
@@ -824,21 +826,23 @@ internal class StartMigreringRiverIntegrationTest(private val datasource: DataSo
     @Test
     fun `migrere flere saker samtidig`() {
         testApplication {
-            val inspector =
-                TestRapid()
-                    .apply {
-                        StartMigreringRiver(rapidsConnection = this)
-                    }
-            inspector.sendTestMessage(
-                JsonMessage.newMessage(
-                    mapOf(
-                        Migreringshendelser.START_MIGRERING.lagParMedEventNameKey(),
-                        SAK_ID_FLERE_KEY to listOf("111", "222", "333"),
-                        LOPENDE_JANUAR_2024_KEY to false,
-                        MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FULL_KJORING,
-                    ),
-                ).toJson(),
-            )
+            val inspector = TestRapid()
+            val repo = StartMigreringRepository(datasource)
+            settOppTestsaker()
+            val root =
+                StartMigrering(
+                    repository = repo,
+                    rapidsConnection = inspector,
+                    featureToggleService =
+                        DummyFeatureToggleService().apply {
+                            settBryter(
+                                MigreringFeatureToggle.SendSakTilMigrering,
+                                true,
+                            )
+                        },
+                    iTraad = { it() },
+                    sleep = { _ -> run {} },
+                )
 
             with(inspector.inspektør.message(0)) {
                 assertEquals(111L, get(SAK_ID_KEY).asLong())
@@ -864,6 +868,35 @@ internal class StartMigreringRiverIntegrationTest(private val datasource: DataSo
                 )
                 assertEquals(false, get(LOPENDE_JANUAR_2024_KEY).asBoolean())
             }
+        }
+    }
+
+    private fun settOppTestsaker() {
+        with(StartMigreringRepository.Databasetabell) {
+            datasource.insert(
+                TABELLNAVN,
+                mapOf(
+                    SAKID to 111,
+                    LOPENDE_JANUAR_2024_KEY to false,
+                    KJOERING to MigreringKjoringVariant.FULL_KJORING.name,
+                ),
+            )
+            datasource.insert(
+                TABELLNAVN,
+                mapOf(
+                    SAKID to 222,
+                    LOPENDE_JANUAR_2024_KEY to false,
+                    KJOERING to MigreringKjoringVariant.FULL_KJORING.name,
+                ),
+            )
+            datasource.insert(
+                TABELLNAVN,
+                mapOf(
+                    SAKID to 333,
+                    LOPENDE_JANUAR_2024_KEY to false,
+                    KJOERING to MigreringKjoringVariant.FULL_KJORING.name,
+                ),
+            )
         }
     }
 }

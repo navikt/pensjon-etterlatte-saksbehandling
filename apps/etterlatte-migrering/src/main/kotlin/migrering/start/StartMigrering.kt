@@ -15,6 +15,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.util.UUID
 import javax.sql.DataSource
 import kotlin.concurrent.thread
@@ -23,6 +24,7 @@ class StartMigrering(
     val repository: StartMigreringRepository,
     val rapidsConnection: RapidsConnection,
     private val featureToggleService: FeatureToggleService,
+    private val sleep: (duration: Duration) -> Unit = { Thread.sleep(it) },
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -37,12 +39,12 @@ class StartMigrering(
         repository.settSakerMigrert(sakerTilMigrering)
         if (sakerTilMigrering.isNotEmpty()) {
             thread {
-                Thread.sleep(60_000)
+                sleep(Duration.ofMinutes(1))
                 val sendTilMigrering = featureToggleService.isEnabled(MigreringFeatureToggle.SendSakTilMigrering, false)
                 sakerTilMigrering.forEach {
                     rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
                     if (sendTilMigrering) {
-                        Thread.sleep(3000)
+                        sleep(Duration.ofSeconds(3))
                     }
                 }
             }

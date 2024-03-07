@@ -435,6 +435,19 @@ class StatistikkService(
         return sakRepository.lagreRad(behandlingTilSakRad(statistikkBehandling, hendelse, tekniskTid))
     }
 
+    fun registrerStatistikkBehandlingPaaVentHendelse(
+        behandlingId: UUID,
+        hendelse: BehandlingHendelseType,
+        tekniskTid: LocalDateTime,
+    ): SakRad? {
+        val rad =
+            sakRepository.hentSisteRad(behandlingId).copy(
+                status = hendelse.name,
+                tekniskTid = tekniskTid.toTidspunkt(),
+            )
+        return sakRepository.lagreRad(rad)
+    }
+
     fun registrerStatistikkForKlagehendelse(
         statistikkKlage: StatistikkKlage,
         tekniskTid: LocalDateTime,

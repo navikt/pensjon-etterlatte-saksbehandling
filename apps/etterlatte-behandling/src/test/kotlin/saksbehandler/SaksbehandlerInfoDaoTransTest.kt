@@ -66,7 +66,7 @@ internal class SaksbehandlerInfoDaoTransTest(val dataSource: DataSource) {
             )
         saksbehandlerInfoDao.upsertSaksbehandlerEnheter(sbaalesund.ident to enheterAalesundSaksbehandler)
 
-        val hentetEnheterForAalesundSB = saksbehandlerInfoDaoTrans.hentEnheterIderForSaksbehandler(sbaalesund.ident)
+        val hentetEnheterForAalesundSB = saksbehandlerInfoDaoTrans.hentSaksbehandlerEnheter(sbaalesund.ident)
         hentetEnheterForAalesundSB shouldContainExactly enheterAalesundSaksbehandler
     }
 }

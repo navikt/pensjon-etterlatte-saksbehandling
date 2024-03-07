@@ -49,7 +49,7 @@ class SaksbehandlerInfoDao(private val connectionAutoclosing: ConnectionAutoclos
         }
     }
 
-    fun hentEnheterIderForSaksbehandler(ident: String): List<SaksbehandlerEnhet>? {
+    fun hentSaksbehandlerEnheter(ident: String): List<SaksbehandlerEnhet>? {
         return connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val statement =

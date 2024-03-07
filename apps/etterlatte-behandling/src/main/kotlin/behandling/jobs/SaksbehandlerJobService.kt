@@ -81,11 +81,12 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                     }
                     .mapNotNull {
                         try {
-                            val enheter = it.second.await()
-                            if (enheter.isNotEmpty()) {
-                                it.first to enheter
+                            val (ident, enheter) = it
+                            val enheterAwait = enheter.await()
+                            if (enheterAwait.isNotEmpty()) {
+                                ident to enheterAwait
                             } else {
-                                logger.info("Saksbehandler med ident ${it.first} har ingen enheter")
+                                logger.info("Saksbehandler med ident $ident har ingen enheter")
                                 null
                             }
                         } catch (e: Exception) {

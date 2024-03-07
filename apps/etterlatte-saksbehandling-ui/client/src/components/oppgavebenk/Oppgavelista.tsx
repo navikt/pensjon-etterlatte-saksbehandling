@@ -203,7 +203,6 @@ export const Oppgavelista = () => {
           key={OppgavelisteValg.GOSYS_OPPGAVER}
           oppdaterTildeling={oppdaterSaksbehandlerTildeling}
           saksbehandlereIEnhet={saksbehandlereIEnheter}
-          revurderingsaarsaker={revurderingsaarsaker}
         />
       )}
     </Container>

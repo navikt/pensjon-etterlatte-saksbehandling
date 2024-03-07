@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentGosysOppgaver, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
-import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
+import { RevurderingsaarsakerDefault } from '~shared/types/Revurderingaarsak'
 import { FilterRad } from '~components/oppgavebenk/filtreringAvOppgaver/FilterRad'
-import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import { Filter, SAKSBEHANDLERFILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { defaultFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 import { Switch } from '@navikt/ds-react'
@@ -19,10 +19,9 @@ import styled from 'styled-components'
 interface Props {
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null, versjon: number | null) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
-  revurderingsaarsaker: RevurderingsaarsakerBySakstype
 }
 
-export const GosysOppgaveliste = ({ oppdaterTildeling, saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
+export const GosysOppgaveliste = ({ oppdaterTildeling, saksbehandlereIEnhet }: Props) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />
@@ -30,15 +29,7 @@ export const GosysOppgaveliste = ({ oppdaterTildeling, saksbehandlereIEnhet, rev
 
   const [filter, setFilter] = useState<Filter>(defaultFiltre)
 
-  const [visKunMineGosysOppgaver, setVisKunMineGosysOppgaver] = useState<boolean>(false)
-
-  const [gosysOppgaver, setGosysOppgaver] = useState<Array<OppgaveDTO>>([])
-
   const [gosysOppgaverResult, hentGosysOppgaverFetch] = useApiCall(hentGosysOppgaver)
-
-  const kunMineGosysOppgaver = (): Array<OppgaveDTO> => {
-    return gosysOppgaver.filter((o) => o.saksbehandler?.ident === innloggetSaksbehandler.ident)
-  }
 
   const hentAlleGosysOppgaver = () => {
     hentGosysOppgaverFetch({})
@@ -48,21 +39,19 @@ export const GosysOppgaveliste = ({ oppdaterTildeling, saksbehandlereIEnhet, rev
     hentAlleGosysOppgaver()
   }, [])
 
-  useEffect(() => {
-    if (isSuccess(gosysOppgaverResult)) setGosysOppgaver(gosysOppgaverResult.data)
-  }, [gosysOppgaverResult])
-
-  return mapApiResult(
-    gosysOppgaverResult,
-    <Spinner visible={true} label="Henter nye Gosys oppgaver" />,
-    (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente Gosys oppgaver'}</ApiErrorAlert>,
-    () => (
+  return mapResult(gosysOppgaverResult, {
+    pending: <Spinner visible={true} label="Henter nye Gosys oppgaver" />,
+    error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente Gosys oppgaver'}</ApiErrorAlert>,
+    success: (oppgaver) => (
       <>
         <VisKunMineGosysOppgaverSwitch
-          checked={visKunMineGosysOppgaver}
-          onChange={(e) => {
-            setVisKunMineGosysOppgaver(e.target.checked)
-          }}
+          checked={filter.saksbehandlerFilter === innloggetSaksbehandler.ident}
+          onChange={(e) =>
+            setFilter({
+              ...filter,
+              saksbehandlerFilter: e.target.checked ? innloggetSaksbehandler.ident : SAKSBEHANDLERFILTER.visAlle,
+            })
+          }
         >
           Vis mine Gosys oppgaver
         </VisKunMineGosysOppgaverSwitch>
@@ -75,15 +64,15 @@ export const GosysOppgaveliste = ({ oppdaterTildeling, saksbehandlereIEnhet, rev
           oppgavelisteValg={OppgavelisteValg.GOSYS_OPPGAVER}
         />
         <Oppgaver
-          oppgaver={visKunMineGosysOppgaver ? kunMineGosysOppgaver() : gosysOppgaver}
+          oppgaver={oppgaver}
           oppdaterTildeling={oppdaterTildeling}
           saksbehandlereIEnhet={saksbehandlereIEnhet}
-          revurderingsaarsaker={revurderingsaarsaker}
+          revurderingsaarsaker={new RevurderingsaarsakerDefault()}
           filter={filter}
         />
       </>
-    )
-  )
+    ),
+  })
 }
 
 const VisKunMineGosysOppgaverSwitch = styled(Switch)`

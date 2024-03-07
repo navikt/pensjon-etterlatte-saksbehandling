@@ -2,46 +2,22 @@ package no.nav.etterlatte.avkorting
 
 import io.kotest.assertions.asClue
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.beregning.regler.DatabaseExtension
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode
 import no.nav.etterlatte.beregning.regler.ytelseFoerAvkorting
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
+import javax.sql.DataSource
 
+@ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class AvkortingRepositoryTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-    private lateinit var avkortingRepository: AvkortingRepository
-
-    @BeforeAll
-    fun beforeAll() {
-        postgreSQLContainer.start()
-
-        val ds =
-            DataSourceBuilder.createDataSource(
-                postgreSQLContainer.jdbcUrl,
-                postgreSQLContainer.username,
-                postgreSQLContainer.password,
-            ).also { it.migrate() }
-
-        avkortingRepository = AvkortingRepository(ds)
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
-    }
+internal class AvkortingRepositoryTest(ds: DataSource) {
+    private val avkortingRepository = AvkortingRepository(ds)
 
     @Test
     fun `skal returnere null hvis mangler avkorting`() {

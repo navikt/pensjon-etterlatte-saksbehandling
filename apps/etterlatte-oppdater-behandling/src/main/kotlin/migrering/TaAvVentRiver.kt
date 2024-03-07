@@ -41,8 +41,8 @@ internal class TaAvVentRiver(
             behandlingService.taAvVent(
                 VentefristGaarUtRequest(
                     dato = packet.dato,
-                    type = OppgaveType.valueOf(packet[OPPGAVETYPE_KEY].asText()),
-                    oppgaveKilde = OppgaveKilde.valueOf(packet[OPPGAVEKILDE_KEY].asText()),
+                    type = setOf(OppgaveType.valueOf(packet[OPPGAVETYPE_KEY].asText())),
+                    oppgaveKilde = setOf(OppgaveKilde.valueOf(packet[OPPGAVEKILDE_KEY].asText())),
                     oppgaver = packet[OPPGAVE_ID_FLERE_KEY].map { it.asUUID() },
                 ),
             )

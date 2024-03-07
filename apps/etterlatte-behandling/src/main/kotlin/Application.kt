@@ -88,6 +88,7 @@ internal fun Application.moduleOnServerReady(context: ApplicationContext) {
         context.metrikkerJob.schedule().also { addShutdownHook(it) }
         context.doedsmeldingerJob.schedule().also { addShutdownHook(it) }
         context.saksbehandlerJob.schedule().also { addShutdownHook(it) }
+        context.fristGaarUtJobb.schedule().also { addShutdownHook(it) }
     }
 }
 

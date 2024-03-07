@@ -9,8 +9,6 @@ import java.time.LocalTime
 import java.time.Month
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-import java.util.Date
 import java.util.UUID
 import javax.xml.datatype.DatatypeConstants
 import javax.xml.datatype.DatatypeFactory
@@ -39,13 +37,6 @@ fun Int.oktober(year: Int): LocalDate = LocalDate.of(year, Month.OCTOBER, this)
 fun Int.november(year: Int): LocalDate = LocalDate.of(year, Month.NOVEMBER, this)
 
 fun Int.desember(year: Int): LocalDate = LocalDate.of(year, Month.DECEMBER, this)
-
-fun Tidspunkt.next(atTime: LocalTime): Date =
-    if (this.toLocalTime().isAfter(atTime)) {
-        this.plus(1, ChronoUnit.DAYS).medTimeMinuttSekund(atTime).toJavaUtilDate()
-    } else {
-        this.medTimeMinuttSekund(atTime).toJavaUtilDate()
-    }
 
 fun tidspunktMidnattIdag(clock: Clock = utcKlokke()): Tidspunkt = Tidspunkt.ofNorskTidssone(LocalDate.now(clock), LocalTime.MIDNIGHT)
 

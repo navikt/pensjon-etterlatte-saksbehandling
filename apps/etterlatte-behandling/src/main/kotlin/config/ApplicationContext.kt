@@ -75,6 +75,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.Doedshende
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
+import no.nav.etterlatte.jobs.next
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
@@ -82,6 +83,8 @@ import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.isProd
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -93,6 +96,7 @@ import no.nav.etterlatte.metrics.GjenopprettingMetrikkerDao
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.person.krr.KrrKlientImpl
+import no.nav.etterlatte.oppgave.FristGaarUtJobb
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -108,6 +112,7 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.token.Fagsaksystem
 import java.time.Duration
+import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 private fun pdlHttpClient(config: Config) =
@@ -480,6 +485,16 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
             interval = Duration.of(10, ChronoUnit.MINUTES),
+        )
+    }
+
+    val fristGaarUtJobb: FristGaarUtJobb by lazy {
+        FristGaarUtJobb(
+            service = oppgaveService,
+            erLeader = { leaderElectionKlient.isLeader() },
+            periode = Duration.ofDays(1),
+            starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
+            featureToggleService = featureToggleService,
         )
     }
 

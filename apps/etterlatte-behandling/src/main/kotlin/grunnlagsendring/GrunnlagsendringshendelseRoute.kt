@@ -33,7 +33,7 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
         post("/doedshendelse") {
             kunSkrivetilgang {
                 val doedshendelse = call.receive<DoedshendelsePdl>()
-                logger.info("Mottar en doedshendelse fra PDL for ${doedshendelse.fnr}")
+                logger.info("Mottar en doedshendelse fra PDL for ${doedshendelse.fnr.maskerFnr()}")
                 grunnlagsendringshendelseService.opprettDoedshendelse(doedshendelse)
                 call.respond(HttpStatusCode.OK)
             }

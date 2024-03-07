@@ -1,5 +1,8 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -60,6 +63,7 @@ class TidshendelseRiver(
                 "dryRun" to dryrun.toString(),
             ),
         ) {
+            packet[ALDERSOVERGANG_STEG_KEY] = "OPPGAVE_OPPRETTET"
             val hendelseData = mutableMapOf<String, Any>()
 
             if (type == "AO_BP20" && packet["yrkesskadefordel_pre_20240101"].asBoolean()) {
@@ -68,26 +72,46 @@ class TidshendelseRiver(
                 logger.info("Har omstillingsstønad med rett uten tidsbegrensning, opphører ikke [sak=$sakId]")
             } else if (packet[HENDELSE_DATA_KEY]["loependeYtelse"]?.asBoolean() == true) {
                 val behandlingsmaaned = packet.dato.let { YearMonth.of(it.year, it.month) }
-                logger.info("Løpende ytelse: opprette oppgave for sak $sakId, behandlingsmåned=$behandlingsmaaned")
+                logger.info("Løpende ytelse: oppretter behandling/oppgave for sak $sakId, behandlingsmåned=$behandlingsmaaned")
 
                 if (!dryrun) {
-                    val frist = Tidspunkt.ofNorskTidssone(behandlingsmaaned.atEndOfMonth(), LocalTime.NOON)
-                    val oppgaveId =
-                        behandlingService.opprettOppgave(
-                            sakId,
-                            OppgaveType.REVURDERING,
-                            merknad = generateMerknad(type),
-                            frist = frist,
-                        )
-                    hendelseData["opprettetOppgaveId"] = oppgaveId
+                    val frist = behandlingsmaaned.atEndOfMonth()
+
+                    try {
+                        behandlingService.opprettOmregning(
+                            Omregningshendelse(
+                                sakId = sakId,
+                                fradato = behandlingsmaaned.plusMonths(1).atDay(1),
+                                prosesstype = Prosesstype.AUTOMATISK,
+                                revurderingaarsak = Revurderingaarsak.ALDERSOVERGANG,
+                                oppgavefrist = frist,
+                            ),
+                        ).let {
+                            logger.info("Opprettet omregning ${it.behandlingId} [sak=$sakId]")
+                            packet[ALDERSOVERGANG_STEG_KEY] = "BEHANDLING_OPPRETTET"
+                            hendelseData["opprettetBehandlingId"] = it.behandlingId
+                            hendelseData["forrigeBehandlingId"] = it.forrigeBehandlingId
+                        }
+                    } catch (e: Exception) {
+                        logger.error("Kunne ikke opprette omregning [sak=$sakId]", e)
+
+                        val oppgaveId =
+                            behandlingService.opprettOppgave(
+                                sakId,
+                                OppgaveType.REVURDERING,
+                                merknad = generateMerknad(type),
+                                frist = Tidspunkt.ofNorskTidssone(frist, LocalTime.NOON),
+                            )
+                        logger.info("Opprettet oppgave $oppgaveId [sak=$sakId]")
+                        hendelseData["opprettetOppgaveId"] = oppgaveId
+                    }
                 } else {
-                    logger.info("Dry run: skipper oppgave")
+                    logger.info("Dry run: skipper behandling/oppgave")
                 }
             } else {
                 logger.info("Ingen løpende ytelse funnet for sak $sakId")
             }
 
-            packet[ALDERSOVERGANG_STEG_KEY] = "OPPGAVE_OPPRETTET"
             packet[HENDELSE_DATA_KEY] = hendelseData
             context.publish(packet.toJson())
         }

@@ -4,7 +4,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.BehandlingServiceImpl
+import no.nav.etterlatte.OpprettOmregningResponse
 import no.nav.etterlatte.TidshendelseRiver
+import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -39,6 +44,10 @@ class TidshendelseRiverTest {
         val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, dryRun = false)
 
         every {
+            behandlingService.opprettOmregning(any())
+        } throws IllegalArgumentException("Feil i opprettelse av omregning")
+
+        every {
             behandlingService.opprettOppgave(
                 sakId,
                 OppgaveType.REVURDERING,
@@ -59,11 +68,56 @@ class TidshendelseRiverTest {
             field(0, HENDELSE_DATA_KEY)["opprettetOppgaveId"].asText() shouldBe nyOppgaveID.toString()
         }
 
+        verify { behandlingService.opprettOmregning(any()) }
         verify { behandlingService.opprettOppgave(sakId, OppgaveType.REVURDERING, any(), "Aldersovergang v/20 år", frist) }
     }
 
     @Test
-    fun `skal ikke kalle tjeneste for aa opprette oppgave hvis dry-run`() {
+    fun `skal opprette behandling og returnere dens id`() {
+        val hendelseId = UUID.randomUUID()
+        val sakId = 321L
+        val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
+        val frist = behandlingsmaaned.atEndOfMonth()
+        val forrigeBehandlingID = UUID.randomUUID()
+        val nyBehandlingID = UUID.randomUUID()
+
+        val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, dryRun = false)
+
+        val omregningshendelse =
+            Omregningshendelse(
+                sakId = sakId,
+                fradato = behandlingsmaaned.plusMonths(1).atDay(1),
+                prosesstype = Prosesstype.AUTOMATISK,
+                revurderingaarsak = Revurderingaarsak.ALDERSOVERGANG,
+                oppgavefrist = frist,
+            )
+
+        every {
+            behandlingService.opprettOmregning(omregningshendelse)
+        } returns
+            OpprettOmregningResponse(
+                behandlingId = nyBehandlingID,
+                forrigeBehandlingId = forrigeBehandlingID,
+                sakType = SakType.BARNEPENSJON,
+            )
+
+        with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
+            size shouldBe 1
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "BEHANDLING_OPPRETTET"
+            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "AO_BP20"
+            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, DRYRUN).asBoolean() shouldBe false
+            field(0, HENDELSE_DATA_KEY) shouldHaveSize 2
+            field(0, HENDELSE_DATA_KEY)["opprettetBehandlingId"].asText() shouldBe nyBehandlingID.toString()
+            field(0, HENDELSE_DATA_KEY)["forrigeBehandlingId"].asText() shouldBe forrigeBehandlingID.toString()
+        }
+
+        verify { behandlingService.opprettOmregning(omregningshendelse) }
+    }
+
+    @Test
+    fun `skal ikke kalle tjeneste for aa opprette behandling hvis dry-run`() {
         val hendelseId = UUID.randomUUID()
         val sakId = 37465L
         val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
@@ -80,7 +134,7 @@ class TidshendelseRiverTest {
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
         }
 
-        verify(exactly = 0) { behandlingService.opprettOppgave(sakId, any(), any(), "Aldersovergang", any()) }
+        verify(exactly = 0) { behandlingService.opprettOmregning(any()) }
     }
 
     @Test

@@ -9,9 +9,15 @@ import org.flywaydb.core.api.output.MigrateResult
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.net.URI
 import java.net.URL
+import java.nio.file.FileSystems
 import java.nio.file.Files
+import java.nio.file.Path
+import java.util.stream.Collectors
 import javax.sql.DataSource
+
+val logge2weer = LoggerFactory.getLogger(DataSourceBuilder::class.java)
 
 object DataSourceBuilder {
     private const val MAX_POOL_SIZE = 10
@@ -31,6 +37,7 @@ object DataSourceBuilder {
         password: String,
         maxPoolSize: Int = MAX_POOL_SIZE,
     ): DataSource {
+        logge2weer.info("ds + $jdbcUrl + $username + $password")
         val hikariConfig =
             HikariConfig().also {
                 it.jdbcUrl = jdbcUrl
@@ -85,29 +92,87 @@ fun validateUniqueMigrationVersions(logger: Logger) {
     }
 }
 
+private fun getPathsFromResourceJAR(
+    folder: String,
+    jarpath: String,
+): List<Path> {
+    var result: List<Path>
+
+    // file walks JAR
+    println(jarpath)
+    val uri: URI = URI.create(jarpath)
+    println(uri)
+    val attributes = hashMapOf("create" to "false")
+    FileSystems.newFileSystem(uri, attributes).use { fs ->
+        result =
+            Files.walk(fs.getPath(folder))
+                .filter { it -> it != null }
+                .filter { path: Path? ->
+                    val file = File(path.toString())
+                    if (file.isDirectory) {
+                        println("is dir " + file.path)
+                        println(file.listFiles())
+                    }
+                    Files.isRegularFile(
+                        path,
+                    )
+                }
+                .collect(Collectors.toList())
+    }
+    println(result)
+    return result
+}
+
 private fun readResources(logger: Logger): File {
+    logger.info("readResources")
     val systemClassLoader = ClassLoader.getSystemClassLoader()
     val resourceFolderURL: URL =
         systemClassLoader.getResource(
             "db",
         ) ?: throw RuntimeException("Fant ikke migreringsscript i resourceFolder for /db")
-    val resourceFolder = File(resourceFolderURL.toExternalForm())
 
-    // Check if it's a directory
-    val isdir = Files.isDirectory(resourceFolder.toPath())
-    logger.info("****************** Resourceurl $resourceFolderURL isdir: $isdir path: ${resourceFolder.toPath()}")
-    /*if (!isdir) {
-        throw RuntimeException("Fant ikke migreringsscript i resourceFolder for /db")
-    }*/
+    logger.info("resourceFolderURL.path" + resourceFolderURL.path)
+    if (resourceFolderURL.path.toString().contains("jar:")) {
+        val pathsFromResourceJAR = getPathsFromResourceJAR("db", resourceFolderURL.path)
+        val filenames =
+            pathsFromResourceJAR.map {
+                var filePathInJAR = it.toString()
+                // Windows will returns /json/file1.json, cut the first /
+                // the correct path should be json/file1.json
+                if (filePathInJAR.startsWith("/")) {
+                    filePathInJAR = filePathInJAR.substring(1, filePathInJAR.length)
+                }
+
+                logger.info("filePathInJAR : $filePathInJAR")
+
+                // read a file from resource folder
+                filePathInJAR
+            }
+        filenames
+    }
+
+    val resourceFolder = File(resourceFolderURL.file)
     return resourceFolder
 }
 
 fun validateMigrationScriptVersions(files: List<List<String>>) {
+    println("validateMigrationScriptVersions Files: " + files)
     val allMigrationVersions =
         files.flatten()
-            .filter { item -> item.endsWith(".sql") }
+            .filter { item ->
+                val harSqlSuffix = item.endsWith(".sql")
+                // TODO: lag validator
+                harSqlSuffix
+            }
             .map { it.substring(it.lastIndexOf("/") + 1) }
-            .map { it.substring(0, it.indexOf("__")) }
+            .map {
+                val pos = it.indexOf("__")
+                if (pos < 0) {
+                    throw RuntimeException("Sql script mangler underscore, fil: $it")
+                }
+                it.substring(0, pos)
+            }
+
     val migreringerSomListe = allMigrationVersions.toList()
     val grupperte = migreringerSomListe.groupingBy { it }.eachCount()
     grupperte.forEach {

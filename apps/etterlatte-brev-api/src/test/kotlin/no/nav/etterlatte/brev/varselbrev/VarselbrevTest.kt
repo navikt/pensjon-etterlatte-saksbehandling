@@ -29,11 +29,13 @@ import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
 import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VarselbrevTest(datasource: DataSource) {
     private lateinit var service: VarselbrevService
 

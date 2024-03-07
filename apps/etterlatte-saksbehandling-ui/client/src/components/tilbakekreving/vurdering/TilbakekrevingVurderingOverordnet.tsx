@@ -1,8 +1,11 @@
-import { BodyShort, Button, Label, Radio, RadioGroup, Select } from '@navikt/ds-react'
+import { Button, Radio, RadioGroup, Select, Textarea, VStack } from '@navikt/ds-react'
 import {
-  TilbakekrevingBehandling,
+  teksterTilbakekrevingAarsak,
+  teksterTilbakekrevingAktsomhet,
+  teksterTilbakekrevingHjemmel,
   TilbakekrevingAarsak,
   TilbakekrevingAktsomhet,
+  TilbakekrevingBehandling,
   TilbakekrevingHjemmel,
   TilbakekrevingVurdering,
 } from '~shared/types/Tilbakekreving'
@@ -10,10 +13,11 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useState } from 'react'
 import { lagreTilbakekrevingsvurdering } from '~shared/api/tilbakekreving'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
-import styled from 'styled-components'
 import { useAppDispatch } from '~store/Store'
 
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
+import { Toast } from '~shared/alerts/Toast'
 
 export function TilbakekrevingVurderingOverordnet({
   behandling,
@@ -34,14 +38,11 @@ export function TilbakekrevingVurderingOverordnet({
   }
 
   return (
-    <InnholdForm>
-      <>
-        <Label>Årsak</Label>
+    <InnholdPadding>
+      <VStack gap="8" style={{ width: '30em' }}>
         <Select
-          label="Aarsak"
-          hideLabel={true}
+          label="Årsak"
           value={vurdering.aarsak ?? ''}
-          readOnly={!redigerbar}
           onChange={(e) => {
             if (e.target.value == '') return
             setVurdering({
@@ -51,27 +52,17 @@ export function TilbakekrevingVurderingOverordnet({
           }}
         >
           <option value="">Velg..</option>
-          <option value={TilbakekrevingAarsak.ANNET}>Annet</option>
-          <option value={TilbakekrevingAarsak.ARBHOYINNT}>Inntekt</option>
-          <option value={TilbakekrevingAarsak.BEREGNFEIL}>Beregningsfeil</option>
-          <option value={TilbakekrevingAarsak.DODSFALL}>Dødsfall</option>
-          <option value={TilbakekrevingAarsak.EKTESKAP}>Eksteskap/Samboer med felles barn</option>
-          <option value={TilbakekrevingAarsak.FEILREGEL}>Feil regelbruk</option>
-          <option value={TilbakekrevingAarsak.FLYTTUTLAND}>Flyttet utland</option>
-          <option value={TilbakekrevingAarsak.IKKESJEKKYTELSE}>Ikke sjekket mot andre ytelse</option>
-          <option value={TilbakekrevingAarsak.OVERSETTMLD}>Oversett melding fra bruker</option>
-          <option value={TilbakekrevingAarsak.SAMLIV}>Samliv</option>
-          <option value={TilbakekrevingAarsak.UTBFEILMOT}>Utbetaling til feil mottaker</option>
+          {Object.values(TilbakekrevingAarsak).map((aarsak) => (
+            <option key={aarsak} value={aarsak}>
+              {teksterTilbakekrevingAarsak[aarsak]}
+            </option>
+          ))}
         </Select>
-      </>
-      <TextAreaWrapper>
-        <>
-          <Label>Beskriv feilutbetalingen</Label>
-          <Beskrivelse>Gi en kort beskrivelse av bakgrunnen for feilutbetalingen og når ble den oppdaget.</Beskrivelse>
-        </>
-        <textarea
+
+        <Textarea
+          label="Beskriv feilutbetalingen"
+          description="Gi en kort beskrivelse av bakgrunnen for feilutbetalingen og når ble den oppdaget."
           value={vurdering.beskrivelse ?? ''}
-          readOnly={!redigerbar}
           onChange={(e) =>
             setVurdering({
               ...vurdering,
@@ -79,15 +70,12 @@ export function TilbakekrevingVurderingOverordnet({
             })
           }
         />
-      </TextAreaWrapper>
-      <>
-        <Label>Vurder uaktsomhet</Label>
+
         <RadioGroup
-          legend=""
+          legend={<div style={{ fontSize: 'large' }}>Vurder uaktsomhet</div>}
           size="small"
           className="radioGroup"
           value={vurdering.aktsomhet.aktsomhet ?? ''}
-          readOnly={!redigerbar}
           onChange={(e) =>
             setVurdering({
               ...vurdering,
@@ -98,18 +86,18 @@ export function TilbakekrevingVurderingOverordnet({
           }
         >
           <div className="flex">
-            <Radio value={TilbakekrevingAktsomhet.GOD_TRO}>God tro</Radio>
-            <Radio value={TilbakekrevingAktsomhet.SIMPEL_UAKTSOMHET}>Simpel uaktsomhet</Radio>
-            <Radio value={TilbakekrevingAktsomhet.GROV_UAKTSOMHET}>Grov uaktsomhet</Radio>
+            {Object.values(TilbakekrevingAktsomhet).map((aktsomhet) => (
+              <Radio key={aktsomhet} value={aktsomhet}>
+                {teksterTilbakekrevingAktsomhet[aktsomhet]}
+              </Radio>
+            ))}
           </div>
         </RadioGroup>
-      </>
-      {vurdering.aktsomhet.aktsomhet === TilbakekrevingAktsomhet.GROV_UAKTSOMHET && (
-        <TextAreaWrapper>
-          <Label>Gjør en strafferettslig vurdering (Valgfri)</Label>
-          <textarea
+
+        {vurdering.aktsomhet.aktsomhet === TilbakekrevingAktsomhet.GROV_UAKTSOMHET && (
+          <Textarea
+            label="Gjør en strafferettslig vurdering (Valgfri)"
             value={vurdering.aktsomhet.strafferettsligVurdering ?? ''}
-            readOnly={!redigerbar}
             onChange={(e) =>
               setVurdering({
                 ...vurdering,
@@ -120,19 +108,17 @@ export function TilbakekrevingVurderingOverordnet({
               })
             }
           />
-        </TextAreaWrapper>
-      )}
-      {vurdering.aktsomhet.aktsomhet &&
-        [TilbakekrevingAktsomhet.SIMPEL_UAKTSOMHET, TilbakekrevingAktsomhet.GROV_UAKTSOMHET].includes(
-          vurdering.aktsomhet.aktsomhet
-        ) && (
-          <>
-            <TextAreaWrapper>
-              <Label>Redusering av kravet</Label>
-              <BodyShort>Finnes det grunner til å redusere kravet?</BodyShort>
-              <textarea
+        )}
+
+        {vurdering.aktsomhet.aktsomhet &&
+          [TilbakekrevingAktsomhet.SIMPEL_UAKTSOMHET, TilbakekrevingAktsomhet.GROV_UAKTSOMHET].includes(
+            vurdering.aktsomhet.aktsomhet
+          ) && (
+            <>
+              <Textarea
+                label="Redusering av kravet"
+                description="Finnes det grunner til å redusere kravet?"
                 value={vurdering.aktsomhet.reduseringAvKravet ?? ''}
-                readOnly={!redigerbar}
                 onChange={(e) =>
                   setVurdering({
                     ...vurdering,
@@ -143,12 +129,9 @@ export function TilbakekrevingVurderingOverordnet({
                   })
                 }
               />
-            </TextAreaWrapper>
-            <TextAreaWrapper>
-              <Label>Rentevurdering</Label>
-              <textarea
+              <Textarea
+                label="Rentevurdering"
                 value={vurdering.aktsomhet.rentevurdering ?? ''}
-                readOnly={!redigerbar}
                 onChange={(e) =>
                   setVurdering({
                     ...vurdering,
@@ -159,14 +142,12 @@ export function TilbakekrevingVurderingOverordnet({
                   })
                 }
               />
-            </TextAreaWrapper>
-          </>
-        )}
-      <TextAreaWrapper>
-        <Label>Konklusjon</Label>
-        <textarea
+            </>
+          )}
+
+        <Textarea
+          label="Konklusjon"
           value={vurdering.konklusjon ?? ''}
-          readOnly={!redigerbar}
           onChange={(e) =>
             setVurdering({
               ...vurdering,
@@ -174,14 +155,10 @@ export function TilbakekrevingVurderingOverordnet({
             })
           }
         />
-      </TextAreaWrapper>
-      <DropdownWrapper>
-        <Label>Rettslig grunnlag</Label>
+
         <Select
           label="Hjemmel"
-          hideLabel={true}
           value={vurdering.hjemmel ?? ''}
-          readOnly={!redigerbar}
           onChange={(e) => {
             if (e.target.value == '') return
             setVurdering({
@@ -191,53 +168,28 @@ export function TilbakekrevingVurderingOverordnet({
           }}
         >
           <option value="">Velg hjemmel</option>
-          <option value={TilbakekrevingHjemmel.ULOVFESTET}>Lovfestet</option>
-          <option value={TilbakekrevingHjemmel.TJUETO_FEMTEN_EN_LEDD_EN}>& 22-15 1. ledd, 1. punktum</option>
-          <option value={TilbakekrevingHjemmel.TJUETO_FEMTEN_EN_LEDD_TO_FORSETT}>
-            & 22-15 1. ledd, 2. punktum (forsett)
-          </option>
-          <option value={TilbakekrevingHjemmel.TJUETO_FEMTEN_EN_LEDD_TO_UAKTSOMT}>
-            & 22-15 1. ledd, 2. punktum (uaktsomt)
-          </option>
-          <option value={TilbakekrevingHjemmel.TJUETO_FEMTEN_FEM}>& 22-15 5. ledd</option>
-          <option value={TilbakekrevingHjemmel.TJUETO_FEMTEN_SEKS}>& 22-15 6. ledd</option>
-          <option value={TilbakekrevingHjemmel.TJUETO_SEKSTEN}>& 22-16</option>
+          {Object.values(TilbakekrevingHjemmel).map((hjemmel) => (
+            <option key={hjemmel} value={hjemmel}>
+              {teksterTilbakekrevingHjemmel[hjemmel]}
+            </option>
+          ))}
         </Select>
-      </DropdownWrapper>
 
-      {redigerbar && (
-        <Button variant="primary" onClick={lagreVurdering} loading={isPending(lagreVurderingStatus)}>
-          Lagre vurdering
-        </Button>
-      )}
-    </InnholdForm>
+        {redigerbar && (
+          <VStack gap="5">
+            <Button
+              variant="primary"
+              size="small"
+              onClick={lagreVurdering}
+              loading={isPending(lagreVurderingStatus)}
+              style={{ maxWidth: '7.5em' }}
+            >
+              Lagre vurdering
+            </Button>
+            {isSuccess(lagreVurderingStatus) && <Toast melding="Vurdering lagret" />}
+          </VStack>
+        )}
+      </VStack>
+    </InnholdPadding>
   )
 }
-
-const InnholdForm = styled.div`
-  padding: 2em 2em 2em 4em;
-  width: 25em;
-`
-const TextAreaWrapper = styled.div`
-  display: grid;
-  align-items: flex-end;
-  margin-top: 1em;
-  margin-bottom: 1em;
-
-  textArea {
-    margin-top: 1em;
-    border-width: 1px;
-    border-radius: 4px 4px 0 4px;
-    height: 98px;
-    text-indent: 4px;
-    resize: none;
-  }
-`
-const DropdownWrapper = styled.div`
-  margin-top: 2em;
-  margin-bottom: 2em;
-`
-
-const Beskrivelse = styled.div`
-  margin: 10px 0;
-`

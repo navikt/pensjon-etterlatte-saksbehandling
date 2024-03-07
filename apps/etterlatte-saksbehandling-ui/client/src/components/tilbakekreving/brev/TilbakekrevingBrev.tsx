@@ -1,6 +1,6 @@
 import { Alert, Heading } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
-import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
 import { erUnderBehandling, TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { fattVedtak, opprettVedtak } from '~shared/api/tilbakekreving'
@@ -89,6 +89,7 @@ export function TilbakekrevingBrev({
           errorMessage: 'Kunne ikke opprette brev',
         })}
       </BrevContent>
+      <Border />
       <FlexRow justify="center">
         {kanAttesteres && (
           <SendTilAttesteringModal

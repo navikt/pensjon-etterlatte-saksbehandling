@@ -175,7 +175,7 @@ data class Klage(
     fun oppdaterUtfall(utfallMedBrev: KlageUtfallMedData): Klage {
         if (!this.kanOppdatereUtfall()) {
             throw IllegalStateException(
-                "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen" +
+                "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen " +
                     "til klagen (${this.status})",
             )
         }
@@ -199,13 +199,13 @@ data class Klage(
         )
     }
 
-    fun oppdaterIntieltUtfallMedBegrunnelse(
+    fun oppdaterInitieltUtfallMedBegrunnelse(
         utfall: InitieltUtfallMedBegrunnelseDto,
         saksbehandlerIdent: String,
     ): Klage {
         if (!this.kanOppdatereUtfall()) {
             throw IllegalStateException(
-                "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen" +
+                "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen " +
                     "til klagen (${this.status})",
             )
         } else {

@@ -11,6 +11,7 @@ import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BrukerServiceImpl
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
@@ -52,6 +53,7 @@ internal class EgenAnsattServiceTest(val dataSource: DataSource) {
     private lateinit var oppgaveService: OppgaveService
     private lateinit var egenAnsattService: EgenAnsattService
     private lateinit var user: SaksbehandlerMedEnheterOgRoller
+    private val hendelser: BehandlingHendelserKafkaProducer = mockk()
 
     @BeforeAll
     fun beforeAll() {
@@ -69,7 +71,7 @@ internal class EgenAnsattServiceTest(val dataSource: DataSource) {
             )
         oppgaveService =
             spyk(
-                OppgaveService(oppgaveRepoMedSporing, sakRepo),
+                OppgaveService(oppgaveRepoMedSporing, sakRepo, hendelser),
             )
         egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, brukerService)
 

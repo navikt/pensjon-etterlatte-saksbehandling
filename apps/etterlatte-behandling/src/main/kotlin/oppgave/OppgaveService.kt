@@ -7,7 +7,9 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.SystemUser
+import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -55,6 +57,7 @@ class ManglerSaksbehandlerException(msg: String) : UgyldigForespoerselException(
 class OppgaveService(
     private val oppgaveDao: OppgaveDaoMedEndringssporing,
     private val sakDao: SakDao,
+    private val hendelser: BehandlingHendelserKafkaProducer,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
@@ -172,12 +175,7 @@ class OppgaveService(
             throw FristTilbakeITid(oppgaveId)
         }
         val hentetOppgave =
-            oppgaveDao.hentOppgave(oppgaveId)
-                ?: throw IkkeFunnetException(
-                    code = "OPPGAVE_IKKE_FUNNET",
-                    detail = "Oppgaven finnes ikke",
-                    meta = mapOf("oppgaveId" to oppgaveId),
-                )
+            oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
         if (hentetOppgave.saksbehandler?.ident.isNullOrBlank()) {
             throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
@@ -192,12 +190,7 @@ class OppgaveService(
         status: Status,
     ) {
         val hentetOppgave =
-            oppgaveDao.hentOppgave(oppgaveId)
-                ?: throw IkkeFunnetException(
-                    code = "OPPGAVE_IKKE_FUNNET",
-                    detail = "Oppgaven finnes ikke",
-                    meta = mapOf("oppgaveId" to oppgaveId),
-                )
+            oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
         if (hentetOppgave.saksbehandler?.ident.isNullOrEmpty()) {
             throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
@@ -211,17 +204,51 @@ class OppgaveService(
         referanse: String,
     ) {
         val hentetOppgave =
-            oppgaveDao.hentOppgave(oppgaveId)
-                ?: throw IkkeFunnetException(
-                    code = "OPPGAVE_IKKE_FUNNET",
-                    detail = "Oppgaven finnes ikke",
-                    meta = mapOf("oppgaveId" to oppgaveId),
-                )
+            oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
         if (hentetOppgave.saksbehandler?.ident.isNullOrEmpty()) {
             throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
         } else {
             oppgaveDao.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId, referanse)
+        }
+    }
+
+    fun settOppgavePaaVent(
+        oppgaveId: UUID,
+        merknad: String,
+        status: Status,
+    ) {
+        val oppgave = hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
+        val nyStatus = if (status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT
+        oppdaterStatusOgMerknad(
+            oppgaveId,
+            merknad,
+            nyStatus,
+        )
+        when (oppgave.type) {
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            OppgaveType.REVURDERING,
+            OppgaveType.ATTESTERING,
+            OppgaveType.UNDERKJENT,
+            -> {
+                hendelser.sendMeldingForHendelsePaaVent(
+                    UUID.fromString(oppgave.referanse),
+                    if (nyStatus == Status.PAA_VENT) BehandlingHendelseType.PAA_VENT else BehandlingHendelseType.AV_VENT,
+                )
+            }
+            OppgaveType.TILBAKEKREVING -> {
+                // TODO
+            }
+            OppgaveType.KLAGE -> {
+                // TODO
+            }
+            OppgaveType.VURDER_KONSEKVENS,
+            OppgaveType.GOSYS,
+            OppgaveType.KRAVPAKKE_UTLAND,
+            OppgaveType.OMGJOERING,
+            OppgaveType.JOURNALFOERING,
+            OppgaveType.GJENOPPRETTING_ALDERSOVERGANG,
+            -> {} // Ingen statistikk for dette
         }
     }
 

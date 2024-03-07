@@ -15,6 +15,7 @@ import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.SoeknadStatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.jobs.MaanedligStatistikkJob
+import no.nav.etterlatte.statistikk.river.BehandlingPaaVentHendelseRiver
 import no.nav.etterlatte.statistikk.river.BehandlinghendelseRiver
 import no.nav.etterlatte.statistikk.river.KlagehendelseRiver
 import no.nav.etterlatte.statistikk.river.SoeknadStatistikkRiver
@@ -39,6 +40,10 @@ class ApplicationContext {
 
     val behandlinghendelseRiver: BehandlinghendelseRiver by lazy {
         BehandlinghendelseRiver(rapidsConnection, statistikkService)
+    }
+
+    val behandlingPaaVentHendelseRiver: BehandlingPaaVentHendelseRiver by lazy {
+        BehandlingPaaVentHendelseRiver(rapidsConnection, statistikkService)
     }
 
     val tilbakekrevingriver: TilbakekrevinghendelseRiver by lazy {

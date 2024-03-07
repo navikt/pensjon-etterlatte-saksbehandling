@@ -1,5 +1,7 @@
 package no.nav.etterlatte.oppgave
 
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.TimerJob
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
@@ -18,6 +20,7 @@ class FristGaarUtJobb(
     private val starttidspunkt: Date,
     private val periode: Duration,
     private val service: OppgaveService,
+    private val featureToggleService: FeatureToggleService,
 ) : TimerJob {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
@@ -40,13 +43,27 @@ class FristGaarUtJobb(
                         oppgaver = listOf(),
                     )
                 service.hentFristGaarUt(request).forEach {
-                    service.oppdaterStatusOgMerknad(
-                        it.oppgaveID,
-                        it.merknad ?: "",
-                        Status.UNDER_BEHANDLING,
-                    )
+                    if (featureToggleService.isEnabled(FristFeatureToggle.AutomatiskAvskrivFrist, false)) {
+                        service.oppdaterStatusOgMerknad(
+                            it.oppgaveID,
+                            it.merknad ?: "",
+                            Status.UNDER_BEHANDLING,
+                        )
+                    } else {
+                        logger.debug(
+                            "Automatisk avskriv frist er skrudd av, gjør derfor ingenting for {}",
+                            it.oppgaveID,
+                        )
+                    }
                 }
             }
         }
     }
+}
+
+enum class FristFeatureToggle(private val key: String) : FeatureToggle {
+    AutomatiskAvskrivFrist("automatisk-avskriv-frist"),
+    ;
+
+    override fun key() = key
 }

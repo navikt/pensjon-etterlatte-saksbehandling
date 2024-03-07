@@ -490,6 +490,7 @@ internal class ApplicationContext(
             erLeader = { leaderElectionKlient.isLeader() },
             periode = Duration.ofDays(1),
             starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
+            featureToggleService = featureToggleService,
         )
     }
 

@@ -38,4 +38,13 @@ class AutomatiskRevurderingService(private val revurderingService: RevurderingSe
             frist = frist,
         )
     }
+
+    fun validerSakensTilstand(
+        sakId: Long,
+        revurderingAarsak: Revurderingaarsak,
+    ) {
+        if (revurderingAarsak == Revurderingaarsak.ALDERSOVERGANG) {
+            revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
+        }
+    }
 }

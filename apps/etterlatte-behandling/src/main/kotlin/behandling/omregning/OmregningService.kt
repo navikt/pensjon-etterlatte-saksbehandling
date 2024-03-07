@@ -38,6 +38,9 @@ class OmregningService(
         if (prosessType == Prosesstype.MANUELL) {
             throw StoetterIkkeProsesstypeManuell()
         }
+
+        revurderingService.validerSakensTilstand(sakId, revurderingAarsak)
+
         return requireNotNull(
             revurderingService.opprettAutomatiskRevurdering(
                 sakId = sakId,

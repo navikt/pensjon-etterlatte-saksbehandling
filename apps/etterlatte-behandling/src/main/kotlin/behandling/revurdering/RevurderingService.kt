@@ -113,7 +113,7 @@ class RevurderingService(
             }
     }
 
-    private fun maksEnOppgaveUnderbehandlingForKildeBehandling(sakId: Long) {
+    fun maksEnOppgaveUnderbehandlingForKildeBehandling(sakId: Long) {
         val oppgaverForSak = oppgaveService.hentOppgaverForSak(sakId)
         val ingenBehandlingerUnderarbeid =
             oppgaverForSak.filter {

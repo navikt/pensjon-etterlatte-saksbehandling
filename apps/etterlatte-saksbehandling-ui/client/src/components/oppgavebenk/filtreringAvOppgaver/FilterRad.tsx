@@ -113,22 +113,26 @@ export const FilterRad = ({
           ))}
         </Select>
 
-        <MultiSelectFilter
-          label="Oppgavestatus"
-          options={Object.entries(OPPGAVESTATUSFILTER).map(([, beskrivelse]) => beskrivelse)}
-          values={filter.oppgavestatusFilter}
-          onChange={(statuser) => {
-            hentOppgaverStatus(statuser)
-            setFilter({ ...filter, oppgavestatusFilter: statuser })
-          }}
-        />
+        {oppgavelisteValg !== OppgavelisteValg.GOSYS_OPPGAVER && (
+          <>
+            <MultiSelectFilter
+              label="Oppgavestatus"
+              options={Object.entries(OPPGAVESTATUSFILTER).map(([, beskrivelse]) => beskrivelse)}
+              values={filter.oppgavestatusFilter}
+              onChange={(statuser) => {
+                hentOppgaverStatus(statuser)
+                setFilter({ ...filter, oppgavestatusFilter: statuser })
+              }}
+            />
 
-        <MultiSelectFilter
-          label="Oppgavetype"
-          options={oppgavetypefilter(kanBrukeKlage).map(([, beskrivelse]) => beskrivelse)}
-          values={filter.oppgavetypeFilter}
-          onChange={(statuser) => setFilter({ ...filter, oppgavetypeFilter: statuser })}
-        />
+            <MultiSelectFilter
+              label="Oppgavetype"
+              options={oppgavetypefilter(kanBrukeKlage).map(([, beskrivelse]) => beskrivelse)}
+              values={filter.oppgavetypeFilter}
+              onChange={(statuser) => setFilter({ ...filter, oppgavetypeFilter: statuser })}
+            />
+          </>
+        )}
       </FlexRow>
 
       <FlexRow $spacing>

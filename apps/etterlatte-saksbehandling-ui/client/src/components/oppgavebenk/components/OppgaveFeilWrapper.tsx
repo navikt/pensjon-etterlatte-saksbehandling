@@ -1,16 +1,11 @@
 import { mapApiResult, Result } from '~shared/api/apiUtils'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { ReactNode } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
-export const OppgaveFeilWrapper = (props: {
-  oppgaver: Result<Array<OppgaveDTO>>
-  gosysOppgaver: Result<Array<OppgaveDTO>>
-  children: ReactNode
-}) => {
-  const { oppgaver, gosysOppgaver, children } = props
+export const OppgaveFeilWrapper = (props: { oppgaver: Result<Array<OppgaveDTO>>; children: ReactNode }) => {
+  const { oppgaver, children } = props
   return (
     <>
       {mapApiResult(
@@ -23,10 +18,6 @@ export const OppgaveFeilWrapper = (props: {
           <>{children}</>
         )
       )}
-      {isFailureHandler({
-        apiResult: gosysOppgaver,
-        errorMessage: 'Kunne ikke hente gosys oppgaver',
-      })}
     </>
   )
 }

@@ -134,24 +134,24 @@ export function filtrerOppgaver(
 
 export const initialFilter = (): Filter => {
   return {
-    sakEllerFnrFilter: '',
-    enhetsFilter: 'visAlle',
-    fristFilter: 'visAlle',
-    saksbehandlerFilter: SAKSBEHANDLERFILTER.visAlle,
-    ytelseFilter: 'visAlle',
+    ...defaultFiltre,
     oppgavestatusFilter: [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
-    oppgavetypeFilter: [OPPGAVETYPEFILTER.visAlle],
   }
 }
 
 export const minOppgavelisteFiltre = (): Filter => {
   return {
-    sakEllerFnrFilter: '',
-    enhetsFilter: 'visAlle',
-    fristFilter: 'visAlle',
-    saksbehandlerFilter: SAKSBEHANDLERFILTER.visAlle,
-    ytelseFilter: 'visAlle',
+    ...defaultFiltre,
     oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
-    oppgavetypeFilter: [OPPGAVETYPEFILTER.visAlle],
   }
+}
+
+export const defaultFiltre: Filter = {
+  sakEllerFnrFilter: '',
+  enhetsFilter: 'visAlle',
+  fristFilter: 'visAlle',
+  saksbehandlerFilter: SAKSBEHANDLERFILTER.visAlle,
+  ytelseFilter: 'visAlle',
+  oppgavestatusFilter: [OPPGAVESTATUSFILTER.visAlle],
+  oppgavetypeFilter: [OPPGAVETYPEFILTER.visAlle],
 }

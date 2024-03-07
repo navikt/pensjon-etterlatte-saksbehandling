@@ -37,7 +37,14 @@ export interface NyOppgaveDto {
 }
 
 export type Oppgavestatus = 'NY' | 'UNDER_BEHANDLING' | 'PAA_VENT' | 'FERDIGSTILT' | 'FEILREGISTRERT' | 'AVBRUTT'
-export type OppgaveKilde = 'HENDELSE' | 'BEHANDLING' | 'EKSTERN' | 'GENERELL_BEHANDLING' | 'TILBAKEKREVING'
+export type OppgaveKilde =
+  | 'HENDELSE'
+  | 'BEHANDLING'
+  | 'EKSTERN'
+  | 'GENERELL_BEHANDLING'
+  | 'TILBAKEKREVING'
+  | 'SAKSBEHANDLER'
+
 export type Oppgavetype =
   | 'FOERSTEGANGSBEHANDLING'
   | 'REVURDERING'

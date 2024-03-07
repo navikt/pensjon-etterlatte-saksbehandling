@@ -1,20 +1,15 @@
-import { Detail, Heading, Table, Tag } from '@navikt/ds-react'
-import { formaterJournalpostStatus, formaterJournalpostType, formaterStringDato } from '~utils/formattering'
+import { Detail, Heading, Table } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
-import { Journalpost, Journalposttype, Journalstatus, Tema } from '~shared/types/Journalpost'
+import { Tema } from '~shared/types/Journalpost'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { mapApiResult, Result } from '~shared/api/apiUtils'
-import { Container, FlexRow } from '~shared/styled'
+import { Container } from '~shared/styled'
 import React, { useEffect, useState } from 'react'
 import { hentDokumenter } from '~shared/api/dokument'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Variants } from '~shared/Tags'
 import { DokumentFilter } from '~components/person/dokumenter/DokumentFilter'
-import { JournalpostInnhold } from '~components/person/journalfoeringsoppgave/journalpost/JournalpostInnhold'
-import { OppgaveFraJournalpostModal } from '~components/person/dokumenter/OppgaveFraJournalpostModal'
-import DokumentModal from '~components/person/dokumenter/DokumentModal'
-import { UtsendingsinfoModal } from '~components/person/dokumenter/UtsendingsinfoModal'
 import { SakMedBehandlinger } from '~components/person/typer'
+import { DokumentRad } from './DokumentRad'
 
 export const Dokumentliste = ({ fnr, sakStatus }: { fnr: string; sakStatus: Result<SakMedBehandlinger> }) => {
   const [filter, setFilter] = useState<DokumentFilter>({
@@ -88,54 +83,5 @@ export const Dokumentliste = ({ fnr, sakStatus }: { fnr: string; sakStatus: Resu
         </Table.Body>
       </Table>
     </Container>
-  )
-}
-
-const DokumentRad = ({ dokument, sakStatus }: { dokument: Journalpost; sakStatus: Result<SakMedBehandlinger> }) => {
-  const [isOpen, setIsOpen] = useState(false)
-
-  const visUtsendingsinfo =
-    dokument.journalposttype === Journalposttype.U &&
-    [Journalstatus.FERDIGSTILT, Journalstatus.JOURNALFOERT].includes(dokument.journalstatus)
-
-  const kanRedigeres = [Journalstatus.MOTTATT, Journalstatus.UNDER_ARBEID].includes(dokument.journalstatus)
-
-  return (
-    <Table.ExpandableRow shadeOnHover={false} content={<JournalpostInnhold journalpost={dokument} />}>
-      <Table.DataCell>{dokument.journalpostId}</Table.DataCell>
-      <Table.DataCell>{dokument.tittel}</Table.DataCell>
-      <Table.DataCell>{dokument.avsenderMottaker.navn || 'Ukjent'}</Table.DataCell>
-      <Table.DataCell>{formaterStringDato(dokument.datoOpprettet)}</Table.DataCell>
-      <Table.DataCell>
-        {dokument?.sak ? `${dokument.sak.fagsaksystem}: ${dokument.sak.fagsakId || '-'}` : '-'}
-      </Table.DataCell>
-      <Table.DataCell>{formaterJournalpostStatus(dokument.journalstatus)}</Table.DataCell>
-      <Table.DataCell title={`Tema ${dokument.tema}`}>
-        {
-          {
-            ['EYO']: <Tag variant={Variants.ALT2}>Omstillingsstønad</Tag>,
-            ['EYB']: <Tag variant={Variants.INFO}>Barnepensjon</Tag>,
-            ['PEN']: <Tag variant={Variants.ALT1}>Pensjon</Tag>,
-          }[dokument.tema]
-        }
-      </Table.DataCell>
-      <Table.DataCell>{formaterJournalpostType(dokument.journalposttype)}</Table.DataCell>
-      <Table.DataCell>
-        <FlexRow justify="right">
-          {visUtsendingsinfo && <UtsendingsinfoModal journalpost={dokument} />}
-
-          {kanRedigeres && (
-            <OppgaveFraJournalpostModal
-              isOpen={isOpen}
-              setIsOpen={setIsOpen}
-              journalpost={dokument}
-              sakStatus={sakStatus}
-            />
-          )}
-
-          <DokumentModal journalpost={dokument} />
-        </FlexRow>
-      </Table.DataCell>
-    </Table.ExpandableRow>
   )
 }

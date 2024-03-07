@@ -1,18 +1,15 @@
 import { Journalpost } from '~shared/types/Journalpost'
-import { Accordion, Alert, BodyShort, Button, Detail, Heading, Link, Modal } from '@navikt/ds-react'
+import { Alert, Button, Detail, Heading, Link, Modal } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaverMedReferanse, opprettOppgave } from '~shared/api/oppgaver'
-import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
+import { hentOppgaverMedReferanse, Oppgavetype, opprettOppgave, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
+import { isFailure, isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
-import { OppgavetypeTag } from '~components/oppgavebenk/components/Tags'
 import { FlexRow } from '~shared/styled'
-import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { formaterOppgaveStatus, formaterSakstype } from '~utils/formattering'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { useNavigate } from 'react-router-dom'
+import { useAppSelector } from '~store/Store'
 
 // TODO: Må på sikt gjøre noe for å støtte tilfeller hvor sak mangler.
 export const OppgaveFraJournalpostModal = ({
@@ -27,11 +24,13 @@ export const OppgaveFraJournalpostModal = ({
   sakStatus: Result<SakMedBehandlinger>
 }) => {
   const navigate = useNavigate()
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const [kanOppretteOppgave, setKanOppretteOppgave] = useState(false)
 
   const [opprettOppgaveStatus, apiOpprettOppgave] = useApiCall(opprettOppgave)
   const [hentOppgaverStatus, hentOppgaver] = useApiCall(hentOppgaverMedReferanse)
+  const [tildelSaksbehandlerStatus, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
 
   useEffect(() => {
     if (isOpen) {
@@ -46,21 +45,28 @@ export const OppgaveFraJournalpostModal = ({
   }, [isOpen])
 
   const opprettJournalfoeringsoppgave = () => {
-    console.log('oppretter oppgave')
-
     if (isSuccess(sakStatus)) {
+      const oppgaveType: Oppgavetype = 'JOURNALFOERING'
+
       apiOpprettOppgave(
         {
           sakId: sakStatus.data.sak.id,
           request: {
-            oppgaveType: 'JOURNALFOERING',
+            oppgaveType,
             referanse: journalpost.journalpostId,
             merknad: 'Manuell redigering av journalpost',
-            oppgaveKilde: 'HENDELSE', // TODO: Vi burde kanskje ha egen kilde for oppgaver saksbehandler selv oppretter?
+            oppgaveKilde: 'SAKSBEHANDLER',
           },
         },
-        (result) => {
-          navigate(`/oppgave/${result.id}`)
+        (oppgave) => {
+          tildelSaksbehandler(
+            {
+              oppgaveId: oppgave.id,
+              type: oppgaveType,
+              nysaksbehandler: { saksbehandler: innloggetSaksbehandler.ident, versjon: null },
+            },
+            () => navigate(`/oppgave/${oppgave.id}`)
+          )
         }
       )
     }
@@ -87,30 +93,8 @@ export const OppgaveFraJournalpostModal = ({
           pending: <Spinner visible label="Sjekker om det allerede finnes en oppgave" />,
           success: (oppgaver) => (
             <Modal.Body>
-              {!oppgaver.length ? (
+              {!oppgaver.length && (
                 <Alert variant="info">Fant ingen andre oppgaver tilknyttet denne journalposten</Alert>
-              ) : (
-                <>
-                  <BodyShort spacing>Fant oppgave(r) tilknyttet journalposten:</BodyShort>
-
-                  {oppgaver.map((oppgave) => (
-                    <Accordion key={oppgave.id}>
-                      <Accordion.Item>
-                        <Accordion.Header>
-                          <OppgavetypeTag oppgavetype={oppgave.type} />
-                        </Accordion.Header>
-                        <Accordion.Content>
-                          <InfoWrapper>
-                            <Info label="Status" tekst={formaterOppgaveStatus(oppgave.status)} />
-                            <Info label="Saksbehandler" tekst={oppgave.saksbehandler?.navn || '-'} />
-                            <Info label="Saktype" tekst={formaterSakstype(oppgave.sakType)} />
-                            <Info label="Merknad" tekst={oppgave.merknad} />
-                          </InfoWrapper>
-                        </Accordion.Content>
-                      </Accordion.Item>
-                    </Accordion>
-                  ))}
-                </>
               )}
 
               <br />
@@ -137,6 +121,12 @@ export const OppgaveFraJournalpostModal = ({
           ),
         })}
 
+        {isFailure(tildelSaksbehandlerStatus) && (
+          <Alert variant="error">
+            Oppgaven ble opprettet, men tildeling feilet. Gå til oppgavelisten for å tildele den manuelt
+          </Alert>
+        )}
+
         <Modal.Footer>
           <FlexRow justify="right">
             <Button variant="tertiary" onClick={() => setIsOpen(false)}>
@@ -145,8 +135,8 @@ export const OppgaveFraJournalpostModal = ({
 
             <Button
               onClick={opprettJournalfoeringsoppgave}
-              disabled={!kanOppretteOppgave}
-              loading={isPending(opprettOppgaveStatus)}
+              disabled={!kanOppretteOppgave || !isSuccess(sakStatus)}
+              loading={isPending(opprettOppgaveStatus) || isPending(tildelSaksbehandlerStatus)}
             >
               Opprett oppgave
             </Button>

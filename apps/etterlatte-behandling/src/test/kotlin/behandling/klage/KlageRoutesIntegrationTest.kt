@@ -28,12 +28,14 @@ import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.Formkrav
+import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
+import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -176,6 +178,31 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                     oppdatertKlage.id shouldBe klage.id
                     oppdatertKlage.kabalStatus shouldBe KabalStatus.FERDIGSTILT
                 }
+        }
+    }
+
+    @Test
+    fun `lagring av initielt utfall`() {
+        withTestApplication { client ->
+            val sak: Sak = opprettSak(client)
+            val klage: Klage =
+                vurderFormkrav(opprettKlage(sak, client), client)
+
+            val oppdatertKlage =
+                client.putAndAssertOk(
+                    "/api/klage/${klage.id}/initieltutfall",
+                    tokenSaksbehandler,
+                    InitieltUtfallMedBegrunnelseDto(KlageUtfall.STADFESTE_VEDTAK, "Begrunnelse"),
+                ).body<Klage>()
+            oppdatertKlage shouldBeEqual hentKlage(client, klage.id)
+
+            with(oppdatertKlage.initieltUtfall!!) {
+                utfallMedBegrunnelse.utfall shouldBe KlageUtfall.STADFESTE_VEDTAK
+                utfallMedBegrunnelse.begrunnelse shouldBe "Begrunnelse"
+                saksbehandler shouldBe "Saksbehandler01"
+                tidspunkt shouldNotBe null
+            }
+            oppdatertKlage.status shouldBe KlageStatus.FORMKRAV_OPPFYLT
         }
     }
 
@@ -436,6 +463,18 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                 setBody(body)
             }
         assertEquals(HttpStatusCode.OK, response.status)
+    }
+
+    private suspend fun HttpClient.putAndAssertOk(
+        url: String,
+        token: String,
+        body: Any? = null,
+    ): HttpResponse {
+        return put(url) {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+            addAuthToken(token)
+        }
     }
 
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {

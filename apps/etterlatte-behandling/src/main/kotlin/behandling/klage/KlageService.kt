@@ -209,7 +209,7 @@ class KlageServiceImpl(
             throw FeatureIkkeStoettetException()
         }
         val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
-        val oppdatertKlage = klage.oppdaterIntieltUtfallMedBegrunnelse(utfall, saksbehandler.ident)
+        val oppdatertKlage = klage.oppdaterInitieltUtfallMedBegrunnelse(utfall, saksbehandler.ident)
         klageDao.lagreKlage(oppdatertKlage)
         return oppdatertKlage
     }
@@ -546,12 +546,11 @@ class KlageServiceImpl(
 
         val oppdatertKlage = klage.attesterVedtak()
 
-        val utfall =
-            checkNotNull(klage.utfall as? KlageUtfallMedData.Avvist) {
-                "Vi har en klage som kunne attesteres, men har feil utfall lagret. Id: $klageId"
-            }
+        checkNotNull(klage.utfall as? KlageUtfallMedData.Avvist) {
+            "Vi har en klage som kunne attesteres, men har feil utfall lagret. Id: $klageId"
+        }
         runBlocking {
-            brevApiKlient.ferdigstillBrev(klage.sak.id, utfall.brev.brevId, saksbehandler)
+            brevApiKlient.ferdigstillBrev(klage.id, klage.sak.id, saksbehandler)
         }
         val vedtak =
             runBlocking {

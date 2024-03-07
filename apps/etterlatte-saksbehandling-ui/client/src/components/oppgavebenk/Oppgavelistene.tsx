@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
@@ -55,6 +55,29 @@ export const Oppgavelistene = () => {
     leggValgILocalstorage(oppgavelisteValg)
   }, [oppgavelisteValg])
 
+  const rendreValgtOppgaveliste = (): ReactNode => {
+    switch (oppgavelisteValg) {
+      case OppgavelisteValg.OPPGAVELISTA:
+        return (
+          <Oppgavelista
+            key={OppgavelisteValg.OPPGAVELISTA}
+            saksbehandlereIEnhet={saksbehandlereIEnheter}
+            revurderingsaarsaker={revurderingsaarsaker}
+          />
+        )
+      case OppgavelisteValg.MIN_OPPGAVELISTE:
+        return (
+          <MinOppgaveliste
+            key={OppgavelisteValg.MIN_OPPGAVELISTE}
+            saksbehandlereIEnhet={saksbehandlereIEnheter}
+            revurderingsaarsaker={revurderingsaarsaker}
+          />
+        )
+      case OppgavelisteValg.GOSYS_OPPGAVER:
+        return <GosysOppgaveliste key={OppgavelisteValg.GOSYS_OPPGAVER} saksbehandlereIEnhet={saksbehandlereIEnheter} />
+    }
+  }
+
   return (
     <Container>
       <VelgOppgaveliste
@@ -63,23 +86,7 @@ export const Oppgavelistene = () => {
         antallOppgavelistaOppgaver={0}
         antallMinOppgavelisteOppgaver={0}
       />
-      {oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA && (
-        <Oppgavelista
-          key={OppgavelisteValg.OPPGAVELISTA}
-          saksbehandlereIEnhet={saksbehandlereIEnheter}
-          revurderingsaarsaker={revurderingsaarsaker}
-        />
-      )}
-      {oppgavelisteValg === OppgavelisteValg.MIN_OPPGAVELISTE && (
-        <MinOppgaveliste
-          key={OppgavelisteValg.MIN_OPPGAVELISTE}
-          saksbehandlereIEnhet={saksbehandlereIEnheter}
-          revurderingsaarsaker={revurderingsaarsaker}
-        />
-      )}
-      {oppgavelisteValg === OppgavelisteValg.GOSYS_OPPGAVER && (
-        <GosysOppgaveliste key={OppgavelisteValg.GOSYS_OPPGAVER} saksbehandlereIEnhet={saksbehandlereIEnheter} />
-      )}
+      {rendreValgtOppgaveliste()}
     </Container>
   )
 }

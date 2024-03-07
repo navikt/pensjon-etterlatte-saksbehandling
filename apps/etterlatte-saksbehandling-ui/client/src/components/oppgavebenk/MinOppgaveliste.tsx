@@ -37,6 +37,10 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
 
   const [minOppgavelisteOppgaverResult, hentMinOppgavelisteOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
 
+  const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
+    return oppgaver.filter((o) => o.saksbehandler?.ident === innloggetSaksbehandler.ident)
+  }
+
   const oppdaterSaksbehandlerTildeling = (
     oppgave: OppgaveDTO,
     saksbehandler: OppgaveSaksbehandler | null,
@@ -46,7 +50,11 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
       if (innloggetSaksbehandler.ident === saksbehandler?.ident) {
         setOppgaver(leggTilOppgavenIMinliste(oppgaver, oppgave, saksbehandler, versjon))
       } else {
-        setOppgaver(finnOgOppdaterSaksbehandlerTildeling(oppgaver, oppgave.id, saksbehandler, versjon))
+        setOppgaver(
+          filtrerKunInnloggetBrukerOppgaver(
+            finnOgOppdaterSaksbehandlerTildeling(oppgaver, oppgave.id, saksbehandler, versjon)
+          )
+        )
       }
     }, 2000)
   }

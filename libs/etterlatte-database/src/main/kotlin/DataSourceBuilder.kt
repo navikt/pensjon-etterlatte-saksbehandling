@@ -80,12 +80,13 @@ fun validateUniqueMigrationVersions(logger: Logger) {
     val resourceFolder = readResources(logger)
 
     val files = resourceFolder.listFiles()
-    println(files)
+    println("******files " + files)
     if (files == null) {
         throw RuntimeException("Failed to list files in the resources folder")
     } else {
         val filerMedPath =
             files.map { dir ->
+                println("listfilespath " + dir.path + " files" + dir.listFiles())
                 dir.listFiles()?.toList()?.map { it.path } ?: emptyList()
             }
         validateMigrationScriptVersions(filerMedPath)
@@ -95,32 +96,38 @@ fun validateUniqueMigrationVersions(logger: Logger) {
 private fun getPathsFromResourceJAR(
     folder: String,
     jarpath: String,
-): List<Path> {
-    var result: List<Path>
-
+): List<List<String>>? {
     // file walks JAR
     println(jarpath)
     val uri: URI = URI.create(jarpath)
     println(uri)
     val attributes = hashMapOf("create" to "false")
+    var filer: List<List<String>>? = null
     FileSystems.newFileSystem(uri, attributes).use { fs ->
-        result =
-            Files.walk(fs.getPath(folder))
-                .filter { it -> it != null }
-                .filter { path: Path? ->
-                    val file = File(path.toString())
-                    if (file.isDirectory) {
-                        println("is dir " + file.path)
-                        println(file.listFiles())
-                    }
-                    Files.isRegularFile(
-                        path,
-                    )
+        val dbFolder = File(fs.getPath(folder).toString())
+        val files = dbFolder.listFiles()
+        val filerMedPath =
+            files?.map { dir ->
+                println("jar listfilespath " + dir.path + " files" + dir.listFiles())
+                dir.listFiles()?.toList()?.map { it.path } ?: emptyList()
+            }
+        filer = filerMedPath
+        println("jar files $filerMedPath")
+        Files.walk(fs.getPath(folder))
+            .filter { it != null }
+            .map { path: Path? ->
+                val file = File(path.toString())
+                if (file.isDirectory) {
+                    println("is dir " + file.path)
+                    println(file.listFiles())
                 }
-                .collect(Collectors.toList())
+                Files.isRegularFile(
+                    path,
+                )
+            }
+            .collect(Collectors.toList())
     }
-    println(result)
-    return result
+    return filer
 }
 
 private fun readResources(logger: Logger): File {

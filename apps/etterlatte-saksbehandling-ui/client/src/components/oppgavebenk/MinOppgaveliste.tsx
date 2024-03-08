@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useAppSelector } from '~store/Store'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
-import { isSuccess, mapResult } from '~shared/api/apiUtils'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaverMedStatus, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
+import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
+import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
@@ -19,13 +18,25 @@ import { Saksbehandler } from '~shared/types/saksbehandler'
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
+import { ApiError } from '~shared/api/apiClient'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
   revurderingsaarsaker: RevurderingsaarsakerBySakstype
+  minOppgavelisteOppgaverResult: Result<OppgaveDTO[]>
+  hentMinOppgavelisteOppgaverFetch: (
+    args: { oppgavestatusFilter: string[]; minOppgavelisteIdent?: boolean | undefined },
+    onSuccess?: ((result: OppgaveDTO[], statusCode: number) => void) | undefined,
+    onError?: ((error: ApiError) => void) | undefined
+  ) => void
 }
 
-export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
+export const MinOppgaveliste = ({
+  saksbehandlereIEnhet,
+  revurderingsaarsaker,
+  minOppgavelisteOppgaverResult,
+  hentMinOppgavelisteOppgaverFetch,
+}: Props) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />
@@ -34,8 +45,6 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
   const [filter, setFilter] = useState<Filter>(minOppgavelisteFiltre())
 
   const [oppgaver, setOppgaver] = useState<Array<OppgaveDTO>>([])
-
-  const [minOppgavelisteOppgaverResult, hentMinOppgavelisteOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
 
   const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
     return oppgaver.filter((o) => o.saksbehandler?.ident === innloggetSaksbehandler.ident)
@@ -66,7 +75,7 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
     })
 
   useEffect(() => {
-    hentMinOppgavelisteOppgaver()
+    if (!oppgaver?.length) hentMinOppgavelisteOppgaver()
   }, [])
 
   useEffect(() => {

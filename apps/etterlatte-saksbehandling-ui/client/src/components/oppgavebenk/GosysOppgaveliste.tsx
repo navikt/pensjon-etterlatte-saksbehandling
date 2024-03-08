@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentGosysOppgaver, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
-import { isSuccess, mapResult } from '~shared/api/apiUtils'
+import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
+import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
@@ -19,12 +18,19 @@ import {
   finnOgOppdaterSaksbehandlerTildeling,
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveutils'
+import { ApiError } from '~shared/api/apiClient'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
+  gosysOppgaverResult: Result<OppgaveDTO[]>
+  hentGosysOppgaverFetch: (
+    args: unknown,
+    onSuccess?: ((result: OppgaveDTO[], statusCode: number) => void) | undefined,
+    onError?: ((error: ApiError) => void) | undefined
+  ) => void
 }
 
-export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
+export const GosysOppgaveliste = ({ saksbehandlereIEnhet, gosysOppgaverResult, hentGosysOppgaverFetch }: Props) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />
@@ -33,8 +39,6 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   const [filter, setFilter] = useState<Filter>(defaultFiltre)
 
   const [oppgaver, setOppgaver] = useState<Array<OppgaveDTO>>([])
-
-  const [gosysOppgaverResult, hentGosysOppgaverFetch] = useApiCall(hentGosysOppgaver)
 
   const oppdaterSaksbehandlerTildeling = (
     oppgave: OppgaveDTO,
@@ -53,7 +57,7 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   }, [gosysOppgaverResult])
 
   useEffect(() => {
-    hentGosysOppgaverFetch({})
+    if (!oppgaver?.length) hentGosysOppgaverFetch({})
   }, [])
 
   return mapResult(gosysOppgaverResult, {

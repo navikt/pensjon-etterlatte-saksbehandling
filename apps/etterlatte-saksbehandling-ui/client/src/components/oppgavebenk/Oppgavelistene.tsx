@@ -3,7 +3,7 @@ import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { saksbehandlereIEnhetApi } from '~shared/api/oppgaver'
+import { hentGosysOppgaver, hentOppgaverMedStatus, saksbehandlereIEnhetApi } from '~shared/api/oppgaver'
 import { isSuccess } from '~shared/api/apiUtils'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { hentAlleStoettedeRevurderinger } from '~shared/api/revurdering'
@@ -27,6 +27,10 @@ export const Oppgavelistene = () => {
   const [oppgavelisteValg, setOppgavelisteValg] = useState<OppgavelisteValg>(
     hentValgFraLocalStorage() as OppgavelisteValg
   )
+
+  const [oppgavelistaOppgaverResult, hentOppgavelistaOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
+  const [minOppgavelisteOppgaverResult, hentMinOppgavelisteOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
+  const [gosysOppgaverResult, hentGosysOppgaverFetch] = useApiCall(hentGosysOppgaver)
 
   const [, hentSaksbehandlereIEnheterFetch] = useApiCall(saksbehandlereIEnhetApi)
   const [saksbehandlereIEnheter, setSaksbehandlereIEnheter] = useState<Array<Saksbehandler>>([])
@@ -63,6 +67,8 @@ export const Oppgavelistene = () => {
             key={OppgavelisteValg.OPPGAVELISTA}
             saksbehandlereIEnhet={saksbehandlereIEnheter}
             revurderingsaarsaker={revurderingsaarsaker}
+            oppgavelistaOppgaverResult={oppgavelistaOppgaverResult}
+            hentOppgavelistaOppgaverFetch={hentOppgavelistaOppgaverFetch}
           />
         )
       case OppgavelisteValg.MIN_OPPGAVELISTE:
@@ -71,10 +77,19 @@ export const Oppgavelistene = () => {
             key={OppgavelisteValg.MIN_OPPGAVELISTE}
             saksbehandlereIEnhet={saksbehandlereIEnheter}
             revurderingsaarsaker={revurderingsaarsaker}
+            minOppgavelisteOppgaverResult={minOppgavelisteOppgaverResult}
+            hentMinOppgavelisteOppgaverFetch={hentMinOppgavelisteOppgaverFetch}
           />
         )
       case OppgavelisteValg.GOSYS_OPPGAVER:
-        return <GosysOppgaveliste key={OppgavelisteValg.GOSYS_OPPGAVER} saksbehandlereIEnhet={saksbehandlereIEnheter} />
+        return (
+          <GosysOppgaveliste
+            key={OppgavelisteValg.GOSYS_OPPGAVER}
+            saksbehandlereIEnhet={saksbehandlereIEnheter}
+            gosysOppgaverResult={gosysOppgaverResult}
+            hentGosysOppgaverFetch={hentGosysOppgaverFetch}
+          />
+        )
     }
   }
 

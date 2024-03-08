@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { isSuccess, mapResult } from '~shared/api/apiUtils'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaverMedStatus, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
+import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
+import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
   sorterOppgaverEtterOpprettet,
@@ -18,18 +17,28 @@ import {
 } from '~components/oppgavebenk/filtreringAvOppgaver/filterLocalStorage'
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
+import { ApiError } from '~shared/api/apiClient'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
   revurderingsaarsaker: RevurderingsaarsakerBySakstype
+  oppgavelistaOppgaverResult: Result<OppgaveDTO[]>
+  hentOppgavelistaOppgaverFetch: (
+    args: { oppgavestatusFilter: string[]; minOppgavelisteIdent?: boolean | undefined },
+    onSuccess?: ((result: OppgaveDTO[], statusCode: number) => void) | undefined,
+    onError?: ((error: ApiError) => void) | undefined
+  ) => void
 }
 
-export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
+export const Oppgavelista = ({
+  saksbehandlereIEnhet,
+  revurderingsaarsaker,
+  oppgavelistaOppgaverResult,
+  hentOppgavelistaOppgaverFetch,
+}: Props) => {
   const [filter, setFilter] = useState<Filter>(hentFilterFraLocalStorage())
 
   const [oppgaver, setOppgaver] = useState<Array<OppgaveDTO>>([])
-
-  const [oppgavelistaOppgaverResult, hentOppgavelistaOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
 
   const oppdaterSaksbehandlerTildeling = (
     oppgave: OppgaveDTO,
@@ -54,7 +63,7 @@ export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Pro
   }, [oppgavelistaOppgaverResult])
 
   useEffect(() => {
-    hentOppgavelistaOppgaver()
+    if (!oppgaver?.length) hentOppgavelistaOppgaver()
   }, [])
 
   useEffect(() => {
@@ -64,7 +73,7 @@ export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Pro
   return mapResult(oppgavelistaOppgaverResult, {
     pending: <Spinner visible={true} label="Henter oppgaver" />,
     error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente oppgaver'}</ApiErrorAlert>,
-    success: () => (
+    success: (oppgaver) => (
       <>
         <FilterRad
           hentAlleOppgaver={hentOppgavelistaOppgaver}

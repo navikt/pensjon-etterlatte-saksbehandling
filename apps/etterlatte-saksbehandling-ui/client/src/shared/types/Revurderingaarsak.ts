@@ -46,7 +46,7 @@ export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   SIVILSTAND: 'Endring av sivilstand',
   NY_SOEKNAD: 'Det har kommet inn en ny søknad',
   FENGSELSOPPHOLD: 'Fengselsopphold',
-  ANNEN: 'Annen (med brev',
+  ANNEN: 'Annen (med brev)',
   ANNEN_UTEN_BREV: 'Annen (uten brev)',
   YRKESSKADE: 'Yrkesskade',
   UT_AV_FENGSEL: 'Ut av fengsel',

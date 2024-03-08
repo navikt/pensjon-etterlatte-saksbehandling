@@ -79,9 +79,8 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                                 subCoroutineExceptionHandler,
                             ) { axsysKlient.hentEnheterForIdent(it) }
                     }
-                    .mapNotNull {
+                    .mapNotNull { (ident, enheter) ->
                         try {
-                            val (ident, enheter) = it
                             val enheterAwait = enheter.await()
                             if (enheterAwait.isNotEmpty()) {
                                 ident to enheterAwait
@@ -90,7 +89,7 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                                 null
                             }
                         } catch (e: Exception) {
-                            logger.error("Kunne ikke hente enheter for saksbehandlerident ${it.first}", e)
+                            logger.error("Kunne ikke hente enheter for saksbehandlerident $ident", e)
                             null
                         }
                     }

@@ -22,8 +22,6 @@ export const SettPaaVent = ({ oppgave, refreshOppgave }: { oppgave: OppgaveDTO; 
         oppgaveId: oppgave.id,
         settPaaVentRequest: {
           merknad,
-          versjon: null,
-          status: oppgave.status,
         },
       },
       () => {

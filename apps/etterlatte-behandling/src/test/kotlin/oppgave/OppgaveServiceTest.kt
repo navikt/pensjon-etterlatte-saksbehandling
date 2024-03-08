@@ -520,7 +520,6 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         oppgaveService.settOppgavePaaVent(
             nyOppgave.id,
             "test",
-            nyOppgave.status,
         )
         val oppgavePaaVent = oppgaveService.hentOppgave(nyOppgave.id)
         assertEquals(Status.PAA_VENT, oppgavePaaVent?.status)
@@ -529,7 +528,6 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         oppgaveService.settOppgavePaaVent(
             oppgavePaaVent!!.id,
             "test",
-            oppgavePaaVent.status,
         )
         val oppgaveTattAvVent = oppgaveService.hentOppgave(oppgavePaaVent.id)
         assertEquals(Status.UNDER_BEHANDLING, oppgaveTattAvVent?.status)

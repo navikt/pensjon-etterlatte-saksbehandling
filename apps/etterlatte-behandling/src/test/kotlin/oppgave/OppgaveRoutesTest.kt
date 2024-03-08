@@ -106,7 +106,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
             }
 
             client.post("/api/oppgaver/${oppgave.id}/sett-paa-vent") {
-                val dto = SettPaaVentRequest("", Status.UNDER_BEHANDLING)
+                val dto = SettPaaVentRequest("")
                 addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(dto)

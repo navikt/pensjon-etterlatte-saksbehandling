@@ -136,7 +136,6 @@ data class RedigerFristRequest(
 
 data class SettPaaVentRequest(
     val merknad: String,
-    val status: Status,
 )
 
 data class FerdigstillRequest(

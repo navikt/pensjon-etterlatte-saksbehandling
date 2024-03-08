@@ -134,8 +134,9 @@ data class RedigerFristRequest(
     val frist: Tidspunkt,
 )
 
-data class SettPaaVentRequest(
+data class SettPaaOgAvVentRequest(
     val merknad: String,
+    val paaVent: Boolean,
 )
 
 data class FerdigstillRequest(

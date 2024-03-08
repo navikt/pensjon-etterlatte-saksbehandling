@@ -517,17 +517,19 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             )
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
 
-        oppgaveService.settOppgavePaaVent(
+        oppgaveService.settOppgavePaaOgAvVent(
             nyOppgave.id,
             "test",
+            true,
         )
         val oppgavePaaVent = oppgaveService.hentOppgave(nyOppgave.id)
         assertEquals(Status.PAA_VENT, oppgavePaaVent?.status)
         verify { hendelser.sendMeldingForHendelsePaaVent(UUID.fromString(nyOppgave.referanse), BehandlingHendelseType.PAA_VENT) }
 
-        oppgaveService.settOppgavePaaVent(
+        oppgaveService.settOppgavePaaOgAvVent(
             oppgavePaaVent!!.id,
             "test",
+            false,
         )
         val oppgaveTattAvVent = oppgaveService.hentOppgave(oppgavePaaVent.id)
         assertEquals(Status.UNDER_BEHANDLING, oppgaveTattAvVent?.status)

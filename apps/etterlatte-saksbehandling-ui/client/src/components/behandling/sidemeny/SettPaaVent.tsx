@@ -30,6 +30,7 @@ export const SettPaaVent = ({
         oppgaveId: oppgave.id,
         settPaaVentRequest: {
           merknad,
+          paaVent: !(oppgave.status === 'PAA_VENT'),
         },
       },
       () => {

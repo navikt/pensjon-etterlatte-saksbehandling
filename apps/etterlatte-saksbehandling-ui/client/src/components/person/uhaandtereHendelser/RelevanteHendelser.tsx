@@ -100,6 +100,7 @@ export default function RelevanteHendelser(props: Props) {
                         hendelse={hendelse}
                         harAapenRevurdering={harAapenRevurdering}
                         startRevurdering={startRevurdering}
+                        revurderingKanOpprettes={revurderingKanOpprettes}
                         revurderinger={
                           isSuccess(muligeRevurderingAarsakerStatus) ? muligeRevurderingAarsakerStatus.data : []
                         }

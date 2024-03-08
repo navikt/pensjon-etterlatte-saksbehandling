@@ -48,7 +48,7 @@ fun Route.dokumentRoute(
             get {
                 val journalpost = safService.hentJournalpost(journalpostId, brukerTokenInfo)
 
-                call.respond(journalpost ?: HttpStatusCode.NotFound)
+                call.respond(journalpost)
             }
 
             put {

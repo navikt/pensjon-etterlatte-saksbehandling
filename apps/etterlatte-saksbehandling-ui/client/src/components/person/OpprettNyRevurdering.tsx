@@ -85,17 +85,18 @@ export const OpprettNyRevurdering = ({
               )
             })}
           </Select>
-          {valgtRevurdering === Revurderingaarsak.ANNEN && (
-            <AnnenRevurderingWrapper>
-              <TextField
-                label="Beskriv årsak"
-                size="medium"
-                type="text"
-                value={fritekstgrunn}
-                onChange={(e) => setFritekstgrunn(e.target.value)}
-              />
-            </AnnenRevurderingWrapper>
-          )}
+          {valgtRevurdering &&
+            [Revurderingaarsak.ANNEN, Revurderingaarsak.ANNEN_UTEN_BREV].includes(valgtRevurdering) && (
+              <AnnenRevurderingWrapper>
+                <TextField
+                  label="Beskriv årsak"
+                  size="medium"
+                  type="text"
+                  value={fritekstgrunn}
+                  onChange={(e) => setFritekstgrunn(e.target.value)}
+                />
+              </AnnenRevurderingWrapper>
+            )}
           <ButtonGroup>
             <Button variant="secondary" onClick={closeAndReset}>
               Avbryt

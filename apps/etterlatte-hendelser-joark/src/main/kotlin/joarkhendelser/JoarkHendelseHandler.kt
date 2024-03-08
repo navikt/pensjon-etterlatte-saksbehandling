@@ -43,14 +43,19 @@ class JoarkHendelseHandler(
      *   oppgaver til saksbehandler.
      */
     suspend fun haandterHendelse(hendelse: JournalfoeringHendelseRecord) {
+        val hendelseId = hendelse.hendelsesId
+        val journalpostId = hendelse.journalpostId
+        val temaNytt = hendelse.temaNytt
+
         if (!hendelse.erTemaEtterlatte()) {
             logger.info("Hendelse (id=${hendelse.hendelsesId}) har tema ${hendelse.temaNytt} og håndteres ikke")
             return // Avbryter behandling
         }
 
-        logger.info("Starter behandling av hendelse (id=${hendelse.hendelsesId}) med tema ${hendelse.temaNytt}")
+        logger.info(
+            "Starter behandling av hendelse (id=$hendelseId, journalpostId=$journalpostId, tema=$temaNytt)",
+        )
 
-        val journalpostId = hendelse.journalpostId
         val journalpost = safKlient.hentJournalpost(journalpostId).journalpost
 
         if (journalpost == null) {
@@ -65,7 +70,7 @@ class JoarkHendelseHandler(
         try {
             if (journalpost.bruker == null) {
                 logger.warn("Bruker mangler på journalpost id=$journalpost")
-                oppgaveKlient.opprettManuellJournalfoeringsoppgave(journalpostId, hendelse.temaNytt)
+                oppgaveKlient.opprettManuellJournalfoeringsoppgave(journalpostId, temaNytt)
                 return
             }
 
@@ -79,7 +84,7 @@ class JoarkHendelseHandler(
                         ident,
                         sakType,
                         hendelse.lagMerknadFraStatus(journalpost.kanal),
-                        hendelse.journalpostId.toString(),
+                        journalpostId.toString(),
                     )
                 }
 
@@ -87,8 +92,8 @@ class JoarkHendelseHandler(
                     behandlingService.opprettOppgave(
                         ident,
                         sakType,
-                        "Tema endret fra ${hendelse.temaGammelt} til ${hendelse.temaNytt}",
-                        hendelse.journalpostId.toString(),
+                        "Tema endret fra ${hendelse.temaGammelt} til $temaNytt",
+                        journalpostId.toString(),
                     )
                 }
 
@@ -105,7 +110,7 @@ class JoarkHendelseHandler(
                 else -> throw IllegalArgumentException("Journalpost=$journalpostId har ukjent hendelsesType=$type")
             }
         } catch (e: Exception) {
-            logger.error("Feil ved behandling av hendelse=${hendelse.hendelsesId} (se sikkerlogg for mer info)", e)
+            logger.error("Feil ved behandling av hendelse=$hendelseId (se sikkerlogg for mer info)", e)
             sikkerlogger().error("Feil oppsto ved behandling av journalpost: \n${journalpost.toJson()}: ")
             throw e
         }

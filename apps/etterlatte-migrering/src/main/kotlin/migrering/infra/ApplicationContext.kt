@@ -12,6 +12,7 @@ import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.start.StartMigreringRepository
+import no.nav.etterlatte.migrering.vent.VentRepository
 import no.nav.etterlatte.migrering.verge.VergeRepository
 import no.nav.etterlatte.migrering.verifisering.GjenlevendeForelderPatcher
 import no.nav.etterlatte.migrering.verifisering.PdlTjenesterKlient
@@ -59,7 +60,6 @@ internal class ApplicationContext {
             gjenlevendeForelderPatcher = gjenlevendeForelderPatcher,
             utenlandstilknytningsjekker = utenlandstilknytningsjekker,
             personHenter = personHenter,
-            featureToggleService = featureToggleService,
             grunnlagKlient = grunnlagKlient,
             penKlient = penklient,
         )
@@ -77,6 +77,7 @@ internal class ApplicationContext {
         )
 
     val startMigreringRepository = StartMigreringRepository(dataSource)
+    val ventRepository = VentRepository(dataSource)
 }
 
 private fun featureToggleProperties(config: Config) =

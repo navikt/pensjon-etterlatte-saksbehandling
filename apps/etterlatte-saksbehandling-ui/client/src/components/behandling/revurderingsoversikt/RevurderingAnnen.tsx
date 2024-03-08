@@ -1,22 +1,29 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { hentUndertypeFraBehandling, RevurderingAarsakAnnen, RevurderingInfo } from '~shared/types/RevurderingInfo'
+import {
+  hentUndertypeFraBehandling,
+  RevurderingAarsakAnnen,
+  RevurderingAarsakAnnenUtenBrev,
+  RevurderingInfo,
+} from '~shared/types/RevurderingInfo'
 import { FormEvent, useState } from 'react'
-import { BodyShort, Button, Heading, TextField } from '@navikt/ds-react'
+import { BodyLong, BodyShort, Button, Heading, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import styled from 'styled-components'
-import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsoversikt/Revurderingsbegrunnelse'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppSelector } from '~store/Store'
+import { Toast } from '~shared/alerts/Toast'
 
-export const RevurderingAnnen = (props: { behandling: IDetaljertBehandling }) => {
-  const { behandling } = props
-  const revurderingAnnenInfo = hentUndertypeFraBehandling<RevurderingAarsakAnnen>('ANNEN', behandling)
+export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; behandling: IDetaljertBehandling }) => {
+  const { type, behandling } = props
+  const revurderingAnnenInfo = hentUndertypeFraBehandling<RevurderingAarsakAnnen | RevurderingAarsakAnnenUtenBrev>(
+    type,
+    behandling
+  )
   const [revurderingsaarsak, setRevurderingsaarsak] = useState(revurderingAnnenInfo?.aarsak)
   const [begrunnelse, setBegrunnelse] = useState(behandling.revurderinginfo?.begrunnelse ?? '')
   const [feilmelding, setFeilmelding] = useState<string | null>(null)
@@ -37,10 +44,12 @@ export const RevurderingAnnen = (props: { behandling: IDetaljertBehandling }) =>
       setFeilmelding('Begrunnelse mangler')
       return
     }
+
     const revurderingInfo: RevurderingInfo = {
-      type: 'ANNEN',
+      type: type,
       aarsak: revurderingsaarsak,
     }
+
     lagre(
       {
         behandlingId: behandling.id,
@@ -53,56 +62,58 @@ export const RevurderingAnnen = (props: { behandling: IDetaljertBehandling }) =>
 
   return (
     <>
-      {redigerbar ? (
-        <SkjemaWrapper onSubmit={handlesubmit}>
-          <AarsakWrapper>
+      <SkjemaWrapper onSubmit={handlesubmit}>
+        <VStack gap="10">
+          <VStack gap="2">
             <Heading size="medium" level="3">
-              Årsak til revurdering (Annen)
+              Årsak til revurdering
             </Heading>
-            <TextField
-              value={revurderingsaarsak ?? ''}
-              onChange={(e) => setRevurderingsaarsak(e.target.value)}
-              error={!revurderingsaarsak && 'Årsak kan ikke være tom'}
-              label=""
-            />
-          </AarsakWrapper>
-          <Revurderingsbegrunnelse begrunnelse={begrunnelse} setBegrunnelse={setBegrunnelse} redigerbar={true} />
-          <Button loading={isPending(lagrestatus)} variant="primary" size="small">
-            Lagre
-          </Button>
-          {isSuccess(lagrestatus) && <span>Lagret!</span>}
-          {isFailureHandler({
-            apiResult: lagrestatus,
-            errorMessage: 'Kunne ikke lagre',
-          })}
-          {feilmelding && <ApiErrorAlert>{feilmelding}</ApiErrorAlert>}
-        </SkjemaWrapper>
-      ) : (
-        <BodyShort>
-          <AarsakWrapper>
+            {redigerbar ? (
+              <TextField
+                value={revurderingsaarsak ?? ''}
+                onChange={(e) => setRevurderingsaarsak(e.target.value)}
+                error={feilmelding && !revurderingsaarsak && 'Årsak kan ikke være tom'}
+                label=""
+              />
+            ) : (
+              <BodyShort>{revurderingsaarsak}</BodyShort>
+            )}
+          </VStack>
+          <VStack gap="2">
             <Heading size="medium" level="3">
-              Årsak til revurdering (Annen)
+              Begrunnelse
             </Heading>
-            {revurderingsaarsak}
-          </AarsakWrapper>
-          <Revurderingsbegrunnelse begrunnelse={begrunnelse} setBegrunnelse={setBegrunnelse} redigerbar={false} />
-        </BodyShort>
-      )}
+            {redigerbar ? (
+              <VStack gap="5">
+                <Textarea
+                  value={begrunnelse}
+                  onChange={(e) => {
+                    setBegrunnelse(e.target.value)
+                  }}
+                  placeholder="Begrunnelse"
+                  error={feilmelding && !begrunnelse && 'Begrunnelse kan ikke være tom'}
+                  label=""
+                />
+                <Button loading={isPending(lagrestatus)} variant="primary" size="small" style={{ maxWidth: '5em' }}>
+                  Lagre
+                </Button>
+                {isSuccess(lagrestatus) && <Toast melding="Lagret" />}
+                {isFailureHandler({
+                  apiResult: lagrestatus,
+                  errorMessage: 'Kunne ikke lagre',
+                })}
+              </VStack>
+            ) : (
+              <BodyLong>{begrunnelse}</BodyLong>
+            )}
+          </VStack>
+        </VStack>
+      </SkjemaWrapper>
     </>
   )
 }
 
 const SkjemaWrapper = styled.form`
-  max-width: fit-content;
-
-  & > *:not(:first-child) {
-    margin-top: 1rem;
-  }
-`
-
-const AarsakWrapper = styled.div`
-  gap: 1rem;
-  padding-right: 1rem;
-  margin-top: 0rem;
-  padding-bottom: 1rem;
+  max-width: 40rem;
+  margin-top: 3rem;
 `

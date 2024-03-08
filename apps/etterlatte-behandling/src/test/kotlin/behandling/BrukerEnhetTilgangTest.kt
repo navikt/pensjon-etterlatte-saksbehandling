@@ -14,13 +14,15 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
-import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
-import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
+import no.nav.etterlatte.behandling.klienter.AxsysKlient
+import no.nav.etterlatte.behandling.klienter.AxsysKlientImpl
+import no.nav.etterlatte.behandling.klienter.Enheter
+import no.nav.etterlatte.behandling.klienter.EnhetslisteResponse
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import org.junit.jupiter.api.Test
 
-class BrukerServiceTest {
+class BrukerEnhetTilgangTest {
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
     private val saksbehandlerEnheter =
@@ -32,10 +34,10 @@ class BrukerServiceTest {
 
     private val testNavIdent = "ident1"
 
-    private fun klient(): NavAnsattKlient =
-        NavAnsattKlientImpl(
+    private fun klient(): AxsysKlient =
+        AxsysKlientImpl(
             mockHttpClient(
-                saksbehandlerEnheter,
+                EnhetslisteResponse(saksbehandlerEnheter.map { Enheter(it.enhetsNummer, null, it.navn) }),
                 testNavIdent,
             ),
             "",
@@ -46,7 +48,7 @@ class BrukerServiceTest {
         val service = klient()
 
         runBlocking {
-            val resultat = service.hentEnheterForSaksbehandler(testNavIdent)
+            val resultat = service.hentEnheterForIdent(testNavIdent)
 
             resultat.size shouldBeExactly 3
 
@@ -57,14 +59,14 @@ class BrukerServiceTest {
     fun harTilgangTilEnhet(
         enheter: List<SaksbehandlerEnhet>,
         enhetId: String,
-    ) = enheter.any { enhet -> enhet.id == enhetId }
+    ) = enheter.any { enhet -> enhet.enhetsNummer == enhetId }
 
     @Test
     fun `enhet tilgang skal returnere true naar det er tilgang`() {
         val service = klient()
 
         runBlocking {
-            val resultat = harTilgangTilEnhet(service.hentEnheterForSaksbehandler(testNavIdent), "id1")
+            val resultat = harTilgangTilEnhet(service.hentEnheterForIdent(testNavIdent), "id1")
 
             resultat shouldBe true
         }
@@ -75,7 +77,7 @@ class BrukerServiceTest {
         val service = klient()
 
         runBlocking {
-            val resultat = harTilgangTilEnhet(service.hentEnheterForSaksbehandler(testNavIdent), "id4")
+            val resultat = harTilgangTilEnhet(service.hentEnheterForIdent(testNavIdent), "id4")
 
             resultat shouldBe false
         }
@@ -90,7 +92,7 @@ class BrukerServiceTest {
                 engine {
                     addHandler { request ->
                         when (request.url.fullPath) {
-                            "/navansatt/$ident/enheter" ->
+                            "/api/v2/tilgang/$ident?inkluderAlleEnheter=false" ->
                                 respond(
                                     respons.toJson(),
                                     HttpStatusCode.OK,

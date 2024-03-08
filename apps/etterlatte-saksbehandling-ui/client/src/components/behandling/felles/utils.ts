@@ -85,6 +85,7 @@ export const behandlingSkalSendeBrev = (
         revurderingsaarsak === Revurderingaarsak.REGULERING ||
         revurderingsaarsak === Revurderingaarsak.DOEDSFALL ||
         revurderingsaarsak === Revurderingaarsak.OPPHOER_UTEN_BREV ||
+        revurderingsaarsak === Revurderingaarsak.ANNEN_UTEN_BREV ||
         revurderingsaarsak === Revurderingaarsak.ALDERSOVERGANG
       )
   }

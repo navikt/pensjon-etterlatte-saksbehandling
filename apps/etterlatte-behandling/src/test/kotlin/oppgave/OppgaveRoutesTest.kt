@@ -119,8 +119,8 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                 val dto =
                     VentefristGaarUtRequest(
                         dato = LocalDate.now().plusMonths(3),
-                        type = OppgaveType.JOURNALFOERING,
-                        oppgaveKilde = OppgaveKilde.EKSTERN,
+                        type = setOf(OppgaveType.JOURNALFOERING),
+                        oppgaveKilde = setOf(OppgaveKilde.EKSTERN),
                         oppgaver = listOf(),
                     )
                 addAuthToken(systemBruker)

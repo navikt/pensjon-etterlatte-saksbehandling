@@ -103,15 +103,12 @@ enum class OppgaveKilde {
     EKSTERN,
     TILBAKEKREVING,
     GJENOPPRETTING,
+    SAKSBEHANDLER,
 }
 
 enum class OppgaveType {
     FOERSTEGANGSBEHANDLING,
     REVURDERING,
-
-    /*
-     * TODO: Manuelt opphør burde fjernes så fort vi får ryddet bort oppgavene som har dukket opp i produksjon.
-     */
     VURDER_KONSEKVENS,
     ATTESTERING,
     UNDERKJENT,
@@ -140,6 +137,10 @@ data class RedigerFristRequest(
 data class SettPaaVentRequest(
     val merknad: String,
     val status: Status,
+)
+
+data class FerdigstillRequest(
+    val merknad: String?,
 )
 
 data class RedigerFristGosysRequest(

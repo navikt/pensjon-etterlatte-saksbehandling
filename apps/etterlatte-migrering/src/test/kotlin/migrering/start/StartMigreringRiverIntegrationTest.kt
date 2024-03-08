@@ -133,7 +133,6 @@ internal class StartMigreringRiverIntegrationTest {
                                         every { it.finnUtenlandstilknytning(any()) } returns UtlandstilknytningType.NASJONAL
                                     },
                                     personHenter,
-                                    featureToggleService,
                                     grunnlagKlient = mockk(),
                                     penKlient =
                                         mockk<PenKlient>().also {
@@ -240,7 +239,6 @@ internal class StartMigreringRiverIntegrationTest {
                                         every { it.finnUtenlandstilknytning(any()) } returns UtlandstilknytningType.NASJONAL
                                     },
                                     personHenter,
-                                    featureToggleService,
                                     grunnlagKlient = mockk(),
                                     penKlient =
                                         mockk<PenKlient>().also {
@@ -377,7 +375,6 @@ internal class StartMigreringRiverIntegrationTest {
                                         every { it.finnUtenlandstilknytning(any()) } returns UtlandstilknytningType.NASJONAL
                                     },
                                     personHenter,
-                                    featureToggleService,
                                     grunnlagKlient = mockk(),
                                     penKlient =
                                         mockk<PenKlient>().also {
@@ -505,7 +502,6 @@ internal class StartMigreringRiverIntegrationTest {
                                     GjenlevendeForelderPatcher(pdlTjenesterKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
                                     personHenter,
-                                    featureToggleService,
                                     grunnlagKlient = mockk(),
                                     penKlient =
                                         mockk<PenKlient>().also {
@@ -595,7 +591,6 @@ internal class StartMigreringRiverIntegrationTest {
                                     GjenlevendeForelderPatcher(pdlTjenesterKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
                                     personHenter,
-                                    featureToggleService,
                                     grunnlagKlient = mockk(),
                                     penKlient =
                                         mockk<PenKlient>().also {
@@ -679,7 +674,6 @@ internal class StartMigreringRiverIntegrationTest {
                                     GjenlevendeForelderPatcher(pdlTjenesterKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
                                     personHenter,
-                                    featureToggleService,
                                     grunnlagKlient = mockk(),
                                     penKlient =
                                         mockk<PenKlient>().also {
@@ -761,7 +755,6 @@ internal class StartMigreringRiverIntegrationTest {
                                     GjenlevendeForelderPatcher(pdlTjenesterKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
                                     personHenter,
-                                    featureToggleService,
                                     grunnlagKlient = mockk(),
                                     penKlient =
                                         mockk<PenKlient>().also {

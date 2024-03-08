@@ -179,6 +179,28 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
         }
     }
 
+    fun settHarLoependeYtelse(
+        hendelseId: UUID,
+        loependeYtelse: Boolean,
+    ) {
+        datasource.transaction {
+            queryOf(
+                """
+                UPDATE hendelse 
+                SET loepende_ytelse = :loependeYtelse,
+                    endret = now(),
+                    versjon = versjon + 1
+                WHERE id = :id
+                """.trimIndent(),
+                mapOf(
+                    "id" to hendelseId,
+                    "loependeYtelse" to loependeYtelse,
+                ),
+            )
+                .let { query -> it.run(query.asUpdate) }
+        }
+    }
+
     fun pollHendelser(limit: Int = 5): List<Hendelse> {
         return datasource.transaction {
             queryOf(
@@ -204,6 +226,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
             versjon = int("versjon"),
             status = HendelseStatus.valueOf(string("status")),
             steg = string("steg"),
+            loependeYtelse = boolean("loepende_ytelse"),
             info = anyOrNull("info"),
         )
 

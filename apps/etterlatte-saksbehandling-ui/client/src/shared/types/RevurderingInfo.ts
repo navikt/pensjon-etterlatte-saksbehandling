@@ -17,6 +17,11 @@ export interface RevurderingAarsakAnnen {
   aarsak: string
 }
 
+export interface RevurderingAarsakAnnenUtenBrev {
+  type: 'ANNEN_UTEN_BREV'
+  aarsak: string
+}
+
 export interface SoeskenjusteringInfo {
   type: 'SOESKENJUSTERING'
   grunnForSoeskenjustering: BarnepensjonSoeskenjusteringGrunn
@@ -59,6 +64,7 @@ export interface Navn {
 
 export type RevurderingInfo =
   | RevurderingAarsakAnnen
+  | RevurderingAarsakAnnenUtenBrev
   | SoeskenjusteringInfo
   | FengselsoppholdInfo
   | InstitusjonsoppholdInfo

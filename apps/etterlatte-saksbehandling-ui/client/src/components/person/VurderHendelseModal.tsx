@@ -77,7 +77,7 @@ const VurderHendelseModal = (props: Props) => {
                   </option>
                 ))}
               </Select>
-              {valgtAarsak === Revurderingaarsak.ANNEN && (
+              {valgtAarsak && [Revurderingaarsak.ANNEN, Revurderingaarsak.ANNEN_UTEN_BREV].includes(valgtAarsak) && (
                 <MarginTop>
                   <TextField
                     label="Beskriv årsak"

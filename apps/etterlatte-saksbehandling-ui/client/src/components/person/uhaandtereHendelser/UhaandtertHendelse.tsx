@@ -22,9 +22,17 @@ interface Props {
   harAapenRevurdering: boolean
   startRevurdering: (hendelse: Grunnlagsendringshendelse) => void
   revurderinger: Array<Revurderingaarsak>
+  revurderingKanOpprettes: boolean
 }
 
-const UhaandtertHendelse = ({ sakType, hendelse, harAapenRevurdering, startRevurdering, revurderinger }: Props) => {
+const UhaandtertHendelse = ({
+  sakType,
+  hendelse,
+  harAapenRevurdering,
+  startRevurdering,
+  revurderinger,
+  revurderingKanOpprettes,
+}: Props) => {
   const { samsvarMellomKildeOgGrunnlag, opprettet } = hendelse
   const [open, setOpen] = useState(false)
   const [hendelsekommentar, oppdaterKommentar] = useState<string>('')
@@ -71,7 +79,7 @@ const UhaandtertHendelse = ({ sakType, hendelse, harAapenRevurdering, startRevur
 
           <div style={{ minHeight: '3rem', marginTop: '1rem' }}>
             <div>
-              {!tattMedIBehandling && stoetterRevurdering && (
+              {!tattMedIBehandling && stoetterRevurdering && revurderingKanOpprettes && (
                 <Button
                   disabled={harAapenRevurdering}
                   onClick={() => startRevurdering(hendelse)}

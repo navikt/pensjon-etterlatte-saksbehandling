@@ -6,14 +6,19 @@ import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppg
 import VelgJournalpost from '~components/person/journalfoeringsoppgave/VelgJournalpost'
 import { Column, Container, GridContainer } from '~shared/styled'
 import styled from 'styled-components'
-import { settBruker, settNyBehandlingRequest, settOppgave, settSak } from '~store/reducers/JournalfoeringOppgaveReducer'
+import {
+  settBruker,
+  settJournalpost,
+  settNyBehandlingRequest,
+  settOppgave,
+  settSak,
+} from '~store/reducers/JournalfoeringOppgaveReducer'
 import { hentOppgave } from '~shared/api/oppgaver'
 import { useAppDispatch } from '~store/Store'
 import Spinner from '~shared/Spinner'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
-import { isPending, isPendingOrInitial, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isPendingOrInitial, isSuccess, mapSuccess } from '~shared/api/apiUtils'
 import { OppdaterJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/OppdaterJournalpost'
-import { JournalpostInnholdSidebarPanel } from '~components/person/journalfoeringsoppgave/journalpost/JournalpostInnholdSidebarPanel'
 import StartOppgavebehandling, {
   OppgaveDetaljer,
 } from '~components/person/journalfoeringsoppgave/handling/StartOppgavebehandling'
@@ -25,14 +30,18 @@ import OpprettKlagebehandling from '~components/person/journalfoeringsoppgave/op
 import OppsummeringKlagebehandling from '~components/person/journalfoeringsoppgave/oppretteklage/OppsummeringKlagebehandling'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
-import { Sidebar } from '~shared/components/Sidebar'
+import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
+import { hentJournalpost } from '~shared/api/dokument'
+import { JournalpostInnhold } from './journalpost/JournalpostInnhold'
 
 export default function BehandleJournalfoeringOppgave() {
-  const { nyBehandlingRequest, journalpost, oppgave, sakMedBehandlinger } = useJournalfoeringOppgave()
+  const { nyBehandlingRequest, oppgave, sakMedBehandlinger } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
 
   const [oppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
   const [sakStatus, apiHentSak] = useApiCall(hentSakMedBehandlnger)
+  const [journalpostStatus, apiHentJournalpost] = useApiCall(hentJournalpost)
+
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   const { id: oppgaveId } = useParams()
@@ -54,6 +63,11 @@ export default function BehandleJournalfoeringOppgave() {
         apiHentSak(oppgave.fnr!!, (sak) => {
           dispatch(settSak(sak))
         })
+        if (oppgave?.referanse) {
+          apiHentJournalpost(oppgave.referanse, (journalpost) => dispatch(settJournalpost(journalpost)))
+        } else {
+          throw Error(`Oppgave id=${oppgaveId} mangler referanse til journalposten`)
+        }
       })
     }
   }, [oppgaveId])
@@ -71,48 +85,54 @@ export default function BehandleJournalfoeringOppgave() {
       <GridContainer>
         <Column>
           <Container>
-            {!!journalpost && !!sakMedBehandlinger ? (
-              kanEndreJournalpost(journalpost) ? (
-                <OppdaterJournalpost
-                  initialJournalpost={journalpost}
-                  sak={sakMedBehandlinger.sak}
-                  oppgaveId={oppgaveId!!}
-                />
-              ) : (
-                <Routes>
-                  <Route
-                    index
-                    element={<StartOppgavebehandling antallBehandlinger={sakMedBehandlinger.behandlinger.length} />}
-                  />
-
-                  <Route path="nybehandling">
-                    <Route index element={<OpprettNyBehandling />} />
-                    <Route path="oppsummering" element={<OppsummeringOppgavebehandling />} />
-                  </Route>
-                  {kanBrukeKlage && (
-                    <Route path="oppretteklage">
-                      <Route index element={<OpprettKlagebehandling />} />
-                      <Route path="oppsummering" element={<OppsummeringKlagebehandling />} />
-                    </Route>
-                  )}
-
-                  <Route path="ferdigstill" element={<FerdigstillOppgave />} />
-                </Routes>
-              )
+            {!sakMedBehandlinger || isPendingOrInitial(journalpostStatus) ? (
+              <Spinner visible label="Laster journalpost" />
+            ) : isSuccess(journalpostStatus) && kanEndreJournalpost(journalpostStatus.data) ? (
+              <OppdaterJournalpost
+                initialJournalpost={journalpostStatus.data}
+                sak={sakMedBehandlinger.sak}
+                oppgaveId={oppgaveId!!}
+              />
             ) : (
-              <Spinner visible label="" />
+              <Routes>
+                <Route
+                  index
+                  element={<StartOppgavebehandling antallBehandlinger={sakMedBehandlinger.behandlinger.length} />}
+                />
+
+                <Route path="nybehandling">
+                  <Route index element={<OpprettNyBehandling />} />
+                  <Route path="oppsummering" element={<OppsummeringOppgavebehandling />} />
+                </Route>
+                {kanBrukeKlage && (
+                  <Route path="oppretteklage">
+                    <Route index element={<OpprettKlagebehandling />} />
+                    <Route path="oppsummering" element={<OppsummeringKlagebehandling />} />
+                  </Route>
+                )}
+
+                <Route path="ferdigstill" element={<FerdigstillOppgave />} />
+              </Routes>
             )}
           </Container>
         </Column>
 
-        <Column>{isSuccess(oppgaveStatus) && <VelgJournalpost journalpostId={oppgave?.referanse || null} />}</Column>
+        <Column>
+          <VelgJournalpost journalpostStatus={journalpostStatus} />
+        </Column>
 
-        {!!journalpost && !kanEndreJournalpost(journalpost) && (
-          <Sidebar>
-            {oppgave && <OppgaveDetaljer oppgave={oppgave} />}
+        {mapSuccess(
+          journalpostStatus,
+          (journalpost) =>
+            !kanEndreJournalpost(journalpost) && (
+              <Sidebar>
+                {oppgave && <OppgaveDetaljer oppgave={oppgave} />}
 
-            <JournalpostInnholdSidebarPanel journalpost={journalpost} />
-          </Sidebar>
+                <SidebarPanel border>
+                  <JournalpostInnhold journalpost={journalpost} />
+                </SidebarPanel>
+              </Sidebar>
+            )
         )}
       </GridContainer>
     </>

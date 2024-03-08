@@ -37,6 +37,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
 import java.sql.Connection
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -64,6 +65,10 @@ internal class GyldighetsproevingServiceImplTest {
                 object : DatabaseKontekst {
                     override fun activeTx(): Connection {
                         throw IllegalArgumentException()
+                    }
+
+                    override fun harIntransaction(): Boolean {
+                        throw NotImplementedException("not implemented")
                     }
 
                     override fun <T> inTransaction(block: () -> T): T {

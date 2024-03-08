@@ -50,12 +50,12 @@ export function Tilbakekrevingsbehandling() {
   return (
     <>
       <StatusBar result={personStatus} />
+      <TilbakekrevingStegmeny />
       <Spinner visible={isPending(fetchTilbakekrevingStatus)} label="Henter tilbakekrevingsbehandling" />
 
       {!!tilbakekreving && viHarLastetRiktigTilbakekreving && (
         <GridContainer>
           <MainContent>
-            <TilbakekrevingStegmeny behandling={tilbakekreving} />
             <Routes>
               <Route
                 path="vurdering"
@@ -68,6 +68,7 @@ export function Tilbakekrevingsbehandling() {
           <TilbakekrevingSidemeny />
         </GridContainer>
       )}
+
       {isFailureHandler({
         apiResult: fetchTilbakekrevingStatus,
         errorMessage: 'Kunne ikke hente tilbakekrevingsbehandling',

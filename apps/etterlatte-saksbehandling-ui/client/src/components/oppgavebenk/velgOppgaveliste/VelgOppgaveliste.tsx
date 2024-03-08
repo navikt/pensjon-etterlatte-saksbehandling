@@ -30,6 +30,7 @@ export const VelgOppgaveliste = ({
           label={`Min oppgaveliste (${antallMinOppgavelisteOppgaver})`}
           icon={<PersonIcon aria-hidden />}
         />
+        <Tabs.Tab value={OppgavelisteValg.GOSYS_OPPGAVER} label="Gosys-oppgaver" icon={<InboxIcon />} />
       </Tabs.List>
     </VelgOppgavelisteTabs>
   )

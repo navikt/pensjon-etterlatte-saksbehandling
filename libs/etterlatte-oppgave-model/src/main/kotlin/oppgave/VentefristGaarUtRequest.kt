@@ -5,8 +5,8 @@ import java.util.UUID
 
 data class VentefristGaarUtRequest(
     val dato: LocalDate,
-    val type: OppgaveType,
-    val oppgaveKilde: OppgaveKilde,
+    val type: Collection<OppgaveType>,
+    val oppgaveKilde: Collection<OppgaveKilde>,
     val oppgaver: List<UUID>,
 )
 
@@ -19,4 +19,5 @@ data class VentefristGaarUt(
     val behandlingId: UUID,
     val oppgaveID: UUID,
     val oppgavekilde: OppgaveKilde,
+    val merknad: String?,
 )

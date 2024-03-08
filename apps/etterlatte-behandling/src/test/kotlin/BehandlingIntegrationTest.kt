@@ -18,8 +18,6 @@ import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.Navkontor
-import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
-import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.BrevStatus
@@ -45,7 +43,6 @@ import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
@@ -67,6 +64,7 @@ import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
+import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.extension.RegisterExtension
@@ -650,17 +648,6 @@ class Norg2KlientTest : Norg2Klient {
 }
 
 class NavAnsattKlientTest : NavAnsattKlient {
-    override suspend fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet> {
-        return listOf(
-            SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
-            SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
-        )
-    }
-
-    override suspend fun hentTemaForSaksbehandler(ident: String): List<SaksbehandlerTema> {
-        return listOf(SaksbehandlerTema(SakType.BARNEPENSJON.name), SaksbehandlerTema(SakType.OMSTILLINGSSTOENAD.name))
-    }
-
     override suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo? {
         return SaksbehandlerInfo("ident", "Max Manus")
     }
@@ -689,6 +676,9 @@ class KrrklientTest : KrrKlient {
 
 class AxsysKlientTest : AxsysKlient {
     override suspend fun hentEnheterForIdent(ident: String): List<SaksbehandlerEnhet> {
-        return listOf(SaksbehandlerEnhet("12345", "navn saksbehnadlersen"))
+        return listOf(
+            SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
+            SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
+        )
     }
 }

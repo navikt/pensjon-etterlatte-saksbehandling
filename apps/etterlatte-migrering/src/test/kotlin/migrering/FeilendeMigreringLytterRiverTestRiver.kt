@@ -9,9 +9,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
@@ -23,30 +21,15 @@ import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
-class FeilendeMigreringLytterRiverTestRiver {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
-    private lateinit var datasource: DataSource
-
-    @BeforeEach
-    fun start() {
-        datasource = opprettInMemoryDatabase(postgreSQLContainer).dataSource
-    }
-
-    @AfterEach
-    fun stop() = postgreSQLContainer.stop()
-
+@ExtendWith(DatabaseExtension::class)
+class FeilendeMigreringLytterRiverTestRiver(private val datasource: DataSource) {
     @Test
     fun `logger og lagrer feilmelding`() {
         testApplication {

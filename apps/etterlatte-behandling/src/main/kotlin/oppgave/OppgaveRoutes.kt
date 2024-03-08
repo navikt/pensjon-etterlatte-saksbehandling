@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.gosysOppgaveId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
+import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
@@ -83,6 +84,16 @@ internal fun Route.oppgaveRoutes(
                             filtrerteStatuser,
                             minOppgavelisteidentQueryParam,
                         )
+                    },
+                )
+            }
+        }
+
+        get("/referanse/{referanse}") {
+            kunSaksbehandler {
+                call.respond(
+                    inTransaction {
+                        service.hentOppgaverForReferanse(referanse)
                     },
                 )
             }
@@ -153,8 +164,9 @@ internal fun Route.oppgaveRoutes(
 
             put("ferdigstill") {
                 kunSkrivetilgang {
+                    val merknad = call.receive<FerdigstillRequest>().merknad
                     inTransaction {
-                        service.hentOgFerdigstillOppgaveById(oppgaveId, brukerTokenInfo)
+                        service.hentOgFerdigstillOppgaveById(oppgaveId, brukerTokenInfo, merknad)
                     }
                     call.respond(HttpStatusCode.OK)
                 }

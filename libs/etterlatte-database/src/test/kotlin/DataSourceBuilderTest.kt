@@ -7,13 +7,13 @@ class DataSourceBuilderTest {
     fun `Skal migrere unike versjoner i migrering og prod`() {
         val migrationScripts = listOf("V1__numerouno.sql", "V3__numerotres.sql")
         val migrationScriptsProd = listOf("V2__numerodos.sql", "V4__numerodos.sql")
-        validateMigrationScriptVersions(listOf(migrationScripts, migrationScriptsProd))
+        validateMigrationScriptVersions(listOf(migrationScripts, migrationScriptsProd).flatten())
     }
 
     @Test
     fun `Skal ikke migrere like versjoner i migrering og prod`() {
         val migrationScripts = listOf("V1__numerouno.sql", "V2__endreoppgavetabell.sql")
         val migrationScriptsProd = listOf("V2__numerodos.sql")
-        assertThrows<RuntimeException> { validateMigrationScriptVersions(listOf(migrationScripts, migrationScriptsProd)) }
+        assertThrows<RuntimeException> { validateMigrationScriptVersions(listOf(migrationScripts, migrationScriptsProd).flatten()) }
     }
 }

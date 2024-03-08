@@ -34,26 +34,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class BrukerManglerAttestantRolleException(ident: String) : UgyldigForespoerselException(
-    code = "BRUKER_ER_IKKE_ATTESTANT",
-    detail = "Bruker $ident mangler attestant rolle for tildeling",
-)
-
-class ManglerOppgaveUnderBehandling(msg: String) : UgyldigForespoerselException(
-    code = "MANGLER_OPPGAVE_UNDER_BEHANDLING",
-    detail = msg,
-)
-
-class ForMangeOppgaverUnderBehandling(msg: String) : UgyldigForespoerselException(
-    code = "FOR_MANGE_OPPGAVER_UNDER_BEHANDLING",
-    detail = msg,
-)
-
-class ManglerSaksbehandlerException(msg: String) : UgyldigForespoerselException(
-    code = "MANGLER_SAKSBEHANDLER_PAA_OPPGAVE",
-    detail = msg,
-)
-
 class OppgaveService(
     private val oppgaveDao: OppgaveDaoMedEndringssporing,
     private val sakDao: SakDao,
@@ -150,20 +130,9 @@ class OppgaveService(
 
     fun fjernSaksbehandler(oppgaveId: UUID) {
         val hentetOppgave =
-            oppgaveDao.hentOppgave(oppgaveId)
-                ?: throw OppgaveIkkeFunnet(oppgaveId)
-
-        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-        if (!hentetOppgave.saksbehandler?.ident.isNullOrBlank()) {
+            oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
+        sikreAktivOppgaveOgTildeltSaksbehandler(hentetOppgave) {
             oppgaveDao.fjernSaksbehandler(oppgaveId)
-        } else {
-            throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
-        }
-    }
-
-    private fun sikreAtOppgaveIkkeErAvsluttet(oppgave: OppgaveIntern) {
-        if (oppgave.erAvsluttet()) {
-            throw OppgaveKanIkkeEndres(oppgave.id, oppgave.status)
         }
     }
 
@@ -191,10 +160,7 @@ class OppgaveService(
     ) {
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
-        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-        if (hentetOppgave.saksbehandler?.ident.isNullOrEmpty()) {
-            throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
-        } else {
+        sikreAktivOppgaveOgTildeltSaksbehandler(hentetOppgave) {
             oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, status)
         }
     }
@@ -205,10 +171,7 @@ class OppgaveService(
     ) {
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
-        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-        if (hentetOppgave.saksbehandler?.ident.isNullOrEmpty()) {
-            throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
-        } else {
+        sikreAktivOppgaveOgTildeltSaksbehandler(hentetOppgave) {
             oppgaveDao.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId, referanse)
         }
     }
@@ -219,36 +182,46 @@ class OppgaveService(
         status: Status,
     ) {
         val oppgave = hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
-        val nyStatus = if (status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT
-        oppdaterStatusOgMerknad(
-            oppgaveId,
-            merknad,
-            nyStatus,
-        )
-        when (oppgave.type) {
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            OppgaveType.REVURDERING,
-            OppgaveType.ATTESTERING,
-            OppgaveType.UNDERKJENT,
-            -> {
-                hendelser.sendMeldingForHendelsePaaVent(
-                    UUID.fromString(oppgave.referanse),
-                    if (nyStatus == Status.PAA_VENT) BehandlingHendelseType.PAA_VENT else BehandlingHendelseType.AV_VENT,
-                )
+        sikreAktivOppgaveOgTildeltSaksbehandler(oppgave) {
+            val nyStatus = if (status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT
+            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, nyStatus)
+            when (oppgave.type) {
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                OppgaveType.REVURDERING,
+                OppgaveType.ATTESTERING,
+                OppgaveType.UNDERKJENT,
+                -> {
+                    hendelser.sendMeldingForHendelsePaaVent(
+                        UUID.fromString(oppgave.referanse),
+                        if (nyStatus == Status.PAA_VENT) BehandlingHendelseType.PAA_VENT else BehandlingHendelseType.AV_VENT,
+                    )
+                }
+                OppgaveType.TILBAKEKREVING -> {
+                    // TODO
+                }
+                OppgaveType.KLAGE -> {
+                    // TODO
+                }
+                else -> {} // Ingen statistikk for resten
             }
-            OppgaveType.TILBAKEKREVING -> {
-                // TODO
-            }
-            OppgaveType.KLAGE -> {
-                // TODO
-            }
-            OppgaveType.VURDER_KONSEKVENS,
-            OppgaveType.GOSYS,
-            OppgaveType.KRAVPAKKE_UTLAND,
-            OppgaveType.OMGJOERING,
-            OppgaveType.JOURNALFOERING,
-            OppgaveType.GJENOPPRETTING_ALDERSOVERGANG,
-            -> {} // Ingen statistikk for dette
+        }
+    }
+
+    private fun sikreAktivOppgaveOgTildeltSaksbehandler(
+        oppgave: OppgaveIntern,
+        operasjon: () -> Unit,
+    ) {
+        sikreAtOppgaveIkkeErAvsluttet(oppgave)
+        if (oppgave.saksbehandler?.ident.isNullOrEmpty()) {
+            throw OppgaveIkkeTildeltSaksbehandler(oppgave.id)
+        } else {
+            operasjon()
+        }
+    }
+
+    private fun sikreAtOppgaveIkkeErAvsluttet(oppgave: OppgaveIntern) {
+        if (oppgave.erAvsluttet()) {
+            throw OppgaveKanIkkeEndres(oppgave.id, oppgave.status)
         }
     }
 
@@ -552,6 +525,26 @@ class OppgaveService(
     fun hentFristGaarUt(request: VentefristGaarUtRequest): List<VentefristGaarUt> =
         oppgaveDao.hentFristGaarUt(request.dato, request.type, request.oppgaveKilde, request.oppgaver)
 }
+
+class BrukerManglerAttestantRolleException(ident: String) : UgyldigForespoerselException(
+    code = "BRUKER_ER_IKKE_ATTESTANT",
+    detail = "Bruker $ident mangler attestant rolle for tildeling",
+)
+
+class ManglerOppgaveUnderBehandling(msg: String) : UgyldigForespoerselException(
+    code = "MANGLER_OPPGAVE_UNDER_BEHANDLING",
+    detail = msg,
+)
+
+class ForMangeOppgaverUnderBehandling(msg: String) : UgyldigForespoerselException(
+    code = "FOR_MANGE_OPPGAVER_UNDER_BEHANDLING",
+    detail = msg,
+)
+
+class ManglerSaksbehandlerException(msg: String) : UgyldigForespoerselException(
+    code = "MANGLER_SAKSBEHANDLER_PAA_OPPGAVE",
+    detail = msg,
+)
 
 class FantIkkeSakException(msg: String) : Exception(msg)
 

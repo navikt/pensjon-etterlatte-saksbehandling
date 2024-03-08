@@ -269,11 +269,12 @@ class DoedshendelseKontrollpunktServiceTest {
                 relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
+        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, 1L, Enheter.defaultEnhet.enhetNr)
         every {
             sakService.finnSaker(
                 any(),
             )
-        } returns listOf(Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, 1L, Enheter.defaultEnhet.enhetNr))
+        } returns listOf(sak)
 
         every {
             pdlTjenesterKlient.hentPdlModellFlereSaktyper(
@@ -289,7 +290,7 @@ class DoedshendelseKontrollpunktServiceTest {
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalAvdoed)
 
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarYtelse)
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarYtelse(sak))
     }
 
     @Test
@@ -336,11 +337,12 @@ class DoedshendelseKontrollpunktServiceTest {
                 endringstype = Endringstype.OPPRETTET,
             )
         val sakIdd = 1L
+        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakIdd, Enheter.defaultEnhet.enhetNr)
         every {
             sakService.finnSaker(
                 any(),
             )
-        } returns listOf(Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakIdd, Enheter.defaultEnhet.enhetNr))
+        } returns listOf(sak)
 
         every {
             pdlTjenesterKlient.hentPdlModellFlereSaktyper(
@@ -376,7 +378,7 @@ class DoedshendelseKontrollpunktServiceTest {
 
         kontrollpunkter shouldContainExactlyInAnyOrder
             listOf(
-                DoedshendelseKontrollpunkt.AvdoedHarYtelse,
+                DoedshendelseKontrollpunkt.AvdoedHarYtelse(sak),
                 DoedshendelseKontrollpunkt.DuplikatGrunnlagsendringsHendelse(grunnlagsendringshendelse.id, oppgaveIntern.id),
             )
     }

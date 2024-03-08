@@ -63,7 +63,7 @@ class DoedshendelseKontrollpunktService(
                 }
 
                 Relasjon.AVDOED -> {
-                    kontrollerAvdoedHarYtelseIGjenny(hendelse) ?: emptyList()
+                    kontrollerAvdoedHarYtelseIGjenny(hendelse)
                 }
             }
 
@@ -127,7 +127,7 @@ class DoedshendelseKontrollpunktService(
                 sakerForAvdoed.map {
                     kontrollerEksisterendeHendelser(hendelse, it)
                 }.first()
-            listOfNotNull(DoedshendelseKontrollpunkt.AvdoedHarYtelse, duplikat)
+            listOfNotNull(DoedshendelseKontrollpunkt.AvdoedHarYtelse(sakerForAvdoed.first()), duplikat)
         }
     }
 

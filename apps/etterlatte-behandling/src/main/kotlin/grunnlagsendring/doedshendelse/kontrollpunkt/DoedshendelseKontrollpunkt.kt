@@ -4,9 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.DuplikatGrunnlagsendringsHendelse
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.EpsHarSakIGjenny
 import no.nav.etterlatte.libs.common.sak.Sak
 import java.util.UUID
+
+interface KontrollpunktMedSak {
+    val sak: Sak
+}
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "kode")
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -18,7 +21,7 @@ sealed class DoedshendelseKontrollpunkt {
     abstract val avbryt: Boolean
 
     @JsonTypeName("AVDOED_HAR_YTELSE_I_GJENNY")
-    data object AvdoedHarYtelse : DoedshendelseKontrollpunkt() {
+    data class AvdoedHarYtelse(override val sak: Sak) : DoedshendelseKontrollpunkt(), KontrollpunktMedSak {
         override val kode = "AVDOED_HAR_YTELSE_I_GJENNY"
         override val beskrivelse: String = "Avdød har ytelse i gjenny"
         override val sendBrev: Boolean = false
@@ -45,7 +48,7 @@ sealed class DoedshendelseKontrollpunkt {
     }
 
     @JsonTypeName("BARN_HAR_BP")
-    data object BarnHarBarnepensjon : DoedshendelseKontrollpunkt() {
+    data class BarnHarBarnepensjon(override val sak: Sak) : DoedshendelseKontrollpunkt(), KontrollpunktMedSak {
         override val kode = "BARN_HAR_BP"
         override val beskrivelse: String = "Barn har barnepensjon"
         override val sendBrev: Boolean = false
@@ -144,7 +147,7 @@ sealed class DoedshendelseKontrollpunkt {
     }
 
     @JsonTypeName("EPS_HAR_SAK_I_GJENNY")
-    data class EpsHarSakIGjenny(val sak: Sak) : DoedshendelseKontrollpunkt() {
+    data class EpsHarSakIGjenny(override val sak: Sak) : DoedshendelseKontrollpunkt(), KontrollpunktMedSak {
         override val kode = "EPS_HAR_SAK_I_GJENNY"
         override val beskrivelse: String = "Det eksisterer allerede en sak på EPS i Gjenny"
         override val sendBrev: Boolean = false
@@ -176,7 +179,7 @@ sealed class DoedshendelseKontrollpunkt {
 }
 
 fun List<DoedshendelseKontrollpunkt>.finnSak(): Sak? {
-    return this.filterIsInstance<EpsHarSakIGjenny>().firstOrNull()?.sak
+    return this.filterIsInstance<KontrollpunktMedSak>().firstOrNull()?.sak
 }
 
 fun List<DoedshendelseKontrollpunkt>.finnOppgaveId(): UUID? {

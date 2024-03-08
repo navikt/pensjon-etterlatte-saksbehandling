@@ -598,6 +598,14 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         return gosysApiOppgave()
     }
 
+    override suspend fun ferdigstill(
+        id: String,
+        oppgaveVersjon: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave {
+        return gosysApiOppgave()
+    }
+
     private fun gosysApiOppgave(): GosysApiOppgave {
         return GosysApiOppgave(
             1,

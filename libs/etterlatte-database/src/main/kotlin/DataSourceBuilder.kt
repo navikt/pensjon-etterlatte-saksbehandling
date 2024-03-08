@@ -107,7 +107,13 @@ private fun readResources(logger: Logger): List<String> {
 
     logger.info("resourceFolderURL.path" + resourceFolderURL.path)
     return if (appIsInGCP()) {
-        getPathsFromResourceJAR(resourceFolderURL.path, logger)
+        getPathsFromResourceJAR(
+            File(
+                DataSource::class.java.getProtectionDomain().getCodeSource().getLocation()
+                    .toURI(),
+            ).getPath(),
+            logger,
+        )
     } else {
         val files =
             File(resourceFolderURL.file).listFiles()

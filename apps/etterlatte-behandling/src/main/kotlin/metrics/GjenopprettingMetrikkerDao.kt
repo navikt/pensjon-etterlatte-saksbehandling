@@ -74,8 +74,10 @@ class GjenopprettingMetrikkerDao(private val dataSource: DataSource) {
                 getString("fnr")
             }.filter { fnr ->
                 try {
-                    val bursdagsmaaned = Folkeregisteridentifikator.of(fnr).getBirthDate().month
-                    bursdagsmaaned > Month.JANUARY && bursdagsmaaned < Month.MAY
+                    val bursdag = Folkeregisteridentifikator.of(fnr).getBirthDate()
+                    val fyller20 = 2024 - bursdag.year == 20
+                    val bursdagsmaaned = bursdag.month
+                    fyller20 && bursdagsmaaned > Month.JANUARY && bursdagsmaaned < Month.MAY
                 } catch (err: InvalidFoedselsnummerException) {
                     false
                 }

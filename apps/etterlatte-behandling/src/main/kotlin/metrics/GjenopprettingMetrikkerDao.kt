@@ -60,8 +60,9 @@ class GjenopprettingMetrikkerDao(private val dataSource: DataSource) {
             val statement =
                 it.prepareStatement(
                     """
-                    select count(b.id) antall, s.fnr from behandling b join sak s on b.sak_id = s.id
+                    select s.fnr from behandling b join sak s on b.sak_id = s.id
                     where behandlingstype = 'FØRSTEGANGSBEHANDLING'
+                    and kilde = 'GJENOPPRETTA'
                     and status = 'IVERKSATT'
                     and b.id not in (
                         select id from behandling

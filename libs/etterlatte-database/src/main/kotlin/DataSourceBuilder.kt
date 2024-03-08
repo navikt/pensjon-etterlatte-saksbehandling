@@ -85,11 +85,11 @@ fun validateUniqueMigrationVersions(logger: Logger) {
 private fun getPathsFromResourceJAR(
     folder: String,
     jarpath: String,
+    logger: Logger,
 ): List<List<String>> {
     // file walks JAR
-    println(jarpath)
+    logger.info(jarpath)
     val uri: URI = URI.create(jarpath)
-    println(uri)
     val attributes = hashMapOf("create" to "false")
     var filer: List<List<String>>
     FileSystems.newFileSystem(uri, attributes).use { fs ->
@@ -100,11 +100,11 @@ private fun getPathsFromResourceJAR(
         }
         val filerMedPath =
             files.map { dir ->
-                println("jar listfilespath " + dir.path + " files" + dir.listFiles())
+                logger.info("jar listfilespath " + dir.path + " files" + dir.listFiles())
                 dir.listFiles()?.toList()?.map { it.path } ?: emptyList()
             }
         filer = filerMedPath
-        println("jar files $filerMedPath")
+        logger.info("jar files $filerMedPath")
         Files.walk(fs.getPath(folder))
             .filter { it != null }
             .map { path: Path? ->
@@ -123,7 +123,6 @@ private fun getPathsFromResourceJAR(
 }
 
 private fun readResources(logger: Logger): List<List<String>> {
-    logger.info("readResources")
     val systemClassLoader = ClassLoader.getSystemClassLoader()
     val resourceFolderURL: URL =
         systemClassLoader.getResource(
@@ -132,13 +131,13 @@ private fun readResources(logger: Logger): List<List<String>> {
 
     logger.info("resourceFolderURL.path" + resourceFolderURL.path)
     return if (resourceFolderURL.path.toString().contains("jar:")) {
-        getPathsFromResourceJAR("db", resourceFolderURL.path)
+        getPathsFromResourceJAR("db", resourceFolderURL.path, logger)
     } else {
         val files =
             File(resourceFolderURL.file).listFiles()
                 ?: throw RuntimeException("Fant ingen filer i $resourceFolderURL listfiles er null")
         files.map { dir ->
-            println("listfilespath " + dir.path + " files" + dir.listFiles())
+            logger.info("listfilespath " + dir.path + " files" + dir.listFiles())
             dir.listFiles()?.toList()?.map { it.path } ?: emptyList()
         }
     }

@@ -77,37 +77,29 @@ fun DataSource.migrate(): MigrateResult {
 }
 
 fun validateUniqueMigrationVersions(logger: Logger) {
-    val resourceFolder = readResources(logger)
+    val filer = readResources(logger)
 
-    val files = resourceFolder.listFiles()
-    println("******files " + files)
-    if (files == null) {
-        throw RuntimeException("Failed to list files in the resources folder")
-    } else {
-        val filerMedPath =
-            files.map { dir ->
-                println("listfilespath " + dir.path + " files" + dir.listFiles())
-                dir.listFiles()?.toList()?.map { it.path } ?: emptyList()
-            }
-        validateMigrationScriptVersions(filerMedPath)
-    }
+    validateMigrationScriptVersions(filer)
 }
 
 private fun getPathsFromResourceJAR(
     folder: String,
     jarpath: String,
-): List<List<String>>? {
+): List<List<String>> {
     // file walks JAR
     println(jarpath)
     val uri: URI = URI.create(jarpath)
     println(uri)
     val attributes = hashMapOf("create" to "false")
-    var filer: List<List<String>>? = null
+    var filer: List<List<String>>
     FileSystems.newFileSystem(uri, attributes).use { fs ->
         val dbFolder = File(fs.getPath(folder).toString())
         val files = dbFolder.listFiles()
+        if (files == null) {
+            throw RuntimeException("Fant ingen filer i $folder listfiles er null")
+        }
         val filerMedPath =
-            files?.map { dir ->
+            files.map { dir ->
                 println("jar listfilespath " + dir.path + " files" + dir.listFiles())
                 dir.listFiles()?.toList()?.map { it.path } ?: emptyList()
             }
@@ -130,7 +122,7 @@ private fun getPathsFromResourceJAR(
     return filer
 }
 
-private fun readResources(logger: Logger): File {
+private fun readResources(logger: Logger): List<List<String>> {
     logger.info("readResources")
     val systemClassLoader = ClassLoader.getSystemClassLoader()
     val resourceFolderURL: URL =
@@ -139,27 +131,17 @@ private fun readResources(logger: Logger): File {
         ) ?: throw RuntimeException("Fant ikke migreringsscript i resourceFolder for /db")
 
     logger.info("resourceFolderURL.path" + resourceFolderURL.path)
-    if (resourceFolderURL.path.toString().contains("jar:")) {
-        val pathsFromResourceJAR = getPathsFromResourceJAR("db", resourceFolderURL.path)
-        val filenames =
-            pathsFromResourceJAR.map {
-                var filePathInJAR = it.toString()
-                // Windows will returns /json/file1.json, cut the first /
-                // the correct path should be json/file1.json
-                if (filePathInJAR.startsWith("/")) {
-                    filePathInJAR = filePathInJAR.substring(1, filePathInJAR.length)
-                }
-
-                logger.info("filePathInJAR : $filePathInJAR")
-
-                // read a file from resource folder
-                filePathInJAR
-            }
-        filenames
+    return if (resourceFolderURL.path.toString().contains("jar:")) {
+        getPathsFromResourceJAR("db", resourceFolderURL.path)
+    } else {
+        val files =
+            File(resourceFolderURL.file).listFiles()
+                ?: throw RuntimeException("Fant ingen filer i $resourceFolderURL listfiles er null")
+        files.map { dir ->
+            println("listfilespath " + dir.path + " files" + dir.listFiles())
+            dir.listFiles()?.toList()?.map { it.path } ?: emptyList()
+        }
     }
-
-    val resourceFolder = File(resourceFolderURL.file)
-    return resourceFolder
 }
 
 fun validateMigrationScriptVersions(files: List<List<String>>) {

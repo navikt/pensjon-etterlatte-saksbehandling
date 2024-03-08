@@ -14,7 +14,7 @@ import {
 import Spinner from '~shared/Spinner'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
-import { BodyShort, Heading } from '@navikt/ds-react'
+import { BodyShort, ErrorMessage, Heading } from '@navikt/ds-react'
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/TrygdetidGrunnlagListe'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
@@ -55,6 +55,8 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
   const [trygdetid, setTrygdetid] = useState<ITrygdetid>()
   const [landListe, setLandListe] = useState<ILand[]>()
   const [harPilotTrygdetid, setHarPilotTrygdetid] = useState<boolean>(false)
+  const [behandlingsIdMangler, setBehandlingsIdMangler] = useState(false)
+  const [trygdetidIdMangler, setTrygdetidIdMangler] = useState(false)
 
   const oppdaterTrygdetid = (trygdetid: ITrygdetid) => {
     setTrygdetid(trygdetid)
@@ -75,8 +77,15 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
   }
 
   const oppdaterYrkesskade = (yrkesskade: Boolean) => {
-    if (!trygdetid?.id) throw new Error('Mangler trygdetidid')
-    if (!behandling?.id) throw new Error('Mangler behandlingsid')
+    if (!trygdetid?.id) {
+      setTrygdetidIdMangler(true)
+      throw new Error('Mangler trygdetidid')
+    }
+
+    if (!behandling?.id) {
+      setBehandlingsIdMangler(true)
+      throw new Error('Mangler behandlingsid')
+    }
 
     requestOppdaterYrkesskade(
       {
@@ -91,7 +100,10 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
   }
 
   useEffect(() => {
-    if (!behandling?.id) throw new Error('Mangler behandlingsid')
+    if (!behandling?.id) {
+      setBehandlingsIdMangler(true)
+      throw new Error('Mangler behandlingsid')
+    }
 
     fetchTrygdetid(behandling.id, (trygdetid: ITrygdetid) => {
       if (trygdetid === null) {
@@ -219,8 +231,10 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
       })}
       {isFailureHandler({
         apiResult: oppdaterYrkesskadeRequest,
-        errorMessage: 'En feil har oppstått ved hoppdatering av yrkesskade',
+        errorMessage: 'En feil har oppstått ved oppdatering av yrkesskade',
       })}
+      {behandlingsIdMangler && <ErrorMessage>Finner ikke behandling - ID mangler</ErrorMessage>}
+      {trygdetidIdMangler && <ErrorMessage>Finner ikke trygdetid - ID mangler</ErrorMessage>}
     </TrygdetidWrapper>
   )
 }

@@ -108,10 +108,8 @@ private fun readResources(logger: Logger): List<String> {
     logger.info("resourceFolderURL.path" + resourceFolderURL.path)
     return if (appIsInGCP()) {
         getPathsFromResourceJAR(
-            File(
-                DataSource::class.java.getProtectionDomain().getCodeSource().getLocation()
-                    .toURI(),
-            ).getPath(),
+            DataSource::class.java.getProtectionDomain().codeSource.location
+                .toURI().path,
             logger,
         )
     } else {

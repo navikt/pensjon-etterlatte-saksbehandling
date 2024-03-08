@@ -142,10 +142,9 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
       </FlexRow>
 
-      {mapSuccess(
-        oppgaveForBehandlingenStatus,
-        (oppgave) => redigerbar && <SettPaaVent oppgave={oppgave} refreshOppgave={hentOppgaveForBehandling} />
-      )}
+      {mapSuccess(oppgaveForBehandlingenStatus, (oppgave) => (
+        <SettPaaVent oppgave={oppgave} redigerbar={redigerbar} refreshOppgave={hentOppgaveForBehandling} />
+      ))}
     </SidebarPanel>
   )
 }

@@ -232,8 +232,8 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                     prepareStatement(
                         """
                         SELECT 
-                            COUNT(*) as "antallOppgavelistaOppgaver",
-                            COUNT(*) FILTER (WHERE saksbehandler = ?) as "antallMinOppgavelisteOppgaver"
+                            COUNT(*) FILTER (WHERE status IN ('NY', 'UNDER_BEHANDLING', 'PAA_VENT')) AS "antallOppgavelistaOppgaver",
+                            COUNT(*) FILTER (WHERE saksbehandler = ? AND status IN ('NY', 'UNDER_BEHANDLING', 'PAA_VENT') ) AS "antallMinOppgavelisteOppgaver"
                         FROM oppgave
                         """.trimIndent(),
                     )

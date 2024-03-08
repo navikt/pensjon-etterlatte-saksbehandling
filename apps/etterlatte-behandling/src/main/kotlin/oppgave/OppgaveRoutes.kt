@@ -27,7 +27,7 @@ import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringGosysDto
-import no.nav.etterlatte.libs.common.oppgave.SettPaaVentRequest
+import no.nav.etterlatte.libs.common.oppgave.SettPaaOgAvVentRequest
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.oppgave.VentefristerGaarUtResponse
@@ -174,9 +174,9 @@ internal fun Route.oppgaveRoutes(
 
             post("sett-paa-vent") {
                 kunSkrivetilgang {
-                    val settPaaVentRequest = call.receive<SettPaaVentRequest>()
+                    val settPaaVentRequest = call.receive<SettPaaOgAvVentRequest>()
                     inTransaction {
-                        service.settOppgavePaaVent(oppgaveId, settPaaVentRequest.merknad)
+                        service.settOppgavePaaOgAvVent(oppgaveId, settPaaVentRequest.merknad, settPaaVentRequest.paaVent)
                     }
                     call.respond(HttpStatusCode.OK)
                 }

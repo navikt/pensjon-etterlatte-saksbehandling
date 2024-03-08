@@ -42,6 +42,11 @@ class BehandlingMetrics(
             .register(registry)
     }
 
+    val iverksattUtenOpphoerOver20 by lazy {
+        Gauge.build("etterlatte_gjenopprettinger_over_20", "Alle iverksatte saker med søker over 20 uten opphør")
+            .register(registry)
+    }
+
     override fun run() {
         logger.info("Samler metrikker med ${this::class.simpleName}")
 
@@ -69,6 +74,10 @@ class BehandlingMetrics(
 
         gjenopprettingDao.avbruttGrunnetSoeknad().forEach {
             avbruttGrunnetSoeknad.labels().set(it.toDouble())
+        }
+
+        gjenopprettingDao.over20().let {
+            iverksattUtenOpphoerOver20.labels().set(it.size.toDouble())
         }
     }
 }

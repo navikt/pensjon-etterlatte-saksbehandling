@@ -1,8 +1,10 @@
 package no.nav.etterlatte.metrics
 
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummerException
 import no.nav.etterlatte.libs.database.toList
-import java.sql.ResultSet
+import java.time.Month
 import javax.sql.DataSource
 
 class GjenopprettingMetrikkerDao(private val dataSource: DataSource) {
@@ -22,7 +24,13 @@ class GjenopprettingMetrikkerDao(private val dataSource: DataSource) {
                     """.trimIndent(),
                 )
             return statement.executeQuery().toList {
-                asBehandling()
+                Behandlinger(
+                    antall = getInt("antall"),
+                    automatisk = getString("automatisk"),
+                    status = Status.valueOf(getString("status")),
+                    enhet = getString("enhet"),
+                    type = getString("type"),
+                )
             }
         }
     }
@@ -47,15 +55,32 @@ class GjenopprettingMetrikkerDao(private val dataSource: DataSource) {
         }
     }
 
-    private fun ResultSet.asBehandling(): Behandlinger {
-        return Behandlinger(
-            antall = getInt("antall"),
-            automatisk = getString("automatisk"),
-            status = Status.valueOf(getString("status")),
-            enhet = getString("enhet"),
-            type = getString("type"),
-        )
-    }
+    fun over20() =
+        dataSource.connection.use {
+            val statement =
+                it.prepareStatement(
+                    """
+                    select count(b.id) antall, s.fnr from behandling b join sak s on b.sak_id = s.id
+                    where behandlingstype = 'FØRSTEGANGSBEHANDLING'
+                    and status = 'IVERKSATT'
+                    and b.id not in (
+                        select id from behandling
+                        where behandlingstype != 'FØRSTEGANGSBEHANDLING'
+                          and revurdering_aarsak = 'ALDERSOVERGANG'
+                    ) group by s.fnr;
+                    """.trimIndent(),
+                )
+            statement.executeQuery().toList {
+                getString("fnr")
+            }.filter { fnr ->
+                try {
+                    val bursdagsmaaned = Folkeregisteridentifikator.of(fnr).getBirthDate().month
+                    bursdagsmaaned > Month.JANUARY && bursdagsmaaned < Month.MAY
+                } catch (err: InvalidFoedselsnummerException) {
+                    false
+                }
+            }
+        }
 }
 
 data class Behandlinger(

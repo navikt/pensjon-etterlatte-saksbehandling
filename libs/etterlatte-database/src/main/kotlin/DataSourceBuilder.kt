@@ -106,7 +106,7 @@ private fun readResources(logger: Logger): List<String> {
         ) ?: throw RuntimeException("Fant ikke migreringsscript i resourceFolder for /db")
 
     logger.info("resourceFolderURL.path" + resourceFolderURL.path)
-    return if (resourceFolderURL.path.toString().contains("jar:")) {
+    return if (appIsInGCP()) {
         getPathsFromResourceJAR(resourceFolderURL.path, logger)
     } else {
         val files =

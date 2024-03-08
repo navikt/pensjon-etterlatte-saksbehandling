@@ -45,15 +45,21 @@ class DoedshendelseKontrollpunktService(
                     val (sak, avdoed) = hentDataForBeroert(hendelse)
                     kontrollpunkterBarneRelasjon(hendelse, avdoed, sak) + fellesKontrollpunkter(hendelse, avdoed, sak)
                 }
+
                 Relasjon.EPS -> {
                     val (sak, avdoed) = hentDataForBeroert(hendelse)
                     val eps =
                         pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                            hendelse.beroertFnr,
-                            PersonRolle.GJENLEVENDE,
-                            hendelse.sakTypeForEpsEllerBarn(),
+                            foedselsnummer = hendelse.beroertFnr,
+                            rolle = PersonRolle.GJENLEVENDE,
+                            saktype = hendelse.sakTypeForEpsEllerBarn(),
                         )
-                    kontrollpunkterEpsRelasjon(hendelse, sak, eps, avdoed) + fellesKontrollpunkter(hendelse, avdoed, sak)
+                    kontrollpunkterEpsRelasjon(hendelse, sak, eps, avdoed) +
+                        fellesKontrollpunkter(
+                            hendelse = hendelse,
+                            avdoed = avdoed,
+                            sak = sak,
+                        )
                 }
 
                 Relasjon.AVDOED -> {
@@ -91,7 +97,7 @@ class DoedshendelseKontrollpunktService(
     ): List<DoedshendelseKontrollpunkt> {
         return listOfNotNull(
             kontrollerUfoeretrygdBarn(hendelse),
-            kontrollerBarnOgHarBP(hendelse, sak),
+            kontrollerBarnOgHarBP(sak),
             kontrollerSamtidigDoedsfall(avdoed, hendelse),
         )
     }
@@ -104,7 +110,7 @@ class DoedshendelseKontrollpunktService(
     ): List<DoedshendelseKontrollpunkt> {
         return listOfNotNull(
             kontrollerKryssendeYtelseEps(hendelse),
-            kontrollerEksisterendeSakEps(hendelse, sak),
+            kontrollerEksisterendeSakEps(sak),
             kontrollerEpsErDoed(eps),
             kontrollerEpsHarFylt67Aar(eps),
             kontrollerSkiltSistefemAarEllerGiftI15(eps, avdoed),
@@ -112,7 +118,7 @@ class DoedshendelseKontrollpunktService(
         )
     }
 
-    private fun kontrollerAvdoedHarYtelseIGjenny(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt>? {
+    private fun kontrollerAvdoedHarYtelseIGjenny(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt> {
         val sakerForAvdoed = sakService.finnSaker(hendelse.avdoedFnr)
         return if (sakerForAvdoed.isEmpty()) {
             listOf(DoedshendelseKontrollpunkt.AvdoedHarIkkeYtelse)
@@ -131,7 +137,8 @@ class DoedshendelseKontrollpunktService(
     ): DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde? {
         if (eps.sivilstand != null) {
             val skilt = eps.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.SKILT }
-            val skiltMedAvdoed = skilt.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
+            val skiltMedAvdoed =
+                skilt.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
             val naa = LocalDate.now()
             val gift = eps.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.GIFT }
             val giftMedAvdoed = gift.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
@@ -158,7 +165,8 @@ class DoedshendelseKontrollpunktService(
     ): DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5OgGiftI15? {
         if (eps.sivilstand != null) {
             val skilt = eps.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.SKILT }
-            val skiltMedAvdoed = skilt.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
+            val skiltMedAvdoed =
+                skilt.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
             val gift = eps.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.GIFT }
             val giftMedAvdoed = gift.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
             val naa = LocalDate.now()
@@ -219,13 +227,10 @@ class DoedshendelseKontrollpunktService(
     }
 
     private fun kontrollerUfoeretrygdBarn(doedshendelse: DoedshendelseInternal): DoedshendelseKontrollpunkt.BarnHarUfoereTrygd? {
-        if (doedshendelse.relasjon == Relasjon.BARN) {
-            return when (harUfoereTrygd(doedshendelse)) {
-                true -> DoedshendelseKontrollpunkt.BarnHarUfoereTrygd
-                false -> null
-            }
+        return when (harUfoereTrygd(doedshendelse)) {
+            true -> DoedshendelseKontrollpunkt.BarnHarUfoereTrygd
+            false -> null
         }
-        return null
     }
 
     private fun harUfoereTrygd(doedshendelse: DoedshendelseInternal): Boolean {
@@ -241,23 +246,19 @@ class DoedshendelseKontrollpunktService(
             this.sakStatus == SakSammendragResponse.Status.LOPENDE
     }
 
-    private fun kontrollerBarnOgHarBP(
-        doedshendelse: DoedshendelseInternal,
-        sak: Sak?,
-    ): DoedshendelseKontrollpunkt.BarnHarBarnepensjon? {
-        if (doedshendelse.relasjon == Relasjon.BARN) {
-            if (sak == null) {
-                return null
-            }
-            val hentSisteIverksatte = behandlingService.hentSisteIverksatte(sak.id)
-            val harIkkeBarnepensjon = hentSisteIverksatte == null
-            if (harIkkeBarnepensjon) {
-                return null
-            } else {
-                return DoedshendelseKontrollpunkt.BarnHarBarnepensjon
-            }
+    private fun kontrollerBarnOgHarBP(sak: Sak?): DoedshendelseKontrollpunkt.BarnHarBarnepensjon? {
+        if (sak == null) {
+            return null
         }
-        return null
+
+        val hentSisteIverksatte = behandlingService.hentSisteIverksatte(sak.id)
+
+        val harBarnepensjon = hentSisteIverksatte != null
+        return if (harBarnepensjon) {
+            DoedshendelseKontrollpunkt.BarnHarBarnepensjon(sak)
+        } else {
+            null
+        }
     }
 
     private fun kontrollerAvdoedDoedsdato(avdoed: PersonDTO): DoedshendelseKontrollpunkt? =
@@ -332,7 +333,11 @@ class DoedshendelseKontrollpunktService(
                 if (annenForelderFnr == null) {
                     DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet
                 } else {
-                    pdlTjenesterKlient.hentPdlModellFlereSaktyper(annenForelderFnr, PersonRolle.GJENLEVENDE, SakType.BARNEPENSJON)
+                    pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                        foedselsnummer = annenForelderFnr,
+                        rolle = PersonRolle.GJENLEVENDE,
+                        saktype = SakType.BARNEPENSJON,
+                    )
                         .doedsdato?.verdi?.let { annenForelderDoedsdato ->
                             if (annenForelderDoedsdato == avdoedDoedsdato) {
                                 DoedshendelseKontrollpunkt.SamtidigDoedsfall
@@ -347,15 +352,8 @@ class DoedshendelseKontrollpunktService(
             DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet
         }
 
-    private fun kontrollerEksisterendeSakEps(
-        doedshendelse: DoedshendelseInternal,
-        sak: Sak?,
-    ): DoedshendelseKontrollpunkt? {
-        if (doedshendelse.relasjon == Relasjon.EPS) {
-            sak?.let { return DoedshendelseKontrollpunkt.EpsHarSakIGjenny(sak) }
-        }
-        return null
-    }
+    private fun kontrollerEksisterendeSakEps(sak: Sak?): DoedshendelseKontrollpunkt? =
+        sak?.let { return DoedshendelseKontrollpunkt.EpsHarSakIGjenny(sak) }
 
     private fun kontrollerEksisterendeHendelser(
         hendelse: DoedshendelseInternal,

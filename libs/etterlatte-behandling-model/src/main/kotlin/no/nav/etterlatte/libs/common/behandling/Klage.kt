@@ -179,6 +179,13 @@ data class Klage(
                     "til klagen (${this.status})",
             )
         }
+        if (formkrav?.formkrav?.erKlagenFramsattInnenFrist == JaNei.JA &&
+            initieltUtfall == null
+        ) {
+            throw IllegalStateException(
+                "Kan ikke oppdatere utfallet i klagen med id=${this.id} uten at initielt utfall er lagret først",
+            )
+        }
         val hjemmel =
             when (utfallMedBrev) {
                 is KlageUtfallMedData.StadfesteVedtak -> utfallMedBrev.innstilling.lovhjemmel

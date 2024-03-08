@@ -233,7 +233,6 @@ class KlageServiceImpl(
             // Vi må rydde bort det vedtaksbrevet som ble opprettet ved forrige utfall
             runBlocking { brevApiKlient.slettVedtaksbrev(klageId, saksbehandler) }
         }
-        // Vurder å slette brev hvis det finnes her? Så vi ikke polluter med hengende brev
 
         val utfallMedBrev =
             when (utfall) {

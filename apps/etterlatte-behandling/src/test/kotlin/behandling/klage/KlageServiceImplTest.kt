@@ -17,12 +17,15 @@ import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.FeatureIkkeStoettetException
 import no.nav.etterlatte.libs.common.behandling.Formkrav
+import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
 import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.behandling.KlageOmgjoering
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
+import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -217,7 +220,6 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
                     saksbehandler,
                 )
             }
-        println(applicationContext.featureToggleService)
         shouldThrow<FeatureIkkeStoettetException> {
             inTransaction {
                 service.lagreInitieltUtfallMedBegrunnelseAvKlage(
@@ -228,6 +230,27 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
                             begrunnelse = "Yndig revebjelle",
                         ),
                     saksbehandler = saksbehandler,
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `lagreUtfallAvKlage feiler hvis initielt utfall ikke er satt`() {
+        val klage =
+            inTransaction {
+                val sak = oppprettOmsSak()
+                val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""))
+                service.lagreFormkravIKlage(klage.id, formkrav(), saksbehandler)
+            }
+        shouldThrow<IllegalStateException> {
+            inTransaction {
+                service.lagreUtfallAvKlage(
+                    klage.id,
+                    KlageUtfallUtenBrev.Omgjoering(
+                        KlageOmgjoering(GrunnForOmgjoering.FEIL_LOVANVENDELSE, "Lorem ipsum"),
+                    ),
+                    saksbehandler,
                 )
             }
         }

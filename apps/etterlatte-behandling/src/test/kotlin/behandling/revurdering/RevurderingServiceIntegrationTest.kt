@@ -35,9 +35,11 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
+import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KlageOmgjoering
+import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -794,6 +796,11 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
 
         val oppgaveForOmgjoering =
             inTransaction {
+                applicationContext.klageService.lagreInitieltUtfallMedBegrunnelseAvKlage(
+                    klageId = klage.id,
+                    utfall = InitieltUtfallMedBegrunnelseDto(KlageUtfall.OMGJOERING, "Vi må endre vedtak"),
+                    saksbehandler = saksbehandler,
+                )
                 applicationContext.klageService.lagreUtfallAvKlage(
                     klageId = klage.id,
                     utfall =

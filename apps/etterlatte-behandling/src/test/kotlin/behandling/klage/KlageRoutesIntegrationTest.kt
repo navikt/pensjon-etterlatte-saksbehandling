@@ -207,13 +207,16 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `lagring av utfall trigger vedtak og brev`() {
+    fun `lagring av utfall = avvist trigger vedtak og brev`() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
             val klage: Klage =
-                vurderFormkrav(opprettKlage(sak, client), client)
-
-            val oppdatertKlage: Klage = vurderUtfallTilAvvist(klage, client)
+                vurderFormkrav(
+                    klage = opprettKlage(sak = sak, client = client),
+                    client = client,
+                    erKlagenFramsattInnenFrist = JaNei.NEI,
+                )
+            val oppdatertKlage: Klage = vurderUtfall(klage, client, KlageUtfallUtenBrev.Avvist())
 
             coVerifyAll {
                 applicationContext.vedtakKlient.lagreVedtakKlage(
@@ -235,7 +238,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
         withTestApplication { client ->
             val vedtakKlient = applicationContext.vedtakKlient
             val sak: Sak = opprettSak(client)
-            val klage = opprettKlageOgFattVedtak(client, sak, saksbehandlerIdent)
+            val klage = opprettKlageOgFattVedtakOmAvvisning(client, sak, saksbehandlerIdent)
             tildelOppgavenForKlagen(client, klage, attestantIdent)
 
             val attestert: Klage =
@@ -265,7 +268,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             val attestantIdent = "Saksbehandler02"
             val vedtakKlient = applicationContext.vedtakKlient
             val sak: Sak = opprettSak(client)
-            val klage = opprettKlageOgFattVedtak(client, sak, saksbehandlerIdent)
+            val klage = opprettKlageOgFattVedtakOmAvvisning(client, sak, saksbehandlerIdent)
             tildelOppgavenForKlagen(client, klage, attestantIdent)
 
             val underkjent: Klage =
@@ -324,15 +327,31 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
         return klage
     }
 
-    private suspend fun vurderUtfallTilAvvist(
+    private suspend fun vurderUtfall(
         klage: Klage,
         client: HttpClient,
+        utfall: KlageUtfallUtenBrev,
     ): Klage {
         val response =
             client.put("/api/klage/${klage.id}/utfall") {
                 addAuthToken(tokenSaksbehandler)
                 contentType(ContentType.Application.Json)
-                setBody(VurdertUtfallDto(KlageUtfallUtenBrev.Avvist()))
+                setBody(VurdertUtfallDto(utfall))
+            }
+        assertEquals(HttpStatusCode.OK, response.status)
+        return response.body()
+    }
+
+    private suspend fun vurderInitieltUtfall(
+        klage: Klage,
+        client: HttpClient,
+        klageUtfall: KlageUtfall,
+    ): Klage {
+        val response =
+            client.put("/api/klage/${klage.id}/initieltutfall") {
+                addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(InitieltUtfallMedBegrunnelseDto(klageUtfall, "Fordi"))
             }
         assertEquals(HttpStatusCode.OK, response.status)
         return response.body()
@@ -341,6 +360,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     private suspend fun vurderFormkrav(
         klage: Klage,
         client: HttpClient,
+        erKlagenFramsattInnenFrist: JaNei = JaNei.JA,
     ): Klage {
         return client.put("/api/klage/${klage.id}/formkrav") {
             addAuthToken(tokenSaksbehandler)
@@ -354,7 +374,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                         erKlagerPartISaken = JaNei.JA,
                         vedtaketKlagenGjelder = VedtaketKlagenGjelder("12", UUID.randomUUID().toString(), null, null),
                         gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
-                        erKlagenFramsattInnenFrist = JaNei.JA,
+                        erKlagenFramsattInnenFrist = erKlagenFramsattInnenFrist,
                     ),
                 ),
             )
@@ -371,14 +391,15 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
         }.body()
     }
 
-    private suspend fun opprettKlageOgFattVedtak(
+    private suspend fun opprettKlageOgFattVedtakOmAvvisning(
         client: HttpClient,
         sak: Sak,
         saksbehandler: String,
     ): Klage {
         val klage = opprettKlage(sak, client)
         vurderFormkrav(klage, client)
-        vurderUtfallTilAvvist(klage, client)
+        vurderInitieltUtfall(klage, client, KlageUtfall.AVVIST)
+        vurderUtfall(klage, client, KlageUtfallUtenBrev.Avvist())
         tildelOppgavenForKlagen(client, klage, saksbehandler)
         return fattVedtak(klage, client)
     }

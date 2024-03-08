@@ -62,8 +62,6 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
         oppgaveId: oppgave.id,
         settPaaVentRequest: {
           merknad: 'Manuelt: Varselbrev er sendt ut | ' + oppgave.merknad || '',
-          versjon: null,
-          status: oppgave.status,
         },
       })
     })

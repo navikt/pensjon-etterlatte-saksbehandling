@@ -176,7 +176,7 @@ internal fun Route.oppgaveRoutes(
                 kunSkrivetilgang {
                     val settPaaVentRequest = call.receive<SettPaaVentRequest>()
                     inTransaction {
-                        service.settOppgavePaaVent(oppgaveId, settPaaVentRequest.merknad, settPaaVentRequest.status)
+                        service.settOppgavePaaVent(oppgaveId, settPaaVentRequest.merknad)
                     }
                     call.respond(HttpStatusCode.OK)
                 }

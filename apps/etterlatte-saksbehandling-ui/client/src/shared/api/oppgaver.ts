@@ -167,8 +167,6 @@ export interface RedigerFristRequest {
 
 export interface SettPaaVentRequest {
   merknad: String
-  status: Oppgavestatus
-  versjon: number | null
 }
 
 export const redigerFristApi = async (args: {

@@ -179,11 +179,10 @@ class OppgaveService(
     fun settOppgavePaaVent(
         oppgaveId: UUID,
         merknad: String,
-        status: Status,
     ) {
         val oppgave = hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
         sikreAktivOppgaveOgTildeltSaksbehandler(oppgave) {
-            val nyStatus = if (status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT
+            val nyStatus = if (oppgave.status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT
             oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, nyStatus)
             when (oppgave.type) {
                 OppgaveType.FOERSTEGANGSBEHANDLING,

@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.SettPaaVentRequest
-import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -126,7 +125,6 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) {
             postBody =
                 SettPaaVentRequest(
                     merknad = merknad,
-                    status = Status.UNDER_BEHANDLING,
                 ),
         )
     }

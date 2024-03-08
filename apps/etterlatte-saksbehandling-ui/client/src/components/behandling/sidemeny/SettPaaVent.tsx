@@ -30,8 +30,6 @@ export const SettPaaVent = ({
         oppgaveId: oppgave.id,
         settPaaVentRequest: {
           merknad,
-          versjon: null,
-          status: oppgave.status,
         },
       },
       () => {

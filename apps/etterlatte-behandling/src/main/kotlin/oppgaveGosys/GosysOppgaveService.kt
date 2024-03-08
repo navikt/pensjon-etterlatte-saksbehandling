@@ -36,6 +36,12 @@ interface GosysOppgaveService {
         nyFrist: Tidspunkt,
         brukerTokenInfo: BrukerTokenInfo,
     ): Long
+
+    suspend fun ferdigstill(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysOppgave
 }
 
 class GosysOppgaveServiceImpl(
@@ -108,6 +114,16 @@ class GosysOppgaveServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): Long {
         return gosysOppgaveKlient.endreFrist(oppgaveId, oppgaveVersjon, nyFrist.toLocalDate(), brukerTokenInfo).versjon
+    }
+
+    override suspend fun ferdigstill(
+        oppgaveId: String,
+        oppgaveVersjon: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysOppgave {
+        return gosysOppgaveKlient.ferdigstill(oppgaveId, oppgaveVersjon, brukerTokenInfo).let {
+            it.fraGosysOppgaveTilNy(pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(it.aktoerId!!)))
+        }
     }
 
     companion object {

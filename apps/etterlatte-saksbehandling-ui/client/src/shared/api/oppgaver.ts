@@ -108,6 +108,12 @@ export interface SaksbehandlerEndringDto {
   versjon: number | null
 }
 
+export const ferdigstilleGosysOppgave = async (args: {
+  oppgaveId: string
+  versjon: number
+}): Promise<ApiResponse<OppgaveDTO>> =>
+  apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/ferdigstill?versjon=${args.versjon}`, {})
+
 export const tildelSaksbehandlerApi = async (args: {
   oppgaveId: string
   type: string

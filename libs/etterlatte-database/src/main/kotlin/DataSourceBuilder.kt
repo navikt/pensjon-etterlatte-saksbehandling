@@ -82,20 +82,20 @@ private fun getPathsFromResourceJAR(
     logger: Logger,
 ): List<String> {
     logger.info(jarpath)
-    val filer: List<String> = emptyList()
+    val sqlFiler: List<String> = emptyList()
     val zip = ZipInputStream(FileInputStream(jarpath))
     zip.use {
         var entry: ZipEntry? = zip.getNextEntry()
         while (entry != null) {
             val filnavnMedPath = entry.name
             if (filnavnMedPath.startsWith("db/") && filnavnMedPath.endsWith(".sql")) {
-                filer.addFirst(filnavnMedPath)
+                sqlFiler.addFirst(filnavnMedPath)
             }
             entry = zip.getNextEntry()
         }
     }
 
-    return filer
+    return sqlFiler
 }
 
 private fun readResources(logger: Logger): List<String> {

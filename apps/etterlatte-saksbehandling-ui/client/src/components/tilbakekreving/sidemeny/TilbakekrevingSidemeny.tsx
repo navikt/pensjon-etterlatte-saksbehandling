@@ -111,7 +111,7 @@ export function TilbakekrevingSidemeny() {
                 TilbakekrevingStatus.FATTET_VEDTAK,
               ].includes(tilbakekreving!!.status)
             ) {
-              return <SettPaaVent oppgave={oppgave} refreshOppgave={hentOppgaveForBehandling} />
+              return <SettPaaVent oppgave={oppgave} redigerbar={true} refreshOppgave={hentOppgaveForBehandling} />
             }
             return null
           })}

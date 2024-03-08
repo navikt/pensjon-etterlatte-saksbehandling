@@ -57,7 +57,7 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingIn
       )}
       <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
       {mapSuccess(oppgaveForBehandlingenStatus, (oppgave) => (
-        <SettPaaVent oppgave={oppgave} refreshOppgave={hentOppgaveForBehandling} />
+        <SettPaaVent oppgave={oppgave} redigerbar={true} refreshOppgave={hentOppgaveForBehandling} />
       ))}
     </Wrapper>
   )

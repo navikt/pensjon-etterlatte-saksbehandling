@@ -9,15 +9,11 @@ import org.flywaydb.core.api.output.MigrateResult
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.net.URI
+import java.io.FileInputStream
 import java.net.URL
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.Path
-import java.util.stream.Collectors
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 import javax.sql.DataSource
-
-val logge2weer = LoggerFactory.getLogger(DataSourceBuilder::class.java)
 
 object DataSourceBuilder {
     private const val MAX_POOL_SIZE = 10
@@ -37,7 +33,6 @@ object DataSourceBuilder {
         password: String,
         maxPoolSize: Int = MAX_POOL_SIZE,
     ): DataSource {
-        logge2weer.info("ds + $jdbcUrl + $username + $password")
         val hikariConfig =
             HikariConfig().also {
                 it.jdbcUrl = jdbcUrl
@@ -83,46 +78,27 @@ fun validateUniqueMigrationVersions(logger: Logger) {
 }
 
 private fun getPathsFromResourceJAR(
-    folder: String,
     jarpath: String,
     logger: Logger,
-): List<List<String>> {
-    // file walks JAR
+): List<String> {
     logger.info(jarpath)
-    val uri: URI = URI.create(jarpath)
-    val attributes = hashMapOf("create" to "false")
-    var filer: List<List<String>>
-    FileSystems.newFileSystem(uri, attributes).use { fs ->
-        val dbFolder = File(fs.getPath(folder).toString())
-        val files = dbFolder.listFiles()
-        if (files == null) {
-            throw RuntimeException("Fant ingen filer i $folder listfiles er null")
+    val filer: List<String> = emptyList()
+    val zip = ZipInputStream(FileInputStream(jarpath))
+    zip.use {
+        var entry: ZipEntry? = zip.getNextEntry()
+        while (entry != null) {
+            val filnavnMedPath = entry.name
+            if (filnavnMedPath.startsWith("db/") && filnavnMedPath.endsWith(".sql")) {
+                filer.addFirst(filnavnMedPath)
+            }
+            entry = zip.getNextEntry()
         }
-        val filerMedPath =
-            files.map { dir ->
-                logger.info("jar listfilespath " + dir.path + " files" + dir.listFiles())
-                dir.listFiles()?.toList()?.map { it.path } ?: emptyList()
-            }
-        filer = filerMedPath
-        logger.info("jar files $filerMedPath")
-        Files.walk(fs.getPath(folder))
-            .filter { it != null }
-            .map { path: Path? ->
-                val file = File(path.toString())
-                if (file.isDirectory) {
-                    println("is dir " + file.path)
-                    println(file.listFiles())
-                }
-                Files.isRegularFile(
-                    path,
-                )
-            }
-            .collect(Collectors.toList())
     }
+
     return filer
 }
 
-private fun readResources(logger: Logger): List<List<String>> {
+private fun readResources(logger: Logger): List<String> {
     val systemClassLoader = ClassLoader.getSystemClassLoader()
     val resourceFolderURL: URL =
         systemClassLoader.getResource(
@@ -131,27 +107,21 @@ private fun readResources(logger: Logger): List<List<String>> {
 
     logger.info("resourceFolderURL.path" + resourceFolderURL.path)
     return if (resourceFolderURL.path.toString().contains("jar:")) {
-        getPathsFromResourceJAR("db", resourceFolderURL.path, logger)
+        getPathsFromResourceJAR(resourceFolderURL.path, logger)
     } else {
         val files =
             File(resourceFolderURL.file).listFiles()
                 ?: throw RuntimeException("Fant ingen filer i $resourceFolderURL listfiles er null")
         files.map { dir ->
-            logger.info("listfilespath " + dir.path + " files" + dir.listFiles())
             dir.listFiles()?.toList()?.map { it.path } ?: emptyList()
-        }
+        }.flatten()
     }
 }
 
-fun validateMigrationScriptVersions(files: List<List<String>>) {
-    println("validateMigrationScriptVersions Files: " + files)
+fun validateMigrationScriptVersions(files: List<String>) {
     val allMigrationVersions =
-        files.flatten()
-            .filter { item ->
-                val harSqlSuffix = item.endsWith(".sql")
-                // TODO: lag validator
-                harSqlSuffix
-            }
+        files
+            .filter { item -> item.endsWith(".sql") }
             .map { it.substring(it.lastIndexOf("/") + 1) }
             .map {
                 val pos = it.indexOf("__")
@@ -161,8 +131,7 @@ fun validateMigrationScriptVersions(files: List<List<String>>) {
                 it.substring(0, pos)
             }
 
-    val migreringerSomListe = allMigrationVersions.toList()
-    val grupperte = migreringerSomListe.groupingBy { it }.eachCount()
+    val grupperte = allMigrationVersions.groupingBy { it }.eachCount()
     grupperte.forEach {
         if (it.value > 1) {
             throw RuntimeException(

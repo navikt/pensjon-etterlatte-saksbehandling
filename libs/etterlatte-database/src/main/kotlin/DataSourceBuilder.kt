@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
 import java.net.URL
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import javax.sql.DataSource
@@ -77,12 +79,26 @@ fun validateUniqueMigrationVersions(logger: Logger) {
     validateMigrationScriptVersions(filer)
 }
 
-private fun getPathsFromResourceJAR(
-    jarpath: String,
-    logger: Logger,
-): List<String> {
+private fun getPathsFromResourceJAR(logger: Logger): List<String> {
+    val runtimeDirectory = System.getProperty("user.dir")
+    val fileSet: MutableSet<String> = HashSet()
+    Files.newDirectoryStream(Paths.get(runtimeDirectory)).use { stream ->
+        for (path in stream) {
+            if (!Files.isDirectory(path)) {
+                fileSet.add(
+                    path.fileName
+                        .toString(),
+                )
+            }
+        }
+    }
+    val manglerAppJar = fileSet.none { it == "app.jar" }
+    if (manglerAppJar) {
+        throw RuntimeException("app.jar ikke funnet i $runtimeDirectory")
+    }
+    val jarpath = "$runtimeDirectory/app.jar"
     logger.info(jarpath)
-    val sqlFiler: List<String> = emptyList()
+    val sqlFiler: List<String> = ArrayList()
     val zip = ZipInputStream(FileInputStream(jarpath))
     zip.use {
         var entry: ZipEntry? = zip.getNextEntry()
@@ -94,6 +110,7 @@ private fun getPathsFromResourceJAR(
             entry = zip.getNextEntry()
         }
     }
+    println("Fant jar sql filer $sqlFiler")
 
     return sqlFiler
 }
@@ -108,8 +125,6 @@ private fun readResources(logger: Logger): List<String> {
     logger.info("resourceFolderURL.path" + resourceFolderURL.path)
     return if (appIsInGCP()) {
         getPathsFromResourceJAR(
-            DataSource::class.java.getProtectionDomain().codeSource.location
-                .toURI().path,
             logger,
         )
     } else {

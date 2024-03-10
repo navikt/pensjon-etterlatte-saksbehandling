@@ -17,6 +17,7 @@ import { VelgOppgaveliste } from '~components/oppgavebenk/velgOppgaveliste/VelgO
 import { GosysOppgaveliste } from '~components/oppgavebenk/GosysOppgaveliste'
 import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
+import { ProvideOppgavebenkContext } from '~components/oppgavebenk/state/OppgavebenkContext'
 
 export const Oppgavelistene = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
@@ -94,9 +95,11 @@ export const Oppgavelistene = () => {
   }
 
   return (
-    <Container>
-      <VelgOppgaveliste oppgavelisteValg={oppgavelisteValg} setOppgavelisteValg={setOppgavelisteValg} />
-      {rendreValgtOppgaveliste()}
-    </Container>
+    <ProvideOppgavebenkContext>
+      <Container>
+        <VelgOppgaveliste oppgavelisteValg={oppgavelisteValg} setOppgavelisteValg={setOppgavelisteValg} />
+        {rendreValgtOppgaveliste()}
+      </Container>
+    </ProvideOppgavebenkContext>
   )
 }

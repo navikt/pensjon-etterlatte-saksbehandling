@@ -18,6 +18,9 @@ import {
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { ApiError } from '~shared/api/apiClient'
+import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
+import { useAppSelector } from '~store/Store'
+import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -36,9 +39,15 @@ export const Oppgavelista = ({
   oppgavelistaOppgaverResult,
   hentOppgavelistaOppgaverFetch,
 }: Props) => {
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  if (!innloggetSaksbehandler.skriveTilgang) {
+    return <Tilgangsmelding />
+  }
+
   const [filter, setFilter] = useState<Filter>(hentFilterFraLocalStorage())
 
-  const [oppgaver, setOppgaver] = useState<Array<OppgaveDTO>>([])
+  const oppgavebenkState = useOppgaveBenkState()
+  const dispatcher = useOppgavebenkStateDispatcher()
 
   const oppdaterSaksbehandlerTildeling = (
     oppgave: OppgaveDTO,
@@ -46,7 +55,9 @@ export const Oppgavelista = ({
     versjon: number | null
   ) => {
     setTimeout(() => {
-      setOppgaver(finnOgOppdaterSaksbehandlerTildeling(oppgaver, oppgave.id, saksbehandler, versjon))
+      dispatcher.setOppgavelistaOppgaver(
+        finnOgOppdaterSaksbehandlerTildeling(oppgavebenkState.oppgavelistaOppgaver, oppgave.id, saksbehandler, versjon)
+      )
     }, 2000)
   }
 
@@ -58,12 +69,12 @@ export const Oppgavelista = ({
 
   useEffect(() => {
     if (isSuccess(oppgavelistaOppgaverResult)) {
-      setOppgaver(sorterOppgaverEtterOpprettet(oppgavelistaOppgaverResult.data))
+      dispatcher.setOppgavelistaOppgaver(sorterOppgaverEtterOpprettet(oppgavelistaOppgaverResult.data))
     }
   }, [oppgavelistaOppgaverResult])
 
   useEffect(() => {
-    if (!oppgaver?.length) hentOppgavelistaOppgaver()
+    if (!oppgavebenkState.oppgavelistaOppgaver?.length) hentOppgavelistaOppgaver()
   }, [])
 
   useEffect(() => {
@@ -73,7 +84,7 @@ export const Oppgavelista = ({
   return mapResult(oppgavelistaOppgaverResult, {
     pending: <Spinner visible={true} label="Henter oppgaver" />,
     error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente oppgaver'}</ApiErrorAlert>,
-    success: (oppgaver) => (
+    success: () => (
       <>
         <FilterRad
           hentAlleOppgaver={hentOppgavelistaOppgaver}
@@ -86,7 +97,7 @@ export const Oppgavelista = ({
           oppgavelisteValg={OppgavelisteValg.OPPGAVELISTA}
         />
         <Oppgaver
-          oppgaver={oppgaver}
+          oppgaver={oppgavebenkState.oppgavelistaOppgaver}
           oppdaterTildeling={oppdaterSaksbehandlerTildeling}
           saksbehandlereIEnhet={saksbehandlereIEnhet}
           revurderingsaarsaker={revurderingsaarsaker}

@@ -19,6 +19,7 @@ import {
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveutils'
 import { ApiError } from '~shared/api/apiClient'
+import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -38,7 +39,8 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet, gosysOppgaverResult, h
 
   const [filter, setFilter] = useState<Filter>(defaultFiltre)
 
-  const [oppgaver, setOppgaver] = useState<Array<OppgaveDTO>>([])
+  const oppgavebenkState = useOppgaveBenkState()
+  const dispatcher = useOppgavebenkStateDispatcher()
 
   const oppdaterSaksbehandlerTildeling = (
     oppgave: OppgaveDTO,
@@ -46,18 +48,25 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet, gosysOppgaverResult, h
     versjon: number | null
   ) => {
     setTimeout(() => {
-      setOppgaver(finnOgOppdaterSaksbehandlerTildeling(oppgaver, oppgave.id, saksbehandler, versjon))
+      dispatcher.setGosysOppgavelisteOppgaver(
+        finnOgOppdaterSaksbehandlerTildeling(
+          oppgavebenkState.gosysOppgavelisteOppgaver,
+          oppgave.id,
+          saksbehandler,
+          versjon
+        )
+      )
     }, 2000)
   }
 
   useEffect(() => {
     if (isSuccess(gosysOppgaverResult)) {
-      setOppgaver(sorterOppgaverEtterOpprettet(gosysOppgaverResult.data))
+      dispatcher.setGosysOppgavelisteOppgaver(sorterOppgaverEtterOpprettet(gosysOppgaverResult.data))
     }
   }, [gosysOppgaverResult])
 
   useEffect(() => {
-    if (!oppgaver?.length) hentGosysOppgaverFetch({})
+    if (!oppgavebenkState.gosysOppgavelisteOppgaver?.length) hentGosysOppgaverFetch({})
   }, [])
 
   return mapResult(gosysOppgaverResult, {
@@ -85,7 +94,7 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet, gosysOppgaverResult, h
           oppgavelisteValg={OppgavelisteValg.GOSYS_OPPGAVER}
         />
         <Oppgaver
-          oppgaver={oppgaver}
+          oppgaver={oppgavebenkState.gosysOppgavelisteOppgaver}
           oppdaterTildeling={oppdaterSaksbehandlerTildeling}
           saksbehandlereIEnhet={saksbehandlereIEnhet}
           revurderingsaarsaker={new RevurderingsaarsakerDefault()}

@@ -1,742 +1,359 @@
 package no.nav.etterlatte.vedtaksvurdering
 
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.patch
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.testing.testApplication
-import io.mockk.clearAllMocks
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.confirmVerified
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.runs
-import no.nav.etterlatte.ktor.issueSaksbehandlerToken
-import no.nav.etterlatte.ktor.runServer
+import io.ktor.server.application.call
+import io.ktor.server.application.install
+import io.ktor.server.application.log
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.application
+import io.ktor.server.routing.get
+import io.ktor.server.routing.patch
+import io.ktor.server.routing.post
+import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.KlageStatus
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.deserialize
-import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.behandlingId
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
-import no.nav.etterlatte.libs.common.vedtak.Periode
-import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
-import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
+import no.nav.etterlatte.libs.common.withBehandlingId
+import no.nav.etterlatte.libs.common.withSakId
+import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
-import no.nav.security.mock.oauth2.MockOAuth2Server
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.UUID
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class VedtaksvurderingRouteTest {
-    private val server = MockOAuth2Server()
-    private val behandlingKlient = mockk<BehandlingKlient>()
-    private val vedtaksvurderingService: VedtaksvurderingService = mockk()
-    private val vedtakBehandlingService: VedtakBehandlingService = mockk()
-    private val vedtakKlageService: VedtakKlageService = mockk()
-    private val rapidService: VedtaksvurderingRapidService = mockk()
+fun Route.vedtaksvurderingRoute(
+    vedtakService: VedtaksvurderingService,
+    vedtakBehandlingService: VedtakBehandlingService,
+    rapidService: VedtaksvurderingRapidService,
+    behandlingKlient: BehandlingKlient,
+) {
+    route("/api/vedtak") {
+        val logger = application.log
 
-    @BeforeAll
-    fun before() {
-        server.start()
-    }
-
-    @AfterEach
-    fun afterEach() {
-        confirmVerified()
-        clearAllMocks()
-    }
-
-    @BeforeEach
-    fun beforeEach() {
-        clearAllMocks()
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
-    }
-
-    @AfterAll
-    fun after() {
-        server.shutdown()
-    }
-
-    @Test
-    fun `skal returnere 401 naar token mangler`() {
-        testApplication {
-            runServer(server) {
-                vedtaksvurderingRoute(
-                    vedtaksvurderingService,
-                    vedtakBehandlingService,
-                    rapidService,
-                    behandlingKlient,
-                )
-            }
-
-            val response =
-                client.get("/api/vedtak/${UUID.randomUUID()}") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                }
-
-            response.status shouldBe HttpStatusCode.Unauthorized
-        }
-    }
-
-    @Test
-    fun `skal returnere 500 ved ukjent feil og returnere generell feilmelding`() {
-        every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } throws Exception("ukjent feil")
-
-        testApplication {
-            runServer(server) {
-                vedtaksvurderingRoute(
-                    vedtaksvurderingService,
-                    vedtakBehandlingService,
-                    rapidService,
-                    behandlingKlient,
-                )
-            }
-
-            val response =
-                client.get("/api/vedtak/${UUID.randomUUID()}") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }
-
-            response.status shouldBe HttpStatusCode.InternalServerError
-        }
-
-        coVerify(exactly = 1) {
-            behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-            vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
-        }
-    }
-
-    @Test
-    fun `skal returnere 404 naar vedtaksvurdering ikke finnes`() {
-        every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns null
-
-        testApplication {
-            runServer(server) {
-                vedtaksvurderingRoute(
-                    vedtaksvurderingService,
-                    vedtakBehandlingService,
-                    rapidService,
-                    behandlingKlient,
-                )
-            }
-
-            val response =
-                client.get("/api/vedtak/${UUID.randomUUID()}") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }
-
-            response.status shouldBe HttpStatusCode.NotFound
-        }
-
-        coVerify(exactly = 1) {
-            behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-            vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
-        }
-    }
-
-    @Test
-    fun `skal returnere eksisterende vedtaksvurdering`() {
-        val opprettetVedtak = vedtak()
-        every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns opprettetVedtak
-
-        testApplication {
-            runServer(server) {
-                vedtaksvurderingRoute(
-                    vedtaksvurderingService,
-                    vedtakBehandlingService,
-                    rapidService,
-                    behandlingKlient,
-                )
-            }
-
-            val vedtak =
-                client.get("/api/vedtak/${UUID.randomUUID()}") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }.let {
-                    it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakDto>(it.bodyAsText())
-                }
-
-            with(vedtak) {
-                id shouldBe opprettetVedtak.id
-                status shouldBe opprettetVedtak.status
-                behandlingId shouldBe opprettetVedtak.behandlingId
-                sak.sakType shouldBe opprettetVedtak.sakType
-                sak.id shouldBe opprettetVedtak.sakId
-                type shouldBe opprettetVedtak.type
-                vedtakFattet shouldBe null
-                attestasjon shouldBe null
-                with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
-                    val opprettetVedtakInnhold = opprettetVedtak.innhold as VedtakInnhold.Behandling
-                    virkningstidspunkt shouldBe opprettetVedtakInnhold.virkningstidspunkt
-                    behandling.type shouldBe opprettetVedtakInnhold.behandlingType
-                    utbetalingsperioder shouldHaveSize 1
-                    with(utbetalingsperioder.first()) {
-                        id shouldBe 1L
-                        periode shouldBe Periode(opprettetVedtakInnhold.virkningstidspunkt, null)
-                        beloep shouldBe BigDecimal.valueOf(100)
-                        type shouldBe UtbetalingsperiodeType.UTBETALING
-                    }
-                }
-            }
-
-            coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-                vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
+        get("/sak/{${SAKID_CALL_PARAMETER}}/iverksatte") {
+            withSakId(behandlingKlient) { sakId ->
+                logger.info("Henter iverksatte vedtak for sak $sakId")
+                val iverksatteVedtak = vedtakBehandlingService.hentIverksatteVedtakISak(sakId)
+                call.respond(iverksatteVedtak.map { it.toVedtakSammendragDto() })
             }
         }
-    }
 
-    @Test
-    fun `skal returnere eksisterende vedtaksvurdering for en behandling`() {
-        val opprettetVedtak = vedtak()
-        every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns opprettetVedtak
-
-        testApplication {
-            runServer(server) {
-                vedtaksvurderingRoute(
-                    vedtaksvurderingService,
-                    vedtakBehandlingService,
-                    rapidService,
-                    behandlingKlient,
-                )
+        get("/sak/{${SAKID_CALL_PARAMETER}}/samordning") {
+            withSakId(behandlingKlient) { sakId ->
+                logger.info("Henter samordningsinfo for sak $sakId")
+                val samordningsinfo = vedtakBehandlingService.samordningsinfo(sakId)
+                call.respond(samordningsinfo)
             }
+        }
 
-            val vedtak =
-                client.get("/api/vedtak/${UUID.randomUUID()}") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }.let {
-                    it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakDto>(it.bodyAsText())
-                }
-
-            with(vedtak) {
-                id shouldBe opprettetVedtak.id
-                status shouldBe opprettetVedtak.status
-                behandlingId shouldBe opprettetVedtak.behandlingId
-                sak.sakType shouldBe opprettetVedtak.sakType
-                sak.id shouldBe opprettetVedtak.sakId
-                type shouldBe opprettetVedtak.type
-                vedtakFattet shouldBe null
-                attestasjon shouldBe null
-                (innhold as VedtakInnholdDto.VedtakBehandlingDto).let {
-                    val opprettVedtakInnhold = opprettetVedtak.innhold as VedtakInnhold.Behandling
-                    it.virkningstidspunkt shouldBe opprettVedtakInnhold.virkningstidspunkt
-                    it.behandling.type shouldBe opprettVedtakInnhold.behandlingType
-                    it.utbetalingsperioder shouldHaveSize 1
-                    with(it.utbetalingsperioder.first()) {
-                        id shouldBe 1L
-                        periode shouldBe Periode(it.virkningstidspunkt, null)
-                        beloep shouldBe BigDecimal.valueOf(100)
-                        type shouldBe UtbetalingsperiodeType.UTBETALING
-                    }
+        get("/{$BEHANDLINGID_CALL_PARAMETER}") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter vedtak for behandling $behandlingId")
+                val vedtak = vedtakService.hentVedtakMedBehandlingId(behandlingId)
+                if (vedtak == null) {
+                    call.response.status(HttpStatusCode.NotFound)
+                } else {
+                    call.respond(vedtak.toDto())
                 }
             }
+        }
 
-            coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-                vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/sammendrag") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter sammendrag av vedtak for behandling $behandlingId")
+                val vedtaksresultat = vedtakService.hentVedtakMedBehandlingId(behandlingId)?.toVedtakSammendragDto()
+                if (vedtaksresultat == null) {
+                    call.response.status(HttpStatusCode.NoContent)
+                } else {
+                    call.respond(vedtaksresultat)
+                }
+            }
+        }
+
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/upsert") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
+                val nyttVedtak = vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
+                call.respond(nyttVedtak.toDto())
+            }
+        }
+
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/fattvedtak") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Fatter vedtak for behandling $behandlingId")
+                val fattetVedtak = vedtakBehandlingService.fattVedtak(behandlingId, brukerTokenInfo)
+                rapidService.sendToRapid(fattetVedtak)
+
+                call.respond(fattetVedtak.vedtak)
+            }
+        }
+
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/attester") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Attesterer vedtak for behandling $behandlingId")
+                val (kommentar) = call.receive<AttesterVedtakDto>()
+                val attestert = vedtakBehandlingService.attesterVedtak(behandlingId, kommentar, brukerTokenInfo)
+
+                try {
+                    rapidService.sendToRapid(attestert)
+                } catch (e: Exception) {
+                    logger.error(
+                        "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.vedtak.id} " +
+                            "Saknr: ${attestert.vedtak.sak.id}. " +
+                            "Det betyr at vi ikke får sendt ut vedtaksbrev og heller ikke utbetalingsoppdrag. " +
+                            "Denne hendelsen må sendes ut manuelt straks.",
+                        e,
+                    )
+                    throw e
+                }
+                call.respond(attestert.vedtak)
+            }
+        }
+
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/samordning") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val respons = vedtakBehandlingService.samordningsinfo(behandlingId)
+                call.respond(respons)
+            }
+        }
+
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/underkjenn") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Underkjenner vedtak for behandling $behandlingId")
+                val begrunnelse = call.receive<UnderkjennVedtakDto>()
+                val underkjentVedtak =
+                    vedtakBehandlingService.underkjennVedtak(
+                        behandlingId,
+                        brukerTokenInfo,
+                        begrunnelse,
+                    )
+                rapidService.sendToRapid(underkjentVedtak)
+
+                call.respond(underkjentVedtak.vedtak)
+            }
+        }
+
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/tilsamordning") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Vedtak er til samordning for behandling $behandlingId")
+                val vedtak = vedtakBehandlingService.tilSamordningVedtak(behandlingId, brukerTokenInfo)
+                rapidService.sendToRapid(vedtak)
+                call.respond(HttpStatusCode.OK, vedtak.rapidInfo1.vedtak)
+            }
+        }
+
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/samordnet") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Vedtak ferdig samordning for behandling $behandlingId")
+
+                vedtakBehandlingService.samordnetVedtak(behandlingId, brukerTokenInfo)?.let { vedtak ->
+                    rapidService.sendToRapid(vedtak)
+                    call.respond(HttpStatusCode.OK, vedtak.rapidInfo1.vedtak)
+                } ?: call.respond(HttpStatusCode.NoContent)
+            }
+        }
+
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/iverksett") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Iverksetter vedtak for behandling $behandlingId")
+                val vedtak = vedtakBehandlingService.iverksattVedtak(behandlingId, brukerTokenInfo)
+                rapidService.sendToRapid(vedtak)
+
+                call.respond(HttpStatusCode.OK, vedtak.vedtak)
+            }
+        }
+
+        get("/loepende/{$SAKID_CALL_PARAMETER}") {
+            withSakId(behandlingKlient) { sakId ->
+                val dato =
+                    call.request.queryParameters["dato"]?.let { LocalDate.parse(it) }
+                        ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
+
+                logger.info("Sjekker om vedtak er løpende for sak $sakId på dato $dato")
+                val loependeYtelse = vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(sakId, dato)
+                call.respond(loependeYtelse.toDto())
+            }
+        }
+
+        patch("/{$BEHANDLINGID_CALL_PARAMETER}/tilbakestill") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Tilbakestiller ikke iverksatte vedtak for behandling $behandlingId")
+                vedtakBehandlingService.tilbakestillIkkeIverksatteVedtak(behandlingId)
+                call.respond(HttpStatusCode.OK)
             }
         }
     }
 
-    @Test
-    fun `skal returnere eksisterende vedtaksvurdering for en tilbakekreving`() {
-        val opprettetVedtak = vedtakTilbakekreving()
-        every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns opprettetVedtak
-
-        testApplication {
-            runServer(server) {
-                vedtaksvurderingRoute(
-                    vedtaksvurderingService,
-                    vedtakBehandlingService,
-                    rapidService,
-                    behandlingKlient,
-                )
+    route("/vedtak") {
+        route("/samordnet") {
+            install(AuthorizationPlugin) {
+                roles = setOf("samordning-write")
             }
 
-            val vedtak =
-                client.get("/api/vedtak/${UUID.randomUUID()}") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }.let {
-                    it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakDto>(it.bodyAsText())
+            post("/{vedtakId}") {
+                val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
+
+                val vedtak = vedtakService.hentVedtak(vedtakId)
+                if (vedtak == null) {
+                    call.respond(HttpStatusCode.NotFound)
                 }
 
-            with(vedtak) {
-                id shouldBe opprettetVedtak.id
-                status shouldBe opprettetVedtak.status
-                behandlingId shouldBe opprettetVedtak.behandlingId
-                sak.sakType shouldBe opprettetVedtak.sakType
-                sak.id shouldBe opprettetVedtak.sakId
-                type shouldBe opprettetVedtak.type
-                vedtakFattet shouldBe null
-                attestasjon shouldBe null
-                (innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving shouldBe
-                    (opprettetVedtak.innhold as VedtakInnhold.Tilbakekreving).tilbakekreving
+                vedtakBehandlingService.samordnetVedtak(vedtak!!.behandlingId, brukerTokenInfo)
+                    ?.let { samordnetVedtak ->
+                        rapidService.sendToRapid(samordnetVedtak)
+                        call.respond(HttpStatusCode.OK, samordnetVedtak.rapidInfo1.vedtak)
+                    } ?: call.respond(vedtak.toDto())
             }
         }
-
-        coVerify(exactly = 1) {
-            behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-            vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
-        }
-    }
-
-    @Test
-    fun `skal returnere vedtaksammendrag`() {
-        val attestertVedtak =
-            vedtak().copy(
-                status = VedtakStatus.ATTESTERT,
-                attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
-            )
-        every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns attestertVedtak
-
-        testApplication {
-            runServer(server) {
-                vedtaksvurderingRoute(
-                    vedtaksvurderingService,
-                    vedtakBehandlingService,
-                    rapidService,
-                    behandlingKlient,
-                )
-            }
-
-            val vedtaksammendrag =
-                client.get("/api/vedtak/${UUID.randomUUID()}/sammendrag") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }.let {
-                    it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakSammendragDto>(it.bodyAsText())
-                }
-
-            vedtaksammendrag.id shouldBe attestertVedtak.id.toString()
-            vedtaksammendrag.behandlingId shouldBe attestertVedtak.behandlingId
-            vedtaksammendrag.datoAttestert shouldNotBe null
-            // TODO datoAttestert leses inn som UTC selv om den er +01:00 - ville forventet med norsk tidssone?
-            // vedtaksammendrag.datoAttestert shouldBe attestertVedtak.attestasjon?.tidspunkt?.toNorskTid()
-
-            coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-                vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
-            }
-        }
-    }
-
-    @Test
-    fun `skal sjekke om sak har loepende vedtak`() {
-        val sakId = 1L
-        val loependeYtelse = LoependeYtelse(erLoepende = true, LocalDate.now(), UUID.randomUUID())
-
-        every { vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(any(), any()) } returns loependeYtelse
-        coEvery { behandlingKlient.harTilgangTilSak(any(), any(), any()) } returns true
-
-        testApplication {
-            runServer(server) {
-                vedtaksvurderingRoute(
-                    vedtaksvurderingService,
-                    vedtakBehandlingService,
-                    rapidService,
-                    behandlingKlient,
-                )
-            }
-
-            val hentetLoependeYtelse =
-                client.get("/api/vedtak/loepende/$sakId?dato=${loependeYtelse.dato}") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }.let {
-                    it.status shouldBe HttpStatusCode.OK
-                    deserialize<LoependeYtelseDTO>(it.bodyAsText())
-                }
-
-            hentetLoependeYtelse.erLoepende shouldBe loependeYtelse.erLoepende
-            hentetLoependeYtelse.dato shouldBe loependeYtelse.dato
-
-            coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilSak(any(), any(), any())
-                vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(any(), any())
-            }
-        }
-    }
-
-    @Test
-    fun `skal opprette eller oppdatere vedtak`() {
-        val opprettetVedtak = vedtak()
-        coEvery { vedtakBehandlingService.opprettEllerOppdaterVedtak(any(), any()) } returns opprettetVedtak
-
-        testApplication {
-            runServer(server) {
-                vedtaksvurderingRoute(
-                    vedtaksvurderingService,
-                    vedtakBehandlingService,
-                    rapidService,
-                    behandlingKlient,
-                )
-            }
-
-            val vedtak =
-                client.post("/api/vedtak/${UUID.randomUUID()}/upsert") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }.let {
-                    it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakDto>(it.bodyAsText())
-                }
-
-            with(vedtak) {
-                id shouldBe opprettetVedtak.id
-                status shouldBe opprettetVedtak.status
-                behandlingId shouldBe opprettetVedtak.behandlingId
-                sak.sakType shouldBe opprettetVedtak.sakType
-                sak.id shouldBe opprettetVedtak.sakId
-                type shouldBe opprettetVedtak.type
-                vedtakFattet shouldBe null
-                attestasjon shouldBe null
-                val opprettetVedtakInnhold = opprettetVedtak.innhold as VedtakInnhold.Behandling
-                with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
-                    virkningstidspunkt shouldBe opprettetVedtakInnhold.virkningstidspunkt
-                    behandling.type shouldBe opprettetVedtakInnhold.behandlingType
-                    utbetalingsperioder shouldHaveSize 1
-                    with(utbetalingsperioder.first()) {
-                        id shouldBe 1L
-                        periode shouldBe Periode(opprettetVedtakInnhold.virkningstidspunkt, null)
-                        beloep shouldBe BigDecimal.valueOf(100)
-                        type shouldBe UtbetalingsperiodeType.UTBETALING
-                    }
-                }
-            }
-
-            coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-                vedtakBehandlingService.opprettEllerOppdaterVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 })
-            }
-        }
-    }
-
-    @Test
-    fun `skal fatte vedtak`() {
-        val fattetVedtak =
-            vedtak().copy(
-                status = VedtakStatus.FATTET_VEDTAK,
-                vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
-            )
-        coEvery { vedtakBehandlingService.fattVedtak(any(), any(), any()) } returns
-            VedtakOgRapid(
-                fattetVedtak.toDto(),
-                mockk(),
-            )
-        coEvery { rapidService.sendToRapid(any()) } just runs
-
-        testApplication {
-            runServer(server) {
-                vedtaksvurderingRoute(
-                    vedtaksvurderingService,
-                    vedtakBehandlingService,
-                    rapidService,
-                    behandlingKlient,
-                )
-            }
-
-            val vedtak =
-                client.post("/api/vedtak/${UUID.randomUUID()}/fattvedtak") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }.let {
-                    it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakDto>(it.bodyAsText())
-                }
-
-            with(vedtak) {
-                id shouldBe fattetVedtak.id
-                status shouldBe fattetVedtak.status
-                behandlingId shouldBe fattetVedtak.behandlingId
-                sak.sakType shouldBe fattetVedtak.sakType
-                sak.id shouldBe fattetVedtak.sakId
-                type shouldBe fattetVedtak.type
-                vedtakFattet shouldBe fattetVedtak.vedtakFattet
-                attestasjon shouldBe null
-                with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
-                    val fattetVedtakInnhold = fattetVedtak.innhold as VedtakInnhold.Behandling
-                    virkningstidspunkt shouldBe fattetVedtakInnhold.virkningstidspunkt
-                    behandling.type shouldBe fattetVedtakInnhold.behandlingType
-                    utbetalingsperioder shouldHaveSize 1
-                    with(utbetalingsperioder.first()) {
-                        id shouldBe 1L
-                        periode shouldBe Periode(fattetVedtakInnhold.virkningstidspunkt, null)
-                        beloep shouldBe BigDecimal.valueOf(100)
-                        type shouldBe UtbetalingsperiodeType.UTBETALING
-                    }
-                }
-            }
-
-            coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-                vedtakBehandlingService.fattVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 }, any())
-                rapidService.sendToRapid(any())
-            }
-        }
-    }
-
-    @Test
-    fun `skal attestere vedtak`() {
-        val attestertVedtakKommentar = AttesterVedtakDto("Alt ser fint ut")
-        val attestertVedtak =
-            vedtak().copy(
-                status = VedtakStatus.ATTESTERT,
-                vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
-                attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
-            )
-        coEvery { vedtakBehandlingService.attesterVedtak(any(), any(), any(), any()) } returns
-            VedtakOgRapid(
-                attestertVedtak.toDto(),
-                mockk(),
-            )
-        coEvery { rapidService.sendToRapid(any()) } just runs
-
-        testApplication {
-            runServer(server) {
-                vedtaksvurderingRoute(
-                    vedtaksvurderingService,
-                    vedtakBehandlingService,
-                    rapidService,
-                    behandlingKlient,
-                )
-            }
-
-            val vedtakDto =
-                client.post("/api/vedtak/${UUID.randomUUID()}/attester") {
-                    setBody(attestertVedtakKommentar.toJson())
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }.let {
-                    it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakDto>(it.bodyAsText())
-                }
-
-            with(vedtakDto) {
-                id shouldBe attestertVedtak.id
-                status shouldBe attestertVedtak.status
-                behandlingId shouldBe attestertVedtak.behandlingId
-                sak.sakType shouldBe attestertVedtak.sakType
-                sak.id shouldBe attestertVedtak.sakId
-                type shouldBe attestertVedtak.type
-                vedtakFattet shouldBe attestertVedtak.vedtakFattet
-                attestasjon shouldBe attestertVedtak.attestasjon
-                with(vedtakDto.innhold as VedtakInnholdDto.VedtakBehandlingDto) {
-                    val attestertVedtakInnhold = attestertVedtak.innhold as VedtakInnhold.Behandling
-                    virkningstidspunkt shouldBe attestertVedtakInnhold.virkningstidspunkt
-                    behandling.type shouldBe attestertVedtakInnhold.behandlingType
-                    utbetalingsperioder shouldHaveSize 1
-                    with(utbetalingsperioder.first()) {
-                        id shouldBe 1L
-                        periode shouldBe Periode(attestertVedtakInnhold.virkningstidspunkt, null)
-                        beloep shouldBe BigDecimal.valueOf(100)
-                        type shouldBe UtbetalingsperiodeType.UTBETALING
-                    }
-                }
-            }
-
-            coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-                vedtakBehandlingService.attesterVedtak(
-                    any(),
-                    match { it == attestertVedtakKommentar.kommentar },
-                    match { it.ident() == SAKSBEHANDLER_1 },
-                    any(),
-                )
-                rapidService.sendToRapid(any())
-            }
-        }
-    }
-
-    @Test
-    fun `skal underkjenne vedtak`() {
-        val underkjentVedtak =
-            vedtak().copy(
-                status = VedtakStatus.RETURNERT,
-            )
-        val begrunnelse = UnderkjennVedtakDto("Ikke bra nok begrunnet", "Annet")
-        coEvery { vedtakBehandlingService.underkjennVedtak(any(), any(), any()) } returns
-            VedtakOgRapid(underkjentVedtak.toDto(), mockk())
-        coEvery { rapidService.sendToRapid(any()) } just runs
-
-        testApplication {
-            runServer(server) {
-                vedtaksvurderingRoute(
-                    vedtaksvurderingService,
-                    vedtakBehandlingService,
-                    rapidService,
-                    behandlingKlient,
-                )
-            }
-
-            val vedtak =
-                client.post("/api/vedtak/${UUID.randomUUID()}/underkjenn") {
-                    setBody(begrunnelse.toJson())
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }.let {
-                    it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakDto>(it.bodyAsText())
-                }
-
-            with(vedtak) {
-                id shouldBe underkjentVedtak.id
-                status shouldBe underkjentVedtak.status
-                behandlingId shouldBe underkjentVedtak.behandlingId
-                sak.sakType shouldBe underkjentVedtak.sakType
-                sak.id shouldBe underkjentVedtak.sakId
-                type shouldBe underkjentVedtak.type
-                vedtakFattet shouldBe null
-                attestasjon shouldBe null
-                with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
-                    val underkjentVedtakInnhold = underkjentVedtak.innhold as VedtakInnhold.Behandling
-                    virkningstidspunkt shouldBe underkjentVedtakInnhold.virkningstidspunkt
-                    behandling.type shouldBe underkjentVedtakInnhold.behandlingType
-                    utbetalingsperioder shouldHaveSize 1
-                    with(utbetalingsperioder.first()) {
-                        id shouldBe 1L
-                        periode shouldBe Periode(underkjentVedtakInnhold.virkningstidspunkt, null)
-                        beloep shouldBe BigDecimal.valueOf(100)
-                        type shouldBe UtbetalingsperiodeType.UTBETALING
-                    }
-                }
-            }
-
-            coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-                vedtakBehandlingService.underkjennVedtak(
-                    any(),
-                    match { it.ident() == SAKSBEHANDLER_1 },
-                    match { it == begrunnelse },
-                )
-                rapidService.sendToRapid(any())
-            }
-        }
-    }
-
-    @Test
-    fun `skal tilbakestille vedtak`() {
-        val tilbakestiltVedtak =
-            vedtak().copy(
-                status = VedtakStatus.RETURNERT,
-            )
-        coEvery { vedtakBehandlingService.tilbakestillIkkeIverksatteVedtak(any()) } returns tilbakestiltVedtak
-
-        testApplication {
-            runServer(server) {
-                vedtaksvurderingRoute(
-                    vedtaksvurderingService,
-                    vedtakBehandlingService,
-                    rapidService,
-                    behandlingKlient,
-                )
-            }
-
-            client.patch("/api/vedtak/${UUID.randomUUID()}/tilbakestill") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let {
-                it.status shouldBe HttpStatusCode.OK
-            }
-
-            coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-                vedtakBehandlingService.tilbakestillIkkeIverksatteVedtak(any())
-            }
-        }
-    }
-
-    @Test
-    fun `skal opprette vedtak for avvist klage`() {
-        val vedtakKlage = vedtakKlage()
-        val klage = klage()
-        coEvery { vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(any()) } returns vedtakKlage
-        every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns vedtakKlage
-
-        testApplication {
-            runServer(server) {
-                vedtaksvurderingRoute(
-                    vedtaksvurderingService,
-                    vedtakBehandlingService,
-                    rapidService,
-                    behandlingKlient,
-                )
-                klagevedtakRoute(
-                    vedtakKlageService,
-                    behandlingKlient,
-                )
-            }
-            val vedtakDto: VedtakDto =
-                client.post("/vedtak/klage/${klage.id}/upsert") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                    setBody(klage.toJson())
-                }.let {
-                    it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakDto>(it.bodyAsText())
-                }
-            vedtakDto.id shouldBe vedtakKlage.id
-
-            coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-                vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(
-                    withArg { it.id shouldBe klage.id },
-                )
-            }
-        }
-    }
-
-    private val token: String by lazy { server.issueSaksbehandlerToken(navIdent = SAKSBEHANDLER_1) }
-
-    private fun klage(): Klage {
-        return Klage(
-            UUID.randomUUID(),
-            Sak("ident", SakType.BARNEPENSJON, 1L, "einheit"),
-            Tidspunkt.now(),
-            KlageStatus.OPPRETTET,
-            kabalResultat = null,
-            kabalStatus = null,
-            formkrav = null,
-            innkommendeDokument = null,
-            resultat = null,
-            utfall = null,
-            aarsakTilAvbrytelse = null,
-            initieltUtfall = null,
-        )
     }
 }
+
+fun Route.samordningsvedtakRoute(vedtakSamordningService: VedtakSamordningService) {
+    route("/api/samordning/vedtak") {
+        install(AuthorizationPlugin) {
+            roles = setOf("samordning-read")
+        }
+
+        get {
+            val fomDato =
+                call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "fomDato ikke angitt")
+            val fnr =
+                call.request.headers["fnr"]?.let { Folkeregisteridentifikator.of(it) }
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
+
+            val vedtaksliste = vedtakSamordningService.hentVedtaksliste(fnr, fomDato)
+            call.respond(vedtaksliste)
+        }
+
+        get("/{vedtakId}") {
+            val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
+
+            val vedtak = vedtakSamordningService.hentVedtak(vedtakId)
+            if (vedtak != null) {
+                call.respond(vedtak)
+            } else {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+    }
+}
+
+fun Route.tilbakekrevingvedtakRoute(
+    service: VedtakTilbakekrevingService,
+    behandlingKlient: BehandlingKlient,
+) {
+    val logger = application.log
+
+    route("/tilbakekreving/{$BEHANDLINGID_CALL_PARAMETER}") {
+        post("/lagre-vedtak") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                val dto = call.receive<TilbakekrevingVedtakDto>()
+                logger.info("Oppretter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
+                call.respond(service.opprettEllerOppdaterVedtak(dto))
+            }
+        }
+        post("/fatt-vedtak") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
+                logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
+                call.respond(service.fattVedtak(dto, brukerTokenInfo))
+            }
+        }
+        post("/attester-vedtak") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
+                logger.info("Attesterer vedtak for tilbakekreving=${dto.tilbakekrevingId}")
+                call.respond(service.attesterVedtak(dto, brukerTokenInfo))
+            }
+        }
+        post("/underkjenn-vedtak") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                logger.info("Underkjenner vedtak for tilbakekreving=$behandlingId")
+                call.respond(service.underkjennVedtak(behandlingId))
+            }
+        }
+    }
+}
+
+fun Route.klagevedtakRoute(
+    service: VedtakKlageService,
+    behandlingKlient: BehandlingKlient,
+) {
+    val logger = application.log
+
+    route("/vedtak/klage/{$BEHANDLINGID_CALL_PARAMETER}") {
+        post("/upsert") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                val klage = call.receive<Klage>()
+                if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
+                logger.info("Oppretter vedtak for klage med id=$behandlingId")
+
+                call.respond(service.opprettEllerOppdaterVedtakOmAvvisning(klage).toDto())
+            }
+        }
+
+        post("/fatt") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                val klage = call.receive<Klage>()
+                if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
+
+                logger.info("Fatter vedtak for klage med id=$behandlingId")
+                call.respond(service.fattVedtak(klage, brukerTokenInfo).toDto())
+            }
+        }
+
+        post("/attester") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                val klage = call.receive<Klage>()
+                if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
+
+                logger.info("Attesterer vedtak for klage med id=$behandlingId")
+                call.respond(service.attesterVedtak(klage, brukerTokenInfo).toDto())
+            }
+        }
+        post("/underkjenn") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                logger.info("Underkjenner vedtak for klage=$behandlingId")
+                call.respond(service.underkjennVedtak(behandlingId).toDto())
+            }
+        }
+    }
+}
+
+private fun Vedtak.toVedtakSammendragDto() =
+    VedtakSammendragDto(
+        id = id.toString(),
+        behandlingId = behandlingId,
+        vedtakType = type,
+        behandlendeSaksbehandler = vedtakFattet?.ansvarligSaksbehandler,
+        datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
+        attesterendeSaksbehandler = attestasjon?.attestant,
+        datoAttestert = attestasjon?.tidspunkt?.toNorskTid(),
+    )
+
+private fun LoependeYtelse.toDto() =
+    LoependeYtelseDTO(
+        erLoepende = erLoepende,
+        dato = dato,
+        behandlingId = behandlingId,
+    )
+
+data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: String)
+
+private class MismatchingIdException(message: String) : ForespoerselException(
+    HttpStatusCode.BadRequest.value,
+    "ID_MISMATCH_MELLOM_PATH_OG_BODY",
+    message,
+)

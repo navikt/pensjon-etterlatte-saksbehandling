@@ -77,7 +77,6 @@ abstract class BehandlingIntegrationTest {
         private val dbExtension = DatabaseExtension()
     }
 
-    private val postgreSQLContainer = GenerellDatabaseExtension.postgreSQLContainer
     protected val server: MockOAuth2Server = MockOAuth2Server()
     internal lateinit var applicationContext: ApplicationContext
 
@@ -86,17 +85,18 @@ abstract class BehandlingIntegrationTest {
         featureToggleService: FeatureToggleService = DummyFeatureToggleService(),
     ) {
         server.start()
+        val props = dbExtension.properties()
 
         applicationContext =
             ApplicationContext(
                 env =
                     System.getenv().toMutableMap().apply {
                         put("KAFKA_RAPID_TOPIC", "test")
-                        put("DB_HOST", postgreSQLContainer.host)
-                        put("DB_USERNAME", postgreSQLContainer.username)
-                        put("DB_PASSWORD", postgreSQLContainer.password)
-                        put("DB_PORT", postgreSQLContainer.firstMappedPort.toString())
-                        put("DB_DATABASE", postgreSQLContainer.databaseName)
+                        put("DB_HOST", props.host)
+                        put("DB_USERNAME", props.username)
+                        put("DB_PASSWORD", props.password)
+                        put("DB_PORT", props.firstMappedPort.toString())
+                        put("DB_DATABASE", props.databaseName)
                         put("AZUREAD_ATTESTANT_GROUPID", azureAdAttestantClaim)
                         put("AZUREAD_SAKSBEHANDLER_GROUPID", azureAdSaksbehandlerClaim)
                         put("AZUREAD_STRENGT_FORTROLIG_GROUPID", azureAdStrengtFortroligClaim)
@@ -593,6 +593,14 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
 
     override suspend fun hentOppgave(
         id: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave {
+        return gosysApiOppgave()
+    }
+
+    override suspend fun ferdigstill(
+        id: String,
+        oppgaveVersjon: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave {
         return gosysApiOppgave()

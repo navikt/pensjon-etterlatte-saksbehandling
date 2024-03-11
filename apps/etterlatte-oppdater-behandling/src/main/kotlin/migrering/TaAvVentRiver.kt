@@ -18,6 +18,7 @@ import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import java.util.UUID
 
 internal class TaAvVentRiver(
     rapidsConnection: RapidsConnection,
@@ -48,7 +49,7 @@ internal class TaAvVentRiver(
             )
         respons.behandlinger.forEach {
             packet.sakId = it.sakId
-            packet.behandlingId = it.behandlingId
+            packet.behandlingId = UUID.fromString(it.referanse)
             packet[OPPGAVEKILDE_KEY] = it.oppgavekilde
             packet.eventName = Ventehendelser.TATT_AV_VENT.lagEventnameForType()
             context.publish(packet.toJson())

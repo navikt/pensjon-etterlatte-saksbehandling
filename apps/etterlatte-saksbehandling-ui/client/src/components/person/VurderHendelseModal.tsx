@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, Heading, Modal, Select, TextField } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, Modal, Select, TextField, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -78,7 +78,7 @@ const VurderHendelseModal = (props: Props) => {
                 ))}
               </Select>
               {valgtAarsak && [Revurderingaarsak.ANNEN, Revurderingaarsak.ANNEN_UTEN_BREV].includes(valgtAarsak) && (
-                <MarginTop>
+                <VStack gap="10" style={{ marginTop: '2rem' }}>
                   <TextField
                     label="Beskriv årsak"
                     size="medium"
@@ -86,7 +86,10 @@ const VurderHendelseModal = (props: Props) => {
                     value={fritekstgrunn}
                     onChange={(e) => setFritekstgrunn(e.target.value)}
                   />
-                </MarginTop>
+                  <Alert variant="warning" style={{ maxWidth: '20em' }}>
+                    Bruk denne årsaken kun dersom andre årsaker ikke er dekkende for revurderingen.
+                  </Alert>
+                </VStack>
               )}
               <MarginTop>
                 <TextField

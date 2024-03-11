@@ -79,17 +79,17 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                                 subCoroutineExceptionHandler,
                             ) { axsysKlient.hentEnheterForIdent(it) }
                     }
-                    .mapNotNull {
+                    .mapNotNull { (ident, enheter) ->
                         try {
-                            val enheter = it.second.await()
-                            if (enheter.isNotEmpty()) {
-                                it.first to enheter.map { enhet -> enhet.enhetsNummer }
+                            val enheterAwait = enheter.await()
+                            if (enheterAwait.isNotEmpty()) {
+                                ident to enheterAwait
                             } else {
-                                logger.info("Saksbehandler med ident ${it.first} har ingen enheter")
+                                logger.info("Saksbehandler med ident $ident har ingen enheter")
                                 null
                             }
                         } catch (e: Exception) {
-                            logger.error("Kunne ikke hente enheter for saksbehandlerident ${it.first}", e)
+                            logger.error("Kunne ikke hente enheter for saksbehandlerident $ident", e)
                             null
                         }
                     }

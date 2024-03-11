@@ -16,35 +16,32 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.VilkaarsvuderingKlient
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.security.SecureRandom
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class TrygdetidServiceImplIntegrationTest {
+internal class TrygdetidServiceImplIntegrationTest(dataSource: DataSource) {
+    companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
+    }
+
     val saksbehandler = Saksbehandler("token", "ident", null)
 
-    @Container
-    private val postgres = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-    private lateinit var repository: TrygdetidRepository
-    private lateinit var dataSource: DataSource
+    private val repository = TrygdetidRepository(dataSource)
     private lateinit var trygdetidService: TrygdetidServiceImpl
 
     private val pdlKilde: Grunnlagsopplysning.Pdl = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
@@ -55,9 +52,6 @@ internal class TrygdetidServiceImplIntegrationTest {
 
     @BeforeAll
     fun beforeAll() {
-        postgres.start()
-        dataSource = DataSourceBuilder.createDataSource(postgres.jdbcUrl, postgres.username, postgres.password)
-        repository = TrygdetidRepository(dataSource.apply { migrate() })
         vilkaarsvuderingKlient = vilkaarsvurderingKlientMock()
         trygdetidService =
             TrygdetidServiceImpl(
@@ -69,14 +63,9 @@ internal class TrygdetidServiceImplIntegrationTest {
             )
     }
 
-    @AfterAll
-    fun afterAll() {
-        postgres.stop()
-    }
-
     @AfterEach
     fun afterEach() {
-        cleanDatabase()
+        dbExtension.resetDb()
     }
 
     @Test
@@ -232,9 +221,5 @@ internal class TrygdetidServiceImplIntegrationTest {
                     mapOf(Opplysningstype.DOEDSDATO to Opplysning.Konstant(UUID.randomUUID(), kilde, nyDoedsdato.toJsonNode())),
             )
         return grunnlagTestData.hentOpplysningsgrunnlag()
-    }
-
-    private fun cleanDatabase() {
-        dataSource.connection.use { it.prepareStatement("TRUNCATE trygdetid CASCADE").apply { execute() } }
     }
 }

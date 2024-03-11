@@ -63,9 +63,10 @@ class SaksbehandlerServiceImplTest(val dataSource: DataSource) {
     fun `Ikke registrert enhet må kalle axsys`() {
         val ident = "ident"
         val navMoldeEnhetsnr = "1502"
-        val molde = SaksbehandlerEnhet(navMoldeEnhetsnr, "NAV Molde")
+        val navMoldeNavn = "NAV Molde"
+        val molde = SaksbehandlerEnhet(navMoldeEnhetsnr, navMoldeNavn)
         coEvery { axsysKlient.hentEnheterForIdent(ident) } returns listOf(molde)
-        val enheterForSaksbehandlerIDb = Pair(ident, listOf(navMoldeEnhetsnr))
+        val enheterForSaksbehandlerIDb = Pair(ident, listOf(molde))
         dao.upsertSaksbehandlerNavn(SaksbehandlerInfo(ident, "Legitim gate"))
         dao.upsertSaksbehandlerEnheter(enheterForSaksbehandlerIDb)
         val hentetEnhetForSaksbehandler = service.hentEnheterForSaksbehandlerIdentWrapper(ident)
@@ -79,7 +80,7 @@ class SaksbehandlerServiceImplTest(val dataSource: DataSource) {
     fun `Skal hente fra db, har navneinfo`() {
         val ident = "ident"
         val porsgrunn = SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn)
-        val enheterForSaksbehandlerIDb = Pair(ident, listOf(Enheter.defaultEnhet.enhetNr))
+        val enheterForSaksbehandlerIDb = Pair(ident, listOf(porsgrunn))
         coEvery { axsysKlient.hentEnheterForIdent(ident) } returns listOf(porsgrunn)
         dao.upsertSaksbehandlerNavn(SaksbehandlerInfo(ident, "Legitim gate"))
         dao.upsertSaksbehandlerEnheter(enheterForSaksbehandlerIDb)

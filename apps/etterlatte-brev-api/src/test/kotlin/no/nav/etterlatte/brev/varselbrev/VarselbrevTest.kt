@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.Brevoppretter
+import no.nav.etterlatte.brev.DatabaseExtension
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.RedigerbartVedleggHenter
 import no.nav.etterlatte.brev.adresse.AdresseService
@@ -22,33 +23,28 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.token.Systembruker
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
 import javax.sql.DataSource
 
-class VarselbrevTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-    private lateinit var datasource: DataSource
+@ExtendWith(DatabaseExtension::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class VarselbrevTest(datasource: DataSource) {
     private lateinit var service: VarselbrevService
+
+    private val brevRepository = BrevRepository(datasource)
 
     val sak = Sak("ident1", SakType.BARNEPENSJON, 1L, Enheter.STEINKJER.enhetNr)
 
     @BeforeEach
     fun start() {
-        datasource = opprettInMemoryDatabase(postgreSQLContainer).dataSource
-
-        val brevRepository = BrevRepository(datasource)
         val adresseService =
             mockk<AdresseService>().also {
                 coEvery { it.hentMottakerAdresse(any(), any()) } returns Mottaker.tom(SOEKER_FOEDSELSNUMMER)
@@ -103,9 +99,6 @@ class VarselbrevTest {
         val pdfGenerator = mockk<PDFGenerator>()
         service = VarselbrevService(brevRepository, brevoppretter, behandlingKlient, pdfGenerator, mockk())
     }
-
-    @AfterEach
-    fun stop() = postgreSQLContainer.stop()
 
     @Test
     fun `lager varselbrev`() {

@@ -165,7 +165,7 @@ export interface RedigerFristRequest {
   versjon: number | null
 }
 
-export interface SettPaaOgAvVentRequest {
+export interface EndrePaaVentRequest {
   merknad: String
   paaVent: boolean
 }
@@ -184,7 +184,7 @@ export const redigerFristApi = async (args: {
 
 export const settOppgavePaaVentApi = async (args: {
   oppgaveId: string
-  settPaaVentRequest: SettPaaOgAvVentRequest
+  settPaaVentRequest: EndrePaaVentRequest
 }): Promise<ApiResponse<void>> => {
   return apiClient.post(`/oppgaver/${args.oppgaveId}/sett-paa-vent`, { ...args.settPaaVentRequest })
 }

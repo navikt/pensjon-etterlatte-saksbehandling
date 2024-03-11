@@ -176,7 +176,7 @@ class OppgaveService(
         }
     }
 
-    fun settOppgavePaaOgAvVent(
+    fun endrePaaVent(
         oppgaveId: UUID,
         merknad: String,
         paaVent: Boolean,

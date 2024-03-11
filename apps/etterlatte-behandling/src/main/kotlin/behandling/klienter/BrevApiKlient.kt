@@ -117,7 +117,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         post(
-            url = "$resourceUrl/api/brev/$behandlingId/vedtak/ferdigstill",
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak/ferdigstill",
             onSuccess = { },
             brukerTokenInfo = brukerTokenInfo,
         )

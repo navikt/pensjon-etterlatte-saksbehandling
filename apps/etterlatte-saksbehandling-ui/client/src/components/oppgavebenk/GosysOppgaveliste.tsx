@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { hentGosysOppgaver, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
-import { mapResult } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
@@ -55,15 +55,19 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
     }, 2000)
   }
 
+  const hentOppgaver = () => {
+    hentGosysOppgaverFetch({}, (oppgaver) => {
+      dispatcher.setGosysOppgavelisteOppgaver(sorterOppgaverEtterOpprettet(oppgaver))
+    })
+  }
+
   useEffect(() => {
     if (!oppgavebenkState.gosysOppgavelisteOppgaver?.length) {
-      hentGosysOppgaverFetch({}, (oppgaver) =>
-        dispatcher.setGosysOppgavelisteOppgaver(sorterOppgaverEtterOpprettet(oppgaver))
-      )
+      hentOppgaver()
     }
   }, [oppgavebenkState.gosysOppgavelisteOppgaver])
 
-  return oppgavebenkState.gosysOppgavelisteOppgaver.length ? (
+  return oppgavebenkState.gosysOppgavelisteOppgaver.length && !isPending(gosysOppgaverResult) ? (
     <>
       <VisKunMineGosysOppgaverSwitch
         checked={filter.saksbehandlerFilter === innloggetSaksbehandler.ident}
@@ -77,7 +81,7 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
         Vis mine Gosys-oppgaver
       </VisKunMineGosysOppgaverSwitch>
       <FilterRad
-        hentAlleOppgaver={() => hentGosysOppgaverFetch({})}
+        hentAlleOppgaver={hentOppgaver}
         hentOppgaverStatus={() => {}}
         filter={filter}
         setFilter={setFilter}

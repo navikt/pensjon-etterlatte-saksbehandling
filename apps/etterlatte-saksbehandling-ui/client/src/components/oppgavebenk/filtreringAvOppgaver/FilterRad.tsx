@@ -136,7 +136,7 @@ export const FilterRad = ({
       </FlexRow>
 
       <FlexRow $spacing>
-        <Button onClick={hentAlleOppgaver} size="small" icon={<ArrowCirclepathIcon />} iconPosition="right">
+        <Button onClick={() => hentAlleOppgaver()} size="small" icon={<ArrowCirclepathIcon />} iconPosition="right">
           Hent oppgaver
         </Button>
         <Button

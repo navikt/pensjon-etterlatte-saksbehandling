@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useAppSelector } from '~store/Store'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
-import { mapResult } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { hentOppgaverMedStatus, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -81,7 +81,7 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
     if (!oppgavebenkState.minOppgavelisteOppgaver?.length) hentMinOppgavelisteOppgaver()
   }, [oppgavebenkState.minOppgavelisteOppgaver])
 
-  return oppgavebenkState.minOppgavelisteOppgaver.length ? (
+  return oppgavebenkState.minOppgavelisteOppgaver.length && !isPending(minOppgavelisteOppgaverResult) ? (
     <>
       <FilterRad
         hentAlleOppgaver={hentMinOppgavelisteOppgaver}

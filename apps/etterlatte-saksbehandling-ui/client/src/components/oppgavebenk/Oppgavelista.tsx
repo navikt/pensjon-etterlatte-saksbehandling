@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { mapResult } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { hentOppgaverMedStatus, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
@@ -58,24 +58,26 @@ export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Pro
         oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : filter.oppgavestatusFilter,
         minOppgavelisteIdent: false,
       },
-      (oppgaver) => dispatcher.setOppgavelistaOppgaver(sorterOppgaverEtterOpprettet(oppgaver))
+      (oppgaver) => {
+        dispatcher.setOppgavelistaOppgaver(sorterOppgaverEtterOpprettet(oppgaver))
+      }
     )
-
-  useEffect(() => {
-    if (!oppgavebenkState.oppgavelistaOppgaver?.length) hentOppgavelistaOppgaver()
-  }, [oppgavebenkState.oppgavelistaOppgaver])
 
   useEffect(() => {
     leggFilterILocalStorage({ ...filter, sakEllerFnrFilter: '' })
   }, [filter])
 
-  return oppgavebenkState.oppgavelistaOppgaver.length ? (
+  useEffect(() => {
+    if (!oppgavebenkState.oppgavelistaOppgaver?.length) {
+      hentOppgavelistaOppgaver()
+    }
+  }, [oppgavebenkState.oppgavelistaOppgaver])
+
+  return oppgavebenkState.oppgavelistaOppgaver.length && !isPending(oppgavelistaOppgaverResult) ? (
     <>
       <FilterRad
         hentAlleOppgaver={hentOppgavelistaOppgaver}
-        hentOppgaverStatus={(oppgavestatusFilter: Array<string>) => {
-          hentOppgavelistaOppgaver(oppgavestatusFilter)
-        }}
+        hentOppgaverStatus={hentOppgavelistaOppgaver}
         filter={filter}
         setFilter={setFilter}
         saksbehandlereIEnhet={saksbehandlereIEnhet}

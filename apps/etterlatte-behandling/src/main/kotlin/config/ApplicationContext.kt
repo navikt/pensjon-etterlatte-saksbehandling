@@ -290,7 +290,7 @@ internal class ApplicationContext(
     val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
 
     // Service
-    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, behandlingsHendelser)
 
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlTjenesterKlient)
     val grunnlagsService = GrunnlagServiceImpl(grunnlagKlient)

@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.ktor.server.plugins.BadRequestException
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseContextTest
@@ -13,8 +14,10 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.User
+import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -49,9 +52,10 @@ import javax.sql.DataSource
 internal class OppgaveServiceTest(val dataSource: DataSource) {
     private val sakDao: SakDao = SakDao(ConnectionAutoclosingTest(dataSource))
     private val oppgaveDao: OppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
+    private val hendelser: BehandlingHendelserKafkaProducer = mockk()
     private val oppgaveDaoMedEndringssporing: OppgaveDaoMedEndringssporing =
         OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource))
-    private val oppgaveService: OppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao)
+    private val oppgaveService: OppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao, hendelser)
     private val saksbehandlerRolleDev = "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"
     private val strengtfortroligDev = "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
     private val attestantRolleDev = "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
@@ -500,30 +504,36 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
     @Test
     fun `kan sette og fjerne oppgave paa vent`() {
+        every { hendelser.sendMeldingForHendelsePaaVent(any(), any()) } returns Unit
+
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                "referanse",
+                UUID.randomUUID().toString(),
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 null,
             )
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
-        oppgaveService.oppdaterStatusOgMerknad(
+
+        oppgaveService.endrePaaVent(
             nyOppgave.id,
             "test",
-            if (nyOppgave.status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT,
+            true,
         )
         val oppgavePaaVent = oppgaveService.hentOppgave(nyOppgave.id)
         assertEquals(Status.PAA_VENT, oppgavePaaVent?.status)
-        oppgaveService.oppdaterStatusOgMerknad(
+        verify { hendelser.sendMeldingForHendelsePaaVent(UUID.fromString(nyOppgave.referanse), BehandlingHendelseType.PAA_VENT) }
+
+        oppgaveService.endrePaaVent(
             oppgavePaaVent!!.id,
             "test",
-            if (oppgavePaaVent.status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT,
+            false,
         )
         val oppgaveTattAvVent = oppgaveService.hentOppgave(oppgavePaaVent.id)
         assertEquals(Status.UNDER_BEHANDLING, oppgaveTattAvVent?.status)
+        verify { hendelser.sendMeldingForHendelsePaaVent(UUID.fromString(nyOppgave.referanse), BehandlingHendelseType.AV_VENT) }
     }
 
     @Test

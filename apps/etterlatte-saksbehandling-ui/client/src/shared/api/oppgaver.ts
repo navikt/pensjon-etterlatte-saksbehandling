@@ -62,6 +62,10 @@ export type Oppgavetype =
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean =>
   ['NY', 'UNDER_BEHANDLING', 'PAA_VENT'].includes(status)
 
+export const kanOppdatereTildeling = (oppgave: OppgaveDTO): boolean => {
+  return !['FERDIGSTILT', 'FEILREGISTRERT', 'AVBRUTT'].includes(oppgave.status)
+}
+
 export const hentOppgaverMedStatus = async (args: {
   oppgavestatusFilter: Array<string>
   minOppgavelisteIdent?: boolean

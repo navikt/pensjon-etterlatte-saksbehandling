@@ -8,6 +8,7 @@ import { Saksbehandler } from '~shared/types/saksbehandler'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 
 export enum SortKey {
+  REGISTRERINGSDATO = 'registreringsdato',
   FRIST = 'frist',
   FNR = 'fnr',
 }
@@ -41,16 +42,27 @@ export const OppgaverTable = ({
           }
     )
     switch (sort?.orderBy) {
+      case SortKey.REGISTRERINGSDATO:
+        const nySorteringRegistreringsdato: OppgaveSortering = {
+          registreringsdatoSortering: sort ? sort.direction : 'none',
+          fristSortering: 'none',
+          fnrSortering: 'none',
+        }
+        setSortering(nySorteringRegistreringsdato)
+        leggTilSorteringILocalStorage(nySorteringRegistreringsdato)
+        break
       case SortKey.FRIST:
         const nySorteringFrist: OppgaveSortering = {
-          fnrSortering: 'none',
+          registreringsdatoSortering: 'none',
           fristSortering: sort ? sort.direction : 'none',
+          fnrSortering: 'none',
         }
         setSortering(nySorteringFrist)
         leggTilSorteringILocalStorage(nySorteringFrist)
         break
       case SortKey.FNR:
         const nySorteringFnr: OppgaveSortering = {
+          registreringsdatoSortering: 'none',
           fristSortering: 'none',
           fnrSortering: sort ? sort.direction : 'none',
         }

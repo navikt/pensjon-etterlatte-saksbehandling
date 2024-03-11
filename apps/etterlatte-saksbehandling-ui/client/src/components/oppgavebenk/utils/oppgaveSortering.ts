@@ -2,12 +2,14 @@ import { logger } from '~utils/logger'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 
 export interface OppgaveSortering {
+  registreringsdatoSortering: Retning
   fristSortering: Retning
   fnrSortering: Retning
 }
 
 export const initialSortering = (): OppgaveSortering => {
   return {
+    registreringsdatoSortering: 'none',
     fnrSortering: 'none',
     fristSortering: 'none',
   }
@@ -59,7 +61,8 @@ export const hentSorteringFraLocalStorage = (): OppgaveSortering => {
       const parsetFilter = JSON.parse(sorteringFraLocalStorage)
       const harGammelVersjon = Object.values(parsetFilter).find((value) => value === 'ingen')
       const harGammelVersjonNummerTo = Object.values(parsetFilter).find((value) => value === 'no-order')
-      if (harGammelVersjon || harGammelVersjonNummerTo) {
+      const harGammelVersjonNummerTre = Object.keys(parsetFilter).find((value) => value === 'registreringsdato')
+      if (harGammelVersjon || harGammelVersjonNummerTo || !harGammelVersjonNummerTre) {
         const initiellSortering = initialSortering()
         leggTilSorteringILocalStorage(initiellSortering)
         return initiellSortering

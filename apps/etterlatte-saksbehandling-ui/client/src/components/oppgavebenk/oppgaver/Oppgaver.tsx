@@ -46,12 +46,15 @@ export const Oppgaver = ({
       )
     : oppgaver
 
-  const sortertFrist = sorterFrist(sortering.fristSortering, filtrerteOppgaver)
+  const sortertRegistreringsdato = sorterFrist(sortering.registreringsdatoSortering, filtrerteOppgaver)
+  const sortertFrist = sorterFrist(sortering.fristSortering, sortertRegistreringsdato)
   const sorterteOppgaver = sorterFnr(sortering.fnrSortering, sortertFrist)
+
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(hentPagineringSizeFraLocalStorage())
 
   let paginerteOppgaver = sorterteOppgaver
+
   useEffect(() => {
     if (paginerteOppgaver.length === 0 && filtrerteOppgaver.length > 0) setPage(1)
   }, [sorterteOppgaver, filtrerteOppgaver])

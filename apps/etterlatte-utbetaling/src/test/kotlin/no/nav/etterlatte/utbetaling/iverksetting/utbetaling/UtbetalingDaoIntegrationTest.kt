@@ -2,16 +2,13 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.utbetaling.TestContainers
+import no.nav.etterlatte.utbetaling.DatabaseExtension
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.nav.etterlatte.utbetaling.oppdrag
 import no.nav.etterlatte.utbetaling.utbetaling
 import no.nav.etterlatte.utbetaling.utbetalingslinje
 import no.trygdeetaten.skjema.oppdrag.Mmel
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -19,10 +16,9 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -33,33 +29,13 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class UtbetalingDaoIntegrationTest {
-    @Container
-    private val postgreSQLContainer = TestContainers.postgreSQLContainer
-
-    private lateinit var dataSource: DataSource
-    private lateinit var utbetalingDao: UtbetalingDao
-
-    @BeforeAll
-    fun beforeAll() {
-        postgreSQLContainer.start()
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            )
-
-        utbetalingDao = UtbetalingDao(dataSource)
-        dataSource.migrate()
+internal class UtbetalingDaoIntegrationTest(dataSource: DataSource) {
+    companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
     }
 
-    private fun cleanDatabase() {
-        dataSource.connection.use {
-            it.prepareStatement("TRUNCATE utbetaling CASCADE").apply { execute() }
-        }
-    }
+    private val utbetalingDao = UtbetalingDao(dataSource)
 
     @Test
     fun `skal opprette og hente utbetaling`() {
@@ -457,12 +433,7 @@ internal class UtbetalingDaoIntegrationTest {
 
     @AfterEach
     fun afterEach() {
-        cleanDatabase()
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
+        dbExtension.resetDb()
     }
 
     private fun opprettUtbetaling(

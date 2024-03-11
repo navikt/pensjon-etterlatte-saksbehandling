@@ -9,7 +9,15 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { isPending } from '~shared/api/apiUtils'
 
-export const SettPaaVent = ({ oppgave, refreshOppgave }: { oppgave: OppgaveDTO; refreshOppgave: () => void }) => {
+export const SettPaaVent = ({
+  oppgave,
+  redigerbar,
+  refreshOppgave,
+}: {
+  oppgave: OppgaveDTO
+  redigerbar: boolean
+  refreshOppgave: () => void
+}) => {
   const [frist, setFrist] = useState<string>(oppgave.frist)
   const [merknad, setMerknad] = useState<string>(oppgave.merknad || '')
   const [settPaaVent, setVisPaaVent] = useState(false)
@@ -85,18 +93,19 @@ export const SettPaaVent = ({ oppgave, refreshOppgave }: { oppgave: OppgaveDTO; 
           )}
 
           <br />
-
-          <FlexRow justify="right">
-            <Button
-              size="small"
-              variant="secondary"
-              onClick={() => setVisPaaVent(true)}
-              icon={oppgave.status === 'PAA_VENT' ? <ClockDashedIcon /> : <ClockIcon />}
-              iconPosition="right"
-            >
-              {oppgave.status === 'PAA_VENT' ? 'Ta av vent' : 'Sett på vent'}
-            </Button>
-          </FlexRow>
+          {redigerbar && (
+            <FlexRow justify="right">
+              <Button
+                size="small"
+                variant="secondary"
+                onClick={() => setVisPaaVent(true)}
+                icon={oppgave.status === 'PAA_VENT' ? <ClockDashedIcon /> : <ClockIcon />}
+                iconPosition="right"
+              >
+                {oppgave.status === 'PAA_VENT' ? 'Ta av vent' : 'Sett på vent'}
+              </Button>
+            </FlexRow>
+          )}
         </>
       )}
     </div>

@@ -23,11 +23,9 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.vilkaarsvurdering.DatabaseExtension
 import no.nav.etterlatte.vilkaarsvurdering.DelvilkaarRepository
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingMigreringRequest
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
@@ -43,19 +41,15 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class MigreringTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
+class MigreringTest(private val ds: DataSource) {
     private val server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
-    private lateinit var ds: DataSource
     private lateinit var migreringService: MigreringService
     private lateinit var vilkaarsvurderingRepository: VilkaarsvurderingRepository
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
@@ -63,13 +57,6 @@ class MigreringTest {
     @BeforeAll
     fun before() {
         server.start()
-        postgreSQLContainer.start()
-        ds =
-            DataSourceBuilder.createDataSource(
-                postgreSQLContainer.jdbcUrl,
-                postgreSQLContainer.username,
-                postgreSQLContainer.password,
-            ).also { it.migrate() }
 
         val delvilkaarRepository = DelvilkaarRepository()
         vilkaarsvurderingRepository = VilkaarsvurderingRepository(ds, delvilkaarRepository)
@@ -106,20 +93,20 @@ class MigreringTest {
 
     @AfterEach
     fun afterEach() {
-        ds.connection.use {
-            it.prepareStatement("TRUNCATE vilkaarsvurdering CASCADE;").execute()
-        }
+        dbExtension.resetDb()
     }
 
     @AfterAll
     fun after() {
         server.shutdown()
-        postgreSQLContainer.stop()
     }
 
     private val token: String by lazy { server.issueSaksbehandlerToken() }
 
     private companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
+
         val behandlingId: UUID = UUID.randomUUID()
     }
 

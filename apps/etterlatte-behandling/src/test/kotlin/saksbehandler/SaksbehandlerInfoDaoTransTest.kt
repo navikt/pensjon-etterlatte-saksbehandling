@@ -30,8 +30,12 @@ internal class SaksbehandlerInfoDaoTransTest(val dataSource: DataSource) {
         val sbaalesund = SaksbehandlerInfo("identaalesund", "navn")
         saksbehandlerInfoDao.upsertSaksbehandlerNavn(sbporsgrunn)
         saksbehandlerInfoDao.upsertSaksbehandlerNavn(sbaalesund)
-        saksbehandlerInfoDao.upsertSaksbehandlerEnheter(sbporsgrunn.ident to listOf(Enheter.PORSGRUNN.enhetNr))
-        saksbehandlerInfoDao.upsertSaksbehandlerEnheter(sbaalesund.ident to listOf(Enheter.AALESUND.enhetNr))
+        saksbehandlerInfoDao.upsertSaksbehandlerEnheter(
+            sbporsgrunn.ident to listOf(SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, Enheter.PORSGRUNN.navn)),
+        )
+        saksbehandlerInfoDao.upsertSaksbehandlerEnheter(
+            sbaalesund.ident to listOf(SaksbehandlerEnhet(Enheter.AALESUND.enhetNr, Enheter.AALESUND.navn)),
+        )
 
         val saksBehandlereMedAalesundEnhet = saksbehandlerInfoDaoTrans.hentSaksbehandlereForEnhet(Enheter.AALESUND.enhetNr)
         Assertions.assertEquals(1, saksBehandlereMedAalesundEnhet.size)
@@ -51,12 +55,18 @@ internal class SaksbehandlerInfoDaoTransTest(val dataSource: DataSource) {
         val sbaalesund = SaksbehandlerInfo("identaalesund", "navn")
         saksbehandlerInfoDao.upsertSaksbehandlerNavn(sbporsgrunn)
         saksbehandlerInfoDao.upsertSaksbehandlerNavn(sbaalesund)
-        saksbehandlerInfoDao.upsertSaksbehandlerEnheter(sbporsgrunn.ident to listOf(Enheter.PORSGRUNN.enhetNr))
+        saksbehandlerInfoDao.upsertSaksbehandlerEnheter(
+            sbporsgrunn.ident to listOf(SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, Enheter.PORSGRUNN.navn)),
+        )
 
-        val enheterAalesundSaksbehandler = listOf(Enheter.AALESUND.enhetNr, Enheter.AALESUND_UTLAND.enhetNr)
+        val enheterAalesundSaksbehandler =
+            listOf(
+                SaksbehandlerEnhet(Enheter.AALESUND.enhetNr, Enheter.AALESUND.navn),
+                SaksbehandlerEnhet(Enheter.AALESUND_UTLAND.enhetNr, Enheter.AALESUND_UTLAND.navn),
+            )
         saksbehandlerInfoDao.upsertSaksbehandlerEnheter(sbaalesund.ident to enheterAalesundSaksbehandler)
 
-        val hentetEnheterForAalesundSB = saksbehandlerInfoDaoTrans.hentEnheterIderForSaksbehandler(sbaalesund.ident)
+        val hentetEnheterForAalesundSB = saksbehandlerInfoDaoTrans.hentSaksbehandlerEnheter(sbaalesund.ident)
         hentetEnheterForAalesundSB shouldContainExactly enheterAalesundSaksbehandler
     }
 }

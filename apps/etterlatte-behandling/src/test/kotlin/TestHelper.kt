@@ -319,6 +319,7 @@ fun kommerBarnetTilgode(
 
 val KONTANT_FOT = Folkeregisteridentifikator.of("10418305857")
 val JOVIAL_LAMA = Folkeregisteridentifikator.of("09498230323")
+val LITE_BARN = Folkeregisteridentifikator.of("22511075258")
 
 fun mockPerson(
     utland: Utland? = null,

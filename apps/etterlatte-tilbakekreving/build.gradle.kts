@@ -45,6 +45,7 @@ dependencies {
     testImplementation(libs.test.wiremock)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(project(":libs:testdata"))
+    testImplementation(testFixtures((project(":libs:etterlatte-database"))))
     testImplementation(testFixtures(project(":libs:etterlatte-mq")))
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
 }

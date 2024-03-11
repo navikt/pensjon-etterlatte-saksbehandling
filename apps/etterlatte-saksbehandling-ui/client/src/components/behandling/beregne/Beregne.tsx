@@ -108,9 +108,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
               {manglerBrevutfall && <Alert variant="error">Du må fylle ut utfall i brev</Alert>}
             </>
           ) : (
-            <InfoAlert variant="info" inline>
-              Det sendes ikke vedtaksbrev for denne behandlingen.
-            </InfoAlert>
+            <InfoAlert variant="info">Det sendes ikke vedtaksbrev for denne behandlingen.</InfoAlert>
           )}
         </BeregningWrapper>
       ) : (
@@ -137,18 +135,18 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                   }
                 })()}
 
-                {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? null : (
-                  <InfoAlert variant="info" inline>
-                    Det sendes ikke vedtaksbrev for denne behandlingen.
-                  </InfoAlert>
+                {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? (
+                  <>
+                    <Brevutfall
+                      behandling={behandling}
+                      erOpphoer={erOpphoer}
+                      resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
+                    />
+                    {manglerBrevutfall && <Alert variant="error">Du må fylle ut utfall i brev</Alert>}
+                  </>
+                ) : (
+                  <InfoAlert variant="info">Det sendes ikke vedtaksbrev for denne behandlingen.</InfoAlert>
                 )}
-
-                <Brevutfall
-                  behandling={behandling}
-                  erOpphoer={erOpphoer}
-                  resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
-                />
-                {manglerBrevutfall && <Alert variant="error">Du må fylle ut utfall i brev</Alert>}
               </BeregningWrapper>
             )
           )}
@@ -187,8 +185,9 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
 }
 
 const InfoAlert = styled(Alert).attrs({ variant: 'info' })`
-  margin-top: 2rem;
+  margin-top: 4rem;
   margin-bottom: 2rem;
+  max-width: fit-content;
 `
 
 const BeregningWrapper = styled.div`

@@ -21,10 +21,13 @@ import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
 import { FlexRow } from '~shared/styled'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { useAppSelector } from '~store/Store'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
-
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const redigerbar = behandlingErRedigerbar(behandlingsInfo.status) && innloggetSaksbehandler.skriveTilgang
   const [oppgaveForBehandlingenStatus, requesthentOppgaveForBehandling] = useApiCall(
     hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave
   )
@@ -140,7 +143,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       </FlexRow>
 
       {mapSuccess(oppgaveForBehandlingenStatus, (oppgave) => (
-        <SettPaaVent oppgave={oppgave} refreshOppgave={hentOppgaveForBehandling} />
+        <SettPaaVent oppgave={oppgave} redigerbar={redigerbar} refreshOppgave={hentOppgaveForBehandling} />
       ))}
     </SidebarPanel>
   )

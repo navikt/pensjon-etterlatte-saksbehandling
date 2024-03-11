@@ -1,14 +1,12 @@
-package no.nav.etterlatte.migrering
+package no.nav.etterlatte.beregning.regler
 
 import no.nav.etterlatte.GenerellDatabaseExtension
 import no.nav.etterlatte.ResetDatabaseStatement
 
 @ResetDatabaseStatement(
     """
-    TRUNCATE TABLE saker_til_migrering;
-    TRUNCATE TABLE feilkjoering;
-    TRUNCATE TABLE dryrun;
-    TRUNCATE TABLE pesyssak CASCADE;
+    TRUNCATE beregningsgrunnlag;
+    TRUNCATE overstyr_beregningsgrunnlag;
 """,
 )
 class DatabaseExtension : GenerellDatabaseExtension()

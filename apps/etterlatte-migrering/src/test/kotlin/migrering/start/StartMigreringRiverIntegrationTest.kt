@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
 import no.nav.etterlatte.migrering.pen.BarnepensjonGrunnlagResponse
@@ -40,7 +39,6 @@ import no.nav.etterlatte.migrering.verifisering.GjenlevendeForelderPatcher
 import no.nav.etterlatte.migrering.verifisering.PdlTjenesterKlient
 import no.nav.etterlatte.migrering.verifisering.PersonHenter
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
-import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
@@ -60,29 +58,24 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class StartMigreringRiverIntegrationTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
-    private lateinit var datasource: DataSource
-
-    @BeforeEach
-    fun start() {
-        datasource = opprettInMemoryDatabase(postgreSQLContainer).dataSource
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+internal class StartMigreringRiverIntegrationTest(private val datasource: DataSource) {
+    companion object {
+        @RegisterExtension
+        private val dbExtension = DatabaseExtension()
     }
 
     @AfterEach
-    fun stop() = postgreSQLContainer.stop()
+    fun reset() = dbExtension.resetDb()
 
     @Test
     fun `kan ta imot og handtere respons fra PEN`() {
@@ -110,7 +103,15 @@ internal class StartMigreringRiverIntegrationTest {
                                 } returns
                                     mockk<PersonDTO>().also {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
-                                        every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
+                                        every { it.foedselsdato } returns
+                                            OpplysningDTO(
+                                                LocalDate.of(
+                                                    2010,
+                                                    Month.JANUARY,
+                                                    1,
+                                                ),
+                                                "",
+                                            )
                                         every { it.doedsdato } returns null
                                         every { it.adressebeskyttelse } returns null
                                     }
@@ -220,7 +221,15 @@ internal class StartMigreringRiverIntegrationTest {
                                 } returns
                                     mockk<PersonDTO>().also {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
-                                        every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
+                                        every { it.foedselsdato } returns
+                                            OpplysningDTO(
+                                                LocalDate.of(
+                                                    2010,
+                                                    Month.JANUARY,
+                                                    1,
+                                                ),
+                                                "",
+                                            )
                                         every { it.adressebeskyttelse } returns null
                                         every { it.doedsdato } returns null
                                     }
@@ -356,7 +365,15 @@ internal class StartMigreringRiverIntegrationTest {
                                 } returns
                                     mockk<PersonDTO>().also {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
-                                        every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
+                                        every { it.foedselsdato } returns
+                                            OpplysningDTO(
+                                                LocalDate.of(
+                                                    2010,
+                                                    Month.JANUARY,
+                                                    1,
+                                                ),
+                                                "",
+                                            )
                                         every { it.doedsdato } returns null
                                         every { it.adressebeskyttelse } returns null
                                     }
@@ -406,7 +423,10 @@ internal class StartMigreringRiverIntegrationTest {
 
             assertEquals(1, inspector.inspektør.size)
             val oppstartMigreringMelding = inspector.inspektør.message(0)
-            assertEquals(Migreringshendelser.MIGRER_SAK.lagEventnameForType(), oppstartMigreringMelding.get(EVENT_NAME_KEY).asText())
+            assertEquals(
+                Migreringshendelser.MIGRER_SAK.lagEventnameForType(),
+                oppstartMigreringMelding.get(EVENT_NAME_KEY).asText(),
+            )
             assertEquals(
                 MigreringKjoringVariant.MED_PAUSE.name,
                 oppstartMigreringMelding.get(MIGRERING_KJORING_VARIANT).asText(),
@@ -451,10 +471,16 @@ internal class StartMigreringRiverIntegrationTest {
             )
             assertEquals(3, inspector.inspektør.size)
             val forttsettMigreringMelding = inspector.inspektør.message(2)
-            assertEquals(Migreringshendelser.BEREGNET_FERDIG.lagEventnameForType(), forttsettMigreringMelding.get(EVENT_NAME_KEY).asText())
+            assertEquals(
+                Migreringshendelser.BEREGNET_FERDIG.lagEventnameForType(),
+                forttsettMigreringMelding.get(EVENT_NAME_KEY).asText(),
+            )
             assertEquals(behandlingId.toString(), forttsettMigreringMelding.get(BEHANDLING_ID_KEY).asText())
             assertEquals(pesysId.id, forttsettMigreringMelding.get(SAK_ID_KEY).asLong())
-            assertEquals(Migreringshendelser.BEREGNET_FERDIG.lagEventnameForType(), forttsettMigreringMelding.get(EVENT_NAME_KEY).asText())
+            assertEquals(
+                Migreringshendelser.BEREGNET_FERDIG.lagEventnameForType(),
+                forttsettMigreringMelding.get(EVENT_NAME_KEY).asText(),
+            )
             assertEquals(
                 MigreringKjoringVariant.FORTSETT_ETTER_PAUSE.name,
                 forttsettMigreringMelding.get(MIGRERING_KJORING_VARIANT).asText(),
@@ -655,7 +681,15 @@ internal class StartMigreringRiverIntegrationTest {
                                     mockk<PersonDTO>().also {
                                         val listOf = komplisertVergemaal()
                                         every { it.vergemaalEllerFremtidsfullmakt } returns listOf
-                                        every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
+                                        every { it.foedselsdato } returns
+                                            OpplysningDTO(
+                                                LocalDate.of(
+                                                    2010,
+                                                    Month.JANUARY,
+                                                    1,
+                                                ),
+                                                "",
+                                            )
                                         every { it.doedsdato } returns null
                                         every { it.adressebeskyttelse } returns null
                                     }
@@ -808,17 +842,26 @@ internal class StartMigreringRiverIntegrationTest {
 
             with(inspector.inspektør.message(0)) {
                 assertEquals(111L, get(SAK_ID_KEY).asLong())
-                assertEquals(Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType(), get(EVENT_NAME_KEY).asText())
+                assertEquals(
+                    Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType(),
+                    get(EVENT_NAME_KEY).asText(),
+                )
                 assertEquals(false, get(LOPENDE_JANUAR_2024_KEY).asBoolean())
             }
             with(inspector.inspektør.message(1)) {
                 assertEquals(222L, get(SAK_ID_KEY).asLong())
-                assertEquals(Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType(), get(EVENT_NAME_KEY).asText())
+                assertEquals(
+                    Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType(),
+                    get(EVENT_NAME_KEY).asText(),
+                )
                 assertEquals(false, get(LOPENDE_JANUAR_2024_KEY).asBoolean())
             }
             with(inspector.inspektør.message(2)) {
                 assertEquals(333L, get(SAK_ID_KEY).asLong())
-                assertEquals(Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType(), get(EVENT_NAME_KEY).asText())
+                assertEquals(
+                    Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType(),
+                    get(EVENT_NAME_KEY).asText(),
+                )
                 assertEquals(false, get(LOPENDE_JANUAR_2024_KEY).asBoolean())
             }
         }

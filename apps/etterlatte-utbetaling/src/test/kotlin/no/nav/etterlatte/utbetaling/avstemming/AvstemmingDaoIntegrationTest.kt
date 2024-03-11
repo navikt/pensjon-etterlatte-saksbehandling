@@ -1,44 +1,29 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.utbetaling.TestContainers
+import no.nav.etterlatte.utbetaling.DatabaseExtension
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.KonsistensavstemmingDataMapper
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.oppdragForKonsistensavstemming
 import no.nav.etterlatte.utbetaling.oppdragslinjeForKonsistensavstemming
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class AvstemmingDaoIntegrationTest {
-    @Container
-    private val postgreSQLContainer = TestContainers.postgreSQLContainer
-    private val dataSource: DataSource
-    private val avstemmingDao: AvstemmingDao
-
-    init {
-        postgreSQLContainer.start()
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            )
-
-        avstemmingDao = AvstemmingDao(dataSource)
-        dataSource.migrate()
+internal class AvstemmingDaoIntegrationTest(dataSource: DataSource) {
+    companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
     }
+
+    private val avstemmingDao = AvstemmingDao(dataSource)
 
     @Test
     fun `skal opprette konsistensavstemming for barnepensjon`() {
@@ -191,14 +176,7 @@ internal class AvstemmingDaoIntegrationTest {
 
     @AfterEach
     fun afterEach() {
-        dataSource.connection.use {
-            it.prepareStatement(""" TRUNCATE avstemming""").execute()
-        }
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
+        dbExtension.resetDb()
     }
 
     fun opprettKonsistensavstemmingMedData(opprettetTilOgMed: Tidspunkt = Tidspunkt.now()): Konsistensavstemming {

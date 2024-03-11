@@ -9,42 +9,26 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import java.util.UUID.randomUUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class TrygdetidRepositoryTest {
-    @Container
-    private val postgres = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-    private lateinit var repository: TrygdetidRepository
-    private lateinit var dataSource: DataSource
-
-    @BeforeAll
-    fun beforeAll() {
-        postgres.start()
-        dataSource = DataSourceBuilder.createDataSource(postgres.jdbcUrl, postgres.username, postgres.password)
-        repository = TrygdetidRepository(dataSource.apply { migrate() })
+internal class TrygdetidRepositoryTest(dataSource: DataSource) {
+    companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
     }
 
-    @AfterAll
-    fun afterAll() {
-        postgres.stop()
-    }
+    private val repository: TrygdetidRepository = TrygdetidRepository(dataSource)
 
     @AfterEach
     fun afterEach() {
-        cleanDatabase()
+        dbExtension.resetDb()
     }
 
     private val pdlKilde: Grunnlagsopplysning.Pdl = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
@@ -343,8 +327,4 @@ internal class TrygdetidRepositoryTest {
             every { id } returns randomUUID()
             every { sak } returns 123L
         }
-
-    private fun cleanDatabase() {
-        dataSource.connection.use { it.prepareStatement("TRUNCATE trygdetid CASCADE").apply { execute() } }
-    }
 }

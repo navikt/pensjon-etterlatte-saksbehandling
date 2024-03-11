@@ -84,7 +84,8 @@ enum class Revurderingaarsak(
     // Opphør og endring
     EKSPORT(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
     IMPORT(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
-    ANNEN(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+    ANNEN(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
+    ANNEN_UTEN_BREV(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalIkkeSendeBrev),
 
     // TODO vurdere disse
     OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),

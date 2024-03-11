@@ -1,14 +1,11 @@
-package no.nav.etterlatte.migrering
+package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.GenerellDatabaseExtension
 import no.nav.etterlatte.ResetDatabaseStatement
 
 @ResetDatabaseStatement(
     """
-    TRUNCATE TABLE saker_til_migrering;
-    TRUNCATE TABLE feilkjoering;
-    TRUNCATE TABLE dryrun;
-    TRUNCATE TABLE pesyssak CASCADE;
+    TRUNCATE brev RESTART IDENTITY CASCADE;
 """,
 )
 class DatabaseExtension : GenerellDatabaseExtension()

@@ -1,6 +1,5 @@
-import { Button, Heading, Modal, Select, TextField } from '@navikt/ds-react'
+import { Alert, Button, Heading, Modal, Select, TextField, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import { useNavigate } from 'react-router-dom'
@@ -85,17 +84,21 @@ export const OpprettNyRevurdering = ({
               )
             })}
           </Select>
-          {valgtRevurdering === Revurderingaarsak.ANNEN && (
-            <AnnenRevurderingWrapper>
-              <TextField
-                label="Beskriv årsak"
-                size="medium"
-                type="text"
-                value={fritekstgrunn}
-                onChange={(e) => setFritekstgrunn(e.target.value)}
-              />
-            </AnnenRevurderingWrapper>
-          )}
+          {valgtRevurdering &&
+            [Revurderingaarsak.ANNEN, Revurderingaarsak.ANNEN_UTEN_BREV].includes(valgtRevurdering) && (
+              <VStack gap="10" style={{ marginTop: '2rem' }}>
+                <TextField
+                  label="Beskriv årsak"
+                  size="medium"
+                  type="text"
+                  value={fritekstgrunn}
+                  onChange={(e) => setFritekstgrunn(e.target.value)}
+                />
+                <Alert variant="warning" style={{ maxWidth: '20em' }}>
+                  Bruk denne årsaken kun dersom andre årsaker ikke er dekkende for revurderingen.
+                </Alert>
+              </VStack>
+            )}
           <ButtonGroup>
             <Button variant="secondary" onClick={closeAndReset}>
               Avbryt
@@ -109,7 +112,3 @@ export const OpprettNyRevurdering = ({
     </>
   )
 }
-
-const AnnenRevurderingWrapper = styled.div`
-  margin-top: 1rem;
-`

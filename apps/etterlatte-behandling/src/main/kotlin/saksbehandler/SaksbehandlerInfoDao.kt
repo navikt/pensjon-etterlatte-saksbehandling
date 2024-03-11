@@ -34,11 +34,11 @@ class SaksbehandlerInfoDao(private val connectionAutoclosing: ConnectionAutoclos
                 val statement =
                     prepareStatement(
                         """
-                        SELECT id, navn from saksbehandler_info
-                        where enheter @> ?::JSONB
+                        select id, navn from saksbehandler_info as sinfo where ? IN (
+                        select jsonb_array_elements(sbenhetstabell.enheter::JSONB)->>'enhetsNummer' from saksbehandler_info as sbenhetstabell where sbenhetstabell.id = sinfo.id);
                         """.trimIndent(),
                     )
-                statement.setJsonb(1, enhet)
+                statement.setString(1, enhet)
                 statement.executeQuery().toList {
                     SaksbehandlerInfo(
                         getString("id"),
@@ -49,9 +49,9 @@ class SaksbehandlerInfoDao(private val connectionAutoclosing: ConnectionAutoclos
         }
     }
 
-    fun hentEnheterIderForSaksbehandler(ident: String): List<String>? {
-        return connectionAutoclosing.hentConnection {
-            with(it) {
+    fun hentSaksbehandlerEnheter(ident: String): List<SaksbehandlerEnhet>? {
+        return connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
                 val statement =
                     prepareStatement(
                         """
@@ -61,7 +61,7 @@ class SaksbehandlerInfoDao(private val connectionAutoclosing: ConnectionAutoclos
                     )
                 statement.setString(1, ident)
                 statement.executeQuery().singleOrNull {
-                    getString("enheter").let { objectMapper.readValue(it) }
+                    getString("enheter")?.let { objectMapper.readValue(it) }
                 }
             }
         }
@@ -102,7 +102,7 @@ class SaksbehandlerInfoDao(private val connectionAutoclosing: ConnectionAutoclos
         }
     }
 
-    fun upsertSaksbehandlerEnheter(saksbehandlerMedEnheter: Pair<String, List<String>>) {
+    fun upsertSaksbehandlerEnheter(saksbehandlerMedEnheter: Pair<String, List<SaksbehandlerEnhet>>) {
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =

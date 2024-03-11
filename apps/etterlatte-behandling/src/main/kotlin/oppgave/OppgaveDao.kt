@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -39,6 +40,8 @@ interface OppgaveDao {
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String? = null,
     ): List<OppgaveIntern>
+
+    fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats
 
     fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern>
 
@@ -217,6 +220,30 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                     asOppgave()
                 }.also { oppgaveliste ->
                     logger.info("Hentet antall nye oppgaver: ${oppgaveliste.size}")
+                }
+            }
+        }
+    }
+
+    override fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT 
+                            COUNT(*) FILTER (WHERE status IN ('NY', 'UNDER_BEHANDLING', 'PAA_VENT')) AS "antallOppgavelistaOppgaver",
+                            COUNT(*) FILTER (WHERE saksbehandler = ? AND status IN ('NY', 'UNDER_BEHANDLING', 'PAA_VENT') ) AS "antallMinOppgavelisteOppgaver"
+                        FROM oppgave
+                        """.trimIndent(),
+                    )
+
+                statement.setString(1, innloggetSaksbehandlerIdent)
+
+                statement.executeQuery().singleOrNull {
+                    OppgavebenkStats(getLong("antallOppgavelistaOppgaver"), getLong("antallMinOppgavelisteOppgaver"))
+                }!!.also {
+                    logger.info("Henter antall oppgaver")
                 }
             }
         }

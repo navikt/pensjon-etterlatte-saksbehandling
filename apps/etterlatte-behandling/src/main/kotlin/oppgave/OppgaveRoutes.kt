@@ -19,11 +19,11 @@ import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
+import no.nav.etterlatte.libs.common.oppgave.EndrePaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
-import no.nav.etterlatte.libs.common.oppgave.SettPaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.oppgave.VentefristerGaarUtResponse
@@ -166,13 +166,9 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
 
             post("sett-paa-vent") {
                 kunSkrivetilgang {
-                    val settPaaVentRequest = call.receive<SettPaaVentRequest>()
+                    val settPaaVentRequest = call.receive<EndrePaaVentRequest>()
                     inTransaction {
-                        service.oppdaterStatusOgMerknad(
-                            oppgaveId,
-                            settPaaVentRequest.merknad,
-                            if (settPaaVentRequest.status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT,
-                        )
+                        service.endrePaaVent(oppgaveId, settPaaVentRequest.merknad, settPaaVentRequest.paaVent)
                     }
                     call.respond(HttpStatusCode.OK)
                 }

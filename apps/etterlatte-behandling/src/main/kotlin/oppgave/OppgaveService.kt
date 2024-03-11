@@ -7,7 +7,9 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.SystemUser
+import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -32,29 +34,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class BrukerManglerAttestantRolleException(ident: String) : UgyldigForespoerselException(
-    code = "BRUKER_ER_IKKE_ATTESTANT",
-    detail = "Bruker $ident mangler attestant rolle for tildeling",
-)
-
-class ManglerOppgaveUnderBehandling(msg: String) : UgyldigForespoerselException(
-    code = "MANGLER_OPPGAVE_UNDER_BEHANDLING",
-    detail = msg,
-)
-
-class ForMangeOppgaverUnderBehandling(msg: String) : UgyldigForespoerselException(
-    code = "FOR_MANGE_OPPGAVER_UNDER_BEHANDLING",
-    detail = msg,
-)
-
-class ManglerSaksbehandlerException(msg: String) : UgyldigForespoerselException(
-    code = "MANGLER_SAKSBEHANDLER_PAA_OPPGAVE",
-    detail = msg,
-)
-
 class OppgaveService(
     private val oppgaveDao: OppgaveDaoMedEndringssporing,
     private val sakDao: SakDao,
+    private val hendelser: BehandlingHendelserKafkaProducer,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
@@ -147,20 +130,9 @@ class OppgaveService(
 
     fun fjernSaksbehandler(oppgaveId: UUID) {
         val hentetOppgave =
-            oppgaveDao.hentOppgave(oppgaveId)
-                ?: throw OppgaveIkkeFunnet(oppgaveId)
-
-        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-        if (!hentetOppgave.saksbehandler?.ident.isNullOrBlank()) {
+            oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
+        sikreAktivOppgaveOgTildeltSaksbehandler(hentetOppgave) {
             oppgaveDao.fjernSaksbehandler(oppgaveId)
-        } else {
-            throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
-        }
-    }
-
-    private fun sikreAtOppgaveIkkeErAvsluttet(oppgave: OppgaveIntern) {
-        if (oppgave.erAvsluttet()) {
-            throw OppgaveKanIkkeEndres(oppgave.id, oppgave.status)
         }
     }
 
@@ -172,12 +144,7 @@ class OppgaveService(
             throw FristTilbakeITid(oppgaveId)
         }
         val hentetOppgave =
-            oppgaveDao.hentOppgave(oppgaveId)
-                ?: throw IkkeFunnetException(
-                    code = "OPPGAVE_IKKE_FUNNET",
-                    detail = "Oppgaven finnes ikke",
-                    meta = mapOf("oppgaveId" to oppgaveId),
-                )
+            oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
         if (hentetOppgave.saksbehandler?.ident.isNullOrBlank()) {
             throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
@@ -192,16 +159,8 @@ class OppgaveService(
         status: Status,
     ) {
         val hentetOppgave =
-            oppgaveDao.hentOppgave(oppgaveId)
-                ?: throw IkkeFunnetException(
-                    code = "OPPGAVE_IKKE_FUNNET",
-                    detail = "Oppgaven finnes ikke",
-                    meta = mapOf("oppgaveId" to oppgaveId),
-                )
-        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-        if (hentetOppgave.saksbehandler?.ident.isNullOrEmpty()) {
-            throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
-        } else {
+            oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
+        sikreAktivOppgaveOgTildeltSaksbehandler(hentetOppgave) {
             oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, status)
         }
     }
@@ -211,17 +170,57 @@ class OppgaveService(
         referanse: String,
     ) {
         val hentetOppgave =
-            oppgaveDao.hentOppgave(oppgaveId)
-                ?: throw IkkeFunnetException(
-                    code = "OPPGAVE_IKKE_FUNNET",
-                    detail = "Oppgaven finnes ikke",
-                    meta = mapOf("oppgaveId" to oppgaveId),
-                )
-        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-        if (hentetOppgave.saksbehandler?.ident.isNullOrEmpty()) {
-            throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
-        } else {
+            oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
+        sikreAktivOppgaveOgTildeltSaksbehandler(hentetOppgave) {
             oppgaveDao.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId, referanse)
+        }
+    }
+
+    fun endrePaaVent(
+        oppgaveId: UUID,
+        merknad: String,
+        paaVent: Boolean,
+    ) {
+        val oppgave = hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
+        if (paaVent && oppgave.status == Status.PAA_VENT) return
+        if (!paaVent && oppgave.status != Status.PAA_VENT) return
+
+        sikreAktivOppgaveOgTildeltSaksbehandler(oppgave) {
+            val nyStatus = if (paaVent) Status.PAA_VENT else Status.UNDER_BEHANDLING
+            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, nyStatus)
+            when (oppgave.type) {
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                OppgaveType.REVURDERING,
+                OppgaveType.ATTESTERING,
+                OppgaveType.UNDERKJENT,
+                OppgaveType.TILBAKEKREVING,
+                OppgaveType.KLAGE,
+                -> {
+                    hendelser.sendMeldingForHendelsePaaVent(
+                        UUID.fromString(oppgave.referanse),
+                        if (nyStatus == Status.PAA_VENT) BehandlingHendelseType.PAA_VENT else BehandlingHendelseType.AV_VENT,
+                    )
+                }
+                else -> {} // Ingen statistikk for resten
+            }
+        }
+    }
+
+    private fun sikreAktivOppgaveOgTildeltSaksbehandler(
+        oppgave: OppgaveIntern,
+        operasjon: () -> Unit,
+    ) {
+        sikreAtOppgaveIkkeErAvsluttet(oppgave)
+        if (oppgave.saksbehandler?.ident.isNullOrEmpty()) {
+            throw OppgaveIkkeTildeltSaksbehandler(oppgave.id)
+        } else {
+            operasjon()
+        }
+    }
+
+    private fun sikreAtOppgaveIkkeErAvsluttet(oppgave: OppgaveIntern) {
+        if (oppgave.erAvsluttet()) {
+            throw OppgaveKanIkkeEndres(oppgave.id, oppgave.status)
         }
     }
 
@@ -525,6 +524,26 @@ class OppgaveService(
     fun hentFristGaarUt(request: VentefristGaarUtRequest): List<VentefristGaarUt> =
         oppgaveDao.hentFristGaarUt(request.dato, request.type, request.oppgaveKilde, request.oppgaver)
 }
+
+class BrukerManglerAttestantRolleException(ident: String) : UgyldigForespoerselException(
+    code = "BRUKER_ER_IKKE_ATTESTANT",
+    detail = "Bruker $ident mangler attestant rolle for tildeling",
+)
+
+class ManglerOppgaveUnderBehandling(msg: String) : UgyldigForespoerselException(
+    code = "MANGLER_OPPGAVE_UNDER_BEHANDLING",
+    detail = msg,
+)
+
+class ForMangeOppgaverUnderBehandling(msg: String) : UgyldigForespoerselException(
+    code = "FOR_MANGE_OPPGAVER_UNDER_BEHANDLING",
+    detail = msg,
+)
+
+class ManglerSaksbehandlerException(msg: String) : UgyldigForespoerselException(
+    code = "MANGLER_SAKSBEHANDLER_PAA_OPPGAVE",
+    detail = msg,
+)
 
 class FantIkkeSakException(msg: String) : Exception(msg)
 

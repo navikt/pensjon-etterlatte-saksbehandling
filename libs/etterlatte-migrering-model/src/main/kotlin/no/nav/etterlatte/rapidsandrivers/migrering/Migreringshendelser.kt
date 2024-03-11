@@ -3,7 +3,6 @@ package no.nav.etterlatte.rapidsandrivers.migrering
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 
 enum class Migreringshendelser : EventnameHendelseType {
-    START_MIGRERING,
     MIGRER_SPESIFIKK_SAK,
     MIGRER_SAK,
     VERIFISER,

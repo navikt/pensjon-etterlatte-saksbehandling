@@ -15,6 +15,7 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -69,6 +70,7 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
     private lateinit var sakRepo: SakDao
     private lateinit var service: GenerellBehandlingService
     private lateinit var behandlingRepo: BehandlingDao
+    private val hendelser: BehandlingHendelserKafkaProducer = mockk()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val behandlingService = mockk<BehandlingService>()
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
@@ -91,6 +93,7 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
             OppgaveService(
                 OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource)),
                 sakRepo,
+                hendelser,
             )
 
         every { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) } returns saksbehandlerNavn

@@ -32,8 +32,8 @@ interface BrevApiKlient {
     ): OpprettetBrevDto
 
     suspend fun ferdigstillBrev(
+        behandlingId: UUID,
         sakId: Long,
-        brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     )
 
@@ -112,12 +112,12 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
     }
 
     override suspend fun ferdigstillBrev(
+        behandlingId: UUID,
         sakId: Long,
-        brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         post(
-            url = "$resourceUrl/api/brev/$brevId/ferdigstill?sakId=$sakId",
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak/ferdigstill",
             onSuccess = { },
             brukerTokenInfo = brukerTokenInfo,
         )

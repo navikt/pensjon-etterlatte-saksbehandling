@@ -10,6 +10,7 @@ import { FlexRow } from '~shared/styled'
 import { UtsendingsinfoModal } from '~components/person/dokumenter/UtsendingsinfoModal'
 import { OppgaveFraJournalpostModal } from '~components/person/dokumenter/OppgaveFraJournalpostModal'
 import DokumentModal from '~components/person/dokumenter/DokumentModal'
+import { HaandterAvvikModal } from './avvik/HaandterAvvikModal'
 
 export const DokumentRad = ({
   dokument,
@@ -58,6 +59,8 @@ export const DokumentRad = ({
               sakStatus={sakStatus}
             />
           )}
+
+          <HaandterAvvikModal journalpost={dokument} sakStatus={sakStatus} />
 
           <DokumentModal journalpost={dokument} />
         </FlexRow>

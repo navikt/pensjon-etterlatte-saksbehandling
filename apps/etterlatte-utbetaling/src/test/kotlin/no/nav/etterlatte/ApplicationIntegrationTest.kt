@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.mq.DummyJmsConnectionFactory
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
-import no.nav.etterlatte.utbetaling.TestContainers
+import no.nav.etterlatte.utbetaling.DatabaseExtension
 import no.nav.etterlatte.utbetaling.attestertvedtakEvent
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
 import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
@@ -29,30 +29,25 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.util.UUID
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApplicationIntegrationTest {
-    @Container
-    private val postgreSQLContainer = TestContainers.postgreSQLContainer
-
     private val rapidsConnection: TestRapid = spyk(TestRapid())
     private val connectionFactory: EtterlatteJmsConnectionFactory = DummyJmsConnectionFactory()
-    private lateinit var dataSource: DataSource
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
+        val props = dbExtension.properties()
 
         val applicationProperties =
             ApplicationProperties(
-                dbName = postgreSQLContainer.databaseName,
-                dbHost = postgreSQLContainer.host,
-                dbPort = postgreSQLContainer.firstMappedPort,
-                dbUsername = postgreSQLContainer.username,
-                dbPassword = postgreSQLContainer.password,
+                dbName = props.databaseName,
+                dbHost = props.host,
+                dbPort = props.firstMappedPort,
+                dbUsername = props.username,
+                dbPassword = props.password,
                 mqHost = "mqHost",
                 mqPort = -1,
                 mqQueueManager = "QM1",
@@ -70,7 +65,6 @@ class ApplicationIntegrationTest {
             )
 
         ApplicationContext(applicationProperties, rapidsConnection, jmsConnectionFactory = connectionFactory).also {
-            dataSource = it.dataSource
             rapidApplication(it).start()
         }
     }
@@ -328,16 +322,12 @@ class ApplicationIntegrationTest {
     @AfterEach
     fun afterEach() {
         rapidsConnection.reset()
-
-        dataSource.connection.use {
-            it.prepareStatement(""" TRUNCATE utbetaling CASCADE""").execute()
-        }
+        dbExtension.resetDb()
     }
 
     @AfterAll
     fun afterAll() {
         rapidsConnection.stop()
-        postgreSQLContainer.stop()
     }
 
     private fun sendFattetVedtakEvent(vedtakEvent: String) {
@@ -349,6 +339,9 @@ class ApplicationIntegrationTest {
     }
 
     companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
+
         const val TIMEOUT: Long = 5000
     }
 

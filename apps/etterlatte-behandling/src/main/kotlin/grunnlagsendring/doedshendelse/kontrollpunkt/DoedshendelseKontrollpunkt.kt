@@ -52,8 +52,8 @@ sealed class DoedshendelseKontrollpunkt {
         override val kode = "BARN_HAR_BP"
         override val beskrivelse: String = "Barn har barnepensjon"
         override val sendBrev: Boolean = false
-        override val opprettOppgave: Boolean = false
-        override val avbryt: Boolean = true
+        override val opprettOppgave: Boolean = true
+        override val avbryt: Boolean = false
     }
 
     @JsonTypeName("BARN_HAR_UFOERE")

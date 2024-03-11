@@ -3,7 +3,11 @@ import { SortState, Table } from '@navikt/ds-react'
 import { OppgaverTableHeader } from '~components/oppgavebenk/oppgaverTable/OppgaverTableHeader'
 import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import { OppgaverTableRow } from '~components/oppgavebenk/oppgaverTable/OppgaverTableRow'
-import { leggTilSorteringILocalStorage, OppgaveSortering } from '~components/oppgavebenk/utils/oppgaveSortering'
+import {
+  initialSortering,
+  leggTilSorteringILocalStorage,
+  OppgaveSortering,
+} from '~components/oppgavebenk/utils/oppgaveSortering'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 
@@ -44,26 +48,23 @@ export const OppgaverTable = ({
     switch (sort?.orderBy) {
       case SortKey.REGISTRERINGSDATO:
         const nySorteringRegistreringsdato: OppgaveSortering = {
+          ...initialSortering,
           registreringsdatoSortering: sort ? sort.direction : 'none',
-          fristSortering: 'none',
-          fnrSortering: 'none',
         }
         setSortering(nySorteringRegistreringsdato)
         leggTilSorteringILocalStorage(nySorteringRegistreringsdato)
         break
       case SortKey.FRIST:
         const nySorteringFrist: OppgaveSortering = {
-          registreringsdatoSortering: 'none',
+          ...initialSortering,
           fristSortering: sort ? sort.direction : 'none',
-          fnrSortering: 'none',
         }
         setSortering(nySorteringFrist)
         leggTilSorteringILocalStorage(nySorteringFrist)
         break
       case SortKey.FNR:
         const nySorteringFnr: OppgaveSortering = {
-          registreringsdatoSortering: 'none',
-          fristSortering: 'none',
+          ...initialSortering,
           fnrSortering: sort ? sort.direction : 'none',
         }
         setSortering(nySorteringFnr)

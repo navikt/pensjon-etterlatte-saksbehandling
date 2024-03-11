@@ -7,12 +7,10 @@ export interface OppgaveSortering {
   fnrSortering: Retning
 }
 
-export const initialSortering = (): OppgaveSortering => {
-  return {
-    registreringsdatoSortering: 'none',
-    fnrSortering: 'none',
-    fristSortering: 'none',
-  }
+export const initialSortering: OppgaveSortering = {
+  registreringsdatoSortering: 'none',
+  fnrSortering: 'none',
+  fristSortering: 'none',
 }
 
 type Retning = 'descending' | 'ascending' | 'none'
@@ -63,17 +61,17 @@ export const hentSorteringFraLocalStorage = (): OppgaveSortering => {
       const harGammelVersjonNummerTo = Object.values(parsetFilter).find((value) => value === 'no-order')
       const harGammelVersjonNummerTre = Object.keys(parsetFilter).find((value) => value === 'registreringsdato')
       if (harGammelVersjon || harGammelVersjonNummerTo || !harGammelVersjonNummerTre) {
-        const initiellSortering = initialSortering()
+        const initiellSortering = initialSortering
         leggTilSorteringILocalStorage(initiellSortering)
         return initiellSortering
       } else {
         return parsetFilter
       }
     } else {
-      return initialSortering()
+      return initialSortering
     }
   } catch (e) {
     logger.generalError({ message: 'Feil i hentingen av sortering fra localstorage' })
-    return initialSortering()
+    return initialSortering
   }
 }

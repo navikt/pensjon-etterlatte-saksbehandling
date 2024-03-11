@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -66,7 +67,7 @@ class BehandlingsHendelserKafkaProducerImpl(
                 hendelseType.lagEventnameForType(),
                 mapOf(
                     CORRELATION_ID_KEY to correlationId,
-                    TEKNISK_TID_KEY to LocalDateTime.now(),
+                    TEKNISK_TID_KEY to Tidspunkt.now(),
                     BEHANDLING_RIVER_KEY to behandlingId,
                 ),
             ).toJson(),

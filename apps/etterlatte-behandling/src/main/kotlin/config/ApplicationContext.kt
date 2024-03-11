@@ -97,7 +97,6 @@ import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.person.krr.KrrKlientImpl
 import no.nav.etterlatte.oppgave.FristGaarUtJobb
-import no.nav.etterlatte.oppgave.MigrerOppgavePaaVentStatistikk
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -467,18 +466,6 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(5, ChronoUnit.MINUTES),
-        )
-    }
-
-    // TODO Midlertidig
-    val migrerOppgavePaaVentStatistikk: MigrerOppgavePaaVentStatistikk by lazy {
-        MigrerOppgavePaaVentStatistikk(
-            oppgaveDaoNy,
-            behandlingsHendelser,
-            featureToggleService,
-            { leaderElectionKlient.isLeader() },
-            Duration.of(5, ChronoUnit.MINUTES).toMillis(),
-            periode = Duration.of(60, ChronoUnit.MINUTES),
         )
     }
 

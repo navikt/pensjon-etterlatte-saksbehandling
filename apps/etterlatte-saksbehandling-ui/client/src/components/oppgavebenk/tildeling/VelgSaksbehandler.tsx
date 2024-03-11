@@ -7,7 +7,7 @@ import {
   byttSaksbehandlerApi,
   erOppgaveRedigerbar,
   fjernSaksbehandlerApi,
-  kanOppdatereTildeling,
+  erOppgaveAvsluttet,
   OppgaveDTO,
   OppgaveSaksbehandler,
   tildelSaksbehandlerApi,
@@ -32,7 +32,7 @@ const mapSaksbehandler = (oppgave: OppgaveDTO): Saksbehandler | undefined =>
 export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, oppgave }: Props): ReactNode => {
   const { sakId, id: oppgaveId, type, versjon, status } = oppgave
   const erRedigerbar = erOppgaveRedigerbar(status)
-  const kanOppdatereTilderling = kanOppdatereTildeling(oppgave)
+  const kanOppdatereTilderling = erOppgaveAvsluttet(oppgave)
   const saksbehandler = mapSaksbehandler(oppgave)
 
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)

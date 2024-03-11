@@ -60,8 +60,9 @@ class GjenopprettingMetrikkerDao(private val dataSource: DataSource) {
             val statement =
                 it.prepareStatement(
                     """
-                    select count(b.id) antall, s.fnr from behandling b join sak s on b.sak_id = s.id
+                    select s.fnr from behandling b join sak s on b.sak_id = s.id
                     where behandlingstype = 'FØRSTEGANGSBEHANDLING'
+                    and kilde = 'GJENOPPRETTA'
                     and status = 'IVERKSATT'
                     and b.id not in (
                         select id from behandling
@@ -74,8 +75,10 @@ class GjenopprettingMetrikkerDao(private val dataSource: DataSource) {
                 getString("fnr")
             }.filter { fnr ->
                 try {
-                    val bursdagsmaaned = Folkeregisteridentifikator.of(fnr).getBirthDate().month
-                    bursdagsmaaned > Month.JANUARY && bursdagsmaaned < Month.MAY
+                    val bursdag = Folkeregisteridentifikator.of(fnr).getBirthDate()
+                    val fyller20 = 2024 - bursdag.year == 20
+                    val bursdagsmaaned = bursdag.month
+                    fyller20 && bursdagsmaaned > Month.JANUARY && bursdagsmaaned < Month.MAY
                 } catch (err: InvalidFoedselsnummerException) {
                     false
                 }

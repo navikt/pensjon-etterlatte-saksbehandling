@@ -88,8 +88,7 @@ export const hentOppgaverMedReferanse = async (referanse: string): Promise<ApiRe
   apiClient.get(`/oppgaver/referanse/${referanse}`)
 export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver/gosys')
 
-export const hentOppgavelisteneStats = async (): Promise<ApiResponse<OppgavebenkStats>> =>
-  apiClient.get('/oppgaver/stats')
+export const hentOppgavebenkStats = async (): Promise<ApiResponse<OppgavebenkStats>> => apiClient.get('/oppgaver/stats')
 
 export const opprettOppgave = async (args: {
   sakId: number

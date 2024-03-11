@@ -4,7 +4,7 @@ import { Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 import { initalOppgavebenkStats, OppgavebenkStats } from '~components/oppgavebenk/utils/oppgaveutils'
-import { hentOppgavelisteneStats } from '~shared/api/oppgaver'
+import { hentOppgavebenkStats } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
 
 export const VelgOppgaveliste = ({ oppgavelisteValg, setOppgavelisteValg }: Props): ReactNode => {
   const [oppgavebenkStats, setOppgavebenkStats] = useState<OppgavebenkStats>(initalOppgavebenkStats)
-  const [, hentOppgavebenkStatsFetch] = useApiCall(hentOppgavelisteneStats)
+  const [, hentOppgavebenkStatsFetch] = useApiCall(hentOppgavebenkStats)
 
   useEffect(() => {
     hentOppgavebenkStatsFetch({}, setOppgavebenkStats)

@@ -6,7 +6,7 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.OppgavelisteneStats
+import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -121,7 +121,7 @@ class OppgaveDaoMedEndringssporingImpl(
         return oppgaveDao.hentOppgaver(oppgaveTyper, enheter, erSuperBruker, oppgaveStatuser, minOppgavelisteIdentFilter)
     }
 
-    override fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavelisteneStats {
+    override fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats {
         return oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)
     }
 

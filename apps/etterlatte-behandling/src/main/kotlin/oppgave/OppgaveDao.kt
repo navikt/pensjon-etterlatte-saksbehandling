@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.OppgavelisteneStats
+import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -41,7 +41,7 @@ interface OppgaveDao {
         minOppgavelisteIdentFilter: String? = null,
     ): List<OppgaveIntern>
 
-    fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavelisteneStats
+    fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats
 
     fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern>
 
@@ -225,7 +225,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
         }
     }
 
-    override fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavelisteneStats {
+    override fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats {
         return connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -241,7 +241,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setString(1, innloggetSaksbehandlerIdent)
 
                 statement.executeQuery().singleOrNull {
-                    OppgavelisteneStats(getLong("antallOppgavelistaOppgaver"), getLong("antallMinOppgavelisteOppgaver"))
+                    OppgavebenkStats(getLong("antallOppgavelistaOppgaver"), getLong("antallMinOppgavelisteOppgaver"))
                 }!!.also {
                     logger.info("Henter antall oppgaver")
                 }

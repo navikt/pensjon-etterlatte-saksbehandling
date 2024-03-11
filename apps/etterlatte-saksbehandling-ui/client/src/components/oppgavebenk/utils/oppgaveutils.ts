@@ -74,12 +74,12 @@ function isNumeric(value: string) {
   return /^-?\d+$/.test(value)
 }
 
-export interface OppgavelisteneStats {
+export interface OppgavebenkStats {
   antallOppgavelistaOppgaver: number
   antallMinOppgavelisteOppgaver: number
 }
 
-export const initalOppgavelisteneStats: OppgavelisteneStats = {
+export const initalOppgavebenkStats: OppgavebenkStats = {
   antallOppgavelistaOppgaver: 0,
   antallMinOppgavelisteOppgaver: 0,
 }

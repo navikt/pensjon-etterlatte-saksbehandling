@@ -19,7 +19,7 @@ import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { ProvideOppgavebenkContext } from '~components/oppgavebenk/state/OppgavebenkContext'
 
-export const Oppgavelistene = () => {
+export const Oppgavebenk = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />

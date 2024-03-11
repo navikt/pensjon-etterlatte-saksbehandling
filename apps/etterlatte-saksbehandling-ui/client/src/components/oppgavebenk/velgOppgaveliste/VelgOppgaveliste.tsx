@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
-import { initalOppgavelisteneStats, OppgavelisteneStats } from '~components/oppgavebenk/utils/oppgaveutils'
+import { initalOppgavebenkStats, OppgavebenkStats } from '~components/oppgavebenk/utils/oppgaveutils'
 import { hentOppgavelisteneStats } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 
@@ -13,11 +13,11 @@ interface Props {
 }
 
 export const VelgOppgaveliste = ({ oppgavelisteValg, setOppgavelisteValg }: Props): ReactNode => {
-  const [oppgavelisteneStats, setOppgavelisteneStats] = useState<OppgavelisteneStats>(initalOppgavelisteneStats)
-  const [, hentOppgavelisteneStatsFetch] = useApiCall(hentOppgavelisteneStats)
+  const [oppgavebenkStats, setOppgavebenkStats] = useState<OppgavebenkStats>(initalOppgavebenkStats)
+  const [, hentOppgavebenkStatsFetch] = useApiCall(hentOppgavelisteneStats)
 
   useEffect(() => {
-    hentOppgavelisteneStatsFetch({}, setOppgavelisteneStats)
+    hentOppgavebenkStatsFetch({}, setOppgavebenkStats)
   }, [])
 
   return (
@@ -25,12 +25,12 @@ export const VelgOppgaveliste = ({ oppgavelisteValg, setOppgavelisteValg }: Prop
       <Tabs.List>
         <Tabs.Tab
           value={OppgavelisteValg.OPPGAVELISTA}
-          label={`Oppgavelisten (${oppgavelisteneStats.antallOppgavelistaOppgaver})`}
+          label={`Oppgavelisten (${oppgavebenkStats.antallOppgavelistaOppgaver})`}
           icon={<InboxIcon />}
         />
         <Tabs.Tab
           value={OppgavelisteValg.MIN_OPPGAVELISTE}
-          label={`Min oppgaveliste (${oppgavelisteneStats.antallMinOppgavelisteOppgaver})`}
+          label={`Min oppgaveliste (${oppgavebenkStats.antallMinOppgavelisteOppgaver})`}
           icon={<PersonIcon aria-hidden />}
         />
         <Tabs.Tab value={OppgavelisteValg.GOSYS_OPPGAVER} label="Gosys-oppgaver" icon={<InboxIcon />} />

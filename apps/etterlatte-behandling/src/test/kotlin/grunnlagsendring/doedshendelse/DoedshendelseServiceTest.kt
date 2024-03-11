@@ -10,6 +10,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.common.klienter.PensjonpersonKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
@@ -31,6 +32,7 @@ import java.util.UUID
 internal class DoedshendelseServiceTest {
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
     private val dao = mockk<DoedshendelseDao>()
+    private val pensjonpersonKlient = mockk<PensjonpersonKlient>()
     private val toggle =
         mockk<FeatureToggleService> {
             every { isEnabled(any(), any()) } returns true
@@ -40,6 +42,7 @@ internal class DoedshendelseServiceTest {
             pdlTjenesterKlient = pdlTjenesterKlient,
             doedshendelseDao = dao,
             featureToggleService = toggle,
+            pensjonpersonKlient = pensjonpersonKlient,
         )
 
     private val avdoed =

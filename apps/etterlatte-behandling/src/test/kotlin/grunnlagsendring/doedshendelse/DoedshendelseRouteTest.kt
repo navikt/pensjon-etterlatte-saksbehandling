@@ -18,6 +18,7 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.common.klienter.PensjonpersonKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
@@ -40,6 +41,7 @@ import javax.sql.DataSource
 internal class DoedshendelseRouteTest(val dataSource: DataSource) {
     private val mockOAuth2Server = MockOAuth2Server()
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
+    private val pensjonpersonKlient = mockk<PensjonpersonKlient>()
     private val doedshendelseDao: DoedshendelseDao = DoedshendelseDao(ConnectionAutoclosingTest(dataSource))
     private val toggle =
         mockk<FeatureToggleService> {
@@ -50,6 +52,7 @@ internal class DoedshendelseRouteTest(val dataSource: DataSource) {
             pdlTjenesterKlient = pdlTjenesterKlient,
             doedshendelseDao = doedshendelseDao,
             featureToggleService = toggle,
+            pensjonpersonKlient = pensjonpersonKlient,
         )
 
     @BeforeAll

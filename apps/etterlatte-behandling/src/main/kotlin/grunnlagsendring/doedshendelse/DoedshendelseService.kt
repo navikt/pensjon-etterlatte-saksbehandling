@@ -1,7 +1,10 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sikkerLogg
+import no.nav.etterlatte.common.klienter.HarSammeBostedsAdresseRequest
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.common.klienter.PensjonpersonKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -30,6 +33,7 @@ class DoedshendelseService(
     private val doedshendelseDao: DoedshendelseDao,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val featureToggleService: FeatureToggleService,
+    private val pensjonpersonKlient: PensjonpersonKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -165,6 +169,46 @@ class DoedshendelseService(
     }
 
     private fun finnBeroerteEpser(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
+        return finnBeroerteEpserSivilstand(avdoed)
+    }
+
+    private fun finnSamboerForAvdoed(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
+        val avdoedesBarn = avdoed.avdoedesBarn
+        val andreForeldreForAvdoedesBarn =
+            avdoedesBarn?.mapNotNull { barn ->
+                val annenForeldre =
+                    barn.familieRelasjon?.foreldre?.filter { it.value != avdoed.foedselsnummer.verdi.value }
+                        ?.map { it }
+                annenForeldre?.map { forelder -> forelder.value }
+            }
+        return harSammeAdresseSomAvdoed(avdoed, andreForeldreForAvdoedesBarn?.flatten())
+    }
+
+    private fun harSammeAdresseSomAvdoed(
+        avdoed: PersonDTO,
+        andreForeldreForAvdoedesBarn: List<String>?,
+    ): List<PersonFnrMedRelasjon> {
+        // TODO: kalle pensjon-person
+        return andreForeldreForAvdoedesBarn?.map {
+            val avdoedFnr = avdoed.foedselsnummer.verdi.value
+            val borSammen =
+                runBlocking {
+                    pensjonpersonKlient.harSammeBostedsadresse(
+                        HarSammeBostedsAdresseRequest(
+                            avdoedFnr,
+                            it,
+                            LocalDate.now(),
+                        ),
+                    ) // Eller hendelsedato?
+                }
+            PersonerBorSammen(avdoedFnr, it, borSammen)
+        }
+            ?.filter { it.borSammen.status }
+            ?.map { PersonFnrMedRelasjon(it.gjenlevendePerson, Relasjon.EPS) }
+            ?: emptyList()
+    }
+
+    private fun finnBeroerteEpserSivilstand(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
         return avdoed.sivilstand?.filter { it.verdi.relatertVedSiviltilstand?.value !== null }
             ?.filter {
                 it.verdi.sivilstatus in

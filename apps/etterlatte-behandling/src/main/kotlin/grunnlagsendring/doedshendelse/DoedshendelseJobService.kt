@@ -69,7 +69,7 @@ class DoedshendelseJobService(
                     val nyeDoedshendelser = hentAlleNyeDoedsmeldinger()
                     logger.info("Antall nye dødsmeldinger ${nyeDoedshendelser.size}")
 
-                    val doedshendelserSomSkalHaanderes = finnGyldigeDoedshendelser(nyeDoedshendelser)
+                    val doedshendelserSomSkalHaanderes = hendelserErGamleNok(nyeDoedshendelser)
                     logger.info("Antall dødsmeldinger plukket ut for kjøring: ${doedshendelserSomSkalHaanderes.size}")
                     doedshendelserSomSkalHaanderes
                 }
@@ -252,7 +252,7 @@ class DoedshendelseJobService(
         return false to null
     }
 
-    private fun finnGyldigeDoedshendelser(hendelser: List<DoedshendelseInternal>): List<DoedshendelseInternal> {
+    private fun hendelserErGamleNok(hendelser: List<DoedshendelseInternal>): List<DoedshendelseInternal> {
         val idag = LocalDateTime.now()
 
         val avdoedHendelser = hendelser.filter { it.relasjon == Relasjon.AVDOED }

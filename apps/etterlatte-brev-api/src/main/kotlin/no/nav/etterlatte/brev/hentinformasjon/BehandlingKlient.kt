@@ -10,9 +10,9 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.oppgave.EndrePaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
-import no.nav.etterlatte.libs.common.oppgave.SettPaaOgAvVentRequest
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -123,7 +123,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) {
             resource = Resource(clientId = clientId, url = "$resourceUrl/api/oppgaver/$oppgaveId/sett-paa-vent"),
             brukerTokenInfo = brukerTokenInfo,
             postBody =
-                SettPaaOgAvVentRequest(
+                EndrePaaVentRequest(
                     merknad = merknad,
                     paaVent = true,
                 ),

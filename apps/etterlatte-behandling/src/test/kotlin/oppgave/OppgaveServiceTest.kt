@@ -517,7 +517,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             )
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
 
-        oppgaveService.settOppgavePaaOgAvVent(
+        oppgaveService.endrePaaVent(
             nyOppgave.id,
             "test",
             true,
@@ -526,7 +526,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         assertEquals(Status.PAA_VENT, oppgavePaaVent?.status)
         verify { hendelser.sendMeldingForHendelsePaaVent(UUID.fromString(nyOppgave.referanse), BehandlingHendelseType.PAA_VENT) }
 
-        oppgaveService.settOppgavePaaOgAvVent(
+        oppgaveService.endrePaaVent(
             oppgavePaaVent!!.id,
             "test",
             false,

@@ -29,6 +29,9 @@ import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.BorSammen
+import no.nav.etterlatte.common.klienter.HarSammeBostedsAdresseRequest
+import no.nav.etterlatte.common.klienter.PensjonpersonKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.config.ApplicationContext
@@ -142,6 +145,7 @@ abstract class BehandlingIntegrationTest {
                 pesysKlient = PesysKlientTest(),
                 krrKlient = KrrklientTest(),
                 axsysKlient = AxsysKlientTest(),
+                pensjonpersonKlient = PensjonpersonTest(),
             )
     }
 
@@ -688,5 +692,11 @@ class AxsysKlientTest : AxsysKlient {
             SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
             SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
         )
+    }
+}
+
+class PensjonpersonTest : PensjonpersonKlient {
+    override suspend fun harSammeBostedsadresse(harSammeBostedsAdresseRequest: HarSammeBostedsAdresseRequest): BorSammen {
+        return BorSammen(true)
     }
 }

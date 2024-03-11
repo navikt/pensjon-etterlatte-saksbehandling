@@ -15,26 +15,21 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.OPPGAVEID_GOSYS_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.gosysOppgaveId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.oppgave.EndrePaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
-import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
-import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringGosysDto
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.oppgave.VentefristerGaarUtResponse
 import no.nav.etterlatte.libs.common.oppgaveId
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.oppgaveGosys.GosysOppgaveService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
@@ -67,10 +62,7 @@ inline val PipelineContext<*, ApplicationCall>.minOppgavelisteidentQueryParam: S
         }
     }
 
-internal fun Route.oppgaveRoutes(
-    service: OppgaveService,
-    gosysOppgaveService: GosysOppgaveService,
-) {
+internal fun Route.oppgaveRoutes(service: OppgaveService) {
     route("/api/oppgaver") {
         get {
             kunSaksbehandler {
@@ -214,60 +206,6 @@ internal fun Route.oppgaveRoutes(
                     val redigerFrist = call.receive<RedigerFristRequest>()
                     inTransaction { service.redigerFrist(oppgaveId, redigerFrist.frist) }
                     call.respond(HttpStatusCode.OK)
-                }
-            }
-        }
-
-        route("/gosys") {
-            get {
-                kunSaksbehandler {
-                    call.respond(gosysOppgaveService.hentOppgaver(brukerTokenInfo))
-                }
-            }
-
-            route("{$OPPGAVEID_GOSYS_CALL_PARAMETER}") {
-                get {
-                    kunSaksbehandler {
-                        val oppgave = gosysOppgaveService.hentOppgave(gosysOppgaveId.toLong(), brukerTokenInfo)
-
-                        call.respond(oppgave ?: HttpStatusCode.NoContent)
-                    }
-                }
-
-                post("tildel-saksbehandler") {
-                    kunSaksbehandlerMedSkrivetilgang {
-                        val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringGosysDto>()
-                        val oppdatertVersjon =
-                            gosysOppgaveService.tildelOppgaveTilSaksbehandler(
-                                gosysOppgaveId,
-                                saksbehandlerEndringDto.versjon,
-                                saksbehandlerEndringDto.saksbehandler,
-                                brukerTokenInfo,
-                            )
-                        call.respond(GosysOppgaveversjon(oppdatertVersjon))
-                    }
-                }
-
-                post("endre-frist") {
-                    kunSaksbehandlerMedSkrivetilgang {
-                        val redigerFristRequest = call.receive<RedigerFristGosysRequest>()
-                        val oppdatertVersjon =
-                            gosysOppgaveService.endreFrist(
-                                gosysOppgaveId,
-                                redigerFristRequest.versjon,
-                                redigerFristRequest.frist,
-                                brukerTokenInfo,
-                            )
-                        call.respond(GosysOppgaveversjon(oppdatertVersjon))
-                    }
-                }
-
-                post("ferdigstill") {
-                    kunSaksbehandlerMedSkrivetilgang {
-                        val versjon = call.request.queryParameters["versjon"]!!.toLong()
-
-                        call.respond(gosysOppgaveService.ferdigstill(gosysOppgaveId, versjon, brukerTokenInfo))
-                    }
                 }
             }
         }

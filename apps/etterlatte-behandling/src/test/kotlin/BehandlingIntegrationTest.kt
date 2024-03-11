@@ -606,6 +606,14 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         return gosysApiOppgave()
     }
 
+    override suspend fun feilregistrer(
+        id: String,
+        oppgaveVersjon: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave {
+        return gosysApiOppgave()
+    }
+
     private fun gosysApiOppgave(): GosysApiOppgave {
         return GosysApiOppgave(
             1,
@@ -613,6 +621,7 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
             "EYB",
             "-",
             "",
+            null,
             Tidspunkt.now(),
             "4808",
             null,

@@ -34,7 +34,7 @@ export const GosysOppgaveModal = ({
   const [open, setOpen] = useState(false)
   const [toggleFerdigstill, setToggleFerdigstill] = useState(false)
 
-  const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandler, beskrivelse, sakType } = oppgave
+  const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandler, beskrivelse, sakType, journalpostId } = oppgave
 
   const [ferdigstillResult, ferdigstillOppgave] = useApiCall(ferdigstilleGosysOppgave)
 
@@ -53,7 +53,7 @@ export const GosysOppgaveModal = ({
       <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
         <Modal.Header>
           <Heading size="medium" id="modal-heading">
-            Oppgave fra Gosys
+            {journalpostId ? 'Journalføringsoppgave fra Gosys' : 'Oppgave fra Gosys'}
           </Heading>
         </Modal.Header>
 
@@ -93,6 +93,12 @@ export const GosysOppgaveModal = ({
               <Label>Saksbehandler</Label>
               <BodyShort>{saksbehandler?.ident || '-'}</BodyShort>
             </div>
+            {!!journalpostId && (
+              <div>
+                <Label>JournalpostId</Label>
+                <BodyShort>{journalpostId || '-'}</BodyShort>
+              </div>
+            )}
           </InfoGrid>
           <Box padding="4" borderRadius="medium" borderColor="border-subtle" borderWidth="1" background="bg-subtle">
             <Label>Beskrivelse</Label>

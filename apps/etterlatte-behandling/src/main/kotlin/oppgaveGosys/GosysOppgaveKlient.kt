@@ -29,6 +29,7 @@ data class GosysApiOppgave(
     val tema: String,
     val behandlingstema: String? = null,
     val oppgavetype: String,
+    val journalpostId: String?,
     val opprettetTidspunkt: Tidspunkt,
     val tildeltEnhetsnr: String,
     val tilordnetRessurs: String?,
@@ -74,6 +75,12 @@ interface GosysOppgaveKlient {
     ): GosysApiOppgave
 
     suspend fun ferdigstill(
+        id: String,
+        oppgaveVersjon: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave
+
+    suspend fun feilregistrer(
         id: String,
         oppgaveVersjon: Long,
         brukerTokenInfo: BrukerTokenInfo,
@@ -160,7 +167,21 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
         return patchOppgave(
             id,
             brukerTokenInfo,
-            body = FerdigstillRequest(oppgaveVersjon.toString(), "FERDIGSTILT"),
+            body = EndreStatusRequest(oppgaveVersjon.toString(), "FERDIGSTILT"),
+        )
+    }
+
+    override suspend fun feilregistrer(
+        id: String,
+        oppgaveVersjon: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave {
+        logger.info("Feilregistrerer Gosys-oppgave med id=$id")
+
+        return patchOppgave(
+            id,
+            brukerTokenInfo,
+            body = EndreStatusRequest(oppgaveVersjon.toString(), "FEILREGISTRERT"),
         )
     }
 
@@ -230,7 +251,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
     }
 }
 
-data class FerdigstillRequest(
+data class EndreStatusRequest(
     val versjon: String,
     val status: String,
 )

@@ -20,6 +20,7 @@ export interface OppgaveDTO {
 
   // GOSYS-spesifikt
   beskrivelse: string | null
+  journalpostId: string | null
   gjelder: string | null
   versjon: number | null
 }
@@ -113,6 +114,12 @@ export const ferdigstilleGosysOppgave = async (args: {
   versjon: number
 }): Promise<ApiResponse<OppgaveDTO>> =>
   apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/ferdigstill?versjon=${args.versjon}`, {})
+
+export const feilregistrerGosysOppgave = async (args: {
+  oppgaveId: string
+  versjon: number
+}): Promise<ApiResponse<OppgaveDTO>> =>
+  apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/feilregistrer?versjon=${args.versjon}`, {})
 
 export const tildelSaksbehandlerApi = async (args: {
   oppgaveId: string

@@ -28,11 +28,6 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SakRepositoryTest(private val dataSource: DataSource) {
-    companion object {
-        @RegisterExtension
-        val dbExtension = DatabaseExtension()
-    }
-
     val mockBeregning =
         Beregning(
             beregningId = UUID.randomUUID(),
@@ -125,6 +120,9 @@ class SakRepositoryTest(private val dataSource: DataSource) {
     }
 
     companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
+
         fun lagSak(
             referanseId: UUID = UUID.randomUUID(),
             beregning: Beregning? = null,

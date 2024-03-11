@@ -2,7 +2,6 @@ package no.nav.etterlatte.sak
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.common.Enheter
@@ -14,7 +13,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import org.slf4j.LoggerFactory
 
 interface SakService {
@@ -206,18 +204,24 @@ class SakServiceImpl(
 
     override fun finnFlyktningForSak(id: Long): Flyktning? = dao.hentSak(id).sjekkEnhet()?.let { dao.finnFlyktningForSak(id) }
 
-    private fun List<Sak>.filterForEnheter() =
-        this.filterSakerForEnheter(
-            Kontekst.get().AppUser,
-        )
-
     private fun Sak?.sjekkEnhet() =
         this?.let { sak ->
             listOf(sak).filterForEnheter().firstOrNull()
         }
-}
 
-fun List<Sak>.filterSakerForEnheter(user: User) =
-    this.filterForEnheter(user) { item, enheter ->
-        enheter.contains(item.enhet)
+    private fun List<Sak>.filterForEnheter(): List<Sak> {
+        val enheterSomSkalFiltreres = ArrayList<String>()
+        val bruker = Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
+        if (!bruker.harRolleStrengtFortrolig()) {
+            enheterSomSkalFiltreres.add(Enheter.STRENGT_FORTROLIG.enhetNr)
+        }
+        return filterSakerForEnheter(enheterSomSkalFiltreres, this)
     }
+
+    private fun filterSakerForEnheter(
+        enheterSomSkalFiltreres: List<String>,
+        saker: List<Sak>,
+    ): List<Sak>  {
+        return saker.filter { it.enhet !in enheterSomSkalFiltreres }
+    }
+}

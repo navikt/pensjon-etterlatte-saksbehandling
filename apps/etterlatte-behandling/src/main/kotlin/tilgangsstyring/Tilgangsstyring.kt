@@ -244,6 +244,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(onSuccess: (
 
 val saksbehandlereMedTilgangTilAlleEnheter = listOf("S128848", "K105085", "O113803")
 
+// TODO: gå gjennom denne
 fun <T> List<T>.filterForEnheter(
     user: User,
     filter: (item: T, enheter: List<String>) -> Boolean,

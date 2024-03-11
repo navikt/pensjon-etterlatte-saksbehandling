@@ -7,7 +7,7 @@ import {
   hentSorteringFraLocalStorage,
   OppgaveSortering,
   sorterFnr,
-  sorterFrist,
+  sorterDato,
 } from '~components/oppgavebenk/utils/oppgaveSortering'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils/oppgaveutils'
@@ -46,8 +46,8 @@ export const Oppgaver = ({
       )
     : oppgaver
 
-  const sortertRegistreringsdato = sorterFrist(sortering.registreringsdatoSortering, filtrerteOppgaver)
-  const sortertFrist = sorterFrist(sortering.fristSortering, sortertRegistreringsdato)
+  const sortertRegistreringsdato = sorterDato(sortering.registreringsdatoSortering, filtrerteOppgaver)
+  const sortertFrist = sorterDato(sortering.fristSortering, sortertRegistreringsdato)
   const sorterteOppgaver = sorterFnr(sortering.fnrSortering, sortertFrist)
 
   const [page, setPage] = useState<number>(1)

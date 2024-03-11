@@ -9,7 +9,7 @@ export const OppgaverTableHeader = (): ReactNode => {
       <Table.Row>
         <Table.HeaderCell scope="col">Sak ID</Table.HeaderCell>
         <Table.ColumnHeader scope="col" sortKey={SortKey.REGISTRERINGSDATO} sortable>
-          Registreringsdato
+          Reg.dato
         </Table.ColumnHeader>
         <Table.ColumnHeader scope="col" sortKey={SortKey.FRIST} sortable>
           Frist

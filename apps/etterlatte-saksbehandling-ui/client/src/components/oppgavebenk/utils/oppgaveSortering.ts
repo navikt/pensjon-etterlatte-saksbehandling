@@ -9,23 +9,23 @@ export interface OppgaveSortering {
 
 export const initialSortering: OppgaveSortering = {
   registreringsdatoSortering: 'none',
-  fnrSortering: 'none',
   fristSortering: 'none',
+  fnrSortering: 'none',
 }
 
-type Retning = 'descending' | 'ascending' | 'none'
+type Retning = 'ascending' | 'descending' | 'none'
 
-const sammenlignFrist = (a: OppgaveDTO, b: OppgaveDTO) => {
+const sammenlignDato = (a: OppgaveDTO, b: OppgaveDTO) => {
   // Konverterer datoene til en numerisk verdi og sammenligner dem
   return (!!a.frist ? new Date(a.frist).getTime() : 0) - (!!b.frist ? new Date(b.frist).getTime() : 0)
 }
 
-export function sorterFrist(retning: Retning, oppgaver: OppgaveDTO[]) {
+export function sorterDato(retning: Retning, oppgaver: OppgaveDTO[]) {
   switch (retning) {
     case 'ascending':
-      return oppgaver.sort(sammenlignFrist)
+      return oppgaver.sort(sammenlignDato)
     case 'descending':
-      return oppgaver.sort(sammenlignFrist).reverse()
+      return oppgaver.sort(sammenlignDato).reverse()
     case 'none':
       return oppgaver
   }
@@ -33,7 +33,7 @@ export function sorterFrist(retning: Retning, oppgaver: OppgaveDTO[]) {
 
 const sammenlignFnr = (a: OppgaveDTO, b: OppgaveDTO) => {
   // Sammenligner de første 6 sifrene i fødselsnummerene
-  return (a.fnr ? Number(a.fnr.slice(0, 5)) : 0) - (b.fnr ? Number(b.fnr.slice(0, 5)) : 0)
+  return (!!a.fnr ? Number(a.fnr.slice(0, 5)) : 0) - (!!b.fnr ? Number(b.fnr.slice(0, 5)) : 0)
 }
 
 export function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[]) {
@@ -61,9 +61,8 @@ export const hentSorteringFraLocalStorage = (): OppgaveSortering => {
       const harGammelVersjonNummerTo = Object.values(parsetFilter).find((value) => value === 'no-order')
       const harGammelVersjonNummerTre = Object.keys(parsetFilter).find((value) => value === 'registreringsdato')
       if (harGammelVersjon || harGammelVersjonNummerTo || !harGammelVersjonNummerTre) {
-        const initiellSortering = initialSortering
-        leggTilSorteringILocalStorage(initiellSortering)
-        return initiellSortering
+        leggTilSorteringILocalStorage(initialSortering)
+        return initialSortering
       } else {
         return parsetFilter
       }

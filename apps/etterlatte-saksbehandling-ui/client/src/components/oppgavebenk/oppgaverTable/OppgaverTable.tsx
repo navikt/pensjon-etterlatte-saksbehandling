@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { SortState, Table } from '@navikt/ds-react'
 import { OppgaverTableHeader } from '~components/oppgavebenk/oppgaverTable/OppgaverTableHeader'
 import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
@@ -45,6 +45,9 @@ export const OppgaverTable = ({
             direction: sort && sortKey === sort.orderBy && sort.direction === 'ascending' ? 'descending' : 'ascending',
           }
     )
+  }
+
+  useEffect(() => {
     switch (sort?.orderBy) {
       case SortKey.REGISTRERINGSDATO:
         const nySorteringRegistreringsdato: OppgaveSortering = {
@@ -71,7 +74,7 @@ export const OppgaverTable = ({
         leggTilSorteringILocalStorage(nySorteringFnr)
         break
     }
-  }
+  }, [sort])
 
   return (
     <Table

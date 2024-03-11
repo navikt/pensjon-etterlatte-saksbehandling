@@ -440,6 +440,25 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
             }
         }
 
+    fun hentAllePaaVent(): List<String> {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT id, referanse FROM oppgave
+                        WHERE status = 'PAA_VENT'
+                        """.trimIndent(),
+                    )
+                statement.executeQuery().toList {
+                    getString("referanse")
+                }.also { oppgaveliste ->
+                    logger.info("Hentet id'er til behandlinger på vent: ${oppgaveliste.size}")
+                }
+            }
+        }
+    }
+
     private fun ResultSet.asOppgave(): OppgaveIntern {
         return OppgaveIntern(
             id = getObject("id") as UUID,

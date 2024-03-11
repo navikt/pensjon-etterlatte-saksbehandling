@@ -117,9 +117,9 @@ class SakRepositoryTest(private val dataSource: DataSource) {
     fun `sakRepository henter siste rad for en sak`() {
         val repo = SakRepository.using(dataSource)
         val behandling = UUID.randomUUID()
-        val nyligste = repo.lagreRad(lagSak(referanseId = behandling, tekniskTidspunkt = Tidspunkt.now().minus(1L, DAYS)))
+        repo.lagreRad(lagSak(referanseId = behandling, tekniskTidspunkt = Tidspunkt.now().minus(1L, DAYS)))
         repo.lagreRad(lagSak(referanseId = behandling, tekniskTidspunkt = Tidspunkt.now().minus(2L, DAYS)))
-        repo.lagreRad(lagSak(referanseId = behandling, tekniskTidspunkt = Tidspunkt.now().minus(3L, DAYS)))
+        val nyligste = repo.lagreRad(lagSak(referanseId = behandling, tekniskTidspunkt = Tidspunkt.now().minus(3L, DAYS)))
 
         repo.hentSisteRad(behandling) shouldBe nyligste
     }

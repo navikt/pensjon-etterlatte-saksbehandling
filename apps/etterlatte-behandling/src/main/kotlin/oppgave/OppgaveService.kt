@@ -193,17 +193,13 @@ class OppgaveService(
                 OppgaveType.REVURDERING,
                 OppgaveType.ATTESTERING,
                 OppgaveType.UNDERKJENT,
+                OppgaveType.TILBAKEKREVING,
+                OppgaveType.KLAGE,
                 -> {
                     hendelser.sendMeldingForHendelsePaaVent(
                         UUID.fromString(oppgave.referanse),
                         if (nyStatus == Status.PAA_VENT) BehandlingHendelseType.PAA_VENT else BehandlingHendelseType.AV_VENT,
                     )
-                }
-                OppgaveType.TILBAKEKREVING -> {
-                    // TODO
-                }
-                OppgaveType.KLAGE -> {
-                    // TODO
                 }
                 else -> {} // Ingen statistikk for resten
             }

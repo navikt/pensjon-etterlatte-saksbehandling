@@ -4,6 +4,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -52,6 +53,12 @@ fun Route.oversendelseBrevRoute(
             }
         }
 
+        delete {
+            withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
+                service.slettOversendelseBrev(behandlingId, brukerTokenInfo)
+            }
+        }
+
         get("pdf") {
             val brevId =
                 call.parameters["brevId"]?.toLong() ?: throw UgyldigForespoerselException(
@@ -63,7 +70,14 @@ fun Route.oversendelseBrevRoute(
                 measureTimedValue {
                     service.pdf(brevId, behandlingId, brukerTokenInfo).bytes
                 }.let { (brev, varighet) ->
-                    logger.info("Henting av pdf for oversendelsesbrev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    logger.info(
+                        "Henting av pdf for oversendelsesbrev tok ${
+                            varighet.toString(
+                                DurationUnit.SECONDS,
+                                2,
+                            )
+                        }",
+                    )
                     call.respond(brev)
                 }
             }

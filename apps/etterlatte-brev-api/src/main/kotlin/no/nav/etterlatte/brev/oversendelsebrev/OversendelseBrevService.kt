@@ -53,6 +53,11 @@ interface OversendelseBrevService {
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Pdf
+
+    suspend fun slettOversendelseBrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 class OversendelseBrevServiceImpl(
@@ -189,12 +194,29 @@ class OversendelseBrevServiceImpl(
                     id = brev.id,
                     bruker = brukerTokenInfo,
                     automatiskMigreringRequest = null,
-                    avsenderRequest = { bruker, generellData -> AvsenderRequest(bruker.ident(), generellData.sak.enhet) },
+                    avsenderRequest = { bruker, generellData ->
+                        AvsenderRequest(
+                            bruker.ident(),
+                            generellData.sak.enhet,
+                        )
+                    },
                     brevKode = { Brevkoder.OVERSENDELSE_KLAGE },
                     brevData = { req -> OversendelseBrevFerdigstillingData.fra(req, klage) },
                 )
             }
         return pdf
+    }
+
+    override suspend fun slettOversendelseBrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val eksisterendeBrev =
+            brevRepository.hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE)
+                .singleOrNull()
+        if (eksisterendeBrev != null) {
+            brevRepository.settBrevSlettet(eksisterendeBrev.id, brukerTokenInfo)
+        }
     }
 }
 

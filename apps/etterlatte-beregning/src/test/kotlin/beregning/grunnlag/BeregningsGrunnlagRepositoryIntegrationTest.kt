@@ -2,68 +2,39 @@ package no.nav.etterlatte.beregning.grunnlag
 
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
+import no.nav.etterlatte.beregning.regler.DatabaseExtension
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BeregningsGrunnlagRepositoryIntegrationTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
+internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSource) {
+    companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
+    }
 
-    private lateinit var repository: BeregningsGrunnlagRepository
-    private lateinit var dataSource: DataSource
+    private val repository = BeregningsGrunnlagRepository(dataSource)
 
     private val foerstePeriodeFra = LocalDate.of(2022, 8, 1)
-
-    @BeforeAll
-    fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            )
-        dataSource.migrate()
-
-        repository = BeregningsGrunnlagRepository(dataSource)
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
-    }
 
     @AfterEach
     fun afterEach() {
         clearAllMocks()
-        dataSource.connection.use {
-            it.prepareStatement(""" TRUNCATE beregningsgrunnlag""").execute()
-            it.prepareStatement(""" TRUNCATE overstyr_beregningsgrunnlag""").execute()
-        }
+        dbExtension.resetDb()
     }
 
     @Test

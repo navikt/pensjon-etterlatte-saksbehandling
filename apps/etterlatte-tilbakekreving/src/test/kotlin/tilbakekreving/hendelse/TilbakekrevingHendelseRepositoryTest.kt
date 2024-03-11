@@ -2,41 +2,26 @@ package no.nav.etterlatte.tilbakekreving.hendelse
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.database.singleOrNull
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.RegisterExtension
+import tilbakekreving.DatabaseExtension
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class TilbakekrevingHendelseRepositoryTest {
-    @Container
-    private val postgres = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-    private lateinit var repository: TilbakekrevingHendelseRepository
-    private lateinit var dataSource: DataSource
-
-    @BeforeAll
-    fun beforeAll() {
-        postgres.start()
-        dataSource = DataSourceBuilder.createDataSource(postgres.jdbcUrl, postgres.username, postgres.password)
-        repository = TilbakekrevingHendelseRepository(dataSource.apply { migrate() })
+internal class TilbakekrevingHendelseRepositoryTest(private val dataSource: DataSource) {
+    companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
     }
 
-    @AfterAll
-    fun afterAll() {
-        postgres.stop()
-    }
+    private val repository = TilbakekrevingHendelseRepository(dataSource)
 
     @AfterEach
     fun afterEach() {
-        cleanDatabase()
+        dbExtension.resetDb()
     }
 
     @Test
@@ -88,10 +73,6 @@ internal class TilbakekrevingHendelseRepositoryTest {
         tilbakekrevingHendelse?.kravgrunnlagId shouldBe kravgrunnlagId
         tilbakekrevingHendelse?.payload shouldBe vedtakResponse
         tilbakekrevingHendelse?.type shouldBe TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING
-    }
-
-    private fun cleanDatabase() {
-        dataSource.connection.use { it.prepareStatement("TRUNCATE tilbakekreving_hendelse").apply { execute() } }
     }
 
     private fun hentTilbakekrevingHendelse(

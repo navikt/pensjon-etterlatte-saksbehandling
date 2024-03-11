@@ -4,9 +4,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.statistikk.domain.AvkortetYtelse
 import no.nav.etterlatte.statistikk.domain.Avkorting
 import no.nav.etterlatte.statistikk.domain.AvkortingGrunnlag
@@ -16,17 +13,14 @@ import no.nav.etterlatte.statistikk.domain.MaanedStoenadRad
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.domain.stoenadRad
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -34,26 +28,10 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class StoenadRepositoryTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
-    private lateinit var dataSource: DataSource
-
-    @BeforeAll
-    fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            )
-
-        dataSource.migrate()
+class StoenadRepositoryTest(private val dataSource: DataSource) {
+    companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
     }
 
     val mockBeregning =
@@ -89,21 +67,9 @@ class StoenadRepositoryTest {
             ),
         )
 
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
-    }
-
     @AfterEach
     fun afterEach() {
-        dataSource.connection.use {
-            it.prepareStatement("TRUNCATE TABLE stoenad")
-                .executeUpdate()
-        }
-        dataSource.connection.use {
-            it.prepareStatement("TRUNCATE TABLE maanedsstatistikk_job")
-                .executeUpdate()
-        }
+        dbExtension.resetDb()
     }
 
     @Test

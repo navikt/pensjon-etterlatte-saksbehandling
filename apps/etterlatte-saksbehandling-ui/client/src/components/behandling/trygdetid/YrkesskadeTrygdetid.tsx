@@ -29,8 +29,10 @@ export const YrkesskadeTrygdetid = ({ redigerbar, trygdetid, oppdaterYrkesskade 
         <YrkesskadeFelt
           checked={yrkesskade}
           onChange={() => {
-            setYrkesskade(!yrkesskade)
-            oppdaterYrkesskade(yrkesskade ?? false)
+            const oppdatertYrkesskade = !(yrkesskade ?? false)
+
+            setYrkesskade(oppdatertYrkesskade)
+            oppdaterYrkesskade(oppdatertYrkesskade)
           }}
         >
           Godkjent yrkesskade/sykdom

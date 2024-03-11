@@ -105,7 +105,7 @@ fun Route.trygdetidV2(
         }
 
         post("yrkesskade") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Oppdater trygdetid (yrkesskade) for behandling $behandlingId")
                 val trygdetidYrkesskadeDto = call.receive<TrygdetidYrkesskadeDto>()
 

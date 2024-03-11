@@ -152,7 +152,7 @@ export interface ITrygdetidOverstyring {
 export interface ITrygdetidYrkesskade {
   id: string
   behandlingId: string
-  yrkesskade: Boolean
+  yrkesskade: boolean
 }
 
 export interface IGrunnlagOpplysninger {

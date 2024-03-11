@@ -69,11 +69,10 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class StartMigreringIntegrationTest(private val datasource: DataSource) {
+internal class StartMigreringRiverIntegrationTest(private val datasource: DataSource) {
     companion object {
-        @JvmField
         @RegisterExtension
-        val dbExtension = DatabaseExtension()
+        private val dbExtension = DatabaseExtension()
     }
 
     @AfterEach

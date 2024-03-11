@@ -24,12 +24,12 @@ import javax.sql.DataSource
 open class GenerellDatabaseExtension : AfterAllCallback, ExtensionContext.Store.CloseableResource, ParameterResolver {
     companion object {
         val logger: org.slf4j.Logger = LoggerFactory.getLogger(this::class.java)
-        val postgreSQLContainer =
+        private val postgreSQLContainer =
             PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
                 .also { logger.info("Starting shared Postgres testcontainer") }
                 .also { it.start() }
 
-        val ds: DataSource =
+        private val ds: DataSource =
             DataSourceBuilder.createDataSource(
                 jdbcUrl = postgreSQLContainer.jdbcUrl,
                 username = postgreSQLContainer.username,
@@ -80,6 +80,15 @@ open class GenerellDatabaseExtension : AfterAllCallback, ExtensionContext.Store.
                 logger.info("Skipper reset av database, @ResetDatabaseStatement ikke funnet.")
             }
     }
+
+    fun properties() =
+        PostgresProperties(
+            databaseName = postgreSQLContainer.databaseName,
+            host = postgreSQLContainer.host,
+            firstMappedPort = postgreSQLContainer.firstMappedPort,
+            username = postgreSQLContainer.username,
+            password = postgreSQLContainer.password,
+        )
 
     /**
      * Wrappe slik at når konsument ber om ny connection så kan den tas vare på mtp eviction

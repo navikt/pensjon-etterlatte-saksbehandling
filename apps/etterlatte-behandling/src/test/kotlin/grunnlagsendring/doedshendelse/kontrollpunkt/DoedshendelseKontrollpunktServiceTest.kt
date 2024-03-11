@@ -8,6 +8,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
+import no.nav.etterlatte.LITE_BARN
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
@@ -61,7 +62,7 @@ class DoedshendelseKontrollpunktServiceTest {
         DoedshendelseInternal.nyHendelse(
             avdoedFnr = KONTANT_FOT.value,
             avdoedDoedsdato = LocalDate.now(),
-            beroertFnr = JOVIAL_LAMA.value,
+            beroertFnr = LITE_BARN.value,
             relasjon = Relasjon.BARN,
             endringstype = Endringstype.OPPRETTET,
         )
@@ -78,6 +79,7 @@ class DoedshendelseKontrollpunktServiceTest {
     @BeforeEach
     fun oppsett() {
         coEvery { pesysKlient.hentSaker(doedshendelseInternalBP.beroertFnr) } returns emptyList()
+        coEvery { pesysKlient.hentSaker(doedshendelseInternalOMS.beroertFnr) } returns emptyList()
 
         every { behandlingService.hentSisteIverksatte(any()) } returns null
         every {
@@ -93,7 +95,7 @@ class DoedshendelseKontrollpunktServiceTest {
             )
         every {
             pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                foedselsnummer = any(),
+                foedselsnummer = doedshendelseInternalBP.beroertFnr,
                 rolle = PersonRolle.BARN,
                 saktype = SakType.BARNEPENSJON,
             )
@@ -111,7 +113,7 @@ class DoedshendelseKontrollpunktServiceTest {
             )
         every {
             pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                foedselsnummer = doedshendelseInternalBP.beroertFnr,
+                foedselsnummer = JOVIAL_LAMA.value,
                 rolle = PersonRolle.GJENLEVENDE,
                 saktype = SakType.BARNEPENSJON,
             )
@@ -267,11 +269,12 @@ class DoedshendelseKontrollpunktServiceTest {
                 relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
+        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, 1L, Enheter.defaultEnhet.enhetNr)
         every {
             sakService.finnSaker(
                 any(),
             )
-        } returns listOf(Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, 1L, Enheter.defaultEnhet.enhetNr))
+        } returns listOf(sak)
 
         every {
             pdlTjenesterKlient.hentPdlModellFlereSaktyper(
@@ -287,7 +290,7 @@ class DoedshendelseKontrollpunktServiceTest {
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalAvdoed)
 
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarYtelse)
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarYtelse(sak))
     }
 
     @Test
@@ -334,11 +337,12 @@ class DoedshendelseKontrollpunktServiceTest {
                 endringstype = Endringstype.OPPRETTET,
             )
         val sakIdd = 1L
+        val sak = Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakIdd, Enheter.defaultEnhet.enhetNr)
         every {
             sakService.finnSaker(
                 any(),
             )
-        } returns listOf(Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakIdd, Enheter.defaultEnhet.enhetNr))
+        } returns listOf(sak)
 
         every {
             pdlTjenesterKlient.hentPdlModellFlereSaktyper(
@@ -374,7 +378,7 @@ class DoedshendelseKontrollpunktServiceTest {
 
         kontrollpunkter shouldContainExactlyInAnyOrder
             listOf(
-                DoedshendelseKontrollpunkt.AvdoedHarYtelse,
+                DoedshendelseKontrollpunkt.AvdoedHarYtelse(sak),
                 DoedshendelseKontrollpunkt.DuplikatGrunnlagsendringsHendelse(grunnlagsendringshendelse.id, oppgaveIntern.id),
             )
     }
@@ -400,7 +404,7 @@ class DoedshendelseKontrollpunktServiceTest {
         every { behandlingService.hentSisteIverksatte(any()) } returns foerstegangsbehandling(sakId = sakId)
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.BarnHarBarnepensjon)
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.BarnHarBarnepensjon(sak))
     }
 
     @Test
@@ -512,13 +516,13 @@ class DoedshendelseKontrollpunktServiceTest {
     fun `Skal opprette kontrollpunkt ved samtidig doedsfall`() {
         every {
             pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                foedselsnummer = doedshendelseInternalBP.beroertFnr,
+                foedselsnummer = JOVIAL_LAMA.value,
                 rolle = PersonRolle.GJENLEVENDE,
                 saktype = SakType.BARNEPENSJON,
             )
         } returns
             mockPerson().copy(
-                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalBP.beroertFnr), null),
+                foedselsnummer = OpplysningDTO(JOVIAL_LAMA, null),
                 doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null),
             )
 

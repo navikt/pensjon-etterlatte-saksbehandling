@@ -21,4 +21,5 @@ dependencies {
 
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.kotlinx.coroutinescore)
+    testImplementation(testFixtures((project(":libs:etterlatte-database"))))
 }

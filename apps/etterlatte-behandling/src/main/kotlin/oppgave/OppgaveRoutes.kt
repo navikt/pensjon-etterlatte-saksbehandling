@@ -265,6 +265,14 @@ internal fun Route.oppgaveRoutes(
                         call.respond(GosysOppgaveversjon(oppdatertVersjon))
                     }
                 }
+
+                post("ferdigstill") {
+                    kunSaksbehandlerMedSkrivetilgang {
+                        val versjon = call.request.queryParameters["versjon"]!!.toLong()
+
+                        call.respond(gosysOppgaveService.ferdigstill(gosysOppgaveId, versjon, brukerTokenInfo))
+                    }
+                }
             }
         }
     }

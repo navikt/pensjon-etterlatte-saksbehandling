@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, Box, Button, Heading, Table, TextField } from '@navikt/ds-react'
+import { Alert, Button, TextField } from '@navikt/ds-react'
 import { isPending, isSuccess, mapFailure, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { Journalpost, Journalstatus, Sakstype } from '~shared/types/Journalpost'
 import { ISak } from '~shared/types/sak'
@@ -11,8 +11,8 @@ import { temaFraSakstype } from '~components/person/journalfoeringsoppgave/journ
 import { feilregistrerSakstilknytning, knyttTilAnnenSak } from '~shared/api/dokument'
 import { MagnifyingGlassIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
-import { formaterSakstype } from '~utils/formattering'
 import { useNavigate } from 'react-router-dom'
+import { SakOverfoeringDetailjer } from 'src/components/person/dokumenter/avvik/common/SakOverfoeringDetailjer'
 
 const erSammeSak = (sak: ISak, journalpost: Journalpost): boolean => {
   const { sak: journalpostSak, tema } = journalpost
@@ -26,7 +26,12 @@ const erSammeSak = (sak: ISak, journalpost: Journalpost): boolean => {
   )
 }
 
-export const FlyttJournalpost = ({
+/**
+ * Knytt til annen sak brukes i tilfeller hvor journalposten er JOURNALFOERT / FERDIGSTILT.
+ * Når en journalpost er i denne tilstanden kan den ikke redigeres på vanlig vis og må dermed
+ * feilregistreres og flyttes til ny sak (dokarkiv lager bare kopi av den gamle).
+ **/
+export const KnyttTilAnnenSak = ({
   journalpost,
   sakStatus,
   lukkModal,
@@ -139,7 +144,7 @@ export const FlyttJournalpost = ({
         pending: <Spinner visible label="Henter sak..." />,
         success: (annenSak) => (
           <>
-            {isSuccess(sakStatus) && <FlyttTilSakDetaljer fra={sakStatus.data.sak} til={annenSak} />}
+            {isSuccess(sakStatus) && <SakOverfoeringDetailjer fra={sakStatus.data.sak} til={annenSak} />}
             <br />
 
             <Alert variant="warning" inline>
@@ -182,39 +187,3 @@ export const FlyttJournalpost = ({
     </>
   )
 }
-
-const FlyttTilSakDetaljer = ({ fra, til }: { fra: ISak; til: ISak }) => (
-  <Box borderWidth="1" padding="4" borderRadius="medium" borderColor="border-subtle" background="bg-subtle">
-    <Heading size="xsmall" spacing>
-      Flyttedetaljer
-    </Heading>
-
-    <Table size="small">
-      <Table.Header>
-        <Table.Row>
-          <Table.HeaderCell />
-          <Table.HeaderCell>Fra</Table.HeaderCell>
-          <Table.HeaderCell>Til</Table.HeaderCell>
-        </Table.Row>
-      </Table.Header>
-
-      <Table.Body>
-        <Table.Row>
-          <Table.HeaderCell>Sakid</Table.HeaderCell>
-          <Table.DataCell>{fra.id}</Table.DataCell>
-          <Table.DataCell>{til.id}</Table.DataCell>
-        </Table.Row>
-        <Table.Row>
-          <Table.HeaderCell>Ident</Table.HeaderCell>
-          <Table.DataCell>{fra.ident}</Table.DataCell>
-          <Table.DataCell>{til.ident}</Table.DataCell>
-        </Table.Row>
-        <Table.Row>
-          <Table.HeaderCell>Sakstype</Table.HeaderCell>
-          <Table.DataCell>{formaterSakstype(fra.sakType)}</Table.DataCell>
-          <Table.DataCell>{formaterSakstype(til.sakType)}</Table.DataCell>
-        </Table.Row>
-      </Table.Body>
-    </Table>
-  </Box>
-)

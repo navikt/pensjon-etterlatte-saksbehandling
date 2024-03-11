@@ -33,6 +33,8 @@ import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { hentJournalpost } from '~shared/api/dokument'
 import { JournalpostInnhold } from './journalpost/JournalpostInnhold'
+import { hentPersonNavn } from '~shared/api/pdltjenester'
+import { StatusBar } from '~shared/statusbar/Statusbar'
 
 export default function BehandleJournalfoeringOppgave() {
   const { nyBehandlingRequest, oppgave, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -41,6 +43,7 @@ export default function BehandleJournalfoeringOppgave() {
   const [oppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
   const [sakStatus, apiHentSak] = useApiCall(hentSakMedBehandlnger)
   const [journalpostStatus, apiHentJournalpost] = useApiCall(hentJournalpost)
+  const [personResult, hentPerson] = useApiCall(hentPersonNavn)
 
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
@@ -68,6 +71,10 @@ export default function BehandleJournalfoeringOppgave() {
         } else {
           throw Error(`Oppgave id=${oppgaveId} mangler referanse til journalposten`)
         }
+
+        if (oppgave.fnr) {
+          hentPerson(oppgave.fnr)
+        }
       })
     }
   }, [oppgaveId])
@@ -80,6 +87,7 @@ export default function BehandleJournalfoeringOppgave() {
 
   return (
     <>
+      <StatusBar result={personResult} />
       <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
 
       <GridContainer>
@@ -121,19 +129,19 @@ export default function BehandleJournalfoeringOppgave() {
           <VelgJournalpost journalpostStatus={journalpostStatus} />
         </Column>
 
-        {mapSuccess(
-          journalpostStatus,
-          (journalpost) =>
-            !kanEndreJournalpost(journalpost) && (
-              <Sidebar>
-                {oppgave && <OppgaveDetaljer oppgave={oppgave} />}
+        <Sidebar>
+          {oppgave && <OppgaveDetaljer oppgave={oppgave} />}
 
+          {mapSuccess(
+            journalpostStatus,
+            (journalpost) =>
+              !kanEndreJournalpost(journalpost) && (
                 <SidebarPanel border>
                   <JournalpostInnhold journalpost={journalpost} />
                 </SidebarPanel>
-              </Sidebar>
-            )
-        )}
+              )
+          )}
+        </Sidebar>
       </GridContainer>
     </>
   )

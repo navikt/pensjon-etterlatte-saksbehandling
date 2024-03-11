@@ -31,6 +31,10 @@ query(
                     saksbehandlerHarTilgang
                 }
             }
+            bruker {
+                id
+                type
+            }
             avsenderMottaker {
                 id
                 navn

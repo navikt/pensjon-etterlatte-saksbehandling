@@ -8,3 +8,4 @@ enum class VedtakType {
     TILBAKEKREVING,
     AVVIST_KLAGE,
 }
+// TODO Flytte slik at pakkestruktur er riktig

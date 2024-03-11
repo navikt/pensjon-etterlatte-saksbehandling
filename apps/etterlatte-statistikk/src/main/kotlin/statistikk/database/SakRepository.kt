@@ -112,7 +112,7 @@ class SakRepository(private val datasource: DataSource) {
         return statement.executeQuery().toList { tilSakRad() }
     }
 
-    fun hentSisteRad(behandlingId: UUID): SakRad {
+    fun hentSisteRad(behandlingId: UUID): SakRad? {
         val statement =
             connection.prepareStatement(
                 """
@@ -122,12 +122,12 @@ class SakRepository(private val datasource: DataSource) {
                     vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, sak_utland,
                     beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting, kilde, pesysid,
                     relatert_til
-                FROM sak where behandling_id = ? order by id
+                FROM sak where behandling_id = ? order by id desc 
                 """.trimIndent(),
             ).apply {
                 setObject(1, behandlingId)
             }
-        return statement.executeQuery().toList { tilSakRad() }.first()
+        return statement.executeQuery().toList { tilSakRad() }.firstOrNull()
     }
 }
 

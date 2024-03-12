@@ -6,6 +6,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -74,10 +75,9 @@ class DownstreamResourceClient(
         resource: Resource,
         token: AccessToken,
     ): Result<JsonNode?, Throwable> =
-
         runCatching {
             httpClient.get(resource.url) {
-                header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")
+                header(token)
                 resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
             }
         }.fold(resource)
@@ -87,10 +87,9 @@ class DownstreamResourceClient(
         token: AccessToken,
         postBody: Any,
     ): Result<JsonNode?, Throwable> =
-
         runCatching {
             httpClient.post(resource.url) {
-                header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")
+                header(token)
                 contentType(ContentType.Application.Json)
                 setBody(postBody)
             }
@@ -103,11 +102,13 @@ class DownstreamResourceClient(
     ): Result<JsonNode?, Throwable> =
         runCatching {
             httpClient.put(resource.url) {
-                header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")
+                header(token)
                 contentType(ContentType.Application.Json)
                 setBody(putBody)
             }
         }.fold(resource)
+
+    private fun HttpRequestBuilder.header(token: AccessToken) = header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")
 
     private suspend fun kotlin.Result<HttpResponse>.fold(resource: Resource) =
         this.fold(
@@ -120,10 +121,9 @@ class DownstreamResourceClient(
         token: AccessToken,
         postBody: String,
     ): Result<JsonNode?, Throwable> =
-
         runCatching {
             httpClient.delete(resource.url) {
-                header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")
+                header(token)
                 contentType(ContentType.Application.Json)
                 setBody(postBody)
             }
@@ -143,7 +143,7 @@ class DownstreamResourceClient(
     ): Result<JsonNode?, Throwable> =
         runCatching {
             httpClient.patch(resource.url) {
-                header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")
+                header(token)
                 contentType(ContentType.Application.Json)
                 setBody(patchBody)
             }

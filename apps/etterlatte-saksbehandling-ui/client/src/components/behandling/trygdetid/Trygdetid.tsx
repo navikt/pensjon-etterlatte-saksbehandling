@@ -76,7 +76,7 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
     )
   }
 
-  const oppdaterYrkesskade = (yrkesskade: Boolean) => {
+  const oppdaterYrkesskade = (yrkesskade: boolean) => {
     if (!trygdetid?.id) {
       setTrygdetidIdMangler(true)
       throw new Error('Mangler trygdetidid')

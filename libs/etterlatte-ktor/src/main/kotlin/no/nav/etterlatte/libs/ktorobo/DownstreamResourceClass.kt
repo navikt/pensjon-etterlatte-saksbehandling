@@ -20,7 +20,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Systembruker
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(DownstreamResourceClient::class.java)
@@ -34,7 +33,7 @@ class DownstreamResourceClient(
         brukerTokenInfo: BrukerTokenInfo,
     ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return hentTokenFraAD(brukerTokenInfo, scopes)
+        return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { oboAccessToken ->
                 fetchFromDownstreamApi(resource, oboAccessToken)
             }
@@ -46,24 +45,13 @@ class DownstreamResourceClient(
             }
     }
 
-    private suspend fun hentTokenFraAD(
-        brukerTokenInfo: BrukerTokenInfo,
-        scopes: List<String>,
-    ): Result<AccessToken, ThrowableErrorMessage> =
-        if (brukerTokenInfo is Systembruker) {
-            azureAdClient.getAccessTokenForResource(scopes)
-        } else {
-            azureAdClient
-                .getOnBehalfOfAccessTokenForResource(scopes, brukerTokenInfo.accessToken())
-        }
-
     suspend fun post(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         postBody: Any,
     ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return hentTokenFraAD(brukerTokenInfo, scopes)
+        return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { token ->
                 postToDownstreamApi(resource, token, postBody)
             }
@@ -78,7 +66,7 @@ class DownstreamResourceClient(
         putBody: Any,
     ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return hentTokenFraAD(brukerTokenInfo, scopes)
+        return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { token ->
                 putToDownstreamApi(resource, token, putBody)
             }
@@ -93,7 +81,7 @@ class DownstreamResourceClient(
         postBody: String,
     ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return hentTokenFraAD(brukerTokenInfo, scopes)
+        return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { oboAccessToken ->
                 deleteToDownstreamApi(resource, oboAccessToken, postBody)
             }
@@ -108,7 +96,7 @@ class DownstreamResourceClient(
         patchBody: String,
     ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return hentTokenFraAD(brukerTokenInfo, scopes)
+        return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { oboAccessToken ->
                 patchToDownstreamApi(resource, oboAccessToken, patchBody)
             }

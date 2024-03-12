@@ -173,9 +173,9 @@ class SafKlient(
 
     private suspend fun getOboToken(bruker: BrukerTokenInfo): String {
         val token =
-            azureAdClient.getOnBehalfOfAccessTokenForResource(
+            azureAdClient.hentTokenFraAD(
+                bruker,
                 listOf(safScope),
-                bruker.accessToken(),
             )
         return token.get()?.accessToken ?: ""
     }

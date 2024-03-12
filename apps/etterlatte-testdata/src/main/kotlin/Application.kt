@@ -56,6 +56,7 @@ import no.nav.etterlatte.testdata.features.index.IndexFeature
 import no.nav.etterlatte.testdata.features.samordning.SamordningMottattFeature
 import no.nav.etterlatte.testdata.features.soeknad.OpprettSoeknadFeature
 import no.nav.etterlatte.testdata.features.standardmelding.StandardMeldingFeature
+import no.nav.etterlatte.token.Systembruker
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -173,12 +174,17 @@ fun PipelineContext<Unit, ApplicationCall>.brukerIdFraToken() = call.firstValidT
 
 fun getDollyAccessToken(): String =
     runBlocking {
-        azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))
+        azureAdClient.hentTokenFraAD(
+            Systembruker.testdata,
+            listOf("api://${config.getString("dolly.client.id")}/.default"),
+        )
             .get()!!.accessToken
     }
 
 fun getTestnavAccessToken(): String =
     runBlocking {
-        azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("testnav.client.id")}/.default"))
-            .get()!!.accessToken
+        azureAdClient.hentTokenFraAD(
+            Systembruker.testdata,
+            listOf("api://${config.getString("testnav.client.id")}/.default"),
+        ).get()!!.accessToken
     }

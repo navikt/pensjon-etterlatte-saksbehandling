@@ -27,32 +27,32 @@ class DownstreamResourceClient(
 ) {
     suspend fun get(
         resource: Resource,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Result<Resource, Throwable> = gjoerKall(resource, brukerTokenInfo) { token -> fetchFromDownstreamApi(resource, token) }
+        bruker: BrukerTokenInfo,
+    ): Result<Resource, Throwable> = gjoerKall(resource, bruker) { token -> fetchFromDownstreamApi(resource, token) }
 
     suspend fun post(
         resource: Resource,
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         postBody: Any,
-    ): Result<Resource, Throwable> = gjoerKall(resource, brukerTokenInfo) { token -> postToDownstreamApi(resource, token, postBody) }
+    ): Result<Resource, Throwable> = gjoerKall(resource, bruker) { token -> postToDownstreamApi(resource, token, postBody) }
 
     suspend fun put(
         resource: Resource,
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         putBody: Any,
-    ): Result<Resource, Throwable> = gjoerKall(resource, brukerTokenInfo) { token -> putToDownstreamApi(resource, token, putBody) }
+    ): Result<Resource, Throwable> = gjoerKall(resource, bruker) { token -> putToDownstreamApi(resource, token, putBody) }
 
     suspend fun delete(
         resource: Resource,
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         postBody: String,
-    ): Result<Resource, Throwable> = gjoerKall(resource, brukerTokenInfo) { token -> deleteToDownstreamApi(resource, token, postBody) }
+    ): Result<Resource, Throwable> = gjoerKall(resource, bruker) { token -> deleteToDownstreamApi(resource, token, postBody) }
 
     suspend fun patch(
         resource: Resource,
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         patchBody: String,
-    ): Result<Resource, Throwable> = gjoerKall(resource, brukerTokenInfo) { token -> patchToDownstreamApi(resource, token, patchBody) }
+    ): Result<Resource, Throwable> = gjoerKall(resource, bruker) { token -> patchToDownstreamApi(resource, token, patchBody) }
 
     private suspend fun gjoerKall(
         resource: Resource,

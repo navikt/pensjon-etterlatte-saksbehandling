@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
+import io.kotest.matchers.maps.shouldContain
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -8,10 +9,13 @@ import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.Test
@@ -21,7 +25,8 @@ import java.util.UUID
 
 class VedtakTilbakekrevingServiceTest {
     private val repo = mockk<VedtaksvurderingRepository>()
-    private val service = VedtakTilbakekrevingService(repo)
+    private val rapid = mockk<VedtaksvurderingRapidService>()
+    private val service = VedtakTilbakekrevingService(repo, rapid)
 
     @Test
     fun `opprettEllerOppdaterVedtak oppretter hvis ikke finnes fra foer`() {
@@ -143,12 +148,12 @@ class VedtakTilbakekrevingServiceTest {
 
     @Test
     fun `attesterVedtak skal attestere vedtak og returnere vedtaket`() {
-        val dto =
+        val attesterDto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
                 enhet = "enhet",
             )
-        every { repo.hentVedtak(dto.tilbakekrevingId) } returns
+        every { repo.hentVedtak(attesterDto.tilbakekrevingId) } returns
             vedtakTilbakekreving(
                 status = VedtakStatus.FATTET_VEDTAK,
                 vedtakFattet =
@@ -160,16 +165,24 @@ class VedtakTilbakekrevingServiceTest {
             )
         val attestertVedtak =
             vedtakTilbakekreving(
+                behandlingId = attesterDto.tilbakekrevingId,
                 vedtakFattet =
                     VedtakFattet(
                         ansvarligSaksbehandler = "saksbehandler",
                         ansvarligEnhet = "enhet",
                         tidspunkt = Tidspunkt.now(),
                     ),
+                attestasjon =
+                    Attestasjon(
+                        attestant = "annen saksbehandler",
+                        attesterendeEnhet = "enhet",
+                        tidspunkt = Tidspunkt.now(),
+                    ),
             )
         every { repo.attesterVedtak(any(), any()) } returns attestertVedtak
+        every { rapid.sendToRapid(any()) } returns Unit
 
-        val vedtakDto = service.attesterVedtak(dto, saksbehandler)
+        val vedtakDto = service.attesterVedtak(attesterDto, saksbehandler)
 
         with(vedtakDto) {
             id shouldBe 1L
@@ -177,13 +190,28 @@ class VedtakTilbakekrevingServiceTest {
             enhet shouldBe "enhet"
             dato shouldBe attestertVedtak.vedtakFattet!!.tidspunkt.toLocalDate()
         }
-        verify { repo.hentVedtak(dto.tilbakekrevingId) }
+        verify { repo.hentVedtak(attesterDto.tilbakekrevingId) }
         verify {
             repo.attesterVedtak(
-                dto.tilbakekrevingId,
+                attesterDto.tilbakekrevingId,
                 withArg {
                     it.attestant shouldBe saksbehandler.ident
-                    it.attesterendeEnhet shouldBe dto.enhet
+                    it.attesterendeEnhet shouldBe attesterDto.enhet
+                },
+            )
+        }
+        verify {
+            val returDto = attestertVedtak.toDto()
+            rapid.sendToRapid(
+                withArg {
+                    it.vedtak shouldBe returDto
+                    with(it.rapidInfo1) {
+                        vedtakhendelse shouldBe VedtakKafkaHendelseHendelseType.ATTESTERT
+                        vedtak shouldBe returDto
+                        behandlingId shouldBe attesterDto.tilbakekrevingId
+                        extraParams.size shouldBe 1
+                        extraParams shouldContain Pair(SKAL_SENDE_BREV, true)
+                    }
                 },
             )
         }

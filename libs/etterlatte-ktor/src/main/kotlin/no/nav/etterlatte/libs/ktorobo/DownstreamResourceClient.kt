@@ -30,16 +30,7 @@ class DownstreamResourceClient(
         brukerTokenInfo: BrukerTokenInfo,
     ): Result<Resource, Throwable> {
         val action: suspend (token: AccessToken) -> Result<JsonNode?, Throwable> = { token -> fetchFromDownstreamApi(resource, token) }
-
-        val scopes = listOf("api://${resource.clientId}/.default")
-        return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
-            .andThen { action(it) }
-            .andThen { response ->
-                when (response) {
-                    null -> Ok(resource)
-                    else -> Ok(resource.addResponse(response))
-                }
-            }
+        return hent(resource, brukerTokenInfo, action)
     }
 
     suspend fun post(
@@ -50,7 +41,7 @@ class DownstreamResourceClient(
         val action: suspend (
             token: AccessToken,
         ) -> Result<JsonNode?, Throwable> = { token -> postToDownstreamApi(resource, token, postBody) }
-        return x(resource, brukerTokenInfo, action)
+        return hent(resource, brukerTokenInfo, action)
     }
 
     suspend fun put(
@@ -59,39 +50,7 @@ class DownstreamResourceClient(
         putBody: Any,
     ): Result<Resource, Throwable> {
         val action: suspend (token: AccessToken) -> Result<JsonNode?, Throwable> = { token -> putToDownstreamApi(resource, token, putBody) }
-        return y(resource, brukerTokenInfo, action)
-    }
-
-    private suspend fun x(
-        resource: Resource,
-        brukerTokenInfo: BrukerTokenInfo,
-        action: suspend (token: AccessToken) -> Result<JsonNode?, Throwable>,
-    ): Result<Resource, Throwable> {
-        val scopes = listOf("api://${resource.clientId}/.default")
-        return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
-            .andThen { action(it) }
-            .andThen { response ->
-                when (response) {
-                    null -> Ok(resource)
-                    else -> Ok(resource.addResponse(response))
-                }
-            }
-    }
-
-    private suspend fun y(
-        resource: Resource,
-        brukerTokenInfo: BrukerTokenInfo,
-        action: suspend (token: AccessToken) -> Result<JsonNode?, Throwable>,
-    ): Result<Resource, Throwable> {
-        val scopes = listOf("api://${resource.clientId}/.default")
-        return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
-            .andThen { action(it) }
-            .andThen { response ->
-                when (response) {
-                    null -> Ok(resource)
-                    else -> Ok(resource.addResponse(response))
-                }
-            }
+        return hent(resource, brukerTokenInfo, action)
     }
 
     suspend fun delete(
@@ -102,16 +61,7 @@ class DownstreamResourceClient(
         val action: suspend (
             token: AccessToken,
         ) -> Result<JsonNode?, Throwable> = { token -> deleteToDownstreamApi(resource, token, postBody) }
-
-        val scopes = listOf("api://${resource.clientId}/.default")
-        return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
-            .andThen { action(it) }
-            .andThen { response ->
-                when (response) {
-                    null -> Ok(resource)
-                    else -> Ok(resource.addResponse(response))
-                }
-            }
+        return hent(resource, brukerTokenInfo, action)
     }
 
     suspend fun patch(
@@ -122,11 +72,22 @@ class DownstreamResourceClient(
         val action: suspend (
             token: AccessToken,
         ) -> Result<JsonNode?, Throwable> = { token -> patchToDownstreamApi(resource, token, patchBody) }
+        return hent(resource, brukerTokenInfo, action)
+    }
+
+    private suspend fun hent(
+        resource: Resource,
+        brukerTokenInfo: BrukerTokenInfo,
+        action: suspend (token: AccessToken) -> Result<JsonNode?, Throwable>,
+    ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { action(it) }
             .andThen { response ->
-                Ok(resource.addResponse(response))
+                when (response) {
+                    null -> Ok(resource)
+                    else -> Ok(resource.addResponse(response))
+                }
             }
     }
 

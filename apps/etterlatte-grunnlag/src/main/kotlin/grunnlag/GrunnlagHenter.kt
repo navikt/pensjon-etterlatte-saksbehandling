@@ -94,7 +94,7 @@ class GrunnlagHenter(
 
             val saksopplysninger =
                 listOfNotNull(
-                    opplysningsbehov.persongalleri.tilGrunnlagsopplysningFraSoeknad(),
+                    opplysningsbehov.persongalleri.tilGrunnlagsopplysningFraSoeknad(overstyrtKilde = opplysningsbehov.kilde),
                     persongalleriFraPdl?.tilGrunnlagsopplysningFraPdl(),
                     vergesAdresseInfo,
                 )
@@ -157,19 +157,22 @@ class GrunnlagHenter(
             periode = this.periode,
         )
 
-    private fun Persongalleri.tilGrunnlagsopplysningFraSoeknad(): Grunnlagsopplysning<JsonNode> {
+    private fun Persongalleri.tilGrunnlagsopplysningFraSoeknad(
+        overstyrtKilde: Grunnlagsopplysning.Kilde? = null,
+    ): Grunnlagsopplysning<JsonNode> {
         return Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde =
-                if (this.innsender == null) {
-                    Grunnlagsopplysning.UkjentInnsender(Tidspunkt.now())
-                } else if (this.innsender == Vedtaksloesning.PESYS.name) {
-                    Grunnlagsopplysning.Pesys.create()
-                } else if (this.innsender!!.matches(Regex("[A-Z][0-9]+"))) {
-                    Grunnlagsopplysning.Saksbehandler(this.innsender!!, Tidspunkt.now())
-                } else {
-                    Grunnlagsopplysning.Privatperson(this.innsender!!, Tidspunkt.now())
-                },
+                overstyrtKilde
+                    ?: if (this.innsender == null) {
+                        Grunnlagsopplysning.UkjentInnsender(Tidspunkt.now())
+                    } else if (this.innsender == Vedtaksloesning.PESYS.name) {
+                        Grunnlagsopplysning.Pesys.create()
+                    } else if (this.innsender!!.matches(Regex("[A-Z][0-9]+"))) {
+                        Grunnlagsopplysning.Saksbehandler(this.innsender!!, Tidspunkt.now())
+                    } else {
+                        Grunnlagsopplysning.Privatperson(this.innsender!!, Tidspunkt.now())
+                    },
             opplysningType = Opplysningstype.PERSONGALLERI_V1,
             meta = objectMapper.createObjectNode(),
             opplysning =

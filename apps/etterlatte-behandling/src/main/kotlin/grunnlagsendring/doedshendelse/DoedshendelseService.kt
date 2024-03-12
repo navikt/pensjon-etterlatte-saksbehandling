@@ -62,8 +62,8 @@ class DoedshendelseService(
 
         val beroerteBarn = finnBeroerteBarn(avdoed)
         val beroerteEpser = finnBeroerteEpser(avdoed)
-        val samboere = finnSamboereForAvdoedMedFellesBarn(avdoed)
-        val alleBeroerte = beroerteBarn + beroerteEpser + samboere
+        val samboereMedFellesbarn = finnSamboereForAvdoedMedFellesBarn(avdoed)
+        val alleBeroerte = beroerteBarn + beroerteEpser + samboereMedFellesbarn
 
         if (gyldigeDoedshendelserForAvdoed.isEmpty()) {
             sikkerLogg.info("Fant ${alleBeroerte.size} berørte personer for avdød (${avdoed.foedselsnummer})")

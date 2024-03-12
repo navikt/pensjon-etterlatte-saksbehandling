@@ -54,7 +54,10 @@ class DownstreamResourceClient(
         return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { action(it) }
             .andThen { response ->
-                Ok(resource.addResponse(response))
+                when (response) {
+                    null -> Ok(resource)
+                    else -> Ok(resource.addResponse(response))
+                }
             }
     }
 
@@ -68,7 +71,10 @@ class DownstreamResourceClient(
         return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { action(it) }
             .andThen { response ->
-                Ok(resource.addResponse(response))
+                when (response) {
+                    null -> Ok(resource)
+                    else -> Ok(resource.addResponse(response))
+                }
             }
     }
 
@@ -85,7 +91,10 @@ class DownstreamResourceClient(
         return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { action(it) }
             .andThen { response ->
-                Ok(resource.addResponse(response))
+                when (response) {
+                    null -> Ok(resource)
+                    else -> Ok(resource.addResponse(response))
+                }
             }
     }
 

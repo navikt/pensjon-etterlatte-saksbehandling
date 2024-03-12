@@ -28,54 +28,33 @@ class DownstreamResourceClient(
     suspend fun get(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Result<Resource, Throwable> {
-        val action: suspend (token: AccessToken) -> Result<JsonNode?, Throwable> = { token -> fetchFromDownstreamApi(resource, token) }
-        return hent(resource, brukerTokenInfo, action)
-    }
+    ): Result<Resource, Throwable> = gjoerKall(resource, brukerTokenInfo) { token -> fetchFromDownstreamApi(resource, token) }
 
     suspend fun post(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         postBody: Any,
-    ): Result<Resource, Throwable> {
-        val action: suspend (
-            token: AccessToken,
-        ) -> Result<JsonNode?, Throwable> = { token -> postToDownstreamApi(resource, token, postBody) }
-        return hent(resource, brukerTokenInfo, action)
-    }
+    ): Result<Resource, Throwable> = gjoerKall(resource, brukerTokenInfo) { token -> postToDownstreamApi(resource, token, postBody) }
 
     suspend fun put(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         putBody: Any,
-    ): Result<Resource, Throwable> {
-        val action: suspend (token: AccessToken) -> Result<JsonNode?, Throwable> = { token -> putToDownstreamApi(resource, token, putBody) }
-        return hent(resource, brukerTokenInfo, action)
-    }
+    ): Result<Resource, Throwable> = gjoerKall(resource, brukerTokenInfo) { token -> putToDownstreamApi(resource, token, putBody) }
 
     suspend fun delete(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         postBody: String,
-    ): Result<Resource, Throwable> {
-        val action: suspend (
-            token: AccessToken,
-        ) -> Result<JsonNode?, Throwable> = { token -> deleteToDownstreamApi(resource, token, postBody) }
-        return hent(resource, brukerTokenInfo, action)
-    }
+    ): Result<Resource, Throwable> = gjoerKall(resource, brukerTokenInfo) { token -> deleteToDownstreamApi(resource, token, postBody) }
 
     suspend fun patch(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         patchBody: String,
-    ): Result<Resource, Throwable> {
-        val action: suspend (
-            token: AccessToken,
-        ) -> Result<JsonNode?, Throwable> = { token -> patchToDownstreamApi(resource, token, patchBody) }
-        return hent(resource, brukerTokenInfo, action)
-    }
+    ): Result<Resource, Throwable> = gjoerKall(resource, brukerTokenInfo) { token -> patchToDownstreamApi(resource, token, patchBody) }
 
-    private suspend fun hent(
+    private suspend fun gjoerKall(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         action: suspend (token: AccessToken) -> Result<JsonNode?, Throwable>,

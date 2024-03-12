@@ -196,6 +196,7 @@ private fun Route.attachContekst(
                         brukerTokenInfo,
                     ),
                 databasecontxt = DatabaseContext(ds),
+                sakTilgangDao = context.sakTilgangDao,
             )
 
         withContext(

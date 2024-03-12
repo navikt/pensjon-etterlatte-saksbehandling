@@ -282,6 +282,11 @@ class BehandlingFactory(
         }
     }
 
+    fun finnGjeldendeEnhet(
+        persongalleri: Persongalleri,
+        sakType: SakType,
+    ) = sakService.finnGjeldeneEnhet(persongalleri.soeker, sakType)
+
     private fun opprettFoerstegangsbehandling(
         harBehandlingUnderbehandling: List<Behandling>,
         sak: Sak,

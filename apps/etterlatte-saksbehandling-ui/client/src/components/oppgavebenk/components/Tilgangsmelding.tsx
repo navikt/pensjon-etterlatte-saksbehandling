@@ -5,7 +5,7 @@ import { Container } from '~shared/styled'
 export const Tilgangsmelding = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
-  if (innloggetSaksbehandler.leseTilgang) {
+  if (!innloggetSaksbehandler.kanSeOppgaveliste) {
     return (
       <Container>
         <GuidePanel>

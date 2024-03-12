@@ -34,7 +34,11 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
   const dispatch = useAppDispatch()
   const vilkaarsvurdering = behandling.vilkaarsvurdering
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
+  const redigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
   const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [slettVilkaarsvurderingStatus, slettGammelVilkaarsvurdering] = useApiCall(slettVilkaarsvurdering)
   const [opprettNyVilkaarsvurderingStatus, opprettNyVilkaarsvurdering] = useApiCall(opprettVilkaarsvurdering)

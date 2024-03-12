@@ -30,7 +30,11 @@ export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; beh
   const [feilmelding, setFeilmelding] = useState<string | null>(null)
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
+  const redigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
 
   const handlesubmit = (e: FormEvent) => {
     e.stopPropagation()

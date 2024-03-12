@@ -6,6 +6,6 @@ export interface Saksbehandler {
 export interface InnloggetSaksbehandler extends Saksbehandler {
   enheter: Array<string>
   kanAttestere: boolean
-  leseTilgang: boolean
-  skriveTilgang: boolean
+  skriveEnheter: Array<string>
+  kanSeOppgaveliste: boolean
 }

@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
@@ -17,6 +17,7 @@ import { TilbakekrevingBrev } from '~components/tilbakekreving/brev/Tilbakekrevi
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { erUnderBehandling } from '~shared/types/Tilbakekreving'
+import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 
 export function Tilbakekrevingsbehandling() {
   const tilbakekreving = useTilbakekreving()
@@ -26,8 +27,7 @@ export function Tilbakekrevingsbehandling() {
   const [personStatus, hentPerson] = useApiCall(getPerson)
   const viHarLastetRiktigTilbakekreving = tilbakekrevingId === tilbakekreving?.id.toString()
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  const redigerbar =
-    innloggetSaksbehandler.skriveTilgang && (tilbakekreving ? erUnderBehandling(tilbakekreving.status) : false)
+  const [redigerbar, setRedigerbar] = useState(false)
 
   useEffect(() => {
     if (!tilbakekrevingId) return
@@ -44,6 +44,13 @@ export function Tilbakekrevingsbehandling() {
   useEffect(() => {
     if (tilbakekreving?.sak.ident) {
       hentPerson(tilbakekreving.sak.ident)
+    }
+
+    if (tilbakekreving?.sak?.enhet) {
+      setRedigerbar(
+        enhetErSkrivbar(tilbakekreving.sak.enhet, innloggetSaksbehandler.skriveEnheter) &&
+          erUnderBehandling(tilbakekreving.status)
+      )
     }
   }, [tilbakekreving?.sak])
 

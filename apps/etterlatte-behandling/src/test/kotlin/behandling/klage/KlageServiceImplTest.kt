@@ -6,12 +6,9 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -33,6 +30,7 @@ import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.token.Saksbehandler
@@ -92,7 +90,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
                     it.settBryter(KlageFeatureToggle.KanBrukeKlageToggle, true)
                 },
         )
-        Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource)))
+        nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)
     }
 
     @AfterAll

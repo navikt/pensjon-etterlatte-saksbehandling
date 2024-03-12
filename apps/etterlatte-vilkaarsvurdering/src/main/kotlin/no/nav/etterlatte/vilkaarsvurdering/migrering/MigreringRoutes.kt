@@ -32,7 +32,7 @@ fun Route.migrering(
         val logger = application.log
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 val request = call.receive<VilkaarsvurderingMigreringRequest>()
                 logger.info("Oppretter vilkårsvurdering for gjenoppretting for $behandlingId")
                 val vilkaarsvurdering = vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, brukerTokenInfo)

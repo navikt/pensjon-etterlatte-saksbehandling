@@ -62,7 +62,10 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
   useEffect(() => {
     const erSammeIdent = saksbehandlerGjeldendeOppgave === innloggetSaksbehandler.ident
     setOppgaveErTildeltInnloggetBruker(erSammeIdent)
-    setRedigerbar(behandlingErRedigerbar(behandling.status) && erSammeIdent)
+    setRedigerbar(
+      behandlingErRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&
+        erSammeIdent
+    )
   }, [])
 
   return (

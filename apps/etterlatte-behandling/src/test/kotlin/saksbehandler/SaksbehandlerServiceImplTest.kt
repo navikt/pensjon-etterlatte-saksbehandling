@@ -6,14 +6,12 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -33,12 +31,7 @@ class SaksbehandlerServiceImplTest(val dataSource: DataSource) {
     fun beforeAll() {
         dao = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
         service = SaksbehandlerServiceImpl(dao, axsysKlient)
-        Kontekst.set(
-            Context(
-                user,
-                DatabaseContextTest(dataSource),
-            ),
-        )
+        nyKontekstMedBrukerOgDatabase(user, dataSource)
     }
 
     @AfterEach

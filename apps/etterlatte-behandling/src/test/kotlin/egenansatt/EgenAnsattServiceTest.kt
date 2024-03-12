@@ -6,10 +6,8 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.ConnectionAutoclosingTest
-import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BrukerServiceImpl
@@ -26,6 +24,7 @@ import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -90,12 +89,7 @@ internal class EgenAnsattServiceTest(val dataSource: DataSource) {
 
     @BeforeEach
     fun before() {
-        Kontekst.set(
-            Context(
-                user,
-                DatabaseContextTest(dataSource),
-            ),
-        )
+        nyKontekstMedBrukerOgDatabaseContext(user, DatabaseContextTest(dataSource))
     }
 
     @Test

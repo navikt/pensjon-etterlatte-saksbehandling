@@ -12,6 +12,7 @@ export interface IDetaljertBehandling {
   id: string
   sakId: number
   sakType: SakType
+  sakEnhetId: string
   gyldighetsprøving?: IGyldighetResultat
   kommerBarnetTilgode: IKommerBarnetTilgode | null
   soeknadMottattDato?: string

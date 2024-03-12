@@ -11,9 +11,6 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseKontekst
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
@@ -48,6 +45,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
+import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakService
@@ -56,8 +54,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
-import java.sql.Connection
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -122,24 +118,7 @@ class BehandlingFactoryTest {
         every { user.name() } returns "User"
         every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
 
-        Kontekst.set(
-            Context(
-                user,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun harIntransaction(): Boolean {
-                        throw NotImplementedException("not implemented")
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
-            ),
-        )
+        nyKontekstMedBruker(user)
     }
 
     @AfterEach

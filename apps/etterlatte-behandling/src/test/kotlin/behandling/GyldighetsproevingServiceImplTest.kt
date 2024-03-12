@@ -7,9 +7,6 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseKontekst
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -32,13 +29,12 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
-import java.sql.Connection
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -59,24 +55,7 @@ internal class GyldighetsproevingServiceImplTest {
     @BeforeEach
     fun before() {
         every { user.name() } returns "User"
-        Kontekst.set(
-            Context(
-                user,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun harIntransaction(): Boolean {
-                        throw NotImplementedException("not implemented")
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
-            ),
-        )
+        nyKontekstMedBruker(user)
     }
 
     @AfterEach

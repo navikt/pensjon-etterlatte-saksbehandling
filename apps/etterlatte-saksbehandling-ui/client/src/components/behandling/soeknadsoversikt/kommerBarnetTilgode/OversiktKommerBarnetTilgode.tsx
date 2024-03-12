@@ -75,14 +75,15 @@ export const OversiktKommerBarnetTilgode = ({
       </div>
 
       <VurderingsContainerWrapper>
-        {vurdert ? (
+        {vurdert && (
           <KommerBarnetTilGodeVurdering
             kommerBarnetTilgode={kommerBarnetTilgode}
             redigerbar={redigerbar}
             setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
             behandlingId={behandlingId}
           />
-        ) : (
+        )}
+        {!vurdert && redigerbar && (
           <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
         )}
       </VurderingsContainerWrapper>

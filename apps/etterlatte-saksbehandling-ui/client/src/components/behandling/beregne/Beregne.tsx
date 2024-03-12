@@ -43,10 +43,14 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     : undefined
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
-  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const erOpphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const vedtaksresultat = useVedtaksResultat()
 
+  const redigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
   const brevutfallOgEtterbetaling = useAppSelector(
     (state) => state.behandlingReducer.behandling?.brevutfallOgEtterbetaling
   )

@@ -1,21 +1,21 @@
 import React, { ReactNode } from 'react'
 import { Box, Heading } from '@navikt/ds-react'
-import { HouseIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 
 interface Props {
   heading: string
+  icon: ReactNode
   children: ReactNode | Array<ReactNode>
 }
 
-export const Personopplysning = ({ heading, children }: Props): ReactNode => {
+export const Personopplysning = ({ heading, children, icon }: Props): ReactNode => {
   return (
     <Box background="bg-subtle" padding="3">
       <PersonopplysningHeader>
-        <HouseIcon height="2.5rem" width="2.5rem" />
-        <Heading size="medium">{heading}</Heading>
+        {icon}
+        <Heading size="small">{heading}</Heading>
       </PersonopplysningHeader>
-      {children}
+      <PersonopplysningContent>{children}</PersonopplysningContent>
     </Box>
   )
 }
@@ -24,4 +24,9 @@ const PersonopplysningHeader = styled.div`
   display: flex;
   align-items: end;
   gap: 1rem;
+`
+
+const PersonopplysningContent = styled.div`
+  padding-top: 1rem;
+  padding-left: 3rem;
 `

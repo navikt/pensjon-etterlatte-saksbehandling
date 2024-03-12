@@ -102,6 +102,7 @@ data class DoedshendelseInternal internal constructor(
             Relasjon.BARN -> SakType.BARNEPENSJON
             Relasjon.EPS -> SakType.OMSTILLINGSSTOENAD
             Relasjon.AVDOED -> throw IllegalStateException("Saktype for relasjon er kun gyldig for BARN og EPS")
+            Relasjon.SAMBOER -> SakType.OMSTILLINGSSTOENAD
         }
 }
 
@@ -124,5 +125,6 @@ enum class Utfall {
 enum class Relasjon {
     BARN,
     EPS,
+    SAMBOER,
     AVDOED,
 }

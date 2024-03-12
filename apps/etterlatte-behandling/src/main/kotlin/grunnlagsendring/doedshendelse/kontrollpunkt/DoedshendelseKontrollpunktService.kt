@@ -62,6 +62,9 @@ class DoedshendelseKontrollpunktService(
                         )
                 }
 
+                Relasjon.SAMBOER -> {
+                }
+
                 Relasjon.AVDOED -> {
                     kontrollerAvdoedHarYtelseIGjenny(hendelse)
                 }

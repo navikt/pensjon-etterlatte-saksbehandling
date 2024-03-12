@@ -32,6 +32,8 @@ import java.util.UUID
 internal class DoedshendelseServiceTest {
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
     private val dao = mockk<DoedshendelseDao>()
+
+    // TODO: må teste denne blir lagret ned
     private val pensjonpersonKlient = mockk<PensjonpersonKlient>()
     private val toggle =
         mockk<FeatureToggleService> {

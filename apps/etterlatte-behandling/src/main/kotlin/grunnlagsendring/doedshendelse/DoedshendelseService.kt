@@ -188,7 +188,6 @@ class DoedshendelseService(
         avdoed: PersonDTO,
         andreForeldreForAvdoedesBarn: List<String>?,
     ): List<PersonFnrMedRelasjon> {
-        // TODO: kalle pensjon-person
         return andreForeldreForAvdoedesBarn?.map {
             val avdoedFnr = avdoed.foedselsnummer.verdi.value
             val borSammen =
@@ -199,12 +198,12 @@ class DoedshendelseService(
                             it,
                             LocalDate.now(),
                         ),
-                    ) // Eller hendelsedato?
+                    )
                 }
             PersonerBorSammen(avdoedFnr, it, borSammen)
         }
             ?.filter { it.borSammen.status }
-            ?.map { PersonFnrMedRelasjon(it.gjenlevendePerson, Relasjon.EPS) }
+            ?.map { PersonFnrMedRelasjon(it.gjenlevendePerson, Relasjon.SAMBOER) }
             ?: emptyList()
     }
 

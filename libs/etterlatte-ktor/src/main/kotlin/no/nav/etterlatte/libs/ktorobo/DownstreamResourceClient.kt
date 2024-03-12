@@ -16,14 +16,10 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMessage
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.token.BrukerTokenInfo
-import org.slf4j.LoggerFactory
-
-private val logger = LoggerFactory.getLogger(DownstreamResourceClient::class.java)
 
 class DownstreamResourceClient(
     private val azureAdClient: AzureAdClient,
@@ -209,19 +205,4 @@ class DownstreamResourceClient(
                     error.toErr(resource.url)
                 },
             )
-}
-
-/**
- * Ktor med content negotiation serialiserer content-type med parametere (som charset), slik at en
- * naiv sammenligning ikke fungerer. Denne metoden sammenligner uten parametere.
- */
-private fun HttpMessage?.harContentType(contentType: ContentType): Boolean {
-    return contentTypeErLik(this?.contentType(), contentType)
-}
-
-fun contentTypeErLik(
-    contentEn: ContentType?,
-    contentTo: ContentType?,
-): Boolean {
-    return contentEn?.withoutParameters() == contentTo?.withoutParameters()
 }

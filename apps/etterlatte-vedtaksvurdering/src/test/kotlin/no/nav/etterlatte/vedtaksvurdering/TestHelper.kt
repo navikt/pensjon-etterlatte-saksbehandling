@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -144,6 +145,7 @@ fun vedtakTilbakekreving(
     tilbakekreving: ObjectNode = objectMapper.createObjectNode(),
     status: VedtakStatus = VedtakStatus.OPPRETTET,
     vedtakFattet: VedtakFattet? = null,
+    attestasjon: Attestasjon? = null,
 ) = Vedtak(
     id = 1L,
     status = status,
@@ -155,6 +157,7 @@ fun vedtakTilbakekreving(
     innhold =
         VedtakInnhold.Tilbakekreving(tilbakekreving),
     vedtakFattet = vedtakFattet,
+    attestasjon = attestasjon,
 )
 
 fun vedtakKlage(

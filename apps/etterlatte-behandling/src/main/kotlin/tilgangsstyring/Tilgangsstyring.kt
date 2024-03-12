@@ -15,7 +15,6 @@ import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
-import no.nav.etterlatte.User
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
@@ -284,16 +283,4 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(onSuccess: (
 
         else -> onSuccess()
     }
-}
-
-fun <T> List<T>.filterForEnheter(
-    user: User,
-    filter: (item: T, enheter: List<String>) -> Boolean,
-) = when (user) {
-    is SaksbehandlerMedEnheterOgRoller -> {
-        val enheter = user.enheter()
-        this.filter { filter(it, enheter) }
-    }
-
-    else -> this
 }

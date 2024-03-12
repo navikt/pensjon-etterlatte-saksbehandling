@@ -88,6 +88,7 @@ export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Pro
         oppdaterTildeling={oppdaterSaksbehandlerTildeling}
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         revurderingsaarsaker={revurderingsaarsaker}
+        filter={filter}
       />
     </>
   ) : (

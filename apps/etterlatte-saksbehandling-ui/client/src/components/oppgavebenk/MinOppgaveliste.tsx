@@ -105,6 +105,7 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
         }
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         revurderingsaarsaker={revurderingsaarsaker}
+        filter={filter}
       />
     </>
   ) : (

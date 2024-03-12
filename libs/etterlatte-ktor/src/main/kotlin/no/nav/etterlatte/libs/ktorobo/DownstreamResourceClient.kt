@@ -80,11 +80,7 @@ class DownstreamResourceClient(
                 header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")
                 resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
             }
-        }
-            .fold(
-                onSuccess = { haandterRespons(it) },
-                onFailure = { error -> error.toErr(resource.url) },
-            )
+        }.fold(resource)
 
     private suspend fun postToDownstreamApi(
         resource: Resource,
@@ -98,29 +94,26 @@ class DownstreamResourceClient(
                 contentType(ContentType.Application.Json)
                 setBody(postBody)
             }
-        }
-            .fold(
-                onSuccess = { haandterRespons(it) },
-                onFailure = { error -> error.toErr(resource.url) },
-            )
+        }.fold(resource)
 
     private suspend fun putToDownstreamApi(
         resource: Resource,
         token: AccessToken,
         putBody: Any,
     ): Result<JsonNode?, Throwable> =
-
         runCatching {
             httpClient.put(resource.url) {
                 header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")
                 contentType(ContentType.Application.Json)
                 setBody(putBody)
             }
-        }
-            .fold(
-                onSuccess = { haandterRespons(it) },
-                onFailure = { error -> error.toErr(resource.url) },
-            )
+        }.fold(resource)
+
+    private suspend fun kotlin.Result<HttpResponse>.fold(resource: Resource) =
+        this.fold(
+            onSuccess = { haandterRespons(it) },
+            onFailure = { error -> error.toErr(resource.url) },
+        )
 
     private suspend fun deleteToDownstreamApi(
         resource: Resource,
@@ -134,11 +127,7 @@ class DownstreamResourceClient(
                 contentType(ContentType.Application.Json)
                 setBody(postBody)
             }
-        }
-            .fold(
-                onSuccess = { haandterRespons(it) },
-                onFailure = { error -> error.toErr(resource.url) },
-            )
+        }.fold(resource)
 
     private suspend fun haandterRespons(response: HttpResponse) =
         when {
@@ -158,9 +147,5 @@ class DownstreamResourceClient(
                 contentType(ContentType.Application.Json)
                 setBody(patchBody)
             }
-        }
-            .fold(
-                onSuccess = { haandterRespons(it) },
-                onFailure = { error -> error.toErr(resource.url) },
-            )
+        }.fold(resource)
 }

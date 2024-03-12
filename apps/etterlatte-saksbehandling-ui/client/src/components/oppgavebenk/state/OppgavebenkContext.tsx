@@ -15,9 +15,10 @@ const ProvideOppgavebenkContext = ({ children }: { children: ReactNode | Array<R
   const [state, setState] = useState<OppgavebenkState>(initialOppgavebenkState)
 
   const dispatcher: OppgavebenkStateDispatcher = {
-    setOppgavelistaOppgaver: (oppgaver) => setState({ ...state, oppgavelistaOppgaver: oppgaver }),
-    setMinOppgavelisteOppgaver: (oppgaver) => setState({ ...state, minOppgavelisteOppgaver: oppgaver }),
-    setGosysOppgavelisteOppgaver: (oppgaver) => setState({ ...state, gosysOppgavelisteOppgaver: oppgaver }),
+    setOppgavelistaOppgaver: (oppgaver) => setState((state) => ({ ...state, oppgavelistaOppgaver: oppgaver })),
+    setMinOppgavelisteOppgaver: (oppgaver) => setState((state) => ({ ...state, minOppgavelisteOppgaver: oppgaver })),
+    setGosysOppgavelisteOppgaver: (oppgaver) =>
+      setState((state) => ({ ...state, gosysOppgavelisteOppgaver: oppgaver })),
   }
 
   return (

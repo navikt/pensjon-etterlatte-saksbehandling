@@ -67,7 +67,7 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
     }
   }, [oppgavebenkState.gosysOppgavelisteOppgaver])
 
-  return oppgavebenkState.gosysOppgavelisteOppgaver.length && !isPending(gosysOppgaverResult) ? (
+  return oppgavebenkState.gosysOppgavelisteOppgaver.length >= 0 && !isPending(gosysOppgaverResult) ? (
     <>
       <VisKunMineGosysOppgaverSwitch
         checked={filter.saksbehandlerFilter === innloggetSaksbehandler.ident}

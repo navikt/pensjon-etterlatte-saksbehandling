@@ -112,14 +112,13 @@ class DownstreamResourceClient(
 
     private suspend fun kotlin.Result<HttpResponse>.fold(resource: Resource) =
         this.fold(
-            onSuccess = { haandterRespons(it) },
+            onSuccess = { response ->
+                when {
+                    response.status == HttpStatusCode.NoContent -> Ok(null)
+                    response.status.isSuccess() -> Ok(response.body())
+                    else -> response.toResponseException()
+                }
+            },
             onFailure = { error -> error.toErr(resource.url) },
         )
-
-    private suspend fun haandterRespons(response: HttpResponse) =
-        when {
-            response.status == HttpStatusCode.NoContent -> Ok(null)
-            response.status.isSuccess() -> Ok(response.body())
-            else -> response.toResponseException()
-        }
 }

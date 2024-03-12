@@ -72,12 +72,12 @@ class DownstreamResourceClient(
 
     private suspend fun fetchFromDownstreamApi(
         resource: Resource,
-        oboAccessToken: AccessToken,
+        token: AccessToken,
     ): Result<JsonNode?, Throwable> =
 
         runCatching {
             httpClient.get(resource.url) {
-                header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
+                header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")
                 resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
             }
         }
@@ -88,13 +88,13 @@ class DownstreamResourceClient(
 
     private suspend fun postToDownstreamApi(
         resource: Resource,
-        oboAccessToken: AccessToken,
+        token: AccessToken,
         postBody: Any,
     ): Result<JsonNode?, Throwable> =
 
         runCatching {
             httpClient.post(resource.url) {
-                header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
+                header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")
                 contentType(ContentType.Application.Json)
                 setBody(postBody)
             }
@@ -106,13 +106,13 @@ class DownstreamResourceClient(
 
     private suspend fun putToDownstreamApi(
         resource: Resource,
-        oboAccessToken: AccessToken,
+        token: AccessToken,
         putBody: Any,
     ): Result<JsonNode?, Throwable> =
 
         runCatching {
             httpClient.put(resource.url) {
-                header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
+                header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")
                 contentType(ContentType.Application.Json)
                 setBody(putBody)
             }
@@ -124,13 +124,13 @@ class DownstreamResourceClient(
 
     private suspend fun deleteToDownstreamApi(
         resource: Resource,
-        oboAccessToken: AccessToken,
+        token: AccessToken,
         postBody: String,
     ): Result<JsonNode?, Throwable> =
 
         runCatching {
             httpClient.delete(resource.url) {
-                header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
+                header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")
                 contentType(ContentType.Application.Json)
                 setBody(postBody)
             }
@@ -149,12 +149,12 @@ class DownstreamResourceClient(
 
     private suspend fun patchToDownstreamApi(
         resource: Resource,
-        oboAccessToken: AccessToken,
+        token: AccessToken,
         patchBody: String,
     ): Result<JsonNode?, Throwable> =
         runCatching {
             httpClient.patch(resource.url) {
-                header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
+                header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")
                 contentType(ContentType.Application.Json)
                 setBody(patchBody)
             }

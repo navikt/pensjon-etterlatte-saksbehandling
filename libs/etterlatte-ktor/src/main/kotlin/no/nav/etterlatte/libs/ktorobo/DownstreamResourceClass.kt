@@ -197,7 +197,7 @@ class DownstreamResourceClient(
         resource: Resource,
         oboAccessToken: AccessToken,
         postBody: String,
-    ): Result<Any, Throwable> =
+    ): Result<JsonNode?, Throwable> =
 
         runCatching {
             httpClient.delete(resource.url) {
@@ -209,14 +209,8 @@ class DownstreamResourceClient(
             .fold(
                 onSuccess = { response ->
                     when {
-                        response.status.isSuccess() -> {
-                            if (response.harContentType(ContentType.Application.Json)) {
-                                Ok(response.body<JsonNode>())
-                            } else {
-                                logger.info("Mottok content-type: ${response.contentType()} som ikke var JSON")
-                                Ok(response.status)
-                            }
-                        }
+                        response.status == HttpStatusCode.NoContent -> Ok(null)
+                        response.status.isSuccess() -> Ok(response.body())
                         else -> response.toResponseException()
                     }
                 },

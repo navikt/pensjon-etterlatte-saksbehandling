@@ -91,6 +91,18 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             }
         }
 
+        route("/stats") {
+            get {
+                kunSaksbehandler {
+                    call.respond(
+                        inTransaction {
+                            service.genererStatsForOppgaver(Kontekst.get().AppUser.name())
+                        },
+                    )
+                }
+            }
+        }
+
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get("/oppgaver") {
                 kunSystembruker {

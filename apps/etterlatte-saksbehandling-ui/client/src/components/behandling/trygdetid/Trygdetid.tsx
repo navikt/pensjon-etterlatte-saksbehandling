@@ -161,6 +161,10 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
             lenke: 'https://lovdata.no/pro/lov/1997-02-28-19/§3-5',
           },
           {
+            tittel: '§ 3-7 Beregning trygdetid',
+            lenke: 'https://lovdata.no/pro/lov/1997-02-28-19/§3-7',
+          },
+          {
             tittel: 'EØS-forordning 883/2004 artikkel 52',
             lenke: 'https://lovdata.no/pro/eu/32004r0883/ARTIKKEL_52',
           },
@@ -172,7 +176,8 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
           67 år til og med 75 år, gis det også et helt års trygdetid for aktuelle poengår. Fremtidig trygdetid kan gis
           fra dødsfallet til og med kalenderåret avdøde hadde blitt 66 år. Trygdetiden beregnes med maks 40 år. Avdødes
           utenlandske trygdetid fra avtaleland skal legges til for alternativ prorata-beregning av ytelsen. Ulike
-          avtaler skal ikke beregnes sammen.
+          avtaler skal ikke beregnes sammen. Hvis avdøde har uføretrygd, skal som hovedregel trygdetid lagt til grunn i
+          uføretrygden benyttes.
         </BodyShort>
       </LovtekstMedLenke>
       {trygdetid && landListe && (

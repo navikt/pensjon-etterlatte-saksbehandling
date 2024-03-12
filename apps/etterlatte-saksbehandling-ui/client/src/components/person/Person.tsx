@@ -8,7 +8,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { Tabs } from '@navikt/ds-react'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
-import { BulletListIcon, CogRotationIcon, EnvelopeClosedIcon, FileTextIcon } from '@navikt/aksel-icons'
+import { BulletListIcon, CogRotationIcon, EnvelopeClosedIcon, FileTextIcon, PersonIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
@@ -20,8 +20,10 @@ import { hentPersonNavn } from '~shared/api/pdltjenester'
 import { SamordningSak } from '~components/person/SamordningSak'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
+import { Personopplysninger } from '~components/person/personopplysninger/Personopplysninger'
 
 export enum PersonOversiktFane {
+  PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
   SAKER = 'SAKER',
   DOKUMENTER = 'DOKUMENTER',
   BREV = 'BREV',
@@ -33,7 +35,7 @@ export const Person = () => {
 
   const [personStatus, hentPerson] = useApiCall(hentPersonNavn)
   const [sakStatus, hentSak] = useApiCall(hentSakMedBehandlnger)
-  const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
+  const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.PERSONOPPLYSNINGER)
 
   const velgFane = (value: string) => {
     const valgtFane = value as PersonOversiktFane
@@ -84,6 +86,11 @@ export const Person = () => {
         (person) => (
           <Tabs value={fane} onChange={velgFane}>
             <Tabs.List>
+              <Tabs.Tab
+                value={PersonOversiktFane.PERSONOPPLYSNINGER}
+                label="Personopplysninger"
+                icon={<PersonIcon />}
+              />
               <Tabs.Tab value={PersonOversiktFane.SAKER} label="Sak og behandling" icon={<BulletListIcon />} />
               <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
               <Tabs.Tab value={PersonOversiktFane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
@@ -92,6 +99,9 @@ export const Person = () => {
               )}
             </Tabs.List>
 
+            <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
+              <Personopplysninger />
+            </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.SAKER}>
               <SakOversikt sakStatus={sakStatus} fnr={person.foedselsnummer} />
             </Tabs.Panel>

@@ -58,6 +58,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.persongalleri
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.AfterAll
@@ -80,7 +81,12 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
     @BeforeAll
     fun start() {
         val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-
+        val saksbehandlerMedRoller =
+            mockk<SaksbehandlerMedRoller> {
+                every { harRolleStrengtFortrolig() } returns false
+                every { harRolleEgenAnsatt() } returns false
+            }
+        every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.name() } returns "User"
         every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
 

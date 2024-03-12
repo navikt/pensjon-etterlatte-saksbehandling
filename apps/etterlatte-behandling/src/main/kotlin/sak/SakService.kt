@@ -2,6 +2,7 @@ package no.nav.etterlatte.sak
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.common.Enheter
@@ -210,18 +211,24 @@ class SakServiceImpl(
         }
 
     private fun List<Sak>.filterForEnheter(): List<Sak> {
-        val enheterSomSkalFiltreres = ArrayList<String>()
-        val bruker = Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
-        if (!bruker.harRolleStrengtFortrolig()) {
-            enheterSomSkalFiltreres.add(Enheter.STRENGT_FORTROLIG.enhetNr)
+        val enheterSomSkalFiltreresBort = ArrayList<String>()
+        val appUser = Kontekst.get().AppUser
+        if (appUser is SaksbehandlerMedEnheterOgRoller) {
+            val bruker = appUser.saksbehandlerMedRoller
+            if (!bruker.harRolleStrengtFortrolig()) {
+                enheterSomSkalFiltreresBort.add(Enheter.STRENGT_FORTROLIG.enhetNr)
+            }
+            if (!bruker.harRolleEgenAnsatt()) {
+                enheterSomSkalFiltreresBort.add(Enheter.EGNE_ANSATTE.enhetNr)
+            }
         }
-        return filterSakerForEnheter(enheterSomSkalFiltreres, this)
+        return filterSakerForEnheter(enheterSomSkalFiltreresBort, this)
     }
 
     private fun filterSakerForEnheter(
         enheterSomSkalFiltreres: List<String>,
         saker: List<Sak>,
-    ): List<Sak>  {
+    ): List<Sak> {
         return saker.filter { it.enhet !in enheterSomSkalFiltreres }
     }
 }

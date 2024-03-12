@@ -32,6 +32,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceImpl
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -76,7 +77,12 @@ internal class EgenAnsattServiceTest(val dataSource: DataSource) {
         egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, brukerService)
 
         user = mockk<SaksbehandlerMedEnheterOgRoller>()
-
+        val saksbehandlerMedRoller =
+            mockk<SaksbehandlerMedRoller> {
+                every { harRolleStrengtFortrolig() } returns false
+                every { harRolleEgenAnsatt() } returns true
+            }
+        every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.name() } returns "User"
 
         coEvery { skjermingKlient.personErSkjermet(any()) } returns false

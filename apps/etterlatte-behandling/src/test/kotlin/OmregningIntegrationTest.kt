@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -41,6 +42,12 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
     fun start() {
         startServer()
         user = mockk<SaksbehandlerMedEnheterOgRoller>()
+        val saksbehandlerMedRoller =
+            mockk<SaksbehandlerMedRoller> {
+                every { harRolleStrengtFortrolig() } returns false
+                every { harRolleEgenAnsatt() } returns false
+            }
+        every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.name() } returns "User"
         every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
         Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource)))
@@ -112,7 +119,6 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 }
 
             for (i in 1..100) {
-                println(i)
                 val (sak, behandling) = opprettSakMedFoerstegangsbehandling(i.toString())
                 iverksettFoerstegangsbehandling(sak, behandling)
                 val (omregning) =

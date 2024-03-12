@@ -42,6 +42,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import no.nav.etterlatte.persongalleri
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -66,6 +67,12 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
             resetDatabase()
         }
         user = mockk<SaksbehandlerMedEnheterOgRoller>()
+        val saksbehandlerMedRoller =
+            mockk<SaksbehandlerMedRoller> {
+                every { harRolleStrengtFortrolig() } returns false
+                every { harRolleEgenAnsatt() } returns false
+            }
+        every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.name() } returns "User"
         every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
         Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource)))

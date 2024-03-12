@@ -100,14 +100,12 @@ class DownstreamResourceClient(
         action: suspend (token: AccessToken) -> Result<JsonNode?, Throwable>,
     ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
-            .andThen { action(it) }
-            .andThen { response ->
-                when (response) {
-                    null -> Ok(resource)
-                    else -> Ok(resource.addResponse(response))
-                }
+        return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes).andThen { action(it) }.andThen { response ->
+            when (response) {
+                null -> Ok(resource)
+                else -> Ok(resource.addResponse(response))
             }
+        }
     }
 
     private fun HttpRequestBuilder.header(token: AccessToken) = header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")

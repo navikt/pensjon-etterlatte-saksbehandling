@@ -1,12 +1,14 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -15,6 +17,7 @@ import java.util.UUID
 
 class VedtakTilbakekrevingService(
     private val repository: VedtaksvurderingRepository,
+    private val rapidService: VedtaksvurderingRapidService,
 ) {
     private val logger = LoggerFactory.getLogger(VedtakTilbakekrevingService::class.java)
 
@@ -90,6 +93,23 @@ class VedtakTilbakekrevingService(
                     tidspunkt = Tidspunkt.now(),
                 ),
             )
+
+        rapidService.sendToRapid(
+            VedtakOgRapid(
+                attestertVedtak.toDto(),
+                RapidInfo(
+                    vedtakhendelse = VedtakKafkaHendelseHendelseType.ATTESTERT,
+                    vedtak = attestertVedtak.toDto(),
+                    tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
+                    behandlingId = attestertVedtak.behandlingId,
+                    extraParams =
+                        mapOf(
+                            SKAL_SENDE_BREV to true,
+                        ),
+                ),
+            ),
+        )
+
         return requireNotNull(attestertVedtak.vedtakFattet).let {
             TilbakekrevingVedtakLagretDto(
                 id = attestertVedtak.id,

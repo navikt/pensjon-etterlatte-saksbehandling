@@ -71,7 +71,7 @@ fun Route.trygdetidV2(
         }
 
         post("oppdater-opplysningsgrunnlag") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Oppdaterer opplysningsgrunnlag på trygdetider for behandling $behandlingId")
 
                 trygdetidService.oppdaterOpplysningsgrunnlagForTrygdetider(behandlingId, brukerTokenInfo)

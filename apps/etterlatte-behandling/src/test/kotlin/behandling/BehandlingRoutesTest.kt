@@ -19,6 +19,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -171,8 +172,11 @@ internal class BehandlingRoutesTest {
     }
 
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
-        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-        every { user.harSkrivetilgang() } returns true
+        val user =
+            mockk<SaksbehandlerMedEnheterOgRoller> {
+                every { enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
+            }
+
         testApplication {
             val client =
                 runServer(mockOAuth2Server) {

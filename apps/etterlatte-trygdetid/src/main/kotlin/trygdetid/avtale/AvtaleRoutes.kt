@@ -52,7 +52,7 @@ fun Route.avtale(
             }
 
             post {
-                withBehandlingId(behandlingKlient) {
+                withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     logger.info("Lagrer trygdeavtale for behandling $behandlingId")
 
                     val trygdeavtaleRequest = call.receive<TrygdeavtaleRequest>()

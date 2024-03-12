@@ -114,11 +114,10 @@ class OppgaveDaoMedEndringssporingImpl(
     override fun hentOppgaver(
         oppgaveTyper: List<OppgaveType>,
         enheter: List<String>,
-        erSuperBruker: Boolean,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String?,
     ): List<OppgaveIntern> {
-        return oppgaveDao.hentOppgaver(oppgaveTyper, enheter, erSuperBruker, oppgaveStatuser, minOppgavelisteIdentFilter)
+        return oppgaveDao.hentOppgaver(oppgaveTyper, enheter, oppgaveStatuser, minOppgavelisteIdentFilter)
     }
 
     override fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats {

@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.mockedSakTilgangDao
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.junit.jupiter.api.AfterEach
@@ -44,6 +45,7 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
             Context(
                 user,
                 DatabaseContextTest(dataSource),
+                mockedSakTilgangDao(),
             ),
         )
     }
@@ -73,7 +75,6 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
             oppgaveDao.hentOppgaver(
                 OppgaveType.entries,
                 listOf(Enheter.AALESUND.enhetNr),
-                true,
                 Status.entries.map {
                     it.name
                 },
@@ -87,7 +88,6 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
                 listOf(
                     Enheter.AALESUND.enhetNr,
                 ),
-                false,
                 Status.entries.map {
                     it.name
                 },
@@ -101,7 +101,6 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
             oppgaveDao.hentOppgaver(
                 OppgaveType.entries,
                 listOf(Enheter.AALESUND.enhetNr),
-                false,
                 Status.entries.map {
                     it.name
                 },
@@ -119,7 +118,7 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
         oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)))
         oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)))
 
-        val hentOppgaver = oppgaveDao.hentOppgaver(OppgaveType.entries, listOf(Enheter.AALESUND.enhetNr), false, listOf(Status.NY.name))
+        val hentOppgaver = oppgaveDao.hentOppgaver(OppgaveType.entries, listOf(Enheter.AALESUND.enhetNr), listOf(Status.NY.name))
         assertEquals(2, hentOppgaver.size)
     }
 
@@ -132,10 +131,10 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
         oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)))
         oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)))
 
-        val hentOppgaver = oppgaveDao.hentOppgaver(OppgaveType.entries, listOf(Enheter.AALESUND.enhetNr), false, emptyList())
+        val hentOppgaver = oppgaveDao.hentOppgaver(OppgaveType.entries, listOf(Enheter.AALESUND.enhetNr), emptyList())
         assertEquals(3, hentOppgaver.size)
 
-        val hentOppgaverVisAlle = oppgaveDao.hentOppgaver(OppgaveType.entries, listOf(Enheter.AALESUND.enhetNr), false, listOf(VISALLE))
+        val hentOppgaverVisAlle = oppgaveDao.hentOppgaver(OppgaveType.entries, listOf(Enheter.AALESUND.enhetNr), listOf(VISALLE))
         assertEquals(3, hentOppgaverVisAlle.size)
     }
 
@@ -151,28 +150,9 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
             oppgaveDao.hentOppgaver(
                 OppgaveType.entries,
                 listOf(Enheter.AALESUND.enhetNr),
-                false,
                 Status.entries.map { it.name },
             )
         assertEquals(1, hentOppgaver.size)
-    }
-
-    @Test
-    fun `superbrukerbruker kan se alle oppgaver som ikke er strengt fortrolig`() {
-        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val oppgaveNy = lagNyOppgave(sakAalesund)
-        oppgaveDao.opprettOppgave(oppgaveNy)
-        oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)))
-        oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)))
-
-        val hentOppgaver =
-            oppgaveDao.hentOppgaver(
-                OppgaveType.entries,
-                listOf(Enheter.AALESUND.enhetNr),
-                true,
-                Status.entries.map { it.name },
-            )
-        assertEquals(3, hentOppgaver.size)
     }
 
     @Test
@@ -187,7 +167,6 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
             oppgaveDao.hentOppgaver(
                 OppgaveType.entries,
                 listOf(Enheter.AALESUND.enhetNr),
-                false,
                 Status.entries.map { it.name },
             )
         assertEquals(3, hentOppgaver.size)
@@ -203,7 +182,6 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
             oppgaveDao.hentOppgaver(
                 OppgaveType.entries,
                 listOf(Enheter.AALESUND.enhetNr),
-                false,
                 Status.entries.map { it.name },
             )
         assertEquals(1, hentOppgaver.size)
@@ -248,7 +226,6 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
             oppgaveDao.hentOppgaver(
                 OppgaveType.entries,
                 listOf(Enheter.AALESUND.enhetNr),
-                false,
                 Status.entries.map { it.name },
             )
         assertEquals(1, hentetOppgave.size)

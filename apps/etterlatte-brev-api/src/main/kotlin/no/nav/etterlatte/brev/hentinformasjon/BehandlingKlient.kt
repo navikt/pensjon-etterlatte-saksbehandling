@@ -137,7 +137,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) {
         return get(
             url = "$resourceUrl/vedtaksbehandling/$behandlingId/redigerbar",
             onSuccess = { deserialize(it.response!!.toString()) },
-            errorMessage = { "Klarte ikke hente svar på om generisk behandling med id=$behandlingId kan redigeres" },
+            errorMessage = { "Klarte ikke hente svar på om vedtaksbehandling med id=$behandlingId kan redigeres" },
             brukerTokenInfo = brukerTokenInfo,
         )
     }

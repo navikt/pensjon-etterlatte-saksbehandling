@@ -29,7 +29,7 @@ interface Props {
 
 export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  if (!innloggetSaksbehandler.skriveTilgang) {
+  if (!innloggetSaksbehandler.skriveEnheter.length) {
     return <Tilgangsmelding />
   }
 
@@ -71,9 +71,9 @@ export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Pro
     if (!oppgavebenkState.oppgavelistaOppgaver?.length) {
       hentOppgavelistaOppgaver()
     }
-  }, [oppgavebenkState.oppgavelistaOppgaver])
+  }, [])
 
-  return oppgavebenkState.oppgavelistaOppgaver.length && !isPending(oppgavelistaOppgaverResult) ? (
+  return oppgavebenkState.oppgavelistaOppgaver.length >= 0 && !isPending(oppgavelistaOppgaverResult) ? (
     <>
       <FilterRad
         hentAlleOppgaver={hentOppgavelistaOppgaver}
@@ -88,6 +88,7 @@ export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Pro
         oppdaterTildeling={oppdaterSaksbehandlerTildeling}
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         revurderingsaarsaker={revurderingsaarsaker}
+        filter={filter}
       />
     </>
   ) : (

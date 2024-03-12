@@ -1,5 +1,6 @@
 package no.nav.etterlatte.oppgaveGosys
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
@@ -82,7 +83,7 @@ interface GosysOppgaveKlient {
 
     suspend fun feilregistrer(
         id: String,
-        oppgaveVersjon: Long,
+        request: EndreStatusRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave
 }
@@ -173,7 +174,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
 
     override suspend fun feilregistrer(
         id: String,
-        oppgaveVersjon: Long,
+        request: EndreStatusRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave {
         logger.info("Feilregistrerer Gosys-oppgave med id=$id")
@@ -181,7 +182,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
         return patchOppgave(
             id,
             brukerTokenInfo,
-            body = EndreStatusRequest(oppgaveVersjon.toString(), "FEILREGISTRERT"),
+            body = request,
         )
     }
 
@@ -251,9 +252,11 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
     }
 }
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class EndreStatusRequest(
     val versjon: String,
     val status: String,
+    val beskrivelse: String? = null,
 )
 
 class GosysTimeout : ForespoerselException(

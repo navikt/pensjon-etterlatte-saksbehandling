@@ -65,7 +65,7 @@ class BehandlingKanIkkeAvbrytesException(behandlingStatus: BehandlingStatus) : U
     detail = "Behandlingen kan ikke avbrytes, status: $behandlingStatus",
 )
 
-class PersongalleriFinnesIkkeException() : IkkeFunnetException(
+class PersongalleriFinnesIkkeException : IkkeFunnetException(
     code = "FANT_IKKE_PERSONGALLERI",
     detail = "Kunne ikke finne persongalleri",
 )
@@ -343,8 +343,12 @@ internal class BehandlingServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): LocalDate? {
         return grunnlagKlient.finnPersonOpplysning(behandlingId, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
-            .also { it?.fnr?.let { fnr -> behandlingRequestLogger.loggRequest(brukerTokenInfo, fnr, "behandling") } }
-            ?.let { it.opplysning.doedsdato }
+            .also {
+                it?.fnr?.let {
+                        fnr ->
+                    behandlingRequestLogger.loggRequest(brukerTokenInfo, fnr, "behandling")
+                }
+            }?.opplysning?.doedsdato
     }
 
     override fun hentFoersteVirk(sakId: Long): YearMonth? {
@@ -442,6 +446,7 @@ internal class BehandlingServiceImpl(
             id = behandling.id,
             sakId = sakId,
             sakType = sakType,
+            sakEnhetId = behandling.sak.enhet,
             gyldighetsprøving = behandling.gyldighetsproeving(),
             kommerBarnetTilgode = kommerBarnetTilgode,
             soeknadMottattDato = behandling.mottattDato(),

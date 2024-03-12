@@ -11,10 +11,10 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 internal fun Route.egenAnsattRoute(
     egenAnsattService: EgenAnsattService,
@@ -24,7 +24,7 @@ internal fun Route.egenAnsattRoute(
 
     route("/egenansatt") {
         post {
-            kunSkrivetilgang {
+            kunSystembruker {
                 val skjermetHendelse = call.receive<EgenAnsattSkjermet>()
                 logger.info("Mottar en egen ansatt hendelse fra skjermingsløsningen")
                 inTransaction {

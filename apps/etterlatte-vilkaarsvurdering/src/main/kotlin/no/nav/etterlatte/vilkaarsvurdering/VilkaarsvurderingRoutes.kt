@@ -103,7 +103,7 @@ fun Route.vilkaarsvurdering(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/kopier") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 val forrigeBehandling = call.receive<OpprettVilkaarsvurderingFraBehandling>().forrigeBehandling
 
                 try {
@@ -266,7 +266,7 @@ fun Route.vilkaarsvurdering(
             }
 
             delete("/{$BEHANDLINGID_CALL_PARAMETER}") {
-                withBehandlingId(behandlingKlient) { behandlingId ->
+                withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                     logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
                     try {
                         val vilkaarsvurdering =

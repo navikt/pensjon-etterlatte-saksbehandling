@@ -45,7 +45,7 @@ interface GosysOppgaveService {
 
     suspend fun feilregistrer(
         oppgaveId: String,
-        oppgaveVersjon: Long,
+        request: FeilregistrerOppgaveRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): Long
 }
@@ -134,10 +134,17 @@ class GosysOppgaveServiceImpl(
 
     override suspend fun feilregistrer(
         oppgaveId: String,
-        oppgaveVersjon: Long,
+        request: FeilregistrerOppgaveRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): Long {
-        return gosysOppgaveKlient.feilregistrer(oppgaveId, oppgaveVersjon, brukerTokenInfo).versjon
+        val endreStatusRequest =
+            EndreStatusRequest(
+                versjon = request.versjon.toString(),
+                status = "FEILREGISTRERT",
+                beskrivelse = request.beskrivelse,
+            )
+
+        return gosysOppgaveKlient.feilregistrer(oppgaveId, endreStatusRequest, brukerTokenInfo).versjon
     }
 
     companion object {

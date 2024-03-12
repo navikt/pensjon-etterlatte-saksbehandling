@@ -47,6 +47,7 @@ import { isPending, isPendingOrInitial, isSuccess, mapApiResult } from '~shared/
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppSelector } from '~store/Store'
 import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
+import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;
@@ -103,6 +104,10 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
 
   const configContext = useContext(ConfigContext)
 
+  const [gjeldendeSakStatus, hentGjeldendeSak] = useApiCall(hentSak)
+
+  const [redigerbar, setRedigerbar] = useState<boolean>(false)
+
   const opprettNyttBrevINyFane = () => {
     opprettBrev(Number(utlandsBehandling.sakId), (brev) => {
       window.open(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`, '_blank', 'noopener noreferrer')
@@ -124,6 +129,13 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
     fetchAlleLand(null, (landliste) => {
       setAlleLandKodeverk(sorterLand(landliste))
     })
+
+    hentGjeldendeSak(utlandsBehandling.sakId, (result) => {
+      setRedigerbar(
+        generellbehandlingErRedigerbar(utlandsBehandling.status) &&
+          enhetErSkrivbar(result.enhet, innloggetSaksbehandler.skriveEnheter)
+      )
+    })
   }, [])
 
   const generellBehandlingMedLocalState: Generellbehandling & { innhold: KravpakkeUtland } = {
@@ -137,7 +149,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
     },
   }
 
-  const oppaterGenerellbehandlingUtland = () => {
+  const oppdaterGenerellbehandlingUtland = () => {
     if (valgtLandIsoKode !== undefined) {
       setErrLand(false)
       putOppdaterGenerellBehandling(generellBehandlingMedLocalState)
@@ -145,8 +157,6 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
       setErrLand(true)
     }
   }
-
-  const redigerbar = generellbehandlingErRedigerbar(utlandsBehandling.status) && innloggetSaksbehandler.skriveTilgang
 
   return (
     <GridContainer>
@@ -452,11 +462,16 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                 Behandlingen er oppdatert
               </Alert>
             )}
+            {isPendingOrInitial(gjeldendeSakStatus) && <Spinner visible={true} label="Henter opplysninger om sak" />}
+            {isFailureHandler({
+              errorMessage: 'Vi klarte ikke å hente gjeldende sak',
+              apiResult: gjeldendeSakStatus,
+            })}
             <ButtonGroup>
               {redigerbar && (
                 <>
                   <Button
-                    onClick={() => oppaterGenerellbehandlingUtland()}
+                    onClick={() => oppdaterGenerellbehandlingUtland()}
                     loading={isPending(putOppdaterGenerellBehandlingStatus)}
                   >
                     Lagre opplysninger

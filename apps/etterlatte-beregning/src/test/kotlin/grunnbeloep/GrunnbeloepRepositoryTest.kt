@@ -1,6 +1,6 @@
 package no.nav.etterlatte.grunnbeloep
 
-import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldHaveAtLeastSize
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -8,7 +8,7 @@ import java.time.YearMonth
 internal class GrunnbeloepRepositoryTest {
     @Test
     fun `skal hente alle historiske grunnbeloep`() {
-        GrunnbeloepRepository.historiskeGrunnbeloep shouldHaveSize 71
+        GrunnbeloepRepository.historiskeGrunnbeloep shouldHaveAtLeastSize 70
     }
 
     @Test

@@ -70,68 +70,73 @@ export const GyldigFramsattVurdering = ({
 
   const tittel = 'Er søknaden gyldig fremsatt?'
 
-  return !vurdert ? (
-    <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
-  ) : (
-    <VurderingsboksWrapper
-      tittel={tittel}
-      subtittelKomponent={
-        <>
-          {gyldigFramsatt?.resultat && (
-            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
-              {JaNeiRec[gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT ? JaNei.JA : JaNei.NEI]}
-            </Label>
-          )}
-        </>
-      }
-      redigerbar={redigerbar}
-      vurdering={
-        manuellVurdering?.kilde
-          ? {
-              saksbehandler: manuellVurdering?.kilde.ident,
-              tidspunkt: new Date(manuellVurdering?.kilde.tidspunkt),
-            }
-          : undefined
-      }
-      lagreklikk={lagre}
-      avbrytklikk={reset}
-      kommentar={manuellVurdering?.begrunnelse}
-      defaultRediger={
-        gyldigFramsatt?.resultat !== VurderingsResultat.OPPFYLT &&
-        gyldigFramsatt?.resultat !== VurderingsResultat.IKKE_OPPFYLT
-      }
-    >
-      <div>
-        <VurderingsTitle title="Er søknaden gyldig fremsatt?" />
-        <RadioGroupWrapper>
-          <RadioGroup
-            legend=""
-            size="small"
-            className="radioGroup"
-            onChange={(event) => {
-              setSvar(JaNei[event as JaNei])
-              setRadioError('')
-            }}
-            value={svar || ''}
-            error={radioError ? radioError : false}
-          >
-            <div className="flex">
-              <Radio value={JaNei.JA}>Ja</Radio>
-              <Radio value={JaNei.NEI}>Nei</Radio>
-            </div>
-          </RadioGroup>
-        </RadioGroupWrapper>
-        <SoeknadsoversiktTextArea
-          value={begrunnelse}
-          onChange={(e) => {
-            const oppdatertBegrunnelse = e.target.value
-            setBegrunnelse(oppdatertBegrunnelse)
-            oppdatertBegrunnelse.trim().length > 0 && setBegrunnelseError('')
-          }}
-          error={begrunnelseError ? begrunnelseError : false}
-        />
-      </div>
-    </VurderingsboksWrapper>
+  return (
+    <>
+      {!vurdert && redigerbar && (
+        <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
+      )}
+      {vurdert && (
+        <VurderingsboksWrapper
+          tittel={tittel}
+          subtittelKomponent={
+            <>
+              {gyldigFramsatt?.resultat && (
+                <Label as="p" size="small" style={{ marginBottom: '32px' }}>
+                  {JaNeiRec[gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT ? JaNei.JA : JaNei.NEI]}
+                </Label>
+              )}
+            </>
+          }
+          redigerbar={redigerbar}
+          vurdering={
+            manuellVurdering?.kilde
+              ? {
+                  saksbehandler: manuellVurdering?.kilde.ident,
+                  tidspunkt: new Date(manuellVurdering?.kilde.tidspunkt),
+                }
+              : undefined
+          }
+          lagreklikk={lagre}
+          avbrytklikk={reset}
+          kommentar={manuellVurdering?.begrunnelse}
+          defaultRediger={
+            gyldigFramsatt?.resultat !== VurderingsResultat.OPPFYLT &&
+            gyldigFramsatt?.resultat !== VurderingsResultat.IKKE_OPPFYLT
+          }
+        >
+          <div>
+            <VurderingsTitle title="Er søknaden gyldig fremsatt?" />
+            <RadioGroupWrapper>
+              <RadioGroup
+                legend=""
+                size="small"
+                className="radioGroup"
+                onChange={(event) => {
+                  setSvar(JaNei[event as JaNei])
+                  setRadioError('')
+                }}
+                value={svar || ''}
+                error={radioError ? radioError : false}
+              >
+                <div className="flex">
+                  <Radio value={JaNei.JA}>Ja</Radio>
+                  <Radio value={JaNei.NEI}>Nei</Radio>
+                </div>
+              </RadioGroup>
+            </RadioGroupWrapper>
+            <SoeknadsoversiktTextArea
+              value={begrunnelse}
+              onChange={(e) => {
+                const oppdatertBegrunnelse = e.target.value
+                setBegrunnelse(oppdatertBegrunnelse)
+                oppdatertBegrunnelse.trim().length > 0 && setBegrunnelseError('')
+              }}
+              error={begrunnelseError ? begrunnelseError : false}
+            />
+          </div>
+        </VurderingsboksWrapper>
+      )}
+    </>
   )
 }
 

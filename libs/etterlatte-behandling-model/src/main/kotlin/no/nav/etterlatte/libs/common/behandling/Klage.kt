@@ -401,37 +401,49 @@ data class VedtakKlagenGjelderBrevbaker(
 sealed class KlageUtfallMedData {
     abstract val saksbehandler: Grunnlagsopplysning.Saksbehandler
 
+    abstract fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean
+
     @JsonTypeName("OMGJOERING")
     data class Omgjoering(
         val omgjoering: KlageOmgjoering,
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
-    ) : KlageUtfallMedData()
+    ) : KlageUtfallMedData() {
+        override fun harSammeUtfall(other: KlageUtfallUtenBrev) = other is KlageUtfallUtenBrev.Omgjoering
+    }
 
     @JsonTypeName("DELVIS_OMGJOERING")
     data class DelvisOmgjoering(
         val omgjoering: KlageOmgjoering,
         val innstilling: InnstillingTilKabal,
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
-    ) : KlageUtfallMedData()
+    ) : KlageUtfallMedData() {
+        override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.DelvisOmgjoering
+    }
 
     @JsonTypeName("STADFESTE_VEDTAK")
     data class StadfesteVedtak(
         val innstilling: InnstillingTilKabal,
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
-    ) : KlageUtfallMedData()
+    ) : KlageUtfallMedData() {
+        override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.StadfesteVedtak
+    }
 
     @JsonTypeName("AVVIST")
     data class Avvist(
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
         val vedtak: KlageVedtak,
         val brev: KlageVedtaksbrev,
-    ) : KlageUtfallMedData()
+    ) : KlageUtfallMedData() {
+        override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.Avvist
+    }
 
     @JsonTypeName("AVVIST_MED_OMGJOERING")
     data class AvvistMedOmgjoering(
         val omgjoering: KlageOmgjoering,
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
-    ) : KlageUtfallMedData()
+    ) : KlageUtfallMedData() {
+        override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.AvvistMedOmgjoering
+    }
 }
 
 sealed class GyldigForYtelse {
@@ -588,7 +600,7 @@ class InnstillingTilKabal(
     val lovhjemmel: KabalHjemmel,
     val internKommentar: String?,
     val innstillingTekst: String,
-    val brev: KlageBrevInnstilling,
+    val brev: KlageOversendelsebrev,
 )
 
 class InnstillingTilKabalUtenBrev(val lovhjemmel: String, internKommentar: String?, val innstillingTekst: String) {
@@ -596,7 +608,7 @@ class InnstillingTilKabalUtenBrev(val lovhjemmel: String, internKommentar: Strin
         get() = if (field.isNullOrBlank()) null else field
 }
 
-data class KlageBrevInnstilling(val brevId: Long)
+data class KlageOversendelsebrev(val brevId: Long)
 
 data class KlageVedtaksbrev(val brevId: Long)
 

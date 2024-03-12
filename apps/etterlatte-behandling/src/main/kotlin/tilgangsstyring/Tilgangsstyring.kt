@@ -14,6 +14,7 @@ import io.ktor.util.pipeline.PipelineContext
 import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.User
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
@@ -22,7 +23,9 @@ import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.behandlingId
+import no.nav.etterlatte.libs.common.klageId
+import no.nav.etterlatte.libs.common.oppgaveId
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sakId
@@ -140,7 +143,6 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
     val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTO.foedselsnummer)
     when (brukerTokenInfo) {
         is Saksbehandler -> {
-            val harLesetilgang = Kontekst.get().AppUser.harLesetilgang()
             val harTilgang =
                 inTransaction {
                     tilgangService.harTilgangTilPerson(
@@ -148,7 +150,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
                         Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
                     )
                 }
-            if (harTilgang && harLesetilgang) {
+            if (harTilgang) {
                 onSuccess(foedselsnummer)
             } else {
                 call.respond(HttpStatusCode.NotFound)
@@ -156,25 +158,6 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
         }
 
         else -> onSuccess(foedselsnummer)
-    }
-}
-
-class ManglerLesetilgang(sakId: Long) :
-    UgyldigForespoerselException(
-        code = "MANGLER_LESETILGANG",
-        detail = "Mangler lesetilgang til sak id: $sakId",
-    )
-
-inline fun PipelineContext<*, ApplicationCall>.withLesetilgang(onSuccess: () -> Unit) {
-    when (brukerTokenInfo) {
-        is Saksbehandler -> {
-            if (Kontekst.get().AppUser.harLesetilgang()) {
-                onSuccess()
-            } else {
-                throw ManglerLesetilgang(sakId)
-            }
-        }
-        is Systembruker -> onSuccess()
     }
 }
 
@@ -204,19 +187,80 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGrad
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(onSuccess: () -> Unit) {
-    val harSkrivetilgang = Kontekst.get().AppUser.harSkrivetilgang()
-    when (harSkrivetilgang) {
+fun <T> hentNullableVerdi(block: () -> T) =
+    try {
+        block()
+    } catch (_: NullPointerException) {
+        null
+    } catch (_: IllegalArgumentException) {
+        null
+    }
+
+fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
+    sak: Long? = null,
+    enhetNr: String? = null,
+): Boolean {
+    return when (val user = Kontekst.get().AppUser) {
+        is SaksbehandlerMedEnheterOgRoller -> {
+            val enhetNrSomSkalTestes =
+                when (enhetNr) {
+                    null -> {
+                        Kontekst.get().sakTilgangDao.let { sakTilgangDao ->
+                            val sakEnhetNr =
+                                sak?.let {
+                                    sakTilgangDao.hentSakMedGraderingOgSkjerming(it)?.enhetNr
+                                } ?: hentNullableVerdi { sakId }?.let {
+                                    sakTilgangDao.hentSakMedGraderingOgSkjerming(it)?.enhetNr
+                                }
+                            val behandlingEnhetNr =
+                                hentNullableVerdi { behandlingId }?.let {
+                                    sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(it.toString())?.enhetNr
+                                }
+                            val oppgaveEnhetNr =
+                                hentNullableVerdi { oppgaveId }?.let {
+                                    sakTilgangDao.hentSakMedGraderingOgSkjermingPaaOppgave(it.toString())?.enhetNr
+                                }
+                            val klageEnhetNr =
+                                hentNullableVerdi { klageId }?.let {
+                                    sakTilgangDao.hentSakMedGraderingOgSkjermingPaaKlage(it.toString())?.enhetNr
+                                }
+
+                            listOfNotNull(sakEnhetNr, behandlingEnhetNr, oppgaveEnhetNr, klageEnhetNr).firstOrNull()
+                        }
+                    }
+
+                    else -> enhetNr
+                }
+
+            when (enhetNrSomSkalTestes) {
+                null -> false
+                else -> user.enheterMedSkrivetilgang().contains(enhetNrSomSkalTestes)
+            }
+        }
+        is SystemUser -> true
+        else -> false
+    }
+}
+
+suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
+    sak: Long? = null,
+    enhetNr: String? = null,
+    onSuccess: () -> Unit,
+) {
+    when (sjekkSkrivetilgang(sak, enhetNr)) {
         true -> onSuccess()
         false -> call.respond(HttpStatusCode.Forbidden)
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrivetilgang(onSuccess: (Saksbehandler) -> Unit) {
+suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrivetilgang(
+    sak: Long? = null,
+    enhetNr: String? = null,
+    onSuccess: (Saksbehandler) -> Unit,
+) {
     when (val token = brukerTokenInfo) {
         is Saksbehandler -> {
-            val harSkrivetilgang = Kontekst.get().appUserAsSaksbehandler().harSkrivetilgang()
-            when (harSkrivetilgang) {
+            when (sjekkSkrivetilgang(sak, enhetNr)) {
                 true -> onSuccess(token)
                 false -> call.respond(HttpStatusCode.Forbidden)
             }
@@ -242,20 +286,14 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(onSuccess: (
     }
 }
 
-val saksbehandlereMedTilgangTilAlleEnheter = listOf("S128848", "K105085", "O113803")
-
 fun <T> List<T>.filterForEnheter(
     user: User,
     filter: (item: T, enheter: List<String>) -> Boolean,
-) = if (user.name() !in (saksbehandlereMedTilgangTilAlleEnheter)) {
-    when (user) {
-        is SaksbehandlerMedEnheterOgRoller -> {
-            val enheter = user.enheter()
-            this.filter { filter(it, enheter) }
-        }
-
-        else -> this
+) = when (user) {
+    is SaksbehandlerMedEnheterOgRoller -> {
+        val enheter = user.enheter()
+        this.filter { filter(it, enheter) }
     }
-} else {
-    this
+
+    else -> this
 }

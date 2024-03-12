@@ -7,8 +7,8 @@ export const initialState: InnloggetSaksbehandlerReducer = {
     navn: '',
     enheter: [],
     kanAttestere: false,
-    skriveTilgang: false,
-    leseTilgang: false,
+    skriveEnheter: [],
+    kanSeOppgaveliste: false,
   },
 }
 

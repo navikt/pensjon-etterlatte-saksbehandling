@@ -24,7 +24,7 @@ fun Route.automatiskBehandlingRoutes(
         val logger = application.log
 
         post("/{$SAKID_CALL_PARAMETER}/{$BEHANDLINGID_CALL_PARAMETER}/automatisk") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Håndterer behandling $behandlingId")
                 val nyttVedtak =
                     service.vedtakStegvis(behandlingId, sakId, brukerTokenInfo, MigreringKjoringVariant.FULL_KJORING)

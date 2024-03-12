@@ -43,6 +43,8 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
                 logger.info("Fant ikke vedtak for behandling $behandlingId. Dette er forventa hvis det f.eks. er et varselbrev.")
                 return null
             } else {
+                logger.error("Ukjent feil ved henting av vedtak for behandling=$behandlingId", re)
+
                 throw ForespoerselException(
                     status = re.response.status.value,
                     code = "UKJENT_FEIL_HENTING_AV_VEDTAKSVURDERING",

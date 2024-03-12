@@ -1,5 +1,6 @@
 package no.nav.etterlatte.trygdetid
 
+import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -12,6 +13,8 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
+import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
@@ -157,7 +160,7 @@ internal class TrygdetidServiceImplIntegrationTest(dataSource: DataSource) {
 
         with(trygdetid!!) {
             trygdetid.ident shouldBe UKJENT_AVDOED
-            opplysningerDifferanse shouldBe null
+            opplysningerDifferanse!! shouldBeEqual OpplysningerDifferanse(false, GrunnlagOpplysningerDto.tomt())
         }
     }
 

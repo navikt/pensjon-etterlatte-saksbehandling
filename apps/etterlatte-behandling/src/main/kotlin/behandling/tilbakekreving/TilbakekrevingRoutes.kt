@@ -89,8 +89,8 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
 
     route("/tilbakekreving") {
         post {
-            kunSkrivetilgang {
-                medBody<Kravgrunnlag> {
+            medBody<Kravgrunnlag> {
+                kunSkrivetilgang(sak = it.sakId.value) {
                     try {
                         service.opprettTilbakekreving(it)
                         call.respond(HttpStatusCode.OK)

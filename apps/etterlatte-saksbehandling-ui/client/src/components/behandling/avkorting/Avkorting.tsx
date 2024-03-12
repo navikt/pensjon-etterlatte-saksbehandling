@@ -11,7 +11,6 @@ import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/B
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-
 import { mapApiResult } from '~shared/api/apiUtils'
 
 export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
@@ -21,7 +20,11 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
   const [avkorting, setAvkorting] = useState<IAvkorting>()
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
-  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
+  const redigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
 
   useEffect(() => {
     if (!avkorting) {

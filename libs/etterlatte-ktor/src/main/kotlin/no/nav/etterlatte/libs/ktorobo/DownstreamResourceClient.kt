@@ -83,9 +83,7 @@ class DownstreamResourceClient(
         }
             .fold(
                 onSuccess = { haandterRespons(it) },
-                onFailure = { error ->
-                    error.toErr(resource.url)
-                },
+                onFailure = { error -> error.toErr(resource.url) },
             )
 
     private suspend fun postToDownstreamApi(
@@ -103,9 +101,7 @@ class DownstreamResourceClient(
         }
             .fold(
                 onSuccess = { haandterRespons(it) },
-                onFailure = { error ->
-                    error.toErr(resource.url)
-                },
+                onFailure = { error -> error.toErr(resource.url) },
             )
 
     private suspend fun putToDownstreamApi(
@@ -123,9 +119,7 @@ class DownstreamResourceClient(
         }
             .fold(
                 onSuccess = { haandterRespons(it) },
-                onFailure = { error ->
-                    error.toErr(resource.url)
-                },
+                onFailure = { error -> error.toErr(resource.url) },
             )
 
     private suspend fun deleteToDownstreamApi(
@@ -143,9 +137,7 @@ class DownstreamResourceClient(
         }
             .fold(
                 onSuccess = { haandterRespons(it) },
-                onFailure = { error ->
-                    error.toErr(resource.url)
-                },
+                onFailure = { error -> error.toErr(resource.url) },
             )
 
     private suspend fun haandterRespons(response: HttpResponse) =
@@ -169,8 +161,6 @@ class DownstreamResourceClient(
         }
             .fold(
                 onSuccess = { haandterRespons(it) },
-                onFailure = { error ->
-                    error.toErr(resource.url)
-                },
+                onFailure = { error -> error.toErr(resource.url) },
             )
 }

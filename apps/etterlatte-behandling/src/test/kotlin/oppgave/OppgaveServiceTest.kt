@@ -1,5 +1,8 @@
 package no.nav.etterlatte.oppgave
 
+import azureAdAttestantClaim
+import azureAdSaksbehandlerClaim
+import azureAdStrengtFortroligClaim
 import com.nimbusds.jwt.JWTClaimsSet
 import io.kotest.matchers.shouldBe
 import io.ktor.server.plugins.BadRequestException
@@ -53,16 +56,13 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
     private val oppgaveDaoMedEndringssporing: OppgaveDaoMedEndringssporing =
         OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource))
     private val oppgaveService: OppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao, hendelser)
-    private val saksbehandlerRolleDev = "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"
-    private val strengtfortroligDev = "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
-    private val attestantRolleDev = "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     private val azureGroupToGroupIDMap =
         mapOf(
-            AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev,
-            AzureGroup.ATTESTANT to attestantRolleDev,
-            AzureGroup.STRENGT_FORTROLIG to strengtfortroligDev,
+            AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim,
+            AzureGroup.ATTESTANT to azureAdAttestantClaim,
+            AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim,
         )
 
     private fun generateSaksbehandlerMedRoller(azureGroup: AzureGroup): SaksbehandlerMedRoller {

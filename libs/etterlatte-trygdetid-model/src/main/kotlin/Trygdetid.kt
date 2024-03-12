@@ -26,6 +26,12 @@ data class TrygdetidOverstyringDto(
     val overstyrtNorskPoengaar: Int?,
 )
 
+data class TrygdetidYrkesskadeDto(
+    val id: UUID,
+    val behandlingId: UUID,
+    val yrkesskade: Boolean,
+)
+
 data class GrunnlagOpplysningerDto(
     val avdoedDoedsdato: OpplysningsgrunnlagDto?,
     val avdoedFoedselsdato: OpplysningsgrunnlagDto?,
@@ -99,6 +105,8 @@ data class DetaljertBeregnetTrygdetidResultat(
     val samletTrygdetidTeoretisk: Int?,
     val prorataBroek: IntBroek?,
     val overstyrt: Boolean,
+    val yrkesskade: Boolean,
+    val beregnetSamletTrygdetidNorge: Int?,
 ) {
     companion object {
         fun fraSamletTrygdetidNorge(anvendtTrygdetid: Int) =
@@ -111,6 +119,8 @@ data class DetaljertBeregnetTrygdetidResultat(
                 samletTrygdetidTeoretisk = null,
                 prorataBroek = null,
                 overstyrt = true,
+                yrkesskade = false,
+                beregnetSamletTrygdetidNorge = null,
             )
 
         fun fraSamletTrygdetidProrata(
@@ -125,6 +135,8 @@ data class DetaljertBeregnetTrygdetidResultat(
             samletTrygdetidTeoretisk = anvendtTrygdetid,
             prorataBroek = prorataBroek,
             overstyrt = true,
+            yrkesskade = false,
+            beregnetSamletTrygdetidNorge = null,
         )
     }
 }

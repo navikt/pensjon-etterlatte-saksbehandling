@@ -57,23 +57,22 @@ class SaksbehandlerMedEnheterOgRoller(
     private val saksbehandlerService: SaksbehandlerService,
     val saksbehandlerMedRoller: SaksbehandlerMedRoller,
 ) : ExternalUser(identifiedBy) {
-    private val saksbehandlersEnheter: Set<String> by lazy {
+    private fun saksbehandlersEnheter() =
         saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(name()).map { it.enhetsNummer }.toSet()
-    }
 
     override fun name(): String {
         return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
     }
 
-    private fun harKjentEnhet() = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter).isNotEmpty()
+    private fun harKjentEnhet() = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter()).isNotEmpty()
 
     fun kanSeOppgaveBenken() =
-        saksbehandlersEnheter.any { enhetNr ->
+        saksbehandlersEnheter().any { enhetNr ->
             Enheter.entries.first { it.enhetNr == enhetNr }.harTilgangTilOppgavebenken
         }
 
     fun enheterMedSkrivetilgang() =
-        saksbehandlersEnheter
+        saksbehandlersEnheter()
             .filter { Enheter.saksbehandlendeEnheter().contains(it) }
 
     // TODO - EY-3441 - lesetilgang for forvaltningsutviklere

@@ -404,13 +404,13 @@ internal class SakServiceTest {
                     ident = ident,
                     sakType = SakType.BARNEPENSJON,
                     id = Random.nextLong(),
-                    enhet = Enheter.PORSGRUNN.enhetNr,
+                    enhet = Enheter.EGNE_ANSATTE.enhetNr,
                 ),
             )
         coEvery { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
             listOf(
                 SaksbehandlerEnhet(
-                    enhetsNummer = Enheter.EGNE_ANSATTE.enhetNr,
+                    enhetsNummer = Enheter.PORSGRUNN.enhetNr,
                     navn = Enheter.PORSGRUNN.navn,
                 ),
             )

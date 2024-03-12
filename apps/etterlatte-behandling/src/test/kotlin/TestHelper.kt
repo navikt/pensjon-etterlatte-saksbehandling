@@ -136,9 +136,9 @@ fun nyKontekstMedBrukerOgDatabase(
 
 fun nyKontekstMedBruker(testUser: User) = Kontekst.set(lagContext(testUser))
 
-fun Route.attachMockContext(saksbehandlerMedEnheterOgRoller: SaksbehandlerMedEnheterOgRoller? = null) {
+fun Route.attachMockContext(testUser: User? = null) {
     intercept(ApplicationCallPipeline.Call) {
-        val context1 = lagContext(saksbehandlerMedEnheterOgRoller ?: user)
+        val context1 = lagContext(testUser ?: user)
 
         withContext(
             Dispatchers.Default +

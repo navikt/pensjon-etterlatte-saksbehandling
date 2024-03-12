@@ -1,12 +1,11 @@
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
-import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
-import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
+import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
@@ -25,7 +24,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
         forventetSkriveEnheter: List<String>,
         forventetLeseEnheter: List<String>,
     ) {
-        val navAnsattKlient = mockk<NavAnsattKlient>()
+        val saksbehandlerService = mockk<SaksbehandlerService>()
         val identifiedBy = mockk<TokenValidationContext>()
         val tokenClaims = mockk<JwtTokenClaims>()
         val saksbehandlerMedRoller = mockk<SaksbehandlerMedRoller>()
@@ -38,11 +37,11 @@ class SaksbehandlerMedEnheterOgRollerTest {
             identifiedBy.hentTokenClaims(any())
         } returns tokenClaims
 
-        coEvery {
-            navAnsattKlient.hentEnheterForSaksbehandler(any())
+        every {
+            saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any())
         } returns enheterForSaksbehandler
 
-        val saksbehandler = SaksbehandlerMedEnheterOgRoller(identifiedBy, navAnsattKlient, saksbehandlerMedRoller)
+        val saksbehandler = SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller)
 
         val skriveEnheter = saksbehandler.enheterMedSkrivetilgang()
         val leseEnheter = saksbehandler.enheterMedLesetilgang()

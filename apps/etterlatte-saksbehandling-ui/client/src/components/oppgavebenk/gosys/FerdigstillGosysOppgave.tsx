@@ -1,9 +1,10 @@
 import { ferdigstilleGosysOppgave, OppgaveDTO } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { mapResult } from '~shared/api/apiUtils'
 import { Alert, Button, Loader } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { GosysActionToggle } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
+import Spinner from '~shared/Spinner'
 
 export const FerdigstillGosysOppgave = ({
   oppgave,
@@ -19,34 +20,29 @@ export const FerdigstillGosysOppgave = ({
       setTimeout(() => window.location.reload(), 2000)
     })
 
-  if (isSuccess(ferdigstillResult)) {
-    return (
+  return mapResult(ferdigstillResult, {
+    success: () => (
       <Alert variant="success">
         Oppgaven ble ferdigstilt. Henter oppgaver på nytt <Loader />
       </Alert>
-    )
-  } else if (isFailure(ferdigstillResult)) {
-    return (
-      <Alert variant="error">
-        {ferdigstillResult.error.detail || 'Ukjent feil oppsto ved ferdigstilling av oppgave'}
-      </Alert>
-    )
-  }
+    ),
+    error: (error) => (
+      <Alert variant="error">{error.detail || 'Ukjent feil oppsto ved ferdigstilling av oppgave'}</Alert>
+    ),
+    pending: <Spinner visible label="Ferdigstiller oppgaven..." />,
+    initial: (
+      <>
+        <Alert variant="info">Er du sikker på at du vil ferdigstille oppgaven?</Alert>
 
-  return (
-    <>
-      <Alert variant="info">Er du sikker på at du vil ferdigstille oppgaven?</Alert>
+        <br />
 
-      <br />
-
-      <FlexRow justify="right">
-        <Button variant="secondary" onClick={() => setToggle({ ferdigstill: false })}>
-          Nei, avbryt
-        </Button>
-        <Button onClick={ferdigstill} loading={isPending(ferdigstillResult)}>
-          Ja, ferdigstill
-        </Button>
-      </FlexRow>
-    </>
-  )
+        <FlexRow justify="right">
+          <Button variant="secondary" onClick={() => setToggle({ ferdigstill: false })}>
+            Nei, avbryt
+          </Button>
+          <Button onClick={ferdigstill}>Ja, ferdigstill</Button>
+        </FlexRow>
+      </>
+    ),
+  })
 }

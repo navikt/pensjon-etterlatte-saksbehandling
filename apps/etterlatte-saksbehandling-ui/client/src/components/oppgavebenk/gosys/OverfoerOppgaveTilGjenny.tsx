@@ -1,13 +1,14 @@
 import { feilregistrerGosysOppgave, OppgaveDTO, opprettOppgave, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentSakForPerson } from '~shared/api/sak'
-import { isInitial, isPending, isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
+import { isInitial, isPending, isSuccess, mapResult, mapSuccess } from '~shared/api/apiUtils'
 import { Alert, Button, Checkbox } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { GosysActionToggle } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formaterSakstype } from '~utils/formattering'
+import { ResultAlert } from '~shared/alerts/ResultAlert'
 
 export const OverfoerOppgaveTilGjenny = ({
   oppgave,
@@ -25,9 +26,6 @@ export const OverfoerOppgaveTilGjenny = ({
   const [feilregistrerStatus, feilregistrerOppgave] = useApiCall(feilregistrerGosysOppgave)
   const [sakStatus, hentSak] = useApiCall(hentSakForPerson)
 
-  /**
-   * TODO: Må endre måten vi konverterer Gosys-oppgaver på slik at vi faktisk vet hvilken oppgavetype de er.
-   **/
   const konverterTilGjennyoppgave = () => {
     if (!oppgave.saksbehandler?.ident) {
       throw Error('Kan ikke konvertere oppgave som ikke er tildelt')
@@ -134,17 +132,3 @@ export const OverfoerOppgaveTilGjenny = ({
     </>
   )
 }
-
-const ResultAlert = ({ result, success }: { result: Result<unknown>; success: string }) =>
-  mapResult(result, {
-    success: () => (
-      <Alert variant="success" size="small">
-        {success}
-      </Alert>
-    ),
-    error: (error) => (
-      <Alert variant="error" size="small">
-        {error.detail || 'Ukjent feil oppsto'}
-      </Alert>
-    ),
-  })

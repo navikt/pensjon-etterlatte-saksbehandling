@@ -729,6 +729,7 @@ class TrygdetidServiceImpl(
     ): Trygdetid? {
         if (trygdetid.ident == UKJENT_AVDOED) {
             return trygdetid
+                .copy(opplysningerDifferanse = OpplysningerDifferanse(false, GrunnlagOpplysningerDto.tomt()))
         }
         val nyAvdoedGrunnlag = grunnlagKlient.hentGrunnlag(trygdetid.behandlingId, brukerTokenInfo).hentAvdoede()
         val avdoedeFnr = nyAvdoedGrunnlag.mapNotNull { it.hentFoedselsnummer()?.verdi?.value }
@@ -738,14 +739,14 @@ class TrygdetidServiceImpl(
         }
         return trygdetid.copy(
             opplysningerDifferanse =
-                nyfinnOpplysningerDifferanse(
+                finnOpplysningerDifferanse(
                     trygdetid,
                     nyAvdoedGrunnlag.firstOrNull { it.hentFoedselsnummer()?.verdi?.value == trygdetid.ident },
                 ),
         )
     }
 
-    private fun nyfinnOpplysningerDifferanse(
+    private fun finnOpplysningerDifferanse(
         trygdetid: Trygdetid,
         nyAvdoedGrunnlag: Grunnlagsdata<JsonNode>?,
     ): OpplysningerDifferanse {

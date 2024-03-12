@@ -2,6 +2,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.ktor.client.statement.HttpResponse
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -9,6 +10,8 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.DRYRUN
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -113,11 +116,43 @@ class TidshendelseRiverTest {
         verify { vilkaarsvurderingService.harRettUtenTidsbegrensning(behandlingId) }
     }
 
+    @Test
+    fun `skal opprette vilkaarsvurdering og opphoere pga aldersovergang`() {
+        val hendelseId = UUID.randomUUID()
+        val sakId = 321L
+        val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
+        val behandlingIdLoepende = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
+        val melding =
+            lagMeldingForVurdertLoependeYtelse(
+                hendelseId = hendelseId,
+                sakId = sakId,
+                behandlingsmaaned = behandlingsmaaned,
+                steg = "BEHANDLING_OPPRETTET",
+            ).also {
+                it[BEHANDLING_ID_KEY] = behandlingId
+                it[BEHANDLING_VI_OMREGNER_FRA_KEY] = behandlingIdLoepende
+            }
+
+        every { vilkaarsvurderingService.opphoerAldersovergang(behandlingId, behandlingIdLoepende) } returns mockk<HttpResponse>()
+
+        with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
+            size shouldBe 1
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "VILKAARSVURDERT"
+            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
+            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
+        }
+
+        verify { vilkaarsvurderingService.opphoerAldersovergang(behandlingId, behandlingIdLoepende) }
+    }
+
     private fun lagMeldingForVurdertLoependeYtelse(
         hendelseId: UUID,
         sakId: Long,
         behandlingsmaaned: YearMonth,
         behandlingIdPerReformtidspunkt: String? = null,
+        steg: String = "VURDERT_LOEPENDE_YTELSE",
     ): JsonMessage {
         val hendelsedata = mutableMapOf<String, Any>()
         behandlingIdPerReformtidspunkt?.let {
@@ -127,7 +162,7 @@ class TidshendelseRiverTest {
         return JsonMessage.newMessage(
             EventNames.ALDERSOVERGANG.lagEventnameForType(),
             mapOf(
-                ALDERSOVERGANG_STEG_KEY to "VURDERT_LOEPENDE_YTELSE",
+                ALDERSOVERGANG_STEG_KEY to steg,
                 ALDERSOVERGANG_TYPE_KEY to "BP20",
                 ALDERSOVERGANG_ID_KEY to hendelseId,
                 SAK_ID_KEY to sakId,

@@ -128,7 +128,7 @@ class DownstreamResourceClient(
         resource: Resource,
         oboAccessToken: AccessToken,
         postBody: Any,
-    ): Result<Any, Throwable> =
+    ): Result<JsonNode?, Throwable> =
 
         runCatching {
             httpClient.post(resource.url) {
@@ -138,19 +138,7 @@ class DownstreamResourceClient(
             }
         }
             .fold(
-                onSuccess = { response ->
-                    when {
-                        response.status.isSuccess() -> {
-                            if (response.harContentType(ContentType.Application.Json)) {
-                                Ok(response.body<JsonNode>())
-                            } else {
-                                logger.info("Mottok content-type: ${response.contentType()} som ikke var JSON")
-                                Ok(response.status)
-                            }
-                        }
-                        else -> response.toResponseException()
-                    }
-                },
+                onSuccess = { haandterRespons(it) },
                 onFailure = { error ->
                     error.toErr(resource.url)
                 },
@@ -160,7 +148,7 @@ class DownstreamResourceClient(
         resource: Resource,
         oboAccessToken: AccessToken,
         putBody: Any,
-    ): Result<Any, Throwable> =
+    ): Result<JsonNode?, Throwable> =
 
         runCatching {
             httpClient.put(resource.url) {
@@ -170,19 +158,7 @@ class DownstreamResourceClient(
             }
         }
             .fold(
-                onSuccess = { response ->
-                    when {
-                        response.status.isSuccess() -> {
-                            if (response.harContentType(ContentType.Application.Json)) {
-                                Ok(response.body<JsonNode>())
-                            } else {
-                                logger.info("Mottok content-type: ${response.contentType()} som ikke var JSON")
-                                Ok(response.status)
-                            }
-                        }
-                        else -> response.toResponseException()
-                    }
-                },
+                onSuccess = { haandterRespons(it) },
                 onFailure = { error ->
                     error.toErr(resource.url)
                 },
@@ -219,7 +195,7 @@ class DownstreamResourceClient(
         resource: Resource,
         oboAccessToken: AccessToken,
         patchBody: String,
-    ): Result<JsonNode, Throwable> =
+    ): Result<JsonNode?, Throwable> =
         runCatching {
             httpClient.patch(resource.url) {
                 header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
@@ -228,12 +204,7 @@ class DownstreamResourceClient(
             }
         }
             .fold(
-                onSuccess = { response ->
-                    when {
-                        response.status.isSuccess() -> Ok(response.body())
-                        else -> response.toResponseException()
-                    }
-                },
+                onSuccess = { haandterRespons(it) },
                 onFailure = { error ->
                     error.toErr(resource.url)
                 },

@@ -52,5 +52,4 @@ const YrkesskadeVerdi = styled(BodyShort)`
 
 const YrkesskadeFelt = styled(Checkbox)`
   padding: 1em 0 0 0;
-  width: 10em;
 `

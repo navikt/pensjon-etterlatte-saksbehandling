@@ -79,9 +79,9 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
 
   useEffect(() => {
     if (!oppgavebenkState.minOppgavelisteOppgaver?.length) hentMinOppgavelisteOppgaver()
-  }, [oppgavebenkState.minOppgavelisteOppgaver])
+  }, [])
 
-  return oppgavebenkState.minOppgavelisteOppgaver.length && !isPending(minOppgavelisteOppgaverResult) ? (
+  return oppgavebenkState.minOppgavelisteOppgaver.length >= 0 && !isPending(minOppgavelisteOppgaverResult) ? (
     <>
       <FilterRad
         hentAlleOppgaver={hentMinOppgavelisteOppgaver}
@@ -105,6 +105,7 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
         }
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         revurderingsaarsaker={revurderingsaarsaker}
+        filter={filter}
       />
     </>
   ) : (

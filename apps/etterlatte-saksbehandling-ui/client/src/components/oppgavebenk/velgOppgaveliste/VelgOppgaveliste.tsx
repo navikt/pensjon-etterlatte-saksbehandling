@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
-import { initalOppgavebenkStats, OppgavebenkStats } from '~components/oppgavebenk/utils/oppgaveutils'
+import { initalOppgavebenkStats, OppgavebenkStats } from '~components/oppgavebenk/utils/oppgavebenkStats'
 import { hentOppgavebenkStats } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 

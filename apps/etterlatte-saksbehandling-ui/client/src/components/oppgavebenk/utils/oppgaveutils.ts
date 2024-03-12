@@ -73,13 +73,3 @@ export const hentPagineringSizeFraLocalStorage = (): number => {
 function isNumeric(value: string) {
   return /^-?\d+$/.test(value)
 }
-
-export interface OppgavebenkStats {
-  antallOppgavelistaOppgaver: number
-  antallMinOppgavelisteOppgaver: number
-}
-
-export const initalOppgavebenkStats: OppgavebenkStats = {
-  antallOppgavelistaOppgaver: 0,
-  antallMinOppgavelisteOppgaver: 0,
-}

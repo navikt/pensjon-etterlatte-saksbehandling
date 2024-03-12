@@ -10,9 +10,10 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 class KlageUtfallMedDataTest {
+    private val tidspunkt = Tidspunkt.ofNorskTidssone(LocalDate.of(2024, 4, 5), LocalTime.of(19, 45))
+
     @Test
     fun toJson() {
-        val tidspunkt = Tidspunkt.ofNorskTidssone(LocalDate.of(2024, 4, 5), LocalTime.of(19, 45))
         KlageUtfallMedData.Omgjoering(
             KlageOmgjoering(GrunnForOmgjoering.FEIL_LOVANVENDELSE, "abc"),
             Grunnlagsopplysning.Saksbehandler("UB40", tidspunkt),
@@ -25,7 +26,6 @@ class KlageUtfallMedDataTest {
 
     @Test
     fun fromJson() {
-        val tidspunkt = Tidspunkt.ofNorskTidssone(LocalDate.of(2024, 4, 5), LocalTime.of(19, 45))
         val json =
             """             
                    {"utfall":"AVVIST",
@@ -33,9 +33,8 @@ class KlageUtfallMedDataTest {
                    "vedtak":{"vedtakId":13},
                    "brev":{"brevId":123}}
                 """.replace("\n", "").trimIndent()
-        val utfall = deserialize<KlageUtfallMedData>(json)
 
-        utfall shouldBeEqual
+        deserialize<KlageUtfallMedData>(json) shouldBeEqual
             KlageUtfallMedData.Avvist(
                 Grunnlagsopplysning.Saksbehandler("UB40", tidspunkt),
                 KlageVedtak(13L),

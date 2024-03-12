@@ -56,6 +56,7 @@ fun Route.oversendelseBrevRoute(
         delete {
             withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
                 service.slettOversendelseBrev(behandlingId, brukerTokenInfo)
+                call.respond(HttpStatusCode.NoContent)
             }
         }
 

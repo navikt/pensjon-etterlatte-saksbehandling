@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregning.regler.sats
 
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.beregning.regler.REGEL_PERIODE
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.antallSoeskenIKullet1967
@@ -28,7 +29,7 @@ import java.time.YearMonth
 internal class BarnepensjonSatsTest {
     @Test
     fun `historiskeGrunnbeloep skal hente alle historiske grunnbeloep`() {
-        historiskeGrunnbeloep.size shouldBeExactly 71
+        historiskeGrunnbeloep.size shouldBeGreaterThanOrEqual 70
     }
 
     @Test

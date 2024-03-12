@@ -15,11 +15,12 @@ import styled from 'styled-components'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useAppSelector } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { Toast } from '~shared/alerts/Toast'
 
 export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; behandling: IDetaljertBehandling }) => {
   const { type, behandling } = props
+  const dispatch = useAppDispatch()
   const revurderingAnnenInfo = hentUndertypeFraBehandling<RevurderingAarsakAnnen | RevurderingAarsakAnnenUtenBrev>(
     type,
     behandling
@@ -53,10 +54,12 @@ export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; beh
     lagre(
       {
         behandlingId: behandling.id,
-        begrunnelse: begrunnelse,
         revurderingInfo,
+        begrunnelse,
       },
-      () => oppdaterRevurderingInfo(revurderingInfo)
+      () => {
+        dispatch(oppdaterRevurderingInfo({ revurderingInfo, begrunnelse }))
+      }
     )
   }
 

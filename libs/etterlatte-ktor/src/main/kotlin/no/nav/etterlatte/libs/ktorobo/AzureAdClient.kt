@@ -102,7 +102,7 @@ class AzureAdClient(
     }
 
     // Service-to-service access token request (client credentials grant)
-    suspend fun getAccessTokenForResource(scopes: List<String>): Result<AccessToken, ThrowableErrorMessage> {
+    internal suspend fun getAccessTokenForResource(scopes: List<String>): Result<AccessToken, ThrowableErrorMessage> {
         val params = { _: ClientCredentialsTokenRequest ->
             Parameters.build {
                 append("client_id", config.getString("azure.app.client.id"))
@@ -141,7 +141,7 @@ class AzureAdClient(
     }
 
     // Service-to-service access token request (on-behalf-of flow)
-    suspend fun getOnBehalfOfAccessTokenForResource(
+    internal suspend fun getOnBehalfOfAccessTokenForResource(
         scopes: List<String>,
         accessToken: String,
     ): Result<AccessToken, ThrowableErrorMessage> {

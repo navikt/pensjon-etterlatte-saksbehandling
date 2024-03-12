@@ -4,7 +4,7 @@ import React, { useEffect } from 'react'
 import styled from 'styled-components'
 import { PersonNavn, PersonUtenIdent, relativPersonrolleTekst } from '~shared/types/Person'
 import { UstiletListe } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
-import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
+import { formaterKanskjeStringDato, formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersongalleriSamsvar } from '~shared/api/grunnlag'
@@ -12,6 +12,8 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { SakType } from '~shared/types/sak'
 import { mapApiResult } from '~shared/api/apiUtils'
+import { FlexRow } from '~shared/styled'
+import { Info } from '~components/behandling/soeknadsoversikt/Info'
 
 function formaterKanskjeNavn(navn: Partial<PersonNavn>) {
   return [navn.fornavn, navn.mellomnavn, navn.etternavn].filter((navn) => !!navn).join(' ')
@@ -47,35 +49,80 @@ const PersonUtenIdentWrapper = styled.div`
   margin-bottom: 1rem;
 `
 
-// TODO: Håndter liste over avvik mellom persongalleri i PDL og det vi har i søknaden
 function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype: SakType }) {
   const { samsvar, saktype } = props
+
   const personerUtenIdenterSak = samsvar.persongalleri?.personerUtenIdent ?? []
   const personerUtenIdenterPdl = samsvar.persongalleriPdl?.personerUtenIdent ?? []
-  const harPersonerUtenIdenter = personerUtenIdenterPdl.length > 0 || personerUtenIdenterSak.length > 0
 
-  if (!harPersonerUtenIdenter) {
+  const harPersonerUtenIdenter = samsvar.problemer.includes('HAR_PERSONER_UTEN_IDENTER')
+  const harAvvikMotPdl =
+    samsvar.problemer.filter(
+      (problem) =>
+        problem !== 'HAR_PERSONER_UTEN_IDENTER' && problem !== 'EKSTRA_SOESKEN' && problem !== 'MANGLER_SOESKEN'
+    ).length > 0
+
+  if (samsvar.problemer.length === 0) {
     return null
   }
 
   return (
-    <div>
-      <Alert variant="warning">
-        Det er personer uten identer i PDL i saksgrunnlaget. Disse personene kan ikke brukes i beregning av trygdetid
-        eller en eventuell søskenjustering på gammelt regelverk.
-      </Alert>
-      <Heading size="small" level="4">
-        Personer uten identer i saksgrunnlag:
-      </Heading>
-      <PersonerUtenIdenterVisning saktype={saktype} personer={personerUtenIdenterSak} />
+    <>
+      {harAvvikMotPdl && (
+        <MediumAdvarsel>
+          <BodyShort spacing>
+            Det er forskjeller mellom familieforholdet i behandlingen og det familieforholdet vi utleder ut i fra PDL.
+            Se nøye over og eventuelt korriger persongalleriet ved å redigere.
+          </BodyShort>
+          <Heading level="4" size="xsmall" spacing>
+            Familieforholdet i behandlingen
+          </Heading>
+          <FlexRow $spacing>
+            <Info label="Avdøde" tekst={samsvar.persongalleri.avdoed?.join(', ')} />
+            <Info label="Gjenlevende" tekst={samsvar.persongalleri.gjenlevende?.join(', ')} />
+            <Info
+              label="Kilde"
+              tekst={`${samsvar.kilde?.type.toUpperCase()} (${formaterKanskjeStringDato(samsvar.kilde?.tidspunkt)})`}
+            />
+          </FlexRow>
 
-      <Heading size="small" level="4">
-        Personer uten identer i PDL:
-      </Heading>
-      <PersonerUtenIdenterVisning saktype={saktype} personer={personerUtenIdenterPdl} />
-    </div>
+          <Heading level="4" size="xsmall" spacing>
+            Familieforholdet i PDL
+          </Heading>
+          <FlexRow $spacing>
+            <Info label="Avdøde" tekst={samsvar.persongalleriPdl?.avdoed?.join(', ')} />
+            <Info label="Gjenlevende" tekst={samsvar.persongalleriPdl?.gjenlevende?.join(', ')} />
+            <Info
+              label="Kilde"
+              tekst={`${samsvar.kildePdl?.type.toUpperCase()} (${formaterKanskjeStringDato(samsvar.kildePdl?.tidspunkt)})`}
+            />
+          </FlexRow>
+        </MediumAdvarsel>
+      )}
+      {!harPersonerUtenIdenter && (
+        <div>
+          <MediumAdvarsel>
+            Det er personer uten identer i PDL i saksgrunnlaget. Disse personene kan ikke brukes i beregning av
+            trygdetid eller en eventuell søskenjustering på gammelt regelverk.
+          </MediumAdvarsel>
+          <Heading size="small" level="4">
+            Personer uten identer i saksgrunnlag:
+          </Heading>
+          <PersonerUtenIdenterVisning saktype={saktype} personer={personerUtenIdenterSak} />
+
+          <Heading size="small" level="4">
+            Personer uten identer i PDL:
+          </Heading>
+          <PersonerUtenIdenterVisning saktype={saktype} personer={personerUtenIdenterPdl} />
+        </div>
+      )}
+    </>
   )
 }
+
+const MediumAdvarsel = styled(Alert).attrs({ variant: 'warning' })`
+  width: fit-content;
+`
 
 export function SamsvarPersongalleri() {
   const behandling = useBehandling()

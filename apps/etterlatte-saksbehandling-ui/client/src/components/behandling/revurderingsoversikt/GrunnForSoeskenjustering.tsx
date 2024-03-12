@@ -3,6 +3,7 @@ import {
   BarnepensjonSoeskenjusteringGrunn,
   hentUndertypeFraBehandling,
   RevurderingInfo,
+  RevurderingMedBegrunnelse,
   SOESKENJUSTERING_GRUNNER,
   SoeskenjusteringInfo,
   tekstSoeskenjustering,
@@ -19,10 +20,11 @@ import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsover
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useAppSelector } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 
 export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
+  const dispatch = useAppDispatch()
   const soeskenjusteringInfo = hentUndertypeFraBehandling<SoeskenjusteringInfo>('SOESKENJUSTERING', behandling)
   const [valgtSoeskenjustering, setValgtSoeskenjustering] = useState<BarnepensjonSoeskenjusteringGrunn | undefined>(
     soeskenjusteringInfo?.grunnForSoeskenjustering
@@ -47,13 +49,19 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
       type: 'SOESKENJUSTERING',
       grunnForSoeskenjustering: valgtSoeskenjustering,
     }
+
+    const revurderingMedBegrunnelse: RevurderingMedBegrunnelse = {
+      revurderingInfo: revurderingInfo,
+      begrunnelse: begrunnelse,
+    }
+
     lagre(
       {
         behandlingId: behandling.id,
         begrunnelse: begrunnelse,
         revurderingInfo,
       },
-      () => oppdaterRevurderingInfo(revurderingInfo)
+      () => dispatch(oppdaterRevurderingInfo(revurderingMedBegrunnelse))
     )
   }
 

@@ -81,7 +81,7 @@ data class DoedshendelseInternal internal constructor(
 
     fun tilBehandlet(
         utfall: Utfall,
-        sakId: Long,
+        sakId: Long?,
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
         oppgaveId: UUID? = null,
         brevId: Long? = null,

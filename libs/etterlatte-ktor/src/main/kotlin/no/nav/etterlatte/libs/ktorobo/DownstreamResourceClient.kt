@@ -29,31 +29,70 @@ class DownstreamResourceClient(
     suspend fun get(
         resource: Resource,
         bruker: BrukerTokenInfo,
-    ) = gjoerKall(resource, bruker) { token -> fetchFromDownstreamApi(resource, token) }
+    ) = gjoerKall(resource, bruker) { token ->
+        runCatching {
+            httpClient.get(resource.url) {
+                header(token)
+                resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
+            }
+        }.fold(resource)
+    }
 
     suspend fun post(
         resource: Resource,
         bruker: BrukerTokenInfo,
         postBody: Any,
-    ) = gjoerKall(resource, bruker) { token -> postToDownstreamApi(resource, token, postBody) }
+    ) = gjoerKall(resource, bruker) { token ->
+        runCatching {
+            httpClient.post(resource.url) {
+                header(token)
+                contentType(ContentType.Application.Json)
+                setBody(postBody)
+            }
+        }.fold(resource)
+    }
 
     suspend fun put(
         resource: Resource,
         bruker: BrukerTokenInfo,
         putBody: Any,
-    ) = gjoerKall(resource, bruker) { token -> putToDownstreamApi(resource, token, putBody) }
+    ) = gjoerKall(resource, bruker) { token ->
+        runCatching {
+            httpClient.put(resource.url) {
+                header(token)
+                contentType(ContentType.Application.Json)
+                setBody(putBody)
+            }
+        }.fold(resource)
+    }
 
     suspend fun delete(
         resource: Resource,
         bruker: BrukerTokenInfo,
         postBody: String,
-    ) = gjoerKall(resource, bruker) { token -> deleteToDownstreamApi(resource, token, postBody) }
+    ) = gjoerKall(resource, bruker) { token ->
+        runCatching {
+            httpClient.delete(resource.url) {
+                header(token)
+                contentType(ContentType.Application.Json)
+                setBody(postBody)
+            }
+        }.fold(resource)
+    }
 
     suspend fun patch(
         resource: Resource,
         bruker: BrukerTokenInfo,
         patchBody: String,
-    ) = gjoerKall(resource, bruker) { token -> patchToDownstreamApi(resource, token, patchBody) }
+    ) = gjoerKall(resource, bruker) { token ->
+        runCatching {
+            httpClient.patch(resource.url) {
+                header(token)
+                contentType(ContentType.Application.Json)
+                setBody(patchBody)
+            }
+        }.fold(resource)
+    }
 
     private suspend fun gjoerKall(
         resource: Resource,
@@ -71,40 +110,6 @@ class DownstreamResourceClient(
             }
     }
 
-    private suspend fun fetchFromDownstreamApi(
-        resource: Resource,
-        token: AccessToken,
-    ) = runCatching {
-        httpClient.get(resource.url) {
-            header(token)
-            resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
-        }
-    }.fold(resource)
-
-    private suspend fun postToDownstreamApi(
-        resource: Resource,
-        token: AccessToken,
-        postBody: Any,
-    ) = runCatching {
-        httpClient.post(resource.url) {
-            header(token)
-            contentType(ContentType.Application.Json)
-            setBody(postBody)
-        }
-    }.fold(resource)
-
-    private suspend fun putToDownstreamApi(
-        resource: Resource,
-        token: AccessToken,
-        putBody: Any,
-    ) = runCatching {
-        httpClient.put(resource.url) {
-            header(token)
-            contentType(ContentType.Application.Json)
-            setBody(putBody)
-        }
-    }.fold(resource)
-
     private fun HttpRequestBuilder.header(token: AccessToken) = header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")
 
     private suspend fun kotlin.Result<HttpResponse>.fold(resource: Resource) =
@@ -113,34 +118,10 @@ class DownstreamResourceClient(
             onFailure = { error -> error.toErr(resource.url) },
         )
 
-    private suspend fun deleteToDownstreamApi(
-        resource: Resource,
-        token: AccessToken,
-        postBody: String,
-    ) = runCatching {
-        httpClient.delete(resource.url) {
-            header(token)
-            contentType(ContentType.Application.Json)
-            setBody(postBody)
-        }
-    }.fold(resource)
-
     private suspend fun haandterRespons(response: HttpResponse) =
         when {
             response.status == HttpStatusCode.NoContent -> Ok(null)
             response.status.isSuccess() -> Ok(response.body())
             else -> response.toResponseException()
         }
-
-    private suspend fun patchToDownstreamApi(
-        resource: Resource,
-        token: AccessToken,
-        patchBody: String,
-    ) = runCatching {
-        httpClient.patch(resource.url) {
-            header(token)
-            contentType(ContentType.Application.Json)
-            setBody(patchBody)
-        }
-    }.fold(resource)
 }

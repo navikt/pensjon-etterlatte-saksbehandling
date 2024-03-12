@@ -35,6 +35,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
@@ -732,6 +733,22 @@ internal class VilkaarsvurderingServiceTest(private val ds: DataSource) {
 
             assertThrows<VirkningstidspunktSamsvarerIkke> {
                 service.sjekkGyldighetOgOppdaterBehandlingStatus(uuid, brukerTokenInfo)
+            }
+        }
+    }
+
+    @Test
+    fun `aldersovergang - skal oppdatere aldersvilkaar for BP med utfall ikke_oppfylt`() {
+        runBlocking {
+            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+            service.opphoerAlder(behandlingId = uuid)
+
+            with(
+                service.hentVilkaarsvurdering(behandlingId = uuid)!!
+                    .vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_ALDER_BARN_2024 },
+            ) {
+                hovedvilkaar.resultat shouldBe Utfall.IKKE_OPPFYLT
+                vurdering!!.saksbehandler shouldBe Fagsaksystem.EY.navn
             }
         }
     }

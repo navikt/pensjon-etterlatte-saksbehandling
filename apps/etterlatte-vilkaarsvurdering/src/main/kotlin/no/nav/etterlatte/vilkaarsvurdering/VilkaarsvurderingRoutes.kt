@@ -185,6 +185,13 @@ fun Route.vilkaarsvurdering(
             }
         }
 
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/aldersovergang/opphoer") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                logger.info("Aldersovergang for $behandlingId")
+                vilkaarsvurderingService.opphoerAlder(behandlingId)
+            }
+        }
+
         delete("/{$BEHANDLINGID_CALL_PARAMETER}/{vilkaarId}") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 withParam("vilkaarId") { vilkaarId ->

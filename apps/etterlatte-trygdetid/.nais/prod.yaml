@@ -9,10 +9,10 @@ spec:
   image: "{{image}}"
   port: 8080
   liveness:
-    initialDelay: 120
+    initialDelay: 5
     path: /health/isalive
   readiness:
-    initialDelay: 120
+    initialDelay: 5
     path: /health/isready
   secureLogs:
     enabled: true

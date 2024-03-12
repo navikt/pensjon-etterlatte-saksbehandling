@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Adresse
@@ -42,19 +43,21 @@ import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OversendelseBrevServiceImplTest(private val dataSource: DataSource) {
+class OversendelseBrevServiceImplTest(dataSource: DataSource) {
     val sakId = 148L
     private val behandlingId = UUID.randomUUID()
     private val saksbehandler = BrukerTokenInfo.of("token", "saksbehandler", null, null, null)
     private val brevdataFacade = mockk<BrevdataFacade>()
     private val adresseService = mockk<AdresseService>()
     private val brevRepository = spyk(BrevRepository(dataSource))
+    private val behandlingKlient = mockk<BehandlingKlient>()
     private val service =
         OversendelseBrevServiceImpl(
             brevRepository,
             mockk(),
             adresseService,
             brevdataFacade,
+            behandlingKlient,
         )
 
     @BeforeEach
@@ -62,6 +65,7 @@ class OversendelseBrevServiceImplTest(private val dataSource: DataSource) {
         coEvery { brevdataFacade.hentKlage(any(), any()) } returns klage()
         coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns brevData()
         coEvery { adresseService.hentMottakerAdresse(any(), any()) } returns opprettMottaker()
+        coEvery { behandlingKlient.hentVedtaksbehandlingKanRedigeres(any(), any()) } returns true
     }
 
     @Test
@@ -92,7 +96,7 @@ class OversendelseBrevServiceImplTest(private val dataSource: DataSource) {
         )
     }
 
-    fun brevData() =
+    private fun brevData() =
         GenerellBrevData(
             sak = Sak("11057523044", SakType.OMSTILLINGSSTOENAD, sakId, "4808"),
             personerISak =

@@ -221,6 +221,7 @@ class ApplicationBuilder {
             pdfGenerator = pdfGenerator,
             adresseService = adresseService,
             brevdataFacade = brevdataFacade,
+            behandlingKlient = behandlingKlient,
         )
 
     private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagKlient, dokarkivKlient)

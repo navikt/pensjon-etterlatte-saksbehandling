@@ -29,11 +29,11 @@ class DownstreamResourceClient(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
     ): Result<Resource, Throwable> {
+        val action: suspend (token: AccessToken) -> Result<JsonNode?, Throwable> = { token -> fetchFromDownstreamApi(resource, token) }
+
         val scopes = listOf("api://${resource.clientId}/.default")
         return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
-            .andThen { oboAccessToken ->
-                fetchFromDownstreamApi(resource, oboAccessToken)
-            }
+            .andThen { action(it) }
             .andThen { response ->
                 when (response) {
                     null -> Ok(resource)
@@ -47,11 +47,12 @@ class DownstreamResourceClient(
         brukerTokenInfo: BrukerTokenInfo,
         postBody: Any,
     ): Result<Resource, Throwable> {
+        val action: suspend (
+            token: AccessToken,
+        ) -> Result<JsonNode?, Throwable> = { token -> postToDownstreamApi(resource, token, postBody) }
         val scopes = listOf("api://${resource.clientId}/.default")
         return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
-            .andThen { token ->
-                postToDownstreamApi(resource, token, postBody)
-            }
+            .andThen { action(it) }
             .andThen { response ->
                 Ok(resource.addResponse(response))
             }
@@ -62,11 +63,10 @@ class DownstreamResourceClient(
         brukerTokenInfo: BrukerTokenInfo,
         putBody: Any,
     ): Result<Resource, Throwable> {
+        val action: suspend (token: AccessToken) -> Result<JsonNode?, Throwable> = { token -> putToDownstreamApi(resource, token, putBody) }
         val scopes = listOf("api://${resource.clientId}/.default")
         return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
-            .andThen { token ->
-                putToDownstreamApi(resource, token, putBody)
-            }
+            .andThen { action(it) }
             .andThen { response ->
                 Ok(resource.addResponse(response))
             }
@@ -77,11 +77,13 @@ class DownstreamResourceClient(
         brukerTokenInfo: BrukerTokenInfo,
         postBody: String,
     ): Result<Resource, Throwable> {
+        val action: suspend (
+            token: AccessToken,
+        ) -> Result<JsonNode?, Throwable> = { token -> deleteToDownstreamApi(resource, token, postBody) }
+
         val scopes = listOf("api://${resource.clientId}/.default")
         return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
-            .andThen { oboAccessToken ->
-                deleteToDownstreamApi(resource, oboAccessToken, postBody)
-            }
+            .andThen { action(it) }
             .andThen { response ->
                 Ok(resource.addResponse(response))
             }
@@ -92,11 +94,12 @@ class DownstreamResourceClient(
         brukerTokenInfo: BrukerTokenInfo,
         patchBody: String,
     ): Result<Resource, Throwable> {
+        val action: suspend (
+            token: AccessToken,
+        ) -> Result<JsonNode?, Throwable> = { token -> patchToDownstreamApi(resource, token, patchBody) }
         val scopes = listOf("api://${resource.clientId}/.default")
         return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
-            .andThen { oboAccessToken ->
-                patchToDownstreamApi(resource, oboAccessToken, patchBody)
-            }
+            .andThen { action(it) }
             .andThen { response ->
                 Ok(resource.addResponse(response))
             }

@@ -117,9 +117,13 @@ export const ferdigstilleGosysOppgave = async (args: {
 
 export const feilregistrerGosysOppgave = async (args: {
   oppgaveId: string
+  beskrivelse: string
   versjon: number
 }): Promise<ApiResponse<OppgaveDTO>> =>
-  apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/feilregistrer?versjon=${args.versjon}`, {})
+  apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/feilregistrer`, {
+    versjon: args.versjon,
+    beskrivelse: args.beskrivelse,
+  })
 
 export const tildelSaksbehandlerApi = async (args: {
   oppgaveId: string

@@ -72,11 +72,16 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
 
             post("feilregistrer") {
                 kunSaksbehandlerMedSkrivetilgang {
-                    val versjon = call.request.queryParameters["versjon"]!!.toLong()
+                    val request = call.receive<FeilregistrerOppgaveRequest>()
 
-                    call.respond(gosysService.feilregistrer(gosysOppgaveId, versjon, brukerTokenInfo))
+                    call.respond(gosysService.feilregistrer(gosysOppgaveId, request, brukerTokenInfo))
                 }
             }
         }
     }
 }
+
+data class FeilregistrerOppgaveRequest(
+    val beskrivelse: String,
+    val versjon: Long,
+)

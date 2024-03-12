@@ -2,9 +2,7 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sikkerLogg
-import no.nav.etterlatte.common.klienter.HarSammeBostedsAdresseRequest
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.common.klienter.PensjonpersonKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -12,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
@@ -33,7 +32,6 @@ class DoedshendelseService(
     private val doedshendelseDao: DoedshendelseDao,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val featureToggleService: FeatureToggleService,
-    private val pensjonpersonKlient: PensjonpersonKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -64,7 +62,8 @@ class DoedshendelseService(
 
         val beroerteBarn = finnBeroerteBarn(avdoed)
         val beroerteEpser = finnBeroerteEpser(avdoed)
-        val alleBeroerte = beroerteBarn + beroerteEpser
+        val samboere = finnSamboereForAvdoedMedFellesBarn(avdoed)
+        val alleBeroerte = beroerteBarn + beroerteEpser + samboere
 
         if (gyldigeDoedshendelserForAvdoed.isEmpty()) {
             sikkerLogg.info("Fant ${alleBeroerte.size} berørte personer for avdød (${avdoed.foedselsnummer})")
@@ -172,7 +171,7 @@ class DoedshendelseService(
         return finnBeroerteEpserSivilstand(avdoed)
     }
 
-    private fun finnSamboerForAvdoed(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
+    private fun finnSamboereForAvdoedMedFellesBarn(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
         val avdoedesBarn = avdoed.avdoedesBarn
         val andreForeldreForAvdoedesBarn =
             avdoedesBarn?.mapNotNull { barn ->
@@ -189,23 +188,35 @@ class DoedshendelseService(
         andreForeldreForAvdoedesBarn: List<String>?,
     ): List<PersonFnrMedRelasjon> {
         return andreForeldreForAvdoedesBarn?.map {
-            val avdoedFnr = avdoed.foedselsnummer.verdi.value
-            val borSammen =
+            val annenForelder =
                 runBlocking {
-                    pensjonpersonKlient.harSammeBostedsadresse(
-                        HarSammeBostedsAdresseRequest(
-                            avdoedFnr,
-                            it,
-                            LocalDate.now(),
-                        ),
-                    )
+                    pdlTjenesterKlient.hentPdlModellFlereSaktyper(it, PersonRolle.TILKNYTTET_BARN, SakType.OMSTILLINGSSTOENAD)
                 }
-            PersonerBorSammen(avdoedFnr, it, borSammen)
+            AvdoedOgAnnenForelderMedFellesbarn(avdoed, annenForelder)
         }
-            ?.filter { it.borSammen.status }
-            ?.map { PersonFnrMedRelasjon(it.gjenlevendePerson, Relasjon.SAMBOER) }
+            ?.filter { erSamboere(it) }
+            ?.map { PersonFnrMedRelasjon(it.gjenlevendeForelder.foedselsnummer.verdi.value, Relasjon.SAMBOER) }
             ?: emptyList()
     }
+
+    private fun erSamboere(avdoedOgAnnenForelderMedFellesbarn: AvdoedOgAnnenForelderMedFellesbarn): Boolean {
+        val gjenlevendeBosteder =
+            avdoedOgAnnenForelderMedFellesbarn.gjenlevendeForelder
+                .bostedsadresse?.map { it.verdi }?.filter { it.aktiv }
+        val avdoedBosteder =
+            avdoedOgAnnenForelderMedFellesbarn
+                .avdoedPerson.bostedsadresse?.map { it.verdi }?.filter { it.aktiv }
+
+        return isAdresserLike(gjenlevendeBosteder?.first(), avdoedBosteder?.first())
+    }
+
+    private fun isAdresserLike(
+        adresse1: Adresse?,
+        adresse2: Adresse?,
+    ) = adresse1?.adresseLinje1 == adresse2?.adresseLinje1 &&
+        adresse1?.adresseLinje2 == adresse2?.adresseLinje2 &&
+        adresse1?.adresseLinje3 == adresse2?.adresseLinje3 &&
+        adresse1?.postnr == adresse2?.postnr
 
     private fun finnBeroerteEpserSivilstand(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
         return avdoed.sivilstand?.filter { it.verdi.relatertVedSiviltilstand?.value !== null }

@@ -60,8 +60,6 @@ import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingDao
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
 import no.nav.etterlatte.common.ConnectionAutoclosingImpl
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.common.klienter.PensjonpersonKlient
-import no.nav.etterlatte.common.klienter.PensjonpersonKlientmpl
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.PesysKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
@@ -123,14 +121,6 @@ private fun pdlHttpClient(config: Config) =
         azureAppJwk = config.getString("azure.app.jwk"),
         azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
         azureAppScope = config.getString("pdl.azure.scope"),
-    )
-
-private fun pensjonpersonHttpClient(config: Config) =
-    httpClientClientCredentials(
-        azureAppClientId = config.getString("azure.app.client.id"),
-        azureAppJwk = config.getString("azure.app.jwk"),
-        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("pensjonperson.scope"),
     )
 
 private fun skjermingHttpClient(config: Config) =
@@ -248,7 +238,6 @@ internal class ApplicationContext(
     val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
     val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
-    val pensjonpersonKlient: PensjonpersonKlient = PensjonpersonKlientmpl(config, pensjonpersonHttpClient(config)),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -383,7 +372,7 @@ internal class ApplicationContext(
             skjermingKlient,
             enhetService,
         )
-    val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService, pensjonpersonKlient)
+    val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
 
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(

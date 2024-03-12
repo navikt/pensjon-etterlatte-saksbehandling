@@ -46,7 +46,7 @@ class DoedshendelseKontrollpunktService(
                     kontrollpunkterBarneRelasjon(hendelse, avdoed, sak) + fellesKontrollpunkter(hendelse, avdoed, sak)
                 }
 
-                Relasjon.EPS -> {
+                Relasjon.EPS, Relasjon.SAMBOER -> {
                     val (sak, avdoed) = hentDataForBeroert(hendelse)
                     val eps =
                         pdlTjenesterKlient.hentPdlModellFlereSaktyper(
@@ -59,10 +59,12 @@ class DoedshendelseKontrollpunktService(
                             hendelse = hendelse,
                             avdoed = avdoed,
                             sak = sak,
-                        )
-                }
-
-                Relasjon.SAMBOER -> {
+                        ) +
+                        if (hendelse.relasjon == Relasjon.SAMBOER) {
+                            listOf(DoedshendelseKontrollpunkt.SamboerSammeAdresseOgFellesBarn)
+                        } else {
+                            emptyList()
+                        }
                 }
 
                 Relasjon.AVDOED -> {

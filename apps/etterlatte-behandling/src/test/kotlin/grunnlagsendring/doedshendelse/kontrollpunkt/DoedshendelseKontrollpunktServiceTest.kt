@@ -236,6 +236,27 @@ class DoedshendelseKontrollpunktServiceTest {
     }
 
     @Test
+    fun `Samboer gir SamboerSammeAdresseOgFellesBarn`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        coEvery {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                doedshendelseInternalOMS.beroertFnr,
+                PersonRolle.GJENLEVENDE,
+                SakType.OMSTILLINGSSTOENAD,
+            )
+        } returns
+            mockPerson()
+                .copy(
+                    foedselsdato = OpplysningDTO(LocalDate.now().minusYears(60L), "foedselsdato"),
+                )
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS.copy(relasjon = Relasjon.SAMBOER))
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.SamboerSammeAdresseOgFellesBarn)
+    }
+
+    @Test
     fun `Skal gi kontrollpunkt eps er død om eps er død, EpsHarDoedsdato`() {
         every { sakService.finnSak(any(), any()) } returns null
 

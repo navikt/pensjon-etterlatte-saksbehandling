@@ -140,10 +140,6 @@ spec:
       value: https://axsys.prod-fss-pub.nais.io
     - name: AXSYS_SCOPE
       value: api://prod-fss.org.axsys/.default
-    - name: PENSJONPERSON_URL
-      value: https://pensjon-persondata.prod-fss-pub.nais.io
-    - name: PENSJONPERSON_SCOPE
-      value: api://prod-fss.pensjon-person.pensjon-persondata/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

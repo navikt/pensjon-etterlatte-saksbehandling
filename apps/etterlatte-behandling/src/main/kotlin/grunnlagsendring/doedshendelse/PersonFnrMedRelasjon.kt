@@ -1,14 +1,13 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
-import no.nav.etterlatte.common.klienter.BorSammen
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
 
 class PersonFnrMedRelasjon(
     val fnr: String,
     val relasjon: Relasjon,
 )
 
-data class PersonerBorSammen(
-    val avdoedPerson: String,
-    val gjenlevendePerson: String,
-    val borSammen: BorSammen,
+data class AvdoedOgAnnenForelderMedFellesbarn(
+    val avdoedPerson: PersonDTO,
+    val gjenlevendeForelder: PersonDTO,
 )

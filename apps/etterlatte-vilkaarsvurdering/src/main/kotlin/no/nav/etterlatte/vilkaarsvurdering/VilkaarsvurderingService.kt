@@ -17,18 +17,15 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar2024
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.OmstillingstoenadVilkaar
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.UUID
 
 class VirkningstidspunktIkkeSattException(behandlingId: UUID) :
@@ -358,37 +355,6 @@ class VilkaarsvurderingService(
             behandlingId = behandlingId,
             grunnlagVersjon = grunnlag.metadata.versjon,
         )
-    }
-
-    fun opphoerAlder(behandlingId: UUID) {
-        vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
-            vilkaarsvurdering.vilkaar.single {
-                it.hovedvilkaar.type in
-                    listOf(
-                        VilkaarType.BP_ALDER_BARN_2024,
-                        VilkaarType.OMS_OVERLAPPENDE_YTELSER,
-                    )
-            }
-                .let {
-                    vilkaarsvurderingRepository.lagreVilkaarResultat(
-                        behandlingId,
-                        VurdertVilkaar(
-                            vilkaarId = it.id,
-                            hovedvilkaar =
-                                VilkaarTypeOgUtfall(
-                                    type = it.hovedvilkaar.type,
-                                    resultat = Utfall.IKKE_OPPFYLT,
-                                ),
-                            vurdering =
-                                VilkaarVurderingData(
-                                    kommentar = "Automatisk opphør ved aldersgrense",
-                                    tidspunkt = LocalDateTime.now(),
-                                    saksbehandler = Fagsaksystem.EY.navn,
-                                ),
-                        ),
-                    )
-                }
-        } ?: throw VilkaarsvurderingIkkeFunnet()
     }
 
     private suspend fun <T> tilstandssjekkFoerKjoering(

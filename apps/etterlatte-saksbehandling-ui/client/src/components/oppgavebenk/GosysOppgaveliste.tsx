@@ -27,7 +27,8 @@ interface Props {
 
 export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  if (!innloggetSaksbehandler.skriveTilgang) {
+
+  if (!innloggetSaksbehandler.skriveEnheter.length) {
     return <Tilgangsmelding />
   }
 

@@ -4,7 +4,6 @@ import {
   RevurderingAarsakAnnen,
   RevurderingAarsakAnnenUtenBrev,
   RevurderingInfo,
-  RevurderingMedBegrunnelse,
 } from '~shared/types/RevurderingInfo'
 import { FormEvent, useState } from 'react'
 import { BodyLong, BodyShort, Button, Heading, Textarea, TextField, VStack } from '@navikt/ds-react'
@@ -52,19 +51,14 @@ export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; beh
       aarsak: revurderingsaarsak,
     }
 
-    const revurderingMedBegrunnelse: RevurderingMedBegrunnelse = {
-      revurderingInfo: revurderingInfo,
-      begrunnelse: begrunnelse,
-    }
-
     lagre(
       {
         behandlingId: behandling.id,
-        begrunnelse: begrunnelse,
         revurderingInfo,
+        begrunnelse,
       },
       () => {
-        dispatch(oppdaterRevurderingInfo(revurderingMedBegrunnelse))
+        dispatch(oppdaterRevurderingInfo({ revurderingInfo, begrunnelse }))
       }
     )
   }

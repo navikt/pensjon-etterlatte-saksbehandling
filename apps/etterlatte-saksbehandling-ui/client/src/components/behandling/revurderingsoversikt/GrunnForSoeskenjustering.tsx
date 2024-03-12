@@ -3,7 +3,6 @@ import {
   BarnepensjonSoeskenjusteringGrunn,
   hentUndertypeFraBehandling,
   RevurderingInfo,
-  RevurderingMedBegrunnelse,
   SOESKENJUSTERING_GRUNNER,
   SoeskenjusteringInfo,
   tekstSoeskenjustering,
@@ -50,18 +49,13 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
       grunnForSoeskenjustering: valgtSoeskenjustering,
     }
 
-    const revurderingMedBegrunnelse: RevurderingMedBegrunnelse = {
-      revurderingInfo: revurderingInfo,
-      begrunnelse: begrunnelse,
-    }
-
     lagre(
       {
         behandlingId: behandling.id,
-        begrunnelse: begrunnelse,
         revurderingInfo,
+        begrunnelse,
       },
-      () => dispatch(oppdaterRevurderingInfo(revurderingMedBegrunnelse))
+      () => dispatch(oppdaterRevurderingInfo({ revurderingInfo, begrunnelse }))
     )
   }
 

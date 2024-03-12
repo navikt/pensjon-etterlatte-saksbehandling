@@ -192,6 +192,20 @@ internal class VedtaksbrevServiceTest {
 
             verify { db.fjernFerdigstiltStatusUnderkjentVedtak(1, vedtak) }
         }
+
+        @Test
+        fun `sletting av vedtaksbrev`() {
+            val brev = opprettBrev(Status.OPPRETTET, mockk())
+            every { db.hentBrevForBehandling(any(), any()) } returns listOf(brev)
+            coEvery {
+                behandlingKlient.hentVedtaksbehandlingKanRedigeres(BEHANDLING_ID, SAKSBEHANDLER)
+            } returns true
+
+            runBlocking { vedtaksbrevService.settVedtaksbrevTilSlettet(BEHANDLING_ID, SAKSBEHANDLER) }
+
+            verify { db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK) }
+            verify { db.settBrevSlettet(brev.id, SAKSBEHANDLER) }
+        }
     }
 
     @Nested

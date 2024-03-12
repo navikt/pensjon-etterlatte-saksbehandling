@@ -5,9 +5,11 @@ import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.PDFGenerator
+import no.nav.etterlatte.brev.VedtaksbrevKanIkkeSlettes
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.PersonerISak
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Brev
@@ -53,6 +55,11 @@ interface OversendelseBrevService {
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Pdf
+
+    suspend fun slettOversendelseBrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 class OversendelseBrevServiceImpl(
@@ -60,6 +67,7 @@ class OversendelseBrevServiceImpl(
     private val pdfGenerator: PDFGenerator,
     private val adresseService: AdresseService,
     private val brevdataFacade: BrevdataFacade,
+    private val behandlingKlient: BehandlingKlient,
 ) : OversendelseBrevService {
     override fun hentOversendelseBrev(behandlingId: UUID): Brev? {
         return brevRepository.hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE).singleOrNull()
@@ -189,12 +197,34 @@ class OversendelseBrevServiceImpl(
                     id = brev.id,
                     bruker = brukerTokenInfo,
                     automatiskMigreringRequest = null,
-                    avsenderRequest = { bruker, generellData -> AvsenderRequest(bruker.ident(), generellData.sak.enhet) },
+                    avsenderRequest = { bruker, generellData ->
+                        AvsenderRequest(
+                            bruker.ident(),
+                            generellData.sak.enhet,
+                        )
+                    },
                     brevKode = { Brevkoder.OVERSENDELSE_KLAGE },
                     brevData = { req -> OversendelseBrevFerdigstillingData.fra(req, klage) },
                 )
             }
         return pdf
+    }
+
+    override suspend fun slettOversendelseBrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val brev =
+            brevRepository.hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE)
+                .singleOrNull() ?: return
+        if (!brev.kanEndres()) {
+            throw VedtaksbrevKanIkkeSlettes(brev.id, "Brevet har status (${brev.status})")
+        }
+        val behandlingKanEndres = behandlingKlient.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
+        if (!behandlingKanEndres) {
+            throw VedtaksbrevKanIkkeSlettes(brev.id, "Behandlingen til vedtaksbrevet kan ikke endres")
+        }
+        brevRepository.settBrevSlettet(brev.id, brukerTokenInfo)
     }
 }
 

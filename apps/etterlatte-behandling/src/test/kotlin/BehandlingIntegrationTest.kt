@@ -569,6 +569,11 @@ class BrevApiKlientTest : BrevApiKlient {
         return OpprettJournalpostDto(UUID.randomUUID().toString())
     }
 
+    override suspend fun slettOversendelsesbrev(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {}
+
     private fun opprettetBrevDto(brevId: Long) =
         OpprettetBrevDto(
             id = brevId,

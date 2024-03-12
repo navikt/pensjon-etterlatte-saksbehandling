@@ -96,7 +96,7 @@ export const GosysOppgaveModal = ({
             {!!journalpostId && (
               <div>
                 <Label>JournalpostId</Label>
-                <BodyShort>{journalpostId || '-'}</BodyShort>
+                <BodyShort>{journalpostId}</BodyShort>
               </div>
             )}
           </InfoGrid>

@@ -97,37 +97,41 @@ class SakRepository(private val datasource: DataSource) {
         )
 
     fun hentRader(): List<SakRad> {
-        val statement =
-            connection.prepareStatement(
-                """
-                SELECT id, behandling_id, sak_id, mottatt_tid, registrert_tid, ferdigbehandlet_tid, vedtak_tid,
-                    behandling_type, behandling_status, behandling_resultat, resultat_begrunnelse, behandling_metode,
-                    opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse,
-                    vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, sak_utland,
-                    beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting, kilde, pesysid,
-                    relatert_til
-                FROM sak
-                """.trimIndent(),
-            )
-        return statement.executeQuery().toList { tilSakRad() }
+        return connection.use { connection ->
+            val statement =
+                connection.prepareStatement(
+                    """
+                    SELECT id, behandling_id, sak_id, mottatt_tid, registrert_tid, ferdigbehandlet_tid, vedtak_tid,
+                        behandling_type, behandling_status, behandling_resultat, resultat_begrunnelse, behandling_metode,
+                        opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse,
+                        vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, sak_utland,
+                        beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting, kilde, pesysid,
+                        relatert_til
+                    FROM sak
+                    """.trimIndent(),
+                )
+            statement.executeQuery().toList { tilSakRad() }
+        }
     }
 
     fun hentSisteRad(behandlingId: UUID): SakRad? {
-        val statement =
-            connection.prepareStatement(
-                """
-                SELECT id, behandling_id, sak_id, mottatt_tid, registrert_tid, ferdigbehandlet_tid, vedtak_tid,
-                    behandling_type, behandling_status, behandling_resultat, resultat_begrunnelse, behandling_metode,
-                    opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse,
-                    vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, sak_utland,
-                    beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting, kilde, pesysid,
-                    relatert_til
-                FROM sak where behandling_id = ? order by id desc 
-                """.trimIndent(),
-            ).apply {
-                setObject(1, behandlingId)
-            }
-        return statement.executeQuery().toList { tilSakRad() }.firstOrNull()
+        return connection.use { connection ->
+            val statement =
+                connection.prepareStatement(
+                    """
+                    SELECT id, behandling_id, sak_id, mottatt_tid, registrert_tid, ferdigbehandlet_tid, vedtak_tid,
+                        behandling_type, behandling_status, behandling_resultat, resultat_begrunnelse, behandling_metode,
+                        opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse,
+                        vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, sak_utland,
+                        beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting, kilde, pesysid,
+                        relatert_til
+                    FROM sak where behandling_id = ? order by id desc 
+                    """.trimIndent(),
+                ).apply {
+                    setObject(1, behandlingId)
+                }
+            statement.executeQuery().toList { tilSakRad() }.firstOrNull()
+        }
     }
 }
 

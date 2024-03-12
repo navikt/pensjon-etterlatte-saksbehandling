@@ -40,6 +40,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.BARN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_ANNEN_FORELDER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.mockedSakTilgangDao
 import no.nav.etterlatte.module
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
@@ -75,7 +76,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.name() } returns "User"
         every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
-        Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource)))
+        Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource), mockedSakTilgangDao()))
     }
 
     @AfterAll

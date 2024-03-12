@@ -24,7 +24,7 @@ fun Route.vedtaksbrevRoute(
     service: VedtaksbrevService,
     tilgangssjekker: Tilgangssjekker,
 ) {
-    val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.VedaksbrevRoute")
+    val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.VedtaksbrevRoute")
 
     route("brev/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
         get("vedtak") {

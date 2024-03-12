@@ -13,8 +13,8 @@ import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.KabalHjemmel
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
 import no.nav.etterlatte.libs.common.behandling.KlageOmgjoering
+import no.nav.etterlatte.libs.common.behandling.KlageOversendelsebrev
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageVedtak
@@ -205,7 +205,7 @@ internal class VedtakKlageServiceTest(dataSource: DataSource) {
             InnstillingTilKabal(
                 lovhjemmel = KabalHjemmel.FTRL_18_4,
                 internKommentar = null,
-                brev = KlageBrevInnstilling(brevId = 123L),
+                brev = KlageOversendelsebrev(brevId = 123L),
                 innstillingTekst = "Hello",
             ),
             Grunnlagsopplysning.Saksbehandler(

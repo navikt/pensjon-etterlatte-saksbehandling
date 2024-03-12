@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
@@ -55,11 +56,14 @@ class OppgaveService(
             oppgaveDao.hentOppgaver(
                 aktuelleOppgavetyperForRoller,
                 bruker.enheter(),
-                bruker.erSuperbruker(),
                 oppgaveStatuser,
                 minOppgavelisteIdentFilter,
             ).sortedByDescending { it.opprettet }
         }
+    }
+
+    fun genererStatsForOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats {
+        return oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)
     }
 
     private fun aktuelleOppgavetyperForRolleTilSaksbehandler(roller: List<Rolle>) =

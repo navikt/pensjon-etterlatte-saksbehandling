@@ -21,6 +21,7 @@ import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { FamilieforholdWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
+import { useAppSelector } from '~store/Store'
 
 type SoeskenKanskjeMedIBeregning = {
   foedselsnummer: string
@@ -77,7 +78,12 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     control,
   })
 
-  const behandles = behandlingErRedigerbar(behandling?.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const behandles = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
   const sisteTom = watch(`soeskenMedIBeregning.${fields.length - 1}.tom`)
   const sisteFom = watch(`soeskenMedIBeregning.${fields.length - 1}.fom`)
   const [visOkLagret, setVisOkLagret] = useState(false)

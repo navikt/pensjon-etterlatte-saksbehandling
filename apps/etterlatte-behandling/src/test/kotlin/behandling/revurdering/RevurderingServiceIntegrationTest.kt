@@ -9,8 +9,6 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
@@ -25,7 +23,6 @@ import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
-import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -56,6 +53,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
@@ -91,7 +89,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
 
         startServer()
-        Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource)))
+        nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)
     }
 
     @AfterAll

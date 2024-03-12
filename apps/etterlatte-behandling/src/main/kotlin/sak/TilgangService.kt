@@ -35,6 +35,7 @@ data class SakMedGraderingOgSkjermet(
     val id: Long,
     val adressebeskyttelseGradering: AdressebeskyttelseGradering?,
     val erSkjermet: Boolean?,
+    val enhetNr: String?,
 )
 
 data class SakMedGradering(

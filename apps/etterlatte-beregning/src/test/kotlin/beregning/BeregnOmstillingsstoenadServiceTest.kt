@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregning
 
-import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
@@ -44,6 +43,8 @@ internal class BeregnOmstillingsstoenadServiceTest {
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private lateinit var beregnOmstillingsstoenadService: BeregnOmstillingsstoenadService
 
+    private val periodensSisteDato = LocalDate.of(2024, Month.APRIL, 30)
+
     @BeforeEach
     fun setup() {
         beregnOmstillingsstoenadService =
@@ -71,7 +72,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
         runBlocking {
-            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
+            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -79,7 +80,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 type shouldBe Beregningstype.OMS
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBeGreaterThanOrEqual 2
+                beregningsperioder.size shouldBe 1
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
@@ -110,7 +111,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id, BeregningsMetode.PRORATA)
 
         runBlocking {
-            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
+            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -118,7 +119,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 type shouldBe Beregningstype.OMS
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBeGreaterThanOrEqual 2
+                beregningsperioder.size shouldBe 1
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe OMS_BELOEP_JAN_24_PRORATA
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
@@ -149,7 +150,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id, BeregningsMetode.BEST)
 
         runBlocking {
-            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
+            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -157,7 +158,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 type shouldBe Beregningstype.OMS
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBeGreaterThanOrEqual 2
+                beregningsperioder.size shouldBe 1
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
@@ -193,7 +194,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
         runBlocking {
-            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
+            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -201,7 +202,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 type shouldBe Beregningstype.OMS
                 beregnetDato shouldNotBe null
                 grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBeGreaterThanOrEqual 2
+                beregningsperioder.size shouldBe 1
                 with(beregningsperioder.first()) {
                     utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
@@ -233,7 +234,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
         runBlocking {
-            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
+            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
 
             with(beregning) {
                 beregningId shouldNotBe null
@@ -270,7 +271,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
 
         runBlocking {
             assertThrows<TrygdetidMangler> {
-                beregnOmstillingsstoenadService.beregn(behandling, bruker)
+                beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
             }
         }
     }
@@ -291,7 +292,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
 
         runBlocking {
             assertThrows<TrygdetidMangler> {
-                beregnOmstillingsstoenadService.beregn(behandling, bruker)
+                beregnOmstillingsstoenadService.beregn(behandling, bruker, periodensSisteDato)
             }
         }
     }

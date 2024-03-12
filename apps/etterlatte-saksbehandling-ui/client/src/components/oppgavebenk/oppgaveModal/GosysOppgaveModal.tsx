@@ -1,15 +1,15 @@
-import { Alert, BodyShort, Box, Button, Heading, Label, Loader, Modal } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Dropdown, Heading, Label, Modal } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { CheckmarkIcon, ExternalLinkIcon, EyeIcon } from '@navikt/aksel-icons'
+import { ChevronDownIcon, ExternalLinkIcon, EyeIcon } from '@navikt/aksel-icons'
 import { useContext, useState } from 'react'
 import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/components/Tags'
 import { formaterFnr, formaterStringDato } from '~utils/formattering'
-import { ferdigstilleGosysOppgave, OppgaveDTO } from '~shared/api/oppgaver'
 import { ConfigContext } from '~clientConfig'
 import { FlexRow } from '~shared/styled'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
+import { OppgaveDTO } from '~shared/api/oppgaver'
+import { FerdigstillGosysOppgave } from '../gosys/FerdigstillGosysOppgave'
+import { OverfoerOppgaveTilGjenny } from '../gosys/OverfoerOppgaveTilGjenny'
 
 const TagRow = styled.div`
   display: flex;
@@ -24,6 +24,11 @@ const InfoGrid = styled.div`
   margin-bottom: 2rem;
 `
 
+export interface GosysActionToggle {
+  ferdigstill?: boolean
+  konverter?: boolean
+}
+
 export const GosysOppgaveModal = ({
   oppgave,
   tilhoererInnloggetSaksbehandler,
@@ -32,18 +37,11 @@ export const GosysOppgaveModal = ({
   tilhoererInnloggetSaksbehandler: boolean
 }) => {
   const [open, setOpen] = useState(false)
-  const [toggleFerdigstill, setToggleFerdigstill] = useState(false)
+  const [toggle, setToggle] = useState<GosysActionToggle>({})
 
   const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandler, beskrivelse, sakType, journalpostId } = oppgave
 
-  const [ferdigstillResult, ferdigstillOppgave] = useApiCall(ferdigstilleGosysOppgave)
-
   const configContext = useContext(ConfigContext)
-
-  const ferdigstill = () =>
-    ferdigstillOppgave({ oppgaveId: oppgave.id, versjon: oppgave.versjon || 0 }, () => {
-      setTimeout(() => window.location.reload(), 2000)
-    })
 
   return (
     <>
@@ -96,7 +94,7 @@ export const GosysOppgaveModal = ({
             {!!journalpostId && (
               <div>
                 <Label>JournalpostId</Label>
-                <BodyShort>{journalpostId || '-'}</BodyShort>
+                <BodyShort>{journalpostId}</BodyShort>
               </div>
             )}
           </InfoGrid>
@@ -107,42 +105,47 @@ export const GosysOppgaveModal = ({
 
           <br />
 
-          {mapFailure(ferdigstillResult, (error) => (
-            <Alert variant="error">{error.detail || 'Ukjent feil oppsto ved ferdigstilling av oppgave'}</Alert>
-          ))}
-
-          {toggleFerdigstill ? (
-            isSuccess(ferdigstillResult) ? (
-              <Alert variant="success">
-                Oppgaven ble ferdigstilt. Henter oppgaver på nytt <Loader />
-              </Alert>
-            ) : (
-              <>
-                <Alert variant="info">Er du sikker på at du vil ferdigstille oppgaven?</Alert>
-
-                <br />
-
-                <FlexRow justify="right">
-                  <Button variant="secondary" onClick={() => setToggleFerdigstill(false)}>
-                    Nei, avbryt
-                  </Button>
-                  <Button onClick={ferdigstill} loading={isPending(ferdigstillResult)}>
-                    Ja, ferdigstill
-                  </Button>
-                </FlexRow>
-              </>
-            )
+          {toggle.ferdigstill ? (
+            <FerdigstillGosysOppgave oppgave={oppgave} setToggle={setToggle} />
+          ) : toggle.konverter ? (
+            <OverfoerOppgaveTilGjenny oppgave={oppgave} setToggle={setToggle} />
           ) : (
             <FlexRow justify="right">
-              <Button variant="tertiary" onClick={() => setOpen(false)}>
+              <Button size="small" variant="tertiary" onClick={() => setOpen(false)}>
                 Avbryt
               </Button>
+
               {tilhoererInnloggetSaksbehandler && (
-                <Button onClick={() => setToggleFerdigstill(true)} variant="secondary" icon={<CheckmarkIcon />}>
-                  Ferdigstill oppgave
-                </Button>
+                <Dropdown>
+                  <Button
+                    size="small"
+                    variant="secondary"
+                    icon={<ChevronDownIcon />}
+                    iconPosition="right"
+                    title="Flere handlinger"
+                    as={Dropdown.Toggle}
+                  >
+                    Flere handlinger
+                  </Button>
+
+                  <Dropdown.Menu>
+                    <Dropdown.Menu.List>
+                      <Dropdown.Menu.List.Item onClick={() => setToggle({ ferdigstill: true })}>
+                        Ferdigstill oppgave
+                      </Dropdown.Menu.List.Item>
+
+                      {!!journalpostId && (
+                        <Dropdown.Menu.List.Item onClick={() => setToggle({ konverter: true })}>
+                          Overfør til Gjenny
+                        </Dropdown.Menu.List.Item>
+                      )}
+                    </Dropdown.Menu.List>
+                  </Dropdown.Menu>
+                </Dropdown>
               )}
+
               <Button
+                size="small"
                 variant="primary"
                 as="a"
                 href={fnr ? `${configContext['gosysUrl']}/personoversikt/fnr=${fnr}` : configContext['gosysUrl']}

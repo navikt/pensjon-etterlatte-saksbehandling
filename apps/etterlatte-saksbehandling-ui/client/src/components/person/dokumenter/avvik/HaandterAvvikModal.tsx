@@ -4,11 +4,13 @@ import { useState } from 'react'
 import { Journalpost, Journalstatus } from '~shared/types/Journalpost'
 import { FeilregistrerJournalpost } from '~components/person/dokumenter/avvik/FeilregistrerJournalpost'
 import { OpphevFeilregistreringJournalpost } from '~components/person/dokumenter/avvik/OpphevFeilregistreringJournalpost'
-import { FlyttJournalpost } from '~components/person/dokumenter/avvik/FlyttJournalpost'
+import { KnyttTilAnnenSak } from '~components/person/dokumenter/avvik/KnyttTilAnnenSak'
 import { Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
+import { kanEndreJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/validering'
+import { KnyttTilAnnentBruker } from './KnyttTilAnnenBruker'
 
 enum Aarsak {
   UTGAAR = 'UTGAAR',
@@ -90,9 +92,16 @@ export const HaandterAvvikModal = ({
               <FeilregistrerJournalpost journalpost={journalpost} />
             ))}
 
-          {aarsak === Aarsak.OVERFOER && (
-            <FlyttJournalpost journalpost={journalpost} sakStatus={sakStatus} lukkModal={() => setIsOpen(false)} />
-          )}
+          {aarsak === Aarsak.OVERFOER &&
+            (kanEndreJournalpost(journalpost) ? (
+              <KnyttTilAnnentBruker
+                journalpost={journalpost}
+                sakStatus={sakStatus}
+                lukkModal={() => setIsOpen(false)}
+              />
+            ) : (
+              <KnyttTilAnnenSak journalpost={journalpost} sakStatus={sakStatus} lukkModal={() => setIsOpen(false)} />
+            ))}
         </Modal.Body>
       </Modal>
     </>

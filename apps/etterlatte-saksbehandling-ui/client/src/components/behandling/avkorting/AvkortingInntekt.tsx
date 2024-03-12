@@ -27,6 +27,7 @@ import { ToolTip } from '~components/behandling/felles/ToolTip'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppSelector } from '~store/Store'
+import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 
 export const AvkortingInntekt = (props: {
   behandling: IBehandlingReducer
@@ -36,7 +37,7 @@ export const AvkortingInntekt = (props: {
 }) => {
   const { behandling } = props
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  const redigerbar = props.redigerbar && innloggetSaksbehandler.skriveTilgang
+  const redigerbar = props.redigerbar && enhetErSkrivbar(behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
   const avkortingGrunnlag = [...props.avkortingGrunnlag]
   avkortingGrunnlag?.sort((a, b) => new Date(b.fom!).getTime() - new Date(a.fom!).getTime())
 

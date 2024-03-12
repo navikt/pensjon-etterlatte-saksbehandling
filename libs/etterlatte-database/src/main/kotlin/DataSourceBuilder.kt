@@ -97,7 +97,7 @@ private fun getPathsFromResourceJAR(logger: Logger): List<String> {
         throw RuntimeException("app.jar ikke funnet i $runtimeDirectory")
     }
     val jarpath = "$runtimeDirectory/app.jar"
-    logger.info(jarpath)
+    logger.info("path to main jar resource $jarpath")
     val sqlFiler: List<String> = ArrayList()
     val zip = ZipInputStream(FileInputStream(jarpath))
     zip.use {
@@ -110,7 +110,6 @@ private fun getPathsFromResourceJAR(logger: Logger): List<String> {
             entry = zip.getNextEntry()
         }
     }
-    println("Fant jar sql filer $sqlFiler")
 
     return sqlFiler
 }

@@ -12,10 +12,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.KONTANT_FOT
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BrukerServiceImpl
@@ -29,6 +26,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
@@ -41,8 +39,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
-import java.sql.Connection
 import kotlin.random.Random
 
 internal class SakServiceTest {
@@ -91,34 +87,19 @@ internal class SakServiceTest {
 
         val groups = AzureGroup.entries.associateWith { it.name }
 
-        Kontekst.set(
-            Context(
-                SaksbehandlerMedEnheterOgRoller(
-                    tokenValidationContext,
-                    saksbehandlerService,
-                    SaksbehandlerMedRoller(
-                        Saksbehandler("", "Z123456", claims),
-                        groups,
-                    ),
+        nyKontekstMedBruker(
+            SaksbehandlerMedEnheterOgRoller(
+                tokenValidationContext,
+                saksbehandlerService,
+                SaksbehandlerMedRoller(
+                    Saksbehandler("", "Z123456", claims),
+                    groups,
                 ),
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun harIntransaction(): Boolean {
-                        throw NotImplementedException("not implemented")
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
             ),
         )
     }
 
-    fun systemBrukerKontekst() {
+    private fun systemBrukerKontekst() {
         val tokenValidationContext = mockk<TokenValidationContext>()
 
         val token = mockk<JwtToken>()
@@ -135,23 +116,8 @@ internal class SakServiceTest {
 
         every { tokenValidationContext.getJwtToken(any()) } returns token
 
-        Kontekst.set(
-            Context(
-                SystemUser(tokenValidationContext),
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun harIntransaction(): Boolean {
-                        throw NotImplementedException("not implemented")
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
-            ),
+        nyKontekstMedBruker(
+            SystemUser(tokenValidationContext),
         )
     }
 
@@ -372,32 +338,6 @@ internal class SakServiceTest {
         verify(exactly = 1) {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         }
-    }
-
-    @Test
-    fun `filtrerer for saksbehandler med nasjonal tilgang`() {
-        saksbehandlerKontekst(nasjonalTilgang = true)
-
-        coEvery { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
-            listOf(
-                SaksbehandlerEnhet(enhetsNummer = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
-            )
-
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns
-            listOf(
-                Sak(
-                    id = 1,
-                    ident = KONTANT_FOT.value,
-                    sakType = SakType.BARNEPENSJON,
-                    enhet = Enheter.STEINKJER.enhetNr,
-                ),
-            )
-
-        val saker = service.finnSaker(KONTANT_FOT.value)
-
-        saker.size shouldBe 1
-
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
     }
 
     @Test

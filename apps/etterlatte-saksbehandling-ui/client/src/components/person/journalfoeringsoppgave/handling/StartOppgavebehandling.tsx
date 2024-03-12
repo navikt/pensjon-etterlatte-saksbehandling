@@ -56,7 +56,7 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
             <Alert variant="info">Bruker har ingen behandlinger i Gjenny</Alert>
           )}
 
-          {journalpost && !temaTilhoererGjenny(journalpost) && (
+          {!temaTilhoererGjenny(journalpost) && (
             <Alert variant="warning">Journalposten tilhører tema {journalpost.tema}</Alert>
           )}
         </>

@@ -30,14 +30,15 @@ export const Utlandstilknytning = ({
         utlandstilsnitt-sak. I andre tilfeller er det en nasjonal sak.
       </Beskrivelse>
       <VurderingsContainerWrapper>
-        {vurdert ? (
+        {vurdert && (
           <UtlandstilknytningVurdering
             utlandstilknytning={behandling.utlandstilknytning}
             redigerbar={redigerbar}
             setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
             behandlingId={behandling.id}
           />
-        ) : (
+        )}
+        {!vurdert && redigerbar && (
           <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
         )}
       </VurderingsContainerWrapper>

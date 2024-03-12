@@ -2,6 +2,7 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { SakType } from '~shared/types/sak'
 import { konverterOppgavestatusFilterValuesTilKeys } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
+import { OppgavebenkStats } from '~components/oppgavebenk/utils/oppgavebenkStats'
 
 export interface OppgaveDTO {
   id: string
@@ -88,6 +89,8 @@ export const hentOppgaverMedReferanse = async (referanse: string): Promise<ApiRe
   apiClient.get(`/oppgaver/referanse/${referanse}`)
 export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver/gosys')
 
+export const hentOppgavebenkStats = async (): Promise<ApiResponse<OppgavebenkStats>> => apiClient.get('/oppgaver/stats')
+
 export const opprettOppgave = async (args: {
   sakId: number
   request: NyOppgaveDto
@@ -117,9 +120,13 @@ export const ferdigstilleGosysOppgave = async (args: {
 
 export const feilregistrerGosysOppgave = async (args: {
   oppgaveId: string
+  beskrivelse: string
   versjon: number
 }): Promise<ApiResponse<OppgaveDTO>> =>
-  apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/feilregistrer?versjon=${args.versjon}`, {})
+  apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/feilregistrer`, {
+    versjon: args.versjon,
+    beskrivelse: args.beskrivelse,
+  })
 
 export const tildelSaksbehandlerApi = async (args: {
   oppgaveId: string

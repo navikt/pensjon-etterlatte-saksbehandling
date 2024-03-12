@@ -21,7 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KabalHjemmel
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
+import no.nav.etterlatte.libs.common.behandling.KlageOversendelsebrev
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
@@ -158,7 +158,7 @@ private fun klageForInnstilling(sakId: Long): Klage {
                     InnstillingTilKabal(
                         lovhjemmel = KabalHjemmel.FTRL_18_4,
                         internKommentar = null,
-                        brev = KlageBrevInnstilling(brevId = 123L),
+                        brev = KlageOversendelsebrev(brevId = 123L),
                         innstillingTekst = "Hello",
                     ),
                 saksbehandler =

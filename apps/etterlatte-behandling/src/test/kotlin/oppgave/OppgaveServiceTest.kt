@@ -7,13 +7,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.ConnectionAutoclosingTest
-import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
-import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -27,11 +24,12 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.nyKontekstMedBruker
+import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
@@ -41,7 +39,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
@@ -77,15 +74,6 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         )
     }
 
-    private fun setNewKontekstWithMockUser(userMock: User) {
-        Kontekst.set(
-            Context(
-                userMock,
-                DatabaseContextTest(dataSource),
-            ),
-        )
-    }
-
     private fun mockForSaksbehandlerMedRoller(
         userSaksbehandler: SaksbehandlerMedEnheterOgRoller,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
@@ -96,11 +84,10 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
     @BeforeEach
     fun beforeEach() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns Enheter.enheterMedLesetilgang().toList()
+        every { saksbehandler.enheter() } returns Enheter.enheterForVanligSaksbehandlere()
         every { saksbehandler.name() } returns "ident"
-        every { saksbehandler.erSuperbruker() } returns false
 
-        setNewKontekstWithMockUser(saksbehandler)
+        nyKontekstMedBrukerOgDatabaseContext(saksbehandler, DatabaseContextTest(dataSource))
 
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
     }
@@ -131,30 +118,9 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
     }
 
     @Test
-    fun `skal kunne tildele seg oppgave som er tildelt systembruker`() {
-        val systemBruker = mockk<SystemUser> { every { name() } returns Fagsaksystem.EY.navn }
-        setNewKontekstWithMockUser(systemBruker)
-
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val referanse = "referanse"
-        val nyOppgave =
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
-            )
-
-        val bruker = Saksbehandler("", "ident1", null)
-        oppgaveService.tildelSaksbehandler(nyOppgave.id, Fagsaksystem.EY.navn)
-        assertDoesNotThrow { oppgaveService.tildelSaksbehandler(nyOppgave.id, bruker.ident()) }
-    }
-
-    @Test
     fun `skal tildele attesteringsoppgave hvis systembruker og fatte`() {
         val systemBruker = mockk<SystemUser> { every { name() } returns "name" }
-        setNewKontekstWithMockUser(systemBruker)
+        nyKontekstMedBruker(systemBruker)
 
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
@@ -209,7 +175,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             )
 
         val attestantSaksbehandler = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
-        setNewKontekstWithMockUser(attestantSaksbehandler)
+        nyKontekstMedBruker(attestantSaksbehandler)
         val attestantmedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
         mockForSaksbehandlerMedRoller(attestantSaksbehandler, attestantmedRoller)
 
@@ -243,7 +209,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             )
 
         val saksbehandlerto = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
-        setNewKontekstWithMockUser(saksbehandlerto)
+        nyKontekstMedBruker(saksbehandlerto)
         val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
 
@@ -366,7 +332,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             )
 
         val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
-        setNewKontekstWithMockUser(attestantmock)
+        nyKontekstMedBruker(attestantmock)
         mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
         oppgaveService.tildelSaksbehandler(oppgaveUnderBehandlingAnnenBehandling.id, saksbehandler.ident)
         oppgaveService.avbrytAapneOppgaverForBehandling(behandlingId)
@@ -858,40 +824,6 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
     }
 
     @Test
-    fun `Superbruker kan se oppgave på en annen enhet unntatt strengt fortrolig`() {
-        val randomenhet = "1111"
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, randomenhet)
-        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null,
-        )
-
-        val attestantSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, randomenhet)
-        val attestantOppgave =
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                "referanse",
-                attestantSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.ATTESTERING,
-                null,
-            )
-
-        val saksbehandlerMedRollerAttestant = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
-        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr) // må ikke endres
-        every { saksbehandler.erSuperbruker() } returns true
-        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
-
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
-        assertEquals(1, oppgaver.size)
-        val attesteringsoppgave = oppgaver[0]
-        assertEquals(attestantOppgave.id, attesteringsoppgave.id)
-        assertEquals(attestantOppgave.sakId, attestantSak.id)
-    }
-
-    @Test
     fun `skal tracke at en tildeling av saksbehandler blir lagret med oppgaveendringer`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
@@ -984,12 +916,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
     @Test
     fun `Skal filtrere bort oppgaver med annen enhet`() {
-        Kontekst.set(
-            Context(
-                saksbehandler,
-                DatabaseContextTest(dataSource),
-            ),
-        )
+        nyKontekstMedBrukerOgDatabaseContext(saksbehandler, DatabaseContextTest(dataSource))
 
         val aalesundSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingsref = UUID.randomUUID().toString()
@@ -1118,7 +1045,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             )
 
         val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
-        setNewKontekstWithMockUser(attestantmock)
+        nyKontekstMedBruker(attestantmock)
         mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
         oppgaveService.tildelSaksbehandler(attestertBehandlingsoppgave.id, "attestant")
 

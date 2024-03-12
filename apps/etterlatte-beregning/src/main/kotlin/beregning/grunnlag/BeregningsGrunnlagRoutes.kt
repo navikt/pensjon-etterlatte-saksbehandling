@@ -25,12 +25,13 @@ fun Route.beregningsGrunnlag(
 ) {
     route("/api/beregning/beregningsgrunnlag") {
         post("/{$BEHANDLINGID_CALL_PARAMETER}/fra/{forrigeBehandlingId}") {
-            val behandlingId = behandlingId
-            val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
 
-            beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(behandlingId, forrigeBehandlingId)
+                beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(behandlingId, forrigeBehandlingId)
 
-            call.respond(HttpStatusCode.NoContent)
+                call.respond(HttpStatusCode.NoContent)
+            }
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/barnepensjon") {

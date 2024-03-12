@@ -13,7 +13,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.omregning.OpprettOmregningResponse
-import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -50,7 +49,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.name() } returns "User"
         every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
-        Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource)))
+        nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)
     }
 
     @AfterAll

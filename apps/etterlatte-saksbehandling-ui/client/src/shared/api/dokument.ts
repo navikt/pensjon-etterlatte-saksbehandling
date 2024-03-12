@@ -38,7 +38,7 @@ export const oppdaterJournalpost = async (args: {
   journalpost: OppdaterJournalpostRequest
   forsoekFerdigstill?: boolean
   journalfoerendeEnhet?: string
-}): Promise<ApiResponse<any>> => {
+}): Promise<ApiResponse<{ journalpostId: string }>> => {
   const queryParams = args.forsoekFerdigstill
     ? `journalfoerendeEnhet=${args.journalfoerendeEnhet}&forsoekFerdigstill=${args.forsoekFerdigstill}`
     : ''

@@ -57,6 +57,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
+import java.time.ZonedDateTime
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -372,7 +373,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                         erFormkraveneOppfylt = JaNei.JA,
                         erKlagenSignert = JaNei.JA,
                         erKlagerPartISaken = JaNei.JA,
-                        vedtaketKlagenGjelder = VedtaketKlagenGjelder("12", UUID.randomUUID().toString(), null, null),
+                        vedtaketKlagenGjelder = VedtaketKlagenGjelder("12", UUID.randomUUID().toString(), ZonedDateTime.now(), null),
                         gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
                         erKlagenFramsattInnenFrist = erKlagenFramsattInnenFrist,
                     ),

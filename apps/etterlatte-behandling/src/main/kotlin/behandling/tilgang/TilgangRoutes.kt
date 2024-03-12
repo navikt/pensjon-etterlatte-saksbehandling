@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.tilgangsstyring.TILGANG_ROUTE_PATH
+import no.nav.etterlatte.tilgangsstyring.sjekkSkrivetilgang
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
@@ -33,9 +34,6 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
     route("/$TILGANG_ROUTE_PATH") {
         post("/person") {
             val fnr = call.receive<String>()
-            if (berOmSkrivetilgang && !Kontekst.get().AppUser.harSkrivetilgang()) {
-                call.respond(false)
-            }
             val harTilgang =
                 harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
                     inTransaction {
@@ -49,7 +47,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
         }
 
         get("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
-            if (berOmSkrivetilgang && !Kontekst.get().AppUser.harSkrivetilgang()) {
+            if (berOmSkrivetilgang && !sjekkSkrivetilgang()) {
                 call.respond(false)
             }
             val harTilgang =
@@ -64,7 +62,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
         }
 
         get("/sak/{$SAKID_CALL_PARAMETER}") {
-            if (berOmSkrivetilgang && !Kontekst.get().AppUser.harSkrivetilgang()) {
+            if (berOmSkrivetilgang && !sjekkSkrivetilgang()) {
                 call.respond(false)
             }
             val harTilgang =

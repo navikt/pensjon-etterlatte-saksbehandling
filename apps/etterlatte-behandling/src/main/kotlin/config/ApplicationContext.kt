@@ -108,6 +108,7 @@ import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.token.Fagsaksystem
@@ -290,7 +291,7 @@ internal class ApplicationContext(
     val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
 
     // Service
-    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, behandlingsHendelser)
 
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlTjenesterKlient)
     val grunnlagsService = GrunnlagServiceImpl(grunnlagKlient)
@@ -364,7 +365,8 @@ internal class ApplicationContext(
             revurderingService = automatiskRevurderingService,
         )
 
-    val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
+    val sakTilgangDao = SakTilgangDao(dataSource)
+    val tilgangService = TilgangServiceImpl(sakTilgangDao)
     val enhetService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
     val sakService =
         SakServiceImpl(
@@ -432,7 +434,7 @@ internal class ApplicationContext(
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
-    val saksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient)
+    val saksbehandlerService: SaksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient)
 
     val behandlingFactory =
         BehandlingFactory(
@@ -477,6 +479,7 @@ internal class ApplicationContext(
             0L,
             interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.MINUTES),
             dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
         )
     }
 

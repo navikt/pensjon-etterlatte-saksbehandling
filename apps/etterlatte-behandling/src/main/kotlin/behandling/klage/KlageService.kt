@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
+import no.nav.etterlatte.libs.common.behandling.KlageOversendelsebrev
 import no.nav.etterlatte.libs.common.behandling.KlageResultat
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
@@ -209,7 +209,7 @@ class KlageServiceImpl(
             throw FeatureIkkeStoettetException()
         }
         val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
-        val oppdatertKlage = klage.oppdaterIntieltUtfallMedBegrunnelse(utfall, saksbehandler.ident)
+        val oppdatertKlage = klage.oppdaterInitieltUtfallMedBegrunnelse(utfall, saksbehandler.ident)
         klageDao.lagreKlage(oppdatertKlage)
         return oppdatertKlage
     }
@@ -233,7 +233,10 @@ class KlageServiceImpl(
             // Vi må rydde bort det vedtaksbrevet som ble opprettet ved forrige utfall
             runBlocking { brevApiKlient.slettVedtaksbrev(klageId, saksbehandler) }
         }
-        // Vurder å slette brev hvis det finnes her? Så vi ikke polluter med hengende brev
+        val sammeUtfallSomFoer = klage.utfall?.harSammeUtfall(utfall) ?: false
+        if (!sammeUtfallSomFoer) {
+            runBlocking { brevApiKlient.slettOversendelsesbrev(klageId, saksbehandler) }
+        }
 
         val utfallMedBrev =
             when (utfall) {
@@ -251,7 +254,7 @@ class KlageServiceImpl(
                                 lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
                                 internKommentar = utfall.innstilling.internKommentar,
                                 innstillingTekst = utfall.innstilling.innstillingTekst,
-                                brev = brevForInnstilling(klage, saksbehandler),
+                                brev = oversendelsesbrev(klage, saksbehandler),
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
@@ -263,7 +266,7 @@ class KlageServiceImpl(
                                 lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
                                 internKommentar = utfall.innstilling.internKommentar,
                                 innstillingTekst = utfall.innstilling.innstillingTekst,
-                                brev = brevForInnstilling(klage, saksbehandler),
+                                brev = oversendelsesbrev(klage, saksbehandler),
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
@@ -306,10 +309,10 @@ class KlageServiceImpl(
         }
     }
 
-    private fun brevForInnstilling(
+    private fun oversendelsesbrev(
         klage: Klage,
         saksbehandler: Saksbehandler,
-    ): KlageBrevInnstilling {
+    ): KlageOversendelsebrev {
         return when (val utfall = klage.utfall) {
             is KlageUtfallMedData.DelvisOmgjoering -> utfall.innstilling.brev
             is KlageUtfallMedData.StadfesteVedtak -> utfall.innstilling.brev
@@ -321,7 +324,7 @@ class KlageServiceImpl(
                             saksbehandler,
                         )
                     }
-                KlageBrevInnstilling(brev.id)
+                KlageOversendelsebrev(brev.id)
             }
         }
     }
@@ -546,12 +549,11 @@ class KlageServiceImpl(
 
         val oppdatertKlage = klage.attesterVedtak()
 
-        val utfall =
-            checkNotNull(klage.utfall as? KlageUtfallMedData.Avvist) {
-                "Vi har en klage som kunne attesteres, men har feil utfall lagret. Id: $klageId"
-            }
+        checkNotNull(klage.utfall as? KlageUtfallMedData.Avvist) {
+            "Vi har en klage som kunne attesteres, men har feil utfall lagret. Id: $klageId"
+        }
         runBlocking {
-            brevApiKlient.ferdigstillBrev(klage.sak.id, utfall.brev.brevId, saksbehandler)
+            brevApiKlient.ferdigstillBrev(klage.id, klage.sak.id, saksbehandler)
         }
         val vedtak =
             runBlocking {

@@ -10,9 +10,8 @@ export const opprettTrygdetid = async (behandlingId: string): Promise<ApiRespons
 export const overstyrTrygdetid = async (overstyring: ITrygdetidOverstyring): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid/${overstyring.behandlingId}/overstyr`, { ...overstyring })
 
-export const lagreYrkesskadeTrygdetidGrunnlag = async (args: {
-  behandlingId: string
-}): Promise<ApiResponse<ITrygdetid>> => apiClient.post(`/trygdetid/${args.behandlingId}/grunnlag/yrkesskade`, {})
+export const setTrygdetidYrkesskade = async (yrkesskade: ITrygdetidYrkesskade): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.post(`/trygdetid/${yrkesskade.behandlingId}/yrkesskade`, { ...yrkesskade })
 
 export const lagreTrygdetidgrunnlag = async (args: {
   behandlingId: string
@@ -150,6 +149,12 @@ export interface ITrygdetidOverstyring {
   overstyrtNorskPoengaar: number | undefined
 }
 
+export interface ITrygdetidYrkesskade {
+  id: string
+  behandlingId: string
+  yrkesskade: boolean
+}
+
 export interface IGrunnlagOpplysninger {
   avdoedDoedsdato: IOpplysningsgrunnlag
   avdoedFoedselsdato: IOpplysningsgrunnlag
@@ -179,6 +184,8 @@ export interface IDetaljertBeregnetTrygdetidResultat {
   samletTrygdetidTeoretisk?: number
   prorataBroek?: IProrataBroek
   overstyrt: boolean
+  yrkesskade: boolean
+  beregnetSamletTrygdetidNorge?: number
 }
 
 export interface IFaktiskTrygdetid {

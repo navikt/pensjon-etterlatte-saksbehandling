@@ -1,3 +1,4 @@
+
 import WireMockBase.Companion.mockServer
 import com.github.benmanes.caffeine.cache.AsyncCache
 import com.github.benmanes.caffeine.cache.Caffeine
@@ -8,6 +9,11 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.spyk
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -16,6 +22,7 @@ import no.nav.etterlatte.libs.ktorobo.AccessToken
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.ClientCredentialsTokenRequest
 import no.nav.etterlatte.libs.ktorobo.OboTokenRequest
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
@@ -186,6 +193,40 @@ internal class AzureAdClientTest {
 
             mockServer.verify(1, postRequestedFor(urlEqualTo("/token_endpoint")))
         }
+    }
+
+    @Test
+    fun `bruker client credentials viss JWT-claims sub og oid er like`() {
+        val client =
+            spyk(AzureAdClient(config, mockHttpClient)).also {
+                coEvery { it.getAccessTokenForResource(any()) } returns Ok(mockk())
+            }
+        runBlocking {
+            client.hentTokenFraAD(
+                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "b", saksbehandler = null, claims = null),
+                listOf(),
+            )
+        }
+        coVerify { client.getAccessTokenForResource(any()) }
+        coVerify(exactly = 0) { client.getOnBehalfOfAccessTokenForResource(any(), any()) }
+    }
+
+    @Test
+    fun `bruker OBO viss JWT-claims sub og oid er ulike`() {
+        val client =
+            spyk(AzureAdClient(config, mockHttpClient)).also {
+                coEvery { it.getAccessTokenForResource(any()) } returns Ok(mockk())
+            }
+        every { runBlocking { client.getOnBehalfOfAccessTokenForResource(any(), any()) } } returns Ok(mockk())
+
+        runBlocking {
+            client.hentTokenFraAD(
+                BrukerTokenInfo.of(accessToken = "a", oid = "b", sub = "c", saksbehandler = "s1", claims = null),
+                listOf(),
+            )
+        }
+        coVerify { client.getOnBehalfOfAccessTokenForResource(any(), "a") }
+        coVerify(exactly = 0) { client.getAccessTokenForResource(any()) }
     }
 }
 

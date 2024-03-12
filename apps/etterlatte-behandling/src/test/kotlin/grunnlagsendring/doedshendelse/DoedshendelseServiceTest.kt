@@ -6,10 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.JOVIAL_LAMA
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -21,12 +18,11 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.mockPerson
+import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.personOpplysning
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
-import java.sql.Connection
 import java.time.LocalDate
 import java.util.UUID
 
@@ -62,24 +58,7 @@ internal class DoedshendelseServiceTest {
 
     @BeforeEach
     fun beforeAll() {
-        Kontekst.set(
-            Context(
-                mockk(),
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun harIntransaction(): Boolean {
-                        throw NotImplementedException("not implemented")
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
-            ),
-        )
+        nyKontekstMedBruker(mockk())
     }
 
     @Test

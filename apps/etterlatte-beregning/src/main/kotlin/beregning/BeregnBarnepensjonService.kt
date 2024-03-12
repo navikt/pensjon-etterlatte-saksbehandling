@@ -59,6 +59,7 @@ class BeregnBarnepensjonService(
     suspend fun beregn(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
+        tilDato: LocalDate? = null,
     ): Beregning {
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo)
         val behandlingType = behandling.behandlingType
@@ -97,6 +98,7 @@ class BeregnBarnepensjonService(
                     grunnlag,
                     barnepensjonGrunnlag,
                     virkningstidspunkt,
+                    tilDato = tilDato,
                 )
 
             BehandlingType.REVURDERING -> {
@@ -111,6 +113,7 @@ class BeregnBarnepensjonService(
                             grunnlag,
                             barnepensjonGrunnlag,
                             virkningstidspunkt,
+                            tilDato = tilDato,
                         )
 
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> opphoer(behandling.id, grunnlag, virkningstidspunkt)
@@ -125,11 +128,12 @@ class BeregnBarnepensjonService(
         beregningsgrunnlag: PeriodisertBarnepensjonGrunnlag,
         virkningstidspunkt: YearMonth,
         kunGammeltRegelverk: Boolean = false,
+        tilDato: LocalDate? = null,
     ): Beregning {
         val beregningTom =
             when (kunGammeltRegelverk) {
                 true -> YearMonth.of(2023, Month.DECEMBER)
-                false -> null
+                false -> tilDato?.let { YearMonth.from(it) }
             }
 
         val resultat =

@@ -18,6 +18,7 @@ import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.module
+import no.nav.etterlatte.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -45,6 +46,9 @@ internal class RevurderingRoutesTest {
             listOf(
                 SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.name),
             )
+        every {
+            applicationContext.sakTilgangDao.hentSakMedGraderingOgSkjerming(any())
+        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
     }
 
     @BeforeEach

@@ -21,6 +21,7 @@ import {
 import InstitusjonsoppholdTableWrapper from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdTableWrapper'
 import styled from 'styled-components'
 import { BP_INSTITUSJONSOPPHOLD_HJEMLER } from '~components/behandling/virkningstidspunkt/utils'
+import { useAppSelector } from '~store/Store'
 
 const ReadMoreMarginBottom = styled(ReadMore)`
   margin-bottom: 1rem;
@@ -33,7 +34,12 @@ type InstitusjonsoppholdProps = {
 
 const InstitusjonsoppholdBP = (props: InstitusjonsoppholdProps) => {
   const { behandling, onSubmit } = props
-  const behandles = behandlingErRedigerbar(behandling?.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const behandles = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
   const [visFeil, setVisFeil] = useState(false)
   const [visOkLagret, setVisOkLagret] = useState(false)
   const { control, register, watch, handleSubmit, formState } = useForm<{

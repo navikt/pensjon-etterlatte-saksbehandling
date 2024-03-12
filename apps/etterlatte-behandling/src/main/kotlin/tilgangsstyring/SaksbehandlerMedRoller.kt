@@ -22,6 +22,4 @@ data class SaksbehandlerMedRoller(
     fun harRolleFortrolig() = harRolle(AzureGroup.FORTROLIG)
 
     fun harRolleEgenAnsatt() = harRolle(AzureGroup.EGEN_ANSATT)
-
-    fun harRolleNasjonalTilgang() = harRolle(AzureGroup.NASJONAL_MED_LOGG) || harRolle(AzureGroup.NASJONAL_UTEN_LOGG)
 }

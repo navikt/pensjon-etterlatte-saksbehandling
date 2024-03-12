@@ -32,8 +32,8 @@ interface BrevApiKlient {
     ): OpprettetBrevDto
 
     suspend fun ferdigstillBrev(
+        behandlingId: UUID,
         sakId: Long,
-        brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     )
 
@@ -76,6 +76,11 @@ interface BrevApiKlient {
         klage: Klage,
         brukerInfoToken: BrukerTokenInfo,
     ): OpprettJournalpostDto
+
+    suspend fun slettOversendelsesbrev(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
@@ -112,12 +117,12 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
     }
 
     override suspend fun ferdigstillBrev(
+        behandlingId: UUID,
         sakId: Long,
-        brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         post(
-            url = "$resourceUrl/api/brev/$brevId/ferdigstill?sakId=$sakId",
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak/ferdigstill",
             onSuccess = { },
             brukerTokenInfo = brukerTokenInfo,
         )
@@ -193,6 +198,17 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
             onSuccess = { response -> deserialize(response.response!!.toJson()) },
             brukerTokenInfo = brukerInfoToken,
         )
+    }
+
+    override suspend fun slettOversendelsesbrev(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        downstreamResourceClient.delete(
+            resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/behandling/$klageId/oversendelse"),
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = "",
+        ).mapError { error -> throw error }
     }
 
     private suspend fun <T> post(

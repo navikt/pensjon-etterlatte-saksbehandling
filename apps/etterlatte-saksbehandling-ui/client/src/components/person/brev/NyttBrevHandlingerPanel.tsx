@@ -118,13 +118,8 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
         )}
       </Modal>
 
-      <Modal
-        open={isOpen && !statusModalOpen}
-        onClose={() => setIsOpen(false)}
-        aria-labelledby="modal-heading"
-        className="padding-modal"
-      >
-        <Modal.Body style={{ textAlign: 'center' }}>
+      <Modal open={isOpen && !statusModalOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading">
+        <Modal.Body>
           <Heading level="1" spacing size="medium" id="modal-heading">
             Er du sikker på at du vil ferdigstille brevet?
           </Heading>
@@ -132,7 +127,12 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
           <BodyLong spacing>
             Når du ferdigstiller brevet vil det bli journalført og distribuert. Denne handlingen kan ikke angres.
           </BodyLong>
+          <Alert variant="info">
+            Ikke glem å lagre innholdet i brev <i>før</i> du ferdigstiller!
+          </Alert>
+        </Modal.Body>
 
+        <Modal.Footer>
           <FlexRow justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Nei, fortsett redigering
@@ -141,7 +141,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
               Ja, ferdigstill brev
             </Button>
           </FlexRow>
-        </Modal.Body>
+        </Modal.Footer>
       </Modal>
     </>
   )

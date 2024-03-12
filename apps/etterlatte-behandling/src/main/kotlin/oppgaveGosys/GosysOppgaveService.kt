@@ -42,6 +42,12 @@ interface GosysOppgaveService {
         oppgaveVersjon: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgave
+
+    suspend fun feilregistrer(
+        oppgaveId: String,
+        request: FeilregistrerOppgaveRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long
 }
 
 class GosysOppgaveServiceImpl(
@@ -126,6 +132,21 @@ class GosysOppgaveServiceImpl(
         }
     }
 
+    override suspend fun feilregistrer(
+        oppgaveId: String,
+        request: FeilregistrerOppgaveRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long {
+        val endreStatusRequest =
+            EndreStatusRequest(
+                versjon = request.versjon.toString(),
+                status = "FEILREGISTRERT",
+                beskrivelse = request.beskrivelse,
+            )
+
+        return gosysOppgaveKlient.feilregistrer(oppgaveId, endreStatusRequest, brukerTokenInfo).versjon
+    }
+
     companion object {
         private val temaTilSakType =
             mapOf(
@@ -150,6 +171,7 @@ class GosysOppgaveServiceImpl(
                 saksbehandler = this.tilordnetRessurs?.let { OppgaveSaksbehandler(it) },
                 beskrivelse = this.beskrivelse,
                 sakType = temaTilSakType[this.tema]!!,
+                journalpostId = this.journalpostId,
             )
         }
     }

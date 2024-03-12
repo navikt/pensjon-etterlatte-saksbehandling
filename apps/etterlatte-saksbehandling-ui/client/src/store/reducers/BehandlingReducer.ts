@@ -15,7 +15,7 @@ import {
   IUtlandstilknytning,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
-import { RevurderingInfo } from '~shared/types/RevurderingInfo'
+import { RevurderingMedBegrunnelse } from '~shared/types/RevurderingInfo'
 import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
 
 export const setBehandling = createAction<IDetaljertBehandling>('behandling/set')
@@ -44,7 +44,7 @@ export const oppdaterBeregingsGrunnlagOMS = createAction<BeregningsGrunnlagOMSPo
 )
 export const oppdaterOverstyrBeregningsGrunnlag =
   createAction<OverstyrBeregningGrunnlagPostDTO>('behandling/overstyrBeregning')
-export const oppdaterRevurderingInfo = createAction<RevurderingInfo>('behandling/revurderinginfo')
+export const oppdaterRevurderingInfo = createAction<RevurderingMedBegrunnelse>('behandling/revurderinginfo')
 export const resetBeregning = createAction('behandling/beregning/reset')
 export const loggError = createAction<any>('loggError')
 export const loggInfo = createAction<any>('loggInfo')
@@ -112,6 +112,6 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
     state.behandling!!.beregning = undefined
   })
   builder.addCase(oppdaterRevurderingInfo, (state, action) => {
-    state.behandling!!.revurderinginfo!!.revurderingInfo = action.payload
+    state.behandling!!.revurderinginfo = action.payload
   })
 })

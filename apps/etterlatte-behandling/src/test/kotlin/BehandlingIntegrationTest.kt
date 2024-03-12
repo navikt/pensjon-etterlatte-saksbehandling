@@ -61,6 +61,7 @@ import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
+import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
@@ -518,8 +519,8 @@ class BrevApiKlientTest : BrevApiKlient {
     }
 
     override suspend fun ferdigstillBrev(
+        behandlingId: UUID,
         sakId: Long,
-        brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
     }
@@ -568,6 +569,11 @@ class BrevApiKlientTest : BrevApiKlient {
         return OpprettJournalpostDto(UUID.randomUUID().toString())
     }
 
+    override suspend fun slettOversendelsesbrev(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {}
+
     private fun opprettetBrevDto(brevId: Long) =
         OpprettetBrevDto(
             id = brevId,
@@ -606,6 +612,14 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         return gosysApiOppgave()
     }
 
+    override suspend fun feilregistrer(
+        id: String,
+        request: EndreStatusRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave {
+        return gosysApiOppgave()
+    }
+
     private fun gosysApiOppgave(): GosysApiOppgave {
         return GosysApiOppgave(
             1,
@@ -613,6 +627,7 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
             "EYB",
             "-",
             "",
+            null,
             Tidspunkt.now(),
             "4808",
             null,

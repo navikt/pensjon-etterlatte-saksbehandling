@@ -1,116 +1,55 @@
-import { BodyShort, Heading } from '@navikt/ds-react'
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { FlexHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
+import { BodyShort, Checkbox, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
-import Spinner from '~shared/Spinner'
-import { hentTrygdetid, ITrygdetid, lagreYrkesskadeTrygdetidGrunnlag, opprettTrygdetid } from '~shared/api/trygdetid'
-import { useApiCall } from '~shared/hooks/useApiCall'
+import { ITrygdetid } from '~shared/api/trygdetid'
+import { useState } from 'react'
 
-import { isPending } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { behandlingErIverksattEllerSamordnet } from '~components/behandling/felles/utils'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+interface Props {
+  redigerbar: boolean
+  trygdetid: ITrygdetid
+  oppdaterYrkesskade: (yrkesskade: boolean) => void
+}
 
-const YrkesskadeTrygdetid = ({
-  status,
-  hjemmel,
-}: {
-  status: IBehandlingStatus
-  hjemmel: {
-    tittel: string
-    lenke: string
-  }
-}) => {
-  const { behandlingId } = useParams()
-  const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
-  const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
-  const [opprettYrkesskadeTrygdetidGrunnlag, requestOpprettYrkesskadeTrygdetidGrunnlag] = useApiCall(
-    lagreYrkesskadeTrygdetidGrunnlag
+export const YrkesskadeTrygdetid = ({ redigerbar, trygdetid, oppdaterYrkesskade }: Props) => {
+  const [yrkesskade, setYrkesskade] = useState<boolean | undefined>(
+    trygdetid.beregnetTrygdetid?.resultat.yrkesskade ?? undefined
   )
 
-  const [harPilotTrygdetid, setHarPilotTrygdetid] = useState<boolean>(false)
-
-  const statusForRedigerTrygdetid =
-    status === IBehandlingStatus.OPPRETTET ||
-    status === IBehandlingStatus.RETURNERT ||
-    status === IBehandlingStatus.VILKAARSVURDERT ||
-    status === IBehandlingStatus.TRYGDETID_OPPDATERT
-
-  useEffect(() => {
-    if (!behandlingId) throw new Error('Mangler behandlingsid')
-
-    fetchTrygdetid(behandlingId, (trygdetid: ITrygdetid) => {
-      if (trygdetid === null) {
-        if (behandlingErIverksattEllerSamordnet(status)) {
-          setHarPilotTrygdetid(true)
-          return
-        }
-        requestOpprettTrygdetid(behandlingId, () => {
-          requestOpprettYrkesskadeTrygdetidGrunnlag({ behandlingId })
-        })
-      } else {
-        // Må skrives om når vi gjør om til å støtte utenlands og poeng i inn/ut år (relatert til prorata)
-        // Pt sjekker vi regelResultat string i backend (Trygdetid.kt) for å gjøre en "er dette yrkesskade"
-        // I mellomtid så vil den bare erstatte en fast 40 år med en ny fast 40 år på samme grunnlag
-        if (statusForRedigerTrygdetid) {
-          requestOpprettYrkesskadeTrygdetidGrunnlag({ behandlingId })
-        }
-      }
-    })
-  }, [])
-
-  if (harPilotTrygdetid) {
-    return (
-      <TrygdetidWrapper>
-        <Heading size="small" level="3">
-          Personen har fått 40 års trygdetid
-        </Heading>
-        <BodyShort>Denne søknaden ble satt automatisk til 40 års trygdetid</BodyShort>
-      </TrygdetidWrapper>
-    )
-  }
-
   return (
-    <TrygdetidWrapper>
-      <LovtekstMedLenke tittel="Trygdetid" hjemler={[hjemmel]} status={null}>
-        <TrygdetidInfo>
-          <BodyShort>Dødsfall som skyldes en skade eller sykdom som går inn under kapittel 13</BodyShort>
-          <BodyShort>
-            Trygdetid: <strong>40 år</strong>
-          </BodyShort>
-        </TrygdetidInfo>
-      </LovtekstMedLenke>
+    <Yrkesskade>
+      <FlexHeader>
+        <Heading size="small" level="4">
+          {redigerbar
+            ? 'Kryss av her hvis dødsfallet skyldtes en godkjent yrkesskade/sykdom. Dette gir automatisk 40 års trygdetid.'
+            : 'Hvis dødsfallet skyldtes en godkjent yrkesskade/sykdom gir dette automatisk 40 års trygdetid.'}
+        </Heading>
+      </FlexHeader>
+      {!redigerbar && <YrkesskadeVerdi>{yrkesskade ? 'Yrkesskade' : 'Ikke yrkesskade'}</YrkesskadeVerdi>}
+      {redigerbar && (
+        <YrkesskadeFelt
+          checked={yrkesskade}
+          onChange={() => {
+            const oppdatertYrkesskade = !(yrkesskade ?? false)
 
-      {isPending(hentTrygdetidRequest) && <Spinner visible={true} label="Henter trygdetid" />}
-      {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label="Oppretter trygdetid" />}
-      {isPending(opprettYrkesskadeTrygdetidGrunnlag) && (
-        <Spinner visible={true} label="Oppretter trygdetid grunnlag for yrkesskade" />
+            setYrkesskade(oppdatertYrkesskade)
+            oppdaterYrkesskade(oppdatertYrkesskade)
+          }}
+        >
+          Godkjent yrkesskade/sykdom
+        </YrkesskadeFelt>
       )}
-      {isFailureHandler({
-        apiResult: hentTrygdetidRequest,
-        errorMessage: 'En feil har oppstått ved henting av trygdetid',
-      })}
-      {isFailureHandler({
-        apiResult: opprettTrygdetidRequest,
-        errorMessage: 'En feil har oppstått ved opprettelse av trygdetid',
-      })}
-      {isFailureHandler({
-        apiResult: opprettYrkesskadeTrygdetidGrunnlag,
-        errorMessage: 'En feil har oppstått ved opprettelse av trygdetid grunnlag for yrkesskade',
-      })}
-    </TrygdetidWrapper>
+    </Yrkesskade>
   )
 }
 
-const TrygdetidWrapper = styled.form`
-  padding: 0em 4em;
-  max-width: 56em;
+const Yrkesskade = styled.div`
+  padding: 2em 0 0 0;
 `
 
-const TrygdetidInfo = styled.div`
-  display: flex;
-  flex-direction: column;
+const YrkesskadeVerdi = styled(BodyShort)`
+  padding: 1em 0 0 0;
 `
 
-export default YrkesskadeTrygdetid
+const YrkesskadeFelt = styled(Checkbox)`
+  padding: 1em 0 0 0;
+`

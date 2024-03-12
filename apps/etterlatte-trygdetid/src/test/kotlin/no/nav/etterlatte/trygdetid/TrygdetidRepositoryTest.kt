@@ -103,6 +103,21 @@ internal class TrygdetidRepositoryTest(dataSource: DataSource) {
         trygdetid shouldNotBe null
         trygdetid?.id shouldNotBe null
         trygdetid?.behandlingId shouldBe behandling.id
+        trygdetid?.yrkesskade shouldBe false
+    }
+
+    @Test
+    fun `skal opprette og hente trygdetid med yrkesskade`() {
+        val behandling = behandlingMock()
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, yrkesskade = true)
+
+        repository.opprettTrygdetid(opprettetTrygdetid)
+        val trygdetid = repository.hentTrygdetid(behandling.id)
+
+        trygdetid shouldNotBe null
+        trygdetid?.id shouldNotBe null
+        trygdetid?.behandlingId shouldBe behandling.id
+        trygdetid?.yrkesskade shouldBe true
     }
 
     @Test
@@ -126,6 +141,32 @@ internal class TrygdetidRepositoryTest(dataSource: DataSource) {
         trygdetid?.behandlingId shouldBe behandling.id
         trygdetid?.trygdetidGrunnlag?.first() shouldBe trygdetidGrunnlag
         trygdetid?.beregnetTrygdetid shouldBe beregnetTrygdetid
+        trygdetid?.yrkesskade shouldBe false
+    }
+
+    @Test
+    fun `skal opprette og hente trygdetid med grunnlag og beregning for yrkesskade`() {
+        val behandling = behandlingMock()
+        val beregnetTrygdetid = beregnetTrygdetid(yrkesskade = true)
+        val trygdetidGrunnlag = trygdetidGrunnlag()
+        val opprettetTrygdetid =
+            trygdetid(
+                behandling.id,
+                behandling.sak,
+                trygdetidGrunnlag = listOf(trygdetidGrunnlag),
+                beregnetTrygdetid = beregnetTrygdetid,
+                yrkesskade = true,
+            )
+
+        repository.opprettTrygdetid(opprettetTrygdetid)
+        val trygdetid = repository.hentTrygdetid(behandling.id)
+
+        trygdetid shouldNotBe null
+        trygdetid?.id shouldNotBe null
+        trygdetid?.behandlingId shouldBe behandling.id
+        trygdetid?.trygdetidGrunnlag?.first() shouldBe trygdetidGrunnlag
+        trygdetid?.beregnetTrygdetid shouldBe beregnetTrygdetid
+        trygdetid?.yrkesskade shouldBe true
     }
 
     @Test
@@ -285,6 +326,22 @@ internal class TrygdetidRepositoryTest(dataSource: DataSource) {
 
         trygdetidMedBeregnetTrygdetid shouldNotBe null
         trygdetidMedBeregnetTrygdetid.beregnetTrygdetid shouldBe beregnetTrygdetid
+        trygdetidMedBeregnetTrygdetid.yrkesskade shouldBe false
+    }
+
+    @Test
+    fun `skal oppdatere beregnet trygdetid med yrkesskade`() {
+        val beregnetTrygdetid = beregnetTrygdetid(total = 12, tidspunkt = Tidspunkt.now(), yrkesskade = true)
+        val behandling = behandlingMock()
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, yrkesskade = true)
+
+        val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
+        val trygdetidMedBeregnetTrygdetid =
+            repository.oppdaterTrygdetid(trygdetid.oppdaterBeregnetTrygdetid(beregnetTrygdetid))
+
+        trygdetidMedBeregnetTrygdetid shouldNotBe null
+        trygdetidMedBeregnetTrygdetid.beregnetTrygdetid shouldBe beregnetTrygdetid
+        trygdetidMedBeregnetTrygdetid.yrkesskade shouldBe true
     }
 
     @Test

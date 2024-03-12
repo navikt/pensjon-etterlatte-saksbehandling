@@ -19,6 +19,7 @@ import {
   validerInstitusjonsopphold,
 } from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPerioder'
 import InstitusjonsoppholdTableWrapper from './InstitusjonsoppholdTableWrapper'
+import { useAppSelector } from '~store/Store'
 
 type InstitusjonsoppholdProps = {
   behandling: IBehandlingReducer
@@ -27,7 +28,12 @@ type InstitusjonsoppholdProps = {
 
 const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
   const { behandling, onSubmit } = props
-  const behandles = behandlingErRedigerbar(behandling?.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const behandles = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
   const [visFeil, setVisFeil] = useState(false)
   const [visOkLagret, setVisOkLagret] = useState(false)
   const { control, register, watch, handleSubmit, formState } = useForm<{

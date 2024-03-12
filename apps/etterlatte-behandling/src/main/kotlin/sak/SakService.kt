@@ -30,6 +30,11 @@ interface SakService {
         sjekkEnhetMotNorg: Boolean = true,
     ): Sak
 
+    fun finnGjeldeneEnhet(
+        fnr: String,
+        type: SakType,
+    ): String
+
     fun finnSak(
         person: String,
         type: SakType,
@@ -148,6 +153,14 @@ class SakServiceImpl(
         }
 
         return sak
+    }
+
+    override fun finnGjeldeneEnhet(
+        fnr: String,
+        type: SakType,
+    ) = when (val sak = finnSakerForPersonOgType(fnr, type)) {
+        null -> sjekkEnhet(fnr, type, null)
+        else -> sak.enhet
     }
 
     private fun sjekkEnhet(

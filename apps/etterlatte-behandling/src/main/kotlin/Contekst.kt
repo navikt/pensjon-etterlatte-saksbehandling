@@ -3,10 +3,10 @@ package no.nav.etterlatte
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
+import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import no.nav.etterlatte.tilgangsstyring.saksbehandlereMedTilgangTilAlleEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
@@ -19,6 +19,7 @@ object Kontekst : ThreadLocal<Context>()
 class Context(
     val AppUser: User,
     val databasecontxt: DatabaseKontekst,
+    val sakTilgangDao: SakTilgangDao,
 ) {
     fun appUserAsSaksbehandler(): SaksbehandlerMedEnheterOgRoller {
         return this.AppUser as SaksbehandlerMedEnheterOgRoller
@@ -29,10 +30,6 @@ interface User {
     fun name(): String
 
     fun kanSetteKilde(): Boolean = false
-
-    fun harSkrivetilgang(): Boolean = false
-
-    fun harLesetilgang(): Boolean = false
 }
 
 abstract class ExternalUser(val identifiedBy: TokenValidationContext) : User
@@ -53,10 +50,6 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
     override fun kanSetteKilde(): Boolean {
         return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.containsClaim("roles", "kan-sette-kilde")
     }
-
-    override fun harSkrivetilgang(): Boolean = true
-
-    override fun harLesetilgang(): Boolean = true
 }
 
 class SaksbehandlerMedEnheterOgRoller(
@@ -64,30 +57,38 @@ class SaksbehandlerMedEnheterOgRoller(
     private val saksbehandlerService: SaksbehandlerService,
     val saksbehandlerMedRoller: SaksbehandlerMedRoller,
 ) : ExternalUser(identifiedBy) {
+    private fun saksbehandlersEnheter() =
+        saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(name()).map { it.enhetsNummer }.toSet()
+
     override fun name(): String {
         return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
     }
 
-    fun erSuperbruker() = name() in (saksbehandlereMedTilgangTilAlleEnheter)
+    private fun harKjentEnhet() = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter()).isNotEmpty()
 
-    fun enheter() =
-        if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {
-            Enheter.nasjonalTilgangEnheter()
+    fun kanSeOppgaveBenken() =
+        saksbehandlersEnheter().firstNotNullOfOrNull { enhetNr ->
+            Enheter.entries.firstOrNull { it.enhetNr == enhetNr }
+        }?.harTilgangTilOppgavebenken ?: false
+
+    fun enheterMedSkrivetilgang() =
+        saksbehandlersEnheter()
+            .filter { Enheter.saksbehandlendeEnheter().contains(it) }
+
+    // TODO - EY-3441 - lesetilgang for forvaltningsutviklere
+    fun enheterMedLesetilgang() =
+        if (harKjentEnhet()) {
+            enheterMedSkrivetilgang().let { egenSkriveEnheter ->
+                when (egenSkriveEnheter.size) {
+                    0 -> Enheter.enheterForVanligSaksbehandlere()
+                    else -> Enheter.enheterForVanligSaksbehandlere() - egenSkriveEnheter.toSet()
+                }
+            }
         } else {
-            saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(name()).map { it.enhetsNummer }
+            emptyList()
         }
 
-    override fun harSkrivetilgang(): Boolean {
-        val enheter = enheter()
-        val skrivetilgangEnhetsnummere = Enheter.enheterMedSkrivetilgang()
-        return enheter.any { skrivetilgangEnhetsnummere.contains(it) }
-    }
-
-    override fun harLesetilgang(): Boolean {
-        val enheter = enheter()
-        val lesetilgangEnheter = Enheter.enheterMedLesetilgang()
-        return enheter.any { lesetilgangEnheter.contains(it) }
-    }
+    fun enheter() = (enheterMedSkrivetilgang() + enheterMedLesetilgang()).distinct()
 }
 
 fun decideUser(

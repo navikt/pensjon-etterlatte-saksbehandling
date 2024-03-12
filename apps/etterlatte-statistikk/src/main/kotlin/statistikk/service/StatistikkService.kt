@@ -435,6 +435,25 @@ class StatistikkService(
         return sakRepository.lagreRad(behandlingTilSakRad(statistikkBehandling, hendelse, tekniskTid))
     }
 
+    fun registrerStatistikkBehandlingPaaVentHendelse(
+        behandlingId: UUID,
+        hendelse: BehandlingHendelseType,
+        tekniskTid: LocalDateTime,
+    ): SakRad? {
+        val sisteRad =
+            sakRepository.hentSisteRad(behandlingId)?.copy(
+                status = hendelse.name,
+                tekniskTid = tekniskTid.toTidspunkt(),
+            )
+        if (sisteRad == null) {
+            logger.warn(
+                "Registrerte ikke behandling på vent fordi det ble ikke funnet en tidligere rad knyttet til behandlig=$behandlingId",
+            )
+            return null
+        }
+        return sakRepository.lagreRad(sisteRad)
+    }
+
     fun registrerStatistikkForKlagehendelse(
         statistikkKlage: StatistikkKlage,
         tekniskTid: LocalDateTime,

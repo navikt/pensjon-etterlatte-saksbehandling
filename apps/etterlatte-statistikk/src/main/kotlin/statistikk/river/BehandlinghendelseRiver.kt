@@ -21,7 +21,11 @@ class BehandlinghendelseRiver(
     rapidsConnection: RapidsConnection,
     private val service: StatistikkService,
 ) : ListenerMedLogging() {
-    private val behandlingshendelser = BehandlingHendelseType.entries.map { it.lagEventnameForType() }
+    private val behandlingshendelser =
+        listOf(
+            BehandlingHendelseType.OPPRETTET.lagEventnameForType(),
+            BehandlingHendelseType.AVBRUTT.lagEventnameForType(),
+        )
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 

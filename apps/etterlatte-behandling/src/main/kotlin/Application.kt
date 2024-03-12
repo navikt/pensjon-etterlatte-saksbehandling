@@ -46,6 +46,7 @@ import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.oppgave.oppgaveRoutes
+import no.nav.etterlatte.oppgaveGosys.gosysOppgaveRoute
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
@@ -141,10 +142,8 @@ internal fun Application.module(context: ApplicationContext) {
                 behandlingService = behandlingService,
             )
             behandlingInfoRoutes(behandlingInfoService)
-            oppgaveRoutes(
-                service = oppgaveService,
-                gosysOppgaveService = gosysOppgaveService,
-            )
+            gosysOppgaveRoute(gosysOppgaveService)
+            oppgaveRoutes(oppgaveService)
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
             doedshendelseRoute(doedshendelseService = doedshendelseService)
             egenAnsattRoute(
@@ -197,6 +196,7 @@ private fun Route.attachContekst(
                         brukerTokenInfo,
                     ),
                 databasecontxt = DatabaseContext(ds),
+                sakTilgangDao = context.sakTilgangDao,
             )
 
         withContext(

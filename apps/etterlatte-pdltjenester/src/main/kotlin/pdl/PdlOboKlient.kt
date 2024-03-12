@@ -67,9 +67,9 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
 
     private suspend fun getOboToken(bruker: BrukerTokenInfo): String {
         val token =
-            azureAdClient.getOnBehalfOfAccessTokenForResource(
+            azureAdClient.hentTokenFraAD(
+                bruker,
                 listOf(pdlScope),
-                bruker.accessToken(),
             )
 
         return requireNotNull(token.get()?.accessToken) {

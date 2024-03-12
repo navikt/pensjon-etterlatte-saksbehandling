@@ -123,12 +123,15 @@ class GrunnlagsendringshendelseService(
             } catch (e: Exception) {
                 logger.error("Noe gikk galt ved opprettelse av dødshendelse i behandling.", e)
             }
-            return emptyList()
-        } else {
+        }
+
+        if (!doedshendelseService.kanSendeBrevOgOppretteOppgave()) {
             return inTransaction {
                 opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL)
             }
         }
+
+        return emptyList()
     }
 
     fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse): List<Grunnlagsendringshendelse> {
@@ -372,7 +375,11 @@ class GrunnlagsendringshendelseService(
     ) {
         val personRolle = grunnlagsendringshendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
         val pdlData =
-            pdltjenesterKlient.hentPdlModellFlereSaktyper(grunnlagsendringshendelse.gjelderPerson, personRolle, sak.sakType)
+            pdltjenesterKlient.hentPdlModellFlereSaktyper(
+                grunnlagsendringshendelse.gjelderPerson,
+                personRolle,
+                sak.sakType,
+            )
         val grunnlag =
             runBlocking {
                 grunnlagKlient.hentGrunnlag(sak.id)

@@ -122,6 +122,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                     doedshendelseService.apply {
                         every { opprettDoedshendelseForBeroertePersoner(any()) } returns Unit
                         every { kanBrukeDeodshendelserJob() } returns false
+                        every { kanSendeBrevOgOppretteOppgave() } returns false
                     },
                 ),
             )

@@ -27,6 +27,8 @@ import kotlinx.coroutines.future.future
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.ktor.client.ClientCallLogging
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Systembruker
 import java.util.concurrent.TimeUnit
 
 internal val defaultHttpClient =
@@ -89,6 +91,15 @@ class AzureAdClient(
                 ex,
             )
         }
+
+    suspend fun hentTokenFraAD(
+        bruker: BrukerTokenInfo,
+        scopes: List<String>,
+    ) = if (bruker is Systembruker) {
+        getAccessTokenForResource(scopes)
+    } else {
+        getOnBehalfOfAccessTokenForResource(scopes, bruker.accessToken())
+    }
 
     // Service-to-service access token request (client credentials grant)
     suspend fun getAccessTokenForResource(scopes: List<String>): Result<AccessToken, ThrowableErrorMessage> {

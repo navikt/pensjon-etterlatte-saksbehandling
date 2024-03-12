@@ -110,7 +110,6 @@ private fun getPathsFromResourceJAR(logger: Logger): List<String> {
             entry = zip.getNextEntry()
         }
     }
-    println("Fant jar sql filer $sqlFiler")
 
     return sqlFiler
 }

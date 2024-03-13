@@ -44,6 +44,7 @@ data class OmstillingsstoenadBeregning(
     val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
     val sisteBeregningsperiode: OmstillingsstoenadBeregningsperiode,
     val trygdetid: TrygdetidMedBeregningsmetode,
+    val inntektendringType: InntektendringType,
 ) : BrevdataMedInnhold
 
 data class OmstillingsstoenadBeregningsperiode(
@@ -55,6 +56,7 @@ data class OmstillingsstoenadBeregningsperiode(
     val relevantMaanederInnAar: Int,
     val grunnbeloep: Kroner,
     val ytelseFoerAvkorting: Kroner,
+    val restanse: Kroner,
     val utbetaltBeloep: Kroner,
     val trygdetid: Int,
     val beregningsMetodeAnvendt: BeregningsMetode,
@@ -75,4 +77,10 @@ enum class FeilutbetalingType {
     FEILUTBETALING_UTEN_VARSEL,
     FEILUTBETALING_MED_VARSEL,
     INGEN_FEILUTBETALING,
+}
+
+enum class InntektendringType {
+    INGEN_ENDRING,
+    MINDRE_INNTEKT,
+    MER_INNTEKT,
 }

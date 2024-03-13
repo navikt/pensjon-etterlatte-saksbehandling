@@ -4,8 +4,11 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
@@ -57,6 +60,7 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.UUID
+import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class KlageServiceImplTest : BehandlingIntegrationTest() {
@@ -68,7 +72,9 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
     private val brevApiKlientMock = mockk<BrevApiKlient>()
 
     private val saksbehandlerIdent = "SaraSak"
+    private val attestantIdent = "AtleAttestant"
     private val saksbehandler = Saksbehandler("token", saksbehandlerIdent, null)
+    private val attestant = Saksbehandler("tokenAttestant", attestantIdent, null)
     private val klagerFnr = GrunnlagTestData().gjenlevende.foedselsnummer.value
     private val enhet = "1337"
 
@@ -86,6 +92,10 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
         hendelseDao = applicationContext.hendelseDao
 
         coEvery { brevApiKlientMock.slettOversendelsesbrev(any(), any()) } returns Unit
+        coEvery { brevApiKlientMock.opprettVedtaksbrev(any(), any(), any()) } returns
+            opprettetBrevDto(Random.nextLong())
+        coEvery { brevApiKlientMock.ferdigstillBrev(any(), any(), any()) } just runs
+        coEvery { brevApiKlientMock.hentVedtaksbrev(any(), any()) } returns null
     }
 
     @BeforeAll
@@ -291,6 +301,34 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
         }
     }
 
+    @Test
+    fun `attestering trigger sletting av oversendelsesbrev`() {
+        coEvery { brevApiKlientMock.hentOversendelsesbrev(any(), any()) } returns opprettetBrevDto(1432)
+        val klageTilAttestering: Klage =
+            inTransaction {
+                val klage = opprettKlageOgSettInitieltUtfallAvvist()
+                service.lagreUtfallAvKlage(
+                    klageId = klage.id,
+                    utfall = KlageUtfallUtenBrev.Avvist(),
+                    saksbehandler = saksbehandler,
+                )
+                service.fattVedtak(klage.id, saksbehandler).also {
+                    oppgaveService.tildelSaksbehandler(
+                        oppgaveService.hentOppgaverForReferanse(klage.id.toString()).single().id,
+                        attestant.ident,
+                    )
+                }
+            }
+        inTransaction {
+            service.attesterVedtak(klageTilAttestering.id, "Gul Golf", attestant)
+        }
+
+        inTransaction {
+            coVerify { brevApiKlientMock.hentOversendelsesbrev(klageTilAttestering.id, attestant) }
+            coVerify { brevApiKlientMock.slettOversendelsesbrev(klageTilAttestering.id, attestant) }
+        }
+    }
+
     private fun formkrav() =
         Formkrav(
             vedtaketKlagenGjelder =
@@ -316,6 +354,10 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
     private fun opprettKlageOgSettInitieltUtfallAvvist(): Klage {
         val sak = oppprettOmsSak()
         val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""))
+        oppgaveService.tildelSaksbehandler(
+            oppgaveService.hentOppgaverForReferanse(klage.id.toString()).single().id,
+            saksbehandler.ident,
+        )
         service.lagreFormkravIKlage(klage.id, formkrav(), saksbehandler)
         return service.lagreInitieltUtfallMedBegrunnelseAvKlage(
             klage.id,

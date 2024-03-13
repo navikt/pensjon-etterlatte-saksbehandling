@@ -45,6 +45,9 @@ class ParallelleSannheterKlient(
                 ),
         )
 
+    suspend fun avklarFolkeregisteridentifikator(folkeregisteridentifikator: List<PdlFolkeregisteridentifikator>) =
+        avklar(folkeregisteridentifikator, Avklaring.FOLKEREGISTERIDENTIFIKATOR)
+
     suspend fun avklarAdressebeskyttelse(adressebeskyttelse: List<PdlAdressebeskyttelse>) =
         avklarNullable(adressebeskyttelse, Avklaring.ADRESSEBESKYTTELSE)
 
@@ -113,6 +116,7 @@ class ParallelleSannheterKlient(
     }
 
     private enum class Avklaring(val feltnavn: String) {
+        FOLKEREGISTERIDENTIFIKATOR("folkeregisteridentifikator"),
         NAVN("navn"),
         ADRESSEBESKYTTELSE("adressebeskyttelse"),
         STATSBORGERSKAP("statsborgerskap"),

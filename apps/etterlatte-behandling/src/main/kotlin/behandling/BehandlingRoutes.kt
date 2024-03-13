@@ -49,7 +49,7 @@ internal fun Route.behandlingRoutes(
     post("/api/behandling") {
         val request = call.receive<NyBehandlingRequest>()
 
-        val gjeldendeEnhet = behandlingFactory.finnGjeldendeEnhet(request.persongalleri, request.sakType)
+        val gjeldendeEnhet = inTransaction { behandlingFactory.finnGjeldendeEnhet(request.persongalleri, request.sakType) }
 
         kunSkrivetilgang(enhetNr = gjeldendeEnhet) {
             val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request, brukerTokenInfo)

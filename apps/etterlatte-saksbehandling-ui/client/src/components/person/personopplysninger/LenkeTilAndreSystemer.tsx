@@ -4,12 +4,9 @@ import { ExternalLinkIcon, MonitorIcon } from '@navikt/aksel-icons'
 import { Link, Tag } from '@navikt/ds-react'
 import { SpaceChildren } from '~shared/styled'
 import { ConfigContext } from '~clientConfig'
-import { useParams } from 'react-router-dom'
 
-export const LenkeTilAndreSystemer = (): ReactNode => {
+export const LenkeTilAndreSystemer = ({ fnr }: { fnr: string }): ReactNode => {
   const configContext = useContext(ConfigContext)
-
-  const { fnr } = useParams()
 
   return (
     <Personopplysning

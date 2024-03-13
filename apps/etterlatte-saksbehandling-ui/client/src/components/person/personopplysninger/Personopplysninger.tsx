@@ -9,7 +9,13 @@ import { hentPersonopplysningerForBehandling } from '~shared/api/grunnlag'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
-export const Personopplysninger = ({ sakStatus }: { sakStatus: Result<SakMedBehandlinger> }): ReactNode => {
+export const Personopplysninger = ({
+  sakStatus,
+  fnr,
+}: {
+  sakStatus: Result<SakMedBehandlinger>
+  fnr: string
+}): ReactNode => {
   const [personopplysningerResult, hentPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
 
   useEffect(() => {
@@ -24,11 +30,15 @@ export const Personopplysninger = ({ sakStatus }: { sakStatus: Result<SakMedBeha
   return (
     <Container>
       <SpaceChildren>
-        <LenkeTilAndreSystemer />
+        <LenkeTilAndreSystemer fnr={fnr} />
         {mapResult(personopplysningerResult, {
           pending: <Spinner visible={true} label="Henter personopplysninger" />,
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente personopplysninger'}</ApiErrorAlert>,
-          success: (personopplysninger) => <Bostedsadresser />,
+          success: (personopplysninger) => (
+            <>
+              <Bostedsadresser bostedsadresse={personopplysninger.soeker?.opplysning.bostedsadresse} />
+            </>
+          ),
         })}
       </SpaceChildren>
     </Container>

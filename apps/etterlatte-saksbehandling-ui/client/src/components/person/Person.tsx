@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
 import { Container } from '~shared/styled'
@@ -21,6 +21,7 @@ import { SamordningSak } from '~components/person/SamordningSak'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
 import { Personopplysninger } from '~components/person/personopplysninger/Personopplysninger'
+import { ConfigContext } from '~clientConfig'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -100,7 +101,7 @@ export const Person = () => {
             </Tabs.List>
 
             <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
-              <Personopplysninger />
+              <Personopplysninger sakStatus={sakStatus} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.SAKER}>
               <SakOversikt sakStatus={sakStatus} fnr={person.foedselsnummer} />

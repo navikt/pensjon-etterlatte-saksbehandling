@@ -1,12 +1,5 @@
 package no.nav.etterlatte
 
-import azureAdAttestantClaim
-import azureAdEgenAnsattClaim
-import azureAdFortroligClaim
-import azureAdNasjonMedLoggClaim
-import azureAdNasjonUtenLoggClaim
-import azureAdSaksbehandlerClaim
-import azureAdStrengtFortroligClaim
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine

@@ -1,12 +1,12 @@
 package no.nav.etterlatte.adressebeskyttelse
 
-import azureAdEgenAnsattClaim
-import azureAdFortroligClaim
-import azureAdStrengtFortroligClaim
 import com.nimbusds.jwt.JWTClaimsSet
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.azureAdEgenAnsattClaim
+import no.nav.etterlatte.azureAdFortroligClaim
+import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.klage.KlageDao

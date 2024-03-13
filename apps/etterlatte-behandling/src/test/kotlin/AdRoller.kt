@@ -1,3 +1,5 @@
+package no.nav.etterlatte
+
 val azureAdStrengtFortroligClaim: String by lazy {
     "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
 }

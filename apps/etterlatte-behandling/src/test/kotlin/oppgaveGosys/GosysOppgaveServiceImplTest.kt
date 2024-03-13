@@ -1,8 +1,5 @@
 package no.nav.etterlatte.oppgaveGosys
 
-import azureAdAttestantClaim
-import azureAdSaksbehandlerClaim
-import azureAdStrengtFortroligClaim
 import com.nimbusds.jwt.JWTClaimsSet
 import io.kotest.matchers.collections.shouldHaveSize
 import io.mockk.coEvery
@@ -10,6 +7,9 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.azureAdAttestantClaim
+import no.nav.etterlatte.azureAdSaksbehandlerClaim
+import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt

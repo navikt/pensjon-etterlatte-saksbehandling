@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Statsborgerskap
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlHentPerson
+import no.nav.etterlatte.pdl.PdlHentPersonNavn
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
 import org.slf4j.LoggerFactory
@@ -96,17 +97,25 @@ object PersonMapper {
 
     fun mapPersonNavn(
         ppsKlient: ParallelleSannheterKlient,
-        fnr: Folkeregisteridentifikator,
-        hentPerson: PdlHentPerson,
+        ident: String,
+        hentPerson: PdlHentPersonNavn,
     ): PersonNavn =
         runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
+
+            val fnr =
+                if (Folkeregisteridentifikator.isValid(ident)) {
+                    ident
+                } else {
+                    ppsKlient.avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
+                        .identifikasjonsnummer
+                }
 
             PersonNavn(
                 fornavn = navn.fornavn,
                 mellomnavn = navn.mellomnavn,
                 etternavn = navn.etternavn,
-                foedselsnummer = fnr,
+                foedselsnummer = Folkeregisteridentifikator.of(fnr),
             )
         }
 

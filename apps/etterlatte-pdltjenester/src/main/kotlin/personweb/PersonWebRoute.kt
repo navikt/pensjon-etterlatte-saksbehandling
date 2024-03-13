@@ -8,7 +8,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.kunSaksbehandler
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
 fun Route.personWebRoute(
@@ -20,9 +19,9 @@ fun Route.personWebRoute(
             kunSaksbehandler {
                 val request = call.receive<HentPersonNavnRequest>()
 
-                val person = service.hentPersonNavn(request.foedselsnummer, brukerTokenInfo)
+                val person = service.hentPersonNavn(request.ident, brukerTokenInfo)
 
-                sporing.logg(brukerTokenInfo, request.foedselsnummer, call.request.path(), "Hentet navn på person")
+                sporing.logg(brukerTokenInfo, person.foedselsnummer, call.request.path(), "Hentet navn på person")
 
                 call.respond(person)
             }
@@ -31,5 +30,5 @@ fun Route.personWebRoute(
 }
 
 private data class HentPersonNavnRequest(
-    val foedselsnummer: Folkeregisteridentifikator,
+    val ident: String,
 )

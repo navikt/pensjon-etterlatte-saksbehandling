@@ -1,6 +1,8 @@
 package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
@@ -11,6 +13,7 @@ import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
@@ -163,10 +166,10 @@ internal class BehandlingServiceImpl(
 
     private fun hentBehandlingForId(id: UUID) =
         behandlingDao.hentBehandling(id)?.let { behandling ->
-            listOf(behandling).firstOrNull()
+            listOf(behandling).filterForEnheter().firstOrNull()
         }
 
-    private fun hentBehandlingerForSakId(sakId: Long) = behandlingDao.alleBehandlingerISak(sakId)
+    private fun hentBehandlingerForSakId(sakId: Long) = behandlingDao.alleBehandlingerISak(sakId).filterForEnheter()
 
     override fun hentBehandling(behandlingId: UUID): Behandling? {
         return hentBehandlingForId(behandlingId)
@@ -568,4 +571,27 @@ internal class BehandlingServiceImpl(
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)
             ?: throw BehandlingNotFoundException(behandlingId)
+
+    private fun List<Behandling>.filterForEnheter(): List<Behandling> {
+        val enheterSomSkalFiltreresBort = ArrayList<String>()
+        val appUser = Kontekst.get().AppUser
+        if (appUser is SaksbehandlerMedEnheterOgRoller) {
+            val bruker = appUser.saksbehandlerMedRoller
+            if (!bruker.harRolleStrengtFortrolig()) {
+                enheterSomSkalFiltreresBort.add(Enheter.STRENGT_FORTROLIG.enhetNr)
+            }
+            if (!bruker.harRolleEgenAnsatt()) {
+                enheterSomSkalFiltreresBort.add(Enheter.EGNE_ANSATTE.enhetNr)
+            }
+        }
+
+        return filterBehandlingerForEnheter(enheterSomSkalFiltreresBort, this)
+    }
+
+    private fun filterBehandlingerForEnheter(
+        enheterSomSkalFiltreres: List<String>,
+        behandlinger: List<Behandling>,
+    ): List<Behandling> {
+        return behandlinger.filter { it.sak.enhet !in enheterSomSkalFiltreres }
+    }
 }

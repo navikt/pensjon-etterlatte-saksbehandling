@@ -302,7 +302,7 @@ class KlageServiceImpl(
             else -> {
                 return runBlocking {
                     val vedtakId = lagreVedtakForAvvisning(klage, saksbehandler)
-                    val vedtaksbrevId = opprettVedtaksbrevForAvvisning(klage, saksbehandler)
+                    val vedtaksbrevId = opprettEllerGjenbrukVedtaksbrev(klage, saksbehandler)
                     Pair(vedtakId, vedtaksbrevId)
                 }
             }
@@ -329,10 +329,14 @@ class KlageServiceImpl(
         }
     }
 
-    private fun opprettVedtaksbrevForAvvisning(
+    private fun opprettEllerGjenbrukVedtaksbrev(
         klage: Klage,
         saksbehandler: Saksbehandler,
     ): KlageVedtaksbrev {
+        val brev = runBlocking { brevApiKlient.hentVedtaksbrev(klage.id, saksbehandler) }
+        if (brev != null) {
+            return KlageVedtaksbrev(brev.id)
+        }
         val brevDto = runBlocking { brevApiKlient.opprettVedtaksbrev(klage.id, klage.sak.id, saksbehandler) }
         return KlageVedtaksbrev(brevDto.id)
     }

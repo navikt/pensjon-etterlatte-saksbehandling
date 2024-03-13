@@ -1,4 +1,5 @@
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
@@ -23,6 +24,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
         enheterForSaksbehandler: List<SaksbehandlerEnhet>,
         forventetSkriveEnheter: List<String>,
         forventetLeseEnheter: List<String>,
+        tilgangTilOppgavebenken: Boolean,
     ) {
         val saksbehandlerService = mockk<SaksbehandlerService>()
         val identifiedBy = mockk<TokenValidationContext>()
@@ -48,6 +50,8 @@ class SaksbehandlerMedEnheterOgRollerTest {
 
         skriveEnheter shouldContainExactlyInAnyOrder forventetSkriveEnheter
         leseEnheter shouldContainExactlyInAnyOrder forventetLeseEnheter
+
+        saksbehandler.kanSeOppgaveBenken() shouldBe tilgangTilOppgavebenken
     }
 
     companion object {
@@ -64,6 +68,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
                         Enheter.AALESUND_UTLAND.enhetNr,
                         Enheter.UTLAND.enhetNr,
                     ),
+                    true,
                 ),
                 Arguments.of(
                     "Vanlig saksbehandler med utland",
@@ -77,6 +82,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
                         Enheter.STEINKJER.enhetNr,
                         Enheter.UTLAND.enhetNr,
                     ),
+                    true,
                 ),
                 Arguments.of(
                     "Kontaktsenter",
@@ -89,12 +95,45 @@ class SaksbehandlerMedEnheterOgRollerTest {
                         Enheter.AALESUND_UTLAND.enhetNr,
                         Enheter.UTLAND.enhetNr,
                     ),
+                    false,
                 ),
                 Arguments.of(
                     "Ukjent",
                     listOf(SaksbehandlerEnhet("12345", "En annen enhet")),
                     emptyList<String>(),
                     emptyList<String>(),
+                    false,
+                ),
+                Arguments.of(
+                    "Vanlig saksbehandler med andre enheter enn bare de etterlatte kjenner til",
+                    listOf(
+                        SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, Enheter.PORSGRUNN.name),
+                        SaksbehandlerEnhet("12345", "En annen enhet"),
+                    ),
+                    listOf(Enheter.PORSGRUNN.enhetNr),
+                    listOf(
+                        Enheter.AALESUND.enhetNr,
+                        Enheter.STEINKJER.enhetNr,
+                        Enheter.AALESUND_UTLAND.enhetNr,
+                        Enheter.UTLAND.enhetNr,
+                    ),
+                    true,
+                ),
+                Arguments.of(
+                    "Kontaktsenter med andre enheter enn bare de etterlatte kjenner til",
+                    listOf(
+                        SaksbehandlerEnhet(Enheter.OEST_VIKEN.enhetNr, Enheter.OEST_VIKEN.navn),
+                        SaksbehandlerEnhet("12345", "En annen enhet"),
+                    ),
+                    emptyList<String>(),
+                    listOf(
+                        Enheter.AALESUND.enhetNr,
+                        Enheter.STEINKJER.enhetNr,
+                        Enheter.PORSGRUNN.enhetNr,
+                        Enheter.AALESUND_UTLAND.enhetNr,
+                        Enheter.UTLAND.enhetNr,
+                    ),
+                    false,
                 ),
             )
     }

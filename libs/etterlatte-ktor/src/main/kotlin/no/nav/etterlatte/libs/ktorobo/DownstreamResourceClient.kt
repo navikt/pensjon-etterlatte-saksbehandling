@@ -28,8 +28,8 @@ class DownstreamResourceClient(
 ) {
     suspend fun get(
         resource: Resource,
-        bruker: BrukerTokenInfo,
-    ) = gjoerKall(resource, bruker) { token ->
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = gjoerKall(resource, brukerTokenInfo) { token ->
         runCatching {
             httpClient.get(resource.url) {
                 header(token)
@@ -40,9 +40,9 @@ class DownstreamResourceClient(
 
     suspend fun post(
         resource: Resource,
-        bruker: BrukerTokenInfo,
+        brukerTokenInfo: BrukerTokenInfo,
         postBody: Any,
-    ) = gjoerKall(resource, bruker) { token ->
+    ) = gjoerKall(resource, brukerTokenInfo) { token ->
         runCatching {
             httpClient.post(resource.url) {
                 header(token)
@@ -54,9 +54,9 @@ class DownstreamResourceClient(
 
     suspend fun put(
         resource: Resource,
-        bruker: BrukerTokenInfo,
+        brukerTokenInfo: BrukerTokenInfo,
         putBody: Any,
-    ) = gjoerKall(resource, bruker) { token ->
+    ) = gjoerKall(resource, brukerTokenInfo) { token ->
         runCatching {
             httpClient.put(resource.url) {
                 header(token)
@@ -68,9 +68,9 @@ class DownstreamResourceClient(
 
     suspend fun delete(
         resource: Resource,
-        bruker: BrukerTokenInfo,
+        brukerTokenInfo: BrukerTokenInfo,
         postBody: String,
-    ) = gjoerKall(resource, bruker) { token ->
+    ) = gjoerKall(resource, brukerTokenInfo) { token ->
         runCatching {
             httpClient.delete(resource.url) {
                 header(token)
@@ -82,9 +82,9 @@ class DownstreamResourceClient(
 
     suspend fun patch(
         resource: Resource,
-        bruker: BrukerTokenInfo,
+        brukerTokenInfo: BrukerTokenInfo,
         patchBody: String,
-    ) = gjoerKall(resource, bruker) { token ->
+    ) = gjoerKall(resource, brukerTokenInfo) { token ->
         runCatching {
             httpClient.patch(resource.url) {
                 header(token)

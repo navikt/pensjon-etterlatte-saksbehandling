@@ -20,6 +20,7 @@ import { hentPersonNavn } from '~shared/api/pdltjenester'
 import { SamordningSak } from '~components/person/SamordningSak'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
+import { useSidetittel } from '~shared/hooks/useSidetittel'
 
 export enum PersonOversiktFane {
   SAKER = 'SAKER',
@@ -29,6 +30,8 @@ export enum PersonOversiktFane {
 }
 
 export const Person = () => {
+  useSidetittel('Personoversikt')
+
   const [search, setSearch] = useSearchParams()
 
   const [personStatus, hentPerson] = useApiCall(hentPersonNavn)

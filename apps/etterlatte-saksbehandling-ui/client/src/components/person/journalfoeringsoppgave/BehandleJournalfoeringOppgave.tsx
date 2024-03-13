@@ -35,8 +35,11 @@ import { hentJournalpost } from '~shared/api/dokument'
 import { JournalpostInnhold } from './journalpost/JournalpostInnhold'
 import { hentPersonNavn } from '~shared/api/pdltjenester'
 import { StatusBar } from '~shared/statusbar/Statusbar'
+import { useSidetittel } from '~shared/hooks/useSidetittel'
 
 export default function BehandleJournalfoeringOppgave() {
+  useSidetittel('Journalføringsoppgave')
+
   const { nyBehandlingRequest, oppgave, sakMedBehandlinger } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
 

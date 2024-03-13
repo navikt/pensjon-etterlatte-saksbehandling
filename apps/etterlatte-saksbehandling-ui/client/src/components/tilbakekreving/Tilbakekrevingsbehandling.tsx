@@ -18,8 +18,11 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { erUnderBehandling } from '~shared/types/Tilbakekreving'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
+import { useSidetittel } from '~shared/hooks/useSidetittel'
 
 export function Tilbakekrevingsbehandling() {
+  useSidetittel('Tilbakekreving')
+
   const tilbakekreving = useTilbakekreving()
   const dispatch = useAppDispatch()
   const { tilbakekrevingId } = useParams()

@@ -18,8 +18,11 @@ import { GosysOppgaveliste } from '~components/oppgavebenk/GosysOppgaveliste'
 import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { ProvideOppgavebenkContext } from '~components/oppgavebenk/state/OppgavebenkContext'
+import { useSidetittel } from '~shared/hooks/useSidetittel'
 
 export const Oppgavebenk = () => {
+  useSidetittel('Oppgavebenk')
+
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   if (!innloggetSaksbehandler.skriveEnheter.length) {
     return <Tilgangsmelding />

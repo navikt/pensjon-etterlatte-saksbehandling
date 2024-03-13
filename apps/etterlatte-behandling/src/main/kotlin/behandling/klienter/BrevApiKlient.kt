@@ -86,6 +86,11 @@ interface BrevApiKlient {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto?
+
+    suspend fun hentOversendelsesbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto?
 }
 
 class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
@@ -188,6 +193,17 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
     ): OpprettetBrevDto? {
         return get(
             url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak",
+            onSuccess = { resource -> resource.response?.let { deserialize(it.toJson()) } },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+    }
+
+    override suspend fun hentOversendelsesbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto? {
+        return get(
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/oversendelse",
             onSuccess = { resource -> resource.response?.let { deserialize(it.toJson()) } },
             brukerTokenInfo = brukerTokenInfo,
         )

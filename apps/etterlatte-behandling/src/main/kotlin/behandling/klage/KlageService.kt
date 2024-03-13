@@ -581,6 +581,13 @@ class KlageServiceImpl(
         )
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(klageId.toString(), saksbehandler)
+
+        runBlocking {
+            val brevDto = brevApiKlient.hentOversendelsesbrev(klageId, saksbehandler)
+            if (brevDto?.status?.ikkeFerdigstilt() == true) {
+                brevApiKlient.slettOversendelsesbrev(klageId, saksbehandler)
+            }
+        }
         return oppdatertKlage
     }
 

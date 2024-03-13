@@ -286,7 +286,7 @@ class KlageServiceImpl(
             else -> {
                 return runBlocking {
                     val vedtakId = lagreVedtakForAvvisning(klage, saksbehandler)
-                    val vedtaksbrevId = opprettEllerGjenbrukVedtaksbrev(klage, saksbehandler)
+                    val vedtaksbrevId = vedtaksbrev(klage, saksbehandler)
                     Pair(vedtakId, vedtaksbrevId)
                 }
             }
@@ -303,26 +303,27 @@ class KlageServiceImpl(
             else -> {
                 val brev =
                     runBlocking {
-                        brevApiKlient.opprettKlageOversendelsesbrevISak(
-                            klage.id,
-                            saksbehandler,
-                        )
+                        brevApiKlient.hentOversendelsesbrev(klage.id, saksbehandler)
+                            ?: brevApiKlient.opprettKlageOversendelsesbrevISak(
+                                klage.id,
+                                saksbehandler,
+                            )
                     }
                 KlageOversendelsebrev(brev.id)
             }
         }
     }
 
-    private fun opprettEllerGjenbrukVedtaksbrev(
+    private fun vedtaksbrev(
         klage: Klage,
         saksbehandler: Saksbehandler,
     ): KlageVedtaksbrev {
-        val brev = runBlocking { brevApiKlient.hentVedtaksbrev(klage.id, saksbehandler) }
-        if (brev != null) {
-            return KlageVedtaksbrev(brev.id)
-        }
-        val brevDto = runBlocking { brevApiKlient.opprettVedtaksbrev(klage.id, klage.sak.id, saksbehandler) }
-        return KlageVedtaksbrev(brevDto.id)
+        val brev =
+            runBlocking {
+                brevApiKlient.hentVedtaksbrev(klage.id, saksbehandler)
+                    ?: brevApiKlient.opprettVedtaksbrev(klage.id, klage.sak.id, saksbehandler)
+            }
+        return KlageVedtaksbrev(brev.id)
     }
 
     private fun lagreVedtakForAvvisning(
@@ -737,17 +738,6 @@ class KlageServiceImpl(
         }
 
         return tidspunktJournalfoert to journalpostIdJournalfoering
-    }
-
-    private fun sjekkStoetteHvisDelvisOmgjoering(utfall: KlageUtfallUtenBrev) {
-        if (utfall is KlageUtfallUtenBrev.DelvisOmgjoering &&
-            !featureToggleService.isEnabled(
-                KlageFeatureToggle.StoetterUtfallDelvisOmgjoering,
-                false,
-            )
-        ) {
-            throw FeatureIkkeStoettetException()
-        }
     }
 
     private fun KlageUtfallUtenBrev.erStoettet(): Boolean =

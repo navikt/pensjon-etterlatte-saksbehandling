@@ -6,17 +6,15 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
@@ -29,10 +27,10 @@ class DownstreamResourceClient(
     suspend fun get(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = gjoerKall(resource, brukerTokenInfo) { token ->
+    ) = medToken(resource, brukerTokenInfo) { token ->
         runCatching {
             httpClient.get(resource.url) {
-                header(token)
+                bearerAuth(token.accessToken)
                 resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
             }
         }.fold(resource)
@@ -42,10 +40,10 @@ class DownstreamResourceClient(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         postBody: Any,
-    ) = gjoerKall(resource, brukerTokenInfo) { token ->
+    ) = medToken(resource, brukerTokenInfo) { token ->
         runCatching {
             httpClient.post(resource.url) {
-                header(token)
+                bearerAuth(token.accessToken)
                 contentType(ContentType.Application.Json)
                 setBody(postBody)
             }
@@ -56,10 +54,10 @@ class DownstreamResourceClient(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         putBody: Any,
-    ) = gjoerKall(resource, brukerTokenInfo) { token ->
+    ) = medToken(resource, brukerTokenInfo) { token ->
         runCatching {
             httpClient.put(resource.url) {
-                header(token)
+                bearerAuth(token.accessToken)
                 contentType(ContentType.Application.Json)
                 setBody(putBody)
             }
@@ -70,10 +68,10 @@ class DownstreamResourceClient(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         postBody: String,
-    ) = gjoerKall(resource, brukerTokenInfo) { token ->
+    ) = medToken(resource, brukerTokenInfo) { token ->
         runCatching {
             httpClient.delete(resource.url) {
-                header(token)
+                bearerAuth(token.accessToken)
                 contentType(ContentType.Application.Json)
                 setBody(postBody)
             }
@@ -84,31 +82,31 @@ class DownstreamResourceClient(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         patchBody: String,
-    ) = gjoerKall(resource, brukerTokenInfo) { token ->
+    ) = medToken(resource, brukerTokenInfo) { token ->
         runCatching {
             httpClient.patch(resource.url) {
-                header(token)
+                bearerAuth(token.accessToken)
                 contentType(ContentType.Application.Json)
                 setBody(patchBody)
             }
         }.fold(resource)
     }
 
-    private suspend fun gjoerKall(
+    private suspend fun medToken(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         action: suspend (token: AccessToken) -> Result<JsonNode?, Throwable>,
     ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
-        return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes).andThen { action(it) }.andThen { response ->
-            when (response) {
-                null -> Ok(resource)
-                else -> Ok(resource.addResponse(response))
+        return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
+            .andThen { action(it) }
+            .andThen { response ->
+                when (response) {
+                    null -> Ok(resource)
+                    else -> Ok(resource.addResponse(response))
+                }
             }
-        }
     }
-
-    private fun HttpRequestBuilder.header(token: AccessToken) = header(HttpHeaders.Authorization, "Bearer ${token.accessToken}")
 
     private suspend fun kotlin.Result<HttpResponse>.fold(resource: Resource) =
         this.fold(

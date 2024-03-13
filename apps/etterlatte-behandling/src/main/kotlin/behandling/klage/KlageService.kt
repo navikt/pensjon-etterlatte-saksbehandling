@@ -219,24 +219,8 @@ class KlageServiceImpl(
         utfall: KlageUtfallUtenBrev,
         saksbehandler: Saksbehandler,
     ): Klage {
-        if (utfall is KlageUtfallUtenBrev.DelvisOmgjoering &&
-            !featureToggleService.isEnabled(
-                KlageFeatureToggle.StoetterUtfallDelvisOmgjoering,
-                false,
-            )
-        ) {
-            throw FeatureIkkeStoettetException()
-        }
-
         val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
-        if (klage.utfall is KlageUtfallMedData.Avvist) {
-            // Vi må rydde bort det vedtaksbrevet som ble opprettet ved forrige utfall
-            runBlocking { brevApiKlient.slettVedtaksbrev(klageId, saksbehandler) }
-        }
-        val sammeUtfallSomFoer = klage.utfall?.harSammeUtfall(utfall) ?: false
-        if (!sammeUtfallSomFoer) {
-            runBlocking { brevApiKlient.slettOversendelsesbrev(klageId, saksbehandler) }
-        }
+        if (!utfall.erStoettet()) throw FeatureIkkeStoettetException()
 
         val utfallMedBrev =
             when (utfall) {
@@ -754,6 +738,28 @@ class KlageServiceImpl(
 
         return tidspunktJournalfoert to journalpostIdJournalfoering
     }
+
+    private fun sjekkStoetteHvisDelvisOmgjoering(utfall: KlageUtfallUtenBrev) {
+        if (utfall is KlageUtfallUtenBrev.DelvisOmgjoering &&
+            !featureToggleService.isEnabled(
+                KlageFeatureToggle.StoetterUtfallDelvisOmgjoering,
+                false,
+            )
+        ) {
+            throw FeatureIkkeStoettetException()
+        }
+    }
+
+    private fun KlageUtfallUtenBrev.erStoettet(): Boolean =
+        when (this) {
+            is KlageUtfallUtenBrev.DelvisOmgjoering ->
+                featureToggleService.isEnabled(
+                    KlageFeatureToggle.StoetterUtfallDelvisOmgjoering,
+                    false,
+                )
+
+            else -> true
+        }
 }
 
 class OmgjoeringMaaGjeldeEtVedtakException(klage: Klage) :

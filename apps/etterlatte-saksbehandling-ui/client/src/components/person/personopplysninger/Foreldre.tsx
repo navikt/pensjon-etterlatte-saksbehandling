@@ -4,6 +4,7 @@ import { PersonIcon } from '@navikt/aksel-icons'
 import { Heading, Table, Tag } from '@navikt/ds-react'
 import { SpaceChildren } from '~shared/styled'
 import { Personopplysning as PdlPersonopplysning } from '~shared/types/grunnlag'
+import { formaterStringDato } from '~utils/formattering'
 
 export const Foreldre = ({
   avdoed,
@@ -33,7 +34,7 @@ export const Foreldre = ({
                       {`${doed.opplysning.fornavn} ${doed.opplysning.etternavn}`}
                       {!!doed.opplysning.doedsdato && (
                         <Tag variant="error-filled" size="small">
-                          {doed.opplysning.doedsdato}
+                          Død {formaterStringDato(doed.opplysning.doedsdato)}
                         </Tag>
                       )}
                     </SpaceChildren>

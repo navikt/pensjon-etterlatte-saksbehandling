@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.ktorobo
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
@@ -28,12 +27,10 @@ class DownstreamResourceClient(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
     ) = medToken(resource, brukerTokenInfo) { token ->
-        runCatching {
-            httpClient.get(resource.url) {
-                bearerAuth(token.accessToken)
-                resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
-            }
-        }.fold(resource)
+        httpClient.get(resource.url) {
+            bearerAuth(token.accessToken)
+            resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
+        }
     }
 
     suspend fun post(
@@ -41,13 +38,11 @@ class DownstreamResourceClient(
         brukerTokenInfo: BrukerTokenInfo,
         postBody: Any,
     ) = medToken(resource, brukerTokenInfo) { token ->
-        runCatching {
-            httpClient.post(resource.url) {
-                bearerAuth(token.accessToken)
-                contentType(ContentType.Application.Json)
-                setBody(postBody)
-            }
-        }.fold(resource)
+        httpClient.post(resource.url) {
+            bearerAuth(token.accessToken)
+            contentType(ContentType.Application.Json)
+            setBody(postBody)
+        }
     }
 
     suspend fun put(
@@ -55,13 +50,11 @@ class DownstreamResourceClient(
         brukerTokenInfo: BrukerTokenInfo,
         putBody: Any,
     ) = medToken(resource, brukerTokenInfo) { token ->
-        runCatching {
-            httpClient.put(resource.url) {
-                bearerAuth(token.accessToken)
-                contentType(ContentType.Application.Json)
-                setBody(putBody)
-            }
-        }.fold(resource)
+        httpClient.put(resource.url) {
+            bearerAuth(token.accessToken)
+            contentType(ContentType.Application.Json)
+            setBody(putBody)
+        }
     }
 
     suspend fun delete(
@@ -69,13 +62,11 @@ class DownstreamResourceClient(
         brukerTokenInfo: BrukerTokenInfo,
         postBody: String,
     ) = medToken(resource, brukerTokenInfo) { token ->
-        runCatching {
-            httpClient.delete(resource.url) {
-                bearerAuth(token.accessToken)
-                contentType(ContentType.Application.Json)
-                setBody(postBody)
-            }
-        }.fold(resource)
+        httpClient.delete(resource.url) {
+            bearerAuth(token.accessToken)
+            contentType(ContentType.Application.Json)
+            setBody(postBody)
+        }
     }
 
     suspend fun patch(
@@ -83,23 +74,21 @@ class DownstreamResourceClient(
         brukerTokenInfo: BrukerTokenInfo,
         patchBody: String,
     ) = medToken(resource, brukerTokenInfo) { token ->
-        runCatching {
-            httpClient.patch(resource.url) {
-                bearerAuth(token.accessToken)
-                contentType(ContentType.Application.Json)
-                setBody(patchBody)
-            }
-        }.fold(resource)
+        httpClient.patch(resource.url) {
+            bearerAuth(token.accessToken)
+            contentType(ContentType.Application.Json)
+            setBody(patchBody)
+        }
     }
 
     private suspend fun medToken(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
-        action: suspend (token: AccessToken) -> Result<JsonNode?, Throwable>,
+        action: suspend (token: AccessToken) -> HttpResponse,
     ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
-            .andThen { action(it) }
+            .andThen { runCatching { action(it) }.fold(resource) }
             .andThen { response ->
                 when (response) {
                     null -> Ok(resource)

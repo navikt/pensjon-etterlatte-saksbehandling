@@ -90,9 +90,9 @@ class GosysOppgaveServiceImpl(
             enheter.contains(item.enhet)
         }
 
-    fun <T> List<T>.filterForEnheter(
+    fun List<GosysOppgave>.filterForEnheter(
         user: User,
-        filter: (item: T, enheter: List<String>) -> Boolean,
+        filter: (item: GosysOppgave, enheter: List<String>) -> Boolean,
     ) = when (user) {
         is SaksbehandlerMedEnheterOgRoller -> {
             val enheter = user.enheter()

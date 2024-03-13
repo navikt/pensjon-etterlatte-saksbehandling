@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.database
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import no.nav.etterlatte.libs.common.appIsInGCP
+import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.isProd
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
@@ -59,6 +60,9 @@ fun DataSource.migrate(): MigrateResult {
                 val dblocationsMiljoe = mutableListOf("db/migration")
                 if (appIsInGCP()) {
                     dblocationsMiljoe.add("db/gcp")
+                }
+                if (isDev()) {
+                    dblocationsMiljoe.add("db/dev")
                 }
                 if (isProd()) {
                     dblocationsMiljoe.add("db/prod")

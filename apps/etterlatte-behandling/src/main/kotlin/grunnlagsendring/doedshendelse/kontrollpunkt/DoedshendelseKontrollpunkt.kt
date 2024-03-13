@@ -110,6 +110,15 @@ sealed class DoedshendelseKontrollpunkt {
         override val avbryt: Boolean = false
     }
 
+    @JsonTypeName("SAMBOER_SAMME_ADRESSE_OG_FELLES_BARN")
+    data object SamboerSammeAdresseOgFellesBarn : DoedshendelseKontrollpunkt() {
+        override val kode = "SAMBOER_SAMME_ADRESSE_OG_FELLES_BARN"
+        override val beskrivelse: String = "Samboer til avdød med samme adresse og felles barn"
+        override val sendBrev: Boolean = true
+        override val opprettOppgave: Boolean = false
+        override val avbryt: Boolean = false
+    }
+
     @JsonTypeName("EPS_SKILT_SISTE_5_UKJENT_GIFTEMAAL_VARIGHET")
     data object EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde : DoedshendelseKontrollpunkt() {
         override val kode = "EPS_SKILT_SISTE_5_UKJENT_GIFTEMAAL_VARIGHET"

@@ -11,7 +11,6 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAktsomhet
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
@@ -24,38 +23,10 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-class TilbakekrevingInnholdBrevDataTest {
+class TilbakekrevingInnholdDTOTest {
     @Test
     fun `skal inneholde saktype`() {
-        TilbakekrevingInnholdBrevData.fra(brevData()).sakType shouldBe SakType.OMSTILLINGSSTOENAD
-    }
-
-    @Test
-    fun `skal sjekke om inneholder renter`() {
-        val brevUtenRenter = brevData(perioder = listOf(tilbakekrevingperiode()))
-        TilbakekrevingInnholdBrevData.fra(brevUtenRenter).harRenter shouldBe false
-
-        val brevDataMedRenter = brevData(perioder = listOf(tilbakekrevingperiode(renteTilleg = 10)))
-        TilbakekrevingInnholdBrevData.fra(brevDataMedRenter).harRenter shouldBe true
-    }
-
-    @Test
-    fun `skal sjekke om inneholder strafferetslig`() {
-        val brevUtenStrafferett = brevData(vurdering = tilbakekrevingvurdering(aktsomhet = TilbakekrevingAktsomhet.SIMPEL_UAKTSOMHET))
-        TilbakekrevingInnholdBrevData.fra(brevUtenStrafferett).harStrafferettslig shouldBe false
-
-        val brevMedStrafferett = brevData(vurdering = tilbakekrevingvurdering(aktsomhet = TilbakekrevingAktsomhet.GROV_UAKTSOMHET))
-        TilbakekrevingInnholdBrevData.fra(brevMedStrafferett).harStrafferettslig shouldBe true
-    }
-
-    @Test
-    fun `skal sjekke om inneholder foreldelse`() {
-        val brevDataUtenForeldelse = brevData(perioder = listOf(tilbakekrevingperiode()))
-        TilbakekrevingInnholdBrevData.fra(brevDataUtenForeldelse).harForeldelse shouldBe false
-
-        val brevDataMedForeldelse =
-            brevData(perioder = listOf(tilbakekrevingperiode(resultat = TilbakekrevingResultat.FORELDET)))
-        TilbakekrevingInnholdBrevData.fra(brevDataMedForeldelse).harForeldelse shouldBe true
+        TilbakekrevingBrevDTO.fra(brevData(), emptyList()).sakType shouldBe SakType.OMSTILLINGSSTOENAD
     }
 
     @Test
@@ -75,10 +46,10 @@ class TilbakekrevingInnholdBrevDataTest {
                     ),
             )
 
-        val innholdData = TilbakekrevingInnholdBrevData.fra(brevData)
+        val data = TilbakekrevingBrevDTO.fra(brevData, emptyList())
 
-        innholdData.perioder.size shouldBe 1
-        with(innholdData.perioder[0]) {
+        data.tilbakekreving.perioder.size shouldBe 1
+        with(data.tilbakekreving.perioder[0]) {
             maaned shouldBe YearMonth.of(2023, 1).atDay(1)
             beloeper shouldBe
                 TilbakekrevingBeloeperData(
@@ -88,7 +59,7 @@ class TilbakekrevingInnholdBrevDataTest {
                     fradragSkatt = Kroner(400),
                     renteTillegg = Kroner(500),
                 )
-            resultat shouldBe TilbakekrevingResultat.FULL_TILBAKEKREV.name
+            resultat shouldBe TilbakekrevingResultat.FULL_TILBAKEKREV
         }
     }
 
@@ -114,7 +85,7 @@ class TilbakekrevingInnholdBrevDataTest {
                         ),
                     ),
             )
-        TilbakekrevingInnholdBrevData.fra(brevData).summer shouldBe
+        TilbakekrevingBrevDTO.fra(brevData, emptyList()).tilbakekreving.summer shouldBe
             TilbakekrevingBeloeperData(
                 feilutbetaling = Kroner(200),
                 bruttoTilbakekreving = Kroner(400),
@@ -126,7 +97,7 @@ class TilbakekrevingInnholdBrevDataTest {
 
     companion object {
         fun brevData(
-            perioder: List<TilbakekrevingPeriode> = emptyList(),
+            perioder: List<TilbakekrevingPeriode> = listOf(tilbakekrevingperiode()),
             vurdering: TilbakekrevingVurdering = tilbakekrevingvurdering(),
         ) = GenerellBrevData(
             sak = Sak("12345612345", SakType.OMSTILLINGSSTOENAD, 123L, "4808"),

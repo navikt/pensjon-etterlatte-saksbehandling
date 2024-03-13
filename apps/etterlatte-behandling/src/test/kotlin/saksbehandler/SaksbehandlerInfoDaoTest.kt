@@ -1,6 +1,7 @@
 package no.nav.etterlatte.saksbehandler
 
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
@@ -14,14 +15,37 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class SaksbehandlerInfoDaoTransTest(val dataSource: DataSource) {
-    private lateinit var saksbehandlerInfoDaoTrans: SaksbehandlerInfoDao
+internal class SaksbehandlerInfoDaoTest(val dataSource: DataSource) {
     private lateinit var saksbehandlerInfoDao: SaksbehandlerInfoDao
 
     @BeforeAll
     fun beforeAll() {
-        saksbehandlerInfoDaoTrans = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
         saksbehandlerInfoDao = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
+    }
+
+    @Test
+    fun `Kan hente navn for saksbehandler`() {
+        val sbporsgrunn = SaksbehandlerInfo("identporsgrunn", "navn")
+        saksbehandlerInfoDao.upsertSaksbehandlerNavn(sbporsgrunn)
+        val saksbehandlerNavn = saksbehandlerInfoDao.hentSaksbehandlerNavn(sbporsgrunn.ident)
+        saksbehandlerNavn shouldBe sbporsgrunn.navn
+    }
+
+    @Test
+    fun `Kan hente alle saksbehandlere sine identer`() {
+        val sbporsgrunn = SaksbehandlerInfo("identporsgrunn", "navn")
+        val sbaalesund = SaksbehandlerInfo("identaalesund", "navn")
+        saksbehandlerInfoDao.upsertSaksbehandlerNavn(sbporsgrunn)
+        saksbehandlerInfoDao.upsertSaksbehandlerNavn(sbaalesund)
+
+        val sbaalesundfinnes = saksbehandlerInfoDao.saksbehandlerFinnes(sbaalesund.ident)
+        sbaalesundfinnes shouldBe true
+
+        val sbporsgrunnfinnes = saksbehandlerInfoDao.saksbehandlerFinnes(sbporsgrunn.ident)
+        sbporsgrunnfinnes shouldBe true
+
+        val randomidentfinnesikke = saksbehandlerInfoDao.saksbehandlerFinnes("ident")
+        randomidentfinnesikke shouldBe false
     }
 
     @Test
@@ -37,15 +61,15 @@ internal class SaksbehandlerInfoDaoTransTest(val dataSource: DataSource) {
             sbaalesund.ident to listOf(SaksbehandlerEnhet(Enheter.AALESUND.enhetNr, Enheter.AALESUND.navn)),
         )
 
-        val saksBehandlereMedAalesundEnhet = saksbehandlerInfoDaoTrans.hentSaksbehandlereForEnhet(Enheter.AALESUND.enhetNr)
+        val saksBehandlereMedAalesundEnhet = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enheter.AALESUND.enhetNr)
         Assertions.assertEquals(1, saksBehandlereMedAalesundEnhet.size)
         Assertions.assertEquals(sbaalesund.ident, saksBehandlereMedAalesundEnhet[0].ident)
 
-        val porsgrunn = saksbehandlerInfoDaoTrans.hentSaksbehandlereForEnhet(Enheter.PORSGRUNN.enhetNr)
+        val porsgrunn = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enheter.PORSGRUNN.enhetNr)
         Assertions.assertEquals(1, porsgrunn.size)
         Assertions.assertEquals(sbporsgrunn.ident, porsgrunn[0].ident)
 
-        val ingenSteinkjerSaksbehandlere = saksbehandlerInfoDaoTrans.hentSaksbehandlereForEnhet(Enheter.STEINKJER.enhetNr)
+        val ingenSteinkjerSaksbehandlere = saksbehandlerInfoDao.hentSaksbehandlereForEnhet(Enheter.STEINKJER.enhetNr)
         Assertions.assertEquals(0, ingenSteinkjerSaksbehandlere.size)
     }
 
@@ -66,7 +90,7 @@ internal class SaksbehandlerInfoDaoTransTest(val dataSource: DataSource) {
             )
         saksbehandlerInfoDao.upsertSaksbehandlerEnheter(sbaalesund.ident to enheterAalesundSaksbehandler)
 
-        val hentetEnheterForAalesundSB = saksbehandlerInfoDaoTrans.hentSaksbehandlerEnheter(sbaalesund.ident)
+        val hentetEnheterForAalesundSB = saksbehandlerInfoDao.hentSaksbehandlerEnheter(sbaalesund.ident)
         hentetEnheterForAalesundSB shouldContainExactly enheterAalesundSaksbehandler
     }
 }

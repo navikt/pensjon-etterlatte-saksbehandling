@@ -7,6 +7,7 @@ export interface IBehandlingInfo {
   behandlingId: string
   sakId: number
   sakType: SakType
+  sakEnhetId: string
   status: IBehandlingStatus
   behandlendeSaksbehandler?: string
   attesterendeSaksbehandler?: string

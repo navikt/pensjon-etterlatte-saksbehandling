@@ -29,7 +29,11 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
   const avdoedesDoedsdato = avdoede?.opplysning?.doedsdato
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
-  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
+  const redigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
   const configContext = useContext(ConfigContext)
 
   const [beskrivelse, setBeskrivelse] = useState<string>('')

@@ -47,6 +47,7 @@ const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSamm
   behandlingId: behandling.id,
   sakId: behandling.sakId,
   sakType: behandling.sakType,
+  sakEnhetId: behandling.sakEnhetId,
   nasjonalEllerUtland: finnUtNasjonalitet(behandling),
   status: behandling.status,
   behandlendeSaksbehandler: vedtak?.behandlendeSaksbehandler,

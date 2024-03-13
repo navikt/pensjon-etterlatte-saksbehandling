@@ -7,6 +7,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseJobService
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.TimerJob
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
+import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
@@ -18,11 +19,12 @@ class DoedsmeldingJob(
     private val initialDelay: Long,
     private val interval: Duration,
     dataSource: DataSource,
+    val sakTilgangDao: SakTilgangDao,
 ) : TimerJob {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
 
-    private var jobContext: Context = Context(Self(doedshendelseService::class.java.simpleName), DatabaseContext(dataSource))
+    private var jobContext: Context = Context(Self(doedshendelseService::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao)
 
     override fun schedule(): Timer {
         logger.info("$jobbNavn er satt til å kjøre med doedshendelseService=${doedshendelseService::class.simpleName} og periode $interval")

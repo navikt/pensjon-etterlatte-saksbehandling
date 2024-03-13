@@ -1,6 +1,6 @@
 import { useKlage, useKlageRedigerbar } from '~components/klage/useKlage'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { addKlage, resetKlage } from '~store/reducers/KlageReducer'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -18,6 +18,7 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { KlageFormkrav } from '~components/klage/formkrav/KlageFormkrav'
 import { KlageVurdering } from '~components/klage/vurdering/KlageVurdering'
+import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 
 export function Klagebehandling() {
   const klage = useKlage()
@@ -25,12 +26,12 @@ export function Klagebehandling() {
   const dispatch = useAppDispatch()
   const [fetchKlageStatus, fetchKlage] = useApiCall(hentKlage)
   const [personStatus, hentPerson] = useApiCall(getPerson)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const [kanRedigere, setKanRedigere] = useState(false)
 
   const klageIdFraUrl = match?.params.klageId
   const viHarLastetRiktigKlage = klageIdFraUrl === klage?.id
-
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  const kanRedigere = (useKlageRedigerbar() && innloggetSaksbehandler.skriveTilgang) ?? false
+  const klageRedigerbar = useKlageRedigerbar()
 
   useEffect(() => {
     if (!klageIdFraUrl) return
@@ -50,6 +51,12 @@ export function Klagebehandling() {
   useEffect(() => {
     if (klage?.sak.ident) {
       hentPerson(klage.sak.ident)
+    }
+
+    if (klage?.sak.enhet) {
+      setKanRedigere(
+        (klageRedigerbar && enhetErSkrivbar(klage.sak.enhet, innloggetSaksbehandler.skriveEnheter)) ?? false
+      )
     }
   }, [klage?.sak])
 

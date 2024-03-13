@@ -9,10 +9,8 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.GrunnlagKlientTest
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
@@ -36,9 +34,12 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.nyKontekstMedBruker
+import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -62,29 +63,191 @@ import java.util.UUID
 class BehandlingServiceImplTest {
     private val user =
         mockk<SaksbehandlerMedEnheterOgRoller> {
+            every { saksbehandlerMedRoller } returns
+                mockk<SaksbehandlerMedRoller> {
+                    every { harRolleStrengtFortrolig() } returns false
+                    every { harRolleEgenAnsatt() } returns false
+                }
             every { name() } returns "ident"
             every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
         }
 
     @BeforeEach
     fun before() {
-        Kontekst.set(
-            Context(
-                user,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
+        nyKontekstMedBruker(user)
+    }
 
-                    override fun harIntransaction(): Boolean {
-                        throw NotImplementedException("not implemented")
+    @Test
+    fun `Kan hente egne ansatte behandlínger som egen ansatt saksbehandler`() {
+        val userStrengfortrolig =
+            mockk<SaksbehandlerMedEnheterOgRoller> {
+                every { saksbehandlerMedRoller } returns
+                    mockk<SaksbehandlerMedRoller> {
+                        every { harRolleStrengtFortrolig() } returns false
+                        every { harRolleEgenAnsatt() } returns true
                     }
+                every { name() } returns "ident"
+                every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+            }
+        nyKontekstMedBruker(userStrengfortrolig)
+        val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
+        val behandlingDaoMock =
+            mockk<BehandlingDao> {
+                every { alleBehandlingerISak(1) } returns
+                    listOf(
+                        revurdering(sakId = 1, revurderingAarsak = Revurderingaarsak.REGULERING, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                        foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                    )
+            }
+        val hendelserMock = mockk<HendelseDao>()
 
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
+        val sut =
+            BehandlingServiceImpl(
+                behandlingDao = behandlingDaoMock,
+                behandlingHendelser = behandlingHendelser,
+                grunnlagsendringshendelseDao = mockk(),
+                hendelseDao = hendelserMock,
+                grunnlagKlient = mockk(),
+                behandlingRequestLogger = mockk(),
+                kommerBarnetTilGodeDao = mockk(),
+                oppgaveService = mockk(),
+                grunnlagService = mockk(),
+            )
+
+        val behandlinger = sut.hentBehandlingerForSak(1)
+
+        assertAll(
+            "skal hente behandlinger",
+            { assertEquals(2, behandlinger.size) },
+            { assertEquals(1, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) },
+            { assertEquals(1, behandlinger.filterIsInstance<Revurdering>().size) },
+        )
+    }
+
+    @Test
+    fun `Kan hente strengt fortrolig behandlínger som streng fortrolig saksbehandler`() {
+        val userStrengfortrolig =
+            mockk<SaksbehandlerMedEnheterOgRoller> {
+                every { saksbehandlerMedRoller } returns
+                    mockk<SaksbehandlerMedRoller> {
+                        every { harRolleStrengtFortrolig() } returns true
+                        every { harRolleEgenAnsatt() } returns false
                     }
-                },
-            ),
+                every { name() } returns "ident"
+                every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+            }
+        nyKontekstMedBruker(userStrengfortrolig)
+        val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
+        val behandlingDaoMock =
+            mockk<BehandlingDao> {
+                every { alleBehandlingerISak(1) } returns
+                    listOf(
+                        revurdering(
+                            sakId = 1,
+                            revurderingAarsak = Revurderingaarsak.REGULERING,
+                            enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
+                        ),
+                        foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
+                    )
+            }
+        val hendelserMock = mockk<HendelseDao>()
+
+        val sut =
+            BehandlingServiceImpl(
+                behandlingDao = behandlingDaoMock,
+                behandlingHendelser = behandlingHendelser,
+                grunnlagsendringshendelseDao = mockk(),
+                hendelseDao = hendelserMock,
+                grunnlagKlient = mockk(),
+                behandlingRequestLogger = mockk(),
+                kommerBarnetTilGodeDao = mockk(),
+                oppgaveService = mockk(),
+                grunnlagService = mockk(),
+            )
+
+        val behandlinger = sut.hentBehandlingerForSak(1)
+
+        assertAll(
+            "skal hente behandlinger",
+            { assertEquals(2, behandlinger.size) },
+            { assertEquals(1, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) },
+            { assertEquals(1, behandlinger.filterIsInstance<Revurdering>().size) },
+        )
+    }
+
+    @Test
+    fun `Kan ikke hente strengt fortrolig behandlínger som vanlig saksbehandler`() {
+        val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
+        val behandlingDaoMock =
+            mockk<BehandlingDao> {
+                every { alleBehandlingerISak(1) } returns
+                    listOf(
+                        revurdering(
+                            sakId = 1,
+                            revurderingAarsak = Revurderingaarsak.REGULERING,
+                            enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
+                        ),
+                        foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
+                    )
+            }
+        val hendelserMock = mockk<HendelseDao>()
+
+        val sut =
+            BehandlingServiceImpl(
+                behandlingDao = behandlingDaoMock,
+                behandlingHendelser = behandlingHendelser,
+                grunnlagsendringshendelseDao = mockk(),
+                hendelseDao = hendelserMock,
+                grunnlagKlient = mockk(),
+                behandlingRequestLogger = mockk(),
+                kommerBarnetTilGodeDao = mockk(),
+                oppgaveService = mockk(),
+                grunnlagService = mockk(),
+            )
+
+        val behandlinger = sut.hentBehandlingerForSak(1)
+
+        assertAll(
+            "skal hente behandlinger",
+            { assertEquals(0, behandlinger.size) },
+            { assertEquals(0, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) },
+            { assertEquals(0, behandlinger.filterIsInstance<Revurdering>().size) },
+        )
+    }
+
+    @Test
+    fun `Kan ikke hente egne ansatte behandlínger som vanlig saksbehandler`() {
+        val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
+        val behandlingDaoMock =
+            mockk<BehandlingDao> {
+                every { alleBehandlingerISak(1) } returns
+                    listOf(
+                        revurdering(sakId = 1, revurderingAarsak = Revurderingaarsak.REGULERING, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                        foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                    )
+            }
+        val hendelserMock = mockk<HendelseDao>()
+
+        val sut =
+            BehandlingServiceImpl(
+                behandlingDao = behandlingDaoMock,
+                behandlingHendelser = behandlingHendelser,
+                grunnlagsendringshendelseDao = mockk(),
+                hendelseDao = hendelserMock,
+                grunnlagKlient = mockk(),
+                behandlingRequestLogger = mockk(),
+                kommerBarnetTilGodeDao = mockk(),
+                oppgaveService = mockk(),
+                grunnlagService = mockk(),
+            )
+
+        val behandlinger = sut.hentBehandlingerForSak(1)
+
+        assertAll(
+            "skal hente behandlinger",
+            { assertEquals(0, behandlinger.size) },
+            { assertEquals(0, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) },
+            { assertEquals(0, behandlinger.filterIsInstance<Revurdering>().size) },
         )
     }
 
@@ -234,29 +397,28 @@ class BehandlingServiceImplTest {
     @Test
     fun `avbrytBehandling ruller tilbake alt ved exception i intransaction`() {
         var didRollback = false
-        Kontekst.set(
-            Context(
-                user,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
+        nyKontekstMedBrukerOgDatabaseContext(
+            user,
+            object : DatabaseKontekst {
+                override fun activeTx(): Connection {
+                    throw IllegalArgumentException()
+                }
 
-                    override fun harIntransaction(): Boolean {
-                        throw NotImplementedException("not implemented")
-                    }
+                override fun harIntransaction(): Boolean {
+                    throw NotImplementedException("not implemented")
+                }
 
-                    override fun <T> inTransaction(block: () -> T): T {
-                        try {
-                            return block()
-                        } catch (ex: Throwable) {
-                            didRollback = true
-                            throw ex
-                        }
+                override fun <T> inTransaction(block: () -> T): T {
+                    try {
+                        return block()
+                    } catch (ex: Throwable) {
+                        didRollback = true
+                        throw ex
                     }
-                },
-            ),
+                }
+            },
         )
+
         val sakId = 1L
         val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
 

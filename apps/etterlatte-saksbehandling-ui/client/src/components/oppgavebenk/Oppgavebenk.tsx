@@ -21,7 +21,7 @@ import { ProvideOppgavebenkContext } from '~components/oppgavebenk/state/Oppgave
 
 export const Oppgavebenk = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  if (!innloggetSaksbehandler.skriveTilgang) {
+  if (!innloggetSaksbehandler.skriveEnheter.length) {
     return <Tilgangsmelding />
   }
 

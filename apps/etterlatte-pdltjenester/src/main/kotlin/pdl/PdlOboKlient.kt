@@ -30,14 +30,14 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
     suspend fun hentPersonNavn(
         ident: String,
         bruker: BrukerTokenInfo,
-    ): PdlPersonResponse {
+    ): PdlPersonNavnResponse {
         val request =
             PdlGraphqlRequest(
-                query = getQuery("/pdl/hentPerson.graphql"),
+                query = getQuery("/pdl/hentPersonNavn.graphql"),
                 variables = PdlVariables(ident),
             )
 
-        return retry<PdlPersonResponse>(times = 3) {
+        return retry<PdlPersonNavnResponse>(times = 3) {
             httpClient.post(apiUrl) {
                 bearerAuth(getOboToken(bruker))
                 behandlingsnummer(Behandlingsnummer.BARNEPENSJON, Behandlingsnummer.OMSTILLINGSSTOENAD)

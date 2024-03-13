@@ -69,6 +69,11 @@ data class PdlPersonResponse(
     val errors: List<PdlResponseError>? = null,
 )
 
+data class PdlPersonNavnResponse(
+    val data: PdlPersonNavnResponseData? = null,
+    val errors: List<PdlResponseError>? = null,
+)
+
 data class PdlPersonResponseBolk(
     val data: PdlPersonResponseBulkData? = null,
     val errors: List<PdlResponseError>? = null,
@@ -130,6 +135,10 @@ data class PdlPersonResponseData(
     val hentPerson: PdlHentPerson? = null,
 )
 
+data class PdlPersonNavnResponseData(
+    val hentPerson: PdlHentPersonNavn? = null,
+)
+
 data class PdlPersonResponseBulkData(
     val hentPersonBolk: List<PdlHentPersonBolkResult>? = null,
 )
@@ -142,6 +151,11 @@ data class PdlHentPersonBolkResult(
 
 data class PdlHentPersonAdressebeskyttelse(
     val adressebeskyttelse: List<PdlAdressebeskyttelse>,
+)
+
+data class PdlHentPersonNavn(
+    val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator>,
+    val navn: List<PdlNavn>,
 )
 
 data class PdlHentPerson(
@@ -174,6 +188,14 @@ enum class PdlGradering {
     FORTROLIG,
     UGRADERT,
 }
+
+data class PdlFolkeregisteridentifikator(
+    val identifikasjonsnummer: String,
+    val status: String,
+    val type: String,
+    val folkeregistermetadata: PdlFolkeregistermetadata? = null,
+    val metadata: PdlMetadata,
+)
 
 data class PdlNavn(
     val fornavn: String,

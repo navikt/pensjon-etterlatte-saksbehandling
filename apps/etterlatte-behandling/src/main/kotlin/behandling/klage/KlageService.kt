@@ -435,6 +435,16 @@ class KlageServiceImpl(
             KlageHendelseType.FERDIGSTILT,
         )
 
+        runBlocking {
+            val vedtaksbrev = brevApiKlient.hentVedtaksbrev(klage.id, saksbehandler)
+            if (vedtaksbrev?.status?.ikkeFerdigstilt() == true) {
+                brevApiKlient.slettVedtaksbrev(klage.id, saksbehandler)
+            }
+            val oversendelsebrev = brevApiKlient.hentOversendelsesbrev(klage.id, saksbehandler)
+            if (oversendelsebrev?.status?.ikkeFerdigstilt() == true) {
+                brevApiKlient.slettOversendelsesbrev(klage.id, saksbehandler)
+            }
+        }
         return klageMedOppdatertResultat
     }
 

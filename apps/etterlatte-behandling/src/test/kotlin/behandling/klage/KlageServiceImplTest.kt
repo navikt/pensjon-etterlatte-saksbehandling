@@ -3,12 +3,16 @@ package no.nav.etterlatte.behandling.klage
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klienter.BrevApiKlient
+import no.nav.etterlatte.behandling.klienter.BrevStatus
+import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -22,7 +26,11 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageOmgjoering
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
+import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
+import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
+import no.nav.etterlatte.libs.common.behandling.Mottaker
+import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -57,6 +65,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
     private lateinit var oppgaveService: OppgaveService
     private lateinit var hendelseDao: HendelseDao
     private lateinit var klageDao: KlageDao
+    private val brevApiKlientMock = mockk<BrevApiKlient>()
 
     private val saksbehandlerIdent = "SaraSak"
     private val saksbehandler = Saksbehandler("token", saksbehandlerIdent, null)
@@ -75,6 +84,8 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
         oppgaveService = applicationContext.oppgaveService
         klageDao = applicationContext.klageDao
         hendelseDao = applicationContext.hendelseDao
+
+        coEvery { brevApiKlientMock.slettOversendelsesbrev(any(), any()) } returns Unit
     }
 
     @BeforeAll
@@ -89,6 +100,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
                 DummyFeatureToggleService().also {
                     it.settBryter(KlageFeatureToggle.KanBrukeKlageToggle, true)
                 },
+            brevApiKlient = brevApiKlientMock,
         )
         nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)
     }
@@ -254,6 +266,31 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
         }
     }
 
+    @Test
+    fun `lagring av utfall avvist gjenbruker vedtaksbrev hvis det finnes fra før`() {
+        coEvery { brevApiKlientMock.hentVedtaksbrev(any(), any()) } returns opprettetBrevDto(1814)
+
+        val klage =
+            inTransaction {
+                opprettKlageOgSettInitieltUtfallAvvist()
+            }
+
+        inTransaction {
+            service.lagreUtfallAvKlage(
+                klageId = klage.id,
+                utfall = KlageUtfallUtenBrev.Avvist(),
+                saksbehandler = saksbehandler,
+            )
+        }
+
+        inTransaction {
+            val oppdatert = requireNotNull(service.hentKlage(klage.id))
+            with(oppdatert.utfall as KlageUtfallMedData.Avvist) {
+                this.brev shouldBe KlageVedtaksbrev(1814)
+            }
+        }
+    }
+
     private fun formkrav() =
         Formkrav(
             vedtaketKlagenGjelder =
@@ -276,6 +313,17 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
             begrunnelse = "Jeg er enig",
         )
 
+    private fun opprettKlageOgSettInitieltUtfallAvvist(): Klage {
+        val sak = oppprettOmsSak()
+        val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""))
+        service.lagreFormkravIKlage(klage.id, formkrav(), saksbehandler)
+        return service.lagreInitieltUtfallMedBegrunnelseAvKlage(
+            klage.id,
+            InitieltUtfallMedBegrunnelseDto(KlageUtfall.AVVIST, "Rød Trost"),
+            saksbehandler,
+        )
+    }
+
     private fun oppprettOmsSak() = sakDao.opprettSak(klagerFnr, SakType.OMSTILLINGSSTOENAD, enhet)
 
     private fun opprettKlage(
@@ -296,4 +344,18 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
             oppgaveService.tildelSaksbehandler(it.id, saksbehandler.ident)
         }
     }
+
+    private fun opprettetBrevDto(brevId: Long) =
+        OpprettetBrevDto(
+            id = brevId,
+            status = BrevStatus.OPPRETTET,
+            mottaker =
+                Mottaker(
+                    navn = "Mottaker mottakersen",
+                    foedselsnummer = Mottakerident("19448310410"),
+                    orgnummer = null,
+                ),
+            journalpostId = null,
+            bestillingsID = null,
+        )
 }

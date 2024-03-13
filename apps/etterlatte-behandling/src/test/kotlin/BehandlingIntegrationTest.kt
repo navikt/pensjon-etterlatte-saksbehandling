@@ -84,6 +84,7 @@ abstract class BehandlingIntegrationTest {
     protected fun startServer(
         norg2Klient: Norg2Klient? = null,
         featureToggleService: FeatureToggleService = DummyFeatureToggleService(),
+        brevApiKlient: BrevApiKlient? = null,
     ) {
         server.start()
         val props = dbExtension.properties()
@@ -136,7 +137,7 @@ abstract class BehandlingIntegrationTest {
                 grunnlagKlientObo = GrunnlagKlientTest(),
                 vedtakKlient = spyk(VedtakKlientTest()),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
-                brevApiHttpClient = BrevApiKlientTest(),
+                brevApiKlient = brevApiKlient ?: BrevApiKlientTest(),
                 klageHttpClient = klageHttpClientTest(),
                 tilbakekrevingHttpClient = tilbakekrevingHttpClientTest(),
                 migreringHttpClient = migreringHttpClientTest(),
@@ -573,6 +574,13 @@ class BrevApiKlientTest : BrevApiKlient {
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {}
+
+    override suspend fun hentVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        return opprettetBrevDto(brevId)
+    }
 
     private fun opprettetBrevDto(brevId: Long) =
         OpprettetBrevDto(

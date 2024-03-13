@@ -1,5 +1,7 @@
 package no.nav.etterlatte.testdata.features.egendefinert
 
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.request.receiveParameters
@@ -8,7 +10,9 @@ import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.TestDataFeature
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.producer
@@ -22,62 +26,75 @@ object EgendefinertMeldingFeature : TestDataFeature {
     override val routes: Route.() -> Unit
         get() = {
             get {
-                call.respond(
-                    MustacheContent(
-                        "egendefinert/ny-melding.hbs",
-                        mapOf(
-                            "path" to path,
-                            "beskrivelse" to beskrivelse,
-                        ),
-                    ),
-                )
-            }
-
-            post {
-                try {
-                    val navIdent =
-                        requireNotNull(navIdentFraToken()) {
-                            "Nav ident mangler. Du må være innlogget for å sende søknad."
-                        }
-
-                    val (partisjon, offset) =
-                        call.receiveParameters().let {
-                            producer.publiser(
-                                requireNotNull(it["key"]),
-                                JsonMessage(requireNotNull(it["json"])).toJson(),
-                                mapOf("NavIdent" to navIdent.toByteArray()),
-                            )
-                        }
-                    logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
-
-                    call.respondRedirect("/$path/sendt?partisjon=$partisjon&offset=$offset")
-                } catch (e: Exception) {
-                    logger.error("En feil har oppstått! ", e)
-
+                kunEtterlatteUtvikling {
                     call.respond(
                         MustacheContent(
-                            "error.hbs",
-                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString()),
+                            "egendefinert/ny-melding.hbs",
+                            mapOf(
+                                "path" to path,
+                                "beskrivelse" to beskrivelse,
+                            ),
                         ),
                     )
                 }
             }
 
-            get("sendt") {
-                val partisjon = call.request.queryParameters["partisjon"]!!
-                val offset = call.request.queryParameters["offset"]!!
+            post {
+                kunEtterlatteUtvikling {
+                    try {
+                        val navIdent =
+                            requireNotNull(navIdentFraToken()) {
+                                "Nav ident mangler. Du må være innlogget for å sende søknad."
+                            }
 
-                call.respond(
-                    MustacheContent(
-                        "egendefinert/melding-sendt.hbs",
-                        mapOf(
-                            "path" to path,
-                            "beskrivelse" to beskrivelse,
-                            "partisjon" to partisjon,
-                            "offset" to offset,
-                        ),
-                    ),
-                )
+                        val (partisjon, offset) =
+                            call.receiveParameters().let {
+                                producer.publiser(
+                                    requireNotNull(it["key"]),
+                                    JsonMessage(requireNotNull(it["json"])).toJson(),
+                                    mapOf("NavIdent" to navIdent.toByteArray()),
+                                )
+                            }
+                        logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
+
+                        call.respondRedirect("/$path/sendt?partisjon=$partisjon&offset=$offset")
+                    } catch (e: Exception) {
+                        logger.error("En feil har oppstått! ", e)
+
+                        call.respond(
+                            MustacheContent(
+                                "error.hbs",
+                                mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString()),
+                            ),
+                        )
+                    }
+                }
             }
+
+            get("sendt") {
+                kunEtterlatteUtvikling {
+                    val partisjon = call.request.queryParameters["partisjon"]!!
+                    val offset = call.request.queryParameters["offset"]!!
+
+                    call.respond(
+                        MustacheContent(
+                            "egendefinert/melding-sendt.hbs",
+                            mapOf(
+                                "path" to path,
+                                "beskrivelse" to beskrivelse,
+                                "partisjon" to partisjon,
+                                "offset" to offset,
+                            ),
+                        ),
+                    )
+                }
+            }
+        }
+
+    private suspend inline fun PipelineContext<*, ApplicationCall>.kunEtterlatteUtvikling(onSuccess: () -> Unit) =
+        if (brukerTokenInfo.roller.any { it == "650684ff-8107-4ae4-98fc-e18b5cf3188b" }) {
+            onSuccess()
+        } else {
+            call.respond(HttpStatusCode.Unauthorized, "Mangler etterlatte-rolle")
         }
 }

@@ -82,7 +82,7 @@ class DollyService(
             dollyClient.markerIdentIBruk(ident, accessToken)
                 .also { logger.info("Test ident $ident markert med 'iBruk=${it.ibruk}'") }
         } catch (e: Exception) {
-            logger.error("Feil ved markering av testident $ident som 'i bruk'")
+            logger.warn("Klart ikke markere testident $ident som 'i bruk'")
         }
     }
 

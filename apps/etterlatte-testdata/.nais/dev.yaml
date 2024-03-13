@@ -32,8 +32,9 @@ spec:
       tenant: nav.no
       claims:
         groups:
-          - id: 650684ff-8107-4ae4-98fc-e18b5cf3188b # Required for authorization
-          - id: 1a424f32-16a4-4b97-9d77-3e9e781a887e
+          - id: 650684ff-8107-4ae4-98fc-e18b5cf3188b # etterlatte
+          - id: 1a424f32-16a4-4b97-9d77-3e9e781a887e # (DG) NAV Team Etterlatte
+          - id: 07371409-3d05-43df-a87b-d01c0cbc8656 # Utviklere NAV IT
         extra:
           - NAVident
     sidecar:

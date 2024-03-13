@@ -20,8 +20,11 @@ import { mapApiResult } from '~shared/api/apiUtils'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import { Box, Heading } from '@navikt/ds-react'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
+import { useSidetittel } from '~shared/hooks/useSidetittel'
 
 export default function NyttBrev() {
+  useSidetittel('Nytt brev')
+
   const { brevId, sakId, fnr } = useParams()
   const [kanRedigeres, setKanRedigeres] = useState(false)
 

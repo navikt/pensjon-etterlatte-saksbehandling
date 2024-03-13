@@ -44,13 +44,20 @@ data class OmstillingsstoenadInnvilgelse(
                         datoFOM = it.datoFOM,
                         datoTOM = it.datoTOM,
                         inntekt = it.inntekt,
+                        aarsinntekt = it.aarsinntekt,
+                        fratrekkInnAar = it.fratrekkInnAar,
+                        relevantMaanederInnAar = it.relevanteMaanederInnAar,
+                        grunnbeloep = it.grunnbeloep,
                         ytelseFoerAvkorting = it.ytelseFoerAvkorting,
                         utbetaltBeloep = it.utbetaltBeloep,
                         trygdetid = it.trygdetid,
+                        beregningsMetodeFraGrunnlag = it.beregningsMetodeFraGrunnlag,
+                        beregningsMetodeAnvendt = it.beregningsMetodeAnvendt,
                     )
                 }
 
             val avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato }
+            val sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM }
 
             return OmstillingsstoenadInnvilgelse(
                 innhold = innholdMedVedlegg.innhold(),
@@ -59,10 +66,8 @@ data class OmstillingsstoenadInnvilgelse(
                     OmstillingsstoenadBeregning(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
                         virkningsdato = avkortingsinfo.virkningsdato,
-                        inntekt = avkortingsinfo.inntekt,
-                        grunnbeloep = avkortingsinfo.grunnbeloep,
                         beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM },
+                        sisteBeregningsperiode = sisteBeregningsperiode,
                         trygdetid =
                             TrygdetidMedBeregningsmetode(
                                 trygdetidsperioder = trygdetid.perioder,
@@ -70,8 +75,8 @@ data class OmstillingsstoenadInnvilgelse(
                                 beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
                                 prorataBroek = trygdetid.prorataBroek,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = trygdetid.mindreEnnFireFemtedelerAvOpptjeningstiden,
-                                beregningsMetodeFraGrunnlag = avkortingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
-                                beregningsMetodeAnvendt = avkortingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
+                                beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
+                                beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
                             ),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =

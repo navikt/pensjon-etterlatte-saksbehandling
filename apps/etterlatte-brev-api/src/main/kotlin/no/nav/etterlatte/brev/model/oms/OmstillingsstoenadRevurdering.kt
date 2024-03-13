@@ -50,13 +50,20 @@ data class OmstillingsstoenadRevurdering(
                         datoFOM = it.datoFOM,
                         datoTOM = it.datoTOM,
                         inntekt = it.inntekt,
+                        aarsinntekt = it.aarsinntekt,
+                        fratrekkInnAar = it.fratrekkInnAar,
+                        relevantMaanederInnAar = it.relevanteMaanederInnAar,
+                        grunnbeloep = it.grunnbeloep,
                         ytelseFoerAvkorting = it.ytelseFoerAvkorting,
                         utbetaltBeloep = it.utbetaltBeloep,
                         trygdetid = it.trygdetid,
+                        beregningsMetodeFraGrunnlag = it.beregningsMetodeFraGrunnlag,
+                        beregningsMetodeAnvendt = it.beregningsMetodeAnvendt,
                     )
                 }
 
             val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
+            val sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM }
 
             return OmstillingsstoenadRevurdering(
                 innhold = innholdMedVedlegg.innhold(),
@@ -74,10 +81,8 @@ data class OmstillingsstoenadRevurdering(
                     OmstillingsstoenadBeregning(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
                         virkningsdato = avkortingsinfo.virkningsdato,
-                        inntekt = avkortingsinfo.inntekt,
-                        grunnbeloep = avkortingsinfo.grunnbeloep,
                         beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM },
+                        sisteBeregningsperiode = sisteBeregningsperiode,
                         trygdetid =
                             TrygdetidMedBeregningsmetode(
                                 trygdetidsperioder = trygdetid.perioder,
@@ -85,8 +90,8 @@ data class OmstillingsstoenadRevurdering(
                                 beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
                                 prorataBroek = trygdetid.prorataBroek,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = trygdetid.mindreEnnFireFemtedelerAvOpptjeningstiden,
-                                beregningsMetodeFraGrunnlag = avkortingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
-                                beregningsMetodeAnvendt = avkortingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
+                                beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
+                                beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
                             ),
                     ),
                 etterbetaling =

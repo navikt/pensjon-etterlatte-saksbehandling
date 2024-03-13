@@ -7,6 +7,9 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.azureAdAttestantClaim
+import no.nav.etterlatte.azureAdSaksbehandlerClaim
+import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -31,15 +34,11 @@ class GosysOppgaveServiceImplTest {
     private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdltjenesterKlient)
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
-    private val saksbehandlerRolleDev = "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"
-    private val strengtfortroligDev = "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
-    private val attestantRolleDev = "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
-
     val azureGroupToGroupIDMap =
         mapOf(
-            AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev,
-            AzureGroup.ATTESTANT to attestantRolleDev,
-            AzureGroup.STRENGT_FORTROLIG to strengtfortroligDev,
+            AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim,
+            AzureGroup.ATTESTANT to azureAdAttestantClaim,
+            AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim,
         )
 
     private fun generateSaksbehandlerMedRoller(azureGroup: AzureGroup): SaksbehandlerMedRoller {

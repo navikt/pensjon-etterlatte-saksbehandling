@@ -12,11 +12,13 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents.VURDE
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.DRYRUN
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
@@ -102,5 +104,32 @@ class AldersovergangRiverTest {
         }
 
         verify { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1)) }
+    }
+
+    @Test
+    fun `vilkaarsvurdert skal gaa til fattet og attestert vedtak`() {
+        every { vedtakService.opprettVedtakFattOgAttester(sakId, behandlingId) } returns mockk<VedtakOgRapid>(relaxed = true)
+
+        val melding =
+            JsonMessage.newMessage(
+                EventNames.ALDERSOVERGANG.name,
+                mapOf(
+                    ALDERSOVERGANG_STEG_KEY to VedtakAldersovergangStepEvents.VILKAARSVURDERT.name,
+                    ALDERSOVERGANG_TYPE_KEY to "AO_BP20",
+                    ALDERSOVERGANG_ID_KEY to UUID.randomUUID().toString(),
+                    SAK_ID_KEY to sakId,
+                    DATO_KEY to datoFom,
+                    DRYRUN to false,
+                    BEHANDLING_ID_KEY to behandlingId,
+                ),
+            )
+
+        with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
+            size shouldBe 3 // 1 for vedtak fattet, 1 for attestert, 1 for original melding (med nytt steg)
+            field(2, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(2, ALDERSOVERGANG_STEG_KEY).asText() shouldBe VedtakAldersovergangStepEvents.VEDTAK_ATTESTERT.name
+        }
+
+        verify { vedtakService.opprettVedtakFattOgAttester(sakId, behandlingId) }
     }
 }

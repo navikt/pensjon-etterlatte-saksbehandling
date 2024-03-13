@@ -10,6 +10,8 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Statsborgerskap } from '~components/person/personopplysninger/Statsborgerskap'
 import { Heading } from '@navikt/ds-react'
+import { SakType } from '~shared/types/sak'
+import { Foreldre } from '~components/person/personopplysninger/Foreldre'
 
 export const Personopplysninger = ({
   sakStatus,
@@ -29,6 +31,10 @@ export const Personopplysninger = ({
     }
   }, [sakStatus])
 
+  const erSaktype = (sakStatus: Result<SakMedBehandlinger>, sakType: SakType) => {
+    return isSuccess(sakStatus) && sakStatus.data.sak.sakType === sakType
+  }
+
   return (
     <Container>
       <SpaceChildren>
@@ -41,6 +47,9 @@ export const Personopplysninger = ({
               success: (personopplysninger) => (
                 <>
                   <Bostedsadresser bostedsadresse={personopplysninger.soeker?.opplysning.bostedsadresse} />
+                  {erSaktype(sakStatus, SakType.BARNEPENSJON) && (
+                    <Foreldre avdoed={personopplysninger.avdoede} gjenlevende={personopplysninger.gjenlevende} />
+                  )}
                   <Statsborgerskap
                     bostedsLand={personopplysninger.soeker?.opplysning.bostedsadresse?.at(0)?.land}
                     pdlStatsborgerskap={personopplysninger.soeker?.opplysning.pdlStatsborgerskap}

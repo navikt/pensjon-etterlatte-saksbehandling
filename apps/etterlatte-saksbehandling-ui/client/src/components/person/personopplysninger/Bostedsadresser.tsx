@@ -23,7 +23,7 @@ export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: IAdresse[
               <Table.Row key={index}>
                 <Table.DataCell>
                   <SpaceChildren direction="row">
-                    {`${adresse.adresseLinje1}, ${adresse.postnr} ${!!adresse.poststed ? `, ${adresse.poststed}` : ''}`}
+                    {`${adresse.adresseLinje1}, ${adresse.postnr} ${!!adresse.poststed ? adresse.poststed : ''}`}
                     {adresse.aktiv && (
                       <Tag variant="success" size="small">
                         Gjeldene

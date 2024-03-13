@@ -26,12 +26,12 @@ export function Klagebehandling() {
   const dispatch = useAppDispatch()
   const [fetchKlageStatus, fetchKlage] = useApiCall(hentKlage)
   const [personStatus, hentPerson] = useApiCall(getPerson)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const [kanRedigere, setKanRedigere] = useState(false)
 
   const klageIdFraUrl = match?.params.klageId
   const viHarLastetRiktigKlage = klageIdFraUrl === klage?.id
-
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  const [kanRedigere, setKanRedigere] = useState(false)
+  const klageRedigerbar = useKlageRedigerbar()
 
   useEffect(() => {
     if (!klageIdFraUrl) return
@@ -55,7 +55,7 @@ export function Klagebehandling() {
 
     if (klage?.sak.enhet) {
       setKanRedigere(
-        (useKlageRedigerbar() && enhetErSkrivbar(klage.sak.enhet, innloggetSaksbehandler.skriveEnheter)) ?? false
+        (klageRedigerbar && enhetErSkrivbar(klage.sak.enhet, innloggetSaksbehandler.skriveEnheter)) ?? false
       )
     }
   }, [klage?.sak])

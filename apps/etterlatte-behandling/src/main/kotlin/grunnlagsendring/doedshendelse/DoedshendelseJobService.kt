@@ -69,7 +69,7 @@ class DoedshendelseJobService(
                     val nyeDoedshendelser = hentAlleNyeDoedsmeldinger()
                     logger.info("Antall nye dødsmeldinger ${nyeDoedshendelser.size}")
 
-                    val doedshendelserSomSkalHaanderes = finnGyldigeDoedshendelser(nyeDoedshendelser)
+                    val doedshendelserSomSkalHaanderes = hendelserErGamleNok(nyeDoedshendelser)
                     logger.info("Antall dødsmeldinger plukket ut for kjøring: ${doedshendelserSomSkalHaanderes.size}")
                     doedshendelserSomSkalHaanderes
                 }
@@ -104,8 +104,12 @@ class DoedshendelseJobService(
 
             false -> {
                 logger.info("Skal håndtere dødshendelse")
-                val sak: Sak =
-                    kontrollpunkter.finnSak() ?: opprettSakOgLagGrunnlag(doedshendelse)
+                val sak: Sak? =
+                    kontrollpunkter.finnSak() ?: if (featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
+                        opprettSakOgLagGrunnlag(doedshendelse)
+                    } else {
+                        null
+                    }
 
                 val brevSendt = sendBrevHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
                 val (oppgaveOpprettet, oppgave) = opprettOppgaveHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
@@ -124,7 +128,7 @@ class DoedshendelseJobService(
                 doedshendelseDao.oppdaterDoedshendelse(
                     doedshendelse.tilBehandlet(
                         utfall = utfall,
-                        sakId = sak.id,
+                        sakId = sak?.id,
                         oppgaveId = oppgave?.id,
                         kontrollpunkter = kontrollpunkter,
                     ),
@@ -196,17 +200,17 @@ class DoedshendelseJobService(
 
     private fun sendBrevHvisKravOppfylles(
         doedshendelse: DoedshendelseInternal,
-        sak: Sak,
+        sak: Sak?,
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
     ): Boolean {
         val skalSendeBrev = kontrollpunkter.none { !it.sendBrev }
         if (skalSendeBrev) {
-            if (featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
+            if (sak != null && featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
                 logger.info("Sender brev for ${doedshendelse.relasjon.name} for sak ${sak.id}")
                 deodshendelserProducer.sendBrevRequest(sak)
                 return true
             } else {
-                logger.info("Sender ikke brev for ${doedshendelse.relasjon.name} for sak ${sak.id} fordi feature toggle er av")
+                logger.info("Sender ikke brev for ${doedshendelse.id} for sak fordi feature toggle er av")
                 return true
             }
         }
@@ -215,13 +219,13 @@ class DoedshendelseJobService(
 
     private fun opprettOppgaveHvisKravOppfylles(
         doedshendelse: DoedshendelseInternal,
-        sak: Sak,
+        sak: Sak?,
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
     ): Pair<Boolean, OppgaveIntern?> {
         val skalOppretteOppgave = kontrollpunkter.any { it.opprettOppgave }
 
         if (skalOppretteOppgave) {
-            if (featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
+            if (sak != null && featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
                 logger.info("Oppretter oppgave for ${doedshendelse.relasjon.name} for sak ${sak.id}")
                 val oppgave =
                     grunnlagsendringshendelseService.opprettDoedshendelseForPerson(
@@ -244,7 +248,7 @@ class DoedshendelseJobService(
                     )
                 return true to oppgave
             } else {
-                logger.info("Oppretter ikke oppgave for ${doedshendelse.relasjon.name} for sak ${sak.id} fordi feature toggle er av")
+                logger.info("Oppretter ikke oppgave for ${doedshendelse.id} fordi feature toggle er av")
                 return true to null
             }
         }
@@ -252,7 +256,7 @@ class DoedshendelseJobService(
         return false to null
     }
 
-    private fun finnGyldigeDoedshendelser(hendelser: List<DoedshendelseInternal>): List<DoedshendelseInternal> {
+    private fun hendelserErGamleNok(hendelser: List<DoedshendelseInternal>): List<DoedshendelseInternal> {
         val idag = LocalDateTime.now()
 
         val avdoedHendelser = hendelser.filter { it.relasjon == Relasjon.AVDOED }

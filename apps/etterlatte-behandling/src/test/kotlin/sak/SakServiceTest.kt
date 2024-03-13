@@ -6,7 +6,6 @@ import io.ktor.client.plugins.ResponseException
 import io.mockk.Called
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
@@ -62,7 +61,11 @@ internal class SakServiceTest {
         confirmVerified(sakDao, pdltjenesterKlient, norg2Klient)
     }
 
-    private fun saksbehandlerKontekst() {
+    private fun saksbehandlerKontekst(
+        nasjonalTilgang: Boolean = false,
+        strentFortrolig: Boolean = false,
+        egenAnsatt: Boolean = false,
+    ) {
         val tokenValidationContext = mockk<TokenValidationContext>()
 
         val token = mockk<JwtToken>()
@@ -73,8 +76,10 @@ internal class SakServiceTest {
 
         every { claims.getStringClaim(any()) } returns "Z123456"
 
-        every { claims.containsClaim("groups", AzureGroup.NASJONAL_MED_LOGG.name) } returns false
-        every { claims.containsClaim("groups", AzureGroup.NASJONAL_UTEN_LOGG.name) } returns false
+        every { claims.containsClaim("groups", AzureGroup.NASJONAL_MED_LOGG.name) } returns nasjonalTilgang
+        every { claims.containsClaim("groups", AzureGroup.NASJONAL_UTEN_LOGG.name) } returns nasjonalTilgang
+        every { claims.containsClaim("groups", AzureGroup.STRENGT_FORTROLIG.name) } returns strentFortrolig
+        every { claims.containsClaim("groups", AzureGroup.EGEN_ANSATT.name) } returns egenAnsatt
 
         every { token.jwtTokenClaims } returns claims
 
@@ -393,7 +398,7 @@ internal class SakServiceTest {
     }
 
     @Test
-    fun `Hent enkeltsak - Bruker har sak, men saksbehandler mangler tilgang til enhet`() {
+    fun `Hent enkeltsak - Bruker har sak, men saksbehandler mangler tilgang til enhet egne ansatte`() {
         saksbehandlerKontekst()
 
         val ident = Random.nextLong().toString()
@@ -407,11 +412,52 @@ internal class SakServiceTest {
                     enhet = Enheter.EGNE_ANSATTE.enhetNr,
                 ),
             )
-        coEvery { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
+
+        assertThrows<ManglerTilgangTilEnhet> {
+            service.hentEnkeltSakForPerson(ident)
+        }
+
+        verify { sakDao.finnSaker(ident) }
+    }
+
+    @Test
+    fun `Hent enkeltsak egen ansatt - Bruker har sak egen ansatt`() {
+        saksbehandlerKontekst(egenAnsatt = true)
+
+        val ident = Random.nextLong().toString()
+
+        val sak =
+            Sak(
+                ident = ident,
+                sakType = SakType.BARNEPENSJON,
+                id = Random.nextLong(),
+                enhet = Enheter.EGNE_ANSATTE.enhetNr,
+            )
+        every { sakDao.finnSaker(any()) } returns
             listOf(
-                SaksbehandlerEnhet(
-                    enhetsNummer = Enheter.PORSGRUNN.enhetNr,
-                    navn = Enheter.PORSGRUNN.navn,
+                sak,
+            )
+
+        val enkeltsak = service.hentEnkeltSakForPerson(ident)
+
+        enkeltsak shouldBe sak
+
+        verify { sakDao.finnSaker(ident) }
+    }
+
+    @Test
+    fun `Hent enkeltsak - Bruker har sak, men saksbehandler mangler tilgang til enhet strengt fortrolig`() {
+        saksbehandlerKontekst()
+
+        val ident = Random.nextLong().toString()
+
+        every { sakDao.finnSaker(any()) } returns
+            listOf(
+                Sak(
+                    ident = ident,
+                    sakType = SakType.BARNEPENSJON,
+                    id = Random.nextLong(),
+                    enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
                 ),
             )
 
@@ -420,11 +466,35 @@ internal class SakServiceTest {
         }
 
         verify { sakDao.finnSaker(ident) }
-        coVerify { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) }
     }
 
     @Test
-    fun `Hent enkeltsak - Bruker har sak, og saksbehandler har tilgang til enhet`() {
+    fun `Hent enkeltsak strengt fortrolig - Bruker har sak`() {
+        saksbehandlerKontekst(nasjonalTilgang = false, strentFortrolig = true)
+
+        val ident = Random.nextLong().toString()
+
+        val sak =
+            Sak(
+                ident = ident,
+                sakType = SakType.BARNEPENSJON,
+                id = Random.nextLong(),
+                enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
+            )
+        every { sakDao.finnSaker(any()) } returns
+            listOf(
+                sak,
+            )
+
+        val enkeltsak = service.hentEnkeltSakForPerson(ident)
+
+        enkeltsak shouldBe sak
+
+        verify { sakDao.finnSaker(ident) }
+    }
+
+    @Test
+    fun `Hent enkeltsak - Bruker har sak, og saksbehandler har tilgang til enhet Porsgrunn`() {
         saksbehandlerKontekst()
 
         val ident = Random.nextLong().toString()
@@ -439,19 +509,10 @@ internal class SakServiceTest {
 
         every { sakDao.finnSaker(any()) } returns listOf(sak)
 
-        coEvery { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
-            listOf(
-                SaksbehandlerEnhet(
-                    enhetsNummer = enhet.enhetNr,
-                    navn = enhet.navn,
-                ),
-            )
-
         val enkeltsak = service.hentEnkeltSakForPerson(ident)
 
         enkeltsak shouldBe sak
 
         verify { sakDao.finnSaker(ident) }
-        coVerify { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) }
     }
 }

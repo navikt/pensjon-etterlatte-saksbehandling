@@ -12,6 +12,7 @@ import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import org.slf4j.LoggerFactory
 import java.sql.Connection
 
 object Kontekst : ThreadLocal<Context>()
@@ -57,6 +58,8 @@ class SaksbehandlerMedEnheterOgRoller(
     private val saksbehandlerService: SaksbehandlerService,
     val saksbehandlerMedRoller: SaksbehandlerMedRoller,
 ) : ExternalUser(identifiedBy) {
+    val logger = LoggerFactory.getLogger(this::class.java)
+
     private fun saksbehandlersEnheter() =
         saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(name()).map { it.enhetsNummer }.toSet()
 
@@ -64,31 +67,36 @@ class SaksbehandlerMedEnheterOgRoller(
         return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
     }
 
-    private fun harKjentEnhet() = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter()).isNotEmpty()
+    private fun harKjentEnhet(saksbehandlersEnheter: Set<String>) = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter).isNotEmpty()
 
     fun kanSeOppgaveBenken() =
-        saksbehandlersEnheter().firstNotNullOfOrNull { enhetNr ->
-            Enheter.entries.firstOrNull { it.enhetNr == enhetNr }
-        }?.harTilgangTilOppgavebenken ?: false
+        saksbehandlersEnheter().any { enhetNr ->
+            Enheter.entries.firstOrNull { it.enhetNr == enhetNr }?.harTilgangTilOppgavebenken ?: false
+        }
 
-    fun enheterMedSkrivetilgang() =
-        saksbehandlersEnheter()
-            .filter { Enheter.saksbehandlendeEnheter().contains(it) }
+    fun enheterMedSkrivetilgang() = enheterMedSaksbehandlendeEnheter(saksbehandlersEnheter())
+
+    private fun enheterMedSaksbehandlendeEnheter(saksbehandlersEnheter: Set<String>) =
+        saksbehandlersEnheter.filter { Enheter.saksbehandlendeEnheter().contains(it) }
 
     // TODO - EY-3441 - lesetilgang for forvaltningsutviklere
-    fun enheterMedLesetilgang() =
-        if (harKjentEnhet()) {
-            enheterMedSkrivetilgang().let { egenSkriveEnheter ->
+    fun enheterMedLesetilgang(saksbehandlersEnheter: Set<String>) =
+        if (harKjentEnhet(saksbehandlersEnheter)) {
+            enheterMedSaksbehandlendeEnheter(saksbehandlersEnheter).let { egenSkriveEnheter ->
                 when (egenSkriveEnheter.size) {
                     0 -> Enheter.enheterForVanligSaksbehandlere()
                     else -> Enheter.enheterForVanligSaksbehandlere() - egenSkriveEnheter.toSet()
                 }
             }
         } else {
+            logger.info("Ukjent enhet på saksbehandler, får ikke lesetilgang. Enheter for saksbehandler: $saksbehandlersEnheter ")
             emptyList()
         }
 
-    fun enheter() = (enheterMedSkrivetilgang() + enheterMedLesetilgang()).distinct()
+    fun enheter(): List<String> {
+        val saksbehandlersEnheter = saksbehandlersEnheter()
+        return (enheterMedSaksbehandlendeEnheter(saksbehandlersEnheter) + enheterMedLesetilgang(saksbehandlersEnheter)).distinct()
+    }
 }
 
 fun decideUser(

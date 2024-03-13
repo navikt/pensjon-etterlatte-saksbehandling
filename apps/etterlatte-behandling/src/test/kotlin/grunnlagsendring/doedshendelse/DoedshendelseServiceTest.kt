@@ -6,12 +6,15 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.mockPerson
@@ -27,6 +30,7 @@ import java.util.UUID
 internal class DoedshendelseServiceTest {
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
     private val dao = mockk<DoedshendelseDao>()
+
     private val toggle =
         mockk<FeatureToggleService> {
             every { isEnabled(any(), any()) } returns true
@@ -55,6 +59,46 @@ internal class DoedshendelseServiceTest {
     @BeforeEach
     fun beforeAll() {
         nyKontekstMedBruker(mockk())
+    }
+
+    @Test
+    fun `Skal opprette doedshendelse for samboer med felles barn`() {
+        val annenForelder = JOVIAL_LAMA
+        val fellesbarn =
+            avdoed.avdoedesBarn!![0].copy(
+                familieRelasjon = FamilieRelasjon(foreldre = listOf(annenForelder), ansvarligeForeldre = emptyList(), barn = emptyList()),
+            )
+        every {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                avdoed.foedselsnummer.verdi.value,
+                PersonRolle.AVDOED,
+                listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
+            )
+        } returns avdoed.copy(avdoedesBarn = listOf(fellesbarn))
+
+        every {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                annenForelder.value,
+                PersonRolle.TILKNYTTET_BARN,
+                SakType.OMSTILLINGSSTOENAD,
+            )
+        } returns avdoed.copy(foedselsnummer = OpplysningDTO(annenForelder, "fødselsnummer"))
+
+        every { dao.opprettDoedshendelse(any()) } just runs
+        every { dao.hentDoedshendelserForPerson(any()) } returns emptyList()
+
+        service.opprettDoedshendelseForBeroertePersoner(
+            DoedshendelsePdl(
+                UUID.randomUUID().toString(),
+                Endringstype.OPPRETTET,
+                fnr = avdoed.foedselsnummer.verdi.value,
+                doedsdato = avdoed.doedsdato!!.verdi,
+            ),
+        )
+        // En for avdød og en for samboer
+        verify(exactly = 2) {
+            dao.opprettDoedshendelse(any())
+        }
     }
 
     @Test

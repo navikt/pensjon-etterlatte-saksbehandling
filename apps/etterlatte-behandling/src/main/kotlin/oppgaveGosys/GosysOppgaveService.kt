@@ -2,6 +2,7 @@ package no.nav.etterlatte.oppgaveGosys
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
@@ -10,7 +11,6 @@ import no.nav.etterlatte.libs.common.oppgave.GosysOppgave
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import java.time.Duration
 import java.time.LocalTime
@@ -89,6 +89,18 @@ class GosysOppgaveServiceImpl(
         ) { item, enheter ->
             enheter.contains(item.enhet)
         }
+
+    fun List<GosysOppgave>.filterForEnheter(
+        user: User,
+        filter: (item: GosysOppgave, enheter: List<String>) -> Boolean,
+    ) = when (user) {
+        is SaksbehandlerMedEnheterOgRoller -> {
+            val enheter = user.enheter()
+            this.filter { filter(it, enheter) }
+        }
+
+        else -> this
+    }
 
     override suspend fun hentOppgave(
         id: Long,

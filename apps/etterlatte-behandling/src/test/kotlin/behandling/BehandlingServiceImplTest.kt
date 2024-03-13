@@ -39,6 +39,7 @@ import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -62,6 +63,11 @@ import java.util.UUID
 class BehandlingServiceImplTest {
     private val user =
         mockk<SaksbehandlerMedEnheterOgRoller> {
+            every { saksbehandlerMedRoller } returns
+                mockk<SaksbehandlerMedRoller> {
+                    every { harRolleStrengtFortrolig() } returns false
+                    every { harRolleEgenAnsatt() } returns false
+                }
             every { name() } returns "ident"
             every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
         }
@@ -69,6 +75,180 @@ class BehandlingServiceImplTest {
     @BeforeEach
     fun before() {
         nyKontekstMedBruker(user)
+    }
+
+    @Test
+    fun `Kan hente egne ansatte behandlínger som egen ansatt saksbehandler`() {
+        val userStrengfortrolig =
+            mockk<SaksbehandlerMedEnheterOgRoller> {
+                every { saksbehandlerMedRoller } returns
+                    mockk<SaksbehandlerMedRoller> {
+                        every { harRolleStrengtFortrolig() } returns false
+                        every { harRolleEgenAnsatt() } returns true
+                    }
+                every { name() } returns "ident"
+                every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+            }
+        nyKontekstMedBruker(userStrengfortrolig)
+        val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
+        val behandlingDaoMock =
+            mockk<BehandlingDao> {
+                every { alleBehandlingerISak(1) } returns
+                    listOf(
+                        revurdering(sakId = 1, revurderingAarsak = Revurderingaarsak.REGULERING, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                        foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                    )
+            }
+        val hendelserMock = mockk<HendelseDao>()
+
+        val sut =
+            BehandlingServiceImpl(
+                behandlingDao = behandlingDaoMock,
+                behandlingHendelser = behandlingHendelser,
+                grunnlagsendringshendelseDao = mockk(),
+                hendelseDao = hendelserMock,
+                grunnlagKlient = mockk(),
+                behandlingRequestLogger = mockk(),
+                kommerBarnetTilGodeDao = mockk(),
+                oppgaveService = mockk(),
+                grunnlagService = mockk(),
+            )
+
+        val behandlinger = sut.hentBehandlingerForSak(1)
+
+        assertAll(
+            "skal hente behandlinger",
+            { assertEquals(2, behandlinger.size) },
+            { assertEquals(1, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) },
+            { assertEquals(1, behandlinger.filterIsInstance<Revurdering>().size) },
+        )
+    }
+
+    @Test
+    fun `Kan hente strengt fortrolig behandlínger som streng fortrolig saksbehandler`() {
+        val userStrengfortrolig =
+            mockk<SaksbehandlerMedEnheterOgRoller> {
+                every { saksbehandlerMedRoller } returns
+                    mockk<SaksbehandlerMedRoller> {
+                        every { harRolleStrengtFortrolig() } returns true
+                        every { harRolleEgenAnsatt() } returns false
+                    }
+                every { name() } returns "ident"
+                every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+            }
+        nyKontekstMedBruker(userStrengfortrolig)
+        val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
+        val behandlingDaoMock =
+            mockk<BehandlingDao> {
+                every { alleBehandlingerISak(1) } returns
+                    listOf(
+                        revurdering(
+                            sakId = 1,
+                            revurderingAarsak = Revurderingaarsak.REGULERING,
+                            enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
+                        ),
+                        foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
+                    )
+            }
+        val hendelserMock = mockk<HendelseDao>()
+
+        val sut =
+            BehandlingServiceImpl(
+                behandlingDao = behandlingDaoMock,
+                behandlingHendelser = behandlingHendelser,
+                grunnlagsendringshendelseDao = mockk(),
+                hendelseDao = hendelserMock,
+                grunnlagKlient = mockk(),
+                behandlingRequestLogger = mockk(),
+                kommerBarnetTilGodeDao = mockk(),
+                oppgaveService = mockk(),
+                grunnlagService = mockk(),
+            )
+
+        val behandlinger = sut.hentBehandlingerForSak(1)
+
+        assertAll(
+            "skal hente behandlinger",
+            { assertEquals(2, behandlinger.size) },
+            { assertEquals(1, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) },
+            { assertEquals(1, behandlinger.filterIsInstance<Revurdering>().size) },
+        )
+    }
+
+    @Test
+    fun `Kan ikke hente strengt fortrolig behandlínger som vanlig saksbehandler`() {
+        val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
+        val behandlingDaoMock =
+            mockk<BehandlingDao> {
+                every { alleBehandlingerISak(1) } returns
+                    listOf(
+                        revurdering(
+                            sakId = 1,
+                            revurderingAarsak = Revurderingaarsak.REGULERING,
+                            enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
+                        ),
+                        foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
+                    )
+            }
+        val hendelserMock = mockk<HendelseDao>()
+
+        val sut =
+            BehandlingServiceImpl(
+                behandlingDao = behandlingDaoMock,
+                behandlingHendelser = behandlingHendelser,
+                grunnlagsendringshendelseDao = mockk(),
+                hendelseDao = hendelserMock,
+                grunnlagKlient = mockk(),
+                behandlingRequestLogger = mockk(),
+                kommerBarnetTilGodeDao = mockk(),
+                oppgaveService = mockk(),
+                grunnlagService = mockk(),
+            )
+
+        val behandlinger = sut.hentBehandlingerForSak(1)
+
+        assertAll(
+            "skal hente behandlinger",
+            { assertEquals(0, behandlinger.size) },
+            { assertEquals(0, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) },
+            { assertEquals(0, behandlinger.filterIsInstance<Revurdering>().size) },
+        )
+    }
+
+    @Test
+    fun `Kan ikke hente egne ansatte behandlínger som vanlig saksbehandler`() {
+        val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
+        val behandlingDaoMock =
+            mockk<BehandlingDao> {
+                every { alleBehandlingerISak(1) } returns
+                    listOf(
+                        revurdering(sakId = 1, revurderingAarsak = Revurderingaarsak.REGULERING, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                        foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                    )
+            }
+        val hendelserMock = mockk<HendelseDao>()
+
+        val sut =
+            BehandlingServiceImpl(
+                behandlingDao = behandlingDaoMock,
+                behandlingHendelser = behandlingHendelser,
+                grunnlagsendringshendelseDao = mockk(),
+                hendelseDao = hendelserMock,
+                grunnlagKlient = mockk(),
+                behandlingRequestLogger = mockk(),
+                kommerBarnetTilGodeDao = mockk(),
+                oppgaveService = mockk(),
+                grunnlagService = mockk(),
+            )
+
+        val behandlinger = sut.hentBehandlingerForSak(1)
+
+        assertAll(
+            "skal hente behandlinger",
+            { assertEquals(0, behandlinger.size) },
+            { assertEquals(0, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) },
+            { assertEquals(0, behandlinger.filterIsInstance<Revurdering>().size) },
+        )
     }
 
     @Test

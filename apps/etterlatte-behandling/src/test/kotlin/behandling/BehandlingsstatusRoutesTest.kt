@@ -11,6 +11,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import no.nav.etterlatte.azureAdAttestantClaim
+import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
@@ -30,14 +32,6 @@ import java.util.UUID
 internal class BehandlingsstatusRoutesTest {
     private val applicationContext: ApplicationContext = mockk(relaxed = true)
     private val server: MockOAuth2Server = MockOAuth2Server()
-
-    private val azureAdAttestantClaim: String by lazy {
-        "0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e"
-    }
-
-    private val azureAdSaksbehandlerClaim: String by lazy {
-        "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
-    }
 
     @BeforeAll
     fun before() {

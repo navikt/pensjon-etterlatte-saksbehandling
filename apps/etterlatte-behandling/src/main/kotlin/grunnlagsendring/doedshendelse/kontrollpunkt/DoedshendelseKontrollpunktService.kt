@@ -46,7 +46,7 @@ class DoedshendelseKontrollpunktService(
                     kontrollpunkterBarneRelasjon(hendelse, avdoed, sak) + fellesKontrollpunkter(hendelse, avdoed, sak)
                 }
 
-                Relasjon.EPS, Relasjon.SAMBOER -> {
+                Relasjon.EKTEFELLE -> {
                     val (sak, avdoed) = hentDataForBeroert(hendelse)
                     val eps =
                         pdlTjenesterKlient.hentPdlModellFlereSaktyper(
@@ -59,16 +59,28 @@ class DoedshendelseKontrollpunktService(
                             hendelse = hendelse,
                             avdoed = avdoed,
                             sak = sak,
-                        ) +
-                        if (hendelse.relasjon == Relasjon.SAMBOER) {
-                            listOf(DoedshendelseKontrollpunkt.SamboerSammeAdresseOgFellesBarn)
-                        } else {
-                            emptyList()
-                        }
+                        )
                 }
 
                 Relasjon.AVDOED -> {
                     kontrollerAvdoedHarYtelseIGjenny(hendelse)
+                }
+
+                Relasjon.SAMBOER -> {
+                    val (sak, avdoed) = hentDataForBeroert(hendelse)
+                    val samboer =
+                        pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                            foedselsnummer = hendelse.beroertFnr,
+                            rolle = PersonRolle.GJENLEVENDE,
+                            saktype = hendelse.sakTypeForEpsEllerBarn(),
+                        )
+
+                    kontrollpunkterEpsRelasjon(hendelse, sak, samboer, avdoed) +
+                        fellesKontrollpunkter(
+                            hendelse = hendelse,
+                            avdoed = avdoed,
+                            sak = sak,
+                        ) + listOf(DoedshendelseKontrollpunkt.SamboerSammeAdresseOgFellesBarn)
                 }
             }
 
@@ -137,15 +149,15 @@ class DoedshendelseKontrollpunktService(
     }
 
     private fun kontrollerSkilti5AarMedUkjentGiftemaalStart(
-        eps: PersonDTO,
+        ektefelle: PersonDTO,
         avdoed: PersonDTO,
     ): DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde? {
-        if (eps.sivilstand != null) {
-            val skilt = eps.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.SKILT }
+        if (ektefelle.sivilstand != null) {
+            val skilt = ektefelle.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.SKILT }
             val skiltMedAvdoed =
                 skilt.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
             val naa = LocalDate.now()
-            val gift = eps.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.GIFT }
+            val gift = ektefelle.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.GIFT }
             val giftMedAvdoed = gift.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
             if (skiltMedAvdoed.isNotEmpty() && giftMedAvdoed.isNotEmpty()) {
                 val skiltsivilstand = skiltMedAvdoed.first()
@@ -165,14 +177,14 @@ class DoedshendelseKontrollpunktService(
     }
 
     private fun kontrollerSkiltSistefemAarEllerGiftI15(
-        eps: PersonDTO,
+        ektefelle: PersonDTO,
         avdoed: PersonDTO,
     ): DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5OgGiftI15? {
-        if (eps.sivilstand != null) {
-            val skilt = eps.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.SKILT }
+        if (ektefelle.sivilstand != null) {
+            val skilt = ektefelle.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.SKILT }
             val skiltMedAvdoed =
                 skilt.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
-            val gift = eps.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.GIFT }
+            val gift = ektefelle.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.GIFT }
             val giftMedAvdoed = gift.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
             val naa = LocalDate.now()
             if (skiltMedAvdoed.isNotEmpty() && giftMedAvdoed.isNotEmpty()) {

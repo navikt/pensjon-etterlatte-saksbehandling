@@ -66,9 +66,9 @@ class DoedshendelseService(
                 .filter { it.utfall !== Utfall.AVBRUTT }
 
         val beroerteBarn = finnBeroerteBarn(avdoed)
-        val beroerteEpser = if (kanLagreDoedshendelseForEPS()) finnBeroerteEpser(avdoed) else emptyList()
+        val beroerteEktefeller = if (kanLagreDoedshendelseForEPS()) finnBeroerteEktefellerSivilstand(avdoed) else emptyList()
         val samboereMedFellesbarn = finnSamboereForAvdoedMedFellesBarn(avdoed)
-        val alleBeroerte = beroerteBarn + beroerteEpser + samboereMedFellesbarn
+        val alleBeroerte = beroerteBarn + beroerteEktefeller + samboereMedFellesbarn
 
         if (gyldigeDoedshendelserForAvdoed.isEmpty()) {
             sikkerLogg.info("Fant ${alleBeroerte.size} berørte personer for avdød (${avdoed.foedselsnummer})")
@@ -172,18 +172,13 @@ class DoedshendelseService(
         }
     }
 
-    private fun finnBeroerteEpser(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
-        return finnBeroerteEpserSivilstand(avdoed)
-    }
-
     private fun finnSamboereForAvdoedMedFellesBarn(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
         val avdoedesBarn = avdoed.avdoedesBarn
         val andreForeldreForAvdoedesBarn =
             avdoedesBarn?.mapNotNull { barn ->
-                val annenForeldre =
-                    barn.familieRelasjon?.foreldre?.filter { it.value != avdoed.foedselsnummer.verdi.value }
-                        ?.map { it }
-                annenForeldre?.map { forelder -> forelder.value }
+                barn.familieRelasjon?.foreldre?.filter { it.value != avdoed.foedselsnummer.verdi.value }
+                    ?.map { it }
+                    ?.map { forelder -> forelder.value }
             }
         return harSammeAdresseSomAvdoed(avdoed, andreForeldreForAvdoedesBarn?.flatten())
     }
@@ -223,7 +218,7 @@ class DoedshendelseService(
         adresse1?.adresseLinje3 == adresse2?.adresseLinje3 &&
         adresse1?.postnr == adresse2?.postnr
 
-    private fun finnBeroerteEpserSivilstand(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
+    private fun finnBeroerteEktefellerSivilstand(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
         return avdoed.sivilstand?.filter { it.verdi.relatertVedSiviltilstand?.value !== null }
             ?.filter {
                 it.verdi.sivilstatus in
@@ -234,7 +229,7 @@ class DoedshendelseService(
                         Sivilstatus.ENKE_ELLER_ENKEMANN,
                         Sivilstatus.SEPARERT,
                     )
-            }?.map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EPS) } ?: emptyList()
+            }?.map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EKTEFELLE) } ?: emptyList()
     }
 }
 

@@ -72,7 +72,7 @@ class DoedshendelseKontrollpunktServiceTest {
             avdoedFnr = KONTANT_FOT.value,
             avdoedDoedsdato = LocalDate.now(),
             beroertFnr = JOVIAL_LAMA.value,
-            relasjon = Relasjon.EPS,
+            relasjon = Relasjon.EKTEFELLE,
             endringstype = Endringstype.OPPRETTET,
         )
 

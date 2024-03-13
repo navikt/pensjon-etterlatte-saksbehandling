@@ -221,6 +221,20 @@ class BrevApiKlientTest : BrevApiKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ) {}
 
+    override suspend fun hentVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        return opprettetBrevDto(brevId)
+    }
+
+    override suspend fun hentOversendelsesbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        return opprettetBrevDto(brevId)
+    }
+
     private fun opprettetBrevDto(brevId: Long) =
         OpprettetBrevDto(
             id = brevId,

@@ -9,6 +9,7 @@ import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
 import io.mockk.spyk
+import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -32,6 +33,7 @@ abstract class BehandlingIntegrationTest {
     protected fun startServer(
         norg2Klient: Norg2Klient? = null,
         featureToggleService: FeatureToggleService = DummyFeatureToggleService(),
+        brevApiKlient: BrevApiKlient? = null,
     ) {
         server.start()
         val props = dbExtension.properties()
@@ -84,7 +86,7 @@ abstract class BehandlingIntegrationTest {
                 grunnlagKlientObo = GrunnlagKlientTest(),
                 vedtakKlient = spyk(VedtakKlientTest()),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
-                brevApiHttpClient = BrevApiKlientTest(),
+                brevApiKlient = brevApiKlient ?: BrevApiKlientTest(),
                 klageHttpClient = klageHttpClientTest(),
                 tilbakekrevingHttpClient = tilbakekrevingHttpClientTest(),
                 migreringHttpClient = migreringHttpClientTest(),

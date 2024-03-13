@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.ktorobo
 
 import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -85,19 +84,16 @@ class DownstreamResourceClient(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         action: suspend (token: AccessToken) -> HttpResponse,
-    ): Result<Resource, Throwable> {
-        val scopes = listOf("api://${resource.clientId}/.default")
-        return azureAdClient.hentTokenFraAD(brukerTokenInfo, scopes)
-            .andThen { runCatching { action(it) }.fold(resource) }
-            .andThen { response ->
-                when (response) {
-                    null -> Ok(resource)
-                    else -> Ok(resource.addResponse(response))
-                }
+    ) = azureAdClient.hentTokenFraAD(brukerTokenInfo, listOf("api://${resource.clientId}/.default"))
+        .andThen { runCatching { action(it) }.fold(resource) }
+        .andThen { response ->
+            when (response) {
+                null -> Ok(resource)
+                else -> Ok(resource.addResponse(response))
             }
-    }
+        }
 
-    private suspend fun kotlin.Result<HttpResponse>.fold(resource: Resource) =
+    private suspend fun Result<HttpResponse>.fold(resource: Resource) =
         this.fold(
             onSuccess = { response ->
                 when {

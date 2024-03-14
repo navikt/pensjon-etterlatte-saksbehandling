@@ -41,19 +41,21 @@ class BeregningService(
             val overstyrBeregningForrige = behandlingViOmregnerFra?.let { hentOverstyrBeregning(it, brukerTokenInfo) }
 
             val beregning =
-                if (overstyrBeregning != null) {
-                    beregnOverstyrBeregningService.beregn(behandling, overstyrBeregning, brukerTokenInfo)
-                } else if (overstyrBeregningForrige != null) {
-                    beregnOverstyrBeregningService.beregn(behandling, overstyrBeregningForrige, brukerTokenInfo)
-                } else {
-                    when (behandling.sakType) {
-                        SakType.BARNEPENSJON -> beregnBarnepensjonService.beregn(behandling, brukerTokenInfo)
-                        SakType.OMSTILLINGSSTOENAD ->
-                            beregnOmstillingsstoenadService.beregn(
-                                behandling,
-                                brukerTokenInfo,
-                            )
-                    }
+                when {
+                    overstyrBeregning != null -> beregnOverstyrBeregningService.beregn(behandling, overstyrBeregning, brukerTokenInfo)
+                    overstyrBeregningForrige != null ->
+                        beregnOverstyrBeregningService.beregn(
+                            behandling,
+                            overstyrBeregningForrige,
+                            brukerTokenInfo,
+                        )
+                    behandling.sakType == SakType.BARNEPENSJON -> beregnBarnepensjonService.beregn(behandling, brukerTokenInfo)
+                    behandling.sakType == SakType.OMSTILLINGSSTOENAD ->
+                        beregnOmstillingsstoenadService.beregn(
+                            behandling,
+                            brukerTokenInfo,
+                        )
+                    else -> throw UgyldigForespoerselException("KAN_IKKE_BEREGNE", "Klarte ikke å beregne. Dette skal ikke kunne skje.")
                 }
 
             val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)

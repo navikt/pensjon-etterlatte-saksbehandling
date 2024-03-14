@@ -14,6 +14,7 @@ import { SakType } from '~shared/types/sak'
 import { mapApiResult } from '~shared/api/apiUtils'
 import { FlexRow } from '~shared/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 function formaterKanskjeNavn(navn: Partial<PersonNavn>) {
   return [navn.fornavn, navn.mellomnavn, navn.etternavn].filter((navn) => !!navn).join(' ')
@@ -51,6 +52,7 @@ const PersonUtenIdentWrapper = styled.div`
 
 function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype: SakType }) {
   const { samsvar, saktype } = props
+  const visMismatchPdl = useFeatureEnabledMedDefault('familieforhold-vis-mismatch-pdl', false)
 
   const personerUtenIdenterSak = samsvar.persongalleri?.personerUtenIdent ?? []
   const personerUtenIdenterPdl = samsvar.persongalleriPdl?.personerUtenIdent ?? []
@@ -68,7 +70,7 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
 
   return (
     <>
-      {harAvvikMotPdl && (
+      {harAvvikMotPdl && visMismatchPdl && (
         <MediumAdvarsel>
           <BodyShort spacing>
             Det er forskjeller mellom familieforholdet i behandlingen og det familieforholdet vi utleder ut i fra PDL.

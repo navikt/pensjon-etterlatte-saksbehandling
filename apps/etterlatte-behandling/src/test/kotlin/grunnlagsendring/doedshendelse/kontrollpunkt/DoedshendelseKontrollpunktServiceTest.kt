@@ -320,7 +320,7 @@ class DoedshendelseKontrollpunktServiceTest {
     }
 
     @Test
-    fun `Skal ikke gi kontrollpunkt AvdoedHarYtelse dersom relasjon avdød og kun har sak ikke iverksatt behandling`() {
+    fun `Skal gi kontrollpunkt AvdoedHarIkkeYtelse dersom relasjon avdød og kun har sak ikke iverksatt behandling`() {
         val doedshendelseInternalAvdoed =
             DoedshendelseInternal.nyHendelse(
                 avdoedFnr = KONTANT_FOT.value,
@@ -350,7 +350,7 @@ class DoedshendelseKontrollpunktServiceTest {
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalAvdoed)
 
-        kontrollpunkter shouldContainExactly emptyList()
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarIkkeYtelse)
     }
 
     @Test

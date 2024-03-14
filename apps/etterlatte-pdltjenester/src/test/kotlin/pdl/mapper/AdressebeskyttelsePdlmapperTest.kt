@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class AdressebeskyttelseTestPdlmapper {
+internal class AdressebeskyttelsePdlmapperTest {
     private val mapper = objectMapper
 
     @Test

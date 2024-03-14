@@ -12,10 +12,13 @@ class SakTilgangDao(private val datasource: DataSource) {
             statement.setString(1, fnr)
             return statement.executeQuery().toList {
                 SakMedGraderingOgSkjermet(
-                    id = getLong(1),
-                    adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
-                    erSkjermet = getBoolean(3),
-                    enhetNr = getString(4),
+                    id = getLong("sak_id"),
+                    adressebeskyttelseGradering =
+                        getString("adressebeskyttelse")?.let {
+                            AdressebeskyttelseGradering.valueOf(it)
+                        },
+                    erSkjermet = getBoolean("erskjermet"),
+                    enhetNr = getString("enhet"),
                 )
             }
         }
@@ -27,10 +30,13 @@ class SakTilgangDao(private val datasource: DataSource) {
             statement.setLong(1, id)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
-                    id = getLong(1),
-                    adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
-                    erSkjermet = getBoolean(3),
-                    enhetNr = getString(4),
+                    id = getLong("sak_id"),
+                    adressebeskyttelseGradering =
+                        getString("adressebeskyttelse")?.let {
+                            AdressebeskyttelseGradering.valueOf(it)
+                        },
+                    erSkjermet = getBoolean("erskjermet"),
+                    enhetNr = getString("enhet"),
                 )
             }
         }
@@ -50,10 +56,13 @@ class SakTilgangDao(private val datasource: DataSource) {
             statement.setString(3, behandlingId)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
-                    id = getLong(1),
-                    adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
-                    erSkjermet = getBoolean(3),
-                    enhetNr = getString(4),
+                    id = getLong("sak_id"),
+                    adressebeskyttelseGradering =
+                        getString("adressebeskyttelse")?.let {
+                            AdressebeskyttelseGradering.valueOf(it)
+                        },
+                    erSkjermet = getBoolean("erskjermet"),
+                    enhetNr = getString("enhet"),
                 )
             }
         }
@@ -79,7 +88,7 @@ class SakTilgangDao(private val datasource: DataSource) {
                             AdressebeskyttelseGradering.valueOf(it)
                         },
                     erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = getString(4),
+                    enhetNr = getString("enhet"),
                 )
             }
         }
@@ -105,7 +114,7 @@ class SakTilgangDao(private val datasource: DataSource) {
                             AdressebeskyttelseGradering.valueOf(it)
                         },
                     erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = getString(4),
+                    enhetNr = getString("enhet"),
                 )
             }
         }
@@ -131,7 +140,7 @@ class SakTilgangDao(private val datasource: DataSource) {
                             AdressebeskyttelseGradering.valueOf(it)
                         },
                     erSkjermet = getBoolean("erskjermet"),
-                    enhetNr = getString(4),
+                    enhetNr = getString("enhet"),
                 )
             }
         }

@@ -165,9 +165,20 @@ data class Klage(
                     JaNei.NEI -> KlageStatus.FORMKRAV_IKKE_OPPFYLT
                 },
             utfall =
-                when (formkrav.erFormkraveneOppfylt) {
-                    JaNei.JA -> this.utfall
-                    JaNei.NEI -> null
+                if (this.erFormkraveneOppfylt() != formkrav.erFormkraveneOppfylt ||
+                    this.erKlagenFramsattInnenFrist() != formkrav.erKlagenFramsattInnenFrist
+                ) {
+                    null
+                } else {
+                    this.utfall
+                },
+            initieltUtfall =
+                if (this.erFormkraveneOppfylt() != formkrav.erFormkraveneOppfylt ||
+                    this.erKlagenFramsattInnenFrist() != formkrav.erKlagenFramsattInnenFrist
+                ) {
+                    null
+                } else {
+                    this.initieltUtfall
                 },
         )
     }
@@ -179,7 +190,7 @@ data class Klage(
                     "til klagen (${this.status})",
             )
         }
-        if (formkrav?.formkrav?.erKlagenFramsattInnenFrist == JaNei.JA &&
+        if (erKlagenFramsattInnenFrist() == JaNei.JA &&
             initieltUtfall == null
         ) {
             throw IllegalStateException(
@@ -278,6 +289,10 @@ data class Klage(
             else -> false
         }
     }
+
+    private fun erFormkraveneOppfylt() = this.formkrav?.formkrav?.erFormkraveneOppfylt
+
+    private fun erKlagenFramsattInnenFrist() = this.formkrav?.formkrav?.erKlagenFramsattInnenFrist
 
     fun kanAvbryte(): Boolean {
         return KlageStatus.kanAvbryte(this.status)

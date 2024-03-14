@@ -44,7 +44,13 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
   const [redigeres, setRedigeres] = useState<boolean>(!klage?.initieltUtfall)
 
   const [lagreInitiellStatus, lagreInitiellKlageUtfall] = useApiCall(oppdaterInitieltUtfallForKlage)
-  const { handleSubmit, control, register, watch } = useForm<InitiellVurderingForm>({
+  const {
+    handleSubmit,
+    control,
+    register,
+    watch,
+    formState: { errors },
+  } = useForm<InitiellVurderingForm>({
     defaultValues: klage.initieltUtfall?.utfallMedBegrunnelse ?? { begrunnelse: null, utfall: null },
   })
 
@@ -105,7 +111,17 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
             {formUtfall && (
               <>
                 <BredVurderingWrapper>
-                  <Textarea size="medium" label={getTextFromutfall(formUtfall)} {...register('begrunnelse')} />
+                  <Textarea
+                    size="medium"
+                    label={getTextFromutfall(formUtfall)}
+                    error={errors.begrunnelse?.message}
+                    {...register('begrunnelse', {
+                      required: {
+                        value: true,
+                        message: 'Du må skrive en begrunnelse for utfallet.',
+                      },
+                    })}
+                  />
                 </BredVurderingWrapper>
 
                 <BredVurderingWrapper>

@@ -5,9 +5,6 @@ import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import javax.sql.DataSource
 
-/*
-    Hvis denne skal gjøre skriveoperasjoner MÅ ingen av metodene her være wrappet i en intransaction, da vil skriveoperasjonen bli overskridet av transaksjonen til intransaction
- */
 class SakTilgangDao(private val datasource: DataSource) {
     fun finnSakerMedGraderingOgSkjerming(fnr: String): List<SakMedGraderingOgSkjermet> {
         datasource.connection.use { connection ->
@@ -100,6 +97,32 @@ class SakTilgangDao(private val datasource: DataSource) {
                     """.trimIndent(),
                 )
             statement.setString(1, klageId)
+            return statement.executeQuery().singleOrNull {
+                SakMedGraderingOgSkjermet(
+                    id = getLong("sak_id"),
+                    adressebeskyttelseGradering =
+                        getString("adressebeskyttelse")?.let {
+                            AdressebeskyttelseGradering.valueOf(it)
+                        },
+                    erSkjermet = getBoolean("erskjermet"),
+                    enhetNr = getString(4),
+                )
+            }
+        }
+    }
+
+    fun hentSakMedGraderingOgSkjermingPaaGenerellbehandling(generellbehandlingId: String): SakMedGraderingOgSkjermet? {
+        datasource.connection.use { connection ->
+            val statement =
+                connection.prepareStatement(
+                    """
+                    SELECT s.id as sak_id, adressebeskyttelse, erskjermet, enhet 
+                    FROM generellbehandling g
+                    INNER JOIN sak s on g.sak_id = s.id
+                    WHERE g.id = ?::uuid
+                    """.trimIndent(),
+                )
+            statement.setString(1, generellbehandlingId)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
                     id = getLong("sak_id"),

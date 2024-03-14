@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.FiksVedtakstilstand
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
@@ -87,6 +88,11 @@ class ApplicationContext {
         AutomatiskBehandlingService(
             vedtakBehandlingService,
             behandlingKlient,
+        )
+    val fiksVedtakstilstand =
+        FiksVedtakstilstand(
+            behandlingService = vedtakBehandlingService,
+            vedtakservice = vedtaksvurderingService,
         )
 
     val metrikkerJob: MetrikkerJob by lazy {

@@ -67,6 +67,7 @@ data class Systembruker(
         val brev = Systembruker(Systembrukere.BREV)
         val doedshendelse = Systembruker(Systembrukere.DOEDSHENDELSE)
         val testdata = Systembruker(Systembrukere.TESTDATA)
+        val tekniskRetting = Systembruker(Systembrukere.TEKNISK_RETTING)
     }
 }
 
@@ -104,4 +105,5 @@ enum class Systembrukere(val oid: String) {
     MIGRERING("migrering"),
     DOEDSHENDELSE("doedshendelse"),
     TESTDATA("testdata"),
+    TEKNISK_RETTING("teknisk_retting"),
 }

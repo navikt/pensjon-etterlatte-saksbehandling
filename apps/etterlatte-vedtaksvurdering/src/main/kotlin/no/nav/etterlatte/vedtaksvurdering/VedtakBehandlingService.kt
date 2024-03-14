@@ -2,6 +2,7 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.BehandlingMedStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -59,6 +60,9 @@ class VedtakBehandlingService(
         val alleVedtakForSak = repository.hentVedtakForSak(sakId)
         return Vedtakstidslinje(alleVedtakForSak).erLoependePaa(dato)
     }
+
+    suspend fun hentAktuelleBehandlingerForFiksStatus(brukerTokenInfo: BrukerTokenInfo): List<BehandlingMedStatus> =
+        behandlingKlient.hentAktuelleBehandlingerForFiksStatus(brukerTokenInfo)
 
     suspend fun opprettEllerOppdaterVedtak(
         behandlingId: UUID,

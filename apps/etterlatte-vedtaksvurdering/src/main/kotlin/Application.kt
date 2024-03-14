@@ -7,12 +7,14 @@ import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.jobs.addShutdownHook
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
 import no.nav.etterlatte.vedtaksvurdering.config.ApplicationContext
 import no.nav.etterlatte.vedtaksvurdering.klagevedtakRoute
@@ -67,5 +69,6 @@ class Server(private val context: ApplicationContext) {
 internal fun Application.moduleOnServerReady(context: ApplicationContext) {
     environment.monitor.subscribe(ServerReady) {
         context.metrikkerJob.schedule().also { addShutdownHook(it) }
+        runBlocking { context.fiksVedtakstilstand.fiks(Systembruker.tekniskRetting) }
     }
 }

@@ -101,7 +101,7 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
           </FlexRow>
         </MediumAdvarsel>
       )}
-      {!harPersonerUtenIdenter && (
+      {harPersonerUtenIdenter && (
         <div>
           <MediumAdvarsel>
             Det er personer uten identer i PDL i saksgrunnlaget. Disse personene kan ikke brukes i beregning av

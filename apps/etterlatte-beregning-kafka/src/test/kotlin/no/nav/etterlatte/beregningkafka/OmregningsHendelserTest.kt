@@ -66,7 +66,7 @@ internal class OmregningsHendelserTest {
                 capture(forrigeBehandlingId),
             )
         }.returns(noContentValue)
-        every { behandlingService.beregn(capture(omregningsid)) }.returns(returnValue)
+        every { behandlingService.beregn(capture(omregningsid), any()) }.returns(returnValue)
 
         val inspector = inspector.apply { sendTestMessage(fullMelding) }
 

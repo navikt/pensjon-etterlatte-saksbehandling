@@ -50,7 +50,7 @@ internal class BeregningServiceTest {
         every { beregning.copy(any(), any(), any(), any(), any(), any(), any()) } returns beregning
 
         runBlocking {
-            beregningService.opprettBeregning(behandling.id, bruker)
+            beregningService.opprettBeregning(behandling.id, null, bruker)
 
             coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
             coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), true) }
@@ -79,7 +79,7 @@ internal class BeregningServiceTest {
         every { beregning.copy(any(), any(), any(), any(), any(), any(), overstyrBeregning) } returns beregning
 
         runBlocking {
-            beregningService.opprettBeregning(behandling.id, bruker)
+            beregningService.opprettBeregning(behandling.id, null, bruker)
 
             coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
             coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), true) }
@@ -98,7 +98,7 @@ internal class BeregningServiceTest {
 
         runBlocking {
             assertThrows<IllegalStateException> {
-                beregningService.opprettBeregning(behandling.id, bruker)
+                beregningService.opprettBeregning(behandling.id, null, bruker)
             }
 
             coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
@@ -121,7 +121,7 @@ internal class BeregningServiceTest {
         every { beregning.copy(any(), any(), any(), any(), any(), any(), any()) } returns beregning
 
         runBlocking {
-            beregningService.opprettBeregning(behandling.id, bruker)
+            beregningService.opprettBeregning(behandling.id, null, bruker)
 
             coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
             coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), true) }
@@ -150,7 +150,7 @@ internal class BeregningServiceTest {
         every { beregning.copy(any(), any(), any(), any(), any(), any(), overstyrBeregning) } returns beregning
 
         runBlocking {
-            beregningService.opprettBeregning(behandling.id, bruker)
+            beregningService.opprettBeregning(behandling.id, null, bruker)
 
             coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
             coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), true) }
@@ -168,7 +168,7 @@ internal class BeregningServiceTest {
 
         runBlocking {
             assertThrows<IllegalStateException> {
-                beregningService.opprettBeregning(behandling.id, bruker)
+                beregningService.opprettBeregning(behandling.id, null, bruker)
             }
 
             coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }

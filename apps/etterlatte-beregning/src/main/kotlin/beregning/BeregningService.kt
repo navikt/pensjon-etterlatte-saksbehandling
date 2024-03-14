@@ -38,10 +38,13 @@ class BeregningService(
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
             val overstyrBeregning = hentOverstyrBeregning(behandlingId, brukerTokenInfo)
+            val overstyrBeregningForrige = behandlingViOmregnerFra?.let { hentOverstyrBeregning(it, brukerTokenInfo) }
 
             val beregning =
                 if (overstyrBeregning != null) {
                     beregnOverstyrBeregningService.beregn(behandling, overstyrBeregning, brukerTokenInfo)
+                } else if (overstyrBeregningForrige != null) {
+                    beregnOverstyrBeregningService.beregn(behandling, overstyrBeregningForrige, brukerTokenInfo)
                 } else {
                     when (behandling.sakType) {
                         SakType.BARNEPENSJON -> beregnBarnepensjonService.beregn(behandling, brukerTokenInfo)

@@ -17,7 +17,7 @@ class BeregningService(
 ) {
     fun beregn(
         behandlingId: UUID,
-        forrigeBehandlingId: UUID?,
+        forrigeBehandlingId: UUID? = null,
     ): HttpResponse =
         runBlocking {
             beregningApp.post("$url/api/beregning/$behandlingId") {

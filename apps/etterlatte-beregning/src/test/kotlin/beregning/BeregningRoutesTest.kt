@@ -1,10 +1,13 @@
 package no.nav.etterlatte.beregning
+import OpprettBeregningRequest
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -26,6 +29,7 @@ import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -154,7 +158,8 @@ internal class BeregningRoutesTest {
             val response =
                 client.post("/api/beregning/${behandling.id}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
+                    bearerAuth(token)
+                    setBody(OpprettBeregningRequest().toJson())
                 }
 
             val opprettetBeregning = objectMapper.readValue(response.bodyAsText(), BeregningDTO::class.java)

@@ -7,6 +7,7 @@ import io.ktor.server.application.Hook
 import io.ktor.server.application.RouteScopedPlugin
 import io.ktor.server.application.call
 import io.ktor.server.application.createRouteScopedPlugin
+import io.ktor.server.request.path
 import io.ktor.server.request.receive
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
@@ -22,16 +23,15 @@ import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+import no.nav.etterlatte.libs.ktor.route.GENERELLBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.behandlingId
-import no.nav.etterlatte.libs.ktor.route.klageId
-import no.nav.etterlatte.libs.ktor.route.oppgaveId
-import no.nav.etterlatte.libs.ktor.route.sakId
+import no.nav.etterlatte.libs.ktor.route.pathParamsIntern
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.sak.TilgangService
+import org.slf4j.LoggerFactory
 
 class PluginConfiguration {
     var harTilgangBehandling: (behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
@@ -186,14 +186,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGrad
     }
 }
 
-fun <T> hentNullableVerdi(block: () -> T) =
-    try {
-        block()
-    } catch (_: NullPointerException) {
-        null
-    } catch (_: IllegalArgumentException) {
-        null
-    }
+private val logger = LoggerFactory.getLogger("Skrivetilgang")
 
 fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
     sakId: Long? = null,
@@ -203,31 +196,7 @@ fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
         is SaksbehandlerMedEnheterOgRoller -> {
             val enhetNrSomSkalTestes =
                 when (enhetNr) {
-                    null -> {
-                        Kontekst.get().sakTilgangDao.let { sakTilgangDao ->
-                            val sakEnhetNr =
-                                sakId?.let {
-                                    sakTilgangDao.hentSakMedGraderingOgSkjerming(it)?.enhetNr
-                                } ?: hentNullableVerdi { this.sakId }?.let {
-                                    sakTilgangDao.hentSakMedGraderingOgSkjerming(it)?.enhetNr
-                                }
-                            val behandlingEnhetNr =
-                                hentNullableVerdi { behandlingId }?.let {
-                                    sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(it.toString())?.enhetNr
-                                }
-                            val oppgaveEnhetNr =
-                                hentNullableVerdi { oppgaveId }?.let {
-                                    sakTilgangDao.hentSakMedGraderingOgSkjermingPaaOppgave(it.toString())?.enhetNr
-                                }
-                            val klageEnhetNr =
-                                hentNullableVerdi { klageId }?.let {
-                                    sakTilgangDao.hentSakMedGraderingOgSkjermingPaaKlage(it.toString())?.enhetNr
-                                }
-
-                            listOfNotNull(sakEnhetNr, behandlingEnhetNr, oppgaveEnhetNr, klageEnhetNr).firstOrNull()
-                        }
-                    }
-
+                    null -> finnSkriveTilgangForId(sakId)
                     else -> enhetNr
                 }
 
@@ -238,6 +207,32 @@ fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
         }
         is SystemUser -> true
         else -> false
+    }
+}
+
+private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: Long? = null): String? {
+    val sakTilgangDao = Kontekst.get().sakTilgangDao
+    if (sakId != null) {
+        return sakTilgangDao.hentSakMedGraderingOgSkjerming(sakId)?.enhetNr
+    }
+    val funnetPathParamType = pathParamsIntern.firstOrNull { call.parameters.contains(it) }
+    return if (funnetPathParamType == null) {
+        logger.warn("Fant ingen pathparam i url: ${call.request.path()}")
+        null
+    } else {
+        val idForRequest = call.parameters[funnetPathParamType]!!
+        when (funnetPathParamType) {
+            BEHANDLINGID_CALL_PARAMETER -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(idForRequest)?.enhetNr
+            SAKID_CALL_PARAMETER -> sakTilgangDao.hentSakMedGraderingOgSkjerming(idForRequest.toLong())?.enhetNr
+            OPPGAVEID_CALL_PARAMETER -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaOppgave(idForRequest)?.enhetNr
+            KLAGEID_CALL_PARAMETER -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaKlage(idForRequest)?.enhetNr
+            GENERELLBEHANDLINGID_CALL_PARAMETER -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaGenerellbehandling(idForRequest)?.enhetNr
+
+            else -> {
+                logger.warn("Fant ingen enhet for id $idForRequest av ukjent type")
+                null
+            }
+        }
     }
 }
 

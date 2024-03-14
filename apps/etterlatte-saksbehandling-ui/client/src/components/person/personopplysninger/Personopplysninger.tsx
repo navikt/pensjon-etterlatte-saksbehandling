@@ -12,6 +12,7 @@ import { Statsborgerskap } from '~components/person/personopplysninger/Statsborg
 import { Heading } from '@navikt/ds-react'
 import { SakType } from '~shared/types/sak'
 import { Foreldre } from '~components/person/personopplysninger/Foreldre'
+import { AvdoedesBarn } from '~components/person/personopplysninger/AvdoedesBarn'
 
 export const Personopplysninger = ({
   sakStatus,
@@ -47,12 +48,16 @@ export const Personopplysninger = ({
               success: (personopplysninger) => (
                 <>
                   <Bostedsadresser bostedsadresse={personopplysninger.soeker?.opplysning.bostedsadresse} />
+                  {/*TODO gå igjennom og sjekk hva som kan gjenbrukes på tvers av BP og OMS*/}
                   {erSaktype(sakStatus, SakType.BARNEPENSJON) && (
-                    <Foreldre
-                      avdoed={personopplysninger.avdoede}
-                      gjenlevende={personopplysninger.gjenlevende}
-                      foreldreansvar={personopplysninger.soeker?.opplysning.familieRelasjon?.ansvarligeForeldre}
-                    />
+                    <>
+                      <Foreldre
+                        avdoed={personopplysninger.avdoede}
+                        gjenlevende={personopplysninger.gjenlevende}
+                        foreldreansvar={personopplysninger.soeker?.opplysning.familieRelasjon?.ansvarligeForeldre}
+                      />
+                      <AvdoedesBarn />
+                    </>
                   )}
                   <Statsborgerskap
                     bostedsLand={personopplysninger.soeker?.opplysning.bostedsadresse?.at(0)?.land}

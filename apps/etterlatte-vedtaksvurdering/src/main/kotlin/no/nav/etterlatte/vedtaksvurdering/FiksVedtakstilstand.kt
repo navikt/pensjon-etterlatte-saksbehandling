@@ -3,6 +3,7 @@ package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.vedtaksvurdering.UnderkjennVedtakDto
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
@@ -12,7 +13,7 @@ class FiksVedtakstilstand(val behandlingService: VedtakFiksBehandlingService, va
         val aktuelleBehandlinger = behandlingService.hentAktuelleBehandlingerForFiksStatus(bruker)
 
         aktuelleBehandlinger.forEach {
-            val brukerTokenInfo = tilBruker(it.ident)
+            val brukerTokenInfo = tilBruker(it.ident ?: Fagsaksystem.EY.navn)
             val vedtak = vedtakservice.hentVedtakMedBehandlingId(it.id)
             when (it.status) {
                 BehandlingStatus.OPPRETTET,

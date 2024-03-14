@@ -5,5 +5,5 @@ import java.util.UUID
 data class BehandlingMedStatus(
     val id: UUID,
     val status: BehandlingStatus,
-    val ident: String,
+    val ident: String?,
 )

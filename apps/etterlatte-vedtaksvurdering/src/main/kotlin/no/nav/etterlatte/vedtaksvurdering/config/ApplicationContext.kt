@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.FiksVedtakstilstand
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakFiksBehandlingService
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
@@ -89,9 +90,18 @@ class ApplicationContext {
             vedtakBehandlingService,
             behandlingKlient,
         )
+    val vedtakFiksBehandlingService =
+        VedtakFiksBehandlingService(
+            repository = VedtaksvurderingRepository.using(dataSource),
+            beregningKlient = BeregningKlientImpl(config, httpClient()),
+            vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
+            behandlingKlient = behandlingKlient,
+            samKlient = samKlient,
+            trygdetidKlient = trygdetidKlient,
+        )
     val fiksVedtakstilstand =
         FiksVedtakstilstand(
-            behandlingService = vedtakBehandlingService,
+            behandlingService = vedtakFiksBehandlingService,
             vedtakservice = vedtaksvurderingService,
         )
 

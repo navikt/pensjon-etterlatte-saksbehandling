@@ -5,10 +5,9 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.vedtaksvurdering.UnderkjennVedtakDto
-import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 
-class FiksVedtakstilstand(val behandlingService: VedtakBehandlingService, val vedtakservice: VedtaksvurderingService) {
+class FiksVedtakstilstand(val behandlingService: VedtakFiksBehandlingService, val vedtakservice: VedtaksvurderingService) {
     suspend fun fiks(bruker: BrukerTokenInfo) {
         val aktuelleBehandlinger = behandlingService.hentAktuelleBehandlingerForFiksStatus(bruker)
 

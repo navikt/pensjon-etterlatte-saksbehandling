@@ -173,7 +173,10 @@ class DoedshendelseKontrollpunktService(
                 val antallSkilteAar = safeYearsBetween(skiltsivilstand.gyldigFraOgMed, naa).absoluteValue
                 val giftSivilstand = giftMedAvdoed.first()
                 return if (antallSkilteAar <= 5 && giftSivilstand.gyldigFraOgMed == null) {
-                    DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde
+                    DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde(
+                        doedsdato = avdoed.doedsdato!!.verdi,
+                        fnr = ektefelle.foedselsnummer.verdi.value,
+                    )
                 } else {
                     null
                 }
@@ -202,7 +205,10 @@ class DoedshendelseKontrollpunktService(
                 val giftSivilstand = giftMedAvdoed.first()
                 val antallGifteAar = safeYearsBetween(giftSivilstand.gyldigFraOgMed, naa).absoluteValue
                 return if (antallSkilteAar <= 5 && antallGifteAar >= 15) {
-                    DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5OgGiftI15
+                    DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5OgGiftI15(
+                        doedsdato = avdoed.doedsdato!!.verdi,
+                        fnr = ektefelle.foedselsnummer.verdi.value,
+                    )
                 } else {
                     null
                 }
@@ -419,4 +425,14 @@ class DoedshendelseKontrollpunktService(
             else -> null
         }
     }
+}
+
+sealed class A(var name: String)
+
+data class B(val lol: String) : A("B")
+
+class C : A("C")
+
+fun lol() {
+    B("2")
 }

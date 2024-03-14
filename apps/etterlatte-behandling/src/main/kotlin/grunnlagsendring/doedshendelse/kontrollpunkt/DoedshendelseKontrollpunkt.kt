@@ -156,9 +156,9 @@ sealed class DoedshendelseKontrollpunkt {
     }
 
     @JsonTypeName("EPS_HAR_SAK_I_GJENNY")
-    data class EpsHarSakIGjenny(override val sak: Sak) : DoedshendelseKontrollpunkt(), KontrollpunktMedSak {
+    data class EpsHarSakMedIverksattBehandlingIGjenny(override val sak: Sak) : DoedshendelseKontrollpunkt(), KontrollpunktMedSak {
         override val kode = "EPS_HAR_SAK_I_GJENNY"
-        override val beskrivelse: String = "Det eksisterer allerede en sak på EPS i Gjenny"
+        override val beskrivelse: String = "Det eksisterer allerede en aktiv sak på EPS i Gjenny(iverksatt behandling)"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
         override val avbryt: Boolean = true

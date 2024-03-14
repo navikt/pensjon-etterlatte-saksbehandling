@@ -385,7 +385,7 @@ class DoedshendelseKontrollpunktService(
             val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(it.id)
             return when (sisteIverksatteBehandling) {
                 is Foerstegangsbehandling, is AutomatiskRevurdering, is ManuellRevurdering ->
-                    DoedshendelseKontrollpunkt.EpsHarSakIGjenny(
+                    DoedshendelseKontrollpunkt.EpsHarSakMedIverksattBehandlingIGjenny(
                         sak,
                     )
                 null -> null

@@ -14,7 +14,7 @@ class FiksVedtaktstilstandDao(private val connection: ConnectionAutoclosing) {
              inner join behandlinghendelse h on b.id = h.behandlingid
               and h.id = 
              (select max(id) from behandlinghendelse h2 where h2.behandlingid = b.id
-             and h2.inntruffet > to_timestamp('2024-03-13 15:00:00', 'YYYY-MM-DD HH24:MI:SS'
+             and h2.inntruffet > to_timestamp('2024-03-13 15:00:00', 'YYYY-MM-DD HH24:MI:SS')
              and h2.inntruffet < to_timestamp('2024-03-14 13:00:00', 'YYYY-MM-DD HH24:MI:SS')
              )
             """.trimIndent()

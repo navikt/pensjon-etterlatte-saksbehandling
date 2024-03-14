@@ -24,6 +24,15 @@ const val KLAGEID_CALL_PARAMETER = "klageId"
 const val GENERELLBEHANDLINGID_CALL_PARAMETER = "generellBehandlingId"
 const val OPPGAVEID_GOSYS_CALL_PARAMETER = "gosysOppgaveId"
 
+val pathParamsIntern =
+    listOf(
+        BEHANDLINGID_CALL_PARAMETER,
+        SAKID_CALL_PARAMETER,
+        OPPGAVEID_CALL_PARAMETER,
+        KLAGEID_CALL_PARAMETER,
+        GENERELLBEHANDLINGID_CALL_PARAMETER,
+    )
+
 inline val PipelineContext<*, ApplicationCall>.generellBehandlingId: UUID
     get() =
         call.parameters[GENERELLBEHANDLINGID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(

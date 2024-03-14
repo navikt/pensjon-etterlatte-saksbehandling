@@ -5,8 +5,7 @@ import { CopyButton, Heading, Table, Tag } from '@navikt/ds-react'
 import { SpaceChildren } from '~shared/styled'
 import { Personopplysning as PdlPersonopplysning } from '~shared/types/grunnlag'
 import { formaterStringDato } from '~utils/formattering'
-import { intervalToDuration } from 'date-fns'
-import styled from 'styled-components'
+import { AlderTag } from '~components/person/personopplysninger/components/AlderTag'
 
 export const Foreldre = ({
   avdoed,
@@ -19,13 +18,6 @@ export const Foreldre = ({
 }) => {
   const harForeldreansvar = (fnr: string): boolean => {
     return !!foreldreansvar && foreldreansvar.includes(fnr)
-  }
-
-  function utregnAlder(foedselsdato: Date): number {
-    return intervalToDuration({
-      start: foedselsdato,
-      end: new Date(),
-    }).years!
   }
 
   return (
@@ -62,11 +54,7 @@ export const Foreldre = ({
                         size="small"
                         iconPosition="right"
                       />
-                      <AlderWrapper>
-                        <Tag variant="info" size="small">
-                          {utregnAlder(doed.opplysning.foedselsdato)} år
-                        </Tag>
-                      </AlderWrapper>
+                      <AlderTag foedselsdato={doed.opplysning.foedselsdato} />
                     </SpaceChildren>
                   </Table.DataCell>
                   {!!doed.opplysning.bostedsadresse ? (
@@ -106,11 +94,7 @@ export const Foreldre = ({
                         size="small"
                         iconPosition="right"
                       />
-                      <AlderWrapper>
-                        <Tag variant="info" size="small">
-                          {utregnAlder(levende.opplysning.foedselsdato)} år
-                        </Tag>
-                      </AlderWrapper>
+                      <AlderTag foedselsdato={levende.opplysning.foedselsdato} />
                     </SpaceChildren>
                   </Table.DataCell>
                   {!!levende.opplysning.bostedsadresse ? (
@@ -138,9 +122,3 @@ export const Foreldre = ({
     </Personopplysning>
   )
 }
-
-const AlderWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-`

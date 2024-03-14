@@ -6,8 +6,8 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingId
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
 
 internal fun Route.vedtaksbehandlingRoutes(vedtaksbehandlingService: VedtaksbehandlingService) {
     get("/vedtaksbehandling/{$BEHANDLINGID_CALL_PARAMETER}/redigerbar") {

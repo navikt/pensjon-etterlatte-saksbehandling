@@ -12,10 +12,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
@@ -24,10 +21,13 @@ import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
-import no.nav.etterlatte.libs.common.withBehandlingId
-import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.withBehandlingId
+import no.nav.etterlatte.libs.ktor.route.withSakId
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate
@@ -41,7 +41,7 @@ fun Route.vedtaksvurderingRoute(
     route("/api/vedtak") {
         val logger = application.log
 
-        get("/sak/{${SAKID_CALL_PARAMETER}}/iverksatte") {
+        get("/sak/{$SAKID_CALL_PARAMETER}/iverksatte") {
             withSakId(behandlingKlient) { sakId ->
                 logger.info("Henter iverksatte vedtak for sak $sakId")
                 val iverksatteVedtak = vedtakBehandlingService.hentIverksatteVedtakISak(sakId)
@@ -49,7 +49,7 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
-        get("/sak/{${SAKID_CALL_PARAMETER}}/samordning") {
+        get("/sak/{$SAKID_CALL_PARAMETER}/samordning") {
             withSakId(behandlingKlient) { sakId ->
                 logger.info("Henter samordningsinfo for sak $sakId")
                 val samordningsinfo = vedtakBehandlingService.samordningsinfo(sakId)

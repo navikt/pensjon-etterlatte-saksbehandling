@@ -10,8 +10,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
-import no.nav.etterlatte.libs.common.kunSystembruker
-import no.nav.etterlatte.libs.common.withFoedselsnummer
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.withFoedselsnummer
 
 fun Route.migreringRoutes(
     persondataKlient: PersondataKlient,

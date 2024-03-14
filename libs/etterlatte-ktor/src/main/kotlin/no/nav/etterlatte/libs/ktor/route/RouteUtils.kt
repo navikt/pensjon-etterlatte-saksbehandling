@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common
+package no.nav.etterlatte.libs.ktor.route
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
@@ -9,7 +9,6 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
@@ -22,8 +21,8 @@ const val BEHANDLINGID_CALL_PARAMETER = "behandlingId"
 const val SAKID_CALL_PARAMETER = "sakId"
 const val OPPGAVEID_CALL_PARAMETER = "oppgaveId"
 const val KLAGEID_CALL_PARAMETER = "klageId"
-const val OPPGAVEID_GOSYS_CALL_PARAMETER = "gosysOppgaveId"
 const val GENERELLBEHANDLINGID_CALL_PARAMETER = "generellBehandlingId"
+const val OPPGAVEID_GOSYS_CALL_PARAMETER = "gosysOppgaveId"
 
 inline val PipelineContext<*, ApplicationCall>.generellBehandlingId: UUID
     get() =
@@ -49,16 +48,16 @@ inline val PipelineContext<*, ApplicationCall>.oppgaveId: UUID
             "OppgaveId er ikke i path params"
         }
 
-inline val PipelineContext<*, ApplicationCall>.gosysOppgaveId: String
-    get() =
-        requireNotNull(call.parameters[OPPGAVEID_GOSYS_CALL_PARAMETER]) {
-            "Gosys oppgaveId er ikke i path params"
-        }
-
 inline val PipelineContext<*, ApplicationCall>.klageId: UUID
     get() =
         requireNotNull(call.parameters[KLAGEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
             "KlageId er ikke i path params"
+        }
+
+inline val PipelineContext<*, ApplicationCall>.gosysOppgaveId: String
+    get() =
+        requireNotNull(call.parameters[OPPGAVEID_GOSYS_CALL_PARAMETER]) {
+            "Gosys oppgaveId er ikke i path params"
         }
 
 val logger = LoggerFactory.getLogger("TilgangsSjekk")
@@ -199,43 +198,6 @@ fun ApplicationCall.uuid(param: String) =
     } ?: throw NullPointerException(
         "$param er ikke i path params",
     )
-
-interface IFoedselsnummerDTO {
-    val foedselsnummer: String
-}
-
-data class FoedselsnummerDTO(
-    override val foedselsnummer: String,
-) : IFoedselsnummerDTO
-
-data class FoedselsNummerMedGraderingDTO(
-    override val foedselsnummer: String,
-    val gradering: AdressebeskyttelseGradering? = null,
-) : IFoedselsnummerDTO
-
-interface BehandlingTilgangsSjekk {
-    suspend fun harTilgangTilBehandling(
-        behandlingId: UUID,
-        skrivetilgang: Boolean = false,
-        bruker: Saksbehandler,
-    ): Boolean
-}
-
-interface SakTilgangsSjekk {
-    suspend fun harTilgangTilSak(
-        sakId: Long,
-        skrivetilgang: Boolean = false,
-        bruker: Saksbehandler,
-    ): Boolean
-}
-
-interface PersonTilgangsSjekk {
-    suspend fun harTilgangTilPerson(
-        foedselsnummer: Folkeregisteridentifikator,
-        skrivetilgang: Boolean = false,
-        bruker: Saksbehandler,
-    ): Boolean
-}
 
 suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
     featureToggleService: FeatureToggleService,

@@ -34,7 +34,7 @@ internal fun Route.behandlingVedtakRoute(
         post {
             val fattVedtak = call.receive<VedtakEndringDTO>()
 
-            kunSkrivetilgang(sak = fattVedtak.sakIdOgReferanse.sakId) {
+            kunSkrivetilgang(sakId = fattVedtak.sakIdOgReferanse.sakId) {
                 val behandling =
                     inTransaction {
                         behandlingService.hentBehandling(
@@ -76,7 +76,7 @@ internal fun Route.behandlingVedtakRoute(
         post {
             val underkjennVedtakOppgave = call.receive<VedtakEndringDTO>()
 
-            kunSkrivetilgang(sak = underkjennVedtakOppgave.sakIdOgReferanse.sakId) {
+            kunSkrivetilgang(sakId = underkjennVedtakOppgave.sakIdOgReferanse.sakId) {
                 val behandling =
                     inTransaction {
                         behandlingService.hentBehandling(
@@ -129,7 +129,7 @@ internal fun Route.behandlingVedtakRoute(
         post {
             val attesterVedtakOppgave = call.receive<VedtakEndringDTO>()
 
-            kunSkrivetilgang(sak = attesterVedtakOppgave.sakIdOgReferanse.sakId) {
+            kunSkrivetilgang(sakId = attesterVedtakOppgave.sakIdOgReferanse.sakId) {
                 val behandling =
                     inTransaction {
                         behandlingService.hentBehandling(

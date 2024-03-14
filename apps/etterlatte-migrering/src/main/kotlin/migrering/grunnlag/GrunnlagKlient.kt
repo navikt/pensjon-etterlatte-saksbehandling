@@ -10,7 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.grunnlag.VurdertBostedsland
-import no.nav.etterlatte.libs.common.FoedselsnummerDTO
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 
 class GrunnlagKlient(
     config: Config,

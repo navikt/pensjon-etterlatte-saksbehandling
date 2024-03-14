@@ -9,9 +9,9 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.KlageOversendelseDto
-import no.nav.etterlatte.libs.common.hvisEnabled
-import no.nav.etterlatte.libs.common.kunSystembruker
-import no.nav.etterlatte.libs.common.medBody
+import no.nav.etterlatte.libs.ktor.route.hvisEnabled
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.medBody
 
 enum class KlageFeaturetoggle(val key: String) : FeatureToggle {
     KanBrukeKlage("pensjon-etterlatte.kan-bruke-klage") {

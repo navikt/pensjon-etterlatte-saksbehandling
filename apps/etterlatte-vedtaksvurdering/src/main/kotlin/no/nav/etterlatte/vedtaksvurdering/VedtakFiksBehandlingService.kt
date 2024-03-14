@@ -9,8 +9,6 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
-import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
@@ -37,7 +35,6 @@ import no.nav.etterlatte.vedtaksvurdering.UgyldigAttestantException
 import no.nav.etterlatte.vedtaksvurdering.UnderkjennVedtakDto
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakData
-import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import no.nav.etterlatte.vedtaksvurdering.Vedtakstidslinje
@@ -109,7 +106,6 @@ class VedtakFiksBehandlingService(
         logger.info("Fatter vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
-        verifiserGyldigBehandlingStatus(behandlingKlient.kanFatteVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
         val (_, vilkaarsvurdering, beregningOgAvkorting, _, trygdetid) = hentDataForVedtak(behandlingId, brukerTokenInfo)
@@ -127,28 +123,7 @@ class VedtakFiksBehandlingService(
                         Tidspunkt.now(),
                     ),
                     tx,
-                ).also { fattetVedtak ->
-                    runBlocking {
-                        behandlingKlient.fattVedtakBehandling(
-                            brukerTokenInfo = brukerTokenInfo,
-                            vedtakEndringDTO =
-                                VedtakEndringDTO(
-                                    sakIdOgReferanse =
-                                        SakIdOgReferanse(
-                                            sakId = sak.id,
-                                            referanse = behandlingId.toString(),
-                                        ),
-                                    vedtakHendelse =
-                                        VedtakHendelse(
-                                            vedtakId = fattetVedtak.id,
-                                            inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
-                                            saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler,
-                                        ),
-                                    vedtakType = fattetVedtak.type,
-                                ),
-                        )
-                    }
-                }
+                )
             }
 
         return VedtakOgRapid(
@@ -179,7 +154,6 @@ class VedtakFiksBehandlingService(
         logger.info("Attesterer vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
-        verifiserGyldigBehandlingStatus(behandlingKlient.kanAttestereVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
         attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
 
@@ -199,27 +173,6 @@ class VedtakFiksBehandlingService(
                         ),
                         tx,
                     )
-                runBlocking {
-                    behandlingKlient.attesterVedtak(
-                        brukerTokenInfo = brukerTokenInfo,
-                        vedtakEndringDTO =
-                            VedtakEndringDTO(
-                                sakIdOgReferanse =
-                                    SakIdOgReferanse(
-                                        sakId = attestertVedtak.sakId,
-                                        referanse = attestertVedtak.behandlingId.toString(),
-                                    ),
-                                vedtakHendelse =
-                                    VedtakHendelse(
-                                        vedtakId = attestertVedtak.id,
-                                        inntruffet = attestertVedtak.attestasjon?.tidspunkt!!,
-                                        saksbehandler = attestertVedtak.attestasjon.attestant,
-                                        kommentar = kommentar,
-                                    ),
-                                vedtakType = attestertVedtak.type,
-                            ),
-                    )
-                }
                 attestertVedtak
             }
 
@@ -254,30 +207,12 @@ class VedtakFiksBehandlingService(
         logger.info("Underkjenner vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
-        verifiserGyldigBehandlingStatus(behandlingKlient.kanUnderkjenneVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
 
         val underkjentTid = Tidspunkt.now()
         val underkjentVedtak =
             repository.inTransaction { tx ->
                 val underkjentVedtak = repository.underkjennVedtak(behandlingId, tx)
-                runBlocking {
-                    behandlingKlient.underkjennVedtak(
-                        brukerTokenInfo,
-                        VedtakEndringDTO(
-                            sakIdOgReferanse = SakIdOgReferanse(vedtak.sakId, behandlingId.toString()),
-                            vedtakHendelse =
-                                VedtakHendelse(
-                                    vedtakId = underkjentVedtak.id,
-                                    inntruffet = underkjentTid,
-                                    saksbehandler = brukerTokenInfo.ident(),
-                                    kommentar = begrunnelse.kommentar,
-                                    valgtBegrunnelse = begrunnelse.valgtBegrunnelse,
-                                ),
-                            vedtakType = underkjentVedtak.type,
-                        ),
-                    )
-                }
                 underkjentVedtak
             }
 
@@ -304,11 +239,6 @@ class VedtakFiksBehandlingService(
         val tilSamordningVedtakLocal =
             repository.inTransaction { tx ->
                 repository.tilSamordningVedtak(behandlingId, tx = tx)
-                    .also {
-                        runBlocking {
-                            behandlingKlient.tilSamordning(behandlingId, brukerTokenInfo, it.id)
-                        }
-                    }
             }
 
         val tilSamordning =
@@ -414,11 +344,7 @@ class VedtakFiksBehandlingService(
         val iverksattVedtak =
             repository.inTransaction { tx ->
                 val iverksattVedtakLocal =
-                    repository.iverksattVedtak(behandlingId, tx = tx).also {
-                        runBlocking {
-                            behandlingKlient.iverksett(behandlingId, brukerTokenInfo, it.id)
-                        }
-                    }
+                    repository.iverksattVedtak(behandlingId, tx = tx)
                 iverksattVedtakLocal
             }
 
@@ -435,13 +361,6 @@ class VedtakFiksBehandlingService(
 
     private fun hentVedtakNonNull(behandlingId: UUID): Vedtak {
         return requireNotNull(repository.hentVedtak(behandlingId)) { "Vedtak for behandling $behandlingId finnes ikke" }
-    }
-
-    private fun verifiserGyldigBehandlingStatus(
-        gyldigForOperasjon: Boolean,
-        vedtak: Vedtak,
-    ) {
-        if (!gyldigForOperasjon) throw BehandlingstilstandException(vedtak)
     }
 
     private fun verifiserGyldigVedtakStatus(
@@ -660,9 +579,6 @@ class VedtakFiksBehandlingService(
 
 class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: List<VedtakStatus>) :
     Exception("Vedtak har status $gjeldendeStatus, men forventet status $forventetStatus")
-
-class BehandlingstilstandException(vedtak: Vedtak) :
-    IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")
 
 class OpphoersrevurderingErIkkeOpphoersvedtakException(revurderingAarsak: Revurderingaarsak?, vedtakType: VedtakType) :
     IllegalStateException(

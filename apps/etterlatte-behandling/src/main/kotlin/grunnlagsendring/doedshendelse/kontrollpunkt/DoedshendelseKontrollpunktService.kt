@@ -2,11 +2,9 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.domain.AutomatiskRevurdering
-import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
-import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
@@ -384,7 +382,7 @@ class DoedshendelseKontrollpunktService(
         return sak?.let {
             val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(it.id)
             return when (sisteIverksatteBehandling) {
-                is Foerstegangsbehandling, is AutomatiskRevurdering, is ManuellRevurdering ->
+                is Behandling ->
                     DoedshendelseKontrollpunkt.EpsHarSakMedIverksattBehandlingIGjenny(
                         sak,
                     )

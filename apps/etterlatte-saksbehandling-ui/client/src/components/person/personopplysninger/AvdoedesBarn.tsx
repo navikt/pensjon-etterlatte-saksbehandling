@@ -7,22 +7,15 @@ import { AlderTag } from '~components/person/personopplysninger/components/Alder
 import { SpaceChildren } from '~shared/styled'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 
-export const AvdoedesBarn = ({
-  avdoede,
-  foreldreansvar,
-}: {
-  avdoede?: PdlPersonopplysning[]
-  foreldreansvar?: string[]
-}): ReactNode => {
+export const AvdoedesBarn = ({ avdoede }: { avdoede?: PdlPersonopplysning[] }): ReactNode => {
   return (
-    <Personopplysning heading="Avdødes barn" icon={<ChildEyesIcon height="2rem" width="2rem" />}>
+    <Personopplysning heading="Søsken (avdødes barn)" icon={<ChildEyesIcon height="2rem" width="2rem" />}>
       <Table>
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeader scope="col">Navn</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Fødselsnummer</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Bostedsadresse</Table.ColumnHeader>
-            <Table.ColumnHeader scope="col">Forelder</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
         <Table.Body>

@@ -153,6 +153,10 @@ data class Klage(
                     "tilstanden til klagen: ${this.status}",
             )
         }
+        val utfallFortsattGyldig =
+            this.erFormkraveneOppfylt() == formkrav.erFormkraveneOppfylt &&
+                this.erKlagenFramsattInnenFrist() == formkrav.erKlagenFramsattInnenFrist
+
         return this.copy(
             formkrav =
                 FormkravMedBeslutter(
@@ -164,22 +168,8 @@ data class Klage(
                     JaNei.JA -> KlageStatus.FORMKRAV_OPPFYLT
                     JaNei.NEI -> KlageStatus.FORMKRAV_IKKE_OPPFYLT
                 },
-            utfall =
-                if (this.erFormkraveneOppfylt() != formkrav.erFormkraveneOppfylt ||
-                    this.erKlagenFramsattInnenFrist() != formkrav.erKlagenFramsattInnenFrist
-                ) {
-                    null
-                } else {
-                    this.utfall
-                },
-            initieltUtfall =
-                if (this.erFormkraveneOppfylt() != formkrav.erFormkraveneOppfylt ||
-                    this.erKlagenFramsattInnenFrist() != formkrav.erKlagenFramsattInnenFrist
-                ) {
-                    null
-                } else {
-                    this.initieltUtfall
-                },
+            utfall = this.utfall.takeIf { utfallFortsattGyldig },
+            initieltUtfall = this.initieltUtfall.takeIf { utfallFortsattGyldig },
         )
     }
 

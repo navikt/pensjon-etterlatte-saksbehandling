@@ -152,7 +152,7 @@ class DoedshendelseKontrollpunktService(
                     }.first()
                 listOfNotNull(DoedshendelseKontrollpunkt.AvdoedHarYtelse(sakerForAvdoed.first()), duplikat)
             } else {
-                emptyList()
+                listOf(DoedshendelseKontrollpunkt.AvdoedHarIkkeYtelse)
             }
         }
     }

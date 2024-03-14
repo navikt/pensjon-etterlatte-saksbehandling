@@ -9,10 +9,16 @@ import { formaterStringDato } from '~utils/formattering'
 export const Foreldre = ({
   avdoed,
   gjenlevende,
+  foreldreansvar,
 }: {
-  avdoed: PdlPersonopplysning[]
-  gjenlevende: PdlPersonopplysning[]
+  avdoed?: PdlPersonopplysning[]
+  gjenlevende?: PdlPersonopplysning[]
+  foreldreansvar?: string[]
 }) => {
+  const harForeldreansvar = (fnr: string): boolean => {
+    return !!foreldreansvar && foreldreansvar.includes(fnr)
+  }
+
   return (
     <Personopplysning heading="Foreldre" icon={<PersonIcon height="2rem" width="2rem" />}>
       <Table>
@@ -91,8 +97,7 @@ export const Foreldre = ({
                   ) : (
                     <Table.DataCell>Ingen bostedsadresse tilgjengelig</Table.DataCell>
                   )}
-                  {/* TODO: Her må det faktisk sjekkes hva foreldreansvaret er*/}
-                  <Table.DataCell>Ja</Table.DataCell>
+                  <Table.DataCell>{harForeldreansvar(levende.opplysning.foedselsnummer) ? 'Ja' : 'Nei'}</Table.DataCell>
                 </Table.Row>
               ))}
             </>

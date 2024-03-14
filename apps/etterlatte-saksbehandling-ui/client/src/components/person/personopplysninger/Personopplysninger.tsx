@@ -48,7 +48,11 @@ export const Personopplysninger = ({
                 <>
                   <Bostedsadresser bostedsadresse={personopplysninger.soeker?.opplysning.bostedsadresse} />
                   {erSaktype(sakStatus, SakType.BARNEPENSJON) && (
-                    <Foreldre avdoed={personopplysninger.avdoede} gjenlevende={personopplysninger.gjenlevende} />
+                    <Foreldre
+                      avdoed={personopplysninger.avdoede}
+                      gjenlevende={personopplysninger.gjenlevende}
+                      foreldreansvar={personopplysninger.soeker?.opplysning.familieRelasjon?.ansvarligeForeldre}
+                    />
                   )}
                   <Statsborgerskap
                     bostedsLand={personopplysninger.soeker?.opplysning.bostedsadresse?.at(0)?.land}

@@ -12,8 +12,9 @@ import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { EndeligVurdering } from '~components/klage/vurdering/EndeligVurdering'
 import { EndeligVurderingVisning } from '~components/klage/vurdering/EndeligVurderingVisning'
 import { Klage } from '~shared/types/Klage'
-import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
+import { forrigeSteg, klageKanSeBrev, nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { useNavigate } from 'react-router'
+import { NavigateFunction } from 'react-router/dist/lib/hooks'
 
 export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
   const klage = useKlage()
@@ -40,15 +41,7 @@ export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
         {kanRedigere ? (
           <>
             <InitiellVurdering klage={klage} />
-            {klage.initieltUtfall ? (
-              <EndeligVurdering klage={klage} />
-            ) : (
-              <FlexRow justify="center">
-                <Button type="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'vurdering'))}>
-                  Gå tilbake
-                </Button>
-              </FlexRow>
-            )}
+            {klage.initieltUtfall && <EndeligVurdering klage={klage} />}
           </>
         ) : (
           <>
@@ -56,6 +49,9 @@ export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
             <EndeligVurderingVisning klage={klage} />
           </>
         )}
+
+        {/* Hvis vi ikke viser redigering av endelig utfall (inkl. knapper) så legges knappene inn her*/}
+        {(!klage.initieltUtfall || !kanRedigere) && <Navigeringsknapper klage={klage} navigate={navigate} />}
       </InnholdPadding>
     </>
   )
@@ -64,4 +60,17 @@ export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
 function skalAvvises(klage: Klage) {
   const formkrav = klage.formkrav?.formkrav
   return formkrav?.erKlagenFramsattInnenFrist === JaNei.NEI
+}
+
+function Navigeringsknapper({ klage, navigate }: { klage: Klage; navigate: NavigateFunction }) {
+  return (
+    <FlexRow justify="center">
+      <Button className="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'vurdering'))}>
+        Gå tilbake
+      </Button>
+      <Button className="button" variant="primary" onClick={() => navigate(nesteSteg(klage, 'vurdering'))}>
+        {klageKanSeBrev(klage) ? 'Gå til brev' : 'Gå til oppsummering'}
+      </Button>
+    </FlexRow>
+  )
 }

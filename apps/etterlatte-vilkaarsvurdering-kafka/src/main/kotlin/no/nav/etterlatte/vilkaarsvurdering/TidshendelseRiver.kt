@@ -69,7 +69,7 @@ class TidshendelseRiver(
             val behandlet =
                 when (steg) {
                     "VURDERT_LOEPENDE_YTELSE" -> sjekkUnntaksregler(packet, type)
-                    "BEHANDLING_OPPRETTET" -> vilkaarsvurder(packet)
+                    "BEHANDLING_OPPRETTET" -> vilkaarsvurder(packet, dryrun)
                     else -> false
                 }
 
@@ -104,10 +104,18 @@ class TidshendelseRiver(
         return true
     }
 
-    private fun vilkaarsvurder(packet: JsonMessage): Boolean {
+    private fun vilkaarsvurder(
+        packet: JsonMessage,
+        dryrun: Boolean,
+    ): Boolean {
         val behandlingId = packet.behandlingId
         val forrigeBehandlingId = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asUUID()
-        vilkaarsvurderingService.opphoerAldersovergang(behandlingId, forrigeBehandlingId)
+
+        if (dryrun) {
+            logger.info("Dryrun: skipper å behandle vilkårsvurdering for behandlingId=$behandlingId")
+        } else {
+            vilkaarsvurderingService.opphoerAldersovergang(behandlingId, forrigeBehandlingId)
+        }
 
         packet[ALDERSOVERGANG_STEG_KEY] = "VILKAARSVURDERT"
         return true

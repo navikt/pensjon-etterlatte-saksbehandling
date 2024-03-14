@@ -19,7 +19,7 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingRedigerbart
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingInnholdBrevData
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
 class BrevDataMapperRedigerbartUtfallVedtak(
     private val brevdataFacade: BrevdataFacade,

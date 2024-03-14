@@ -9,12 +9,12 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.BREV_ID_CALL_PARAMETER
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
-import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingId
-import no.nav.etterlatte.libs.common.sakId
-import no.nav.etterlatte.libs.common.withBehandlingId
-import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.sakId
+import no.nav.etterlatte.libs.ktor.route.withBehandlingId
+import no.nav.etterlatte.libs.ktor.route.withSakId
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue

@@ -64,6 +64,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.libs.ktor.ktor.clientCredential
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
@@ -79,7 +80,6 @@ import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVarselbrevForGjenopprettaRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
-import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection

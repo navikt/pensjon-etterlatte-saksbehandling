@@ -6,18 +6,18 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
-import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
-import no.nav.etterlatte.libs.common.SakTilgangsSjekk
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
-import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
+import no.nav.etterlatte.libs.ktor.route.PersonTilgangsSjekk
+import no.nav.etterlatte.libs.ktor.route.SakTilgangsSjekk
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

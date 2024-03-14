@@ -7,10 +7,10 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.maskerFnr
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
-import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.Systembruker
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 

@@ -41,7 +41,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.UUID
 import javax.sql.DataSource

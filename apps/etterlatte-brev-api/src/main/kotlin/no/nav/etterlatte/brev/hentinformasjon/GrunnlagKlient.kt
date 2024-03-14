@@ -7,10 +7,10 @@ import io.ktor.client.plugins.ResponseException
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
-import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

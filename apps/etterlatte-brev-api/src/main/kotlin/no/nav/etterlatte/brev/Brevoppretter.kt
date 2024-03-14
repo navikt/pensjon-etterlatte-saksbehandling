@@ -25,8 +25,8 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.UUID
 

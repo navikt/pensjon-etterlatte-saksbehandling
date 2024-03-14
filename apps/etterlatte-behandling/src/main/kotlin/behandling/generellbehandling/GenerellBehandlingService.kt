@@ -20,10 +20,10 @@ import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
-import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.time.temporal.ChronoUnit
 import java.util.UUID

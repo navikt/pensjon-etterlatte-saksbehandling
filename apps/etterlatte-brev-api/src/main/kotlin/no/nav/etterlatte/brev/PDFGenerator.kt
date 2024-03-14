@@ -16,7 +16,7 @@ import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.libs.common.retryOgPakkUt
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 class PDFGenerator(

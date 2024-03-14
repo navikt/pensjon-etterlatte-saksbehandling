@@ -13,8 +13,6 @@ import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.behandling.tilgang.SKRIVETILGANG_CALL_QUERYPARAMETER
 import no.nav.etterlatte.ktor.runServerWithModule
-import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
-import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -24,6 +22,8 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.ktor.route.FoedselsNummerMedGraderingDTO
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import no.nav.etterlatte.tilgangsstyring.TILGANG_ROUTE_PATH

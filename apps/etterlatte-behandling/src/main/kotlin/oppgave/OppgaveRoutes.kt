@@ -14,11 +14,7 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.kunSaksbehandler
-import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.oppgave.EndrePaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
@@ -27,9 +23,13 @@ import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.oppgave.VentefristerGaarUtResponse
-import no.nav.etterlatte.libs.common.oppgaveId
-import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.oppgaveId
+import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 

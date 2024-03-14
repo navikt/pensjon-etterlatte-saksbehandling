@@ -13,7 +13,7 @@ import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
 class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService, private val brevdataFacade: BrevdataFacade) {
     suspend fun hentInitiellPayloadVedlegg(

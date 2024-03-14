@@ -16,22 +16,22 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
-import no.nav.etterlatte.libs.common.FoedselsnummerDTO
-import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingId
-import no.nav.etterlatte.libs.common.klageId
-import no.nav.etterlatte.libs.common.oppgaveId
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.FoedselsNummerMedGraderingDTO
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+import no.nav.etterlatte.libs.ktor.route.KLAGEID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.klageId
+import no.nav.etterlatte.libs.ktor.route.oppgaveId
+import no.nav.etterlatte.libs.ktor.route.sakId
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.sak.TilgangService
-import no.nav.etterlatte.token.Saksbehandler
-import no.nav.etterlatte.token.Systembruker
 
 class PluginConfiguration {
     var harTilgangBehandling: (behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
@@ -196,7 +196,7 @@ fun <T> hentNullableVerdi(block: () -> T) =
     }
 
 fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
-    sak: Long? = null,
+    sakId: Long? = null,
     enhetNr: String? = null,
 ): Boolean {
     return when (val user = Kontekst.get().AppUser) {
@@ -206,9 +206,9 @@ fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
                     null -> {
                         Kontekst.get().sakTilgangDao.let { sakTilgangDao ->
                             val sakEnhetNr =
-                                sak?.let {
+                                sakId?.let {
                                     sakTilgangDao.hentSakMedGraderingOgSkjerming(it)?.enhetNr
-                                } ?: hentNullableVerdi { sakId }?.let {
+                                } ?: hentNullableVerdi { this.sakId }?.let {
                                     sakTilgangDao.hentSakMedGraderingOgSkjerming(it)?.enhetNr
                                 }
                             val behandlingEnhetNr =
@@ -242,24 +242,24 @@ fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
 }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
-    sak: Long? = null,
+    sakId: Long? = null,
     enhetNr: String? = null,
     onSuccess: () -> Unit,
 ) {
-    when (sjekkSkrivetilgang(sak, enhetNr)) {
+    when (sjekkSkrivetilgang(sakId, enhetNr)) {
         true -> onSuccess()
         false -> call.respond(HttpStatusCode.Forbidden)
     }
 }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrivetilgang(
-    sak: Long? = null,
+    sakId: Long? = null,
     enhetNr: String? = null,
     onSuccess: (Saksbehandler) -> Unit,
 ) {
     when (val token = brukerTokenInfo) {
         is Saksbehandler -> {
-            when (sjekkSkrivetilgang(sak, enhetNr)) {
+            when (sjekkSkrivetilgang(sakId, enhetNr)) {
                 true -> onSuccess(token)
                 false -> call.respond(HttpStatusCode.Forbidden)
             }

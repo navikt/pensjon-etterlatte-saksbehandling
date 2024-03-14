@@ -17,11 +17,11 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
-import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Systembruker
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import java.util.UUID
 
 class BehandlingKlient(config: Config, httpClient: HttpClient) {

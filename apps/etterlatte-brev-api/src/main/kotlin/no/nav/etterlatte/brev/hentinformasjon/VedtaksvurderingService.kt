@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev.hentinformasjon
 
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
 class VedtaksvurderingService(private val vedtaksvurderingKlient: VedtaksvurderingKlient) {

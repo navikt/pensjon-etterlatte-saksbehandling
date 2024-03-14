@@ -18,11 +18,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import no.nav.etterlatte.libs.ktorobo.AccessToken
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.libs.ktorobo.ClientCredentialsTokenRequest
-import no.nav.etterlatte.libs.ktorobo.OboTokenRequest
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AccessToken
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.ClientCredentialsTokenRequest
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.OboTokenRequest
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit

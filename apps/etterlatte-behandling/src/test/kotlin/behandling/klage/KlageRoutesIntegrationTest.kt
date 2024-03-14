@@ -25,7 +25,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServerWithModule
-import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
@@ -49,6 +48,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.AfterEach

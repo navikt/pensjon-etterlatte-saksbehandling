@@ -9,8 +9,8 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 
 fun Route.tilbakekrevingVedtakRoutes(tilbakekrevingVedtakService: TilbakekrevingVedtakService) {
     val logger = application.log

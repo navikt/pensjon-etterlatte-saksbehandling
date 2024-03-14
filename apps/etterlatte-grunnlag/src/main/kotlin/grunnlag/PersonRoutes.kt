@@ -9,10 +9,10 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
-import no.nav.etterlatte.libs.common.hentNavidentFraToken
-import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummerException
-import no.nav.etterlatte.libs.common.withFoedselsnummer
+import no.nav.etterlatte.libs.ktor.route.hentNavidentFraToken
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.withFoedselsnummer
 
 fun Route.personRoute(
     grunnlagService: GrunnlagService,

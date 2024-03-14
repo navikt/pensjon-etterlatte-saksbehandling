@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.ktorobo
+package no.nav.etterlatte.libs.ktor.ktor.ktorobo
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.michaelbull.result.Err

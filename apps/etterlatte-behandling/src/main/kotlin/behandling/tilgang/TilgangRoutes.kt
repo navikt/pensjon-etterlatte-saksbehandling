@@ -11,17 +11,17 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingId
-import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.sakId
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.tilgangsstyring.TILGANG_ROUTE_PATH
 import no.nav.etterlatte.tilgangsstyring.sjekkSkrivetilgang
-import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Saksbehandler
-import no.nav.etterlatte.token.Systembruker
 
 const val SKRIVETILGANG_CALL_QUERYPARAMETER = "skrivetilgang"
 inline val PipelineContext<*, ApplicationCall>.berOmSkrivetilgang: Boolean

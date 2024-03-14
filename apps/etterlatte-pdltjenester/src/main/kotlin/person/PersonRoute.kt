@@ -6,7 +6,6 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
@@ -14,6 +13,7 @@ import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonHistorikkForeldreAnsvarRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
+import no.nav.etterlatte.libs.ktor.route.medBody
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("PersonRoute")

@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
-import no.nav.etterlatte.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository

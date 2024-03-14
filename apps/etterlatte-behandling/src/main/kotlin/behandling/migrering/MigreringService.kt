@@ -27,11 +27,11 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.sak.SakService
-import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Fagsaksystem
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit

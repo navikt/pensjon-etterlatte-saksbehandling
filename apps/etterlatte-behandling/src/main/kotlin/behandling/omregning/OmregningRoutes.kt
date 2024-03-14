@@ -17,7 +17,7 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
     route("/omregning") {
         post {
             val request = call.receive<Omregningshendelse>()
-            kunSkrivetilgang(sak = request.sakId) {
+            kunSkrivetilgang(sakId = request.sakId) {
                 val forrigeBehandling = inTransaction { omregningService.hentForrigeBehandling(request.sakId) }
                 val persongalleri = omregningService.hentPersongalleri(forrigeBehandling.id)
                 val revurderingOgOppfoelging =

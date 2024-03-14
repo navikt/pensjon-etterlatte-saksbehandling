@@ -1,9 +1,8 @@
+package no.nav.etterlatte
+
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.BehandlingService
-import no.nav.etterlatte.InformasjonsbrevFeatureToggle
-import no.nav.etterlatte.OpprettBrevRiver
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling

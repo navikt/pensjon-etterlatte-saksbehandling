@@ -2,8 +2,11 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.AutomatiskRevurdering
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
+import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
@@ -19,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
@@ -139,12 +143,19 @@ class DoedshendelseKontrollpunktService(
         val sakerForAvdoed = sakService.finnSaker(hendelse.avdoedFnr)
         return if (sakerForAvdoed.isEmpty()) {
             listOf(DoedshendelseKontrollpunkt.AvdoedHarIkkeYtelse)
+        } else if (sakerForAvdoed.size > 1) {
+            throw RuntimeException("Person: ${hendelse.avdoedFnr.maskerFnr()} hendelseid: ${hendelse.id} har 2 saker, må sjekkes manuelt")
         } else {
-            val duplikat =
-                sakerForAvdoed.map {
-                    kontrollerEksisterendeHendelser(hendelse, it)
-                }.first()
-            listOfNotNull(DoedshendelseKontrollpunkt.AvdoedHarYtelse(sakerForAvdoed.first()), duplikat)
+            val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(sakerForAvdoed[0].id)
+            if (sisteIverksatteBehandling != null) {
+                val duplikat =
+                    sakerForAvdoed.map {
+                        kontrollerEksisterendeHendelser(hendelse, it)
+                    }.first()
+                listOfNotNull(DoedshendelseKontrollpunkt.AvdoedHarYtelse(sakerForAvdoed.first()), duplikat)
+            } else {
+                emptyList()
+            }
         }
     }
 
@@ -268,9 +279,9 @@ class DoedshendelseKontrollpunktService(
             return null
         }
 
-        val hentSisteIverksatte = behandlingService.hentSisteIverksatte(sak.id)
+        val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(sak.id)
 
-        val harBarnepensjon = hentSisteIverksatte != null
+        val harBarnepensjon = sisteIverksatteBehandling != null && sisteIverksatteBehandling.sak.sakType == SakType.BARNEPENSJON
         return if (harBarnepensjon) {
             DoedshendelseKontrollpunkt.BarnHarBarnepensjon(sak)
         } else {
@@ -369,8 +380,18 @@ class DoedshendelseKontrollpunktService(
             DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet
         }
 
-    private fun kontrollerEksisterendeSakEps(sak: Sak?): DoedshendelseKontrollpunkt? =
-        sak?.let { return DoedshendelseKontrollpunkt.EpsHarSakIGjenny(sak) }
+    private fun kontrollerEksisterendeSakEps(sak: Sak?): DoedshendelseKontrollpunkt? {
+        return sak?.let {
+            val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(it.id)
+            return when (sisteIverksatteBehandling) {
+                is Foerstegangsbehandling, is AutomatiskRevurdering, is ManuellRevurdering ->
+                    DoedshendelseKontrollpunkt.EpsHarSakIGjenny(
+                        sak,
+                    )
+                null -> null
+            }
+        }
+    }
 
     private fun kontrollerEksisterendeHendelser(
         hendelse: DoedshendelseInternal,

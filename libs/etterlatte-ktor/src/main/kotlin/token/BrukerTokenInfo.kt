@@ -1,4 +1,4 @@
-package no.nav.etterlatte.token
+package no.nav.etterlatte.libs.ktor.token
 
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 

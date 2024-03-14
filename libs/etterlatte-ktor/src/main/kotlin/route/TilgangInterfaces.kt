@@ -1,7 +1,7 @@
 package no.nav.etterlatte.libs.ktor.route
 
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import java.util.UUID
 
 interface BehandlingTilgangsSjekk {

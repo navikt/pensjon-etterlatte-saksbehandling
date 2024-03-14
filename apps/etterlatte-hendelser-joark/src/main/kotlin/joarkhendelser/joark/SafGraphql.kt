@@ -2,7 +2,7 @@ package no.nav.etterlatte.joarkhendelser.joark
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import io.ktor.http.HttpStatusCode
-import no.nav.etterlatte.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 
 data class HentJournalpostResult(
     val journalpost: Journalpost? = null,

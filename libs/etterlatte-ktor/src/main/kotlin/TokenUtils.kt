@@ -5,8 +5,8 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.auth.parseAuthorizationHeader
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Claims
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Claims
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 
 const val AZURE_ISSUER = "azure"

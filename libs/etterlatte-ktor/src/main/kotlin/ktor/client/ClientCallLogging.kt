@@ -1,4 +1,4 @@
-package no.nav.etterlatte.ktor.client
+package no.nav.etterlatte.libs.ktor.ktor.client
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpClientPlugin

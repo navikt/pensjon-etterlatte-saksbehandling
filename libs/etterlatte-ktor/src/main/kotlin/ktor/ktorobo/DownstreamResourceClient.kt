@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.ktorobo
+package no.nav.etterlatte.libs.ktor.ktor.ktorobo
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.andThen
@@ -16,7 +16,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
 class DownstreamResourceClient(
     private val azureAdClient: AzureAdClient,

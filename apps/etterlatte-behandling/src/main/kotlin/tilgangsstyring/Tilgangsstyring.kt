@@ -20,14 +20,9 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.CallParamAuthIds
 import no.nav.etterlatte.libs.ktor.route.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
-import no.nav.etterlatte.libs.ktor.route.GENERELLBEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.KLAGEID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.pathParamsIntern
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.sak.TilgangService
@@ -80,7 +75,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
 
             if (bruker is Saksbehandler) {
                 val saksbehandlerGroupIdsByKey = pluginConfig.saksbehandlerGroupIdsByKey
-                val behandlingId = call.parameters[BEHANDLINGID_CALL_PARAMETER]
+                val behandlingId = call.parameters[CallParamAuthIds.BEHANDLINGID.value]
                 if (!behandlingId.isNullOrEmpty()) {
                     if (!pluginConfig.harTilgangBehandling(
                             behandlingId,
@@ -92,7 +87,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                     return@on
                 }
 
-                val sakId = call.parameters[SAKID_CALL_PARAMETER]
+                val sakId = call.parameters[CallParamAuthIds.SAKID.value]
                 if (!sakId.isNullOrEmpty()) {
                     if (!pluginConfig.harTilgangTilSak(
                             sakId.toLong(),
@@ -104,7 +99,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                     return@on
                 }
 
-                val oppgaveId = call.parameters[OPPGAVEID_CALL_PARAMETER]
+                val oppgaveId = call.parameters[CallParamAuthIds.OPPGAVEID.value]
                 if (!oppgaveId.isNullOrEmpty()) {
                     if (!pluginConfig.harTilgangTilOppgave(
                             oppgaveId,
@@ -116,7 +111,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                     return@on
                 }
 
-                val klageId = call.parameters[KLAGEID_CALL_PARAMETER]
+                val klageId = call.parameters[CallParamAuthIds.KLAGEID.value]
                 if (!klageId.isNullOrEmpty()) {
                     if (!pluginConfig.harTilgangTilKlage(
                             klageId,
@@ -215,18 +210,21 @@ private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: Lo
     if (sakId != null) {
         return sakTilgangDao.hentSakMedGraderingOgSkjerming(sakId)?.enhetNr
     }
-    val funnetPathParamType = pathParamsIntern.firstOrNull { call.parameters.contains(it) }
-    return if (funnetPathParamType == null) {
+    val funnetCallIdParametersType = CallParamAuthIds.entries.firstOrNull { call.parameters.contains(it.value) }
+    return if (funnetCallIdParametersType == null) {
         logger.warn("Fant ingen pathparam i url: ${call.request.path()}")
         null
     } else {
-        val idForRequest = call.parameters[funnetPathParamType]!!
-        when (funnetPathParamType) {
-            BEHANDLINGID_CALL_PARAMETER -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(idForRequest)?.enhetNr
-            SAKID_CALL_PARAMETER -> sakTilgangDao.hentSakMedGraderingOgSkjerming(idForRequest.toLong())?.enhetNr
-            OPPGAVEID_CALL_PARAMETER -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaOppgave(idForRequest)?.enhetNr
-            KLAGEID_CALL_PARAMETER -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaKlage(idForRequest)?.enhetNr
-            GENERELLBEHANDLINGID_CALL_PARAMETER -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaGenerellbehandling(idForRequest)?.enhetNr
+        val idForRequest = call.parameters[funnetCallIdParametersType.value]!!
+        when (funnetCallIdParametersType) {
+            CallParamAuthIds.BEHANDLINGID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(idForRequest)?.enhetNr
+            CallParamAuthIds.SAKID -> sakTilgangDao.hentSakMedGraderingOgSkjerming(idForRequest.toLong())?.enhetNr
+            CallParamAuthIds.OPPGAVEID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaOppgave(idForRequest)?.enhetNr
+            CallParamAuthIds.KLAGEID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaKlage(idForRequest)?.enhetNr
+            CallParamAuthIds.GENERELLBEHANDLINGID ->
+                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaGenerellbehandling(
+                    idForRequest,
+                )?.enhetNr
 
             else -> {
                 logger.warn("Fant ingen enhet for id $idForRequest av ukjent type")

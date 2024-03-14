@@ -118,7 +118,7 @@ data class InitieltUtfallMedBegrunnelseOgSaksbehandler(
 
 data class InitieltUtfallMedBegrunnelseDto(
     val utfall: KlageUtfall,
-    val begrunnelse: String,
+    val begrunnelse: String?,
 )
 
 enum class KlageUtfall {

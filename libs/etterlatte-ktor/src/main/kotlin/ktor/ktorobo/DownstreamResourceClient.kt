@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.ktor.ktor.ktorobo
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.andThen
 import io.ktor.client.HttpClient
@@ -13,15 +14,19 @@ import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
+import io.ktor.http.HttpMessage
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import org.slf4j.LoggerFactory
 
 class DownstreamResourceClient(
     private val azureAdClient: AzureAdClient,
     private val httpClient: HttpClient = defaultHttpClient,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     suspend fun get(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
@@ -98,10 +103,25 @@ class DownstreamResourceClient(
             onSuccess = { response ->
                 when {
                     response.status == HttpStatusCode.NoContent -> Ok(null)
-                    response.status.isSuccess() -> Ok(response.body())
+                    response.status.isSuccess() -> {
+                        if (response.harContentType(ContentType.Application.Json)) {
+                            Ok(response.body<JsonNode>())
+                        } else {
+                            logger.info("Mottok content-type: ${response.contentType()} som ikke var JSON")
+                            Ok(response.status)
+                        }
+                    }
+
                     else -> response.toResponseException()
                 }
             },
             onFailure = { error -> error.toErr(resource.url) },
         )
+
+    /**
+     * Ktor med content negotiation serialiserer content-type med parametere (som charset), slik at en
+     * naiv sammenligning ikke fungerer. Denne metoden sammenligner uten parametere.
+     */
+    private fun HttpMessage?.harContentType(contentType: ContentType): Boolean =
+        this?.contentType()?.withoutParameters() == contentType.withoutParameters()
 }

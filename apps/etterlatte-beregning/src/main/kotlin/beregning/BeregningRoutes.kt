@@ -68,7 +68,8 @@ fun Route.beregning(
         post("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Oppretter beregning for behandlingId=$it")
-                val beregning = beregningService.opprettBeregning(it, brukerTokenInfo)
+                val request = call.receive<OpprettBeregningRequest>()
+                val beregning = beregningService.opprettBeregning(it, request.behandlingViOmregnerFra, brukerTokenInfo)
                 call.respond(beregning.toDTO())
             }
         }

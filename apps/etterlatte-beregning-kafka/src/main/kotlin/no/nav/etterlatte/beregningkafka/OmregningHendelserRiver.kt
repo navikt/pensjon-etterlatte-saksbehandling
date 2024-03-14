@@ -52,10 +52,10 @@ internal class OmregningHendelserRiver(
         runBlocking {
             if (sakType == SakType.BARNEPENSJON) {
                 beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
-                val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
+                val beregning = beregningService.beregn(behandlingId, behandlingViOmregnerFra).body<BeregningDTO>()
                 packet[BEREGNING_KEY] = beregning
             } else {
-                val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
+                val beregning = beregningService.beregn(behandlingId, behandlingViOmregnerFra).body<BeregningDTO>()
                 packet[BEREGNING_KEY] = beregning
                 val avkorting =
                     beregningService.regulerAvkorting(behandlingId, behandlingViOmregnerFra)

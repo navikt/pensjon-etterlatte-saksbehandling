@@ -29,6 +29,7 @@ class BeregningService(
 
     suspend fun opprettBeregning(
         behandlingId: UUID,
+        behandlingViOmregnerFra: UUID?,
         brukerTokenInfo: BrukerTokenInfo,
     ): Beregning {
         logger.info("Oppretter beregning for behandlingId=$behandlingId")

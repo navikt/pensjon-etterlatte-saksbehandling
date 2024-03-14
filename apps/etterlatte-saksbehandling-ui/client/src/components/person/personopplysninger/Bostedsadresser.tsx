@@ -2,9 +2,9 @@ import React, { ReactNode } from 'react'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { HouseIcon } from '@navikt/aksel-icons'
 import { IAdresse } from '~shared/types/IAdresse'
-import { Heading, Table, Tag } from '@navikt/ds-react'
-import { SpaceChildren } from '~shared/styled'
+import { Heading, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
+import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 
 export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: IAdresse[] }): ReactNode => {
   return (
@@ -21,16 +21,7 @@ export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: IAdresse[
           <Table.Body>
             {bostedsadresse.map((adresse: IAdresse, index: number) => (
               <Table.Row key={index}>
-                <Table.DataCell>
-                  <SpaceChildren direction="row">
-                    {`${adresse.adresseLinje1}, ${adresse.postnr} ${!!adresse.poststed ? adresse.poststed : ''}`}
-                    {adresse.aktiv && (
-                      <Tag variant="success" size="small">
-                        Gjeldene
-                      </Tag>
-                    )}
-                  </SpaceChildren>
-                </Table.DataCell>
+                <BostedsadresseDataCell bostedsadresse={bostedsadresse} index={index} visAktiv />
                 <Table.DataCell>{formaterStringDato(adresse.gyldigFraOgMed)}</Table.DataCell>
                 <Table.DataCell>
                   {!!adresse.gyldigTilOgMed ? formaterStringDato(adresse.gyldigTilOgMed) : ''}

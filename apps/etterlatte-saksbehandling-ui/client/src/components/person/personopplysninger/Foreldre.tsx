@@ -6,6 +6,7 @@ import { SpaceChildren } from '~shared/styled'
 import { Personopplysning as PdlPersonopplysning } from '~shared/types/grunnlag'
 import { formaterStringDato } from '~utils/formattering'
 import { AlderTag } from '~components/person/personopplysninger/components/AlderTag'
+import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 
 export const Foreldre = ({
   avdoed,
@@ -57,15 +58,7 @@ export const Foreldre = ({
                       <AlderTag foedselsdato={doed.opplysning.foedselsdato} />
                     </SpaceChildren>
                   </Table.DataCell>
-                  {!!doed.opplysning.bostedsadresse ? (
-                    <Table.DataCell>
-                      <SpaceChildren direction="row">
-                        {`${doed.opplysning.bostedsadresse[0].adresseLinje1}, ${doed.opplysning.bostedsadresse[0].postnr} ${!!doed.opplysning.bostedsadresse[0].poststed ? doed.opplysning.bostedsadresse[0].poststed : ''}`}
-                      </SpaceChildren>
-                    </Table.DataCell>
-                  ) : (
-                    <Table.DataCell>Ingen bostedsadresse tilgjengelig</Table.DataCell>
-                  )}
+                  <BostedsadresseDataCell bostedsadresse={doed.opplysning.bostedsadresse} index={0} />
                   <Table.DataCell>-</Table.DataCell>
                 </Table.Row>
               ))}

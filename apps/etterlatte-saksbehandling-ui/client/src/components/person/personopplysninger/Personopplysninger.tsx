@@ -56,7 +56,10 @@ export const Personopplysninger = ({
                         gjenlevende={personopplysninger.gjenlevende}
                         foreldreansvar={personopplysninger.soeker?.opplysning.familieRelasjon?.ansvarligeForeldre}
                       />
-                      <AvdoedesBarn />
+                      <AvdoedesBarn
+                        avdoede={personopplysninger.avdoede}
+                        foreldreansvar={personopplysninger.soeker?.opplysning.familieRelasjon?.ansvarligeForeldre}
+                      />
                     </>
                   )}
                   <Statsborgerskap

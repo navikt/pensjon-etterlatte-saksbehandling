@@ -60,7 +60,7 @@ export const Personopplysninger = ({
                     </>
                   )}
                   <Statsborgerskap
-                    bostedsLand={personopplysninger.soeker?.opplysning.bostedsadresse?.at(0)?.land}
+                    statsborgerskap={personopplysninger.soeker?.opplysning.statsborgerskap}
                     pdlStatsborgerskap={personopplysninger.soeker?.opplysning.pdlStatsborgerskap}
                   />
                 </>

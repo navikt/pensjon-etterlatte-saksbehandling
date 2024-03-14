@@ -12,7 +12,7 @@ class SakTilgangDao(private val datasource: DataSource) {
             statement.setString(1, fnr)
             return statement.executeQuery().toList {
                 SakMedGraderingOgSkjermet(
-                    id = getLong("sak_id"),
+                    id = getLong("id"),
                     adressebeskyttelseGradering =
                         getString("adressebeskyttelse")?.let {
                             AdressebeskyttelseGradering.valueOf(it)
@@ -30,7 +30,7 @@ class SakTilgangDao(private val datasource: DataSource) {
             statement.setLong(1, id)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
-                    id = getLong("sak_id"),
+                    id = getLong("id"),
                     adressebeskyttelseGradering =
                         getString("adressebeskyttelse")?.let {
                             AdressebeskyttelseGradering.valueOf(it)
@@ -56,7 +56,7 @@ class SakTilgangDao(private val datasource: DataSource) {
             statement.setString(3, behandlingId)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
-                    id = getLong("sak_id"),
+                    id = getLong("id"),
                     adressebeskyttelseGradering =
                         getString("adressebeskyttelse")?.let {
                             AdressebeskyttelseGradering.valueOf(it)

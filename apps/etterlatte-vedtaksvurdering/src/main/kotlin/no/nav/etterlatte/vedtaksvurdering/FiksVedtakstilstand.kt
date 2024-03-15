@@ -36,9 +36,9 @@ class FiksVedtakstilstand(
                     BehandlingStatus.OPPRETTET,
                     BehandlingStatus.VILKAARSVURDERT,
                     BehandlingStatus.TRYGDETID_OPPDATERT,
+                    -> return@forEach
                     BehandlingStatus.BEREGNET,
                     BehandlingStatus.AVKORTET,
-                    BehandlingStatus.AVSLAG,
                     ->
                         when (vedtak?.status) {
                             VedtakStatus.OPPRETTET -> return@forEach
@@ -51,7 +51,9 @@ class FiksVedtakstilstand(
                             else -> behandlingService.fattVedtak(it.id, brukerTokenInfo)
                         }
 
-                    BehandlingStatus.ATTESTERT ->
+                    BehandlingStatus.AVSLAG,
+                    BehandlingStatus.ATTESTERT,
+                    ->
                         when (vedtak?.status) {
                             VedtakStatus.ATTESTERT -> return@forEach
                             else -> behandlingService.attesterVedtak(it.id, "", brukerTokenInfo)
@@ -88,6 +90,7 @@ class FiksVedtakstilstand(
 
                     BehandlingStatus.AVBRUTT -> return@forEach
                 }
+                logger.info("Oppdaterte status for vedtak for behandling ${it.id}")
             } catch (e: Exception) {
                 logger.error("Statusoppdatering feila for ${it.id}. Fortsetter med neste behandling", e)
             }

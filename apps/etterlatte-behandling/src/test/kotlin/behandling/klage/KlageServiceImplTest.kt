@@ -24,9 +24,12 @@ import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
 import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
+import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabalUtenBrev
 import no.nav.etterlatte.libs.common.behandling.JaNei
+import no.nav.etterlatte.libs.common.behandling.KabalHjemmel
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageOmgjoering
+import no.nav.etterlatte.libs.common.behandling.KlageResultat
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
@@ -35,12 +38,17 @@ import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
 import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SendtInnstillingsbrev
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.route.FeatureIkkeStoettetException
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -98,13 +106,14 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
         coEvery { brevApiKlientMock.ferdigstillVedtaksbrev(any(), any(), any()) } just runs
         coEvery { brevApiKlientMock.ferdigstillOversendelseBrev(any(), any(), any()) } just runs
         coEvery { brevApiKlientMock.hentBrev(any(), any(), any()) } returns randomOpprettetBrevDto()
-        coEvery { brevApiKlientMock.hentVedtaksbrev(any(), any()) } returns null
         coEvery { brevApiKlientMock.journalfoerBrev(any(), any(), any()) } returns JournalpostIdDto(randomString())
         coEvery { brevApiKlientMock.journalfoerNotatKa(any(), any()) } returns OpprettJournalpostDto(randomString())
         coEvery { brevApiKlientMock.opprettKlageOversendelsesbrevISak(any(), any()) } returns randomOpprettetBrevDto()
         coEvery { brevApiKlientMock.opprettVedtaksbrev(any(), any(), any()) } returns randomOpprettetBrevDto()
-        coEvery { brevApiKlientMock.slettOversendelsesbrev(any(), any()) } returns Unit
+        coEvery { brevApiKlientMock.hentVedtaksbrev(any(), any()) } returns randomOpprettetBrevDto()
+        coEvery { brevApiKlientMock.hentOversendelsesbrev(any(), any()) } returns randomOpprettetBrevDto()
         coEvery { brevApiKlientMock.slettVedtaksbrev(any(), any()) } returns Unit
+        coEvery { brevApiKlientMock.slettOversendelsesbrev(any(), any()) } returns Unit
     }
 
     @BeforeAll
@@ -339,32 +348,124 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `ferdigstilling trigger sletting av oversendelsesbrev og vedtaksbrev`() {
-        coEvery { brevApiKlientMock.hentOversendelsesbrev(any(), any()) } returns opprettetBrevDto(1432)
-        coEvery { brevApiKlientMock.hentVedtaksbrev(any(), any()) } returns opprettetBrevDto(2643)
+    fun `ferdigstilling med stadfesting lykkes`() {
+        val oversendelsebrevId: Long = 234
+        with(brevApiKlientMock) {
+            coEvery { hentBrev(any(), oversendelsebrevId, any()) } returns opprettetBrevDto(oversendelsebrevId)
+            coEvery { opprettKlageOversendelsesbrevISak(any(), any()) } returns opprettetBrevDto(oversendelsebrevId)
+            coEvery { hentOversendelsesbrev(any(), any()) } returns opprettetBrevDto(oversendelsebrevId)
+        }
         val klage: Klage =
             inTransaction {
                 val klage = opprettKlageOgSettInitieltUtfallOmgjoering()
-                service.lagreUtfallAvKlage(
-                    klageId = klage.id,
-                    utfall =
-                        KlageUtfallUtenBrev.Omgjoering(
-                            KlageOmgjoering(GrunnForOmgjoering.FEIL_LOVANVENDELSE, "Bra klage"),
-                        ),
-                    saksbehandler = saksbehandler,
-                )
+                service.lagreUtfallAvKlage(klage.id, utfallStadfesting(), saksbehandler)
             }
         inTransaction {
             service.ferdigstillKlage(klage.id, saksbehandler)
         }
 
         inTransaction {
+            with(service.hentKlage(klage.id)!!) {
+                status shouldBe KlageStatus.FERDIGSTILT
+                resultat?.opprettetOppgaveOmgjoeringId shouldBe null
+                resultat?.sendtInnstillingsbrev?.brevId shouldBe oversendelsebrevId
+                resultat?.sendtInnstillingsbrev?.sendtKabalTidspunkt shouldNotBe null
+                resultat?.sendtInnstillingsbrev?.journalpostId shouldNotBe null
+                resultat?.sendtInnstillingsbrev?.journalfoerTidspunkt shouldNotBe null
+                KlageResultat(null, SendtInnstillingsbrev(Tidspunkt.now(), Tidspunkt.now(), 2, ""))
+            }
+        }
+    }
+
+    @Test
+    fun `ferdigstilling med omgjoering lykkes`() {
+        val klage: Klage =
+            inTransaction {
+                val klage = opprettKlageOgSettInitieltUtfallOmgjoering()
+                service.lagreUtfallAvKlage(klage.id, utfallOmgjoering(), saksbehandler)
+            }
+        inTransaction {
+            service.ferdigstillKlage(klage.id, saksbehandler)
+        }
+
+        inTransaction {
+            val omgjoeringsOppgave =
+                oppgaveService.hentOppgaverForReferanse(klage.id.toString())
+                    .single { it.type == OppgaveType.OMGJOERING }.also {
+                        it.saksbehandler shouldBe null
+                        it.sakId shouldBe klage.sak.id
+                        it.kilde shouldBe OppgaveKilde.BEHANDLING
+                        it.status shouldBe Status.NY
+                    }
+
+            with(service.hentKlage(klage.id)!!) {
+                status shouldBe KlageStatus.FERDIGSTILT
+                resultat shouldBe KlageResultat(omgjoeringsOppgave.id, null)
+            }
             coVerify { brevApiKlientMock.hentVedtaksbrev(klage.id, saksbehandler) }
             coVerify { brevApiKlientMock.slettVedtaksbrev(klage.id, saksbehandler) }
             coVerify { brevApiKlientMock.hentOversendelsesbrev(klage.id, saksbehandler) }
             coVerify { brevApiKlientMock.slettOversendelsesbrev(klage.id, saksbehandler) }
         }
     }
+
+    @Test
+    fun `ferdigstilling takler feil ved sletting av vedtaksbrev`() {
+        coEvery { brevApiKlientMock.slettVedtaksbrev(any(), any()) } throws IllegalStateException()
+
+        val klage: Klage =
+            inTransaction {
+                val klage = opprettKlageOgSettInitieltUtfallOmgjoering()
+                service.lagreUtfallAvKlage(klage.id, utfallOmgjoering(), saksbehandler)
+            }
+        inTransaction {
+            service.ferdigstillKlage(klage.id, saksbehandler)
+        }
+
+        inTransaction {
+            service.hentKlage(klage.id)?.status shouldBe KlageStatus.FERDIGSTILT
+
+            coVerify { brevApiKlientMock.hentVedtaksbrev(klage.id, saksbehandler) }
+            coVerify { brevApiKlientMock.slettVedtaksbrev(klage.id, saksbehandler) }
+        }
+    }
+
+    @Test
+    fun `ferdigstilling takler feil ved sletting av oversendelsesbrev`() {
+        coEvery { brevApiKlientMock.slettOversendelsesbrev(any(), any()) } throws IllegalStateException()
+
+        val klage: Klage =
+            inTransaction {
+                val klage = opprettKlageOgSettInitieltUtfallOmgjoering()
+                service.lagreUtfallAvKlage(klage.id, utfallOmgjoering(), saksbehandler)
+            }
+        inTransaction {
+            service.ferdigstillKlage(klage.id, saksbehandler)
+        }
+
+        inTransaction {
+            service.hentKlage(klage.id)?.status shouldBe KlageStatus.FERDIGSTILT
+
+            coVerify { brevApiKlientMock.hentVedtaksbrev(klage.id, saksbehandler) }
+            coVerify { brevApiKlientMock.slettVedtaksbrev(klage.id, saksbehandler) }
+            coVerify { brevApiKlientMock.hentOversendelsesbrev(klage.id, saksbehandler) }
+            coVerify { brevApiKlientMock.slettOversendelsesbrev(klage.id, saksbehandler) }
+        }
+    }
+
+    private fun utfallOmgjoering() =
+        KlageUtfallUtenBrev.Omgjoering(
+            KlageOmgjoering(GrunnForOmgjoering.FEIL_LOVANVENDELSE, "Bra klage"),
+        )
+
+    private fun utfallStadfesting() =
+        KlageUtfallUtenBrev.StadfesteVedtak(
+            InnstillingTilKabalUtenBrev(
+                KabalHjemmel.FVL_36.name,
+                "Intern kommentar",
+                "Bra klage, men vi er uenige!",
+            ),
+        )
 
     private fun formkrav() =
         Formkrav(

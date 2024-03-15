@@ -64,7 +64,7 @@ class KlageBrevService(private val brevApiKlient: BrevApiKlient) {
                     brevId = innstillingsbrev.brevId,
                     saksbehandler = saksbehandler,
                 )
-            val brev =
+            val oversendelsesbrev =
                 hentBrev(
                     sakId = klage.sak.id,
                     brevId = innstillingsbrev.brevId,
@@ -80,7 +80,7 @@ class KlageBrevService(private val brevApiKlient: BrevApiKlient) {
                     "journalpostId=${notatTilKa.journalpostId}",
             )
             FerdigstillResultat(
-                brev = brev,
+                oversendelsesbrev = oversendelsesbrev,
                 notatTilKa = notatTilKa,
                 journalpostIdOversendelsesbrev = journalpostId,
                 journalfoertOversendelsesbrevTidspunkt = tidJournalfoert,
@@ -93,13 +93,21 @@ class KlageBrevService(private val brevApiKlient: BrevApiKlient) {
         saksbehandler: BrukerTokenInfo,
     ) {
         runBlocking {
-            val vedtaksbrev = brevApiKlient.hentVedtaksbrev(klageId, saksbehandler)
-            if (vedtaksbrev?.status?.ikkeFerdigstilt() == true) {
-                brevApiKlient.slettVedtaksbrev(klageId, saksbehandler)
+            try {
+                val vedtaksbrev = brevApiKlient.hentVedtaksbrev(klageId, saksbehandler)
+                if (vedtaksbrev?.status?.ikkeFerdigstilt() == true) {
+                    brevApiKlient.slettVedtaksbrev(klageId, saksbehandler)
+                }
+            } catch (e: Exception) {
+                logger.warn("Kunne ikke slette vedtaksbrev for klageId=$klageId", e)
             }
-            val oversendelsebrev = brevApiKlient.hentOversendelsesbrev(klageId, saksbehandler)
-            if (oversendelsebrev?.status?.ikkeFerdigstilt() == true) {
-                brevApiKlient.slettOversendelsesbrev(klageId, saksbehandler)
+            try {
+                val oversendelsebrev = brevApiKlient.hentOversendelsesbrev(klageId, saksbehandler)
+                if (oversendelsebrev?.status?.ikkeFerdigstilt() == true) {
+                    brevApiKlient.slettOversendelsesbrev(klageId, saksbehandler)
+                }
+            } catch (e: Exception) {
+                logger.warn("Kunne ikke slette oversendelsesbrev for klageId=$klageId", e)
             }
         }
     }

@@ -591,7 +591,7 @@ class KlageServiceImpl(
             klage = klage,
             ekstradataInnstilling =
                 EkstradataInnstilling(
-                    mottakerInnstilling = ferdigstillResultat.brev.mottaker,
+                    mottakerInnstilling = ferdigstillResultat.oversendelsesbrev.mottaker,
                     // TODO: Håndter verge
                     vergeEllerFullmektig = null,
                     journalpostInnstillingsbrev = ferdigstillResultat.notatTilKa.journalpostId,
@@ -605,7 +605,7 @@ class KlageServiceImpl(
         return SendtInnstillingsbrev(
             journalfoerTidspunkt = ferdigstillResultat.journalfoertOversendelsesbrevTidspunkt,
             sendtKabalTidspunkt = Tidspunkt.now(),
-            brevId = ferdigstillResultat.brev.id,
+            brevId = ferdigstillResultat.oversendelsesbrev.id,
             journalpostId = ferdigstillResultat.journalpostIdOversendelsesbrev,
         )
     }
@@ -649,7 +649,7 @@ class KlageIkkeFunnetException(klageId: UUID) :
     IkkeFunnetException(code = "KLAGE_IKKE_FUNNET", detail = "Kunne ikke finne klage med id=$klageId")
 
 data class FerdigstillResultat(
-    val brev: OpprettetBrevDto,
+    val oversendelsesbrev: OpprettetBrevDto,
     val notatTilKa: OpprettJournalpostDto,
     val journalfoertOversendelsesbrevTidspunkt: Tidspunkt,
     val journalpostIdOversendelsesbrev: String,

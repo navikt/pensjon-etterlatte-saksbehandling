@@ -95,7 +95,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
         hendelseDao = applicationContext.hendelseDao
 
         coEvery { brevApiKlientMock.distribuerBrev(any(), any(), any()) } returns BestillingsIdDto(randomString())
-        coEvery { brevApiKlientMock.ferdigstillBrev(any(), any(), any()) } just runs
+        coEvery { brevApiKlientMock.ferdigstillVedtaksbrev(any(), any(), any()) } just runs
         coEvery { brevApiKlientMock.ferdigstillOversendelseBrev(any(), any(), any()) } just runs
         coEvery { brevApiKlientMock.hentBrev(any(), any(), any()) } returns randomOpprettetBrevDto()
         coEvery { brevApiKlientMock.hentVedtaksbrev(any(), any()) } returns null

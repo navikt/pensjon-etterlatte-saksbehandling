@@ -31,7 +31,7 @@ interface BrevApiKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto
 
-    suspend fun ferdigstillBrev(
+    suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
@@ -126,7 +126,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         )
     }
 
-    override suspend fun ferdigstillBrev(
+    override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,

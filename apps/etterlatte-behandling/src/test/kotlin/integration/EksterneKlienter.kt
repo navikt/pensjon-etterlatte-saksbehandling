@@ -165,7 +165,7 @@ class BrevApiKlientTest : BrevApiKlient {
         return opprettetBrevDto(brevId++)
     }
 
-    override suspend fun ferdigstillBrev(
+    override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,

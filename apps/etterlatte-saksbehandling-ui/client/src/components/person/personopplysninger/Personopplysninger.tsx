@@ -13,6 +13,7 @@ import { Heading } from '@navikt/ds-react'
 import { SakType } from '~shared/types/sak'
 import { Foreldre } from '~components/person/personopplysninger/Foreldre'
 import { AvdoedesBarn } from '~components/person/personopplysninger/AvdoedesBarn'
+import { Sivilstatus } from '~components/person/personopplysninger/Sivilstatus'
 
 export const Personopplysninger = ({
   sakStatus,
@@ -48,20 +49,24 @@ export const Personopplysninger = ({
               success: (personopplysninger) => (
                 <>
                   <Bostedsadresser bostedsadresse={personopplysninger.soeker?.opplysning.bostedsadresse} />
-                  {/*TODO gå igjennom og sjekk hva som kan gjenbrukes på tvers av BP og OMS*/}
                   {erSaktype(sakStatus, SakType.BARNEPENSJON) && (
-                    <>
-                      <Foreldre
-                        avdoed={personopplysninger.avdoede}
-                        gjenlevende={personopplysninger.gjenlevende}
-                        foreldreansvar={personopplysninger.soeker?.opplysning.familieRelasjon?.ansvarligeForeldre}
-                      />
-                      <AvdoedesBarn avdoede={personopplysninger.avdoede} />
-                    </>
+                    <Foreldre
+                      avdoed={personopplysninger.avdoede}
+                      gjenlevende={personopplysninger.gjenlevende}
+                      foreldreansvar={personopplysninger.soeker?.opplysning.familieRelasjon?.ansvarligeForeldre}
+                    />
                   )}
+                  {erSaktype(sakStatus, SakType.OMSTILLINGSSTOENAD) && (
+                    <Sivilstatus
+                      sivilstand={personopplysninger.soeker?.opplysning.sivilstand}
+                      avdoede={personopplysninger.avdoede}
+                    />
+                  )}
+                  <AvdoedesBarn avdoede={personopplysninger.avdoede} />
                   <Statsborgerskap
                     statsborgerskap={personopplysninger.soeker?.opplysning.statsborgerskap}
                     pdlStatsborgerskap={personopplysninger.soeker?.opplysning.pdlStatsborgerskap}
+                    bosattLand={personopplysninger.soeker?.opplysning.bostedsadresse?.at(0)?.land}
                   />
                 </>
               ),

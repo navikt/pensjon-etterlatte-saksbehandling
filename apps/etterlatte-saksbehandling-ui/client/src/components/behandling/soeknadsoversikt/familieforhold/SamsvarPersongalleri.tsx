@@ -43,6 +43,13 @@ function PersonerUtenIdenterVisning(props: { saktype: SakType; personer: Array<P
   )
 }
 
+const formaterListeMedIdenter = (identer?: string[]): string => {
+  if (!identer || identer.length === 0) {
+    return 'Ingen'
+  }
+  return identer.join(', ')
+}
+
 const PersonUtenIdentWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -84,20 +91,24 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
     <>
       {harAvvikMotPdl && visMismatchPdl && (
         <MediumAdvarsel>
-          <BodyShort spacing>
-            Det er forskjeller mellom familieforholdet i behandlingen og det familieforholdet vi utleder ut i fra PDL.
-            Se nøye over og eventuelt korriger persongalleriet ved å redigere.
-          </BodyShort>
-          {saktype === SakType.OMSTILLINGSSTOENAD && (
-            <BodyShort spacing>Utleding av samboerskap ut i fra PDL kan ha mangler.</BodyShort>
+          {saktype === SakType.BARNEPENSJON ? (
+            <BodyShort spacing>
+              Det er forskjeller mellom familieforholdet i behandlingen og det familieforholdet vi utleder ut i fra PDL.
+              Se nøye over og eventuelt korriger persongalleriet ved å redigere.
+            </BodyShort>
+          ) : (
+            <BodyShort spacing>
+              Det er utledet forskjellig avdød i PDL enn det som er familieforholdet i behandlingen. Merk at utleding av
+              samboerskap ut i fra PDL kan ha mangler.
+            </BodyShort>
           )}
           <Heading level="4" size="xsmall" spacing>
             Familieforholdet i behandlingen
           </Heading>
           <FlexRow $spacing>
-            <Info label="Avdøde" tekst={samsvar.persongalleri.avdoed?.join(', ')} />
+            <Info label="Avdøde" tekst={formaterListeMedIdenter(samsvar.persongalleri.avdoed)} />
             {saktype === SakType.BARNEPENSJON && (
-              <Info label="Gjenlevende" tekst={samsvar.persongalleri.gjenlevende?.join(', ')} />
+              <Info label="Gjenlevende" tekst={formaterListeMedIdenter(samsvar.persongalleri.gjenlevende)} />
             )}
             <Info
               label="Kilde"
@@ -109,9 +120,9 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
             Familieforholdet i PDL
           </Heading>
           <FlexRow $spacing>
-            <Info label="Avdøde" tekst={samsvar.persongalleriPdl?.avdoed?.join(', ')} />
+            <Info label="Avdøde" tekst={formaterListeMedIdenter(samsvar.persongalleriPdl?.avdoed)} />
             {saktype === SakType.BARNEPENSJON && (
-              <Info label="Gjenlevende" tekst={samsvar.persongalleriPdl?.gjenlevende?.join(', ')} />
+              <Info label="Gjenlevende" tekst={formaterListeMedIdenter(samsvar.persongalleriPdl?.gjenlevende)} />
             )}
             <Info
               label="Kilde"

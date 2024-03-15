@@ -9,25 +9,27 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
+import no.nav.etterlatte.libs.common.clusterNavn
 import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import org.slf4j.Logger
 
 suspend fun HttpClient.ping(
-    url: String,
+    pingUrl: String,
     logger: Logger,
     serviceName: String,
     beskrivelse: String,
-    konsument: String,
+    konsument: String? = null,
 ): PingResult {
+    val konsumentEndelig = konsument ?: clusterNavn() ?: throw RuntimeException("Må ha konsument")
     return try {
-        this.get(url) {
+        this.get(pingUrl) {
             accept(ContentType.Application.Json)
-            header(NAV_CONSUMER_ID, konsument)
+            header(NAV_CONSUMER_ID, konsumentEndelig)
         }
         logger.info("$serviceName svarer OK")
-        PingResultUp(serviceName, endpoint = url, beskrivelse = beskrivelse)
+        PingResultUp(serviceName, endpoint = pingUrl, beskrivelse = beskrivelse)
     } catch (e: Exception) {
-        PingResultDown(serviceName, endpoint = url, errorMessage = e.message, beskrivelse = beskrivelse).also {
+        PingResultDown(serviceName, endpoint = pingUrl, errorMessage = e.message, beskrivelse = beskrivelse).also {
             logger.warn("$serviceName svarer IKKE ok. ${it.toStringServiceDown()}")
         }
     }
@@ -38,7 +40,7 @@ interface Pingable {
     val beskrivelse: String
     val endpoint: String
 
-    suspend fun ping(): PingResult
+    suspend fun ping(konsument: String? = null): PingResult
 
     @OptIn(DelicateCoroutinesApi::class)
     fun asyncPing() {

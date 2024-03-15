@@ -40,7 +40,7 @@ internal class NavAnsattKlientTest {
 
         val navAnsattKlient = NavAnsattKlientImpl(klient, "navansatt")
         runBlocking {
-            val ping = navAnsattKlient.ping()
+            val ping = navAnsattKlient.ping(konsument = "etterlatte-behandling")
             ping.status shouldBeEqualComparingTo ServiceStatus.UP
         }
     }
@@ -62,7 +62,7 @@ internal class NavAnsattKlientTest {
 
         val navAnsattKlient = NavAnsattKlientImpl(klient, "navansatt")
         runBlocking {
-            val ping = navAnsattKlient.ping()
+            val ping = navAnsattKlient.ping(konsument = "etterlatte-behandling")
             ping.status shouldBeEqualComparingTo ServiceStatus.DOWN
         }
     }

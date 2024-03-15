@@ -11,12 +11,15 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
+import no.nav.etterlatte.libs.ktor.PingResult
+import no.nav.etterlatte.libs.ktor.Pingable
+import no.nav.etterlatte.libs.ktor.ping
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
-interface AxsysKlient {
+interface AxsysKlient : Pingable {
     suspend fun hentEnheterForIdent(ident: String): List<SaksbehandlerEnhet>
 }
 
@@ -52,6 +55,22 @@ class AxsysKlientImpl(private val client: HttpClient, private val url: String) :
             throw HentEnhetException(feilmelding, cause)
         }
     }
+
+    override suspend fun ping(konsument: String?): PingResult {
+        return client.ping(
+            pingUrl = url.plus("/internal/isReady"),
+            logger = logger,
+            serviceName = serviceName,
+            beskrivelse = beskrivelse,
+        )
+    }
+
+    override val serviceName: String
+        get() = "Axsysklient"
+    override val beskrivelse: String
+        get() = "Sjekker om en person er skjermet"
+    override val endpoint: String
+        get() = this.url
 }
 
 class HentEnhetException(override val detail: String, override val cause: Throwable?) :

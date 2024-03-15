@@ -17,6 +17,7 @@ import { Sivilstatus } from '~components/person/personopplysninger/Sivilstatus'
 import { Innflytting } from '~components/person/personopplysninger/Innflytting'
 import { hentAlleLand, ILand } from '~shared/api/trygdetid'
 import { Utflytting } from '~components/person/personopplysninger/Utflytting'
+import { Vergemaal } from '~components/person/personopplysninger/Vergemaal'
 
 export const Personopplysninger = ({
   sakStatus,
@@ -86,6 +87,11 @@ export const Personopplysninger = ({
                   <Utflytting
                     utflytting={personopplysninger.soeker?.opplysning.utland?.utflyttingFraNorge}
                     landListe={landListe}
+                  />
+                  <Vergemaal
+                    vergemaalEllerFremtidsfullmakt={
+                      personopplysninger.soeker?.opplysning.vergemaalEllerFremtidsfullmakt
+                    }
                   />
                 </>
               ),

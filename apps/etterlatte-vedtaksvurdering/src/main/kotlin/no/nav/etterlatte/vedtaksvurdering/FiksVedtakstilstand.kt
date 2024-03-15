@@ -59,7 +59,7 @@ class FiksVedtakstilstand(val behandlingService: VedtakFiksBehandlingService, va
                         VedtakStatus.IVERKSATT -> return
                         else -> behandlingService.iverksattVedtak(it.id, brukerTokenInfo)
                     }
-                BehandlingStatus.AVBRUTT -> TODO()
+                BehandlingStatus.AVBRUTT -> return
             }
         }
     }

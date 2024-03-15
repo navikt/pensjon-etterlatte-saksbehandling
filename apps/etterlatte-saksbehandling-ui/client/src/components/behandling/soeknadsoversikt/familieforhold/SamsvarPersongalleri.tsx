@@ -89,14 +89,16 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
             Se nøye over og eventuelt korriger persongalleriet ved å redigere.
           </BodyShort>
           {saktype === SakType.OMSTILLINGSSTOENAD && (
-            <BodyShort>Utleding av samboerskap ut i fra PDL kan ha mangler.</BodyShort>
+            <BodyShort spacing>Utleding av samboerskap ut i fra PDL kan ha mangler.</BodyShort>
           )}
           <Heading level="4" size="xsmall" spacing>
             Familieforholdet i behandlingen
           </Heading>
           <FlexRow $spacing>
             <Info label="Avdøde" tekst={samsvar.persongalleri.avdoed?.join(', ')} />
-            <Info label="Gjenlevende" tekst={samsvar.persongalleri.gjenlevende?.join(', ')} />
+            {saktype === SakType.BARNEPENSJON && (
+              <Info label="Gjenlevende" tekst={samsvar.persongalleri.gjenlevende?.join(', ')} />
+            )}
             <Info
               label="Kilde"
               tekst={`${samsvar.kilde?.type.toUpperCase()} (${formaterKanskjeStringDato(samsvar.kilde?.tidspunkt)})`}
@@ -108,7 +110,9 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
           </Heading>
           <FlexRow $spacing>
             <Info label="Avdøde" tekst={samsvar.persongalleriPdl?.avdoed?.join(', ')} />
-            <Info label="Gjenlevende" tekst={samsvar.persongalleriPdl?.gjenlevende?.join(', ')} />
+            {saktype === SakType.BARNEPENSJON && (
+              <Info label="Gjenlevende" tekst={samsvar.persongalleriPdl?.gjenlevende?.join(', ')} />
+            )}
             <Info
               label="Kilde"
               tekst={`${samsvar.kildePdl?.type.toUpperCase()} (${formaterKanskjeStringDato(samsvar.kildePdl?.tidspunkt)})`}

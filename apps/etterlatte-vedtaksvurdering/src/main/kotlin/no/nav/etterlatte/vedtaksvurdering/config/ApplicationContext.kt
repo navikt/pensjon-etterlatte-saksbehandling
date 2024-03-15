@@ -3,6 +3,8 @@ package no.nav.etterlatte.vedtaksvurdering.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -99,10 +101,21 @@ class ApplicationContext {
             samKlient = samKlient,
             trygdetidKlient = trygdetidKlient,
         )
+
+    val featureToggleService =
+        FeatureToggleService.initialiser(
+            properties =
+                FeatureToggleProperties(
+                    applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+                    host = config.getString("funksjonsbrytere.unleash.host"),
+                    apiKey = config.getString("funksjonsbrytere.unleash.token"),
+                ),
+        )
     val fiksVedtakstilstand =
         FiksVedtakstilstand(
             behandlingService = vedtakFiksBehandlingService,
             vedtakservice = vedtaksvurderingService,
+            featureToggleService = featureToggleService,
         )
 
     val metrikkerJob: MetrikkerJob by lazy {

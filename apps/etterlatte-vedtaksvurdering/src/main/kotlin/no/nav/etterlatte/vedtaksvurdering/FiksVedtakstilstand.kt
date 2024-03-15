@@ -1,5 +1,7 @@
 package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering
 
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -9,10 +11,19 @@ import no.nav.etterlatte.vedtaksvurdering.UnderkjennVedtakDto
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import org.slf4j.LoggerFactory
 
-class FiksVedtakstilstand(val behandlingService: VedtakFiksBehandlingService, val vedtakservice: VedtaksvurderingService) {
+class FiksVedtakstilstand(
+    val behandlingService: VedtakFiksBehandlingService,
+    val vedtakservice: VedtaksvurderingService,
+    val featureToggleService: FeatureToggleService,
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun fiks(bruker: BrukerTokenInfo) {
+        if (!featureToggleService.isEnabled(FiksVedtakstilstandFeatureToggle.FiksVedtakstilstand, false)) {
+            logger.info("Fiksing av vedtakstilstand er skrudd av. Avbryter uten å gjøre noe.")
+            return
+        }
+
         val aktuelleBehandlinger = behandlingService.hentAktuelleBehandlingerForFiksStatus(bruker)
         logger.info("Verifiserer og potensielt retter status for ${aktuelleBehandlinger.size} behandlinger")
 
@@ -70,4 +81,11 @@ class FiksVedtakstilstand(val behandlingService: VedtakFiksBehandlingService, va
     }
 
     private fun tilBruker(ident: String) = Systembruker(oid = ident, sub = ident, ident = ident)
+}
+
+enum class FiksVedtakstilstandFeatureToggle(private val key: String) : FeatureToggle {
+    FiksVedtakstilstand("fiks-vedtakstilstand"),
+    ;
+
+    override fun key() = key
 }

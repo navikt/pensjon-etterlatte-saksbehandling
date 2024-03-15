@@ -61,7 +61,10 @@ internal class LoependeYtelserforespoerselRiverTest {
 
         inspector.sendTestMessage(melding.toJson())
         val sendtMelding = inspector.inspektør.message(0)
-        Assertions.assertEquals(ReguleringHendelseType.OMREGNINGSHENDELSE.lagEventnameForType(), sendtMelding.get(EVENT_NAME_KEY).asText())
+        Assertions.assertEquals(
+            ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET.lagEventnameForType(),
+            sendtMelding.get(EVENT_NAME_KEY).asText(),
+        )
         Assertions.assertEquals(
             Omregningshendelse(
                 sakId = sakId,

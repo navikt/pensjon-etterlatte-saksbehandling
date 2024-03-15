@@ -31,7 +31,7 @@ internal class OmregningHendelserRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringHendelseType.BEREGN) {
+        initialiserRiver(rapidsConnection, ReguleringHendelseType.VILKAARSVURDERT) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(SAK_TYPE) }
             validate { it.rejectKey(BEREGNING_KEY) }
@@ -62,7 +62,7 @@ internal class OmregningHendelserRiver(
                         .body<AvkortingDto>()
                 packet[AVKORTING_KEY] = avkorting
             }
-            packet.setEventNameForHendelseType(ReguleringHendelseType.OPPRETT_VEDTAK)
+            packet.setEventNameForHendelseType(ReguleringHendelseType.BEREGNA)
             context.publish(packet.toJson())
         }
         logger.info("Publiserte oppdatert omregningshendelse")

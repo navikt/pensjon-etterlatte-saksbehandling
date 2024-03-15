@@ -22,7 +22,7 @@ internal class OpprettVedtakforespoerselRiver(
     private val logger = LoggerFactory.getLogger(OpprettVedtakforespoerselRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringHendelseType.OPPRETT_VEDTAK) {
+        initialiserRiver(rapidsConnection, ReguleringHendelseType.BEREGNA) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(DATO_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
@@ -37,7 +37,7 @@ internal class OpprettVedtakforespoerselRiver(
         logger.info("Leser opprett-vedtak forespoersel for sak $sakId")
         val behandlingId = packet.behandlingId
 
-        withFeilhaandtering(packet, context, ReguleringHendelseType.OPPRETT_VEDTAK.lagEventnameForType()) {
+        withFeilhaandtering(packet, context, ReguleringHendelseType.BEREGNA.lagEventnameForType()) {
             val respons = vedtak.opprettVedtakFattOgAttester(packet.sakId, behandlingId)
             logger.info("Opprettet vedtak ${respons.vedtak.id} for sak: $sakId og behandling: $behandlingId")
             RapidUtsender.sendUt(respons, packet, context)

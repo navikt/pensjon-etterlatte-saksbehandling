@@ -22,7 +22,7 @@ internal class OmregningsHendelserRiver(rapidsConnection: RapidsConnection, priv
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringHendelseType.OMREGNINGSHENDELSE) {
+        initialiserRiver(rapidsConnection, ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET) {
             validate { it.rejectKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }
@@ -39,7 +39,7 @@ internal class OmregningsHendelserRiver(rapidsConnection: RapidsConnection, priv
         packet.behandlingId = behandlingId
         packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = behandlingViOmregnerFra
         packet[SAK_TYPE] = sakType
-        packet.setEventNameForHendelseType(ReguleringHendelseType.VILKAARSVURDER)
+        packet.setEventNameForHendelseType(ReguleringHendelseType.BEHANDLING_OPPRETTA)
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert omregningshendelse")
     }

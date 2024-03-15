@@ -53,7 +53,7 @@ internal class LoependeYtelserforespoerselRiver(
 
         val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato)
         respons.takeIf { it.erLoepende }?.let {
-            packet.setEventNameForHendelseType(ReguleringHendelseType.OMREGNINGSHENDELSE)
+            packet.setEventNameForHendelseType(ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET)
             packet[HENDELSE_DATA_KEY] =
                 Omregningshendelse(
                     sakId = sakId,
@@ -61,7 +61,7 @@ internal class LoependeYtelserforespoerselRiver(
                     prosesstype = Prosesstype.AUTOMATISK,
                 )
             context.publish(packet.toJson())
-            logger.info("Grunnlopesreguleringmelding ble sendt for sak $sakId. Dato=${respons.dato}")
-        } ?: logger.info("Grunnlopesreguleringmelding ble ikke sendt for sak $sakId. Dato=${respons.dato}")
+            logger.info("Grunnbeløpsreguleringmelding ble sendt for sak $sakId. Dato=${respons.dato}")
+        } ?: logger.info("Grunnbeløpsreguleringmelding ble ikke sendt for sak $sakId. Dato=${respons.dato}")
     }
 }

@@ -17,12 +17,4 @@ internal fun Route.vedtaksbehandlingRoutes(vedtaksbehandlingService: Vedtaksbeha
             }
         call.respond(HttpStatusCode.OK, redigerbar)
     }
-
-    get("/vedtaksbehandling/aktuelleForFiks") {
-        val aktuelle =
-            inTransaction {
-                vedtaksbehandlingService.hentAktuelle()
-            }
-        call.respond(HttpStatusCode.OK, aktuelle)
-    }
 }

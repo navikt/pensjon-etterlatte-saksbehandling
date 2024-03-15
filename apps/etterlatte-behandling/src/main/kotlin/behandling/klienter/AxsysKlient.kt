@@ -7,15 +7,13 @@ import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import no.nav.etterlatte.libs.ktor.PingResult
-import no.nav.etterlatte.libs.ktor.PingResultDown
-import no.nav.etterlatte.libs.ktor.PingResultUp
 import no.nav.etterlatte.libs.ktor.Pingable
+import no.nav.etterlatte.libs.ktor.ping
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -59,23 +57,16 @@ class AxsysKlientImpl(private val client: HttpClient, private val url: String) :
     }
 
     override suspend fun ping(): PingResult {
-        try {
-            client.post("$url/internal/isReady") {
-                accept(ContentType.Application.Json)
-                contentType(ContentType.Application.Json)
-            }.body<Boolean>()
-        } catch (e: Exception) {
-            return PingResultDown(serviceName, endpoint = endpoint, errorMessage = e.message, beskrivelse = beskrivelse)
-                .also {
-                    logger.warn("$serviceName svarer IKKE ok. ${it.toStringServiceDown()}")
-                }
-        }
-        logger.info("$serviceName svarer OK")
-        return PingResultUp(serviceName, endpoint = endpoint, beskrivelse = beskrivelse)
+        return client.ping(
+            pingUrl = url.plus("/internal/isReady"),
+            logger = logger,
+            serviceName = serviceName,
+            beskrivelse = beskrivelse,
+        )
     }
 
     override val serviceName: String
-        get() = "SkjermingKlient"
+        get() = "Axsysklient"
     override val beskrivelse: String
         get() = "Sjekker om en person er skjermet"
     override val endpoint: String

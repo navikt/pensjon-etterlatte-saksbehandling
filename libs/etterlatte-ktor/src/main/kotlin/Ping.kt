@@ -13,21 +13,21 @@ import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import org.slf4j.Logger
 
 suspend fun HttpClient.ping(
-    url: String,
+    pingUrl: String,
     logger: Logger,
     serviceName: String,
     beskrivelse: String,
-    konsument: String,
+    konsument: String = System.getenv("NAIS_APP_NAME"),
 ): PingResult {
     return try {
-        this.get(url) {
+        this.get(pingUrl) {
             accept(ContentType.Application.Json)
             header(NAV_CONSUMER_ID, konsument)
         }
         logger.info("$serviceName svarer OK")
-        PingResultUp(serviceName, endpoint = url, beskrivelse = beskrivelse)
+        PingResultUp(serviceName, endpoint = pingUrl, beskrivelse = beskrivelse)
     } catch (e: Exception) {
-        PingResultDown(serviceName, endpoint = url, errorMessage = e.message, beskrivelse = beskrivelse).also {
+        PingResultDown(serviceName, endpoint = pingUrl, errorMessage = e.message, beskrivelse = beskrivelse).also {
             logger.warn("$serviceName svarer IKKE ok. ${it.toStringServiceDown()}")
         }
     }

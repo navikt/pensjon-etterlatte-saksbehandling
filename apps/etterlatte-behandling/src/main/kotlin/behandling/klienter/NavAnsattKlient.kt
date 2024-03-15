@@ -56,11 +56,10 @@ class NavAnsattKlientImpl(
 
     override suspend fun ping(): PingResult {
         return client.ping(
-            url = url.plus("/ping"),
+            pingUrl = url.plus("/ping"),
             logger = logger,
             serviceName = serviceName,
             beskrivelse = beskrivelse,
-            konsument = "etterlatte-behandling",
         )
     }
 }

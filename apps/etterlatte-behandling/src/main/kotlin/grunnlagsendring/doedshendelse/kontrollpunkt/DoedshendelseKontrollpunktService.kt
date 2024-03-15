@@ -426,13 +426,3 @@ class DoedshendelseKontrollpunktService(
         }
     }
 }
-
-sealed class A(var name: String)
-
-data class B(val lol: String) : A("B")
-
-class C : A("C")
-
-fun lol() {
-    B("2")
-}

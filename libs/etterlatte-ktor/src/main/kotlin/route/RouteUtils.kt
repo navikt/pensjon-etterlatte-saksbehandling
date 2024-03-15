@@ -23,7 +23,7 @@ const val OPPGAVEID_CALL_PARAMETER = "oppgaveId"
 const val KLAGEID_CALL_PARAMETER = "klageId"
 const val GENERELLBEHANDLINGID_CALL_PARAMETER = "generellBehandlingId"
 
-enum class CallParamAuthIds(val value: String) {
+enum class CallParamAuthId(val value: String) {
     BEHANDLINGID(BEHANDLINGID_CALL_PARAMETER),
     SAKID(SAKID_CALL_PARAMETER),
     OPPGAVEID(OPPGAVEID_CALL_PARAMETER),

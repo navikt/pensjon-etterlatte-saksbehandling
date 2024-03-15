@@ -40,6 +40,8 @@ import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utlandstilknytning/Utlandstilknytning'
 import { useAppSelector } from '~store/Store'
+import { Familieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -100,6 +102,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
     behandling.revurderingsaarsak,
     'Kan ikke starte en revurdering uten en revurderingsårsak'
   )
+  const personopplysninger = usePersonopplysninger()
 
   const [hjemler, beskrivelse] = hjemlerOgBeskrivelse(behandling.sakType, revurderingsaarsak)
   return (
@@ -161,6 +164,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         </Virkningstidspunkt>
       </InnholdPadding>
       <Border />
+      <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />
       {redigerbar ? (
         <BehandlingHandlingKnapper>
           <Start disabled={behandling.virkningstidspunkt === null} />

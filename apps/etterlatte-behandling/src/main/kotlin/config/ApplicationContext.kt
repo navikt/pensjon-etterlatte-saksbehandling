@@ -56,6 +56,7 @@ import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingHendelserServiceImpl
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
+import no.nav.etterlatte.behandling.vedtaksbehandling.FiksVedtaktstilstandDao
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingDao
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
 import no.nav.etterlatte.common.ConnectionAutoclosingImpl
@@ -316,9 +317,11 @@ internal class ApplicationContext(
             hendelseDao,
             saksbehandlerInfoDao,
         )
+    val fiksVedtakstilstandDao = FiksVedtaktstilstandDao(autoClosingDatabase)
     val vedtaksbehandlingService =
         VedtaksbehandlingService(
             vedtaksbehandlingDao,
+            fiksVedtakstilstandDao,
         )
     val kommerBarnetTilGodeService =
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)

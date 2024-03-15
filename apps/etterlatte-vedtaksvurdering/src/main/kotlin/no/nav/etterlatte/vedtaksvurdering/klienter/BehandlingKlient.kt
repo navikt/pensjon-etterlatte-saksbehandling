@@ -6,6 +6,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.behandling.BehandlingMedStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
@@ -98,6 +99,8 @@ interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
         oppgaveTilAttestering: OppgaveIntern,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
+
+    suspend fun hentAktuelleBehandlingerForFiksStatus(brukerTokenInfo: BrukerTokenInfo): List<BehandlingMedStatus>
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable? = null) :
@@ -212,6 +215,19 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             }
         }
     }
+
+    override suspend fun hentAktuelleBehandlingerForFiksStatus(brukerTokenInfo: BrukerTokenInfo): List<BehandlingMedStatus> =
+        downstreamResourceClient.get(
+            resource =
+                Resource(
+                    clientId = clientId,
+                    url = "$resourceUrl/vedtaksbehandling/aktuelleForFiks",
+                ),
+            brukerTokenInfo = brukerTokenInfo,
+        ).mapBoth(
+            success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+            failure = { throwableErrorMessage -> throw throwableErrorMessage },
+        )
 
     override suspend fun fattVedtakBehandling(
         brukerTokenInfo: BrukerTokenInfo,

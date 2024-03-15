@@ -3,6 +3,8 @@ package no.nav.etterlatte.vedtaksvurdering.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -14,6 +16,8 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.FiksVedtakstilstand
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakFiksBehandlingService
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
@@ -87,6 +91,31 @@ class ApplicationContext {
         AutomatiskBehandlingService(
             vedtakBehandlingService,
             behandlingKlient,
+        )
+    val vedtakFiksBehandlingService =
+        VedtakFiksBehandlingService(
+            repository = VedtaksvurderingRepository.using(dataSource),
+            beregningKlient = BeregningKlientImpl(config, httpClient()),
+            vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
+            behandlingKlient = behandlingKlient,
+            samKlient = samKlient,
+            trygdetidKlient = trygdetidKlient,
+        )
+
+    val featureToggleService =
+        FeatureToggleService.initialiser(
+            properties =
+                FeatureToggleProperties(
+                    applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+                    host = config.getString("funksjonsbrytere.unleash.host"),
+                    apiKey = config.getString("funksjonsbrytere.unleash.token"),
+                ),
+        )
+    val fiksVedtakstilstand =
+        FiksVedtakstilstand(
+            behandlingService = vedtakFiksBehandlingService,
+            vedtakservice = vedtaksvurderingService,
+            featureToggleService = featureToggleService,
         )
 
     val metrikkerJob: MetrikkerJob by lazy {

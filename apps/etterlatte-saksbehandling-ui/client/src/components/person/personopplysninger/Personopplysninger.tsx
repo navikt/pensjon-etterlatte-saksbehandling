@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { Container, SpaceChildren } from '~shared/styled'
 import { LenkeTilAndreSystemer } from '~components/person/personopplysninger/LenkeTilAndreSystemer'
 import { Bostedsadresser } from '~components/person/personopplysninger/Bostedsadresser'
@@ -14,6 +14,9 @@ import { SakType } from '~shared/types/sak'
 import { Foreldre } from '~components/person/personopplysninger/Foreldre'
 import { AvdoedesBarn } from '~components/person/personopplysninger/AvdoedesBarn'
 import { Sivilstatus } from '~components/person/personopplysninger/Sivilstatus'
+import { Innflytting } from '~components/person/personopplysninger/Innflytting'
+import { hentAlleLand, ILand } from '~shared/api/trygdetid'
+import { Utflytting } from '~components/person/personopplysninger/Utflytting'
 
 export const Personopplysninger = ({
   sakStatus,
@@ -22,7 +25,14 @@ export const Personopplysninger = ({
   sakStatus: Result<SakMedBehandlinger>
   fnr: string
 }): ReactNode => {
+  const [landListe, setLandListe] = useState<ILand[]>([])
+
   const [personopplysningerResult, hentPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
+  const [, hentLandListe] = useApiCall(hentAlleLand)
+
+  const erSaktype = (sakStatus: Result<SakMedBehandlinger>, sakType: SakType) => {
+    return isSuccess(sakStatus) && sakStatus.data.sak.sakType === sakType
+  }
 
   useEffect(() => {
     if (isSuccess(sakStatus)) {
@@ -33,9 +43,9 @@ export const Personopplysninger = ({
     }
   }, [sakStatus])
 
-  const erSaktype = (sakStatus: Result<SakMedBehandlinger>, sakType: SakType) => {
-    return isSuccess(sakStatus) && sakStatus.data.sak.sakType === sakType
-  }
+  useEffect(() => {
+    hentLandListe(null, setLandListe)
+  }, [])
 
   return (
     <Container>
@@ -67,6 +77,15 @@ export const Personopplysninger = ({
                     statsborgerskap={personopplysninger.soeker?.opplysning.statsborgerskap}
                     pdlStatsborgerskap={personopplysninger.soeker?.opplysning.pdlStatsborgerskap}
                     bosattLand={personopplysninger.soeker?.opplysning.bostedsadresse?.at(0)?.land}
+                    landListe={landListe}
+                  />
+                  <Innflytting
+                    innflytting={personopplysninger.soeker?.opplysning.utland?.innflyttingTilNorge}
+                    landListe={landListe}
+                  />
+                  <Utflytting
+                    utflytting={personopplysninger.soeker?.opplysning.utland?.utflyttingFraNorge}
+                    landListe={landListe}
                   />
                 </>
               ),

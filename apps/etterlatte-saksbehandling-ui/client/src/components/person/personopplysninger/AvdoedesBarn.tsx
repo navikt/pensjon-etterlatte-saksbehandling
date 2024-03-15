@@ -19,11 +19,11 @@ export const AvdoedesBarn = ({ avdoede }: { avdoede?: PdlPersonopplysning[] }): 
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {avdoede && avdoede.length >= 0 ? (
+          {avdoede && avdoede.length > 0 ? (
             <>
               {avdoede.map((doed) => (
                 <>
-                  {doed.opplysning.avdoedesBarn && doed.opplysning.avdoedesBarn.length >= 0 ? (
+                  {doed.opplysning.avdoedesBarn && doed.opplysning.avdoedesBarn.length > 0 ? (
                     <>
                       {doed.opplysning.avdoedesBarn.map((barn, index) => (
                         <Table.Row key={index}>

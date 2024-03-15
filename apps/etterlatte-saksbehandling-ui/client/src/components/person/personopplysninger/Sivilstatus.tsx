@@ -35,7 +35,7 @@ export const Sivilstatus = ({
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {sivilstand && sivilstand.length >= 0 ? (
+          {sivilstand && sivilstand.length > 0 ? (
             <>
               {sivilstand.map((stand: Sivilstand, index: number) => (
                 <Table.Row key={index}>

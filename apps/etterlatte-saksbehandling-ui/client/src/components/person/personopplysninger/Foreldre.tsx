@@ -33,7 +33,7 @@ export const Foreldre = ({
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {avdoed && avdoed.length >= 0 ? (
+          {avdoed && avdoed.length > 0 ? (
             <>
               {avdoed.map((doed: PdlPersonopplysning, index: number) => (
                 <Table.Row key={index}>

@@ -226,6 +226,7 @@ class DoedshendelseJobService(
 
         if (skalOppretteOppgave) {
             if (sak != null && featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
+                val oppgaveTekster = kontrollpunkter.filter { it.opprettOppgave }.map { it.oppgaveTekst }.joinToString(" ")
                 logger.info("Oppretter oppgave for ${doedshendelse.relasjon.name} for sak ${sak.id}")
                 val oppgave =
                     grunnlagsendringshendelseService.opprettDoedshendelseForPerson(
@@ -238,6 +239,7 @@ class DoedshendelseJobService(
                                 opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                                 hendelseGjelderRolle = Saksrolle.AVDOED,
                                 gjelderPerson = doedshendelse.avdoedFnr,
+                                kommentar = oppgaveTekster,
                                 samsvarMellomKildeOgGrunnlag =
                                     SamsvarMellomKildeOgGrunnlag.Doedsdatoforhold(
                                         fraGrunnlag = null,

@@ -168,7 +168,10 @@ class DoedshendelseKontrollpunktServiceTest {
 
         kontrollpunkter shouldContainExactly
             listOf(
-                DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde,
+                DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde(
+                    doedshendelseInternalOMS.avdoedDoedsdato,
+                    doedshendelseInternalOMS.avdoedFnr,
+                ),
             )
     }
 
@@ -212,7 +215,13 @@ class DoedshendelseKontrollpunktServiceTest {
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
 
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5OgGiftI15)
+        kontrollpunkter shouldContainExactly
+            listOf(
+                DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5OgGiftI15(
+                    doedshendelseInternalOMS.avdoedDoedsdato,
+                    doedshendelseInternalOMS.avdoedFnr,
+                ),
+            )
     }
 
     @Test

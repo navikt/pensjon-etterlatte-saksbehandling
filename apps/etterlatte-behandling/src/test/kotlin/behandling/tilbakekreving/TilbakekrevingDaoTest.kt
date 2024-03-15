@@ -22,12 +22,10 @@ import no.nav.etterlatte.libs.common.tilbakekreving.NavIdent
 import no.nav.etterlatte.libs.common.tilbakekreving.Periode
 import no.nav.etterlatte.libs.common.tilbakekreving.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAktsomhet
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingRettsligGrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurderingUaktsomhet
 import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
 import no.nav.etterlatte.mockedSakTilgangDao
@@ -91,17 +89,26 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
                     lagret.tilbakekreving.copy(
                         vurdering =
                             TilbakekrevingVurdering(
-                                beskrivelse = "beskrivelse",
-                                vedtak = "konklusjon",
                                 aarsak = TilbakekrevingAarsak.ANNET,
-                                aktsomhet =
-                                    TilbakekrevingVurderingUaktsomhet(
-                                        aktsomhet = TilbakekrevingAktsomhet.GOD_TRO,
-                                        reduseringAvKravet = "Redusering av kravet",
-                                        strafferettsligVurdering = "Strafferettslig",
-                                        rentevurdering = "Rentevurdering",
-                                    ),
-                                hjemmel = TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_EN_LEDD_EN,
+                                beskrivelse = "beskrivelse",
+                                forhaandsvarsel = null,
+                                forhaandsvarselDato = null,
+                                doedsbosak = null,
+                                foraarsaketAv = null,
+                                tilsvar = null,
+                                rettsligGrunnlag = TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
+                                objektivtVilkaarOppfylt = null,
+                                subjektivtVilkaarOppfylt = null,
+                                uaktsomtForaarsaketFeilutbetaling = null,
+                                burdeBrukerForstaatt = null,
+                                burdeBrukerForstaattEllerUaktsomtForaarsaket = null,
+                                vilkaarsresultat = null,
+                                beloepBehold = null,
+                                reduseringAvKravet = null,
+                                foreldet = null,
+                                rentevurdering = null,
+                                vedtak = "konklusjon",
+                                vurderesForPaatale = null,
                             ),
                         perioder =
                             lagret.tilbakekreving.perioder.map {

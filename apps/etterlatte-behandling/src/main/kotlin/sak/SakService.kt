@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
 interface SakService {
@@ -139,7 +140,7 @@ class SakServiceImpl(
         if (sak == null) {
             val enhet =
                 if (sjekkEnhetMotNorg) {
-                    sjekkEnhet(fnr, type, overstyrendeEnhet)
+                    hentEnhetFraNorgOmTom(fnr, type, overstyrendeEnhet)
                 } else {
                     overstyrendeEnhet!!
                 }
@@ -151,18 +152,51 @@ class SakServiceImpl(
             oppdaterAdressebeskyttelse(sak.id, it)
         }
 
+        sjekkGraderingOgEnhetStemmer(dao.finnSakMedGraderingOgSkjerming(sak.id))
         return sak
+    }
+
+    private fun sjekkGraderingOgEnhetStemmer(sak: SakMedGraderingOgSkjermet) {
+        sak.egenAnsattStemmer()
+        sak.graderingerStemmer()
+    }
+
+    private fun SakMedGraderingOgSkjermet.graderingerStemmer() {
+        when (this.adressebeskyttelseGradering) {
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> {
+                if (this.enhetNr != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr) {
+                    logger.error("Sak har fått satt feil enhetsnummer basert på gradering, se sikkerlogg.")
+                    sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering strengt fortrolig")
+                }
+            }
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
+                if (this.enhetNr != Enheter.STRENGT_FORTROLIG.enhetNr) {
+                    logger.error("Sak har fått satt feil enhetsnummer basert på gradering, se sikkerlogg.")
+                    sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering strengt fortrolig")
+                }
+            }
+            AdressebeskyttelseGradering.FORTROLIG, AdressebeskyttelseGradering.UGRADERT, null -> return
+        }
+    }
+
+    private fun SakMedGraderingOgSkjermet.egenAnsattStemmer() {
+        if (this.erSkjermet == true) {
+            if (this.enhetNr != Enheter.EGNE_ANSATTE.enhetNr) {
+                logger.error("Sak har fått satt feil enhetsnummer basert på skjermingen, se sikkerlogg.")
+                sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering skjerming(egen ansatt)")
+            }
+        }
     }
 
     override fun finnGjeldeneEnhet(
         fnr: String,
         type: SakType,
     ) = when (val sak = finnSakerForPersonOgType(fnr, type)) {
-        null -> sjekkEnhet(fnr, type, null)
+        null -> hentEnhetFraNorgOmTom(fnr, type, null)
         else -> sak.enhet
     }
 
-    private fun sjekkEnhet(
+    private fun hentEnhetFraNorgOmTom(
         fnr: String,
         type: SakType,
         enhet: String?,

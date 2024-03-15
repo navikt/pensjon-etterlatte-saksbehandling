@@ -22,16 +22,16 @@ const val SAKID_CALL_PARAMETER = "sakId"
 const val OPPGAVEID_CALL_PARAMETER = "oppgaveId"
 const val KLAGEID_CALL_PARAMETER = "klageId"
 const val GENERELLBEHANDLINGID_CALL_PARAMETER = "generellBehandlingId"
-const val OPPGAVEID_GOSYS_CALL_PARAMETER = "gosysOppgaveId"
 
-val pathParamsIntern =
-    listOf(
-        BEHANDLINGID_CALL_PARAMETER,
-        SAKID_CALL_PARAMETER,
-        OPPGAVEID_CALL_PARAMETER,
-        KLAGEID_CALL_PARAMETER,
-        GENERELLBEHANDLINGID_CALL_PARAMETER,
-    )
+enum class CallParamAuthId(val value: String) {
+    BEHANDLINGID(BEHANDLINGID_CALL_PARAMETER),
+    SAKID(SAKID_CALL_PARAMETER),
+    OPPGAVEID(OPPGAVEID_CALL_PARAMETER),
+    KLAGEID(KLAGEID_CALL_PARAMETER),
+    GENERELLBEHANDLINGID(GENERELLBEHANDLINGID_CALL_PARAMETER),
+}
+
+const val OPPGAVEID_GOSYS_CALL_PARAMETER = "gosysOppgaveId"
 
 inline val PipelineContext<*, ApplicationCall>.generellBehandlingId: UUID
     get() =

@@ -212,7 +212,7 @@ private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: Lo
     }
     val funnetCallIdParametersType = CallParamAuthId.entries.firstOrNull { call.parameters.contains(it.value) }
     return if (funnetCallIdParametersType == null) {
-        logger.warn("Fant ingen pathparam i url: ${call.request.path()}")
+        logger.warn("Fant ingen pathparam i url: ${call.request.path()} params: ${call.parameters}")
         null
     } else {
         val idForRequest = call.parameters[funnetCallIdParametersType.value]!!

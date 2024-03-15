@@ -54,12 +54,13 @@ class NavAnsattKlientImpl(
     override val endpoint: String
         get() = this.url
 
-    override suspend fun ping(): PingResult {
+    override suspend fun ping(konsument: String?): PingResult {
         return client.ping(
             pingUrl = url.plus("/ping"),
             logger = logger,
             serviceName = serviceName,
             beskrivelse = beskrivelse,
+            konsument = konsument,
         )
     }
 }

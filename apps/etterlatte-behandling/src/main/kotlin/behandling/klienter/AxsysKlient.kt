@@ -56,7 +56,7 @@ class AxsysKlientImpl(private val client: HttpClient, private val url: String) :
         }
     }
 
-    override suspend fun ping(): PingResult {
+    override suspend fun ping(konsument: String?): PingResult {
         return client.ping(
             pingUrl = url.plus("/internal/isReady"),
             logger = logger,

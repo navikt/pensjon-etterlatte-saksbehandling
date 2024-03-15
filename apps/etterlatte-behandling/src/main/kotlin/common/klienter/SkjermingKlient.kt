@@ -27,7 +27,7 @@ class SkjermingKlient(
         }.body()
     }
 
-    override suspend fun ping(): PingResult {
+    override suspend fun ping(konsument: String?): PingResult {
         try {
             httpClient.post("$url/skjermet") {
                 accept(ContentType.Application.Json)

@@ -9,6 +9,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
+import no.nav.etterlatte.libs.common.clusterNavn
 import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import org.slf4j.Logger
 
@@ -17,12 +18,13 @@ suspend fun HttpClient.ping(
     logger: Logger,
     serviceName: String,
     beskrivelse: String,
-    konsument: String = System.getenv("NAIS_APP_NAME"),
+    konsument: String? = null,
 ): PingResult {
+    val konsumentEndelig = konsument ?: clusterNavn() ?: throw RuntimeException("Må ha konsument")
     return try {
         this.get(pingUrl) {
             accept(ContentType.Application.Json)
-            header(NAV_CONSUMER_ID, konsument)
+            header(NAV_CONSUMER_ID, konsumentEndelig)
         }
         logger.info("$serviceName svarer OK")
         PingResultUp(serviceName, endpoint = pingUrl, beskrivelse = beskrivelse)
@@ -38,7 +40,7 @@ interface Pingable {
     val beskrivelse: String
     val endpoint: String
 
-    suspend fun ping(): PingResult
+    suspend fun ping(konsument: String? = null): PingResult
 
     @OptIn(DelicateCoroutinesApi::class)
     fun asyncPing() {

@@ -332,7 +332,7 @@ class NavAnsattKlientTest : NavAnsattKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    override suspend fun ping(): PingResult {
+    override suspend fun ping(konsument: String?): PingResult {
         return PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
     }
 }
@@ -373,7 +373,7 @@ class AxsysKlientTest : AxsysKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    override suspend fun ping(): PingResult {
+    override suspend fun ping(konsument: String?): PingResult {
         return PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
     }
 }

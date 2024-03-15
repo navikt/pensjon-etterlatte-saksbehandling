@@ -7,14 +7,19 @@ import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.vedtaksvurdering.UnderkjennVedtakDto
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
+import org.slf4j.LoggerFactory
 
 class FiksVedtakstilstand(val behandlingService: VedtakFiksBehandlingService, val vedtakservice: VedtaksvurderingService) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     suspend fun fiks(bruker: BrukerTokenInfo) {
         val aktuelleBehandlinger = behandlingService.hentAktuelleBehandlingerForFiksStatus(bruker)
+        logger.info("Verifiserer og potensielt retter status for ${aktuelleBehandlinger.size} behandlinger")
 
         aktuelleBehandlinger.forEach {
             val brukerTokenInfo = tilBruker(it.ident ?: Fagsaksystem.EY.navn)
             val vedtak = vedtakservice.hentVedtakMedBehandlingId(it.id)
+            logger.info("Fikser vedtaksstatus for behandling ${it.id} med status ${it.status} og vedtakstatus ${vedtak?.status}")
             when (it.status) {
                 BehandlingStatus.OPPRETTET,
                 BehandlingStatus.VILKAARSVURDERT,

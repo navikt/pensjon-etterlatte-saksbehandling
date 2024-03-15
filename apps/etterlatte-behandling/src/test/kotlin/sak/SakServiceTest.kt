@@ -54,6 +54,11 @@ internal class SakServiceTest {
     @BeforeEach
     fun before() {
         clearAllMocks()
+        every {
+            sakDao.finnSakMedGraderingOgSkjerming(
+                any(),
+            )
+        } returns SakMedGraderingOgSkjermet(1L, null, false, Enheter.defaultEnhet.enhetNr)
     }
 
     @AfterEach
@@ -277,6 +282,7 @@ internal class SakServiceTest {
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
+        verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
         verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
@@ -331,6 +337,7 @@ internal class SakServiceTest {
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG,
             )
         }
+        verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
         verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
@@ -376,6 +383,7 @@ internal class SakServiceTest {
 
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
+        verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
         verify(exactly = 1) {

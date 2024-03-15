@@ -28,68 +28,54 @@ class FiksVedtakstilstand(
         logger.info("Verifiserer og potensielt retter status for ${aktuelleBehandlinger.size} behandlinger")
 
         aktuelleBehandlinger.forEach {
-            try {
-                val brukerTokenInfo = tilBruker(it.ident ?: Fagsaksystem.EY.navn)
-                val vedtak = vedtakservice.hentVedtakMedBehandlingId(it.id)
-                logger.info("Fikser vedtaksstatus for behandling ${it.id} med status ${it.status} og vedtakstatus ${vedtak?.status}")
-                when (it.status) {
-                    BehandlingStatus.OPPRETTET,
-                    BehandlingStatus.VILKAARSVURDERT,
-                    BehandlingStatus.TRYGDETID_OPPDATERT,
-                    BehandlingStatus.BEREGNET,
-                    BehandlingStatus.AVKORTET,
-                    BehandlingStatus.AVSLAG,
-                    ->
-                        when (vedtak?.status) {
-                            VedtakStatus.OPPRETTET -> return@forEach
-                            else -> behandlingService.opprettEllerOppdaterVedtak(it.id, brukerTokenInfo)
-                        }
+            val brukerTokenInfo = tilBruker(it.ident ?: Fagsaksystem.EY.navn)
+            val vedtak = vedtakservice.hentVedtakMedBehandlingId(it.id)
+            logger.info("Fikser vedtaksstatus for behandling ${it.id} med status ${it.status} og vedtakstatus ${vedtak?.status}")
+            when (it.status) {
+                BehandlingStatus.OPPRETTET,
+                BehandlingStatus.VILKAARSVURDERT,
+                BehandlingStatus.TRYGDETID_OPPDATERT,
+                BehandlingStatus.BEREGNET,
+                BehandlingStatus.AVKORTET,
+                BehandlingStatus.AVSLAG,
+                ->
+                    when (vedtak?.status) {
+                        null -> return
+                        VedtakStatus.OPPRETTET -> return
+                        else -> behandlingService.opprettEllerOppdaterVedtak(it.id, brukerTokenInfo)
+                    }
+                BehandlingStatus.FATTET_VEDTAK ->
+                    when (vedtak?.status) {
+                        VedtakStatus.FATTET_VEDTAK -> return
+                        else -> behandlingService.fattVedtak(it.id, brukerTokenInfo)
+                    }
 
-                    BehandlingStatus.FATTET_VEDTAK ->
-                        when (vedtak?.status) {
-                            VedtakStatus.FATTET_VEDTAK -> return@forEach
-                            else -> behandlingService.fattVedtak(it.id, brukerTokenInfo)
-                        }
-
-                    BehandlingStatus.ATTESTERT ->
-                        when (vedtak?.status) {
-                            VedtakStatus.ATTESTERT -> return@forEach
-                            else -> behandlingService.attesterVedtak(it.id, "", brukerTokenInfo)
-                        }
-
-                    BehandlingStatus.RETURNERT ->
-                        when (vedtak?.status) {
-                            VedtakStatus.RETURNERT -> return@forEach
-                            else ->
-                                behandlingService.underkjennVedtak(
-                                    it.id,
-                                    brukerTokenInfo,
-                                    UnderkjennVedtakDto("", ""),
-                                )
-                        }
-
-                    BehandlingStatus.TIL_SAMORDNING ->
-                        when (vedtak?.status) {
-                            VedtakStatus.TIL_SAMORDNING -> return@forEach
-                            else -> behandlingService.tilSamordningVedtak(it.id, brukerTokenInfo)
-                        }
-
-                    BehandlingStatus.SAMORDNET ->
-                        when (vedtak?.status) {
-                            VedtakStatus.SAMORDNET -> return@forEach
-                            else -> behandlingService.samordnetVedtak(it.id, brukerTokenInfo)
-                        }
-
-                    BehandlingStatus.IVERKSATT ->
-                        when (vedtak?.status) {
-                            VedtakStatus.IVERKSATT -> return@forEach
-                            else -> behandlingService.iverksattVedtak(it.id, brukerTokenInfo)
-                        }
-
-                    BehandlingStatus.AVBRUTT -> return@forEach
-                }
-            } catch (e: Exception) {
-                logger.error("Statusoppdatering feila for ${it.id}. Fortsetter med neste behandling", e)
+                BehandlingStatus.ATTESTERT ->
+                    when (vedtak?.status) {
+                        VedtakStatus.ATTESTERT -> return
+                        else -> behandlingService.attesterVedtak(it.id, "", brukerTokenInfo)
+                    }
+                BehandlingStatus.RETURNERT ->
+                    when (vedtak?.status) {
+                        VedtakStatus.RETURNERT -> return
+                        else -> behandlingService.underkjennVedtak(it.id, brukerTokenInfo, UnderkjennVedtakDto("", ""))
+                    }
+                BehandlingStatus.TIL_SAMORDNING ->
+                    when (vedtak?.status) {
+                        VedtakStatus.TIL_SAMORDNING -> return
+                        else -> behandlingService.tilSamordningVedtak(it.id, brukerTokenInfo)
+                    }
+                BehandlingStatus.SAMORDNET ->
+                    when (vedtak?.status) {
+                        VedtakStatus.SAMORDNET -> return
+                        else -> behandlingService.samordnetVedtak(it.id, brukerTokenInfo)
+                    }
+                BehandlingStatus.IVERKSATT ->
+                    when (vedtak?.status) {
+                        VedtakStatus.IVERKSATT -> return
+                        else -> behandlingService.iverksattVedtak(it.id, brukerTokenInfo)
+                    }
+                BehandlingStatus.AVBRUTT -> return
             }
         }
     }

@@ -113,7 +113,11 @@ interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
-        return opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo).minBy { it.ident }
+        val trygdetid = opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo).minByOrNull { it.ident }
+
+        return checkNotNull(trygdetid) {
+            "Kunne ikke opprette trygdetid for behandling=$behandlingId"
+        }
     }
 
     override suspend fun lagreTrygdetidGrunnlag(
@@ -277,7 +281,7 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> {
-        return tilstandssjekk(
+        return kanOppdatereTrygdetid(
             behandlingId,
             brukerTokenInfo,
         ) {
@@ -330,6 +334,12 @@ class TrygdetidServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> {
         val avdoede = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo).hentAvdoede()
+
+        if (avdoede.isNullOrEmpty()) {
+            logger.error("Kan ikke opprette trygdetid når det mangler avdøde (behandling=$${behandling.id})")
+            throw GrunnlagManglerAvdoede()
+        }
+
         val trygdetider =
             avdoede.map { avdoed ->
                 val trygdetid =
@@ -351,6 +361,8 @@ class TrygdetidServiceImpl(
 
                 oppdatertTrygdetid ?: opprettetTrygdetid
             }
+
+        logger.info("Opprettet ${trygdetider.size} trygdetider for behandling=${behandling.id}")
 
         return trygdetider
     }
@@ -403,7 +415,7 @@ class TrygdetidServiceImpl(
         trygdetidGrunnlag: TrygdetidGrunnlag,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid =
-        tilstandssjekk(behandlingId, brukerTokenInfo) {
+        kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
             val gjeldendeTrygdetid: Trygdetid =
                 trygdetidRepository.hentTrygdetidMedId(behandlingId, trygdetidId) ?: throw GenerellIkkeFunnetException()
 
@@ -437,7 +449,7 @@ class TrygdetidServiceImpl(
         trygdetidGrunnlagId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid =
-        tilstandssjekk(behandlingId, brukerTokenInfo) {
+        kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
             val trygdetid =
                 trygdetidRepository.hentTrygdetidMedId(behandlingId, trygdetidId)
                     ?.slettTrygdetidGrunnlag(trygdetidGrunnlagId)
@@ -530,7 +542,7 @@ class TrygdetidServiceImpl(
         )
     }
 
-    private suspend fun <T> tilstandssjekk(
+    private suspend fun <T> kanOppdatereTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         block: suspend () -> T,
@@ -539,7 +551,12 @@ class TrygdetidServiceImpl(
         return if (kanFastsetteTrygdetid) {
             block()
         } else {
-            throw Exception("Kan ikke opprette/endre trygdetid da behandlingen er i feil tilstand")
+            logger.error("Kan ikke opprette/endre trygdetid da behandlingen er i feil tilstand")
+
+            throw UgyldigForespoerselException(
+                code = "UGYLDIG_TILSTAND_TRYGDETID",
+                detail = "Kan ikke opprette/endre trygdetid da behandlingen er i feil tilstand",
+            )
         }
     }
 
@@ -603,7 +620,7 @@ class TrygdetidServiceImpl(
         yrkesskade: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid =
-        tilstandssjekk(behandlingId, brukerTokenInfo) {
+        kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
             val trygdetid =
                 trygdetidRepository.hentTrygdetidMedId(behandlingId, trygdetidId)
                     ?: throw TrygdetidIkkeFunnetForBehandling()
@@ -669,7 +686,7 @@ class TrygdetidServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean =
-        tilstandssjekk(behandlingId, brukerTokenInfo) {
+        kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
             val trygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
@@ -695,7 +712,7 @@ class TrygdetidServiceImpl(
         trygdetidId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid =
-        tilstandssjekk(behandlingId, brukerTokenInfo) {
+        kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
             val gjeldendeTrygdetid: Trygdetid =
                 trygdetidRepository.hentTrygdetidMedId(behandlingId, trygdetidId) ?: throw GenerellIkkeFunnetException()
 
@@ -771,7 +788,8 @@ class TrygdetidServiceImpl(
         val nyFylt16 = nyeOpplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FYLT_16 }
         val nyFyller66 = nyeOpplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FYLLER_66 }
 
-        val eksisterendeFoedselsdato = trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FOEDSELSDATO }
+        val eksisterendeFoedselsdato =
+            trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FOEDSELSDATO }
         val eksisterendeDoedsdato = trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.DOEDSDATO }
         val eksisterendeFylt16 = trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FYLT_16 }
         val eksisterendeFyller66 = trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FYLLER_66 }
@@ -798,7 +816,7 @@ class TrygdetidServiceImpl(
         overstyrtNorskPoengaar: Int?,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid =
-        tilstandssjekk(behandlingId, brukerTokenInfo) {
+        kanOppdatereTrygdetid(behandlingId, brukerTokenInfo) {
             val trygdetid =
                 trygdetidRepository.hentTrygdetidMedId(behandlingId, trygdetidId)
                     ?: throw GenerellIkkeFunnetException()
@@ -839,6 +857,11 @@ class TrygdetidServiceImpl(
 class ManglerForrigeTrygdetidMaaReguleresManuelt : UgyldigForespoerselException(
     "MANGLER_TRYGDETID_FOR_REGULERING",
     "Forrige behandling mangler trygdetid, og kan dermed ikke reguleres manuelt",
+)
+
+class GrunnlagManglerAvdoede : UgyldigForespoerselException(
+    code = "GRUNNLAG_MANGLER_AVDOEDE",
+    detail = "Ingen avdød(e) funnet i grunnlag. Kan ikke opprette trygdetid.",
 )
 
 class TrygdetidAlleredeOpprettetException :

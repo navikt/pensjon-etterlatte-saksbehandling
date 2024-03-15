@@ -1,4 +1,4 @@
-import { PersongalleriSamsvar } from '~shared/types/grunnlag'
+import { MismatchPersongalleri, PersongalleriSamsvar } from '~shared/types/grunnlag'
 import { Alert, BodyShort, Box, Heading } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
 import styled from 'styled-components'
@@ -50,6 +50,22 @@ const PersonUtenIdentWrapper = styled.div`
   margin-bottom: 1rem;
 `
 
+const erAvvikRelevantForSaktype = (avvik: MismatchPersongalleri, sakType: SakType) => {
+  switch (avvik) {
+    case 'EKSTRA_AVDOED':
+    case 'MANGLER_AVDOED':
+      return true
+    case 'EKSTRA_GJENLEVENDE':
+    case 'MANGLER_GJENLEVENDE':
+      return sakType === SakType.BARNEPENSJON
+    case 'EKSTRA_SOESKEN':
+    case 'HAR_PERSONER_UTEN_IDENTER':
+    // Håndteres separat fra person-avvik
+    case 'MANGLER_SOESKEN':
+      return false
+  }
+}
+
 function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype: SakType }) {
   const { samsvar, saktype } = props
   const visMismatchPdl = useFeatureEnabledMedDefault('familieforhold-vis-mismatch-pdl', false)
@@ -58,11 +74,7 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
   const personerUtenIdenterPdl = samsvar.persongalleriPdl?.personerUtenIdent ?? []
 
   const harPersonerUtenIdenter = samsvar.problemer.includes('HAR_PERSONER_UTEN_IDENTER')
-  const harAvvikMotPdl =
-    samsvar.problemer.filter(
-      (problem) =>
-        problem !== 'HAR_PERSONER_UTEN_IDENTER' && problem !== 'EKSTRA_SOESKEN' && problem !== 'MANGLER_SOESKEN'
-    ).length > 0
+  const harAvvikMotPdl = samsvar.problemer.filter((avvik) => erAvvikRelevantForSaktype(avvik, saktype)).length > 0
 
   if (samsvar.problemer.length === 0) {
     return null
@@ -76,6 +88,9 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
             Det er forskjeller mellom familieforholdet i behandlingen og det familieforholdet vi utleder ut i fra PDL.
             Se nøye over og eventuelt korriger persongalleriet ved å redigere.
           </BodyShort>
+          {saktype === SakType.OMSTILLINGSSTOENAD && (
+            <BodyShort>Utleding av samboerskap ut i fra PDL kan ha mangler.</BodyShort>
+          )}
           <Heading level="4" size="xsmall" spacing>
             Familieforholdet i behandlingen
           </Heading>
@@ -107,11 +122,14 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
             Det er personer uten identer i PDL i saksgrunnlaget. Disse personene kan ikke brukes i beregning av
             trygdetid eller en eventuell søskenjustering på gammelt regelverk.
           </MediumAdvarsel>
-          <Heading size="small" level="4">
-            Personer uten identer i saksgrunnlag:
-          </Heading>
-          <PersonerUtenIdenterVisning saktype={saktype} personer={personerUtenIdenterSak} />
-
+          {personerUtenIdenterSak.length > 0 && (
+            <>
+              <Heading size="small" level="4">
+                Personer uten identer i saksgrunnlag:
+              </Heading>
+              <PersonerUtenIdenterVisning saktype={saktype} personer={personerUtenIdenterSak} />
+            </>
+          )}
           <Heading size="small" level="4">
             Personer uten identer i PDL:
           </Heading>

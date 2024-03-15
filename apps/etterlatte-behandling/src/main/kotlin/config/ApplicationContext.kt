@@ -26,6 +26,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
+import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
 import no.nav.etterlatte.behandling.klage.KlageServiceImpl
@@ -232,7 +233,7 @@ internal class ApplicationContext(
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
-    val brevApiHttpClient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
+    val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
     val tilbakekrevingHttpClient: HttpClient = tilbakekrevingHttpClient(config),
     val migreringHttpClient: HttpClient = migreringHttpClient(config),
@@ -325,17 +326,18 @@ internal class ApplicationContext(
     val aktivtetspliktService = AktivitetspliktService(aktivitetspliktDao)
     val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
 
+    val klageBrevService = KlageBrevService(brevApiKlient)
     val klageService =
         KlageServiceImpl(
             klageDao = klageDao,
             sakDao = sakDao,
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,
-            brevApiKlient = brevApiHttpClient,
             klageKlient = klageKlient,
             klageHendelser = klageHendelser,
             vedtakKlient = vedtakKlient,
             featureToggleService = featureToggleService,
+            klageBrevService = klageBrevService,
         )
 
     val revurderingService =

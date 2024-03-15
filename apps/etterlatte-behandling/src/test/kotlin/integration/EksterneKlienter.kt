@@ -165,7 +165,7 @@ class BrevApiKlientTest : BrevApiKlient {
         return opprettetBrevDto(brevId++)
     }
 
-    override suspend fun ferdigstillBrev(
+    override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
@@ -220,6 +220,20 @@ class BrevApiKlientTest : BrevApiKlient {
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {}
+
+    override suspend fun hentVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        return opprettetBrevDto(brevId)
+    }
+
+    override suspend fun hentOversendelsesbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        return opprettetBrevDto(brevId)
+    }
 
     private fun opprettetBrevDto(brevId: Long) =
         OpprettetBrevDto(

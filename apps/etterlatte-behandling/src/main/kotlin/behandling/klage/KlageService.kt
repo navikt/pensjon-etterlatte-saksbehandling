@@ -4,8 +4,9 @@ import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
-import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.KlageKlient
+import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
+import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
@@ -17,7 +18,6 @@ import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.KlageOversendelsebrev
 import no.nav.etterlatte.libs.common.behandling.KlageResultat
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
@@ -120,11 +120,11 @@ class KlageServiceImpl(
     private val sakDao: SakDao,
     private val hendelseDao: HendelseDao,
     private val oppgaveService: OppgaveService,
-    private val brevApiKlient: BrevApiKlient,
     private val klageKlient: KlageKlient,
     private val klageHendelser: IKlageHendelserService,
     private val vedtakKlient: VedtakKlient,
     private val featureToggleService: FeatureToggleService,
+    private val klageBrevService: KlageBrevService,
 ) : KlageService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -219,24 +219,8 @@ class KlageServiceImpl(
         utfall: KlageUtfallUtenBrev,
         saksbehandler: Saksbehandler,
     ): Klage {
-        if (utfall is KlageUtfallUtenBrev.DelvisOmgjoering &&
-            !featureToggleService.isEnabled(
-                KlageFeatureToggle.StoetterUtfallDelvisOmgjoering,
-                false,
-            )
-        ) {
-            throw FeatureIkkeStoettetException()
-        }
-
         val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
-        if (klage.utfall is KlageUtfallMedData.Avvist) {
-            // Vi må rydde bort det vedtaksbrevet som ble opprettet ved forrige utfall
-            runBlocking { brevApiKlient.slettVedtaksbrev(klageId, saksbehandler) }
-        }
-        val sammeUtfallSomFoer = klage.utfall?.harSammeUtfall(utfall) ?: false
-        if (!sammeUtfallSomFoer) {
-            runBlocking { brevApiKlient.slettOversendelsesbrev(klageId, saksbehandler) }
-        }
+        if (!utfall.erStoettet()) throw FeatureIkkeStoettetException()
 
         val utfallMedBrev =
             when (utfall) {
@@ -254,7 +238,7 @@ class KlageServiceImpl(
                                 lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
                                 internKommentar = utfall.innstilling.internKommentar,
                                 innstillingTekst = utfall.innstilling.innstillingTekst,
-                                brev = oversendelsesbrev(klage, saksbehandler),
+                                brev = klageBrevService.oversendelsesbrev(klage, saksbehandler),
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
@@ -266,7 +250,7 @@ class KlageServiceImpl(
                                 lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
                                 internKommentar = utfall.innstilling.internKommentar,
                                 innstillingTekst = utfall.innstilling.innstillingTekst,
-                                brev = oversendelsesbrev(klage, saksbehandler),
+                                brev = klageBrevService.oversendelsesbrev(klage, saksbehandler),
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
@@ -302,39 +286,11 @@ class KlageServiceImpl(
             else -> {
                 return runBlocking {
                     val vedtakId = lagreVedtakForAvvisning(klage, saksbehandler)
-                    val vedtaksbrevId = opprettVedtaksbrevForAvvisning(klage, saksbehandler)
+                    val vedtaksbrevId = klageBrevService.vedtaksbrev(klage, saksbehandler)
                     Pair(vedtakId, vedtaksbrevId)
                 }
             }
         }
-    }
-
-    private fun oversendelsesbrev(
-        klage: Klage,
-        saksbehandler: Saksbehandler,
-    ): KlageOversendelsebrev {
-        return when (val utfall = klage.utfall) {
-            is KlageUtfallMedData.DelvisOmgjoering -> utfall.innstilling.brev
-            is KlageUtfallMedData.StadfesteVedtak -> utfall.innstilling.brev
-            else -> {
-                val brev =
-                    runBlocking {
-                        brevApiKlient.opprettKlageOversendelsesbrevISak(
-                            klage.id,
-                            saksbehandler,
-                        )
-                    }
-                KlageOversendelsebrev(brev.id)
-            }
-        }
-    }
-
-    private fun opprettVedtaksbrevForAvvisning(
-        klage: Klage,
-        saksbehandler: Saksbehandler,
-    ): KlageVedtaksbrev {
-        val brevDto = runBlocking { brevApiKlient.opprettVedtaksbrev(klage.id, klage.sak.id, saksbehandler) }
-        return KlageVedtaksbrev(brevDto.id)
     }
 
     private fun lagreVedtakForAvvisning(
@@ -430,7 +386,7 @@ class KlageServiceImpl(
             StatistikkKlage(klage.id, klage, Tidspunkt.now(), saksbehandler.ident),
             KlageHendelseType.FERDIGSTILT,
         )
-
+        klageBrevService.slettUferdigeBrev(klage.id, saksbehandler)
         return klageMedOppdatertResultat
     }
 
@@ -552,9 +508,7 @@ class KlageServiceImpl(
         checkNotNull(klage.utfall as? KlageUtfallMedData.Avvist) {
             "Vi har en klage som kunne attesteres, men har feil utfall lagret. Id: $klageId"
         }
-        runBlocking {
-            brevApiKlient.ferdigstillBrev(klage.id, klage.sak.id, saksbehandler)
-        }
+        klageBrevService.ferdigstillVedtaksbrev(klage, saksbehandler)
         val vedtak =
             runBlocking {
                 vedtakKlient.attesterVedtakKlage(
@@ -577,6 +531,8 @@ class KlageServiceImpl(
         )
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(klageId.toString(), saksbehandler)
+
+        klageBrevService.slettUferdigeBrev(klage.id, saksbehandler)
         return oppdatertKlage
     }
 
@@ -629,37 +585,16 @@ class KlageServiceImpl(
         klage: Klage,
         saksbehandler: Saksbehandler,
     ): SendtInnstillingsbrev {
-        val innstillingsbrev = innstilling.brev
-        val (tidJournalfoert, journalpostId) =
-            ferdigstillOgDistribuerBrev(
-                sakId = klage.sak.id,
-                brevId = innstillingsbrev.brevId,
-                saksbehandler = saksbehandler,
-            )
-        val brev =
-            brevApiKlient.hentBrev(
-                sakId = klage.sak.id,
-                brevId = innstillingsbrev.brevId,
-                brukerTokenInfo = saksbehandler,
-            )
-        val notatTilKa =
-            brevApiKlient.journalfoerNotatKa(
-                klage = klage,
-                brukerInfoToken = saksbehandler,
-            )
-        logger.info(
-            "Journalførte notat til KA for innstilling i klageId=${klage.id} på " +
-                "journalpostId=${notatTilKa.journalpostId}",
-        )
+        val ferdigstillResultat = klageBrevService.ferdigstillBrevOgNotatTilKa(innstilling, klage, saksbehandler)
 
         klageKlient.sendKlageTilKabal(
             klage = klage,
             ekstradataInnstilling =
                 EkstradataInnstilling(
-                    mottakerInnstilling = brev.mottaker,
+                    mottakerInnstilling = ferdigstillResultat.oversendelsesbrev.mottaker,
                     // TODO: Håndter verge
                     vergeEllerFullmektig = null,
-                    journalpostInnstillingsbrev = notatTilKa.journalpostId,
+                    journalpostInnstillingsbrev = ferdigstillResultat.notatTilKa.journalpostId,
                     journalpostKlage = klage.innkommendeDokument?.journalpostId,
                     // TODO: koble på når vi har journalpost soeknad inn
                     journalpostSoeknad = null,
@@ -668,10 +603,10 @@ class KlageServiceImpl(
                 ),
         )
         return SendtInnstillingsbrev(
-            journalfoerTidspunkt = tidJournalfoert,
+            journalfoerTidspunkt = ferdigstillResultat.journalfoertOversendelsesbrevTidspunkt,
             sendtKabalTidspunkt = Tidspunkt.now(),
-            brevId = innstillingsbrev.brevId,
-            journalpostId = journalpostId,
+            brevId = ferdigstillResultat.oversendelsesbrev.id,
+            journalpostId = ferdigstillResultat.journalpostIdOversendelsesbrev,
         )
     }
 
@@ -692,47 +627,16 @@ class KlageServiceImpl(
         )
     }
 
-    private suspend fun ferdigstillOgDistribuerBrev(
-        sakId: Long,
-        brevId: Long,
-        saksbehandler: Saksbehandler,
-    ): Pair<Tidspunkt, String> {
-        val eksisterendeInnstillingsbrev = brevApiKlient.hentBrev(sakId, brevId, saksbehandler)
-        if (eksisterendeInnstillingsbrev.status.ikkeFerdigstilt()) {
-            brevApiKlient.ferdigstillOversendelseBrev(sakId, brevId, saksbehandler)
-        } else {
-            logger.info("Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede ferdigstilt")
-        }
-
-        val journalpostIdJournalfoering =
-            if (eksisterendeInnstillingsbrev.status.ikkeJournalfoert()) {
-                brevApiKlient.journalfoerBrev(sakId, brevId, saksbehandler).journalpostId
-            } else {
-                logger.info(
-                    "Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede " +
-                        "journalført på journalpostId=${eksisterendeInnstillingsbrev.journalpostId}",
+    private fun KlageUtfallUtenBrev.erStoettet(): Boolean =
+        when (this) {
+            is KlageUtfallUtenBrev.DelvisOmgjoering ->
+                featureToggleService.isEnabled(
+                    KlageFeatureToggle.StoetterUtfallDelvisOmgjoering,
+                    false,
                 )
-                requireNotNull(eksisterendeInnstillingsbrev.journalpostId) {
-                    "Har et brev med id=$brevId med status=${eksisterendeInnstillingsbrev.status} som mangler journalpostId"
-                }
-            }
-        val tidspunktJournalfoert = Tidspunkt.now()
 
-        if (eksisterendeInnstillingsbrev.status.ikkeDistribuert()) {
-            val bestillingsIdDistribuering = brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler).bestillingsId
-            logger.info(
-                "Distribusjon av innstillingsbrevet med id=$brevId bestilt til klagen i sak med sakId=$sakId, " +
-                    "med bestillingsId $bestillingsIdDistribuering",
-            )
-        } else {
-            logger.info(
-                "Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede " +
-                    "distribuert med bestillingsid=${eksisterendeInnstillingsbrev.bestillingsID}",
-            )
+            else -> true
         }
-
-        return tidspunktJournalfoert to journalpostIdJournalfoering
-    }
 }
 
 class OmgjoeringMaaGjeldeEtVedtakException(klage: Klage) :
@@ -743,3 +647,10 @@ class OmgjoeringMaaGjeldeEtVedtakException(klage: Klage) :
 
 class KlageIkkeFunnetException(klageId: UUID) :
     IkkeFunnetException(code = "KLAGE_IKKE_FUNNET", detail = "Kunne ikke finne klage med id=$klageId")
+
+data class FerdigstillResultat(
+    val oversendelsesbrev: OpprettetBrevDto,
+    val notatTilKa: OpprettJournalpostDto,
+    val journalfoertOversendelsesbrevTidspunkt: Tidspunkt,
+    val journalpostIdOversendelsesbrev: String,
+)

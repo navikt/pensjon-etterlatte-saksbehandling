@@ -31,7 +31,7 @@ interface BrevApiKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto
 
-    suspend fun ferdigstillBrev(
+    suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
@@ -81,6 +81,16 @@ interface BrevApiKlient {
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     )
+
+    suspend fun hentVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto?
+
+    suspend fun hentOversendelsesbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto?
 }
 
 class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
@@ -116,7 +126,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         )
     }
 
-    override suspend fun ferdigstillBrev(
+    override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
@@ -173,6 +183,28 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         return get(
             url = "$resourceUrl/api/brev/$brevId?sakId=$sakId",
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+    }
+
+    override suspend fun hentVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto? {
+        return get(
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak",
+            onSuccess = { resource -> resource.response?.let { deserialize(it.toJson()) } },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+    }
+
+    override suspend fun hentOversendelsesbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto? {
+        return get(
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/oversendelse",
+            onSuccess = { resource -> resource.response?.let { deserialize(it.toJson()) } },
             brukerTokenInfo = brukerTokenInfo,
         )
     }

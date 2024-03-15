@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import java.time.LocalDate
 
@@ -19,6 +20,7 @@ class AutomatiskRevurderingService(private val revurderingService: RevurderingSe
         persongalleri: Persongalleri,
         mottattDato: String? = null,
         begrunnelse: String? = null,
+        frist: Tidspunkt? = null,
     ) = forrigeBehandling.let {
         revurderingService.opprettRevurdering(
             sakId = sakId,
@@ -33,6 +35,16 @@ class AutomatiskRevurderingService(private val revurderingService: RevurderingSe
             boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
             begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
             saksbehandlerIdent = Fagsaksystem.EY.navn,
+            frist = frist,
         )
+    }
+
+    fun validerSakensTilstand(
+        sakId: Long,
+        revurderingAarsak: Revurderingaarsak,
+    ) {
+        if (revurderingAarsak == Revurderingaarsak.ALDERSOVERGANG) {
+            revurderingService.maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
+        }
     }
 }

@@ -8,4 +8,6 @@ data class Omregningshendelse(
     val fradato: LocalDate,
     val omregningsId: UUID? = null,
     val prosesstype: Prosesstype,
+    val revurderingaarsak: Revurderingaarsak = Revurderingaarsak.REGULERING,
+    val oppgavefrist: LocalDate? = null,
 )

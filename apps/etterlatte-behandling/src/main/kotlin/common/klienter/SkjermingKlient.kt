@@ -37,10 +37,10 @@ class SkjermingKlient(
         } catch (e: Exception) {
             return PingResultDown(serviceName, endpoint = endpoint, errorMessage = e.message, beskrivelse = beskrivelse)
                 .also {
-                    logger.warn("Skjermingstjeneste svarer IKKE ok. ${it.toStringServiceDown()}")
+                    logger.warn("$serviceName svarer IKKE ok. ${it.toStringServiceDown()}")
                 }
         }
-        logger.info("Skjermingstjeneste svarer OK")
+        logger.info("$serviceName svarer OK")
         return PingResultUp(serviceName, endpoint = endpoint, beskrivelse = beskrivelse)
     }
 

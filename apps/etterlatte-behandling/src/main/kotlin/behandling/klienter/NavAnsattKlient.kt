@@ -15,14 +15,14 @@ data class SaksbehandlerInfo(
     val navn: String,
 )
 
-interface NavAnsattKlient {
+interface NavAnsattKlient : Pingable {
     suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo?
 }
 
 class NavAnsattKlientImpl(
     private val client: HttpClient,
     private val url: String,
-) : NavAnsattKlient, Pingable {
+) : NavAnsattKlient {
     private val logger = LoggerFactory.getLogger(NavAnsattKlientImpl::class.java)
 
     private val navneCache =

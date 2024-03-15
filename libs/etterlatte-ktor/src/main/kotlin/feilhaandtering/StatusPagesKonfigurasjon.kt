@@ -121,7 +121,7 @@ class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
             )
         } else {
             this.error(
-                "En intern feil oppstod i et endepunkt. Svarer frontend med 500-feil",
+                internfeil.cause?.message ?: "En intern feil oppstod i et endepunkt. Svarer frontend med 500-feil",
                 internfeil.cause ?: internfeil,
             )
         }

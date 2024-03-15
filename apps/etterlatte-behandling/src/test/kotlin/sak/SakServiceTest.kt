@@ -42,7 +42,10 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.random.Random
 
 internal class SakServiceTest {
-    private val sakDao = mockk<SakDao>()
+    private val sakDao =
+        mockk<SakDao> {
+            every { finnSakMedGraderingOgSkjerming(any()) } returns SakMedGraderingOgSkjermet(1L, null, false, Enheter.defaultEnhet.enhetNr)
+        }
     private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
     private val norg2Klient = mockk<Norg2Klient>()
     private val brukerService = BrukerServiceImpl(pdltjenesterKlient, norg2Klient)

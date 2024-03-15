@@ -157,8 +157,21 @@ class SakServiceImpl(
     }
 
     private fun sjekkGraderingOgEnhetStemmer(sak: SakMedGraderingOgSkjermet) {
+        sak.gradertEnhetsnummerErIkkeAlene()
         sak.egenAnsattStemmer()
         sak.graderingerStemmer()
+    }
+
+    private fun SakMedGraderingOgSkjermet.gradertEnhetsnummerErIkkeAlene() {
+        if (this.enhetNr == Enheter.STRENGT_FORTROLIG.enhetNr && this.adressebeskyttelseGradering !in
+            listOf(
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
+            )
+        ) {
+            logger.error("Sak har fått satt feil gradering basert enhetsnummer, se sikkerlogg.")
+            sikkerLogg.info("Sakid: ${this.id} har fått satt feil gradering basert enhetsnummer")
+        }
     }
 
     private fun SakMedGraderingOgSkjermet.graderingerStemmer() {
@@ -185,6 +198,10 @@ class SakServiceImpl(
                 logger.error("Sak har fått satt feil enhetsnummer basert på skjermingen, se sikkerlogg.")
                 sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering skjerming(egen ansatt)")
             }
+        }
+        if (this.enhetNr == Enheter.EGNE_ANSATTE.enhetNr && this.erSkjermet != true) {
+            logger.error("Sak mangler skjerming, se sikkerlogg.")
+            sikkerLogg.info("Sakid: ${this.id} har fått satt feil skjerming(egen ansatt)")
         }
     }
 

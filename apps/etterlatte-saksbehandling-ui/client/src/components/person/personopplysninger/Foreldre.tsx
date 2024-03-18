@@ -1,12 +1,13 @@
 import React from 'react'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { PersonIcon } from '@navikt/aksel-icons'
-import { CopyButton, Heading, Table, Tag } from '@navikt/ds-react'
+import { Heading, Table, Tag } from '@navikt/ds-react'
 import { SpaceChildren } from '~shared/styled'
 import { Personopplysning as PdlPersonopplysning } from '~shared/types/grunnlag'
 import { formaterStringDato } from '~utils/formattering'
 import { AlderTag } from '~components/person/personopplysninger/components/AlderTag'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
+import { KopierFnr } from '~components/person/personopplysninger/components/KopierFnr'
 
 export const Foreldre = ({
   avdoed,
@@ -49,12 +50,7 @@ export const Foreldre = ({
                   </Table.DataCell>
                   <Table.DataCell>
                     <SpaceChildren direction="row">
-                      <CopyButton
-                        copyText={doed.opplysning.foedselsnummer}
-                        text={doed.opplysning.foedselsnummer}
-                        size="small"
-                        iconPosition="right"
-                      />
+                      <KopierFnr fnr={doed.opplysning.foedselsnummer} />
                       <AlderTag foedselsdato={doed.opplysning.foedselsdato} />
                     </SpaceChildren>
                   </Table.DataCell>
@@ -68,6 +64,9 @@ export const Foreldre = ({
               <Table.DataCell>
                 <Heading size="small">Ingen avdøde</Heading>
               </Table.DataCell>
+              <Table.DataCell>-</Table.DataCell>
+              <Table.DataCell>-</Table.DataCell>
+              <Table.DataCell>-</Table.DataCell>
             </Table.Row>
           )}
           {gjenlevende && gjenlevende.length >= 0 ? (
@@ -81,21 +80,12 @@ export const Foreldre = ({
                   </Table.DataCell>
                   <Table.DataCell>
                     <SpaceChildren direction="row">
-                      <CopyButton
-                        copyText={levende.opplysning.foedselsnummer}
-                        text={levende.opplysning.foedselsnummer}
-                        size="small"
-                        iconPosition="right"
-                      />
+                      <KopierFnr fnr={levende.opplysning.foedselsnummer} />
                       <AlderTag foedselsdato={levende.opplysning.foedselsdato} />
                     </SpaceChildren>
                   </Table.DataCell>
                   {!!levende.opplysning.bostedsadresse ? (
-                    <Table.DataCell>
-                      <SpaceChildren direction="row">
-                        {`${levende.opplysning.bostedsadresse[0].adresseLinje1}, ${levende.opplysning.bostedsadresse[0].postnr} ${!!levende.opplysning.bostedsadresse[0].poststed ? levende.opplysning.bostedsadresse[0].poststed : ''}`}
-                      </SpaceChildren>
-                    </Table.DataCell>
+                    <BostedsadresseDataCell bostedsadresse={levende.opplysning.bostedsadresse} index={0} />
                   ) : (
                     <Table.DataCell>Ingen bostedsadresse tilgjengelig</Table.DataCell>
                   )}
@@ -106,8 +96,11 @@ export const Foreldre = ({
           ) : (
             <Table.Row>
               <Table.DataCell>
-                <Heading size="small">Ingen avdøde</Heading>
+                <Heading size="small">Ingen gjenlevende</Heading>
               </Table.DataCell>
+              <Table.DataCell>-</Table.DataCell>
+              <Table.DataCell>-</Table.DataCell>
+              <Table.DataCell>-</Table.DataCell>
             </Table.Row>
           )}
         </Table.Body>

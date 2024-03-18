@@ -1,11 +1,12 @@
 import React, { ReactNode } from 'react'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
-import { CopyButton, Heading, Table } from '@navikt/ds-react'
+import { Heading, Table } from '@navikt/ds-react'
 import { Personopplysning as PdlPersonopplysning } from '~shared/types/grunnlag'
 import { AlderTag } from '~components/person/personopplysninger/components/AlderTag'
 import { SpaceChildren } from '~shared/styled'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
+import { KopierFnr } from '~components/person/personopplysninger/components/KopierFnr'
 
 export const AvdoedesBarn = ({ avdoede }: { avdoede?: PdlPersonopplysning[] }): ReactNode => {
   return (
@@ -32,12 +33,7 @@ export const AvdoedesBarn = ({ avdoede }: { avdoede?: PdlPersonopplysning[] }): 
                           </Table.DataCell>
                           <Table.DataCell>
                             <SpaceChildren direction="row">
-                              <CopyButton
-                                copyText={barn.foedselsnummer}
-                                text={barn.foedselsnummer}
-                                size="small"
-                                iconPosition="right"
-                              />
+                              <KopierFnr fnr={barn.foedselsnummer} />
                               <AlderTag foedselsdato={barn.foedselsdato} />
                             </SpaceChildren>
                           </Table.DataCell>
@@ -52,17 +48,15 @@ export const AvdoedesBarn = ({ avdoede }: { avdoede?: PdlPersonopplysning[] }): 
                           Ingen barn for avdoed: ${doed.opplysning.fornavn} ${doed.opplysning.etternavn}
                         </Heading>
                       </Table.DataCell>
+                      <Table.DataCell>-</Table.DataCell>
+                      <Table.DataCell>-</Table.DataCell>
                     </Table.Row>
                   )}
                 </>
               ))}
             </>
           ) : (
-            <Table.Row>
-              <Table.DataCell>
-                <Heading size="small">Ingen avdøde</Heading>
-              </Table.DataCell>
-            </Table.Row>
+            <Heading size="small">Ingen avdøde</Heading>
           )}
         </Table.Body>
       </Table>

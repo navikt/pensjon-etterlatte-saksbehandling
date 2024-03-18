@@ -41,8 +41,9 @@ export const Innflytting = ({
           ) : (
             <Table.Row>
               <Table.DataCell>
-                <Heading size="small">Ingen innflytting</Heading>
+                <Heading size="small">Ingen innflyttinger</Heading>
               </Table.DataCell>
+              <Table.DataCell>-</Table.DataCell>
             </Table.Row>
           )}
         </Table.Body>

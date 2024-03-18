@@ -51,8 +51,12 @@ export const Vergemaal = ({
           ) : (
             <Table.Row>
               <Table.DataCell>
-                <Heading size="small">Ingen verge</Heading>
+                <Heading size="small">Ingen vergemål</Heading>
               </Table.DataCell>
+              <Table.DataCell>-</Table.DataCell>
+              <Table.DataCell>-</Table.DataCell>
+              <Table.DataCell>-</Table.DataCell>
+              <Table.DataCell>-</Table.DataCell>
             </Table.Row>
           )}
         </Table.Body>

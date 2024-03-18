@@ -27,6 +27,7 @@ export const Personopplysninger = ({
   fnr: string
 }): ReactNode => {
   const [landListe, setLandListe] = useState<ILand[]>([])
+  const [harBehandling, setHarBehandling] = useState<boolean>(false)
 
   const [personopplysningerResult, hentPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
   const [, hentLandListe] = useApiCall(hentAlleLand)
@@ -37,10 +38,13 @@ export const Personopplysninger = ({
 
   useEffect(() => {
     if (isSuccess(sakStatus)) {
-      hentPersonopplysninger({
-        behandlingId: sakStatus.data.behandlinger[0].id,
-        sakType: sakStatus.data.behandlinger[0].sakType,
-      })
+      if (sakStatus.data.behandlinger.length > 0) {
+        setHarBehandling(true)
+        hentPersonopplysninger({
+          behandlingId: sakStatus.data.behandlinger[0].id,
+          sakType: sakStatus.data.behandlinger[0].sakType,
+        })
+      }
     }
   }, [fnr, sakStatus])
 
@@ -51,58 +55,64 @@ export const Personopplysninger = ({
   return (
     <Container>
       <SpaceChildren>
-        {!!sakStatus ? (
+        {!!sakStatus && (
           <>
             <Alert variant="warning">
               Denne informasjonen baserer seg på når en behandling var opprettet på brukeren, vi jobber med å få
               informasjonen til å oppdatere seg i sanntid.
             </Alert>
             <LenkeTilAndreSystemer fnr={fnr} />
-            {mapResult(personopplysningerResult, {
-              pending: <Spinner visible={true} label="Henter personopplysninger" />,
-              error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente personopplysninger'}</ApiErrorAlert>,
-              success: (personopplysninger) => (
-                <>
-                  <Bostedsadresser bostedsadresse={personopplysninger.soeker?.opplysning.bostedsadresse} />
-                  {erSaktype(sakStatus, SakType.BARNEPENSJON) && (
-                    <Foreldre
-                      avdoed={personopplysninger.avdoede}
-                      gjenlevende={personopplysninger.gjenlevende}
-                      foreldreansvar={personopplysninger.soeker?.opplysning.familieRelasjon?.ansvarligeForeldre}
-                    />
-                  )}
-                  {erSaktype(sakStatus, SakType.OMSTILLINGSSTOENAD) && (
-                    <Sivilstatus
-                      sivilstand={personopplysninger.soeker?.opplysning.sivilstand}
-                      avdoede={personopplysninger.avdoede}
-                    />
-                  )}
-                  <AvdoedesBarn avdoede={personopplysninger.avdoede} />
-                  <Statsborgerskap
-                    statsborgerskap={personopplysninger.soeker?.opplysning.statsborgerskap}
-                    pdlStatsborgerskap={personopplysninger.soeker?.opplysning.pdlStatsborgerskap}
-                    bosattLand={personopplysninger.soeker?.opplysning.bostedsadresse?.at(0)?.land}
-                    landListe={landListe}
-                  />
-                  <Innflytting
-                    innflytting={personopplysninger.soeker?.opplysning.utland?.innflyttingTilNorge}
-                    landListe={landListe}
-                  />
-                  <Utflytting
-                    utflytting={personopplysninger.soeker?.opplysning.utland?.utflyttingFraNorge}
-                    landListe={landListe}
-                  />
-                  <Vergemaal
-                    vergemaalEllerFremtidsfullmakt={
-                      personopplysninger.soeker?.opplysning.vergemaalEllerFremtidsfullmakt
-                    }
-                  />
-                </>
-              ),
-            })}
+            {harBehandling ? (
+              <>
+                {mapResult(personopplysningerResult, {
+                  pending: <Spinner visible={true} label="Henter personopplysninger" />,
+                  error: (error) => (
+                    <ApiErrorAlert>{error.detail || 'Kunne ikke hente personopplysninger'}</ApiErrorAlert>
+                  ),
+                  success: (personopplysninger) => (
+                    <>
+                      <Bostedsadresser bostedsadresse={personopplysninger.soeker?.opplysning.bostedsadresse} />
+                      {erSaktype(sakStatus, SakType.BARNEPENSJON) && (
+                        <Foreldre
+                          avdoed={personopplysninger.avdoede}
+                          gjenlevende={personopplysninger.gjenlevende}
+                          foreldreansvar={personopplysninger.soeker?.opplysning.familieRelasjon?.ansvarligeForeldre}
+                        />
+                      )}
+                      {erSaktype(sakStatus, SakType.OMSTILLINGSSTOENAD) && (
+                        <Sivilstatus
+                          sivilstand={personopplysninger.soeker?.opplysning.sivilstand}
+                          avdoede={personopplysninger.avdoede}
+                        />
+                      )}
+                      <AvdoedesBarn avdoede={personopplysninger.avdoede} />
+                      <Statsborgerskap
+                        statsborgerskap={personopplysninger.soeker?.opplysning.statsborgerskap}
+                        pdlStatsborgerskap={personopplysninger.soeker?.opplysning.pdlStatsborgerskap}
+                        bosattLand={personopplysninger.soeker?.opplysning.bostedsadresse?.at(0)?.land}
+                        landListe={landListe}
+                      />
+                      <Innflytting
+                        innflytting={personopplysninger.soeker?.opplysning.utland?.innflyttingTilNorge}
+                        landListe={landListe}
+                      />
+                      <Utflytting
+                        utflytting={personopplysninger.soeker?.opplysning.utland?.utflyttingFraNorge}
+                        landListe={landListe}
+                      />
+                      <Vergemaal
+                        vergemaalEllerFremtidsfullmakt={
+                          personopplysninger.soeker?.opplysning.vergemaalEllerFremtidsfullmakt
+                        }
+                      />
+                    </>
+                  ),
+                })}
+              </>
+            ) : (
+              <Heading size="medium">Bruker har ingen behandling i Gjenny</Heading>
+            )}
           </>
-        ) : (
-          <Heading size="medium">{`Person med fnr: ${fnr} har ingen sak i Gjenny`}</Heading>
         )}
       </SpaceChildren>
     </Container>

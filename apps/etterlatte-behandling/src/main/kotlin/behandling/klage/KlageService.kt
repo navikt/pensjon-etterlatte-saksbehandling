@@ -454,7 +454,7 @@ class KlageServiceImpl(
         oppgaveService.hentOppgaveUnderBehandlingForReferanse(klageId.toString()).let { oppgave ->
             oppgaveService.oppdaterStatusOgMerknad(
                 oppgave.id,
-                "Vedtak er fattet",
+                "Vedtak om avvist klage til attestering",
                 Status.UNDER_BEHANDLING,
             )
             oppgaveService.fjernSaksbehandler(oppgave.id)

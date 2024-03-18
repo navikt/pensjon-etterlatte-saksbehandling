@@ -65,7 +65,7 @@ class BeregningRepository(private val dataSource: DataSource) {
         }
     }
 
-    fun opprettOverstyrBeregning(overstyrBeregning: OverstyrBeregning): OverstyrBeregning? {
+    fun opprettOverstyrBeregning(overstyrBeregning: OverstyrBeregning): OverstyrBeregning {
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.opprettOverstyrBeregning,
@@ -80,7 +80,9 @@ class BeregningRepository(private val dataSource: DataSource) {
             }
         }
 
-        return hentOverstyrBeregning(overstyrBeregning.sakId)
+        return checkNotNull(hentOverstyrBeregning(overstyrBeregning.sakId)) {
+            "Vi opprettet en overstyrt beregning akkurat nå men den finnes ikke >:("
+        }
     }
 
     private fun createMapFromBeregningsperiode(

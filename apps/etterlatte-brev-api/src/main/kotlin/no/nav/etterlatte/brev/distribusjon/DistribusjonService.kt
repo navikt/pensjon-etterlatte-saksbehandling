@@ -3,7 +3,7 @@ package no.nav.etterlatte.brev.distribusjon
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Adresse
-import no.nav.etterlatte.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.brev.distribusjon.Adresse as DistAdresse
 
 interface DistribusjonService {

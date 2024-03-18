@@ -35,9 +35,9 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakService
-import no.nav.etterlatte.token.Fagsaksystem
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDateTime
@@ -226,6 +226,7 @@ class DoedshendelseJobService(
 
         if (skalOppretteOppgave) {
             if (sak != null && featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
+                val oppgaveTekster = kontrollpunkter.filter { it.opprettOppgave }.map { it.oppgaveTekst }.joinToString(" ")
                 logger.info("Oppretter oppgave for ${doedshendelse.relasjon.name} for sak ${sak.id}")
                 val oppgave =
                     grunnlagsendringshendelseService.opprettDoedshendelseForPerson(
@@ -238,6 +239,7 @@ class DoedshendelseJobService(
                                 opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                                 hendelseGjelderRolle = Saksrolle.AVDOED,
                                 gjelderPerson = doedshendelse.avdoedFnr,
+                                kommentar = oppgaveTekster,
                                 samsvarMellomKildeOgGrunnlag =
                                     SamsvarMellomKildeOgGrunnlag.Doedsdatoforhold(
                                         fraGrunnlag = null,

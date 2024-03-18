@@ -9,6 +9,7 @@ dependencies {
     testRuntimeOnly(libs.test.jupiter.engine)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(project(":libs:testdata"))
+    testImplementation(libs.test.jupiter.params)
 }
 
 tasks {

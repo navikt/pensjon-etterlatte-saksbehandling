@@ -20,9 +20,9 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriodeVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID

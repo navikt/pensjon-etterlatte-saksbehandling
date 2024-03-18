@@ -26,12 +26,12 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
@@ -54,6 +54,11 @@ internal class SakServiceTest {
     @BeforeEach
     fun before() {
         clearAllMocks()
+        every {
+            sakDao.finnSakMedGraderingOgSkjerming(
+                any(),
+            )
+        } returns SakMedGraderingOgSkjermet(1L, null, false, Enheter.defaultEnhet.enhetNr)
     }
 
     @AfterEach
@@ -277,6 +282,7 @@ internal class SakServiceTest {
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
+        verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
         verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
@@ -331,6 +337,7 @@ internal class SakServiceTest {
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG,
             )
         }
+        verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
         verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
@@ -376,6 +383,7 @@ internal class SakServiceTest {
 
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
+        verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
         verify(exactly = 1) {

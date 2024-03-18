@@ -4,8 +4,8 @@ import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonVarselRedigerbartUtfall
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
-import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Systembruker
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 
 object BrevDataMapperRedigerbartUtfallVarsel {
     fun hentBrevDataRedigerbar(

@@ -15,7 +15,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.person.ForelderVerge
-import no.nav.etterlatte.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
 data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(

@@ -31,6 +31,10 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.ktor.PingResult
+import no.nav.etterlatte.libs.ktor.PingResultUp
+import no.nav.etterlatte.libs.ktor.ServiceStatus
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
@@ -38,7 +42,6 @@ import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
-import no.nav.etterlatte.token.BrukerTokenInfo
 import java.time.LocalDate
 import java.util.UUID
 
@@ -165,7 +168,7 @@ class BrevApiKlientTest : BrevApiKlient {
         return opprettetBrevDto(brevId++)
     }
 
-    override suspend fun ferdigstillBrev(
+    override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
@@ -220,6 +223,20 @@ class BrevApiKlientTest : BrevApiKlient {
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {}
+
+    override suspend fun hentVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        return opprettetBrevDto(brevId)
+    }
+
+    override suspend fun hentOversendelsesbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        return opprettetBrevDto(brevId)
+    }
 
     private fun opprettetBrevDto(brevId: Long) =
         OpprettetBrevDto(
@@ -321,6 +338,17 @@ class NavAnsattKlientTest : NavAnsattKlient {
     override suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo? {
         return SaksbehandlerInfo("ident", "Max Manus")
     }
+
+    override val serviceName: String
+        get() = "Navansatt"
+    override val beskrivelse: String
+        get() = "Henter navn for saksbehandlerident"
+    override val endpoint: String
+        get() = "endpoint"
+
+    override suspend fun ping(konsument: String?): PingResult {
+        return PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
+    }
 }
 
 class PesysKlientTest : PesysKlient {
@@ -350,5 +378,16 @@ class AxsysKlientTest : AxsysKlient {
             SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
             SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
         )
+    }
+
+    override val serviceName: String
+        get() = "Axsys"
+    override val beskrivelse: String
+        get() = "Henter enheter for saksbehandlerident"
+    override val endpoint: String
+        get() = "endpoint"
+
+    override suspend fun ping(konsument: String?): PingResult {
+        return PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
     }
 }

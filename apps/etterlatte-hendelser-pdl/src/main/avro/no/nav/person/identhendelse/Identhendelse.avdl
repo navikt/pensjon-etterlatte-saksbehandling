@@ -2,7 +2,7 @@
 protocol IdenthendelseProto {
   import idl "Lineage.avdl";
   import idl "v1/adressebeskyttelse/Adressebeskyttelse.avdl";
-  import idl "v1/bostedsadresse/Bostedsadresse.avdl";
+  import idl "v1/bostedsadresse/BostedsadresseDataCell.avdl";
   import idl "v1/common/FregMetadata.avdl";
   import idl "v1/common/NavMetadata.avdl";
   import idl "v1/deltbosted/DeltBosted.avdl";
@@ -59,7 +59,7 @@ protocol IdenthendelseProto {
 
   // Identhendelsen kan inneholde én og bare én av følgende:
     union { null, no.nav.person.identhendelse.v1.adressebeskyttelse.Adressebeskyttelse } adressebeskyttelse = null;
-    union { null, no.nav.person.identhendelse.v1.bostedsadresse.Bostedsadresse } bostedsadresse = null;
+    union { null, no.nav.person.identhendelse.v1.bostedsadresse.BostedsadresseDataCell } bostedsadresse = null;
     union { null, no.nav.person.identhendelse.v1.deltbosted.DeltBosted } deltBosted = null;
     union { null, no.nav.person.identhendelse.v1.doedfoedtbarn.DoedfoedtBarn } doedfoedtBarn = null;
     union { null, no.nav.person.identhendelse.v1.doedsfall.Doedsfall } doedsfall = null;

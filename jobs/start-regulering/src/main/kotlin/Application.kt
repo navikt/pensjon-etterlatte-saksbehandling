@@ -9,10 +9,11 @@ import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.Month
 import java.util.UUID
 import kotlin.system.exitProcess
 
-val GRUNNBELOEP_REGULERING_DATO: LocalDate = LocalDate.of(2024, 5, 1)
+val GRUNNBELOEP_REGULERING_DATO: LocalDate = LocalDate.of(LocalDate.now().year, Month.MAY, 1)
 
 val logger: Logger = LoggerFactory.getLogger("StartReguleringJob")
 

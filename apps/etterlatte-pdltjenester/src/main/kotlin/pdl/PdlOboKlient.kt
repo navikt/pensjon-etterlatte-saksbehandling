@@ -15,8 +15,8 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Behandlingsnummer
 import no.nav.etterlatte.libs.common.retry
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 class PdlOboKlient(private val httpClient: HttpClient, private val config: Config) {

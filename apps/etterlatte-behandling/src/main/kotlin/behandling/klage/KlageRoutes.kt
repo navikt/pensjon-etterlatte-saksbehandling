@@ -13,20 +13,20 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
-import no.nav.etterlatte.libs.common.hvisEnabled
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
-import no.nav.etterlatte.libs.common.klageId
-import no.nav.etterlatte.libs.common.kunSystembruker
-import no.nav.etterlatte.libs.common.medBody
-import no.nav.etterlatte.libs.common.sakId
+import no.nav.etterlatte.libs.ktor.route.KLAGEID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.hvisEnabled
+import no.nav.etterlatte.libs.ktor.route.klageId
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.medBody
+import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 

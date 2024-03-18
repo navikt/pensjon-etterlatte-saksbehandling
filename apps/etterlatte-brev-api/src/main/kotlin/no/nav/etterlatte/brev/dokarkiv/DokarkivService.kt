@@ -6,7 +6,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.slf4j.LoggerFactory
 import java.util.Base64
 

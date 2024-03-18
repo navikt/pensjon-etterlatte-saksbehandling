@@ -23,6 +23,7 @@ import { formaterDatoStrengTilLocaleDateTime, formaterSpraak, mapRHFArrayToStrin
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
 import { GRADERING, GraderingFilterKeys } from '~shared/types/Gradering'
 import GjenopprettingModal from '~components/manuelbehandling/GjenopprettingModal'
+import { useSidetittel } from '~shared/hooks/useSidetittel'
 
 interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   kilde: string
@@ -36,6 +37,8 @@ interface ManuellBehandingSkjema extends NyBehandlingSkjema {
 }
 
 export default function ManuellBehandling() {
+  useSidetittel('Manuell behandling')
+
   const [opprettBehandlingStatus, opprettNyBehandling] = useApiCall(opprettBehandling)
   const [nyBehandlingId, setNyId] = useState('')
   const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)

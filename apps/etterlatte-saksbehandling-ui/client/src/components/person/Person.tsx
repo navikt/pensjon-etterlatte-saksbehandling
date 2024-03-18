@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
 import { Container } from '~shared/styled'
@@ -21,7 +21,7 @@ import { SamordningSak } from '~components/person/SamordningSak'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
 import { Personopplysninger } from '~components/person/personopplysninger/Personopplysninger'
-import { ConfigContext } from '~clientConfig'
+import { useSidetittel } from '~shared/hooks/useSidetittel'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -32,6 +32,8 @@ export enum PersonOversiktFane {
 }
 
 export const Person = () => {
+  useSidetittel('Personoversikt')
+
   const [search, setSearch] = useSearchParams()
 
   const [personStatus, hentPerson] = useApiCall(hentPersonNavn)

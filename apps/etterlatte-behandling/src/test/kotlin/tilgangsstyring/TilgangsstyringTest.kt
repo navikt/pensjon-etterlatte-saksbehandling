@@ -23,10 +23,10 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.lagContext
-import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.KLAGEID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
@@ -326,7 +326,7 @@ class TilgangsstyringTest {
                         }
                         route("/annet") {
                             get("/sak") {
-                                kunSaksbehandlerMedSkrivetilgang(sak = 2L) {
+                                kunSaksbehandlerMedSkrivetilgang(sakId = 2L) {
                                     call.respond("OK")
                                 }
                             }

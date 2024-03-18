@@ -276,8 +276,7 @@ class RealGrunnlagService(
         sakId: Long,
         sakType: SakType,
     ) {
-        val persongalleriJsonNode =
-            opplysningDao.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1)?.opplysning
+        val persongalleriJsonNode = opplysningDao.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1)?.opplysning
 
         if (persongalleriJsonNode == null) {
             logger.info("Klarte ikke å hente ut grunnlag for sak $sakId. Fant ikke persongalleri")
@@ -288,7 +287,7 @@ class RealGrunnlagService(
 
         opprettGrunnlag(
             behandlingId,
-            Opplysningsbehov(sakId, sakType, persongalleri),
+            Opplysningsbehov(sakId, sakType, persongalleri, persongalleriJsonNode.kilde),
         )
     }
 
@@ -383,7 +382,7 @@ class RealGrunnlagService(
         val forskjellerSoesken =
             forskjellerMellomPersonerPdlOgSak(
                 personerPdl = persongalleriPdl.soesken,
-                persongalleriISak.soesken,
+                personerSak = persongalleriISak.soesken,
             )
         return listOfNotNull(
             MismatchPersongalleri.MANGLER_GJENLEVENDE.takeIf { forskjellerGjenlevende.kunPdl.isNotEmpty() },

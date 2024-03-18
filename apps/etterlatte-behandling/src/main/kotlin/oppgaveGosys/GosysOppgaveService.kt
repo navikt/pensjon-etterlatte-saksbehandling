@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.oppgave.GosysOppgave
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.time.Duration
 import java.time.LocalTime
 

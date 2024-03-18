@@ -1,6 +1,6 @@
 package no.nav.etterlatte.tilgangsstyring
 
-import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 
 data class SaksbehandlerMedRoller(
     val saksbehandler: Saksbehandler,

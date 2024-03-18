@@ -28,8 +28,8 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAvslag
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelse
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoer
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurdering
-import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingFerdigData
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevDTO
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
 data class BrevDataFerdigstillingRequest(
     val generellBrevData: GenerellBrevData,
@@ -71,7 +71,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
                 OMSTILLINGSSTOENAD_AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, innholdMedVedlegg.innhold())
                 OMSTILLINGSSTOENAD_OPPHOER -> omstillingsstoenadOpphoer(bruker, generellBrevData, innholdMedVedlegg)
 
-                TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)
+                TILBAKEKREVING_FERDIG -> TilbakekrevingBrevDTO.fra(generellBrevData, innholdMedVedlegg.innhold())
 
                 AVVIST_KLAGE_FERDIG -> AvvistKlageFerdigData.fra(generellBrevData, innholdMedVedlegg)
 

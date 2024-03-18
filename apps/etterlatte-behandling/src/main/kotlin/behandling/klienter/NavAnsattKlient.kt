@@ -15,14 +15,14 @@ data class SaksbehandlerInfo(
     val navn: String,
 )
 
-interface NavAnsattKlient {
+interface NavAnsattKlient : Pingable {
     suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo?
 }
 
 class NavAnsattKlientImpl(
     private val client: HttpClient,
     private val url: String,
-) : NavAnsattKlient, Pingable {
+) : NavAnsattKlient {
     private val logger = LoggerFactory.getLogger(NavAnsattKlientImpl::class.java)
 
     private val navneCache =
@@ -54,13 +54,13 @@ class NavAnsattKlientImpl(
     override val endpoint: String
         get() = this.url
 
-    override suspend fun ping(): PingResult {
+    override suspend fun ping(konsument: String?): PingResult {
         return client.ping(
-            url = url.plus("/ping"),
+            pingUrl = url.plus("/ping"),
             logger = logger,
             serviceName = serviceName,
             beskrivelse = beskrivelse,
-            konsument = "etterlatte-behandling",
+            konsument = konsument,
         )
     }
 }

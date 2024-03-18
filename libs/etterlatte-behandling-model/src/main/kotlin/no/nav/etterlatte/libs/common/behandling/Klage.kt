@@ -118,7 +118,7 @@ data class InitieltUtfallMedBegrunnelseOgSaksbehandler(
 
 data class InitieltUtfallMedBegrunnelseDto(
     val utfall: KlageUtfall,
-    val begrunnelse: String,
+    val begrunnelse: String?,
 )
 
 enum class KlageUtfall {
@@ -153,6 +153,10 @@ data class Klage(
                     "tilstanden til klagen: ${this.status}",
             )
         }
+        val utfallFortsattGyldig =
+            this.erFormkraveneOppfylt() == formkrav.erFormkraveneOppfylt &&
+                this.erKlagenFramsattInnenFrist() == formkrav.erKlagenFramsattInnenFrist
+
         return this.copy(
             formkrav =
                 FormkravMedBeslutter(
@@ -164,11 +168,8 @@ data class Klage(
                     JaNei.JA -> KlageStatus.FORMKRAV_OPPFYLT
                     JaNei.NEI -> KlageStatus.FORMKRAV_IKKE_OPPFYLT
                 },
-            utfall =
-                when (formkrav.erFormkraveneOppfylt) {
-                    JaNei.JA -> this.utfall
-                    JaNei.NEI -> null
-                },
+            utfall = this.utfall.takeIf { utfallFortsattGyldig },
+            initieltUtfall = this.initieltUtfall.takeIf { utfallFortsattGyldig },
         )
     }
 
@@ -179,7 +180,7 @@ data class Klage(
                     "til klagen (${this.status})",
             )
         }
-        if (formkrav?.formkrav?.erKlagenFramsattInnenFrist == JaNei.JA &&
+        if (erKlagenFramsattInnenFrist() == JaNei.JA &&
             initieltUtfall == null
         ) {
             throw IllegalStateException(
@@ -278,6 +279,10 @@ data class Klage(
             else -> false
         }
     }
+
+    private fun erFormkraveneOppfylt() = this.formkrav?.formkrav?.erFormkraveneOppfylt
+
+    private fun erKlagenFramsattInnenFrist() = this.formkrav?.formkrav?.erKlagenFramsattInnenFrist
 
     fun kanAvbryte(): Boolean {
         return KlageStatus.kanAvbryte(this.status)

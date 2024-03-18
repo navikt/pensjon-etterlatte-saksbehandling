@@ -17,8 +17,11 @@ import { resetPersonopplysninger, setPersonopplysninger } from '~store/reducers/
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { mapAllApiResult } from '~shared/api/apiUtils'
+import { useSidetittel } from '~shared/hooks/useSidetittel'
 
 export const Behandling = () => {
+  useSidetittel('Behandling')
+
   const behandlingFraRedux = useBehandling()
   const dispatch = useAppDispatch()
   const { behandlingId: behandlingIdFraURL } = useParams()

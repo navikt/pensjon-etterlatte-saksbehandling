@@ -19,8 +19,11 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { KlageFormkrav } from '~components/klage/formkrav/KlageFormkrav'
 import { KlageVurdering } from '~components/klage/vurdering/KlageVurdering'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
+import { useSidetittel } from '~shared/hooks/useSidetittel'
 
 export function Klagebehandling() {
+  useSidetittel('Klage')
+
   const klage = useKlage()
   const match = useMatch('/klage/:klageId/*')
   const dispatch = useAppDispatch()

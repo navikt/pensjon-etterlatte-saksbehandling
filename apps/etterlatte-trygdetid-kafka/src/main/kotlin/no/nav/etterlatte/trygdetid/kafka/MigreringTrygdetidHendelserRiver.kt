@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResulta
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
@@ -18,7 +19,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.TRYGDETID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
-import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext

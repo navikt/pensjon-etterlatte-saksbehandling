@@ -26,6 +26,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
+import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
 import no.nav.etterlatte.behandling.klage.KlageServiceImpl
@@ -89,6 +90,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.metrics.BehandlingMetrics
 import no.nav.etterlatte.metrics.BehandlingMetrikkerDao
@@ -111,7 +113,6 @@ import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
-import no.nav.etterlatte.token.Fagsaksystem
 import java.time.Duration
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
@@ -232,7 +233,7 @@ internal class ApplicationContext(
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
-    val brevApiHttpClient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
+    val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
     val tilbakekrevingHttpClient: HttpClient = tilbakekrevingHttpClient(config),
     val migreringHttpClient: HttpClient = migreringHttpClient(config),
@@ -325,17 +326,18 @@ internal class ApplicationContext(
     val aktivtetspliktService = AktivitetspliktService(aktivitetspliktDao)
     val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
 
+    val klageBrevService = KlageBrevService(brevApiKlient)
     val klageService =
         KlageServiceImpl(
             klageDao = klageDao,
             sakDao = sakDao,
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,
-            brevApiKlient = brevApiHttpClient,
             klageKlient = klageKlient,
             klageHendelser = klageHendelser,
             vedtakKlient = vedtakKlient,
             featureToggleService = featureToggleService,
+            klageBrevService = klageBrevService,
         )
 
     val revurderingService =
@@ -487,7 +489,7 @@ internal class ApplicationContext(
         SaksbehandlerJob(
             saksbehandlerJobService = saksbehandlerJobService,
             { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
+            initialDelay = Duration.of(1, ChronoUnit.SECONDS).toMillis(),
             interval = Duration.of(20, ChronoUnit.MINUTES),
         )
     }

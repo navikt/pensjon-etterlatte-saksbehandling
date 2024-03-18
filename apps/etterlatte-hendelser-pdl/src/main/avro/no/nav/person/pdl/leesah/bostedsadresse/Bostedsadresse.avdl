@@ -5,7 +5,7 @@ protocol BostedsadresseV1 {
   import idl "../common/adresse/UtenlandskAdresse.avdl";
   import idl "../common/adresse/UkjentBosted.avdl";
 
-  record Bostedsadresse {
+  record BostedsadresseDataCell {
     union { null, date } angittFlyttedato = null;
     union { null, date } gyldigFraOgMed = null;
     union { null, date } gyldigTilOgMed = null;

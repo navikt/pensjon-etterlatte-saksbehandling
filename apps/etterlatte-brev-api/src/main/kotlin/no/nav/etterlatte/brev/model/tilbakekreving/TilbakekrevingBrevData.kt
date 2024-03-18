@@ -2,62 +2,63 @@ package no.nav.etterlatte.brev.model.tilbakekreving
 
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
-import no.nav.etterlatte.brev.model.BrevDataRedigerbar
-import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAktsomhet
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
-data class TilbakekrevingFerdigData(
+data class TilbakekrevingBrevDTO(
     override val innhold: List<Slate.Element>,
-    val data: TilbakekrevingInnholdBrevData,
+    val sakType: SakType,
+    val bosattUtland: Boolean,
+    val varselVedlagt: Boolean,
+    val datoVarselEllerVedtak: LocalDate,
+    val datoTilsvarBruker: LocalDate?,
+    val tilbakekreving: TilbakekrevingData,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,
-            innholdMedVedlegg: InnholdMedVedlegg,
-        ) = TilbakekrevingFerdigData(
-            innhold = innholdMedVedlegg.innhold(),
-            data = TilbakekrevingInnholdBrevData.fra(generellBrevData),
-        )
-    }
-}
-
-data class TilbakekrevingInnholdBrevData(
-    val sakType: SakType,
-    val harRenter: Boolean,
-    val harStrafferettslig: Boolean,
-    val harForeldelse: Boolean,
-    val perioder: List<TilbakekrevingPeriodeData>,
-    val summer: TilbakekrevingBeloeperData,
-) : BrevDataRedigerbar {
-    companion object {
-        fun fra(generellBrevData: GenerellBrevData): TilbakekrevingInnholdBrevData {
+            redigerbart: List<Slate.Element>,
+        ): TilbakekrevingBrevDTO {
             val tilbakekreving =
                 generellBrevData.forenkletVedtak?.tilbakekreving
                     ?: throw BrevDataTilbakerevingHarManglerException("Vedtak mangler tilbakekreving")
-            return TilbakekrevingInnholdBrevData(
+            return TilbakekrevingBrevDTO(
+                innhold = redigerbart,
                 sakType = generellBrevData.sak.sakType,
-                harRenter = sjekkOmHarRenter(tilbakekreving),
-                harStrafferettslig = tilbakekreving.vurdering.aktsomhet.aktsomhet == TilbakekrevingAktsomhet.GROV_UAKTSOMHET,
-                harForeldelse = sjekkOmHarForeldet(tilbakekreving),
-                perioder = tilbakekrevingsPerioder(tilbakekreving),
-                summer = perioderSummert(tilbakekreving),
+                bosattUtland = generellBrevData.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
+                // TODO varselVedlagt Hvordn vet vi det?
+                varselVedlagt = false,
+                // TODO hvis varsel ikke er vedlagt skal varsel sin dato brukes..
+                datoVarselEllerVedtak = generellBrevData.forenkletVedtak.vedtaksdato ?: LocalDate.now(),
+                // TODO hvordan vet vi tilsvar bruker?
+                datoTilsvarBruker = null,
+                tilbakekreving =
+                    TilbakekrevingData(
+                        fraOgMed = tilbakekreving.perioder.first().maaned.atDay(1),
+                        tilOgMed = tilbakekreving.perioder.last().maaned.atEndOfMonth(),
+                        skalTilbakekreve =
+                            tilbakekreving.perioder.any {
+                                it.ytelse.resultat == TilbakekrevingResultat.FULL_TILBAKEKREV ||
+                                    it.ytelse.resultat == TilbakekrevingResultat.DELVIS_TILBAKEKREV
+                            },
+                        helTilbakekreving =
+                            tilbakekreving.perioder.any {
+                                it.ytelse.resultat != TilbakekrevingResultat.FULL_TILBAKEKREV
+                            },
+                        perioder = tilbakekrevingsPerioder(tilbakekreving),
+                        summer = perioderSummert(tilbakekreving),
+                    ),
             )
         }
 
         private fun sjekkOmHarRenter(tilbakekreving: Tilbakekreving) =
             tilbakekreving.perioder.any { periode ->
                 periode.ytelse.rentetillegg.let { it != null && it > 0 }
-            }
-
-        private fun sjekkOmHarForeldet(tilbakekreving: Tilbakekreving) =
-            tilbakekreving.perioder.any { periode ->
-                periode.ytelse.resultat.let { it != null && it == TilbakekrevingResultat.FORELDET }
             }
 
         private fun tilbakekrevingsPerioder(tilbakekreving: Tilbakekreving) =
@@ -75,7 +76,7 @@ data class TilbakekrevingInnholdBrevData(
                             )
                         },
                     resultat =
-                        periode.ytelse.resultat?.name
+                        periode.ytelse.resultat
                             ?: throw BrevDataTilbakerevingHarManglerException("Alle perioder må ha resultat"),
                 )
             }
@@ -91,10 +92,19 @@ data class TilbakekrevingInnholdBrevData(
     }
 }
 
+data class TilbakekrevingData(
+    val fraOgMed: LocalDate,
+    val tilOgMed: LocalDate,
+    val skalTilbakekreve: Boolean,
+    val helTilbakekreving: Boolean,
+    val perioder: List<TilbakekrevingPeriodeData>,
+    val summer: TilbakekrevingBeloeperData,
+)
+
 data class TilbakekrevingPeriodeData(
     val maaned: LocalDate,
     val beloeper: TilbakekrevingBeloeperData,
-    val resultat: String,
+    val resultat: TilbakekrevingResultat,
 )
 
 data class TilbakekrevingBeloeperData(

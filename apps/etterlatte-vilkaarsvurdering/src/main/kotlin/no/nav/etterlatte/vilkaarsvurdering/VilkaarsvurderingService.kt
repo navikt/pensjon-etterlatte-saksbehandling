@@ -19,7 +19,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
@@ -98,7 +98,7 @@ class VilkaarsvurderingService(
             return vilkaarsvurdering
         }
 
-        throw BehandlingstilstandException
+        throw BehandlingstilstandException()
     }
 
     suspend fun oppdaterVurderingPaaVilkaar(
@@ -261,7 +261,7 @@ class VilkaarsvurderingService(
         vilkaarsvurderingRepository.slettVilkaarvurdering(vilkaarsvurdering.id)
         behandlingKlient.settBehandlingStatusOpprettet(behandlingId, brukerTokenInfo, true)
     } else {
-        throw BehandlingstilstandException
+        throw BehandlingstilstandException()
     }
 
     private fun opprettNyVilkaarsvurdering(
@@ -365,7 +365,7 @@ class VilkaarsvurderingService(
         val kanVilkaarsvurdere = behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
 
         if (!kanVilkaarsvurdere) {
-            throw BehandlingstilstandException
+            throw BehandlingstilstandException()
         }
 
         return block()
@@ -384,7 +384,7 @@ class VilkaarsvurderingService(
     }
 }
 
-object BehandlingstilstandException : IllegalStateException()
+class BehandlingstilstandException : IllegalStateException()
 
 class VilkaarsvurderingTilstandException(message: String) : IllegalStateException(message)
 

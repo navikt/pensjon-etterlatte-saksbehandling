@@ -5,6 +5,7 @@ import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.vilkaarsvurdering.AldersovergangService
 import no.nav.etterlatte.vilkaarsvurdering.DelvilkaarRepository
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
@@ -26,4 +27,5 @@ class ApplicationContext {
             grunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
         )
     val migreringService = MigreringService(vilkaarsvurderingRepository)
+    val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
 }

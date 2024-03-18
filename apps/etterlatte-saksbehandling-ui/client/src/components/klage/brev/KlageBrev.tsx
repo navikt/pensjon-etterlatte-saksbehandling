@@ -14,7 +14,6 @@ import { hentBrev } from '~shared/api/brev'
 import styled from 'styled-components'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { JaNei } from '~shared/types/ISvar'
-import { Innhold } from '~components/klage/styled'
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
@@ -57,30 +56,28 @@ export function KlageBrev() {
         <Sidebar>
           <ContentHeader>
             <HeadingWrapper>
-              <Heading level="1" size="large">
+              <Heading spacing level="1" size="large">
                 Brev
               </Heading>
             </HeadingWrapper>
+            {klage.formkrav?.formkrav.erKlagenFramsattInnenFrist === JaNei.JA ? (
+              <BodyShort spacing> Skriv oversendelsesbrevet til klager</BodyShort>
+            ) : (
+              <BodyShort>Skriv avvisningsbrev her</BodyShort>
+            )}
+            {isSuccess(hentetBrev) && (
+              <>
+                <BrevTittel
+                  brevId={hentetBrev.data.id}
+                  sakId={hentetBrev.data.sakId}
+                  tittel={hentetBrev.data.tittel}
+                  kanRedigeres={true}
+                />
+                <br />
+                <BrevMottaker brev={hentetBrev.data} kanRedigeres={true} />
+              </>
+            )}
           </ContentHeader>
-          {klage.formkrav?.formkrav.erKlagenFramsattInnenFrist === JaNei.JA ? (
-            <Innhold>
-              <BodyShort>Skriv oversendelsesbrevet til klager</BodyShort>
-            </Innhold>
-          ) : (
-            <BodyShort>Skriv avvisningsbrev her</BodyShort>
-          )}
-          {/* TODO lar være å bytte ut med ny brevmottaker komponent her, siden dette virker å være ganske wip */}
-          {isSuccess(hentetBrev) && (
-            <>
-              <BrevTittel
-                brevId={hentetBrev.data.id}
-                sakId={hentetBrev.data.sakId}
-                tittel={hentetBrev.data.tittel}
-                kanRedigeres={true}
-              />
-              <BrevMottaker brev={hentetBrev.data} kanRedigeres={true} />
-            </>
-          )}
         </Sidebar>
 
         {mapApiResult(
@@ -119,8 +116,6 @@ export function KlageBrev() {
 
 const BrevContent = styled.div`
   display: flex;
-  height: 75vh;
-  max-height: 75vh;
 `
 
 const SpinnerContainer = styled.div`

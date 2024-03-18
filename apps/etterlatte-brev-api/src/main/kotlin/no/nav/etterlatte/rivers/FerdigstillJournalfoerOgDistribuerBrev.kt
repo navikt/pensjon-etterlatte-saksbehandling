@@ -10,8 +10,8 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.libs.common.retryOgPakkUt
-import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.slf4j.LoggerFactory
 
 class FerdigstillJournalfoerOgDistribuerBrev(

@@ -9,8 +9,8 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
-import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 class JournalfoerBrevService(

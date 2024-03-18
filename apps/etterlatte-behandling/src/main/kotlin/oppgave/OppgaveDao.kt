@@ -445,6 +445,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                         WHERE o.frist <= ?
                         and type = ANY(?)
                         and kilde = ANY(?)
+                        and status = 'PAA_VENT'
                         """.trimIndent(),
                     )
                 statement.setTidspunkt(1, dato.atTime(LocalTime.NOON).toTidspunkt())

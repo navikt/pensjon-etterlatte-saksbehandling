@@ -16,7 +16,7 @@ protocol PersonhendelseProto {
   import idl "statsborgerskap/Statsborgerskap.avdl";
   import idl "telefonnummer/Telefonnummer.avdl";
   import idl "kontaktadresse/Kontaktadresse.avdl";
-  import idl "bostedsadresse/Bostedsadresse.avdl";
+  import idl "bostedsadresse/BostedsadresseDataCell.avdl";
 
   enum Endringstype {
     OPPRETTET,
@@ -52,6 +52,6 @@ protocol PersonhendelseProto {
     union { null, no.nav.person.pdl.leesah.statsborgerskap.Statsborgerskap } statsborgerskap = null;
     union { null, no.nav.person.pdl.leesah.telefonnummer.Telefonnummer } telefonnummer = null;
     union { null, no.nav.person.pdl.leesah.kontaktadresse.Kontaktadresse } kontaktadresse = null;
-    union { null, no.nav.person.pdl.leesah.bostedsadresse.Bostedsadresse } bostedsadresse = null;
+    union { null, no.nav.person.pdl.leesah.bostedsadresse.BostedsadresseDataCell } bostedsadresse = null;
   }
 }

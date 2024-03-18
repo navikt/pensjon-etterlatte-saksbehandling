@@ -7,6 +7,7 @@ import io.ktor.server.application.Hook
 import io.ktor.server.application.RouteScopedPlugin
 import io.ktor.server.application.call
 import io.ktor.server.application.createRouteScopedPlugin
+import io.ktor.server.request.path
 import io.ktor.server.request.receive
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
@@ -16,22 +17,16 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
-import no.nav.etterlatte.libs.common.FoedselsnummerDTO
-import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingId
-import no.nav.etterlatte.libs.common.klageId
-import no.nav.etterlatte.libs.common.oppgaveId
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.route.CallParamAuthId
+import no.nav.etterlatte.libs.ktor.route.FoedselsNummerMedGraderingDTO
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.sak.TilgangService
-import no.nav.etterlatte.token.Saksbehandler
-import no.nav.etterlatte.token.Systembruker
+import org.slf4j.LoggerFactory
 
 class PluginConfiguration {
     var harTilgangBehandling: (behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
@@ -80,7 +75,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
 
             if (bruker is Saksbehandler) {
                 val saksbehandlerGroupIdsByKey = pluginConfig.saksbehandlerGroupIdsByKey
-                val behandlingId = call.parameters[BEHANDLINGID_CALL_PARAMETER]
+                val behandlingId = call.parameters[CallParamAuthId.BEHANDLINGID.value]
                 if (!behandlingId.isNullOrEmpty()) {
                     if (!pluginConfig.harTilgangBehandling(
                             behandlingId,
@@ -92,7 +87,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                     return@on
                 }
 
-                val sakId = call.parameters[SAKID_CALL_PARAMETER]
+                val sakId = call.parameters[CallParamAuthId.SAKID.value]
                 if (!sakId.isNullOrEmpty()) {
                     if (!pluginConfig.harTilgangTilSak(
                             sakId.toLong(),
@@ -104,7 +99,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                     return@on
                 }
 
-                val oppgaveId = call.parameters[OPPGAVEID_CALL_PARAMETER]
+                val oppgaveId = call.parameters[CallParamAuthId.OPPGAVEID.value]
                 if (!oppgaveId.isNullOrEmpty()) {
                     if (!pluginConfig.harTilgangTilOppgave(
                             oppgaveId,
@@ -116,7 +111,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                     return@on
                 }
 
-                val klageId = call.parameters[KLAGEID_CALL_PARAMETER]
+                val klageId = call.parameters[CallParamAuthId.KLAGEID.value]
                 if (!klageId.isNullOrEmpty()) {
                     if (!pluginConfig.harTilgangTilKlage(
                             klageId,
@@ -186,48 +181,17 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGrad
     }
 }
 
-fun <T> hentNullableVerdi(block: () -> T) =
-    try {
-        block()
-    } catch (_: NullPointerException) {
-        null
-    } catch (_: IllegalArgumentException) {
-        null
-    }
+private val logger = LoggerFactory.getLogger("Skrivetilgang")
 
 fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
-    sak: Long? = null,
+    sakId: Long? = null,
     enhetNr: String? = null,
 ): Boolean {
     return when (val user = Kontekst.get().AppUser) {
         is SaksbehandlerMedEnheterOgRoller -> {
             val enhetNrSomSkalTestes =
                 when (enhetNr) {
-                    null -> {
-                        Kontekst.get().sakTilgangDao.let { sakTilgangDao ->
-                            val sakEnhetNr =
-                                sak?.let {
-                                    sakTilgangDao.hentSakMedGraderingOgSkjerming(it)?.enhetNr
-                                } ?: hentNullableVerdi { sakId }?.let {
-                                    sakTilgangDao.hentSakMedGraderingOgSkjerming(it)?.enhetNr
-                                }
-                            val behandlingEnhetNr =
-                                hentNullableVerdi { behandlingId }?.let {
-                                    sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(it.toString())?.enhetNr
-                                }
-                            val oppgaveEnhetNr =
-                                hentNullableVerdi { oppgaveId }?.let {
-                                    sakTilgangDao.hentSakMedGraderingOgSkjermingPaaOppgave(it.toString())?.enhetNr
-                                }
-                            val klageEnhetNr =
-                                hentNullableVerdi { klageId }?.let {
-                                    sakTilgangDao.hentSakMedGraderingOgSkjermingPaaKlage(it.toString())?.enhetNr
-                                }
-
-                            listOfNotNull(sakEnhetNr, behandlingEnhetNr, oppgaveEnhetNr, klageEnhetNr).firstOrNull()
-                        }
-                    }
-
+                    null -> finnSkriveTilgangForId(sakId)
                     else -> enhetNr
                 }
 
@@ -241,25 +205,49 @@ fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
     }
 }
 
+private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: Long? = null): String? {
+    val sakTilgangDao = Kontekst.get().sakTilgangDao
+    if (sakId != null) {
+        return sakTilgangDao.hentSakMedGraderingOgSkjerming(sakId)?.enhetNr
+    }
+    val funnetCallIdParametersType = CallParamAuthId.entries.firstOrNull { call.parameters.contains(it.value) }
+    return if (funnetCallIdParametersType == null) {
+        logger.warn("Fant ingen pathparam i url: ${call.request.path()} params: ${call.parameters}")
+        null
+    } else {
+        val idForRequest = call.parameters[funnetCallIdParametersType.value]!!
+        when (funnetCallIdParametersType) {
+            CallParamAuthId.BEHANDLINGID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaBehandling(idForRequest)?.enhetNr
+            CallParamAuthId.SAKID -> sakTilgangDao.hentSakMedGraderingOgSkjerming(idForRequest.toLong())?.enhetNr
+            CallParamAuthId.OPPGAVEID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaOppgave(idForRequest)?.enhetNr
+            CallParamAuthId.KLAGEID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaKlage(idForRequest)?.enhetNr
+            CallParamAuthId.GENERELLBEHANDLINGID ->
+                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaGenerellbehandling(
+                    idForRequest,
+                )?.enhetNr
+        }
+    }
+}
+
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
-    sak: Long? = null,
+    sakId: Long? = null,
     enhetNr: String? = null,
     onSuccess: () -> Unit,
 ) {
-    when (sjekkSkrivetilgang(sak, enhetNr)) {
+    when (sjekkSkrivetilgang(sakId, enhetNr)) {
         true -> onSuccess()
         false -> call.respond(HttpStatusCode.Forbidden)
     }
 }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrivetilgang(
-    sak: Long? = null,
+    sakId: Long? = null,
     enhetNr: String? = null,
     onSuccess: (Saksbehandler) -> Unit,
 ) {
     when (val token = brukerTokenInfo) {
         is Saksbehandler -> {
-            when (sjekkSkrivetilgang(sak, enhetNr)) {
+            when (sjekkSkrivetilgang(sakId, enhetNr)) {
                 true -> onSuccess(token)
                 false -> call.respond(HttpStatusCode.Forbidden)
             }

@@ -27,7 +27,7 @@ class SkjermingKlient(
         }.body()
     }
 
-    override suspend fun ping(): PingResult {
+    override suspend fun ping(konsument: String?): PingResult {
         try {
             httpClient.post("$url/skjermet") {
                 accept(ContentType.Application.Json)
@@ -37,10 +37,10 @@ class SkjermingKlient(
         } catch (e: Exception) {
             return PingResultDown(serviceName, endpoint = endpoint, errorMessage = e.message, beskrivelse = beskrivelse)
                 .also {
-                    logger.warn("Skjermingstjeneste svarer IKKE ok. ${it.toStringServiceDown()}")
+                    logger.warn("$serviceName svarer IKKE ok. ${it.toStringServiceDown()}")
                 }
         }
-        logger.info("Skjermingstjeneste svarer OK")
+        logger.info("$serviceName svarer OK")
         return PingResultUp(serviceName, endpoint = endpoint, beskrivelse = beskrivelse)
     }
 

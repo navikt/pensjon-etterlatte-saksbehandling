@@ -131,6 +131,7 @@ export const oppdaterTrygdetidOverstyrtMigrering = async (args: {
     samletTrygdetidTeoretisk: args.prorataBroek ? args.anvendtTrygdetid : undefined,
     prorataBroek: args.prorataBroek,
     overstyrt: true,
+    yrkesskade: false,
   })
 
 export interface ITrygdetid {

@@ -8,14 +8,13 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.OPPGAVEID_GOSYS_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.gosysOppgaveId
-import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringGosysDto
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_GOSYS_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.gosysOppgaveId
+import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.oppgave.GosysOppgaveversjon
-import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 
 internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
     route("/api/oppgaver/gosys") {
@@ -35,7 +34,7 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
             }
 
             post("tildel-saksbehandler") {
-                kunSaksbehandlerMedSkrivetilgang {
+                kunSaksbehandler {
                     val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringGosysDto>()
                     val oppdatertVersjon =
                         gosysService.tildelOppgaveTilSaksbehandler(
@@ -49,7 +48,7 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
             }
 
             post("endre-frist") {
-                kunSaksbehandlerMedSkrivetilgang {
+                kunSaksbehandler {
                     val redigerFristRequest = call.receive<RedigerFristGosysRequest>()
                     val oppdatertVersjon =
                         gosysService.endreFrist(
@@ -63,7 +62,7 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
             }
 
             post("ferdigstill") {
-                kunSaksbehandlerMedSkrivetilgang {
+                kunSaksbehandler {
                     val versjon = call.request.queryParameters["versjon"]!!.toLong()
 
                     call.respond(gosysService.ferdigstill(gosysOppgaveId, versjon, brukerTokenInfo))
@@ -71,7 +70,7 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
             }
 
             post("feilregistrer") {
-                kunSaksbehandlerMedSkrivetilgang {
+                kunSaksbehandler {
                     val request = call.receive<FeilregistrerOppgaveRequest>()
 
                     call.respond(gosysService.feilregistrer(gosysOppgaveId, request, brukerTokenInfo))

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.ktorobo
+package no.nav.etterlatte.libs.ktor.ktor.ktorobo
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
@@ -25,10 +25,10 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.future.asDeferred
 import kotlinx.coroutines.future.future
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.ktor.client.ClientCallLogging
 import no.nav.etterlatte.libs.common.retryOgPakkUt
-import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Systembruker
+import no.nav.etterlatte.libs.ktor.ktor.client.ClientCallLogging
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import java.util.concurrent.TimeUnit
 
 internal val defaultHttpClient =

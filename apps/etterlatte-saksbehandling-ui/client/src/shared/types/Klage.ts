@@ -139,7 +139,7 @@ export interface InitieltUtfallMedBegrunnelseOgMeta {
 
 export interface IniteltUtfallMedBegrunnelseDto {
   utfall: Utfall
-  begrunnelse?: string
+  begrunnelse: string | null
 }
 
 export const teksterKlageutfall: Record<Utfall | 'UKJENT', string> = {

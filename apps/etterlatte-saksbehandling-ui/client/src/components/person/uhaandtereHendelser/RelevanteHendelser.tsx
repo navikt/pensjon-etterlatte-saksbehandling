@@ -9,7 +9,11 @@ import { OpprettNyRevurdering } from '~components/person/OpprettNyRevurdering'
 import VurderHendelseModal from '~components/person/VurderHendelseModal'
 import UhaandtertHendelse from '~components/person/uhaandtereHendelser/UhaandtertHendelse'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
-import { behandlingErIverksattEllerSamordnet, erFerdigBehandlet } from '~components/behandling/felles/utils'
+import {
+  behandlingErIverksattEllerSamordnet,
+  enhetErSkrivbar,
+  erFerdigBehandlet,
+} from '~components/behandling/felles/utils'
 import { hentGrunnlagsendringshendelserForSak } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
 import { ISak } from '~shared/types/sak'
@@ -18,6 +22,7 @@ import { hentStoettedeRevurderinger } from '~shared/api/revurdering'
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
+import { useAppSelector } from '~store/Store'
 
 type Props = {
   sak: ISak
@@ -26,6 +31,7 @@ type Props = {
 
 export default function RelevanteHendelser(props: Props) {
   const { sak, behandlingliste } = props
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const [visOpprettRevurderingsmodal, setVisOpprettRevurderingsmodal] = useState<boolean>(false)
   const [valgtHendelse, setValgtHendelse] = useState<Grunnlagsendringshendelse | undefined>(undefined)
@@ -66,7 +72,8 @@ export default function RelevanteHendelser(props: Props) {
       .filter((behandling) => !erFerdigBehandlet(behandling.status)).length > 0
 
   const revurderingKanOpprettes =
-    behandlingliste.filter((behandling) => behandlingErIverksattEllerSamordnet(behandling.status)).length > 0
+    behandlingliste.filter((behandling) => behandlingErIverksattEllerSamordnet(behandling.status)).length > 0 &&
+    enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
   return (
     <>

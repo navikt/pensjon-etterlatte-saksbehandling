@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.DuplikatGrunnlagsendringsHendelse
 import no.nav.etterlatte.libs.common.sak.Sak
+import java.time.LocalDate
 import java.util.UUID
 
 interface KontrollpunktMedSak {
@@ -19,6 +20,7 @@ sealed class DoedshendelseKontrollpunkt {
     abstract val sendBrev: Boolean
     abstract val opprettOppgave: Boolean
     abstract val avbryt: Boolean
+    abstract val oppgaveTekst: String?
 
     @JsonTypeName("AVDOED_HAR_YTELSE_I_GJENNY")
     data class AvdoedHarYtelse(override val sak: Sak) : DoedshendelseKontrollpunkt(), KontrollpunktMedSak {
@@ -27,6 +29,10 @@ sealed class DoedshendelseKontrollpunkt {
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = true
         override val avbryt: Boolean = false
+        override val oppgaveTekst: String
+            get() =
+                "Bruker har krav til behandling som ikke kan avsluttes automatisk." +
+                    " Kravet må ferdigbehandles, eventuelt feilregistreres, før det opphøres manuelt."
     }
 
     @JsonTypeName("AVDOED_HAR_IKKE_YTELSE_I_GJENNY")
@@ -36,6 +42,7 @@ sealed class DoedshendelseKontrollpunkt {
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
         override val avbryt: Boolean = true
+        override val oppgaveTekst: String? = null
     }
 
     @JsonTypeName("AVDOED_LEVER_I_PDL")
@@ -44,6 +51,7 @@ sealed class DoedshendelseKontrollpunkt {
         override val beskrivelse: String = "Avdød lever i PDL"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
+        override val oppgaveTekst: String? = null
         override val avbryt: Boolean = true
     }
 
@@ -54,6 +62,8 @@ sealed class DoedshendelseKontrollpunkt {
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = true
         override val avbryt: Boolean = false
+        override val oppgaveTekst: String
+            get() = this.beskrivelse
     }
 
     @JsonTypeName("BARN_HAR_UFOERE")
@@ -62,6 +72,7 @@ sealed class DoedshendelseKontrollpunkt {
         override val beskrivelse: String = "Barnet har uføretrygd"
         override val sendBrev: Boolean = true
         override val opprettOppgave: Boolean = false
+        override val oppgaveTekst: String? = null
         override val avbryt: Boolean = false
     }
 
@@ -71,6 +82,7 @@ sealed class DoedshendelseKontrollpunkt {
         override val beskrivelse: String = "Den berørte(EPS) har uføretrygd eller alderspensjon i Pesys"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
+        override val oppgaveTekst: String? = null
         override val avbryt: Boolean = true
     }
 
@@ -81,6 +93,8 @@ sealed class DoedshendelseKontrollpunkt {
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = true
         override val avbryt: Boolean = false
+        override val oppgaveTekst: String
+            get() = "Avdød har d-nummer. Sjekk familierelasjoner i Pesys og send eventuelt informasjonsbrev til gjenlevende/barn manuelt."
     }
 
     @JsonTypeName("EPS_HAR_DOEDSDATO")
@@ -89,6 +103,7 @@ sealed class DoedshendelseKontrollpunkt {
         override val beskrivelse: String = "Eps har dødsdato"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
+        override val oppgaveTekst: String? = null
         override val avbryt: Boolean = true
     }
 
@@ -98,16 +113,19 @@ sealed class DoedshendelseKontrollpunkt {
         override val beskrivelse: String = "Eps kan ha alderspensjon"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
+        override val oppgaveTekst: String? = null
         override val avbryt: Boolean = true
     }
 
     @JsonTypeName("EPS_SKILT_SISTE_5_OG_GIFT_I_15")
-    data object EpsHarVaertSkiltSiste5OgGiftI15 : DoedshendelseKontrollpunkt() {
+    data class EpsHarVaertSkiltSiste5OgGiftI15(val doedsdato: LocalDate, val fnr: String) : DoedshendelseKontrollpunkt() {
         override val kode = "EPS_SKILT_SISTE_5_OG_GIFT_I_15"
         override val beskrivelse: String = "Eps er skilt siste 5 år og gift i 15"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = true
         override val avbryt: Boolean = false
+        override val oppgaveTekst: String
+            get() = "Tidligere ektefelle ($fnr) døde ($doedsdato). Saksbehandler må vurdere om gjenlevende har rettigheter."
     }
 
     @JsonTypeName("SAMBOER_SAMME_ADRESSE_OG_FELLES_BARN")
@@ -116,16 +134,21 @@ sealed class DoedshendelseKontrollpunkt {
         override val beskrivelse: String = "Samboer til avdød med samme adresse og felles barn"
         override val sendBrev: Boolean = true
         override val opprettOppgave: Boolean = false
+        override val oppgaveTekst: String? = null
         override val avbryt: Boolean = false
     }
 
     @JsonTypeName("EPS_SKILT_SISTE_5_UKJENT_GIFTEMAAL_VARIGHET")
-    data object EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde : DoedshendelseKontrollpunkt() {
+    data class EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde(val doedsdato: LocalDate, val fnr: String) : DoedshendelseKontrollpunkt() {
         override val kode = "EPS_SKILT_SISTE_5_UKJENT_GIFTEMAAL_VARIGHET"
         override val beskrivelse: String = "Eps er skilt siste 5 år med ukjent lengde på giftermål"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = true
         override val avbryt: Boolean = false
+        override val oppgaveTekst: String
+            get() =
+                "Tidligere ektefelle ($fnr) døde ($doedsdato), men lengden på ekteskapet er ikke mulig å utlede." +
+                    " Saksbehandler må vurdere lengden på ekteskapet og eventuelt sende informasjonsbrev til gjenlevende."
     }
 
     @JsonTypeName("AVDOED_HAR_UTVANDRET")
@@ -135,6 +158,8 @@ sealed class DoedshendelseKontrollpunkt {
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = true
         override val avbryt: Boolean = false
+        override val oppgaveTekst: String
+            get() = "Avdød er utvandret. Sjekk familierelasjoner i Pesys og send eventuelt informasjonsbrev til gjenlevende/barn manuelt."
     }
 
     @JsonTypeName("ANNEN_FORELDER_IKKE_FUNNET")
@@ -144,6 +169,8 @@ sealed class DoedshendelseKontrollpunkt {
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = true
         override val avbryt: Boolean = false
+        override val oppgaveTekst: String
+            get() = beskrivelse
     }
 
     @JsonTypeName("SAMTIDIG_DOEDSFALL")
@@ -153,14 +180,17 @@ sealed class DoedshendelseKontrollpunkt {
         override val sendBrev: Boolean = true
         override val opprettOppgave: Boolean = true
         override val avbryt: Boolean = false
+        override val oppgaveTekst: String
+            get() = beskrivelse
     }
 
     @JsonTypeName("EPS_HAR_SAK_I_GJENNY")
-    data class EpsHarSakIGjenny(override val sak: Sak) : DoedshendelseKontrollpunkt(), KontrollpunktMedSak {
+    data class EpsHarSakMedIverksattBehandlingIGjenny(override val sak: Sak) : DoedshendelseKontrollpunkt(), KontrollpunktMedSak {
         override val kode = "EPS_HAR_SAK_I_GJENNY"
-        override val beskrivelse: String = "Det eksisterer allerede en sak på EPS i Gjenny"
+        override val beskrivelse: String = "Det eksisterer allerede en aktiv sak på EPS i Gjenny(iverksatt behandling)"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
+        override val oppgaveTekst: String? = null
         override val avbryt: Boolean = true
     }
 
@@ -174,6 +204,7 @@ sealed class DoedshendelseKontrollpunkt {
         override val beskrivelse: String = "Det finnes en duplikat grunnlagsendringshendelse"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
+        override val oppgaveTekst: String? = null
         override val avbryt: Boolean = true
     }
 
@@ -183,6 +214,7 @@ sealed class DoedshendelseKontrollpunkt {
         override val beskrivelse: String = "Dødshendelsen ble annulert i PDL"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
+        override val oppgaveTekst: String? = null
         override val avbryt: Boolean = true
     }
 }

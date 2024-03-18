@@ -60,4 +60,5 @@ internal val defaultSjekklisteItemsOMS =
         "Bosatt Norge: Sendt brev til bruker om krav til avtaleland",
         "Bosatt Norge: Opprettet oppfølgingsoppgave på sluttbehandling i Gosys",
         "Bosatt utland: Nødvendige SED er opprettet og klar for utsendelse. P6000 må opprettes etter attestering",
+        "Bosatt utland: Opprettet oppgave til NØP om kildeskatt",
     )

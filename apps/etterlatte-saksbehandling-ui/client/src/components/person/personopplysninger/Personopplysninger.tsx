@@ -2,7 +2,7 @@ import React, { ReactNode, useEffect, useState } from 'react'
 import { Container, SpaceChildren } from '~shared/styled'
 import { LenkeTilAndreSystemer } from '~components/person/personopplysninger/LenkeTilAndreSystemer'
 import { Bostedsadresser } from '~components/person/personopplysninger/Bostedsadresser'
-import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
+import { isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonopplysningerForBehandling } from '~shared/api/grunnlag'
@@ -27,24 +27,20 @@ export const Personopplysninger = ({
   fnr: string
 }): ReactNode => {
   const [landListe, setLandListe] = useState<ILand[]>([])
-  const [harBehandling, setHarBehandling] = useState<boolean>(false)
 
   const [personopplysningerResult, hentPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
   const [, hentLandListe] = useApiCall(hentAlleLand)
 
-  const erSaktype = (sakStatus: Result<SakMedBehandlinger>, sakType: SakType) => {
-    return isSuccess(sakStatus) && sakStatus.data.sak.sakType === sakType
+  const erSaktype = (sak: SakMedBehandlinger, sakType: SakType) => {
+    return sak.sak.sakType === sakType
   }
 
   useEffect(() => {
     if (isSuccess(sakStatus)) {
-      if (sakStatus.data.behandlinger.length > 0) {
-        setHarBehandling(true)
-        hentPersonopplysninger({
-          behandlingId: sakStatus.data.behandlinger[0].id,
-          sakType: sakStatus.data.behandlinger[0].sakType,
-        })
-      }
+      hentPersonopplysninger({
+        behandlingId: sakStatus.data.behandlinger[0].id,
+        sakType: sakStatus.data.behandlinger[0].sakType,
+      })
     }
   }, [fnr, sakStatus])
 
@@ -55,14 +51,14 @@ export const Personopplysninger = ({
   return (
     <Container>
       <SpaceChildren>
-        {!!sakStatus && (
+        {mapSuccess(sakStatus, (sak) => (
           <>
             <Alert variant="warning">
               Denne informasjonen baserer seg på når en behandling var opprettet på brukeren, vi jobber med å få
               informasjonen til å oppdatere seg i sanntid.
             </Alert>
             <LenkeTilAndreSystemer fnr={fnr} />
-            {harBehandling ? (
+            {!!sak.behandlinger?.length ? (
               <>
                 {mapResult(personopplysningerResult, {
                   pending: <Spinner visible={true} label="Henter personopplysninger" />,
@@ -72,14 +68,14 @@ export const Personopplysninger = ({
                   success: (personopplysninger) => (
                     <>
                       <Bostedsadresser bostedsadresse={personopplysninger.soeker?.opplysning.bostedsadresse} />
-                      {erSaktype(sakStatus, SakType.BARNEPENSJON) && (
+                      {erSaktype(sak, SakType.BARNEPENSJON) && (
                         <Foreldre
                           avdoed={personopplysninger.avdoede}
                           gjenlevende={personopplysninger.gjenlevende}
                           foreldreansvar={personopplysninger.soeker?.opplysning.familieRelasjon?.ansvarligeForeldre}
                         />
                       )}
-                      {erSaktype(sakStatus, SakType.OMSTILLINGSSTOENAD) && (
+                      {erSaktype(sak, SakType.OMSTILLINGSSTOENAD) && (
                         <Sivilstatus
                           sivilstand={personopplysninger.soeker?.opplysning.sivilstand}
                           avdoede={personopplysninger.avdoede}
@@ -113,7 +109,7 @@ export const Personopplysninger = ({
               <Heading size="medium">Bruker har ingen behandling i Gjenny</Heading>
             )}
           </>
-        )}
+        ))}
       </SpaceChildren>
     </Container>
   )

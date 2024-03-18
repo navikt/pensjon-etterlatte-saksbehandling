@@ -27,7 +27,7 @@ fun Route.beregningsGrunnlag(
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
 
-                beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(behandlingId, forrigeBehandlingId)
+                beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(behandlingId, forrigeBehandlingId, brukerTokenInfo)
 
                 call.respond(HttpStatusCode.NoContent)
             }

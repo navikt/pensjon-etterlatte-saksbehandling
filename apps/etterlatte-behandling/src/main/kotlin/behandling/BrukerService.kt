@@ -116,11 +116,11 @@ class BrukerServiceImpl(
 
     private fun finnEnhetForTemaOgOmraade(arbeidsFordelingRequest: ArbeidsFordelingRequest) =
         norg2Klient.hentArbeidsfordelingForOmraadeOgTema(arbeidsFordelingRequest).firstOrNull()
-            ?: throw IngenEnhetFunnetException(arbeidsFordelingRequest.geografiskOmraade, arbeidsFordelingRequest.tema)
+            ?: throw IngenEnhetFunnetException(arbeidsFordelingRequest)
 }
 
 open class EnhetException(override val message: String) : Exception(message)
 
-class IngenEnhetFunnetException(val omraade: String, val tema: String) : EnhetException(
-    message = "Ingen enheter funnet for tema $tema og omraade $omraade",
+class IngenEnhetFunnetException(val arbeidsFordelingRequest: ArbeidsFordelingRequest) : EnhetException(
+    message = "Ingen enheter funnet for tema ${arbeidsFordelingRequest.tema} og omraade ${arbeidsFordelingRequest.geografiskOmraade}",
 )

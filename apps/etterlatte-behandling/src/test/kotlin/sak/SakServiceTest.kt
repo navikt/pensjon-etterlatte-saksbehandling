@@ -247,8 +247,8 @@ internal class SakServiceTest {
                 service.finnEllerOpprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON)
             }
 
-        thrown.tema shouldBe SakType.BARNEPENSJON.tema
-        thrown.omraade shouldBe "0301"
+        thrown.arbeidsFordelingRequest.tema shouldBe SakType.BARNEPENSJON.tema
+        thrown.arbeidsFordelingRequest.geografiskOmraade shouldBe "0301"
 
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
         verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }

@@ -54,7 +54,7 @@ spec:
   observability:
     autoInstrumentation:
       enabled: true
-      runtime: node
+      runtime: nodejs
   resources:
     limits:
       memory: 512Mi

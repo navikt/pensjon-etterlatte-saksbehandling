@@ -92,6 +92,7 @@ class AldersovergangServiceTest {
                 behandlingId,
                 loependeBehandlingId,
                 brukerTokenInfo,
+                false,
             )
         } returns vilkaarsvurdering
         coEvery {
@@ -119,6 +120,7 @@ class AldersovergangServiceTest {
                 behandlingId,
                 loependeBehandlingId,
                 brukerTokenInfo,
+                false,
             )
         }
         coVerify {

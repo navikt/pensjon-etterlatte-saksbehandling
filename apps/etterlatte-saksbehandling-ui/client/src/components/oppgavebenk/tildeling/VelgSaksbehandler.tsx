@@ -9,7 +9,6 @@ import {
   fjernSaksbehandlerApi,
   OppgaveDTO,
   OppgaveSaksbehandler,
-  tildelSaksbehandlerApi,
 } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Saksbehandler } from '~shared/types/saksbehandler'
@@ -40,7 +39,6 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
 
   const [valgtSaksbehandler, setValgtSaksbehandler] = useState<Saksbehandler | undefined>(saksbehandler)
 
-  const [tildelSaksbehandlerResult, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
   const [fjernSaksbehandlerResult, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
   const [byttSaksbehandlerResult, byttSaksbehandler] = useApiCall(byttSaksbehandlerApi)
 
@@ -65,7 +63,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
   }
 
   const onTildelTilMeg = () => {
-    tildelSaksbehandler(
+    byttSaksbehandler(
       { oppgaveId, type, nysaksbehandler: { saksbehandler: innloggetSaksbehandler.ident, versjon } },
       (result) => {
         oppdaterTildeling(oppgave, innloggetSaksbehandler, result.versjon)
@@ -124,7 +122,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                   variant="tertiary"
                   size="xsmall"
                   onClick={onTildelTilMeg}
-                  loading={tildelSaksbehandlerResult.status === 'pending'}
+                  loading={byttSaksbehandlerResult.status === 'pending'}
                 >
                   Tildel til meg
                 </ValgButton>

@@ -5,8 +5,7 @@ import Spinner from '~shared/Spinner'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
 import { Alert, BodyShort, Heading, HelpText, HStack, Tag } from '@navikt/ds-react'
 import { formaterEnumTilLesbarString, formaterSakstype, formaterStringDato } from '~utils/formattering'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE, KlageListe } from '~components/person/KlageListe'
+import { KlageListe } from '~components/person/KlageListe'
 import { tagColors } from '~shared/Tags'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { isSuccess, mapApiResult, Result } from '~shared/api/apiUtils'
@@ -21,7 +20,6 @@ import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 
 export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
-  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
   const [hentNavkontorStatus, hentNavkontor] = useApiCall(hentNavkontorForPerson)
   const [hentFlyktningStatus, hentFlyktning] = useApiCall(hentFlyktningStatusForSak)
 
@@ -107,7 +105,7 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
               <hr />
               <Behandlingsliste sakOgBehandlinger={sakOgBehandlinger} />
 
-              {kanBrukeKlage ? <KlageListe sakId={sakOgBehandlinger.sak.id} /> : null}
+              <KlageListe sakId={sakOgBehandlinger.sak.id} />
               <TilbakekrevingListe sakId={sakOgBehandlinger.sak.id} />
             </MainContent>
             <HendelseSidebar>

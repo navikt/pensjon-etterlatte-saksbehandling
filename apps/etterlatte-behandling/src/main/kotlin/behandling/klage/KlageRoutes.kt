@@ -31,7 +31,6 @@ import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 enum class KlageFeatureToggle(private val key: String) : FeatureToggle {
-    KanBrukeKlageToggle("pensjon-etterlatte.kan-bruke-klage"),
     KanFerdigstilleKlageToggle("pensjon-etterlatte.kan-ferdigstille-klage"),
     KanOppretteVedtakAvvisningToggle("pensjon-etterlatte.kan-opprette-vedtak-avvist-klage"),
     StoetterUtfallDelvisOmgjoering("pensjon-etterlatte.klage-delvis-omgjoering"),
@@ -47,76 +46,66 @@ internal fun Route.klageRoutes(
     route("/api/klage") {
         post("opprett/{$SAKID_CALL_PARAMETER}") {
             kunSkrivetilgang {
-                hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
-                    medBody<InnkommendeKlage> { innkommendeKlage ->
-                        val sakId = sakId
-                        val klage =
-                            inTransaction {
-                                klageService.opprettKlage(sakId, innkommendeKlage)
-                            }
-                        call.respond(klage)
-                    }
+                medBody<InnkommendeKlage> { innkommendeKlage ->
+                    val sakId = sakId
+                    val klage =
+                        inTransaction {
+                            klageService.opprettKlage(sakId, innkommendeKlage)
+                        }
+                    call.respond(klage)
                 }
             }
         }
 
         route("{$KLAGEID_CALL_PARAMETER}") {
             get {
-                hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
-                    val klage =
-                        inTransaction {
-                            klageService.hentKlage(klageId)
-                        }
-                    when (klage) {
-                        null -> call.respond(HttpStatusCode.NotFound)
-                        else -> call.respond(klage)
+                val klage =
+                    inTransaction {
+                        klageService.hentKlage(klageId)
                     }
+                when (klage) {
+                    null -> call.respond(HttpStatusCode.NotFound)
+                    else -> call.respond(klage)
                 }
             }
 
             put("formkrav") {
-                hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
-                    kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
-                        medBody<VurdereFormkravDto> { formkravDto ->
-                            val oppdatertKlage =
-                                inTransaction {
-                                    klageService.lagreFormkravIKlage(klageId, formkravDto.formkrav, saksbehandler)
-                                }
-                            call.respond(oppdatertKlage)
-                        }
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    medBody<VurdereFormkravDto> { formkravDto ->
+                        val oppdatertKlage =
+                            inTransaction {
+                                klageService.lagreFormkravIKlage(klageId, formkravDto.formkrav, saksbehandler)
+                            }
+                        call.respond(oppdatertKlage)
                     }
                 }
             }
 
             put("initieltutfall") {
-                hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
-                    kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
-                        medBody<InitieltUtfallMedBegrunnelseDto> { utfallMedBegrunnelse ->
-                            val oppdatertKlage =
-                                inTransaction {
-                                    klageService.lagreInitieltUtfallMedBegrunnelseAvKlage(
-                                        klageId,
-                                        utfallMedBegrunnelse,
-                                        saksbehandler,
-                                    )
-                                }
-                            call.respond(oppdatertKlage)
-                        }
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    medBody<InitieltUtfallMedBegrunnelseDto> { utfallMedBegrunnelse ->
+                        val oppdatertKlage =
+                            inTransaction {
+                                klageService.lagreInitieltUtfallMedBegrunnelseAvKlage(
+                                    klageId,
+                                    utfallMedBegrunnelse,
+                                    saksbehandler,
+                                )
+                            }
+                        call.respond(oppdatertKlage)
                     }
                 }
             }
 
             put("utfall") {
-                hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
-                    kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
-                        medBody<VurdertUtfallDto> { utfall ->
-                            sjekkStoetterUtfallHvisAvvist(featureToggleService, utfall)
-                            val oppdatertKlage =
-                                inTransaction {
-                                    klageService.lagreUtfallAvKlage(klageId, utfall.utfall, saksbehandler)
-                                }
-                            call.respond(oppdatertKlage)
-                        }
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    medBody<VurdertUtfallDto> { utfall ->
+                        sjekkStoetterUtfallHvisAvvist(featureToggleService, utfall)
+                        val oppdatertKlage =
+                            inTransaction {
+                                klageService.lagreUtfallAvKlage(klageId, utfall.utfall, saksbehandler)
+                            }
+                        call.respond(oppdatertKlage)
                     }
                 }
             }
@@ -134,33 +123,29 @@ internal fun Route.klageRoutes(
             }
 
             patch("kabalstatus") {
-                hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
-                    kunSystembruker {
-                        medBody<Kabalrespons> {
-                            inTransaction {
-                                klageService.haandterKabalrespons(klageId, it)
-                            }
-                            call.respond(HttpStatusCode.OK)
+                kunSystembruker {
+                    medBody<Kabalrespons> {
+                        inTransaction {
+                            klageService.haandterKabalrespons(klageId, it)
                         }
+                        call.respond(HttpStatusCode.OK)
                     }
                 }
             }
 
             post("avbryt") {
                 kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
-                    hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
-                        medBody<AvbrytKlageDto> { avbrytKlageDto ->
-                            inTransaction {
-                                klageService.avbrytKlage(
-                                    klageId,
-                                    avbrytKlageDto.aarsakTilAvbrytelse,
-                                    avbrytKlageDto.kommentar,
-                                    saksbehandler,
-                                )
-                            }
+                    medBody<AvbrytKlageDto> { avbrytKlageDto ->
+                        inTransaction {
+                            klageService.avbrytKlage(
+                                klageId,
+                                avbrytKlageDto.aarsakTilAvbrytelse,
+                                avbrytKlageDto.kommentar,
+                                saksbehandler,
+                            )
                         }
-                        call.respond(HttpStatusCode.OK)
                     }
+                    call.respond(HttpStatusCode.OK)
                 }
             }
 
@@ -200,13 +185,11 @@ internal fun Route.klageRoutes(
         }
 
         get("sak/{$SAKID_CALL_PARAMETER}") {
-            hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
-                val klager =
-                    inTransaction {
-                        klageService.hentKlagerISak(sakId)
-                    }
-                call.respond(klager)
-            }
+            val klager =
+                inTransaction {
+                    klageService.hentKlagerISak(sakId)
+                }
+            call.respond(klager)
         }
     }
 }

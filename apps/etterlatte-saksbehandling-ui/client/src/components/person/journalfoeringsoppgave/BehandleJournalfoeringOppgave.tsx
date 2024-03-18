@@ -28,8 +28,6 @@ import FerdigstillOppgave from '~components/person/journalfoeringsoppgave/ferdig
 import { kanEndreJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/validering'
 import OpprettKlagebehandling from '~components/person/journalfoeringsoppgave/oppretteklage/OpprettKlagebehandling'
 import OppsummeringKlagebehandling from '~components/person/journalfoeringsoppgave/oppretteklage/OppsummeringKlagebehandling'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { hentJournalpost } from '~shared/api/dokument'
 import { JournalpostInnhold } from './journalpost/JournalpostInnhold'
@@ -47,8 +45,6 @@ export default function BehandleJournalfoeringOppgave() {
   const [sakStatus, apiHentSak] = useApiCall(hentSakMedBehandlnger)
   const [journalpostStatus, apiHentJournalpost] = useApiCall(hentJournalpost)
   const [personResult, hentPerson] = useApiCall(hentPersonNavn)
-
-  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   const { id: oppgaveId } = useParams()
 
@@ -115,12 +111,10 @@ export default function BehandleJournalfoeringOppgave() {
                   <Route index element={<OpprettNyBehandling />} />
                   <Route path="oppsummering" element={<OppsummeringOppgavebehandling />} />
                 </Route>
-                {kanBrukeKlage && (
-                  <Route path="oppretteklage">
-                    <Route index element={<OpprettKlagebehandling />} />
-                    <Route path="oppsummering" element={<OppsummeringKlagebehandling />} />
-                  </Route>
-                )}
+                <Route path="oppretteklage">
+                  <Route index element={<OpprettKlagebehandling />} />
+                  <Route path="oppsummering" element={<OppsummeringKlagebehandling />} />
+                </Route>
 
                 <Route path="ferdigstill" element={<FerdigstillOppgave />} />
               </Routes>

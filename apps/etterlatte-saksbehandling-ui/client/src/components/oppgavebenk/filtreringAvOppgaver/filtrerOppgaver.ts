@@ -65,16 +65,8 @@ export function filtrerOppgaveStatus(oppgavestatusFilter: Array<string>, oppgave
   }
 }
 
-export const oppgavetypefilter = (kanBrukeKlage: boolean): Array<[OppgavetypeFilterKeys, string]> => {
-  const entries = Object.entries(OPPGAVETYPEFILTER) as Array<[OppgavetypeFilterKeys, string]>
-  if (!kanBrukeKlage) {
-    return entries.filter(([key]) => key !== 'KLAGE' && key !== 'OMGJOERING')
-  }
-  return entries
-}
-
 const konverterOppgavetypeFilterTilKeys = (oppgavetypeFilter: Array<string>): Array<OppgavetypeFilterKeys> => {
-  return oppgavetypefilter(false)
+  return Object.entries(OPPGAVETYPEFILTER)
     .filter(([, val]) => oppgavetypeFilter.includes(val))
     .map(([key]) => key as OppgavetypeFilterKeys)
 }

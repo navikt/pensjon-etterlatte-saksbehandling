@@ -124,10 +124,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
                 every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
             }
         startServer(
-            featureToggleService =
-                DummyFeatureToggleService().also {
-                    it.settBryter(KlageFeatureToggle.KanBrukeKlageToggle, true)
-                },
+            featureToggleService = DummyFeatureToggleService(),
             brevApiKlient = brevApiKlientMock,
         )
         nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)

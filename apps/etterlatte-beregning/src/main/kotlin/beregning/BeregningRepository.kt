@@ -81,7 +81,7 @@ class BeregningRepository(private val dataSource: DataSource) {
         }
 
         return checkNotNull(hentOverstyrBeregning(overstyrBeregning.sakId)) {
-            "Vi opprettet en overstyrt beregning akkurat nå men den finnes ikke >:("
+            "Vi opprettet en overstyrt beregning på sakId=${overstyrBeregning.sakId} akkurat nå men den finnes ikke >:("
         }
     }
 

@@ -53,8 +53,8 @@ data class TilbakekrevingBrevDTO(
                                     it.ytelse.resultat == TilbakekrevingResultat.DELVIS_TILBAKEKREV
                             },
                         helTilbakekreving =
-                            tilbakekreving.perioder.any {
-                                it.ytelse.resultat != TilbakekrevingResultat.FULL_TILBAKEKREV
+                            tilbakekreving.perioder.all {
+                                it.ytelse.resultat == TilbakekrevingResultat.FULL_TILBAKEKREV
                             },
                         perioder = tilbakekrevingsPerioder(tilbakekreving),
                         summer = perioderSummert(tilbakekreving),

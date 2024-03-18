@@ -78,8 +78,10 @@ class HentEnhetException(override val detail: String, override val cause: Throwa
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Enheter(
-    val enhetId: String, // Enhetsnummer
-    val temaer: ArrayList<String>?, // EYB EYO
+    // Enhetsnummer
+    val enhetId: String,
+    // EYB EYO
+    val temaer: ArrayList<String>?,
     val navn: String,
 )
 

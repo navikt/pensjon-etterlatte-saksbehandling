@@ -102,6 +102,10 @@ spec:
       value: http://rina-ss1.adeo.no
     - name: NORG2_URL
       value: https://norg2.prod-fss-pub.nais.io
+    - name: MODIAPERSONOVERSIKT_URL
+      value: https://app.adeo.no/modiapersonoversikt/person
+    - name: PSAK_URL
+      value: https://pensjon-psak.nais.adeo.no/psak
     - name: APP_VERSION
       value: "{{ image }}"
   envFrom:

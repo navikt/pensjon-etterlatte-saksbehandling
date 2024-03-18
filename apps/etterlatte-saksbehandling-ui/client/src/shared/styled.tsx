@@ -80,8 +80,11 @@ export const FlexRow = styled.div<{
     `}
 `
 
-export const SpaceChildren = styled.div`
+export const SpaceChildren = styled.div<{
+  direction?: 'column' | 'row'
+  gap?: string
+}>`
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  flex-direction: ${(props) => props.direction ?? 'column'};
+  gap: ${(props) => props.gap ?? '1rem'};
 `

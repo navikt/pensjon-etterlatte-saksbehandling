@@ -14,6 +14,8 @@ services:
       EESSI_PENSJON_URL: https://pensjon-utland-q2.intern.dev.nav.no/gjenny
       RINA_URL: https://rina-ss3-q.adeo.no
       NORG2_URL: https://norg2.dev-fss-pub.nais.io
+      MODIAPERSONOVERSIKT_URL: https://navikt.github.io/modiapersonoversikt/#
+      PSAK_URL: https://pensjon-psak-q2.dev.adeo.no/psak
       APP_VERSION: 1
       # Lokale URL-er skal kommenteres ut når de ikke er i bruk
 #      BREV_API_URL: http://host.docker.internal:8084

@@ -19,7 +19,7 @@ export const Statsborgerskap = ({
   landListe: ILand[]
 }): ReactNode => {
   return (
-    <Personopplysning heading="Statsborgerskap" icon={<PassportIcon height="2rem" width="2rem" />}>
+    <Personopplysning heading="Statsborgerskap" icon={<PassportIcon />}>
       <Table>
         <Table.Header>
           <Table.Row>

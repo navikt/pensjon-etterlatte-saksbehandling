@@ -9,7 +9,7 @@ import { BostedsadresseDataCell } from '~components/person/personopplysninger/co
 
 export const AvdoedesBarn = ({ avdoede }: { avdoede?: PdlPersonopplysning[] }): ReactNode => {
   return (
-    <Personopplysning heading="Søsken (avdødes barn)" icon={<ChildEyesIcon height="2rem" width="2rem" />}>
+    <Personopplysning heading="Søsken (avdødes barn)" icon={<ChildEyesIcon />}>
       <Table>
         <Table.Header>
           <Table.Row>

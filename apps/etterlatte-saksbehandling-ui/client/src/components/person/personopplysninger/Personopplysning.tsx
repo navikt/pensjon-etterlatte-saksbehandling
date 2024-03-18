@@ -24,6 +24,13 @@ const PersonopplysningHeader = styled.div`
   display: flex;
   align-items: end;
   gap: 1rem;
+
+  svg {
+    max-width: 2rem;
+    max-height: 2rem;
+    width: 100%;
+    height: 100%;
+  }
 `
 
 const PersonopplysningContent = styled.div`

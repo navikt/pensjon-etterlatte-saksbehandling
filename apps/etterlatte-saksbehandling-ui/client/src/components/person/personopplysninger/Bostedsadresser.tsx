@@ -8,7 +8,7 @@ import { BostedsadresseDataCell } from '~components/person/personopplysninger/co
 
 export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: IAdresse[] }): ReactNode => {
   return (
-    <Personopplysning heading="Bostedsadresser" icon={<HouseIcon height="2rem" width="2rem" />}>
+    <Personopplysning heading="Bostedsadresser" icon={<HouseIcon />}>
       {bostedsadresse && bostedsadresse.length > 0 ? (
         <Table>
           <Table.Header>

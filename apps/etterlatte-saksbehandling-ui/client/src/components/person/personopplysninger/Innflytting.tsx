@@ -18,7 +18,7 @@ export const Innflytting = ({
   landListe: ILand[]
 }): ReactNode => {
   return (
-    <Personopplysning heading="Innflytting" icon={<AirplaneIcon height="2rem" width="2rem" />}>
+    <Personopplysning heading="Innflytting" icon={<AirplaneIcon />}>
       <Table>
         <Table.Header>
           <Table.Row>

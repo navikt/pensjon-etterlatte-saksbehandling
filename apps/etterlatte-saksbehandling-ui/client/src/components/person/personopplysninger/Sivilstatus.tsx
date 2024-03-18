@@ -25,7 +25,7 @@ export const Sivilstatus = ({
   }
 
   return (
-    <Personopplysning heading="Sivilstatus" icon={<HeartIcon height="2rem" width="2rem" />}>
+    <Personopplysning heading="Sivilstatus" icon={<HeartIcon />}>
       <Table>
         <Table.Header>
           <Table.Row>

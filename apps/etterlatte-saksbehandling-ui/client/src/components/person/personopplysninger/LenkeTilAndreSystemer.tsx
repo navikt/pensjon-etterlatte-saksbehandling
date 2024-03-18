@@ -9,10 +9,7 @@ export const LenkeTilAndreSystemer = ({ fnr }: { fnr: string }): ReactNode => {
   const configContext = useContext(ConfigContext)
 
   return (
-    <Personopplysning
-      heading="Snarvei til brukers opplysninger i andre system"
-      icon={<MonitorIcon height="2rem" width="2rem" />}
-    >
+    <Personopplysning heading="Snarvei til brukers opplysninger i andre system" icon={<MonitorIcon />}>
       <SpaceChildren direction="row" gap="2rem">
         <SpaceChildren direction="row" gap="0.5rem">
           <Tag variant="alt3" size="small">

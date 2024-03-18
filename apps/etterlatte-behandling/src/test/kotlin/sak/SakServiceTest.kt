@@ -16,10 +16,11 @@ import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BrukerServiceImpl
+import no.nav.etterlatte.behandling.IngenEnhetFunnetException
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
+import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.IngenEnhetFunnetException
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -234,7 +235,11 @@ internal class SakServiceTest {
         every {
             pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
-        every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns emptyList()
+        every {
+            norg2Klient.hentArbeidsfordelingForOmraadeOgTema(
+                ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301"),
+            )
+        } returns emptyList()
         every { sakDao.finnSaker(KONTANT_FOT.value) } returns emptyList()
 
         val thrown =
@@ -247,7 +252,7 @@ internal class SakServiceTest {
 
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
         verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
-        verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
+        verify(exactly = 1) { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) }
     }
 
     @Test
@@ -267,7 +272,7 @@ internal class SakServiceTest {
         every {
             pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
-        every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns
+        every { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) } returns
             listOf(
                 ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr),
             )
@@ -286,7 +291,7 @@ internal class SakServiceTest {
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
         verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
-        verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
+        verify(exactly = 1) { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) }
         verify(exactly = 1) {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         }
@@ -310,7 +315,7 @@ internal class SakServiceTest {
         every {
             pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
-        every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns
+        every { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) } returns
             listOf(
                 ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr),
             )
@@ -341,7 +346,7 @@ internal class SakServiceTest {
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
         verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
-        verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
+        verify(exactly = 1) { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) }
         verify(exactly = 1) {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         }
@@ -366,7 +371,7 @@ internal class SakServiceTest {
         every {
             pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
-        every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns
+        every { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) } returns
             listOf(
                 ArbeidsFordelingEnhet(Enheter.EGNE_ANSATTE.navn, Enheter.EGNE_ANSATTE.enhetNr),
             )
@@ -385,7 +390,7 @@ internal class SakServiceTest {
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
         verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
-        verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
+        verify(exactly = 1) { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) }
         verify(exactly = 1) {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         }

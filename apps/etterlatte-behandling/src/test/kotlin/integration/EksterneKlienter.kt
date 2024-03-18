@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
+import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
@@ -322,10 +323,7 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
 }
 
 class Norg2KlientTest : Norg2Klient {
-    override fun hentEnheterForOmraade(
-        tema: String,
-        omraade: String,
-    ): List<ArbeidsFordelingEnhet> {
+    override fun hentArbeidsfordelingForOmraadeOgTema(request: ArbeidsFordelingRequest): List<ArbeidsFordelingEnhet> {
         return listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
     }
 

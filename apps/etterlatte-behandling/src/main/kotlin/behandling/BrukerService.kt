@@ -1,15 +1,14 @@
 package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
+import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.IngenEnhetFunnetException
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
-import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.slf4j.LoggerFactory
 
 interface BrukerService {
@@ -96,8 +95,6 @@ class BrukerServiceImpl(
                 }
             }
             else -> {
-                logger.warn("Fant ikke geografisk omraade for ${fnr.maskerFnr()} og tema $tema med saktype: $saktype")
-                sikkerLogg.error("Fant ikke geografisk omraade for fnr:  $fnr og tema $tema med saktype: $saktype")
                 val geografiskTilknytning = tilknytning.geografiskTilknytning()
                 when (geografiskTilknytning) {
                     null -> {
@@ -107,15 +104,23 @@ class BrukerServiceImpl(
                         )
                     }
                     else -> {
-                        finnEnhetForTemaOgOmraade(tema, geografiskTilknytning)
+                        val finnEnhetForTemaOgOmraade =
+                            finnEnhetForTemaOgOmraade(ArbeidsFordelingRequest(tema = tema, geografiskOmraade = geografiskTilknytning))
+                        logger.info("Fant enhet fra norg $finnEnhetForTemaOgOmraade")
+                        finnEnhetForTemaOgOmraade
                     }
                 }
             }
         }
     }
 
-    private fun finnEnhetForTemaOgOmraade(
-        tema: String,
-        omraade: String,
-    ) = norg2Klient.hentEnheterForOmraade(tema, omraade).firstOrNull() ?: throw IngenEnhetFunnetException(omraade, tema)
+    private fun finnEnhetForTemaOgOmraade(arbeidsFordelingRequest: ArbeidsFordelingRequest) =
+        norg2Klient.hentArbeidsfordelingForOmraadeOgTema(arbeidsFordelingRequest).firstOrNull()
+            ?: throw IngenEnhetFunnetException(arbeidsFordelingRequest.geografiskOmraade, arbeidsFordelingRequest.tema)
 }
+
+open class EnhetException(override val message: String) : Exception(message)
+
+class IngenEnhetFunnetException(val omraade: String, val tema: String) : EnhetException(
+    message = "Ingen enheter funnet for tema $tema og omraade $omraade",
+)

@@ -33,9 +33,3 @@ enum class Enheter(
         fun kjenteEnheter() = entries.map { it.enhetNr }.toSet()
     }
 }
-
-open class EnhetException(override val message: String) : Exception(message)
-
-class IngenEnhetFunnetException(val omraade: String, val tema: String) : EnhetException(
-    message = "Ingen enheter funnet for tema $tema og omraade $omraade",
-)

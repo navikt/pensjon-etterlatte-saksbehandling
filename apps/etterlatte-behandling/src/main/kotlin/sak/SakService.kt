@@ -27,7 +27,6 @@ interface SakService {
         type: SakType,
         overstyrendeEnhet: String? = null,
         gradering: AdressebeskyttelseGradering? = null,
-        sjekkEnhetMotNorg: Boolean = true,
     ): Sak
 
     fun finnGjeldeneEnhet(
@@ -134,16 +133,10 @@ class SakServiceImpl(
         type: SakType,
         overstyrendeEnhet: String?,
         gradering: AdressebeskyttelseGradering?,
-        sjekkEnhetMotNorg: Boolean,
     ): Sak {
         var sak = finnSakerForPersonOgType(fnr, type)
         if (sak == null) {
-            val enhet =
-                if (sjekkEnhetMotNorg) {
-                    hentEnhetFraNorgOmTom(fnr, type, overstyrendeEnhet)
-                } else {
-                    overstyrendeEnhet!!
-                }
+            val enhet = sjekkEnhetFraNorg(fnr, type, overstyrendeEnhet)
             sak = dao.opprettSak(fnr, type, enhet)
         }
 
@@ -209,11 +202,11 @@ class SakServiceImpl(
         fnr: String,
         type: SakType,
     ) = when (val sak = finnSakerForPersonOgType(fnr, type)) {
-        null -> hentEnhetFraNorgOmTom(fnr, type, null)
+        null -> sjekkEnhetFraNorg(fnr, type, null)
         else -> sak.enhet
     }
 
-    private fun hentEnhetFraNorgOmTom(
+    private fun sjekkEnhetFraNorg(
         fnr: String,
         type: SakType,
         enhet: String?,

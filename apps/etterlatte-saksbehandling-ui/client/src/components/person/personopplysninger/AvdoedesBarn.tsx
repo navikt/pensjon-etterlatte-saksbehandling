@@ -22,36 +22,32 @@ export const AvdoedesBarn = ({ avdoede }: { avdoede?: PdlPersonopplysning[] }): 
         <Table.Body>
           {!!avdoede?.length ? (
             <>
-              {avdoede.map((doed) => (
-                <>
-                  {!!doed.opplysning.avdoedesBarn?.length ? (
-                    <>
-                      {doed.opplysning.avdoedesBarn.map((barn, index) => (
-                        <Table.Row key={index}>
-                          <Table.DataCell>
-                            {barn.fornavn} {barn.etternavn}
-                          </Table.DataCell>
-                          <Table.DataCell>
-                            <SpaceChildren direction="row">
-                              <KopierFnr fnr={barn.foedselsnummer} />
-                              <AlderTag foedselsdato={barn.foedselsdato} />
-                            </SpaceChildren>
-                          </Table.DataCell>
-                          <BostedsadresseDataCell bostedsadresse={doed.opplysning.bostedsadresse} index={0} />
-                        </Table.Row>
-                      ))}
-                    </>
-                  ) : (
-                    <Table.Row>
-                      <Table.DataCell colSpan={3}>
-                        <Heading size="small">
-                          Ingen barn for avdoed: ${doed.opplysning.fornavn} ${doed.opplysning.etternavn}
-                        </Heading>
+              {avdoede.map((doed, i) =>
+                !!doed.opplysning.avdoedesBarn?.length ? (
+                  doed.opplysning.avdoedesBarn.map((barn, index) => (
+                    <Table.Row key={index}>
+                      <Table.DataCell>
+                        {barn.fornavn} {barn.etternavn}
                       </Table.DataCell>
+                      <Table.DataCell>
+                        <SpaceChildren direction="row">
+                          <KopierFnr fnr={barn.foedselsnummer} />
+                          <AlderTag foedselsdato={barn.foedselsdato} />
+                        </SpaceChildren>
+                      </Table.DataCell>
+                      <BostedsadresseDataCell bostedsadresse={doed.opplysning.bostedsadresse} index={0} />
                     </Table.Row>
-                  )}
-                </>
-              ))}
+                  ))
+                ) : (
+                  <Table.Row key={i}>
+                    <Table.DataCell colSpan={3}>
+                      <Heading size="small">
+                        Ingen barn for avdoed: ${doed.opplysning.fornavn} ${doed.opplysning.etternavn}
+                      </Heading>
+                    </Table.DataCell>
+                  </Table.Row>
+                )
+              )}
             </>
           ) : (
             <Heading size="small">Ingen avdøde</Heading>

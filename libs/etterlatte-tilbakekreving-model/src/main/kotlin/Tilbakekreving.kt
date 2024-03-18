@@ -212,7 +212,7 @@ data class TilbakekrevingVedtak(
     val vedtakId: Long,
     val fattetVedtak: FattetVedtak,
     val aarsak: TilbakekrevingAarsak,
-    val rettsligGrunnlag: TilbakekrevingRettsligGrunnlag,
+    val hjemmel: TilbakekrevingRettsligGrunnlag,
     val kravgrunnlagId: String,
     val kontrollfelt: String,
     val perioder: List<TilbakekrevingPeriodeVedtak>,

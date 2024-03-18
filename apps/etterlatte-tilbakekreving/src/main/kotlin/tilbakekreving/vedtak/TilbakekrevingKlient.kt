@@ -82,7 +82,7 @@ class TilbakekrevingKlient(
 
                     // Skal være satt som statisk enhet 4819
                     enhetAnsvarlig = ANSVARLIG_ENHET
-                    kodeHjemmel = vedtak.rettsligGrunnlag.kode
+                    kodeHjemmel = vedtak.hjemmel.kode
 
                     // Dette skal være likt kontrollfeltet i mottatt kravgrunnlag, hvis forskjellig er grunnlag utdatert
                     kontrollfelt = vedtak.kontrollfelt
@@ -120,9 +120,16 @@ class TilbakekrevingKlient(
             belopTilbakekreves = bruttoTilbakekreving.medToDesimaler()
             belopSkatt = skatt.medToDesimaler()
             kodeResultat = resultat.name
-            kodeAarsak = aarsak.name
+            kodeAarsak = mapFraTilbakekrevingAarsak(aarsak)
             kodeSkyld = skyld.name
         }
+
+    private fun mapFraTilbakekrevingAarsak(aarsak: TilbakekrevingAarsak): String {
+        return when (aarsak) {
+            TilbakekrevingAarsak.UTBFEILMOT -> aarsak.name
+            else -> TilbakekrevingAarsak.ANNET.name
+        }
+    }
 
     private fun TilbakekrevingsbelopFeilkontoVedtak.toTilbakekreivngsbelopFeilkonto() =
         TilbakekrevingsbelopDto().apply {

@@ -10,7 +10,7 @@
       <env name="DOKDIST_URL" value="https://dokdistfordeling.dev-fss-pub.nais.io/rest/v1" />
       <env name="CLAMAV_ENDPOINT_URL" value="http://clamav.nais-system.svc.cluster.local" />
       <env name="ETTERLATTE_BEHANDLING_CLIENT_ID" value="59967ac8-009c-492e-a618-e5a0f6b3e4e4" />
-      <env name="ETTERLATTE_BEHANDLING_URL" value="http://localhost:8090" />
+      <env name="ETTERLATTE_BEHANDLING_URL" value="https://etterlatte-behandling.intern.dev.nav.no" />
       <env name="ETTERLATTE_BEREGNING_CLIENT_ID" value="b07cf335-11fb-4efa-bd46-11f51afd5052" />
       <env name="ETTERLATTE_BEREGNING_URL" value="https://etterlatte-beregning.intern.dev.nav.no" />
       <env name="ETTERLATTE_GRUNNLAG_CLIENT_ID" value="ce96a301-13db-4409-b277-5b27f464d08b" />

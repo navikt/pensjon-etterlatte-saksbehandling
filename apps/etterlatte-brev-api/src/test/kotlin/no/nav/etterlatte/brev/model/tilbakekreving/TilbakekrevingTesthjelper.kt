@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Periode
 import no.nav.etterlatte.libs.common.tilbakekreving.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAktsomhet
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingRettsligGrunnlag
@@ -34,7 +33,7 @@ fun tilbakekreving(
     kravgrunnlag = kravgrunnlag(),
 )
 
-fun tilbakekrevingvurdering(aktsomhet: TilbakekrevingAktsomhet = TilbakekrevingAktsomhet.GOD_TRO) =
+fun tilbakekrevingvurdering() =
     TilbakekrevingVurdering(
         aarsak = TilbakekrevingAarsak.ANNET,
         beskrivelse = "beskrivelse",

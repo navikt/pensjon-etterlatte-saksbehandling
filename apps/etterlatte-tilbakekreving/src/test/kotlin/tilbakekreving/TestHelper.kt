@@ -55,8 +55,8 @@ fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
                         ),
                 ),
             ),
-        aarsak = TilbakekrevingAarsak.DODSFALL,
-        rettsligGrunnlag = TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_SEKS,
+        aarsak = TilbakekrevingAarsak.ANNET,
+        rettsligGrunnlag = TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FEMTE_LEDD,
         kravgrunnlagId = "1",
         kontrollfelt = "2023-09-19-10.01.03.842916",
     )

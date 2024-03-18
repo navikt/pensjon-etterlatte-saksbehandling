@@ -1,6 +1,5 @@
 package no.nav.etterlatte.beregningkafka
 
-import OpprettBeregningRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -8,6 +7,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.beregning.OpprettBeregningRequest
 import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
 import java.util.UUID
 

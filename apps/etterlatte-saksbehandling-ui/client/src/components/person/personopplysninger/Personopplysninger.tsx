@@ -31,10 +31,6 @@ export const Personopplysninger = ({
   const [personopplysningerResult, hentPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
   const [, hentLandListe] = useApiCall(hentAlleLand)
 
-  const erSaktype = (sak: SakMedBehandlinger, sakType: SakType) => {
-    return sak.sak.sakType === sakType
-  }
-
   useEffect(() => {
     if (isSuccess(sakStatus)) {
       hentPersonopplysninger({
@@ -68,14 +64,14 @@ export const Personopplysninger = ({
                   success: (personopplysninger) => (
                     <>
                       <Bostedsadresser bostedsadresse={personopplysninger.soeker?.opplysning.bostedsadresse} />
-                      {erSaktype(sak, SakType.BARNEPENSJON) && (
+                      {sak.sak.sakType === SakType.BARNEPENSJON && (
                         <Foreldre
                           avdoed={personopplysninger.avdoede}
                           gjenlevende={personopplysninger.gjenlevende}
                           foreldreansvar={personopplysninger.soeker?.opplysning.familieRelasjon?.ansvarligeForeldre}
                         />
                       )}
-                      {erSaktype(sak, SakType.OMSTILLINGSSTOENAD) && (
+                      {sak.sak.sakType === SakType.OMSTILLINGSSTOENAD && (
                         <Sivilstatus
                           sivilstand={personopplysninger.soeker?.opplysning.sivilstand}
                           avdoede={personopplysninger.avdoede}

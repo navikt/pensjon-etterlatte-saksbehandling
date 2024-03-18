@@ -6,7 +6,7 @@ import { Personopplysning as PdlPersonopplysning } from '~shared/types/grunnlag'
 import { AlderTag } from '~components/person/personopplysninger/components/AlderTag'
 import { SpaceChildren } from '~shared/styled'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
-import { KopierFnr } from '~components/person/personopplysninger/components/KopierFnr'
+import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 
 export const AvdoedesBarn = ({ avdoede }: { avdoede?: PdlPersonopplysning[] }): ReactNode => {
   return (
@@ -30,7 +30,7 @@ export const AvdoedesBarn = ({ avdoede }: { avdoede?: PdlPersonopplysning[] }): 
                     </Table.DataCell>
                     <Table.DataCell>
                       <SpaceChildren direction="row">
-                        <KopierFnr fnr={barn.foedselsnummer} />
+                        <KopierbarVerdi value={barn.foedselsnummer} iconPosition="right" />
                         <AlderTag foedselsdato={barn.foedselsdato} />
                       </SpaceChildren>
                     </Table.DataCell>

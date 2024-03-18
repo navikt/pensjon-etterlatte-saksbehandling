@@ -7,8 +7,8 @@ import { Personopplysning as PdlPersonopplysning } from '~shared/types/grunnlag'
 import { formaterDato, formaterStringDato } from '~utils/formattering'
 import { SpaceChildren } from '~shared/styled'
 import styled from 'styled-components'
-import { KopierFnr } from '~components/person/personopplysninger/components/KopierFnr'
 import { lowerCase, startCase } from 'lodash'
+import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 export const Sivilstatus = ({
   sivilstand,
   avdoede,
@@ -47,7 +47,7 @@ export const Sivilstatus = ({
                     <SpaceChildren direction="row">
                       {!!stand.relatertVedSiviltilstand && (
                         <>
-                          <KopierFnr fnr={stand.relatertVedSiviltilstand} />
+                          <KopierbarVerdi value={stand.relatertVedSiviltilstand} iconPosition="right" />
                           {avdoede && avdoede.length >= 0 && (
                             <>
                               {!!relatertVedSivilstandDoedsdato(stand.relatertVedSiviltilstand, avdoede) && (

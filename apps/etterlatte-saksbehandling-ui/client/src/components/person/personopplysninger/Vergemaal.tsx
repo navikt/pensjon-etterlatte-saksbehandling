@@ -1,9 +1,10 @@
 import React, { ReactNode } from 'react'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { PersonGroupIcon } from '@navikt/aksel-icons'
-import { CopyButton, Heading, Table } from '@navikt/ds-react'
+import { Heading, Table } from '@navikt/ds-react'
 import { VergemaalEllerFremtidsfullmakt } from '~components/person/typer'
 import { lowerCase, upperFirst } from 'lodash'
+import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 
 export const Vergemaal = ({
   vergemaalEllerFremtidsfullmakt,
@@ -32,12 +33,7 @@ export const Vergemaal = ({
                   </Table.DataCell>
                   <Table.DataCell>
                     {!!verge.vergeEllerFullmektig.motpartsPersonident && (
-                      <CopyButton
-                        copyText={verge.vergeEllerFullmektig.motpartsPersonident}
-                        text={verge.vergeEllerFullmektig.motpartsPersonident}
-                        size="small"
-                        iconPosition="right"
-                      />
+                      <KopierbarVerdi value={verge.vergeEllerFullmektig.motpartsPersonident} iconPosition="right" />
                     )}
                   </Table.DataCell>
                   <Table.DataCell>

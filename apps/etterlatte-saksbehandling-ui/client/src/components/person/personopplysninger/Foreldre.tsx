@@ -7,7 +7,7 @@ import { Personopplysning as PdlPersonopplysning } from '~shared/types/grunnlag'
 import { formaterStringDato } from '~utils/formattering'
 import { AlderTag } from '~components/person/personopplysninger/components/AlderTag'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
-import { KopierFnr } from '~components/person/personopplysninger/components/KopierFnr'
+import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 
 export const Foreldre = ({
   avdoed,
@@ -50,7 +50,7 @@ export const Foreldre = ({
                   </Table.DataCell>
                   <Table.DataCell>
                     <SpaceChildren direction="row">
-                      <KopierFnr fnr={doed.opplysning.foedselsnummer} />
+                      <KopierbarVerdi value={doed.opplysning.foedselsnummer} iconPosition="right" />
                       <AlderTag foedselsdato={doed.opplysning.foedselsdato} />
                     </SpaceChildren>
                   </Table.DataCell>
@@ -77,7 +77,7 @@ export const Foreldre = ({
                   </Table.DataCell>
                   <Table.DataCell>
                     <SpaceChildren direction="row">
-                      <KopierFnr fnr={levende.opplysning.foedselsnummer} />
+                      <KopierbarVerdi value={levende.opplysning.foedselsnummer} iconPosition="right" />
                       <AlderTag foedselsdato={levende.opplysning.foedselsdato} />
                     </SpaceChildren>
                   </Table.DataCell>

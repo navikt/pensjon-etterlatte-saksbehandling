@@ -79,7 +79,7 @@ data class Saksbehandler(
 
     override fun accessToken() = accessToken
 
-    override fun kanEndreOppgaverFor(ident: String?) = erSammePerson(ident)
+    override fun kanEndreOppgaverFor(ident: String?) = erSammePerson(ident) || ident == Fagsaksystem.EY.navn
 
     override fun erSammePerson(ident: String?) = ident == this.ident
 

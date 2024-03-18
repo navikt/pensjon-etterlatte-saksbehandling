@@ -336,7 +336,7 @@ class TrygdetidServiceImpl(
         val avdoede = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo).hentAvdoede()
 
         if (avdoede.isNullOrEmpty()) {
-            logger.error("Kan ikke opprette trygdetid når det mangler avdøde (behandling=$${behandling.id})")
+            logger.warn("Kan ikke opprette trygdetid når det mangler avdøde (behandling=${behandling.id})")
             throw GrunnlagManglerAvdoede()
         }
 

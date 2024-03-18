@@ -34,7 +34,7 @@ internal fun finnSamsvarForHendelse(
         GrunnlagsendringsType.DOEDSFALL -> {
             samsvarDoedsdatoer(
                 doedsdatoPdl = pdlData.hentDoedsdato(),
-                doedsdatoGrunnlag = grunnlag?.doedsdato(rolle, fnr)?.verdi,
+                doedsdatoGrunnlag = grunnlag?.doedsdato(rolle, fnr),
             )
         }
 
@@ -82,7 +82,7 @@ internal fun finnSamsvarForHendelse(
 
         GrunnlagsendringsType.BOSTED -> {
             val pdlBosted = pdlData.hentBostedsadresse()
-            val grunnlagBosted = grunnlag?.bostedsadresse(rolle, fnr)?.verdi
+            val grunnlagBosted = grunnlag?.bostedsadresse(rolle, fnr)
             samsvarBostedsadresse(pdlBosted, grunnlagBosted)
         }
 

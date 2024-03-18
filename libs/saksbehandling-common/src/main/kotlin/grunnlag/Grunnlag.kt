@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common.grunnlag
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 
 class Grunnlag(
@@ -27,12 +28,7 @@ class Grunnlag(
 
     fun hentAvdoede(): List<Grunnlagsdata<JsonNode>> = hentFamiliemedlemmer(PersonRolle.AVDOED)
 
-    @Deprecated(
-        "Denne er ikke safe med tanke på endringer i persongalleri / feil i gammelt grunnlag",
-        replaceWith =
-            ReplaceWith("hentAvdoede().flatMap { it.barn }"),
-    )
-    fun hentSoesken() = familie.filter { it.hentPersonrolle()?.verdi in listOf(PersonRolle.BARN, PersonRolle.TILKNYTTET_BARN) }
+    fun hentSoesken(): List<Person> = hentAvdoede().flatMap { it.hentAvdoedesbarn()?.verdi?.avdoedesBarn ?: emptyList() }
 
     private fun hentFamiliemedlemNullable(personRolle: PersonRolle): Grunnlagsdata<JsonNode>? {
         val aktuellePersoner = folkMedRolle(personRolle)

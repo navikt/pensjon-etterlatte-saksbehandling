@@ -33,7 +33,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
@@ -46,7 +45,6 @@ import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -363,7 +361,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val grunnlagMock = mockk<Grunnlag>()
         coEvery { grunnlagKlient.hentGrunnlag(sakId) } returns grunnlagMock
         with(grunnlagMock) {
-            every { doedsdato(any(), any()) } returns Opplysning.Konstant(randomUUID(), kilde, doedsdato)
+            every { doedsdato(any(), any()) } returns doedsdato
         }
 
         grunnlagsendringshendelseService.opprettDoedshendelse(
@@ -446,7 +444,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val grunnlagMock = mockk<Grunnlag>()
         coEvery { grunnlagKlient.hentGrunnlag(sakId) } returns grunnlagMock
         with(grunnlagMock) {
-            every { doedsdato(any(), any()) } returns Opplysning.Konstant(randomUUID(), kilde, nyDoedsdato)
+            every { doedsdato(any(), any()) } returns nyDoedsdato
         }
 
         grunnlagsendringshendelseService.opprettDoedshendelse(

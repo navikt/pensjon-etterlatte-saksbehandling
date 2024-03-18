@@ -54,10 +54,10 @@ internal class GrunnlagHelperKtTest {
         val doedsdatoGjenlevende = grunnlag.doedsdato(Saksrolle.GJENLEVENDE, GJENLEVENDE_FOEDSELSNUMMER.value)
         val doedsdatoSoeker = grunnlag.doedsdato(Saksrolle.SOEKER, SOEKER_FOEDSELSNUMMER.value)
         val doedsdatoSoesken = grunnlag.doedsdato(Saksrolle.SOESKEN, HELSOESKEN_FOEDSELSNUMMER.value)
-        assertEquals(grunnlagDoedsdato, doedsdatoAvdoed?.verdi)
-        assertEquals(grunnlagDoedsdato, doedsdatoGjenlevende?.verdi)
-        assertEquals(grunnlagDoedsdato, doedsdatoSoeker?.verdi)
-        assertEquals(grunnlagDoedsdato, doedsdatoSoesken?.verdi)
+        assertEquals(grunnlagDoedsdato, doedsdatoAvdoed)
+        assertEquals(grunnlagDoedsdato, doedsdatoGjenlevende)
+        assertEquals(grunnlagDoedsdato, doedsdatoSoeker)
+        assertEquals(grunnlagDoedsdato, doedsdatoSoesken)
     }
 
     @Test

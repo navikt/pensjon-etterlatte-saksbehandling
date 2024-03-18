@@ -1,5 +1,7 @@
 package no.nav.etterlatte.beregning.grunnlag
 
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -23,6 +25,7 @@ class ManglerVirkningstidspunktBP : UgyldigForespoerselException(
 
 class BeregningsGrunnlagService(
     private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
+    private val beregningRepository: BeregningRepository,
     private val behandlingKlient: BehandlingKlient,
     private val grunnlagKlient: GrunnlagKlient,
 ) {
@@ -251,12 +254,24 @@ class BeregningsGrunnlagService(
     fun dupliserBeregningsGrunnlagBP(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         logger.info("Dupliser grunnlag for $behandlingId fra $forrigeBehandlingId")
 
         val forrigeGrunnlagBP =
             beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(forrigeBehandlingId)
-                ?: throw RuntimeException("Ingen grunnlag funnet for $forrigeBehandlingId")
+
+        if (forrigeGrunnlagBP == null) {
+            val behandling =
+                runBlocking {
+                    behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+                }
+            if (beregningRepository.hentOverstyrBeregning(behandling.sak) != null) {
+                return
+            } else {
+                throw RuntimeException("Ingen grunnlag funnet for $forrigeBehandlingId")
+            }
+        }
 
         if (beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(behandlingId) != null) {
             throw RuntimeException("Eksisterende grunnlag funnet for $behandlingId")

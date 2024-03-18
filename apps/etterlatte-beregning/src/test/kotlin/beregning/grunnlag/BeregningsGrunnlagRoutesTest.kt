@@ -17,6 +17,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
+import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
@@ -51,8 +52,9 @@ internal class BeregningsGrunnlagRoutesTest {
     private val server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val repository = mockk<BeregningsGrunnlagRepository>()
+    private val beregningRepository = mockk<BeregningRepository>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
-    private val service = BeregningsGrunnlagService(repository, behandlingKlient, grunnlagKlient)
+    private val service = BeregningsGrunnlagService(repository, beregningRepository, behandlingKlient, grunnlagKlient)
 
     @BeforeAll
     fun before() {

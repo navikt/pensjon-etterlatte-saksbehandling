@@ -9,7 +9,7 @@ import { hentPersonopplysningerForBehandling } from '~shared/api/grunnlag'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Statsborgerskap } from '~components/person/personopplysninger/Statsborgerskap'
-import { Heading } from '@navikt/ds-react'
+import { Alert, Heading } from '@navikt/ds-react'
 import { SakType } from '~shared/types/sak'
 import { Foreldre } from '~components/person/personopplysninger/Foreldre'
 import { AvdoedesBarn } from '~components/person/personopplysninger/AvdoedesBarn'
@@ -53,6 +53,7 @@ export const Personopplysninger = ({
       <SpaceChildren>
         {!!sakStatus ? (
           <>
+            <Alert variant="warning">Denne informasjonen baserer seg på når en behandling var opprettet på brukeren, vi jobber med å få informasjonen til å oppdatere seg i sanntid.</Alert>
             <LenkeTilAndreSystemer fnr={fnr} />
             {mapResult(personopplysningerResult, {
               pending: <Spinner visible={true} label="Henter personopplysninger" />,

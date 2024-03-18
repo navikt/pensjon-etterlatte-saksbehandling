@@ -38,7 +38,7 @@ export const Person = () => {
 
   const [personStatus, hentPerson] = useApiCall(hentPersonNavn)
   const [sakStatus, hentSak] = useApiCall(hentSakMedBehandlnger)
-  const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.PERSONOPPLYSNINGER)
+  const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
 
   const velgFane = (value: string) => {
     const valgtFane = value as PersonOversiktFane
@@ -89,12 +89,12 @@ export const Person = () => {
         (person) => (
           <Tabs value={fane} onChange={velgFane}>
             <Tabs.List>
+              <Tabs.Tab value={PersonOversiktFane.SAKER} label="Sak og behandling" icon={<BulletListIcon />} />
               <Tabs.Tab
                 value={PersonOversiktFane.PERSONOPPLYSNINGER}
                 label="Personopplysninger"
                 icon={<PersonIcon />}
               />
-              <Tabs.Tab value={PersonOversiktFane.SAKER} label="Sak og behandling" icon={<BulletListIcon />} />
               <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
               <Tabs.Tab value={PersonOversiktFane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
               {isOmstillingsstoenad(sakStatus) && (
@@ -102,11 +102,11 @@ export const Person = () => {
               )}
             </Tabs.List>
 
-            <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
-              <Personopplysninger sakStatus={sakStatus} fnr={person.foedselsnummer} />
-            </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.SAKER}>
               <SakOversikt sakStatus={sakStatus} fnr={person.foedselsnummer} />
+            </Tabs.Panel>
+            <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
+              <Personopplysninger sakStatus={sakStatus} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.DOKUMENTER}>
               <Dokumentliste sakStatus={sakStatus} fnr={person.foedselsnummer} />

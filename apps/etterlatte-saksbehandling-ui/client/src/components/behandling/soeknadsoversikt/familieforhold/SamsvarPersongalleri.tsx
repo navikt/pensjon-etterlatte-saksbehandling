@@ -98,8 +98,8 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
             </BodyShort>
           ) : (
             <BodyShort spacing>
-              Det er utledet forskjellig avdød i PDL enn det som er familieforholdet i behandlingen. Merk at utleding av
-              samboerskap ut i fra PDL kan ha mangler.
+              Familieforhold må kontrolleres fordi det er avvik mellom registrert informasjon i behandlingen og det som
+              er registrert i PDL. Merk at PDL kan ha mangler i informasjon om samboerskap.
             </BodyShort>
           )}
           <Heading level="4" size="xsmall" spacing>

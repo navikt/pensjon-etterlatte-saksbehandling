@@ -32,11 +32,9 @@ export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: IAdresse[
             </>
           ) : (
             <Table.Row>
-              <Table.DataCell>
+              <Table.DataCell colSpan={3}>
                 <Heading size="medium">Ingen bostedsadresser</Heading>
               </Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
             </Table.Row>
           )}
         </Table.Body>

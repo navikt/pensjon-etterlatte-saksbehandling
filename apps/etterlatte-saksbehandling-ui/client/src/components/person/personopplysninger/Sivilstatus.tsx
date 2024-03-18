@@ -68,11 +68,9 @@ export const Sivilstatus = ({
             </>
           ) : (
             <Table.Row>
-              <Table.DataCell>
+              <Table.DataCell colSpan={3}>
                 <Heading size="small">Ingen sivilstatuser</Heading>
               </Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
             </Table.Row>
           )}
         </Table.Body>

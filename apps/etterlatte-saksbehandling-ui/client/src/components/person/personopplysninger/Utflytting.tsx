@@ -40,10 +40,9 @@ export const Utflytting = ({
             </>
           ) : (
             <Table.Row>
-              <Table.DataCell>
+              <Table.DataCell colSpan={2}>
                 <Heading size="small">Ingen utflyttninger</Heading>
               </Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
             </Table.Row>
           )}
         </Table.Body>

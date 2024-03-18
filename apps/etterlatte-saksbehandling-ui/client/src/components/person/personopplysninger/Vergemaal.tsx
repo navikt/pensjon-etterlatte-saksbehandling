@@ -50,13 +50,9 @@ export const Vergemaal = ({
             </>
           ) : (
             <Table.Row>
-              <Table.DataCell>
+              <Table.DataCell colSpan={5}>
                 <Heading size="small">Ingen vergemål</Heading>
               </Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
             </Table.Row>
           )}
         </Table.Body>

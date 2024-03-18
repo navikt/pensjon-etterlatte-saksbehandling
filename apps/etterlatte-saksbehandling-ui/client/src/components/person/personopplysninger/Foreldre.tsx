@@ -61,12 +61,9 @@ export const Foreldre = ({
             </>
           ) : (
             <Table.Row>
-              <Table.DataCell>
+              <Table.DataCell colSpan={4}>
                 <Heading size="small">Ingen avdøde</Heading>
               </Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
             </Table.Row>
           )}
           {!!gjenlevende?.length ? (
@@ -95,12 +92,9 @@ export const Foreldre = ({
             </>
           ) : (
             <Table.Row>
-              <Table.DataCell>
+              <Table.DataCell colSpan={4}>
                 <Heading size="small">Ingen gjenlevende</Heading>
               </Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
             </Table.Row>
           )}
         </Table.Body>

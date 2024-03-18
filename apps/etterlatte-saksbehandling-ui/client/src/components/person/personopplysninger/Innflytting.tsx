@@ -40,10 +40,9 @@ export const Innflytting = ({
             </>
           ) : (
             <Table.Row>
-              <Table.DataCell>
+              <Table.DataCell colSpan={2}>
                 <Heading size="small">Ingen innflyttinger</Heading>
               </Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
             </Table.Row>
           )}
         </Table.Body>

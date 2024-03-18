@@ -43,13 +43,11 @@ export const AvdoedesBarn = ({ avdoede }: { avdoede?: PdlPersonopplysning[] }): 
                     </>
                   ) : (
                     <Table.Row>
-                      <Table.DataCell>
+                      <Table.DataCell colSpan={3}>
                         <Heading size="small">
                           Ingen barn for avdoed: ${doed.opplysning.fornavn} ${doed.opplysning.etternavn}
                         </Heading>
                       </Table.DataCell>
-                      <Table.DataCell>-</Table.DataCell>
-                      <Table.DataCell>-</Table.DataCell>
                     </Table.Row>
                   )}
                 </>

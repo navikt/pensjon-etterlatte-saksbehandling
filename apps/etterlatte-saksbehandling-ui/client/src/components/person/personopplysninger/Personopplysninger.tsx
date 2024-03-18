@@ -42,7 +42,7 @@ export const Personopplysninger = ({
         sakType: sakStatus.data.behandlinger[0].sakType,
       })
     }
-  }, [sakStatus])
+  }, [fnr, sakStatus])
 
   useEffect(() => {
     hentLandListe(null, setLandListe)
@@ -53,7 +53,10 @@ export const Personopplysninger = ({
       <SpaceChildren>
         {!!sakStatus ? (
           <>
-            <Alert variant="warning">Denne informasjonen baserer seg på når en behandling var opprettet på brukeren, vi jobber med å få informasjonen til å oppdatere seg i sanntid.</Alert>
+            <Alert variant="warning">
+              Denne informasjonen baserer seg på når en behandling var opprettet på brukeren, vi jobber med å få
+              informasjonen til å oppdatere seg i sanntid.
+            </Alert>
             <LenkeTilAndreSystemer fnr={fnr} />
             {mapResult(personopplysningerResult, {
               pending: <Spinner visible={true} label="Henter personopplysninger" />,

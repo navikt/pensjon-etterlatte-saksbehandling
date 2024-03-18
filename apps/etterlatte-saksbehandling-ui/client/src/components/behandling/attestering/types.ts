@@ -17,3 +17,10 @@ export enum IReturTypeTilbakekreving {
   feil_i_brev = 'Feil i brev',
   hent_nytt_grunnlag = 'Hent nytt grunnlag',
 }
+
+export enum IReturTypeKlage {
+  feil_i_formkrav = 'Feil i formkrav / klagefrist',
+  feil_i_utfall = 'Feil i utfall',
+  feil_i_brev = 'Feil i brev',
+  annet = 'Annet',
+}

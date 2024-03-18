@@ -70,7 +70,6 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
         startServer(
             featureToggleService =
                 mockk {
-                    every { isEnabled(KlageFeatureToggle.KanBrukeKlageToggle, any()) } returns true
                     every { isEnabled(KlageFeatureToggle.KanOppretteVedtakAvvisningToggle, any()) } returns true
                     every { isEnabled(KlageFeatureToggle.KanFerdigstilleKlageToggle, any()) } returns true
                 },

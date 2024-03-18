@@ -51,6 +51,7 @@ data class TilbakekrevingBrevDTO(
                                 it.ytelse.resultat != TilbakekrevingResultat.FULL_TILBAKEKREV
                             },
                         perioder = tilbakekrevingsPerioder(tilbakekreving),
+                        harRenteTillegg = sjekkOmHarRenter(tilbakekreving),
                         summer = perioderSummert(tilbakekreving),
                     ),
             )
@@ -97,6 +98,7 @@ data class TilbakekrevingData(
     val tilOgMed: LocalDate,
     val skalTilbakekreve: Boolean,
     val helTilbakekreving: Boolean,
+    val harRenteTillegg: Boolean,
     val perioder: List<TilbakekrevingPeriodeData>,
     val summer: TilbakekrevingBeloeperData,
 )

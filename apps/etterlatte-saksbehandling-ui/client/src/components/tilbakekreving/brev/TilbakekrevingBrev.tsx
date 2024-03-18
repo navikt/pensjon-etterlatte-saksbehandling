@@ -106,8 +106,6 @@ export function TilbakekrevingBrev({
 
 const BrevContent = styled.div`
   display: flex;
-  height: 75vh;
-  max-height: 75vh;
 `
 
 const Sidebar = styled.div`

@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from 'react'
+import React, { ReactNode, useEffect } from 'react'
 import { Container, SpaceChildren } from '~shared/styled'
 import { LenkeTilAndreSystemer } from '~components/person/personopplysninger/LenkeTilAndreSystemer'
 import { Bostedsadresser } from '~components/person/personopplysninger/Bostedsadresser'
@@ -15,7 +15,7 @@ import { Foreldre } from '~components/person/personopplysninger/Foreldre'
 import { AvdoedesBarn } from '~components/person/personopplysninger/AvdoedesBarn'
 import { Sivilstatus } from '~components/person/personopplysninger/Sivilstatus'
 import { Innflytting } from '~components/person/personopplysninger/Innflytting'
-import { hentAlleLand, ILand } from '~shared/api/trygdetid'
+import { hentAlleLand } from '~shared/api/trygdetid'
 import { Utflytting } from '~components/person/personopplysninger/Utflytting'
 import { Vergemaal } from '~components/person/personopplysninger/Vergemaal'
 
@@ -26,10 +26,8 @@ export const Personopplysninger = ({
   sakStatus: Result<SakMedBehandlinger>
   fnr: string
 }): ReactNode => {
-  const [landListe, setLandListe] = useState<ILand[]>([])
-
   const [personopplysningerResult, hentPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
-  const [, hentLandListe] = useApiCall(hentAlleLand)
+  const [landListeResult, hentLandListe] = useApiCall(hentAlleLand)
 
   useEffect(() => {
     if (isSuccess(sakStatus)) {
@@ -41,7 +39,7 @@ export const Personopplysninger = ({
   }, [fnr, sakStatus])
 
   useEffect(() => {
-    hentLandListe(null, setLandListe)
+    hentLandListe(null)
   }, [])
 
   return (
@@ -78,25 +76,29 @@ export const Personopplysninger = ({
                         />
                       )}
                       <AvdoedesBarn avdoede={personopplysninger.avdoede} />
-                      <Statsborgerskap
-                        statsborgerskap={personopplysninger.soeker?.opplysning.statsborgerskap}
-                        pdlStatsborgerskap={personopplysninger.soeker?.opplysning.pdlStatsborgerskap}
-                        bosattLand={personopplysninger.soeker?.opplysning.bostedsadresse?.at(0)?.land}
-                        landListe={landListe}
-                      />
-                      <Innflytting
-                        innflytting={personopplysninger.soeker?.opplysning.utland?.innflyttingTilNorge}
-                        landListe={landListe}
-                      />
-                      <Utflytting
-                        utflytting={personopplysninger.soeker?.opplysning.utland?.utflyttingFraNorge}
-                        landListe={landListe}
-                      />
-                      <Vergemaal
-                        vergemaalEllerFremtidsfullmakt={
-                          personopplysninger.soeker?.opplysning.vergemaalEllerFremtidsfullmakt
-                        }
-                      />
+                      {mapSuccess(landListeResult, (landListe) => (
+                        <>
+                          <Statsborgerskap
+                            statsborgerskap={personopplysninger.soeker?.opplysning.statsborgerskap}
+                            pdlStatsborgerskap={personopplysninger.soeker?.opplysning.pdlStatsborgerskap}
+                            bosattLand={personopplysninger.soeker?.opplysning.bostedsadresse?.at(0)?.land}
+                            landListe={landListe}
+                          />
+                          <Innflytting
+                            innflytting={personopplysninger.soeker?.opplysning.utland?.innflyttingTilNorge}
+                            landListe={landListe}
+                          />
+                          <Utflytting
+                            utflytting={personopplysninger.soeker?.opplysning.utland?.utflyttingFraNorge}
+                            landListe={landListe}
+                          />
+                          <Vergemaal
+                            vergemaalEllerFremtidsfullmakt={
+                              personopplysninger.soeker?.opplysning.vergemaalEllerFremtidsfullmakt
+                            }
+                          />
+                        </>
+                      ))}
                     </>
                   ),
                 })}

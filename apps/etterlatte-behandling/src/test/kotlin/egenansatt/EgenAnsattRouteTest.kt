@@ -61,7 +61,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                     module(applicationContext)
                 }
             coEvery {
-                norg2Klient.hentEnheterForOmraade(any(), any())
+                norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any())
             } returns listOf(ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr))
             val sak: Sak =
                 client.post("personer/saker/${SakType.BARNEPENSJON}") {
@@ -106,7 +106,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             Assertions.assertEquals(Enheter.EGNE_ANSATTE.enhetNr, saketterSkjerming.enhet)
 
             val steinkjer = ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
-            coEvery { norg2Klient.hentEnheterForOmraade(any(), any()) } returns listOf(steinkjer)
+            coEvery { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any()) } returns listOf(steinkjer)
             client.post("egenansatt") {
                 addAuthToken(systemBruker)
                 contentType(ContentType.Application.Json)
@@ -148,7 +148,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                 }
 
             coEvery {
-                norg2Klient.hentEnheterForOmraade(any(), any())
+                norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any())
             } returns listOf(ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr))
 
             val sak: Sak =

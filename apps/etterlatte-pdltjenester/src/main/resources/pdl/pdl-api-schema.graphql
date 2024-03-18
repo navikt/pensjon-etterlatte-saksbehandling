@@ -28,7 +28,7 @@ type Adressebeskyttelse {
     metadata: Metadata!
 }
 
-type BostedsadresseDataCell {
+type Bostedsadresse {
     angittFlyttedato: Date
     coAdressenavn: String
     folkeregistermetadata: Folkeregistermetadata
@@ -433,7 +433,7 @@ type OriginaltNavn {
 
 type Person {
     adressebeskyttelse(historikk: Boolean = false): [Adressebeskyttelse!]!
-    bostedsadresse(historikk: Boolean = false): [BostedsadresseDataCell!]!
+    bostedsadresse(historikk: Boolean = false): [Bostedsadresse!]!
     deltBosted(historikk: Boolean = false): [DeltBosted!]!
     doedfoedtBarn: [DoedfoedtBarn!]!
     doedsfall: [Doedsfall!]!

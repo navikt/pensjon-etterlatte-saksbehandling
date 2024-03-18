@@ -28,7 +28,7 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAvslag
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelse
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoer
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurdering
-import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingFerdigData
+import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingBrevDTO
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
 data class BrevDataFerdigstillingRequest(

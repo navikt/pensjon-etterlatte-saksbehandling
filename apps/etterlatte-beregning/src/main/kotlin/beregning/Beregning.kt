@@ -25,7 +25,7 @@ data class Beregning(
             beregningsperioder = beregningsperioder,
             beregnetDato = beregnetDato,
             grunnlagMetadata = grunnlagMetadata,
-            overstyrBeregning = overstyrBeregning.toDTO(),
+            overstyrBeregning = overstyrBeregning?.toDTO(),
         )
 }
 
@@ -35,4 +35,4 @@ data class OverstyrBeregning(
     val tidspunkt: Tidspunkt,
 )
 
-fun OverstyrBeregning?.toDTO() = this?.let { OverstyrBeregningDTO(it.beskrivelse) }
+fun OverstyrBeregning.toDTO() = OverstyrBeregningDTO(this.beskrivelse)

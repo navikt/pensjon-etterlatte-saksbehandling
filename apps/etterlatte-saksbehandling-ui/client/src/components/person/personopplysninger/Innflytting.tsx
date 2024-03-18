@@ -27,7 +27,7 @@ export const Innflytting = ({
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {innflytting && innflytting.length > 0 ? (
+          {!!innflytting?.length ? (
             <>
               {innflytting.map((flytting: InnflyttingDTO, index) => (
                 <Table.Row key={index}>

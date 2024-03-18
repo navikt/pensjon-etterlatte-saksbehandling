@@ -18,7 +18,7 @@ export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: IAdresse[
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {bostedsadresse && bostedsadresse.length > 0 ? (
+          {!!bostedsadresse?.length ? (
             <>
               {bostedsadresse.map((adresse: IAdresse, index: number) => (
                 <Table.Row key={index}>

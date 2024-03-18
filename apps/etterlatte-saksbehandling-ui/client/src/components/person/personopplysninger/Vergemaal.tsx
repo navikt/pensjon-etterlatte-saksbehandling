@@ -23,7 +23,7 @@ export const Vergemaal = ({
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {vergemaalEllerFremtidsfullmakt && vergemaalEllerFremtidsfullmakt.length > 0 ? (
+          {!!vergemaalEllerFremtidsfullmakt?.length ? (
             <>
               {vergemaalEllerFremtidsfullmakt.map((verge: VergemaalEllerFremtidsfullmakt, index: number) => (
                 <Table.Row key={index}>

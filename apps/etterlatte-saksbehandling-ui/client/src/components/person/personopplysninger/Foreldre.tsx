@@ -34,7 +34,7 @@ export const Foreldre = ({
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {avdoed && avdoed.length > 0 ? (
+          {!!avdoed?.length ? (
             <>
               {avdoed.map((doed: PdlPersonopplysning, index: number) => (
                 <Table.Row key={index}>
@@ -69,7 +69,7 @@ export const Foreldre = ({
               <Table.DataCell>-</Table.DataCell>
             </Table.Row>
           )}
-          {gjenlevende && gjenlevende.length >= 0 ? (
+          {!!gjenlevende?.length ? (
             <>
               {gjenlevende.map((levende: PdlPersonopplysning, index: number) => (
                 <Table.Row key={index}>

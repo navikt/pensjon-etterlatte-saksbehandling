@@ -27,7 +27,7 @@ export const Utflytting = ({
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {utflytting && utflytting.length > 0 ? (
+          {!!utflytting?.length ? (
             <>
               {utflytting.map((flytting: UtflyttingDTO, index) => (
                 <Table.Row key={index}>

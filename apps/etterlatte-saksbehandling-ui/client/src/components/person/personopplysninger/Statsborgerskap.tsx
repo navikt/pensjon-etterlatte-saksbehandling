@@ -30,7 +30,7 @@ export const Statsborgerskap = ({
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {pdlStatsborgerskap && pdlStatsborgerskap.length > 0 ? (
+          {!!pdlStatsborgerskap?.length ? (
             pdlStatsborgerskap.map((borgerskap: PdlStatsborgerskap, index: number) => (
               <Table.Row key={index}>
                 <Table.DataCell>{finnLandSomTekst(borgerskap.land, landListe)}</Table.DataCell>

@@ -102,60 +102,7 @@ internal fun Application.module(context: ApplicationContext) {
             withMetrics = true,
         ) {
             attachContekst(dataSource, context)
-            sakSystemRoutes(
-                tilgangService = tilgangService,
-                sakService = sakService,
-                behandlingService = behandlingService,
-                requestLogger = behandlingRequestLogger,
-            )
-            sakWebRoutes(
-                tilgangService = tilgangService,
-                sakService = sakService,
-                behandlingService = behandlingService,
-                grunnlagsendringshendelseService = grunnlagsendringshendelseService,
-                oppgaveService = oppgaveService,
-                requestLogger = behandlingRequestLogger,
-                hendelseDao = hendelseDao,
-            )
-            klageRoutes(klageService = klageService, featureToggleService = featureToggleService)
-            tilbakekrevingRoutes(service = tilbakekrevingService)
-            behandlingRoutes(
-                behandlingService = behandlingService,
-                gyldighetsproevingService = gyldighetsproevingService,
-                kommerBarnetTilGodeService = kommerBarnetTilGodeService,
-                aktivitetspliktService = aktivtetspliktService,
-                behandlingFactory = behandlingFactory,
-            )
-            sjekklisteRoute(sjekklisteService = sjekklisteService)
-            statistikkRoutes(behandlingService = behandlingService)
-            generellbehandlingRoutes(
-                generellBehandlingService = generellBehandlingService,
-                sakService = sakService,
-            )
-            vedtaksbehandlingRoutes(vedtaksbehandlingService = vedtaksbehandlingService)
-            revurderingRoutes(revurderingService = revurderingService)
-            omregningRoutes(omregningService = omregningService)
-            migreringRoutes(migreringService = migreringService)
-            bosattUtlandRoutes(bosattUtlandService = bosattUtlandService)
-            behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService)
-            behandlingVedtakRoute(
-                behandlingsstatusService = behandlingsStatusService,
-                oppgaveService = oppgaveService,
-                behandlingService = behandlingService,
-            )
-            behandlingInfoRoutes(behandlingInfoService)
-            gosysOppgaveRoute(gosysOppgaveService)
-            oppgaveRoutes(oppgaveService)
-            grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
-            doedshendelseRoute(doedshendelseService = doedshendelseService)
-            egenAnsattRoute(
-                egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, enhetService),
-                requestLogger = behandlingRequestLogger,
-            )
-            institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(institusjonsoppholdDao))
-            saksbehandlerRoutes(saksbehandlerService = saksbehandlerService)
-
-            tilgangRoutes(tilgangService)
+            settOppRoutes(context)
 
             install(adressebeskyttelsePlugin) {
                 saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey
@@ -181,6 +128,72 @@ internal fun Application.module(context: ApplicationContext) {
             }
         }
     }
+}
+
+private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
+    sakSystemRoutes(
+        tilgangService = applicationContext.tilgangService,
+        sakService = applicationContext.sakService,
+        behandlingService = applicationContext.behandlingService,
+        requestLogger = applicationContext.behandlingRequestLogger,
+    )
+    sakWebRoutes(
+        tilgangService = applicationContext.tilgangService,
+        sakService = applicationContext.sakService,
+        behandlingService = applicationContext.behandlingService,
+        grunnlagsendringshendelseService = applicationContext.grunnlagsendringshendelseService,
+        oppgaveService = applicationContext.oppgaveService,
+        requestLogger = applicationContext.behandlingRequestLogger,
+        hendelseDao = applicationContext.hendelseDao,
+    )
+    klageRoutes(
+        klageService = applicationContext.klageService,
+        featureToggleService = applicationContext.featureToggleService,
+    )
+    tilbakekrevingRoutes(service = applicationContext.tilbakekrevingService)
+    behandlingRoutes(
+        behandlingService = applicationContext.behandlingService,
+        gyldighetsproevingService = applicationContext.gyldighetsproevingService,
+        kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
+        aktivitetspliktService = applicationContext.aktivtetspliktService,
+        behandlingFactory = applicationContext.behandlingFactory,
+    )
+    sjekklisteRoute(sjekklisteService = applicationContext.sjekklisteService)
+    statistikkRoutes(behandlingService = applicationContext.behandlingService)
+    generellbehandlingRoutes(
+        generellBehandlingService = applicationContext.generellBehandlingService,
+        sakService = applicationContext.sakService,
+    )
+    vedtaksbehandlingRoutes(vedtaksbehandlingService = applicationContext.vedtaksbehandlingService)
+    revurderingRoutes(revurderingService = applicationContext.revurderingService)
+    omregningRoutes(omregningService = applicationContext.omregningService)
+    migreringRoutes(migreringService = applicationContext.migreringService)
+    bosattUtlandRoutes(bosattUtlandService = applicationContext.bosattUtlandService)
+    behandlingsstatusRoutes(behandlingsstatusService = applicationContext.behandlingsStatusService)
+    behandlingVedtakRoute(
+        behandlingsstatusService = applicationContext.behandlingsStatusService,
+        oppgaveService = applicationContext.oppgaveService,
+        behandlingService = applicationContext.behandlingService,
+    )
+    behandlingInfoRoutes(applicationContext.behandlingInfoService)
+    gosysOppgaveRoute(applicationContext.gosysOppgaveService)
+    oppgaveRoutes(applicationContext.oppgaveService)
+    grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = applicationContext.grunnlagsendringshendelseService)
+    doedshendelseRoute(doedshendelseService = applicationContext.doedshendelseService)
+    egenAnsattRoute(
+        egenAnsattService =
+            EgenAnsattService(
+                applicationContext.sakService,
+                applicationContext.oppgaveService,
+                sikkerLogg,
+                applicationContext.enhetService,
+            ),
+        requestLogger = applicationContext.behandlingRequestLogger,
+    )
+    institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(applicationContext.institusjonsoppholdDao))
+    saksbehandlerRoutes(saksbehandlerService = applicationContext.saksbehandlerService)
+
+    tilgangRoutes(applicationContext.tilgangService)
 }
 
 private fun Route.attachContekst(

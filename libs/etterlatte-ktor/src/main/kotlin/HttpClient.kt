@@ -64,4 +64,4 @@ fun httpClient(
         }
         ekstraDefaultHeaders.invoke(this)
     }
-}.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
+}

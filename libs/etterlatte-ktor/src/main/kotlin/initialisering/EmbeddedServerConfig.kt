@@ -12,6 +12,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.ktor.healthApi
+import no.nav.etterlatte.libs.ktor.ktor.shutdownPolicyEmbeddedServer
 import no.nav.etterlatte.libs.ktor.metricsRoute
 import no.nav.etterlatte.libs.ktor.restModule
 
@@ -42,6 +43,7 @@ private fun settOppEmbeddedServer(
     body: Application.() -> Unit,
 ): CIOApplicationEngine =
     embeddedServer(
+        configure = shutdownPolicyEmbeddedServer(),
         factory = CIO,
         environment =
             applicationEngineEnvironment {

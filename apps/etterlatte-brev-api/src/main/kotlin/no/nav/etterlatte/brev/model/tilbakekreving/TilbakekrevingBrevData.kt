@@ -62,23 +62,21 @@ data class TilbakekrevingBrevDTO(
             )
         }
 
-        private fun sjekkOmHarRenter(tilbakekreving: Tilbakekreving) =
-            tilbakekreving.perioder.any { periode ->
-                periode.ytelse.rentetillegg.let { it != null && it > 0 }
-            }
-
         private fun tilbakekrevingsPerioder(tilbakekreving: Tilbakekreving) =
             tilbakekreving.perioder.map { periode ->
                 TilbakekrevingPeriodeData(
                     maaned = periode.maaned.atDay(1),
                     beloeper =
                         periode.ytelse.let { beloeper ->
+                            val netto = tilbakekreving.perioder.sumOf { it.ytelse.nettoTilbakekreving ?: 0 }
+                            val renteTillegg = tilbakekreving.perioder.sumOf { it.ytelse.rentetillegg ?: 0 }
                             TilbakekrevingBeloeperData(
                                 feilutbetaling = Kroner(beloeper.beregnetFeilutbetaling ?: 0),
                                 bruttoTilbakekreving = Kroner(beloeper.bruttoTilbakekreving ?: 0),
                                 fradragSkatt = Kroner(beloeper.skatt ?: 0),
-                                nettoTilbakekreving = Kroner(beloeper.nettoTilbakekreving ?: 0),
-                                renteTillegg = Kroner(beloeper.rentetillegg ?: 0),
+                                nettoTilbakekreving = Kroner(netto),
+                                renteTillegg = Kroner(renteTillegg),
+                                sumNettoRenter = Kroner(netto + renteTillegg),
                             )
                         },
                     resultat =
@@ -87,14 +85,18 @@ data class TilbakekrevingBrevDTO(
                 )
             }
 
-        private fun perioderSummert(tilbakekreving: Tilbakekreving) =
-            TilbakekrevingBeloeperData(
+        private fun perioderSummert(tilbakekreving: Tilbakekreving): TilbakekrevingBeloeperData {
+            val netto = tilbakekreving.perioder.sumOf { it.ytelse.nettoTilbakekreving ?: 0 }
+            val renteTillegg = tilbakekreving.perioder.sumOf { it.ytelse.rentetillegg ?: 0 }
+            return TilbakekrevingBeloeperData(
                 feilutbetaling = Kroner(tilbakekreving.perioder.sumOf { it.ytelse.beregnetFeilutbetaling ?: 0 }),
                 bruttoTilbakekreving = Kroner(tilbakekreving.perioder.sumOf { it.ytelse.bruttoTilbakekreving ?: 0 }),
                 fradragSkatt = Kroner(tilbakekreving.perioder.sumOf { it.ytelse.skatt ?: 0 }),
-                nettoTilbakekreving = Kroner(tilbakekreving.perioder.sumOf { it.ytelse.nettoTilbakekreving ?: 0 }),
-                renteTillegg = Kroner(tilbakekreving.perioder.sumOf { it.ytelse.rentetillegg ?: 0 }),
+                nettoTilbakekreving = Kroner(netto),
+                renteTillegg = Kroner(renteTillegg),
+                sumNettoRenter = Kroner(netto + renteTillegg),
             )
+        }
     }
 }
 
@@ -119,6 +121,7 @@ data class TilbakekrevingBeloeperData(
     val nettoTilbakekreving: Kroner,
     val fradragSkatt: Kroner,
     val renteTillegg: Kroner,
+    val sumNettoRenter: Kroner,
 )
 
 class BrevDataTilbakerevingHarManglerException(message: String) : RuntimeException(message)

@@ -66,16 +66,6 @@ sealed class DoedshendelseKontrollpunkt {
             get() = this.beskrivelse
     }
 
-    @JsonTypeName("BARN_HAR_UFOERE")
-    data object BarnHarUfoereTrygd : DoedshendelseKontrollpunkt() {
-        override val kode = "BARN_HAR_UFOERE"
-        override val beskrivelse: String = "Barnet har uføretrygd"
-        override val sendBrev: Boolean = true
-        override val opprettOppgave: Boolean = false
-        override val oppgaveTekst: String? = null
-        override val avbryt: Boolean = false
-    }
-
     @JsonTypeName("KRYSSENDE_YTELSE_I_PESYS")
     data object KryssendeYtelseIPesysEps : DoedshendelseKontrollpunkt() {
         override val kode = "KRYSSENDE_YTELSE_I_PESYS"

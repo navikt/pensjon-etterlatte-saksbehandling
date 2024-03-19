@@ -550,58 +550,6 @@ class DoedshendelseKontrollpunktServiceTest {
     }
 
     @Test
-    fun `Skal returnere kontrollpunkt BarnHarBarnepensjon for relasjon barn og har BP`() {
-        every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                foedselsnummer = doedshendelseInternalBP.avdoedFnr,
-                rolle = PersonRolle.AVDOED,
-                saktype = any(),
-            )
-        } returns mockPerson().copy(doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null))
-        val sakId = 1L
-        val sak =
-            Sak(
-                doedshendelseInternalBP.beroertFnr,
-                SakType.BARNEPENSJON,
-                sakId,
-                Enheter.defaultEnhet.enhetNr,
-            )
-        every { sakService.finnSak(any(), any()) } returns sak
-        every {
-            behandlingService.hentSisteIverksatte(
-                any(),
-            )
-        } returns foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.IVERKSATT)
-
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.BarnHarBarnepensjon(sak))
-    }
-
-    @Test
-    fun `Skal returnere kontrollpunkt BarnHarUfoereTrygd for relasjon barn og har uføretrygd`() {
-        every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                foedselsnummer = doedshendelseInternalBP.avdoedFnr,
-                rolle = PersonRolle.AVDOED,
-                saktype = any(),
-            )
-        } returns mockPerson().copy(doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null))
-        coEvery { pesysKlient.hentSaker(doedshendelseInternalBP.beroertFnr) } returns
-            listOf(
-                SakSammendragResponse(
-                    sakType = SakSammendragResponse.UFORE_SAKTYPE,
-                    sakStatus = SakSammendragResponse.Status.LOPENDE,
-                    fomDato = LocalDate.now().minusMonths(2),
-                    tomDate = null,
-                ),
-            )
-
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
-
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.BarnHarUfoereTrygd)
-    }
-
-    @Test
     fun `Skal returnere kontrollpunkt hvis den beroerte har ufoeretrygd`() {
         coEvery { pesysKlient.hentSaker(doedshendelseInternalOMS.beroertFnr) } returns
             listOf(
@@ -623,51 +571,6 @@ class DoedshendelseKontrollpunktServiceTest {
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.KryssendeYtelseIPesysEps)
-    }
-
-    @Test
-    fun `Skal opprette kontrollpunkt ved samtidig doedsfall`() {
-        every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                foedselsnummer = JOVIAL_LAMA.value,
-                rolle = PersonRolle.GJENLEVENDE,
-                saktype = SakType.BARNEPENSJON,
-            )
-        } returns
-            mockPerson().copy(
-                foedselsnummer = OpplysningDTO(JOVIAL_LAMA, null),
-                doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null),
-            )
-
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
-
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.SamtidigDoedsfall)
-    }
-
-    @Test
-    fun `Skal opprette kontrollpunkt dersom vi ikke finner den andre forelderen`() {
-        every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                foedselsnummer = any(),
-                rolle = PersonRolle.BARN,
-                saktype = any(),
-            )
-        } returns
-            mockPerson().copy(
-                familieRelasjon =
-                    OpplysningDTO(
-                        FamilieRelasjon(
-                            ansvarligeForeldre = emptyList(),
-                            foreldre = listOf(KONTANT_FOT),
-                            barn = emptyList(),
-                        ),
-                        null,
-                    ),
-            )
-
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
-
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet)
     }
 
     @Test

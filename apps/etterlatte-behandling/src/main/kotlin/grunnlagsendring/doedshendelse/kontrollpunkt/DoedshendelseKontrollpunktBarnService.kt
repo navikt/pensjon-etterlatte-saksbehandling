@@ -1,19 +1,15 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.common.klienter.PesysKlient
-import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.Sak
 
-internal class DoedshendelseKontrollpunktBarnService(
+class DoedshendelseKontrollpunktBarnService(
     private val pdlTjenesterKlient: PdlTjenesterKlient,
-    private val pesysKlient: PesysKlient,
     private val behandlingService: BehandlingService,
 ) {
     fun identifiser(
@@ -22,30 +18,9 @@ internal class DoedshendelseKontrollpunktBarnService(
         sak: Sak?,
     ): List<DoedshendelseKontrollpunkt> {
         return listOfNotNull(
-            kontrollerUfoeretrygdBarn(hendelse),
             kontrollerBarnOgHarBP(sak),
             kontrollerSamtidigDoedsfall(avdoed, hendelse),
         )
-    }
-
-    private fun kontrollerUfoeretrygdBarn(doedshendelse: DoedshendelseInternal): DoedshendelseKontrollpunkt.BarnHarUfoereTrygd? {
-        return when (harUfoereTrygd(doedshendelse)) {
-            true -> DoedshendelseKontrollpunkt.BarnHarUfoereTrygd
-            false -> null
-        }
-    }
-
-    private fun harUfoereTrygd(doedshendelse: DoedshendelseInternal): Boolean {
-        val sakerFraPesys =
-            runBlocking {
-                pesysKlient.hentSaker(doedshendelse.beroertFnr)
-            }
-        return sakerFraPesys.any { it.harLoependeUfoeretrygd() }
-    }
-
-    private fun SakSammendragResponse.harLoependeUfoeretrygd(): Boolean {
-        return this.sakType == SakSammendragResponse.UFORE_SAKTYPE &&
-            this.sakStatus == SakSammendragResponse.Status.LOPENDE
     }
 
     private fun kontrollerBarnOgHarBP(sak: Sak?): DoedshendelseKontrollpunkt.BarnHarBarnepensjon? {

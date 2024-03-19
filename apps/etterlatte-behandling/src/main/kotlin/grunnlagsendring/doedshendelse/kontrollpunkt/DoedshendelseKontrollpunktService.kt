@@ -34,12 +34,7 @@ class DoedshendelseKontrollpunktService(
 ) {
     private val kontrollpunktEktefelleService = DoedshendelseKontrollpunktEktefelleService()
     private val kontrollpunktAvdoedService = DoedshendelseKontrollpunktAvdoedService()
-    private val kontrollpunktBarnService =
-        DoedshendelseKontrollpunktBarnService(
-            pdlTjenesterKlient,
-            pesysKlient,
-            behandlingService,
-        )
+    private val kontrollpunktBarnService = DoedshendelseKontrollpunktBarnService(pdlTjenesterKlient, behandlingService)
 
     fun identifiserKontrollerpunkter(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt> =
         when (hendelse.relasjon) {

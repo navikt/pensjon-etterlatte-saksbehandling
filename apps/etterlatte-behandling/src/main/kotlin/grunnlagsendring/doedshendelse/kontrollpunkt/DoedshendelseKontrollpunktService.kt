@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.time.temporal.Temporal
 import kotlin.math.absoluteValue
@@ -131,7 +130,7 @@ class DoedshendelseKontrollpunktService(
             kontrollerKryssendeYtelseEps(hendelse),
             kontrollerEksisterendeSakEps(sak),
             kontrollerEpsErDoed(eps),
-            kontrollerEpsHarFylt67Aar(eps),
+            kontrollerEpsHarFylt67Aar(eps, avdoed),
             kontrollerSkiltSistefemAarEllerGiftI15(eps, avdoed),
             kontrollerSkilti5AarMedUkjentGiftemaalStart(eps, avdoed),
         )
@@ -165,12 +164,12 @@ class DoedshendelseKontrollpunktService(
             val skilt = ektefelle.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.SKILT }
             val skiltMedAvdoed =
                 skilt.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
-            val naa = LocalDate.now()
+            val doedsdato = avdoed.doedsdato!!.verdi
             val gift = ektefelle.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.GIFT }
             val giftMedAvdoed = gift.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
             if (skiltMedAvdoed.isNotEmpty() && giftMedAvdoed.isNotEmpty()) {
                 val skiltsivilstand = skiltMedAvdoed.first()
-                val antallSkilteAar = safeYearsBetween(skiltsivilstand.gyldigFraOgMed, naa).absoluteValue
+                val antallSkilteAar = safeYearsBetween(skiltsivilstand.gyldigFraOgMed, doedsdato).absoluteValue
                 val giftSivilstand = giftMedAvdoed.first()
                 return if (antallSkilteAar <= 5 && giftSivilstand.gyldigFraOgMed == null) {
                     DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde(
@@ -198,12 +197,12 @@ class DoedshendelseKontrollpunktService(
                 skilt.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
             val gift = ektefelle.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.GIFT }
             val giftMedAvdoed = gift.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
-            val naa = LocalDate.now()
+            val doedsdato = avdoed.doedsdato!!.verdi
             if (skiltMedAvdoed.isNotEmpty() && giftMedAvdoed.isNotEmpty()) {
                 val skiltsivilstand = skiltMedAvdoed.first()
-                val antallSkilteAar = safeYearsBetween(naa, skiltsivilstand.gyldigFraOgMed).absoluteValue
+                val antallSkilteAar = safeYearsBetween(skiltsivilstand.gyldigFraOgMed, doedsdato).absoluteValue
                 val giftSivilstand = giftMedAvdoed.first()
-                val antallGifteAar = safeYearsBetween(giftSivilstand.gyldigFraOgMed, naa).absoluteValue
+                val antallGifteAar = safeYearsBetween(giftSivilstand.gyldigFraOgMed, doedsdato).absoluteValue
                 return if (antallSkilteAar <= 5 && antallGifteAar >= 15) {
                     DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5OgGiftI15(
                         doedsdato = avdoed.doedsdato!!.verdi,
@@ -220,11 +219,14 @@ class DoedshendelseKontrollpunktService(
         }
     }
 
-    private fun kontrollerEpsHarFylt67Aar(eps: PersonDTO): DoedshendelseKontrollpunkt.EpsKanHaAlderspensjon? {
+    private fun kontrollerEpsHarFylt67Aar(
+        eps: PersonDTO,
+        avdoed: PersonDTO,
+    ): DoedshendelseKontrollpunkt.EpsKanHaAlderspensjon? {
         return if (eps.foedselsdato != null) {
             val foedselsdato = eps.foedselsdato?.verdi
-            val naaPlussEnMaaned = LocalDate.now().plusMonths(1L)
-            val alder = safeYearsBetween(foedselsdato, naaPlussEnMaaned).absoluteValue
+            val maanedenEtterDoedsdato = avdoed.doedsdato!!.verdi.plusMonths(1).withDayOfMonth(1)
+            val alder = safeYearsBetween(foedselsdato, maanedenEtterDoedsdato).absoluteValue
             val alderspensjonAar = 67
             if (alder >= alderspensjonAar) {
                 DoedshendelseKontrollpunkt.EpsKanHaAlderspensjon

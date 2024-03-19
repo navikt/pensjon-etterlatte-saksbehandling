@@ -131,7 +131,7 @@ internal fun Application.module(context: ApplicationContext) {
                 sakService = sakService,
             )
             vedtaksbehandlingRoutes(vedtaksbehandlingService = vedtaksbehandlingService)
-            revurderingRoutes(revurderingService = revurderingService, featureToggleService = featureToggleService)
+            revurderingRoutes(revurderingService = revurderingService)
             omregningRoutes(omregningService = omregningService)
             migreringRoutes(migreringService = migreringService)
             bosattUtlandRoutes(bosattUtlandService = bosattUtlandService)

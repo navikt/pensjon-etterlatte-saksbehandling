@@ -5,13 +5,13 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 class DoedshendelseKontrollpunktAvdoedService {
     fun identifiser(avdoed: PersonDTO): List<DoedshendelseKontrollpunkt> {
         return listOfNotNull(
-            kontrollerAvdoedDoedsdato(avdoed),
+            kontrollerDoedsdato(avdoed),
             kontrollerDNummer(avdoed),
             kontrollerUtvandring(avdoed),
         )
     }
 
-    private fun kontrollerAvdoedDoedsdato(avdoed: PersonDTO): DoedshendelseKontrollpunkt? =
+    private fun kontrollerDoedsdato(avdoed: PersonDTO): DoedshendelseKontrollpunkt? =
         when (avdoed.doedsdato) {
             null -> DoedshendelseKontrollpunkt.AvdoedLeverIPDL
             else -> null

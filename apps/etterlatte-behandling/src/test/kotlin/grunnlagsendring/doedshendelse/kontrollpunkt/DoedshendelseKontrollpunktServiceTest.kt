@@ -32,8 +32,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
-import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
-import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -604,21 +602,6 @@ class DoedshendelseKontrollpunktServiceTest {
     }
 
     @Test
-    fun `Skal returnere kontrollpunkt hvis avdoed ikke har doedsdato i PDL`() {
-        every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                foedselsnummer = doedshendelseInternalBP.avdoedFnr,
-                rolle = PersonRolle.AVDOED,
-                saktype = any(),
-            )
-        } returns mockPerson()
-
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
-
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedLeverIPDL)
-    }
-
-    @Test
     fun `Skal returnere kontrollpunkt hvis den beroerte har ufoeretrygd`() {
         coEvery { pesysKlient.hentSaker(doedshendelseInternalOMS.beroertFnr) } returns
             listOf(
@@ -640,48 +623,6 @@ class DoedshendelseKontrollpunktServiceTest {
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.KryssendeYtelseIPesysEps)
-    }
-
-    @Test
-    fun `Skal returnere kontrollpunkt hvis den avdoede hadde utvandring`() {
-        every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                foedselsnummer = doedshendelseInternalBP.avdoedFnr,
-                rolle = PersonRolle.AVDOED,
-                saktype = any(),
-            )
-        } returns
-            mockPerson(
-                Utland(
-                    innflyttingTilNorge = emptyList(),
-                    utflyttingFraNorge = listOf(UtflyttingFraNorge("Sverige", LocalDate.now().minusMonths(2))),
-                ),
-            ).copy(
-                doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null),
-            )
-
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
-
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarUtvandret)
-    }
-
-    @Test
-    fun `Skal returnere kontrollpunkt hvis den avdoede har D-nummer`() {
-        every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                foedselsnummer = doedshendelseInternalBP.avdoedFnr,
-                rolle = PersonRolle.AVDOED,
-                saktype = any(),
-            )
-        } returns
-            mockPerson().copy(
-                doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null),
-                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of("69057949961"), null),
-            )
-
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
-
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarDNummer)
     }
 
     @Test

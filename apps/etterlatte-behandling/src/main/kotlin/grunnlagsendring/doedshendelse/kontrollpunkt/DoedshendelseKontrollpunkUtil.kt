@@ -9,7 +9,7 @@ import kotlin.math.absoluteValue
 fun harFellesBarn(
     avdoed: PersonDTO,
     eps: PersonDTO,
-): Boolean = finnBarn(avdoed).intersect(finnBarn(eps)).isNotEmpty()
+): Boolean = finnBarn(avdoed).intersect(finnBarn(eps).toSet()).isNotEmpty()
 
 fun harBarn(personDTO: PersonDTO): Boolean = finnBarn(personDTO).isNotEmpty()
 

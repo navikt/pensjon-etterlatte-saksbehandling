@@ -53,6 +53,7 @@ import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
+import java.util.Timer
 import javax.sql.DataSource
 
 val sikkerLogg: Logger = sikkerlogger()
@@ -87,11 +88,15 @@ private class Server(private val context: ApplicationContext) {
 }
 
 internal fun Application.moduleOnServerReady(context: ApplicationContext) {
+    val hooks =
+        mapOf<Timer, (Timer) -> Unit>(
+            context.metrikkerJob.schedule() to { addShutdownHook(it) },
+            context.doedsmeldingerJob.schedule() to { addShutdownHook(it) },
+            context.saksbehandlerJob.schedule() to { addShutdownHook(it) },
+            context.fristGaarUtJobb.schedule() to { addShutdownHook(it) },
+        )
     environment.monitor.subscribe(ServerReady) {
-        context.metrikkerJob.schedule().also { addShutdownHook(it) }
-        context.doedsmeldingerJob.schedule().also { addShutdownHook(it) }
-        context.saksbehandlerJob.schedule().also { addShutdownHook(it) }
-        context.fristGaarUtJobb.schedule().also { addShutdownHook(it) }
+        hooks.forEach { it.value.apply { it.key } }
     }
 }
 

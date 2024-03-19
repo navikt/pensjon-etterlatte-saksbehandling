@@ -73,7 +73,7 @@ class BeregningService(
         behandlingId: UUID,
         overstyrBeregning: OverstyrBeregningDTO,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OverstyrBeregning? {
+    ): OverstyrBeregning {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
         return hentOverstyrBeregning(behandlingId, brukerTokenInfo).takeIf { it != null }

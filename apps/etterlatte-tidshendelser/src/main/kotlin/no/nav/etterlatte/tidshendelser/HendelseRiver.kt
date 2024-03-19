@@ -62,6 +62,7 @@ class HendelseRiver(
             } else if (steg in listOf("VEDTAK_ATTESTERT", "OPPGAVE_OPPRETTET")) {
                 logger.info("Ferdigstiller hendelse")
                 hendelseDao.oppdaterHendelseStatus(hendelseIdUUID, HendelseStatus.FERDIG)
+                hendelseDao.ferdigstillJobbHvisAlleHendelserErFerdige(hendelseIdUUID)
             }
         }
     }

@@ -114,6 +114,7 @@ class TidshendelseRiver(
         if (dryrun) {
             logger.info("Dryrun: skipper å behandle vilkårsvurdering for behandlingId=$behandlingId")
         } else {
+            logger.info("Oppretter vilkårsvurdering for aldersovergang, behandlingId=$behandlingId")
             vilkaarsvurderingService.opphoerAldersovergang(behandlingId, forrigeBehandlingId)
         }
 

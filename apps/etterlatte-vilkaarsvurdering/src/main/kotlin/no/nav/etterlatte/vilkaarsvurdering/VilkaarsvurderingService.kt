@@ -134,6 +134,7 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         kopierFraBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        kopierResultat: Boolean = true,
     ): Vilkaarsvurdering {
         logger.info("Oppretter og kopierer vilkårsvurdering for $behandlingId fra $kopierFraBehandling")
         return tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
@@ -171,7 +172,7 @@ class VilkaarsvurderingService(
                 )
 
             // Hvis minst ett av vilkårene mangler vurdering - slett vilkårsvurderingresultat
-            if (nyVilkaarsvurdering.vilkaar.any { v -> v.vurdering == null }) {
+            if (!kopierResultat || nyVilkaarsvurdering.vilkaar.any { v -> v.vurdering == null }) {
                 vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId)
             } else {
                 runBlocking { behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo) }

@@ -119,4 +119,6 @@ export const ClientConfig = {
   eessiPensjonUrl: requireEnvValue('EESSI_PENSJON_URL'),
   cachebuster: requireEnvValue('APP_VERSION'),
   rinaUrl: requireEnvValue('RINA_URL'),
+  modiapersonoversiktUrl: requireEnvValue('MODIAPERSONOVERSIKT_URL'),
+  psakUrl: requireEnvValue('PSAK_URL'),
 }

@@ -26,7 +26,7 @@ class FristGaarUtJobb(
     private val jobbNavn = this::class.simpleName
 
     override fun schedule(): Timer {
-        logger.info("$jobbNavn er satt til å starte $starttidspunkt med periode $periode")
+        logger.debug("{} er satt til å starte {} med periode {}", jobbNavn, starttidspunkt, periode)
 
         return fixedRateCancellableTimer(
             name = jobbNavn,
@@ -42,13 +42,16 @@ class FristGaarUtJobb(
                         oppgaveKilde = (OppgaveKilde.entries - OppgaveKilde.GJENOPPRETTING),
                         oppgaver = listOf(),
                     )
+                val automatiskAvskrivFrist = featureToggleService.isEnabled(FristFeatureToggle.AutomatiskAvskrivFrist, false)
                 service.hentFristGaarUt(request).forEach {
-                    if (featureToggleService.isEnabled(FristFeatureToggle.AutomatiskAvskrivFrist, false)) {
+                    if (automatiskAvskrivFrist) {
+                        logger.info("Frist er gått ut for ${it.oppgaveID}, tar av vent")
                         service.oppdaterStatusOgMerknad(
                             it.oppgaveID,
                             it.merknad ?: "",
                             Status.UNDER_BEHANDLING,
                         )
+                        logger.info("Tok ${it.oppgaveID} av vent")
                     } else {
                         logger.debug(
                             "Automatisk avskriv frist er skrudd av, gjør derfor ingenting for {}",
@@ -56,6 +59,7 @@ class FristGaarUtJobb(
                         )
                     }
                 }
+                logger.info("Ferdig med å ta oppgaver av vent")
             }
         }
     }

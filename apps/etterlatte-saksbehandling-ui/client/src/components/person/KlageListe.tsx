@@ -20,8 +20,6 @@ import { JaNei } from '~shared/types/ISvar'
 
 import { mapApiResult } from '~shared/api/apiUtils'
 
-export const FEATURE_TOGGLE_KAN_BRUKE_KLAGE = 'pensjon-etterlatte.kan-bruke-klage'
-
 function formaterKlagestatus(status: KlageStatus): string | null {
   return teksterKlagestatus[status]
 }

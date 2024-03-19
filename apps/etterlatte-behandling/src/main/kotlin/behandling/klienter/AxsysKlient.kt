@@ -6,13 +6,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
-import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.Pingable
+import no.nav.etterlatte.libs.ktor.navConsumerId
 import no.nav.etterlatte.libs.ktor.ping
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import org.slf4j.Logger
@@ -41,7 +40,7 @@ class AxsysKlientImpl(private val client: HttpClient, private val url: String) :
         return try {
             val response =
                 client.get("$url/api/v2/tilgang/$ident?inkluderAlleEnheter=false") {
-                    header(NAV_CONSUMER_ID, "etterlatte-behandling")
+                    navConsumerId("etterlatte-behandling")
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
                 }
@@ -78,8 +77,10 @@ class HentEnhetException(override val detail: String, override val cause: Throwa
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Enheter(
-    val enhetId: String, // Enhetsnummer
-    val temaer: ArrayList<String>?, // EYB EYO
+    // Enhetsnummer
+    val enhetId: String,
+    // EYB EYO
+    val temaer: ArrayList<String>?,
     val navn: String,
 )
 

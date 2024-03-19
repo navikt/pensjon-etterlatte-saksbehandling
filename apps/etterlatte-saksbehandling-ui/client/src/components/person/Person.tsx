@@ -8,7 +8,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { Tabs } from '@navikt/ds-react'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
-import { BulletListIcon, CogRotationIcon, EnvelopeClosedIcon, FileTextIcon } from '@navikt/aksel-icons'
+import { BulletListIcon, CogRotationIcon, EnvelopeClosedIcon, FileTextIcon, PersonIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
@@ -20,9 +20,11 @@ import { hentPersonNavn } from '~shared/api/pdltjenester'
 import { SamordningSak } from '~components/person/SamordningSak'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
+import { Personopplysninger } from '~components/person/personopplysninger/Personopplysninger'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 
 export enum PersonOversiktFane {
+  PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
   SAKER = 'SAKER',
   DOKUMENTER = 'DOKUMENTER',
   BREV = 'BREV',
@@ -88,6 +90,11 @@ export const Person = () => {
           <Tabs value={fane} onChange={velgFane}>
             <Tabs.List>
               <Tabs.Tab value={PersonOversiktFane.SAKER} label="Sak og behandling" icon={<BulletListIcon />} />
+              <Tabs.Tab
+                value={PersonOversiktFane.PERSONOPPLYSNINGER}
+                label="Personopplysninger"
+                icon={<PersonIcon />}
+              />
               <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
               <Tabs.Tab value={PersonOversiktFane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
               {isOmstillingsstoenad(sakStatus) && (
@@ -97,6 +104,9 @@ export const Person = () => {
 
             <Tabs.Panel value={PersonOversiktFane.SAKER}>
               <SakOversikt sakStatus={sakStatus} fnr={person.foedselsnummer} />
+            </Tabs.Panel>
+            <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
+              <Personopplysninger sakStatus={sakStatus} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.DOKUMENTER}>
               <Dokumentliste sakStatus={sakStatus} fnr={person.foedselsnummer} />

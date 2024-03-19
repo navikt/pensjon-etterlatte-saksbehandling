@@ -21,8 +21,7 @@ import { SakType } from '~shared/types/sak'
 import TrygdetidVisning from '~components/behandling/trygdetid/TrygdetidVisning'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { erOpphoer } from '~shared/types/Revurderingaarsak'
-import { FEATURE_TOGGLE_LAG_VARSELBREV, Varselbrev } from '~components/behandling/brev/Varselbrev'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { Varselbrev } from '~components/behandling/brev/Varselbrev'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -136,8 +135,7 @@ export const useBehandlingRoutes = () => {
   const { currentRoute, goto } = useRouteNavigation()
   const behandling = useBehandling()
 
-  const varselbrevAktivert = useFeatureEnabledMedDefault(FEATURE_TOGGLE_LAG_VARSELBREV, false)
-  const aktuelleRoutes = hentAktuelleRoutes(behandling, varselbrevAktivert)
+  const aktuelleRoutes = hentAktuelleRoutes(behandling)
 
   const firstPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === 0
   const lastPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === aktuelleRoutes.length - 1
@@ -158,10 +156,10 @@ export const useBehandlingRoutes = () => {
   return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, goto }
 }
 
-const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, varselbrevAktivert: boolean) => {
+const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
   if (!behandling) return []
 
-  const lagVarselbrev = varselbrevAktivert && behandling?.kilde === Vedtaksloesning.GJENOPPRETTA
+  const lagVarselbrev = behandling?.kilde === Vedtaksloesning.GJENOPPRETTA
 
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:

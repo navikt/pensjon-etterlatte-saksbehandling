@@ -267,6 +267,7 @@ class BeregningsGrunnlagService(
                     behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                 }
             if (beregningRepository.hentOverstyrBeregning(behandling.sak) != null) {
+                dupliserOverstyrBeregningGrunnlag(behandlingId, forrigeBehandlingId)
                 return
             } else {
                 throw RuntimeException("Ingen grunnlag funnet for $forrigeBehandlingId")

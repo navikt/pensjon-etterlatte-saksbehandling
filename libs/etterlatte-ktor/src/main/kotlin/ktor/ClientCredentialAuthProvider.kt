@@ -32,7 +32,8 @@ class ClientCredentialAuthProvider(config: Map<String, String>) : AuthProvider {
 
     private val clientPropertiesConfig =
         ClientProperties(
-            tokenEndpointUrl = null, // URI(conf["token_endpoint_url"]!!),
+            // URI(conf["token_endpoint_url"]!!),
+            tokenEndpointUrl = null,
             wellKnownUrl = config["AZURE_APP_WELL_KNOWN_URL"]?.let { URI(it) },
             grantType = GrantType.CLIENT_CREDENTIALS,
             scope = config["AZURE_APP_OUTBOUND_SCOPE"]?.split(",") ?: emptyList(),
@@ -43,7 +44,8 @@ class ClientCredentialAuthProvider(config: Map<String, String>) : AuthProvider {
                 )
                     .clientJwk(config.getOrThrow("AZURE_APP_JWK"))
                     .build(),
-            resourceUrl = null, // conf["resource_url"]?.let { URI(it) },
+            // conf["resource_url"]?.let { URI(it) },
+            resourceUrl = null,
             tokenExchange = null,
         )
 

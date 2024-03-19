@@ -27,9 +27,6 @@ import {
   hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave,
   settOppgavePaaVentApi,
 } from '~shared/api/oppgaver'
-
-export const FEATURE_TOGGLE_LAG_VARSELBREV = 'lag-varselbrev'
-
 export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()

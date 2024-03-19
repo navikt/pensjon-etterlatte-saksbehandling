@@ -61,9 +61,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
     @BeforeAll
     fun beforeAll() {
         startServer(
-            featureToggleService =
-                DummyFeatureToggleService()
-                    .apply { settBryter(KlageFeatureToggle.KanBrukeKlageToggle, true) },
+            featureToggleService = DummyFeatureToggleService(),
         ).also {
             resetDatabase()
         }

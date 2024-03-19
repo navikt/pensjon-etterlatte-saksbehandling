@@ -1,13 +1,7 @@
 import { Button, Select, TextField } from '@navikt/ds-react'
 import React, { ReactNode, useEffect, useState } from 'react'
-import {
-  initialFilter,
-  minOppgavelisteFiltre,
-  oppgavetypefilter,
-} from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { initialFilter, minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { FlexRow } from '~shared/styled'
-import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { FiltrerPaaSaksbehandler } from '~components/oppgavebenk/filtreringAvOppgaver/FiltrerPaaSaksbehandler'
 import {
@@ -17,6 +11,7 @@ import {
   FRISTFILTER,
   FristFilterKeys,
   OPPGAVESTATUSFILTER,
+  OPPGAVETYPEFILTER,
   YTELSEFILTER,
   YtelseFilterKeys,
 } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
@@ -42,8 +37,6 @@ export const FilterRad = ({
   oppgavelisteValg,
 }: Props): ReactNode => {
   const [sakEllerFnr, setSakEllerFnr] = useState<string>(filter.sakEllerFnrFilter)
-
-  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   useEffect(() => {
     const delay = setTimeout(() => setFilter({ ...filter, sakEllerFnrFilter: sakEllerFnr }), 500)
@@ -127,7 +120,7 @@ export const FilterRad = ({
 
             <MultiSelectFilter
               label="Oppgavetype"
-              options={oppgavetypefilter(kanBrukeKlage).map(([, beskrivelse]) => beskrivelse)}
+              options={Object.entries(OPPGAVETYPEFILTER).map(([, beskrivelse]) => beskrivelse)}
               values={filter.oppgavetypeFilter}
               onChange={(statuser) => setFilter({ ...filter, oppgavetypeFilter: statuser })}
             />

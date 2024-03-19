@@ -23,6 +23,10 @@ spec:
       enabled: true
   secureLogs:
     enabled: true
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   resources:
     requests:
       cpu: 25m

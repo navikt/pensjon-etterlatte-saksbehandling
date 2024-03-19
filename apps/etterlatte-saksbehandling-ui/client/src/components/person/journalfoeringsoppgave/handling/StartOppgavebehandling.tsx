@@ -11,8 +11,6 @@ import { FlexRow } from '~shared/styled'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgaveHandling, settOppgaveHandling } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { FormWrapper } from '../BehandleJournalfoeringOppgave'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
@@ -21,7 +19,6 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
   const { oppgave, journalpost, oppgaveHandling } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   const neste = () => {
     switch (oppgaveHandling) {
@@ -30,11 +27,7 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
       case OppgaveHandling.FERDIGSTILL_OPPGAVE:
         return navigate('ferdigstill', { relative: 'path' })
       case OppgaveHandling.NY_KLAGE:
-        if (kanBrukeKlage) {
-          return navigate('oppretteklage', { relative: 'path' })
-        } else {
-          return navigate('../', { relative: 'path' })
-        }
+        return navigate('oppretteklage', { relative: 'path' })
     }
   }
 
@@ -75,11 +68,9 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
         <Radio value={OppgaveHandling.NY_BEHANDLING} description="Oppretter en ny behandling" disabled={!journalpost}>
           Opprett behandling
         </Radio>
-        {kanBrukeKlage && (
-          <Radio value={OppgaveHandling.NY_KLAGE} description="Opprett ny klagebehandling" disabled={!journalpost}>
-            Opprett klagebehandling
-          </Radio>
-        )}
+        <Radio value={OppgaveHandling.NY_KLAGE} description="Opprett ny klagebehandling" disabled={!journalpost}>
+          Opprett klagebehandling
+        </Radio>
         <Radio
           value={OppgaveHandling.FERDIGSTILL_OPPGAVE}
           description="Dersom oppgaven ikke er aktuell/relevant kan du ferdigstille den"

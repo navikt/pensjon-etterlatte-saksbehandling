@@ -48,6 +48,7 @@ class StartTaAvVentTest(private val dataSource: DataSource) {
                 ventRepository = ventRepository,
                 rapidsConnection = rapid,
                 featureToggleService = DummyFeatureToggleService().also { it.settBryter(VentFeatureToggle.TaAvVent, true) },
+                iTraad = { it() },
                 sleep = {},
             )
 

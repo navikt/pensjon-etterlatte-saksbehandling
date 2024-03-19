@@ -16,7 +16,6 @@ import { useAppDispatch } from '~store/Store'
 import { settAppversion } from '~store/reducers/AppconfigReducer'
 import Versioncheck from '~Versioncheck'
 import { Klagebehandling } from '~components/klage/Klagebehandling'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { Oppgavebenk } from '~components/oppgavebenk/Oppgavebenk'
 import { Tilbakekrevingsbehandling } from '~components/tilbakekreving/Tilbakekrevingsbehandling'
 import GenerellBehandling from '~components/generellbehandling/GenerellBehandling'
@@ -25,13 +24,11 @@ import BehandleJournalfoeringOppgave from '~components/person/journalfoeringsopp
 import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { FlyttJournalpost } from '~components/person/flyttjournalpost/FlyttJournalpost'
-import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
   registerLocale('nb', nb)
   const dispatch = useAppDispatch()
-  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   const [hentConfigStatus, hentConfig] = useApiCall(hentClientConfig)
 
@@ -59,7 +56,7 @@ function App() {
                   <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                   <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
                   <Route path="/manuellbehandling/*" element={<ManuellBehandling />} />
-                  {kanBrukeKlage ? <Route path="/klage/:klageId/*" element={<Klagebehandling />} /> : null}
+                  <Route path="/klage/:klageId/*" element={<Klagebehandling />} />
                   <Route path="/tilbakekreving/:tilbakekrevingId/*" element={<Tilbakekrevingsbehandling />} />
                   <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
                   <Route path="*" element={<Navigate to="/" replace />} />

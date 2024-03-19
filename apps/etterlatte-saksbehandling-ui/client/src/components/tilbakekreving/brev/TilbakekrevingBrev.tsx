@@ -45,7 +45,7 @@ export function TilbakekrevingBrev({
 
   useEffect(() => {
     hentVedtak(behandling.id, (vedtak: VedtakSammendrag | null) => {
-      if (vedtak) {
+      if (vedtak?.datoFattet) {
         hentBrev()
       } else {
         opprettVedtak(behandling.id).then(() => hentBrev())

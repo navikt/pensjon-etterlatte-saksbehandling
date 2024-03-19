@@ -4,6 +4,9 @@ import { JaNei } from '~shared/types/ISvar'
 export const hentTrygdetid = async (behandlingId: string): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.get<ITrygdetid>(`/trygdetid/${behandlingId}`)
 
+export const hentTrygdetider = async (behandlingId: string): Promise<ApiResponse<ITrygdetid[]>> =>
+  apiClient.get<ITrygdetid[]>(`/trygdetid_v2/${behandlingId}`)
+
 export const opprettTrygdetid = async (behandlingId: string): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid/${behandlingId}`, {})
 
@@ -136,6 +139,7 @@ export const oppdaterTrygdetidOverstyrtMigrering = async (args: {
 
 export interface ITrygdetid {
   id: string
+  ident: string
   behandlingId: string
   beregnetTrygdetid?: IDetaljertBeregnetTrygdetid
   trygdetidGrunnlag: ITrygdetidGrunnlag[]

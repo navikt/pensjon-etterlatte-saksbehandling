@@ -31,10 +31,12 @@ export const Personopplysninger = ({
 
   useEffect(() => {
     if (isSuccess(sakStatus)) {
-      hentPersonopplysninger({
-        behandlingId: sakStatus.data.behandlinger[0].id,
-        sakType: sakStatus.data.behandlinger[0].sakType,
-      })
+      if (!!sakStatus.data.behandlinger?.length) {
+        hentPersonopplysninger({
+          behandlingId: sakStatus.data.behandlinger[0].id,
+          sakType: sakStatus.data.behandlinger[0].sakType,
+        })
+      }
     }
   }, [fnr, sakStatus])
 

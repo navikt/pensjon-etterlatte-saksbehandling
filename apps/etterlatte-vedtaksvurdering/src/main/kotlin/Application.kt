@@ -11,6 +11,7 @@ import no.nav.etterlatte.jobs.addShutdownHook
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.ktor.shutdownPolicyEmbeddedServer
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
@@ -32,6 +33,7 @@ class Server(private val context: ApplicationContext) {
     private val engine =
         with(context) {
             embeddedServer(
+                configure = shutdownPolicyEmbeddedServer(),
                 factory = CIO,
                 environment =
                     applicationEngineEnvironment {

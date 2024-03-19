@@ -43,6 +43,7 @@ import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.ktor.shutdownPolicyEmbeddedServer
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.oppgave.oppgaveRoutes
@@ -67,6 +68,7 @@ private class Server(private val context: ApplicationContext) {
 
     private val engine =
         embeddedServer(
+            configure = shutdownPolicyEmbeddedServer(),
             factory = CIO,
             environment =
                 applicationEngineEnvironment {

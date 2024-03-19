@@ -102,14 +102,14 @@ private fun shutdownHooks(context: ApplicationContext): Map<Timer, (Timer) -> Un
     )
 
 internal fun Application.module(context: ApplicationContext) {
-    with(context) {
-        restModule(
-            sikkerLogg,
-            withMetrics = true,
-        ) {
-            attachContekst(dataSource, context)
-            settOppRoutes(context)
+    restModule(
+        sikkerLogg,
+        withMetrics = true,
+    ) {
+        attachContekst(context.dataSource, context)
+        settOppRoutes(context)
 
+        with(context) {
             install(adressebeskyttelsePlugin) {
                 saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey
 

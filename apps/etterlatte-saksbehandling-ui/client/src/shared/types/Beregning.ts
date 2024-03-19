@@ -60,6 +60,7 @@ export interface Beregningsperiode {
 export interface OverstyrBeregningsperiode {
   utbetaltBeloep: string
   trygdetid: string
+  trygdetidForIdent: string | undefined
   prorataBroekTeller: string | undefined
   prorataBroekNevner: string | undefined
   beskrivelse: string

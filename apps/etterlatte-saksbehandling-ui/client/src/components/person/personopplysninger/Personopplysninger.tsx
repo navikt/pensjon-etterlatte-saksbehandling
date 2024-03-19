@@ -5,7 +5,6 @@ import { Bostedsadresser } from '~components/person/personopplysninger/Bostedsad
 import { isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentPersonopplysningerForBehandling } from '~shared/api/grunnlag'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Statsborgerskap } from '~components/person/personopplysninger/Statsborgerskap'
@@ -18,6 +17,7 @@ import { Innflytting } from '~components/person/personopplysninger/Innflytting'
 import { hentAlleLand } from '~shared/api/trygdetid'
 import { Utflytting } from '~components/person/personopplysninger/Utflytting'
 import { Vergemaal } from '~components/person/personopplysninger/Vergemaal'
+import { hentPerson } from '~shared/api/pdltjenester'
 
 export const Personopplysninger = ({
   sakStatus,
@@ -26,17 +26,13 @@ export const Personopplysninger = ({
   sakStatus: Result<SakMedBehandlinger>
   fnr: string
 }): ReactNode => {
-  const [personopplysningerResult, hentPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
+  const [personResult, hentPersonFetch] = useApiCall(hentPerson)
+
   const [landListeResult, hentLandListe] = useApiCall(hentAlleLand)
 
   useEffect(() => {
     if (isSuccess(sakStatus)) {
-      if (!!sakStatus.data.behandlinger?.length) {
-        hentPersonopplysninger({
-          behandlingId: sakStatus.data.behandlinger[0].id,
-          sakType: sakStatus.data.behandlinger[0].sakType,
-        })
-      }
+      hentPersonFetch({ ident: fnr, sakType: sakStatus.data.sak.sakType })
     }
   }, [fnr, sakStatus])
 
@@ -56,24 +52,24 @@ export const Personopplysninger = ({
             <LenkeTilAndreSystemer fnr={fnr} />
             {!!sak.behandlinger?.length ? (
               <>
-                {mapResult(personopplysningerResult, {
+                {mapResult(personResult, {
                   pending: <Spinner visible={true} label="Henter personopplysninger" />,
                   error: (error) => (
                     <ApiErrorAlert>{error.detail || 'Kunne ikke hente personopplysninger'}</ApiErrorAlert>
                   ),
                   success: (personopplysninger) => (
                     <>
-                      <Bostedsadresser bostedsadresse={personopplysninger.soeker?.opplysning.bostedsadresse} />
+                      <Bostedsadresser bostedsadresse={personopplysninger.soeker?.bostedsadresse} />
                       {sak.sak.sakType === SakType.BARNEPENSJON && (
                         <Foreldre
                           avdoed={personopplysninger.avdoede}
                           gjenlevende={personopplysninger.gjenlevende}
-                          foreldreansvar={personopplysninger.soeker?.opplysning.familieRelasjon?.ansvarligeForeldre}
+                          foreldreansvar={personopplysninger.soeker?.familieRelasjon?.ansvarligeForeldre}
                         />
                       )}
                       {sak.sak.sakType === SakType.OMSTILLINGSSTOENAD && (
                         <Sivilstatus
-                          sivilstand={personopplysninger.soeker?.opplysning.sivilstand}
+                          sivilstand={personopplysninger.soeker?.sivilstand}
                           avdoede={personopplysninger.avdoede}
                         />
                       )}
@@ -81,23 +77,21 @@ export const Personopplysninger = ({
                       {mapSuccess(landListeResult, (landListe) => (
                         <>
                           <Statsborgerskap
-                            statsborgerskap={personopplysninger.soeker?.opplysning.statsborgerskap}
-                            pdlStatsborgerskap={personopplysninger.soeker?.opplysning.pdlStatsborgerskap}
-                            bosattLand={personopplysninger.soeker?.opplysning.bostedsadresse?.at(0)?.land}
+                            statsborgerskap={personopplysninger.soeker?.statsborgerskap}
+                            pdlStatsborgerskap={personopplysninger.soeker?.pdlStatsborgerskap}
+                            bosattLand={personopplysninger.soeker?.bostedsadresse?.at(0)?.land}
                             landListe={landListe}
                           />
                           <Innflytting
-                            innflytting={personopplysninger.soeker?.opplysning.utland?.innflyttingTilNorge}
+                            innflytting={personopplysninger.soeker?.utland?.innflyttingTilNorge}
                             landListe={landListe}
                           />
                           <Utflytting
-                            utflytting={personopplysninger.soeker?.opplysning.utland?.utflyttingFraNorge}
+                            utflytting={personopplysninger.soeker?.utland?.utflyttingFraNorge}
                             landListe={landListe}
                           />
                           <Vergemaal
-                            vergemaalEllerFremtidsfullmakt={
-                              personopplysninger.soeker?.opplysning.vergemaalEllerFremtidsfullmakt
-                            }
+                            vergemaalEllerFremtidsfullmakt={personopplysninger.soeker?.vergemaalEllerFremtidsfullmakt}
                           />
                         </>
                       ))}

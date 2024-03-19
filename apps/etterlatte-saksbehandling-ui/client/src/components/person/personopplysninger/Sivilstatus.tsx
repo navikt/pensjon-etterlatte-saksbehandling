@@ -1,9 +1,8 @@
 import React, { ReactNode } from 'react'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { HeartIcon } from '@navikt/aksel-icons'
-import { Sivilstand } from '~shared/types/Person'
+import { IPdlPerson, Sivilstand } from '~shared/types/Person'
 import { Heading, Table, Tag } from '@navikt/ds-react'
-import { Personopplysning as PdlPersonopplysning } from '~shared/types/grunnlag'
 import { formaterDato, formaterStringDato } from '~utils/formattering'
 import { SpaceChildren } from '~shared/styled'
 import styled from 'styled-components'
@@ -14,15 +13,15 @@ export const Sivilstatus = ({
   avdoede,
 }: {
   sivilstand?: Sivilstand[]
-  avdoede?: PdlPersonopplysning[]
+  avdoede?: IPdlPerson[]
 }): ReactNode => {
   const relatertVedSivilstandDoedsdato = (
     relatertVedSiviltilstand: string,
-    avdoede: PdlPersonopplysning[]
+    avdoede: IPdlPerson[]
   ): string | undefined => {
-    const relaterteAvdoed = avdoede.find((val) => val.opplysning.foedselsnummer === relatertVedSiviltilstand)
+    const relaterteAvdoed = avdoede.find((val) => val.foedselsnummer === relatertVedSiviltilstand)
 
-    if (!!relaterteAvdoed?.opplysning.doedsdato) return formaterStringDato(relaterteAvdoed.opplysning.doedsdato)
+    if (!!relaterteAvdoed?.doedsdato) return formaterStringDato(relaterteAvdoed.doedsdato)
     else return undefined
   }
 

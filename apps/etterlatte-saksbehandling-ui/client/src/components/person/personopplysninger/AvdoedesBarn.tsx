@@ -2,13 +2,13 @@ import React, { ReactNode } from 'react'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
 import { Heading, Table } from '@navikt/ds-react'
-import { Personopplysning as PdlPersonopplysning } from '~shared/types/grunnlag'
 import { AlderTag } from '~components/person/personopplysninger/components/AlderTag'
 import { SpaceChildren } from '~shared/styled'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { IPdlPerson } from '~shared/types/Person'
 
-export const AvdoedesBarn = ({ avdoede }: { avdoede?: PdlPersonopplysning[] }): ReactNode => {
+export const AvdoedesBarn = ({ avdoede }: { avdoede?: IPdlPerson[] }): ReactNode => {
   return (
     <Personopplysning heading="Søsken (avdødes barn)" icon={<ChildEyesIcon />}>
       <Table>
@@ -22,8 +22,8 @@ export const AvdoedesBarn = ({ avdoede }: { avdoede?: PdlPersonopplysning[] }): 
         <Table.Body>
           {!!avdoede?.length ? (
             avdoede.map((doed, i) =>
-              !!doed.opplysning.avdoedesBarn?.length ? (
-                doed.opplysning.avdoedesBarn.map((barn, index) => (
+              !!doed.avdoedesBarn?.length ? (
+                doed.avdoedesBarn.map((barn, index) => (
                   <Table.Row key={index}>
                     <Table.DataCell>
                       {barn.fornavn} {barn.etternavn}
@@ -34,14 +34,14 @@ export const AvdoedesBarn = ({ avdoede }: { avdoede?: PdlPersonopplysning[] }): 
                         <AlderTag foedselsdato={barn.foedselsdato} />
                       </SpaceChildren>
                     </Table.DataCell>
-                    <BostedsadresseDataCell bostedsadresse={doed.opplysning.bostedsadresse} index={0} />
+                    <BostedsadresseDataCell bostedsadresse={doed.bostedsadresse} index={0} />
                   </Table.Row>
                 ))
               ) : (
                 <Table.Row key={i}>
                   <Table.DataCell colSpan={3}>
                     <Heading size="small">
-                      Ingen barn for avdoed: ${doed.opplysning.fornavn} ${doed.opplysning.etternavn}
+                      Ingen barn for avdoed: {doed.fornavn} {doed.etternavn}
                     </Heading>
                   </Table.DataCell>
                 </Table.Row>

@@ -60,11 +60,11 @@ export function KlageBrev() {
                 Brev
               </Heading>
             </HeadingWrapper>
-            {klage.formkrav?.formkrav.erKlagenFramsattInnenFrist === JaNei.JA ? (
-              <BodyShort spacing> Skriv oversendelsesbrevet til klager</BodyShort>
-            ) : (
-              <BodyShort>Skriv avvisningsbrev her</BodyShort>
-            )}
+            <BodyShort spacing>
+              {klage.formkrav?.formkrav.erKlagenFramsattInnenFrist === JaNei.JA
+                ? 'Oversendelsesbrev til klager'
+                : 'Avvisningsbrev til klager'}
+            </BodyShort>
             {isSuccess(hentetBrev) && (
               <>
                 <BrevTittel

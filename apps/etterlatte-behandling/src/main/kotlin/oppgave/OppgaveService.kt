@@ -266,6 +266,7 @@ class OppgaveService(
     fun ferdigStillOppgaveUnderBehandling(
         referanse: String,
         saksbehandler: BrukerTokenInfo,
+        merknad: String? = null,
     ): OppgaveIntern {
         val behandlingsoppgaver = oppgaveDao.hentOppgaverForReferanse(referanse)
         if (behandlingsoppgaver.isEmpty()) {
@@ -273,7 +274,7 @@ class OppgaveService(
         }
         try {
             val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
-            ferdigstillOppgaveById(oppgaveUnderbehandling, saksbehandler)
+            ferdigstillOppgaveById(oppgaveUnderbehandling, saksbehandler, merknad)
             return requireNotNull(oppgaveDao.hentOppgave(oppgaveUnderbehandling.id)) {
                 "Oppgaven vi akkurat ferdigstilte kunne ikke hentes ut"
             }

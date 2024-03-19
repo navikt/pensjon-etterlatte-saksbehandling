@@ -7,19 +7,13 @@ import { useNavigate } from 'react-router-dom'
 import { useKlage } from '~components/klage/useKlage'
 import Spinner from '~shared/Spinner'
 import { forrigeSteg, kanSeOppsummering } from '~components/klage/stegmeny/KlageStegmeny'
-import { JaNei } from '~shared/types/ISvar'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { fattVedtakOmAvvistKlage, ferdigstillKlagebehandling } from '~shared/api/klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
 
 import { isPending } from '~shared/api/apiUtils'
-import {
-  formaterKlageutfall,
-  VisInnstilling,
-  VisKlageavslag,
-  VisOmgjoering,
-} from '~components/klage/vurdering/KlageVurderingFelles'
+import { formaterKlageutfall, VisInnstilling, VisOmgjoering } from '~components/klage/vurdering/KlageVurderingFelles'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
@@ -53,7 +47,7 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
     return <Spinner visible label="Henter klage" />
   }
 
-  const { utfall, sak, formkrav } = klage
+  const { utfall, sak } = klage
   return (
     <Content>
       <ContentHeader>
@@ -71,8 +65,6 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
         <BodyShort spacing>
           Utfallet av klagen er <strong>{formaterKlageutfall(klage)}</strong>.
         </BodyShort>
-
-        {formkrav?.formkrav.erFormkraveneOppfylt === JaNei.NEI ? <VisKlageavslag klage={klage} /> : null}
 
         {utfall?.utfall === 'DELVIS_OMGJOERING' || utfall?.utfall === 'STADFESTE_VEDTAK' ? (
           <VisInnstilling innstilling={utfall.innstilling} sakId={sak.id} kanRedigere={kanRedigere} />

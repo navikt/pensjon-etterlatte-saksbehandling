@@ -251,7 +251,14 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             coVerifyAll {
                 vedtakKlient.lagreVedtakKlage(any(), any())
                 vedtakKlient.fattVedtakKlage(any(), any())
-                vedtakKlient.attesterVedtakKlage(klage, withArg { it.ident() shouldBe attestantIdent })
+                vedtakKlient.attesterVedtakKlage(
+                    withArg {
+                        it.id shouldBeEqual klage.id
+                        it.status shouldBeEqual KlageStatus.FERDIGSTILT
+                        it.utfall!! shouldBeEqual klage.utfall!!
+                    },
+                    withArg { it.ident() shouldBe attestantIdent },
+                )
             }
             attestert shouldBeEqual hentKlage(client, klage.id)
             attestert.status shouldBe KlageStatus.FERDIGSTILT
@@ -372,7 +379,13 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                         erFormkraveneOppfylt = JaNei.JA,
                         erKlagenSignert = JaNei.JA,
                         erKlagerPartISaken = JaNei.JA,
-                        vedtaketKlagenGjelder = VedtaketKlagenGjelder("12", UUID.randomUUID().toString(), ZonedDateTime.now(), null),
+                        vedtaketKlagenGjelder =
+                            VedtaketKlagenGjelder(
+                                "12",
+                                UUID.randomUUID().toString(),
+                                ZonedDateTime.now(),
+                                null,
+                            ),
                         gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
                         erKlagenFramsattInnenFrist = erKlagenFramsattInnenFrist,
                     ),

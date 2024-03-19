@@ -63,6 +63,15 @@ export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId:
       <BodyShort spacing>
         Vedtak opprettholdes med følgende hovedhjemmel: <strong>{TEKSTER_LOVHJEMLER[innstilling.lovhjemmel]}.</strong>
       </BodyShort>
+      <Heading size="xsmall" level="4">
+        Innstillingstekst:
+      </Heading>
+      <BodyShort spacing>{innstilling.innstillingTekst}</BodyShort>
+      <Heading size="xsmall" level="4">
+        Intern kommentar:
+      </Heading>
+      <BodyShort spacing>{innstilling.internKommentar || 'Ikke registrert'}</BodyShort>
+
       <BodyShort spacing>
         <Button size="small" variant="primary" onClick={visOversendelseModal}>
           Se innstillingsbrevet
@@ -126,11 +135,6 @@ export function VisOmgjoering(props: { omgjoering: Omgjoering; kanRedigere: bool
       )}
     </Maksbredde>
   )
-}
-
-export function VisKlageavslag(props: { klage: Klage }) {
-  const { klage } = props
-  return <BodyShort>TODO {klage.id} skal få avslagsbrev og håndteres</BodyShort>
 }
 
 export function formaterKlageutfall(klage: Klage) {

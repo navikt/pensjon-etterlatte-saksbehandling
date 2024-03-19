@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.ktor.initialisering
 
 import com.typesafe.config.Config
 import io.ktor.server.application.Application
+import io.ktor.server.application.ServerReady
 import io.ktor.server.cio.CIO
 import io.ktor.server.cio.CIOApplicationEngine
 import io.ktor.server.config.HoconApplicationConfig
@@ -15,12 +16,13 @@ import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.ktor.shutdownPolicyEmbeddedServer
 import no.nav.etterlatte.libs.ktor.metricsRoute
 import no.nav.etterlatte.libs.ktor.restModule
+import java.util.Timer
 
 fun initEmbeddedServer(
     httpPort: Int,
     applicationConfig: Config,
     withMetrics: Boolean = true,
-    shutdownHooks: List<ShutdownHook> = listOf(),
+    shutdownHooks: Map<Timer, (Timer) -> Unit> = mapOf(),
     routes: Route.() -> Unit,
 ) = settOppEmbeddedServer(httpPort, applicationConfig, shutdownHooks) {
     restModule(sikkerlogger(), withMetrics = withMetrics) {
@@ -41,7 +43,7 @@ fun initEmbeddedServerUtenRest(
 private fun settOppEmbeddedServer(
     httpPort: Int,
     applicationConfig: Config,
-    shutdownHooks: List<ShutdownHook> = listOf(),
+    shutdownHooks: Map<Timer, (Timer) -> Unit> = mapOf(),
     body: Application.() -> Unit,
 ): CIOApplicationEngine =
     embeddedServer(
@@ -52,7 +54,11 @@ private fun settOppEmbeddedServer(
                 config = HoconApplicationConfig(applicationConfig)
                 module {
                     body()
-                    shutdownHooks.forEach { it.action.apply { it.timer } }
+                }
+                module {
+                    environment.monitor.subscribe(ServerReady) {
+                        shutdownHooks.forEach { it.value.apply { it.key } }
+                    }
                 }
                 connector { port = httpPort }
             },

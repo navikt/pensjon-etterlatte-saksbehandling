@@ -46,8 +46,6 @@ class VedtakKlageService(
                     ),
                 )
             } else {
-                // TODO Kandidat for å flytte til felles sjekk for alle vedtakstyper
-                // TODO verifiser lovlig type-overgang
                 verifiserGyldigVedtakStatus(
                     eksisterendeVedtak.status,
                     listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT),

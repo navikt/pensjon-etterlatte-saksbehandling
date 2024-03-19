@@ -218,7 +218,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
         val klage =
             inTransaction {
                 val sak = oppprettOmsSak()
-                val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""))
+                val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""), saksbehandler)
                 service.lagreFormkravIKlage(
                     klage.id,
                     formkrav(),
@@ -248,7 +248,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
         val klage =
             inTransaction {
                 val sak = oppprettOmsSak()
-                val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""))
+                val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""), saksbehandler)
                 service.lagreFormkravIKlage(
                     klage.id,
                     formkrav(),
@@ -275,7 +275,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
         val klage =
             inTransaction {
                 val sak = oppprettOmsSak()
-                val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""))
+                val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""), saksbehandler)
                 service.lagreFormkravIKlage(klage.id, formkrav(), saksbehandler)
             }
         shouldThrow<IllegalStateException> {
@@ -488,7 +488,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
 
     private fun opprettKlageOgSettInitieltUtfallAvvist(): Klage {
         val sak = oppprettOmsSak()
-        val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""))
+        val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""), saksbehandler)
         oppgaveService.tildelSaksbehandler(
             oppgaveService.hentOppgaverForReferanse(klage.id.toString()).single().id,
             saksbehandler.ident,
@@ -503,7 +503,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
 
     private fun opprettKlageOgSettInitieltUtfallOmgjoering(): Klage {
         val sak = oppprettOmsSak()
-        val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""))
+        val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""), saksbehandler)
         oppgaveService.tildelSaksbehandler(
             oppgaveService.hentOppgaverForReferanse(klage.id.toString()).single().id,
             saksbehandler.ident,
@@ -522,7 +522,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
         sak: Sak,
         status: KlageStatus? = null,
     ): Klage {
-        val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""))
+        val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""), saksbehandler)
         tildelOppgave(klage)
         return if (status != null) {
             klage.copy(status = status).also { klageDao.lagreKlage(it) }

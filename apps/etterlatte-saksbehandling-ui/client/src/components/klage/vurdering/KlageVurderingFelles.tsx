@@ -137,11 +137,6 @@ export function VisOmgjoering(props: { omgjoering: Omgjoering; kanRedigere: bool
   )
 }
 
-export function VisKlageavslag(props: { klage: Klage }) {
-  const { klage } = props
-  return <BodyShort>TODO {klage.id} skal få avslagsbrev og håndteres</BodyShort>
-}
-
 export function formaterKlageutfall(klage: Klage) {
   switch (klage.utfall?.utfall) {
     case 'DELVIS_OMGJOERING':

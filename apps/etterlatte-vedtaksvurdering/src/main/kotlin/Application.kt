@@ -1,18 +1,9 @@
 package no.nav.etterlatte
 
-import io.ktor.server.application.Application
-import io.ktor.server.application.ServerReady
-import io.ktor.server.cio.CIO
-import io.ktor.server.config.HoconApplicationConfig
-import io.ktor.server.engine.applicationEngineEnvironment
-import io.ktor.server.engine.connector
-import io.ktor.server.engine.embeddedServer
 import no.nav.etterlatte.jobs.addShutdownHook
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
-import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.libs.ktor.ktor.shutdownPolicyEmbeddedServer
-import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
 import no.nav.etterlatte.vedtaksvurdering.config.ApplicationContext
@@ -32,30 +23,25 @@ class Server(private val context: ApplicationContext) {
 
     private val engine =
         with(context) {
-            embeddedServer(
-                configure = shutdownPolicyEmbeddedServer(),
-                factory = CIO,
-                environment =
-                    applicationEngineEnvironment {
-                        config = HoconApplicationConfig(context.config)
-                        module {
-                            restModule(sikkerlogger(), withMetrics = true) {
-                                vedtaksvurderingRoute(
-                                    vedtaksvurderingService,
-                                    vedtakBehandlingService,
-                                    vedtaksvurderingRapidService,
-                                    behandlingKlient,
-                                )
-                                automatiskBehandlingRoutes(automatiskBehandlingService, behandlingKlient)
-                                samordningsvedtakRoute(vedtakSamordningService)
-                                tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
-                                klagevedtakRoute(vedtakKlageService, behandlingKlient)
-                            }
-                        }
-                        module { moduleOnServerReady(context) }
-                        connector { port = context.httpPort }
-                    },
-            )
+            initEmbeddedServer(
+                httpPort = context.httpPort,
+                applicationConfig = context.config,
+                shutdownHooks =
+                    mapOf(
+                        context.metrikkerJob.schedule() to { addShutdownHook(it) },
+                    ),
+            ) {
+                vedtaksvurderingRoute(
+                    vedtaksvurderingService,
+                    vedtakBehandlingService,
+                    vedtaksvurderingRapidService,
+                    behandlingKlient,
+                )
+                automatiskBehandlingRoutes(automatiskBehandlingService, behandlingKlient)
+                samordningsvedtakRoute(vedtakSamordningService)
+                tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
+                klagevedtakRoute(vedtakKlageService, behandlingKlient)
+            }
         }
 
     fun run() =
@@ -64,10 +50,4 @@ class Server(private val context: ApplicationContext) {
             setReady()
             engine.start(true)
         }
-}
-
-internal fun Application.moduleOnServerReady(context: ApplicationContext) {
-    environment.monitor.subscribe(ServerReady) {
-        context.metrikkerJob.schedule().also { addShutdownHook(it) }
-    }
 }

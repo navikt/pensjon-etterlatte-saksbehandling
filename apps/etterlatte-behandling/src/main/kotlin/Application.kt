@@ -88,17 +88,18 @@ private class Server(private val context: ApplicationContext) {
 }
 
 internal fun Application.moduleOnServerReady(context: ApplicationContext) {
-    val hooks =
-        mapOf<Timer, (Timer) -> Unit>(
-            context.metrikkerJob.schedule() to { addShutdownHook(it) },
-            context.doedsmeldingerJob.schedule() to { addShutdownHook(it) },
-            context.saksbehandlerJob.schedule() to { addShutdownHook(it) },
-            context.fristGaarUtJobb.schedule() to { addShutdownHook(it) },
-        )
     environment.monitor.subscribe(ServerReady) {
-        hooks.forEach { it.value.apply { it.key } }
+        shutdownHooks(context).forEach { it.value.apply { it.key } }
     }
 }
+
+private fun shutdownHooks(context: ApplicationContext): Map<Timer, (Timer) -> Unit> =
+    mapOf(
+        context.metrikkerJob.schedule() to { addShutdownHook(it) },
+        context.doedsmeldingerJob.schedule() to { addShutdownHook(it) },
+        context.saksbehandlerJob.schedule() to { addShutdownHook(it) },
+        context.fristGaarUtJobb.schedule() to { addShutdownHook(it) },
+    )
 
 internal fun Application.module(context: ApplicationContext) {
     with(context) {

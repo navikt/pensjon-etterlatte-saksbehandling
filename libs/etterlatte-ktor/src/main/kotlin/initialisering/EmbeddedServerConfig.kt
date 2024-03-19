@@ -20,8 +20,9 @@ fun initEmbeddedServer(
     httpPort: Int,
     applicationConfig: Config,
     withMetrics: Boolean = true,
+    shutdownHooks: List<ShutdownHook> = listOf(),
     routes: Route.() -> Unit,
-) = settOppEmbeddedServer(httpPort, applicationConfig) {
+) = settOppEmbeddedServer(httpPort, applicationConfig, shutdownHooks) {
     restModule(sikkerlogger(), withMetrics = withMetrics) {
         routes()
     }
@@ -40,6 +41,7 @@ fun initEmbeddedServerUtenRest(
 private fun settOppEmbeddedServer(
     httpPort: Int,
     applicationConfig: Config,
+    shutdownHooks: List<ShutdownHook> = listOf(),
     body: Application.() -> Unit,
 ): CIOApplicationEngine =
     embeddedServer(
@@ -50,6 +52,7 @@ private fun settOppEmbeddedServer(
                 config = HoconApplicationConfig(applicationConfig)
                 module {
                     body()
+                    shutdownHooks.forEach { it.action.apply { it.timer } }
                 }
                 connector { port = httpPort }
             },

@@ -56,11 +56,8 @@ class DoedshendelseKontrollpunktService(
                             saktype = hendelse.sakTypeForEpsEllerBarn(),
                         )
                     kontrollpunkterEpsRelasjon(hendelse, sak, eps, avdoed) +
-                        fellesKontrollpunkter(
-                            hendelse = hendelse,
-                            avdoed = avdoed,
-                            sak = sak,
-                        )
+                        fellesKontrollpunkter(hendelse, avdoed, sak) +
+                        listOfNotNull(kontrollerEpsVarighet(avdoed, eps))
                 }
 
                 Relasjon.AVDOED -> {
@@ -118,6 +115,44 @@ class DoedshendelseKontrollpunktService(
             kontrollerBarnOgHarBP(sak),
             kontrollerSamtidigDoedsfall(avdoed, hendelse),
         )
+    }
+
+    private fun kontrollerEpsVarighet(
+        avdoed: PersonDTO,
+        eps: PersonDTO,
+    ): DoedshendelseKontrollpunkt? {
+        val antallAarGift =
+            avdoed.sivilstand
+                ?.asSequence()
+                ?.map { it.verdi }
+                ?.filter { it.relatertVedSiviltilstand == eps.foedselsnummer.verdi }
+                ?.filter { it.sivilstatus == Sivilstatus.GIFT }
+                ?.sortedBy { it.gyldigFraOgMed }
+                ?.lastOrNull()
+                ?.let { safeYearsBetween(it.gyldigFraOgMed, avdoed.doedsdato!!.verdi) }
+
+        if (antallAarGift != null) {
+            if (antallAarGift < 5) {
+                // For ektefeller hvor varigheten av ekteskapet er under 5 år gjeler egne regler
+                if (harFellesBarn(avdoed, eps)) {
+                    // Ektefeller med felles barn har rett.
+                    return null
+                }
+                if (!harBarn(avdoed) && !harBarn(eps)) {
+                    // Hvis ingen har barn har ektefellen ingen rettighet.
+                    return DoedshendelseKontrollpunkt.EpsVarighetUnderFemAarUtenBarn
+                } else if (harBarn(avdoed) || !harBarn(eps)) {
+                    // Hvis en av ektefellene har/hadde barn kan gjenlevende ha rett.
+                    return DoedshendelseKontrollpunkt.EpsVarighetUnderFemAarUtenFellesBarn
+                }
+            } else {
+                // Ektefeller hvor ekteskapet har vart over 5 år har rett.
+                return null
+            }
+        } else {
+            return null
+        }
+        return TODO("Provide the return value")
     }
 
     private fun kontrollpunkterEpsRelasjon(

@@ -176,6 +176,101 @@ class DoedshendelseKontrollpunktServiceTest {
     }
 
     @Test
+    fun `Eps har vaert gift mindre enn 5 aar, uten barn, EpsVarighetUnderFemAarUtenBarn`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        val sivilstandGift =
+            Sivilstand(
+                Sivilstatus.GIFT,
+                Folkeregisteridentifikator.of(doedshendelseInternalOMS.beroertFnr),
+                gyldigFraOgMed = LocalDate.now().minusYears(3),
+                null,
+                "",
+            )
+
+        every {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                foedselsnummer = doedshendelseInternalBP.avdoedFnr,
+                rolle = PersonRolle.AVDOED,
+                saktype = any(),
+            )
+        } returns
+            mockPerson().copy(
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalOMS.avdoedFnr), null),
+                doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null),
+                sivilstand = listOf(OpplysningDTO(sivilstandGift, "sivilstand")),
+                familieRelasjon = null,
+            )
+        coEvery {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                doedshendelseInternalOMS.beroertFnr,
+                PersonRolle.GJENLEVENDE,
+                SakType.OMSTILLINGSSTOENAD,
+            )
+        } returns
+            mockPerson()
+                .copy(
+                    foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalOMS.beroertFnr), null),
+                    familieRelasjon = null,
+                )
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsVarighetUnderFemAarUtenBarn)
+    }
+
+    @Test
+    fun `Eps har vaert gift mindre enn 5 aar, uten felles barn, EpsVarighetUnderFemAarUtenFellesBarn`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        val sivilstandGift =
+            Sivilstand(
+                sivilstatus = Sivilstatus.GIFT,
+                relatertVedSiviltilstand = Folkeregisteridentifikator.of(doedshendelseInternalOMS.beroertFnr),
+                gyldigFraOgMed = LocalDate.now().minusYears(3),
+                bekreftelsesdato = null,
+                kilde = "",
+            )
+
+        every {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                foedselsnummer = doedshendelseInternalBP.avdoedFnr,
+                rolle = PersonRolle.AVDOED,
+                saktype = any(),
+            )
+        } returns
+            mockPerson().copy(
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalOMS.avdoedFnr), null),
+                doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null),
+                sivilstand = listOf(OpplysningDTO(sivilstandGift, "sivilstand")),
+                familieRelasjon =
+                    OpplysningDTO(
+                        FamilieRelasjon(
+                            ansvarligeForeldre = emptyList(),
+                            foreldre = emptyList(),
+                            barn = listOf(LITE_BARN),
+                        ),
+                        null,
+                    ),
+            )
+        coEvery {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                doedshendelseInternalOMS.beroertFnr,
+                PersonRolle.GJENLEVENDE,
+                SakType.OMSTILLINGSSTOENAD,
+            )
+        } returns
+            mockPerson().copy(
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalOMS.beroertFnr), null),
+                familieRelasjon = null,
+            )
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsVarighetUnderFemAarUtenFellesBarn)
+    }
+
+    @Test
     fun `Eps har vært gift i 15 år med avdød og skilt ila de siste 5 år, EpsHarVaertSkiltSiste5EllerGiftI15`() {
         every { sakService.finnSak(any(), any()) } returns null
 

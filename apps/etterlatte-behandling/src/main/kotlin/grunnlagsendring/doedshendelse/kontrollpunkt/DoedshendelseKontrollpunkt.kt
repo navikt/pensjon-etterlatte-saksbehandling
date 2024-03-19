@@ -128,6 +128,26 @@ sealed class DoedshendelseKontrollpunkt {
             get() = "Tidligere ektefelle ($fnr) døde ($doedsdato). Saksbehandler må vurdere om gjenlevende har rettigheter."
     }
 
+    @JsonTypeName("EPS_VARIGHET_UNDER_5_AAR_UTEN_BARN")
+    data object EpsVarighetUnderFemAarUtenBarn : DoedshendelseKontrollpunkt() {
+        override val kode = "EPS_VARIGHET_UNDER_5_AAR_UTEN_BARN"
+        override val beskrivelse: String = "Giftemål har ikke vart i 5 år, og finner ingen barn"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = false
+        override val avbryt: Boolean = true
+        override val oppgaveTekst: String? = null
+    }
+
+    @JsonTypeName("EPS_VARIGHET_UNDER_5_AAR_UTEN_FELLES_BARN")
+    data object EpsVarighetUnderFemAarUtenFellesBarn : DoedshendelseKontrollpunkt() {
+        override val kode = "EPS_VARIGHET_UNDER_5_AAR_UTEN_FELLES_BARN"
+        override val beskrivelse: String = "Giftemål har ikke vart i 5 år, og finner ingen felles barn"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = true
+        override val avbryt: Boolean = false
+        override val oppgaveTekst: String = beskrivelse
+    }
+
     @JsonTypeName("SAMBOER_SAMME_ADRESSE_OG_FELLES_BARN")
     data object SamboerSammeAdresseOgFellesBarn : DoedshendelseKontrollpunkt() {
         override val kode = "SAMBOER_SAMME_ADRESSE_OG_FELLES_BARN"

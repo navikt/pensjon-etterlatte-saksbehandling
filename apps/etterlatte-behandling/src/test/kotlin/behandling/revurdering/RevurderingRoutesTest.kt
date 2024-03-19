@@ -25,7 +25,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
@@ -49,13 +48,6 @@ internal class RevurderingRoutesTest {
         every {
             applicationContext.sakTilgangDao.hentSakMedGraderingOgSkjerming(any())
         } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
-    }
-
-    @BeforeEach
-    fun beforeEach() {
-        every {
-            applicationContext.featureToggleService.isEnabled(RevurderingRoutesFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev, any())
-        } returns true
     }
 
     @AfterAll
@@ -145,37 +137,6 @@ internal class RevurderingRoutesTest {
             assertTrue(
                 revurderingAarsak.containsAll(
                     Revurderingaarsak.entries
-                        .filter { it.gyldigForSakType(SakType.OMSTILLINGSSTOENAD) }
-                        .filter { it.name !== Revurderingaarsak.NY_SOEKNAD.toString() },
-                ),
-            )
-        }
-    }
-
-    @Test
-    fun `returnerer ikke revurderingsaarsak opphoer uten brev dersom feature toggle er av`() {
-        every {
-            applicationContext.featureToggleService.isEnabled(RevurderingRoutesFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev, any())
-        } returns false
-
-        testApplication {
-            val client =
-                runServerWithModule(server) {
-                    module(applicationContext)
-                }
-
-            val response =
-                client.get("api/stoettederevurderinger/${SakType.OMSTILLINGSSTOENAD.name}") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }
-
-            val revurderingAarsak: List<Revurderingaarsak> = response.body()
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertTrue(
-                revurderingAarsak.containsAll(
-                    Revurderingaarsak.entries
-                        .filterNot { it == Revurderingaarsak.OPPHOER_UTEN_BREV }
                         .filter { it.gyldigForSakType(SakType.OMSTILLINGSSTOENAD) }
                         .filter { it.name !== Revurderingaarsak.NY_SOEKNAD.toString() },
                 ),

@@ -9,6 +9,7 @@ export interface IBehandlingInfo {
   sakType: SakType
   sakEnhetId: string
   status: IBehandlingStatus
+  kilde: string
   behandlendeSaksbehandler?: string
   attesterendeSaksbehandler?: string
   virkningsdato?: string

@@ -9,7 +9,6 @@ import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
-import no.nav.etterlatte.brev.model.InntektendringType
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
@@ -95,7 +94,6 @@ data class OmstillingsstoenadRevurdering(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
                             ),
-                        inntektendringType = inntektstype(forrigeAvkortingsinfo, avkortingsinfo),
                     ),
                 etterbetaling =
                     etterbetalingDTO?.let {
@@ -120,24 +118,6 @@ data class OmstillingsstoenadRevurdering(
             val beloepForrigeBehandling = forrigeAvkortingsinfo?.beregningsperioder?.maxBy { it.datoFOM }?.utbetaltBeloep
             val beloepGjeldendeBehandling = avkortingsinfo.beregningsperioder.maxBy { it.datoFOM }.utbetaltBeloep
             return beloepForrigeBehandling == null || beloepForrigeBehandling != beloepGjeldendeBehandling
-        }
-
-        private fun inntektstype(
-            forrigeAvkortingsinfo: Avkortingsinfo?,
-            avkortingsinfo: Avkortingsinfo,
-        ): InntektendringType {
-            if (forrigeAvkortingsinfo == null) {
-                return InntektendringType.INGEN_ENDRING
-            }
-            val nyInntekt = avkortingsinfo.beregningsperioder.maxBy { it.datoFOM }.inntekt.value
-            val forrigeInntekt = forrigeAvkortingsinfo.beregningsperioder.maxBy { it.datoFOM }.inntekt.value
-            return if (nyInntekt < forrigeInntekt) {
-                InntektendringType.MINDRE_INNTEKT
-            } else if (nyInntekt > forrigeInntekt) {
-                InntektendringType.MER_INNTEKT
-            } else {
-                InntektendringType.INGEN_ENDRING
-            }
         }
     }
 }

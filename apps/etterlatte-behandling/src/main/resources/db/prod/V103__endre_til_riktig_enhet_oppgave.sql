@@ -1,0 +1,1 @@
+UPDATE oppgave SET enhet = '4817' where sak_id = '16013';

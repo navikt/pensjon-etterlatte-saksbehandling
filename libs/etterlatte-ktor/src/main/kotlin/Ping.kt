@@ -3,14 +3,12 @@ package no.nav.etterlatte.libs.ktor
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import no.nav.etterlatte.libs.common.appName
-import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import org.slf4j.Logger
 
 suspend fun HttpClient.ping(
@@ -24,7 +22,7 @@ suspend fun HttpClient.ping(
     return try {
         this.get(pingUrl) {
             accept(ContentType.Application.Json)
-            header(NAV_CONSUMER_ID, konsumentEndelig)
+            navConsumerId(konsumentEndelig)
         }
         logger.info("$serviceName svarer OK")
         PingResultUp(serviceName, endpoint = pingUrl, beskrivelse = beskrivelse)

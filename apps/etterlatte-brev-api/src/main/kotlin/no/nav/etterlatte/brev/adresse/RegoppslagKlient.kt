@@ -5,7 +5,6 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
-import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -14,8 +13,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
-import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Behandlingsnummer
-import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseKlient.Companion.HEADER_BEHANDLINGSNUMMER
+import no.nav.etterlatte.libs.ktor.behandlingsnummer
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -45,7 +43,7 @@ class RegoppslagKlient(
                 logger.info("Ingen cachet mottakeradresse funnet. Henter fra regoppslag")
 
                 client.post("$url/rest/postadresse") {
-                    header(HEADER_BEHANDLINGSNUMMER, sakType.mapTilBehandlingsnummer())
+                    behandlingsnummer(sakType)
                     contentType(ContentType.Application.Json)
                     setBody(RegoppslagRequest(ident))
                 }
@@ -70,12 +68,6 @@ class RegoppslagKlient(
                     detail = "Ukjent feil oppsto ved uthenting av mottakers adresse fra regoppslag",
                 )
             }
-        }
-
-    private fun SakType.mapTilBehandlingsnummer() =
-        when (this) {
-            SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON.behandlingsnummer
-            SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD.behandlingsnummer
         }
 }
 

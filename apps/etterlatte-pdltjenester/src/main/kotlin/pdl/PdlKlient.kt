@@ -7,11 +7,9 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
-import io.ktor.http.HttpMessageBuilder
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Behandlingsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
@@ -21,9 +19,8 @@ import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.ktor.behandlingsnummer
 import org.slf4j.LoggerFactory
-
-const val HEADER_BEHANDLINGSNUMMER = "behandlingsnummer"
 
 class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) {
     private val logger = LoggerFactory.getLogger(PdlKlient::class.java)
@@ -35,12 +32,9 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 variables = toPdlVariables(hentPersonRequest.foedselsnummer, hentPersonRequest.rolle),
             )
 
-        val behandlingsnummere = hentBehandlingsnummerFromSaktyper(hentPersonRequest.saktyper)
-
         return retry<PdlPersonResponse>(times = 3) {
             httpClient.post(apiUrl) {
-                behandlingsnummer(behandlingsnummere)
-                header(HEADER_BEHANDLINGSNUMMER, behandlingsnummere.joinToString { it.behandlingsnummer })
+                behandlingsnummer(hentPersonRequest.saktyper)
                 header(HEADER_TEMA, HEADER_TEMA_VALUE)
                 accept(Json)
                 contentType(Json)
@@ -67,11 +61,9 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 variables = PdlAdressebeskyttelseVariables(hentAdressebeskyttelseRequest.ident.value),
             )
 
-        val behandlingsnummer = finnBehandlingsnummerFromSaktype(hentAdressebeskyttelseRequest.saktype)
-
         return retry<PdlAdressebeskyttelseResponse>(times = 3) {
             httpClient.post(apiUrl) {
-                behandlingsnummer(listOf(behandlingsnummer))
+                behandlingsnummer(hentAdressebeskyttelseRequest.saktype)
                 header(HEADER_TEMA, HEADER_TEMA_VALUE)
                 accept(Json)
                 contentType(Json)
@@ -95,10 +87,9 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                     ),
             )
 
-        val behandlingsnummer = finnBehandlingsnummerFromSaktype(SakType.BARNEPENSJON)
         return retry<PdlHentForeldreansvarHistorikkResponse>(times = 3) {
             httpClient.post(apiUrl) {
-                header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
+                behandlingsnummer(SakType.BARNEPENSJON)
                 header(HEADER_TEMA, HEADER_TEMA_VALUE)
                 accept(Json)
                 contentType(Json)
@@ -136,12 +127,10 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                     ),
             )
 
-        val behandlingsnummere = hentBehandlingsnummerFromSaktyper(saktyper)
-
         logger.info("Bolkhenter personer med fnr=$fnr fra PDL")
         return retry<PdlPersonResponseBolk> {
             httpClient.post(apiUrl) {
-                behandlingsnummer(behandlingsnummere)
+                behandlingsnummer(saktyper)
                 header(HEADER_TEMA, HEADER_TEMA_VALUE)
                 accept(Json)
                 contentType(Json)
@@ -200,6 +189,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             val response =
                 retry<PdlFoedselsnumreFraAktoerIdResponse> {
                     httpClient.post(apiUrl) {
+                        behandlingsnummer(SakType.entries)
                         header(HEADER_TEMA, HEADER_TEMA_VALUE)
                         accept(Json)
                         contentType(Json)
@@ -226,10 +216,9 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             )
 
         logger.info("Henter geografisk tilknytning for fnr = ${request.foedselsnummer} fra PDL")
-        val behandlingsnummer = finnBehandlingsnummerFromSaktype(SakType.BARNEPENSJON)
         return retry<PdlGeografiskTilknytningResponse> {
             httpClient.post(apiUrl) {
-                header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
+                behandlingsnummer(SakType.BARNEPENSJON)
                 header(HEADER_TEMA, HEADER_TEMA_VALUE)
                 accept(Json)
                 contentType(Json)
@@ -338,24 +327,5 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         const val HEADER_TEMA = "Tema"
         const val HEADER_TEMA_VALUE = "PEN"
         const val PDL_BULK_SIZE = 100
-    }
-}
-
-fun HttpMessageBuilder.behandlingsnummer(behandlingsnummer: List<Behandlingsnummer>): Unit =
-    header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.joinToString { it.behandlingsnummer })
-
-private fun hentBehandlingsnummerFromSaktyper(saktyper: List<SakType>): List<Behandlingsnummer> {
-    return saktyper.map {
-        when (it) {
-            SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
-            SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD
-        }
-    }.distinct()
-}
-
-private fun finnBehandlingsnummerFromSaktype(saktype: SakType): Behandlingsnummer {
-    return when (saktype) {
-        SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
-        SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD
     }
 }

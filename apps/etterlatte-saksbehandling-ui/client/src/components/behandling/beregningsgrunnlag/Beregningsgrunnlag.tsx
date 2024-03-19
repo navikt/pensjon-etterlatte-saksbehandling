@@ -22,7 +22,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
 
-  const [overstyrBeregning, getOverstyrBeregning] = useApiCall(hentOverstyrBeregning)
+  const [overstyrtBeregning, getOverstyrtBeregning] = useApiCall(hentOverstyrBeregning)
   const [overstyrt, setOverstyrt] = useState<OverstyrBeregning | undefined>(undefined)
   const vedtaksresultat = useVedtaksResultat()
   const visOverstyrKnapp = useFeatureEnabledMedDefault('overstyr-beregning-knapp', false)
@@ -32,7 +32,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
     : undefined
 
   useEffect(() => {
-    getOverstyrBeregning(behandling.id, (result) => {
+    getOverstyrtBeregning(behandling.id, (result) => {
       if (result) {
         setOverstyrt(result || undefined)
       }
@@ -50,7 +50,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
         </HeadingWrapper>
       </ContentHeader>
       <>
-        {isSuccess(overstyrBeregning) && (
+        {isSuccess(overstyrtBeregning) && (
           <>
             {visOverstyrKnapp && !overstyrt && (
               <OverstyrBeregning behandlingId={behandling.id} setOverstyrt={setOverstyrt} />

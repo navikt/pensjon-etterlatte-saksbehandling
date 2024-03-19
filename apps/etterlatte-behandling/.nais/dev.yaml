@@ -180,3 +180,4 @@ spec:
         - application: etterlatte-institusjonsopphold
         - application: etterlatte-klage
         - application: etterlatte-tilbakekreving
+        - application: etterlatte-brev-api

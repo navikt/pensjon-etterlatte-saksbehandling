@@ -37,6 +37,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.route.FeatureIkkeStoettetException
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -149,15 +150,7 @@ class KlageServiceImpl(
             merknad = null,
         )
 
-        hendelseDao.klageHendelse(
-            klageId = klage.id,
-            sakId = klage.sak.id,
-            hendelse = KlageHendelseType.OPPRETTET,
-            inntruffet = Tidspunkt.now(),
-            saksbehandler = saksbehandler.ident,
-            kommentar = null,
-            begrunnelse = null,
-        )
+        opprettKlageHendelse(klage, KlageHendelseType.OPPRETTET, saksbehandler)
 
         klageHendelser.sendKlageHendelseRapids(
             StatistikkKlage(klage.id, klage, Tidspunkt.now()),
@@ -324,14 +317,11 @@ class KlageServiceImpl(
             }
         }
 
-        hendelseDao.klageHendelse(
-            klageId = opprinneligKlage.id,
-            sakId = opprinneligKlage.sak.id,
+        opprettKlageHendelse(
+            klage = opprinneligKlage,
             hendelse = KlageHendelseType.KABAL_HENDELSE,
-            inntruffet = Tidspunkt.now(),
             saksbehandler = null,
             kommentar = "Mottok status=${kabalrespons.kabalStatus} fra kabal, med resultat=${kabalrespons.resultat}",
-            begrunnelse = null,
         )
 
         klageDao.oppdaterKabalStatus(klageId, kabalrespons)
@@ -360,26 +350,17 @@ class KlageServiceImpl(
                     opprettetOppgaveOmgjoeringId = oppgaveOmgjoering?.id,
                     sendtInnstillingsbrev = sendtInnstillingsbrev,
                 ),
-            ).also {
-                klageDao.lagreKlage(it)
-            }
+            )
+        klageDao.lagreKlage(klageMedResultat)
 
-        oppgaveService.ferdigStillOppgaveUnderBehandling(klage.id.toString(), saksbehandler)
-        hendelseDao.klageHendelse(
-            klageId = klageId,
-            sakId = klage.sak.id,
-            hendelse = KlageHendelseType.FERDIGSTILT,
-            inntruffet = Tidspunkt.now(),
-            saksbehandler = saksbehandler.ident,
-            kommentar = null,
-            begrunnelse = null,
-        )
+        oppgaveService.ferdigStillOppgaveUnderBehandling(klageMedResultat.id.toString(), saksbehandler)
+        opprettKlageHendelse(klageMedResultat, KlageHendelseType.FERDIGSTILT, saksbehandler)
 
         klageHendelser.sendKlageHendelseRapids(
-            StatistikkKlage(klage.id, klage, Tidspunkt.now(), saksbehandler.ident),
+            StatistikkKlage(klageMedResultat.id, klageMedResultat, Tidspunkt.now(), saksbehandler.ident),
             KlageHendelseType.FERDIGSTILT,
         )
-        klageBrevService.slettUferdigeBrev(klage.id, saksbehandler)
+        klageBrevService.slettUferdigeBrev(klageMedResultat.id, saksbehandler)
 
         return klageMedResultat
     }
@@ -402,12 +383,10 @@ class KlageServiceImpl(
         klageDao.lagreKlage(avbruttKlage).also {
             oppgaveService.avbrytOppgaveUnderBehandling(klageId.toString(), saksbehandler)
 
-            hendelseDao.klageHendelse(
-                klageId = avbruttKlage.id,
-                sakId = avbruttKlage.sak.id,
+            opprettKlageHendelse(
+                klage = avbruttKlage,
                 hendelse = KlageHendelseType.AVBRUTT,
-                inntruffet = Tidspunkt.now(),
-                saksbehandler = saksbehandler.ident(),
+                saksbehandler = saksbehandler,
                 kommentar = kommentar,
                 begrunnelse = aarsak.name,
             )
@@ -434,16 +413,7 @@ class KlageServiceImpl(
         sjekkVedtakIdLagretIUtfall(klage, vedtak.id)
         klageDao.lagreKlage(oppdatertKlage)
 
-        hendelseDao.vedtakHendelse(
-            behandlingId = klage.id,
-            sakId = klage.sak.id,
-            vedtakId = vedtak.id,
-            hendelse = HendelseType.FATTET,
-            inntruffet = Tidspunkt.now(),
-            saksbehandler = saksbehandler.ident(),
-            kommentar = null,
-            begrunnelse = null,
-        )
+        opprettVedtakHendelse(klage, vedtak, HendelseType.FATTET, saksbehandler)
 
         oppgaveService.hentOppgaveUnderBehandlingForReferanse(klageId.toString()).let { oppgave ->
             oppgaveService.oppdaterStatusOgMerknad(
@@ -490,6 +460,43 @@ class KlageServiceImpl(
                     // TODO: hent ut vedtaksbrev for vedtaket
                     journalpostVedtak = null,
                 ),
+        )
+    }
+
+    private fun opprettKlageHendelse(
+        klage: Klage,
+        hendelse: KlageHendelseType,
+        saksbehandler: Saksbehandler?,
+        kommentar: String? = null,
+        begrunnelse: String? = null,
+    ) {
+        hendelseDao.klageHendelse(
+            klageId = klage.id,
+            sakId = klage.sak.id,
+            hendelse = hendelse,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = saksbehandler?.ident,
+            kommentar = kommentar,
+            begrunnelse = begrunnelse,
+        )
+    }
+
+    private fun opprettVedtakHendelse(
+        klage: Klage,
+        vedtak: VedtakDto,
+        hendelse: HendelseType,
+        saksbehandler: Saksbehandler,
+        kommentar: String? = null,
+    ) {
+        hendelseDao.vedtakHendelse(
+            behandlingId = klage.id,
+            sakId = klage.sak.id,
+            vedtakId = vedtak.id,
+            hendelse = hendelse,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = saksbehandler.ident,
+            kommentar = kommentar,
+            begrunnelse = null,
         )
     }
 
@@ -540,38 +547,28 @@ class KlageServiceImpl(
     ): Klage {
         logger.info("Attesterer vedtak for klage=$klageId")
         val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
-        sjekkAtSaksbehandlerHarOppgaven(klageId, saksbehandler, "attestere vedtak")
 
-        val oppdatertKlage = klage.attesterVedtak()
+        sjekkAtSaksbehandlerHarOppgaven(klageId, saksbehandler, "attestere vedtak")
 
         checkNotNull(klage.utfall as? KlageUtfallMedData.Avvist) {
             "Vi har en klage som kunne attesteres, men har feil utfall lagret. Id: $klageId"
         }
-        klageBrevService.ferdigstillVedtaksbrev(klage, saksbehandler)
+
+        val oppdatertKlage = klage.attesterVedtak()
+
+        klageBrevService.ferdigstillVedtaksbrev(oppdatertKlage, saksbehandler)
         val vedtak =
             runBlocking {
-                vedtakKlient.attesterVedtakKlage(
-                    klage = klage,
-                    brukerTokenInfo = saksbehandler,
-                )
+                vedtakKlient.attesterVedtakKlage(oppdatertKlage, saksbehandler)
             }
         sjekkVedtakIdLagretIUtfall(oppdatertKlage, vedtak.id)
         klageDao.lagreKlage(oppdatertKlage)
 
-        hendelseDao.vedtakHendelse(
-            behandlingId = klageId,
-            sakId = klage.sak.id,
-            vedtakId = vedtak.id,
-            hendelse = HendelseType.ATTESTERT,
-            inntruffet = Tidspunkt.now(),
-            saksbehandler = saksbehandler.ident(),
-            kommentar = kommentar,
-            begrunnelse = null,
-        )
+        opprettVedtakHendelse(oppdatertKlage, vedtak, HendelseType.ATTESTERT, saksbehandler, kommentar)
 
-        oppgaveService.ferdigStillOppgaveUnderBehandling(klageId.toString(), saksbehandler)
+        oppgaveService.ferdigStillOppgaveUnderBehandling(klageId.toString(), saksbehandler, "Vedtak attestert")
 
-        klageBrevService.slettUferdigeBrev(klage.id, saksbehandler)
+        klageBrevService.slettUferdigeBrev(oppdatertKlage.id, saksbehandler)
         return oppdatertKlage
     }
 
@@ -596,16 +593,7 @@ class KlageServiceImpl(
 
         klageDao.lagreKlage(oppdatertKlage)
 
-        hendelseDao.vedtakHendelse(
-            behandlingId = klage.id,
-            sakId = klage.sak.id,
-            vedtakId = vedtak.id,
-            hendelse = HendelseType.UNDERKJENT,
-            inntruffet = Tidspunkt.now(),
-            saksbehandler = saksbehandler.ident(),
-            kommentar = kommentar,
-            begrunnelse = valgtBegrunnelse,
-        )
+        opprettVedtakHendelse(oppdatertKlage, vedtak, HendelseType.UNDERKJENT, saksbehandler, kommentar)
 
         oppgaveService.hentOppgaveUnderBehandlingForReferanse(klageId.toString()).let { oppgave ->
             oppgaveService.oppdaterStatusOgMerknad(

@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.RouteScopedPlugin
 import io.ktor.server.application.ServerReady
 import io.ktor.server.application.call
 import io.ktor.server.application.install
@@ -51,6 +52,7 @@ import no.nav.etterlatte.oppgaveGosys.gosysOppgaveRoute
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
+import no.nav.etterlatte.tilgangsstyring.PluginConfiguration
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
 import java.util.Timer
@@ -108,29 +110,35 @@ internal fun Application.module(context: ApplicationContext) {
     ) {
         attachContekst(context.dataSource, context)
         settOppRoutes(context)
+        settOppTilganger(context, adressebeskyttelsePlugin)
+    }
+}
 
-        with(context) {
-            install(adressebeskyttelsePlugin) {
-                saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey
+private fun Route.settOppTilganger(
+    context: ApplicationContext,
+    adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration>,
+) {
+    with(context) {
+        install(adressebeskyttelsePlugin) {
+            saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey
 
-                harTilgangBehandling = { behandlingId, saksbehandlerMedRoller ->
-                    tilgangService.harTilgangTilBehandling(behandlingId, saksbehandlerMedRoller)
-                }
-                harTilgangTilSak = { sakId, saksbehandlerMedRoller ->
-                    tilgangService.harTilgangTilSak(sakId, saksbehandlerMedRoller)
-                }
-                harTilgangTilOppgave = { oppgaveId, saksbehandlerMedRoller ->
-                    tilgangService.harTilgangTilOppgave(
-                        oppgaveId,
-                        saksbehandlerMedRoller,
-                    )
-                }
-                harTilgangTilKlage = { klageId, saksbehandlerMedRoller ->
-                    tilgangService.harTilgangTilKlage(
-                        klageId,
-                        saksbehandlerMedRoller,
-                    )
-                }
+            harTilgangBehandling = { behandlingId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilBehandling(behandlingId, saksbehandlerMedRoller)
+            }
+            harTilgangTilSak = { sakId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilSak(sakId, saksbehandlerMedRoller)
+            }
+            harTilgangTilOppgave = { oppgaveId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilOppgave(
+                    oppgaveId,
+                    saksbehandlerMedRoller,
+                )
+            }
+            harTilgangTilKlage = { klageId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilKlage(
+                    klageId,
+                    saksbehandlerMedRoller,
+                )
             }
         }
     }

@@ -3,12 +3,11 @@ package no.nav.etterlatte
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.ktor.navConsumerId
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -20,7 +19,7 @@ class InstitusjonsoppholdKlient(
         retry<Institusjonsopphold> {
             httpKlient.get("$url/api/v1/person/institusjonsopphold/$oppholdId?Med-Institusjonsinformasjon=true") {
                 contentType(ContentType.Application.Json)
-                header(NAV_CONSUMER_ID, "etterlatte-institusjonsopphold")
+                navConsumerId("etterlatte-institusjonsopphold")
             }.body()
         }.let {
             when (it) {

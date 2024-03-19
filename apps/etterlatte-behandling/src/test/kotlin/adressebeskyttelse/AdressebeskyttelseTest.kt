@@ -22,10 +22,11 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
-import no.nav.etterlatte.module
+import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.tilgangsstyring.TILGANG_ROUTE_PATH
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -59,7 +60,12 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    module(applicationContext)
+                    restModule(
+                        sikkerLogg,
+                        withMetrics = true,
+                    ) {
+                        applicationContext
+                    }
                 }
 
             val sak: Sak =
@@ -142,7 +148,12 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
         testApplication {
             val httpClient =
                 runServerWithModule(server) {
-                    module(applicationContext)
+                    restModule(
+                        sikkerLogg,
+                        withMetrics = true,
+                    ) {
+                        applicationContext
+                    }
                 }
 
             val sak: Sak =
@@ -200,7 +211,12 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    module(applicationContext)
+                    restModule(
+                        sikkerLogg,
+                        withMetrics = true,
+                    ) {
+                        applicationContext
+                    }
                 }
 
             val sak: Sak =
@@ -275,7 +291,12 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
         testApplication {
             val httpClient =
                 runServerWithModule(server) {
-                    module(applicationContext)
+                    restModule(
+                        sikkerLogg,
+                        withMetrics = true,
+                    ) {
+                        applicationContext
+                    }
                 }
 
             httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
@@ -315,7 +336,12 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
         testApplication {
             val httpClient =
                 runServerWithModule(server) {
-                    module(applicationContext)
+                    restModule(
+                        sikkerLogg,
+                        withMetrics = true,
+                    ) {
+                        applicationContext
+                    }
                 }
 
             httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {

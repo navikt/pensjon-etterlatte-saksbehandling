@@ -34,9 +34,10 @@ import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.mockedSakTilgangDao
-import no.nav.etterlatte.module
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
+import no.nav.etterlatte.sikkerLogg
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -98,7 +99,12 @@ internal class BehandlingInfoRoutesTest {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    module(applicationContext)
+                    restModule(
+                        sikkerLogg,
+                        withMetrics = true,
+                    ) {
+                        applicationContext
+                    }
                 }
 
             val response =
@@ -133,7 +139,12 @@ internal class BehandlingInfoRoutesTest {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    module(applicationContext)
+                    restModule(
+                        sikkerLogg,
+                        withMetrics = true,
+                    ) {
+                        applicationContext
+                    }
                 }
 
             val response =
@@ -161,7 +172,12 @@ internal class BehandlingInfoRoutesTest {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    module(applicationContext)
+                    restModule(
+                        sikkerLogg,
+                        withMetrics = true,
+                    ) {
+                        applicationContext
+                    }
                 }
 
             val response =

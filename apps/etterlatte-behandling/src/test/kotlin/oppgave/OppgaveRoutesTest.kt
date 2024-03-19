@@ -28,9 +28,10 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
-import no.nav.etterlatte.module
+import no.nav.etterlatte.sikkerLogg
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -55,7 +56,12 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    module(applicationContext)
+                    restModule(
+                        sikkerLogg,
+                        withMetrics = true,
+                    ) {
+                        applicationContext
+                    }
                 }
 
             val sak: Sak =

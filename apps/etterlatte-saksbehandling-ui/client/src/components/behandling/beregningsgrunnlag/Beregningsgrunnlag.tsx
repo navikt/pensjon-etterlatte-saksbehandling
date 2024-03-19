@@ -83,7 +83,7 @@ const OverstyrBeregning = (props: {
       },
       (result) => {
         if (result) {
-          setOverstyrt(result || undefined)
+          setOverstyrt(result)
         }
       }
     )

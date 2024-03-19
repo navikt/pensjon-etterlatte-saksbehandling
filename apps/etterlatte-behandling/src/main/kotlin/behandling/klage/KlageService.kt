@@ -272,30 +272,6 @@ class KlageServiceImpl(
         return klageMedOppdatertUtfall
     }
 
-    private fun opprettVedtakOgBrev(
-        klage: Klage,
-        saksbehandler: Saksbehandler,
-    ): Pair<KlageVedtak, KlageVedtaksbrev> {
-        return when (val utfall = klage.utfall) {
-            is KlageUtfallMedData.Avvist -> Pair(utfall.vedtak, utfall.brev)
-            else -> {
-                return runBlocking {
-                    val vedtakId = lagreVedtakForAvvisning(klage, saksbehandler)
-                    val vedtaksbrevId = klageBrevService.vedtaksbrev(klage, saksbehandler)
-                    Pair(vedtakId, vedtaksbrevId)
-                }
-            }
-        }
-    }
-
-    private fun lagreVedtakForAvvisning(
-        klage: Klage,
-        saksbehandler: Saksbehandler,
-    ): KlageVedtak {
-        val vedtak = runBlocking { vedtakKlient.lagreVedtakKlage(klage, saksbehandler) }
-        return KlageVedtak(vedtak.id)
-    }
-
     override fun haandterKabalrespons(
         klageId: UUID,
         kabalrespons: Kabalrespons,
@@ -427,6 +403,98 @@ class KlageServiceImpl(
         return oppdatertKlage
     }
 
+    override fun attesterVedtak(
+        klageId: UUID,
+        kommentar: String,
+        saksbehandler: Saksbehandler,
+    ): Klage {
+        logger.info("Attesterer vedtak for klage=$klageId")
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
+
+        sjekkAtSaksbehandlerHarOppgaven(klageId, saksbehandler, "attestere vedtak")
+
+        checkNotNull(klage.utfall as? KlageUtfallMedData.Avvist) {
+            "Vi har en klage som kunne attesteres, men har feil utfall lagret. Id: $klageId"
+        }
+
+        val oppdatertKlage = klage.attesterVedtak()
+
+        klageBrevService.ferdigstillVedtaksbrev(oppdatertKlage, saksbehandler)
+        val vedtak =
+            runBlocking {
+                vedtakKlient.attesterVedtakKlage(oppdatertKlage, saksbehandler)
+            }
+        sjekkVedtakIdLagretIUtfall(oppdatertKlage, vedtak.id)
+        klageDao.lagreKlage(oppdatertKlage)
+
+        opprettVedtakHendelse(oppdatertKlage, vedtak, HendelseType.ATTESTERT, saksbehandler, kommentar)
+
+        oppgaveService.ferdigStillOppgaveUnderBehandling(klageId.toString(), saksbehandler, "Vedtak attestert")
+
+        klageBrevService.slettUferdigeBrev(oppdatertKlage.id, saksbehandler)
+        return oppdatertKlage
+    }
+
+    override fun underkjennVedtak(
+        klageId: UUID,
+        kommentar: String,
+        valgtBegrunnelse: String,
+        saksbehandler: Saksbehandler,
+    ): Klage {
+        logger.info("Underkjenner vedtak for klage=$klageId")
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
+
+        val oppdatertKlage = klage.underkjennVedtak()
+
+        val vedtak =
+            runBlocking {
+                vedtakKlient.underkjennVedtakKlage(
+                    klageId = klageId,
+                    brukerTokenInfo = saksbehandler,
+                )
+            }
+
+        klageDao.lagreKlage(oppdatertKlage)
+
+        opprettVedtakHendelse(oppdatertKlage, vedtak, HendelseType.UNDERKJENT, saksbehandler, kommentar)
+
+        oppgaveService.hentOppgaveUnderBehandlingForReferanse(klageId.toString()).let { oppgave ->
+            oppgaveService.oppdaterStatusOgMerknad(
+                oppgave.id,
+                "Vedtak er underkjent",
+                Status.UNDER_BEHANDLING,
+            )
+            oppgaveService.fjernSaksbehandler(oppgave.id)
+        }
+
+        return oppdatertKlage
+    }
+
+    private fun opprettVedtakOgBrev(
+        klage: Klage,
+        saksbehandler: Saksbehandler,
+    ): Pair<KlageVedtak, KlageVedtaksbrev> {
+        return when (val utfall = klage.utfall) {
+            is KlageUtfallMedData.Avvist -> Pair(utfall.vedtak, utfall.brev)
+            else -> {
+                return runBlocking {
+                    val vedtakId = lagreVedtakForAvvisning(klage, saksbehandler)
+                    val vedtaksbrevId = klageBrevService.vedtaksbrev(klage, saksbehandler)
+                    Pair(vedtakId, vedtaksbrevId)
+                }
+            }
+        }
+    }
+
+    private fun lagreVedtakForAvvisning(
+        klage: Klage,
+        saksbehandler: Saksbehandler,
+    ): KlageVedtak =
+        runBlocking {
+            val vedtak = vedtakKlient.lagreVedtakKlage(klage, saksbehandler)
+            KlageVedtak(vedtak.id)
+        }
+
     private fun ferdigstillBrevOgSendTilKabal(
         it: InnstillingTilKabal,
         klage: Klage,
@@ -538,73 +606,6 @@ class KlageServiceImpl(
                 detail = "Klagen med id=${klage.id} kan ikke ferdigstilles siden den har feil status / tilstand",
             )
         }
-    }
-
-    override fun attesterVedtak(
-        klageId: UUID,
-        kommentar: String,
-        saksbehandler: Saksbehandler,
-    ): Klage {
-        logger.info("Attesterer vedtak for klage=$klageId")
-        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
-
-        sjekkAtSaksbehandlerHarOppgaven(klageId, saksbehandler, "attestere vedtak")
-
-        checkNotNull(klage.utfall as? KlageUtfallMedData.Avvist) {
-            "Vi har en klage som kunne attesteres, men har feil utfall lagret. Id: $klageId"
-        }
-
-        val oppdatertKlage = klage.attesterVedtak()
-
-        klageBrevService.ferdigstillVedtaksbrev(oppdatertKlage, saksbehandler)
-        val vedtak =
-            runBlocking {
-                vedtakKlient.attesterVedtakKlage(oppdatertKlage, saksbehandler)
-            }
-        sjekkVedtakIdLagretIUtfall(oppdatertKlage, vedtak.id)
-        klageDao.lagreKlage(oppdatertKlage)
-
-        opprettVedtakHendelse(oppdatertKlage, vedtak, HendelseType.ATTESTERT, saksbehandler, kommentar)
-
-        oppgaveService.ferdigStillOppgaveUnderBehandling(klageId.toString(), saksbehandler, "Vedtak attestert")
-
-        klageBrevService.slettUferdigeBrev(oppdatertKlage.id, saksbehandler)
-        return oppdatertKlage
-    }
-
-    override fun underkjennVedtak(
-        klageId: UUID,
-        kommentar: String,
-        valgtBegrunnelse: String,
-        saksbehandler: Saksbehandler,
-    ): Klage {
-        logger.info("Underkjenner vedtak for klage=$klageId")
-        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
-
-        val oppdatertKlage = klage.underkjennVedtak()
-
-        val vedtak =
-            runBlocking {
-                vedtakKlient.underkjennVedtakKlage(
-                    klageId = klageId,
-                    brukerTokenInfo = saksbehandler,
-                )
-            }
-
-        klageDao.lagreKlage(oppdatertKlage)
-
-        opprettVedtakHendelse(oppdatertKlage, vedtak, HendelseType.UNDERKJENT, saksbehandler, kommentar)
-
-        oppgaveService.hentOppgaveUnderBehandlingForReferanse(klageId.toString()).let { oppgave ->
-            oppgaveService.oppdaterStatusOgMerknad(
-                oppgave.id,
-                "Vedtak er underkjent",
-                Status.UNDER_BEHANDLING,
-            )
-            oppgaveService.fjernSaksbehandler(oppgave.id)
-        }
-
-        return oppdatertKlage
     }
 
     private fun lagOppgaveForOmgjoering(klage: Klage): OppgaveIntern {

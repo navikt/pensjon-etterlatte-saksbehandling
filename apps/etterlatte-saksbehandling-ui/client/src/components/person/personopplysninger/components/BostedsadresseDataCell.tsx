@@ -14,10 +14,10 @@ export const BostedsadresseDataCell = ({
 }) => {
   return (
     <>
-      {!!bostedsadresse ? (
+      {!!bostedsadresse && !!bostedsadresse[index] ? (
         <Table.DataCell>
           <SpaceChildren direction="row">
-            {`${bostedsadresse[index].adresseLinje1}, ${bostedsadresse[index].postnr} ${!!bostedsadresse[index].poststed ? bostedsadresse[index].poststed : ''}`}
+            {`${!!bostedsadresse[index].adresseLinje1 ? bostedsadresse[index].adresseLinje1 : '-'}, ${!!bostedsadresse[index].postnr ? bostedsadresse[index].postnr : ''} ${!!bostedsadresse[index].poststed ? bostedsadresse[index].poststed : ''}`}
             {bostedsadresse[index].aktiv && visAktiv && (
               <Tag variant="success" size="small">
                 Gjeldene

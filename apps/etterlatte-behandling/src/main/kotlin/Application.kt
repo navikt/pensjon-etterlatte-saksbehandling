@@ -3,15 +3,9 @@ package no.nav.etterlatte
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.RouteScopedPlugin
-import io.ktor.server.application.ServerReady
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.auth.principal
-import io.ktor.server.cio.CIO
-import io.ktor.server.config.HoconApplicationConfig
-import io.ktor.server.engine.applicationEngineEnvironment
-import io.ktor.server.engine.connector
-import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.Route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
@@ -44,7 +38,7 @@ import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.libs.ktor.ktor.shutdownPolicyEmbeddedServer
+import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.oppgave.oppgaveRoutes
@@ -70,29 +64,19 @@ private class Server(private val context: ApplicationContext) {
     }
 
     private val engine =
-        embeddedServer(
-            configure = shutdownPolicyEmbeddedServer(),
-            factory = CIO,
-            environment =
-                applicationEngineEnvironment {
-                    config = HoconApplicationConfig(context.config)
-                    module { module(context) }
-                    module { moduleOnServerReady(context) }
-                    connector { port = context.httpPort }
-                },
-        )
+        initEmbeddedServer(
+            httpPort = context.httpPort,
+            applicationConfig = context.config,
+            shutdownHooks = shutdownHooks(context),
+        ) {
+            settOppApplikasjonen(context)
+        }
 
     fun run() =
         with(context) {
             dataSource.migrate()
             setReady().also { engine.start(true) }
         }
-}
-
-internal fun Application.moduleOnServerReady(context: ApplicationContext) {
-    environment.monitor.subscribe(ServerReady) {
-        shutdownHooks(context).forEach { it.value.apply { it.key } }
-    }
 }
 
 private fun shutdownHooks(context: ApplicationContext): Map<Timer, (Timer) -> Unit> =
@@ -103,15 +87,20 @@ private fun shutdownHooks(context: ApplicationContext): Map<Timer, (Timer) -> Un
         context.fristGaarUtJobb.schedule() to { addShutdownHook(it) },
     )
 
+@Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")
 internal fun Application.module(context: ApplicationContext) {
     restModule(
         sikkerLogg,
         withMetrics = true,
     ) {
-        attachContekst(context.dataSource, context)
-        settOppRoutes(context)
-        settOppTilganger(context, adressebeskyttelsePlugin)
+        settOppApplikasjonen(context)
     }
+}
+
+private fun Route.settOppApplikasjonen(context: ApplicationContext) {
+    attachContekst(context.dataSource, context)
+    settOppRoutes(context)
+    settOppTilganger(context, adressebeskyttelsePlugin)
 }
 
 private fun Route.settOppTilganger(

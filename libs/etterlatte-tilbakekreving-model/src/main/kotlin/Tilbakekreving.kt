@@ -57,9 +57,14 @@ data class TilbakekrevingTilsvar(
 )
 
 data class TilbakekrevingBeloepBehold(
-    val behold: JaNei?,
+    val behold: TilbakekrevingBeloepBeholdSvar?,
     val beskrivelse: String?,
 )
+
+enum class TilbakekrevingBeloepBeholdSvar {
+    BELOEP_I_BEHOLD,
+    BELOEP_IKKE_I_BEHOLD,
+}
 
 data class TilbakekrevingVurderingUaktsomhet(
     val aktsomhet: TilbakekrevingAktsomhet?,

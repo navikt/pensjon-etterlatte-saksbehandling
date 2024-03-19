@@ -28,7 +28,6 @@ import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
-import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 enum class KlageFeatureToggle(private val key: String) : FeatureToggle {
     KanFerdigstilleKlageToggle("pensjon-etterlatte.kan-ferdigstille-klage"),
@@ -45,12 +44,12 @@ internal fun Route.klageRoutes(
 ) {
     route("/api/klage") {
         post("opprett/{$SAKID_CALL_PARAMETER}") {
-            kunSkrivetilgang {
+            kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                 medBody<InnkommendeKlage> { innkommendeKlage ->
                     val sakId = sakId
                     val klage =
                         inTransaction {
-                            klageService.opprettKlage(sakId, innkommendeKlage)
+                            klageService.opprettKlage(sakId, innkommendeKlage, saksbehandler)
                         }
                     call.respond(klage)
                 }

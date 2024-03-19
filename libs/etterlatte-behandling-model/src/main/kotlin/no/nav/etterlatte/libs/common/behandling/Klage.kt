@@ -271,11 +271,6 @@ data class Klage(
                 this.utfall != null
             }
 
-            KlageStatus.FORMKRAV_IKKE_OPPFYLT -> {
-                // TODO("Støtt avslag på formkrav på klage")
-                false
-            }
-
             else -> false
         }
     }
@@ -448,6 +443,26 @@ sealed class KlageUtfallMedData {
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
     ) : KlageUtfallMedData() {
         override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.AvvistMedOmgjoering
+    }
+
+    fun innstilling(): InnstillingTilKabal? {
+        return when (this) {
+            is StadfesteVedtak -> innstilling
+            is DelvisOmgjoering -> innstilling
+            is Omgjoering -> null
+            is Avvist -> null
+            is AvvistMedOmgjoering -> null
+        }
+    }
+
+    fun omgjoering(): KlageOmgjoering? {
+        return when (this) {
+            is StadfesteVedtak -> null
+            is DelvisOmgjoering -> omgjoering
+            is Omgjoering -> omgjoering
+            is Avvist -> null
+            is AvvistMedOmgjoering -> omgjoering
+        }
     }
 }
 

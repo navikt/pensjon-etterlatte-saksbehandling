@@ -765,6 +765,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                             journalpostId = "En id for journalpost",
                             innsender = SOEKER_FOEDSELSNUMMER.value,
                         ),
+                    saksbehandler = saksbehandler,
                 )
             }
         val klageOppgave =

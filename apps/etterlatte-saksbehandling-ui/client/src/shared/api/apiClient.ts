@@ -91,7 +91,8 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
         return { status: 401, ok: false, detail: 'Du er utlogget, last på siden på nytt.' }
       }
 
-      const error: JsonError = await response.json()
+      const error: JsonError = await errorFrom(response)
+
       if (response.status >= 500) {
         if (shouldLogError) {
           logger.generalError({
@@ -127,6 +128,15 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
         cause: e,
       },
     }
+  }
+}
+
+async function errorFrom(response: Response): Promise<JsonError> {
+  try {
+    return await response.json()
+  } catch (err) {
+    logger.generalError({ msg: 'Feilet ved henting av JSON-error fra backend', errorInfo: response.text() })
+    return { status: response.status, detail: 'Fikk feil i kall mot backend' }
   }
 }
 

@@ -30,6 +30,6 @@ private fun RapidInfo.sendUt(
     packet[TEKNISK_TID_KEY] = tekniskTid
     packet["vedtak"] = vedtak
     extraParams.forEach { (k, v) -> packet[k] = v }
-    context.publish(behandlingId.toString(), packet.toJson())
+    context.publish("${packet.id}:$behandlingId", packet.toJson())
     logger.info("Sendte ut på rapid for hendelse $vedtakhendelse")
 }

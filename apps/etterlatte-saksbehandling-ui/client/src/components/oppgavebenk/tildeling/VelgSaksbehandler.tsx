@@ -13,6 +13,7 @@ import {
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
+import { isPending } from '~shared/api/apiUtils'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -102,7 +103,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
             size="small"
             variant="tertiary"
             onClick={() => setOpenDropdown(true)}
-            loading={byttSaksbehandlerResult.status === 'pending'}
+            loading={isPending(byttSaksbehandlerResult)}
           >
             {valgtSaksbehandler?.navn
               ? `${valgtSaksbehandler.navn} ${valgtSaksbehandler.ident === innloggetSaksbehandler.ident ? '(meg)' : ''}`
@@ -115,14 +116,14 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                 options={saksbehandlereIEnhet.map((behandler) => behandler.navn!)}
                 onToggleSelected={onSaksbehandlerSelect}
                 selectedOptions={!!valgtSaksbehandler ? [valgtSaksbehandler.navn!] : []}
-                isLoading={byttSaksbehandlerResult.status === 'pending'}
+                isLoading={isPending(byttSaksbehandlerResult)}
               />
               {!valgtSaksbehandler?.ident?.includes(innloggetSaksbehandler.ident) && (
                 <ValgButton
                   variant="tertiary"
                   size="xsmall"
                   onClick={onTildelTilMeg}
-                  loading={byttSaksbehandlerResult.status === 'pending'}
+                  loading={isPending(byttSaksbehandlerResult)}
                 >
                   Tildel til meg
                 </ValgButton>
@@ -136,7 +137,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                   onClick={onFjernTildeling}
                   icon={<PersonCrossIcon />}
                   iconPosition="right"
-                  loading={fjernSaksbehandlerResult.status === 'pending'}
+                  loading={isPending(fjernSaksbehandlerResult)}
                 >
                   Fjern tildeling
                 </ValgButton>

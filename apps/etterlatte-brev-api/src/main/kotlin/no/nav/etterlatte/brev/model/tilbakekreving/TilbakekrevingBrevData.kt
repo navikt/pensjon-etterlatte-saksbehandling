@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model.tilbakekreving
 
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.brevbaker.formaterNavn
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -14,6 +15,8 @@ data class TilbakekrevingBrevDTO(
     override val innhold: List<Slate.Element>,
     val sakType: SakType,
     val bosattUtland: Boolean,
+    val brukerNavn: String,
+    val doedsbo: Boolean,
     val varselVedlagt: Boolean,
     val datoVarselEllerVedtak: LocalDate,
     val datoTilsvarBruker: LocalDate?,
@@ -31,6 +34,9 @@ data class TilbakekrevingBrevDTO(
                 innhold = redigerbart,
                 sakType = generellBrevData.sak.sakType,
                 bosattUtland = generellBrevData.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
+                brukerNavn = generellBrevData.personerISak.soeker.formaterNavn(),
+                // TODO hvordan vet vi om det er dødsbo?
+                doedsbo = false,
                 // TODO varselVedlagt Hvordn vet vi det?
                 varselVedlagt = false,
                 // TODO hvis varsel ikke er vedlagt skal varsel sin dato brukes..
@@ -47,8 +53,8 @@ data class TilbakekrevingBrevDTO(
                                     it.ytelse.resultat == TilbakekrevingResultat.DELVIS_TILBAKEKREV
                             },
                         helTilbakekreving =
-                            tilbakekreving.perioder.any {
-                                it.ytelse.resultat != TilbakekrevingResultat.FULL_TILBAKEKREV
+                            tilbakekreving.perioder.all {
+                                it.ytelse.resultat == TilbakekrevingResultat.FULL_TILBAKEKREV
                             },
                         perioder = tilbakekrevingsPerioder(tilbakekreving),
                         summer = perioderSummert(tilbakekreving),

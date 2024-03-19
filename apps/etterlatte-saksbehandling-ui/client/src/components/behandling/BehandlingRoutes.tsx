@@ -193,6 +193,12 @@ export function soeknadRoutes(behandling: IBehandlingReducer, lagVarselbrev: boo
         routeTypes.beregning,
       ]
 
+  const boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet?.boddEllerArbeidetUtlandet ?? false
+
+  if (avslag && boddEllerArbeidetUtlandet) {
+    defaultRoutes.push(routeTypes.trygdetid)
+  }
+
   if (lagVarselbrev) {
     defaultRoutes.push(routeTypes.varselbrev)
   }

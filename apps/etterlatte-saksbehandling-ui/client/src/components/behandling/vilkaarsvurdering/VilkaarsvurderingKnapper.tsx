@@ -12,14 +12,18 @@ import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/Beh
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useBehandling } from '~components/behandling/useBehandling'
 
 export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
   const { next, goto } = useBehandlingRoutes()
   const dispatch = useAppDispatch()
   const { behandlingId } = props
   const vedtaksresultat = useVedtaksResultat()
+  const behandling = useBehandling()
   const [vedtakResult, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [oppdaterStatusResult, oppdaterStatusRequest] = useApiCall(oppdaterStatus)
+
+  const boddEllerArbeidetUtlandet = behandling?.boddEllerArbeidetUtlandet?.boddEllerArbeidetUtlandet ?? false
 
   const oppdaterVedtakAvslag = () => {
     oppdaterStatusRequest(behandlingId, (result) => {
@@ -27,7 +31,11 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
       }
       oppdaterVedtakRequest(behandlingId, () => {
-        goto('brev')
+        if (boddEllerArbeidetUtlandet) {
+          goto('trygdetid')
+        } else {
+          goto('brev')
+        }
       })
     })
   }
@@ -69,7 +77,7 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
             case 'avslag':
               return (
                 <Button variant="primary" loading={isPending(vedtakResult)} onClick={() => oppdaterVedtakAvslag()}>
-                  {handlinger.AVSLAG.navn}
+                  {boddEllerArbeidetUtlandet ? handlinger.AVSLAG_UTLAND.navn : handlinger.AVSLAG.navn}
                 </Button>
               )
           }

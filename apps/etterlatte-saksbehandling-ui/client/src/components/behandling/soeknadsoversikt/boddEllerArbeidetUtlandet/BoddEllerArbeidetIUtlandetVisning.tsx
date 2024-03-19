@@ -56,9 +56,11 @@ const BoddEllerArbeidetIUtlandetVisning = (props: { boddEllerArbeidetUtlandet: I
           </SpoersmaalSvarWrapper>
         </>
       ) : (
-        <Label as="p" size="small" style={{ marginBottom: '32px' }}>
-          Nei
-        </Label>
+        <>
+          <TekstWrapper>Nei</TekstWrapper>
+
+          <TekstWrapper>Ved avslag på helnasjonal sak vil ikke trygdetidsbildet vises</TekstWrapper>
+        </>
       )}
     </>
   )
@@ -68,4 +70,8 @@ export default BoddEllerArbeidetIUtlandetVisning
 
 const SpoersmaalSvarWrapper = styled(VStack).attrs({ gap: '6' })`
   margin-bottom: 3em;
+`
+
+const TekstWrapper = styled(BodyShort).attrs({ size: 'small' })`
+  margin-bottom: 1.5em;
 `

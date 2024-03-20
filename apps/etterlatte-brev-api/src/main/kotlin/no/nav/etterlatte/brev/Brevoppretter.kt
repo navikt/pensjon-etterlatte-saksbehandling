@@ -1,10 +1,12 @@
 package no.nav.etterlatte.brev
 
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
+import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
@@ -18,6 +20,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
+import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -103,6 +106,38 @@ class Brevoppretter(
             return Pair(db.opprettBrev(nyttBrev), generellBrevData)
         }
 
+    suspend fun opprettBrev2(
+        sakId: Long,
+        bruker: BrukerTokenInfo,
+        brevKode: EtterlatteBrevKode,
+        soekerFnr: String,
+        letterData: Any,
+    ): Brev {
+        val innhold =
+            hentData(
+                BrevbakerRequest(
+                    kode = brevKode,
+                    letterData = letterData,
+                    felles = TODO(),
+                    language = TODO(),
+                ),
+            )
+
+        val nyttBrev =
+            OpprettNyttBrev(
+                sakId = sakId,
+                behandlingId = null,
+                prosessType = BrevProsessType.REDIGERBAR,
+                soekerFnr = soekerFnr,
+                mottaker = TODO(),
+                opprettet = Tidspunkt.now(),
+                innhold = BrevInnhold("!!, !!", Spraak.NB, innhold.await()),
+                innholdVedlegg = null,
+                brevtype = brevKode.brevtype,
+            )
+        return db.opprettBrev(nyttBrev)
+    }
+
     suspend fun hentNyttInnhold(
         sakId: Long,
         brevId: Long,
@@ -183,6 +218,19 @@ class Brevoppretter(
                 BrevInnhold(tittel, generellBrevData.spraak, innhold.await()),
                 innholdVedlegg.await(),
             )
+        }
+    }
+
+    private suspend fun hentData(bre: BrevbakerRequest): Deferred<Slate> {
+        return coroutineScope {
+            val innhold =
+                async {
+                    brevbaker.hentRedigerbarTekstFraBrevbakeren2(
+                        brevbakerRequest = bre,
+                    )
+                }
+
+            innhold
         }
     }
 

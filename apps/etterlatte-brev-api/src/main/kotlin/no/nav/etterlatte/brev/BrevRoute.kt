@@ -177,6 +177,25 @@ fun Route.brevRoute(
             }
         }
 
+        post("2") {
+            withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
+                logger.info("Oppretter nytt brev på sak=$sakId)")
+
+                measureTimedValue {
+                    service.opprettBrev2(
+                        sakId,
+                        brukerTokenInfo,
+                        EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG,
+                        TODO(),
+                        "12345678901",
+                    )
+                }.let { (brev, varighet) ->
+                    logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    call.respond(HttpStatusCode.Created, brev)
+                }
+            }
+        }
+
         post("pdf") {
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 try {

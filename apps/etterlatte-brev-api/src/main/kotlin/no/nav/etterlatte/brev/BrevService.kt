@@ -48,6 +48,21 @@ class BrevService(
             brevDataMapping = brevDataMapping,
         ).first
 
+    suspend fun opprettBrev2(
+        sakId: Long,
+        bruker: BrukerTokenInfo,
+        brevkode: EtterlatteBrevKode,
+        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
+        soekerFnr: String,
+    ): Brev =
+        brevoppretter.opprettBrev2(
+            sakId = sakId,
+            bruker = bruker,
+            brevKode = brevkode,
+            soekerFnr = soekerFnr,
+            letterData = TODO(),
+        )
+
     data class BrevPayload(
         val hoveddel: Slate?,
         val vedlegg: List<BrevInnholdVedlegg>?,

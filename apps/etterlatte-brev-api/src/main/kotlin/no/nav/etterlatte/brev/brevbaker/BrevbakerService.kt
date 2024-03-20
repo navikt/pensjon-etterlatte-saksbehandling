@@ -45,6 +45,11 @@ class BrevbakerService(private val brevbakerKlient: BrevbakerKlient, private val
         val brevbakerResponse = retryOgPakkUt { brevbakerKlient.genererJSON(request) }
         return BlockTilSlateKonverterer.konverter(brevbakerResponse)
     }
+
+    suspend fun hentRedigerbarTekstFraBrevbakeren2(brevbakerRequest: BrevbakerRequest): Slate {
+        val brevbakerResponse = retryOgPakkUt { brevbakerKlient.genererJSON(brevbakerRequest) }
+        return BlockTilSlateKonverterer.konverter(brevbakerResponse)
+    }
 }
 
 data class RedigerbarTekstRequest(

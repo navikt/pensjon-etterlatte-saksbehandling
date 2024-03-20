@@ -9,10 +9,11 @@ import {
   fjernSaksbehandlerApi,
   OppgaveDTO,
   OppgaveSaksbehandler,
-  tildelSaksbehandlerApi,
 } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Saksbehandler } from '~shared/types/saksbehandler'
+import { enhetErSkrivbar } from '~components/behandling/felles/utils'
+import { isPending } from '~shared/api/apiUtils'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -30,16 +31,15 @@ const mapSaksbehandler = (oppgave: OppgaveDTO): Saksbehandler | undefined =>
 
 export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, oppgave }: Props): ReactNode => {
   const { sakId, id: oppgaveId, type, versjon, status } = oppgave
-  const erRedigerbar = erOppgaveRedigerbar(status)
-  const saksbehandler = mapSaksbehandler(oppgave)
-
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const erRedigerbar =
+    erOppgaveRedigerbar(status) && enhetErSkrivbar(oppgave.enhet, innloggetSaksbehandler.skriveEnheter)
+  const saksbehandler = mapSaksbehandler(oppgave)
 
   const [openDropdown, setOpenDropdown] = useState<boolean>(false)
 
   const [valgtSaksbehandler, setValgtSaksbehandler] = useState<Saksbehandler | undefined>(saksbehandler)
 
-  const [tildelSaksbehandlerResult, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
   const [fjernSaksbehandlerResult, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
   const [byttSaksbehandlerResult, byttSaksbehandler] = useApiCall(byttSaksbehandlerApi)
 
@@ -64,7 +64,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
   }
 
   const onTildelTilMeg = () => {
-    tildelSaksbehandler(
+    byttSaksbehandler(
       { oppgaveId, type, nysaksbehandler: { saksbehandler: innloggetSaksbehandler.ident, versjon } },
       (result) => {
         oppdaterTildeling(oppgave, innloggetSaksbehandler, result.versjon)
@@ -103,7 +103,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
             size="small"
             variant="tertiary"
             onClick={() => setOpenDropdown(true)}
-            loading={byttSaksbehandlerResult.status === 'pending'}
+            loading={isPending(byttSaksbehandlerResult)}
           >
             {valgtSaksbehandler?.navn
               ? `${valgtSaksbehandler.navn} ${valgtSaksbehandler.ident === innloggetSaksbehandler.ident ? '(meg)' : ''}`
@@ -116,14 +116,14 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                 options={saksbehandlereIEnhet.map((behandler) => behandler.navn!)}
                 onToggleSelected={onSaksbehandlerSelect}
                 selectedOptions={!!valgtSaksbehandler ? [valgtSaksbehandler.navn!] : []}
-                isLoading={byttSaksbehandlerResult.status === 'pending'}
+                isLoading={isPending(byttSaksbehandlerResult)}
               />
               {!valgtSaksbehandler?.ident?.includes(innloggetSaksbehandler.ident) && (
                 <ValgButton
                   variant="tertiary"
                   size="xsmall"
                   onClick={onTildelTilMeg}
-                  loading={tildelSaksbehandlerResult.status === 'pending'}
+                  loading={isPending(byttSaksbehandlerResult)}
                 >
                   Tildel til meg
                 </ValgButton>
@@ -137,7 +137,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                   onClick={onFjernTildeling}
                   icon={<PersonCrossIcon />}
                   iconPosition="right"
-                  loading={fjernSaksbehandlerResult.status === 'pending'}
+                  loading={isPending(fjernSaksbehandlerResult)}
                 >
                   Fjern tildeling
                 </ValgButton>

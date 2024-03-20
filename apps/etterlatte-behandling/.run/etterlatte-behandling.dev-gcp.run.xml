@@ -45,6 +45,8 @@
       <env name="PEN_URL" value="https://pensjon-pen-q2.dev-fss-pub.nais.io/pen/springapi" />
       <env name="KRR_ENDPOINT_URL" value="http://digdir-krr-proxy.team-rocket" />
       <env name="KRR_SCOPE" value="api://dev-gcp.team-rocket.digdir-krr-proxy/.default" />
+      <env name="AXSYS_URL" value="https://axsys.dev-fss-pub.nais.io" />
+      <env name="AXSYS_SCOPE" value="api://dev-fss.org.axsys/.default" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-behandling.main" />

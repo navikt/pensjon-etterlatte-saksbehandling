@@ -1,6 +1,6 @@
-import { Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { IniteltUtfallMedBegrunnelseDto, Klage, Utfall } from '~shared/types/Klage'
+import { IniteltUtfallMedBegrunnelseDto, Klage, teksterKlageutfall, Utfall } from '~shared/types/Klage'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterInitieltUtfallForKlage } from '~shared/api/klage'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -8,11 +8,12 @@ import { isPending } from '~shared/api/apiUtils'
 import { addKlage } from '~store/reducers/KlageReducer'
 import { useAppDispatch } from '~store/Store'
 import { InitiellVurderingVisningContent } from '~components/klage/vurdering/InitiellVurderingVisning'
-import { VurderingWrapper } from '~components/klage/styled'
+import { BredVurderingWrapper, VurderingWrapper } from '~components/klage/styled'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { FieldOrNull } from '~shared/types/util'
 import { Controller, useForm } from 'react-hook-form'
+import { ButtonNavigerTilBrev } from '~components/klage/vurdering/KlageVurderingFelles'
 
 const getTextFromutfall = (utfall: Utfall): string => {
   switch (utfall) {
@@ -39,8 +40,8 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
   const klage = props.klage
 
   const dispatch = useAppDispatch()
-  const harIkkeInitieltUtfall = !klage?.initieltUtfall
-  const [redigerbar, setRedigerbar] = useState<boolean>(false)
+
+  const [redigeres, setRedigeres] = useState<boolean>(!klage?.initieltUtfall)
 
   const [lagreInitiellStatus, lagreInitiellKlageUtfall] = useApiCall(oppdaterInitieltUtfallForKlage)
   const { handleSubmit, control, register, watch } = useForm<InitiellVurderingForm>({
@@ -63,22 +64,20 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
       },
       (klage) => {
         dispatch(addKlage(klage))
-        setRedigerbar(false)
+        setRedigeres(false)
       }
     )
   }
-
-  const redigeringsModus = redigerbar || harIkkeInitieltUtfall
 
   const stoetterDelvisOmgjoering = useFeatureEnabledMedDefault('pensjon-etterlatte.klage-delvis-omgjoering', false)
 
   return (
     <>
-      <Heading level="2" size="medium">
+      <Heading level="2" size="medium" spacing>
         Første vurdering
       </Heading>
       <>
-        {redigeringsModus ? (
+        {redigeres ? (
           <form onSubmit={handleSubmit(lagreInitieltUtfall)}>
             <Controller
               name="utfall"
@@ -105,19 +104,20 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
             />
             {formUtfall && (
               <>
-                <VurderingWrapper>
+                <BredVurderingWrapper>
                   <Textarea size="medium" label={getTextFromutfall(formUtfall)} {...register('begrunnelse')} />
-                </VurderingWrapper>
-                <VurderingWrapper>
+                </BredVurderingWrapper>
+
+                <BredVurderingWrapper>
                   <Button type="submit" variant="primary" loading={isPending(lagreInitiellStatus)}>
                     Lagre vurdering
                   </Button>
-                </VurderingWrapper>
-                {isFailureHandler({
-                  apiResult: lagreInitiellStatus,
-                  errorMessage:
-                    'Kunne ikke lagre initielt utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
-                })}
+                  {isFailureHandler({
+                    apiResult: lagreInitiellStatus,
+                    errorMessage:
+                      'Kunne ikke lagre initielt utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
+                  })}
+                </BredVurderingWrapper>
               </>
             )}
           </form>
@@ -130,11 +130,25 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
               size="small"
               icon={<PencilIcon />}
               variant="secondary"
-              onClick={() => setRedigerbar(true)}
+              onClick={() => setRedigeres(true)}
             >
               Rediger
             </Button>
           </>
+        )}
+        {klage.initieltUtfall?.utfallMedBegrunnelse?.utfall === Utfall.STADFESTE_VEDTAK && !klage.utfall && (
+          <VurderingWrapper>
+            <Alert variant="info">
+              <Heading level="2" size="small">
+                Du må sende brev til klager
+              </Heading>
+              <BodyLong spacing>
+                Siden vurderingen er satt til {teksterKlageutfall[Utfall.STADFESTE_VEDTAK]} må du opprette et manuelt
+                kvitteringsbrev til klager for å opplyse om saksbehandlingstid.
+              </BodyLong>
+              <ButtonNavigerTilBrev klage={klage} />
+            </Alert>
+          </VurderingWrapper>
         )}
       </>
     </>

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.libs.common
 
+fun appName(): String? = System.getenv()["NAIS_APP_NAME"]
+
 fun clusterNavn(): String? = System.getenv()["NAIS_CLUSTER_NAME"]
 
 enum class GcpEnv(val env: String) {

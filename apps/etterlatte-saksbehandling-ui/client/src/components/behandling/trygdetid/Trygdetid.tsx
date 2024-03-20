@@ -8,12 +8,13 @@ import {
   ITrygdetidGrunnlagType,
   opprettTrygdetid,
   overstyrTrygdetid,
+  setTrygdetidYrkesskade,
   sorterLand,
 } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
-import { BodyShort, Heading } from '@navikt/ds-react'
+import { BodyShort, ErrorMessage, Heading } from '@navikt/ds-react'
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/TrygdetidGrunnlagListe'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
@@ -28,10 +29,13 @@ import { TrygdetidManueltOverstyrt } from '~components/behandling/trygdetid/Tryg
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingErIverksattEllerSamordnet } from '~components/behandling/felles/utils'
+import { YrkesskadeTrygdetid } from '~components/behandling/trygdetid/YrkesskadeTrygdetid'
+import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
 
 interface Props {
   redigerbar: boolean
   behandling: IDetaljertBehandling
+  vedtaksresultat: VedtakResultat | null
   virkningstidspunktEtterNyRegelDato: Boolean
 }
 
@@ -43,15 +47,19 @@ const visTrydeavtale = (behandling: IDetaljertBehandling): Boolean => {
   )
 }
 
-export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyRegelDato }: Props) => {
+export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningstidspunktEtterNyRegelDato }: Props) => {
   const dispatch = useAppDispatch()
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
   const [overstyrTrygdetidRequest, requestOverstyrTrygdetid] = useApiCall(overstyrTrygdetid)
+  const [oppdaterYrkesskadeRequest, requestOppdaterYrkesskade] = useApiCall(setTrygdetidYrkesskade)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [trygdetid, setTrygdetid] = useState<ITrygdetid>()
   const [landListe, setLandListe] = useState<ILand[]>()
   const [harPilotTrygdetid, setHarPilotTrygdetid] = useState<boolean>(false)
+  const [behandlingsIdMangler, setBehandlingsIdMangler] = useState(false)
+  const [trygdetidIdMangler, setTrygdetidIdMangler] = useState(false)
+  const [trygdetidManglerVedAvslag, setTrygdetidManglerVedAvslag] = useState(false)
 
   const oppdaterTrygdetid = (trygdetid: ITrygdetid) => {
     setTrygdetid(trygdetid)
@@ -71,17 +79,48 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
     )
   }
 
+  const oppdaterYrkesskade = (yrkesskade: boolean) => {
+    if (!trygdetid?.id) {
+      setTrygdetidIdMangler(true)
+      throw new Error('Mangler trygdetidid')
+    }
+
+    if (!behandling?.id) {
+      setBehandlingsIdMangler(true)
+      throw new Error('Mangler behandlingsid')
+    }
+
+    requestOppdaterYrkesskade(
+      {
+        id: trygdetid.id,
+        behandlingId: trygdetid.behandlingId,
+        yrkesskade: yrkesskade,
+      },
+      (trygdetid: ITrygdetid) => {
+        oppdaterTrygdetid(trygdetid)
+      }
+    )
+  }
+
   useEffect(() => {
-    if (!behandling?.id) throw new Error('Mangler behandlingsid')
+    if (!behandling?.id) {
+      setBehandlingsIdMangler(true)
+      throw new Error('Mangler behandlingsid')
+    }
 
     fetchTrygdetid(behandling.id, (trygdetid: ITrygdetid) => {
       if (trygdetid === null) {
         if (behandlingErIverksattEllerSamordnet(behandling.status)) {
           setHarPilotTrygdetid(true)
-        } else {
+        } else if (redigerbar) {
           requestOpprettTrygdetid(behandling.id, (trygdetid: ITrygdetid) => {
             oppdaterTrygdetid(trygdetid)
           })
+        } else if (vedtaksresultat === 'avslag') {
+          setTrygdetidManglerVedAvslag(true)
+        } else {
+          setTrygdetidIdMangler(true)
+          throw new Error('Kan ikke opprette trygdetid når readonly')
         }
       } else {
         setTrygdetid(trygdetid)
@@ -102,6 +141,17 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
           Personen har fått 40 års trygdetid
         </Heading>
         <BodyShort>Denne søknaden ble satt automatisk til 40 års trygdetid</BodyShort>
+      </TrygdetidWrapper>
+    )
+  }
+
+  if (trygdetidManglerVedAvslag) {
+    return (
+      <TrygdetidWrapper>
+        <Heading size="small" level="3">
+          Informasjon om trygdetid mangler
+        </Heading>
+        <BodyShort>Det kan være fordi saken har blitt avslått uten å oppgi trygdetid.</BodyShort>
       </TrygdetidWrapper>
     )
   }
@@ -130,6 +180,10 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
             lenke: 'https://lovdata.no/pro/lov/1997-02-28-19/§3-5',
           },
           {
+            tittel: '§ 3-7 Beregning trygdetid',
+            lenke: 'https://lovdata.no/pro/lov/1997-02-28-19/§3-7',
+          },
+          {
             tittel: 'EØS-forordning 883/2004 artikkel 52',
             lenke: 'https://lovdata.no/pro/eu/32004r0883/ARTIKKEL_52',
           },
@@ -141,12 +195,15 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
           67 år til og med 75 år, gis det også et helt års trygdetid for aktuelle poengår. Fremtidig trygdetid kan gis
           fra dødsfallet til og med kalenderåret avdøde hadde blitt 66 år. Trygdetiden beregnes med maks 40 år. Avdødes
           utenlandske trygdetid fra avtaleland skal legges til for alternativ prorata-beregning av ytelsen. Ulike
-          avtaler skal ikke beregnes sammen.
+          avtaler skal ikke beregnes sammen. Hvis avdøde har uføretrygd, skal som hovedregel trygdetid lagt til grunn i
+          uføretrygden benyttes.
         </BodyShort>
       </LovtekstMedLenke>
       {trygdetid && landListe && (
         <>
           <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />
+
+          <YrkesskadeTrygdetid redigerbar={redigerbar} trygdetid={trygdetid} oppdaterYrkesskade={oppdaterYrkesskade} />
 
           <TrygdetidGrunnlagListe
             trygdetid={trygdetid}
@@ -179,6 +236,7 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
         <Spinner visible={true} label="Henter trygdetid" />
       )}
       {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label="Oppretter trygdetid" />}
+      {isPending(oppdaterYrkesskadeRequest) && <Spinner visible={true} label="Oppdater yrkesskade" />}
       {isFailureHandler({
         apiResult: hentTrygdetidRequest,
         errorMessage: 'En feil har oppstått ved henting av trygdetid',
@@ -195,6 +253,12 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
         apiResult: hentAlleLandRequest,
         errorMessage: 'Hent feil har oppstått ved henting av landliste',
       })}
+      {isFailureHandler({
+        apiResult: oppdaterYrkesskadeRequest,
+        errorMessage: 'En feil har oppstått ved oppdatering av yrkesskade',
+      })}
+      {behandlingsIdMangler && <ErrorMessage>Finner ikke behandling - ID mangler</ErrorMessage>}
+      {trygdetidIdMangler && <ErrorMessage>Finner ikke trygdetid - ID mangler</ErrorMessage>}
     </TrygdetidWrapper>
   )
 }

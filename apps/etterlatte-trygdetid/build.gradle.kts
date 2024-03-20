@@ -12,7 +12,6 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-regler"))
     implementation(project(":libs:etterlatte-behandling-model"))
-    implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-trygdetid-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
@@ -28,5 +27,6 @@ dependencies {
     testImplementation(project(":libs:testdata"))
     testImplementation(libs.ktor2.jackson)
     testImplementation(libs.ktor2.clientcontentnegotiation)
+    testImplementation(testFixtures((project(":libs:etterlatte-database"))))
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
 }

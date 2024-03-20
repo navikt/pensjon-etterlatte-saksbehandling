@@ -37,6 +37,10 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   secureLogs:
     enabled: true
   azure:
@@ -136,6 +140,10 @@ spec:
       value: http://digdir-krr-proxy.team-rocket
     - name: KRR_SCOPE
       value: api://prod-gcp.team-rocket.digdir-krr-proxy/.default
+    - name: AXSYS_URL
+      value: https://axsys.prod-fss-pub.nais.io
+    - name: AXSYS_SCOPE
+      value: api://prod-fss.org.axsys/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -146,6 +154,9 @@ spec:
         - application: etterlatte-grunnlag
         - application: skjermede-personer-pip
           namespace: nom
+        - application: digdir-krr-proxy
+          namespace: team-rocket
+          cluster: prod-gcp
         - application: etterlatte-migrering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-tilbakekreving
@@ -157,6 +168,7 @@ spec:
         - host: oppgave.prod-fss-pub.nais.io
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: pensjon-pen.prod-fss-pub.nais.io
+        - host: axsys.prod-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter
@@ -169,13 +181,10 @@ spec:
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-opplysninger-fra-soeknad
-        - application: etterlatte-brev-api
-          permissions:
-            roles:
-              - "kan-sette-kilde"
         - application: etterlatte-grunnlag
         - application: etterlatte-trygdetid
         - application: etterlatte-fordeler
         - application: etterlatte-institusjonsopphold
         - application: etterlatte-tilbakekreving
         - application: etterlatte-klage
+        - application: etterlatte-brev-api

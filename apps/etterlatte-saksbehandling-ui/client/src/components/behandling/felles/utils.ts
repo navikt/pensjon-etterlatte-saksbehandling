@@ -46,14 +46,19 @@ export const hentGyldigeNavigeringsStatuser = (status: IBehandlingStatus) => {
   return rekkefoelge.slice(0, index)
 }
 
-export const behandlingErRedigerbar = (status: IBehandlingStatus): boolean => {
+export const enhetErSkrivbar = (enhetId: string, enheter: Array<string>): boolean => {
+  return enheter.includes(enhetId)
+}
+
+export const behandlingErRedigerbar = (status: IBehandlingStatus, enhetId: string, enheter: Array<string>): boolean => {
   return (
-    status === IBehandlingStatus.OPPRETTET ||
-    status === IBehandlingStatus.VILKAARSVURDERT ||
-    status === IBehandlingStatus.TRYGDETID_OPPDATERT ||
-    status === IBehandlingStatus.BEREGNET ||
-    status === IBehandlingStatus.AVKORTET ||
-    status === IBehandlingStatus.RETURNERT
+    enhetErSkrivbar(enhetId, enheter) &&
+    (status === IBehandlingStatus.OPPRETTET ||
+      status === IBehandlingStatus.VILKAARSVURDERT ||
+      status === IBehandlingStatus.TRYGDETID_OPPDATERT ||
+      status === IBehandlingStatus.BEREGNET ||
+      status === IBehandlingStatus.AVKORTET ||
+      status === IBehandlingStatus.RETURNERT)
   )
 }
 
@@ -85,6 +90,7 @@ export const behandlingSkalSendeBrev = (
         revurderingsaarsak === Revurderingaarsak.REGULERING ||
         revurderingsaarsak === Revurderingaarsak.DOEDSFALL ||
         revurderingsaarsak === Revurderingaarsak.OPPHOER_UTEN_BREV ||
+        revurderingsaarsak === Revurderingaarsak.ANNEN_UTEN_BREV ||
         revurderingsaarsak === Revurderingaarsak.ALDERSOVERGANG
       )
   }

@@ -40,6 +40,7 @@ import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
+import BrevutfallModal from '~components/behandling/brevutfall/BrevutfallModal'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -47,7 +48,11 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { sakId, soeknadMottattDato } = props.behandling
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
-  const redigerbar = behandlingErRedigerbar(props.behandling.status) && innloggetSaksbehandler.skriveTilgang
+  const redigerbar = behandlingErRedigerbar(
+    props.behandling.status,
+    props.behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
 
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev>()
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
@@ -55,6 +60,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
   const [, fetchBehandling] = useApiCall(hentBehandling)
+
+  const [visBrevutfall, setVisBrevutfall] = useState(true)
 
   const sjekkliste = useSjekkliste()
   const valideringsfeil = useSjekklisteValideringsfeil()
@@ -149,6 +156,9 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   return (
     <Content>
+      {visBrevutfall && behandling && behandling.kilde === Vedtaksloesning.GJENOPPRETTA && (
+        <BrevutfallModal behandling={behandling} onLagre={hentBrevPaaNytt} setVis={setVisBrevutfall} />
+      )}
       <BrevContent>
         <Sidebar>
           <ContentHeader>

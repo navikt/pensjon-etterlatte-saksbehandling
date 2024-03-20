@@ -6,23 +6,22 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseKontekst
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
-import no.nav.etterlatte.User
+import no.nav.etterlatte.azureAdAttestantClaim
+import no.nav.etterlatte.azureAdSaksbehandlerClaim
+import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.sql.Connection
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -35,32 +34,11 @@ class GosysOppgaveServiceImplTest {
     private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdltjenesterKlient)
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
-    private fun setNewKontekstWithMockUser(userMock: User) {
-        Kontekst.set(
-            Context(
-                userMock,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
-            ),
-        )
-    }
-
-    private val saksbehandlerRolleDev = "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"
-    private val strengtfortroligDev = "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
-    private val attestantRolleDev = "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
-
     val azureGroupToGroupIDMap =
         mapOf(
-            AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev,
-            AzureGroup.ATTESTANT to attestantRolleDev,
-            AzureGroup.STRENGT_FORTROLIG to strengtfortroligDev,
+            AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim,
+            AzureGroup.ATTESTANT to azureAdAttestantClaim,
+            AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim,
         )
 
     private fun generateSaksbehandlerMedRoller(azureGroup: AzureGroup): SaksbehandlerMedRoller {
@@ -75,9 +53,9 @@ class GosysOppgaveServiceImplTest {
     @BeforeEach
     fun beforeEach() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns Enheter.enheterMedLesetilgang().toList()
+        every { saksbehandler.enheter() } returns Enheter.enheterForVanligSaksbehandlere()
 
-        setNewKontekstWithMockUser(saksbehandler)
+        nyKontekstMedBruker(saksbehandler)
 
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
     }
@@ -85,10 +63,10 @@ class GosysOppgaveServiceImplTest {
     @Test
     fun `skal hente oppgaver og deretter folkeregisterIdent for unike identer`() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns Enheter.enheterMedLesetilgang().toList()
+        every { saksbehandler.enheter() } returns Enheter.enheterForVanligSaksbehandlere()
         every { saksbehandler.name() } returns "ident"
 
-        setNewKontekstWithMockUser(saksbehandler)
+        nyKontekstMedBruker(saksbehandler)
 
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 
@@ -103,6 +81,7 @@ class GosysOppgaveServiceImplTest {
                             tema = "EYB",
                             behandlingstema = "",
                             oppgavetype = "",
+                            journalpostId = null,
                             opprettetTidspunkt = Tidspunkt.now(),
                             tildeltEnhetsnr = Enheter.PORSGRUNN.enhetNr,
                             tilordnetRessurs = null,
@@ -117,6 +96,7 @@ class GosysOppgaveServiceImplTest {
                             tema = "EYB",
                             behandlingstema = "",
                             oppgavetype = "",
+                            journalpostId = null,
                             opprettetTidspunkt = Tidspunkt.now().minus(5L, ChronoUnit.DAYS),
                             tildeltEnhetsnr = Enheter.PORSGRUNN.enhetNr,
                             tilordnetRessurs = "A123456",
@@ -131,6 +111,7 @@ class GosysOppgaveServiceImplTest {
                             tema = "EYO",
                             behandlingstema = "",
                             oppgavetype = "",
+                            journalpostId = null,
                             opprettetTidspunkt = Tidspunkt.now().minus(3L, ChronoUnit.DAYS),
                             tildeltEnhetsnr = Enheter.PORSGRUNN.enhetNr,
                             tilordnetRessurs = null,
@@ -171,7 +152,7 @@ class GosysOppgaveServiceImplTest {
         every { saksbehandler.enheter() } returns listOf(Enheter.STRENGT_FORTROLIG.enhetNr)
         every { saksbehandler.name() } returns "ident"
 
-        setNewKontekstWithMockUser(saksbehandler)
+        nyKontekstMedBruker(saksbehandler)
 
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 
@@ -185,6 +166,7 @@ class GosysOppgaveServiceImplTest {
                         tema = "EYB",
                         behandlingstema = "",
                         oppgavetype = "",
+                        journalpostId = null,
                         opprettetTidspunkt = Tidspunkt.now(),
                         tildeltEnhetsnr = Enheter.PORSGRUNN.enhetNr,
                         tilordnetRessurs = null,
@@ -199,6 +181,7 @@ class GosysOppgaveServiceImplTest {
                         tema = "EYB",
                         behandlingstema = "",
                         oppgavetype = "",
+                        journalpostId = null,
                         opprettetTidspunkt = Tidspunkt.now().minus(5L, ChronoUnit.DAYS),
                         tildeltEnhetsnr = Enheter.PORSGRUNN.enhetNr,
                         tilordnetRessurs = "A123456",
@@ -213,6 +196,7 @@ class GosysOppgaveServiceImplTest {
                         tema = "EYO",
                         behandlingstema = "",
                         oppgavetype = "",
+                        journalpostId = null,
                         opprettetTidspunkt = Tidspunkt.now().minus(3L, ChronoUnit.DAYS),
                         tildeltEnhetsnr = Enheter.STRENGT_FORTROLIG.enhetNr,
                         tilordnetRessurs = null,
@@ -255,6 +239,7 @@ class GosysOppgaveServiceImplTest {
                 tema = "EYO",
                 behandlingstema = "",
                 oppgavetype = "",
+                journalpostId = null,
                 opprettetTidspunkt = Tidspunkt.now().minus(3L, ChronoUnit.DAYS),
                 tildeltEnhetsnr = Enheter.STEINKJER.enhetNr,
                 tilordnetRessurs = "A012345",

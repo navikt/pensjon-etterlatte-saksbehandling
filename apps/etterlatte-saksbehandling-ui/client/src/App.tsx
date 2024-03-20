@@ -4,7 +4,7 @@ import { Behandling } from '~components/behandling/Behandling'
 import { HeaderBanner } from '~shared/header/HeaderBanner'
 import { Person } from '~components/person/Person'
 import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
-import nb from 'date-fns/locale/nb'
+import { nb } from 'date-fns/locale'
 import { registerLocale } from 'react-datepicker'
 import ErrorBoundary from '~ErrorBoundary'
 import NyttBrev from '~components/person/brev/NyttBrev'
@@ -16,24 +16,21 @@ import { useAppDispatch } from '~store/Store'
 import { settAppversion } from '~store/reducers/AppconfigReducer'
 import Versioncheck from '~Versioncheck'
 import { Klagebehandling } from '~components/klage/Klagebehandling'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-
-import { ToggleMinOppgaveliste } from '~components/oppgavebenk/ToggleMinOppgaveliste'
+import { Oppgavebenk } from '~components/oppgavebenk/Oppgavebenk'
 import { Tilbakekrevingsbehandling } from '~components/tilbakekreving/Tilbakekrevingsbehandling'
 import GenerellBehandling from '~components/generellbehandling/GenerellBehandling'
 import ManuellBehandling from '~components/manuelbehandling/ManuellBehandling'
 import BehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
-
 import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { FlyttJournalpost } from '~components/person/flyttjournalpost/FlyttJournalpost'
-import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
+import { setDefaultOptions } from 'date-fns'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
+  setDefaultOptions({ locale: nb })
   registerLocale('nb', nb)
   const dispatch = useAppDispatch()
-  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   const [hentConfigStatus, hentConfig] = useApiCall(hentClientConfig)
 
@@ -54,17 +51,14 @@ function App() {
             <ErrorBoundary>
               <ConfigContext.Provider value={hentConfigStatus.data}>
                 <Routes>
-                  <Route path="/" element={<ToggleMinOppgaveliste />}>
-                    <Route path="/minoppgaveliste" element={<ToggleMinOppgaveliste />} />
-                  </Route>
-
+                  <Route path="/" element={<Oppgavebenk />} />
                   <Route path="/flyttjournalpost" element={<FlyttJournalpost />} />
                   <Route path="/person/:fnr" element={<Person />} />
                   <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
                   <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                   <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
                   <Route path="/manuellbehandling/*" element={<ManuellBehandling />} />
-                  {kanBrukeKlage ? <Route path="/klage/:klageId/*" element={<Klagebehandling />} /> : null}
+                  <Route path="/klage/:klageId/*" element={<Klagebehandling />} />
                   <Route path="/tilbakekreving/:tilbakekrevingId/*" element={<Tilbakekrevingsbehandling />} />
                   <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
                   <Route path="*" element={<Navigate to="/" replace />} />

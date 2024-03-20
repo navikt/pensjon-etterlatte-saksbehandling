@@ -31,20 +31,7 @@ data class TilbakekrevingBehandling(
             opprettet = Tidspunkt.now(),
             tilbakekreving =
                 Tilbakekreving(
-                    vurdering =
-                        TilbakekrevingVurdering(
-                            beskrivelse = null,
-                            konklusjon = null,
-                            aarsak = null,
-                            aktsomhet =
-                                TilbakekrevingVurderingUaktsomhet(
-                                    aktsomhet = null,
-                                    reduseringAvKravet = null,
-                                    strafferettsligVurdering = null,
-                                    rentevurdering = null,
-                                ),
-                            hjemmel = null,
-                        ),
+                    vurdering = null,
                     perioder = kravgrunnlag.perioder.tilTilbakekrevingPerioder(),
                     kravgrunnlag = kravgrunnlag,
                 ),

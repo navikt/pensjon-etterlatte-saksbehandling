@@ -51,6 +51,10 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: nodejs
   resources:
     limits:
       memory: 512Mi
@@ -98,6 +102,10 @@ spec:
       value: https://rina-ss3-q.adeo.no
     - name: NORG2_URL
       value: https://norg2.dev-fss-pub.nais.io
+    - name: MODIAPERSONOVERSIKT_URL
+      value: https://navikt.github.io/modiapersonoversikt/#
+    - name: PSAK_URL
+      value: https://pensjon-psak-q2.dev.adeo.no/psak
     - name: APP_VERSION
       value: "{{ image }}"
   envFrom:

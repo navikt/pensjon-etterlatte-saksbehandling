@@ -6,35 +6,33 @@ import io.ktor.client.plugins.ResponseException
 import io.mockk.Called
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.KONTANT_FOT
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BrukerServiceImpl
+import no.nav.etterlatte.behandling.IngenEnhetFunnetException
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
-import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
-import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
+import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.IngenEnhetFunnetException
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.nyKontekstMedBruker
+import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
@@ -42,7 +40,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.sql.Connection
 import kotlin.random.Random
 
 internal class SakServiceTest {
@@ -50,7 +47,7 @@ internal class SakServiceTest {
     private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
     private val norg2Klient = mockk<Norg2Klient>()
     private val brukerService = BrukerServiceImpl(pdltjenesterKlient, norg2Klient)
-    private val navansattKlient = mockk<NavAnsattKlient>()
+    private val saksbehandlerService = mockk<SaksbehandlerService>()
     private val skjermingKlient = mockk<SkjermingKlient>()
 
     private val service = SakServiceImpl(sakDao, skjermingKlient, brukerService)
@@ -58,6 +55,11 @@ internal class SakServiceTest {
     @BeforeEach
     fun before() {
         clearAllMocks()
+        every {
+            sakDao.finnSakMedGraderingOgSkjerming(
+                any(),
+            )
+        } returns SakMedGraderingOgSkjermet(1L, null, false, Enheter.defaultEnhet.enhetNr)
     }
 
     @AfterEach
@@ -65,7 +67,11 @@ internal class SakServiceTest {
         confirmVerified(sakDao, pdltjenesterKlient, norg2Klient)
     }
 
-    private fun saksbehandlerKontekst(nasjonalTilgang: Boolean = false) {
+    private fun saksbehandlerKontekst(
+        nasjonalTilgang: Boolean = false,
+        strentFortrolig: Boolean = false,
+        egenAnsatt: Boolean = false,
+    ) {
         val tokenValidationContext = mockk<TokenValidationContext>()
 
         val token = mockk<JwtToken>()
@@ -78,6 +84,8 @@ internal class SakServiceTest {
 
         every { claims.containsClaim("groups", AzureGroup.NASJONAL_MED_LOGG.name) } returns nasjonalTilgang
         every { claims.containsClaim("groups", AzureGroup.NASJONAL_UTEN_LOGG.name) } returns nasjonalTilgang
+        every { claims.containsClaim("groups", AzureGroup.STRENGT_FORTROLIG.name) } returns strentFortrolig
+        every { claims.containsClaim("groups", AzureGroup.EGEN_ANSATT.name) } returns egenAnsatt
 
         every { token.jwtTokenClaims } returns claims
 
@@ -85,30 +93,19 @@ internal class SakServiceTest {
 
         val groups = AzureGroup.entries.associateWith { it.name }
 
-        Kontekst.set(
-            Context(
-                SaksbehandlerMedEnheterOgRoller(
-                    tokenValidationContext,
-                    navansattKlient,
-                    SaksbehandlerMedRoller(
-                        Saksbehandler("", "Z123456", claims),
-                        groups,
-                    ),
+        nyKontekstMedBruker(
+            SaksbehandlerMedEnheterOgRoller(
+                tokenValidationContext,
+                saksbehandlerService,
+                SaksbehandlerMedRoller(
+                    Saksbehandler("", "Z123456", claims),
+                    groups,
                 ),
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
             ),
         )
     }
 
-    fun systemBrukerKontekst() {
+    private fun systemBrukerKontekst() {
         val tokenValidationContext = mockk<TokenValidationContext>()
 
         val token = mockk<JwtToken>()
@@ -125,19 +122,8 @@ internal class SakServiceTest {
 
         every { tokenValidationContext.getJwtToken(any()) } returns token
 
-        Kontekst.set(
-            Context(
-                SystemUser(tokenValidationContext),
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
-            ),
+        nyKontekstMedBruker(
+            SystemUser(tokenValidationContext),
         )
     }
 
@@ -145,9 +131,9 @@ internal class SakServiceTest {
     fun `enhet filtrering skjer hvis vi har en saksbehandler`() {
         saksbehandlerKontekst()
 
-        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
+        coEvery { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
             listOf(
-                SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
+                SaksbehandlerEnhet(enhetsNummer = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
 
         every { sakDao.finnSaker(KONTANT_FOT.value) } returns
@@ -171,9 +157,9 @@ internal class SakServiceTest {
     fun `enhet filtrering skjer hvis vi har en saksbehandler uten riktig enhet`() {
         saksbehandlerKontekst()
 
-        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
+        coEvery { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
             listOf(
-                SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
+                SaksbehandlerEnhet(enhetsNummer = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
 
         every { sakDao.finnSaker(KONTANT_FOT.value) } returns
@@ -197,9 +183,9 @@ internal class SakServiceTest {
     fun `enhet filtrering skjer ikke hvis vi har en system bruker`() {
         systemBrukerKontekst()
 
-        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
+        coEvery { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
             listOf(
-                SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
+                SaksbehandlerEnhet(enhetsNummer = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
 
         every { sakDao.finnSaker(KONTANT_FOT.value) } returns
@@ -249,7 +235,11 @@ internal class SakServiceTest {
         every {
             pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
-        every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns emptyList()
+        every {
+            norg2Klient.hentArbeidsfordelingForOmraadeOgTema(
+                ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301"),
+            )
+        } returns emptyList()
         every { sakDao.finnSaker(KONTANT_FOT.value) } returns emptyList()
 
         val thrown =
@@ -257,12 +247,12 @@ internal class SakServiceTest {
                 service.finnEllerOpprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON)
             }
 
-        thrown.tema shouldBe SakType.BARNEPENSJON.tema
-        thrown.omraade shouldBe "0301"
+        thrown.arbeidsFordelingRequest.tema shouldBe SakType.BARNEPENSJON.tema
+        thrown.arbeidsFordelingRequest.geografiskOmraade shouldBe "0301"
 
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
         verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
-        verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
+        verify(exactly = 1) { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) }
     }
 
     @Test
@@ -282,7 +272,7 @@ internal class SakServiceTest {
         every {
             pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
-        every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns
+        every { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) } returns
             listOf(
                 ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr),
             )
@@ -297,10 +287,11 @@ internal class SakServiceTest {
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
 
+        verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
         verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
-        verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
+        verify(exactly = 1) { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) }
         verify(exactly = 1) {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         }
@@ -324,7 +315,7 @@ internal class SakServiceTest {
         every {
             pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
-        every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns
+        every { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) } returns
             listOf(
                 ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr),
             )
@@ -351,39 +342,14 @@ internal class SakServiceTest {
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG,
             )
         }
+        verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
         verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
-        verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
+        verify(exactly = 1) { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) }
         verify(exactly = 1) {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         }
-    }
-
-    @Test
-    fun `filtrerer for saksbehandler med nasjonal tilgang`() {
-        saksbehandlerKontekst(nasjonalTilgang = true)
-
-        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
-            listOf(
-                SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
-            )
-
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns
-            listOf(
-                Sak(
-                    id = 1,
-                    ident = KONTANT_FOT.value,
-                    sakType = SakType.BARNEPENSJON,
-                    enhet = Enheter.STEINKJER.enhetNr,
-                ),
-            )
-
-        val saker = service.finnSaker(KONTANT_FOT.value)
-
-        saker.size shouldBe 1
-
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
     }
 
     @Test
@@ -405,7 +371,7 @@ internal class SakServiceTest {
         every {
             pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
-        every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns
+        every { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) } returns
             listOf(
                 ArbeidsFordelingEnhet(Enheter.EGNE_ANSATTE.navn, Enheter.EGNE_ANSATTE.enhetNr),
             )
@@ -422,8 +388,9 @@ internal class SakServiceTest {
 
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
+        verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
-        verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
+        verify(exactly = 1) { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) }
         verify(exactly = 1) {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         }
@@ -444,7 +411,7 @@ internal class SakServiceTest {
     }
 
     @Test
-    fun `Hent enkeltsak - Bruker har sak, men saksbehandler mangler tilgang til enhet`() {
+    fun `Hent enkeltsak - Bruker har sak, men saksbehandler mangler tilgang til enhet egne ansatte`() {
         saksbehandlerKontekst()
 
         val ident = Random.nextLong().toString()
@@ -455,14 +422,7 @@ internal class SakServiceTest {
                     ident = ident,
                     sakType = SakType.BARNEPENSJON,
                     id = Random.nextLong(),
-                    enhet = Enheter.UTLAND.enhetNr,
-                ),
-            )
-        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
-            listOf(
-                SaksbehandlerEnhet(
-                    id = Enheter.PORSGRUNN.enhetNr,
-                    navn = Enheter.PORSGRUNN.navn,
+                    enhet = Enheter.EGNE_ANSATTE.enhetNr,
                 ),
             )
 
@@ -471,11 +431,83 @@ internal class SakServiceTest {
         }
 
         verify { sakDao.finnSaker(ident) }
-        coVerify { navansattKlient.hentEnheterForSaksbehandler(any()) }
     }
 
     @Test
-    fun `Hent enkeltsak - Bruker har sak, og saksbehandler har tilgang til enhet`() {
+    fun `Hent enkeltsak egen ansatt - Bruker har sak egen ansatt`() {
+        saksbehandlerKontekst(egenAnsatt = true)
+
+        val ident = Random.nextLong().toString()
+
+        val sak =
+            Sak(
+                ident = ident,
+                sakType = SakType.BARNEPENSJON,
+                id = Random.nextLong(),
+                enhet = Enheter.EGNE_ANSATTE.enhetNr,
+            )
+        every { sakDao.finnSaker(any()) } returns
+            listOf(
+                sak,
+            )
+
+        val enkeltsak = service.hentEnkeltSakForPerson(ident)
+
+        enkeltsak shouldBe sak
+
+        verify { sakDao.finnSaker(ident) }
+    }
+
+    @Test
+    fun `Hent enkeltsak - Bruker har sak, men saksbehandler mangler tilgang til enhet strengt fortrolig`() {
+        saksbehandlerKontekst()
+
+        val ident = Random.nextLong().toString()
+
+        every { sakDao.finnSaker(any()) } returns
+            listOf(
+                Sak(
+                    ident = ident,
+                    sakType = SakType.BARNEPENSJON,
+                    id = Random.nextLong(),
+                    enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
+                ),
+            )
+
+        assertThrows<ManglerTilgangTilEnhet> {
+            service.hentEnkeltSakForPerson(ident)
+        }
+
+        verify { sakDao.finnSaker(ident) }
+    }
+
+    @Test
+    fun `Hent enkeltsak strengt fortrolig - Bruker har sak`() {
+        saksbehandlerKontekst(nasjonalTilgang = false, strentFortrolig = true)
+
+        val ident = Random.nextLong().toString()
+
+        val sak =
+            Sak(
+                ident = ident,
+                sakType = SakType.BARNEPENSJON,
+                id = Random.nextLong(),
+                enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
+            )
+        every { sakDao.finnSaker(any()) } returns
+            listOf(
+                sak,
+            )
+
+        val enkeltsak = service.hentEnkeltSakForPerson(ident)
+
+        enkeltsak shouldBe sak
+
+        verify { sakDao.finnSaker(ident) }
+    }
+
+    @Test
+    fun `Hent enkeltsak - Bruker har sak, og saksbehandler har tilgang til enhet Porsgrunn`() {
         saksbehandlerKontekst()
 
         val ident = Random.nextLong().toString()
@@ -490,19 +522,10 @@ internal class SakServiceTest {
 
         every { sakDao.finnSaker(any()) } returns listOf(sak)
 
-        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
-            listOf(
-                SaksbehandlerEnhet(
-                    id = enhet.enhetNr,
-                    navn = enhet.navn,
-                ),
-            )
-
         val enkeltsak = service.hentEnkeltSakForPerson(ident)
 
         enkeltsak shouldBe sak
 
         verify { sakDao.finnSaker(ident) }
-        coVerify { navansattKlient.hentEnheterForSaksbehandler(any()) }
     }
 }

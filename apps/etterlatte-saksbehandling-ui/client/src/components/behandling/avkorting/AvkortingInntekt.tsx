@@ -3,6 +3,7 @@ import {
   Button,
   ErrorMessage,
   Heading,
+  HelpText,
   HStack,
   Label,
   ReadMore,
@@ -27,6 +28,7 @@ import { ToolTip } from '~components/behandling/felles/ToolTip'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppSelector } from '~store/Store'
+import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 
 export const AvkortingInntekt = (props: {
   behandling: IBehandlingReducer
@@ -36,7 +38,7 @@ export const AvkortingInntekt = (props: {
 }) => {
   const { behandling } = props
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  const redigerbar = props.redigerbar && innloggetSaksbehandler.skriveTilgang
+  const redigerbar = props.redigerbar && enhetErSkrivbar(behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
   const avkortingGrunnlag = [...props.avkortingGrunnlag]
   avkortingGrunnlag?.sort((a, b) => new Date(b.fom!).getTime() - new Date(a.fom!).getTime())
 
@@ -133,7 +135,14 @@ export const AvkortingInntekt = (props: {
                 <Table.HeaderCell>Forventet inntekt Norge</Table.HeaderCell>
                 <Table.HeaderCell>Forventet inntekt utland</Table.HeaderCell>
                 <Table.HeaderCell>Forventet inntekt totalt</Table.HeaderCell>
-                <Table.HeaderCell>Gjenværende måneder</Table.HeaderCell>
+                <Table.HeaderCell>
+                  Innvilgede måneder
+                  <HelpText title="Hva betyr innvilgede måneder">
+                    Her vises antall måneder med innvilget stønad i gjeldende inntektsår. Registrert forventet inntekt,
+                    med eventuelt fratrekk for inntekt opptjent før/etter innvilgelse, blir fordelt på de innvilgede
+                    månedene. Antallet vil ikke endres selv om man tar en inntektsendring i løpet av året.
+                  </HelpText>
+                </Table.HeaderCell>
                 <Table.HeaderCell>Periode</Table.HeaderCell>
                 <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>
                 <Table.HeaderCell>Kilde</Table.HeaderCell>

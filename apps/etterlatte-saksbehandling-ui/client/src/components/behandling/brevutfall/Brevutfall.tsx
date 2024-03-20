@@ -78,7 +78,11 @@ export const Brevutfall = (props: {
   const behandlingErOpphoer = props.erOpphoer
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const dispatch = useAppDispatch()
-  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
+  const redigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
   const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<BrevutfallOgEtterbetaling>(
     initialBrevutfallOgEtterbetaling(behandling.sakType, behandlingErOpphoer)
   )

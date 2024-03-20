@@ -13,16 +13,16 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Periode
 import no.nav.etterlatte.libs.common.tilbakekreving.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAktsomhet
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingRettsligGrunnlag
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVarsel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurderingUaktsomhet
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
 import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -35,19 +35,28 @@ fun tilbakekreving(
     kravgrunnlag = kravgrunnlag(),
 )
 
-fun tilbakekrevingvurdering(aktsomhet: TilbakekrevingAktsomhet = TilbakekrevingAktsomhet.GOD_TRO) =
+fun tilbakekrevingvurdering() =
     TilbakekrevingVurdering(
-        beskrivelse = "beskrivelse",
-        konklusjon = "konklusjon",
         aarsak = TilbakekrevingAarsak.ANNET,
-        aktsomhet =
-            TilbakekrevingVurderingUaktsomhet(
-                aktsomhet = aktsomhet,
-                reduseringAvKravet = null,
-                strafferettsligVurdering = null,
-                rentevurdering = null,
-            ),
-        hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_EN_LEDD_EN,
+        beskrivelse = "beskrivelse",
+        forhaandsvarsel = TilbakekrevingVarsel.EGET_BREV,
+        forhaandsvarselDato = LocalDate.of(2024, 1, 1),
+        doedsbosak = null,
+        foraarsaketAv = null,
+        tilsvar = null,
+        rettsligGrunnlag = TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
+        objektivtVilkaarOppfylt = null,
+        subjektivtVilkaarOppfylt = null,
+        uaktsomtForaarsaketFeilutbetaling = null,
+        burdeBrukerForstaatt = null,
+        burdeBrukerForstaattEllerUaktsomtForaarsaket = null,
+        vilkaarsresultat = null,
+        beloepBehold = null,
+        reduseringAvKravet = null,
+        foreldet = null,
+        rentevurdering = null,
+        vedtak = "konklusjon",
+        vurderesForPaatale = null,
     )
 
 fun kravgrunnlag() =

@@ -21,9 +21,18 @@ import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
 import { FlexRow } from '~shared/styled'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { useAppSelector } from '~store/Store'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+
+  const redigerbar = behandlingErRedigerbar(
+    behandlingsInfo.status,
+    behandlingsInfo.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
 
   const [oppgaveForBehandlingenStatus, requesthentOppgaveForBehandling] = useApiCall(
     hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave
@@ -96,23 +105,29 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           )}
         </li>
       </TagList>
-      <div className="info">
-        <Info>Saksbehandler</Info>
-        {mapApiResult(
-          oppgaveForBehandlingenStatus,
-          <Spinner visible={true} label="Henter oppgave" />,
-          () => (
-            <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
-          ),
-          (oppgave) =>
-            !!oppgave?.saksbehandler ? (
-              <Tekst>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Tekst>
-            ) : (
-              <Alert size="small" variant="warning">
-                Ingen saksbehandler har tatt denne oppgaven
-              </Alert>
-            )
-        )}
+      <div className="flex">
+        <div className="info">
+          <Info>Saksbehandler</Info>
+          {mapApiResult(
+            oppgaveForBehandlingenStatus,
+            <Spinner visible={true} label="Henter oppgave" />,
+            () => (
+              <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
+            ),
+            (oppgave) =>
+              !!oppgave?.saksbehandler ? (
+                <Tekst>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Tekst>
+              ) : (
+                <Alert size="small" variant="warning">
+                  Ingen saksbehandler har tatt denne oppgaven
+                </Alert>
+              )
+          )}
+        </div>
+        <div className="info">
+          <Info>Kilde</Info>
+          <Tekst>{behandlingsInfo.kilde}</Tekst>
+        </div>
       </div>
       <div className="flex">
         <div>
@@ -140,7 +155,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       </FlexRow>
 
       {mapSuccess(oppgaveForBehandlingenStatus, (oppgave) => (
-        <SettPaaVent oppgave={oppgave} refreshOppgave={hentOppgaveForBehandling} />
+        <SettPaaVent oppgave={oppgave} redigerbar={redigerbar} refreshOppgave={hentOppgaveForBehandling} />
       ))}
     </SidebarPanel>
   )

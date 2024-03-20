@@ -17,7 +17,7 @@ import no.nav.etterlatte.brev.dokarkiv.OppdaterJournalpostRequest
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 
 fun Route.dokumentRoute(
     safService: SafService,
@@ -48,7 +48,7 @@ fun Route.dokumentRoute(
             get {
                 val journalpost = safService.hentJournalpost(journalpostId, brukerTokenInfo)
 
-                call.respond(journalpost ?: HttpStatusCode.NotFound)
+                call.respond(journalpost)
             }
 
             put {

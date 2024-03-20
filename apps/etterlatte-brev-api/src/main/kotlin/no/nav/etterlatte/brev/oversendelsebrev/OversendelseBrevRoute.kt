@@ -4,16 +4,18 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.BREV_ID_CALL_PARAMETER
 import no.nav.etterlatte.brev.brevId
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
-import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.withBehandlingId
-import no.nav.etterlatte.libs.common.withSakId
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.withBehandlingId
+import no.nav.etterlatte.libs.ktor.route.withSakId
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
@@ -46,6 +48,37 @@ fun Route.oversendelseBrevRoute(
                     service.opprettOversendelseBrev(behandlingId, brukerTokenInfo)
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av oversendelsebrev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    call.respond(brev)
+                }
+            }
+        }
+
+        delete {
+            withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
+                service.slettOversendelseBrev(behandlingId, brukerTokenInfo)
+                call.respond(HttpStatusCode.NoContent)
+            }
+        }
+
+        get("pdf") {
+            val brevId =
+                call.parameters["brevId"]?.toLong() ?: throw UgyldigForespoerselException(
+                    "MANGLER_BREV_ID",
+                    "Mangler brevId i url parameters",
+                )
+
+            withBehandlingId(tilgangssjekker, skrivetilgang = false) { behandlingId ->
+                measureTimedValue {
+                    service.pdf(brevId, behandlingId, brukerTokenInfo).bytes
+                }.let { (brev, varighet) ->
+                    logger.info(
+                        "Henting av pdf for oversendelsesbrev tok ${
+                            varighet.toString(
+                                DurationUnit.SECONDS,
+                                2,
+                            )
+                        }",
+                    )
                     call.respond(brev)
                 }
             }

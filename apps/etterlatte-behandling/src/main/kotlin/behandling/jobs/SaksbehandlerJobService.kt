@@ -8,8 +8,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
+import no.nav.etterlatte.libs.ktor.PingResultDown
+import no.nav.etterlatte.libs.ktor.PingResultUp
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -27,6 +30,7 @@ val SAKSBEHANDLERPATTERN = Regex("[a-zA-Z]\\d{6}")
 class SaksbehandlerJobService(
     private val saksbehandlerInfoDao: SaksbehandlerInfoDao,
     private val navAnsattKlient: NavAnsattKlient,
+    private val axsysKlient: AxsysKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -45,7 +49,7 @@ class SaksbehandlerJobService(
                     logger.error("Kunne ikke hente navn for saksbehandlere", e)
                 }
                 try {
-                    oppdaterSaksbehandlerEnhet(logger, saksbehandlerInfoDao, navAnsattKlient, subCoroutineExceptionHandler)
+                    oppdaterSaksbehandlerEnhet(logger, saksbehandlerInfoDao, axsysKlient, subCoroutineExceptionHandler)
                 } catch (e: Exception) {
                     logger.error("Kunne ikke hente enheter for saksbehandlere", e)
                 }
@@ -57,49 +61,56 @@ class SaksbehandlerJobService(
 internal suspend fun oppdaterSaksbehandlerEnhet(
     logger: Logger,
     saksbehandlerInfoDao: SaksbehandlerInfoDao,
-    navAnsattKlient: NavAnsattKlient,
+    axsysKlient: AxsysKlient,
     subCoroutineExceptionHandler: CoroutineExceptionHandler,
 ) {
-    val tidbrukt =
-        measureTime {
-            val sbidenter = saksbehandlerInfoDao.hentalleSaksbehandlere()
-            logger.info("Antall saksbehandlingsidenter vi henter identer for ${sbidenter.size}")
-
-            // SupervisorJob så noen kall kan feile uten å cancle parent job
-            val scope = CoroutineScope(SupervisorJob())
-            val alleIdenterMedEnheter =
-                sbidenter.filter {
-                    it !in ugyldigeIdenter && SAKSBEHANDLERPATTERN.matches(it)
-                }
-                    .map {
-                        it to
-                            scope.async(
-                                subCoroutineExceptionHandler,
-                            ) { navAnsattKlient.hentEnheterForSaksbehandler(it) }
-                    }
-                    .mapNotNull {
-                        try {
-                            val enheter = it.second.await()
-                            if (enheter.isNotEmpty()) {
-                                it.first to enheter.map { enhet -> enhet.id }
-                            } else {
-                                logger.info("Saksbehandler med ident ${it.first} har ingen enheter")
-                                null
-                            }
-                        } catch (e: Exception) {
-                            logger.error("Kunne ikke hente enheter for saksbehandlerident ${it.first}", e)
-                            null
-                        }
-                    }
-
-            logger.info("Hentet enheter for saksbehandlere antall: ${alleIdenterMedEnheter.size}")
-
-            alleIdenterMedEnheter.forEach {
-                saksbehandlerInfoDao.upsertSaksbehandlerEnheter(it)
-            }
+    when (val pingRes = axsysKlient.ping()) {
+        is PingResultDown -> {
+            logger.warn("Axsysklient er ikke ready, forsøker ikke å oppdatere saksbehandleres enheter. ${pingRes.toStringServiceDown()}")
         }
+        is PingResultUp -> {
+            val tidbrukt =
+                measureTime {
+                    val sbidenter = saksbehandlerInfoDao.hentalleSaksbehandlere()
+                    logger.info("Antall saksbehandlingsidenter vi henter identer for ${sbidenter.size}")
 
-    logger.info("Ferdig, tid brukt for å hente enheter $tidbrukt")
+                    // SupervisorJob så noen kall kan feile uten å cancle parent job
+                    val scope = CoroutineScope(SupervisorJob())
+                    val alleIdenterMedEnheter =
+                        sbidenter.filter {
+                            it !in ugyldigeIdenter && SAKSBEHANDLERPATTERN.matches(it)
+                        }
+                            .map {
+                                it to
+                                    scope.async(
+                                        subCoroutineExceptionHandler,
+                                    ) { axsysKlient.hentEnheterForIdent(it) }
+                            }
+                            .mapNotNull { (ident, enheter) ->
+                                try {
+                                    val enheterAwait = enheter.await()
+                                    if (enheterAwait.isNotEmpty()) {
+                                        ident to enheterAwait
+                                    } else {
+                                        logger.info("Saksbehandler med ident $ident har ingen enheter")
+                                        null
+                                    }
+                                } catch (e: Exception) {
+                                    logger.error("Kunne ikke hente enheter for saksbehandlerident $ident", e)
+                                    null
+                                }
+                            }
+
+                    logger.info("Hentet enheter for saksbehandlere antall: ${alleIdenterMedEnheter.size}")
+
+                    alleIdenterMedEnheter.forEach {
+                        saksbehandlerInfoDao.upsertSaksbehandlerEnheter(it)
+                    }
+                }
+
+            logger.info("Ferdig, tid brukt for å hente enheter $tidbrukt")
+        }
+    }
 }
 
 internal suspend fun oppdaterSaksbehandlerNavn(
@@ -108,39 +119,52 @@ internal suspend fun oppdaterSaksbehandlerNavn(
     navAnsattKlient: NavAnsattKlient,
     subCoroutineExceptionHandler: CoroutineExceptionHandler,
 ) {
-    val tidbrukt =
-        measureTime {
-            val sbidenter = saksbehandlerInfoDao.hentalleSaksbehandlere()
-            logger.info("Antall saksbehandlingsidenter ${sbidenter.size}")
-            val filtrerteIdenter = sbidenter.filter { !saksbehandlerInfoDao.saksbehandlerFinnes(it) }
-            logger.info("Antall saksbehandlingsidenter uten navn i databasen ${sbidenter.size}")
+    when (val pingRes = navAnsattKlient.ping()) {
+        is PingResultDown ->
+            logger.warn(
+                "navAnsattKlient er ikke ready, forsøker ikke å oppdatere saksbehandleres navn. ${pingRes.toStringServiceDown()}",
+            )
+        is PingResultUp -> {
+            val tidbrukt =
+                measureTime {
+                    val sbidenter = saksbehandlerInfoDao.hentalleSaksbehandlere()
+                    logger.info("Antall saksbehandlingsidenter ${sbidenter.size}")
+                    val filtrerteIdenter = sbidenter.filter { !saksbehandlerInfoDao.saksbehandlerFinnes(it) }
+                    logger.info("Antall saksbehandlingsidenter uten navn i databasen ${sbidenter.size}")
 
-            val egneIdenter =
-                filtrerteIdenter.filter { it in ugyldigeIdenter }
-                    .map { it to SaksbehandlerInfo(it, it) }
+                    val egneIdenter =
+                        filtrerteIdenter.filter { it in ugyldigeIdenter }
+                            .map { it to SaksbehandlerInfo(it, it) }
 
-            logger.info("Mappet egne ${sbidenter.size}")
+                    logger.info("Mappet egne ${sbidenter.size}")
 
-            val hentedeIdenter =
-                coroutineScope {
-                    filtrerteIdenter.filter {
-                        it !in ugyldigeIdenter && SAKSBEHANDLERPATTERN.matches(it)
+                    val hentedeIdenter =
+                        coroutineScope {
+                            filtrerteIdenter.filter {
+                                it !in ugyldigeIdenter && SAKSBEHANDLERPATTERN.matches(it)
+                            }
+                                .map {
+                                    it to
+                                        async(subCoroutineExceptionHandler) {
+                                            navAnsattKlient.hentSaksbehanderNavn(it)
+                                        }
+                                }
+                                .map { it.first to it.second.await() }
+                        }
+
+                    val alleIdenterMedNavn = hentedeIdenter + egneIdenter
+
+                    logger.info("mappedMedNavn antall: ${alleIdenterMedNavn.size}")
+
+                    alleIdenterMedNavn.forEach { (ident, saksbehandlerInfo) ->
+                        if (saksbehandlerInfo == null) {
+                            saksbehandlerInfoDao.upsertSaksbehandlerNavn(SaksbehandlerInfo(ident, ident))
+                        } else {
+                            saksbehandlerInfoDao.upsertSaksbehandlerNavn(saksbehandlerInfo)
+                        }
                     }
-                        .map { it to async(subCoroutineExceptionHandler) { navAnsattKlient.hentSaksbehanderNavn(it) } }
-                        .map { it.first to it.second.await() }
                 }
-
-            val alleIdenterMedNavn = hentedeIdenter + egneIdenter
-
-            logger.info("mappedMedNavn antall: ${alleIdenterMedNavn.size}")
-
-            alleIdenterMedNavn.forEach { (ident, saksbehandlerInfo) ->
-                if (saksbehandlerInfo == null) {
-                    saksbehandlerInfoDao.upsertSaksbehandlerNavn(SaksbehandlerInfo(ident, ident))
-                } else {
-                    saksbehandlerInfoDao.upsertSaksbehandlerNavn(saksbehandlerInfo)
-                }
-            }
+            logger.info("Ferdig, tid brukt for å hente navn $tidbrukt")
         }
-    logger.info("Ferdig, tid brukt for å hente navn $tidbrukt")
+    }
 }

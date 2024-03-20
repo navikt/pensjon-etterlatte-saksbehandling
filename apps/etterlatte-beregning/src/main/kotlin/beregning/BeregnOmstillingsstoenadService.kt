@@ -28,14 +28,15 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
-import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import java.util.UUID.randomUUID
@@ -52,6 +53,7 @@ class BeregnOmstillingsstoenadService(
     suspend fun beregn(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
+        tilDato: LocalDate? = null,
     ): Beregning {
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo)
         val trygdetid =
@@ -73,7 +75,7 @@ class BeregnOmstillingsstoenadService(
             )
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING ->
-                beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt)
+                beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
 
             BehandlingType.REVURDERING -> {
                 val vilkaarsvurderingUtfall =
@@ -86,7 +88,7 @@ class BeregnOmstillingsstoenadService(
 
                 when (vilkaarsvurderingUtfall) {
                     VilkaarsvurderingUtfall.OPPFYLT ->
-                        beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt)
+                        beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt, tilDato)
 
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT ->
                         opphoer(behandling.id, grunnlag, virkningstidspunkt)
@@ -100,11 +102,12 @@ class BeregnOmstillingsstoenadService(
         grunnlag: Grunnlag,
         beregningsgrunnlag: PeriodisertOmstillingstoenadGrunnlag,
         virkningstidspunkt: YearMonth,
+        tilDato: LocalDate? = null,
     ): Beregning {
         val resultat =
             kroneavrundetOmstillingstoenadRegelMedInstitusjon.eksekver(
                 grunnlag = beregningsgrunnlag,
-                periode = RegelPeriode(virkningstidspunkt.atDay(1)),
+                periode = RegelPeriode(fraDato = virkningstidspunkt.atDay(1), tilDato = tilDato),
             )
 
         val beregnetDato = Tidspunkt.now()

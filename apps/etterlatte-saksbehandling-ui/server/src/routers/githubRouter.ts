@@ -11,6 +11,7 @@ interface Release {
   id: number
   name: string
   published_at: string
+  draft: boolean
   body: string
 }
 
@@ -26,7 +27,9 @@ githubRouter.get('/releases', async (_: Request, res: Response) => {
     ).then((response) => response.json())
 
     if (Array.isArray(data)) {
-      const releases = data.map(({ id, name, published_at, body }) => ({ id, name, published_at, body }))
+      const releases = data
+        .filter(({ draft }) => !draft)
+        .map(({ id, name, published_at, body }) => ({ id, name, published_at, body }))
 
       if (releases.length) cache.set(RELEASE_CACHE_KEY, releases)
 

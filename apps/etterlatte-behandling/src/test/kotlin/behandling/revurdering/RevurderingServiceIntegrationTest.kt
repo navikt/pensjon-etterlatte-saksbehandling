@@ -9,8 +9,6 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
@@ -25,7 +23,6 @@ import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
-import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -35,9 +32,11 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
+import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KlageOmgjoering
+import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -53,11 +52,13 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.persongalleri
-import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -78,12 +79,17 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
     @BeforeAll
     fun start() {
         val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-
+        val saksbehandlerMedRoller =
+            mockk<SaksbehandlerMedRoller> {
+                every { harRolleStrengtFortrolig() } returns false
+                every { harRolleEgenAnsatt() } returns false
+            }
+        every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.name() } returns "User"
         every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
 
         startServer()
-        Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource)))
+        nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)
     }
 
     @AfterAll
@@ -759,6 +765,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                             journalpostId = "En id for journalpost",
                             innsender = SOEKER_FOEDSELSNUMMER.value,
                         ),
+                    saksbehandler = saksbehandler,
                 )
             }
         val klageOppgave =
@@ -794,6 +801,11 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
 
         val oppgaveForOmgjoering =
             inTransaction {
+                applicationContext.klageService.lagreInitieltUtfallMedBegrunnelseAvKlage(
+                    klageId = klage.id,
+                    utfall = InitieltUtfallMedBegrunnelseDto(KlageUtfall.OMGJOERING, "Vi må endre vedtak"),
+                    saksbehandler = saksbehandler,
+                )
                 applicationContext.klageService.lagreUtfallAvKlage(
                     klageId = klage.id,
                     utfall =

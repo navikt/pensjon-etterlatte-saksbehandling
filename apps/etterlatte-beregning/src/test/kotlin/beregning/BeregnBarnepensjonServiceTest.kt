@@ -62,6 +62,7 @@ internal class BeregnBarnepensjonServiceTest {
     private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
+    private val periodensSisteDato = LocalDate.of(2024, Month.APRIL, 30)
 
     private fun beregnBarnepensjonService(): BeregnBarnepensjonService {
         return BeregnBarnepensjonService(
@@ -444,7 +445,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
 
         runBlocking {
-            val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
+            val beregning = beregnBarnepensjonService().beregn(behandling, bruker, periodensSisteDato)
             beregning.beregningsperioder.size shouldBeGreaterThanOrEqual 3
 
             with(beregning.beregningsperioder[0]) {
@@ -498,7 +499,7 @@ internal class BeregnBarnepensjonServiceTest {
             )
 
         runBlocking {
-            val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
+            val beregning = beregnBarnepensjonService().beregn(behandling, bruker, periodensSisteDato)
             beregning.beregningsperioder.size shouldBeGreaterThanOrEqual 1
 
             with(beregning.beregningsperioder[0]) {

@@ -11,7 +11,6 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
@@ -20,6 +19,7 @@ import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
+import no.nav.etterlatte.libs.common.oppgave.VentefristerGaarUtResponse
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.route.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import java.util.UUID
 
@@ -80,7 +81,7 @@ interface BehandlingService {
         frist: Tidspunkt? = null,
     ): UUID
 
-    fun taAvVent(request: VentefristGaarUtRequest)
+    fun taAvVent(request: VentefristGaarUtRequest): VentefristerGaarUtResponse
 }
 
 data class ReguleringFeiletHendelse(val sakId: Long)
@@ -255,14 +256,13 @@ class BehandlingServiceImpl(
         }
     }
 
-    override fun taAvVent(request: VentefristGaarUtRequest) {
+    override fun taAvVent(request: VentefristGaarUtRequest): VentefristerGaarUtResponse =
         runBlocking {
             behandlingKlient.put("$url/oppgaver/ventefrist-gaar-ut") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
-            }
+            }.body()
         }
-    }
 }
 
 data class OpprettOmregningResponse(val behandlingId: UUID, val forrigeBehandlingId: UUID, val sakType: SakType)

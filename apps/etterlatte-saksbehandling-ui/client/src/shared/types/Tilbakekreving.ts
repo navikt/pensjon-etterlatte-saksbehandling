@@ -1,4 +1,5 @@
 import { ISak } from '~shared/types/sak'
+import { JaNei } from '~shared/types/ISvar'
 
 export interface TilbakekrevingBehandling {
   id: string
@@ -9,23 +10,37 @@ export interface TilbakekrevingBehandling {
 }
 
 export interface Tilbakekreving {
-  vurdering: TilbakekrevingVurdering
+  vurdering?: TilbakekrevingVurdering | null
   perioder: TilbakekrevingPeriode[]
 }
 
 export interface TilbakekrevingVurdering {
-  beskrivelse: string | null
-  konklusjon: string | null
   aarsak: TilbakekrevingAarsak | null
-  aktsomhet: TilbakekrevingVurderingUaktsomhet
-  hjemmel: TilbakekrevingHjemmel | null
+  beskrivelse: string | null
+  forhaandsvarsel: TilbakekrevingVarsel | null
+  forhaandsvarselDato: string | null
+  doedsbosak: JaNei | null
+  foraarsaketAv: string | null
+  tilsvar: TilbakekrevingTilsvar | null
+  rettsligGrunnlag: TilbakekrevingRettsligGrunnlag | null
+  objektivtVilkaarOppfylt: string | null
+  subjektivtVilkaarOppfylt: string | null
+  uaktsomtForaarsaketFeilutbetaling: string | null
+  burdeBrukerForstaatt: string | null
+  burdeBrukerForstaattEllerUaktsomtForaarsaket: string | null
+  vilkaarsresultat: TilbakekrevingVilkaar | null
+  beloepBehold: TilbakekrevingBeloepBehold | null
+  reduseringAvKravet: string | null
+  foreldet: string | null
+  rentevurdering: string | null
+  vedtak: string | null
+  vurderesForPaatale: string | null
 }
 
-export interface TilbakekrevingVurderingUaktsomhet {
-  aktsomhet: TilbakekrevingAktsomhet | null
-  reduseringAvKravet?: string
-  strafferettsligVurdering?: string
-  rentevurdering?: string
+export interface TilbakekrevingTilsvar {
+  tilsvar: JaNei | null
+  dato: string | null
+  beskrivelse: string | null
 }
 
 export interface TilbakekrevingPeriode {
@@ -47,26 +62,58 @@ export interface TilbakekrevingBeloep {
   rentetillegg: number | null
 }
 
-export enum TilbakekrevingAarsak {
-  ANNET = 'ANNET',
-  ARBHOYINNT = 'ARBHOYINNT',
-  BEREGNFEIL = 'BEREGNFEIL',
-  DODSFALL = 'DODSFALL',
-  EKTESKAP = 'EKTESKAP',
-  FEILREGEL = 'FEILREGEL',
-  FEILUFOREG = 'FEILUFOREG',
-  FLYTTUTLAND = 'FLYTTUTLAND',
-  IKKESJEKKYTELSE = 'IKKESJEKKYTELSE',
-  OVERSETTMLD = 'OVERSETTMLD',
-  SAMLIV = 'SAMLIV',
-  UTBFEILMOT = 'UTBFEILMOT',
+export enum TilbakekrevingVarsel {
+  EGET_BREV = 'EGET_BREV',
+  MED_I_ENDRINGSBREV = 'MED_I_ENDRINGSBREV',
 }
 
-export enum TilbakekrevingAktsomhet {
-  GOD_TRO = 'GOD_TRO',
-  SIMPEL_UAKTSOMHET = 'SIMPEL_UAKTSOMHET',
-  GROV_UAKTSOMHET = 'GROV_UAKTSOMHET',
+export const teksterTilbakekrevingVarsel: Record<TilbakekrevingVarsel, string> = {
+  EGET_BREV: 'Sendt i eget brev',
+  MED_I_ENDRINGSBREV: 'Sendt som vedlegg i endringsbrev',
+} as const
+
+export enum TilbakekrevingAarsak {
+  OMGJOERING = 'OMGJOERING',
+  OPPHOER = 'OPPHOER',
+  REVURDERING = 'REVURDERING',
+  UTBFEILMOT = 'UTBFEILMOT',
+  ANNET = 'ANNET',
 }
+
+export enum TilbakekrevingVilkaar {
+  OPPFYLT = 'OPPFYLT',
+  DELVIS_OPPFYLT = 'DELVIS_OPPFYLT',
+  IKKE_OPPFYLT = 'IKKE_OPPFYLT',
+}
+
+export const teksterTilbakekrevingVilkaar: Record<TilbakekrevingVilkaar, string> = {
+  OPPFYLT: 'Vilkår oppfylt for hele perioden',
+  DELVIS_OPPFYLT: 'Vilkår oppfylt for deler av perioden',
+  IKKE_OPPFYLT: 'Vilkår ikke oppfylt',
+} as const
+
+export interface TilbakekrevingBeloepBehold {
+  behold: TilbakekrevingBeloepBeholdSvar | null
+  beskrivelse: string | null
+}
+
+export enum TilbakekrevingBeloepBeholdSvar {
+  BELOEP_I_BEHOLD = 'BELOEP_I_BEHOLD',
+  BELOEP_IKKE_I_BEHOLD = 'BELOEP_IKKE_I_BEHOLD',
+}
+
+export const teksterTilbakekrevingBeloepBehold: Record<TilbakekrevingBeloepBeholdSvar, string> = {
+  BELOEP_I_BEHOLD: 'Beløp helt eller delvis i behold',
+  BELOEP_IKKE_I_BEHOLD: 'Beløp ikke i behold',
+} as const
+
+export const teksterTilbakekrevingAarsak: Record<TilbakekrevingAarsak, string> = {
+  OMGJOERING: 'Omgjøring',
+  OPPHOER: 'Opphør',
+  REVURDERING: 'Revurdering',
+  UTBFEILMOT: 'Utbetaling til feil mottaker',
+  ANNET: 'Annet',
+} as const
 
 export enum TilbakekrevingStatus {
   OPPRETTET = 'OPPRETTET',
@@ -95,6 +142,13 @@ export enum TilbakekrevingSkyld {
   SKYLDDELING = 'SKYLDDELING',
 }
 
+export const teksterTilbakekrevingSkyld: Record<TilbakekrevingSkyld, string> = {
+  BRUKER: 'Bruker',
+  IKKE_FORDELT: 'Ikke fordelt',
+  NAV: 'Nav',
+  SKYLDDELING: 'Skylddeling',
+}
+
 export enum TilbakekrevingResultat {
   DELVIS_TILBAKEKREV = 'DELVIS_TILBAKEKREV',
   FEILREGISTRERT = 'FEILREGISTRERT',
@@ -103,12 +157,23 @@ export enum TilbakekrevingResultat {
   INGEN_TILBAKEKREV = 'INGEN_TILBAKEKREV',
 }
 
-export enum TilbakekrevingHjemmel {
-  ULOVFESTET = 'ULOVFESTET',
-  TJUETO_FEMTEN_EN_LEDD_EN = 'TJUETO_FEMTEN_EN_LEDD_EN',
-  TJUETO_FEMTEN_EN_LEDD_TO_FORSETT = 'TJUETO_FEMTEN_EN_LEDD_TO_FORSETT',
-  TJUETO_FEMTEN_EN_LEDD_TO_UAKTSOMT = 'TJUETO_FEMTEN_EN_LEDD_TO_UAKTSOMT',
-  TJUETO_FEMTEN_FEM = 'TJUETO_FEMTEN_FEM',
-  TJUETO_FEMTEN_SEKS = 'TJUETO_FEMTEN_SEKS',
-  TJUETO_SEKSTEN = 'TJUETO_SEKSTEN',
+export const teksterTilbakekrevingResultat: Record<TilbakekrevingResultat, string> = {
+  INGEN_TILBAKEKREV: 'Full tilbakekreving',
+  DELVIS_TILBAKEKREV: 'Delvis tilbakekreving',
+  FULL_TILBAKEKREV: 'Ingen tilbakekreving',
+  FEILREGISTRERT: 'Feilregistrert',
+  FORELDET: 'Foreldet',
 }
+
+export enum TilbakekrevingRettsligGrunnlag {
+  TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM = 'TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM',
+  TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM = 'TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM',
+  TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM = 'TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM',
+}
+
+export const teksterTilbakekrevingHjemmel: Record<TilbakekrevingRettsligGrunnlag, string> = {
+  TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM: 'Folketrygdloven § 22-15 første ledd, første punktum',
+  TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM: 'Folketrygdloven § 22-15 første ledd, andre punktum',
+  TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM:
+    'Kombinasjon folketrygdloven § 22-15 første ledd, første og andre punktum ',
+} as const

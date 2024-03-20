@@ -15,8 +15,8 @@ import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.ktor.runServerWithModule
-import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgave.EndrePaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -24,11 +24,11 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
-import no.nav.etterlatte.libs.common.oppgave.SettPaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.AfterAll
@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OppgaveRoutesTest : BehandlingIntegrationTest() {
@@ -66,10 +67,11 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                     assertEquals(HttpStatusCode.OK, status)
                 }.body()
 
+            val referanse = UUID.randomUUID().toString()
             val oppgave =
                 client.post("/oppgaver/sak/${sak.id}/opprett") {
                     val dto =
-                        NyOppgaveDto(OppgaveKilde.EKSTERN, OppgaveType.JOURNALFOERING, "Mottatt journalpost", "12345")
+                        NyOppgaveDto(OppgaveKilde.EKSTERN, OppgaveType.JOURNALFOERING, "Mottatt journalpost", referanse)
 
                     addAuthToken(systemBruker)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -78,7 +80,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                     assertEquals(HttpStatusCode.OK, it.status)
                     val lestOppgave: OppgaveIntern = it.body()
                     assertEquals(fnr, lestOppgave.fnr)
-                    assertEquals("12345", lestOppgave.referanse)
+                    assertEquals(referanse, lestOppgave.referanse)
                     assertEquals(OppgaveType.JOURNALFOERING, lestOppgave.type)
                     lestOppgave
                 }
@@ -104,7 +106,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
             }
 
             client.post("/api/oppgaver/${oppgave.id}/sett-paa-vent") {
-                val dto = SettPaaVentRequest("", Status.UNDER_BEHANDLING)
+                val dto = EndrePaaVentRequest("", true)
                 addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(dto)
@@ -117,8 +119,8 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                 val dto =
                     VentefristGaarUtRequest(
                         dato = LocalDate.now().plusMonths(3),
-                        type = OppgaveType.JOURNALFOERING,
-                        oppgaveKilde = OppgaveKilde.EKSTERN,
+                        type = setOf(OppgaveType.JOURNALFOERING),
+                        oppgaveKilde = setOf(OppgaveKilde.EKSTERN),
                         oppgaver = listOf(),
                     )
                 addAuthToken(systemBruker)

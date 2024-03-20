@@ -16,6 +16,10 @@ class DatabaseContext(private val ds: DataSource) : DatabaseKontekst {
 
     private var transactionalConnection: Connection? = null
 
+    override fun harIntransaction(): Boolean {
+        return transaktionOpen.get()
+    }
+
     override fun activeTx(): Connection =
         transactionalConnection ?: throw IllegalStateException(
             "No currently open transaction",

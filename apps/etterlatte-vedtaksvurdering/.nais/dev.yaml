@@ -29,6 +29,10 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   secureLogs:
     enabled: true
   azure:
@@ -76,9 +80,9 @@ spec:
     - name: BEHANDLING_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: SAMORDNEVEDTAK_URL
-      value: https://sam-q1.dev-fss-pub.nais.io
+      value: https://sam-q2.dev-fss-pub.nais.io
     - name: SAMORDNEVEDTAK_AZURE_SCOPE
-      value: api://dev-fss.pensjonsamhandling.sam-q1/.default
+      value: api://dev-fss.pensjonsamhandling.sam-q2/.default
     - name: ETTERLATTE_TRYGDETID_URL
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
@@ -111,4 +115,4 @@ spec:
         - application: etterlatte-trygdetid
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
-        - host: sam-q1.dev-fss-pub.nais.io
+        - host: sam-q2.dev-fss-pub.nais.io

@@ -9,21 +9,20 @@ import { Personopplysninger } from '~shared/types/grunnlag'
 import styled from 'styled-components'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { RedigerFamilieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/RedigerFamilieforhold'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
   personopplysninger: Personopplysninger | null
+  redigerbar: boolean
 }
 
-export const Familieforhold = ({ behandling, personopplysninger }: PropsFamilieforhold) => {
-  const featureAktiv = useFeatureEnabledMedDefault('pensjon-etterlatte.kan-bruke-rediger-familie', false)
+export const Familieforhold = ({ behandling, personopplysninger, redigerbar }: PropsFamilieforhold) => {
   return (
     <>
       <ContentHeader>
         <Heading spacing size="medium" level="2" as="div">
           Familieforhold
-          {featureAktiv && personopplysninger && (
+          {personopplysninger && redigerbar && (
             <RedigerFamilieforhold behandling={behandling} personopplysninger={personopplysninger} />
           )}
         </Heading>

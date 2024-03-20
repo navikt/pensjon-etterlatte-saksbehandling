@@ -2,6 +2,7 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { SakType } from '~shared/types/sak'
 import { konverterOppgavestatusFilterValuesTilKeys } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
+import { OppgavebenkStats } from '~components/oppgavebenk/utils/oppgavebenkStats'
 
 export interface OppgaveDTO {
   id: string
@@ -20,6 +21,7 @@ export interface OppgaveDTO {
 
   // GOSYS-spesifikt
   beskrivelse: string | null
+  journalpostId: string | null
   gjelder: string | null
   versjon: number | null
 }
@@ -37,7 +39,14 @@ export interface NyOppgaveDto {
 }
 
 export type Oppgavestatus = 'NY' | 'UNDER_BEHANDLING' | 'PAA_VENT' | 'FERDIGSTILT' | 'FEILREGISTRERT' | 'AVBRUTT'
-export type OppgaveKilde = 'HENDELSE' | 'BEHANDLING' | 'EKSTERN' | 'GENERELL_BEHANDLING' | 'TILBAKEKREVING'
+export type OppgaveKilde =
+  | 'HENDELSE'
+  | 'BEHANDLING'
+  | 'EKSTERN'
+  | 'GENERELL_BEHANDLING'
+  | 'TILBAKEKREVING'
+  | 'SAKSBEHANDLER'
+
 export type Oppgavetype =
   | 'FOERSTEGANGSBEHANDLING'
   | 'REVURDERING'
@@ -76,15 +85,23 @@ export const hentOppgaverMedStatus = async (args: {
 }
 
 export const hentOppgave = async (id: string): Promise<ApiResponse<OppgaveDTO>> => apiClient.get(`/oppgaver/${id}`)
+export const hentOppgaverMedReferanse = async (referanse: string): Promise<ApiResponse<OppgaveDTO[]>> =>
+  apiClient.get(`/oppgaver/referanse/${referanse}`)
 export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver/gosys')
+
+export const hentOppgavebenkStats = async (): Promise<ApiResponse<OppgavebenkStats>> => apiClient.get('/oppgaver/stats')
 
 export const opprettOppgave = async (args: {
   sakId: number
   request: NyOppgaveDto
 }): Promise<ApiResponse<OppgaveDTO>> => apiClient.post(`/oppgaver/sak/${args.sakId}/opprett`, { ...args.request })
 
-export const ferdigstillOppgave = async (id: string): Promise<ApiResponse<any>> =>
-  apiClient.put(`/oppgaver/${id}/ferdigstill`, {})
+export const ferdigstillOppgave = async (id: string): Promise<ApiResponse<any>> => ferdigstillOppgaveMedMerknad({ id })
+
+export const ferdigstillOppgaveMedMerknad = async (args: {
+  id: string
+  merknad?: string | null
+}): Promise<ApiResponse<any>> => apiClient.put(`/oppgaver/${args.id}/ferdigstill`, { merknad: args.merknad })
 
 export interface OppdatertOppgaveversjonResponseDto {
   versjon: number | null
@@ -94,6 +111,22 @@ export interface SaksbehandlerEndringDto {
   saksbehandler: string
   versjon: number | null
 }
+
+export const ferdigstilleGosysOppgave = async (args: {
+  oppgaveId: string
+  versjon: number
+}): Promise<ApiResponse<OppgaveDTO>> =>
+  apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/ferdigstill?versjon=${args.versjon}`, {})
+
+export const feilregistrerGosysOppgave = async (args: {
+  oppgaveId: string
+  beskrivelse: string
+  versjon: number
+}): Promise<ApiResponse<OppgaveDTO>> =>
+  apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/feilregistrer`, {
+    versjon: args.versjon,
+    beskrivelse: args.beskrivelse,
+  })
 
 export const tildelSaksbehandlerApi = async (args: {
   oppgaveId: string
@@ -146,10 +179,9 @@ export interface RedigerFristRequest {
   versjon: number | null
 }
 
-export interface SettPaaVentRequest {
+export interface EndrePaaVentRequest {
   merknad: String
-  status: Oppgavestatus
-  versjon: number | null
+  paaVent: boolean
 }
 
 export const redigerFristApi = async (args: {
@@ -166,7 +198,7 @@ export const redigerFristApi = async (args: {
 
 export const settOppgavePaaVentApi = async (args: {
   oppgaveId: string
-  settPaaVentRequest: SettPaaVentRequest
+  settPaaVentRequest: EndrePaaVentRequest
 }): Promise<ApiResponse<void>> => {
   return apiClient.post(`/oppgaver/${args.oppgaveId}/sett-paa-vent`, { ...args.settPaaVentRequest })
 }

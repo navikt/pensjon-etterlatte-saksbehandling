@@ -7,14 +7,13 @@ import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { Klage } from '~shared/types/Klage'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { BrevStatus, kanBrevRedigeres } from '~shared/types/Brev'
+import { BrevProsessType, BrevStatus, kanBrevRedigeres } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { hentBrev } from '~shared/api/brev'
 import styled from 'styled-components'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { JaNei } from '~shared/types/ISvar'
-import { Innhold } from '~components/klage/styled'
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
@@ -57,30 +56,28 @@ export function KlageBrev() {
         <Sidebar>
           <ContentHeader>
             <HeadingWrapper>
-              <Heading level="1" size="large">
+              <Heading spacing level="1" size="large">
                 Brev
               </Heading>
             </HeadingWrapper>
+            <BodyShort spacing>
+              {klage.formkrav?.formkrav.erKlagenFramsattInnenFrist === JaNei.JA
+                ? 'Oversendelsesbrev til klager'
+                : 'Avvisningsbrev til klager'}
+            </BodyShort>
+            {isSuccess(hentetBrev) && (
+              <>
+                <BrevTittel
+                  brevId={hentetBrev.data.id}
+                  sakId={hentetBrev.data.sakId}
+                  tittel={hentetBrev.data.tittel}
+                  kanRedigeres={true}
+                />
+                <br />
+                <BrevMottaker brev={hentetBrev.data} kanRedigeres={true} />
+              </>
+            )}
           </ContentHeader>
-          {klage.formkrav?.formkrav.erKlagenFramsattInnenFrist === JaNei.JA ? (
-            <Innhold>
-              <BodyShort>Skriv oversendelsesbrevet til klager</BodyShort>
-            </Innhold>
-          ) : (
-            <BodyShort>Skriv avvisningsbrev her</BodyShort>
-          )}
-          {/* TODO lar være å bytte ut med ny brevmottaker komponent her, siden dette virker å være ganske wip */}
-          {isSuccess(hentetBrev) && (
-            <>
-              <BrevTittel
-                brevId={hentetBrev.data.id}
-                sakId={hentetBrev.data.sakId}
-                tittel={hentetBrev.data.tittel}
-                kanRedigeres={true}
-              />
-              <BrevMottaker brev={hentetBrev.data} kanRedigeres={true} />
-            </>
-          )}
         </Sidebar>
 
         {mapApiResult(
@@ -92,7 +89,7 @@ export function KlageBrev() {
             <ApiErrorAlert>Kunne ikke hente brevet. Prøv å laste siden på nytt</ApiErrorAlert>
           ),
           (brev) => {
-            if (brev.status === BrevStatus.DISTRIBUERT) {
+            if (brev.status === BrevStatus.DISTRIBUERT || brev.prosessType !== BrevProsessType.REDIGERBAR) {
               return <ForhaandsvisningBrev brev={brev} />
             } else {
               return <RedigerbartBrev brev={brev} kanRedigeres={kanBrevRedigeres(brev.status)} />
@@ -119,8 +116,6 @@ export function KlageBrev() {
 
 const BrevContent = styled.div`
   display: flex;
-  height: 75vh;
-  max-height: 75vh;
 `
 
 const SpinnerContainer = styled.div`

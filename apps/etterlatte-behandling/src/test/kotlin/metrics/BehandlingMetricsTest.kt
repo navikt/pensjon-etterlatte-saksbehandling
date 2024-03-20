@@ -31,6 +31,7 @@ internal class BehandlingMetricsTest(private val ds: DataSource) {
     private lateinit var behandlingMetrikkerDao: BehandlingMetrikkerDao
     private lateinit var oppgaveDao: OppgaveMetrikkerDao
     private lateinit var behandlingRepo: BehandlingDao
+    private lateinit var gjenopprettingDao: GjenopprettingMetrikkerDao
     private lateinit var sakRepo: SakDao
     private lateinit var behandlingMetrics: BehandlingMetrics
 
@@ -50,7 +51,8 @@ internal class BehandlingMetricsTest(private val ds: DataSource) {
 
         behandlingMetrikkerDao = BehandlingMetrikkerDao(ds)
         oppgaveDao = OppgaveMetrikkerDao(ds)
-        behandlingMetrics = BehandlingMetrics(oppgaveDao, behandlingMetrikkerDao, testreg)
+        gjenopprettingDao = GjenopprettingMetrikkerDao(ds)
+        behandlingMetrics = BehandlingMetrics(oppgaveDao, behandlingMetrikkerDao, gjenopprettingDao, testreg)
 
         behandlingMetrics.run()
     }

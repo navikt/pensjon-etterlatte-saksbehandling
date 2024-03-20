@@ -27,7 +27,7 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
                     setString(1, Status.FERDIG.name)
                     setLong(2, doedshendelseBrevDistribuert.brevId)
                     setLong(3, doedshendelseBrevDistribuert.sakId)
-                }
+                }.executeUpdate()
             }
         }
     }

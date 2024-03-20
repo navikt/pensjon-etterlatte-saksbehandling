@@ -1,3 +1,12 @@
+fragment folkeregistermetadata on Folkeregistermetadata {
+    ajourholdstidspunkt
+    gyldighetstidspunkt
+    opphoerstidspunkt
+    kilde
+    aarsak
+    sekvens
+}
+
 fragment metadata on Metadata {
     master
     historisk
@@ -15,6 +24,17 @@ query(
     $ident: ID!,
 ) {
     hentPerson(ident: $ident) {
+        folkeregisteridentifikator(historikk: false) {
+            identifikasjonsnummer
+            status
+            type
+            folkeregistermetadata {
+                ...folkeregistermetadata
+            }
+            metadata {
+                ...metadata
+            }
+        }
         navn {
             fornavn
             mellomnavn

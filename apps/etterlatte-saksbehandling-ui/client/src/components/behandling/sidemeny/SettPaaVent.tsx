@@ -1,4 +1,4 @@
-import { Alert, Button, Heading, Label, TextField } from '@navikt/ds-react'
+import { Alert, Button, Heading, Label, Textarea } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
 import { erOppgaveRedigerbar, OppgaveDTO, settOppgavePaaVentApi } from '~shared/api/oppgaver'
@@ -9,7 +9,15 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { isPending } from '~shared/api/apiUtils'
 
-export const SettPaaVent = ({ oppgave, refreshOppgave }: { oppgave: OppgaveDTO; refreshOppgave: () => void }) => {
+export const SettPaaVent = ({
+  oppgave,
+  redigerbar,
+  refreshOppgave,
+}: {
+  oppgave: OppgaveDTO
+  redigerbar: boolean
+  refreshOppgave: () => void
+}) => {
   const [frist, setFrist] = useState<string>(oppgave.frist)
   const [merknad, setMerknad] = useState<string>(oppgave.merknad || '')
   const [settPaaVent, setVisPaaVent] = useState(false)
@@ -22,8 +30,7 @@ export const SettPaaVent = ({ oppgave, refreshOppgave }: { oppgave: OppgaveDTO; 
         oppgaveId: oppgave.id,
         settPaaVentRequest: {
           merknad,
-          versjon: null,
-          status: oppgave.status,
+          paaVent: !(oppgave.status === 'PAA_VENT'),
         },
       },
       () => {
@@ -38,7 +45,7 @@ export const SettPaaVent = ({ oppgave, refreshOppgave }: { oppgave: OppgaveDTO; 
       {settPaaVent && (
         <>
           <hr />
-          <TextField label="Merknad" type="text" value={merknad} onChange={(e) => setMerknad(e.target.value)} />
+          <Textarea label="Merknad" value={merknad} onChange={(e) => setMerknad(e.target.value)} />
 
           <br />
           {oppgave.status !== 'PAA_VENT' && (
@@ -85,18 +92,19 @@ export const SettPaaVent = ({ oppgave, refreshOppgave }: { oppgave: OppgaveDTO; 
           )}
 
           <br />
-
-          <FlexRow justify="right">
-            <Button
-              size="small"
-              variant="secondary"
-              onClick={() => setVisPaaVent(true)}
-              icon={oppgave.status === 'PAA_VENT' ? <ClockDashedIcon /> : <ClockIcon />}
-              iconPosition="right"
-            >
-              {oppgave.status === 'PAA_VENT' ? 'Ta av vent' : 'Sett på vent'}
-            </Button>
-          </FlexRow>
+          {redigerbar && (
+            <FlexRow justify="right">
+              <Button
+                size="small"
+                variant="secondary"
+                onClick={() => setVisPaaVent(true)}
+                icon={oppgave.status === 'PAA_VENT' ? <ClockDashedIcon /> : <ClockIcon />}
+                iconPosition="right"
+              >
+                {oppgave.status === 'PAA_VENT' ? 'Ta av vent' : 'Sett på vent'}
+              </Button>
+            </FlexRow>
+          )}
         </>
       )}
     </div>

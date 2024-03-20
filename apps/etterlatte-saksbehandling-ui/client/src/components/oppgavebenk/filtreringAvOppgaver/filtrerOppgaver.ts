@@ -65,16 +65,8 @@ export function filtrerOppgaveStatus(oppgavestatusFilter: Array<string>, oppgave
   }
 }
 
-export const oppgavetypefilter = (kanBrukeKlage: boolean): Array<[OppgavetypeFilterKeys, string]> => {
-  const entries = Object.entries(OPPGAVETYPEFILTER) as Array<[OppgavetypeFilterKeys, string]>
-  if (!kanBrukeKlage) {
-    return entries.filter(([key]) => key !== 'KLAGE' && key !== 'OMGJOERING')
-  }
-  return entries
-}
-
 const konverterOppgavetypeFilterTilKeys = (oppgavetypeFilter: Array<string>): Array<OppgavetypeFilterKeys> => {
-  return oppgavetypefilter(false)
+  return Object.entries(OPPGAVETYPEFILTER)
     .filter(([, val]) => oppgavetypeFilter.includes(val))
     .map(([key]) => key as OppgavetypeFilterKeys)
 }
@@ -134,24 +126,24 @@ export function filtrerOppgaver(
 
 export const initialFilter = (): Filter => {
   return {
-    sakEllerFnrFilter: '',
-    enhetsFilter: 'visAlle',
-    fristFilter: 'visAlle',
-    saksbehandlerFilter: SAKSBEHANDLERFILTER.visAlle,
-    ytelseFilter: 'visAlle',
+    ...defaultFiltre,
     oppgavestatusFilter: [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
-    oppgavetypeFilter: [OPPGAVETYPEFILTER.visAlle],
   }
 }
 
 export const minOppgavelisteFiltre = (): Filter => {
   return {
-    sakEllerFnrFilter: '',
-    enhetsFilter: 'visAlle',
-    fristFilter: 'visAlle',
-    saksbehandlerFilter: 'visAlle',
-    ytelseFilter: 'visAlle',
+    ...defaultFiltre,
     oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
-    oppgavetypeFilter: [OPPGAVETYPEFILTER.visAlle],
   }
+}
+
+export const defaultFiltre: Filter = {
+  sakEllerFnrFilter: '',
+  enhetsFilter: 'visAlle',
+  fristFilter: 'visAlle',
+  saksbehandlerFilter: SAKSBEHANDLERFILTER.visAlle,
+  ytelseFilter: 'visAlle',
+  oppgavestatusFilter: [OPPGAVESTATUSFILTER.visAlle],
+  oppgavetypeFilter: [OPPGAVETYPEFILTER.visAlle],
 }

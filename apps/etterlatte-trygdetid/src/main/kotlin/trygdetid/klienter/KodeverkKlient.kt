@@ -6,9 +6,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.http.ContentType
-import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
+import no.nav.etterlatte.libs.ktor.navConsumerId
 import org.slf4j.LoggerFactory
 
 class KodeverkKlient(config: Config, private val httpKlient: HttpClient) {
@@ -21,7 +20,7 @@ class KodeverkKlient(config: Config, private val httpKlient: HttpClient) {
 
             httpKlient.get("$url/Landkoder/koder/betydninger?ekskluderUgyldige=false&spraak=nb") {
                 accept(ContentType.Application.Json)
-                header(NAV_CONSUMER_ID, "etterlatte-trygdetid")
+                navConsumerId("etterlatte-trygdetid")
             }.body()
         } catch (e: Exception) {
             logger.error("Henting av landkoder feilet", e)

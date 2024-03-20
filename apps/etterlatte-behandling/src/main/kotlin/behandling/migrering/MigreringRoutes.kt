@@ -9,19 +9,21 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 fun Route.migreringRoutes(migreringService: MigreringService) {
     route("/migrering") {
         post {
-            kunSkrivetilgang {
+            val migreringRequest = call.receive<MigreringRequest>()
+            kunSkrivetilgang(enhetNr = migreringRequest.enhet.nr) {
                 val behandling =
                     try {
-                        migreringService.migrer(call.receive()).let {
+                        migreringService.migrer(migreringRequest).let {
                             when (it) {
                                 is RetryResult.Success -> it.content
                                 is RetryResult.Failure -> throw it.samlaExceptions()
@@ -43,8 +45,9 @@ fun Route.migreringRoutes(migreringService: MigreringService) {
             }
         }
         post("/manuell-gjenoppretting") {
-            kunSkrivetilgang {
-                migreringService.opprettOppgaveManuellGjenoppretting(call.receive())
+            val migreringRequest = call.receive<MigreringRequest>()
+            kunSkrivetilgang(enhetNr = migreringRequest.enhet.nr) {
+                migreringService.opprettOppgaveManuellGjenoppretting(migreringRequest)
                 call.respond(HttpStatusCode.OK)
             }
         }

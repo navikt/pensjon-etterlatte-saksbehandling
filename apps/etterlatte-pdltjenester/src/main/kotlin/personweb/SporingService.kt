@@ -1,11 +1,11 @@
 package no.nav.etterlatte.personweb
 
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
-import no.nav.etterlatte.token.BrukerTokenInfo
 
 class SporingService(private val sporingslogg: Sporingslogg) {
     fun logg(

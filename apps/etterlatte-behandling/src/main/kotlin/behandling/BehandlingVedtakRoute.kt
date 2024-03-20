@@ -11,10 +11,10 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
-import no.nav.etterlatte.token.Saksbehandler
-import no.nav.etterlatte.token.Systembruker
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -32,8 +32,9 @@ internal fun Route.behandlingVedtakRoute(
 
     route("/fattvedtak") {
         post {
-            kunSkrivetilgang {
-                val fattVedtak = call.receive<VedtakEndringDTO>()
+            val fattVedtak = call.receive<VedtakEndringDTO>()
+
+            kunSkrivetilgang(sakId = fattVedtak.sakIdOgReferanse.sakId) {
                 val behandling =
                     inTransaction {
                         behandlingService.hentBehandling(
@@ -73,8 +74,9 @@ internal fun Route.behandlingVedtakRoute(
     }
     route("/underkjennvedtak") {
         post {
-            kunSkrivetilgang {
-                val underkjennVedtakOppgave = call.receive<VedtakEndringDTO>()
+            val underkjennVedtakOppgave = call.receive<VedtakEndringDTO>()
+
+            kunSkrivetilgang(sakId = underkjennVedtakOppgave.sakIdOgReferanse.sakId) {
                 val behandling =
                     inTransaction {
                         behandlingService.hentBehandling(
@@ -125,8 +127,9 @@ internal fun Route.behandlingVedtakRoute(
     }
     route("/attestervedtak") {
         post {
-            kunSkrivetilgang {
-                val attesterVedtakOppgave = call.receive<VedtakEndringDTO>()
+            val attesterVedtakOppgave = call.receive<VedtakEndringDTO>()
+
+            kunSkrivetilgang(sakId = attesterVedtakOppgave.sakIdOgReferanse.sakId) {
                 val behandling =
                     inTransaction {
                         behandlingService.hentBehandling(

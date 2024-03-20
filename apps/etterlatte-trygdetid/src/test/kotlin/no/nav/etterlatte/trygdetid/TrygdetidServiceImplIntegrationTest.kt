@@ -1,8 +1,8 @@
 package no.nav.etterlatte.trygdetid
 
+import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.deserialize
@@ -13,70 +13,56 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
+import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
-import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
-import no.nav.etterlatte.trygdetid.klienter.VilkaarsvuderingKlient
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.security.SecureRandom
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class TrygdetidServiceImplIntegrationTest {
-    val saksbehandler = Saksbehandler("token", "ident", null)
+internal class TrygdetidServiceImplIntegrationTest(dataSource: DataSource) {
+    companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
+    }
 
-    @Container
-    private val postgres = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-    private lateinit var repository: TrygdetidRepository
-    private lateinit var dataSource: DataSource
+    private val saksbehandler = Saksbehandler("token", "ident", null)
+
+    private val repository = TrygdetidRepository(dataSource)
     private lateinit var trygdetidService: TrygdetidServiceImpl
 
     private val pdlKilde: Grunnlagsopplysning.Pdl = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
     private val regelKilde: Grunnlagsopplysning.RegelKilde = Grunnlagsopplysning.RegelKilde("regel", Tidspunkt.now(), "1")
 
-    private lateinit var vilkaarsvuderingKlient: VilkaarsvuderingKlient
     private val grunnlagKlient: GrunnlagKlient = mockk<GrunnlagKlient>()
 
     @BeforeAll
     fun beforeAll() {
-        postgres.start()
-        dataSource = DataSourceBuilder.createDataSource(postgres.jdbcUrl, postgres.username, postgres.password)
-        repository = TrygdetidRepository(dataSource.apply { migrate() })
-        vilkaarsvuderingKlient = vilkaarsvurderingKlientMock()
         trygdetidService =
             TrygdetidServiceImpl(
                 repository,
                 mockk<BehandlingKlient>(),
                 grunnlagKlient,
-                vilkaarsvuderingKlient,
                 TrygdetidBeregningService,
             )
     }
 
-    @AfterAll
-    fun afterAll() {
-        postgres.stop()
-    }
-
     @AfterEach
     fun afterEach() {
-        cleanDatabase()
+        dbExtension.resetDb()
     }
 
     @Test
@@ -174,7 +160,7 @@ internal class TrygdetidServiceImplIntegrationTest {
 
         with(trygdetid!!) {
             trygdetid.ident shouldBe UKJENT_AVDOED
-            opplysningerDifferanse shouldBe null
+            opplysningerDifferanse!! shouldBeEqual OpplysningerDifferanse(false, GrunnlagOpplysningerDto.tomt())
         }
     }
 
@@ -214,17 +200,6 @@ internal class TrygdetidServiceImplIntegrationTest {
         )
     }
 
-    private fun vilkaarsvurderingKlientMock(): VilkaarsvuderingKlient {
-        val dtoMock = mockk<VilkaarsvurderingDto>()
-        every { dtoMock.isYrkesskade() } returns false
-
-        val klient = mockk<VilkaarsvuderingKlient>()
-        coEvery {
-            klient.hentVilkaarsvurdering(any(), any())
-        } returns dtoMock
-        return klient
-    }
-
     private fun grunnlagMedNyDoedsdato(nyDoedsdato: LocalDate): Grunnlag {
         val grunnlagTestData =
             GrunnlagTestData(
@@ -232,9 +207,5 @@ internal class TrygdetidServiceImplIntegrationTest {
                     mapOf(Opplysningstype.DOEDSDATO to Opplysning.Konstant(UUID.randomUUID(), kilde, nyDoedsdato.toJsonNode())),
             )
         return grunnlagTestData.hentOpplysningsgrunnlag()
-    }
-
-    private fun cleanDatabase() {
-        dataSource.connection.use { it.prepareStatement("TRUNCATE trygdetid CASCADE").apply { execute() } }
     }
 }

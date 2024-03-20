@@ -51,6 +51,8 @@ data class OppgaveIntern(
     }
 }
 
+data class OppgavebenkStats(val antallOppgavelistaOppgaver: Long, val antallMinOppgavelisteOppgaver: Long)
+
 data class OppgaveListe(val sak: Sak, val oppgaver: List<OppgaveIntern>)
 
 data class GosysOppgave(
@@ -65,6 +67,7 @@ data class GosysOppgave(
     override val fnr: String? = null,
     val gjelder: String,
     val beskrivelse: String?,
+    val journalpostId: String?,
 ) : Oppgave() {
     override val type: OppgaveType
         get() = OppgaveType.GOSYS
@@ -103,15 +106,12 @@ enum class OppgaveKilde {
     EKSTERN,
     TILBAKEKREVING,
     GJENOPPRETTING,
+    SAKSBEHANDLER,
 }
 
 enum class OppgaveType {
     FOERSTEGANGSBEHANDLING,
     REVURDERING,
-
-    /*
-     * TODO: Manuelt opphør burde fjernes så fort vi får ryddet bort oppgavene som har dukket opp i produksjon.
-     */
     VURDER_KONSEKVENS,
     ATTESTERING,
     UNDERKJENT,
@@ -137,9 +137,13 @@ data class RedigerFristRequest(
     val frist: Tidspunkt,
 )
 
-data class SettPaaVentRequest(
+data class EndrePaaVentRequest(
     val merknad: String,
-    val status: Status,
+    val paaVent: Boolean,
+)
+
+data class FerdigstillRequest(
+    val merknad: String?,
 )
 
 data class RedigerFristGosysRequest(

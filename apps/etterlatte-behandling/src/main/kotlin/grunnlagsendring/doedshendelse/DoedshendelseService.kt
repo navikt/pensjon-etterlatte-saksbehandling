@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.sikkerLogg
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
@@ -9,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
@@ -20,6 +22,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl as PdlDoedshen
 
 enum class DoedshendelseFeatureToggle(private val key: String) : FeatureToggle {
     KanLagreDoedshendelse("pensjon-etterlatte.kan-lage-doedhendelse"),
+    KanLagreDoedshendelseForEPS("pensjon-etterlatte.kan-lage-doedhendelse-for-eps"),
     KanSendeBrevOgOppretteOppgave("pensjon-etterlatte.kan-sende-brev-og-opprette-oppgave"),
     ;
 
@@ -37,6 +40,14 @@ class DoedshendelseService(
         doedshendelseDao.oppdaterBrevDistribuertDoedshendelse(doedshendelseBrevDistribuert)
 
     fun kanBrukeDeodshendelserJob() = featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)
+
+    fun kanSendeBrevOgOppretteOppgave() = featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, false)
+
+    private fun kanLagreDoedshendelseForEPS() =
+        featureToggleService.isEnabled(
+            toggleId = DoedshendelseFeatureToggle.KanLagreDoedshendelseForEPS,
+            defaultValue = false,
+        )
 
     fun opprettDoedshendelseForBeroertePersoner(doedshendelse: PdlDoedshendelse) {
         logger.info("Mottok dødsmelding fra PDL, finner berørte personer og lagrer ned dødsmelding.")
@@ -59,8 +70,9 @@ class DoedshendelseService(
                 .filter { it.utfall !== Utfall.AVBRUTT }
 
         val beroerteBarn = finnBeroerteBarn(avdoed)
-        val beroerteEpser = finnBeroerteEpser(avdoed)
-        val alleBeroerte = beroerteBarn + beroerteEpser
+        val beroerteEktefeller = if (kanLagreDoedshendelseForEPS()) finnBeroerteEktefellerSivilstand(avdoed) else emptyList()
+        val samboereMedFellesbarn = if (kanLagreDoedshendelseForEPS()) finnSamboereForAvdoedMedFellesBarn(avdoed) else emptyList()
+        val alleBeroerte = beroerteBarn + beroerteEktefeller + samboereMedFellesbarn
 
         if (gyldigeDoedshendelserForAvdoed.isEmpty()) {
             sikkerLogg.info("Fant ${alleBeroerte.size} berørte personer for avdød (${avdoed.foedselsnummer})")
@@ -164,7 +176,53 @@ class DoedshendelseService(
         }
     }
 
-    private fun finnBeroerteEpser(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
+    private fun finnSamboereForAvdoedMedFellesBarn(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
+        val avdoedesBarn = avdoed.avdoedesBarn
+        val andreForeldreForAvdoedesBarn =
+            avdoedesBarn?.mapNotNull { barn ->
+                barn.familieRelasjon?.foreldre?.filter { it.value != avdoed.foedselsnummer.verdi.value }
+                    ?.map { it }
+                    ?.map { forelder -> forelder.value }
+            }
+        return harSammeAdresseSomAvdoed(avdoed, andreForeldreForAvdoedesBarn?.flatten())
+    }
+
+    private fun harSammeAdresseSomAvdoed(
+        avdoed: PersonDTO,
+        andreForeldreForAvdoedesBarn: List<String>?,
+    ): List<PersonFnrMedRelasjon> {
+        return andreForeldreForAvdoedesBarn?.map {
+            val annenForelder =
+                runBlocking {
+                    pdlTjenesterKlient.hentPdlModellFlereSaktyper(it, PersonRolle.TILKNYTTET_BARN, SakType.OMSTILLINGSSTOENAD)
+                }
+            AvdoedOgAnnenForelderMedFellesbarn(avdoed, annenForelder)
+        }
+            ?.filter { erSamboere(it) }
+            ?.map { PersonFnrMedRelasjon(it.gjenlevendeForelder.foedselsnummer.verdi.value, Relasjon.SAMBOER) }
+            ?: emptyList()
+    }
+
+    private fun erSamboere(avdoedOgAnnenForelderMedFellesbarn: AvdoedOgAnnenForelderMedFellesbarn): Boolean {
+        val gjenlevendeBosteder =
+            avdoedOgAnnenForelderMedFellesbarn
+                .gjenlevendeForelder.bostedsadresse?.map { it.verdi }?.filter { it.aktiv }
+        val avdoedBosteder =
+            avdoedOgAnnenForelderMedFellesbarn
+                .avdoedPerson.bostedsadresse?.map { it.verdi }?.filter { it.aktiv }
+
+        return isAdresserLike(gjenlevendeBosteder?.first(), avdoedBosteder?.first())
+    }
+
+    private fun isAdresserLike(
+        adresse1: Adresse?,
+        adresse2: Adresse?,
+    ) = adresse1?.adresseLinje1 == adresse2?.adresseLinje1 &&
+        adresse1?.adresseLinje2 == adresse2?.adresseLinje2 &&
+        adresse1?.adresseLinje3 == adresse2?.adresseLinje3 &&
+        adresse1?.postnr == adresse2?.postnr
+
+    private fun finnBeroerteEktefellerSivilstand(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
         return avdoed.sivilstand?.filter { it.verdi.relatertVedSiviltilstand?.value !== null }
             ?.filter {
                 it.verdi.sivilstatus in
@@ -175,7 +233,7 @@ class DoedshendelseService(
                         Sivilstatus.ENKE_ELLER_ENKEMANN,
                         Sivilstatus.SEPARERT,
                     )
-            }?.map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EPS) } ?: emptyList()
+            }?.map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EKTEFELLE) } ?: emptyList()
     }
 }
 

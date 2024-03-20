@@ -1,19 +1,18 @@
 package no.nav.etterlatte
 
-import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.sak.SakTilgangDao
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import no.nav.etterlatte.tilgangsstyring.saksbehandlereMedTilgangTilAlleEnheter
-import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Saksbehandler
-import no.nav.etterlatte.token.Systembruker
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import org.slf4j.LoggerFactory
 import java.sql.Connection
 
 object Kontekst : ThreadLocal<Context>()
@@ -21,6 +20,7 @@ object Kontekst : ThreadLocal<Context>()
 class Context(
     val AppUser: User,
     val databasecontxt: DatabaseKontekst,
+    val sakTilgangDao: SakTilgangDao,
 ) {
     fun appUserAsSaksbehandler(): SaksbehandlerMedEnheterOgRoller {
         return this.AppUser as SaksbehandlerMedEnheterOgRoller
@@ -29,20 +29,12 @@ class Context(
 
 interface User {
     fun name(): String
-
-    fun kanSetteKilde(): Boolean = false
-
-    fun harSkrivetilgang(): Boolean = false
-
-    fun harLesetilgang(): Boolean = false
 }
 
 abstract class ExternalUser(val identifiedBy: TokenValidationContext) : User
 
 class Self(private val prosess: String) : User {
     override fun name() = prosess
-
-    override fun kanSetteKilde() = true
 }
 
 class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identifiedBy) {
@@ -51,60 +43,58 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
             ?.getStringClaim("azp_name") // format=cluster:namespace:app-name
             ?: throw IllegalArgumentException("Støtter ikke navn på systembruker")
     }
-
-    override fun kanSetteKilde(): Boolean {
-        return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.containsClaim("roles", "kan-sette-kilde")
-    }
-
-    override fun harSkrivetilgang(): Boolean = true
-
-    override fun harLesetilgang(): Boolean = true
 }
-
-class HentEnhetException(override val detail: String, override val cause: Throwable?) :
-    InternfeilException(detail, cause)
 
 class SaksbehandlerMedEnheterOgRoller(
     identifiedBy: TokenValidationContext,
-    private val navAnsattKlient: NavAnsattKlient,
+    private val saksbehandlerService: SaksbehandlerService,
     val saksbehandlerMedRoller: SaksbehandlerMedRoller,
 ) : ExternalUser(identifiedBy) {
+    val logger = LoggerFactory.getLogger(this::class.java)
+
+    private fun saksbehandlersEnheter() =
+        saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(name()).map { it.enhetsNummer }.toSet()
+
     override fun name(): String {
         return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
     }
 
-    fun erSuperbruker() = name() in (saksbehandlereMedTilgangTilAlleEnheter)
+    private fun harKjentEnhet(saksbehandlersEnheter: Set<String>) = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter).isNotEmpty()
 
-    fun enheter() =
-        if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {
-            Enheter.nasjonalTilgangEnheter()
-        } else {
-            try {
-                runBlocking {
-                    navAnsattKlient.hentEnheterForSaksbehandler(name()).map { it.id }
-                }
-            } catch (e: Exception) {
-                throw HentEnhetException("Henting av enheter feilet. Sjekk on-prem status(fss)", e)
-            }
+    fun kanSeOppgaveBenken() =
+        saksbehandlersEnheter().any { enhetNr ->
+            Enheter.entries.firstOrNull { it.enhetNr == enhetNr }?.harTilgangTilOppgavebenken ?: false
         }
 
-    override fun harSkrivetilgang(): Boolean {
-        val enheter = enheter()
-        val skrivetilgangEnhetsnummere = Enheter.enheterMedSkrivetilgang()
-        return enheter.any { skrivetilgangEnhetsnummere.contains(it) }
-    }
+    fun enheterMedSkrivetilgang() = enheterMedSaksbehandlendeEnheter(saksbehandlersEnheter())
 
-    override fun harLesetilgang(): Boolean {
-        val enheter = enheter()
-        val lesetilgangEnheter = Enheter.enheterMedLesetilgang()
-        return enheter.any { lesetilgangEnheter.contains(it) }
+    private fun enheterMedSaksbehandlendeEnheter(saksbehandlersEnheter: Set<String>) =
+        saksbehandlersEnheter.filter { Enheter.saksbehandlendeEnheter().contains(it) }
+
+    // TODO - EY-3441 - lesetilgang for forvaltningsutviklere
+    fun enheterMedLesetilgang(saksbehandlersEnheter: Set<String>) =
+        if (harKjentEnhet(saksbehandlersEnheter)) {
+            enheterMedSaksbehandlendeEnheter(saksbehandlersEnheter).let { egenSkriveEnheter ->
+                when (egenSkriveEnheter.size) {
+                    0 -> Enheter.enheterForVanligSaksbehandlere()
+                    else -> Enheter.enheterForVanligSaksbehandlere() - egenSkriveEnheter.toSet()
+                }
+            }
+        } else {
+            logger.info("Ukjent enhet på saksbehandler, får ikke lesetilgang. Enheter for saksbehandler: $saksbehandlersEnheter ")
+            emptyList()
+        }
+
+    fun enheter(): List<String> {
+        val saksbehandlersEnheter = saksbehandlersEnheter()
+        return (enheterMedSaksbehandlendeEnheter(saksbehandlersEnheter) + enheterMedLesetilgang(saksbehandlersEnheter)).distinct()
     }
 }
 
 fun decideUser(
     principal: TokenValidationContextPrincipal,
     saksbehandlerGroupIdsByKey: Map<AzureGroup, String>,
-    navAnsattKlient: NavAnsattKlient,
+    saksbehandlerService: SaksbehandlerService,
     brukerTokenInfo: BrukerTokenInfo,
 ): ExternalUser {
     return if (principal.context.issuers.contains(AZURE_ISSUER)) {
@@ -113,7 +103,7 @@ fun decideUser(
         } else {
             SaksbehandlerMedEnheterOgRoller(
                 principal.context,
-                navAnsattKlient,
+                saksbehandlerService,
                 SaksbehandlerMedRoller(brukerTokenInfo as Saksbehandler, saksbehandlerGroupIdsByKey),
             )
         }
@@ -124,6 +114,8 @@ fun decideUser(
 
 interface DatabaseKontekst {
     fun activeTx(): Connection
+
+    fun harIntransaction(): Boolean
 
     fun <T> inTransaction(block: () -> T): T
 }

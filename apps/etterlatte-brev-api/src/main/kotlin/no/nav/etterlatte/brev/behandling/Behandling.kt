@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -43,7 +43,7 @@ data class GenerellBrevData(
     // Tidligere erMigrering - Vil si saker som er løpende i Pesys når det vedtas i Gjenny og opphøres etter vedtaket.
     fun loependeIPesys() = systemkilde == Vedtaksloesning.PESYS && behandlingId != null && revurderingsaarsak == null
 
-    fun vedtakstype() = forenkletVedtak?.type?.name?.lowercase()
+    fun vedtakstype() = forenkletVedtak?.type?.name?.lowercase()?.replace("_", " ")
 
     fun erForeldreloes() =
         with(personerISak) {
@@ -94,8 +94,6 @@ data class Utbetalingsinfo(
 )
 
 data class Avkortingsinfo(
-    val grunnbeloep: Kroner,
-    val inntekt: Kroner,
     val virkningsdato: LocalDate,
     val beregningsperioder: List<AvkortetBeregningsperiode>,
 )
@@ -103,8 +101,13 @@ data class Avkortingsinfo(
 data class AvkortetBeregningsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
+    val grunnbeloep: Kroner,
     val inntekt: Kroner,
+    val aarsinntekt: Kroner,
+    val fratrekkInnAar: Kroner,
+    val relevanteMaanederInnAar: Int,
     val ytelseFoerAvkorting: Kroner,
+    val restanse: Kroner,
     val trygdetid: Int,
     val utbetaltBeloep: Kroner,
     val beregningsMetodeAnvendt: BeregningsMetode,

@@ -21,6 +21,7 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/etterlatte-migrering-model/**
+      - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-brev-model/**
@@ -35,6 +36,7 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
       - libs/etterlatte-migrering-model/**
+      - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-brev-model/**

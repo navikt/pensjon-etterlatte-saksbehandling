@@ -31,7 +31,7 @@ internal class VilkaarsvurderingRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    ReguleringHendelseType.VILKAARSVURDER.lagParMedEventNameKey(),
+                    ReguleringHendelseType.BEHANDLING_OPPRETTA.lagParMedEventNameKey(),
                     SAK_ID_KEY to 1,
                     BEHANDLING_ID_KEY to behandlingId,
                     BEHANDLING_VI_OMREGNER_FRA_KEY to behandlingViOmregnerFra,
@@ -46,7 +46,7 @@ internal class VilkaarsvurderingRiverTest {
             )
         }
         with(testRapid.inspektør.message(0)) {
-            Assertions.assertEquals(ReguleringHendelseType.BEREGN.lagEventnameForType(), this[EVENT_NAME_KEY].asText())
+            Assertions.assertEquals(ReguleringHendelseType.VILKAARSVURDERT.lagEventnameForType(), this[EVENT_NAME_KEY].asText())
         }
     }
 }

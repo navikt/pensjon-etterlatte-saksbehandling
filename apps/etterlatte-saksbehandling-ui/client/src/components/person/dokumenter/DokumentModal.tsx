@@ -1,5 +1,5 @@
 import { Alert, Button, Dropdown, Heading, Modal } from '@navikt/ds-react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { hentDokumentPDF } from '~shared/api/dokument'
 import Spinner from '~shared/Spinner'
 import { DokumentVisningModal, PdfVisning } from '~shared/brev/pdf-visning'
@@ -9,6 +9,7 @@ import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { mapApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { EyeIcon } from '@navikt/aksel-icons'
 
 export default function DokumentModal({ journalpost }: { journalpost: Journalpost }) {
   const { tittel, journalpostId, dokumenter } = journalpost
@@ -36,7 +37,7 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
     <>
       {dokumenter.length > 1 ? (
         <Dropdown>
-          <Button variant="secondary" size="small" as={Dropdown.Toggle}>
+          <Button icon={<EyeIcon />} size="small" as={Dropdown.Toggle}>
             Åpne
           </Button>
           <DropdownMenu>
@@ -62,15 +63,19 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
             </Dropdown.Menu.GroupedList>
           </DropdownMenu>
         </Dropdown>
-      ) : (
+      ) : dokumenter[0].dokumentvarianter[0].saksbehandlerHarTilgang ? (
         <Button
-          variant="secondary"
+          icon={<EyeIcon />}
           size="small"
           onClick={() => open(dokumenter[0].dokumentInfoId)}
           disabled={!dokumenter[0].dokumentvarianter[0].saksbehandlerHarTilgang}
         >
           Åpne
         </Button>
+      ) : (
+        <Alert variant="warning" size="small">
+          Ingen tilgang
+        </Alert>
       )}
 
       <DokumentVisningModal open={isOpen} onClose={() => setIsOpen(false)} aria-label={tittel}>

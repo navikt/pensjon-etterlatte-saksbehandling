@@ -13,10 +13,10 @@ import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
-import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
 interface BrevApiKlient {
@@ -31,9 +31,9 @@ interface BrevApiKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto
 
-    suspend fun ferdigstillBrev(
+    suspend fun ferdigstillVedtaksbrev(
+        behandlingId: UUID,
         sakId: Long,
-        brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     )
 
@@ -76,6 +76,21 @@ interface BrevApiKlient {
         klage: Klage,
         brukerInfoToken: BrukerTokenInfo,
     ): OpprettJournalpostDto
+
+    suspend fun slettOversendelsesbrev(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
+
+    suspend fun hentVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto?
+
+    suspend fun hentOversendelsesbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto?
 }
 
 class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
@@ -111,13 +126,13 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         )
     }
 
-    override suspend fun ferdigstillBrev(
+    override suspend fun ferdigstillVedtaksbrev(
+        behandlingId: UUID,
         sakId: Long,
-        brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         post(
-            url = "$resourceUrl/api/brev/$brevId/ferdigstill?sakId=$sakId",
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak/ferdigstill",
             onSuccess = { },
             brukerTokenInfo = brukerTokenInfo,
         )
@@ -172,6 +187,28 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         )
     }
 
+    override suspend fun hentVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto? {
+        return get(
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak",
+            onSuccess = { resource -> resource.response?.let { deserialize(it.toJson()) } },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+    }
+
+    override suspend fun hentOversendelsesbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto? {
+        return get(
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/oversendelse",
+            onSuccess = { resource -> resource.response?.let { deserialize(it.toJson()) } },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+    }
+
     override suspend fun slettVedtaksbrev(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -189,14 +226,21 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
     ): OpprettJournalpostDto {
         return post(
             url = "$resourceUrl/api/notat/${klage.sak.id}/journalfoer",
-            postBody =
-                mapOf(
-                    "type" to "KLAGE_BLANKETT",
-                    "klage" to klage,
-                ),
+            postBody = mapOf("data" to KlageNotatRequest(klage)),
             onSuccess = { response -> deserialize(response.response!!.toJson()) },
             brukerTokenInfo = brukerInfoToken,
         )
+    }
+
+    override suspend fun slettOversendelsesbrev(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        downstreamResourceClient.delete(
+            resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/behandling/$klageId/oversendelse"),
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = "",
+        ).mapError { error -> throw error }
     }
 
     private suspend fun <T> post(
@@ -250,6 +294,12 @@ enum class BrevStatus {
     fun ikkeDistribuert(): Boolean {
         return this != DISTRIBUERT
     }
+}
+
+data class KlageNotatRequest(
+    val klage: Klage,
+) {
+    val type = "KLAGE_BLANKETT"
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)

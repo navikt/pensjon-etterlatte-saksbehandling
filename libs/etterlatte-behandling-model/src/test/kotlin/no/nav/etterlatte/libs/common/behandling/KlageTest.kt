@@ -1,11 +1,16 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import io.kotest.matchers.equals.shouldBeEqual
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 
 class KlageTest {
     @Test
@@ -33,7 +38,7 @@ class KlageTest {
         val klageMedFormkravOppfylt = klage.oppdaterFormkrav(alleFormkravOppfylt(), "en saksbehandler")
         Assertions.assertEquals(KlageStatus.FORMKRAV_OPPFYLT, klageMedFormkravOppfylt.status)
 
-        val klageMedFormkravIkkeOppfylt = klage.oppdaterFormkrav(formkravIkkeOppfylt(), "en saksbehandler")
+        val klageMedFormkravIkkeOppfylt = klage.oppdaterFormkrav(formkrav(), "en saksbehandler")
         Assertions.assertEquals(KlageStatus.FORMKRAV_IKKE_OPPFYLT, klageMedFormkravIkkeOppfylt.status)
     }
 
@@ -45,35 +50,87 @@ class KlageTest {
         Assertions.assertEquals(KlageStatus.FORMKRAV_OPPFYLT, klageMedFormkravOppfylt.status)
     }
 
-    @Test
-    fun `oppdaterFormkrav sletter utfall hvis formkravene ikke er oppfylt`() {
+    @ParameterizedTest
+    @MethodSource("slettUtfallTestdata")
+    fun `oppdaterFormkrav sletter eksisterende utfall hvis endring i formkravOppfylt eller klagenFramsattInnenFrist`(
+        formkravOppfyltGammel: JaNei,
+        formkravOppfyltNy: JaNei,
+        klagenFramsattInnenFristGammel: JaNei,
+        klagenFramsattInnenFristNy: JaNei,
+        forventerNullstiltUtfall: Boolean,
+    ) {
         val sak = Sak(ident = "bruker", sakType = SakType.BARNEPENSJON, id = 1, enhet = "1337")
+        val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("en saksbehandler")
         val klage =
             Klage.ny(sak, null)
                 .copy(
                     utfall =
                         KlageUtfallMedData.Omgjoering(
                             KlageOmgjoering(GrunnForOmgjoering.PROSESSUELL_FEIL, "svada"),
-                            Grunnlagsopplysning.Saksbehandler.create("en saksbehandler"),
+                            saksbehandler,
+                        ),
+                    initieltUtfall =
+                        InitieltUtfallMedBegrunnelseOgSaksbehandler(
+                            InitieltUtfallMedBegrunnelseDto(KlageUtfall.AVVIST, ""),
+                            "SB",
+                            Tidspunkt.now(),
+                        ),
+                    formkrav =
+                        FormkravMedBeslutter(
+                            formkrav =
+                                formkrav(
+                                    erFormkraveneOppfylt = formkravOppfyltGammel,
+                                    erKlagenFramsattInnenFrist = klagenFramsattInnenFristGammel,
+                                ),
+                            saksbehandler = saksbehandler,
                         ),
                 )
         val oppdatertKlage =
-            assertDoesNotThrow {
-                klage.oppdaterFormkrav(formkravIkkeOppfylt(), "en saksbehandler")
-            }
-        Assertions.assertEquals(KlageStatus.FORMKRAV_IKKE_OPPFYLT, oppdatertKlage.status)
-        Assertions.assertEquals("en saksbehandler", oppdatertKlage.formkrav?.saksbehandler?.ident)
-        Assertions.assertNull(oppdatertKlage.utfall)
+            klage.oppdaterFormkrav(formkrav(formkravOppfyltNy, klagenFramsattInnenFristNy), "en saksbehandler")
+
+        if (forventerNullstiltUtfall) {
+            Assertions.assertNull(oppdatertKlage.utfall)
+            Assertions.assertNull(oppdatertKlage.initieltUtfall)
+        } else {
+            oppdatertKlage.utfall!! shouldBeEqual klage.utfall!!
+            oppdatertKlage.initieltUtfall!! shouldBeEqual klage.initieltUtfall!!
+        }
     }
 
-    private fun formkravIkkeOppfylt(): Formkrav {
+    companion object {
+        @JvmStatic
+        private fun slettUtfallTestdata() =
+            listOf(
+                Arguments.of(JaNei.NEI, JaNei.NEI, JaNei.NEI, JaNei.NEI, false),
+                Arguments.of(JaNei.NEI, JaNei.NEI, JaNei.NEI, JaNei.JA, true),
+                Arguments.of(JaNei.NEI, JaNei.NEI, JaNei.JA, JaNei.NEI, true),
+                Arguments.of(JaNei.NEI, JaNei.NEI, JaNei.JA, JaNei.JA, false),
+                Arguments.of(JaNei.NEI, JaNei.JA, JaNei.NEI, JaNei.NEI, true),
+                Arguments.of(JaNei.NEI, JaNei.JA, JaNei.NEI, JaNei.JA, true),
+                Arguments.of(JaNei.NEI, JaNei.JA, JaNei.JA, JaNei.NEI, true),
+                Arguments.of(JaNei.NEI, JaNei.JA, JaNei.JA, JaNei.JA, true),
+                Arguments.of(JaNei.JA, JaNei.NEI, JaNei.NEI, JaNei.NEI, true),
+                Arguments.of(JaNei.JA, JaNei.NEI, JaNei.NEI, JaNei.JA, true),
+                Arguments.of(JaNei.JA, JaNei.NEI, JaNei.JA, JaNei.NEI, true),
+                Arguments.of(JaNei.JA, JaNei.NEI, JaNei.JA, JaNei.JA, true),
+                Arguments.of(JaNei.JA, JaNei.JA, JaNei.NEI, JaNei.NEI, false),
+                Arguments.of(JaNei.JA, JaNei.JA, JaNei.NEI, JaNei.JA, true),
+                Arguments.of(JaNei.JA, JaNei.JA, JaNei.JA, JaNei.NEI, true),
+                Arguments.of(JaNei.JA, JaNei.JA, JaNei.JA, JaNei.JA, false),
+            )
+    }
+
+    private fun formkrav(
+        erFormkraveneOppfylt: JaNei = JaNei.NEI,
+        erKlagenFramsattInnenFrist: JaNei = JaNei.NEI,
+    ): Formkrav {
         return Formkrav(
             vedtaketKlagenGjelder = null,
             erKlagerPartISaken = JaNei.NEI,
             erKlagenSignert = JaNei.NEI,
             gjelderKlagenNoeKonkretIVedtaket = JaNei.NEI,
-            erKlagenFramsattInnenFrist = JaNei.NEI,
-            erFormkraveneOppfylt = JaNei.NEI,
+            erKlagenFramsattInnenFrist = erKlagenFramsattInnenFrist,
+            erFormkraveneOppfylt = erFormkraveneOppfylt,
         )
     }
 

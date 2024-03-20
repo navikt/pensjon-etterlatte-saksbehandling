@@ -132,7 +132,7 @@ internal class KlageDaoImplTest(val dataSource: DataSource) {
         klageDao.lagreKlage(klage)
         val utfalldto = InitieltUtfallMedBegrunnelseDto(KlageUtfall.OMGJOERING, "begrunnelse")
         val saksbehandlerIdent = "z123456"
-        val oppdatertKlage = klage.oppdaterIntieltUtfallMedBegrunnelse(utfalldto, saksbehandlerIdent)
+        val oppdatertKlage = klage.oppdaterInitieltUtfallMedBegrunnelse(utfalldto, saksbehandlerIdent)
         klageDao.lagreKlage(oppdatertKlage)
 
         val hentetKlage = klageDao.hentKlage(klage.id)

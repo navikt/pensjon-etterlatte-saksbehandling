@@ -1,7 +1,6 @@
 package no.nav.etterlatte.migrering.verifisering
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.VurdertBostedsland
 import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
@@ -17,7 +16,6 @@ import no.nav.etterlatte.migrering.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.pen.SakSammendragResponse
-import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import org.slf4j.LoggerFactory
@@ -28,7 +26,6 @@ internal class Verifiserer(
     private val gjenlevendeForelderPatcher: GjenlevendeForelderPatcher,
     private val utenlandstilknytningsjekker: Utenlandstilknytningsjekker,
     private val personHenter: PersonHenter,
-    private val featureToggleService: FeatureToggleService,
     private val grunnlagKlient: GrunnlagKlient,
     private val penKlient: PenKlient,
 ) {
@@ -51,7 +48,7 @@ internal class Verifiserer(
         feilSomAvbryter.addAll(finnesIPdlFeil)
 
         if (soeker != null) {
-            feilSomMedfoererManuell.addAll(sjekkAtSoekerHarRelevantVerge(patchedRequest, soeker))
+            feilSomMedfoererManuell.addAll(sjekkAtSoekerHarRelevantVerge(soeker))
             if (!patchedRequest.erUnder18) {
                 feilSomMedfoererManuell.addAll(sjekkOmSoekerHaddeFlyktningerfordel(patchedRequest))
                 feilSomMedfoererManuell.addAll(sjekkAdresseOgUtlandsopphold(patchedRequest.pesysId.id, soeker, patchedRequest))
@@ -139,10 +136,7 @@ internal class Verifiserer(
             .filterIsInstance<Verifiseringsfeil>()
     }
 
-    private fun sjekkAtSoekerHarRelevantVerge(
-        request: MigreringRequest,
-        person: PersonDTO,
-    ): List<Verifiseringsfeil> {
+    private fun sjekkAtSoekerHarRelevantVerge(person: PersonDTO): List<Verifiseringsfeil> {
         if ((person.vergemaalEllerFremtidsfullmakt?.size ?: 0) > 1) {
             return listOf(BarnetHarFlereVerger)
         }
@@ -150,22 +144,7 @@ internal class Verifiserer(
             return emptyList()
         }
 
-        if (!featureToggleService.isEnabled(MigreringFeatureToggle.MigrerNaarSoekerHarVerge, false)) {
-            return listOf(BarnetHarVergemaal)
-        } else {
-            return try {
-                runBlocking {
-                    if (grunnlagKlient.hentVergesAdresse(request.soeker.value) == null) {
-                        listOf(VergeManglerAdresseFraPDL)
-                    } else {
-                        emptyList()
-                    }
-                }
-            } catch (e: Exception) {
-                logger.error("Feil under henting av verges adresse", e)
-                listOf(FeilUnderHentingAvVergesAdresse)
-            }
-        }
+        return listOf(BarnetHarVergemaal)
     }
 
     private fun sjekkAdresseOgUtlandsopphold(
@@ -282,29 +261,9 @@ data object BarnetHarVergemaal : Verifiseringsfeil() {
         get() = "Barn har vergemål eller framtidsfullmakt, støtte for det er deaktivert"
 }
 
-data object StrengtFortroligPesys : Verifiseringsfeil() {
-    override val message: String
-        get() = "Skal ikke migrere strengt fortrolig saker (Pesys)"
-}
-
-data object StrengtFortroligPDL : Verifiseringsfeil() {
-    override val message: String
-        get() = "Skal ikke migrere strengt fortrolig saker (PDL)"
-}
-
 data class PDLException(val kilde: Throwable) : Verifiseringsfeil() {
     override val message: String?
         get() = kilde.message
-}
-
-data object VergeManglerAdresseFraPDL : Verifiseringsfeil() {
-    override val message: String
-        get() = "Verge mangler adresse i PDL"
-}
-
-data object FeilUnderHentingAvVergesAdresse : Verifiseringsfeil() {
-    override val message: String
-        get() = "Noe feil skjedde under henting av verges adresse, se detaljer i logg"
 }
 
 data object SoekerErDoed : Verifiseringsfeil() {
@@ -360,9 +319,4 @@ data object BrukerManglerAdresse : Verifiseringsfeil() {
 data object BeregningsmetodeIkkeNasjonal : Verifiseringsfeil() {
     override val message: String
         get() = "Sak har brukt annen beregningsmetode enn Nasjonal"
-}
-
-data object ManglerTrygdetidsperioder : Verifiseringsfeil() {
-    override val message: String
-        get() = "Mangler trygdetidsperioder, og anvendt trygdetid er ikke 40 i nasjonal sak"
 }

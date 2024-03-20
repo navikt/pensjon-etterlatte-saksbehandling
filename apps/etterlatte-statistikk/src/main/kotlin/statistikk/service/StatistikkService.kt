@@ -285,7 +285,7 @@ class StatistikkService(
         type = "TILBAKEKREVING",
         status = hendelse.name,
         ansvarligEnhet = statistikkTilbakekreving.tilbakekreving.sak.enhet,
-        resultat = statistikkTilbakekreving.tilbakekreving.tilbakekreving.vurdering.konklusjon,
+        resultat = statistikkTilbakekreving.tilbakekreving.tilbakekreving.vurdering?.vedtak,
         tekniskTid = tekniskTid.toTidspunkt(),
         sakYtelse = statistikkTilbakekreving.tilbakekreving.sak.sakType.name,
         behandlingMetode = BehandlingMetode.MANUELL,
@@ -433,6 +433,25 @@ class StatistikkService(
         tekniskTid: LocalDateTime,
     ): SakRad? {
         return sakRepository.lagreRad(behandlingTilSakRad(statistikkBehandling, hendelse, tekniskTid))
+    }
+
+    fun registrerStatistikkBehandlingPaaVentHendelse(
+        behandlingId: UUID,
+        hendelse: BehandlingHendelseType,
+        tekniskTid: LocalDateTime,
+    ): SakRad? {
+        val sisteRad =
+            sakRepository.hentSisteRad(behandlingId)?.copy(
+                status = hendelse.name,
+                tekniskTid = tekniskTid.toTidspunkt(),
+            )
+        if (sisteRad == null) {
+            logger.warn(
+                "Registrerte ikke behandling på vent fordi det ble ikke funnet en tidligere rad knyttet til behandlig=$behandlingId",
+            )
+            return null
+        }
+        return sakRepository.lagreRad(sisteRad)
     }
 
     fun registrerStatistikkForKlagehendelse(

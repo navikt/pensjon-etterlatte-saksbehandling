@@ -1,19 +1,53 @@
-import { BodyShort, Button, Label, Radio, RadioGroup, Select } from '@navikt/ds-react'
+import { Button, Radio, RadioGroup, Select, Textarea, VStack } from '@navikt/ds-react'
 import {
-  TilbakekrevingBehandling,
+  teksterTilbakekrevingAarsak,
+  teksterTilbakekrevingBeloepBehold,
+  teksterTilbakekrevingHjemmel,
+  teksterTilbakekrevingVarsel,
+  teksterTilbakekrevingVilkaar,
   TilbakekrevingAarsak,
-  TilbakekrevingAktsomhet,
-  TilbakekrevingHjemmel,
+  TilbakekrevingBehandling,
+  TilbakekrevingBeloepBeholdSvar,
+  TilbakekrevingRettsligGrunnlag,
+  TilbakekrevingVarsel,
+  TilbakekrevingVilkaar,
   TilbakekrevingVurdering,
 } from '~shared/types/Tilbakekreving'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useState } from 'react'
 import { lagreTilbakekrevingsvurdering } from '~shared/api/tilbakekreving'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
-import styled from 'styled-components'
 import { useAppDispatch } from '~store/Store'
 
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
+import { Toast } from '~shared/alerts/Toast'
+import { JaNei, JaNeiRec } from '~shared/types/ISvar'
+import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
+import { parseISO } from 'date-fns'
+
+export const initialVurdering = {
+  aarsak: null,
+  beskrivelse: null,
+  forhaandsvarsel: null,
+  forhaandsvarselDato: null,
+  doedsbosak: null,
+  foraarsaketAv: null,
+  tilsvar: null,
+  rettsligGrunnlag: null,
+  objektivtVilkaarOppfylt: null,
+  subjektivtVilkaarOppfylt: null,
+  uaktsomtForaarsaketFeilutbetaling: null,
+  burdeBrukerForstaatt: null,
+  burdeBrukerForstaattEllerUaktsomtForaarsaket: null,
+  vilkaarsresultat: null,
+  beloepBehold: null,
+  reduseringAvKravet: null,
+  foreldet: null,
+  rentevurdering: null,
+  vedtak: null,
+  vurderesForPaatale: null,
+}
 
 export function TilbakekrevingVurderingOverordnet({
   behandling,
@@ -24,7 +58,9 @@ export function TilbakekrevingVurderingOverordnet({
 }) {
   const dispatch = useAppDispatch()
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
-  const [vurdering, setVurdering] = useState<TilbakekrevingVurdering>(behandling.tilbakekreving.vurdering)
+  const [vurdering, setVurdering] = useState<TilbakekrevingVurdering>(
+    behandling.tilbakekreving.vurdering ? behandling.tilbakekreving.vurdering : initialVurdering
+  )
 
   const lagreVurdering = () => {
     // TODO validering?
@@ -33,15 +69,18 @@ export function TilbakekrevingVurderingOverordnet({
     })
   }
 
+  const vilkaarOppfyltEllerBeloepIBehold =
+    (vurdering.vilkaarsresultat &&
+      [TilbakekrevingVilkaar.OPPFYLT, TilbakekrevingVilkaar.DELVIS_OPPFYLT].includes(vurdering.vilkaarsresultat)) ||
+    vurdering.beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD
+
   return (
-    <InnholdForm>
-      <>
-        <Label>Årsak</Label>
+    <InnholdPadding>
+      <VStack gap="8" style={{ width: '50em' }}>
         <Select
-          label="Aarsak"
-          hideLabel={true}
-          value={vurdering.aarsak ?? ''}
+          label="Årsak til sak om feilutbetaling"
           readOnly={!redigerbar}
+          value={vurdering.aarsak ?? ''}
           onChange={(e) => {
             if (e.target.value == '') return
             setVurdering({
@@ -51,27 +90,52 @@ export function TilbakekrevingVurderingOverordnet({
           }}
         >
           <option value="">Velg..</option>
-          <option value={TilbakekrevingAarsak.ANNET}>Annet</option>
-          <option value={TilbakekrevingAarsak.ARBHOYINNT}>Inntekt</option>
-          <option value={TilbakekrevingAarsak.BEREGNFEIL}>Beregningsfeil</option>
-          <option value={TilbakekrevingAarsak.DODSFALL}>Dødsfall</option>
-          <option value={TilbakekrevingAarsak.EKTESKAP}>Eksteskap/Samboer med felles barn</option>
-          <option value={TilbakekrevingAarsak.FEILREGEL}>Feil regelbruk</option>
-          <option value={TilbakekrevingAarsak.FLYTTUTLAND}>Flyttet utland</option>
-          <option value={TilbakekrevingAarsak.IKKESJEKKYTELSE}>Ikke sjekket mot andre ytelse</option>
-          <option value={TilbakekrevingAarsak.OVERSETTMLD}>Oversett melding fra bruker</option>
-          <option value={TilbakekrevingAarsak.SAMLIV}>Samliv</option>
-          <option value={TilbakekrevingAarsak.UTBFEILMOT}>Utbetaling til feil mottaker</option>
+          {Object.values(TilbakekrevingAarsak).map((aarsak) => (
+            <option key={aarsak} value={aarsak}>
+              {teksterTilbakekrevingAarsak[aarsak]}
+            </option>
+          ))}
         </Select>
-      </>
-      <TextAreaWrapper>
-        <>
-          <Label>Beskriv feilutbetalingen</Label>
-          <Beskrivelse>Gi en kort beskrivelse av bakgrunnen for feilutbetalingen og når ble den oppdaget.</Beskrivelse>
-        </>
-        <textarea
-          value={vurdering.beskrivelse ?? ''}
+
+        <RadioGroup
+          legend={<div style={{ fontSize: 'large' }}>Forhåndsvarsel</div>}
           readOnly={!redigerbar}
+          size="small"
+          className="radioGroup"
+          value={vurdering.forhaandsvarsel ?? ''}
+          onChange={(e) =>
+            setVurdering({
+              ...vurdering,
+              forhaandsvarsel: TilbakekrevingVarsel[e as TilbakekrevingVarsel],
+            })
+          }
+        >
+          <div className="flex">
+            {Object.values(TilbakekrevingVarsel).map((varsel) => (
+              <Radio key={varsel} value={varsel}>
+                {teksterTilbakekrevingVarsel[varsel]}
+              </Radio>
+            ))}
+          </div>
+        </RadioGroup>
+
+        <DatoVelger
+          value={vurdering?.forhaandsvarselDato ? parseISO(vurdering.forhaandsvarselDato) : undefined}
+          readOnly={!redigerbar}
+          onChange={(e) =>
+            setVurdering({
+              ...vurdering,
+              forhaandsvarselDato: e?.toISOString() ?? null,
+            })
+          }
+          label="Forhåndsvarsel dato"
+        ></DatoVelger>
+
+        <Textarea
+          label="Beskriv feilutbetalingen"
+          readOnly={!redigerbar}
+          description="Gi en kort beskrivelse av bakgrunnen for feilutbetalingen og når ble den oppdaget."
+          value={vurdering.beskrivelse ?? ''}
           onChange={(e) =>
             setVurdering({
               ...vurdering,
@@ -79,165 +143,367 @@ export function TilbakekrevingVurderingOverordnet({
             })
           }
         />
-      </TextAreaWrapper>
-      <>
-        <Label>Vurder uaktsomhet</Label>
+
         <RadioGroup
-          legend=""
+          legend={<div style={{ fontSize: 'large' }}>Dødsbosak?</div>}
+          readOnly={!redigerbar}
           size="small"
           className="radioGroup"
-          value={vurdering.aktsomhet.aktsomhet ?? ''}
-          readOnly={!redigerbar}
+          value={vurdering.doedsbosak ?? ''}
           onChange={(e) =>
             setVurdering({
               ...vurdering,
-              aktsomhet: {
-                aktsomhet: TilbakekrevingAktsomhet[e as TilbakekrevingAktsomhet],
+              doedsbosak: JaNei[e as JaNei],
+            })
+          }
+        >
+          <div className="flex">
+            {Object.values(JaNei).map((svar) => (
+              <Radio key={svar} value={svar}>
+                {JaNeiRec[svar]}
+              </Radio>
+            ))}
+          </div>
+        </RadioGroup>
+
+        <Textarea
+          label="Hvem forårsaket feilutbetalingen?"
+          readOnly={!redigerbar}
+          value={vurdering.foraarsaketAv ?? ''}
+          onChange={(e) =>
+            setVurdering({
+              ...vurdering,
+              foraarsaketAv: e.target.value,
+            })
+          }
+        />
+
+        <RadioGroup
+          legend={<div style={{ fontSize: 'large' }}>Tilsvar til varsel om mulig tilbakekreving?</div>}
+          readOnly={!redigerbar}
+          size="small"
+          className="radioGroup"
+          value={vurdering.tilsvar?.tilsvar ?? ''}
+          onChange={(e) =>
+            setVurdering({
+              ...vurdering,
+              tilsvar: {
+                ...vurdering.tilsvar,
+                beskrivelse: vurdering.tilsvar?.beskrivelse ?? null,
+                dato: vurdering.tilsvar?.dato ?? null,
+                tilsvar: JaNei[e as JaNei],
               },
             })
           }
         >
           <div className="flex">
-            <Radio value={TilbakekrevingAktsomhet.GOD_TRO}>God tro</Radio>
-            <Radio value={TilbakekrevingAktsomhet.SIMPEL_UAKTSOMHET}>Simpel uaktsomhet</Radio>
-            <Radio value={TilbakekrevingAktsomhet.GROV_UAKTSOMHET}>Grov uaktsomhet</Radio>
+            {Object.values(JaNei).map((svar) => (
+              <Radio key={svar} value={svar}>
+                {JaNeiRec[svar]}
+              </Radio>
+            ))}
           </div>
         </RadioGroup>
-      </>
-      {vurdering.aktsomhet.aktsomhet === TilbakekrevingAktsomhet.GROV_UAKTSOMHET && (
-        <TextAreaWrapper>
-          <Label>Gjør en strafferettslig vurdering (Valgfri)</Label>
-          <textarea
-            value={vurdering.aktsomhet.strafferettsligVurdering ?? ''}
-            readOnly={!redigerbar}
-            onChange={(e) =>
-              setVurdering({
-                ...vurdering,
-                aktsomhet: {
-                  ...vurdering.aktsomhet,
-                  strafferettsligVurdering: e.target.value,
-                },
-              })
-            }
-          />
-        </TextAreaWrapper>
-      )}
-      {vurdering.aktsomhet.aktsomhet &&
-        [TilbakekrevingAktsomhet.SIMPEL_UAKTSOMHET, TilbakekrevingAktsomhet.GROV_UAKTSOMHET].includes(
-          vurdering.aktsomhet.aktsomhet
-        ) && (
+
+        {vurdering.tilsvar?.tilsvar == JaNei.JA && (
           <>
-            <TextAreaWrapper>
-              <Label>Redusering av kravet</Label>
-              <BodyShort>Finnes det grunner til å redusere kravet?</BodyShort>
-              <textarea
-                value={vurdering.aktsomhet.reduseringAvKravet ?? ''}
-                readOnly={!redigerbar}
-                onChange={(e) =>
-                  setVurdering({
-                    ...vurdering,
-                    aktsomhet: {
-                      ...vurdering.aktsomhet,
-                      reduseringAvKravet: e.target.value,
-                    },
-                  })
-                }
-              />
-            </TextAreaWrapper>
-            <TextAreaWrapper>
-              <Label>Rentevurdering</Label>
-              <textarea
-                value={vurdering.aktsomhet.rentevurdering ?? ''}
-                readOnly={!redigerbar}
-                onChange={(e) =>
-                  setVurdering({
-                    ...vurdering,
-                    aktsomhet: {
-                      ...vurdering.aktsomhet,
-                      rentevurdering: e.target.value,
-                    },
-                  })
-                }
-              />
-            </TextAreaWrapper>
+            <DatoVelger
+              value={vurdering.tilsvar?.dato ? parseISO(vurdering.tilsvar?.dato) : undefined}
+              readOnly={!redigerbar}
+              onChange={(e) =>
+                setVurdering({
+                  ...vurdering,
+                  tilsvar: {
+                    ...vurdering.tilsvar,
+                    beskrivelse: vurdering.tilsvar?.beskrivelse ?? null,
+                    tilsvar: vurdering.tilsvar?.tilsvar ?? null,
+                    dato: e?.toISOString() ?? null,
+                  },
+                })
+              }
+              label="Tilsvar dato"
+            ></DatoVelger>
+
+            <Textarea
+              label="Beskriv tilsvar"
+              readOnly={!redigerbar}
+              value={vurdering.tilsvar?.beskrivelse ?? ''}
+              onChange={(e) =>
+                setVurdering({
+                  ...vurdering,
+                  tilsvar: {
+                    ...vurdering.tilsvar,
+                    tilsvar: vurdering.tilsvar?.tilsvar ?? null,
+                    dato: vurdering.tilsvar?.dato ?? null,
+                    beskrivelse: e.target.value,
+                  },
+                })
+              }
+            />
           </>
         )}
-      <TextAreaWrapper>
-        <Label>Konklusjon</Label>
-        <textarea
-          value={vurdering.konklusjon ?? ''}
+
+        <RadioGroup
+          legend={<div style={{ fontSize: 'large' }}>Rettslig grunnlag</div>}
           readOnly={!redigerbar}
+          size="small"
+          className="radioGroup"
+          value={vurdering.rettsligGrunnlag ?? ''}
           onChange={(e) =>
             setVurdering({
               ...vurdering,
-              konklusjon: e.target.value,
+              rettsligGrunnlag: TilbakekrevingRettsligGrunnlag[e as TilbakekrevingRettsligGrunnlag],
             })
           }
-        />
-      </TextAreaWrapper>
-      <DropdownWrapper>
-        <Label>Rettslig grunnlag</Label>
-        <Select
-          label="Hjemmel"
-          hideLabel={true}
-          value={vurdering.hjemmel ?? ''}
-          readOnly={!redigerbar}
-          onChange={(e) => {
-            if (e.target.value == '') return
-            setVurdering({
-              ...vurdering,
-              hjemmel: TilbakekrevingHjemmel[e.target.value as TilbakekrevingHjemmel],
-            })
-          }}
         >
-          <option value="">Velg hjemmel</option>
-          <option value={TilbakekrevingHjemmel.ULOVFESTET}>Lovfestet</option>
-          <option value={TilbakekrevingHjemmel.TJUETO_FEMTEN_EN_LEDD_EN}>& 22-15 1. ledd, 1. punktum</option>
-          <option value={TilbakekrevingHjemmel.TJUETO_FEMTEN_EN_LEDD_TO_FORSETT}>
-            & 22-15 1. ledd, 2. punktum (forsett)
-          </option>
-          <option value={TilbakekrevingHjemmel.TJUETO_FEMTEN_EN_LEDD_TO_UAKTSOMT}>
-            & 22-15 1. ledd, 2. punktum (uaktsomt)
-          </option>
-          <option value={TilbakekrevingHjemmel.TJUETO_FEMTEN_FEM}>& 22-15 5. ledd</option>
-          <option value={TilbakekrevingHjemmel.TJUETO_FEMTEN_SEKS}>& 22-15 6. ledd</option>
-          <option value={TilbakekrevingHjemmel.TJUETO_SEKSTEN}>& 22-16</option>
-        </Select>
-      </DropdownWrapper>
+          <div className="flex">
+            {Object.values(TilbakekrevingRettsligGrunnlag).map((hjemmel) => (
+              <Radio key={hjemmel} value={hjemmel}>
+                {teksterTilbakekrevingHjemmel[hjemmel]}
+              </Radio>
+            ))}
+          </div>
+        </RadioGroup>
 
-      {redigerbar && (
-        <Button variant="primary" onClick={lagreVurdering} loading={isPending(lagreVurderingStatus)}>
-          Lagre vurdering
-        </Button>
-      )}
-    </InnholdForm>
+        {vurdering.rettsligGrunnlag &&
+          [
+            TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
+            TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM,
+            TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM,
+          ].includes(vurdering.rettsligGrunnlag) && (
+            <>
+              <Textarea
+                label="Er det objektive vilkåret oppfylt?"
+                description="Foreligger det en feilutbetaling?"
+                readOnly={!redigerbar}
+                value={vurdering.objektivtVilkaarOppfylt ?? ''}
+                onChange={(e) =>
+                  setVurdering({
+                    ...vurdering,
+                    objektivtVilkaarOppfylt: e.target.value,
+                  })
+                }
+              />
+
+              {[TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM].includes(
+                vurdering.rettsligGrunnlag
+              ) && (
+                <Textarea
+                  label="Er de subjektive vilkårene oppfylt?"
+                  description="Forstod eller burde brukeren forstått at ubetalingen skyldes en feil?"
+                  readOnly={!redigerbar}
+                  value={vurdering.burdeBrukerForstaatt ?? ''}
+                  onChange={(e) =>
+                    setVurdering({
+                      ...vurdering,
+                      burdeBrukerForstaatt: e.target.value,
+                    })
+                  }
+                />
+              )}
+
+              {[TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM].includes(
+                vurdering.rettsligGrunnlag
+              ) && (
+                <Textarea
+                  label="Er de subjektive vilkårene oppfylt?"
+                  description="Har brukeren uaktsomt forårsaket feilutbetalingen?"
+                  readOnly={!redigerbar}
+                  value={vurdering.uaktsomtForaarsaketFeilutbetaling ?? ''}
+                  onChange={(e) =>
+                    setVurdering({
+                      ...vurdering,
+                      uaktsomtForaarsaketFeilutbetaling: e.target.value,
+                    })
+                  }
+                />
+              )}
+
+              {[TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM].includes(
+                vurdering.rettsligGrunnlag
+              ) && (
+                <Textarea
+                  label="Er de subjektive vilkårene oppfylt?"
+                  description="Forstod eller burde brukeren forstått at utbetalingen skyldtes en feil, og/eller har brukeren uaktsomt forårsaket feilutbetalingen?"
+                  readOnly={!redigerbar}
+                  value={vurdering.burdeBrukerForstaattEllerUaktsomtForaarsaket ?? ''}
+                  onChange={(e) =>
+                    setVurdering({
+                      ...vurdering,
+                      burdeBrukerForstaattEllerUaktsomtForaarsaket: e.target.value,
+                    })
+                  }
+                />
+              )}
+
+              <RadioGroup
+                legend=""
+                hideLegend={true}
+                readOnly={!redigerbar}
+                size="small"
+                className="radioGroup"
+                value={vurdering.vilkaarsresultat ?? ''}
+                onChange={(e) =>
+                  setVurdering({
+                    ...vurdering,
+                    vilkaarsresultat: TilbakekrevingVilkaar[e as TilbakekrevingVilkaar],
+                  })
+                }
+              >
+                <div className="flex">
+                  {Object.values(TilbakekrevingVilkaar).map((vilkaar) => (
+                    <Radio key={vilkaar} value={vilkaar}>
+                      {teksterTilbakekrevingVilkaar[vilkaar]}
+                    </Radio>
+                  ))}
+                </div>
+              </RadioGroup>
+
+              {vurdering.vilkaarsresultat && vurdering.vilkaarsresultat == TilbakekrevingVilkaar.IKKE_OPPFYLT && (
+                <>
+                  <Textarea
+                    label="Tilbakekreving etter folketrygdloven § 22-15 femte ledd?"
+                    description="Er noe av det feilutbetalte beløpet i behold?"
+                    readOnly={!redigerbar}
+                    value={vurdering.beloepBehold?.beskrivelse ?? ''}
+                    onChange={(e) =>
+                      setVurdering({
+                        ...vurdering,
+                        beloepBehold: {
+                          ...vurdering.beloepBehold,
+                          behold: vurdering.beloepBehold?.behold ?? null,
+                          beskrivelse: e.target.value,
+                        },
+                      })
+                    }
+                  />
+
+                  <RadioGroup
+                    legend=""
+                    hideLegend={true}
+                    readOnly={!redigerbar}
+                    size="small"
+                    className="radioGroup"
+                    value={vurdering.beloepBehold?.behold ?? ''}
+                    onChange={(e) =>
+                      setVurdering({
+                        ...vurdering,
+                        beloepBehold: {
+                          ...vurdering.beloepBehold,
+                          behold: TilbakekrevingBeloepBeholdSvar[e as TilbakekrevingBeloepBeholdSvar],
+                          beskrivelse: vurdering.beloepBehold?.beskrivelse ?? null,
+                        },
+                      })
+                    }
+                  >
+                    <div className="flex">
+                      {Object.values(TilbakekrevingBeloepBeholdSvar).map((behold) => (
+                        <Radio key={behold} value={behold}>
+                          {teksterTilbakekrevingBeloepBehold[behold]}
+                        </Radio>
+                      ))}
+                    </div>
+                  </RadioGroup>
+
+                  {vurdering.beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_IKKE_I_BEHOLD && (
+                    <Textarea
+                      label="Vedtak"
+                      readOnly={!redigerbar}
+                      value={vurdering.vedtak ?? ''}
+                      onChange={(e) =>
+                        setVurdering({
+                          ...vurdering,
+                          vedtak: e.target.value,
+                        })
+                      }
+                    />
+                  )}
+                </>
+              )}
+              {vilkaarOppfyltEllerBeloepIBehold && (
+                <>
+                  <Textarea
+                    label="Er det særlige grunner til å frafalle eller redusere kravet?"
+                    description="Det legges blant annet vekt på graden av uaktsomhet hos brukeren, størrelsen på det feilutbetalte beløpet, hvor lang tid det er gått siden utbetalingen fant sted og om noe av feilen helt eller delvis kan tilskrives NAV. Kravet kan frafalles helt, eller settes til en del av det feilutbetalte beløpet. Ved utvist forsett skal krav alltid fremmes, og beløpet kan ikke settes ned."
+                    readOnly={!redigerbar}
+                    value={vurdering.reduseringAvKravet ?? ''}
+                    onChange={(e) =>
+                      setVurdering({
+                        ...vurdering,
+                        reduseringAvKravet: e.target.value,
+                      })
+                    }
+                  />
+
+                  <Textarea
+                    label="Er noen deler av kravet foreldet?"
+                    description="Det er bestemt i folketrygdloven § 22-14 første ledd at våre krav om tilbakebetaling i utgangspunktet foreldes etter foreldelsesloven. Etter foreldelsesloven § 2, jf. § 3 nr. 1 er den alminnelige foreldelsesfristen tre år. Fristen løper særskilt for hver månedsutbetaling. Vurder også om foreldelsesloven § 10 om ett års tilleggsfrist får anvendelse."
+                    readOnly={!redigerbar}
+                    value={vurdering.foreldet ?? ''}
+                    onChange={(e) =>
+                      setVurdering({
+                        ...vurdering,
+                        foreldet: e.target.value,
+                      })
+                    }
+                  />
+
+                  <Textarea
+                    label="Skal det ilegges renter?"
+                    description="Det følger av folketrygdloven § 22-17 a at det skal beregnes et rentetillegg på 10 prosent av det beløpet som kreves tilbake når brukeren har opptrådt grovt uaktsomt eller med forsett."
+                    readOnly={!redigerbar}
+                    value={vurdering.rentevurdering ?? ''}
+                    onChange={(e) =>
+                      setVurdering({
+                        ...vurdering,
+                        rentevurdering: e.target.value,
+                      })
+                    }
+                  />
+
+                  <Textarea
+                    label="Vedtak"
+                    readOnly={!redigerbar}
+                    value={vurdering.vedtak ?? ''}
+                    onChange={(e) =>
+                      setVurdering({
+                        ...vurdering,
+                        vedtak: e.target.value,
+                      })
+                    }
+                  />
+
+                  <Textarea
+                    label="Skal saken vurderes for påtale?"
+                    readOnly={!redigerbar}
+                    value={vurdering.vurderesForPaatale ?? ''}
+                    onChange={(e) =>
+                      setVurdering({
+                        ...vurdering,
+                        vurderesForPaatale: e.target.value,
+                      })
+                    }
+                  />
+                </>
+              )}
+            </>
+          )}
+
+        {redigerbar && (
+          <VStack gap="5">
+            <Button
+              variant="primary"
+              size="small"
+              onClick={lagreVurdering}
+              loading={isPending(lagreVurderingStatus)}
+              style={{ maxWidth: '7.5em' }}
+            >
+              Lagre vurdering
+            </Button>
+            {isSuccess(lagreVurderingStatus) && <Toast melding="Vurdering lagret" />}
+          </VStack>
+        )}
+      </VStack>
+    </InnholdPadding>
   )
 }
-
-const InnholdForm = styled.div`
-  padding: 2em 2em 2em 4em;
-  width: 25em;
-`
-const TextAreaWrapper = styled.div`
-  display: grid;
-  align-items: flex-end;
-  margin-top: 1em;
-  margin-bottom: 1em;
-
-  textArea {
-    margin-top: 1em;
-    border-width: 1px;
-    border-radius: 4px 4px 0 4px;
-    height: 98px;
-    text-indent: 4px;
-    resize: none;
-  }
-`
-const DropdownWrapper = styled.div`
-  margin-top: 2em;
-  margin-bottom: 2em;
-`
-
-const Beskrivelse = styled.div`
-  margin: 10px 0;
-`

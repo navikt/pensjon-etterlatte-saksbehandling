@@ -6,6 +6,7 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -113,11 +114,14 @@ class OppgaveDaoMedEndringssporingImpl(
     override fun hentOppgaver(
         oppgaveTyper: List<OppgaveType>,
         enheter: List<String>,
-        erSuperBruker: Boolean,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String?,
     ): List<OppgaveIntern> {
-        return oppgaveDao.hentOppgaver(oppgaveTyper, enheter, erSuperBruker, oppgaveStatuser, minOppgavelisteIdentFilter)
+        return oppgaveDao.hentOppgaver(oppgaveTyper, enheter, oppgaveStatuser, minOppgavelisteIdentFilter)
+    }
+
+    override fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats {
+        return oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)
     }
 
     override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern> {
@@ -187,7 +191,8 @@ class OppgaveDaoMedEndringssporingImpl(
 
     override fun hentFristGaarUt(
         dato: LocalDate,
-        type: OppgaveType,
-        kilde: OppgaveKilde,
-    ): List<UUID> = oppgaveDao.hentFristGaarUt(dato, type, kilde)
+        type: Collection<OppgaveType>,
+        kilde: Collection<OppgaveKilde>,
+        oppgaver: List<UUID>,
+    ) = oppgaveDao.hentFristGaarUt(dato, type, kilde, oppgaver)
 }

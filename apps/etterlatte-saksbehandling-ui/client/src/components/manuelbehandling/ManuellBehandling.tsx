@@ -15,13 +15,15 @@ import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useParams } from 'react-router-dom'
-import { hentOppgave } from '~shared/api/oppgaver'
+import { hentOppgave, Oppgavestatus } from '~shared/api/oppgaver'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import { FormProvider, useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { formaterDatoStrengTilLocaleDateTime, formaterSpraak, mapRHFArrayToStringArray } from '~utils/formattering'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
 import { GRADERING, GraderingFilterKeys } from '~shared/types/Gradering'
+import GjenopprettingModal from '~components/manuelbehandling/GjenopprettingModal'
+import { useSidetittel } from '~shared/hooks/useSidetittel'
 
 interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   kilde: string
@@ -35,25 +37,26 @@ interface ManuellBehandingSkjema extends NyBehandlingSkjema {
 }
 
 export default function ManuellBehandling() {
-  const [status, opprettNyBehandling] = useApiCall(opprettBehandling)
+  useSidetittel('Manuell behandling')
+
+  const [opprettBehandlingStatus, opprettNyBehandling] = useApiCall(opprettBehandling)
   const [nyBehandlingId, setNyId] = useState('')
   const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)
   const [overstyrTrygdetidStatus, opprettOverstyrtTrygdetidReq] = useApiCall(opprettTrygdetidOverstyrtMigrering)
 
-  const [oppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
+  const [hentOppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
   const { '*': oppgaveId } = useParams()
 
-  const [pesysId, setPesysId] = useState<number | undefined>(undefined)
-  const [fnrFraOppgave, setFnr] = useState<string | undefined>(undefined)
-  const [vedtaksloesning, setVedtaksloesning] = useState<string>('')
+  const [oppgaveStatus, setOppgaveStatus] = useState<Oppgavestatus | undefined>(undefined)
 
   useEffect(() => {
     if (oppgaveId) {
       apiHentOppgave(oppgaveId, (oppgave) => {
-        oppgave.fnr && setFnr(oppgave.fnr)
-        oppgave.referanse && setPesysId(Number(oppgave.referanse))
+        setOppgaveStatus(oppgave.status)
+        oppgave.fnr && methods.setValue('persongalleri.soeker', oppgave.fnr)
+        oppgave.referanse && methods.setValue('pesysId', Number(oppgave.referanse))
         if (oppgave.type == 'GJENOPPRETTING_ALDERSOVERGANG') {
-          setVedtaksloesning('GJENOPPRETTA')
+          methods.setValue('kilde', 'GJENOPPRETTA')
         }
       })
     }
@@ -62,14 +65,10 @@ export default function ManuellBehandling() {
   const methods = useForm<ManuellBehandingSkjema>({
     defaultValues: {
       persongalleri: {
-        innsender: undefined,
-        soeker: fnrFraOppgave,
         gjenlevende: [],
         soesken: [],
         avdoed: [],
       },
-      pesysId: pesysId,
-      kilde: vedtaksloesning,
     },
   })
 
@@ -115,7 +114,7 @@ export default function ManuellBehandling() {
     getValues,
   } = methods
 
-  if (isPending(oppgaveStatus)) {
+  if (isPending(hentOppgaveStatus)) {
     return <div>Henter oppgave</div>
   }
   return (
@@ -128,7 +127,7 @@ export default function ManuellBehandling() {
             required: { value: true, message: 'Du må spesifisere om det er en sak i fra Pesys' },
           })}
           label="Er det sak fra Pesys? (påkrevd)"
-          error={errors.spraak?.message}
+          error={errors.kilde?.message}
         >
           <option>Velg ...</option>
           <option value="PESYS">Løpende i Pesys til 1.1.2024</option>
@@ -138,7 +137,13 @@ export default function ManuellBehandling() {
 
         <InputRow>
           <TextField
-            {...register('pesysId')}
+            {...register('pesysId', {
+              required: {
+                value: ['GJENOPPRETTA', 'PESYS'].includes(methods.getValues().kilde),
+                message: 'Du må legge til sakid i fra Pesys',
+              },
+            })}
+            error={errors.pesysId?.message}
             label="Sakid Pesys"
             placeholder="Sakid Pesys"
             pattern="[0-9]{11}"
@@ -205,15 +210,27 @@ export default function ManuellBehandling() {
           <Button
             variant="secondary"
             onClick={handleSubmit(ferdigstill)}
-            loading={isPending(status) || isPending(overstyrBeregningStatus) || isPending(overstyrTrygdetidStatus)}
+            loading={
+              isPending(opprettBehandlingStatus) ||
+              isPending(overstyrBeregningStatus) ||
+              isPending(overstyrTrygdetidStatus)
+            }
           >
             Opprett behandling
           </Button>
         </Knapp>
 
-        {isSuccess(status) && <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>}
+        {oppgaveId && oppgaveStatus && isSuccess(hentOppgaveStatus) && (
+          <Knapp>
+            <GjenopprettingModal oppgaveId={oppgaveId} oppgaveStatus={oppgaveStatus} />
+          </Knapp>
+        )}
+
+        {isSuccess(opprettBehandlingStatus) && (
+          <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>
+        )}
         {isFailureHandler({
-          apiResult: status,
+          apiResult: opprettBehandlingStatus,
           errorMessage: 'Det oppsto en feil ved oppretting av behandlingen.',
         })}
 

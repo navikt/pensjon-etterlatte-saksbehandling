@@ -45,13 +45,14 @@ export const BoddEllerArbeidetUtlandet = ({
         </VStack>
       </Beskrivelse>
       <VurderingsContainerWrapper>
-        {vurdert ? (
+        {vurdert && (
           <BoddEllerArbeidetUtlandetVurdering
             redigerbar={redigerbar}
             setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
             behandlingId={behandling.id}
           />
-        ) : (
+        )}
+        {!vurdert && redigerbar && (
           <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
         )}
       </VurderingsContainerWrapper>

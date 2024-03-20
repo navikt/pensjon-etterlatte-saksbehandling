@@ -19,7 +19,6 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.ForenkletBehandling
 import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -27,19 +26,19 @@ import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.kunSaksbehandler
-import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Saker
-import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
-import no.nav.etterlatte.tilgangsstyring.withLesetilgang
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -140,13 +139,11 @@ internal fun Route.sakWebRoutes(
     route("/api") {
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get {
-                withLesetilgang {
-                    val sak =
-                        inTransaction {
-                            sakService.finnSak(sakId)
-                        }
-                    call.respond(sak ?: HttpStatusCode.NotFound)
-                }
+                val sak =
+                    inTransaction {
+                        sakService.finnSak(sakId)
+                    }
+                call.respond(sak ?: HttpStatusCode.NotFound)
             }
 
             get("/grunnlagsendringshendelser") {
@@ -207,27 +204,21 @@ internal fun Route.sakWebRoutes(
             }
 
             get("flyktning") {
-                withLesetilgang {
-                    val flyktning = inTransaction { sakService.finnFlyktningForSak(sakId) }
-                    call.respond(flyktning ?: HttpStatusCode.NoContent)
-                }
+                val flyktning = inTransaction { sakService.finnFlyktningForSak(sakId) }
+                call.respond(flyktning ?: HttpStatusCode.NoContent)
             }
 
             get("/behandlinger/foerstevirk") {
-                withLesetilgang {
-                    logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
-                    when (val foersteVirk = inTransaction { behandlingService.hentFoersteVirk(sakId) }) {
-                        null -> call.respond(HttpStatusCode.NotFound)
-                        else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
-                    }
+                logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
+                when (val foersteVirk = inTransaction { behandlingService.hentFoersteVirk(sakId) }) {
+                    null -> call.respond(HttpStatusCode.NotFound)
+                    else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
                 }
             }
 
             get("hendelser") {
-                withLesetilgang {
-                    logger.info("Henter behandlingshendelser i sak med sakId=$sakId")
-                    call.respond(hendelseDao.hentHendelserISak(sakId))
-                }
+                logger.info("Henter behandlingshendelser i sak med sakId=$sakId")
+                call.respond(hendelseDao.hentHendelserISak(sakId))
             }
         }
 

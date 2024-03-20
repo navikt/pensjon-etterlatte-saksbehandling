@@ -15,6 +15,7 @@ import {
   UstiletListe,
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import styled from 'styled-components'
+import { useAppSelector } from '~store/Store'
 
 type SoeskenjusteringPeriodeProps = {
   control: Control<{ soeskenMedIBeregning: SoeskengrunnlagUtfylling }>
@@ -35,7 +36,12 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
     name: `soeskenMedIBeregning.${index}.data`,
     control,
   })
-  const behandles = behandlingErRedigerbar(behandling?.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const behandles = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
 
   const grunnlag = watch(`soeskenMedIBeregning.${index}`)
   const mineFeil = [...feil.filter(([feilIndex]) => feilIndex === index).flatMap((a) => a[1])]

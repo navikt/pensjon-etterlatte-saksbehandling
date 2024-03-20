@@ -11,8 +11,6 @@ import { FlexRow } from '~shared/styled'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgaveHandling, settOppgaveHandling } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { FormWrapper } from '../BehandleJournalfoeringOppgave'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
@@ -21,7 +19,6 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
   const { oppgave, journalpost, oppgaveHandling } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   const neste = () => {
     switch (oppgaveHandling) {
@@ -30,11 +27,7 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
       case OppgaveHandling.FERDIGSTILL_OPPGAVE:
         return navigate('ferdigstill', { relative: 'path' })
       case OppgaveHandling.NY_KLAGE:
-        if (kanBrukeKlage) {
-          return navigate('oppretteklage', { relative: 'path' })
-        } else {
-          return navigate('../', { relative: 'path' })
-        }
+        return navigate('oppretteklage', { relative: 'path' })
     }
   }
 
@@ -48,16 +41,21 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
         Behandle journalføringsoppgave
       </Heading>
 
-      {antallBehandlinger > 0 ? (
-        <Alert variant="info">Bruker har allerede {antallBehandlinger} behandling(er) i Gjenny</Alert>
-      ) : (
-        <Alert variant="info">Bruker har ingen behandlinger i Gjenny</Alert>
-      )}
+      {journalpost ? (
+        <>
+          {antallBehandlinger > 0 ? (
+            <Alert variant="info">Bruker har allerede {antallBehandlinger} behandling(er) i Gjenny</Alert>
+          ) : (
+            <Alert variant="info">Bruker har ingen behandlinger i Gjenny</Alert>
+          )}
 
-      {journalpost && !temaTilhoererGjenny(journalpost) && (
-        <Alert variant="warning">Journalposten tilhører tema {journalpost.tema}</Alert>
+          {!temaTilhoererGjenny(journalpost) && (
+            <Alert variant="warning">Journalposten tilhører tema {journalpost.tema}</Alert>
+          )}
+        </>
+      ) : (
+        <Alert variant="warning">Kan ikke behandle oppgaven uten journalpost</Alert>
       )}
-      <br />
 
       <RadioGroup
         legend="Velg handling"
@@ -66,10 +64,12 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
           dispatch(settOppgaveHandling(value as OppgaveHandling))
         }}
         value={oppgaveHandling || ''}
-        disabled={!journalpost}
       >
-        <Radio value={OppgaveHandling.NY_BEHANDLING} description="Oppretter en ny behandling">
+        <Radio value={OppgaveHandling.NY_BEHANDLING} description="Oppretter en ny behandling" disabled={!journalpost}>
           Opprett behandling
+        </Radio>
+        <Radio value={OppgaveHandling.NY_KLAGE} description="Opprett ny klagebehandling" disabled={!journalpost}>
+          Opprett klagebehandling
         </Radio>
         <Radio
           value={OppgaveHandling.FERDIGSTILL_OPPGAVE}
@@ -77,15 +77,10 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
         >
           Ferdigstill oppgaven
         </Radio>
-        {kanBrukeKlage && (
-          <Radio value={OppgaveHandling.NY_KLAGE} description="Opprett ny klagebehandling">
-            Opprett klagebehandling
-          </Radio>
-        )}
       </RadioGroup>
 
       <FlexRow justify="center" $spacing>
-        <Button variant="primary" onClick={neste} disabled={!oppgaveHandling || !journalpost}>
+        <Button variant="primary" onClick={neste} disabled={!oppgaveHandling}>
           Neste
         </Button>
       </FlexRow>

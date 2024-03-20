@@ -95,6 +95,29 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
         }
     }
 
+    fun ferdigstillJobbHvisAlleHendelserErFerdige(hendelseId: UUID) {
+        datasource.transaction {
+            queryOf(
+                """
+                UPDATE jobb j
+                SET status  = 'FERDIG',
+                    endret  = CURRENT_TIMESTAMP,
+                    versjon = j.versjon + 1
+                WHERE j.id = (SELECT jobb_id FROM hendelse h WHERE h.id = :hendelseId)
+                AND NOT EXISTS (SELECT 1
+                      FROM hendelse h
+                      WHERE h.jobb_id = j.id
+                        AND h.status <> 'FERDIG'
+                )
+                """.trimIndent(),
+                mapOf(
+                    "hendelseId" to hendelseId,
+                ),
+            )
+                .let { query -> it.run(query.asUpdate) }
+        }
+    }
+
     fun opprettHendelserForSaker(
         jobbId: Int,
         saksIDer: List<Long>,
@@ -179,16 +202,41 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
         }
     }
 
+    fun settHarLoependeYtelse(
+        hendelseId: UUID,
+        loependeYtelse: Boolean,
+    ) {
+        datasource.transaction {
+            queryOf(
+                """
+                UPDATE hendelse 
+                SET loepende_ytelse = :loependeYtelse,
+                    endret = now(),
+                    versjon = versjon + 1
+                WHERE id = :id
+                """.trimIndent(),
+                mapOf(
+                    "id" to hendelseId,
+                    "loependeYtelse" to loependeYtelse,
+                ),
+            )
+                .let { query -> it.run(query.asUpdate) }
+        }
+    }
+
     fun pollHendelser(limit: Int = 5): List<Hendelse> {
         return datasource.transaction {
             queryOf(
                 """
                 SELECT * FROM hendelse 
-                WHERE status = :status 
+                WHERE (
+                    status = 'NY' OR (
+                        status = 'FEILET' AND versjon < 3
+                    )
+                )
                 ORDER BY opprettet asc
                 LIMIT $limit
                 """.trimIndent(),
-                mapOf("status" to "NY"),
             )
                 .let { query -> it.run(query.map { row -> row.toHendelse() }.asList) }
         }
@@ -204,6 +252,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
             versjon = int("versjon"),
             status = HendelseStatus.valueOf(string("status")),
             steg = string("steg"),
+            loependeYtelse = boolean("loepende_ytelse"),
             info = anyOrNull("info"),
         )
 

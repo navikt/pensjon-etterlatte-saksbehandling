@@ -1,4 +1,3 @@
-import { SakType } from '~shared/types/sak'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Button, Heading } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
@@ -10,9 +9,7 @@ import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
-import React, { useEffect, useState } from 'react'
-import YrkesskadeTrygdetid from '~components/behandling/trygdetid/YrkesskadeTrygdetid'
+import React from 'react'
 import { Trygdetid } from '~components/behandling/trygdetid/Trygdetid'
 import { oppdaterStatus } from '~shared/api/trygdetid'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
@@ -20,7 +17,7 @@ import { useAppDispatch, useAppSelector } from '~store/Store'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
 
-import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
@@ -28,10 +25,12 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
   const dispatch = useAppDispatch()
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
-  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
+  const redigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
   const { next } = useBehandlingRoutes()
-  const [vilkaarsvurdering, getVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
-  const [yrkesskadeTrygdetid, setYrkesskadeTrygdetid] = useState<boolean>(false)
 
   const vedtaksresultat = useVedtaksResultat()
 
@@ -39,13 +38,6 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
     : undefined
   const [oppdaterStatusResult, oppdaterStatusRequest] = useApiCall(oppdaterStatus)
-
-  useEffect(() => {
-    getVilkaarsvurdering(behandling.id, (vurdering) => {
-      setYrkesskadeTrygdetid(vurdering.isYrkesskade)
-    })
-  }, [])
-
   const virkningstidspunktEtterNyRegelDato = () => {
     return (
       behandling.virkningstidspunkt == null || new Date(behandling.virkningstidspunkt.dato) >= new Date('2024-01-01')
@@ -71,44 +63,18 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
           <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
         </HeadingWrapper>
       </ContentHeader>
-      {isSuccess(vilkaarsvurdering) &&
-        (yrkesskadeTrygdetid ? (
-          {
-            [SakType.BARNEPENSJON]: (
-              <YrkesskadeTrygdetid
-                status={behandling.status}
-                hjemmel={{
-                  tittel: '§ 18-11.Barnepensjon etter dødsfall som skyldes yrkesskade',
-                  lenke: 'https://lovdata.no/lov/1997-02-28-19/§18-11',
-                }}
-              />
-            ),
-            [SakType.OMSTILLINGSSTOENAD]: (
-              <YrkesskadeTrygdetid
-                status={behandling.status}
-                hjemmel={{
-                  tittel: '§ 17-12.Pensjon etter dødsfall som skyldes yrkesskade',
-                  lenke: 'https://lovdata.no/lov/1997-02-28-19/§17-12',
-                }}
-              />
-            ),
-          }[behandling.sakType]
-        ) : (
-          <Trygdetid
-            redigerbar={redigerbar}
-            behandling={behandling}
-            virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato()}
-          />
-        ))}
+
+      <Trygdetid
+        redigerbar={redigerbar}
+        behandling={behandling}
+        vedtaksresultat={vedtaksresultat}
+        virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato()}
+      />
 
       <Border />
       {isFailureHandler({
-        apiResult: vilkaarsvurdering,
-        errorMessage: 'Kunne ikke hente vilkårsvurdering',
-      })}
-      {isFailureHandler({
         apiResult: oppdaterStatusResult,
-        errorMessage: 'Kunne ikke oppdatere vilkårsvurderingsresultat',
+        errorMessage: 'Kunne ikke oppdatere trygdetid status',
       })}
 
       {redigerbar ? (

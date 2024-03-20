@@ -7,7 +7,9 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -34,10 +36,11 @@ interface OppgaveDao {
     fun hentOppgaver(
         oppgaveTyper: List<OppgaveType>,
         enheter: List<String>,
-        erSuperBruker: Boolean,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String? = null,
     ): List<OppgaveIntern>
+
+    fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats
 
     fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern>
 
@@ -76,9 +79,10 @@ interface OppgaveDao {
 
     fun hentFristGaarUt(
         dato: LocalDate,
-        type: OppgaveType,
-        kilde: OppgaveKilde,
-    ): List<UUID>
+        type: Collection<OppgaveType>,
+        kilde: Collection<OppgaveKilde>,
+        oppgaver: List<UUID>,
+    ): List<VentefristGaarUt>
 }
 
 class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) : OppgaveDao {
@@ -177,7 +181,6 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
     override fun hentOppgaver(
         oppgaveTyper: List<OppgaveType>,
         enheter: List<String>,
-        erSuperBruker: Boolean,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String?,
     ): List<OppgaveIntern> {
@@ -192,7 +195,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                         FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.type = ANY(?)
                         AND (? OR o.status = ANY(?))
-                        AND (? OR o.enhet = ANY(?))
+                        AND o.enhet = ANY(?)
                         AND (
                             s.adressebeskyttelse is null OR 
                             (s.adressebeskyttelse is NOT NULL AND (s.adressebeskyttelse != ? AND s.adressebeskyttelse != ?))
@@ -204,17 +207,40 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setArray(1, createArrayOf("text", oppgaveTyper.toTypedArray()))
                 statement.setBoolean(2, oppgaveStatuser.isEmpty() || oppgaveStatuser.contains(VISALLE))
                 statement.setArray(3, createArrayOf("text", oppgaveStatuser.toTypedArray()))
-                statement.setBoolean(4, erSuperBruker)
-                statement.setArray(5, createArrayOf("text", enheter.toTypedArray()))
-                statement.setString(6, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
-                statement.setString(7, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
-                statement.setBoolean(8, minOppgavelisteIdentFilter == null)
-                statement.setString(9, minOppgavelisteIdentFilter)
+                statement.setArray(4, createArrayOf("text", enheter.toTypedArray()))
+                statement.setString(5, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
+                statement.setString(6, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
+                statement.setBoolean(7, minOppgavelisteIdentFilter == null)
+                statement.setString(8, minOppgavelisteIdentFilter)
 
                 statement.executeQuery().toList {
                     asOppgave()
                 }.also { oppgaveliste ->
                     logger.info("Hentet antall nye oppgaver: ${oppgaveliste.size}")
+                }
+            }
+        }
+    }
+
+    override fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT 
+                            COUNT(*) FILTER (WHERE status IN ('NY', 'UNDER_BEHANDLING', 'PAA_VENT')) AS "antallOppgavelistaOppgaver",
+                            COUNT(*) FILTER (WHERE saksbehandler = ? AND status IN ('NY', 'UNDER_BEHANDLING', 'PAA_VENT') ) AS "antallMinOppgavelisteOppgaver"
+                        FROM oppgave
+                        """.trimIndent(),
+                    )
+
+                statement.setString(1, innloggetSaksbehandlerIdent)
+
+                statement.executeQuery().singleOrNull {
+                    OppgavebenkStats(getLong("antallOppgavelistaOppgaver"), getLong("antallMinOppgavelisteOppgaver"))
+                }!!.also {
+                    logger.info("Henter antall oppgaver")
                 }
             }
         }
@@ -405,29 +431,37 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
 
     override fun hentFristGaarUt(
         dato: LocalDate,
-        type: OppgaveType,
-        kilde: OppgaveKilde,
-    ): List<UUID> =
+        type: Collection<OppgaveType>,
+        kilde: Collection<OppgaveKilde>,
+        oppgaver: List<UUID>,
+    ): List<VentefristGaarUt> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id
+                        SELECT o.id, o.referanse, o.sak_id, o.kilde, o.merknad
                         FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.frist <= ?
-                        and type = ?
-                        and kilde = ?
+                        and type = ANY(?)
+                        and kilde = ANY(?)
+                        and status = 'PAA_VENT'
                         """.trimIndent(),
                     )
                 statement.setTidspunkt(1, dato.atTime(LocalTime.NOON).toTidspunkt())
-                statement.setString(2, type.name)
-                statement.setString(3, kilde.name)
+                statement.setArray(2, createArrayOf("text", type.map { i -> i.name }.toTypedArray()))
+                statement.setArray(3, createArrayOf("text", kilde.map { i -> i.name }.toTypedArray()))
                 statement.executeQuery().toList {
-                    getUUID("id")
+                    VentefristGaarUt(
+                        oppgaveID = getUUID("id"),
+                        sakId = getLong("sak_id"),
+                        referanse = getString("referanse"),
+                        oppgavekilde = OppgaveKilde.valueOf(getString("kilde")),
+                        merknad = getString("merknad"),
+                    )
                 }.also { utgaatte ->
                     logger.info("Hentet ${utgaatte.size} oppgaver der fristen går ut for dato $dato og type $type")
-                }
+                }.filter { oppgave -> oppgaver.isEmpty() || oppgaver.contains(oppgave.oppgaveID) }
             }
         }
 

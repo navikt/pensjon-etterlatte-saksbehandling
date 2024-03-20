@@ -21,7 +21,7 @@ internal class OpprettVedtakforespoerselRiverTest {
     private fun genererOpprettVedtakforespoersel(behandlingId: UUID) =
         JsonMessage.newMessage(
             mapOf(
-                ReguleringHendelseType.OPPRETT_VEDTAK.lagParMedEventNameKey(),
+                ReguleringHendelseType.BEREGNA.lagParMedEventNameKey(),
                 SAK_ID_KEY to sakId,
                 DATO_KEY to foersteMai2023,
                 BEHANDLING_ID_KEY to behandlingId,

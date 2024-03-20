@@ -26,7 +26,6 @@ class Server(private val context: ApplicationContext) {
             with(context) {
                 kabalOvesendelseRoute(
                     kabalOversendelseService = kabalOversendelseService,
-                    featureToggleService = featureToggleService,
                 )
             }
         }

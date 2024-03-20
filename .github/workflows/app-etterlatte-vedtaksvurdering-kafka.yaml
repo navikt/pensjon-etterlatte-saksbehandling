@@ -21,6 +21,7 @@ on:
       - libs/etterlatte-funksjonsbrytere/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-migrering-model/**
+      - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/testdata/**
@@ -35,6 +36,7 @@ on:
       - libs/etterlatte-funksjonsbrytere/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-migrering-model/**
+      - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/testdata/**

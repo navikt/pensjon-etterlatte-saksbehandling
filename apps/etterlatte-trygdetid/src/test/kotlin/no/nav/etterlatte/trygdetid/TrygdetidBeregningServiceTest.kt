@@ -3,8 +3,6 @@ package no.nav.etterlatte.trygdetid
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -33,10 +31,11 @@ class TrygdetidBeregningServiceTest {
 
         val beregnetTrygdetid =
             TrygdetidBeregningService.beregnTrygdetid(
-                trygdetidGrunnlag,
-                now,
-                now,
-                null,
+                trygdetidGrunnlag = trygdetidGrunnlag,
+                foedselsDato = now,
+                doedsDato = now,
+                norskPoengaar = null,
+                yrkesskade = false,
             )
         beregnetTrygdetid shouldNotBe null
         with(beregnetTrygdetid!!) {
@@ -64,10 +63,11 @@ class TrygdetidBeregningServiceTest {
 
         val beregnetTrygdetid =
             TrygdetidBeregningService.beregnTrygdetid(
-                trygdetidGrunnlag,
-                now,
-                now,
-                null,
+                trygdetidGrunnlag = trygdetidGrunnlag,
+                foedselsDato = now,
+                doedsDato = now,
+                norskPoengaar = null,
+                yrkesskade = false,
             )
 
         beregnetTrygdetid!!.resultat.samletTrygdetidNorge shouldBe 40
@@ -82,10 +82,11 @@ class TrygdetidBeregningServiceTest {
 
         val beregnetTrygdetid =
             TrygdetidBeregningService.beregnTrygdetid(
-                trygdetidGrunnlag,
-                LocalDate.now(),
-                LocalDate.now(),
-                null,
+                trygdetidGrunnlag = trygdetidGrunnlag,
+                foedselsDato = LocalDate.now(),
+                doedsDato = LocalDate.now(),
+                norskPoengaar = null,
+                yrkesskade = false,
             )
 
         beregnetTrygdetid!!.resultat.samletTrygdetidNorge shouldBe null
@@ -113,10 +114,11 @@ class TrygdetidBeregningServiceTest {
 
         val beregnetTrygdetid =
             TrygdetidBeregningService.beregnTrygdetid(
-                trygdetidGrunnlag,
-                now,
-                now,
-                10,
+                trygdetidGrunnlag = trygdetidGrunnlag,
+                foedselsDato = now,
+                doedsDato = now,
+                norskPoengaar = 10,
+                yrkesskade = false,
             )
         beregnetTrygdetid shouldNotBe null
         with(beregnetTrygdetid!!) {
@@ -134,10 +136,11 @@ class TrygdetidBeregningServiceTest {
 
         val beregnetTrygdetid =
             TrygdetidBeregningService.beregnTrygdetid(
-                trygdetidGrunnlag,
-                now,
-                now,
-                10,
+                trygdetidGrunnlag = trygdetidGrunnlag,
+                foedselsDato = now,
+                doedsDato = now,
+                norskPoengaar = 10,
+                yrkesskade = false,
             )
         beregnetTrygdetid shouldNotBe null
         with(beregnetTrygdetid!!) {
@@ -192,12 +195,20 @@ class TrygdetidBeregningServiceTest {
 
     @Test
     fun `skal gi 40 aar total trygdetid for yrkesskade`() {
+        val now = LocalDate.now()
+
+        val trygdetidGrunnlag = emptyList<TrygdetidGrunnlag>()
+
         val beregnetTrygdetid =
-            TrygdetidBeregningService.beregnTrygdetidForYrkesskade(
-                Grunnlagsopplysning.Saksbehandler(saksbehandler.ident(), Tidspunkt.now()),
+            TrygdetidBeregningService.beregnTrygdetid(
+                trygdetidGrunnlag = trygdetidGrunnlag,
+                foedselsDato = now,
+                doedsDato = now,
+                norskPoengaar = 10,
+                yrkesskade = true,
             )
         beregnetTrygdetid shouldNotBe null
-        with(beregnetTrygdetid) {
+        with(beregnetTrygdetid!!) {
             regelResultat shouldNotBe null
             tidspunkt shouldNotBe null
             resultat.samletTrygdetidNorge shouldBe 40

@@ -6,17 +6,16 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
-import io.ktor.http.HttpMessageBuilder
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Behandlingsnummer
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.retry
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.behandlingsnummer
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 class PdlOboKlient(private val httpClient: HttpClient, private val config: Config) {
@@ -30,17 +29,17 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
     suspend fun hentPersonNavn(
         ident: String,
         bruker: BrukerTokenInfo,
-    ): PdlPersonResponse {
+    ): PdlPersonNavnResponse {
         val request =
             PdlGraphqlRequest(
-                query = getQuery("/pdl/hentPerson.graphql"),
+                query = getQuery("/pdl/hentPersonNavn.graphql"),
                 variables = PdlVariables(ident),
             )
 
-        return retry<PdlPersonResponse>(times = 3) {
+        return retry<PdlPersonNavnResponse>(times = 3) {
             httpClient.post(apiUrl) {
                 bearerAuth(getOboToken(bruker))
-                behandlingsnummer(Behandlingsnummer.BARNEPENSJON, Behandlingsnummer.OMSTILLINGSSTOENAD)
+                behandlingsnummer(SakType.entries)
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(request)
@@ -67,16 +66,13 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
 
     private suspend fun getOboToken(bruker: BrukerTokenInfo): String {
         val token =
-            azureAdClient.getOnBehalfOfAccessTokenForResource(
+            azureAdClient.hentTokenFraAD(
+                bruker,
                 listOf(pdlScope),
-                bruker.accessToken(),
             )
 
         return requireNotNull(token.get()?.accessToken) {
             "Kunne ikke hente ut obo-token for bruker ${bruker.ident()}"
         }
     }
-
-    private fun HttpMessageBuilder.behandlingsnummer(vararg behandlingsnummer: Behandlingsnummer): Unit =
-        header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.joinToString { it.behandlingsnummer })
 }

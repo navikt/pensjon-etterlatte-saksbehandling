@@ -16,6 +16,7 @@ import ForhaandsvisningBrev, { PdfViewer } from '~components/behandling/brev/For
 import styled from 'styled-components'
 import { useKlage } from '~components/klage/useKlage'
 import { forhaandsvisBlankettKa } from '~shared/api/klage'
+import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
 
 export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId: number; kanRedigere: boolean }) {
   const klage = useKlage()
@@ -62,6 +63,15 @@ export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId:
       <BodyShort spacing>
         Vedtak opprettholdes med følgende hovedhjemmel: <strong>{TEKSTER_LOVHJEMLER[innstilling.lovhjemmel]}.</strong>
       </BodyShort>
+      <Heading size="xsmall" level="4">
+        Innstillingstekst:
+      </Heading>
+      <BodyShort spacing>{innstilling.innstillingTekst}</BodyShort>
+      <Heading size="xsmall" level="4">
+        Intern kommentar:
+      </Heading>
+      <BodyShort spacing>{innstilling.internKommentar || 'Ikke registrert'}</BodyShort>
+
       <BodyShort spacing>
         <Button size="small" variant="primary" onClick={visOversendelseModal}>
           Se innstillingsbrevet
@@ -127,11 +137,6 @@ export function VisOmgjoering(props: { omgjoering: Omgjoering; kanRedigere: bool
   )
 }
 
-export function VisKlageavslag(props: { klage: Klage }) {
-  const { klage } = props
-  return <BodyShort>TODO {klage.id} skal få avslagsbrev og håndteres</BodyShort>
-}
-
 export function formaterKlageutfall(klage: Klage) {
   switch (klage.utfall?.utfall) {
     case 'DELVIS_OMGJOERING':
@@ -152,3 +157,17 @@ const Maksbredde = styled.div`
   max-width: 40rem;
   padding: 1rem 0;
 `
+
+export const ButtonNavigerTilBrev = (props: { klage: Klage }) => {
+  return (
+    <Button
+      as="a"
+      variant="primary"
+      icon={<EnvelopeClosedIcon />}
+      href={`/person/${props.klage.sak.ident}?fane=BREV`}
+      target="_blank"
+    >
+      Opprett brev
+    </Button>
+  )
+}

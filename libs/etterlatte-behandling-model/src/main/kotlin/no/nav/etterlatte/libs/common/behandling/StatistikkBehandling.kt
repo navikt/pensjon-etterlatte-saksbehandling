@@ -32,6 +32,8 @@ data class StatistikkBehandling(
 
 enum class BehandlingHendelseType : EventnameHendelseType {
     OPPRETTET,
+    PAA_VENT,
+    AV_VENT,
     AVBRUTT,
     ;
 

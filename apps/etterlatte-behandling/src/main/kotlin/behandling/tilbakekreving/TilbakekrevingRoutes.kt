@@ -9,15 +9,15 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingId
-import no.nav.etterlatte.libs.common.medBody
-import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.medBody
+import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
@@ -89,8 +89,8 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
 
     route("/tilbakekreving") {
         post {
-            kunSkrivetilgang {
-                medBody<Kravgrunnlag> {
+            medBody<Kravgrunnlag> {
+                kunSkrivetilgang(sakId = it.sakId.value) {
                     try {
                         service.opprettTilbakekreving(it)
                         call.respond(HttpStatusCode.OK)

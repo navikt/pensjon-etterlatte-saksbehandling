@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.jobs.addShutdownHook
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.statistikk.config.ApplicationContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -22,6 +21,7 @@ fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
         .apply {
             applicationContext.vedtakhendelserRiver
             applicationContext.behandlinghendelseRiver
+            applicationContext.behandlingPaaVentHendelseRiver
             applicationContext.tilbakekrevingriver
             applicationContext.soeknadStatistikkRiver
             applicationContext.klageHendelseRiver

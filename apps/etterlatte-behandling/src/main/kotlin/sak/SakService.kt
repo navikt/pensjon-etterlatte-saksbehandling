@@ -2,7 +2,7 @@ package no.nav.etterlatte.sak
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.User
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.common.Enheter
@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.tilgangsstyring.filterForEnheter
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
 interface SakService {
@@ -27,8 +27,12 @@ interface SakService {
         type: SakType,
         overstyrendeEnhet: String? = null,
         gradering: AdressebeskyttelseGradering? = null,
-        sjekkEnhetMotNorg: Boolean = true,
     ): Sak
+
+    fun finnGjeldeneEnhet(
+        fnr: String,
+        type: SakType,
+    ): String
 
     fun finnSak(
         person: String,
@@ -129,16 +133,10 @@ class SakServiceImpl(
         type: SakType,
         overstyrendeEnhet: String?,
         gradering: AdressebeskyttelseGradering?,
-        sjekkEnhetMotNorg: Boolean,
     ): Sak {
         var sak = finnSakerForPersonOgType(fnr, type)
         if (sak == null) {
-            val enhet =
-                if (sjekkEnhetMotNorg) {
-                    sjekkEnhet(fnr, type, overstyrendeEnhet)
-                } else {
-                    overstyrendeEnhet!!
-                }
+            val enhet = sjekkEnhetFraNorg(fnr, type, overstyrendeEnhet)
             sak = dao.opprettSak(fnr, type, enhet)
         }
 
@@ -147,10 +145,68 @@ class SakServiceImpl(
             oppdaterAdressebeskyttelse(sak.id, it)
         }
 
+        sjekkGraderingOgEnhetStemmer(dao.finnSakMedGraderingOgSkjerming(sak.id))
         return sak
     }
 
-    private fun sjekkEnhet(
+    private fun sjekkGraderingOgEnhetStemmer(sak: SakMedGraderingOgSkjermet) {
+        sak.gradertEnhetsnummerErIkkeAlene()
+        sak.egenAnsattStemmer()
+        sak.graderingerStemmer()
+    }
+
+    private fun SakMedGraderingOgSkjermet.gradertEnhetsnummerErIkkeAlene() {
+        if (this.enhetNr == Enheter.STRENGT_FORTROLIG.enhetNr && this.adressebeskyttelseGradering !in
+            listOf(
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
+            )
+        ) {
+            logger.error("Sak har fått satt feil gradering basert enhetsnummer, se sikkerlogg.")
+            sikkerLogg.info("Sakid: ${this.id} har fått satt feil gradering basert enhetsnummer")
+        }
+    }
+
+    private fun SakMedGraderingOgSkjermet.graderingerStemmer() {
+        when (this.adressebeskyttelseGradering) {
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> {
+                if (this.enhetNr != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr) {
+                    logger.error("Sak har fått satt feil enhetsnummer basert på gradering, se sikkerlogg.")
+                    sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering strengt fortrolig")
+                }
+            }
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
+                if (this.enhetNr != Enheter.STRENGT_FORTROLIG.enhetNr) {
+                    logger.error("Sak har fått satt feil enhetsnummer basert på gradering, se sikkerlogg.")
+                    sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering strengt fortrolig")
+                }
+            }
+            AdressebeskyttelseGradering.FORTROLIG, AdressebeskyttelseGradering.UGRADERT, null -> return
+        }
+    }
+
+    private fun SakMedGraderingOgSkjermet.egenAnsattStemmer() {
+        if (this.erSkjermet == true) {
+            if (this.enhetNr != Enheter.EGNE_ANSATTE.enhetNr) {
+                logger.error("Sak har fått satt feil enhetsnummer basert på skjermingen, se sikkerlogg.")
+                sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering skjerming(egen ansatt)")
+            }
+        }
+        if (this.enhetNr == Enheter.EGNE_ANSATTE.enhetNr && this.erSkjermet != true) {
+            logger.error("Sak mangler skjerming, se sikkerlogg.")
+            sikkerLogg.info("Sakid: ${this.id} har fått satt feil skjerming(egen ansatt)")
+        }
+    }
+
+    override fun finnGjeldeneEnhet(
+        fnr: String,
+        type: SakType,
+    ) = when (val sak = finnSakerForPersonOgType(fnr, type)) {
+        null -> sjekkEnhetFraNorg(fnr, type, null)
+        else -> sak.enhet
+    }
+
+    private fun sjekkEnhetFraNorg(
         fnr: String,
         type: SakType,
         enhet: String?,
@@ -206,18 +262,30 @@ class SakServiceImpl(
 
     override fun finnFlyktningForSak(id: Long): Flyktning? = dao.hentSak(id).sjekkEnhet()?.let { dao.finnFlyktningForSak(id) }
 
-    private fun List<Sak>.filterForEnheter() =
-        this.filterSakerForEnheter(
-            Kontekst.get().AppUser,
-        )
-
     private fun Sak?.sjekkEnhet() =
         this?.let { sak ->
             listOf(sak).filterForEnheter().firstOrNull()
         }
-}
 
-fun List<Sak>.filterSakerForEnheter(user: User) =
-    this.filterForEnheter(user) { item, enheter ->
-        enheter.contains(item.enhet)
+    private fun List<Sak>.filterForEnheter(): List<Sak> {
+        val enheterSomSkalFiltreresBort = ArrayList<String>()
+        val appUser = Kontekst.get().AppUser
+        if (appUser is SaksbehandlerMedEnheterOgRoller) {
+            val bruker = appUser.saksbehandlerMedRoller
+            if (!bruker.harRolleStrengtFortrolig()) {
+                enheterSomSkalFiltreresBort.add(Enheter.STRENGT_FORTROLIG.enhetNr)
+            }
+            if (!bruker.harRolleEgenAnsatt()) {
+                enheterSomSkalFiltreresBort.add(Enheter.EGNE_ANSATTE.enhetNr)
+            }
+        }
+        return filterSakerForEnheter(enheterSomSkalFiltreresBort, this)
     }
+
+    private fun filterSakerForEnheter(
+        enheterSomSkalFiltreres: List<String>,
+        saker: List<Sak>,
+    ): List<Sak> {
+        return saker.filter { it.enhet !in enheterSomSkalFiltreres }
+    }
+}

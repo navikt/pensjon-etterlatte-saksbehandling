@@ -13,6 +13,7 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
+import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.common.Enheter
 import org.junit.jupiter.api.Test
 
@@ -50,7 +51,7 @@ class Norg2KlientTest {
 
         val norg2Klient: Norg2Klient = Norg2KlientImpl(klient, "")
 
-        val resultat = norg2Klient.hentEnheterForOmraade("EYB", "0301")
+        val resultat = norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest("EYB", "0301"))
 
         resultat.size shouldBeExactly 1
 

@@ -10,14 +10,14 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.BrevbakerBlankettDTO
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.medBody
+import no.nav.etterlatte.libs.ktor.route.withSakId
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -62,7 +62,7 @@ fun Route.notatRoute(
             withSakId(tilgangsSjekk, skrivetilgang = false) { sakId ->
                 logger.info("Forhåndsviser notatpdf i sak $sakId")
                 medBody<NotatRequest> {
-                    call.respond(notatService.forhaandsvisNotat(it.data, brukerTokenInfo))
+                    call.respond(notatService.forhaandsvisNotat(it.data, brukerTokenInfo).bytes)
                 }
             }
         }
@@ -74,7 +74,7 @@ fun Route.notatRoute(
 
             withSakId(tilgangsSjekk, skrivetilgang = false) {
                 logger.info("Henter pdf for notat med id=$notatId i sak $it")
-                call.respond(notatService.hentPdf(notatId))
+                call.respond(notatService.hentPdf(notatId).bytes)
             }
         }
 

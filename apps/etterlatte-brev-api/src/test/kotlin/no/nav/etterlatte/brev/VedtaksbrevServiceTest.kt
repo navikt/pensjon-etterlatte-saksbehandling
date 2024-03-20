@@ -58,8 +58,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import no.nav.pensjon.brevbaker.api.model.LetterMetadata
@@ -191,6 +191,20 @@ internal class VedtaksbrevServiceTest {
             gjenaapnetOK shouldBe true
 
             verify { db.fjernFerdigstiltStatusUnderkjentVedtak(1, vedtak) }
+        }
+
+        @Test
+        fun `sletting av vedtaksbrev`() {
+            val brev = opprettBrev(Status.OPPRETTET, mockk())
+            every { db.hentBrevForBehandling(any(), any()) } returns listOf(brev)
+            coEvery {
+                behandlingKlient.hentVedtaksbehandlingKanRedigeres(BEHANDLING_ID, SAKSBEHANDLER)
+            } returns true
+
+            runBlocking { vedtaksbrevService.settVedtaksbrevTilSlettet(BEHANDLING_ID, SAKSBEHANDLER) }
+
+            verify { db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK) }
+            verify { db.settBrevSlettet(brev.id, SAKSBEHANDLER) }
         }
     }
 

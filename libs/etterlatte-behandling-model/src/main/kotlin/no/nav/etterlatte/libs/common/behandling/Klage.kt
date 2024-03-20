@@ -118,7 +118,7 @@ data class InitieltUtfallMedBegrunnelseOgSaksbehandler(
 
 data class InitieltUtfallMedBegrunnelseDto(
     val utfall: KlageUtfall,
-    val begrunnelse: String,
+    val begrunnelse: String?,
 )
 
 enum class KlageUtfall {
@@ -153,6 +153,10 @@ data class Klage(
                     "tilstanden til klagen: ${this.status}",
             )
         }
+        val utfallFortsattGyldig =
+            this.erFormkraveneOppfylt() == formkrav.erFormkraveneOppfylt &&
+                this.erKlagenFramsattInnenFrist() == formkrav.erKlagenFramsattInnenFrist
+
         return this.copy(
             formkrav =
                 FormkravMedBeslutter(
@@ -164,19 +168,23 @@ data class Klage(
                     JaNei.JA -> KlageStatus.FORMKRAV_OPPFYLT
                     JaNei.NEI -> KlageStatus.FORMKRAV_IKKE_OPPFYLT
                 },
-            utfall =
-                when (formkrav.erFormkraveneOppfylt) {
-                    JaNei.JA -> this.utfall
-                    JaNei.NEI -> null
-                },
+            utfall = this.utfall.takeIf { utfallFortsattGyldig },
+            initieltUtfall = this.initieltUtfall.takeIf { utfallFortsattGyldig },
         )
     }
 
     fun oppdaterUtfall(utfallMedBrev: KlageUtfallMedData): Klage {
         if (!this.kanOppdatereUtfall()) {
             throw IllegalStateException(
-                "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen" +
+                "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen " +
                     "til klagen (${this.status})",
+            )
+        }
+        if (erKlagenFramsattInnenFrist() == JaNei.JA &&
+            initieltUtfall == null
+        ) {
+            throw IllegalStateException(
+                "Kan ikke oppdatere utfallet i klagen med id=${this.id} uten at initielt utfall er lagret først",
             )
         }
         val hjemmel =
@@ -199,17 +207,24 @@ data class Klage(
         )
     }
 
-    fun oppdaterIntieltUtfallMedBegrunnelse(
+    fun oppdaterInitieltUtfallMedBegrunnelse(
         utfall: InitieltUtfallMedBegrunnelseDto,
         saksbehandlerIdent: String,
     ): Klage {
         if (!this.kanOppdatereUtfall()) {
             throw IllegalStateException(
-                "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen" +
+                "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen " +
                     "til klagen (${this.status})",
             )
         } else {
-            return this.copy(initieltUtfall = InitieltUtfallMedBegrunnelseOgSaksbehandler(utfall, saksbehandlerIdent, Tidspunkt.now()))
+            return this.copy(
+                initieltUtfall =
+                    InitieltUtfallMedBegrunnelseOgSaksbehandler(
+                        utfall,
+                        saksbehandlerIdent,
+                        Tidspunkt.now(),
+                    ),
+            )
         }
     }
 
@@ -256,14 +271,13 @@ data class Klage(
                 this.utfall != null
             }
 
-            KlageStatus.FORMKRAV_IKKE_OPPFYLT -> {
-                // TODO("Støtt avslag på formkrav på klage")
-                false
-            }
-
             else -> false
         }
     }
+
+    private fun erFormkraveneOppfylt() = this.formkrav?.formkrav?.erFormkraveneOppfylt
+
+    private fun erKlagenFramsattInnenFrist() = this.formkrav?.formkrav?.erKlagenFramsattInnenFrist
 
     fun kanAvbryte(): Boolean {
         return KlageStatus.kanAvbryte(this.status)
@@ -294,8 +308,7 @@ data class Klage(
                     erFormkraveneOppfylt = formkrav.erFormkraveneOppfylt == JaNei.JA,
                     begrunnelse = formkrav.begrunnelse,
                 ),
-            // TODO: mennesklig lesbart navn her
-            hjemmel = innstilling.lovhjemmel.name,
+            hjemmel = innstilling.lovhjemmel.lesbarTekst(),
             sakType = this.sak.sakType,
             internKommentar = innstilling.internKommentar,
             ovesendelseTekst = innstilling.innstillingTekst,
@@ -388,37 +401,69 @@ data class VedtakKlagenGjelderBrevbaker(
 sealed class KlageUtfallMedData {
     abstract val saksbehandler: Grunnlagsopplysning.Saksbehandler
 
+    abstract fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean
+
     @JsonTypeName("OMGJOERING")
     data class Omgjoering(
         val omgjoering: KlageOmgjoering,
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
-    ) : KlageUtfallMedData()
+    ) : KlageUtfallMedData() {
+        override fun harSammeUtfall(other: KlageUtfallUtenBrev) = other is KlageUtfallUtenBrev.Omgjoering
+    }
 
     @JsonTypeName("DELVIS_OMGJOERING")
     data class DelvisOmgjoering(
         val omgjoering: KlageOmgjoering,
         val innstilling: InnstillingTilKabal,
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
-    ) : KlageUtfallMedData()
+    ) : KlageUtfallMedData() {
+        override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.DelvisOmgjoering
+    }
 
     @JsonTypeName("STADFESTE_VEDTAK")
     data class StadfesteVedtak(
         val innstilling: InnstillingTilKabal,
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
-    ) : KlageUtfallMedData()
+    ) : KlageUtfallMedData() {
+        override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.StadfesteVedtak
+    }
 
     @JsonTypeName("AVVIST")
     data class Avvist(
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
         val vedtak: KlageVedtak,
         val brev: KlageVedtaksbrev,
-    ) : KlageUtfallMedData()
+    ) : KlageUtfallMedData() {
+        override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.Avvist
+    }
 
     @JsonTypeName("AVVIST_MED_OMGJOERING")
     data class AvvistMedOmgjoering(
         val omgjoering: KlageOmgjoering,
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
-    ) : KlageUtfallMedData()
+    ) : KlageUtfallMedData() {
+        override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.AvvistMedOmgjoering
+    }
+
+    fun innstilling(): InnstillingTilKabal? {
+        return when (this) {
+            is StadfesteVedtak -> innstilling
+            is DelvisOmgjoering -> innstilling
+            is Omgjoering -> null
+            is Avvist -> null
+            is AvvistMedOmgjoering -> null
+        }
+    }
+
+    fun omgjoering(): KlageOmgjoering? {
+        return when (this) {
+            is StadfesteVedtak -> null
+            is DelvisOmgjoering -> omgjoering
+            is Omgjoering -> omgjoering
+            is Avvist -> null
+            is AvvistMedOmgjoering -> omgjoering
+        }
+    }
 }
 
 sealed class GyldigForYtelse {
@@ -448,111 +493,115 @@ sealed class GyldigForYtelse {
     }
 }
 
-enum class KabalHjemmel(private val gyldigForYtelse: GyldigForYtelse) {
-    FTRL_1_3(GyldigForYtelse.OmsOgBp),
-    FTRL_1_3_A(GyldigForYtelse.OmsOgBp),
-    FTRL_1_3_B(GyldigForYtelse.OmsOgBp),
-    FTRL_1_5(GyldigForYtelse.OmsOgBp),
+enum class KabalHjemmel(private val gyldigForYtelse: GyldigForYtelse, private val leseligTekst: String) {
+    FTRL_1_3(GyldigForYtelse.OmsOgBp, "Ftrl. § 1-3"),
+    FTRL_1_3_A(GyldigForYtelse.OmsOgBp, "Ftrl. § 1-3-A"),
+    FTRL_1_3_B(GyldigForYtelse.OmsOgBp, "Ftrl. § 1-3-B"),
+    FTRL_1_5(GyldigForYtelse.OmsOgBp, "Ftrl. § 1-5"),
 
-    FTRL_2_1(GyldigForYtelse.OmsOgBp),
-    FTRL_2_1_A(GyldigForYtelse.OmsOgBp),
-    FTRL_2_2(GyldigForYtelse.OmsOgBp),
-    FTRL_2_3(GyldigForYtelse.OmsOgBp),
-    FTRL_2_4(GyldigForYtelse.OmsOgBp),
-    FTRL_2_5(GyldigForYtelse.OmsOgBp),
-    FTRL_2_6(GyldigForYtelse.OmsOgBp),
-    FTRL_2_7(GyldigForYtelse.OmsOgBp),
-    FTRL_2_7_A(GyldigForYtelse.OmsOgBp),
-    FTRL_2_8(GyldigForYtelse.OmsOgBp),
-    FTRL_2_9(GyldigForYtelse.OmsOgBp),
-    FTRL_2_10(GyldigForYtelse.OmsOgBp),
-    FTRL_2_11(GyldigForYtelse.OmsOgBp),
-    FTRL_2_12(GyldigForYtelse.OmsOgBp),
-    FTRL_2_13(GyldigForYtelse.OmsOgBp),
-    FTRL_2_14(GyldigForYtelse.OmsOgBp),
-    FTRL_2_15(GyldigForYtelse.OmsOgBp),
-    FTRL_2_16(GyldigForYtelse.OmsOgBp),
-    FTRL_2_17(GyldigForYtelse.OmsOgBp),
+    FTRL_2_1(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-1"),
+    FTRL_2_1_A(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-1-A"),
+    FTRL_2_2(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-2"),
+    FTRL_2_3(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-3"),
+    FTRL_2_4(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-4"),
+    FTRL_2_5(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-5"),
+    FTRL_2_6(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-6"),
+    FTRL_2_7(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-7"),
+    FTRL_2_7_A(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-7-A"),
+    FTRL_2_8(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-8"),
+    FTRL_2_9(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-9"),
+    FTRL_2_10(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-10"),
+    FTRL_2_11(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-11"),
+    FTRL_2_12(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-12"),
+    FTRL_2_13(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-13"),
+    FTRL_2_14(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-14"),
+    FTRL_2_15(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-15"),
+    FTRL_2_16(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-16"),
+    FTRL_2_17(GyldigForYtelse.OmsOgBp, "Ftrl. § 2-17"),
 
-    FTRL_3_1(GyldigForYtelse.OmsOgBp),
-    FTRL_3_5_TRYGDETID(GyldigForYtelse.OmsOgBp),
-    FTRL_3_7(GyldigForYtelse.OmsOgBp),
-    FTRL_3_10(GyldigForYtelse.OmsOgBp),
-    FTRL_3_13(GyldigForYtelse.OmsOgBp),
-    FTRL_3_14(GyldigForYtelse.OmsOgBp),
-    FTRL_3_15(GyldigForYtelse.OmsOgBp),
+    FTRL_3_1(GyldigForYtelse.OmsOgBp, "Ftrl. § 3-1"),
+    FTRL_3_5_TRYGDETID(GyldigForYtelse.OmsOgBp, "Ftrl. § 3-5 (trygdetid)"),
+    FTRL_3_7(GyldigForYtelse.OmsOgBp, "Ftrl. § 3-7"),
+    FTRL_3_10(GyldigForYtelse.OmsOgBp, "Ftrl. § 3-10"),
+    FTRL_3_13(GyldigForYtelse.OmsOgBp, "Ftrl. § 3-13"),
+    FTRL_3_14(GyldigForYtelse.OmsOgBp, "Ftrl. § 3-14"),
+    FTRL_3_15(GyldigForYtelse.OmsOgBp, "Ftrl. § 3-15"),
 
-    FTRL_21_6(GyldigForYtelse.OmsOgBp),
-    FTRL_21_7(GyldigForYtelse.OmsOgBp),
-    FTRL_21_10(GyldigForYtelse.OmsOgBp),
+    FTRL_21_6(GyldigForYtelse.OmsOgBp, "Ftrl. § 21-6"),
+    FTRL_21_7(GyldigForYtelse.OmsOgBp, "Ftrl. § 21-7"),
+    FTRL_21_10(GyldigForYtelse.OmsOgBp, "Ftrl. § 21-10"),
 
-    FTRL_22_1(GyldigForYtelse.OmsOgBp),
-    FTRL_22_1_A(GyldigForYtelse.OmsOgBp),
-    FTRL_22_12(GyldigForYtelse.OmsOgBp),
-    FTRL_22_13_1(GyldigForYtelse.OmsOgBp),
-    FTRL_22_13_3(GyldigForYtelse.OmsOgBp),
-    FTRL_22_13_4_C(GyldigForYtelse.OmsOgBp),
-    FTRL_22_13_7(GyldigForYtelse.OmsOgBp),
-    FTRL_22_14_3(GyldigForYtelse.OmsOgBp),
-    FTRL_22_15_1_1(GyldigForYtelse.OmsOgBp),
-    FTRL_22_15_1_2(GyldigForYtelse.OmsOgBp),
-    FTRL_22_15_2(GyldigForYtelse.OmsOgBp),
-    FTRL_22_15_4(GyldigForYtelse.OmsOgBp),
-    FTRL_22_15_5(GyldigForYtelse.OmsOgBp),
-    FTRL_22_17A(GyldigForYtelse.OmsOgBp),
-    FTRL_22_17B(GyldigForYtelse.OmsOgBp),
-    FTRL_25_14(GyldigForYtelse.OmsOgBp),
+    FTRL_22_1(GyldigForYtelse.OmsOgBp, "Ftrl. § 22-1"),
+    FTRL_22_1_A(GyldigForYtelse.OmsOgBp, "Ftrl. § 22-1 A"),
+    FTRL_22_12(GyldigForYtelse.OmsOgBp, "Ftrl. § 22-12"),
+    FTRL_22_13_1(GyldigForYtelse.OmsOgBp, "Ftrl. § 22-13 1. ledd"),
+    FTRL_22_13_3(GyldigForYtelse.OmsOgBp, "Ftrl. § 22-13 3. ledd"),
+    FTRL_22_13_4_C(GyldigForYtelse.OmsOgBp, "Ftrl. § 22-13 4. ledd c)"),
+    FTRL_22_13_7(GyldigForYtelse.OmsOgBp, "Ftrl. § 22-13 7. ledd"),
+    FTRL_22_14_3(GyldigForYtelse.OmsOgBp, "Ftrl. § 22-14 3. ledd"),
+    FTRL_22_15_1_1(GyldigForYtelse.OmsOgBp, "Ftrl. § 22-15 1. ledd 1. pkt."),
+    FTRL_22_15_1_2(GyldigForYtelse.OmsOgBp, "Ftrl. § 22-15 1. ledd 2. pkt."),
+    FTRL_22_15_2(GyldigForYtelse.OmsOgBp, "Ftrl. § 22-15 2. ledd"),
+    FTRL_22_15_4(GyldigForYtelse.OmsOgBp, "Ftrl. § 22-15 4. ledd"),
+    FTRL_22_15_5(GyldigForYtelse.OmsOgBp, "Ftrl. § 22-15 5. ledd"),
+    FTRL_22_17A(GyldigForYtelse.OmsOgBp, "Ftrl. § 22-17 a"),
+    FTRL_22_17B(GyldigForYtelse.OmsOgBp, "Ftrl. § 22-17 b"),
+    FTRL_25_14(GyldigForYtelse.OmsOgBp, "Ftrl. § 25-14"),
 
-    FVL_31(GyldigForYtelse.OmsOgBp),
-    FVL_32(GyldigForYtelse.OmsOgBp),
-    FVL_33_2(GyldigForYtelse.OmsOgBp),
-    FVL_35_1_C(GyldigForYtelse.OmsOgBp),
-    FVL_36(GyldigForYtelse.OmsOgBp),
+    FVL_31(GyldigForYtelse.OmsOgBp, "Fvl. § 31"),
+    FVL_32(GyldigForYtelse.OmsOgBp, "Fvl. § 32"),
+    FVL_33_2(GyldigForYtelse.OmsOgBp, "Fvl. § 33-2"),
+    FVL_35_1_C(GyldigForYtelse.OmsOgBp, "Fvl. § 35, 1.ledd c)"),
+    FVL_36(GyldigForYtelse.OmsOgBp, "Fvl. § 36"),
 
-    ANDRE_TRYGDEAVTALER(GyldigForYtelse.OmsOgBp),
-    EOES_AVTALEN_BEREGNING(GyldigForYtelse.OmsOgBp),
-    EOES_AVTALEN_MEDLEMSKAP_TRYGDETID(GyldigForYtelse.OmsOgBp),
+    ANDRE_TRYGDEAVTALER(GyldigForYtelse.OmsOgBp, "Andre trygdeavtaler"),
+    EOES_AVTALEN_BEREGNING(GyldigForYtelse.OmsOgBp, "EØS - beregning"),
+    EOES_AVTALEN_MEDLEMSKAP_TRYGDETID(GyldigForYtelse.OmsOgBp, "EØS - medlemskap / trygdetid"),
 
-    FTRL_18_1_A(GyldigForYtelse.KunBp),
-    FTRL_18_2(GyldigForYtelse.KunBp),
-    FTRL_18_3(GyldigForYtelse.KunBp),
-    FTRL_18_4(GyldigForYtelse.KunBp),
-    FTRL_18_5(GyldigForYtelse.KunBp),
-    FTRL_18_6(GyldigForYtelse.KunBp),
-    FTRL_18_7(GyldigForYtelse.KunBp),
-    FTRL_18_8(GyldigForYtelse.KunBp),
-    FTRL_18_9(GyldigForYtelse.KunBp),
-    FTRL_18_10(GyldigForYtelse.KunBp),
-    FTRL_18_11(GyldigForYtelse.KunBp),
+    FTRL_18_1_A(GyldigForYtelse.KunBp, "Ftrl. § 18-1 A"),
+    FTRL_18_2(GyldigForYtelse.KunBp, "Ftrl. § 18-2"),
+    FTRL_18_3(GyldigForYtelse.KunBp, "Ftrl. § 18-3"),
+    FTRL_18_4(GyldigForYtelse.KunBp, "Ftrl. § 18-4"),
+    FTRL_18_5(GyldigForYtelse.KunBp, "Ftrl. § 18-5"),
+    FTRL_18_6(GyldigForYtelse.KunBp, "Ftrl. § 18-6"),
+    FTRL_18_7(GyldigForYtelse.KunBp, "Ftrl. § 18-7"),
+    FTRL_18_8(GyldigForYtelse.KunBp, "Ftrl. § 18-8"),
+    FTRL_18_9(GyldigForYtelse.KunBp, "Ftrl. § 18-9"),
+    FTRL_18_10(GyldigForYtelse.KunBp, "Ftrl. § 18-10"),
+    FTRL_18_11(GyldigForYtelse.KunBp, "Ftrl. § 18-11"),
 
-    FTRL_17_1_A(GyldigForYtelse.KunOms),
-    FTRL_17_2(GyldigForYtelse.KunOms),
-    FTRL_17_3(GyldigForYtelse.KunOms),
-    FTRL_17_4(GyldigForYtelse.KunOms),
-    FTRL_17_5(GyldigForYtelse.KunOms),
-    FTRL_17_6(GyldigForYtelse.KunOms),
-    FTRL_17_7(GyldigForYtelse.KunOms),
-    FTRL_17_8(GyldigForYtelse.KunOms),
-    FTRL_17_9(GyldigForYtelse.KunOms),
-    FTRL_17_10(GyldigForYtelse.KunOms),
-    FTRL_17_11(GyldigForYtelse.KunOms),
-    FTRL_17_12(GyldigForYtelse.KunOms),
-    FTRL_17_13(GyldigForYtelse.KunOms),
-    FTRL_17_14(GyldigForYtelse.KunOms),
-    FTRL_17_15(GyldigForYtelse.KunOms),
+    FTRL_17_1_A(GyldigForYtelse.KunOms, "Ftrl. § 17-1 A"),
+    FTRL_17_2(GyldigForYtelse.KunOms, "Ftrl. § 17-2"),
+    FTRL_17_3(GyldigForYtelse.KunOms, "Ftrl. § 17-3"),
+    FTRL_17_4(GyldigForYtelse.KunOms, "Ftrl. § 17-4"),
+    FTRL_17_5(GyldigForYtelse.KunOms, "Ftrl. § 17-5"),
+    FTRL_17_6(GyldigForYtelse.KunOms, "Ftrl. § 17-6"),
+    FTRL_17_7(GyldigForYtelse.KunOms, "Ftrl. § 17-7"),
+    FTRL_17_8(GyldigForYtelse.KunOms, "Ftrl. § 17-8"),
+    FTRL_17_9(GyldigForYtelse.KunOms, "Ftrl. § 17-9"),
+    FTRL_17_10(GyldigForYtelse.KunOms, "Ftrl. § 17-10"),
+    FTRL_17_11(GyldigForYtelse.KunOms, "Ftrl. § 17-11"),
+    FTRL_17_12(GyldigForYtelse.KunOms, "Ftrl. § 17-12"),
+    FTRL_17_13(GyldigForYtelse.KunOms, "Ftrl. § 17-13"),
+    FTRL_17_14(GyldigForYtelse.KunOms, "Ftrl. § 17-14"),
+    FTRL_17_15(GyldigForYtelse.KunOms, "Ftrl. § 17-15"),
 
-    FTRL_17_A_1(GyldigForYtelse.KunOms),
-    FTRL_17_A_2(GyldigForYtelse.KunOms),
-    FTRL_17_A_3(GyldigForYtelse.KunOms),
-    FTRL_17_A_4(GyldigForYtelse.KunOms),
-    FTRL_17_A_5(GyldigForYtelse.KunOms),
-    FTRL_17_A_6(GyldigForYtelse.KunOms),
-    FTRL_17_A_7(GyldigForYtelse.KunOms),
-    FTRL_17_A_8(GyldigForYtelse.KunOms),
+    FTRL_17_A_1(GyldigForYtelse.KunOms, "Ftrl. § 17 A-1"),
+    FTRL_17_A_2(GyldigForYtelse.KunOms, "Ftrl. § 17 A-2"),
+    FTRL_17_A_3(GyldigForYtelse.KunOms, "Ftrl. § 17 A-3"),
+    FTRL_17_A_4(GyldigForYtelse.KunOms, "Ftrl. § 17 A-4"),
+    FTRL_17_A_5(GyldigForYtelse.KunOms, "Ftrl. § 17 A-5"),
+    FTRL_17_A_6(GyldigForYtelse.KunOms, "Ftrl. § 17 A-6"),
+    FTRL_17_A_7(GyldigForYtelse.KunOms, "Ftrl. § 17 A-7"),
+    FTRL_17_A_8(GyldigForYtelse.KunOms, "Ftrl. § 17 A-8"),
     ;
 
     fun kanBrukesForSaktype(sakType: SakType): Boolean {
         return this.gyldigForYtelse.gyldigForSaktype(sakType)
+    }
+
+    fun lesbarTekst(): String {
+        return this.leseligTekst
     }
 }
 
@@ -571,7 +620,7 @@ class InnstillingTilKabal(
     val lovhjemmel: KabalHjemmel,
     val internKommentar: String?,
     val innstillingTekst: String,
-    val brev: KlageBrevInnstilling,
+    val brev: KlageOversendelsebrev,
 )
 
 class InnstillingTilKabalUtenBrev(val lovhjemmel: String, internKommentar: String?, val innstillingTekst: String) {
@@ -579,7 +628,7 @@ class InnstillingTilKabalUtenBrev(val lovhjemmel: String, internKommentar: Strin
         get() = if (field.isNullOrBlank()) null else field
 }
 
-data class KlageBrevInnstilling(val brevId: Long)
+data class KlageOversendelsebrev(val brevId: Long)
 
 data class KlageVedtaksbrev(val brevId: Long)
 

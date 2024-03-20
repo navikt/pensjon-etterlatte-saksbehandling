@@ -8,31 +8,40 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { Tabs } from '@navikt/ds-react'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
-import { BulletListIcon, EnvelopeClosedIcon, FileTextIcon } from '@navikt/aksel-icons'
+import { BulletListIcon, CogRotationIcon, EnvelopeClosedIcon, FileTextIcon, PersonIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
 
-import { mapAllApiResult, mapSuccess } from '~shared/api/apiUtils'
+import { isSuccess, mapAllApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
 import { hentPersonNavn } from '~shared/api/pdltjenester'
+import { SamordningSak } from '~components/person/SamordningSak'
+import { SakMedBehandlinger } from '~components/person/typer'
+import { SakType } from '~shared/types/sak'
+import { Personopplysninger } from '~components/person/personopplysninger/Personopplysninger'
+import { useSidetittel } from '~shared/hooks/useSidetittel'
 
-enum Fane {
+export enum PersonOversiktFane {
+  PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
   SAKER = 'SAKER',
   DOKUMENTER = 'DOKUMENTER',
   BREV = 'BREV',
+  SAMORDNING = 'SAMORDNING',
 }
 
 export const Person = () => {
+  useSidetittel('Personoversikt')
+
   const [search, setSearch] = useSearchParams()
 
   const [personStatus, hentPerson] = useApiCall(hentPersonNavn)
   const [sakStatus, hentSak] = useApiCall(hentSakMedBehandlnger)
-  const [fane, setFane] = useState(search.get('fane') || Fane.SAKER)
+  const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
 
   const velgFane = (value: string) => {
-    const valgtFane = value as Fane
+    const valgtFane = value as PersonOversiktFane
 
     setSearch({ fane: valgtFane })
     setFane(valgtFane)
@@ -59,6 +68,10 @@ export const Person = () => {
     return <ApiErrorAlert>Fødselsnummeret {fnr} har et ugyldig format (ikke 11 siffer)</ApiErrorAlert>
   }
 
+  const isOmstillingsstoenad = (sakStatus: Result<SakMedBehandlinger>) => {
+    return isSuccess(sakStatus) && sakStatus.data.sak.sakType === SakType.OMSTILLINGSSTOENAD
+  }
+
   return (
     <>
       {mapSuccess(personStatus, (person) => (
@@ -76,19 +89,33 @@ export const Person = () => {
         (person) => (
           <Tabs value={fane} onChange={velgFane}>
             <Tabs.List>
-              <Tabs.Tab value={Fane.SAKER} label="Sak og behandling" icon={<BulletListIcon />} />
-              <Tabs.Tab value={Fane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
-              <Tabs.Tab value={Fane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
+              <Tabs.Tab value={PersonOversiktFane.SAKER} label="Sak og behandling" icon={<BulletListIcon />} />
+              <Tabs.Tab
+                value={PersonOversiktFane.PERSONOPPLYSNINGER}
+                label="Personopplysninger"
+                icon={<PersonIcon />}
+              />
+              <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
+              <Tabs.Tab value={PersonOversiktFane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
+              {isOmstillingsstoenad(sakStatus) && (
+                <Tabs.Tab value={PersonOversiktFane.SAMORDNING} label="Samordning" icon={<CogRotationIcon />} />
+              )}
             </Tabs.List>
 
-            <Tabs.Panel value={Fane.SAKER}>
+            <Tabs.Panel value={PersonOversiktFane.SAKER}>
               <SakOversikt sakStatus={sakStatus} fnr={person.foedselsnummer} />
             </Tabs.Panel>
-            <Tabs.Panel value={Fane.DOKUMENTER}>
-              <Dokumentliste fnr={person.foedselsnummer} />
+            <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
+              <Personopplysninger sakStatus={sakStatus} fnr={person.foedselsnummer} />
             </Tabs.Panel>
-            <Tabs.Panel value={Fane.BREV}>
+            <Tabs.Panel value={PersonOversiktFane.DOKUMENTER}>
+              <Dokumentliste sakStatus={sakStatus} fnr={person.foedselsnummer} />
+            </Tabs.Panel>
+            <Tabs.Panel value={PersonOversiktFane.BREV}>
               <BrevOversikt sakStatus={sakStatus} />
+            </Tabs.Panel>
+            <Tabs.Panel value={PersonOversiktFane.SAMORDNING}>
+              <SamordningSak sakStatus={sakStatus} />
             </Tabs.Panel>
           </Tabs>
         )

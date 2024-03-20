@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.config
 
+import no.nav.etterlatte.jobs.next
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
@@ -24,7 +25,6 @@ import no.nav.etterlatte.utbetaling.common.juli
 import no.nav.etterlatte.utbetaling.common.juni
 import no.nav.etterlatte.utbetaling.common.mai
 import no.nav.etterlatte.utbetaling.common.mars
-import no.nav.etterlatte.utbetaling.common.next
 import no.nav.etterlatte.utbetaling.common.november
 import no.nav.etterlatte.utbetaling.common.oktober
 import no.nav.etterlatte.utbetaling.common.september

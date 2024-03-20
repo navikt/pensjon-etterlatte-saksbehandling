@@ -12,8 +12,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.token.Saksbehandler
 import java.time.LocalDate
 import java.time.Period
 import java.util.UUID
@@ -52,6 +52,7 @@ fun trygdetid(
     beregnetTrygdetid: DetaljertBeregnetTrygdetid? = null,
     trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
     opplysninger: List<Opplysningsgrunnlag> = standardOpplysningsgrunnlag(),
+    yrkesskade: Boolean = false,
 ) = Trygdetid(
     id = randomUUID(),
     sakId = sakId,
@@ -60,6 +61,7 @@ fun trygdetid(
     opplysninger = opplysninger,
     beregnetTrygdetid = beregnetTrygdetid,
     ident = ident,
+    yrkesskade = yrkesskade,
 )
 
 fun standardOpplysningsgrunnlag(): List<Opplysningsgrunnlag> {
@@ -141,6 +143,7 @@ fun trygdeavtale(
 fun beregnetTrygdetid(
     total: Int = 0,
     tidspunkt: Tidspunkt = Tidspunkt.now(),
+    yrkesskade: Boolean = false,
 ) = DetaljertBeregnetTrygdetid(
     resultat =
         DetaljertBeregnetTrygdetidResultat(
@@ -152,6 +155,8 @@ fun beregnetTrygdetid(
             samletTrygdetidTeoretisk = null,
             prorataBroek = null,
             overstyrt = false,
+            yrkesskade = yrkesskade,
+            beregnetSamletTrygdetidNorge = null,
         ),
     tidspunkt = tidspunkt,
     regelResultat = "".toJsonNode(),
@@ -162,45 +167,4 @@ fun beregnetTrygdetidGrunnlag(verdi: Period = Period.parse("P2Y2D")) =
         verdi = verdi,
         tidspunkt = Tidspunkt.now(),
         regelResultat = "".toJsonNode(),
-    )
-
-fun beregnetYrkesskadeTrygdetid() =
-    DetaljertBeregnetTrygdetid(
-        resultat = DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(40),
-        tidspunkt = Tidspunkt.now(),
-        regelResultat =
-            """
-            {
-                "verdi": {
-                    "faktiskTrygdetidNorge": null,
-                    "faktiskTrygdetidTeoretisk": null,
-                    "fremtidigTrygdetidNorge": null,
-                    "fremtidigTrygdetidTeoretisk": null,
-                    "samletTrygdetidNorge": null,
-                    "samletTrygdetidTeoretisk": null,
-                    "prorataBroek": [0, 0] 
-                },
-                "regel": {
-                    "gjelderFra": "1900-01-01",
-                    "beskrivelse": "Yrkesskade fører altid til 40 år",
-                    "regelReferanse": { "id": "REGEL-YRKESSKADE-TRYGDETID", "versjon": "1" }
-                },
-                "noder": [
-                    {
-                        "verdi": 40,
-                        "regel": {
-                        "gjelderFra": "1900-01-01",
-                        "beskrivelse": "Full trygdetidsopptjening er 40 år",
-                        "regelReferanse": {
-                        "id": "REGEL-TOTAL-TRYGDETID-MAKS-ANTALL-ÅR",
-                        "versjon": "1"
-                    }
-                    },
-                        "noder": [],
-                        "opprettet": "2023-06-30T13:22:15.799453Z"
-                    }
-                ],
-                "opprettet": "2023-06-30T13:22:15.799509Z"
-            }
-            """.trimIndent().toJsonNode(),
     )

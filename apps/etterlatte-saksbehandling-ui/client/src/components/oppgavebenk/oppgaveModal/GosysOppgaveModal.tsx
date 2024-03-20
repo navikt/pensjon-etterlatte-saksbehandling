@@ -1,13 +1,15 @@
-import { BodyShort, Button, Heading, Label, Modal } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Dropdown, Heading, Label, Modal } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { EyeIcon } from '@navikt/aksel-icons'
+import { ChevronDownIcon, ExternalLinkIcon, EyeIcon } from '@navikt/aksel-icons'
 import { useContext, useState } from 'react'
 import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/components/Tags'
 import { formaterFnr, formaterStringDato } from '~utils/formattering'
-import { OppgaveDTO } from '~shared/api/oppgaver'
 import { ConfigContext } from '~clientConfig'
 import { FlexRow } from '~shared/styled'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
+import { OppgaveDTO } from '~shared/api/oppgaver'
+import { FerdigstillGosysOppgave } from '../gosys/FerdigstillGosysOppgave'
+import { OverfoerOppgaveTilGjenny } from '../gosys/OverfoerOppgaveTilGjenny'
 
 const TagRow = styled.div`
   display: flex;
@@ -22,9 +24,22 @@ const InfoGrid = styled.div`
   margin-bottom: 2rem;
 `
 
-export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
+export interface GosysActionToggle {
+  ferdigstill?: boolean
+  konverter?: boolean
+}
+
+export const GosysOppgaveModal = ({
+  oppgave,
+  tilhoererInnloggetSaksbehandler,
+}: {
+  oppgave: OppgaveDTO
+  tilhoererInnloggetSaksbehandler: boolean
+}) => {
   const [open, setOpen] = useState(false)
-  const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandler, beskrivelse, sakType } = oppgave
+  const [toggle, setToggle] = useState<GosysActionToggle>({})
+
+  const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandler, beskrivelse, sakType, journalpostId } = oppgave
 
   const configContext = useContext(ConfigContext)
 
@@ -34,10 +49,13 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
         Se oppgave
       </Button>
       <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
-        <Modal.Body>
+        <Modal.Header>
           <Heading size="medium" id="modal-heading">
-            Oppgave fra Gosys
+            {journalpostId ? 'Journalføringsoppgave fra Gosys' : 'Oppgave fra Gosys'}
           </Heading>
+        </Modal.Header>
+
+        <Modal.Body>
           <TagRow>
             <SaktypeTag sakType={sakType} />
             <OppgavetypeTag oppgavetype="GOSYS" />
@@ -73,27 +91,71 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
               <Label>Saksbehandler</Label>
               <BodyShort>{saksbehandler?.ident || '-'}</BodyShort>
             </div>
+            {!!journalpostId && (
+              <div>
+                <Label>JournalpostId</Label>
+                <BodyShort>{journalpostId}</BodyShort>
+              </div>
+            )}
           </InfoGrid>
-          <div>
+          <Box padding="4" borderRadius="medium" borderColor="border-subtle" borderWidth="1" background="bg-subtle">
             <Label>Beskrivelse</Label>
-            <BodyShort>{beskrivelse || <i>Mangler beskrivelse</i>}</BodyShort>
-          </div>
+            <BodyShort style={{ whiteSpace: 'pre-wrap' }}>{beskrivelse || <i>Mangler beskrivelse</i>}</BodyShort>
+          </Box>
 
           <br />
 
-          <FlexRow justify="right">
-            <Button variant="tertiary" onClick={() => setOpen(false)}>
-              Avbryt
-            </Button>
-            <Button
-              variant="primary"
-              as="a"
-              href={fnr ? `${configContext['gosysUrl']}/personoversikt/fnr=${fnr}` : configContext['gosysUrl']}
-              target="_blank"
-            >
-              Åpne og rediger i Gosys
-            </Button>
-          </FlexRow>
+          {toggle.ferdigstill ? (
+            <FerdigstillGosysOppgave oppgave={oppgave} setToggle={setToggle} />
+          ) : toggle.konverter ? (
+            <OverfoerOppgaveTilGjenny oppgave={oppgave} setToggle={setToggle} />
+          ) : (
+            <FlexRow justify="right">
+              <Button size="small" variant="tertiary" onClick={() => setOpen(false)}>
+                Avbryt
+              </Button>
+
+              {tilhoererInnloggetSaksbehandler && (
+                <Dropdown>
+                  <Button
+                    size="small"
+                    variant="secondary"
+                    icon={<ChevronDownIcon />}
+                    iconPosition="right"
+                    title="Flere handlinger"
+                    as={Dropdown.Toggle}
+                  >
+                    Flere handlinger
+                  </Button>
+
+                  <Dropdown.Menu>
+                    <Dropdown.Menu.List>
+                      <Dropdown.Menu.List.Item onClick={() => setToggle({ ferdigstill: true })}>
+                        Ferdigstill oppgave
+                      </Dropdown.Menu.List.Item>
+
+                      {!!journalpostId && (
+                        <Dropdown.Menu.List.Item onClick={() => setToggle({ konverter: true })}>
+                          Overfør til Gjenny
+                        </Dropdown.Menu.List.Item>
+                      )}
+                    </Dropdown.Menu.List>
+                  </Dropdown.Menu>
+                </Dropdown>
+              )}
+
+              <Button
+                size="small"
+                variant="primary"
+                as="a"
+                href={fnr ? `${configContext['gosysUrl']}/personoversikt/fnr=${fnr}` : configContext['gosysUrl']}
+                target="_blank"
+                icon={<ExternalLinkIcon />}
+              >
+                Åpne i Gosys
+              </Button>
+            </FlexRow>
+          )}
         </Modal.Body>
       </Modal>
     </>

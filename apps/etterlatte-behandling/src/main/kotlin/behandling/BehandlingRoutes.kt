@@ -17,7 +17,6 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -28,16 +27,15 @@ import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
-import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
-import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.hentNavidentFraToken
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
-import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
-import no.nav.etterlatte.tilgangsstyring.withLesetilgang
 
 internal fun Route.behandlingRoutes(
     behandlingService: BehandlingService,
@@ -49,8 +47,11 @@ internal fun Route.behandlingRoutes(
     val logger = application.log
 
     post("/api/behandling") {
-        kunSaksbehandlerMedSkrivetilgang {
-            val request = call.receive<NyBehandlingRequest>()
+        val request = call.receive<NyBehandlingRequest>()
+
+        val gjeldendeEnhet = inTransaction { behandlingFactory.finnGjeldendeEnhet(request.persongalleri, request.sakType) }
+
+        kunSkrivetilgang(enhetNr = gjeldendeEnhet) {
             val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request, brukerTokenInfo)
             call.respondText(behandling.id.toString())
         }
@@ -58,11 +59,9 @@ internal fun Route.behandlingRoutes(
 
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/") {
         get {
-            withLesetilgang {
-                val detaljertBehandlingDTO =
-                    behandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingId, brukerTokenInfo)
-                call.respond(detaljertBehandlingDTO)
-            }
+            val detaljertBehandlingDTO =
+                behandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingId, brukerTokenInfo)
+            call.respond(detaljertBehandlingDTO)
         }
 
         post("/gyldigfremsatt") {
@@ -276,12 +275,10 @@ internal fun Route.behandlingRoutes(
     route("/behandlinger") {
         route("/{$BEHANDLINGID_CALL_PARAMETER}") {
             get {
-                withLesetilgang {
-                    logger.info("Henter detaljert behandling for behandling med id=$behandlingId")
-                    when (val behandling = behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)) {
-                        is DetaljertBehandling -> call.respond(behandling)
-                        else -> call.respond(HttpStatusCode.NotFound, "Fant ikke behandling med id=$behandlingId")
-                    }
+                logger.info("Henter detaljert behandling for behandling med id=$behandlingId")
+                when (val behandling = behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)) {
+                    is DetaljertBehandling -> call.respond(behandling)
+                    else -> call.respond(HttpStatusCode.NotFound, "Fant ikke behandling med id=$behandlingId")
                 }
             }
 
@@ -296,9 +293,9 @@ internal fun Route.behandlingRoutes(
 
         route("/opprettbehandling") {
             post {
-                kunSkrivetilgang {
-                    val behandlingsBehov = call.receive<BehandlingsBehov>()
+                val behandlingsBehov = call.receive<BehandlingsBehov>()
 
+                kunSkrivetilgang(sakId = behandlingsBehov.sakId) {
                     when (
                         val behandling =
                             inTransaction {

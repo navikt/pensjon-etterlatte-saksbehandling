@@ -8,13 +8,20 @@ import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.util.UUID
 
 interface BehandlingHendelserKafkaProducer {
     fun sendMeldingForHendelseMedDetaljertBehandling(
         statistikkBehandling: StatistikkBehandling,
+        hendelseType: BehandlingHendelseType,
+    )
+
+    fun sendMeldingForHendelsePaaVent(
+        behandlingId: UUID,
         hendelseType: BehandlingHendelseType,
     )
 }
@@ -43,6 +50,30 @@ class BehandlingsHendelserKafkaProducerImpl(
         ).also { (partition, offset) ->
             logger.info(
                 "Posted event ${hendelseType.lagEventnameForType()} for behandling ${statistikkBehandling.id}" +
+                    " to partiton $partition, offset $offset correlationid: $correlationId",
+            )
+        }
+    }
+
+    override fun sendMeldingForHendelsePaaVent(
+        behandlingId: UUID,
+        hendelseType: BehandlingHendelseType,
+    ) {
+        val correlationId = getCorrelationId()
+
+        rapid.publiser(
+            behandlingId.toString(),
+            JsonMessage.newMessage(
+                hendelseType.lagEventnameForType(),
+                mapOf(
+                    CORRELATION_ID_KEY to correlationId,
+                    TEKNISK_TID_KEY to Tidspunkt.now(),
+                    BEHANDLING_RIVER_KEY to behandlingId,
+                ),
+            ).toJson(),
+        ).also { (partition, offset) ->
+            logger.info(
+                "Posted event ${hendelseType.lagEventnameForType()} for behandling $behandlingId" +
                     " to partiton $partition, offset $offset correlationid: $correlationId",
             )
         }

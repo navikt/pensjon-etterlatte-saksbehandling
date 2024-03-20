@@ -20,9 +20,9 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriodeVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -254,8 +254,8 @@ class TilbakekrevingService(
                             enhet = vedtak.enhet,
                             dato = vedtak.dato,
                         ),
-                    aarsak = requireNotNull(behandling.tilbakekreving.vurdering.aarsak),
-                    hjemmel = requireNotNull(behandling.tilbakekreving.vurdering.hjemmel),
+                    aarsak = requireNotNull(behandling.tilbakekreving.vurdering?.aarsak),
+                    hjemmel = requireNotNull(behandling.tilbakekreving.vurdering?.rettsligGrunnlag),
                     kravgrunnlagId = behandling.tilbakekreving.kravgrunnlag.kravgrunnlagId.value.toString(),
                     kontrollfelt = behandling.tilbakekreving.kravgrunnlag.kontrollFelt.value,
                     perioder =

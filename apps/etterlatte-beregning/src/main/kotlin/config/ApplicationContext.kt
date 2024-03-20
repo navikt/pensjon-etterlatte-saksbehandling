@@ -34,9 +34,11 @@ class ApplicationContext {
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
 
     private val beregningsGrunnlagRepository = BeregningsGrunnlagRepository(dataSource)
+    val beregningRepository = BeregningRepository(dataSource)
     val beregningsGrunnlagService =
         BeregningsGrunnlagService(
             beregningsGrunnlagRepository = beregningsGrunnlagRepository,
+            beregningRepository = beregningRepository,
             behandlingKlient = behandlingKlient,
             grunnlagKlient = grunnlagKlient,
         )
@@ -61,7 +63,6 @@ class ApplicationContext {
             grunnlagKlient = grunnlagKlient,
             vilkaarsvurderingKlient = vilkaarsvurderingKlient,
         )
-    val beregningRepository = BeregningRepository(dataSource)
     val beregningService =
         BeregningService(
             beregningRepository = beregningRepository,

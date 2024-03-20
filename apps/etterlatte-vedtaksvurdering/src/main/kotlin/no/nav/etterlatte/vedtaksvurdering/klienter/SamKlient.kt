@@ -18,8 +18,8 @@ import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
-import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import org.slf4j.LoggerFactory
@@ -35,7 +35,13 @@ interface SamKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
 
-    suspend fun hentSamordningsdata(vedtak: Vedtak): List<Samordningsvedtak>
+    /**
+     * @param vedtak IDer som sendes til SAM
+     */
+    suspend fun hentSamordningsdata(
+        vedtak: Vedtak,
+        alleVedtak: Boolean,
+    ): List<Samordningsvedtak>
 }
 
 class SamKlientImpl(
@@ -69,14 +75,20 @@ class SamKlientImpl(
         }
     }
 
-    override suspend fun hentSamordningsdata(vedtak: Vedtak): List<Samordningsvedtak> {
+    override suspend fun hentSamordningsdata(
+        vedtak: Vedtak,
+        alleVedtak: Boolean,
+    ): List<Samordningsvedtak> {
         try {
             val response =
                 httpClient.get {
                     url("$resourceUrl/api/vedtak")
                     header("pid", vedtak.soeker.value)
                     parameter("fagomrade", "EYO")
-                    parameter("vedtakId", "${vedtak.id}")
+                    parameter("sakId", "${vedtak.sakId}")
+                    if (!alleVedtak) {
+                        parameter("vedtakId", "${vedtak.id}")
+                    }
                 }
 
             return when (response.status) {

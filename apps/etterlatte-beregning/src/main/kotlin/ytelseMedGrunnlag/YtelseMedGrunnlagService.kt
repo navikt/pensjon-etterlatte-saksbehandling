@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagPeriodisertDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
 class YtelseMedGrunnlagService(
@@ -37,14 +37,20 @@ class YtelseMedGrunnlagService(
                         .filter { it.grunnlag.periode.fom <= avkortetYtelse.periode.fom }
                         .maxBy { it.grunnlag.periode.fom }
 
+                val grunnlag = avkortingsgrunnlagIPeriode.grunnlag
+                val aarsinntekt = grunnlag.aarsinntekt + grunnlag.inntektUtland
+                val fratrekkInnAar = grunnlag.fratrekkInnAar + grunnlag.fratrekkInnAarUtland
+
                 YtelseMedGrunnlagPeriodisertDto(
                     periode = avkortetYtelse.periode,
                     ytelseEtterAvkorting = avkortetYtelse.ytelseEtterAvkorting,
+                    restanse = avkortetYtelse.restanse?.fordeltRestanse ?: 0,
                     avkortingsbeloep = avkortetYtelse.avkortingsbeloep,
                     ytelseFoerAvkorting = beregningIPeriode.utbetaltBeloep,
                     trygdetid = beregningIPeriode.trygdetid,
-                    aarsinntekt = avkortingsgrunnlagIPeriode.grunnlag.aarsinntekt,
-                    fratrekkInnAar = avkortingsgrunnlagIPeriode.grunnlag.fratrekkInnAar,
+                    aarsinntekt = aarsinntekt,
+                    fratrekkInnAar = fratrekkInnAar,
+                    relevanteMaanederInnAar = grunnlag.relevanteMaanederInnAar,
                     grunnbelop = beregningIPeriode.grunnbelop,
                     grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
                     beregningsMetode = beregningIPeriode.beregningsMetode,

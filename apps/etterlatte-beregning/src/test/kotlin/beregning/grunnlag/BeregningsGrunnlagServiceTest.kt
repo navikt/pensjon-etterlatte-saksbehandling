@@ -11,6 +11,7 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlient
@@ -30,13 +31,14 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregn
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_ANNEN_FORELDER
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
-import no.nav.etterlatte.token.BrukerTokenInfo
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -51,10 +53,12 @@ import java.util.UUID.randomUUID
 internal class BeregningsGrunnlagServiceTest {
     private val behandlingKlient = mockk<BehandlingKlientImpl>()
     private val beregningsGrunnlagRepository = mockk<BeregningsGrunnlagRepository>()
+    private val beregningRepository = mockk<BeregningRepository>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val beregningsGrunnlagService: BeregningsGrunnlagService =
         BeregningsGrunnlagService(
             beregningsGrunnlagRepository,
+            beregningRepository,
             behandlingKlient,
             grunnlagKlient,
         )
@@ -395,7 +399,7 @@ internal class BeregningsGrunnlagServiceTest {
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(omregningsId, behandlingsId)
+            beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(omregningsId, behandlingsId, Systembruker.testdata)
 
             verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
             verify(exactly = 0) { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) }
@@ -436,7 +440,7 @@ internal class BeregningsGrunnlagServiceTest {
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(omregningsId, behandlingsId)
+            beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(omregningsId, behandlingsId, Systembruker.testdata)
 
             verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
             verify(exactly = 1) { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) }
@@ -456,7 +460,7 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             assertThrows<RuntimeException> {
-                beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(randomUUID(), behandlingsId)
+                beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(randomUUID(), behandlingsId, Systembruker.testdata)
 
                 verify(exactly = 0) { beregningsGrunnlagRepository.lagre(any()) }
             }
@@ -484,7 +488,7 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             assertThrows<RuntimeException> {
-                beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(omregningsId, behandlingsId)
+                beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(omregningsId, behandlingsId, Systembruker.testdata)
 
                 verify(exactly = 0) { beregningsGrunnlagRepository.lagre(any()) }
             }

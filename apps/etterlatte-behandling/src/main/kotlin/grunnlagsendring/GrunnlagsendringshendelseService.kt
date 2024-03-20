@@ -32,10 +32,10 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
-import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -123,12 +123,15 @@ class GrunnlagsendringshendelseService(
             } catch (e: Exception) {
                 logger.error("Noe gikk galt ved opprettelse av dødshendelse i behandling.", e)
             }
-            return emptyList()
-        } else {
+        }
+
+        if (!doedshendelseService.kanSendeBrevOgOppretteOppgave()) {
             return inTransaction {
                 opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL)
             }
         }
+
+        return emptyList()
     }
 
     fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse): List<Grunnlagsendringshendelse> {
@@ -372,7 +375,11 @@ class GrunnlagsendringshendelseService(
     ) {
         val personRolle = grunnlagsendringshendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
         val pdlData =
-            pdltjenesterKlient.hentPdlModellFlereSaktyper(grunnlagsendringshendelse.gjelderPerson, personRolle, sak.sakType)
+            pdltjenesterKlient.hentPdlModellFlereSaktyper(
+                grunnlagsendringshendelse.gjelderPerson,
+                personRolle,
+                sak.sakType,
+            )
         val grunnlag =
             runBlocking {
                 grunnlagKlient.hentGrunnlag(sak.id)

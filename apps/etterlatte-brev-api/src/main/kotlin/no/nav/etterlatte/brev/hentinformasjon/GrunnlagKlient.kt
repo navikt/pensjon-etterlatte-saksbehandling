@@ -3,17 +3,16 @@ package no.nav.etterlatte.brev.hentinformasjon
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
+import io.ktor.client.plugins.ResponseException
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
-import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
-
-class GrunnlagKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
 
 class GrunnlagKlient(config: Config, httpClient: HttpClient) {
     private val logger = LoggerFactory.getLogger(GrunnlagKlient::class.java)
@@ -38,8 +37,14 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
                 success = { resource -> resource.response.let { deserialize(it.toString()) } },
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
-        } catch (e: Exception) {
-            throw GrunnlagKlientException("Henting av grunnlag for sak med sakId=$sakid feilet", e)
+        } catch (e: ResponseException) {
+            logger.error("Henting av grunnlag for sak med sakId=$sakid feilet", e)
+
+            throw ForespoerselException(
+                status = e.response.status.value,
+                code = "UKJENT_FEIL_HENT_GRUNNLAG",
+                detail = "Henting av grunnlag for sak feilet",
+            )
         }
     }
 
@@ -57,8 +62,14 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
                 success = { resource -> resource.response.let { deserialize(it.toString()) } },
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
-        } catch (e: Exception) {
-            throw GrunnlagKlientException("Henting av grunnlag for behandling med id=$behandlingId feilet", e)
+        } catch (e: ResponseException) {
+            logger.error("Henting av grunnlag for behandling med id=$behandlingId feilet", e)
+
+            throw ForespoerselException(
+                status = e.response.status.value,
+                code = "UKJENT_FEIL_HENT_GRUNNLAG",
+                detail = "Henting av grunnlag for behandling feilet",
+            )
         }
     }
 }

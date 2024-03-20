@@ -1,11 +1,11 @@
 import { CollapsibleSidebar, SidebarContent, SidebarTools } from '~shared/styled'
 import React, { useEffect, useState } from 'react'
-import { BodyShort, Button } from '@navikt/ds-react'
+import { Alert, Button, Heading, Tag } from '@navikt/ds-react'
 import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
+import { teksterTilbakekrevingStatus, TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
@@ -14,8 +14,14 @@ import { IBeslutning } from '~components/behandling/attestering/types'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { updateVedtakSammendrag } from '~store/reducers/VedtakReducer'
 
-import { mapApiResult } from '~shared/api/apiUtils'
+import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
+import { tagColors, TagList } from '~shared/Tags'
+import { formaterSakstype } from '~utils/formattering'
+import { Info, Tekst } from '~components/behandling/attestering/styled'
+import { hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave } from '~shared/api/oppgaver'
+import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 
 export function TilbakekrevingSidemeny() {
   const tilbakekreving = useTilbakekreving()
@@ -25,6 +31,20 @@ export function TilbakekrevingSidemeny() {
 
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
   const [beslutning, setBeslutning] = useState<IBeslutning>()
+
+  const [oppgaveForBehandlingenStatus, requesthentOppgaveForBehandling] = useApiCall(
+    hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave
+  )
+
+  const hentOppgaveForBehandling = () => {
+    if (tilbakekreving) {
+      requesthentOppgaveForBehandling({ referanse: tilbakekreving.id, sakId: tilbakekreving.sak.id })
+    }
+  }
+
+  useEffect(() => {
+    hentOppgaveForBehandling()
+  }, [])
 
   const kanAttestere =
     !!tilbakekreving &&
@@ -48,8 +68,53 @@ export function TilbakekrevingSidemeny() {
         </Button>
       </SidebarTools>
       <SidebarContent collapsed={collapsed}>
-        <SidebarPanel>
-          <BodyShort>Her kan vi vise info om tilbakekrevingen, som sakid: {tilbakekreving?.sak?.id}</BodyShort>
+        <SidebarPanel border>
+          <Heading size="small">Tilbakekreving</Heading>
+          <Heading size="xsmall" spacing>
+            {teksterTilbakekrevingStatus[tilbakekreving!!.status]}
+          </Heading>
+          <TagList>
+            <li>
+              <Tag variant={tagColors[tilbakekreving!!.sak.sakType]}>
+                {formaterSakstype(tilbakekreving!!.sak.sakType)}
+              </Tag>
+            </li>
+          </TagList>
+          <div className="info">
+            <Info>Saksbehandler</Info>
+            {mapApiResult(
+              oppgaveForBehandlingenStatus,
+              <Spinner visible={true} label="Henter oppgave" />,
+              () => (
+                <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
+              ),
+              (oppgave) =>
+                !!oppgave?.saksbehandler ? (
+                  <Tekst>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Tekst>
+                ) : (
+                  <Alert size="small" variant="warning">
+                    Ingen saksbehandler har tatt denne oppgaven
+                  </Alert>
+                )
+            )}
+          </div>
+          <div>
+            <Info>Sakid:</Info>
+            <KopierbarVerdi value={tilbakekreving!!.sak.id.toString()} />
+          </div>
+          {mapSuccess(oppgaveForBehandlingenStatus, (oppgave) => {
+            if (
+              [
+                TilbakekrevingStatus.OPPRETTET,
+                TilbakekrevingStatus.UNDER_ARBEID,
+                TilbakekrevingStatus.UNDERKJENT,
+                TilbakekrevingStatus.FATTET_VEDTAK,
+              ].includes(tilbakekreving!!.status)
+            ) {
+              return <SettPaaVent oppgave={oppgave} redigerbar={true} refreshOppgave={hentOppgaveForBehandling} />
+            }
+            return null
+          })}
         </SidebarPanel>
       </SidebarContent>
       {kanAttestere && (

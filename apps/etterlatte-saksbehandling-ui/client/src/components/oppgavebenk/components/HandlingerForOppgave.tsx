@@ -117,7 +117,7 @@ export const HandlingerForOppgave = ({
         </>
       )
     case 'GOSYS':
-      return <GosysOppgaveModal oppgave={oppgave} />
+      return <GosysOppgaveModal oppgave={oppgave} tilhoererInnloggetSaksbehandler={erInnloggetSaksbehandlerOppgave} />
     case 'KLAGE':
       return erInnloggetSaksbehandlerOppgave ? (
         <Button size="small" href={`/klage/${referanse}`} as="a">

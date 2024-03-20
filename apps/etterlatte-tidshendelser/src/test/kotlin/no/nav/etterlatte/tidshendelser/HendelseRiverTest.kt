@@ -48,6 +48,7 @@ class HendelseRiverTest(dataSource: DataSource) {
         with(hendelseDao.hentHendelserForJobb(jobb.id).first()) {
             this.steg shouldBe "VURDERT_LOEPENDE_YTELSE"
             this.info shouldNotBe null
+            this.loependeYtelse shouldBe true
         }
     }
 
@@ -74,6 +75,10 @@ class HendelseRiverTest(dataSource: DataSource) {
             this.steg shouldBe "OPPGAVE_OPPRETTET"
             this.status shouldBe HendelseStatus.FERDIG
             this.info shouldNotBe null
+        }
+
+        with(hendelseDao.hentJobb(jobb.id)) {
+            this.status shouldBe JobbStatus.FERDIG
         }
     }
 }

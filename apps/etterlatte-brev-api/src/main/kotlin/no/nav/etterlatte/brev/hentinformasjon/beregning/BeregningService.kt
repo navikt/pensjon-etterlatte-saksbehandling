@@ -9,7 +9,7 @@ import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.hentBenyttetTrygdetidOgProratabroek
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.YearMonth
 import java.util.UUID
@@ -109,8 +109,13 @@ class BeregningService(private val beregningKlient: BeregningKlient) {
                 AvkortetBeregningsperiode(
                     datoFOM = it.periode.fom.atDay(1),
                     datoTOM = it.periode.tom?.atEndOfMonth(),
+                    grunnbeloep = Kroner(it.grunnbelop),
                     inntekt = Kroner(it.aarsinntekt - it.fratrekkInnAar),
+                    aarsinntekt = Kroner(it.aarsinntekt),
+                    fratrekkInnAar = Kroner(it.fratrekkInnAar),
+                    relevanteMaanederInnAar = it.relevanteMaanederInnAar,
                     ytelseFoerAvkorting = Kroner(it.ytelseFoerAvkorting),
+                    restanse = Kroner(it.restanse),
                     utbetaltBeloep = Kroner(it.ytelseEtterAvkorting),
                     trygdetid = it.trygdetid,
                     beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
@@ -121,12 +126,7 @@ class BeregningService(private val beregningKlient: BeregningKlient) {
                 )
             }
 
-        val aarsInntekt = ytelseMedGrunnlag.perioder.first().aarsinntekt
-        val grunnbeloep = ytelseMedGrunnlag.perioder.first().grunnbelop
-
         return Avkortingsinfo(
-            grunnbeloep = Kroner(grunnbeloep),
-            inntekt = Kroner(aarsInntekt),
             virkningsdato = virkningstidspunkt.atDay(1),
             beregningsperioder = beregningsperioder,
         )

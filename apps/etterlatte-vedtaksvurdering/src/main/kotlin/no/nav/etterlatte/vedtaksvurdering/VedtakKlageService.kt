@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.OpprettVedtak
 import no.nav.etterlatte.vedtaksvurdering.RapidInfo
 import no.nav.etterlatte.vedtaksvurdering.UgyldigAttestantException
@@ -46,8 +46,6 @@ class VedtakKlageService(
                     ),
                 )
             } else {
-                // TODO Kandidat for å flytte til felles sjekk for alle vedtakstyper
-                // TODO verifiser lovlig type-overgang
                 verifiserGyldigVedtakStatus(
                     eksisterendeVedtak.status,
                     listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT),

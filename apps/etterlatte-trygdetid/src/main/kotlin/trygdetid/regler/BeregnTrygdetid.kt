@@ -107,13 +107,6 @@ val dagerPrMaanedTrygdetid =
         verdi = 30,
     )
 
-val totalTrygdetidYrkesskade =
-    RegelMeta(
-        gjelderFra = TRYGDETID_DATO,
-        beskrivelse = "Yrkesskade fører altid til 40 år",
-        regelReferanse = RegelReferanse(id = "REGEL-YRKESSKADE-TRYGDETID"),
-    ) benytter maksTrygdetid med { it }
-
 val totalTrygdetidFraPerioder =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
@@ -159,6 +152,7 @@ data class TrygdetidGrunnlagMedAvdoed(
     val foedselsDato: LocalDate,
     val doedsDato: LocalDate,
     val norskPoengaar: Int?,
+    val yrkesskade: Boolean,
 )
 
 data class TrygdetidGrunnlagMedAvdoedGrunnlag(
@@ -187,6 +181,14 @@ val antallPoengaarINorge: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Int?> =
         beskrivelse = "Finner antall poengår i Norge for overstyring av norske TT perioder",
         finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagMedAvdoed,
         finnFelt = { it.norskPoengaar },
+    )
+
+val erYrkesskade: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Boolean> =
+    finnFaktumIGrunnlag(
+        gjelderFra = TRYGDETID_DATO,
+        beskrivelse = "Er dette yrkesskade",
+        finnFaktum = TrygdetidGrunnlagMedAvdoedGrunnlag::trygdetidGrunnlagMedAvdoed,
+        finnFelt = { it.yrkesskade },
     )
 
 val finnDatoerForOpptjeningstid =
@@ -482,8 +484,27 @@ val beregnDetaljertBeregnetTrygdetid =
                 samletTrygdetidTeoretisk = avrundet.first.teoretisk.takeIf { it != null && it > 0 },
                 prorataBroek = avrundet.second,
                 overstyrt = false,
+                yrkesskade = false,
+                beregnetSamletTrygdetidNorge = null,
             )
         }
+
+val beregnDetaljertBeregnetTrygdetidMedYrkesskade =
+    RegelMeta(
+        gjelderFra = TRYGDETID_DATO,
+        beskrivelse = "Sjekk om detaljert beregnet trygdetid skal endres pga yrkesskade",
+        regelReferanse = RegelReferanse(id = "REGEL-TOTAL-DETALJERT-TRYGDETID-YS"),
+    ) benytter beregnDetaljertBeregnetTrygdetid og erYrkesskade med { trygdetid, erYrkesskade ->
+        when (erYrkesskade) {
+            false -> trygdetid
+            true ->
+                trygdetid.copy(
+                    yrkesskade = true,
+                    beregnetSamletTrygdetidNorge = trygdetid.samletTrygdetidNorge,
+                    samletTrygdetidNorge = 40,
+                )
+        }
+    }
 
 // Utility functions - burde vaert regler men maa kalles fra flere steder.
 // Subsumsjonsverdi for regler som kalle disse skal fortsatt være korrekt.

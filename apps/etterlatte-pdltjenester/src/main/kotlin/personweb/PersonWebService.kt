@@ -2,12 +2,12 @@ package no.nav.etterlatte.personweb
 
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlResponseError
 import no.nav.etterlatte.pdl.mapper.PersonMapper
-import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import personweb.dto.PersonNavn
 
@@ -24,26 +24,26 @@ class PersonWebService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun hentPersonNavn(
-        foedselsnummer: Folkeregisteridentifikator,
+        ident: String,
         bruker: BrukerTokenInfo,
     ): PersonNavn {
-        logger.info("Henter navn for fnr=$foedselsnummer fra PDL")
+        logger.info("Henter navn for ident=${ident.maskerFnr()} fra PDL")
 
-        return pdlOboKlient.hentPersonNavn(foedselsnummer.value, bruker).let {
+        return pdlOboKlient.hentPersonNavn(ident, bruker).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.joinToString()
 
                 if (it.errors?.personIkkeFunnet() == true) {
-                    throw FantIkkePersonException("Fant ikke personen $foedselsnummer")
+                    throw FantIkkePersonException("Fant ikke person i PDL")
                 } else {
                     throw PdlForesporselFeilet(
-                        "Kunne ikke hente person med fnr=$foedselsnummer fra PDL: $pdlFeil",
+                        "Kunne ikke hente person med ident=${ident.maskerFnr()} fra PDL: $pdlFeil",
                     )
                 }
             } else {
                 PersonMapper.mapPersonNavn(
                     ppsKlient = ppsKlient,
-                    fnr = foedselsnummer,
+                    ident = ident,
                     hentPerson = it.data.hentPerson,
                 )
             }

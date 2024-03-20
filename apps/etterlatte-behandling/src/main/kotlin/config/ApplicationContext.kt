@@ -26,9 +26,12 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
+import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
 import no.nav.etterlatte.behandling.klage.KlageServiceImpl
+import no.nav.etterlatte.behandling.klienter.AxsysKlient
+import no.nav.etterlatte.behandling.klienter.AxsysKlientImpl
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlientObo
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
@@ -73,6 +76,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.Doedshende
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
+import no.nav.etterlatte.jobs.next
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
@@ -80,16 +84,21 @@ import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.isProd
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.metrics.BehandlingMetrics
 import no.nav.etterlatte.metrics.BehandlingMetrikkerDao
+import no.nav.etterlatte.metrics.GjenopprettingMetrikkerDao
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.person.krr.KrrKlientImpl
+import no.nav.etterlatte.oppgave.FristGaarUtJobb
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -101,9 +110,11 @@ import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
+import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
-import no.nav.etterlatte.token.Fagsaksystem
 import java.time.Duration
+import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 private fun pdlHttpClient(config: Config) =
@@ -177,6 +188,14 @@ private fun krrHttKlient(config: Config) =
         azureAppScope = config.getString("krr.scope"),
     )
 
+private fun axsysKlient(config: Config) =
+    httpClientClientCredentials(
+        azureAppClientId = config.getString("azure.app.client.id"),
+        azureAppJwk = config.getString("azure.app.jwk"),
+        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+        azureAppScope = config.getString("axsys.scope"),
+    )
+
 private fun finnBrukerIdent(): String {
     val kontekst = Kontekst.get()
     return when (kontekst) {
@@ -214,12 +233,13 @@ internal class ApplicationContext(
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
-    val brevApiHttpClient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
+    val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
     val tilbakekrevingHttpClient: HttpClient = tilbakekrevingHttpClient(config),
     val migreringHttpClient: HttpClient = migreringHttpClient(config),
     val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
     val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
+    val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -248,6 +268,7 @@ internal class ApplicationContext(
     val institusjonsoppholdDao = InstitusjonsoppholdDao(autoClosingDatabase)
     val oppgaveMetrikkerDao = OppgaveMetrikkerDao(dataSource)
     val behandlingMetrikkerDao = BehandlingMetrikkerDao(dataSource)
+    val gjenopprettingMetrikkerDao = GjenopprettingMetrikkerDao(dataSource)
     val klageDao = KlageDaoImpl(autoClosingDatabase)
     val tilbakekrevingDao = TilbakekrevingDao(autoClosingDatabase)
     val behandlingInfoDao = BehandlingInfoDao(autoClosingDatabase)
@@ -271,7 +292,7 @@ internal class ApplicationContext(
     val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
 
     // Service
-    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, behandlingsHendelser)
 
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlTjenesterKlient)
     val grunnlagsService = GrunnlagServiceImpl(grunnlagKlient)
@@ -305,17 +326,18 @@ internal class ApplicationContext(
     val aktivtetspliktService = AktivitetspliktService(aktivitetspliktDao)
     val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
 
+    val klageBrevService = KlageBrevService(brevApiKlient)
     val klageService =
         KlageServiceImpl(
             klageDao = klageDao,
             sakDao = sakDao,
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,
-            brevApiKlient = brevApiHttpClient,
             klageKlient = klageKlient,
             klageHendelser = klageHendelser,
             vedtakKlient = vedtakKlient,
             featureToggleService = featureToggleService,
+            klageBrevService = klageBrevService,
         )
 
     val revurderingService =
@@ -345,7 +367,8 @@ internal class ApplicationContext(
             revurderingService = automatiskRevurderingService,
         )
 
-    val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
+    val sakTilgangDao = SakTilgangDao(dataSource)
+    val tilgangService = TilgangServiceImpl(sakTilgangDao)
     val enhetService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
     val sakService =
         SakServiceImpl(
@@ -354,6 +377,7 @@ internal class ApplicationContext(
             enhetService,
         )
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
+
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             oppgaveService = oppgaveService,
@@ -381,7 +405,7 @@ internal class ApplicationContext(
             featureToggleService = featureToggleService,
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
             sakService = sakService,
-            dagerGamleHendelserSomSkalKjoeres = if (isProd()) 2 else 0,
+            dagerGamleHendelserSomSkalKjoeres = if (isProd()) 5 else 0,
             deodshendelserProducer = deodshendelserProducer,
             pdlTjenesterKlient = pdlTjenesterKlient,
             grunnlagService = grunnlagsService,
@@ -397,6 +421,22 @@ internal class ApplicationContext(
         )
 
     val behandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService, behandlingsStatusService)
+
+    val bosattUtlandService = BosattUtlandService(bosattUtlandDao = bosattUtlandDao)
+
+    val tilbakekrevingService =
+        TilbakekrevingService(
+            tilbakekrevingDao = tilbakekrevingDao,
+            sakDao = sakDao,
+            hendelseDao = hendelseDao,
+            oppgaveService = oppgaveService,
+            vedtakKlient = vedtakKlient,
+            tilbakekrevingKlient = tilbakekrevingKlient,
+            tilbakekrevinghendelser = tilbakekreving,
+        )
+
+    val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
+    val saksbehandlerService: SaksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient)
 
     val behandlingFactory =
         BehandlingFactory(
@@ -423,28 +463,13 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
         )
 
-    val bosattUtlandService = BosattUtlandService(bosattUtlandDao = bosattUtlandDao)
-
-    val tilbakekrevingService =
-        TilbakekrevingService(
-            tilbakekrevingDao = tilbakekrevingDao,
-            sakDao = sakDao,
-            hendelseDao = hendelseDao,
-            oppgaveService = oppgaveService,
-            vedtakKlient = vedtakKlient,
-            tilbakekrevingKlient = tilbakekrevingKlient,
-            tilbakekrevinghendelser = tilbakekreving,
-        )
-
-    val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient)
-
     // Jobs
 
     val metrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
-            BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao),
+            BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao, gjenopprettingMetrikkerDao),
             { leaderElectionKlient.isLeader() },
-            Duration.of(10, ChronoUnit.MINUTES).toMillis(),
+            Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(5, ChronoUnit.MINUTES),
         )
     }
@@ -456,6 +481,7 @@ internal class ApplicationContext(
             0L,
             interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.MINUTES),
             dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
         )
     }
 
@@ -463,8 +489,18 @@ internal class ApplicationContext(
         SaksbehandlerJob(
             saksbehandlerJobService = saksbehandlerJobService,
             { leaderElectionKlient.isLeader() },
-            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
-            interval = Duration.of(1, ChronoUnit.HOURS),
+            initialDelay = Duration.of(1, ChronoUnit.SECONDS).toMillis(),
+            interval = Duration.of(20, ChronoUnit.MINUTES),
+        )
+    }
+
+    val fristGaarUtJobb: FristGaarUtJobb by lazy {
+        FristGaarUtJobb(
+            service = oppgaveService,
+            erLeader = { leaderElectionKlient.isLeader() },
+            periode = Duration.ofDays(1),
+            starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
+            featureToggleService = featureToggleService,
         )
     }
 

@@ -81,7 +81,7 @@ data class DoedshendelseInternal internal constructor(
 
     fun tilBehandlet(
         utfall: Utfall,
-        sakId: Long,
+        sakId: Long?,
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
         oppgaveId: UUID? = null,
         brevId: Long? = null,
@@ -100,8 +100,9 @@ data class DoedshendelseInternal internal constructor(
     fun sakTypeForEpsEllerBarn(): SakType =
         when (relasjon) {
             Relasjon.BARN -> SakType.BARNEPENSJON
-            Relasjon.EPS -> SakType.OMSTILLINGSSTOENAD
+            Relasjon.EKTEFELLE -> SakType.OMSTILLINGSSTOENAD
             Relasjon.AVDOED -> throw IllegalStateException("Saktype for relasjon er kun gyldig for BARN og EPS")
+            Relasjon.SAMBOER -> SakType.OMSTILLINGSSTOENAD
         }
 }
 
@@ -123,6 +124,7 @@ enum class Utfall {
 // Holder det enkelt til vi vet mer om behovet.
 enum class Relasjon {
     BARN,
-    EPS,
+    EKTEFELLE,
+    SAMBOER,
     AVDOED,
 }

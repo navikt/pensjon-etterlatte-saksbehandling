@@ -3,20 +3,20 @@ package no.nav.etterlatte.brev.hentinformasjon
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.ResponseException
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningsGrunnlagFellesDto
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagDto
 import no.nav.etterlatte.libs.common.deserialize
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
-import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
-
-class BeregningKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
 
 class BeregningKlient(config: Config, httpClient: HttpClient) {
     private val logger = LoggerFactory.getLogger(BeregningKlient::class.java)
@@ -93,10 +93,13 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
                 success = { resource -> deserialize(resource.response.toString()) },
                 failure = { errorResponse -> throw errorResponse },
             )
-        } catch (e: Exception) {
-            throw BeregningKlientException(
-                "Henting av utregnet ytelse med grunnlag for behandling med behandlingId=$behandlingId feilet",
-                e,
+        } catch (re: ResponseException) {
+            logger.error("Henting av utregnet ytelse med grunnlag for behandling med behandlingId=$behandlingId feilet", re)
+
+            throw ForespoerselException(
+                status = re.response.status.value,
+                code = "FEIL_HENT_UTREGNET_YTELSE",
+                detail = "Henting av utregnet ytelse med grunnlag for behandling med behandlingId=$behandlingId feilet",
             )
         }
     }
@@ -112,8 +115,14 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
                 success = { resource -> deserialize(resource.response.toString()) },
                 failure = { errorResponse -> throw errorResponse },
             )
-        } catch (e: Exception) {
-            throw BeregningKlientException("Henting av grunnbeløp feilet", e)
+        } catch (re: ResponseException) {
+            logger.error("Henting av grunnbeløp feilet", re)
+
+            throw ForespoerselException(
+                status = re.response.status.value,
+                code = "FEIL_HENT_GRUNNBELOEP",
+                detail = "Henting av grunnbeløp feilet",
+            )
         }
     }
 }

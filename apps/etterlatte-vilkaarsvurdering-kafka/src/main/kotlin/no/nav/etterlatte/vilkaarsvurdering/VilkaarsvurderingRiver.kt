@@ -22,7 +22,7 @@ internal class VilkaarsvurderingRiver(
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringHendelseType.VILKAARSVURDER) {
+        initialiserRiver(rapidsConnection, ReguleringHendelseType.BEHANDLING_OPPRETTA) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }
@@ -37,7 +37,7 @@ internal class VilkaarsvurderingRiver(
         val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
 
         vilkaarsvurderingService.kopierForrigeVilkaarsvurdering(behandlingId, behandlingViOmregnerFra)
-        packet.setEventNameForHendelseType(ReguleringHendelseType.BEREGN)
+        packet.setEventNameForHendelseType(ReguleringHendelseType.VILKAARSVURDERT)
         context.publish(packet.toJson())
         logger.info(
             "Vilkaarsvurdert ferdig for behandling $behandlingId og melding beregningsmelding ble sendt.",

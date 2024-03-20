@@ -11,13 +11,14 @@ import { HeadingWrapper } from '~components/person/SakOversikt'
 import {
   BP_INSTITUSJONSOPPHOLD_BESKRIVELSE,
   BP_INSTITUSJONSOPPHOLD_HJEMLER,
-  FELLES_SLUTTBEHANDLING_BESKRIVELSE,
   BP_OPPHOER_BESKRIVELSE,
   BP_OPPHOER_HJEMLER,
   BP_REVURDERING_BESKRIVELSE,
-  FELLES_REVURDERING_HJEMLER,
   BP_REVURDERING_YRKESSKADE_BESKRIVELSE,
   BP_REVURDERING_YRKESSKADE_HJEMLER,
+  FELLES_REVURDERING_HJEMLER,
+  FELLES_SLUTTBEHANDLING_BESKRIVELSE,
+  FELLES_SLUTTBEHANDLING_HJEMLER,
   OMS_ALDERSOVERGANG_BESKRIVELSE,
   OMS_ALDERSOVERGANG_HJEMLER,
   OMS_INNTEKTSENDRING_BESKRIVELSE,
@@ -27,7 +28,6 @@ import {
   OMS_OPPHOER_BESKRIVELSE,
   OMS_OPPHOER_HJEMLER,
   OMS_REVURDERING_BESKRIVELSE,
-  FELLES_SLUTTBEHANDLING_HJEMLER,
 } from '~components/behandling/virkningstidspunkt/utils'
 import { SakType } from '~shared/types/sak'
 import { erOpphoer, Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
@@ -40,6 +40,8 @@ import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utlandstilknytning/Utlandstilknytning'
 import { useAppSelector } from '~store/Store'
+import { Familieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -91,11 +93,16 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingaarsak)
 export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
+  const redigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
   const revurderingsaarsak = requireNotNull(
     behandling.revurderingsaarsak,
     'Kan ikke starte en revurdering uten en revurderingsårsak'
   )
+  const personopplysninger = usePersonopplysninger()
 
   const [hjemler, beskrivelse] = hjemlerOgBeskrivelse(behandling.sakType, revurderingsaarsak)
   return (
@@ -106,7 +113,9 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
             Revurdering
           </Heading>
         </HeadingWrapper>
-        {revurderingsaarsak != Revurderingaarsak.ANNEN && (
+        {[Revurderingaarsak.ANNEN, Revurderingaarsak.ANNEN_UTEN_BREV].includes(revurderingsaarsak) ? (
+          <BodyShort spacing>Revurdering på grunn av annen årsak (spesifiseres nedenfor).</BodyShort>
+        ) : (
           <BodyShort spacing>
             {erOpphoer(revurderingsaarsak) ? 'Opphør' : 'Revurdering'} på grunn av{' '}
             <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
@@ -114,7 +123,11 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         )}
       </ContentHeader>
       <InnholdPadding>
-        <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />
+        <OppdaterGrunnlagModal
+          behandlingId={behandling.id}
+          behandlingStatus={behandling.status}
+          enhetId={behandling.sakEnhetId}
+        />
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
         {behandling.begrunnelse !== null && (
           <>
@@ -133,7 +146,12 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         {behandling.revurderingsaarsak === Revurderingaarsak.SOESKENJUSTERING && (
           <GrunnForSoeskenjustering behandling={behandling} />
         )}
-        {behandling.revurderingsaarsak === Revurderingaarsak.ANNEN && <RevurderingAnnen behandling={behandling} />}
+        {behandling.revurderingsaarsak === Revurderingaarsak.ANNEN && (
+          <RevurderingAnnen type={Revurderingaarsak.ANNEN} behandling={behandling} />
+        )}
+        {behandling.revurderingsaarsak === Revurderingaarsak.ANNEN_UTEN_BREV && (
+          <RevurderingAnnen type={Revurderingaarsak.ANNEN_UTEN_BREV} behandling={behandling} />
+        )}
 
         <Virkningstidspunkt
           erBosattUtland={false}
@@ -146,6 +164,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         </Virkningstidspunkt>
       </InnholdPadding>
       <Border />
+      <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />
       {redigerbar ? (
         <BehandlingHandlingKnapper>
           <Start disabled={behandling.virkningstidspunkt === null} />

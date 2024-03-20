@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
@@ -17,8 +17,14 @@ import { TilbakekrevingBrev } from '~components/tilbakekreving/brev/Tilbakekrevi
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { erUnderBehandling } from '~shared/types/Tilbakekreving'
+import { enhetErSkrivbar } from '~components/behandling/felles/utils'
+import { useSidetittel } from '~shared/hooks/useSidetittel'
+import { TilbakekrevingUtbetalinger } from '~components/tilbakekreving/utbetalinger/TilbakekrevingUtbetalinger'
+import { TilbakekrevingOppsummering } from '~components/tilbakekreving/oppsummering/TilbakekrevingOppsummering'
 
 export function Tilbakekrevingsbehandling() {
+  useSidetittel('Tilbakekreving')
+
   const tilbakekreving = useTilbakekreving()
   const dispatch = useAppDispatch()
   const { tilbakekrevingId } = useParams()
@@ -26,8 +32,7 @@ export function Tilbakekrevingsbehandling() {
   const [personStatus, hentPerson] = useApiCall(getPerson)
   const viHarLastetRiktigTilbakekreving = tilbakekrevingId === tilbakekreving?.id.toString()
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  const redigerbar =
-    innloggetSaksbehandler.skriveTilgang && (tilbakekreving ? erUnderBehandling(tilbakekreving.status) : false)
+  const [redigerbar, setRedigerbar] = useState(false)
 
   useEffect(() => {
     if (!tilbakekrevingId) return
@@ -45,22 +50,34 @@ export function Tilbakekrevingsbehandling() {
     if (tilbakekreving?.sak.ident) {
       hentPerson(tilbakekreving.sak.ident)
     }
+
+    if (tilbakekreving?.sak?.enhet) {
+      setRedigerbar(
+        enhetErSkrivbar(tilbakekreving.sak.enhet, innloggetSaksbehandler.skriveEnheter) &&
+          erUnderBehandling(tilbakekreving.status)
+      )
+    }
   }, [tilbakekreving?.sak])
 
   return (
     <>
       <StatusBar result={personStatus} />
+      <TilbakekrevingStegmeny />
       <Spinner visible={isPending(fetchTilbakekrevingStatus)} label="Henter tilbakekrevingsbehandling" />
 
       {!!tilbakekreving && viHarLastetRiktigTilbakekreving && (
         <GridContainer>
           <MainContent>
-            <TilbakekrevingStegmeny behandling={tilbakekreving} />
             <Routes>
               <Route
                 path="vurdering"
                 element={<TilbakekrevingVurdering behandling={tilbakekreving} redigerbar={redigerbar} />}
               />
+              <Route
+                path="utbetalinger"
+                element={<TilbakekrevingUtbetalinger behandling={tilbakekreving} redigerbar={redigerbar} />}
+              />
+              <Route path="oppsummering" element={<TilbakekrevingOppsummering behandling={tilbakekreving} />} />
               <Route path="brev" element={<TilbakekrevingBrev behandling={tilbakekreving} redigerbar={redigerbar} />} />
               <Route path="*" element={<Navigate to="vurdering" replace />} />
             </Routes>
@@ -68,6 +85,7 @@ export function Tilbakekrevingsbehandling() {
           <TilbakekrevingSidemeny />
         </GridContainer>
       )}
+
       {isFailureHandler({
         apiResult: fetchTilbakekrevingStatus,
         errorMessage: 'Kunne ikke hente tilbakekrevingsbehandling',

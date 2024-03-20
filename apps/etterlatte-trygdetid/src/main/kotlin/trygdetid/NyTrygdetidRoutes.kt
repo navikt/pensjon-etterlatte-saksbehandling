@@ -11,16 +11,17 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.MigreringOverstyringDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidOverstyringDto
-import no.nav.etterlatte.libs.common.uuid
-import no.nav.etterlatte.libs.common.withBehandlingId
-import no.nav.etterlatte.libs.common.withParam
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidYrkesskadeDto
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.uuid
+import no.nav.etterlatte.libs.ktor.route.withBehandlingId
+import no.nav.etterlatte.libs.ktor.route.withParam
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -70,7 +71,7 @@ fun Route.trygdetidV2(
         }
 
         post("oppdater-opplysningsgrunnlag") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Oppdaterer opplysningsgrunnlag på trygdetider for behandling $behandlingId")
 
                 trygdetidService.oppdaterOpplysningsgrunnlagForTrygdetider(behandlingId, brukerTokenInfo)
@@ -103,6 +104,28 @@ fun Route.trygdetidV2(
             }
         }
 
+        post("yrkesskade") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                logger.info("Oppdater trygdetid (yrkesskade) for behandling $behandlingId")
+                val trygdetidYrkesskadeDto = call.receive<TrygdetidYrkesskadeDto>()
+
+                trygdetidService.setYrkesskade(
+                    trygdetidYrkesskadeDto.id,
+                    behandlingId,
+                    trygdetidYrkesskadeDto.yrkesskade,
+                    brukerTokenInfo,
+                )
+
+                call.respond(
+                    trygdetidService.hentTrygdetidIBehandlingMedId(
+                        behandlingId,
+                        trygdetidYrkesskadeDto.id,
+                        brukerTokenInfo,
+                    )!!.toDto(),
+                )
+            }
+        }
+
         route("{${TRYGDETIDID_CALL_PARAMETER}}") {
             post("grunnlag") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
@@ -119,24 +142,6 @@ fun Route.trygdetidV2(
                         trygdetidService.hentTrygdetidIBehandlingMedId(
                             behandlingId,
                             trygdetidId(),
-                            brukerTokenInfo,
-                        )!!.toDto(),
-                    )
-                }
-            }
-
-            post("/grunnlag/yrkesskade") {
-                withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                    logger.info("Legger til yrkesskade trygdetidsgrunnlag for behandling $behandlingId")
-                    val trygdetid =
-                        trygdetidService.lagreYrkesskadeTrygdetidGrunnlag(
-                            behandlingId,
-                            brukerTokenInfo,
-                        )
-                    call.respond(
-                        trygdetidService.hentTrygdetidIBehandlingMedId(
-                            behandlingId,
-                            trygdetid.id,
                             brukerTokenInfo,
                         )!!.toDto(),
                     )

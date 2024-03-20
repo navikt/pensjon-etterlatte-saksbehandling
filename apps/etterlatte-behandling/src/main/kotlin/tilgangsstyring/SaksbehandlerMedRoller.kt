@@ -1,6 +1,6 @@
 package no.nav.etterlatte.tilgangsstyring
 
-import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 
 data class SaksbehandlerMedRoller(
     val saksbehandler: Saksbehandler,
@@ -22,6 +22,4 @@ data class SaksbehandlerMedRoller(
     fun harRolleFortrolig() = harRolle(AzureGroup.FORTROLIG)
 
     fun harRolleEgenAnsatt() = harRolle(AzureGroup.EGEN_ANSATT)
-
-    fun harRolleNasjonalTilgang() = harRolle(AzureGroup.NASJONAL_MED_LOGG) || harRolle(AzureGroup.NASJONAL_UTEN_LOGG)
 }

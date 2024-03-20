@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.database.setJsonb
+import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
@@ -100,6 +101,24 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                 val statement = prepareStatement("SELECT id, sakType, fnr, enhet from sak where id = ?")
                 statement.setLong(1, id)
                 statement.executeQuery().singleOrNull { this.toSak() }
+            }
+        }
+    }
+
+    fun finnSakMedGraderingOgSkjerming(id: Long): SakMedGraderingOgSkjermet {
+        return connectionAutoclosing.hentConnection { connection ->
+            val statement = connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet, enhet from sak where id = ?")
+            statement.setLong(1, id)
+            statement.executeQuery().single {
+                SakMedGraderingOgSkjermet(
+                    id = getLong("id"),
+                    adressebeskyttelseGradering =
+                        getString("adressebeskyttelse")?.let {
+                            AdressebeskyttelseGradering.valueOf(it)
+                        },
+                    erSkjermet = getBoolean("erskjermet"),
+                    enhetNr = getString("enhet"),
+                )
             }
         }
     }

@@ -16,10 +16,9 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAvslagRedigerbartUtfal
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoerRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingRedigerbartUtfall
-import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingInnholdBrevData
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
 class BrevDataMapperRedigerbartUtfallVedtak(
     private val brevdataFacade: BrevdataFacade,
@@ -56,9 +55,10 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     VedtakType.ENDRING -> barnepensjonEndring(brukerTokenInfo, generellBrevData)
                     VedtakType.OPPHOER -> barnepensjonOpphoer(brukerTokenInfo, generellBrevData)
                     VedtakType.AVSLAG -> ManueltBrevData()
-                    VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
                     VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData)
-                    null -> ManueltBrevData()
+                    VedtakType.TILBAKEKREVING,
+                    null,
+                    -> ManueltBrevData()
                 }
             }
 
@@ -68,9 +68,10 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     VedtakType.ENDRING -> omstillingsstoenadEndring(brukerTokenInfo, generellBrevData)
                     VedtakType.OPPHOER -> omstillingsstoenadOpphoer(brukerTokenInfo, generellBrevData)
                     VedtakType.AVSLAG -> OmstillingsstoenadAvslagRedigerbartUtfall.fra(generellBrevData)
-                    VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
                     VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData)
-                    null -> ManueltBrevData()
+                    VedtakType.TILBAKEKREVING,
+                    null,
+                    -> ManueltBrevData()
                 }
             }
         }

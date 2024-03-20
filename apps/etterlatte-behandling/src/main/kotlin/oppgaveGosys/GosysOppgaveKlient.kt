@@ -1,5 +1,6 @@
 package no.nav.etterlatte.oppgaveGosys
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
@@ -14,10 +15,10 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
-import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -29,6 +30,7 @@ data class GosysApiOppgave(
     val tema: String,
     val behandlingstema: String? = null,
     val oppgavetype: String,
+    val journalpostId: String?,
     val opprettetTidspunkt: Tidspunkt,
     val tildeltEnhetsnr: String,
     val tilordnetRessurs: String?,
@@ -70,6 +72,18 @@ interface GosysOppgaveKlient {
 
     suspend fun hentOppgave(
         id: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave
+
+    suspend fun ferdigstill(
+        id: String,
+        oppgaveVersjon: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave
+
+    suspend fun feilregistrer(
+        id: String,
+        request: EndreStatusRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave
 }
@@ -144,6 +158,34 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
         }
     }
 
+    override suspend fun ferdigstill(
+        id: String,
+        oppgaveVersjon: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave {
+        logger.info("Ferdigstiller Gosys-oppgave med id=$id")
+
+        return patchOppgave(
+            id,
+            brukerTokenInfo,
+            body = EndreStatusRequest(oppgaveVersjon.toString(), "FERDIGSTILT"),
+        )
+    }
+
+    override suspend fun feilregistrer(
+        id: String,
+        request: EndreStatusRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave {
+        logger.info("Feilregistrerer Gosys-oppgave med id=$id")
+
+        return patchOppgave(
+            id,
+            brukerTokenInfo,
+            body = request,
+        )
+    }
+
     override suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
         oppgaveVersjon: Long,
@@ -209,6 +251,13 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
         }
     }
 }
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class EndreStatusRequest(
+    val versjon: String,
+    val status: String,
+    val beskrivelse: String? = null,
+)
 
 class GosysTimeout : ForespoerselException(
     status = HttpStatusCode.RequestTimeout.value,

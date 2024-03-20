@@ -27,9 +27,6 @@ import {
   hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave,
   settOppgavePaaVentApi,
 } from '~shared/api/oppgaver'
-
-export const FEATURE_TOGGLE_LAG_VARSELBREV = 'lag-varselbrev'
-
 export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
@@ -37,7 +34,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const [redigerbar, setKanRedigeres] = useState(
-    behandlingErRedigerbar(props.behandling.status) && innloggetSaksbehandler.skriveTilgang
+    behandlingErRedigerbar(props.behandling.status, props.behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
   )
 
   const [varselbrev, setVarselbrev] = useState<IBrev>()
@@ -62,8 +59,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
         oppgaveId: oppgave.id,
         settPaaVentRequest: {
           merknad: 'Manuelt: Varselbrev er sendt ut | ' + oppgave.merknad || '',
-          versjon: null,
-          status: oppgave.status,
+          paaVent: true,
         },
       })
     })

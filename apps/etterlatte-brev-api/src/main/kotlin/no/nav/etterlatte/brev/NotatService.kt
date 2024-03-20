@@ -28,8 +28,8 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Felles
 import org.slf4j.LoggerFactory
 import java.util.Base64
@@ -109,7 +109,7 @@ class NotatService(
             brevRequest =
                 BrevbakerRequest.fraStrukturertBrev(
                     strukturertBrev = notatData,
-                    felles = mapFelles(notatData.sak.id, notatData.soekerFnr, bruker),
+                    felles = mapFelles(notatData.sak.id, notatData.sak.enhet, bruker),
                 ),
         )
     }
@@ -126,7 +126,6 @@ class NotatService(
 
         val journalpostRequest =
             OpprettNotatJournalpostRequest(
-                behandlingstema = sak.sakType.tema,
                 bruker =
                     Bruker(
                         id = sak.ident,

@@ -85,10 +85,12 @@ data class YtelseMedGrunnlagDto(
 data class YtelseMedGrunnlagPeriodisertDto(
     val periode: Periode,
     val ytelseEtterAvkorting: Int,
+    val restanse: Int,
     val avkortingsbeloep: Int,
     val ytelseFoerAvkorting: Int,
     val aarsinntekt: Int,
     val fratrekkInnAar: Int,
+    val relevanteMaanederInnAar: Int,
     val trygdetid: Int,
     val grunnbelop: Int,
     val grunnbelopMnd: Int,

@@ -13,8 +13,11 @@ import { hentSak } from '~shared/api/sak'
 
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useSidetittel } from '~shared/hooks/useSidetittel'
 
 const GenerellBehandling = () => {
+  useSidetittel('Generell behandling')
+
   const { generellbehandlingId } = useParams()
   if (!generellbehandlingId) return null
 

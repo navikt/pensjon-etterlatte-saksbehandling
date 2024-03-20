@@ -10,10 +10,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingId
-import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -25,12 +24,13 @@ fun Route.beregningsGrunnlag(
 ) {
     route("/api/beregning/beregningsgrunnlag") {
         post("/{$BEHANDLINGID_CALL_PARAMETER}/fra/{forrigeBehandlingId}") {
-            val behandlingId = behandlingId
-            val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
 
-            beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(behandlingId, forrigeBehandlingId)
+                beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(behandlingId, forrigeBehandlingId, brukerTokenInfo)
 
-            call.respond(HttpStatusCode.NoContent)
+                call.respond(HttpStatusCode.NoContent)
+            }
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/barnepensjon") {

@@ -10,13 +10,14 @@ import { nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 
 export function KlageFormkravVisning() {
   const klage = useKlage()
+  const navigate = useNavigate()
 
   if (!klage) return
 
-  const navigate = useNavigate()
   const formkrav = klage.formkrav?.formkrav
   const vedtak = formkrav?.vedtaketKlagenGjelder
   const saksbehandler = klage.formkrav?.saksbehandler
+
   return (
     <Content>
       <ContentHeader>

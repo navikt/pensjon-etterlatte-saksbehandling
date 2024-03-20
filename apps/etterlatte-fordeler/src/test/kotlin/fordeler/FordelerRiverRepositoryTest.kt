@@ -1,55 +1,27 @@
 package no.nav.etterlatte.fordeler
 
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.RegisterExtension
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class FordelerRiverRepositoryTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
-    private lateinit var fordelerRepo: FordelerRepository
-    private lateinit var datasource: DataSource
-
-    @BeforeAll
-    fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        datasource =
-            DataSourceBuilder.createDataSource(
-                postgreSQLContainer.jdbcUrl,
-                postgreSQLContainer.username,
-                postgreSQLContainer.password,
-            )
-        datasource.migrate()
-        fordelerRepo = FordelerRepository(datasource)
+internal class FordelerRiverRepositoryTest(datasource: DataSource) {
+    companion object {
+        @RegisterExtension
+        val dbExtension = DatabaseExtension()
     }
 
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
-    }
+    private val fordelerRepo = FordelerRepository(datasource)
 
     @AfterEach
     fun afterEach() {
-        datasource.connection.use {
-            it.prepareStatement(""" TRUNCATE kriterietreff, fordelinger""").execute()
-        }
+        dbExtension.resetDb()
     }
 
     @Test

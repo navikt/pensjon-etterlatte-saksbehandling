@@ -1,14 +1,17 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.call
 import io.ktor.server.application.log
+import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
-import no.nav.etterlatte.libs.common.kunSystembruker
-import no.nav.etterlatte.libs.common.medBody
+import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.medBody
 
 internal fun Route.doedshendelseRoute(doedshendelseService: DoedshendelseService) {
     val logger = application.log
@@ -20,6 +23,7 @@ internal fun Route.doedshendelseRoute(doedshendelseService: DoedshendelseService
                     inTransaction {
                         doedshendelseService.settHendelseTilFerdigOgOppdaterBrevId(it)
                     }
+                    call.respond(HttpStatusCode.OK)
                 }
             }
         }

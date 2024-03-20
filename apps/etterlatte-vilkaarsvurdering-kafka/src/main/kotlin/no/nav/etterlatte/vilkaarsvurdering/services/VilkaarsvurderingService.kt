@@ -26,6 +26,11 @@ interface VilkaarsvurderingService {
         yrkesskadeFordel: Boolean,
     ): HttpResponse
 
+    fun opphoerAldersovergang(
+        behandlingId: UUID,
+        behandlingKopiereFraId: UUID,
+    ): HttpResponse
+
     fun harMigrertYrkesskadefordel(behandlingId: String): Boolean
 
     fun harRettUtenTidsbegrensning(behandlingId: String): Boolean
@@ -57,6 +62,15 @@ class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: HttpClie
         vilkaarsvurderingKlient.post("$url/api/vilkaarsvurdering/migrering/$behandlingId") {
             contentType(ContentType.Application.Json)
             setBody(VilkaarsvurderingMigreringRequest(yrkesskadeFordel))
+        }
+    }
+
+    override fun opphoerAldersovergang(
+        behandlingId: UUID,
+        behandlingKopiereFraId: UUID,
+    ) = runBlocking {
+        vilkaarsvurderingKlient.post("$url/api/vilkaarsvurdering/aldersovergang/$behandlingId?fra=$behandlingKopiereFraId") {
+            contentType(ContentType.Application.Json)
         }
     }
 

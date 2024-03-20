@@ -2,7 +2,6 @@ package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.michaelbull.result.get
@@ -11,7 +10,6 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.install
@@ -26,15 +24,15 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.mustache.Mustache
 import io.ktor.server.plugins.callloging.CallLogging
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.callloging.processingTimeMillis
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.request.header
+import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
-import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
-import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelineContext
@@ -42,11 +40,12 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.metricsRoute
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.skjulAllePotensielleFnr
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.testdata.dolly.DollyClientImpl
 import no.nav.etterlatte.testdata.dolly.DollyService
 import no.nav.etterlatte.testdata.dolly.TestnavClient
@@ -55,7 +54,7 @@ import no.nav.etterlatte.testdata.features.egendefinert.EgendefinertMeldingFeatu
 import no.nav.etterlatte.testdata.features.index.IndexFeature
 import no.nav.etterlatte.testdata.features.samordning.SamordningMottattFeature
 import no.nav.etterlatte.testdata.features.soeknad.OpprettSoeknadFeature
-import no.nav.etterlatte.testdata.features.standardmelding.StandardMeldingFeature
+import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -90,7 +89,6 @@ val features: List<TestDataFeature> =
     listOf(
         IndexFeature,
         EgendefinertMeldingFeature,
-        StandardMeldingFeature,
         OpprettSoeknadFeature,
         DollyFeature(
             DollyService(
@@ -111,7 +109,27 @@ fun main() {
                 }
                 install(CallLogging) {
                     level = org.slf4j.event.Level.INFO
-                    filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive|.*/metrics")) }
+                    filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive|.*/metrics|.*/static")) }
+
+                    format { call ->
+                        val responseTime = call.processingTimeMillis()
+                        val status = call.response.status()?.value
+                        val method = call.request.httpMethod.value
+                        val path = call.request.path()
+
+                        skjulAllePotensielleFnr(
+                            "<- $status $method $path in $responseTime ms",
+                        )
+                    }
+
+                    mdc("user") { call ->
+                        call.request.header("Authorization")?.let {
+                            val token = JwtToken(it.substringAfterLast("Bearer "))
+                            val jwtTokenClaims = token.jwtTokenClaims
+                            jwtTokenClaims.get("NAVident") as? String // human
+                                ?: token.jwtTokenClaims.get("azp_name") as? String // system/app-user
+                        }
+                    }
                 }
                 install(StatusPages) {
                     exception<Throwable> { call, cause ->
@@ -132,7 +150,9 @@ fun main() {
                     routing {
                         get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
                         get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
+
                         staticResources("/static", "static")
+
                         authenticate {
                             api()
                         }
@@ -151,20 +171,6 @@ private fun Route.api() {
             apply(it.routes)
         }
     }
-
-    route("/kafka") {
-        install(ContentNegotiation) {
-            jackson {
-                registerModule(JavaTimeModule())
-                disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            }
-        }
-
-        post {
-            producer.publiser("0", objectMapper.writeValueAsString(call.receive<ObjectNode>()))
-            call.respondText("Record lagt på kafka", ContentType.Text.Plain)
-        }
-    }
 }
 
 fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.firstValidTokenClaims()?.get("NAVident")?.toString()
@@ -173,12 +179,17 @@ fun PipelineContext<Unit, ApplicationCall>.brukerIdFraToken() = call.firstValidT
 
 fun getDollyAccessToken(): String =
     runBlocking {
-        azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))
+        azureAdClient.hentTokenFraAD(
+            Systembruker.testdata,
+            listOf("api://${config.getString("dolly.client.id")}/.default"),
+        )
             .get()!!.accessToken
     }
 
 fun getTestnavAccessToken(): String =
     runBlocking {
-        azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("testnav.client.id")}/.default"))
-            .get()!!.accessToken
+        azureAdClient.hentTokenFraAD(
+            Systembruker.testdata,
+            listOf("api://${config.getString("testnav.client.id")}/.default"),
+        ).get()!!.accessToken
     }

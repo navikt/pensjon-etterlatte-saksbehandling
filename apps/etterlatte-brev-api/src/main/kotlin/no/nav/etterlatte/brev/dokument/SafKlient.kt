@@ -20,8 +20,8 @@ import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.retry
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 /*
@@ -58,7 +58,7 @@ class SafKlient(
                 throw IkkeTilgangTilJournalpost()
             } else if (re.response.status == HttpStatusCode.NotFound) {
                 throw IkkeFunnetException(
-                    code = "JOURNALPOST_IKKE_FUNNET",
+                    code = "JOURNALPOST_DOKUMENT_IKKE_FUNNET",
                     detail =
                         "Dokument med journalpostId=$journalpostId, dokumentInfoId=$dokumentInfoId, " +
                             "variantFormat=ARKIV ikke funnet i Joark",
@@ -173,9 +173,9 @@ class SafKlient(
 
     private suspend fun getOboToken(bruker: BrukerTokenInfo): String {
         val token =
-            azureAdClient.getOnBehalfOfAccessTokenForResource(
+            azureAdClient.hentTokenFraAD(
+                bruker,
                 listOf(safScope),
-                bruker.accessToken(),
             )
         return token.get()?.accessToken ?: ""
     }

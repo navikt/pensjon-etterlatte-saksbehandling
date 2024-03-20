@@ -9,33 +9,21 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandlingId
-import no.nav.etterlatte.libs.common.hentNavidentFraToken
-import no.nav.etterlatte.libs.common.medBody
-import no.nav.etterlatte.libs.common.sakId
+import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.hentNavidentFraToken
+import no.nav.etterlatte.libs.ktor.route.medBody
+import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import java.util.UUID
 
-enum class RevurderingRoutesFeatureToggle(private val key: String) : FeatureToggle {
-    VisRevurderingsaarsakOpphoerUtenBrev("pensjon-etterlatte.vis-opphoer-uten-brev"),
-    ;
-
-    override fun key() = key
-}
-
-internal fun Route.revurderingRoutes(
-    revurderingService: RevurderingService,
-    featureToggleService: FeatureToggleService,
-) {
+internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
     val logger = application.log
 
     route("/api/revurdering") {
@@ -113,7 +101,7 @@ internal fun Route.revurderingRoutes(
     route("/api/stoettederevurderinger") {
         get {
             val stoettedeRevurderinger =
-                SakType.entries.associateWith { hentRevurderingaarsaker(it, featureToggleService) }
+                SakType.entries.associateWith { hentRevurderingaarsaker(it) }
             call.respond(stoettedeRevurderinger)
         }
 
@@ -122,32 +110,16 @@ internal fun Route.revurderingRoutes(
                 call.parameters["saktype"]?.let { SakType.valueOf(it) }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig saktype")
 
-            val stoettedeRevurderinger = hentRevurderingaarsaker(sakType, featureToggleService)
+            val stoettedeRevurderinger = hentRevurderingaarsaker(sakType)
 
             call.respond(stoettedeRevurderinger)
         }
     }
 }
 
-private fun hentRevurderingaarsaker(
-    sakType: SakType,
-    featureToggleService: FeatureToggleService,
-): List<Revurderingaarsak> {
-    val stoettedeRevurderinger =
-        Revurderingaarsak.entries
-            .filter { it.erStoettaRevurdering(sakType) }
-            .filter {
-                if (it == Revurderingaarsak.OPPHOER_UTEN_BREV) {
-                    featureToggleService.isEnabled(
-                        RevurderingRoutesFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev,
-                        false,
-                    )
-                } else {
-                    true
-                }
-            }
-    return stoettedeRevurderinger
-}
+private fun hentRevurderingaarsaker(sakType: SakType) =
+    Revurderingaarsak.entries
+        .filter { it.erStoettaRevurdering(sakType) }
 
 data class OpprettOmgjoeringKlageRequest(
     val oppgaveIdOmgjoering: UUID,

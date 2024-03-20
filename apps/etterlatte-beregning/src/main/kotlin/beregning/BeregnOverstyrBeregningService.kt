@@ -216,6 +216,7 @@ class BeregnOverstyrBeregningService(
                                 grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,
                                 trygdetid = trygdetid,
+                                trygdetidForIdent = periodisertResultat.resultat.verdi.trygdetidForIdent,
                                 beregningsMetode =
                                     when (broek) {
                                         null -> BeregningsMetode.NASJONAL
@@ -230,7 +231,6 @@ class BeregnOverstyrBeregningService(
                                 broek = broek,
                                 regelResultat = objectMapper.valueToTree(periodisertResultat),
                                 regelVersjon = periodisertResultat.reglerVersjon,
-                                trygdetidForIdent = null,
                                 kilde =
                                     Grunnlagsopplysning.RegelKilde(
                                         navn = beregnOverstyrRegel.regelReferanse.id,

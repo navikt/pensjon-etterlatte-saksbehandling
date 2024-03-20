@@ -153,8 +153,7 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO =
                     versjon = long(BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn),
                 ),
             trygdetid = int(BeregningsperiodeDatabaseColumns.Trygdetid.navn),
-            // TODO stringOrNull(BeregningsperiodeDatabaseColumns.TrygdetidForIdent.navn),
-            trygdetidForIdent = null,
+            trygdetidForIdent = stringOrNull(BeregningsperiodeDatabaseColumns.TrygdetidForIdent.navn),
             beregningsMetode =
                 stringOrNull(BeregningsperiodeDatabaseColumns.BeregningsMetode.navn)?.let {
                     BeregningsMetode.valueOf(it)
@@ -242,7 +241,7 @@ private enum class BeregningsperiodeDatabaseColumns(val navn: String) {
     SakId("sakId"),
     GrunnlagVersjon("grunnlagVersjon"),
     Trygdetid("trygdetid"),
-    TrygdetidForIdent("trygdetidForIdent"),
+    TrygdetidForIdent("trygdetid_for_ident"),
     BeregningsMetode("beregnings_metode"),
     SamletNorskTrygdetid("samlet_norsk_trygdetid"),
     SamletTeoretiskTrygdetid("samlet_teoretisk_trygdetid"),
@@ -277,6 +276,7 @@ private object Queries {
             ${BeregningsperiodeDatabaseColumns.SakId.navn}, 
             ${BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn}, 
             ${BeregningsperiodeDatabaseColumns.Trygdetid.navn},
+            ${BeregningsperiodeDatabaseColumns.TrygdetidForIdent.navn},
             ${BeregningsperiodeDatabaseColumns.BeregningsMetode.navn},
             ${BeregningsperiodeDatabaseColumns.SamletNorskTrygdetid.navn},
             ${BeregningsperiodeDatabaseColumns.SamletTeoretiskTrygdetid.navn},
@@ -288,9 +288,9 @@ private object Queries {
             ${BeregningsperiodeDatabaseColumns.Institusjonsopphold.navn})
         VALUES(:id::UUID, :beregningId::UUID, :behandlingId::UUID, :type::TEXT, :beregnetDato::TIMESTAMP, 
             :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, 
-            :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT, :trygdetid::BIGINT, :beregningsMetode::TEXT,
-            :samletNorskTrygdetid::BIGINT, :samletTeoretiskTrygdetid::BIGINT, :prorataBroekTeller::BIGINT,
-            :prorataBroekNevner::BIGINT, :regelResultat::JSONB, :regelVersjon::TEXT, :kilde::TEXT,
+            :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT, :trygdetid::BIGINT, :trygdetidForIdent::TEXT,
+            :beregningsMetode::TEXT, :samletNorskTrygdetid::BIGINT, :samletTeoretiskTrygdetid::BIGINT,
+            :prorataBroekTeller::BIGINT, :prorataBroekNevner::BIGINT, :regelResultat::JSONB, :regelVersjon::TEXT, :kilde::TEXT,
             :institusjonsopphold::JSONB) 
     """
 

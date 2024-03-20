@@ -47,15 +47,8 @@ class DoedshendelseKontrollpunktBarnServiceTest {
                 saktype = SakType.BARNEPENSJON,
             )
         } returns gjenlevende.copy(doedsdato = OpplysningDTO(doedsdato, null))
-        every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                foedselsnummer = doedshendelse.beroertFnr,
-                rolle = PersonRolle.BARN,
-                saktype = SakType.BARNEPENSJON,
-            )
-        } returns barnet
 
-        val kontrollpunkter = kontrollpunktService.identifiser(doedshendelse, avdoed, null)
+        val kontrollpunkter = kontrollpunktService.identifiser(doedshendelse, avdoed, null, barnet)
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.SamtidigDoedsfall)
     }
@@ -76,13 +69,7 @@ class DoedshendelseKontrollpunktBarnServiceTest {
                 saktype = SakType.BARNEPENSJON,
             )
         } returns gjenlevende.copy(doedsdato = OpplysningDTO(doedsdato, null))
-        every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                foedselsnummer = doedshendelse.beroertFnr,
-                rolle = PersonRolle.BARN,
-                saktype = SakType.BARNEPENSJON,
-            )
-        } returns
+        val barnet =
             barnet.copy(
                 familieRelasjon =
                     OpplysningDTO(
@@ -95,7 +82,7 @@ class DoedshendelseKontrollpunktBarnServiceTest {
                     ),
             )
 
-        val kontrollpunkter = kontrollpunktService.identifiser(doedshendelse, avdoed, null)
+        val kontrollpunkter = kontrollpunktService.identifiser(doedshendelse, avdoed, null, barnet)
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet)
     }
@@ -117,17 +104,10 @@ class DoedshendelseKontrollpunktBarnServiceTest {
             )
         } returns gjenlevende
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                foedselsnummer = doedshendelse.beroertFnr,
-                rolle = PersonRolle.BARN,
-                saktype = SakType.BARNEPENSJON,
-            )
-        } returns barnet
-        every {
             behandlingService.hentSisteIverksatte(sak.id)
         } returns foerstegangsbehandling(sakId = sak.id, status = BehandlingStatus.IVERKSATT)
 
-        val kontrollpunkter = kontrollpunktService.identifiser(doedshendelse, avdoed, sak)
+        val kontrollpunkter = kontrollpunktService.identifiser(doedshendelse, avdoed, sak, barnet)
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.BarnHarBarnepensjon(sak))
     }
 
@@ -148,17 +128,10 @@ class DoedshendelseKontrollpunktBarnServiceTest {
             )
         } returns gjenlevende
         every {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                foedselsnummer = doedshendelse.beroertFnr,
-                rolle = PersonRolle.BARN,
-                saktype = SakType.BARNEPENSJON,
-            )
-        } returns barnet
-        every {
             behandlingService.hentSisteIverksatte(sak.id)
         } returns null
 
-        val kontrollpunkter = kontrollpunktService.identifiser(doedshendelse, avdoed, sak)
+        val kontrollpunkter = kontrollpunktService.identifiser(doedshendelse, avdoed, sak, barnet)
         kontrollpunkter shouldBe emptyList()
     }
 

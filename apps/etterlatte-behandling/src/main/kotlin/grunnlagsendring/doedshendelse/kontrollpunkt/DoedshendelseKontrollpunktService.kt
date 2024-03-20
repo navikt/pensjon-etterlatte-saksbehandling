@@ -20,7 +20,7 @@ class DoedshendelseKontrollpunktService(
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val oppgaveService: OppgaveService,
     private val sakService: SakService,
-    private val pesysKlient: PesysKlient,
+    pesysKlient: PesysKlient,
     private val behandlingService: BehandlingService,
 ) {
     private val kontrollpunktEktefelleService = DoedshendelseKontrollpunktEktefelleService()
@@ -31,39 +31,27 @@ class DoedshendelseKontrollpunktService(
     fun identifiserKontrollerpunkter(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt> =
         when (hendelse.relasjon) {
             Relasjon.BARN -> {
-                val (sak, avdoed) = hentDataForBeroert(hendelse)
-                val barnKontrollpunkter = kontrollpunktBarnService.identifiser(hendelse, avdoed, sak)
+                val (sak, avdoed, barn) = hentDataForBeroert(hendelse, PersonRolle.BARN)
+                val barnKontrollpunkter = kontrollpunktBarnService.identifiser(hendelse, avdoed, sak, barn)
                 val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
-                val fellesKontrollpunkter = fellesKontrollpunkter(hendelse, sak)
+                val duplikatKontrollpunkt = listOfNotNull(kontrollerDuplikatHendelse(hendelse, sak))
 
-                barnKontrollpunkter + avdoedKontrollpunkter + fellesKontrollpunkter
+                barnKontrollpunkter + avdoedKontrollpunkter + duplikatKontrollpunkt
             }
 
             Relasjon.EKTEFELLE -> {
-                val (sak, avdoed) = hentDataForBeroert(hendelse)
-                val eps =
-                    pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                        foedselsnummer = hendelse.beroertFnr,
-                        rolle = PersonRolle.GJENLEVENDE,
-                        saktype = hendelse.sakTypeForEpsEllerBarn(),
-                    )
+                val (sak, avdoed, eps) = hentDataForBeroert(hendelse, PersonRolle.GJENLEVENDE)
 
                 val ektefelleKontrollpunkter = kontrollpunktEktefelleService.identifiser(eps, avdoed)
                 val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
                 val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, eps, avdoed)
-                val fellesKontrollpunkter = fellesKontrollpunkter(hendelse, sak) // todo: rename
+                val duplikatKontrollpunkt = listOfNotNull(kontrollerDuplikatHendelse(hendelse, sak))
 
-                ektefelleKontrollpunkter + avdoedKontrollpunkter + omsKontrollpunkter + fellesKontrollpunkter
+                ektefelleKontrollpunkter + avdoedKontrollpunkter + omsKontrollpunkter + duplikatKontrollpunkt
             }
 
             Relasjon.SAMBOER -> {
-                val (sak, avdoed) = hentDataForBeroert(hendelse)
-                val samboer =
-                    pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                        foedselsnummer = hendelse.beroertFnr,
-                        rolle = PersonRolle.GJENLEVENDE,
-                        saktype = hendelse.sakTypeForEpsEllerBarn(),
-                    )
+                val (sak, avdoed, samboer) = hentDataForBeroert(hendelse, PersonRolle.GJENLEVENDE)
 
                 val samboerKontrollpunkt =
                     listOf(
@@ -71,9 +59,9 @@ class DoedshendelseKontrollpunktService(
                     ) // todo: Liker ikke positiv sjekk
                 val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
                 val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, samboer, avdoed)
-                val fellesKontrollpunkter = fellesKontrollpunkter(hendelse, sak) // todo: Trekk ut i egen
+                val duplikatKontrollpunkt = listOfNotNull(kontrollerDuplikatHendelse(hendelse, sak))
 
-                samboerKontrollpunkt + avdoedKontrollpunkter + omsKontrollpunkter + fellesKontrollpunkter
+                samboerKontrollpunkt + avdoedKontrollpunkter + omsKontrollpunkter + duplikatKontrollpunkt
             }
 
             Relasjon.AVDOED -> {
@@ -81,17 +69,17 @@ class DoedshendelseKontrollpunktService(
             }
         }
 
-    private fun hentDataForBeroert(hendelse: DoedshendelseInternal): Pair<Sak?, PersonDTO> {
+    private fun hentDataForBeroert(
+        hendelse: DoedshendelseInternal,
+        beroert: PersonRolle,
+    ): Triple<Sak?, PersonDTO, PersonDTO> {
         val sakType = hendelse.sakTypeForEpsEllerBarn()
         val sak = sakService.finnSak(hendelse.beroertFnr, sakType)
         val avdoed = pdlTjenesterKlient.hentPdlModellFlereSaktyper(hendelse.avdoedFnr, PersonRolle.AVDOED, sakType)
-        return Pair(sak, avdoed)
-    }
+        val gjenlevende = pdlTjenesterKlient.hentPdlModellFlereSaktyper(hendelse.beroertFnr, beroert, hendelse.sakTypeForEpsEllerBarn())
 
-    private fun fellesKontrollpunkter(
-        hendelse: DoedshendelseInternal,
-        sak: Sak?,
-    ): List<DoedshendelseKontrollpunkt> = listOfNotNull(kontrollerEksisterendeHendelser(hendelse, sak))
+        return Triple(sak, avdoed, gjenlevende)
+    }
 
     private fun kontrollerAvdoedHarYtelseIGjenny(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt> {
         val sakerForAvdoed = sakService.finnSaker(hendelse.avdoedFnr)
@@ -104,7 +92,7 @@ class DoedshendelseKontrollpunktService(
             if (sisteIverksatteBehandling != null) {
                 val duplikat =
                     sakerForAvdoed.map {
-                        kontrollerEksisterendeHendelser(hendelse, it)
+                        kontrollerDuplikatHendelse(hendelse, it)
                     }.first()
                 listOfNotNull(DoedshendelseKontrollpunkt.AvdoedHarYtelse(sakerForAvdoed.first()), duplikat)
             } else {
@@ -113,7 +101,7 @@ class DoedshendelseKontrollpunktService(
         }
     }
 
-    private fun kontrollerEksisterendeHendelser(
+    private fun kontrollerDuplikatHendelse(
         hendelse: DoedshendelseInternal,
         sak: Sak?,
     ): DoedshendelseKontrollpunkt? {

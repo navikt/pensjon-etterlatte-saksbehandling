@@ -16,10 +16,11 @@ internal class DoedshendelseKontrollpunktBarnService(
         hendelse: DoedshendelseInternal,
         avdoed: PersonDTO,
         sak: Sak?,
+        barn: PersonDTO,
     ): List<DoedshendelseKontrollpunkt> {
         return listOfNotNull(
             kontrollerBarnOgHarBP(sak),
-            kontrollerSamtidigDoedsfall(avdoed, hendelse),
+            kontrollerSamtidigDoedsfall(avdoed, hendelse, barn),
         )
     }
 
@@ -41,15 +42,12 @@ internal class DoedshendelseKontrollpunktBarnService(
     private fun kontrollerSamtidigDoedsfall(
         avdoed: PersonDTO,
         hendelse: DoedshendelseInternal,
+        barn: PersonDTO,
     ): DoedshendelseKontrollpunkt? =
         try {
             avdoed.doedsdato?.verdi?.let { avdoedDoedsdato ->
                 val annenForelderFnr =
-                    pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                        foedselsnummer = hendelse.beroertFnr,
-                        rolle = PersonRolle.BARN,
-                        saktype = SakType.BARNEPENSJON,
-                    ).familieRelasjon?.verdi?.foreldre
+                    barn.familieRelasjon?.verdi?.foreldre
                         ?.map { it.value }
                         ?.firstOrNull { it != hendelse.avdoedFnr }
 

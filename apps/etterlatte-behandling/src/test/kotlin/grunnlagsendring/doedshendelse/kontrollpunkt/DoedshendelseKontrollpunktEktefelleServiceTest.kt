@@ -1,0 +1,3 @@
+package grunnlagsendring.doedshendelse.kontrollpunkt
+
+internal class DoedshendelseKontrollpunktEktefelleServiceTest

@@ -64,7 +64,7 @@ spec:
     - name: JOBB_POLLER_INITIAL_DELAY
       value: "60"
     - name: JOBB_POLLER_INTERVAL
-      value: "PT30S"
+      value: "PT5M"
     - name: JOBB_POLLER_OPENING_HOURS
       value: "09-15"
     - name: HENDELSE_POLLER_INITIAL_DELAY

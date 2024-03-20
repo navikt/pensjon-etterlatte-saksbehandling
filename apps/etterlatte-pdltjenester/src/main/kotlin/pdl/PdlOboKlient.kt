@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktor.behandlingsnummer
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.utils.toPdlVariables
 import org.slf4j.LoggerFactory
 
 class PdlOboKlient(private val httpClient: HttpClient, private val config: Config) {
@@ -112,90 +113,5 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
         return requireNotNull(token.get()?.accessToken) {
             "Kunne ikke hente ut obo-token for bruker ${bruker.ident()}"
         }
-    }
-
-    private fun toPdlVariables(
-        fnr: Folkeregisteridentifikator,
-        rolle: PersonRolle,
-    ) = when (rolle) {
-        PersonRolle.INNSENDER ->
-            PdlVariables(
-                ident = fnr.value,
-                bostedsadresse = true,
-                bostedsadresseHistorikk = false,
-                deltBostedsadresse = false,
-                kontaktadresse = false,
-                kontaktadresseHistorikk = false,
-                oppholdsadresse = false,
-                oppholdsadresseHistorikk = false,
-                utland = false,
-                sivilstand = false,
-                familieRelasjon = false,
-                vergemaal = false,
-            )
-
-        PersonRolle.BARN ->
-            PdlVariables(
-                ident = fnr.value,
-                bostedsadresse = true,
-                bostedsadresseHistorikk = true,
-                deltBostedsadresse = true,
-                kontaktadresse = true,
-                kontaktadresseHistorikk = true,
-                oppholdsadresse = true,
-                oppholdsadresseHistorikk = true,
-                utland = true,
-                sivilstand = false,
-                familieRelasjon = true,
-                vergemaal = true,
-            )
-
-        PersonRolle.GJENLEVENDE ->
-            PdlVariables(
-                ident = fnr.value,
-                bostedsadresse = true,
-                bostedsadresseHistorikk = true,
-                deltBostedsadresse = false,
-                kontaktadresse = false,
-                kontaktadresseHistorikk = false,
-                oppholdsadresse = true,
-                oppholdsadresseHistorikk = false,
-                utland = true,
-                sivilstand = true,
-                familieRelasjon = true,
-                vergemaal = true,
-            )
-
-        PersonRolle.AVDOED ->
-            PdlVariables(
-                ident = fnr.value,
-                bostedsadresse = true,
-                bostedsadresseHistorikk = true,
-                deltBostedsadresse = false,
-                kontaktadresse = true,
-                kontaktadresseHistorikk = true,
-                oppholdsadresse = true,
-                oppholdsadresseHistorikk = true,
-                utland = true,
-                sivilstand = true,
-                familieRelasjon = true,
-                vergemaal = false,
-            )
-
-        PersonRolle.TILKNYTTET_BARN ->
-            PdlVariables(
-                ident = fnr.value,
-                bostedsadresse = true,
-                bostedsadresseHistorikk = true,
-                deltBostedsadresse = true,
-                kontaktadresse = true,
-                kontaktadresseHistorikk = true,
-                oppholdsadresse = true,
-                oppholdsadresseHistorikk = true,
-                utland = true,
-                sivilstand = false,
-                familieRelasjon = false,
-                vergemaal = false,
-            )
     }
 }

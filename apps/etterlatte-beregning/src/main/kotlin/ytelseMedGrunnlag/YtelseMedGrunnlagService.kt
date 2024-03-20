@@ -44,6 +44,7 @@ class YtelseMedGrunnlagService(
                 YtelseMedGrunnlagPeriodisertDto(
                     periode = avkortetYtelse.periode,
                     ytelseEtterAvkorting = avkortetYtelse.ytelseEtterAvkorting,
+                    restanse = avkortetYtelse.restanse?.fordeltRestanse ?: 0,
                     avkortingsbeloep = avkortetYtelse.avkortingsbeloep,
                     ytelseFoerAvkorting = beregningIPeriode.utbetaltBeloep,
                     trygdetid = beregningIPeriode.trygdetid,

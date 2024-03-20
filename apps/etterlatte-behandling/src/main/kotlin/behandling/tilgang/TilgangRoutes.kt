@@ -10,7 +10,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -36,12 +35,10 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
             val fnr = call.receive<String>()
             val harTilgang =
                 harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
-                    inTransaction {
-                        tilgangService.harTilgangTilPerson(
-                            fnr,
-                            Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
-                        )
-                    }
+                    tilgangService.harTilgangTilPerson(
+                        fnr,
+                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                    )
                 }
             call.respond(harTilgang)
         }

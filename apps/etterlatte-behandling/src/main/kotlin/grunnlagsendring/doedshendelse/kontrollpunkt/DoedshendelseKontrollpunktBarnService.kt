@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.sak.Sak
 
-class DoedshendelseKontrollpunktBarnService(
+internal class DoedshendelseKontrollpunktBarnService(
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val behandlingService: BehandlingService,
 ) {

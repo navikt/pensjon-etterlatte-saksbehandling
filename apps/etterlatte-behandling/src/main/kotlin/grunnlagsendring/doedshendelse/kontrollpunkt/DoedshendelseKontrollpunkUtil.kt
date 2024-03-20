@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 
+import no.nav.etterlatte.common.klienter.hentBarn
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import java.time.temporal.ChronoUnit
@@ -11,9 +12,9 @@ fun harFellesBarn(
     eps: PersonDTO,
 ): Boolean = finnBarn(avdoed).intersect(finnBarn(eps).toSet()).isNotEmpty()
 
-fun harBarn(personDTO: PersonDTO): Boolean = finnBarn(personDTO).isNotEmpty()
+fun harBarn(personDTO: PersonDTO): Boolean = personDTO.hentBarn()?.isNotEmpty() ?: false
 
-fun finnBarn(personDTO: PersonDTO): List<Folkeregisteridentifikator> = personDTO.familieRelasjon?.verdi?.barn ?: emptyList()
+fun finnBarn(personDTO: PersonDTO): List<Folkeregisteridentifikator> = personDTO.hentBarn() ?: emptyList()
 
 fun safeYearsBetween(
     first: Temporal?,

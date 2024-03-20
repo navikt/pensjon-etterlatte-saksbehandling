@@ -13,7 +13,10 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.sak.Sak
 import kotlin.math.absoluteValue
 
-class DoedshendelseKontrollpunktOMSService(private val pesysKlient: PesysKlient, private val behandlingService: BehandlingService) {
+internal class DoedshendelseKontrollpunktOMSService(
+    private val pesysKlient: PesysKlient,
+    private val behandlingService: BehandlingService,
+) {
     fun identifiser(
         hendelse: DoedshendelseInternal,
         sak: Sak?,

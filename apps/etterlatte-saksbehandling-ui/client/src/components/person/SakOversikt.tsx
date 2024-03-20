@@ -8,7 +8,7 @@ import { formaterEnumTilLesbarString, formaterSakstype, formaterStringDato } fro
 import { KlageListe } from '~components/person/KlageListe'
 import { tagColors } from '~shared/Tags'
 import { SakMedBehandlinger } from '~components/person/typer'
-import { isSuccess, mapApiResult, Result } from '~shared/api/apiUtils'
+import { isSuccess, mapApiResult, mapResult, Result } from '~shared/api/apiUtils'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { EndreEnhet } from '~components/person/EndreEnhet'
@@ -93,19 +93,20 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
                 apiResult: hentFlyktningStatus,
                 errorMessage: 'Klarte ikke hente informasjon om flyktningstatus',
               })}
-              {isSuccess(yrkesskadefordelStatus) && yrkesskadefordelStatus.data && (
-                <>
-                  <FlexRow>
-                    <Alert variant="info">
-                      Søker har yrkesskadefordel fra før 01.01.2024 og har rett til stønad til fylte 21 år.
-                    </Alert>
-                  </FlexRow>
-                  <hr />
-                </>
-              )}
-              {isFailureHandler({
-                apiResult: yrkesskadefordelStatus,
-                errorMessage: 'Klarte ikke hente informasjon om yrkesskadefordel',
+              {mapResult(yrkesskadefordelStatus, {
+                success: (data) =>
+                  data && (
+                    <>
+                      <FlexRow>
+                        <Alert variant="info">
+                          Søker har yrkesskadefordel fra før 01.01.2024 og har rett til stønad til fylte 21 år.
+                        </Alert>
+                      </FlexRow>
+                      <hr />
+                    </>
+                  ),
+                pending: <Spinner visible={true} label="Henter status yrkesskadefordel" />,
+                error: () => <ApiErrorAlert>Klarte ikke hente informasjon om yrkesskadefordel</ApiErrorAlert>,
               })}
               {mapApiResult(
                 hentNavkontorStatus,

@@ -49,7 +49,7 @@ export const initialVurdering = {
   vurderesForPaatale: null,
 }
 
-export function TilbakekrevingVurderingOverordnet({
+export function TilbakekrevingVurderingSkjema({
   behandling,
   redigerbar,
 }: {

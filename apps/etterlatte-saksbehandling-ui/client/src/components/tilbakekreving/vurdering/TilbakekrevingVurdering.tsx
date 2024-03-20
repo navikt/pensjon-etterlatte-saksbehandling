@@ -4,7 +4,7 @@ import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/
 import { useNavigate } from 'react-router-dom'
 import React from 'react'
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
-import { TilbakekrevingVurderingOverordnet } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingOverordnet'
+import { TilbakekrevingVurderingSkjema } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingSkjema'
 
 export function TilbakekrevingVurdering({
   behandling,
@@ -23,7 +23,7 @@ export function TilbakekrevingVurdering({
           </Heading>
         </HeadingWrapper>
       </ContentHeader>
-      <TilbakekrevingVurderingOverordnet behandling={behandling} redigerbar={redigerbar} />
+      <TilbakekrevingVurderingSkjema behandling={behandling} redigerbar={redigerbar} />
       <Border style={{ marginTop: '3em' }} />
       <FlexRow $spacing={true} justify="center">
         <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/utbetalinger`)}>

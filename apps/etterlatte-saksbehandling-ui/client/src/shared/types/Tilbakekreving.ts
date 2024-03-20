@@ -158,9 +158,9 @@ export enum TilbakekrevingResultat {
 }
 
 export const teksterTilbakekrevingResultat: Record<TilbakekrevingResultat, string> = {
-  INGEN_TILBAKEKREV: 'Full tilbakekreving',
+  INGEN_TILBAKEKREV: 'Ingen tilbakekreving',
   DELVIS_TILBAKEKREV: 'Delvis tilbakekreving',
-  FULL_TILBAKEKREV: 'Ingen tilbakekreving',
+  FULL_TILBAKEKREV: 'Full tilbakekreving',
   FEILREGISTRERT: 'Feilregistrert',
   FORELDET: 'Foreldet',
 }

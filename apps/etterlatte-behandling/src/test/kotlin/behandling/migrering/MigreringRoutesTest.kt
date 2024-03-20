@@ -15,16 +15,15 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.module
 import no.nav.etterlatte.rapidsandrivers.migrering.AvdoedForelder
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
-import no.nav.etterlatte.sikkerLogg
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -45,12 +44,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    restModule(
-                        sikkerLogg,
-                        withMetrics = true,
-                    ) {
-                        applicationContext
-                    }
+                    module(applicationContext)
                 }
 
             val request =

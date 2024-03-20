@@ -36,14 +36,13 @@ import no.nav.etterlatte.libs.common.tilbakekreving.NavIdent
 import no.nav.etterlatte.libs.common.tilbakekreving.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.BARN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_ANNEN_FORELDER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.mockedSakTilgangDao
+import no.nav.etterlatte.module
 import no.nav.etterlatte.persongalleri
-import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -230,12 +229,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    restModule(
-                        sikkerLogg,
-                        withMetrics = true,
-                    ) {
-                        applicationContext
-                    }
+                    module(applicationContext)
                 }
             block(client)
         }

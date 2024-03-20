@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.RouteScopedPlugin
 import io.ktor.server.application.call
@@ -38,6 +39,7 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.oppgaveGosys.gosysOppgaveRoute
@@ -85,7 +87,17 @@ private fun shutdownHooks(context: ApplicationContext): Map<Timer, (Timer) -> Un
         context.fristGaarUtJobb.schedule() to { addShutdownHook(it) },
     )
 
-internal fun Route.settOppApplikasjonen(context: ApplicationContext) {
+@Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")
+internal fun Application.module(context: ApplicationContext) {
+    restModule(
+        sikkerLogg,
+        withMetrics = true,
+    ) {
+        settOppApplikasjonen(context)
+    }
+}
+
+private fun Route.settOppApplikasjonen(context: ApplicationContext) {
     attachContekst(context.dataSource, context)
     settOppRoutes(context)
     settOppTilganger(context, adressebeskyttelsePlugin)

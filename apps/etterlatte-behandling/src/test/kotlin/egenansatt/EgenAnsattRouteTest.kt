@@ -27,10 +27,9 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
-import no.nav.etterlatte.sikkerLogg
+import no.nav.etterlatte.module
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -59,12 +58,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    restModule(
-                        sikkerLogg,
-                        withMetrics = true,
-                    ) {
-                        applicationContext
-                    }
+                    module(applicationContext)
                 }
             coEvery {
                 norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any())
@@ -150,12 +144,7 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    restModule(
-                        sikkerLogg,
-                        withMetrics = true,
-                    ) {
-                        applicationContext
-                    }
+                    module(applicationContext)
                 }
 
             coEvery {

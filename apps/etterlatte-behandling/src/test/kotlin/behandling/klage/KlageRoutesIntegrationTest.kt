@@ -48,10 +48,9 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.sikkerLogg
+import no.nav.etterlatte.module
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -516,12 +515,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    restModule(
-                        sikkerLogg,
-                        withMetrics = true,
-                    ) {
-                        applicationContext
-                    }
+                    module(applicationContext)
                 }
             block(client)
         }

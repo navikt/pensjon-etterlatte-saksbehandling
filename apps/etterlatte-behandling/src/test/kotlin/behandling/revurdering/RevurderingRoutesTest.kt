@@ -17,10 +17,9 @@ import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.module
 import no.nav.etterlatte.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
-import no.nav.etterlatte.sikkerLogg
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -62,12 +61,7 @@ internal class RevurderingRoutesTest {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    restModule(
-                        sikkerLogg,
-                        withMetrics = true,
-                    ) {
-                        applicationContext
-                    }
+                    module(applicationContext)
                 }
 
             val response =
@@ -84,15 +78,7 @@ internal class RevurderingRoutesTest {
     @Test
     fun `returnerer bad request hvis payloaden er ugyldig for opprettelse av en revurdering`() {
         testApplication {
-            val client =
-                runServerWithModule(server) {
-                    restModule(
-                        sikkerLogg,
-                        withMetrics = true,
-                    ) {
-                        applicationContext
-                    }
-                }
+            val client = runServerWithModule(server) { module(applicationContext) }
 
             val response =
                 client.post("api/revurdering/1") {
@@ -110,12 +96,7 @@ internal class RevurderingRoutesTest {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    restModule(
-                        sikkerLogg,
-                        withMetrics = true,
-                    ) {
-                        applicationContext
-                    }
+                    module(applicationContext)
                 }
 
             val response =
@@ -142,12 +123,7 @@ internal class RevurderingRoutesTest {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    restModule(
-                        sikkerLogg,
-                        withMetrics = true,
-                    ) {
-                        applicationContext
-                    }
+                    module(applicationContext)
                 }
 
             val response =
@@ -173,12 +149,7 @@ internal class RevurderingRoutesTest {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    restModule(
-                        sikkerLogg,
-                        withMetrics = true,
-                    ) {
-                        applicationContext
-                    }
+                    module(applicationContext)
                 }
 
             val response =

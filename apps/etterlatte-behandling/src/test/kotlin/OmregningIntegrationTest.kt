@@ -24,7 +24,6 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
@@ -115,12 +114,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    restModule(
-                        sikkerLogg,
-                        withMetrics = true,
-                    ) {
-                        applicationContext
-                    }
+                    module(applicationContext)
                 }
 
             for (i in 1..100) {
@@ -163,12 +157,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
         testApplication {
             val client =
                 runServerWithModule(server) {
-                    restModule(
-                        sikkerLogg,
-                        withMetrics = true,
-                    ) {
-                        applicationContext
-                    }
+                    module(applicationContext)
                 }
 
             client.post("/omregning") {

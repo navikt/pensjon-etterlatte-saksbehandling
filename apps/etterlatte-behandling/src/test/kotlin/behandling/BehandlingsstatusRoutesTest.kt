@@ -18,8 +18,7 @@ import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.sikkerLogg
+import no.nav.etterlatte.module
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -67,12 +66,7 @@ internal class BehandlingsstatusRoutesTest {
 
         testApplication {
             runServerWithModule(server) {
-                restModule(
-                    sikkerLogg,
-                    withMetrics = true,
-                ) {
-                    applicationContext
-                }
+                module(applicationContext)
             }
 
             val response =
@@ -98,12 +92,7 @@ internal class BehandlingsstatusRoutesTest {
 
         testApplication {
             runServerWithModule(server) {
-                restModule(
-                    sikkerLogg,
-                    withMetrics = true,
-                ) {
-                    applicationContext
-                }
+                module(applicationContext)
             }
 
             val response =
@@ -129,12 +118,7 @@ internal class BehandlingsstatusRoutesTest {
 
         testApplication {
             runServerWithModule(server) {
-                restModule(
-                    sikkerLogg,
-                    withMetrics = true,
-                ) {
-                    applicationContext
-                }
+                module(applicationContext)
             }
 
             val response =
@@ -162,12 +146,7 @@ internal class BehandlingsstatusRoutesTest {
 
         testApplication {
             runServerWithModule(server) {
-                restModule(
-                    sikkerLogg,
-                    withMetrics = true,
-                ) {
-                    applicationContext
-                }
+                module(applicationContext)
             }
 
             val response =

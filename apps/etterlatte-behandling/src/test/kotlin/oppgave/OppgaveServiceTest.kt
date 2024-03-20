@@ -38,6 +38,7 @@ import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -407,7 +408,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         oppgaveService.fjernSaksbehandler(nyOppgave.id)
         val oppgaveUtenSaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
         Assertions.assertNotNull(oppgaveUtenSaksbehandler?.id)
-        Assertions.assertNull(oppgaveUtenSaksbehandler?.saksbehandler)
+        assertNull(oppgaveUtenSaksbehandler?.saksbehandler)
         assertEquals(Status.NY, oppgaveUtenSaksbehandler?.status)
     }
 
@@ -841,12 +842,17 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler?.ident)
 
         val hentEndringerForOppgave = oppgaveDaoMedEndringssporing.hentEndringerForOppgave(nyOppgave.id)
-        assertEquals(1, hentEndringerForOppgave.size)
-        val endringPaaOppgave = hentEndringerForOppgave[0]
-        Assertions.assertNull(endringPaaOppgave.oppgaveFoer.saksbehandler)
-        assertEquals("nysaksbehandler", endringPaaOppgave.oppgaveEtter.saksbehandler?.ident)
-        assertEquals(Status.NY, endringPaaOppgave.oppgaveFoer.status)
-        assertEquals(Status.UNDER_BEHANDLING, endringPaaOppgave.oppgaveEtter.status)
+        assertEquals(2, hentEndringerForOppgave.size)
+
+        val oppgaveOpprettetEndring = hentEndringerForOppgave[0]
+        assertNull(oppgaveOpprettetEndring.saksbehandler)
+        assertEquals(Status.NY, oppgaveOpprettetEndring.status)
+        assertEquals(EndringType.OPPRETTET_OPPGAVE, oppgaveOpprettetEndring.type)
+
+        val oppgaveTildeltEndring = hentEndringerForOppgave[1]
+        assertEquals(Status.UNDER_BEHANDLING, oppgaveTildeltEndring.status)
+        assertEquals(nysaksbehandler, oppgaveTildeltEndring.saksbehandler)
+        assertEquals(EndringType.ENDRET_TILDELING, oppgaveTildeltEndring.type)
     }
 
     @Test
@@ -867,6 +873,14 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         oppgaveService.ferdigStillOppgaveUnderBehandling(behandlingsref, saksbehandler1)
         val ferdigstiltOppgave = oppgaveService.hentOppgave(oppgave.id)
         assertEquals(Status.FERDIGSTILT, ferdigstiltOppgave?.status)
+
+        val hentEndringerForOppgave = oppgaveDaoMedEndringssporing.hentEndringerForOppgave(oppgave.id)
+        assertEquals(3, hentEndringerForOppgave.size)
+
+        val oppgaveFerdigstiltEndring = hentEndringerForOppgave[2]
+        assertEquals(Status.FERDIGSTILT, oppgaveFerdigstiltEndring.status)
+        assertEquals(saksbehandler1.ident, oppgaveFerdigstiltEndring.saksbehandler)
+        assertEquals(EndringType.ENDRET_STATUS, oppgaveFerdigstiltEndring.type)
     }
 
     @Test
@@ -1069,7 +1083,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
-        Assertions.assertNull(saksbehandlerHentet?.ident)
+        assertNull(saksbehandlerHentet?.ident)
     }
 
     @Test

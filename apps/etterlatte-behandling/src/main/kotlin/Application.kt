@@ -102,33 +102,33 @@ internal fun Route.settOppApplikasjonen(context: ApplicationContext) {
     settOppTilganger(context, adressebeskyttelsePlugin)
 }
 
-private fun Route.settOppTilganger(
+private fun Route.attachContekst(
+    ds: DataSource,
     context: ApplicationContext,
-    adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration>,
 ) {
-    with(context) {
-        install(adressebeskyttelsePlugin) {
-            saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey
+    intercept(ApplicationCallPipeline.Call) {
+        val requestContekst =
+            Context(
+                AppUser =
+                    decideUser(
+                        call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
+                        context.saksbehandlerGroupIdsByKey,
+                        context.saksbehandlerService,
+                        brukerTokenInfo,
+                    ),
+                databasecontxt = DatabaseContext(ds),
+                sakTilgangDao = context.sakTilgangDao,
+            )
 
-            harTilgangBehandling = { behandlingId, saksbehandlerMedRoller ->
-                tilgangService.harTilgangTilBehandling(behandlingId, saksbehandlerMedRoller)
-            }
-            harTilgangTilSak = { sakId, saksbehandlerMedRoller ->
-                tilgangService.harTilgangTilSak(sakId, saksbehandlerMedRoller)
-            }
-            harTilgangTilOppgave = { oppgaveId, saksbehandlerMedRoller ->
-                tilgangService.harTilgangTilOppgave(
-                    oppgaveId,
-                    saksbehandlerMedRoller,
-                )
-            }
-            harTilgangTilKlage = { klageId, saksbehandlerMedRoller ->
-                tilgangService.harTilgangTilKlage(
-                    klageId,
-                    saksbehandlerMedRoller,
-                )
-            }
+        withContext(
+            Dispatchers.Default +
+                Kontekst.asContextElement(
+                    value = requestContekst,
+                ),
+        ) {
+            proceed()
         }
+        Kontekst.remove()
     }
 }
 
@@ -198,32 +198,32 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     tilgangRoutes(applicationContext.tilgangService)
 }
 
-private fun Route.attachContekst(
-    ds: DataSource,
+private fun Route.settOppTilganger(
     context: ApplicationContext,
+    adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration>,
 ) {
-    intercept(ApplicationCallPipeline.Call) {
-        val requestContekst =
-            Context(
-                AppUser =
-                    decideUser(
-                        call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
-                        context.saksbehandlerGroupIdsByKey,
-                        context.saksbehandlerService,
-                        brukerTokenInfo,
-                    ),
-                databasecontxt = DatabaseContext(ds),
-                sakTilgangDao = context.sakTilgangDao,
-            )
+    with(context) {
+        install(adressebeskyttelsePlugin) {
+            saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey
 
-        withContext(
-            Dispatchers.Default +
-                Kontekst.asContextElement(
-                    value = requestContekst,
-                ),
-        ) {
-            proceed()
+            harTilgangBehandling = { behandlingId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilBehandling(behandlingId, saksbehandlerMedRoller)
+            }
+            harTilgangTilSak = { sakId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilSak(sakId, saksbehandlerMedRoller)
+            }
+            harTilgangTilOppgave = { oppgaveId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilOppgave(
+                    oppgaveId,
+                    saksbehandlerMedRoller,
+                )
+            }
+            harTilgangTilKlage = { klageId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilKlage(
+                    klageId,
+                    saksbehandlerMedRoller,
+                )
+            }
         }
-        Kontekst.remove()
     }
 }

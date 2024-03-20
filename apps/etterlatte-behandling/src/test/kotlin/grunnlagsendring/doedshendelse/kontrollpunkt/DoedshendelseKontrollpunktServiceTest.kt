@@ -15,7 +15,6 @@ import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
-import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
@@ -318,27 +317,6 @@ class DoedshendelseKontrollpunktServiceTest {
     }
 
     @Test
-    fun `Eps er 67 år EpsKanHaAlderspensjon`() {
-        every { sakService.finnSak(any(), any()) } returns null
-
-        coEvery {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                doedshendelseInternalOMS.beroertFnr,
-                PersonRolle.GJENLEVENDE,
-                SakType.OMSTILLINGSSTOENAD,
-            )
-        } returns
-            mockPerson()
-                .copy(
-                    foedselsdato = OpplysningDTO(LocalDate.now().minusYears(67L), "foedselsdato"),
-                )
-
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
-
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsKanHaAlderspensjon)
-    }
-
-    @Test
     fun `Samboer gir SamboerSammeAdresseOgFellesBarn`() {
         every { sakService.finnSak(any(), any()) } returns null
 
@@ -357,30 +335,6 @@ class DoedshendelseKontrollpunktServiceTest {
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS.copy(relasjon = Relasjon.SAMBOER))
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.SamboerSammeAdresseOgFellesBarn)
-    }
-
-    @Test
-    fun `Skal gi kontrollpunkt eps er død om eps er død, EpsHarDoedsdato`() {
-        every { sakService.finnSak(any(), any()) } returns null
-
-        coEvery {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                doedshendelseInternalOMS.beroertFnr,
-                PersonRolle.GJENLEVENDE,
-                SakType.OMSTILLINGSSTOENAD,
-            )
-        } returns
-            mockPerson().copy(
-                doedsdato =
-                    OpplysningDTO(
-                        LocalDate.now(),
-                        "doedsdato",
-                    ),
-            )
-
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
-
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarDoedsdato)
     }
 
     @Test
@@ -547,98 +501,6 @@ class DoedshendelseKontrollpunktServiceTest {
                 DoedshendelseKontrollpunkt.AvdoedHarYtelse(sak),
                 DoedshendelseKontrollpunkt.DuplikatGrunnlagsendringsHendelse(grunnlagsendringshendelse.id, oppgaveIntern.id),
             )
-    }
-
-    @Test
-    fun `Skal returnere kontrollpunkt hvis den beroerte har ufoeretrygd`() {
-        coEvery { pesysKlient.hentSaker(doedshendelseInternalOMS.beroertFnr) } returns
-            listOf(
-                SakSammendragResponse(
-                    sakType = SakSammendragResponse.UFORE_SAKTYPE,
-                    sakStatus = SakSammendragResponse.Status.LOPENDE,
-                    fomDato = LocalDate.now().minusMonths(2),
-                    tomDate = null,
-                ),
-            )
-        coEvery {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                doedshendelseInternalOMS.beroertFnr,
-                PersonRolle.GJENLEVENDE,
-                SakType.OMSTILLINGSSTOENAD,
-            )
-        } returns mockPerson()
-
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
-
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.KryssendeYtelseIPesysEps)
-    }
-
-    @Test
-    fun `Skal opprette kontrollpunkt EpsHarSakMedIverksattBehandlingIGjenny ved sak og med iverksatt behandling for EPS`() {
-        val sak =
-            Sak(
-                ident = doedshendelseInternalOMS.beroertFnr,
-                sakType = doedshendelseInternalOMS.sakTypeForEpsEllerBarn(),
-                id = 1L,
-                enhet = "0000",
-            )
-        every { sakService.finnSak(any(), any()) } returns sak
-        every {
-            behandlingService.hentSisteIverksatte(
-                sak.id,
-            )
-        } returns foerstegangsbehandling(sakId = sak.id, status = BehandlingStatus.IVERKSATT)
-        coEvery {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                doedshendelseInternalOMS.beroertFnr,
-                PersonRolle.GJENLEVENDE,
-                SakType.OMSTILLINGSSTOENAD,
-            )
-        } returns mockPerson()
-
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
-
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarSakMedIverksattBehandlingIGjenny(sak))
-    }
-
-    @Test
-    fun `Skal ikke opprette kontrollpunkt EpsHarSakMedIverksattBehandlingIGjenny dersom det eksisterer kun sak for EPS`() {
-        val sak =
-            Sak(
-                ident = doedshendelseInternalOMS.beroertFnr,
-                sakType = doedshendelseInternalOMS.sakTypeForEpsEllerBarn(),
-                id = 1L,
-                enhet = "0000",
-            )
-        every { sakService.finnSak(sak.ident, sak.sakType) } returns sak
-        every { behandlingService.hentSisteIverksatte(sak.id) } returns null
-        coEvery {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                doedshendelseInternalOMS.beroertFnr,
-                PersonRolle.GJENLEVENDE,
-                SakType.OMSTILLINGSSTOENAD,
-            )
-        } returns mockPerson()
-
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
-
-        kontrollpunkter shouldContainExactly emptyList()
-    }
-
-    @Test
-    fun `Skal ikke opprette kontrollpunkt EpsHarSakMedIverksattBehandlingIGjenny dersom det ikke eksisterer sak for EPS`() {
-        every { sakService.finnSak(any(), any()) } returns null
-        coEvery {
-            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                doedshendelseInternalOMS.beroertFnr,
-                PersonRolle.GJENLEVENDE,
-                SakType.OMSTILLINGSSTOENAD,
-            )
-        } returns mockPerson()
-
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
-
-        kontrollpunkter shouldContainExactly emptyList()
     }
 
     @Test

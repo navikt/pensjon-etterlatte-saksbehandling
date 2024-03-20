@@ -105,23 +105,29 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           )}
         </li>
       </TagList>
-      <div className="info">
-        <Info>Saksbehandler</Info>
-        {mapApiResult(
-          oppgaveForBehandlingenStatus,
-          <Spinner visible={true} label="Henter oppgave" />,
-          () => (
-            <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
-          ),
-          (oppgave) =>
-            !!oppgave?.saksbehandler ? (
-              <Tekst>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Tekst>
-            ) : (
-              <Alert size="small" variant="warning">
-                Ingen saksbehandler har tatt denne oppgaven
-              </Alert>
-            )
-        )}
+      <div className="flex">
+        <div className="info">
+          <Info>Saksbehandler</Info>
+          {mapApiResult(
+            oppgaveForBehandlingenStatus,
+            <Spinner visible={true} label="Henter oppgave" />,
+            () => (
+              <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
+            ),
+            (oppgave) =>
+              !!oppgave?.saksbehandler ? (
+                <Tekst>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Tekst>
+              ) : (
+                <Alert size="small" variant="warning">
+                  Ingen saksbehandler har tatt denne oppgaven
+                </Alert>
+              )
+          )}
+        </div>
+        <div className="info">
+          <Info>Kilde</Info>
+          <Tekst>{behandlingsInfo.kilde}</Tekst>
+        </div>
       </div>
       <div className="flex">
         <div>

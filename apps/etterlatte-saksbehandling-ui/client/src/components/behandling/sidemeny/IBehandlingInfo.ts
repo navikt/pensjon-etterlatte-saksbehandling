@@ -1,4 +1,9 @@
-import { IBehandlingStatus, IBehandlingsType, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
+import {
+  IBehandlingStatus,
+  IBehandlingsType,
+  UtlandstilknytningType,
+  Vedtaksloesning,
+} from '~shared/types/IDetaljertBehandling'
 import { IHendelse } from '~shared/types/IHendelse'
 import { SakType } from '~shared/types/sak'
 
@@ -9,6 +14,7 @@ export interface IBehandlingInfo {
   sakType: SakType
   sakEnhetId: string
   status: IBehandlingStatus
+  kilde: Vedtaksloesning
   behandlendeSaksbehandler?: string
   attesterendeSaksbehandler?: string
   virkningsdato?: string

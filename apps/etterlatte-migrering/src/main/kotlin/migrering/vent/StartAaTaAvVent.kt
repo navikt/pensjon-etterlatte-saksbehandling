@@ -15,19 +15,23 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import kotlin.concurrent.thread
 
 class StartAaTaAvVent(
     private val ventRepository: VentRepository,
     private val rapidsConnection: RapidsConnection,
     featureToggleService: FeatureToggleService,
     sleep: (millis: Duration) -> Unit = { Thread.sleep(it) },
+    iTraad: (handling: () -> Unit) -> Unit = { thread { it() } },
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         if (featureToggleService.isEnabled(VentFeatureToggle.TaAvVent, false)) {
-            sleep(Duration.ofMinutes(1))
-            taAvVent()
+            iTraad {
+                sleep(Duration.ofMinutes(1))
+                taAvVent()
+            }
         }
     }
 

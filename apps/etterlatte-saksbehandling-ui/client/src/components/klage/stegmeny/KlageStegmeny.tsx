@@ -17,13 +17,16 @@ export function kanSeOppsummering(klage: Klage | null): boolean {
   switch (klageStatus) {
     case KlageStatus.FERDIGSTILT:
     case KlageStatus.UTFALL_VURDERT:
-    case KlageStatus.FORMKRAV_IKKE_OPPFYLT:
     case KlageStatus.FORMKRAV_OPPFYLT:
     case KlageStatus.FATTET_VEDTAK:
     case KlageStatus.RETURNERT:
       return true
+    case KlageStatus.OPPRETTET:
+    case KlageStatus.AVBRUTT:
+    case KlageStatus.FORMKRAV_IKKE_OPPFYLT:
+    case undefined:
+      return false
   }
-  return false
 }
 
 export function klageKanSeBrev(klage: Klage | null): boolean {

@@ -8,7 +8,6 @@ import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.retryOgPakkUt
@@ -83,14 +82,12 @@ internal class OpprettVarselbrevForGjenopprettaRiver(
             varselbrev.let { Pair(it.brev, it.generellBrevData) },
             brukerTokenInfo,
         )
-        if (featureToggleService.isEnabled(MigreringFeatureToggle.GjenopprettingJournalfoerOgDistribuerVarsel, false)) {
-            ferdigstillJournalfoerOgDistribuerBrev.journalfoerOgDistribuer(
-                varselbrev.brevkoder,
-                sakId,
-                varselbrev.brev.id,
-                brukerTokenInfo,
-            )
-        }
+        ferdigstillJournalfoerOgDistribuerBrev.journalfoerOgDistribuer(
+            varselbrev.brevkoder,
+            sakId,
+            varselbrev.brev.id,
+            brukerTokenInfo,
+        )
     }
 
     private suspend fun ferdigstillOgGenererPDF(
@@ -116,11 +113,4 @@ internal class OpprettVarselbrevForGjenopprettaRiver(
         }
         return brevId
     }
-}
-
-enum class MigreringFeatureToggle(private val key: String) : FeatureToggle {
-    GjenopprettingJournalfoerOgDistribuerVarsel("pensjon-etterlatte.gjenoppretting-distribuer-varsel"),
-    ;
-
-    override fun key() = key
 }

@@ -95,6 +95,29 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
         }
     }
 
+    fun ferdigstillJobbHvisAlleHendelserErFerdige(hendelseId: UUID) {
+        datasource.transaction {
+            queryOf(
+                """
+                UPDATE jobb j
+                SET status  = 'FERDIG',
+                    endret  = CURRENT_TIMESTAMP,
+                    versjon = j.versjon + 1
+                WHERE j.id = (SELECT jobb_id FROM hendelse h WHERE h.id = :hendelseId)
+                AND NOT EXISTS (SELECT 1
+                      FROM hendelse h
+                      WHERE h.jobb_id = j.id
+                        AND h.status <> 'FERDIG'
+                )
+                """.trimIndent(),
+                mapOf(
+                    "hendelseId" to hendelseId,
+                ),
+            )
+                .let { query -> it.run(query.asUpdate) }
+        }
+    }
+
     fun opprettHendelserForSaker(
         jobbId: Int,
         saksIDer: List<Long>,

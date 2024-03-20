@@ -43,7 +43,11 @@ class DoedshendelseService(
 
     fun kanSendeBrevOgOppretteOppgave() = featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, false)
 
-    fun kanLagreDoedshendelseForEPS() = featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelseForEPS, false)
+    private fun kanLagreDoedshendelseForEPS() =
+        featureToggleService.isEnabled(
+            toggleId = DoedshendelseFeatureToggle.KanLagreDoedshendelseForEPS,
+            defaultValue = false,
+        )
 
     fun opprettDoedshendelseForBeroertePersoner(doedshendelse: PdlDoedshendelse) {
         logger.info("Mottok dødsmelding fra PDL, finner berørte personer og lagrer ned dødsmelding.")
@@ -67,7 +71,7 @@ class DoedshendelseService(
 
         val beroerteBarn = finnBeroerteBarn(avdoed)
         val beroerteEktefeller = if (kanLagreDoedshendelseForEPS()) finnBeroerteEktefellerSivilstand(avdoed) else emptyList()
-        val samboereMedFellesbarn = finnSamboereForAvdoedMedFellesBarn(avdoed)
+        val samboereMedFellesbarn = if (kanLagreDoedshendelseForEPS()) finnSamboereForAvdoedMedFellesBarn(avdoed) else emptyList()
         val alleBeroerte = beroerteBarn + beroerteEktefeller + samboereMedFellesbarn
 
         if (gyldigeDoedshendelserForAvdoed.isEmpty()) {
@@ -201,8 +205,8 @@ class DoedshendelseService(
 
     private fun erSamboere(avdoedOgAnnenForelderMedFellesbarn: AvdoedOgAnnenForelderMedFellesbarn): Boolean {
         val gjenlevendeBosteder =
-            avdoedOgAnnenForelderMedFellesbarn.gjenlevendeForelder
-                .bostedsadresse?.map { it.verdi }?.filter { it.aktiv }
+            avdoedOgAnnenForelderMedFellesbarn
+                .gjenlevendeForelder.bostedsadresse?.map { it.verdi }?.filter { it.aktiv }
         val avdoedBosteder =
             avdoedOgAnnenForelderMedFellesbarn
                 .avdoedPerson.bostedsadresse?.map { it.verdi }?.filter { it.aktiv }

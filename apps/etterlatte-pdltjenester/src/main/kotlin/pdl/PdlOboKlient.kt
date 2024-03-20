@@ -10,14 +10,13 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
-import io.ktor.http.HttpMessageBuilder
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Behandlingsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.ktor.behandlingsnummer
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -43,7 +42,7 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
         return retry<PdlPersonNavnResponse>(times = 3) {
             httpClient.post(apiUrl) {
                 bearerAuth(getOboToken(bruker))
-                behandlingsnummer(Behandlingsnummer.BARNEPENSJON, Behandlingsnummer.OMSTILLINGSSTOENAD)
+                behandlingsnummer(SakType.entries)
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(request)
@@ -74,13 +73,10 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
                 variables = toPdlVariables(fnr, rolle),
             )
 
-        val behandlingsnummere = hentBehandlingsnummerFromSaktyper(saktyper)
-
         return retry<PdlPersonResponse>(times = 3) {
             httpClient.post(apiUrl) {
                 bearerAuth(getOboToken(bruker))
-                behandlingsnummer(behandlingsnummere)
-                header(HEADER_BEHANDLINGSNUMMER, behandlingsnummere.joinToString { it.behandlingsnummer })
+                behandlingsnummer(saktyper)
                 header(PdlKlient.HEADER_TEMA, PdlKlient.HEADER_TEMA_VALUE)
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
@@ -116,18 +112,6 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
         return requireNotNull(token.get()?.accessToken) {
             "Kunne ikke hente ut obo-token for bruker ${bruker.ident()}"
         }
-    }
-
-    private fun HttpMessageBuilder.behandlingsnummer(vararg behandlingsnummer: Behandlingsnummer): Unit =
-        header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.joinToString { it.behandlingsnummer })
-
-    private fun hentBehandlingsnummerFromSaktyper(saktyper: List<SakType>): List<Behandlingsnummer> {
-        return saktyper.map {
-            when (it) {
-                SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
-                SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD
-            }
-        }.distinct()
     }
 
     private fun toPdlVariables(

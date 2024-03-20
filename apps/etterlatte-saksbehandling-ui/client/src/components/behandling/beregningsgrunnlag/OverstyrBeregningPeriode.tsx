@@ -63,7 +63,7 @@ const OverstyrBeregningPeriode = (props: OverstyrBeregningPerioder) => {
           <VerdiFelt>
             <TextField label="Anvendt Trygdetid" {...register(`overstyrBeregningForm.${index}.data.trygdetid`)} />
             <TextField
-              label="Trygdetid tilhører"
+              label="Trygdetid tilhører FNR"
               {...register(`overstyrBeregningForm.${index}.data.trygdetidForIdent`)}
             />
           </VerdiFelt>

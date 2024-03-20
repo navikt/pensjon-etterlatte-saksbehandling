@@ -192,7 +192,7 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
                       <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
                       <Table.HeaderCell scope="col">Utbetalt beløp</Table.HeaderCell>
                       <Table.HeaderCell scope="col">Trygdetid</Table.HeaderCell>
-                      <Table.HeaderCell scope="col">Tilhører</Table.HeaderCell>
+                      <Table.HeaderCell scope="col">Tilhører FNR</Table.HeaderCell>
                       <Table.HeaderCell scope="col">Prorata</Table.HeaderCell>
                       <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
                     </Table.Row>

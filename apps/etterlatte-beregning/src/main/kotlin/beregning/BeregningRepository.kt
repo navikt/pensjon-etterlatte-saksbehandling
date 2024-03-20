@@ -105,6 +105,7 @@ class BeregningRepository(private val dataSource: DataSource) {
             "sakId" to beregning.grunnlagMetadata.sakId,
             "grunnlagVersjon" to beregning.grunnlagMetadata.versjon,
             "trygdetid" to beregningsperiode.trygdetid,
+            "trygdetidForIdent" to beregningsperiode.trygdetidForIdent,
             "beregningsMetode" to beregningsperiode.beregningsMetode?.name,
             "samletNorskTrygdetid" to beregningsperiode.samletNorskTrygdetid,
             "samletTeoretiskTrygdetid" to beregningsperiode.samletTeoretiskTrygdetid,
@@ -152,6 +153,8 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO =
                     versjon = long(BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn),
                 ),
             trygdetid = int(BeregningsperiodeDatabaseColumns.Trygdetid.navn),
+            // TODO stringOrNull(BeregningsperiodeDatabaseColumns.TrygdetidForIdent.navn),
+            trygdetidForIdent = null,
             beregningsMetode =
                 stringOrNull(BeregningsperiodeDatabaseColumns.BeregningsMetode.navn)?.let {
                     BeregningsMetode.valueOf(it)
@@ -210,6 +213,7 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
                     grunnbelopMnd = it.grunnbelopMnd,
                     grunnbelop = it.grunnbelop,
                     trygdetid = it.trygdetid,
+                    trygdetidForIdent = it.trygdetidForIdent,
                     beregningsMetode = it.beregningsMetode,
                     samletNorskTrygdetid = it.samletNorskTrygdetid,
                     samletTeoretiskTrygdetid = it.samletTeoretiskTrygdetid,
@@ -238,6 +242,7 @@ private enum class BeregningsperiodeDatabaseColumns(val navn: String) {
     SakId("sakId"),
     GrunnlagVersjon("grunnlagVersjon"),
     Trygdetid("trygdetid"),
+    TrygdetidForIdent("trygdetidForIdent"),
     BeregningsMetode("beregnings_metode"),
     SamletNorskTrygdetid("samlet_norsk_trygdetid"),
     SamletTeoretiskTrygdetid("samlet_teoretisk_trygdetid"),
@@ -322,6 +327,7 @@ private data class BeregningsperiodeDAO(
     val grunnbelop: Int,
     val grunnlagMetadata: Metadata,
     val trygdetid: Int,
+    val trygdetidForIdent: String?,
     val beregningsMetode: BeregningsMetode? = null,
     val samletNorskTrygdetid: Int? = null,
     val samletTeoretiskTrygdetid: Int? = null,

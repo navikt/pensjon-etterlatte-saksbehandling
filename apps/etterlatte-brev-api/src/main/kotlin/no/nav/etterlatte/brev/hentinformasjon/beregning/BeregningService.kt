@@ -115,6 +115,7 @@ class BeregningService(private val beregningKlient: BeregningKlient) {
                     fratrekkInnAar = Kroner(it.fratrekkInnAar),
                     relevanteMaanederInnAar = it.relevanteMaanederInnAar,
                     ytelseFoerAvkorting = Kroner(it.ytelseFoerAvkorting),
+                    restanse = Kroner(it.restanse),
                     utbetaltBeloep = Kroner(it.ytelseEtterAvkorting),
                     trygdetid = it.trygdetid,
                     beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),

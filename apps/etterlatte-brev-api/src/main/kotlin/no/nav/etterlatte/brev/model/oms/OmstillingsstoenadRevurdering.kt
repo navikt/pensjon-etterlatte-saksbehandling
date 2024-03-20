@@ -55,6 +55,7 @@ data class OmstillingsstoenadRevurdering(
                         relevantMaanederInnAar = it.relevanteMaanederInnAar,
                         grunnbeloep = it.grunnbeloep,
                         ytelseFoerAvkorting = it.ytelseFoerAvkorting,
+                        restanse = it.restanse,
                         utbetaltBeloep = it.utbetaltBeloep,
                         trygdetid = it.trygdetid,
                         beregningsMetodeFraGrunnlag = it.beregningsMetodeFraGrunnlag,

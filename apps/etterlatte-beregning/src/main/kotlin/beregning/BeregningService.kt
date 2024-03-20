@@ -101,6 +101,11 @@ class TrygdetidMangler(behandlingId: UUID) : UgyldigForespoerselException(
     detail = "Trygdetid ikke satt for behandling $behandlingId",
 )
 
+class ForeldreloesTrygdetid(behandlingId: UUID) : UgyldigForespoerselException(
+    code = "FORELDRELOES_TRYGDETID",
+    detail = "Flere avdødes trygdetid er ikke støttet for behandling $behandlingId",
+)
+
 class BeregningsgrunnlagMangler(behandlingId: UUID) : UgyldigForespoerselException(
     code = "BEREGNINGSGRUNNLAG_MANGLER",
     detail = "Behandling med id: $behandlingId mangler beregningsgrunnlag oms",

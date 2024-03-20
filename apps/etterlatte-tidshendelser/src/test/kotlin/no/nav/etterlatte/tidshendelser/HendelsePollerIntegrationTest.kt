@@ -46,4 +46,22 @@ class HendelsePollerIntegrationTest(dataSource: DataSource) {
             }
         }
     }
+
+    @Test
+    fun `poll skal inkludere feilede hendelser som ikke har blitt forsoekt mer enn gitt antall ganger`() {
+        val behandlingsmaaned = YearMonth.of(2024, Month.FEBRUARY)
+        val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, behandlingsmaaned)
+        hendelseDao.opprettHendelserForSaker(jobb.id, listOf(43, 23), Steg.IDENTIFISERT_SAK)
+
+        hendelseDao.hentHendelserForJobb(jobb.id).forEach {
+            hendelseDao.oppdaterHendelseStatus(it.id, HendelseStatus.FEILET)
+        }
+
+        hendelsePoller.poll(5)
+
+        hendelseDao.hentHendelserForJobb(jobb.id).forEach {
+            it.status shouldBe HendelseStatus.SENDT
+            it.versjon shouldBe 3
+        }
+    }
 }

@@ -229,11 +229,14 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
             queryOf(
                 """
                 SELECT * FROM hendelse 
-                WHERE status = :status 
+                WHERE (
+                    status = 'NY' OR (
+                        status = 'FEILET' AND versjon < 3
+                    )
+                )
                 ORDER BY opprettet asc
                 LIMIT $limit
                 """.trimIndent(),
-                mapOf("status" to "NY"),
             )
                 .let { query -> it.run(query.map { row -> row.toHendelse() }.asList) }
         }

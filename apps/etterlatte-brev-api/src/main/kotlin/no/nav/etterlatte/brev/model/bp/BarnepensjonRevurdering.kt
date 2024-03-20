@@ -78,7 +78,7 @@ data class BarnepensjonRevurdering(
                             avdoede.find {
                                 val fnr =
                                     utbetalingsinfo.beregningsperioder.last().trygdetidForIdent
-                                        ?: throw ManglerFnrTilBruktTrygdetidExceoption()
+                                        ?: throw ManglerFnrTilBruktTrygdetidException()
                                 it.fnr.value == fnr
                             }?.navn ?: throw ManglerAvdoedBruktTilTrygdetidExceoption(),
                     ),

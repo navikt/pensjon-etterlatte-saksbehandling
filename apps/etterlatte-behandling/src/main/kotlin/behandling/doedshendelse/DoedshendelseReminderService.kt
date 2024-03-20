@@ -8,15 +8,14 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseFeatureToggle
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.Status
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.Utfall
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.oppgave.OppgaveService
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import kotlin.math.absoluteValue
 
 class DoedshendelseReminderService(
     private val featureToggleService: FeatureToggleService,
@@ -53,17 +52,10 @@ class DoedshendelseReminderService(
     }
 
     private fun hendelserErGamleNok(hendelser: List<DoedshendelseInternal>): List<DoedshendelseInternal> {
-        val idag = LocalDateTime.now()
+        val idag = LocalDateTime.now().plusHours(1L)
         val toMaaneder = 2L
-        return hendelser.filter { ChronoUnit.MONTHS.between(it.endret, idag.toTidspunkt()) >= toMaaneder }
+        return hendelser.filter { ChronoUnit.MONTHS.between(it.endret.toLocalDatetimeNorskTid(), idag).absoluteValue >= toMaaneder }
     }
 
-    private fun hentAlleFerdigDoedsmeldingerMedBrevBp() =
-        doedshendelseDao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp(
-            Status.FERDIG,
-            listOf(
-                Utfall.BREV,
-                Utfall.BREV_OG_OPPGAVE,
-            ),
-        )
+    private fun hentAlleFerdigDoedsmeldingerMedBrevBp() = doedshendelseDao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp()
 }

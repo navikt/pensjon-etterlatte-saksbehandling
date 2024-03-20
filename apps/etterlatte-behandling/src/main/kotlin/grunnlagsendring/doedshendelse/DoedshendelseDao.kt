@@ -94,10 +94,7 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
         }
     }
 
-    fun hentDoedshendelserMedStatusFerdigOgUtFallBrevBp(
-        status: Status,
-        gyldigeUtfall: List<Utfall>,
-    ): List<DoedshendelseInternal> {
+    fun hentDoedshendelserMedStatusFerdigOgUtFallBrevBp(): List<DoedshendelseInternal> {
         return connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
@@ -105,13 +102,22 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
                     SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype, kontrollpunkter
                     FROM doedshendelse
                     WHERE status = ?
-                    AND RELASJON = ?
-                    AND utfall IN (?)
+                    AND relasjon = ?
+                    AND utfall = ANY (?)
                     """.trimIndent(),
                 ).apply {
-                    setString(1, status.name)
+                    setString(1, Status.FERDIG.name)
                     setString(2, Relasjon.BARN.name)
-                    setArray(3, createArrayOf("text", gyldigeUtfall.toTypedArray()))
+                    setArray(
+                        3,
+                        createArrayOf(
+                            "text",
+                            listOf(
+                                Utfall.BREV,
+                                Utfall.BREV_OG_OPPGAVE,
+                            ).toTypedArray(),
+                        ),
+                    )
                 }.executeQuery().toList { asDoedshendelse() }
             }
         }

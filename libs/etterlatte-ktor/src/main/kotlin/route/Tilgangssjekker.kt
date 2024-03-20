@@ -29,6 +29,7 @@ class Tilgangssjekker(
         bruker: Saksbehandler,
     ): Boolean {
         try {
+            logger.info("Sjekker tilgang til behandling $behandlingId")
             return downstreamResourceClient
                 .get(
                     resource =

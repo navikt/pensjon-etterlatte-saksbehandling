@@ -36,7 +36,6 @@ import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
 import no.nav.etterlatte.brev.hentinformasjon.SakService
-import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
@@ -66,6 +65,7 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.ktor.clientCredential
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv

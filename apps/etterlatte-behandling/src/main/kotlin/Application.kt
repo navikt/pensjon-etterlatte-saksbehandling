@@ -33,7 +33,6 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.doedshendelseRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
-import no.nav.etterlatte.jobs.addShutdownHook
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
@@ -97,7 +96,7 @@ internal fun Application.module(context: ApplicationContext) {
     }
 }
 
-private fun Route.settOppApplikasjonen(context: ApplicationContext) {
+internal fun Route.settOppApplikasjonen(context: ApplicationContext) {
     attachContekst(context.dataSource, context)
     settOppRoutes(context)
     settOppTilganger(context, adressebeskyttelsePlugin)

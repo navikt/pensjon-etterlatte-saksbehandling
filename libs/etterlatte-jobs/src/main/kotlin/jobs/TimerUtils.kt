@@ -1,11 +1,10 @@
 package no.nav.etterlatte.jobs
 
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.shuttingDown
 import org.slf4j.Logger
 import java.util.Date
-import java.util.Timer
 import java.util.UUID
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.fixedRateTimer
 
 data class LoggerInfo(val logger: Logger, val sikkerLogg: Logger? = null, val loggTilSikkerLogg: Boolean = false)
@@ -68,15 +67,3 @@ private fun run(
         }
     }
 }
-
-val shuttingDown: AtomicBoolean = AtomicBoolean(false)
-
-fun addShutdownHook(timers: Set<Timer>) = addShutdownHook(*timers.toTypedArray())
-
-fun addShutdownHook(vararg timer: Timer): Unit =
-    Runtime.getRuntime().addShutdownHook(
-        Thread {
-            shuttingDown.set(true)
-            timer.forEach { it.cancel() }
-        },
-    )

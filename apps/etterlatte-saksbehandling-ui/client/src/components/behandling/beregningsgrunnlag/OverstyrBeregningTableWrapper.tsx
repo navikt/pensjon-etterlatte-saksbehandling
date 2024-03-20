@@ -40,6 +40,7 @@ const OverstyrBeregningTableWrapper = (props: OverstyrBeregningPerioder) => {
         </Table.DataCell>
         <Table.DataCell>{item.data.utbetaltBeloep}</Table.DataCell>
         <Table.DataCell>{item.data.trygdetid}</Table.DataCell>
+        <Table.DataCell>{item.data.trygdetidForIdent}</Table.DataCell>
         <Table.DataCell>
           {item.data.prorataBroekTeller} / {item.data.prorataBroekNevner}
         </Table.DataCell>

@@ -135,7 +135,7 @@ async function errorFrom(response: Response): Promise<JsonError> {
   try {
     return await response.json()
   } catch (err) {
-    logger.generalError({ msg: 'Feilet ved henting av JSON-error fra backend', errorInfo: response.text() })
+    logger.generalError({ msg: `Feilet ved henting av JSON-error fra backend: ${response.text()}` })
     return { status: response.status, detail: 'Fikk feil i kall mot backend' }
   }
 }

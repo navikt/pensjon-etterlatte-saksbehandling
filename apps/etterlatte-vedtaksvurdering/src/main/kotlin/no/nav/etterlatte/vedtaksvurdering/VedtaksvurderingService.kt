@@ -17,4 +17,8 @@ class VedtaksvurderingService(
         logger.info("Henter vedtak for behandling med behandlingId=$behandlingId")
         return repository.hentVedtak(behandlingId)
     }
+
+    fun hentVedtakISak(sakId: Long): List<Vedtak> {
+        return repository.hentVedtakForSak(sakId)
+    }
 }

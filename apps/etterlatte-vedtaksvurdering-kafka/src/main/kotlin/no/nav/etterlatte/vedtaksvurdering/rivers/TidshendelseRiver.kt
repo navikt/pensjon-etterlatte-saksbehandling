@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.Month
 
-class AldersovergangRiver(
+class TidshendelseRiver(
     rapidsConnection: RapidsConnection,
     private val vedtakService: VedtakService,
 ) : ListenerMedLogging() {

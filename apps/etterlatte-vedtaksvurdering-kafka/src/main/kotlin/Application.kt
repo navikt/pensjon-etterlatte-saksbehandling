@@ -6,8 +6,8 @@ import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.regulering.AppBuilder
 import no.nav.etterlatte.regulering.LoependeYtelserforespoerselRiver
 import no.nav.etterlatte.regulering.OpprettVedtakforespoerselRiver
-import no.nav.etterlatte.vedtaksvurdering.rivers.AldersovergangRiver
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtakRiver
+import no.nav.etterlatte.vedtaksvurdering.rivers.TidshendelseRiver
 import no.nav.etterlatte.vedtaksvurdering.samordning.AttestertVedtakRiver
 import no.nav.etterlatte.vedtaksvurdering.samordning.SamordningMottattRiver
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -22,7 +22,7 @@ fun main() {
         LagreIverksattVedtakRiver(rapidsConnection, vedtakKlient)
         AttestertVedtakRiver(rapidsConnection, vedtakKlient)
         SamordningMottattRiver(rapidsConnection, vedtakKlient)
-        AldersovergangRiver(rapidsConnection, vedtakKlient)
+        TidshendelseRiver(rapidsConnection, vedtakKlient)
         FattVedtakEtterVentRiver(rapidsConnection, vedtakKlient)
     }.start()
 }

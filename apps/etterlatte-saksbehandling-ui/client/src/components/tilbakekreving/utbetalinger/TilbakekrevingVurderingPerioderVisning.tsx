@@ -8,7 +8,6 @@ import React, { useState } from 'react'
 import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { Table } from '@navikt/ds-react'
 import { format } from 'date-fns'
-import nb from 'date-fns/locale/nb'
 
 export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const [perioder] = useState<TilbakekrevingPeriode[]>(behandling.tilbakekreving.perioder)
@@ -37,7 +36,7 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
             const beloeper = periode.ytelse
             return (
               <Table.Row key={'beloeperRad' + index}>
-                <Table.DataCell key="maaned">{format(periode.maaned, 'MMMM yyyy', { locale: nb })}</Table.DataCell>
+                <Table.DataCell key="maaned">{format(periode.maaned, 'MMMM yyyy')}</Table.DataCell>
                 <Table.DataCell key="bruttoUtbetaling">{beloeper.bruttoUtbetaling} kr</Table.DataCell>
                 <Table.DataCell key="nyBruttoUtbetaling">{beloeper.nyBruttoUtbetaling} kr</Table.DataCell>
                 <Table.DataCell key="beregnetFeilutbetaling">{beloeper.beregnetFeilutbetaling} kr</Table.DataCell>

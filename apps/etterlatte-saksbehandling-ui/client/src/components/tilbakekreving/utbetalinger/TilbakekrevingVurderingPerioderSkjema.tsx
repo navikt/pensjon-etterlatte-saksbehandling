@@ -18,7 +18,6 @@ import { Button, Select, Table, TextField, VStack } from '@navikt/ds-react'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { Toast } from '~shared/alerts/Toast'
 import { format } from 'date-fns'
-import nb from 'date-fns/locale/nb'
 
 export function TilbakekrevingVurderingPerioderSkjema({
   behandling,
@@ -67,7 +66,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
             const beloeper = periode.ytelse
             return (
               <Table.Row key={'beloeperRad' + index} style={{ alignItems: 'start' }}>
-                <Table.DataCell key="maaned">{format(periode.maaned, 'MMMM yyyy', { locale: nb })}</Table.DataCell>
+                <Table.DataCell key="maaned">{format(periode.maaned, 'MMMM yyyy')}</Table.DataCell>
                 <Table.DataCell key="bruttoUtbetaling">{beloeper.bruttoUtbetaling} kr</Table.DataCell>
                 <Table.DataCell key="nyBruttoUtbetaling">{beloeper.nyBruttoUtbetaling} kr</Table.DataCell>
                 <Table.DataCell key="beregnetFeilutbetaling">

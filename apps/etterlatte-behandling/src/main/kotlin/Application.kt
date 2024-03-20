@@ -82,6 +82,7 @@ private fun shutdownHooks(context: ApplicationContext): List<Timer> =
     listOf(
         context.metrikkerJob.schedule(),
         context.doedsmeldingerJob.schedule(),
+        context.doedsmeldingerReminderJob.schedule(),
         context.saksbehandlerJob.schedule(),
         context.fristGaarUtJobb.schedule(),
     )

@@ -132,11 +132,12 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
 }
 
 async function errorFrom(response: Response): Promise<JsonError> {
+  const responseContent = await response.text()
+
   try {
-    return await response.json()
+    return JSON.parse(responseContent)
   } catch (err) {
-    const error = await response.text()
-    logger.generalError({ msg: `Feilet ved henting av JSON-error fra backend: ${error}` })
+    logger.generalError({ msg: responseContent || 'Feil oppsto ved parsing av JSON-error' })
 
     return { status: response.status, detail: 'Fikk feil i kall mot backend' }
   }

@@ -44,14 +44,22 @@ export function TilbakekrevingBrev({
   }
 
   useEffect(() => {
+    let ignore = false
+
     hentVedtak(behandling.id, (vedtak: VedtakSammendrag | null) => {
-      if (vedtak?.datoFattet) {
-        hentBrev()
-      } else {
-        opprettVedtak(behandling.id).then(() => hentBrev())
+      if (!ignore) {
+        if (vedtak?.datoFattet) {
+          hentBrev()
+        } else {
+          opprettVedtak(behandling.id).then(() => hentBrev())
+        }
       }
     })
-  }, [behandling])
+
+    return () => {
+      ignore = true
+    }
+  }, [behandling.id])
 
   if (isPendingOrInitial(hentBrevStatus)) {
     return <Spinner visible label="Henter brev ..." />

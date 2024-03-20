@@ -16,11 +16,13 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingRettsligGrunnlag
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVarsel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
 import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -37,8 +39,8 @@ fun tilbakekrevingvurdering() =
     TilbakekrevingVurdering(
         aarsak = TilbakekrevingAarsak.ANNET,
         beskrivelse = "beskrivelse",
-        forhaandsvarsel = null,
-        forhaandsvarselDato = null,
+        forhaandsvarsel = TilbakekrevingVarsel.EGET_BREV,
+        forhaandsvarselDato = LocalDate.of(2024, 1, 1),
         doedsbosak = null,
         foraarsaketAv = null,
         tilsvar = null,

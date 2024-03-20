@@ -2,15 +2,10 @@ package no.nav.etterlatte
 
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCallPipeline
-import io.ktor.server.application.ServerReady
+import io.ktor.server.application.RouteScopedPlugin
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.auth.principal
-import io.ktor.server.cio.CIO
-import io.ktor.server.config.HoconApplicationConfig
-import io.ktor.server.engine.applicationEngineEnvironment
-import io.ktor.server.engine.connector
-import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.Route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
@@ -38,12 +33,11 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.doedshendelseRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
-import no.nav.etterlatte.jobs.addShutdownHook
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.libs.ktor.ktor.shutdownPolicyEmbeddedServer
+import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.oppgave.oppgaveRoutes
@@ -51,8 +45,10 @@ import no.nav.etterlatte.oppgaveGosys.gosysOppgaveRoute
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
+import no.nav.etterlatte.tilgangsstyring.PluginConfiguration
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
+import java.util.Timer
 import javax.sql.DataSource
 
 val sikkerLogg: Logger = sikkerlogger()
@@ -67,17 +63,13 @@ private class Server(private val context: ApplicationContext) {
     }
 
     private val engine =
-        embeddedServer(
-            configure = shutdownPolicyEmbeddedServer(),
-            factory = CIO,
-            environment =
-                applicationEngineEnvironment {
-                    config = HoconApplicationConfig(context.config)
-                    module { module(context) }
-                    module { moduleOnServerReady(context) }
-                    connector { port = context.httpPort }
-                },
-        )
+        initEmbeddedServer(
+            httpPort = context.httpPort,
+            applicationConfig = context.config,
+            shutdownHooks = shutdownHooks(context),
+        ) {
+            settOppApplikasjonen(context)
+        }
 
     fun run() =
         with(context) {
@@ -86,101 +78,28 @@ private class Server(private val context: ApplicationContext) {
         }
 }
 
-internal fun Application.moduleOnServerReady(context: ApplicationContext) {
-    environment.monitor.subscribe(ServerReady) {
-        context.metrikkerJob.schedule().also { addShutdownHook(it) }
-        context.doedsmeldingerJob.schedule().also { addShutdownHook(it) }
-        context.saksbehandlerJob.schedule().also { addShutdownHook(it) }
-        context.fristGaarUtJobb.schedule().also { addShutdownHook(it) }
+private fun shutdownHooks(context: ApplicationContext): List<Timer> =
+    listOf(
+        context.metrikkerJob.schedule(),
+        context.doedsmeldingerJob.schedule(),
+        context.saksbehandlerJob.schedule(),
+        context.fristGaarUtJobb.schedule(),
+    )
+
+@Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")
+internal fun Application.module(context: ApplicationContext) {
+    restModule(
+        sikkerLogg,
+        withMetrics = true,
+    ) {
+        settOppApplikasjonen(context)
     }
 }
 
-internal fun Application.module(context: ApplicationContext) {
-    with(context) {
-        restModule(
-            sikkerLogg,
-            withMetrics = true,
-        ) {
-            attachContekst(dataSource, context)
-            sakSystemRoutes(
-                tilgangService = tilgangService,
-                sakService = sakService,
-                behandlingService = behandlingService,
-                requestLogger = behandlingRequestLogger,
-            )
-            sakWebRoutes(
-                tilgangService = tilgangService,
-                sakService = sakService,
-                behandlingService = behandlingService,
-                grunnlagsendringshendelseService = grunnlagsendringshendelseService,
-                oppgaveService = oppgaveService,
-                requestLogger = behandlingRequestLogger,
-                hendelseDao = hendelseDao,
-            )
-            klageRoutes(klageService = klageService, featureToggleService = featureToggleService)
-            tilbakekrevingRoutes(service = tilbakekrevingService)
-            behandlingRoutes(
-                behandlingService = behandlingService,
-                gyldighetsproevingService = gyldighetsproevingService,
-                kommerBarnetTilGodeService = kommerBarnetTilGodeService,
-                aktivitetspliktService = aktivtetspliktService,
-                behandlingFactory = behandlingFactory,
-            )
-            sjekklisteRoute(sjekklisteService = sjekklisteService)
-            statistikkRoutes(behandlingService = behandlingService)
-            generellbehandlingRoutes(
-                generellBehandlingService = generellBehandlingService,
-                sakService = sakService,
-            )
-            vedtaksbehandlingRoutes(vedtaksbehandlingService = vedtaksbehandlingService)
-            revurderingRoutes(revurderingService = revurderingService)
-            omregningRoutes(omregningService = omregningService)
-            migreringRoutes(migreringService = migreringService)
-            bosattUtlandRoutes(bosattUtlandService = bosattUtlandService)
-            behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService)
-            behandlingVedtakRoute(
-                behandlingsstatusService = behandlingsStatusService,
-                oppgaveService = oppgaveService,
-                behandlingService = behandlingService,
-            )
-            behandlingInfoRoutes(behandlingInfoService)
-            gosysOppgaveRoute(gosysOppgaveService)
-            oppgaveRoutes(oppgaveService)
-            grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
-            doedshendelseRoute(doedshendelseService = doedshendelseService)
-            egenAnsattRoute(
-                egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, enhetService),
-                requestLogger = behandlingRequestLogger,
-            )
-            institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(institusjonsoppholdDao))
-            saksbehandlerRoutes(saksbehandlerService = saksbehandlerService)
-
-            tilgangRoutes(tilgangService)
-
-            install(adressebeskyttelsePlugin) {
-                saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey
-
-                harTilgangBehandling = { behandlingId, saksbehandlerMedRoller ->
-                    tilgangService.harTilgangTilBehandling(behandlingId, saksbehandlerMedRoller)
-                }
-                harTilgangTilSak = { sakId, saksbehandlerMedRoller ->
-                    tilgangService.harTilgangTilSak(sakId, saksbehandlerMedRoller)
-                }
-                harTilgangTilOppgave = { oppgaveId, saksbehandlerMedRoller ->
-                    tilgangService.harTilgangTilOppgave(
-                        oppgaveId,
-                        saksbehandlerMedRoller,
-                    )
-                }
-                harTilgangTilKlage = { klageId, saksbehandlerMedRoller ->
-                    tilgangService.harTilgangTilKlage(
-                        klageId,
-                        saksbehandlerMedRoller,
-                    )
-                }
-            }
-        }
-    }
+internal fun Route.settOppApplikasjonen(context: ApplicationContext) {
+    attachContekst(context.dataSource, context)
+    settOppRoutes(context)
+    settOppTilganger(context, adressebeskyttelsePlugin)
 }
 
 private fun Route.attachContekst(
@@ -210,5 +129,101 @@ private fun Route.attachContekst(
             proceed()
         }
         Kontekst.remove()
+    }
+}
+
+private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
+    sakSystemRoutes(
+        tilgangService = applicationContext.tilgangService,
+        sakService = applicationContext.sakService,
+        behandlingService = applicationContext.behandlingService,
+        requestLogger = applicationContext.behandlingRequestLogger,
+    )
+    sakWebRoutes(
+        tilgangService = applicationContext.tilgangService,
+        sakService = applicationContext.sakService,
+        behandlingService = applicationContext.behandlingService,
+        grunnlagsendringshendelseService = applicationContext.grunnlagsendringshendelseService,
+        oppgaveService = applicationContext.oppgaveService,
+        requestLogger = applicationContext.behandlingRequestLogger,
+        hendelseDao = applicationContext.hendelseDao,
+    )
+    klageRoutes(
+        klageService = applicationContext.klageService,
+        featureToggleService = applicationContext.featureToggleService,
+    )
+    tilbakekrevingRoutes(service = applicationContext.tilbakekrevingService)
+    behandlingRoutes(
+        behandlingService = applicationContext.behandlingService,
+        gyldighetsproevingService = applicationContext.gyldighetsproevingService,
+        kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
+        aktivitetspliktService = applicationContext.aktivtetspliktService,
+        behandlingFactory = applicationContext.behandlingFactory,
+    )
+    sjekklisteRoute(sjekklisteService = applicationContext.sjekklisteService)
+    statistikkRoutes(behandlingService = applicationContext.behandlingService)
+    generellbehandlingRoutes(
+        generellBehandlingService = applicationContext.generellBehandlingService,
+        sakService = applicationContext.sakService,
+    )
+    vedtaksbehandlingRoutes(vedtaksbehandlingService = applicationContext.vedtaksbehandlingService)
+    revurderingRoutes(revurderingService = applicationContext.revurderingService)
+    omregningRoutes(omregningService = applicationContext.omregningService)
+    migreringRoutes(migreringService = applicationContext.migreringService)
+    bosattUtlandRoutes(bosattUtlandService = applicationContext.bosattUtlandService)
+    behandlingsstatusRoutes(behandlingsstatusService = applicationContext.behandlingsStatusService)
+    behandlingVedtakRoute(
+        behandlingsstatusService = applicationContext.behandlingsStatusService,
+        oppgaveService = applicationContext.oppgaveService,
+        behandlingService = applicationContext.behandlingService,
+    )
+    behandlingInfoRoutes(applicationContext.behandlingInfoService)
+    gosysOppgaveRoute(applicationContext.gosysOppgaveService)
+    oppgaveRoutes(applicationContext.oppgaveService)
+    grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = applicationContext.grunnlagsendringshendelseService)
+    doedshendelseRoute(doedshendelseService = applicationContext.doedshendelseService)
+    egenAnsattRoute(
+        egenAnsattService =
+            EgenAnsattService(
+                applicationContext.sakService,
+                applicationContext.oppgaveService,
+                sikkerLogg,
+                applicationContext.enhetService,
+            ),
+        requestLogger = applicationContext.behandlingRequestLogger,
+    )
+    institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(applicationContext.institusjonsoppholdDao))
+    saksbehandlerRoutes(saksbehandlerService = applicationContext.saksbehandlerService)
+
+    tilgangRoutes(applicationContext.tilgangService)
+}
+
+private fun Route.settOppTilganger(
+    context: ApplicationContext,
+    adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration>,
+) {
+    with(context) {
+        install(adressebeskyttelsePlugin) {
+            saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey
+
+            harTilgangBehandling = { behandlingId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilBehandling(behandlingId, saksbehandlerMedRoller)
+            }
+            harTilgangTilSak = { sakId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilSak(sakId, saksbehandlerMedRoller)
+            }
+            harTilgangTilOppgave = { oppgaveId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilOppgave(
+                    oppgaveId,
+                    saksbehandlerMedRoller,
+                )
+            }
+            harTilgangTilKlage = { klageId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilKlage(
+                    klageId,
+                    saksbehandlerMedRoller,
+                )
+            }
+        }
     }
 }

@@ -31,7 +31,7 @@ fun Route.personWebRoute(
 
         post("/opplysninger") {
             kunSaksbehandler {
-                val request = call.receive<HentPersongalleriRequest>()
+                val request = call.receive<HentPersonopplysningerRequest>()
 
                 val personopplysninger = service.hentPersonopplysninger(request.ident, request.sakType, brukerTokenInfo)
 
@@ -52,7 +52,7 @@ private data class HentPersonNavnRequest(
     val ident: String,
 )
 
-private data class HentPersongalleriRequest(
+private data class HentPersonopplysningerRequest(
     val ident: String,
     val sakType: SakType,
 )

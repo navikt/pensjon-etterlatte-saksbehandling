@@ -245,7 +245,7 @@ class PersonService(
         )
     }
 
-    suspend fun hentPersongalleriForOmstillingsstoenad(
+    private suspend fun hentPersongalleriForOmstillingsstoenad(
         mottakerAvYtelsen: Folkeregisteridentifikator,
         innsender: Folkeregisteridentifikator?,
     ): Persongalleri {

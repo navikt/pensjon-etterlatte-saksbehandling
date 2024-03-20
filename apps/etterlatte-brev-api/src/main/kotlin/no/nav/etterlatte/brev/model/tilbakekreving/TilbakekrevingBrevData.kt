@@ -95,6 +95,11 @@ data class TilbakekrevingBrevDTO(
                 sumNettoRenter = Kroner(netto + renteTillegg),
             )
         }
+
+        private fun sjekkOmHarRenter(tilbakekreving: Tilbakekreving) =
+            tilbakekreving.perioder.any { periode ->
+                periode.ytelse.rentetillegg.let { it != null && it > 0 }
+            }
     }
 }
 

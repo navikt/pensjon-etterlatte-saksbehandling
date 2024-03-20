@@ -10,14 +10,14 @@ import { Container } from '~shared/styled'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Samordningsvedtak } from '~components/vedtak/typer'
 
-export const SamordningSak = ({ sakStatus }: { sakStatus: Result<SakMedBehandlinger> }) => {
+export const SamordningSak = ({ sakResult }: { sakResult: Result<SakMedBehandlinger> }) => {
   const [samordningdataStatus, hent] = useApiCall(hentSamordningsdataForSak)
 
   useEffect(() => {
-    if (isSuccess(sakStatus)) {
-      hent(sakStatus.data.sak.id)
+    if (isSuccess(sakResult)) {
+      hent(sakResult.data.sak.id)
     }
-  }, [sakStatus])
+  }, [sakResult])
 
   return (
     <Container>

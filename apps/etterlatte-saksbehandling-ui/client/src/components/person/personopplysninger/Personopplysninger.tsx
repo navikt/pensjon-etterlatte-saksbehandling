@@ -8,7 +8,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Statsborgerskap } from '~components/person/personopplysninger/Statsborgerskap'
-import { Alert, Heading } from '@navikt/ds-react'
+import { Heading } from '@navikt/ds-react'
 import { SakType } from '~shared/types/sak'
 import { Foreldre } from '~components/person/personopplysninger/Foreldre'
 import { AvdoedesBarn } from '~components/person/personopplysninger/AvdoedesBarn'
@@ -17,24 +17,24 @@ import { Innflytting } from '~components/person/personopplysninger/Innflytting'
 import { hentAlleLand } from '~shared/api/trygdetid'
 import { Utflytting } from '~components/person/personopplysninger/Utflytting'
 import { Vergemaal } from '~components/person/personopplysninger/Vergemaal'
-import { hentPerson } from '~shared/api/pdltjenester'
+import { hentPersonopplysninger } from '~shared/api/pdltjenester'
 
 export const Personopplysninger = ({
-  sakStatus,
+  sakResult,
   fnr,
 }: {
-  sakStatus: Result<SakMedBehandlinger>
+  sakResult: Result<SakMedBehandlinger>
   fnr: string
 }): ReactNode => {
-  const [personResult, hentPersonFetch] = useApiCall(hentPerson)
+  const [personopplysningerResult, hentPersonopplysningerFetch] = useApiCall(hentPersonopplysninger)
 
   const [landListeResult, hentLandListe] = useApiCall(hentAlleLand)
 
   useEffect(() => {
-    if (isSuccess(sakStatus)) {
-      hentPersonFetch({ ident: fnr, sakType: sakStatus.data.sak.sakType })
+    if (isSuccess(sakResult)) {
+      hentPersonopplysningerFetch({ ident: fnr, sakType: sakResult.data.sak.sakType })
     }
-  }, [fnr, sakStatus])
+  }, [fnr, sakResult])
 
   useEffect(() => {
     hentLandListe(null)
@@ -43,16 +43,12 @@ export const Personopplysninger = ({
   return (
     <Container>
       <SpaceChildren>
-        {mapSuccess(sakStatus, (sak) => (
+        {mapSuccess(sakResult, (sak) => (
           <>
-            <Alert variant="warning">
-              Denne informasjonen baserer seg på når en behandling var opprettet på brukeren, vi jobber med å få
-              informasjonen til å oppdatere seg i sanntid.
-            </Alert>
             <LenkeTilAndreSystemer fnr={fnr} />
-            {!!sak.behandlinger?.length ? (
+            {!!sak.sak ? (
               <>
-                {mapResult(personResult, {
+                {mapResult(personopplysningerResult, {
                   pending: <Spinner visible={true} label="Henter personopplysninger" />,
                   error: (error) => (
                     <ApiErrorAlert>{error.detail || 'Kunne ikke hente personopplysninger'}</ApiErrorAlert>
@@ -100,7 +96,7 @@ export const Personopplysninger = ({
                 })}
               </>
             ) : (
-              <Heading size="medium">Bruker har ingen behandling i Gjenny</Heading>
+              <Heading size="medium">Bruker har ingen sak i Gjenny</Heading>
             )}
           </>
         ))}

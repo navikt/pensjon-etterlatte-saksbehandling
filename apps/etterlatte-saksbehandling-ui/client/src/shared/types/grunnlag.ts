@@ -14,6 +14,12 @@ export interface PersonMedNavn {
   etternavn: string
 }
 
+export interface PersonopplysningerForenklet {
+  soeker?: IPdlPerson
+  avdoede?: IPdlPerson[]
+  gjenlevende?: IPdlPerson[]
+}
+
 export interface Personopplysninger {
   innsender?: Personopplysning
   soeker?: Personopplysning

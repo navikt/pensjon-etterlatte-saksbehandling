@@ -11,7 +11,7 @@ import { DokumentFilter } from '~components/person/dokumenter/DokumentFilter'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { DokumentRad } from './DokumentRad'
 
-export const Dokumentliste = ({ fnr, sakStatus }: { fnr: string; sakStatus: Result<SakMedBehandlinger> }) => {
+export const Dokumentliste = ({ fnr, sakResult }: { fnr: string; sakResult: Result<SakMedBehandlinger> }) => {
   const [filter, setFilter] = useState<DokumentFilter>({
     tema: [Tema.EYO, Tema.EYB],
     type: [],
@@ -75,7 +75,7 @@ export const Dokumentliste = ({ fnr, sakStatus }: { fnr: string; sakStatus: Resu
               ) : (
                 <>
                   {dokumentListe.map((dokument) => (
-                    <DokumentRad key={dokument.journalpostId} dokument={dokument} sakStatus={sakStatus} />
+                    <DokumentRad key={dokument.journalpostId} dokument={dokument} sakStatus={sakResult} />
                   ))}
                 </>
               )

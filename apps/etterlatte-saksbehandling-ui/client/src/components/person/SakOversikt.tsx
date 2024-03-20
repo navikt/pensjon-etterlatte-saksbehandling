@@ -19,23 +19,23 @@ import { TilbakekrevingListe } from '~components/person/TilbakekrevingListe'
 import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 
-export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
+export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandlinger>; fnr: string }) => {
   const [hentNavkontorStatus, hentNavkontor] = useApiCall(hentNavkontorForPerson)
   const [hentFlyktningStatus, hentFlyktning] = useApiCall(hentFlyktningStatusForSak)
 
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   useEffect(() => {
-    if (isSuccess(sakStatus)) {
+    if (isSuccess(sakResult)) {
       hentNavkontor(fnr)
-      hentFlyktning(sakStatus.data.sak.id)
+      hentFlyktning(sakResult.data.sak.id)
     }
-  }, [fnr, sakStatus])
+  }, [fnr, sakResult])
 
   return (
     <GridContainer>
       {mapApiResult(
-        sakStatus,
+        sakResult,
         <Spinner visible={true} label="Henter sak og behandlinger" />,
         (error) => (
           <MainContent>

@@ -11,6 +11,7 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.routing
+import no.nav.etterlatte.addShutdownHook
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.ktor.shutdownPolicyEmbeddedServer
@@ -22,7 +23,7 @@ fun initEmbeddedServer(
     httpPort: Int,
     applicationConfig: Config,
     withMetrics: Boolean = true,
-    shutdownHooks: Map<Timer, (Timer) -> Unit> = mapOf(),
+    shutdownHooks: List<Timer> = listOf(),
     routes: Route.() -> Unit,
 ) = settOppEmbeddedServer(httpPort, applicationConfig, shutdownHooks) {
     restModule(sikkerlogger(), withMetrics = withMetrics) {
@@ -43,7 +44,7 @@ fun initEmbeddedServerUtenRest(
 private fun settOppEmbeddedServer(
     httpPort: Int,
     applicationConfig: Config,
-    shutdownHooks: Map<Timer, (Timer) -> Unit> = mapOf(),
+    shutdownHooks: List<Timer> = listOf(),
     body: Application.() -> Unit,
 ): CIOApplicationEngine =
     embeddedServer(
@@ -57,7 +58,7 @@ private fun settOppEmbeddedServer(
                 }
                 module {
                     environment.monitor.subscribe(ServerReady) {
-                        shutdownHooks.forEach { it.value.apply { it.key } }
+                        shutdownHooks.forEach { addShutdownHook(it) }
                     }
                 }
                 connector { port = httpPort }

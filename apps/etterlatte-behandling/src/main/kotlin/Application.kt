@@ -78,12 +78,12 @@ private class Server(private val context: ApplicationContext) {
         }
 }
 
-private fun shutdownHooks(context: ApplicationContext): Map<Timer, (Timer) -> Unit> =
-    mapOf(
-        context.metrikkerJob.schedule() to { addShutdownHook(it) },
-        context.doedsmeldingerJob.schedule() to { addShutdownHook(it) },
-        context.saksbehandlerJob.schedule() to { addShutdownHook(it) },
-        context.fristGaarUtJobb.schedule() to { addShutdownHook(it) },
+private fun shutdownHooks(context: ApplicationContext): List<Timer> =
+    listOf(
+        context.metrikkerJob.schedule(),
+        context.doedsmeldingerJob.schedule(),
+        context.saksbehandlerJob.schedule(),
+        context.fristGaarUtJobb.schedule(),
     )
 
 @Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")

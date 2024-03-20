@@ -12,8 +12,8 @@ import { lagreTilbakekrevingsperioder } from '~shared/api/tilbakekreving'
 import React, { useState } from 'react'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
-import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { Button, Heading, Select, Table, TextField, VStack } from '@navikt/ds-react'
+import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
+import { Button, Select, Table, TextField, VStack } from '@navikt/ds-react'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { Toast } from '~shared/alerts/Toast'
@@ -43,11 +43,6 @@ export function TilbakekrevingVurderingPerioder({
 
   return (
     <InnholdPadding>
-      <HeadingWrapper>
-        <Heading level="2" size="medium">
-          Utbetalinger
-        </Heading>
-      </HeadingWrapper>
       <Table className="table" zebraStripes>
         <Table.Header>
           <Table.Row>

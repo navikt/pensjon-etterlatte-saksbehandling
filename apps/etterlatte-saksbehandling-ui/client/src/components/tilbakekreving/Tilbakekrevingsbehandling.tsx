@@ -19,6 +19,8 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { erUnderBehandling } from '~shared/types/Tilbakekreving'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
+import { TilbakekrevingUtbetalinger } from '~components/tilbakekreving/utbetalinger/TilbakekrevingUtbetalinger'
+import { TilbakekrevingOppsummering } from '~components/tilbakekreving/oppsummering/TilbakekrevingOppsummering'
 
 export function Tilbakekrevingsbehandling() {
   useSidetittel('Tilbakekreving')
@@ -71,6 +73,11 @@ export function Tilbakekrevingsbehandling() {
                 path="vurdering"
                 element={<TilbakekrevingVurdering behandling={tilbakekreving} redigerbar={redigerbar} />}
               />
+              <Route
+                path="utbetalinger"
+                element={<TilbakekrevingUtbetalinger behandling={tilbakekreving} redigerbar={redigerbar} />}
+              />
+              <Route path="oppsummering" element={<TilbakekrevingOppsummering behandling={tilbakekreving} />} />
               <Route path="brev" element={<TilbakekrevingBrev behandling={tilbakekreving} redigerbar={redigerbar} />} />
               <Route path="*" element={<Navigate to="vurdering" replace />} />
             </Routes>

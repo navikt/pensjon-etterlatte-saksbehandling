@@ -9,15 +9,10 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAktsomhet
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurderingUaktsomhet
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.setJsonb
@@ -55,10 +50,7 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag,
-                            vurdering_beskrivelse, vurdering_konklusjon, vurdering_aarsak, vurdering_hjemmel,
-                            vurdering_aktsomhet, akstomhet_redusering_av_kravet,
-                            aktsomhet_strafferettslig_vurdering, aktsomhet_rentevurdering
+                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag, vurdering
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.sak_id = ?
                     """.trimIndent(),
@@ -89,10 +81,7 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag,
-                            vurdering_beskrivelse, vurdering_konklusjon, vurdering_aarsak, vurdering_hjemmel,
-                            vurdering_aktsomhet, akstomhet_redusering_av_kravet,
-                            aktsomhet_strafferettslig_vurdering, aktsomhet_rentevurdering
+                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag, vurdering
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.id = ?
                     """.trimIndent(),
@@ -145,23 +134,13 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
             prepareStatement(
                 """
                 INSERT INTO tilbakekreving(
-                    id, status, sak_id, opprettet, kravgrunnlag,
-                    vurdering_beskrivelse, vurdering_konklusjon, vurdering_aarsak, vurdering_hjemmel,
-                    vurdering_aktsomhet, akstomhet_redusering_av_kravet,
-                    aktsomhet_strafferettslig_vurdering, aktsomhet_rentevurdering
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    id, status, sak_id, opprettet, kravgrunnlag, vurdering
+                ) 
+                VALUES (?, ?, ?, ?, ?, ?) 
                 ON CONFLICT (id) DO UPDATE SET
                     status = excluded.status,
                     kravgrunnlag = excluded.kravgrunnlag,
-                    vurdering_beskrivelse = excluded.vurdering_beskrivelse,
-                    vurdering_konklusjon = excluded.vurdering_konklusjon,
-                    vurdering_aarsak = excluded.vurdering_aarsak,
-                    vurdering_hjemmel = excluded.vurdering_hjemmel,
-                    vurdering_aktsomhet = excluded.vurdering_aktsomhet,
-                    akstomhet_redusering_av_kravet = excluded.akstomhet_redusering_av_kravet,
-                    aktsomhet_strafferettslig_vurdering = excluded.aktsomhet_strafferettslig_vurdering, 
-                    aktsomhet_rentevurdering = excluded.aktsomhet_rentevurdering 
+                    vurdering = excluded.vurdering
                 """.trimIndent(),
             )
         statement.setObject(1, tilbakekrevingBehandling.id)
@@ -170,14 +149,7 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
         statement.setTidspunkt(4, tilbakekrevingBehandling.opprettet)
         with(tilbakekrevingBehandling.tilbakekreving) {
             statement.setJsonb(5, kravgrunnlag.toJsonNode())
-            statement.setString(6, vurdering.beskrivelse)
-            statement.setString(7, vurdering.konklusjon)
-            statement.setString(8, vurdering.aarsak?.name)
-            statement.setString(9, vurdering.hjemmel?.name)
-            statement.setString(10, vurdering.aktsomhet.aktsomhet?.name)
-            statement.setString(11, vurdering.aktsomhet.reduseringAvKravet)
-            statement.setString(12, vurdering.aktsomhet.strafferettsligVurdering)
-            statement.setString(13, vurdering.aktsomhet.rentevurdering)
+            statement.setJsonb(6, vurdering)
         }
         statement.executeUpdate().also { require(it == 1) }
     }
@@ -263,20 +235,7 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
             status = enumValueOf(getString("status")),
             tilbakekreving =
                 Tilbakekreving(
-                    vurdering =
-                        TilbakekrevingVurdering(
-                            beskrivelse = getString("vurdering_beskrivelse"),
-                            konklusjon = getString("vurdering_konklusjon"),
-                            aarsak = getString("vurdering_aarsak")?.let { TilbakekrevingAarsak.valueOf(it) },
-                            aktsomhet =
-                                TilbakekrevingVurderingUaktsomhet(
-                                    aktsomhet = getString("vurdering_aktsomhet")?.let { TilbakekrevingAktsomhet.valueOf(it) },
-                                    reduseringAvKravet = getString("akstomhet_redusering_av_kravet"),
-                                    strafferettsligVurdering = getString("aktsomhet_strafferettslig_vurdering"),
-                                    rentevurdering = getString("aktsomhet_rentevurdering"),
-                                ),
-                            hjemmel = getString("vurdering_hjemmel")?.let { TilbakekrevingHjemmel.valueOf(it) },
-                        ),
+                    vurdering = getString("vurdering")?.let { objectMapper.readValue(it) },
                     perioder = emptyList(),
                     kravgrunnlag = getString("kravgrunnlag").let { objectMapper.readValue(it) },
                 ),

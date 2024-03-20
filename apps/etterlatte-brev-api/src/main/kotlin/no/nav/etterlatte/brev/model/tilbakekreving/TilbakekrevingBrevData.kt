@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.tilbakekreving.JaNei
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -35,14 +36,10 @@ data class TilbakekrevingBrevDTO(
                 sakType = generellBrevData.sak.sakType,
                 bosattUtland = generellBrevData.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
                 brukerNavn = generellBrevData.personerISak.soeker.formaterNavn(),
-                // TODO hvordan vet vi om det er dødsbo?
-                doedsbo = false,
-                // TODO varselVedlagt Hvordn vet vi det?
-                varselVedlagt = false,
-                // TODO hvis varsel ikke er vedlagt skal varsel sin dato brukes..
-                datoVarselEllerVedtak = generellBrevData.forenkletVedtak.vedtaksdato ?: LocalDate.now(),
-                // TODO hvordan vet vi tilsvar bruker?
-                datoTilsvarBruker = null,
+                doedsbo = tilbakekreving.vurdering?.doedsbosak == JaNei.JA,
+                varselVedlagt = tilbakekreving.vurdering?.forhaandsvarsel != null,
+                datoVarselEllerVedtak = requireNotNull(tilbakekreving.vurdering?.forhaandsvarselDato),
+                datoTilsvarBruker = tilbakekreving.vurdering?.tilsvar?.dato,
                 tilbakekreving =
                     TilbakekrevingData(
                         fraOgMed = tilbakekreving.perioder.first().maaned.atDay(1),
@@ -57,6 +54,7 @@ data class TilbakekrevingBrevDTO(
                                 it.ytelse.resultat == TilbakekrevingResultat.FULL_TILBAKEKREV
                             },
                         perioder = tilbakekrevingsPerioder(tilbakekreving),
+                        harRenteTillegg = sjekkOmHarRenter(tilbakekreving),
                         summer = perioderSummert(tilbakekreving),
                     ),
             )
@@ -97,6 +95,11 @@ data class TilbakekrevingBrevDTO(
                 sumNettoRenter = Kroner(netto + renteTillegg),
             )
         }
+
+        private fun sjekkOmHarRenter(tilbakekreving: Tilbakekreving) =
+            tilbakekreving.perioder.any { periode ->
+                periode.ytelse.rentetillegg.let { it != null && it > 0 }
+            }
     }
 }
 
@@ -105,6 +108,7 @@ data class TilbakekrevingData(
     val tilOgMed: LocalDate,
     val skalTilbakekreve: Boolean,
     val helTilbakekreving: Boolean,
+    val harRenteTillegg: Boolean,
     val perioder: List<TilbakekrevingPeriodeData>,
     val summer: TilbakekrevingBeloeperData,
 )

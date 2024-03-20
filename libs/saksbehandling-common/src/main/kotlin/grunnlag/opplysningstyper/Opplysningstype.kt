@@ -50,4 +50,8 @@ enum class Opplysningstype {
     VERGES_ADRESSE,
     FORELDRELOES,
     UFOERE,
+
+    // opplysningstyper for søknaden BP / OMS
+    SOEKNAD_OMS,
+    SOEKNAD_BP,
 }

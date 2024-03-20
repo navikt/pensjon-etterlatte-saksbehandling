@@ -106,7 +106,19 @@ internal object BarnepensjonUthenter {
                 spraak(barnepensjonssoknad, Opplysningstype.SPRAAK),
                 soeknadMottattDato(barnepensjonssoknad, Opplysningstype.SOEKNAD_MOTTATT_DATO),
                 soeknadsType(barnepensjonssoknad, Opplysningstype.SOEKNADSTYPE_V1),
+                soeknad(barnepensjonssoknad, Opplysningstype.SOEKNAD_BP),
             )
+    }
+
+    private fun soeknad(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstype,
+    ): Grunnlagsopplysning<out Barnepensjon> {
+        return setBehandlingsopplysninger(
+            barnepensjon,
+            opplysningsType,
+            barnepensjon,
+        )
     }
 
     private fun <T> setBehandlingsopplysninger(

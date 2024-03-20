@@ -614,6 +614,7 @@ internal class BeregningsGrunnlagServiceTest {
                     datoTOM = LocalDate.now().minusYears(6L),
                     utbetaltBeloep = 123L,
                     trygdetid = 10L,
+                    trygdetidForIdent = null,
                     prorataBroekTeller = null,
                     prorataBroekNevner = null,
                     sakId = 1L,
@@ -632,6 +633,7 @@ internal class BeregningsGrunnlagServiceTest {
                     datoTOM = null,
                     utbetaltBeloep = 456L,
                     trygdetid = 20L,
+                    trygdetidForIdent = null,
                     prorataBroekTeller = null,
                     prorataBroekNevner = null,
                     sakId = 1L,
@@ -701,6 +703,7 @@ internal class BeregningsGrunnlagServiceTest {
                                         OverstyrBeregningGrunnlagData(
                                             utbetaltBeloep = 12L,
                                             trygdetid = 25L,
+                                            trygdetidForIdent = null,
                                             prorataBroekTeller = null,
                                             prorataBroekNevner = null,
                                             beskrivelse = "test periode 1",

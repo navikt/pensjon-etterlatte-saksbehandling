@@ -11,6 +11,7 @@ data class OverstyrBeregningGrunnlagDao(
     val datoTOM: LocalDate?,
     val utbetaltBeloep: Long,
     val trygdetid: Long,
+    val trygdetidForIdent: String?,
     val prorataBroekTeller: Long?,
     val prorataBroekNevner: Long?,
     val sakId: Long,
@@ -21,6 +22,7 @@ data class OverstyrBeregningGrunnlagDao(
 data class OverstyrBeregningGrunnlagData(
     val utbetaltBeloep: Long,
     val trygdetid: Long,
+    val trygdetidForIdent: String?,
     val prorataBroekTeller: Long?,
     val prorataBroekNevner: Long?,
     val beskrivelse: String,

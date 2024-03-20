@@ -142,6 +142,7 @@ class BeregnOverstyrBeregningService(
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 0,
                                 trygdetid = 0,
+                                trygdetidForIdent = null,
                                 prorataBroekTeller = null,
                                 prorataBroekNevner = null,
                                 beskrivelse = "Overstyr beregning grunnlag",

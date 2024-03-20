@@ -299,6 +299,8 @@ private fun Row.asOverstyrBeregningGrunnlag(): OverstyrBeregningGrunnlagDao {
         datoTOM = this.sqlDateOrNull("dato_til_og_med")?.toLocalDate(),
         utbetaltBeloep = this.longOrNull("utbetalt_beloep") ?: 0L,
         trygdetid = this.longOrNull("trygdetid") ?: 0,
+        // TODO flyway
+        trygdetidForIdent = null,
         prorataBroekTeller = this.longOrNull("prorata_broek_teller"),
         prorataBroekNevner = this.longOrNull("prorata_broek_nevner"),
         sakId = this.long("sak_id"),

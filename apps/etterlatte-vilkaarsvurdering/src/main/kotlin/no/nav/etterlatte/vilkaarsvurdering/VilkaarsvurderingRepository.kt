@@ -10,7 +10,10 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -34,7 +37,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
                     session.run(
                         query.map { row ->
                             val vilkaarsvurderingId = row.uuid("id")
-                            row.toVilkaarsvurdering(hentVilkaar(vilkaarsvurderingId, session))
+                            row.toVilkaarsvurdering(hentVilkaarFull(vilkaarsvurderingId, session))
                         }.asSingle,
                     )
                 }
@@ -47,7 +50,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
         val params = mapOf("behandling_id" to behandlingId)
         return tx.hent(Queries.HENT_VILKAARSVURDERING, params) { row ->
             val vilkaarsvurderingId = row.uuid("id")
-            row.toVilkaarsvurdering(hentVilkaar(vilkaarsvurderingId, tx))
+            row.toVilkaarsvurdering(hentVilkaarFull(vilkaarsvurderingId, tx))
         } ?: throw NullPointerException("Forventet å hente en vilkaarsvurdering men var null.")
     }
 
@@ -220,6 +223,28 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
                 ).sortedBy { it.hovedvilkaar.type.rekkefoelge }
             }
 
+    private fun hentVilkaarFull(
+        vilkaarsvurderingId: UUID,
+        session: Session,
+    ): List<Vilkaar> =
+        queryOf(Queries.HENT_VILKAAR_FULL, mapOf("vilkaarsvurdering_id" to vilkaarsvurderingId))
+            .let { query ->
+                session.run(
+                    query.map { row -> row.toVilkaarFull() }.asList,
+                )
+                    .groupBy { it.vilkaarId }
+                    .map { (vilkaarId, alleDelvilkaar) ->
+                        val hovedvilkaar = alleDelvilkaar.first { it.hovedvilkaar }
+                        val unntaksvilkaar = alleDelvilkaar.filter { !it.hovedvilkaar }.map { it.delvilkaar }
+                        Vilkaar(
+                            id = vilkaarId,
+                            hovedvilkaar = hovedvilkaar.delvilkaar,
+                            unntaksvilkaar = unntaksvilkaar,
+                            vurdering = hovedvilkaar.vurderingData,
+                        )
+                    }.sortedBy { it.hovedvilkaar.type.rekkefoelge }
+            }
+
     private fun lagreVilkaarsvurdering(
         vilkaarsvurdering: Vilkaarsvurdering,
         tx: TransactionalSession,
@@ -314,6 +339,44 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
             },
     )
 
+    private fun Row.toVilkaarFull(): VilkaarFullWrapper {
+        val vilkaarId = uuid("id")
+        val vurdering =
+            stringOrNull("resultat_kommentar")?.let { kommentar ->
+                VilkaarVurderingData(
+                    kommentar = kommentar,
+                    tidspunkt = tidspunkt("resultat_tidspunkt").toLocalDatetimeUTC(),
+                    saksbehandler = string("resultat_saksbehandler"),
+                )
+            }
+
+        val hovedvilkaar = boolean("hovedvilkaar")
+        val delvilkaar =
+            Delvilkaar(
+                type = VilkaarType.valueOf(string("vilkaar_type")),
+                tittel = string("tittel"),
+                beskrivelse = stringOrNull("beskrivelse"),
+                spoersmaal = stringOrNull("spoersmaal"),
+                lovreferanse =
+                    Lovreferanse(
+                        paragraf = string("paragraf"),
+                        ledd = intOrNull("ledd"),
+                        bokstav = stringOrNull("bokstav"),
+                        lenke = stringOrNull("lenke"),
+                    ),
+                resultat = stringOrNull("resultat")?.let { Utfall.valueOf(it) },
+            )
+
+        return VilkaarFullWrapper(vilkaarId, vurdering, hovedvilkaar, delvilkaar)
+    }
+
+    data class VilkaarFullWrapper(
+        val vilkaarId: UUID,
+        val vurderingData: VilkaarVurderingData?,
+        val hovedvilkaar: Boolean,
+        val delvilkaar: Delvilkaar,
+    )
+
     private object Queries {
         const val LAGRE_VILKAARSVURDERING = """
             INSERT INTO vilkaarsvurdering(id, behandling_id, virkningstidspunkt, grunnlag_versjon) 
@@ -355,6 +418,27 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
         const val HENT_VILKAAR = """
             SELECT id, resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler FROM vilkaar 
             WHERE vilkaarsvurdering_id = :vilkaarsvurdering_id
+        """
+
+        const val HENT_VILKAAR_FULL = """
+            SELECT v.id,
+                   v.resultat_kommentar,
+                   v.resultat_tidspunkt,
+                   v.resultat_saksbehandler,
+                   dv.vilkaar_id,
+                   dv.vilkaar_type,
+                   dv.hovedvilkaar,
+                   dv.tittel,
+                   dv.beskrivelse,
+                   dv.spoersmaal,
+                   dv.paragraf,
+                   dv.ledd,
+                   dv.bokstav,
+                   dv.lenke,
+                   dv.resultat
+            FROM vilkaar v
+              JOIN delvilkaar dv on dv.vilkaar_id = v.id
+            WHERE v.vilkaarsvurdering_id = :vilkaarsvurdering_id
         """
 
         const val SLETT_VILKAARSVURDERING_RESULTAT = """

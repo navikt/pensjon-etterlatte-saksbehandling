@@ -2,12 +2,17 @@ package no.nav.etterlatte.tidshendelser
 
 import no.nav.etterlatte.GenerellDatabaseExtension
 import no.nav.etterlatte.ResetDatabaseStatement
+import org.junit.jupiter.api.extension.AfterEachCallback
+import org.junit.jupiter.api.extension.ExtensionContext
 
 @ResetDatabaseStatement(
     """
     TRUNCATE hendelse CASCADE;
     TRUNCATE jobb CASCADE;
-    ALTER SEQUENCE jobb_id_seq RESTART WITH 1;
 """,
 )
-class DatabaseExtension : GenerellDatabaseExtension()
+class DatabaseExtension : GenerellDatabaseExtension(), AfterEachCallback {
+    override fun afterEach(context: ExtensionContext) {
+        resetDb()
+    }
+}

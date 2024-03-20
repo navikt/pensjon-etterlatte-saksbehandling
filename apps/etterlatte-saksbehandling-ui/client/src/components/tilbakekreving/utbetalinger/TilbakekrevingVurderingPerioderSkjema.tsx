@@ -17,8 +17,10 @@ import { Button, Select, Table, TextField, VStack } from '@navikt/ds-react'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { Toast } from '~shared/alerts/Toast'
+import { format } from 'date-fns'
+import nb from 'date-fns/locale/nb'
 
-export function TilbakekrevingVurderingPerioder({
+export function TilbakekrevingVurderingPerioderSkjema({
   behandling,
   redigerbar,
 }: {
@@ -46,7 +48,7 @@ export function TilbakekrevingVurderingPerioder({
       <Table className="table" zebraStripes>
         <Table.Header>
           <Table.Row>
-            <Table.HeaderCell style={{ width: '5em' }}>Måned</Table.HeaderCell>
+            <Table.HeaderCell style={{ minWidth: '6em' }}>Måned</Table.HeaderCell>
             <Table.HeaderCell>Brutto utbetaling</Table.HeaderCell>
             <Table.HeaderCell>Ny brutto utbetaling</Table.HeaderCell>
             <Table.HeaderCell>Beregnet feilutbetaling</Table.HeaderCell>
@@ -65,7 +67,7 @@ export function TilbakekrevingVurderingPerioder({
             const beloeper = periode.ytelse
             return (
               <Table.Row key={'beloeperRad' + index} style={{ alignItems: 'start' }}>
-                <Table.DataCell key="maaned">{periode.maaned.toString()}</Table.DataCell>
+                <Table.DataCell key="maaned">{format(periode.maaned, 'MMMM yyyy', { locale: nb })}</Table.DataCell>
                 <Table.DataCell key="bruttoUtbetaling">{beloeper.bruttoUtbetaling} kr</Table.DataCell>
                 <Table.DataCell key="nyBruttoUtbetaling">{beloeper.nyBruttoUtbetaling} kr</Table.DataCell>
                 <Table.DataCell key="beregnetFeilutbetaling">

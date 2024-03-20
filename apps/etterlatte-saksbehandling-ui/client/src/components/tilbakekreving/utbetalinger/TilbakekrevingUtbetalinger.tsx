@@ -4,7 +4,7 @@ import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/
 import { useNavigate } from 'react-router-dom'
 import React from 'react'
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
-import { TilbakekrevingVurderingPerioder } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioder'
+import { TilbakekrevingVurderingPerioderSkjema } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioderSkjema'
 import { TilbakekrevingVurderingPerioderVisning } from '~components/tilbakekreving/utbetalinger/TilbakekrevingVurderingPerioderVisning'
 
 export function TilbakekrevingUtbetalinger({
@@ -26,7 +26,7 @@ export function TilbakekrevingUtbetalinger({
       </ContentHeader>
       {redigerbar ? (
         <>
-          <TilbakekrevingVurderingPerioder behandling={behandling} redigerbar={redigerbar} />
+          <TilbakekrevingVurderingPerioderSkjema behandling={behandling} redigerbar={redigerbar} />
         </>
       ) : (
         <>

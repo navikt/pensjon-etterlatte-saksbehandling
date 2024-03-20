@@ -66,8 +66,8 @@ data class TilbakekrevingBrevDTO(
                     maaned = periode.maaned.atDay(1),
                     beloeper =
                         periode.ytelse.let { beloeper ->
-                            val netto = tilbakekreving.perioder.sumOf { it.ytelse.nettoTilbakekreving ?: 0 }
-                            val renteTillegg = tilbakekreving.perioder.sumOf { it.ytelse.rentetillegg ?: 0 }
+                            val netto = periode.ytelse.nettoTilbakekreving ?: 0
+                            val renteTillegg = periode.ytelse.rentetillegg ?: 0
                             TilbakekrevingBeloeperData(
                                 feilutbetaling = Kroner(beloeper.beregnetFeilutbetaling ?: 0),
                                 bruttoTilbakekreving = Kroner(beloeper.bruttoTilbakekreving ?: 0),

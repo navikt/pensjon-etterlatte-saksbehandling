@@ -207,11 +207,11 @@ class DoedshendelseJobService(
     ): Boolean {
         val skalSendeBrev = kontrollpunkter.none { !it.sendBrev }
 
-        sjekkUtlandForBeroertIHendelse(doedshendelse)
         if (skalSendeBrev) {
             if (sak != null && featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
+                val borIUtlandet = sjekkUtlandForBeroertIHendelse(doedshendelse)
                 logger.info("Sender brev for ${doedshendelse.relasjon.name} for sak ${sak.id}")
-                deodshendelserProducer.sendBrevRequest(sak)
+                deodshendelserProducer.sendBrevRequest(sak, borIUtlandet)
                 return true
             } else {
                 logger.info("Sender ikke brev for ${doedshendelse.id} for sak fordi feature toggle er av eller mangler sak")
@@ -242,7 +242,6 @@ class DoedshendelseJobService(
         return personBorIUtlandet(beroertPersonDto)
     }
 
-    // TODO: test?
     private fun personBorIUtlandet(beroertPersonDto: PersonDTO): Boolean {
         val person = beroertPersonDto.toPerson()
         val kontaktadresse = person.kontaktadresse ?: emptyList()

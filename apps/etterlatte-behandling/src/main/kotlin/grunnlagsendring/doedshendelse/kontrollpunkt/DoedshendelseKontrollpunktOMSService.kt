@@ -8,6 +8,7 @@ import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.LOPENDE
 import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.OPPRETTET
 import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.TIL_BEHANDLING
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.safeYearsBetween
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.sak.Sak

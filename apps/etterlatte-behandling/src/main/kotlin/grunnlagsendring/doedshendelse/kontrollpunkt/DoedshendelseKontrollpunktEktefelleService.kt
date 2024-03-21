@@ -2,6 +2,11 @@
 
 package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.finnAntallAarGiftVedDoedsfall
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.harBarn
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.harFellesBarn
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.safeYearsBetween
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.varEktefelleVedDoedsfall
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Sivilstatus.*
 import kotlin.math.absoluteValue
@@ -16,7 +21,7 @@ internal class DoedshendelseKontrollpunktEktefelleService {
         avdoed: PersonDTO,
         eps: PersonDTO,
     ): List<DoedshendelseKontrollpunkt> {
-        return if (varEktefelleVedDoedsfall(avdoed, eps)) {
+        return if (varEktefelleVedDoedsfall(avdoed, eps.foedselsnummer.verdi.value)) {
             when (val antallAarGiftVedDoedsfall = finnAntallAarGiftVedDoedsfall(avdoed, eps)) {
                 null ->
                     listOf(
@@ -94,40 +99,4 @@ internal class DoedshendelseKontrollpunktEktefelleService {
             }
         }
     }
-
-    private fun varEktefelleVedDoedsfall(
-        avdoed: PersonDTO,
-        eps: PersonDTO,
-    ): Boolean =
-        avdoed.sivilstand
-            ?.asSequence()
-            ?.map { it.verdi }
-            ?.sortedBy { it.gyldigFraOgMed }
-            ?.lastOrNull()
-            ?.let {
-                if (it.sivilstatus in listOf(GIFT, SEPARERT, REGISTRERT_PARTNER, SEPARERT_PARTNER)) {
-                    return it.relatertVedSiviltilstand == eps.foedselsnummer.verdi
-                }
-                return false
-            }
-            ?: false
-
-    private fun finnAntallAarGiftVedDoedsfall(
-        avdoed: PersonDTO,
-        eps: PersonDTO,
-    ): Long? =
-        avdoed.sivilstand
-            ?.asSequence()
-            ?.map { it.verdi }
-            ?.filter { it.relatertVedSiviltilstand == eps.foedselsnummer.verdi }
-            ?.filter { it.sivilstatus in listOf(GIFT, SEPARERT, REGISTRERT_PARTNER, SEPARERT_PARTNER) }
-            ?.sortedBy { it.gyldigFraOgMed }
-            ?.firstOrNull()
-            ?.let {
-                if (it.gyldigFraOgMed != null) {
-                    safeYearsBetween(it.gyldigFraOgMed, avdoed.doedsdato!!.verdi)
-                } else {
-                    null
-                }
-            }
 }

@@ -177,7 +177,6 @@ class DoedshendelseService(
     }
 
     private fun finnSamboereForAvdoedMedFellesBarn(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
-        val ektefelleVedDoedsfall = finnEktefelleVedDoedsfall(avdoed)
         val avdoedesBarn = avdoed.avdoedesBarn
         val andreForeldreForAvdoedesBarn =
             avdoedesBarn
@@ -186,7 +185,7 @@ class DoedshendelseService(
                         ?.map { it.value }
                 }
                 ?.flatten()
-                ?.filter { it != ektefelleVedDoedsfall?.value }
+                ?.filterNot { varEktefelleVedDoedsfall(avdoed, it) }
 
         return harSammeAdresseSomAvdoed(avdoed, andreForeldreForAvdoedesBarn)
     }
@@ -251,22 +250,3 @@ private fun Person.under20PaaDato(dato: LocalDate): Boolean {
 
     return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue < 20
 }
-
-private fun finnEktefelleVedDoedsfall(avdoed: PersonDTO) =
-    avdoed.sivilstand
-        ?.asSequence()
-        ?.map { it.verdi }
-        ?.sortedBy { it.gyldigFraOgMed }
-        ?.lastOrNull()
-        ?.let { sisteSivilstand ->
-            if (sisteSivilstand.sivilstatus in
-                listOf(
-                    Sivilstatus.GIFT, Sivilstatus.SEPARERT,
-                    Sivilstatus.REGISTRERT_PARTNER, Sivilstatus.SEPARERT_PARTNER,
-                )
-            ) {
-                sisteSivilstand.relatertVedSiviltilstand
-            } else {
-                null
-            }
-        }

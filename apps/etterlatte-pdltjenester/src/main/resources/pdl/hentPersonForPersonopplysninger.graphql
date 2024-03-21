@@ -1,0 +1,95 @@
+# TODO Legge til parametre utifra soeker, avdød, gjenlevende?
+query($ident: ID! $erOMS: Boolean!) {
+    hentPerson(ident: $ident) {
+        navn {
+            fornavn
+            etternavn
+            metadata {
+                ...metadata
+            }
+        }
+        folkeregisteridentifikator {
+            identifikasjonsnummer
+            metadata {
+                ...metadata
+            }
+        }
+        kontaktadresse {
+            postadresseIFrittFormat {
+                adresselinje1
+                postnummer
+
+            }
+            metadata {
+                ...metadata
+            }
+        }
+        foedsel {
+            foedselsdato
+            metadata {
+                ...metadata
+            }
+        }
+        sivilstand @include(if: $erOMS) {
+            type
+            relatertVedSivilstand
+            gyldigFraOgMed
+            metadata {
+                ...metadata
+            }
+        }
+        statsborgerskap {
+            land
+            gyldigFraOgMed
+            gyldigTilOgMed
+            metadata {
+                ...metadata
+            }
+        }
+        innflyttingTilNorge {
+            fraflyttingsland
+            folkeregistermetadata {
+                gyldighetstidspunkt
+            }
+            metadata {
+                ...metadata
+            }
+        }
+        utflyttingFraNorge {
+            tilflyttingsland
+            folkeregistermetadata {
+                gyldighetstidspunkt
+            }
+            metadata {
+                ...metadata
+            }
+        }
+        foreldreansvar {
+            ansvarlig
+            ansvarssubjekt
+            metadata {
+                ...metadata
+            }
+        }
+        forelderBarnRelasjon {
+            relatertPersonsRolle
+            relatertPersonsIdent
+            metadata {
+                ...metadata
+            }
+        }
+        vergemaalEllerFremtidsfullmakt {
+            embete
+            type
+            folkeregistermetadata {
+                ...folkeregistermetadata
+            }
+            vergeEllerFullmektig {
+                ...vergeEllerFullmektig
+            }
+            metadata {
+                ...metadata
+            }
+        }
+    }
+}

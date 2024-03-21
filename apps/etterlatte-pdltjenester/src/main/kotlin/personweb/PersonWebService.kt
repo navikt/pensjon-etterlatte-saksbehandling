@@ -57,6 +57,8 @@ class PersonWebService(
         }
     }
 
+    // TODO: Hent persongalleri -> Hent personer utifra ny datastruktur, se på PersonService, lag dette til å funke med pdlOboKlient
+
     suspend fun hentPersonopplysninger(
         ident: String,
         sakType: SakType,

@@ -18,5 +18,6 @@
     <logger name="org.apache.kafka" level="INFO"/>
     <logger name="io.netty" level="INFO"/>
     <logger name="no.nav.helse.rapids_rivers.PingPong" level="DEBUG"/>
+    <logger name="no.nav.etterlatte" level="DEBUG"/>
     <include resource="logback-secure.xml"/>
 </configuration>

@@ -15,5 +15,5 @@
     </root>
 
     <logger name="no.nav.helse.rapids_rivers.PingPong" level="DEBUG"/>
-
+    <logger name="no.nav.etterlatte" level="DEBUG"/>
 </configuration>

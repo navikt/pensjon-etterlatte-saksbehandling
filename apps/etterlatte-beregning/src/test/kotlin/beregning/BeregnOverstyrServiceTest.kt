@@ -61,6 +61,7 @@ internal class BeregnOverstyrServiceTest {
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 123L,
                                 trygdetid = 20L,
+                                trygdetidForIdent = null,
                                 prorataBroekTeller = null,
                                 prorataBroekNevner = null,
                                 beskrivelse = "test periode 1",
@@ -72,6 +73,7 @@ internal class BeregnOverstyrServiceTest {
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 456,
                                 trygdetid = 10L,
+                                trygdetidForIdent = null,
                                 prorataBroekTeller = null,
                                 prorataBroekNevner = null,
                                 beskrivelse = "test periode 2",
@@ -136,6 +138,7 @@ internal class BeregnOverstyrServiceTest {
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 123L,
                                 trygdetid = 20L,
+                                trygdetidForIdent = null,
                                 prorataBroekTeller = 10,
                                 prorataBroekNevner = 20,
                                 beskrivelse = "test periode 1",
@@ -147,6 +150,7 @@ internal class BeregnOverstyrServiceTest {
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 456,
                                 trygdetid = 10L,
+                                trygdetidForIdent = null,
                                 prorataBroekTeller = 10,
                                 prorataBroekNevner = 20,
                                 beskrivelse = "test periode 2",
@@ -218,6 +222,7 @@ internal class BeregnOverstyrServiceTest {
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 123L,
                                 trygdetid = 20L,
+                                trygdetidForIdent = null,
                                 prorataBroekTeller = null,
                                 prorataBroekNevner = null,
                                 beskrivelse = "test periode 1",
@@ -229,6 +234,7 @@ internal class BeregnOverstyrServiceTest {
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 456,
                                 trygdetid = 10L,
+                                trygdetidForIdent = null,
                                 prorataBroekTeller = null,
                                 prorataBroekNevner = null,
                                 beskrivelse = "test periode 2",
@@ -300,6 +306,7 @@ internal class BeregnOverstyrServiceTest {
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 123L,
                                 trygdetid = 20L,
+                                trygdetidForIdent = null,
                                 prorataBroekTeller = null,
                                 prorataBroekNevner = null,
                                 beskrivelse = "test periode 1",
@@ -311,6 +318,7 @@ internal class BeregnOverstyrServiceTest {
                             OverstyrBeregningGrunnlagData(
                                 utbetaltBeloep = 456,
                                 trygdetid = 10L,
+                                trygdetidForIdent = null,
                                 prorataBroekTeller = null,
                                 prorataBroekNevner = null,
                                 beskrivelse = "test periode 2",

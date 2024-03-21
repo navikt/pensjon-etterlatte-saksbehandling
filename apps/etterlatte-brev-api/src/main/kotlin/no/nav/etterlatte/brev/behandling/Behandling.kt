@@ -121,6 +121,7 @@ data class Beregningsperiode(
     val antallBarn: Int,
     val utbetaltBeloep: Kroner,
     val trygdetid: Int,
+    val trygdetidForIdent: String? = null,
     val prorataBroek: IntBroek?,
     val institusjon: Boolean,
     val beregningsMetodeAnvendt: BeregningsMetode,

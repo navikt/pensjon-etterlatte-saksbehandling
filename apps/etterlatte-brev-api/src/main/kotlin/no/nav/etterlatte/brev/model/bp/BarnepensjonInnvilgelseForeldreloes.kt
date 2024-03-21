@@ -56,11 +56,14 @@ data class BarnepensjonInnvilgelseForeldreloes(
                         grunnbeloep,
                         beregningsperioder,
                         trygdetid,
-                    ).copy(
                         erForeldreloes = true,
                         bruktAvdoed =
-                            avdoede.find { it.fnr.value == trygdetid.ident }?.navn
-                                ?: throw ManglerAvdoedBruktTilTrygdetidExceoption(),
+                            avdoede.find {
+                                val fnr =
+                                    utbetalingsinfo.beregningsperioder.last().trygdetidForIdent
+                                        ?: throw ManglerFnrTilBruktTrygdetidException()
+                                it.fnr.value == fnr
+                            }?.navn ?: throw ManglerAvdoedBruktTilTrygdetidExceoption(),
                     ),
                 etterbetaling =
                     etterbetaling
@@ -95,6 +98,9 @@ data class BarnepensjonForeldreloesRedigerbar(
             )
     }
 }
+
+class ManglerFnrTilBruktTrygdetidException() :
+    IllegalArgumentException("Mangler fnr til avdoed brukt til trygdetid")
 
 class ManglerAvdoedBruktTilTrygdetidExceoption() :
     IllegalArgumentException("Mangler avdoed som er brukt til beregning av trygdetid")

@@ -59,6 +59,7 @@ class BeregningService(private val beregningKlient: BeregningKlient) {
                     // Legger til 1 pga at beregning fjerner soeker
                     utbetaltBeloep = Kroner(it.utbetaltBeloep),
                     trygdetid = benyttetTrygdetid,
+                    trygdetidForIdent = it.trygdetidForIdent,
                     prorataBroek = prorataBroek,
                     institusjon = it.institusjonsopphold != null,
                     beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),

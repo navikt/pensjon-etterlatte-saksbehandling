@@ -429,6 +429,7 @@ internal class BehandlingTest {
         Kroner(beloep),
         10000,
         null,
+        null,
         false,
         BeregningsMetode.NASJONAL,
         BeregningsMetode.BEST,

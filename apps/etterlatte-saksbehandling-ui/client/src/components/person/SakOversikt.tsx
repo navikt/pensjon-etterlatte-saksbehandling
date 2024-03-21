@@ -94,8 +94,8 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
                 errorMessage: 'Klarte ikke hente informasjon om flyktningstatus',
               })}
               {mapResult(yrkesskadefordelStatus, {
-                success: (data) =>
-                  data && (
+                success: (harYrkesskadeFordel) =>
+                  harYrkesskadeFordel && (
                     <>
                       <FlexRow>
                         <Alert variant="info">

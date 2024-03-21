@@ -35,7 +35,7 @@ class BrevService(
     suspend fun opprettBrev(
         sakId: Long,
         bruker: BrukerTokenInfo,
-        brevkoder: Brevkoder,
+        brevkode: EtterlatteBrevKode,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): Brev =
         brevoppretter.opprettBrev(
@@ -43,8 +43,8 @@ class BrevService(
             behandlingId = null,
             bruker = bruker,
             automatiskMigreringRequest = null,
-            brevKode = { brevkoder.redigering },
-            brevtype = brevkoder.redigering.brevtype,
+            brevKode = { brevkode },
+            brevtype = brevkode.brevtype,
             brevDataMapping = brevDataMapping,
         ).first
 

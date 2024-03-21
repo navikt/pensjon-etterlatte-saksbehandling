@@ -13,6 +13,8 @@ import { SakMedBehandlinger } from '~components/person/typer'
 
 import { isFailure, isPending, isSuccess, mapApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { LastOppBrev } from '~components/person/brev/LastOppBrev'
+import { NyttBrevModal } from '~components/person/brev/NyttBrevModal'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 const mapAdresse = (mottaker: Mottaker) => {
   const adr = mottaker.adresse
@@ -72,7 +74,9 @@ export default function BrevOversikt({ sakStatus }: { sakStatus: Result<SakMedBe
   const navigate = useNavigate()
 
   const [brevListe, hentBrev] = useApiCall(hentBrevForSak)
+
   const [nyttBrevStatus, opprettBrev] = useApiCall(opprettBrevForSak)
+  const kanOppretteBrevMedGittType = useFeatureEnabledMedDefault('kan-opprette-brev-med-data-for-spesifikk-type', false)
 
   useEffect(() => {
     if (isSuccess(sakStatus)) {
@@ -155,18 +159,23 @@ export default function BrevOversikt({ sakStatus }: { sakStatus: Result<SakMedBe
       <br />
 
       <FlexRow>
-        <Button
-          variant="primary"
-          icon={<DocPencilIcon />}
-          iconPosition="right"
-          onClick={opprettNyttBrevOgRedirect}
-          loading={isPending(nyttBrevStatus)}
-        >
-          Nytt brev
-        </Button>
-
         {mapSuccess(sakStatus, (sak) => (
-          <LastOppBrev sak={sak.sak} />
+          <>
+            {kanOppretteBrevMedGittType ? (
+              <NyttBrevModal sakId={sak.sak.id} />
+            ) : (
+              <Button
+                variant="primary"
+                icon={<DocPencilIcon />}
+                iconPosition="right"
+                onClick={opprettNyttBrevOgRedirect}
+                loading={isPending(nyttBrevStatus)}
+              >
+                Nytt brev
+              </Button>
+            )}
+            <LastOppBrev sak={sak.sak} />
+          </>
         ))}
       </FlexRow>
     </Container>

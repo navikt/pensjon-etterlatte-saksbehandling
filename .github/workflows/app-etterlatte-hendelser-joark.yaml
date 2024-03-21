@@ -26,6 +26,7 @@ on:
       - main
     paths:
       - apps/etterlatte-hendelser-joark/**
+      - "!apps/etterlatte-hendelser-joark/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-kafka/**
       - libs/etterlatte-ktor/**

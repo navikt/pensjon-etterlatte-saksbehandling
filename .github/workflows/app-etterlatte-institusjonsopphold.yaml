@@ -24,6 +24,7 @@ on:
       - main
     paths:
       - apps/etterlatte-institusjonsopphold/**
+      - "!apps/etterlatte-institusjonsopphold/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-institusjonsopphold-model/**
       - gradle/libs.versions.toml

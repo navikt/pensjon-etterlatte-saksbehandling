@@ -26,6 +26,7 @@ on:
       - main
     paths:
       - apps/etterlatte-trygdetid-kafka/**
+      - "!apps/etterlatte-trygdetid-kafka/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-trygdetid-model/**
       - libs/etterlatte-migrering-model/**

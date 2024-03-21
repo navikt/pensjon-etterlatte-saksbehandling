@@ -26,6 +26,7 @@ on:
       - main
     paths:
       - apps/etterlatte-tilbakekreving/**
+      - "!apps/etterlatte-tilbakekreving/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**

@@ -28,6 +28,7 @@ on:
       - main
     paths:
       - apps/etterlatte-statistikk/**
+      - "!apps/etterlatte-statistikk/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-beregning-model/**

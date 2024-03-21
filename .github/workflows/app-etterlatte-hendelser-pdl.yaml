@@ -26,6 +26,7 @@ on:
       - main
     paths:
       - apps/etterlatte-hendelser-pdl/**
+      - "!apps/etterlatte-hendelser-pdl/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-kafka/**
       - libs/etterlatte-ktor/**

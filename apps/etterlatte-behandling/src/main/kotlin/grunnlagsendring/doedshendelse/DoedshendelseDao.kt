@@ -99,7 +99,7 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
             with(it) {
                 prepareStatement(
                     """
-                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype, kontrollpunkter
+                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype
                     FROM doedshendelse
                     WHERE status = ?
                     AND relasjon = ?

@@ -14,7 +14,7 @@ import java.util.Timer
 import javax.sql.DataSource
 
 class DoedsmeldingReminderJob(
-    private val doedshendelseService: DoedshendelseReminderService,
+    private val doedshendelseReminderService: DoedshendelseReminderService,
     private val erLeader: () -> Boolean,
     private val initialDelay: Long,
     private val interval: Duration,
@@ -25,10 +25,10 @@ class DoedsmeldingReminderJob(
     private val jobbNavn = this::class.simpleName
 
     private var jobContext: Context =
-        Context(Self(doedshendelseService::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao)
+        Context(Self(doedshendelseReminderService::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao)
 
     override fun schedule(): Timer {
-        logger.info("$jobbNavn er satt til å kjøre med doedshendelseService=${doedshendelseService::class.simpleName} og periode $interval")
+        logger.info("$jobbNavn er satt til å kjøre med ${doedshendelseReminderService::class.simpleName} og periode $interval")
 
         return fixedRateCancellableTimer(
             name = jobbNavn,
@@ -37,7 +37,7 @@ class DoedsmeldingReminderJob(
             period = interval.toMillis(),
         ) {
             if (erLeader()) {
-                doedshendelseService.setupKontekstAndRun(jobContext)
+                doedshendelseReminderService.setupKontekstAndRun(jobContext)
             }
         }
     }

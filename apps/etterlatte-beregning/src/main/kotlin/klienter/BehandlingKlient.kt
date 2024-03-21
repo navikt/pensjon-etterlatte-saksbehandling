@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
+import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import org.slf4j.LoggerFactory
@@ -53,6 +54,8 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
+
+    private val tilgangssjekker = Tilgangssjekker(config, httpClient)
 
     override suspend fun hentBehandling(
         behandlingId: UUID,
@@ -168,23 +171,5 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         behandlingId: UUID,
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
-    ): Boolean {
-        try {
-            return downstreamResourceClient
-                .get(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$resourceUrl/tilgang/behandling/$behandlingId?skrivetilgang=$skrivetilgang",
-                        ),
-                    brukerTokenInfo = bruker,
-                )
-                .mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
-                )
-        } catch (e: Exception) {
-            throw BehandlingKlientException("Sjekking av tilgang for behandling feilet", e)
-        }
-    }
+    ): Boolean = tilgangssjekker.harTilgangTilBehandling(behandlingId, skrivetilgang, bruker)
 }

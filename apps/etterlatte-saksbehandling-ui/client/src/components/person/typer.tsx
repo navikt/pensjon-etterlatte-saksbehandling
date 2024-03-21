@@ -2,6 +2,7 @@ import {
   IBehandlingStatus,
   IBehandlingsType,
   IBoddEllerArbeidetUtlandet,
+  Vedtaksloesning,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
@@ -32,6 +33,7 @@ export interface IBehandlingsammendrag {
   aarsak: BehandlingOgRevurderingsAarsakerType
   virkningstidspunkt?: Virkningstidspunkt
   boddEllerArbeidetUtlandet?: IBoddEllerArbeidetUtlandet
+  kilde: Vedtaksloesning
 }
 
 export enum AarsaksTyper {

@@ -262,4 +262,5 @@ fun Behandling.toBehandlingSammendrag() =
             },
         virkningstidspunkt = this.virkningstidspunkt,
         boddEllerArbeidetUtlandet = this.boddEllerArbeidetUtlandet,
+        kilde = this.kilde,
     )

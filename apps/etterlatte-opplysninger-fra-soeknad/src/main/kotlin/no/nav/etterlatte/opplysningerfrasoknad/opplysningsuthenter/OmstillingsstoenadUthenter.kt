@@ -31,6 +31,7 @@ internal object OmstillingsstoenadUthenter {
             spraak(omstillingsstoenad),
             soeknadMottattDato(omstillingsstoenad),
             soeknadsType(omstillingsstoenad),
+            soeknad(omstillingsstoenad),
         )
     }
 
@@ -40,6 +41,10 @@ internal object OmstillingsstoenadUthenter {
                 mottattDato = soknad.mottattDato,
             )
         return lagOpplysning(Opplysningstype.SOEKNAD_MOTTATT_DATO, kilde(soknad), opplysning, null)
+    }
+
+    private fun soeknad(soknad: Omstillingsstoenad): Grunnlagsopplysning<Omstillingsstoenad> {
+        return lagOpplysning(Opplysningstype.SOEKNAD_OMS, kilde(soknad), soknad, null)
     }
 
     private fun kilde(soknad: Omstillingsstoenad): Grunnlagsopplysning.Kilde {

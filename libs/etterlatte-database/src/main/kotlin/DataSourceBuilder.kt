@@ -17,6 +17,7 @@ import java.nio.file.Paths
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import javax.sql.DataSource
+import kotlin.system.exitProcess
 
 object DataSourceBuilder {
     private const val MAX_POOL_SIZE = 10
@@ -73,8 +74,7 @@ fun DataSource.migrate(): MigrateResult {
             .migrate()
     } catch (e: InvalidMigrationScriptVersion) {
         logger.error("Ugyldig versjon på migreringsscript", e)
-        System.exit(1)
-        throw e
+        exitProcess(1)
     } catch (e: Exception) {
         logger.error("Fikk feil under Flyway-migrering", e)
         throw e

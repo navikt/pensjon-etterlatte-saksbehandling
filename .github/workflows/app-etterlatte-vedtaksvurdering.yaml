@@ -32,6 +32,7 @@ on:
       - main
     paths:
       - apps/etterlatte-vedtaksvurdering/**
+      - "!apps/etterlatte-vedtaksvurdering/.nais/*"
       - libs/saksbehandling-common/**
       - libs/testdata/**
       - libs/etterlatte-ktor/**

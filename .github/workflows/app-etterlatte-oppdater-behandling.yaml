@@ -29,6 +29,7 @@ on:
       - main
     paths:
       - apps/etterlatte-oppdater-behandling/**
+      - "!apps/etterlatte-oppdater-behandling/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-oppgave-model/**

@@ -28,6 +28,7 @@ on:
     paths:
       - apps/etterlatte-tidshendelser/**
       - "!apps/etterlatte-tidshendelser/**.md"
+      - "!apps/etterlatte-tidshendelser/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-database/**
       - libs/etterlatte-jobs/**

@@ -29,6 +29,7 @@ on:
       - main
     paths:
       - apps/etterlatte-utbetaling/**
+      - "!apps/etterlatte-utbetaling/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-jobs/**
       - libs/etterlatte-database/**

@@ -22,7 +22,7 @@ export interface TilbakekrevingVurdering {
   doedsbosak: JaNei | null
   foraarsaketAv: string | null
   tilsvar: TilbakekrevingTilsvar | null
-  rettsligGrunnlag: TilbakekrevingRettsligGrunnlag | null
+  rettsligGrunnlag: TilbakekrevingHjemmel | null
   objektivtVilkaarOppfylt: string | null
   subjektivtVilkaarOppfylt: string | null
   uaktsomtForaarsaketFeilutbetaling: string | null
@@ -35,6 +35,7 @@ export interface TilbakekrevingVurdering {
   rentevurdering: string | null
   vedtak: string | null
   vurderesForPaatale: string | null
+  hjemmel: TilbakekrevingHjemmel | null
 }
 
 export interface TilbakekrevingTilsvar {
@@ -165,15 +166,17 @@ export const teksterTilbakekrevingResultat: Record<TilbakekrevingResultat, strin
   FORELDET: 'Foreldet',
 }
 
-export enum TilbakekrevingRettsligGrunnlag {
+export enum TilbakekrevingHjemmel {
   TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM = 'TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM',
   TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM = 'TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM',
   TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM = 'TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM',
+  TJUETO_FEMTEN_FEMTE_LEDD = 'TJUETO_FEMTEN_FEMTE_LEDD',
 }
 
-export const teksterTilbakekrevingHjemmel: Record<TilbakekrevingRettsligGrunnlag, string> = {
+export const teksterTilbakekrevingHjemmel: Record<TilbakekrevingHjemmel, string> = {
   TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM: 'Folketrygdloven § 22-15 første ledd, første punktum',
   TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM: 'Folketrygdloven § 22-15 første ledd, andre punktum',
   TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM:
     'Kombinasjon folketrygdloven § 22-15 første ledd, første og andre punktum ',
+  TJUETO_FEMTEN_FEMTE_LEDD: 'Folketrygdloven § 22-15 femte ledd',
 } as const

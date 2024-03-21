@@ -23,7 +23,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Periode
 import no.nav.etterlatte.libs.common.tilbakekreving.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingRettsligGrunnlag
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
@@ -96,7 +96,7 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
                                 doedsbosak = null,
                                 foraarsaketAv = null,
                                 tilsvar = null,
-                                rettsligGrunnlag = TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
+                                rettsligGrunnlag = TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
                                 objektivtVilkaarOppfylt = null,
                                 subjektivtVilkaarOppfylt = null,
                                 uaktsomtForaarsaketFeilutbetaling = null,
@@ -109,6 +109,7 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
                                 rentevurdering = null,
                                 vedtak = "konklusjon",
                                 vurderesForPaatale = null,
+                                hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM,
                             ),
                         perioder =
                             lagret.tilbakekreving.perioder.map {

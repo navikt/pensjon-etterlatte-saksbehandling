@@ -1,4 +1,4 @@
-import { Button, Radio, RadioGroup, Select, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Label, Radio, RadioGroup, Select, Textarea, VStack } from '@navikt/ds-react'
 import {
   teksterTilbakekrevingAarsak,
   teksterTilbakekrevingBeloepBehold,
@@ -8,7 +8,7 @@ import {
   TilbakekrevingAarsak,
   TilbakekrevingBehandling,
   TilbakekrevingBeloepBeholdSvar,
-  TilbakekrevingRettsligGrunnlag,
+  TilbakekrevingHjemmel,
   TilbakekrevingVarsel,
   TilbakekrevingVilkaar,
   TilbakekrevingVurdering,
@@ -19,7 +19,7 @@ import { lagreTilbakekrevingsvurdering } from '~shared/api/tilbakekreving'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
 
-import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { Toast } from '~shared/alerts/Toast'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
@@ -47,6 +47,7 @@ export const initialVurdering = {
   rentevurdering: null,
   vedtak: null,
   vurderesForPaatale: null,
+  hjemmel: null,
 }
 
 export function TilbakekrevingVurderingSkjema({
@@ -73,6 +74,19 @@ export function TilbakekrevingVurderingSkjema({
     (vurdering.vilkaarsresultat &&
       [TilbakekrevingVilkaar.OPPFYLT, TilbakekrevingVilkaar.DELVIS_OPPFYLT].includes(vurdering.vilkaarsresultat)) ||
     vurdering.beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD
+
+  const hjemmelFraVurdering = (
+    rettsligGrunnlag: TilbakekrevingHjemmel | null,
+    vilkaarsresultat: TilbakekrevingVilkaar | null
+  ): TilbakekrevingHjemmel | null => {
+    // Femte ledd dersom vilkår ikke er oppfylt
+    if (vilkaarsresultat === TilbakekrevingVilkaar.IKKE_OPPFYLT) {
+      return TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD
+    }
+
+    // Ellers det som settes i rettslig grunnlag
+    return rettsligGrunnlag
+  }
 
   return (
     <InnholdPadding>
@@ -249,27 +263,33 @@ export function TilbakekrevingVurderingSkjema({
           size="small"
           className="radioGroup"
           value={vurdering.rettsligGrunnlag ?? ''}
-          onChange={(e) =>
+          onChange={(e) => {
             setVurdering({
               ...vurdering,
-              rettsligGrunnlag: TilbakekrevingRettsligGrunnlag[e as TilbakekrevingRettsligGrunnlag],
+              rettsligGrunnlag: TilbakekrevingHjemmel[e as TilbakekrevingHjemmel],
+              hjemmel: hjemmelFraVurdering(
+                TilbakekrevingHjemmel[e as TilbakekrevingHjemmel],
+                vurdering.vilkaarsresultat
+              ),
             })
-          }
+          }}
         >
           <div className="flex">
-            {Object.values(TilbakekrevingRettsligGrunnlag).map((hjemmel) => (
-              <Radio key={hjemmel} value={hjemmel}>
-                {teksterTilbakekrevingHjemmel[hjemmel]}
-              </Radio>
-            ))}
+            {Object.values(TilbakekrevingHjemmel)
+              .filter((hjemmel) => hjemmel != TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD)
+              .map((hjemmel) => (
+                <Radio key={hjemmel} value={hjemmel}>
+                  {teksterTilbakekrevingHjemmel[hjemmel]}
+                </Radio>
+              ))}
           </div>
         </RadioGroup>
 
         {vurdering.rettsligGrunnlag &&
           [
-            TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
-            TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM,
-            TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM,
+            TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
+            TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM,
+            TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM,
           ].includes(vurdering.rettsligGrunnlag) && (
             <>
               <Textarea
@@ -285,7 +305,7 @@ export function TilbakekrevingVurderingSkjema({
                 }
               />
 
-              {[TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM].includes(
+              {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM].includes(
                 vurdering.rettsligGrunnlag
               ) && (
                 <Textarea
@@ -302,7 +322,7 @@ export function TilbakekrevingVurderingSkjema({
                 />
               )}
 
-              {[TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM].includes(
+              {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM].includes(
                 vurdering.rettsligGrunnlag
               ) && (
                 <Textarea
@@ -319,7 +339,7 @@ export function TilbakekrevingVurderingSkjema({
                 />
               )}
 
-              {[TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM].includes(
+              {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM].includes(
                 vurdering.rettsligGrunnlag
               ) && (
                 <Textarea
@@ -343,12 +363,16 @@ export function TilbakekrevingVurderingSkjema({
                 size="small"
                 className="radioGroup"
                 value={vurdering.vilkaarsresultat ?? ''}
-                onChange={(e) =>
+                onChange={(e) => {
                   setVurdering({
                     ...vurdering,
                     vilkaarsresultat: TilbakekrevingVilkaar[e as TilbakekrevingVilkaar],
+                    hjemmel: hjemmelFraVurdering(
+                      vurdering.rettsligGrunnlag,
+                      TilbakekrevingVilkaar[e as TilbakekrevingVilkaar]
+                    ),
                   })
-                }
+                }}
               >
                 <div className="flex">
                   {Object.values(TilbakekrevingVilkaar).map((vilkaar) => (
@@ -489,6 +513,11 @@ export function TilbakekrevingVurderingSkjema({
             </>
           )}
 
+        <div>
+          <Label>Hjemmel</Label>
+          <BodyLong>{vurdering.hjemmel ? teksterTilbakekrevingHjemmel[vurdering.hjemmel] : 'Ikke satt'}</BodyLong>
+        </div>
+
         {redigerbar && (
           <VStack gap="5">
             <Button
@@ -500,7 +529,10 @@ export function TilbakekrevingVurderingSkjema({
             >
               Lagre vurdering
             </Button>
-            {isSuccess(lagreVurderingStatus) && <Toast melding="Vurdering lagret" />}
+            {mapResult(lagreVurderingStatus, {
+              success: () => <Toast melding="Vurdering lagret" />,
+              error: (error) => <Alert variant="error">Kunne ikke lagre vurdering: {error.detail}</Alert>,
+            })}
           </VStack>
         )}
       </VStack>

@@ -228,37 +228,6 @@ class VedtakBehandlingService(
         )
     }
 
-    suspend fun lagMelding(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): VedtakOgRapid? {
-        val attestertVedtak = repository.hentVedtak(behandlingId)
-        if (attestertVedtak == null) {
-            logger.warn("Fant ikke vedtak for behandling $behandlingId. Avbryter denne.")
-            return null
-        }
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        return VedtakOgRapid(
-            attestertVedtak.toDto(),
-            RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseHendelseType.ATTESTERT,
-                vedtak = attestertVedtak.toDto(),
-                tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
-                behandlingId = behandlingId,
-                extraParams =
-                    mapOf(
-                        SKAL_SENDE_BREV to
-                            when {
-                                behandling.revurderingsaarsak.skalIkkeSendeBrev() -> false
-                                else -> true
-                            },
-                        KILDE_KEY to behandling.kilde,
-                        REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
-                    ),
-            ),
-        )
-    }
-
     private fun Revurderingaarsak?.skalIkkeSendeBrev() = this != null && !utfall.skalSendeBrev
 
     suspend fun underkjennVedtak(

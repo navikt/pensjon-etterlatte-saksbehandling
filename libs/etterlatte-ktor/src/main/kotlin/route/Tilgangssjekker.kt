@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.UUID
 
@@ -29,6 +30,8 @@ class Tilgangssjekker(
         Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofMinutes(1))
             .build<Tilgangsrequest, Boolean>()
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override suspend fun harTilgangTilBehandling(
         behandlingId: UUID,

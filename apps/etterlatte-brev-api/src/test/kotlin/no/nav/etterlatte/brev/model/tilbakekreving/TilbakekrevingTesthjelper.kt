@@ -13,9 +13,9 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Periode
 import no.nav.etterlatte.libs.common.tilbakekreving.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingRettsligGrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVarsel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
@@ -44,7 +44,7 @@ fun tilbakekrevingvurdering() =
         doedsbosak = null,
         foraarsaketAv = null,
         tilsvar = null,
-        rettsligGrunnlag = TilbakekrevingRettsligGrunnlag.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
+        rettsligGrunnlag = TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
         objektivtVilkaarOppfylt = null,
         subjektivtVilkaarOppfylt = null,
         uaktsomtForaarsaketFeilutbetaling = null,
@@ -57,6 +57,7 @@ fun tilbakekrevingvurdering() =
         rentevurdering = null,
         vedtak = "konklusjon",
         vurderesForPaatale = null,
+        hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
     )
 
 fun kravgrunnlag() =

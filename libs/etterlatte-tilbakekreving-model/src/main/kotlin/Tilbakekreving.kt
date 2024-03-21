@@ -19,7 +19,7 @@ data class TilbakekrevingVurdering(
     val doedsbosak: JaNei?,
     val foraarsaketAv: String?,
     val tilsvar: TilbakekrevingTilsvar?,
-    val rettsligGrunnlag: TilbakekrevingRettsligGrunnlag?,
+    val rettsligGrunnlag: TilbakekrevingHjemmel?,
     val objektivtVilkaarOppfylt: String?,
     val subjektivtVilkaarOppfylt: String?,
     val uaktsomtForaarsaketFeilutbetaling: String?,
@@ -32,6 +32,7 @@ data class TilbakekrevingVurdering(
     val rentevurdering: String?,
     val vedtak: String?,
     val vurderesForPaatale: String?,
+    val hjemmel: TilbakekrevingHjemmel?,
 )
 
 enum class TilbakekrevingVarsel {
@@ -65,13 +66,6 @@ enum class TilbakekrevingBeloepBeholdSvar {
     BELOEP_I_BEHOLD,
     BELOEP_IKKE_I_BEHOLD,
 }
-
-data class TilbakekrevingVurderingUaktsomhet(
-    val aktsomhet: TilbakekrevingAktsomhet?,
-    val reduseringAvKravet: String?,
-    val strafferettsligVurdering: String?,
-    val rentevurdering: String?,
-)
 
 data class TilbakekrevingPeriode(
     val maaned: YearMonth,
@@ -182,13 +176,7 @@ enum class TilbakekrevingAarsak {
     ANNET,
 }
 
-enum class TilbakekrevingAktsomhet {
-    GOD_TRO,
-    SIMPEL_UAKTSOMHET,
-    GROV_UAKTSOMHET,
-}
-
-enum class TilbakekrevingRettsligGrunnlag(val kode: String) {
+enum class TilbakekrevingHjemmel(val kode: String) {
     TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM("22-15-1-1"),
     TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM("22-15-1-2"),
     TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM("22-15-1-1/22-15-1-2"),
@@ -217,7 +205,7 @@ data class TilbakekrevingVedtak(
     val vedtakId: Long,
     val fattetVedtak: FattetVedtak,
     val aarsak: TilbakekrevingAarsak,
-    val hjemmel: TilbakekrevingRettsligGrunnlag,
+    val hjemmel: TilbakekrevingHjemmel,
     val kravgrunnlagId: String,
     val kontrollfelt: String,
     val perioder: List<TilbakekrevingPeriodeVedtak>,

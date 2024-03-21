@@ -30,6 +30,7 @@ on:
       - main
     paths:
       - apps/etterlatte-grunnlag/**
+      - "!apps/etterlatte-grunnlag/.nais/*"
       - libs/saksbehandling-common/**
       - libs/testdata/**
       - libs/etterlatte-ktor/**

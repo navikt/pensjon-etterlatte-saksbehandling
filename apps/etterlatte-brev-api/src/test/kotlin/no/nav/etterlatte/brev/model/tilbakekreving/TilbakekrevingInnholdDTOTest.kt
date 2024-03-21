@@ -58,6 +58,7 @@ class TilbakekrevingInnholdDTOTest {
                     nettoTilbakekreving = Kroner(300),
                     fradragSkatt = Kroner(400),
                     renteTillegg = Kroner(500),
+                    sumNettoRenter = Kroner(800),
                 )
             resultat shouldBe TilbakekrevingResultat.FULL_TILBAKEKREV
         }
@@ -92,6 +93,7 @@ class TilbakekrevingInnholdDTOTest {
                 nettoTilbakekreving = Kroner(600),
                 fradragSkatt = Kroner(800),
                 renteTillegg = Kroner(1000),
+                sumNettoRenter = Kroner(1600),
             )
     }
 

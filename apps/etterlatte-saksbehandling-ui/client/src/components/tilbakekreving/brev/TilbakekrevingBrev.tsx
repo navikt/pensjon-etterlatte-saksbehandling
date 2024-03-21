@@ -17,6 +17,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { VedtakSammendrag } from '~components/vedtak/typer'
+import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 
 export function TilbakekrevingBrev({
   behandling,
@@ -45,7 +46,7 @@ export function TilbakekrevingBrev({
 
   useEffect(() => {
     hentVedtak(behandling.id, (vedtak: VedtakSammendrag | null) => {
-      if (vedtak) {
+      if (vedtak?.datoFattet) {
         hentBrev()
       } else {
         opprettVedtak(behandling.id).then(() => hentBrev())
@@ -74,8 +75,14 @@ export function TilbakekrevingBrev({
             <Alert variant="warning">
               Dette er et manuelt opprettet brev. Kontroller innholdet nøye før attestering.
             </Alert>
-            <br />
-            {vedtaksbrev && <BrevMottaker brev={vedtaksbrev} kanRedigeres={redigerbar} />}
+            {vedtaksbrev && (
+              <>
+                <br />
+                <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
+                <br />
+                <BrevMottaker brev={vedtaksbrev} kanRedigeres={redigerbar} />
+              </>
+            )}
           </ContentHeader>
         </Sidebar>
 
@@ -106,8 +113,6 @@ export function TilbakekrevingBrev({
 
 const BrevContent = styled.div`
   display: flex;
-  height: 75vh;
-  max-height: 75vh;
 `
 
 const Sidebar = styled.div`

@@ -29,16 +29,12 @@ class Context(
 
 interface User {
     fun name(): String
-
-    fun kanSetteKilde(): Boolean = false
 }
 
 abstract class ExternalUser(val identifiedBy: TokenValidationContext) : User
 
 class Self(private val prosess: String) : User {
     override fun name() = prosess
-
-    override fun kanSetteKilde() = true
 }
 
 class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identifiedBy) {
@@ -46,10 +42,6 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
         return identifiedBy.hentTokenClaims(AZURE_ISSUER)
             ?.getStringClaim("azp_name") // format=cluster:namespace:app-name
             ?: throw IllegalArgumentException("Støtter ikke navn på systembruker")
-    }
-
-    override fun kanSetteKilde(): Boolean {
-        return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.containsClaim("roles", "kan-sette-kilde")
     }
 }
 

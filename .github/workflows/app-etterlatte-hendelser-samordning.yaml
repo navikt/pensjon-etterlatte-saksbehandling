@@ -25,6 +25,7 @@ on:
       - main
     paths:
       - apps/etterlatte-hendelser-samordning/**
+      - "!apps/etterlatte-hendelser-samordning/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-kafka/**
       - libs/etterlatte-ktor/**

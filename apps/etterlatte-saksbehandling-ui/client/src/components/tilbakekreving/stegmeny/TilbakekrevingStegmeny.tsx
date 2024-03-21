@@ -10,6 +10,8 @@ export function TilbakekrevingStegmeny() {
   return (
     <StegMenyWrapper>
       <TilbakekrevingNavLenke path="vurdering" description="Vurdering" enabled separator />
+      <TilbakekrevingNavLenke path="utbetalinger" description="Utbetalinger" enabled={true} separator={false} />
+      <TilbakekrevingNavLenke path="oppsummering" description="Oppsummering" enabled={true} separator={false} />
       <TilbakekrevingNavLenke
         path="brev"
         description="Brev"
@@ -21,5 +23,5 @@ export function TilbakekrevingStegmeny() {
 }
 
 function kanSeBrev(tilbakekrevingBehandling: TilbakekrevingBehandling | null): boolean {
-  return !!tilbakekrevingBehandling?.tilbakekreving?.vurdering.konklusjon
+  return !!tilbakekrevingBehandling?.tilbakekreving?.vurdering?.vedtak
 }

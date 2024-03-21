@@ -1,5 +1,5 @@
 import { useKlage } from '~components/klage/useKlage'
-import { BodyShort, Heading, Tag } from '@navikt/ds-react'
+import { Heading, Tag } from '@navikt/ds-react'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { KlageStatus, teksterKabalstatus, teksterKlagestatus } from '~shared/types/Klage'
 import { tagColors, TagList } from '~shared/Tags'
@@ -23,6 +23,7 @@ import {
   setSaksbehandlerGjeldendeOppgave,
 } from '~store/reducers/SaksbehandlerGjeldendeOppgaveForBehandlingReducer'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { FlexRow } from '~shared/styled'
 
 export function KlageSidemeny() {
   const klage = useKlage()
@@ -73,15 +74,6 @@ export function KlageSidemeny() {
           {teksterKlagestatus[klage.status]}
         </Heading>
 
-        {mapApiResult(
-          fetchVedtakStatus,
-          <Spinner label="Henter vedtaksdetaljer" visible />,
-          () => (
-            <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>
-          ),
-          (vedtak) => vedtak && <BodyShort>Vedtak er opprettet: {vedtak.vedtakType}</BodyShort>
-        )}
-
         {klage.kabalStatus && (
           <>
             <Heading size="small">Status Kabal</Heading>
@@ -89,13 +81,15 @@ export function KlageSidemeny() {
           </>
         )}
 
-        <TagList>
-          <li>
-            <Tag variant={tagColors[klage.sak.sakType]}>{formaterSakstype(klage.sak.sakType)}</Tag>
-          </li>
-        </TagList>
+        <FlexRow $spacing>
+          <TagList>
+            <li>
+              <Tag variant={tagColors[klage.sak.sakType]}>{formaterSakstype(klage.sak.sakType)}</Tag>
+            </li>
+          </TagList>
+        </FlexRow>
 
-        <div className="flex">
+        <FlexRow>
           <div>
             <Info>Klager</Info>
             <Tekst>{klage.innkommendeDokument?.innsender ?? 'Ukjent'}</Tekst>
@@ -108,7 +102,7 @@ export function KlageSidemeny() {
                 : 'Ukjent'}
             </Tekst>
           </div>
-        </div>
+        </FlexRow>
       </SidebarPanel>
       {kanAttestere && (
         <>

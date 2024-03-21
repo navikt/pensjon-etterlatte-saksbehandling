@@ -1,6 +1,7 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminder
 import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
@@ -94,6 +95,35 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
         }
     }
 
+    fun hentDoedshendelserMedStatusFerdigOgUtFallBrevBp(): List<DoedshendelseReminder> {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    SELECT id, endret, beroert_fnr, sak_id, relasjon
+                    FROM doedshendelse
+                    WHERE status = ?
+                    AND relasjon = ?
+                    AND utfall = ANY (?)
+                    """.trimIndent(),
+                ).apply {
+                    setString(1, Status.FERDIG.name)
+                    setString(2, Relasjon.BARN.name)
+                    setArray(
+                        3,
+                        createArrayOf(
+                            "text",
+                            listOf(
+                                Utfall.BREV,
+                                Utfall.BREV_OG_OPPGAVE,
+                            ).toTypedArray(),
+                        ),
+                    )
+                }.executeQuery().toList { asDoedshendelseReminder() }
+            }
+        }
+    }
+
     fun hentDoedshendelserForPerson(avdoedFnr: String): List<DoedshendelseInternal> {
         return connectionAutoclosing.hentConnection {
             with(it) {
@@ -110,6 +140,15 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
         }
     }
 }
+
+private fun ResultSet.asDoedshendelseReminder(): DoedshendelseReminder =
+    DoedshendelseReminder(
+        id = getString("id").toUUID(),
+        beroertFnr = getString("beroert_fnr"),
+        relasjon = getString("relasjon").let { relasjon -> Relasjon.valueOf(relasjon) },
+        endret = getTidspunkt("endret"),
+        sakId = getString("sak_id")?.toLong(),
+    )
 
 private fun ResultSet.asDoedshendelse(): DoedshendelseInternal =
     DoedshendelseInternal(

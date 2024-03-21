@@ -7,6 +7,10 @@ export enum IReturTypeBehandling {
   inngangsvilkår_feilvurdert = 'Inngangsvilkår feilvurdert',
   feil_i_beregning = 'Feil i beregning',
   feil_i_brev = 'Feil i brev',
+  inntektsavkortning = 'Feil i inntektsavkorting',
+  trygdetid = 'Feil i trygdetid',
+  feil_i_grunnlag = 'Feil i grunnlag',
+  systemfeil = 'Systemfeil',
   dokumentasjon_mangler = 'Dokumentasjon mangler',
   annet = 'Annet',
 }

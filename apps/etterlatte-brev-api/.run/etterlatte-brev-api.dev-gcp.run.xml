@@ -40,7 +40,6 @@
       <env name="DB_HOST" value="host.docker.internal" />
       <env name="DB_PASSWORD" value="postgres" />
       <env name="DB_PORT" value="5435" />
-      <env name="NAIS_CLUSTER_NAME" value="dev-gcp" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-brev-api.main" />

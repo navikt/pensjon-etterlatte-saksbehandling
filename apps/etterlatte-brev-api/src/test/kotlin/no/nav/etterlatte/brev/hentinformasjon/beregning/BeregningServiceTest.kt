@@ -130,6 +130,7 @@ class BeregningServiceTest {
                 Kroner(3063),
                 10,
                 null,
+                null,
                 false,
                 BeregningsMetode.NASJONAL,
                 BeregningsMetode.BEST,

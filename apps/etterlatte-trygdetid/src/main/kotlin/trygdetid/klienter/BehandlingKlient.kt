@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
+import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import org.slf4j.LoggerFactory
@@ -23,6 +24,7 @@ class BehandlingKlientException(override val message: String, override val cause
 
 class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilgangsSjekk {
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
+    private val tilgangssjekker = Tilgangssjekker(config, httpClient)
 
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
@@ -33,27 +35,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
         behandlingId: UUID,
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
-    ): Boolean {
-        try {
-            logger.info("Sjekker tilgang til behandling $behandlingId")
-
-            return downstreamResourceClient
-                .get(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$resourceUrl/tilgang/behandling/$behandlingId?skrivetilgang=$skrivetilgang",
-                        ),
-                    brukerTokenInfo = bruker,
-                )
-                .mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
-                )
-        } catch (e: Exception) {
-            throw BehandlingKlientException("Sjekking av tilgang for behandling feilet", e)
-        }
-    }
+    ): Boolean = tilgangssjekker.harTilgangTilBehandling(behandlingId, skrivetilgang, bruker)
 
     suspend fun kanOppdatereTrygdetid(
         behandlingId: UUID,

@@ -12,13 +12,14 @@ import { lagreTilbakekrevingsperioder } from '~shared/api/tilbakekreving'
 import React, { useState } from 'react'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
-import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { Button, Heading, Select, Table, TextField, VStack } from '@navikt/ds-react'
+import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
+import { Button, Select, Table, TextField, VStack } from '@navikt/ds-react'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { Toast } from '~shared/alerts/Toast'
+import { format } from 'date-fns'
 
-export function TilbakekrevingVurderingPerioder({
+export function TilbakekrevingVurderingPerioderSkjema({
   behandling,
   redigerbar,
 }: {
@@ -43,15 +44,10 @@ export function TilbakekrevingVurderingPerioder({
 
   return (
     <InnholdPadding>
-      <HeadingWrapper>
-        <Heading level="2" size="medium">
-          Utbetalinger
-        </Heading>
-      </HeadingWrapper>
       <Table className="table" zebraStripes>
         <Table.Header>
           <Table.Row>
-            <Table.HeaderCell style={{ width: '5em' }}>Måned</Table.HeaderCell>
+            <Table.HeaderCell style={{ minWidth: '6em' }}>Måned</Table.HeaderCell>
             <Table.HeaderCell>Brutto utbetaling</Table.HeaderCell>
             <Table.HeaderCell>Ny brutto utbetaling</Table.HeaderCell>
             <Table.HeaderCell>Beregnet feilutbetaling</Table.HeaderCell>
@@ -70,7 +66,7 @@ export function TilbakekrevingVurderingPerioder({
             const beloeper = periode.ytelse
             return (
               <Table.Row key={'beloeperRad' + index} style={{ alignItems: 'start' }}>
-                <Table.DataCell key="maaned">{periode.maaned.toString()}</Table.DataCell>
+                <Table.DataCell key="maaned">{format(periode.maaned, 'MMMM yyyy')}</Table.DataCell>
                 <Table.DataCell key="bruttoUtbetaling">{beloeper.bruttoUtbetaling} kr</Table.DataCell>
                 <Table.DataCell key="nyBruttoUtbetaling">{beloeper.nyBruttoUtbetaling} kr</Table.DataCell>
                 <Table.DataCell key="beregnetFeilutbetaling">

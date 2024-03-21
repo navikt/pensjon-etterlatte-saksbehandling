@@ -28,6 +28,7 @@ on:
       - main
     paths:
       - apps/etterlatte-vilkaarsvurdering/**
+      - "!apps/etterlatte-vilkaarsvurdering/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-ktor/**

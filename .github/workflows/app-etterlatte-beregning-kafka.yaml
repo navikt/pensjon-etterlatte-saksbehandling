@@ -27,6 +27,7 @@ on:
       - main
     paths:
       - apps/etterlatte-beregning-kafka/**
+      - "!apps/etterlatte-beregning-kafka/.nais/*"
       - libs/saksbehandling-common/**
       - apps/etterlatte-beregning-model/**
       - libs/etterlatte-ktor/**

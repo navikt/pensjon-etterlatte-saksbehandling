@@ -5,23 +5,19 @@ import {
   TilbakekrevingPeriode,
 } from '~shared/types/Tilbakekreving'
 import React, { useState } from 'react'
-import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { Heading, Table } from '@navikt/ds-react'
+import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
+import { Table } from '@navikt/ds-react'
+import { format } from 'date-fns'
 
 export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const [perioder] = useState<TilbakekrevingPeriode[]>(behandling.tilbakekreving.perioder)
 
   return (
     <InnholdPadding>
-      <HeadingWrapper>
-        <Heading level="2" size="medium" spacing>
-          Utbetalinger
-        </Heading>
-      </HeadingWrapper>
       <Table className="table" zebraStripes>
         <Table.Header>
           <Table.Row>
-            <Table.HeaderCell>Måned</Table.HeaderCell>
+            <Table.HeaderCell style={{ minWidth: '6em' }}>Måned</Table.HeaderCell>
             <Table.HeaderCell>Brutto utbetaling</Table.HeaderCell>
             <Table.HeaderCell>Ny brutto utbetaling</Table.HeaderCell>
             <Table.HeaderCell>Beregnet feilutbetaling</Table.HeaderCell>
@@ -40,7 +36,7 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
             const beloeper = periode.ytelse
             return (
               <Table.Row key={'beloeperRad' + index}>
-                <Table.DataCell key="maaned">{periode.maaned.toString()}</Table.DataCell>
+                <Table.DataCell key="maaned">{format(periode.maaned, 'MMMM yyyy')}</Table.DataCell>
                 <Table.DataCell key="bruttoUtbetaling">{beloeper.bruttoUtbetaling} kr</Table.DataCell>
                 <Table.DataCell key="nyBruttoUtbetaling">{beloeper.nyBruttoUtbetaling} kr</Table.DataCell>
                 <Table.DataCell key="beregnetFeilutbetaling">{beloeper.beregnetFeilutbetaling} kr</Table.DataCell>

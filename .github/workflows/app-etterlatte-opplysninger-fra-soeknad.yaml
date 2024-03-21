@@ -23,6 +23,7 @@ on:
       - main
     paths:
       - apps/etterlatte-opplysninger-fra-soeknad/**
+      - "!apps/etterlatte-opplysninger-fra-soeknad/.nais/*"
       - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
 

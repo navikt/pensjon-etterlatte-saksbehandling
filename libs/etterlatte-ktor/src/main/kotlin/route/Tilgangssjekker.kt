@@ -1,6 +1,7 @@
-package no.nav.etterlatte.brev.hentinformasjon
+package no.nav.etterlatte.libs.ktor.route
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
@@ -10,10 +11,8 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
-import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
-import no.nav.etterlatte.libs.ktor.route.PersonTilgangsSjekk
-import no.nav.etterlatte.libs.ktor.route.SakTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import java.time.Duration
 import java.util.UUID
 
 class Tilgangssjekker(
@@ -26,12 +25,25 @@ class Tilgangssjekker(
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
 
+    private val tilgangscache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(1))
+            .build<Tilgangsrequest, Boolean>()
+
     override suspend fun harTilgangTilBehandling(
         behandlingId: UUID,
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean {
+        val tilgangsrequest = Tilgangsrequest(behandlingId, skrivetilgang, bruker.ident)
+        val fraCache = tilgangscache.getIfPresent(tilgangsrequest)
+        if (fraCache != null) {
+            logger.debug("Cache hit for behandling")
+            return fraCache
+        }
+        logger.debug("Cache miss for behandling")
         try {
+            logger.debug("Sjekker tilgang til behandling {}", behandlingId)
             return downstreamResourceClient
                 .get(
                     resource =
@@ -42,7 +54,10 @@ class Tilgangssjekker(
                     brukerTokenInfo = bruker,
                 )
                 .mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    success = { resource ->
+                        resource.response.let { objectMapper.readValue<Boolean>(it.toString()) }
+                            .also { tilgangscache.put(tilgangsrequest, it) }
+                    },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
@@ -55,6 +70,13 @@ class Tilgangssjekker(
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean {
+        val tilgangsrequest = Tilgangsrequest(foedselsnummer, skrivetilgang, bruker.ident)
+        val fraCache = tilgangscache.getIfPresent(tilgangsrequest)
+        if (fraCache != null) {
+            logger.debug("Cache hit for person")
+            return fraCache
+        }
+        logger.debug("Cache miss for person")
         try {
             return downstreamResourceClient
                 .post(
@@ -67,7 +89,10 @@ class Tilgangssjekker(
                     postBody = foedselsnummer.value,
                 )
                 .mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    success = { resource ->
+                        resource.response.let { objectMapper.readValue<Boolean>(it.toString()) }
+                            .also { tilgangscache.put(tilgangsrequest, it) }
+                    },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
@@ -80,6 +105,13 @@ class Tilgangssjekker(
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean {
+        val tilgangsrequest = Tilgangsrequest(sakId, skrivetilgang, bruker.ident)
+        val fraCache = tilgangscache.getIfPresent(tilgangsrequest)
+        if (fraCache != null) {
+            logger.debug("Cache hit for sak")
+            return fraCache
+        }
+        logger.debug("Cache miss for sak")
         try {
             return downstreamResourceClient
                 .get(
@@ -91,7 +123,10 @@ class Tilgangssjekker(
                     brukerTokenInfo = bruker,
                 )
                 .mapBoth(
-                    success = { deserialize(it.response.toString()) },
+                    success = {
+                        deserialize<Boolean>(it.response.toString())
+                            .also { resultat -> tilgangscache.put(tilgangsrequest, resultat) }
+                    },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
@@ -102,3 +137,9 @@ class Tilgangssjekker(
 
 class TilgangssjekkException(override val message: String, override val cause: Throwable? = null) :
     Exception(message, cause)
+
+data class Tilgangsrequest(
+    val id: Any,
+    val skrivetilgang: Boolean,
+    val bruker: String,
+)

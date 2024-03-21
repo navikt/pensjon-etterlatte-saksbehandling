@@ -62,10 +62,6 @@ class OppgaveService(
         }
     }
 
-    fun genererStatsForOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats {
-        return oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)
-    }
-
     private fun aktuelleOppgavetyperForRolleTilSaksbehandler(roller: List<Rolle>) =
         roller.flatMap {
             when (it) {
@@ -81,6 +77,10 @@ class OppgaveService(
             Rolle.ATTESTANT.takeIf { bruker.harRolleAttestant() },
             Rolle.STRENGT_FORTROLIG.takeIf { bruker.harRolleStrengtFortrolig() },
         )
+
+    fun genererStatsForOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats {
+        return oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)
+    }
 
     private fun sjekkOmkanTildeleAttestantOppgave(): Boolean {
         val appUser = Kontekst.get().AppUser

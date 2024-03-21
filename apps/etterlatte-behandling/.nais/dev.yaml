@@ -58,7 +58,7 @@ spec:
   resources:
     requests:
       cpu: 50m
-      memory: 448Mi
+      memory: 640Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 2
@@ -174,13 +174,10 @@ spec:
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-opplysninger-fra-soeknad
-        - application: etterlatte-brev-api
-          permissions:
-            roles:
-              - "kan-sette-kilde"
         - application: etterlatte-grunnlag
         - application: etterlatte-fordeler
         - application: etterlatte-trygdetid
         - application: etterlatte-institusjonsopphold
         - application: etterlatte-klage
         - application: etterlatte-tilbakekreving
+        - application: etterlatte-brev-api

@@ -28,6 +28,7 @@ on:
       - main
     paths:
       - apps/etterlatte-trygdetid/**
+      - "!apps/etterlatte-trygdetid/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-trygdetid-model/**
       - libs/etterlatte-ktor/**

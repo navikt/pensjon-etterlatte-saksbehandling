@@ -30,10 +30,12 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingErIverksattEllerSamordnet } from '~components/behandling/felles/utils'
 import { YrkesskadeTrygdetid } from '~components/behandling/trygdetid/YrkesskadeTrygdetid'
+import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
 
 interface Props {
   redigerbar: boolean
   behandling: IDetaljertBehandling
+  vedtaksresultat: VedtakResultat | null
   virkningstidspunktEtterNyRegelDato: Boolean
 }
 
@@ -45,7 +47,7 @@ const visTrydeavtale = (behandling: IDetaljertBehandling): Boolean => {
   )
 }
 
-export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyRegelDato }: Props) => {
+export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningstidspunktEtterNyRegelDato }: Props) => {
   const dispatch = useAppDispatch()
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
@@ -57,6 +59,7 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
   const [harPilotTrygdetid, setHarPilotTrygdetid] = useState<boolean>(false)
   const [behandlingsIdMangler, setBehandlingsIdMangler] = useState(false)
   const [trygdetidIdMangler, setTrygdetidIdMangler] = useState(false)
+  const [trygdetidManglerVedAvslag, setTrygdetidManglerVedAvslag] = useState(false)
 
   const oppdaterTrygdetid = (trygdetid: ITrygdetid) => {
     setTrygdetid(trygdetid)
@@ -109,10 +112,15 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
       if (trygdetid === null) {
         if (behandlingErIverksattEllerSamordnet(behandling.status)) {
           setHarPilotTrygdetid(true)
-        } else {
+        } else if (redigerbar) {
           requestOpprettTrygdetid(behandling.id, (trygdetid: ITrygdetid) => {
             oppdaterTrygdetid(trygdetid)
           })
+        } else if (vedtaksresultat === 'avslag') {
+          setTrygdetidManglerVedAvslag(true)
+        } else {
+          setTrygdetidIdMangler(true)
+          throw new Error('Kan ikke opprette trygdetid når readonly')
         }
       } else {
         setTrygdetid(trygdetid)
@@ -133,6 +141,17 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
           Personen har fått 40 års trygdetid
         </Heading>
         <BodyShort>Denne søknaden ble satt automatisk til 40 års trygdetid</BodyShort>
+      </TrygdetidWrapper>
+    )
+  }
+
+  if (trygdetidManglerVedAvslag) {
+    return (
+      <TrygdetidWrapper>
+        <Heading size="small" level="3">
+          Informasjon om trygdetid mangler
+        </Heading>
+        <BodyShort>Det kan være fordi saken har blitt avslått uten å oppgi trygdetid.</BodyShort>
       </TrygdetidWrapper>
     )
   }

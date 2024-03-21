@@ -313,6 +313,7 @@ class BeregningsGrunnlagService(
                                 OverstyrBeregningGrunnlagData(
                                     utbetaltBeloep = periode.utbetaltBeloep,
                                     trygdetid = periode.trygdetid,
+                                    trygdetidForIdent = periode.trygdetidForIdent,
                                     prorataBroekTeller = periode.prorataBroekTeller,
                                     prorataBroekNevner = periode.prorataBroekNevner,
                                     beskrivelse = periode.beskrivelse,
@@ -345,6 +346,7 @@ class BeregningsGrunnlagService(
                     datoTOM = it.tom,
                     utbetaltBeloep = it.data.utbetaltBeloep,
                     trygdetid = it.data.trygdetid,
+                    trygdetidForIdent = it.data.trygdetidForIdent,
                     prorataBroekTeller = it.data.prorataBroekTeller,
                     prorataBroekNevner = it.data.prorataBroekNevner,
                     sakId = behandling.sak,

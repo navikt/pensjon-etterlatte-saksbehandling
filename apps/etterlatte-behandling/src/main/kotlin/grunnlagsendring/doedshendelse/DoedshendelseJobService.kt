@@ -28,6 +28,8 @@ import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -204,17 +206,60 @@ class DoedshendelseJobService(
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
     ): Boolean {
         val skalSendeBrev = kontrollpunkter.none { !it.sendBrev }
+
+        sjekkUtland(doedshendelse)
         if (skalSendeBrev) {
             if (sak != null && featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
                 logger.info("Sender brev for ${doedshendelse.relasjon.name} for sak ${sak.id}")
                 deodshendelserProducer.sendBrevRequest(sak)
                 return true
             } else {
-                logger.info("Sender ikke brev for ${doedshendelse.id} for sak fordi feature toggle er av")
+                logger.info("Sender ikke brev for ${doedshendelse.id} for sak fordi feature toggle er av eller mangler sak")
                 return true
             }
         }
         return false
+    }
+
+    private fun sjekkUtland(doedshendelse: DoedshendelseInternal) {
+        val beroertPersonDto =
+            when (doedshendelse.sakTypeForEpsEllerBarn()) {
+                SakType.BARNEPENSJON -> {
+                    pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                        foedselsnummer = doedshendelse.beroertFnr,
+                        rolle = PersonRolle.BARN,
+                        saktype = SakType.BARNEPENSJON,
+                    )
+                }
+                SakType.OMSTILLINGSSTOENAD -> {
+                    pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                        foedselsnummer = doedshendelse.beroertFnr,
+                        rolle = PersonRolle.GJENLEVENDE,
+                        saktype = SakType.OMSTILLINGSSTOENAD,
+                    )
+                }
+            }
+        personBorIUtlandet(beroertPersonDto)
+    }
+
+    private fun personBorIUtlandet(beroertPersonDto: PersonDTO): Boolean {
+        val person = beroertPersonDto.toPerson()
+        val kontaktadresse = person.kontaktadresse ?: emptyList()
+        val bostedsadresse = person.bostedsadresse ?: emptyList()
+        val oppholdsadresse = person.oppholdsadresse ?: emptyList()
+        val adresserforPerson = kontaktadresse + bostedsadresse + oppholdsadresse
+        val harAktivAdresse = adresserforPerson.any { it.aktiv }
+        return if (harAktivAdresse) {
+            val adresse = adresserforPerson.filter { it.aktiv }.sortedByDescending { it.gyldigFraOgMed }.first()
+            borIUtlandet(adresse)
+        } else {
+            val adresse = adresserforPerson.filter { !it.aktiv }.sortedByDescending { it.gyldigFraOgMed }.first()
+            borIUtlandet(adresse)
+        }
+    }
+
+    private fun borIUtlandet(adresse: Adresse): Boolean {
+        return adresse.land == null || adresse.land?.uppercase() != "NOR"
     }
 
     private fun opprettOppgaveHvisKravOppfylles(

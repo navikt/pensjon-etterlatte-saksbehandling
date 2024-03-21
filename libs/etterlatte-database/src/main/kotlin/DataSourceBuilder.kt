@@ -71,6 +71,10 @@ fun DataSource.migrate(): MigrateResult {
             }
             .load()
             .migrate()
+    } catch (e: InvalidMigrationScriptVersion) {
+        logger.error("Ugyldig versjon på migreringsscript", e)
+        System.exit(1)
+        throw e
     } catch (e: Exception) {
         logger.error("Fikk feil under Flyway-migrering", e)
         throw e
@@ -156,11 +160,7 @@ fun validateMigrationScriptVersions(files: List<String>) {
     val grupperte = allMigrationVersions.groupingBy { it }.eachCount()
     grupperte.forEach { (key, value) ->
         if (value > 1) {
-            val logger = LoggerFactory.getLogger(DataSourceBuilder::class.java)
-            logger.error(
-                "Kan ikke ha flere migreringer med samme versjon! Sjekk alle mapper under /resources/db. Versjon: $key, Antall: $value",
-            )
-            System.exit(1)
+            throw InvalidMigrationScriptVersion(key, value)
         }
     }
 }
@@ -170,3 +170,7 @@ fun jdbcUrl(
     port: Int,
     databaseName: String,
 ): String = "jdbc:postgresql://$host:$port/$databaseName"
+
+class InvalidMigrationScriptVersion(versjon: String, antall: Int) : RuntimeException(
+    "Kan ikke ha flere migreringer med samme versjon! Sjekk alle mapper under /resources/db. Versjon: $versjon, Antall: $antall",
+)

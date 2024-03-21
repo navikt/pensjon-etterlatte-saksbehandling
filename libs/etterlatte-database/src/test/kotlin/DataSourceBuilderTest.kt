@@ -1,3 +1,4 @@
+import no.nav.etterlatte.libs.database.InvalidMigrationScriptVersion
 import no.nav.etterlatte.libs.database.validateMigrationScriptVersions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -14,6 +15,9 @@ class DataSourceBuilderTest {
     fun `Skal ikke migrere like versjoner i migrering og prod`() {
         val migrationScripts = listOf("V1__numerouno.sql", "V2__endreoppgavetabell.sql")
         val migrationScriptsProd = listOf("V2__numerodos.sql")
-        assertThrows<RuntimeException> { validateMigrationScriptVersions(listOf(migrationScripts, migrationScriptsProd).flatten()) }
+
+        assertThrows<InvalidMigrationScriptVersion> {
+            validateMigrationScriptVersions(listOf(migrationScripts, migrationScriptsProd).flatten())
+        }
     }
 }

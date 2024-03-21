@@ -207,7 +207,7 @@ class DoedshendelseService(
         val gjenlevendeBosteder =
             avdoedOgAnnenForelderMedFellesbarn
                 .gjenlevendeForelder.bostedsadresse?.map { it.verdi }?.filter { it.aktiv }
-        val avdoedBosteder = // todo: Denne gir aldri treff
+        val avdoedBosteder =
             avdoedOgAnnenForelderMedFellesbarn
                 .avdoedPerson.bostedsadresse?.map { it.verdi }?.filter { it.aktiv }
 

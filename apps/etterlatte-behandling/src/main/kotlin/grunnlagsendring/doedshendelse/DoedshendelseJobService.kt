@@ -207,7 +207,7 @@ class DoedshendelseJobService(
     ): Boolean {
         val skalSendeBrev = kontrollpunkter.none { !it.sendBrev }
 
-        sjekkUtland(doedshendelse)
+        sjekkUtlandForBeroertIHendelse(doedshendelse)
         if (skalSendeBrev) {
             if (sak != null && featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
                 logger.info("Sender brev for ${doedshendelse.relasjon.name} for sak ${sak.id}")
@@ -221,7 +221,7 @@ class DoedshendelseJobService(
         return false
     }
 
-    private fun sjekkUtland(doedshendelse: DoedshendelseInternal) {
+    private fun sjekkUtlandForBeroertIHendelse(doedshendelse: DoedshendelseInternal): Boolean {
         val beroertPersonDto =
             when (doedshendelse.sakTypeForEpsEllerBarn()) {
                 SakType.BARNEPENSJON -> {
@@ -239,9 +239,10 @@ class DoedshendelseJobService(
                     )
                 }
             }
-        personBorIUtlandet(beroertPersonDto)
+        return personBorIUtlandet(beroertPersonDto)
     }
 
+    // TODO: test?
     private fun personBorIUtlandet(beroertPersonDto: PersonDTO): Boolean {
         val person = beroertPersonDto.toPerson()
         val kontaktadresse = person.kontaktadresse ?: emptyList()

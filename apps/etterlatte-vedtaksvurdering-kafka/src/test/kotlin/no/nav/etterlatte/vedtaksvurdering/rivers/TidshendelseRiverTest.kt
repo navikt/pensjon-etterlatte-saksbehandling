@@ -26,10 +26,10 @@ import java.time.LocalDate
 import java.time.Month
 import java.util.UUID
 
-class AldersovergangRiverTest {
+class TidshendelseRiverTest {
     private val vedtakService = mockk<VedtakService>()
 
-    private val inspector = TestRapid().apply { AldersovergangRiver(this, vedtakService) }
+    private val inspector = TestRapid().apply { TidshendelseRiver(this, vedtakService) }
 
     private val sakId = 1234L
     private val behandlingId = UUID.randomUUID()

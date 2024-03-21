@@ -74,24 +74,20 @@ export const FilterRad = ({
             ))}
         </Select>
         {oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA && (
-          <>
-            <FiltrerPaaSaksbehandler
-              saksbehandlereIEnhet={saksbehandlereIEnhet}
-              filter={filter}
-              setFilter={setFilter}
-            />
-            <Select
-              label="Enhet"
-              value={filter.enhetsFilter}
-              onChange={(e) => setFilter({ ...filter, enhetsFilter: e.target.value as EnhetFilterKeys })}
-            >
-              {Object.entries(ENHETFILTER).map(([enhetsnummer, enhetBeskrivelse]) => (
-                <option key={enhetsnummer} value={enhetsnummer}>
-                  {enhetBeskrivelse}
-                </option>
-              ))}
-            </Select>
-          </>
+          <FiltrerPaaSaksbehandler saksbehandlereIEnhet={saksbehandlereIEnhet} filter={filter} setFilter={setFilter} />
+        )}
+        {oppgavelisteValg !== OppgavelisteValg.MIN_OPPGAVELISTE && (
+          <Select
+            label="Enhet"
+            value={filter.enhetsFilter}
+            onChange={(e) => setFilter({ ...filter, enhetsFilter: e.target.value as EnhetFilterKeys })}
+          >
+            {Object.entries(ENHETFILTER).map(([enhetsnummer, enhetBeskrivelse]) => (
+              <option key={enhetsnummer} value={enhetsnummer}>
+                {enhetBeskrivelse}
+              </option>
+            ))}
+          </Select>
         )}
 
         <Select

@@ -209,7 +209,7 @@ class DoedshendelseService(
                 .gjenlevendeForelder.bostedsadresse?.map { it.verdi }?.filter { it.aktiv }
         val avdoedBosteder =
             avdoedOgAnnenForelderMedFellesbarn
-                .avdoedPerson.bostedsadresse?.map { it.verdi }?.filter { it.aktiv }
+                .avdoedPerson.bostedsadresse?.map { it.verdi }?.sortedByDescending { it.gyldigFraOgMed }
 
         return isAdresserLike(gjenlevendeBosteder?.first(), avdoedBosteder?.first())
     }

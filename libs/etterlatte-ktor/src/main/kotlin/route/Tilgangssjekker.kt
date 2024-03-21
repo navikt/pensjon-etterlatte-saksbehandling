@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import java.time.Duration
 import java.util.UUID
@@ -36,13 +35,15 @@ class Tilgangssjekker(
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean {
-        val tilgangsrequest = Tilgangsrequest(behandlingId, skrivetilgang, bruker)
+        val tilgangsrequest = Tilgangsrequest(behandlingId, skrivetilgang, bruker.ident)
         val fraCache = tilgangscache.getIfPresent(tilgangsrequest)
         if (fraCache != null) {
+            logger.debug("Cache hit for behandling")
             return fraCache
         }
+        logger.debug("Cache miss for behandling")
         try {
-            logger.info("Sjekker tilgang til behandling $behandlingId")
+            logger.debug("Sjekker tilgang til behandling {}", behandlingId)
             return downstreamResourceClient
                 .get(
                     resource =
@@ -69,11 +70,13 @@ class Tilgangssjekker(
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean {
-        val tilgangsrequest = Tilgangsrequest(foedselsnummer, skrivetilgang, bruker)
+        val tilgangsrequest = Tilgangsrequest(foedselsnummer, skrivetilgang, bruker.ident)
         val fraCache = tilgangscache.getIfPresent(tilgangsrequest)
         if (fraCache != null) {
+            logger.debug("Cache hit for person")
             return fraCache
         }
+        logger.debug("Cache miss for person")
         try {
             return downstreamResourceClient
                 .post(
@@ -102,11 +105,13 @@ class Tilgangssjekker(
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean {
-        val tilgangsrequest = Tilgangsrequest(sakId, skrivetilgang, bruker)
+        val tilgangsrequest = Tilgangsrequest(sakId, skrivetilgang, bruker.ident)
         val fraCache = tilgangscache.getIfPresent(tilgangsrequest)
         if (fraCache != null) {
+            logger.debug("Cache hit for sak")
             return fraCache
         }
+        logger.debug("Cache miss for sak")
         try {
             return downstreamResourceClient
                 .get(
@@ -136,5 +141,5 @@ class TilgangssjekkException(override val message: String, override val cause: T
 data class Tilgangsrequest(
     val id: Any,
     val skrivetilgang: Boolean,
-    val bruker: BrukerTokenInfo,
+    val bruker: String,
 )

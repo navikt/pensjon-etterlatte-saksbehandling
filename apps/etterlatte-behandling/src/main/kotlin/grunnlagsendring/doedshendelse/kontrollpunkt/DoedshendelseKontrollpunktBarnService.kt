@@ -44,31 +44,27 @@ internal class DoedshendelseKontrollpunktBarnService(
         hendelse: DoedshendelseInternal,
         barn: PersonDTO,
     ): DoedshendelseKontrollpunkt? =
-        try {
-            avdoed.doedsdato?.verdi?.let { avdoedDoedsdato ->
-                val annenForelderFnr =
-                    barn.familieRelasjon?.verdi?.foreldre
-                        ?.map { it.value }
-                        ?.firstOrNull { it != hendelse.avdoedFnr }
+        avdoed.doedsdato?.verdi?.let { avdoedDoedsdato ->
+            val annenForelderFnr =
+                barn.familieRelasjon?.verdi?.foreldre
+                    ?.map { it.value }
+                    ?.firstOrNull { it != hendelse.avdoedFnr }
 
-                if (annenForelderFnr == null) {
-                    DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet
-                } else {
-                    pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                        foedselsnummer = annenForelderFnr,
-                        rolle = PersonRolle.GJENLEVENDE,
-                        saktype = SakType.BARNEPENSJON,
-                    )
-                        .doedsdato?.verdi?.let { annenForelderDoedsdato ->
-                            if (annenForelderDoedsdato == avdoedDoedsdato) {
-                                DoedshendelseKontrollpunkt.SamtidigDoedsfall
-                            } else {
-                                null
-                            }
+            if (annenForelderFnr == null) {
+                DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet
+            } else {
+                pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                    foedselsnummer = annenForelderFnr,
+                    rolle = PersonRolle.GJENLEVENDE,
+                    saktype = SakType.BARNEPENSJON,
+                )
+                    .doedsdato?.verdi?.let { annenForelderDoedsdato ->
+                        if (annenForelderDoedsdato == avdoedDoedsdato) {
+                            DoedshendelseKontrollpunkt.SamtidigDoedsfall
+                        } else {
+                            null
                         }
-                }
+                    }
             }
-        } catch (e: Exception) {
-            DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet
         }
 }

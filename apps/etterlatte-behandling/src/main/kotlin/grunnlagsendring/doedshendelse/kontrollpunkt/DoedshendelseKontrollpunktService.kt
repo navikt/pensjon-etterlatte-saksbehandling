@@ -53,15 +53,11 @@ class DoedshendelseKontrollpunktService(
             Relasjon.SAMBOER -> {
                 val (sak, avdoed, samboer) = hentDataForBeroert(hendelse, PersonRolle.GJENLEVENDE)
 
-                val samboerKontrollpunkt =
-                    listOf(
-                        DoedshendelseKontrollpunkt.SamboerSammeAdresseOgFellesBarn,
-                    ) // todo: Liker ikke positiv sjekk
                 val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
                 val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, samboer, avdoed)
                 val duplikatKontrollpunkt = listOfNotNull(kontrollerDuplikatHendelse(hendelse, sak))
 
-                samboerKontrollpunkt + avdoedKontrollpunkter + omsKontrollpunkter + duplikatKontrollpunkt
+                avdoedKontrollpunkter + omsKontrollpunkter + duplikatKontrollpunkt
             }
 
             Relasjon.AVDOED -> {

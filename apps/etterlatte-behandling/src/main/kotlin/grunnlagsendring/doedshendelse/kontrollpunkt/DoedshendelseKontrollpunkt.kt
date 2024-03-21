@@ -127,16 +127,6 @@ sealed class DoedshendelseKontrollpunkt {
         override val oppgaveTekst: String = beskrivelse
     }
 
-    @JsonTypeName("SAMBOER_SAMME_ADRESSE_OG_FELLES_BARN")
-    data object SamboerSammeAdresseOgFellesBarn : DoedshendelseKontrollpunkt() {
-        override val kode = "SAMBOER_SAMME_ADRESSE_OG_FELLES_BARN"
-        override val beskrivelse: String = "Samboer til avdød med samme adresse og felles barn"
-        override val sendBrev: Boolean = true
-        override val opprettOppgave: Boolean = false
-        override val oppgaveTekst: String? = null
-        override val avbryt: Boolean = false
-    }
-
     @JsonTypeName("TIDLIGERE_EPS_GIFT_MER_ENN_25_AAR")
     data class TidligereEpsGiftMerEnn25Aar(val doedsdato: LocalDate, val fnr: String) : DoedshendelseKontrollpunkt() {
         override val kode = "TIDLIGERE_EPS_GIFT_MER_ENN_25_AAR"

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminder
 import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
@@ -94,12 +95,12 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
         }
     }
 
-    fun hentDoedshendelserMedStatusFerdigOgUtFallBrevBp(): List<DoedshendelseInternal> {
+    fun hentDoedshendelserMedStatusFerdigOgUtFallBrevBp(): List<DoedshendelseReminder> {
         return connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
-                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype
+                    SELECT id, endret, beroert_fnr, sak_id, relasjon
                     FROM doedshendelse
                     WHERE status = ?
                     AND relasjon = ?
@@ -118,7 +119,7 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
                             ).toTypedArray(),
                         ),
                     )
-                }.executeQuery().toList { asDoedshendelse() }
+                }.executeQuery().toList { asDoedshendelseReminder() }
             }
         }
     }
@@ -139,6 +140,15 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
         }
     }
 }
+
+private fun ResultSet.asDoedshendelseReminder(): DoedshendelseReminder =
+    DoedshendelseReminder(
+        id = getString("id").toUUID(),
+        beroertFnr = getString("beroert_fnr"),
+        relasjon = getString("relasjon").let { relasjon -> Relasjon.valueOf(relasjon) },
+        endret = getTidspunkt("endret"),
+        sakId = getString("sak_id")?.toLong(),
+    )
 
 private fun ResultSet.asDoedshendelse(): DoedshendelseInternal =
     DoedshendelseInternal(

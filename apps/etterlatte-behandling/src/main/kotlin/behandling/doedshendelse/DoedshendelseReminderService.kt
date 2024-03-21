@@ -7,7 +7,6 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseFeatureToggle
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -36,7 +35,7 @@ class DoedshendelseReminderService(
         }
     }
 
-    private fun lagOppgaveOmIkkeSoekt(hendelse: DoedshendelseInternal) {
+    private fun lagOppgaveOmIkkeSoekt(hendelse: DoedshendelseReminder) {
         val behandlingerForSak = behandlingService.hentBehandlingerForSak(hendelse.sakId!!)
         val harSoekt = behandlingerForSak.any { it is Foerstegangsbehandling }
         if (!harSoekt) {
@@ -51,7 +50,7 @@ class DoedshendelseReminderService(
         }
     }
 
-    private fun hendelserErGamleNok(hendelser: List<DoedshendelseInternal>): List<DoedshendelseInternal> {
+    private fun hendelserErGamleNok(hendelser: List<DoedshendelseReminder>): List<DoedshendelseReminder> {
         val idag = LocalDateTime.now().plusHours(1L)
         val toMaaneder = 2L
         return hendelser.filter { ChronoUnit.MONTHS.between(it.endret.toLocalDatetimeNorskTid(), idag).absoluteValue >= toMaaneder }

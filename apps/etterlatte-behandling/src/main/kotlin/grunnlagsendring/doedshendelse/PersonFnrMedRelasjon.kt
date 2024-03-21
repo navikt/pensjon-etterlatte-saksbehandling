@@ -2,7 +2,7 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 
-class PersonFnrMedRelasjon(
+data class PersonFnrMedRelasjon(
     val fnr: String,
     val relasjon: Relasjon,
 )

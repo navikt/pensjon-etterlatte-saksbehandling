@@ -228,12 +228,15 @@ class DoedshendelseService(
                 it.verdi.sivilstatus in
                     listOf(
                         Sivilstatus.GIFT,
-                        Sivilstatus.UGIFT,
-                        Sivilstatus.SKILT,
-                        Sivilstatus.ENKE_ELLER_ENKEMANN,
                         Sivilstatus.SEPARERT,
+                        Sivilstatus.SKILT,
+                        Sivilstatus.REGISTRERT_PARTNER,
+                        Sivilstatus.SEPARERT_PARTNER,
+                        Sivilstatus.SKILT_PARTNER,
                     )
-            }?.map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EKTEFELLE) } ?: emptyList()
+            }?.map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EKTEFELLE) }
+            ?.distinct()
+            ?: emptyList()
     }
 }
 

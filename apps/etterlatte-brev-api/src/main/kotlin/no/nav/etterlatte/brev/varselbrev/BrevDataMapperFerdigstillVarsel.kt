@@ -8,7 +8,7 @@ import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
 import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonVarsel
-import no.nav.etterlatte.brev.model.bp.ManglerAvdoedBruktTilTrygdetidExceoption
+import no.nav.etterlatte.brev.model.bp.ManglerAvdoedBruktTilTrygdetid
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregning
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregningsperioder
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -60,7 +60,7 @@ class BrevDataMapperFerdigstillVarsel(
                         bruktAvdoed =
                             if (request.generellBrevData.erForeldreloes()) {
                                 avdoede.find { it.fnr.value == trygdetid.await()?.ident }?.navn
-                                    ?: throw ManglerAvdoedBruktTilTrygdetidExceoption()
+                                    ?: throw ManglerAvdoedBruktTilTrygdetid()
                             } else {
                                 null
                             },

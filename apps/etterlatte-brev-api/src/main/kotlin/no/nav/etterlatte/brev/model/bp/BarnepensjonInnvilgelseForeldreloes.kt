@@ -62,9 +62,9 @@ data class BarnepensjonInnvilgelseForeldreloes(
                             avdoede.find {
                                 val fnr =
                                     utbetalingsinfo.beregningsperioder.last().trygdetidForIdent
-                                        ?: throw ManglerAvdoedBruktTilTrygdetidExceoption()
+                                        ?: throw ManglerAvdoedBruktTilTrygdetid()
                                 it.fnr.value == fnr
-                            }?.navn ?: throw ManglerAvdoedBruktTilTrygdetidExceoption(),
+                            }?.navn ?: throw ManglerAvdoedBruktTilTrygdetid(),
                     ),
                 etterbetaling =
                     etterbetaling
@@ -100,7 +100,7 @@ data class BarnepensjonForeldreloesRedigerbar(
     }
 }
 
-class ManglerAvdoedBruktTilTrygdetidExceoption : UgyldigForespoerselException(
+class ManglerAvdoedBruktTilTrygdetid : UgyldigForespoerselException(
     code = "MANGLER_AVDOED_INFO_I_BEREGNING",
     detail = "Det er mangler i beregning. Utfør beregning på nytt og prøv igjen.",
 )

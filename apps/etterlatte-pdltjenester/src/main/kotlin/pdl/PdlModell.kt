@@ -35,6 +35,7 @@ data class PdlVariables(
     val kontaktadresseHistorikk: Boolean = false,
     val utland: Boolean = false,
     val sivilstand: Boolean = false,
+    val sivilstandHistorikk: Boolean = false,
     val familieRelasjon: Boolean = false,
     val vergemaal: Boolean = false,
 )

@@ -209,7 +209,13 @@ class DoedshendelseJobService(
             if (sak != null && featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
                 val borIUtlandet = sjekkUtlandForBeroertIHendelse(doedshendelse)
                 logger.info("Sender brev for ${doedshendelse.relasjon.name} for sak ${sak.id}")
-                deodshendelserProducer.sendBrevRequest(sak, borIUtlandet)
+                when (sak.sakType) {
+                    SakType.BARNEPENSJON -> {
+                        val under18aar = sjekkUnder18aar(doedshendelse)
+                        deodshendelserProducer.sendBrevRequestBP(sak, borIUtlandet, !under18aar)
+                    }
+                    SakType.OMSTILLINGSSTOENAD -> deodshendelserProducer.sendBrevRequestOMS(sak, borIUtlandet)
+                }
                 return true
             } else {
                 logger.info("Sender ikke brev for ${doedshendelse.id} for sak fordi feature toggle er av eller mangler sak")
@@ -217,6 +223,17 @@ class DoedshendelseJobService(
             }
         }
         return false
+    }
+
+    private fun sjekkUnder18aar(doedshendelse: DoedshendelseInternal): Boolean {
+        val person =
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                foedselsnummer = doedshendelse.beroertFnr,
+                rolle = PersonRolle.BARN,
+                saktype = SakType.BARNEPENSJON,
+            )
+        val aar18 = 18
+        return person.toPerson().foedselsaar < aar18
     }
 
     private fun sjekkUtlandForBeroertIHendelse(doedshendelse: DoedshendelseInternal): Boolean {

@@ -58,7 +58,7 @@ class DoedshendelseJobServiceTest {
     private val femDagerGammel = 5
     private val doedshendelserProducer =
         mockk<DoedshendelserKafkaService> {
-            every { sendBrevRequest(any(), false) } just runs
+            every { sendBrevRequestOMS(any(), false) } just runs
         }
 
     private val grunnlagService =
@@ -245,7 +245,7 @@ class DoedshendelseJobServiceTest {
         service.setupKontekstAndRun(kontekst)
 
         verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
-        verify { doedshendelserProducer.sendBrevRequest(any(), any()) }
+        verify { doedshendelserProducer.sendBrevRequestOMS(any(), any()) }
         doedshendelseCapture.captured.status shouldBe Status.FERDIG
         doedshendelseCapture.captured.utfall shouldBe Utfall.BREV
     }

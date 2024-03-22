@@ -1,7 +1,7 @@
 package no.nav.etterlatte.institusjonsopphold
 
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 
 data class InstitusjonsoppholdService(private val institusjonsoppholdDao: InstitusjonsoppholdDao) {
@@ -23,14 +23,18 @@ data class InstitusjonsoppholdService(private val institusjonsoppholdDao: Instit
 }
 
 data class InstitusjonsoppholdBegrunnelse(
-    val kanGiReduksjonAvYtelse: JaNeiMedBegrunnelse,
-    val forventetVarighetMerEnn3Maaneder: JaNeiMedBegrunnelse,
+    val kanGiReduksjonAvYtelse: JaNei,
+    val kanGiReduksjonAvYtelseBegrunnelse: String,
+    val forventetVarighetMerEnn3Maaneder: JaNei,
+    val forventetVarighetMerEnn3MaanederBegrunnelse: String,
     val grunnlagsEndringshendelseId: String,
 )
 
 data class InstitusjonsoppholdBegrunnelseMedSaksbehandler(
-    val kanGiReduksjonAvYtelse: JaNeiMedBegrunnelse,
-    val forventetVarighetMerEnn3Maaneder: JaNeiMedBegrunnelse,
+    val kanGiReduksjonAvYtelse: JaNei,
+    val kanGiReduksjonAvYtelseBegrunnelse: String,
+    val forventetVarighetMerEnn3Maaneder: JaNei,
+    val forventetVarighetMerEnn3MaanederBegrunnelse: String,
     val grunnlagsEndringshendelseId: String,
     val saksbehandler: Grunnlagsopplysning.Saksbehandler,
 )

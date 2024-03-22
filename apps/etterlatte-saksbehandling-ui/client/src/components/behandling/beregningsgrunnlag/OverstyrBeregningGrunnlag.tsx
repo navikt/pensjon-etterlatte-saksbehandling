@@ -298,6 +298,10 @@ function feilIOverstyrBeregningperiode(
     feil.push('TRYGDETID_MANGLER')
   }
 
+  if (grunnlag.data.trygdetidForIdent === undefined || grunnlag.data.trygdetidForIdent === '') {
+    feil.push('TRYGDETID_MANGLER_FNR')
+  }
+
   const prorataBroekNevner = parseInt(grunnlag.data.prorataBroekNevner ?? '')
   const prorataBroekTeller = parseInt(grunnlag.data.prorataBroekTeller ?? '')
 
@@ -340,6 +344,7 @@ export type FeilIPeriodeGrunnlagAlle =
   | FeilIPeriodeOverstyrBeregning
   | 'BELOEP_MANGLER'
   | 'TRYGDETID_MANGLER'
+  | 'TRYGDETID_MANGLER_FNR'
   | 'BESKRIVELSE_MANGLER'
   | 'PRORATA_MANGLER'
 
@@ -352,6 +357,7 @@ export const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
   TOM_FOER_FOM: 'Til og med kan ikke være før fra og med',
   BELOEP_MANGLER: 'Utbetalt beløp er påkrevd',
   TRYGDETID_MANGLER: 'Trygdetid er påkrevd',
+  TRYGDETID_MANGLER_FNR: 'Trygdetid tilhører FNR er påkrevd',
   BESKRIVELSE_MANGLER: 'Beskrivelse er påkrevd',
   PRORATA_MANGLER: 'Prorata brøk må ha begge felter fyllt ut hvis det er i bruk',
 } as const

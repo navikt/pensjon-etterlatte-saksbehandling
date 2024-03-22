@@ -69,6 +69,7 @@ const OverstyrBeregningPeriode = (props: OverstyrBeregningPerioder) => {
           </VerdiFelt>
           <VerdiFelt>
             <TextField
+              required
               label="Prorata Broek (valgfritt)"
               {...register(`overstyrBeregningForm.${index}.data.prorataBroekTeller`)}
             />

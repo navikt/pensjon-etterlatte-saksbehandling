@@ -28,8 +28,6 @@ import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
-import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -240,26 +238,6 @@ class DoedshendelseJobService(
                 }
             }
         return personBorIUtlandet(beroertPersonDto)
-    }
-
-    private fun personBorIUtlandet(beroertPersonDto: PersonDTO): Boolean {
-        val person = beroertPersonDto.toPerson()
-        val kontaktadresse = person.kontaktadresse ?: emptyList()
-        val bostedsadresse = person.bostedsadresse ?: emptyList()
-        val oppholdsadresse = person.oppholdsadresse ?: emptyList()
-        val adresserforPerson = kontaktadresse + bostedsadresse + oppholdsadresse
-        val harAktivAdresse = adresserforPerson.any { it.aktiv }
-        return if (harAktivAdresse) {
-            val adresse = adresserforPerson.filter { it.aktiv }.sortedByDescending { it.gyldigFraOgMed }.first()
-            borIUtlandet(adresse)
-        } else {
-            val adresse = adresserforPerson.filter { !it.aktiv }.sortedByDescending { it.gyldigFraOgMed }.first()
-            borIUtlandet(adresse)
-        }
-    }
-
-    private fun borIUtlandet(adresse: Adresse): Boolean {
-        return adresse.land == null || adresse.land?.uppercase() != "NOR"
     }
 
     private fun opprettOppgaveHvisKravOppfylles(

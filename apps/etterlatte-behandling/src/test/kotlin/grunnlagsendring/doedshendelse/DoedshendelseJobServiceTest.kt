@@ -15,7 +15,6 @@ import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedHarDNummer
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedHarUtvandret
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedLeverIPDL
@@ -240,7 +239,7 @@ class DoedshendelseJobServiceTest {
             }
         every { toggle.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, any()) } returns true
         every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns
-            listOf(DoedshendelseKontrollpunkt.BarnHarUfoereTrygd)
+            emptyList()
         val doedshendelseCapture = slot<DoedshendelseInternal>()
 
         service.setupKontekstAndRun(kontekst)

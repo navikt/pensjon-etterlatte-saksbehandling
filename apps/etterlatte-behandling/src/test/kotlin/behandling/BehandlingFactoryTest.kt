@@ -367,7 +367,7 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         } returns mockOppgave
         every {
-            oppgaveService.avbrytAapneOppgaverForBehandling(any())
+            oppgaveService.avbrytAapneOppgaverMedReferanse(any())
         } just runs
 
         val foerstegangsbehandling =
@@ -406,7 +406,7 @@ class BehandlingFactoryTest {
         }
         verify {
             behandlingDaoMock.lagreStatus(any(), BehandlingStatus.AVBRUTT, any())
-            oppgaveService.avbrytAapneOppgaverForBehandling(nyfoerstegangsbehandling!!.id.toString())
+            oppgaveService.avbrytAapneOppgaverMedReferanse(nyfoerstegangsbehandling!!.id.toString())
         }
     }
 

@@ -223,7 +223,6 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
           <SendTilAttesteringModal
             behandlingId={props.behandling.id}
             fattVedtakApi={fattVedtak}
-            sakId={sakId}
             validerKanSendeTilAttestering={kanSendeTilAttestering}
           />
         )}

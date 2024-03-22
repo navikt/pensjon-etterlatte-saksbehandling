@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { FlexRow } from '~shared/styled'
 import { ApiResponse } from '~shared/api/apiClient'
-import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaver'
+import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
@@ -16,12 +16,10 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 export const SendTilAttesteringModal = ({
   behandlingId,
   fattVedtakApi,
-  sakId,
   validerKanSendeTilAttestering,
 }: {
   behandlingId: string
   fattVedtakApi: (id: string) => Promise<ApiResponse<unknown>>
-  sakId: number
   validerKanSendeTilAttestering: () => boolean
 }) => {
   const navigate = useNavigate()
@@ -30,13 +28,13 @@ export const SendTilAttesteringModal = ({
   const [fattVedtakStatus, fattVedtak] = useApiCall(fattVedtakApi)
 
   const [oppgaveForBehandlingStatus, requesthentOppgaveForBehandling] = useApiCall(
-    hentOppgaveForBehandlingUnderBehandlingIkkeattestert
+    hentOppgaveForReferanseUnderBehandling
   )
 
   const soeker = usePersonopplysninger()?.soeker?.opplysning
 
   useEffect(() => {
-    requesthentOppgaveForBehandling({ referanse: behandlingId, sakId: sakId })
+    requesthentOppgaveForBehandling(behandlingId)
   }, [])
 
   const fattVedtakWrapper = () => {
@@ -66,7 +64,7 @@ export const SendTilAttesteringModal = ({
             Fatting er ikke tilgjengelig for øyeblikket. Sjekk oppgavestatus for vedkommende
           </ApiErrorAlert>
         ),
-        (saksbehandlerPaaOppgave) => {
+        ({ saksbehandler: saksbehandlerPaaOppgave }) => {
           return !saksbehandlerPaaOppgave?.ident ? (
             <Alert size="small" variant="warning">
               Oppgaven til denne behandlingen må tildeles en saksbehandler før den kan sende til attestering

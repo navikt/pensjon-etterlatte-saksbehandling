@@ -34,7 +34,6 @@ interface OppgaveDao {
     fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern>
 
     fun hentOppgaver(
-        oppgaveTyper: List<OppgaveType>,
         enheter: List<String>,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String? = null,
@@ -42,7 +41,7 @@ interface OppgaveDao {
 
     fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats
 
-    fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern>
+    fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(): List<OppgaveIntern>
 
     fun settNySaksbehandler(
         oppgaveId: UUID,
@@ -150,8 +149,8 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setString(1, referanse)
                 statement.executeQuery().toList {
                     asOppgave()
-                }.also { oppgaveliste ->
-                    logger.info("Hentet antall nye oppgaver for referanse: ${oppgaveliste.size} referanse: $referanse")
+                }.also {
+                    logger.info("Hentet ${it.size} oppgave(r) for referanse: $referanse")
                 }
             }
         }
@@ -179,13 +178,10 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
     }
 
     override fun hentOppgaver(
-        oppgaveTyper: List<OppgaveType>,
         enheter: List<String>,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String?,
     ): List<OppgaveIntern> {
-        if (oppgaveTyper.isEmpty()) return emptyList()
-
         return connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -193,8 +189,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                         """
                         SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
                         FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
-                        WHERE o.type = ANY(?)
-                        AND (? OR o.status = ANY(?))
+                        WHERE (? OR o.status = ANY(?))
                         AND o.enhet = ANY(?)
                         AND (
                             s.adressebeskyttelse is null OR 
@@ -204,14 +199,13 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                         """.trimIndent(),
                     )
 
-                statement.setArray(1, createArrayOf("text", oppgaveTyper.toTypedArray()))
-                statement.setBoolean(2, oppgaveStatuser.isEmpty() || oppgaveStatuser.contains(VISALLE))
-                statement.setArray(3, createArrayOf("text", oppgaveStatuser.toTypedArray()))
-                statement.setArray(4, createArrayOf("text", enheter.toTypedArray()))
-                statement.setString(5, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
-                statement.setString(6, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
-                statement.setBoolean(7, minOppgavelisteIdentFilter == null)
-                statement.setString(8, minOppgavelisteIdentFilter)
+                statement.setBoolean(1, oppgaveStatuser.isEmpty() || oppgaveStatuser.contains(VISALLE))
+                statement.setArray(2, createArrayOf("text", oppgaveStatuser.toTypedArray()))
+                statement.setArray(3, createArrayOf("text", enheter.toTypedArray()))
+                statement.setString(4, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
+                statement.setString(5, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
+                statement.setBoolean(6, minOppgavelisteIdentFilter == null)
+                statement.setString(7, minOppgavelisteIdentFilter)
 
                 statement.executeQuery().toList {
                     asOppgave()
@@ -246,7 +240,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
         }
     }
 
-    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern> {
+    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(): List<OppgaveIntern> {
         return connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
@@ -255,12 +249,10 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                         SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
                         FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE ((s.adressebeskyttelse = ?) OR (s.adressebeskyttelse = ?))
-                        AND o.type = ANY(?)
                         """.trimIndent(),
                     )
                 statement.setString(1, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
                 statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
-                statement.setArray(3, createArrayOf("text", oppgaveTypeTyper.toTypedArray()))
 
                 statement.executeQuery().toList {
                     asOppgave()
@@ -281,14 +273,13 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                     prepareStatement(
                         """
                         UPDATE oppgave
-                        SET saksbehandler = ?, status = ?
+                        SET saksbehandler = ?
                         where id = ?::UUID
                         """.trimIndent(),
                     )
 
                 statement.setString(1, saksbehandler)
-                statement.setString(2, Status.UNDER_BEHANDLING.name)
-                statement.setObject(3, oppgaveId)
+                statement.setObject(2, oppgaveId)
 
                 statement.executeUpdate()
             }
@@ -348,12 +339,11 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                     prepareStatement(
                         """
                         UPDATE oppgave
-                        SET saksbehandler = NULL, status = ?
+                        SET saksbehandler = NULL
                         where id = ?::UUID
                         """.trimIndent(),
                     )
-                statement.setString(1, Status.NY.name)
-                statement.setObject(2, oppgaveId)
+                statement.setObject(1, oppgaveId)
 
                 statement.executeUpdate()
             }

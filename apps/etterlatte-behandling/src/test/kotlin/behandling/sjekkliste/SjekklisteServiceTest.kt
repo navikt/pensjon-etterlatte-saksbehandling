@@ -6,6 +6,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -75,8 +76,11 @@ class SjekklisteServiceTest {
             foerstegangsbehandling(id = behandlingId, sakId = 33L, status = BehandlingStatus.FATTET_VEDTAK)
         every { user.name() } returns "Sak B. Handlersen"
         every {
-            oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(behandlingId.toString())
-        } returns OppgaveSaksbehandler("Noe helt annet")
+            oppgaveService.hentOppgaveUnderBehandling(behandlingId.toString())
+        } returns
+            mockk<OppgaveIntern> {
+                every { saksbehandler } returns OppgaveSaksbehandler("Noe helt annet")
+            }
 
         assertThrows<SjekklisteIkkeTillattException> {
             sjekklisteService.oppdaterSjekkliste(

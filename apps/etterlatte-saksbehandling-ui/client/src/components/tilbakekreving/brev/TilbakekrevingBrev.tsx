@@ -102,7 +102,6 @@ export function TilbakekrevingBrev({
           <SendTilAttesteringModal
             behandlingId={behandling.id}
             fattVedtakApi={fattVedtak}
-            sakId={behandling.sak.id}
             validerKanSendeTilAttestering={() => true}
           />
         )}

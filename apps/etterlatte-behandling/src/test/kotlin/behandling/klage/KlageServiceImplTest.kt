@@ -56,6 +56,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertNull
@@ -122,6 +123,10 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
             mockk<SaksbehandlerMedEnheterOgRoller> {
                 every { name() } returns "User"
                 every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+                every { saksbehandlerMedRoller } returns
+                    mockk<SaksbehandlerMedRoller> {
+                        every { harRolleAttestant() } returns true
+                    }
             }
         startServer(
             featureToggleService = DummyFeatureToggleService(),
@@ -504,6 +509,7 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
     private fun opprettKlageOgSettInitieltUtfallOmgjoering(): Klage {
         val sak = oppprettOmsSak()
         val klage = service.opprettKlage(sak.id, InnkommendeKlage(LocalDate.now(), "", ""), saksbehandler)
+
         oppgaveService.tildelSaksbehandler(
             oppgaveService.hentOppgaverForReferanse(klage.id.toString()).single().id,
             saksbehandler.ident,

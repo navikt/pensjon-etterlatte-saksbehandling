@@ -2,11 +2,32 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import no.nav.etterlatte.common.klienter.hentBarn
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import java.time.temporal.ChronoUnit
 import java.time.temporal.Temporal
 import kotlin.math.absoluteValue
+
+fun personBorIUtlandet(person: PersonDTO): Boolean {
+    val person = person.toPerson()
+    val kontaktadresse = person.kontaktadresse ?: emptyList()
+    val bostedsadresse = person.bostedsadresse ?: emptyList()
+    val oppholdsadresse = person.oppholdsadresse ?: emptyList()
+    val adresserforPerson = kontaktadresse + bostedsadresse + oppholdsadresse
+    val harAktivAdresse = adresserforPerson.any { it.aktiv }
+    return if (harAktivAdresse) {
+        val adresse = adresserforPerson.filter { it.aktiv }.sortedByDescending { it.gyldigFraOgMed }.first()
+        borIUtlandet(adresse)
+    } else {
+        val adresse = adresserforPerson.filter { !it.aktiv }.sortedByDescending { it.gyldigFraOgMed }.first()
+        borIUtlandet(adresse)
+    }
+}
+
+private fun borIUtlandet(adresse: Adresse): Boolean {
+    return adresse.land == null || adresse.land?.uppercase() != "NOR"
+}
 
 fun harFellesBarn(
     avdoed: PersonDTO,

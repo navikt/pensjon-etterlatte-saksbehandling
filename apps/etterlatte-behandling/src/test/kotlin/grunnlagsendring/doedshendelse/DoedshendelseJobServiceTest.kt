@@ -58,7 +58,7 @@ class DoedshendelseJobServiceTest {
     private val femDagerGammel = 5
     private val doedshendelserProducer =
         mockk<DoedshendelserKafkaService> {
-            every { sendBrevRequest(any()) } just runs
+            every { sendBrevRequest(any(), false) } just runs
         }
 
     private val grunnlagService =
@@ -217,5 +217,36 @@ class DoedshendelseJobServiceTest {
         doedshendelseCapture.captured.status shouldBe Status.FERDIG
         doedshendelseCapture.captured.utfall shouldBe Utfall.OPPGAVE
         doedshendelseCapture.captured.oppgaveId shouldBe null
+    }
+
+    @Test
+    fun `Skal sjekke sende med bor i utlandet til brev`() {
+        val doedshendelseInternal =
+            DoedshendelseInternal.nyHendelse(
+                avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
+                avdoedDoedsdato = LocalDate.now(),
+                beroertFnr = "12345678901",
+                relasjon = Relasjon.BARN,
+                endringstype = Endringstype.OPPRETTET,
+            ).copy(endret = LocalDateTime.now().minusDays(femDagerGammel.toLong()).toTidspunkt())
+
+        every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
+        every { dao.oppdaterDoedshendelse(any()) } returns Unit
+        val oppgaveId = UUID.randomUUID()
+        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns
+            mockk {
+                every { id } returns oppgaveId
+            }
+        every { toggle.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, any()) } returns true
+        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns
+            emptyList()
+        val doedshendelseCapture = slot<DoedshendelseInternal>()
+
+        service.setupKontekstAndRun(kontekst)
+
+        verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
+        verify { doedshendelserProducer.sendBrevRequest(any(), any()) }
+        doedshendelseCapture.captured.status shouldBe Status.FERDIG
+        doedshendelseCapture.captured.utfall shouldBe Utfall.BREV
     }
 }

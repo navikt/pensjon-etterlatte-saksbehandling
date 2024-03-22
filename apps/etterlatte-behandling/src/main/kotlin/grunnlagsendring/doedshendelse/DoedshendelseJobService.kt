@@ -204,17 +204,40 @@ class DoedshendelseJobService(
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
     ): Boolean {
         val skalSendeBrev = kontrollpunkter.none { !it.sendBrev }
+
         if (skalSendeBrev) {
             if (sak != null && featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
+                val borIUtlandet = sjekkUtlandForBeroertIHendelse(doedshendelse)
                 logger.info("Sender brev for ${doedshendelse.relasjon.name} for sak ${sak.id}")
-                deodshendelserProducer.sendBrevRequest(sak)
+                deodshendelserProducer.sendBrevRequest(sak, borIUtlandet)
                 return true
             } else {
-                logger.info("Sender ikke brev for ${doedshendelse.id} for sak fordi feature toggle er av")
+                logger.info("Sender ikke brev for ${doedshendelse.id} for sak fordi feature toggle er av eller mangler sak")
                 return true
             }
         }
         return false
+    }
+
+    private fun sjekkUtlandForBeroertIHendelse(doedshendelse: DoedshendelseInternal): Boolean {
+        val beroertPersonDto =
+            when (doedshendelse.sakTypeForEpsEllerBarn()) {
+                SakType.BARNEPENSJON -> {
+                    pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                        foedselsnummer = doedshendelse.beroertFnr,
+                        rolle = PersonRolle.BARN,
+                        saktype = SakType.BARNEPENSJON,
+                    )
+                }
+                SakType.OMSTILLINGSSTOENAD -> {
+                    pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                        foedselsnummer = doedshendelse.beroertFnr,
+                        rolle = PersonRolle.GJENLEVENDE,
+                        saktype = SakType.OMSTILLINGSSTOENAD,
+                    )
+                }
+            }
+        return personBorIUtlandet(beroertPersonDto)
     }
 
     private fun opprettOppgaveHvisKravOppfylles(

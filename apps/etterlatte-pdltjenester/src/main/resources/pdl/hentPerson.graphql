@@ -101,6 +101,7 @@ query(
     $kontaktadresseHistorikk: Boolean!,
     $utland: Boolean!,
     $sivilstand: Boolean!,
+    $sivilstandHistorikk: Boolean!,
     $familieRelasjon: Boolean!,
     $vergemaal: Boolean!,
 ) {
@@ -132,7 +133,7 @@ query(
                 ...metadata
             }
         }
-        sivilstand @include(if: $sivilstand){
+        sivilstand(historikk: $sivilstandHistorikk) @include(if: $sivilstand){
             type
             gyldigFraOgMed
             relatertVedSivilstand

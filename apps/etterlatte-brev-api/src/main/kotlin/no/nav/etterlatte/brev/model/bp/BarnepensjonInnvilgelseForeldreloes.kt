@@ -102,5 +102,5 @@ data class BarnepensjonForeldreloesRedigerbar(
 
 class ManglerAvdoedBruktTilTrygdetidExceoption : UgyldigForespoerselException(
     code = "MANGLER_AVDOED_INFO_I_BEREGNING",
-    detail = "Det er mangler beregning. Utfør beregning på nytt og prøv igjen.",
+    detail = "Det er mangler i beregning. Utfør beregning på nytt og prøv igjen.",
 )

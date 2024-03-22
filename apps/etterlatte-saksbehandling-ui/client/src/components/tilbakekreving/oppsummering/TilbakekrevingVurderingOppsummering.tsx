@@ -31,38 +31,38 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
         </Table.Header>
         <Table.Body>
           <Table.Row key="Beloep">
-            <Table.HeaderCell></Table.HeaderCell>
+            <Table.DataCell></Table.DataCell>
             <Table.DataCell>{NOK(sumFeilutbetaling)}</Table.DataCell>
             <Table.DataCell></Table.DataCell>
             <Table.DataCell></Table.DataCell>
           </Table.Row>
           <Table.Row key="Brutto">
-            <Table.HeaderCell>Brutto tilbakekreving</Table.HeaderCell>
+            <Table.DataCell>Brutto tilbakekreving</Table.DataCell>
             <Table.DataCell></Table.DataCell>
             <Table.DataCell></Table.DataCell>
             <Table.DataCell>{NOK(sumTilbakekreving)}</Table.DataCell>
           </Table.Row>
           <Table.Row key="Skatt">
-            <Table.HeaderCell>Fradrag skatt</Table.HeaderCell>
+            <Table.DataCell>Fradrag skatt</Table.DataCell>
             <Table.DataCell></Table.DataCell>
             <Table.DataCell>-</Table.DataCell>
             <Table.DataCell>{NOK(sumSkatt)}</Table.DataCell>
           </Table.Row>
           <Table.Row key="Netto">
-            <Table.HeaderCell>Netto tilbakekreving</Table.HeaderCell>
+            <Table.DataCell>Netto tilbakekreving</Table.DataCell>
             <Table.DataCell></Table.DataCell>
             <Table.DataCell>=</Table.DataCell>
             <Table.DataCell>{NOK(sumNettoTilbakekreving)}</Table.DataCell>
           </Table.Row>
           <Table.Row key="Renter">
-            <Table.HeaderCell>Rentetillegg</Table.HeaderCell>
+            <Table.DataCell>Rentetillegg</Table.DataCell>
             <Table.DataCell></Table.DataCell>
             <Table.DataCell>+</Table.DataCell>
             <Table.DataCell>{NOK(sumRenter)}</Table.DataCell>
           </Table.Row>
           <Table.Row key="SumInnkreving">
             <Table.HeaderCell>Sum til innkreving</Table.HeaderCell>
-            <Table.DataCell></Table.DataCell>
+            <Table.HeaderCell></Table.HeaderCell>
             <Table.HeaderCell>=</Table.HeaderCell>
             <Table.HeaderCell>{NOK(oppsummertInnkreving)}</Table.HeaderCell>
           </Table.Row>

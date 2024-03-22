@@ -40,6 +40,7 @@ import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -209,7 +210,13 @@ class DoedshendelseJobService(
             if (sak != null && featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
                 val borIUtlandet = sjekkUtlandForBeroertIHendelse(doedshendelse)
                 logger.info("Sender brev for ${doedshendelse.relasjon.name} for sak ${sak.id}")
-                deodshendelserProducer.sendBrevRequest(sak, borIUtlandet)
+                when (sak.sakType) {
+                    SakType.BARNEPENSJON -> {
+                        val under18aar = sjekkUnder18aar(doedshendelse)
+                        deodshendelserProducer.sendBrevRequestBP(sak, borIUtlandet, !under18aar)
+                    }
+                    SakType.OMSTILLINGSSTOENAD -> deodshendelserProducer.sendBrevRequestOMS(sak, borIUtlandet)
+                }
                 return true
             } else {
                 logger.info("Sender ikke brev for ${doedshendelse.id} for sak fordi feature toggle er av eller mangler sak")
@@ -217,6 +224,16 @@ class DoedshendelseJobService(
             }
         }
         return false
+    }
+
+    private fun sjekkUnder18aar(doedshendelse: DoedshendelseInternal): Boolean {
+        val person =
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                foedselsnummer = doedshendelse.beroertFnr,
+                rolle = PersonRolle.BARN,
+                saktype = SakType.BARNEPENSJON,
+            )
+        return person.toPerson().under18aarPaaDato(LocalDate.now())
     }
 
     private fun sjekkUtlandForBeroertIHendelse(doedshendelse: DoedshendelseInternal): Boolean {

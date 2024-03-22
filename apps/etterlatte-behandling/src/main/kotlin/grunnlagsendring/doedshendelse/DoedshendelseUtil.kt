@@ -4,10 +4,19 @@ import no.nav.etterlatte.common.klienter.hentBarn
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Sivilstatus
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.time.temporal.Temporal
 import kotlin.math.absoluteValue
+
+fun Person.under18aarPaaDato(dato: LocalDate): Boolean {
+    val aar18 = 18
+    val benyttetFoedselsdato = foedselsdato ?: LocalDate.of(foedselsaar, 12, 31)
+
+    return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue < aar18
+}
 
 fun personBorIUtlandet(person: PersonDTO): Boolean {
     val person = person.toPerson()

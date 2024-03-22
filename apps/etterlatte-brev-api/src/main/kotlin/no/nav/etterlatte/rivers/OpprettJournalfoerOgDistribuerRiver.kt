@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.rapidsandrivers.BOR_I_UTLAND_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_KODE
+import no.nav.etterlatte.rapidsandrivers.ER_OVER_18_AAR
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.sakId
@@ -78,7 +79,8 @@ class OpprettJournalfoerOgDistribuerRiver(
                         when (brevKode.redigering) {
                             EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL -> {
                                 val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
-                                opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland)
+                                val erOver18aar = packet.hentVerdiEllerKastFeil(ER_OVER_18_AAR).toBoolean()
+                                opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland, erOver18aar)
                             }
                             EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL -> {
                                 val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
@@ -139,6 +141,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     private suspend fun opprettBarnepensjonInformasjonDoedsfall(
         sakId: Long,
         borIutland: Boolean,
+        erOver18aar: Boolean,
     ) = BarnepensjonInformasjonDoedsfall.fra(
         generellBrevData =
             brevdataFacade.hentGenerellBrevData(
@@ -147,6 +150,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                 brukerTokenInfo = Systembruker.brev,
             ),
         borIutland,
+        erOver18aar,
     )
 
     private suspend fun opprettOmstillingsstoenadInformasjonDoedsfall(

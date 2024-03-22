@@ -13,7 +13,9 @@ import kotlin.math.absoluteValue
 
 fun Person.under18aarPaaDato(dato: LocalDate): Boolean {
     val aar18 = 18
-    return Math.abs(dato.year - foedselsaar).absoluteValue < aar18
+    val benyttetFoedselsdato = foedselsdato ?: LocalDate.of(foedselsaar, 12, 31)
+
+    return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue < aar18
 }
 
 fun personBorIUtlandet(person: PersonDTO): Boolean {

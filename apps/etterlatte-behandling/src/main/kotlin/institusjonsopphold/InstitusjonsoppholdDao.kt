@@ -3,7 +3,6 @@ package no.nav.etterlatte.institusjonsopphold
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.JaNei
-import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -25,10 +24,10 @@ class InstitusjonsoppholdDao(private val connectionAutoclosing: ConnectionAutocl
                     )
                 statement.setString(1, UUID.randomUUID().toString())
                 statement.setLong(2, sakId)
-                statement.setString(3, institusjonoppholdBegrunnelse.kanGiReduksjonAvYtelse.svar.toString())
-                statement.setString(4, institusjonoppholdBegrunnelse.kanGiReduksjonAvYtelse.begrunnelse)
-                statement.setString(5, institusjonoppholdBegrunnelse.forventetVarighetMerEnn3Maaneder.svar.toString())
-                statement.setString(6, institusjonoppholdBegrunnelse.forventetVarighetMerEnn3Maaneder.begrunnelse)
+                statement.setString(3, institusjonoppholdBegrunnelse.kanGiReduksjonAvYtelse.name)
+                statement.setString(4, institusjonoppholdBegrunnelse.kanGiReduksjonAvYtelseBegrunnelse)
+                statement.setString(5, institusjonoppholdBegrunnelse.forventetVarighetMerEnn3Maaneder.name)
+                statement.setString(6, institusjonoppholdBegrunnelse.forventetVarighetMerEnn3MaanederBegrunnelse)
                 statement.setString(7, saksbehandler.toJson())
                 statement.setString(8, institusjonoppholdBegrunnelse.grunnlagsEndringshendelseId)
                 statement.executeUpdate()
@@ -47,16 +46,10 @@ class InstitusjonsoppholdDao(private val connectionAutoclosing: ConnectionAutocl
                 statement.setString(1, grunnlagsEndringshendelseId)
                 statement.executeQuery().singleOrNull {
                     InstitusjonsoppholdBegrunnelseMedSaksbehandler(
-                        kanGiReduksjonAvYtelse =
-                            JaNeiMedBegrunnelse(
-                                svar = JaNei.valueOf(getString("kanGiReduksjon")),
-                                begrunnelse = getString("kanGiReduksjonTekst"),
-                            ),
-                        forventetVarighetMerEnn3Maaneder =
-                            JaNeiMedBegrunnelse(
-                                svar = JaNei.valueOf(getString("merEnnTreMaaneder")),
-                                begrunnelse = getString("merEnnTreMaanederTekst"),
-                            ),
+                        kanGiReduksjonAvYtelse = JaNei.valueOf(getString("kanGiReduksjon")),
+                        kanGiReduksjonAvYtelseBegrunnelse = getString("kanGiReduksjonTekst"),
+                        forventetVarighetMerEnn3Maaneder = JaNei.valueOf(getString("merEnnTreMaaneder")),
+                        forventetVarighetMerEnn3MaanederBegrunnelse = getString("merEnnTreMaanederTekst"),
                         grunnlagsEndringshendelseId = getString("grunnlagsendringshendelse_id"),
                         saksbehandler = getString("saksbehandler").let { objectMapper.readValue(it) },
                     )

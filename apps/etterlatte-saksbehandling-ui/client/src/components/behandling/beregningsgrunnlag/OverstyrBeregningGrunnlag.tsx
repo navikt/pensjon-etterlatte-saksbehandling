@@ -298,7 +298,7 @@ function feilIOverstyrBeregningperiode(
     feil.push('TRYGDETID_MANGLER')
   }
 
-  if (grunnlag.data.trygdetidForIdent === undefined || grunnlag.data.trygdetidForIdent === '') {
+  if (!grunnlag.data.trygdetidForIdent) {
     feil.push('TRYGDETID_MANGLER_FNR')
   }
 
@@ -315,7 +315,7 @@ function feilIOverstyrBeregningperiode(
     feil.push('TOM_FOER_FOM')
   }
 
-  if (grunnlag.data.beskrivelse === undefined || grunnlag.data.beskrivelse === '') {
+  if (!grunnlag.data.beskrivelse) {
     feil.push('BESKRIVELSE_MANGLER')
   }
 

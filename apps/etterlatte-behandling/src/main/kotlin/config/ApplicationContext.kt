@@ -434,6 +434,7 @@ internal class ApplicationContext(
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,
             vedtakKlient = vedtakKlient,
+            brevApiKlient = brevApiKlient,
             tilbakekrevingKlient = tilbakekrevingKlient,
             tilbakekrevinghendelser = tilbakekreving,
         )

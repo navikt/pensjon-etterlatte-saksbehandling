@@ -162,7 +162,7 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
     fom: Date | undefined = new Date(behandling.virkningstidspunkt!.dato),
     tom: Date | undefined
   ): Date => {
-    return addMonths(tom || fom, 1)
+    return tom ? addMonths(tom, 1) : fom
   }
 
   return (

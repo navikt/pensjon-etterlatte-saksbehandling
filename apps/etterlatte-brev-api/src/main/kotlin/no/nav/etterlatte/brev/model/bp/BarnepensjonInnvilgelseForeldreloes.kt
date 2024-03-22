@@ -16,6 +16,7 @@ import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import java.time.LocalDate
 
 data class BarnepensjonInnvilgelseForeldreloes(
@@ -61,9 +62,9 @@ data class BarnepensjonInnvilgelseForeldreloes(
                             avdoede.find {
                                 val fnr =
                                     utbetalingsinfo.beregningsperioder.last().trygdetidForIdent
-                                        ?: throw ManglerFnrTilBruktTrygdetidException()
+                                        ?: throw ManglerAvdoedBruktTilTrygdetid()
                                 it.fnr.value == fnr
-                            }?.navn ?: throw ManglerAvdoedBruktTilTrygdetidExceoption(),
+                            }?.navn ?: throw ManglerAvdoedBruktTilTrygdetid(),
                     ),
                 etterbetaling =
                     etterbetaling
@@ -99,8 +100,7 @@ data class BarnepensjonForeldreloesRedigerbar(
     }
 }
 
-class ManglerFnrTilBruktTrygdetidException() :
-    IllegalArgumentException("Mangler fnr til avdoed brukt til trygdetid")
-
-class ManglerAvdoedBruktTilTrygdetidExceoption() :
-    IllegalArgumentException("Mangler avdoed som er brukt til beregning av trygdetid")
+class ManglerAvdoedBruktTilTrygdetid : UgyldigForespoerselException(
+    code = "MANGLER_AVDOED_INFO_I_BEREGNING",
+    detail = "Det er mangler i beregning. Utfør beregning på nytt og prøv igjen.",
+)

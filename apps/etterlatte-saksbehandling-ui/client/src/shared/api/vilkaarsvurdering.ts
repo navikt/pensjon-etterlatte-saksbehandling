@@ -43,7 +43,9 @@ export const lagreTotalVurdering = async (args: {
 export const oppdaterStatus = async (behandlingId: string): Promise<ApiResponse<StatusOppdatert>> =>
   apiClient.post(`/vilkaarsvurdering/${behandlingId}/oppdater-status`, {})
 
-export const hentMigrertYrkesskadeFordel = async (behandlingId: string): Promise<ApiResponse<Boolean>> =>
+export const hentMigrertYrkesskadeFordel = async (
+  behandlingId: string
+): Promise<ApiResponse<MigrertYrkesskadefordel>> =>
   apiClient.get(`/vilkaarsvurdering/${behandlingId}/migrert-yrkesskadefordel`)
 
 export interface StatusOppdatert {
@@ -131,4 +133,8 @@ export interface VilkaarsvurderingVurdertResultat {
   kommentar?: string
   tidspunkt: Date
   saksbehandler: string
+}
+
+export interface MigrertYrkesskadefordel {
+  migrertYrkesskadefordel: boolean
 }

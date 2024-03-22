@@ -50,16 +50,19 @@ export const enhetErSkrivbar = (enhetId: string, enheter: Array<string>): boolea
   return enheter.includes(enhetId)
 }
 
-export const behandlingErRedigerbar = (status: IBehandlingStatus, enhetId: string, enheter: Array<string>): boolean => {
+export const statusErRedigerbar = (status: IBehandlingStatus) => {
   return (
-    enhetErSkrivbar(enhetId, enheter) &&
-    (status === IBehandlingStatus.OPPRETTET ||
-      status === IBehandlingStatus.VILKAARSVURDERT ||
-      status === IBehandlingStatus.TRYGDETID_OPPDATERT ||
-      status === IBehandlingStatus.BEREGNET ||
-      status === IBehandlingStatus.AVKORTET ||
-      status === IBehandlingStatus.RETURNERT)
+    status === IBehandlingStatus.OPPRETTET ||
+    status === IBehandlingStatus.VILKAARSVURDERT ||
+    status === IBehandlingStatus.TRYGDETID_OPPDATERT ||
+    status === IBehandlingStatus.BEREGNET ||
+    status === IBehandlingStatus.AVKORTET ||
+    status === IBehandlingStatus.RETURNERT
   )
+}
+
+export const behandlingErRedigerbar = (status: IBehandlingStatus, enhetId: string, enheter: Array<string>): boolean => {
+  return enhetErSkrivbar(enhetId, enheter) && statusErRedigerbar(status)
 }
 
 export const erFerdigBehandlet = (status: IBehandlingStatus): boolean => {

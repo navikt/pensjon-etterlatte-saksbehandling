@@ -40,6 +40,7 @@ import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -232,8 +233,7 @@ class DoedshendelseJobService(
                 rolle = PersonRolle.BARN,
                 saktype = SakType.BARNEPENSJON,
             )
-        val aar18 = 18
-        return person.toPerson().foedselsaar < aar18
+        return person.toPerson().under18aarPaaDato(LocalDate.now())
     }
 
     private fun sjekkUtlandForBeroertIHendelse(doedshendelse: DoedshendelseInternal): Boolean {

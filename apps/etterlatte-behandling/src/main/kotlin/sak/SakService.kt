@@ -29,7 +29,7 @@ interface SakService {
         gradering: AdressebeskyttelseGradering? = null,
     ): Sak
 
-    fun finnGjeldeneEnhet(
+    fun finnGjeldendeEnhet(
         fnr: String,
         type: SakType,
     ): String
@@ -198,7 +198,7 @@ class SakServiceImpl(
         }
     }
 
-    override fun finnGjeldeneEnhet(
+    override fun finnGjeldendeEnhet(
         fnr: String,
         type: SakType,
     ) = when (val sak = finnSakerForPersonOgType(fnr, type)) {

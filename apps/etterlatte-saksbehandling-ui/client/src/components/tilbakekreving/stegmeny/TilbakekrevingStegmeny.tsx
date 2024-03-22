@@ -10,8 +10,8 @@ export function TilbakekrevingStegmeny() {
   return (
     <StegMenyWrapper>
       <TilbakekrevingNavLenke path="vurdering" description="Vurdering" enabled separator />
-      <TilbakekrevingNavLenke path="utbetalinger" description="Utbetalinger" enabled={true} separator={false} />
-      <TilbakekrevingNavLenke path="oppsummering" description="Oppsummering" enabled={true} separator={false} />
+      <TilbakekrevingNavLenke path="utbetalinger" description="Utbetalinger" enabled separator />
+      <TilbakekrevingNavLenke path="oppsummering" description="Oppsummering" enabled separator />
       <TilbakekrevingNavLenke
         path="brev"
         description="Brev"

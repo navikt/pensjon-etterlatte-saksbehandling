@@ -66,16 +66,6 @@ sealed class DoedshendelseKontrollpunkt {
             get() = this.beskrivelse
     }
 
-    @JsonTypeName("BARN_HAR_UFOERE")
-    data object BarnHarUfoereTrygd : DoedshendelseKontrollpunkt() {
-        override val kode = "BARN_HAR_UFOERE"
-        override val beskrivelse: String = "Barnet har uføretrygd"
-        override val sendBrev: Boolean = true
-        override val opprettOppgave: Boolean = false
-        override val oppgaveTekst: String? = null
-        override val avbryt: Boolean = false
-    }
-
     @JsonTypeName("KRYSSENDE_YTELSE_I_PESYS")
     data object KryssendeYtelseIPesysEps : DoedshendelseKontrollpunkt() {
         override val kode = "KRYSSENDE_YTELSE_I_PESYS"
@@ -117,31 +107,76 @@ sealed class DoedshendelseKontrollpunkt {
         override val avbryt: Boolean = true
     }
 
-    @JsonTypeName("EPS_SKILT_SISTE_5_OG_GIFT_I_15")
-    data class EpsHarVaertSkiltSiste5OgGiftI15(val doedsdato: LocalDate, val fnr: String) : DoedshendelseKontrollpunkt() {
-        override val kode = "EPS_SKILT_SISTE_5_OG_GIFT_I_15"
-        override val beskrivelse: String = "Eps er skilt siste 5 år og gift i 15"
+    @JsonTypeName("EPS_VARIGHET_UNDER_5_AAR_UTEN_BARN")
+    data object EpsVarighetUnderFemAarUtenBarn : DoedshendelseKontrollpunkt() {
+        override val kode = "EPS_VARIGHET_UNDER_5_AAR_UTEN_BARN"
+        override val beskrivelse: String = "Giftemål har ikke vart i 5 år, og finner ingen barn"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = false
+        override val avbryt: Boolean = true
+        override val oppgaveTekst: String? = null
+    }
+
+    @JsonTypeName("EPS_VARIGHET_UNDER_5_AAR_UTEN_FELLES_BARN")
+    data object EpsVarighetUnderFemAarUtenFellesBarn : DoedshendelseKontrollpunkt() {
+        override val kode = "EPS_VARIGHET_UNDER_5_AAR_UTEN_FELLES_BARN"
+        override val beskrivelse: String = "Giftemål har ikke vart i 5 år, og finner ingen felles barn"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = true
+        override val avbryt: Boolean = false
+        override val oppgaveTekst: String = beskrivelse
+    }
+
+    @JsonTypeName("TIDLIGERE_EPS_GIFT_MER_ENN_25_AAR")
+    data class TidligereEpsGiftMerEnn25Aar(val doedsdato: LocalDate, val fnr: String) : DoedshendelseKontrollpunkt() {
+        override val kode = "TIDLIGERE_EPS_GIFT_MER_ENN_25_AAR"
+        override val beskrivelse: String = "Eps er skilt fra avdød, men har vært gift mer enn 25 år tidligere"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = true
         override val avbryt: Boolean = false
         override val oppgaveTekst: String
-            get() = "Tidligere ektefelle ($fnr) døde ($doedsdato). Saksbehandler må vurdere om gjenlevende har rettigheter."
+            get() =
+                "Tidligere ektefelle ($fnr) døde ($doedsdato), og ekteskapet varte i mer enn 25 år." +
+                    " Saksbehandler må vurdere om gjenlevende har rettigheter."
     }
 
-    @JsonTypeName("SAMBOER_SAMME_ADRESSE_OG_FELLES_BARN")
-    data object SamboerSammeAdresseOgFellesBarn : DoedshendelseKontrollpunkt() {
-        override val kode = "SAMBOER_SAMME_ADRESSE_OG_FELLES_BARN"
-        override val beskrivelse: String = "Samboer til avdød med samme adresse og felles barn"
-        override val sendBrev: Boolean = true
+    @JsonTypeName("TIDLIGERE_EPS_GIFT_UNDER_25_AAR_UTEN_FELLES_BARN")
+    data object TidligereEpsGiftUnder25AarUtenFellesBarn : DoedshendelseKontrollpunkt() {
+        override val kode = "TIDLIGERE_EPS_GIFT_UNDER_25_AAR_UTEN_FELLES_BARN"
+        override val beskrivelse: String = "Eps er skilt fra avdød, har ikke vært gift i 25 år, og har ikke felles barn"
+        override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
+        override val avbryt: Boolean = true
         override val oppgaveTekst: String? = null
-        override val avbryt: Boolean = false
     }
 
-    @JsonTypeName("EPS_SKILT_SISTE_5_UKJENT_GIFTEMAAL_VARIGHET")
-    data class EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde(val doedsdato: LocalDate, val fnr: String) : DoedshendelseKontrollpunkt() {
-        override val kode = "EPS_SKILT_SISTE_5_UKJENT_GIFTEMAAL_VARIGHET"
-        override val beskrivelse: String = "Eps er skilt siste 5 år med ukjent lengde på giftermål"
+    @JsonTypeName("TIDLIGERE_EPS_GIFT_MER_ENN_15_AAR_FELLES_BARN")
+    data class TidligereEpsGiftMerEnn15AarFellesBarn(val doedsdato: LocalDate, val fnr: String) : DoedshendelseKontrollpunkt() {
+        override val kode = "TIDLIGERE_EPS_GIFT_MER_ENN_15_AAR_FELLES_BARN"
+        override val beskrivelse: String = "Eps er skilt fra avdød, men har vært gift mer enn 15 år tidligere og har felles barn"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = true
+        override val avbryt: Boolean = false
+        override val oppgaveTekst: String
+            get() =
+                "Tidligere ektefelle ($fnr) døde ($doedsdato), og ekteskapet varte i mer enn 15 år og de har felles barn." +
+                    " Saksbehandler må vurdere om gjenlevende har rettigheter."
+    }
+
+    @JsonTypeName("TIDLIGERE_EPS_GIFT_MINDRE_ENN_15_AAR_FELLES_BARN")
+    data object TidligereEpsGiftMindreEnn15AarFellesBarn : DoedshendelseKontrollpunkt() {
+        override val kode = "TIDLIGERE_EPS_GIFT_MINDRE_ENN_15_AAR_FELLES_BARN"
+        override val beskrivelse: String = "Eps er skilt fra avdød, men har vært gift mindre enn 15 år tidligere og har felles barn"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = false
+        override val avbryt: Boolean = true
+        override val oppgaveTekst: String? = null
+    }
+
+    @JsonTypeName("EPS_GIFT_UKJENT_GIFTEMAAL_VARIGHET")
+    data class EktefelleMedUkjentGiftemaalLengde(val doedsdato: LocalDate, val fnr: String) : DoedshendelseKontrollpunkt() {
+        override val kode = "EPS_GIFT_UKJENT_GIFTEMAAL_VARIGHET"
+        override val beskrivelse: String = "Eps har ukjent lengde på giftermål"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = true
         override val avbryt: Boolean = false
@@ -187,7 +222,7 @@ sealed class DoedshendelseKontrollpunkt {
     @JsonTypeName("EPS_HAR_SAK_I_GJENNY")
     data class EpsHarSakMedIverksattBehandlingIGjenny(override val sak: Sak) : DoedshendelseKontrollpunkt(), KontrollpunktMedSak {
         override val kode = "EPS_HAR_SAK_I_GJENNY"
-        override val beskrivelse: String = "Det eksisterer allerede en aktiv sak på EPS i Gjenny(iverksatt behandling)"
+        override val beskrivelse: String = "Det eksisterer allerede en aktiv sak på EPS i Gjenny med iverksatt behandling"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
         override val oppgaveTekst: String? = null

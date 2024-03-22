@@ -65,6 +65,8 @@ function KlageTabell(props: { klager: Array<Klage> }) {
     return null
   }
 
+  klager.sort((a, b) => (new Date(a.opprettet) < new Date(b.opprettet) ? 1 : -1))
+
   return (
     <KlageWrapper>
       <Heading size="medium">Klager</Heading>

@@ -19,9 +19,16 @@ import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteL
 import { tagColors, TagList } from '~shared/Tags'
 import { formaterSakstype } from '~utils/formattering'
 import { Info, Tekst } from '~components/behandling/attestering/styled'
-import { hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave } from '~shared/api/oppgaver'
+import {
+  hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave,
+  hentSaksbehandlerForReferanseOppgaveUnderArbeid,
+} from '~shared/api/oppgaver'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
+import {
+  resetSaksbehandlerGjeldendeOppgave,
+  setSaksbehandlerGjeldendeOppgave,
+} from '~store/reducers/SaksbehandlerGjeldendeOppgaveForBehandlingReducer'
 
 export function TilbakekrevingSidemeny() {
   const tilbakekreving = useTilbakekreving()
@@ -35,6 +42,7 @@ export function TilbakekrevingSidemeny() {
   const [oppgaveForBehandlingenStatus, requesthentOppgaveForBehandling] = useApiCall(
     hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave
   )
+  const [, hentSaksbehandlerForOppgave] = useApiCall(hentSaksbehandlerForReferanseOppgaveUnderArbeid)
 
   const hentOppgaveForBehandling = () => {
     if (tilbakekreving) {
@@ -59,6 +67,19 @@ export function TilbakekrevingSidemeny() {
       }
     })
   }, [tilbakekreving?.id])
+
+  useEffect(() => {
+    if (!tilbakekreving) return
+    hentSaksbehandlerForOppgave(
+      { referanse: tilbakekreving.id, sakId: tilbakekreving.sak.id },
+      (saksbehandler, statusCode) => {
+        if (statusCode === 200) {
+          dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler.ident))
+        }
+      },
+      () => dispatch(resetSaksbehandlerGjeldendeOppgave())
+    )
+  }, [])
 
   return (
     <CollapsibleSidebar collapsed={collapsed}>

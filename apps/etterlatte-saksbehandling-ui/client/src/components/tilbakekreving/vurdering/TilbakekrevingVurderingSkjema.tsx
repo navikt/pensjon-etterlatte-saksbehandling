@@ -70,9 +70,11 @@ export function TilbakekrevingVurderingSkjema({
     })
   }
 
-  const vilkaarOppfyltEllerBeloepIBehold =
-    (vurdering.vilkaarsresultat &&
-      [TilbakekrevingVilkaar.OPPFYLT, TilbakekrevingVilkaar.DELVIS_OPPFYLT].includes(vurdering.vilkaarsresultat)) ||
+  const vilkaarOppfylt = (vilkaarsresultat: TilbakekrevingVilkaar) =>
+    [TilbakekrevingVilkaar.OPPFYLT, TilbakekrevingVilkaar.DELVIS_OPPFYLT].includes(vilkaarsresultat)
+
+  const vilkaarOppfyltEllerBeloepIBehold = (vurdering: TilbakekrevingVurdering) =>
+    (vurdering.vilkaarsresultat && vilkaarOppfylt(vurdering.vilkaarsresultat)) ||
     vurdering.beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD
 
   const hjemmelFraVurdering = (
@@ -198,17 +200,18 @@ export function TilbakekrevingVurderingSkjema({
           size="small"
           className="radioGroup"
           value={vurdering.tilsvar?.tilsvar ?? ''}
-          onChange={(e) =>
+          onChange={(e) => {
+            const tilsvar = e as JaNei
             setVurdering({
               ...vurdering,
               tilsvar: {
                 ...vurdering.tilsvar,
-                beskrivelse: vurdering.tilsvar?.beskrivelse ?? null,
-                dato: vurdering.tilsvar?.dato ?? null,
-                tilsvar: JaNei[e as JaNei],
+                tilsvar: JaNei[tilsvar],
+                beskrivelse: tilsvar === JaNei.NEI ? null : vurdering.tilsvar?.beskrivelse ?? null,
+                dato: tilsvar === JaNei.NEI ? null : vurdering.tilsvar?.dato ?? null,
               },
             })
-          }
+          }}
         >
           <div className="flex">
             {Object.values(JaNei).map((svar) => (
@@ -271,6 +274,18 @@ export function TilbakekrevingVurderingSkjema({
                 TilbakekrevingHjemmel[e as TilbakekrevingHjemmel],
                 vurdering.vilkaarsresultat
               ),
+              reduseringAvKravet: null,
+              foreldet: null,
+              rentevurdering: null,
+              vurderesForPaatale: null,
+              beloepBehold: null,
+              objektivtVilkaarOppfylt: null,
+              subjektivtVilkaarOppfylt: null,
+              burdeBrukerForstaatt: null,
+              uaktsomtForaarsaketFeilutbetaling: null,
+              burdeBrukerForstaattEllerUaktsomtForaarsaket: null,
+              vilkaarsresultat: null,
+              vedtak: null,
             })
           }}
         >
@@ -364,13 +379,12 @@ export function TilbakekrevingVurderingSkjema({
                 className="radioGroup"
                 value={vurdering.vilkaarsresultat ?? ''}
                 onChange={(e) => {
+                  const vilkaarsresultat = e as TilbakekrevingVilkaar
                   setVurdering({
                     ...vurdering,
-                    vilkaarsresultat: TilbakekrevingVilkaar[e as TilbakekrevingVilkaar],
-                    hjemmel: hjemmelFraVurdering(
-                      vurdering.rettsligGrunnlag,
-                      TilbakekrevingVilkaar[e as TilbakekrevingVilkaar]
-                    ),
+                    vilkaarsresultat: TilbakekrevingVilkaar[vilkaarsresultat],
+                    hjemmel: hjemmelFraVurdering(vurdering.rettsligGrunnlag, TilbakekrevingVilkaar[vilkaarsresultat]),
+                    beloepBehold: null,
                   })
                 }}
               >
@@ -409,16 +423,22 @@ export function TilbakekrevingVurderingSkjema({
                     size="small"
                     className="radioGroup"
                     value={vurdering.beloepBehold?.behold ?? ''}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const beloepBeholdSvar = e as TilbakekrevingBeloepBeholdSvar
+                      const beloepBehold = beloepBeholdSvar === TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD
                       setVurdering({
                         ...vurdering,
                         beloepBehold: {
                           ...vurdering.beloepBehold,
-                          behold: TilbakekrevingBeloepBeholdSvar[e as TilbakekrevingBeloepBeholdSvar],
+                          behold: TilbakekrevingBeloepBeholdSvar[beloepBeholdSvar],
                           beskrivelse: vurdering.beloepBehold?.beskrivelse ?? null,
                         },
+                        reduseringAvKravet: beloepBehold ? vurdering.reduseringAvKravet : null,
+                        foreldet: beloepBehold ? vurdering.foreldet : null,
+                        rentevurdering: beloepBehold ? vurdering.rentevurdering : null,
+                        vurderesForPaatale: beloepBehold ? vurdering.vurderesForPaatale : null,
                       })
-                    }
+                    }}
                   >
                     <div className="flex">
                       {Object.values(TilbakekrevingBeloepBeholdSvar).map((behold) => (
@@ -444,7 +464,7 @@ export function TilbakekrevingVurderingSkjema({
                   )}
                 </>
               )}
-              {vilkaarOppfyltEllerBeloepIBehold && (
+              {vilkaarOppfyltEllerBeloepIBehold(vurdering) && (
                 <>
                   <Textarea
                     label="Er det særlige grunner til å frafalle eller redusere kravet?"

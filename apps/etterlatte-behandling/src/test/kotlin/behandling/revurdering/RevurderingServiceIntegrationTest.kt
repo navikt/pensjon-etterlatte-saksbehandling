@@ -46,7 +46,6 @@ import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -83,6 +82,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             mockk<SaksbehandlerMedRoller> {
                 every { harRolleStrengtFortrolig() } returns false
                 every { harRolleEgenAnsatt() } returns false
+                every { harRolleAttestant() } returns true
             }
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
         every { user.name() } returns "User"
@@ -399,7 +399,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     null,
                 )
             }
-            verify { oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any()) }
+            verify { oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any(), any()) }
             verify {
                 hendelser.sendMeldingForHendelseMedDetaljertBehandling(
                     behandling!!.toStatistikkBehandling(
@@ -542,13 +542,9 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             )
         }
         inTransaction {
-            applicationContext.oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                SakIdOgReferanse(
-                    sakId = sak.id,
-                    referanse = behandling!!.id.toString(),
-                ),
-                oppgaveType = OppgaveType.ATTESTERING,
-                saksbehandler = Saksbehandler("", saksbehandler, null),
+            applicationContext.oppgaveService.tilAttestering(
+                referanse = behandling!!.id.toString(),
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = null,
             )
         }
@@ -738,13 +734,9 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             )
         }
         inTransaction {
-            applicationContext.oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                SakIdOgReferanse(
-                    sakId = sak.id,
-                    referanse = behandling!!.id.toString(),
-                ),
-                oppgaveType = OppgaveType.ATTESTERING,
-                saksbehandler = saksbehandler,
+            applicationContext.oppgaveService.tilAttestering(
+                referanse = behandling!!.id.toString(),
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = null,
             )
         }
@@ -876,13 +868,9 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             )
         }
         inTransaction {
-            applicationContext.oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                SakIdOgReferanse(
-                    sakId = sak.id,
-                    referanse = nonNullBehandling.id.toString(),
-                ),
-                oppgaveType = OppgaveType.ATTESTERING,
-                saksbehandler = Saksbehandler("", saksbehandler, null),
+            applicationContext.oppgaveService.tilAttestering(
+                referanse = nonNullBehandling.id.toString(),
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 merknad = null,
             )
         }

@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.generellbehandling
 
 import io.kotest.inspectors.forExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -31,6 +32,7 @@ import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandlingHendel
 import no.nav.etterlatte.libs.common.generellbehandling.Innhold
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -96,7 +98,15 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
             )
 
         every { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) } returns saksbehandlerNavn
-        service = GenerellBehandlingService(dao, oppgaveService, behandlingService, grunnlagKlient, hendelseDao, saksbehandlerInfoDao)
+        service =
+            GenerellBehandlingService(
+                dao,
+                oppgaveService,
+                behandlingService,
+                grunnlagKlient,
+                hendelseDao,
+                saksbehandlerInfoDao,
+            )
 
         nyKontekstMedBrukerOgDatabaseContext(user, DatabaseContextTest(dataSource))
     }
@@ -240,7 +250,12 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
         oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsBehandling.id, saksbehandler)
 
         val tokenInfo = BrukerTokenInfo.of(randomUUID().toString(), saksbehandler, null, null, null)
-        oppgaveService.ferdigStillOppgaveUnderBehandling(behandlingId.toString(), tokenInfo)
+
+        oppgaveService.ferdigStillOppgaveUnderBehandling(
+            behandlingId.toString(),
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            tokenInfo,
+        )
 
         val oppgaverforGenerellBehandling =
             oppgaveService.hentOppgaverForReferanse(manueltOpprettetBehandling.id.toString())
@@ -291,21 +306,14 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
         val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
         service.sendTilAttestering(oppdaterBehandling, SAKSBEHANDLER)
         val fattetBehandling = service.hentBehandlingMedId(oppdaterBehandling.id)
-        Assertions.assertEquals(GenerellBehandling.Status.FATTET, fattetBehandling?.status)
-        val behandlingsOppgaverFattetOgAttestering =
-            oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
-        Assertions.assertEquals(2, behandlingsOppgaverFattetOgAttestering.size)
 
-        behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
-            oppgave.type.shouldBe(OppgaveType.ATTESTERING)
-        }
-        behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
-            oppgave.status.shouldBe(Status.FERDIGSTILT)
-        }
+        fattetBehandling?.status shouldBe GenerellBehandling.Status.FATTET
 
-        val attesteringsoppgave = behandlingsOppgaverFattetOgAttestering.filter { it.type == OppgaveType.ATTESTERING }
-        Assertions.assertEquals(1, attesteringsoppgave.size)
-        Assertions.assertTrue(attesteringsoppgave[0].merknad?.contains(saksbehandlerNavn) ?: false)
+        val oppgaveTilAttestering =
+            oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString()).single()
+
+        oppgaveTilAttestering.status shouldBe Status.ATTESTERING
+        oppgaveTilAttestering.merknad shouldContain saksbehandlerNavn
 
         verify {
             hendelseDao.generellBehandlingHendelse(
@@ -491,32 +499,30 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
         val behandlingUtfylt = opprettBehandling.copy(innhold = kravpakkeUtlandInnhold)
         val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
         service.sendTilAttestering(oppdaterBehandling, SAKSBEHANDLER)
+
         val fattetBehandling = service.hentBehandlingMedId(oppdaterBehandling.id)
         Assertions.assertEquals(GenerellBehandling.Status.FATTET, fattetBehandling?.status)
+
         val behandlingsOppgaverFattetOgAttestering =
             oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
-        Assertions.assertEquals(2, behandlingsOppgaverFattetOgAttestering.size)
+        Assertions.assertEquals(1, behandlingsOppgaverFattetOgAttestering.size)
 
         behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
-            oppgave.type.shouldBe(OppgaveType.ATTESTERING)
-        }
-        behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
-            oppgave.status.shouldBe(Status.FERDIGSTILT)
+            oppgave.status shouldBe Status.ATTESTERING
             oppgave.type.shouldBe(OppgaveType.KRAVPAKKE_UTLAND)
         }
 
         val attestant = ATTESTANT
-        val oppgaveForAttestering = oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
-        Assertions.assertEquals(2, oppgaveForAttestering.size)
-        val nyattesteringsoppgave = oppgaveForAttestering.filter { o -> o.status === Status.NY && o.erAttestering() }
-        Assertions.assertEquals(1, nyattesteringsoppgave.size)
+        val attesteringsOppgave =
+            oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
+                .single(OppgaveIntern::erAttestering)
+
         val saksbehandlerMedRoller =
             mockk<SaksbehandlerMedRoller> {
                 every { harRolleAttestant() } returns true
             }
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
-        val attesteringsOppgave = nyattesteringsoppgave[0]
         val trettidagerfrem = Tidspunkt.now().plus(30L, ChronoUnit.DAYS).toNorskLocalDate()
         Assertions.assertEquals(trettidagerfrem, attesteringsOppgave.frist!!.toNorskLocalDate())
         oppgaveService.tildelSaksbehandler(attesteringsOppgave.id, attestant.ident)
@@ -567,29 +573,24 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
         Assertions.assertEquals(GenerellBehandling.Status.FATTET, fattetBehandling?.status)
         val behandlingsOppgaverFattetOgAttestering =
             oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
-        Assertions.assertEquals(2, behandlingsOppgaverFattetOgAttestering.size)
+        Assertions.assertEquals(1, behandlingsOppgaverFattetOgAttestering.size)
 
         behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
-            oppgave.type.shouldBe(OppgaveType.ATTESTERING)
-        }
-        behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
-            oppgave.status.shouldBe(Status.FERDIGSTILT)
+            oppgave.status shouldBe Status.ATTESTERING
             oppgave.type.shouldBe(OppgaveType.KRAVPAKKE_UTLAND)
         }
 
         val attestant = SAKSBEHANDLER // Intentional
-        val oppgaveForAttestering = oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
-        Assertions.assertEquals(2, oppgaveForAttestering.size)
-        val nyattesteringsoppgave = oppgaveForAttestering.filter { o -> o.status === Status.NY && o.erAttestering() }
-        Assertions.assertEquals(1, nyattesteringsoppgave.size)
+        val attesteringsOppgave = oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString()).single()
+
         val saksbehandlerMedRoller =
             mockk<SaksbehandlerMedRoller> {
                 every { harRolleAttestant() } returns true
             }
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
-        val attesteringsOppgave = nyattesteringsoppgave[0]
         val trettidagerfrem = Tidspunkt.now().plus(30L, ChronoUnit.DAYS).toNorskLocalDate()
+
         Assertions.assertEquals(trettidagerfrem, attesteringsOppgave.frist!!.toNorskLocalDate())
         oppgaveService.tildelSaksbehandler(attesteringsOppgave.id, attestant.ident)
         val ugyldigAttesteringsForespoersel =
@@ -607,9 +608,10 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
             }
 
         val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val behandling = service.opprettBehandling(GenerellBehandling.opprettUtland(sak.id, randomUUID()), SAKSBEHANDLER)
+        val behandling =
+            service.opprettBehandling(GenerellBehandling.opprettUtland(sak.id, randomUUID()), SAKSBEHANDLER)
 
-        val behandlingsoppgave = oppgaveService.hentOppgaverForReferanse(behandling.id.toString()).first()
+        val behandlingsoppgave = oppgaveService.hentOppgaverForReferanse(behandling.id.toString()).single()
         oppgaveService.tildelSaksbehandler(behandlingsoppgave.id, SAKSBEHANDLER.ident)
 
         val behandlingMedKravpakke = service.lagreNyeOpplysninger(behandling.copy(innhold = kravpakkeUtland()))
@@ -617,7 +619,8 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
 
         val nyAttesteringsoppgave =
             oppgaveService.hentOppgaverForReferanse(behandling.id.toString())
-                .first { o -> o.status === Status.NY && o.erAttestering() }
+                .single(OppgaveIntern::erAttestering)
+
         oppgaveService.tildelSaksbehandler(nyAttesteringsoppgave.id, ATTESTANT.ident)
 
         val begrunnelse = "Ikke godkjent"

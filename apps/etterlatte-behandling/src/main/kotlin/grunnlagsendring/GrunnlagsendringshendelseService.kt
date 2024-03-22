@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import io.ktor.server.plugins.BadRequestException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BrukerService
@@ -88,12 +89,16 @@ class GrunnlagsendringshendelseService(
         inTransaction {
             grunnlagsendringshendelseDao.lukkGrunnlagsendringStatus(hendelse = hendelse)
             try {
-                val oppgaveForReferanse = oppgaveService.hentEnkeltOppgaveForReferanse(hendelse.id.toString())
+                val oppgaveForReferanse =
+                    oppgaveService.hentOppgaverForReferanse(hendelse.id.toString()).singleOrNull()
+                        ?: throw BadRequestException("Ugyldig antall oppgaver med referanse: ${hendelse.id}")
+
                 if (oppgaveForReferanse.manglerSaksbehandler()) {
                     oppgaveService.tildelSaksbehandler(oppgaveForReferanse.id, saksbehandler.ident)
                 }
                 oppgaveService.ferdigStillOppgaveUnderBehandling(
-                    hendelse.id.toString(),
+                    referanse = hendelse.id.toString(),
+                    type = OppgaveType.VURDER_KONSEKVENS,
                     saksbehandler = saksbehandler,
                 )
             } catch (e: Exception) {

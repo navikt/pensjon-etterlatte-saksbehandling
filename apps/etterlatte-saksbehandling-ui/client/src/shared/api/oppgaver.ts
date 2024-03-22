@@ -38,7 +38,17 @@ export interface NyOppgaveDto {
   referanse?: string
 }
 
-export type Oppgavestatus = 'NY' | 'UNDER_BEHANDLING' | 'PAA_VENT' | 'FERDIGSTILT' | 'FEILREGISTRERT' | 'AVBRUTT'
+export enum Oppgavestatus {
+  NY = 'NY',
+  UNDER_BEHANDLING = 'UNDER_BEHANDLING',
+  ATTESTERING = 'ATTESTERING',
+  UNDERKJENT = 'UNDERKJENT',
+  PAA_VENT = 'PAA_VENT',
+  FERDIGSTILT = 'FERDIGSTILT',
+  FEILREGISTRERT = 'FEILREGISTRERT',
+  AVBRUTT = 'AVBRUTT',
+}
+
 export type OppgaveKilde =
   | 'HENDELSE'
   | 'BEHANDLING'
@@ -51,8 +61,6 @@ export type Oppgavetype =
   | 'FOERSTEGANGSBEHANDLING'
   | 'REVURDERING'
   | 'VURDER_KONSEKVENS'
-  | 'ATTESTERING'
-  | 'UNDERKJENT'
   | 'GOSYS'
   | 'KRAVPAKKE_UTLAND'
   | 'KLAGE'
@@ -62,7 +70,7 @@ export type Oppgavetype =
   | 'GJENOPPRETTING_ALDERSOVERGANG'
 
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean =>
-  ['NY', 'UNDER_BEHANDLING', 'PAA_VENT'].includes(status)
+  ['NY', 'UNDER_BEHANDLING', 'ATTESTERING', 'UNDERKJENT', 'PAA_VENT'].includes(status)
 
 export const hentOppgaverMedStatus = async (args: {
   oppgavestatusFilter: Array<string>
@@ -85,8 +93,13 @@ export const hentOppgaverMedStatus = async (args: {
 }
 
 export const hentOppgave = async (id: string): Promise<ApiResponse<OppgaveDTO>> => apiClient.get(`/oppgaver/${id}`)
+
 export const hentOppgaverMedReferanse = async (referanse: string): Promise<ApiResponse<OppgaveDTO[]>> =>
   apiClient.get(`/oppgaver/referanse/${referanse}`)
+
+export const hentOppgaveForReferanseUnderBehandling = async (referanse: string): Promise<ApiResponse<OppgaveDTO>> =>
+  apiClient.get(`/oppgaver/referanse/${referanse}/underbehandling`)
+
 export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver/gosys')
 
 export const hentOppgavebenkStats = async (): Promise<ApiResponse<OppgavebenkStats>> => apiClient.get('/oppgaver/stats')
@@ -202,20 +215,3 @@ export const settOppgavePaaVentApi = async (args: {
 }): Promise<ApiResponse<void>> => {
   return apiClient.post(`/oppgaver/${args.oppgaveId}/sett-paa-vent`, { ...args.settPaaVentRequest })
 }
-
-export const hentOppgaveForBehandlingUnderBehandlingIkkeattestert = async (args: {
-  referanse: string
-  sakId: number
-}): Promise<ApiResponse<Saksbehandler>> => apiClient.get(`/oppgaver/sak/${args.sakId}/ikkeattestert/${args.referanse}`)
-
-export const hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave = async (args: {
-  referanse: string
-  sakId: number
-}): Promise<ApiResponse<OppgaveDTO>> =>
-  apiClient.get(`/oppgaver/sak/${args.sakId}/ikkeattestertOppgave/${args.referanse}`)
-
-export const hentSaksbehandlerForReferanseOppgaveUnderArbeid = async (args: {
-  referanse: string
-  sakId: number
-}): Promise<ApiResponse<Saksbehandler>> =>
-  apiClient.get(`/oppgaver/sak/${args.sakId}/oppgaveunderbehandling/${args.referanse}`)

@@ -91,6 +91,17 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             }
         }
 
+        get("/referanse/{referanse}/underbehandling") {
+            kunSaksbehandler {
+                val oppgave =
+                    inTransaction {
+                        service.hentOppgaveUnderBehandling(referanse)
+                    }
+
+                call.respond(oppgave ?: HttpStatusCode.NoContent)
+            }
+        }
+
         route("/stats") {
             get {
                 kunSaksbehandler {
@@ -106,10 +117,11 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get("/oppgaver") {
                 kunSystembruker {
-                    call.respond(inTransaction { service.hentSakOgOppgaverForSak(sakId) })
+                    call.respond(inTransaction { service.hentOppgaverForSak(sakId) })
                 }
             }
 
+            // TODO: Standardisere opprettelse av oppgave
             post("/opprett") {
                 kunSaksbehandlerMedSkrivetilgang {
                     val nyOppgaveDto = call.receive<NyOppgaveDto>()
@@ -128,32 +140,6 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                     call.respond(nyOppgave)
                 }
             }
-
-            get("/oppgaveunderbehandling/{referanse}") {
-                kunSaksbehandler {
-                    val saksbehandler =
-                        inTransaction {
-                            service.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(referanse)
-                        }
-                    call.respond(saksbehandler ?: HttpStatusCode.NoContent)
-                }
-            }
-
-            get("/ikkeattestert/{referanse}") {
-                kunSaksbehandler {
-                    val saksbehandler =
-                        inTransaction {
-                            service.hentSisteSaksbehandlerIkkeAttestertOppgave(referanse)
-                        }
-                    call.respond(saksbehandler ?: HttpStatusCode.NoContent)
-                }
-            }
-            get("/ikkeattestertOppgave/{referanse}") {
-                kunSaksbehandler {
-                    val oppgave = inTransaction { service.hentSisteIkkeAttestertOppgave(referanse) }
-                    call.respond(oppgave)
-                }
-            }
         }
 
         route("{$OPPGAVEID_CALL_PARAMETER}") {
@@ -163,14 +149,14 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                         service.hentOppgave(oppgaveId)
                     }
 
-                call.respond(oppgave ?: HttpStatusCode.NoContent)
+                call.respond(oppgave)
             }
 
             put("ferdigstill") {
                 kunSkrivetilgang {
                     val merknad = call.receive<FerdigstillRequest>().merknad
                     inTransaction {
-                        service.hentOgFerdigstillOppgaveById(oppgaveId, brukerTokenInfo, merknad)
+                        service.ferdigstillOppgave(oppgaveId, brukerTokenInfo, merknad)
                     }
                     call.respond(HttpStatusCode.OK)
                 }

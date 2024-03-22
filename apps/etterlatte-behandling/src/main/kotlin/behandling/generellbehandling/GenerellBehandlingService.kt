@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -102,9 +102,10 @@ class GenerellBehandlingService(
     ) {
         if (generellBehandling.tilknyttetBehandling !== null) {
             val kanskjeOppgaveMedSaksbehandler =
-                oppgaveService.hentOppgaveForSaksbehandlerFraFoerstegangsbehandling(
-                    behandlingId = generellBehandling.tilknyttetBehandling!!,
-                )
+                oppgaveService.hentOppgaverForReferanse(generellBehandling.tilknyttetBehandling!!.toString())
+                    .filter { it.type == OppgaveType.FOERSTEGANGSBEHANDLING }
+                    .maxByOrNull { it.opprettet }
+
             if (kanskjeOppgaveMedSaksbehandler != null) {
                 val saksbehandler = kanskjeOppgaveMedSaksbehandler.saksbehandler
                 if (saksbehandler != null) {
@@ -133,21 +134,23 @@ class GenerellBehandlingService(
             null -> throw NotImplementedError("Ikke implementert")
         }
 
-        oppgaveService.ferdigStillOppgaveUnderBehandling(generellBehandling.id.toString(), saksbehandler)
-        val trettiDagerFremITid = Tidspunkt.now().plus(30L, ChronoUnit.DAYS)
-
         val saksbehandlerNavn = saksbehandlerInfoDao.hentSaksbehandlerNavn(saksbehandler.ident)
-        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-            generellBehandling.id.toString(),
-            generellBehandling.sakId,
-            OppgaveKilde.GENERELL_BEHANDLING,
-            OppgaveType.ATTESTERING,
-            merknad = "Attestering av ${generellBehandling.type.name}, behandlet av ${saksbehandlerNavn ?: saksbehandler.ident}.",
+        val trettiDagerFremITid = Tidspunkt.now().plus(30L, ChronoUnit.DAYS)
+        val merknad =
+            "Attestering av ${generellBehandling.type.name}, behandlet av ${saksbehandlerNavn ?: saksbehandler.ident}."
+
+        oppgaveService.tilAttestering(
+            referanse = generellBehandling.id.toString(),
+            type = OppgaveType.KRAVPAKKE_UTLAND,
+            merknad = merknad,
             frist = trettiDagerFremITid,
         )
 
         oppdaterBehandling(
-            generellBehandling.copy(status = GenerellBehandling.Status.FATTET, behandler = Behandler(saksbehandler.ident, Tidspunkt.now())),
+            generellBehandling.copy(
+                status = GenerellBehandling.Status.FATTET,
+                behandler = Behandler(saksbehandler.ident, Tidspunkt.now()),
+            ),
         )
         opprettHendelse(GenerellBehandlingHendelseType.FATTET, generellBehandling, saksbehandler)
     }
@@ -167,7 +170,11 @@ class GenerellBehandlingService(
 
         verifiserRiktigSaksbehandler(saksbehandler, hentetBehandling!!)
         harRiktigTilstandIOppgave(generellbehandlingId)
-        oppgaveService.ferdigStillOppgaveUnderBehandling(generellbehandlingId.toString(), saksbehandler)
+        oppgaveService.ferdigStillOppgaveUnderBehandling(
+            referanse = generellbehandlingId.toString(),
+            type = OppgaveType.KRAVPAKKE_UTLAND,
+            saksbehandler = saksbehandler,
+        )
         oppdaterBehandling(
             hentetBehandling.copy(
                 status = GenerellBehandling.Status.ATTESTERT,
@@ -177,7 +184,7 @@ class GenerellBehandlingService(
         opprettHendelse(GenerellBehandlingHendelseType.ATTESTERT, hentetBehandling, saksbehandler)
     }
 
-    fun verifiserRiktigSaksbehandler(
+    private fun verifiserRiktigSaksbehandler(
         saksbehandler: Saksbehandler,
         hentetBehandling: GenerellBehandling,
     ) {
@@ -189,7 +196,7 @@ class GenerellBehandlingService(
         }
     }
 
-    fun harRiktigTilstandIOppgave(generellbehandlingId: UUID) {
+    private fun harRiktigTilstandIOppgave(generellbehandlingId: UUID) {
         val oppgaverForReferanse = oppgaveService.hentOppgaverForReferanse(generellbehandlingId.toString())
         if (oppgaverForReferanse.isEmpty()) {
             throw UgyldigAttesteringsForespoersel(
@@ -197,24 +204,12 @@ class GenerellBehandlingService(
                 "ATTESTERING_INGEN_OPPGAVER_FUNNET",
             )
         }
-        val ferdigstilteOppgaver = oppgaverForReferanse.filter { o -> o.erFerdigstilt() }
-        if (oppgaverForReferanse.isEmpty()) {
-            throw UgyldigAttesteringsForespoersel(
-                "Fant ingen ferdigstilte oppgaver for referanse $generellbehandlingId." +
-                    " Det må finnes en ferdigstilt oppgave for å kunne attesere",
-                "ATTESTERING_INGEN_FERDIGSTILTE_OPPGAVER",
-            )
-        }
-        val saksbehandlerOppgaver =
-            ferdigstilteOppgaver.filter { o -> o.type == OppgaveType.KRAVPAKKE_UTLAND || o.type == OppgaveType.UNDERKJENT }
 
-        if (saksbehandlerOppgaver.isEmpty()) {
-            throw UgyldigAttesteringsForespoersel(
-                "Fant ingen oppgaver for referanse $generellbehandlingId " +
-                    "med riktig type: [${OppgaveType.KRAVPAKKE_UTLAND} ${OppgaveType.UNDERKJENT}]",
-                "ATTESTERING_INGEN_FERDIGSTILTE_OPPGAVER_AV_RIKTIG_TYPE",
+        oppgaverForReferanse.singleOrNull { it.status == Status.ATTESTERING }
+            ?: throw UgyldigAttesteringsForespoersel(
+                code = "ATTESTERING_INGEN_FERDIGSTILTE_OPPGAVER_AV_RIKTIG_TYPE",
+                message = "Fant ingen oppgave med status ${Status.ATTESTERING} for referanse: $generellbehandlingId",
             )
-        }
     }
 
     fun underkjenn(
@@ -228,12 +223,13 @@ class GenerellBehandlingService(
             "Behandlingen må ha status FATTET, hadde: ${hentetBehandling?.status}"
         }
         val behandling = hentetBehandling!!
-        oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-            fattetoppgaveReferanseOgSak = SakIdOgReferanse(behandling.sakId, behandling.id.toString()),
-            oppgaveType = OppgaveType.UNDERKJENT,
+
+        oppgaveService.tilUnderkjent(
+            referanse = behandling.id.toString(),
+            type = OppgaveType.KRAVPAKKE_UTLAND,
             merknad = kommentar.begrunnelse,
-            saksbehandler = saksbehandler,
         )
+
         oppdaterBehandling(
             behandling.copy(
                 status = GenerellBehandling.Status.RETURNERT,
@@ -241,7 +237,12 @@ class GenerellBehandlingService(
                 returnertKommenar = kommentar.begrunnelse,
             ),
         )
-        opprettHendelse(GenerellBehandlingHendelseType.UNDERKJENT, hentetBehandling, saksbehandler, kommentar.begrunnelse)
+        opprettHendelse(
+            GenerellBehandlingHendelseType.UNDERKJENT,
+            hentetBehandling,
+            saksbehandler,
+            kommentar.begrunnelse,
+        )
     }
 
     private fun opprettHendelse(

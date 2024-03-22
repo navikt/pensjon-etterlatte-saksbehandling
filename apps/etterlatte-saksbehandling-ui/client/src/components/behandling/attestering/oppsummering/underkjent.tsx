@@ -8,7 +8,7 @@ import { mapSuccess } from '~shared/api/apiUtils'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave } from '~shared/api/oppgaver'
+import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 
 export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const innloggetId = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler.ident)
@@ -20,10 +20,9 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingIn
   const attestant = erReturnert ? underkjentSiste?.ident : innloggetId
 
   const [oppgaveForBehandlingenStatus, requesthentOppgaveForBehandling] = useApiCall(
-    hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave
+    hentOppgaveForReferanseUnderBehandling
   )
-  const hentOppgaveForBehandling = () =>
-    requesthentOppgaveForBehandling({ referanse: behandlingsInfo.behandlingId, sakId: behandlingsInfo.sakId })
+  const hentOppgaveForBehandling = () => requesthentOppgaveForBehandling(behandlingsInfo.behandlingId)
 
   useEffect(() => {
     hentOppgaveForBehandling()

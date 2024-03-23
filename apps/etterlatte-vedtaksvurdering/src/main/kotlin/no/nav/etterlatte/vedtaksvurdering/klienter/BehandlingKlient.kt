@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
-import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.retryOgPakkUt
@@ -93,7 +92,7 @@ interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
     suspend fun hentOppgaverForSak(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OppgaveListe
+    ): List<OppgaveIntern>
 
     suspend fun tildelSaksbehandler(
         oppgaveTilAttestering: OppgaveIntern,
@@ -166,7 +165,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     override suspend fun hentOppgaverForSak(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OppgaveListe {
+    ): List<OppgaveIntern> {
         logger.info("Henter oppgaver for sak med id $sakId")
         try {
             return downstreamResourceClient

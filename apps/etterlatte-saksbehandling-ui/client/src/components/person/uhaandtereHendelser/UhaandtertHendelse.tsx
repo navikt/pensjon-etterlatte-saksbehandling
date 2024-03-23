@@ -25,6 +25,12 @@ interface Props {
   revurderingKanOpprettes: boolean
 }
 
+/**
+ * TODO: Forbedre lukking av hendelse.
+ *  - Hent oppgave
+ *  - Sjekk om den tilhører sb.
+ *  - Varsel hvis nei, slik at sb slipper å bruke unødvendig tid
+ **/
 const UhaandtertHendelse = ({
   sakType,
   hendelse,

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering
 
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
@@ -48,10 +48,8 @@ class AutomatiskBehandlingService(
         logger.info("Tildeler attesteringsoppgave til systembruker")
         val oppgaveTilAttestering =
             behandlingKlient.hentOppgaverForSak(sakId, brukerTokenInfo)
-                .oppgaver
                 .filter { it.referanse == behandlingId.toString() }
-                .filter { it.type == OppgaveType.ATTESTERING }
-                .filterNot { it.erAvsluttet() }
+                .filter { it.status == Status.ATTESTERING }
                 .first()
         behandlingKlient.tildelSaksbehandler(oppgaveTilAttestering, brukerTokenInfo)
         return vedtakOgRapid

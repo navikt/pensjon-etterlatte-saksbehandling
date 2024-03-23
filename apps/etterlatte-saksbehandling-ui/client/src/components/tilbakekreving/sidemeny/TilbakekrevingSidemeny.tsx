@@ -19,12 +19,9 @@ import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteL
 import { tagColors, TagList } from '~shared/Tags'
 import { formaterSakstype } from '~utils/formattering'
 import { Info, Tekst } from '~components/behandling/attestering/styled'
-import {
-  hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave,
-  hentSaksbehandlerForReferanseOppgaveUnderArbeid,
-} from '~shared/api/oppgaver'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
+import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import {
   resetSaksbehandlerGjeldendeOppgave,
   setSaksbehandlerGjeldendeOppgave,
@@ -40,13 +37,20 @@ export function TilbakekrevingSidemeny() {
   const [beslutning, setBeslutning] = useState<IBeslutning>()
 
   const [oppgaveForBehandlingenStatus, requesthentOppgaveForBehandling] = useApiCall(
-    hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave
+    hentOppgaveForReferanseUnderBehandling
   )
-  const [, hentSaksbehandlerForOppgave] = useApiCall(hentSaksbehandlerForReferanseOppgaveUnderArbeid)
 
   const hentOppgaveForBehandling = () => {
     if (tilbakekreving) {
-      requesthentOppgaveForBehandling({ referanse: tilbakekreving.id, sakId: tilbakekreving.sak.id })
+      requesthentOppgaveForBehandling(
+        tilbakekreving.id,
+        ({ saksbehandler }, statusCode) => {
+          if (statusCode === 200 &&  !!saksbehandler) {
+            dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler.ident))
+          }
+        },
+        () => dispatch(resetSaksbehandlerGjeldendeOppgave())
+      )
     }
   }
 
@@ -67,19 +71,6 @@ export function TilbakekrevingSidemeny() {
       }
     })
   }, [tilbakekreving?.id])
-
-  useEffect(() => {
-    if (!tilbakekreving) return
-    hentSaksbehandlerForOppgave(
-      { referanse: tilbakekreving.id, sakId: tilbakekreving.sak.id },
-      (saksbehandler, statusCode) => {
-        if (statusCode === 200) {
-          dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler.ident))
-        }
-      },
-      () => dispatch(resetSaksbehandlerGjeldendeOppgave())
-    )
-  }, [])
 
   return (
     <CollapsibleSidebar collapsed={collapsed}>

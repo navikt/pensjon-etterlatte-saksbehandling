@@ -174,7 +174,7 @@ class BehandlingFactory(
                     if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
                         oppgaveService.hentOppgaverForSak(sak.id)
                             .find { it.type == OppgaveType.GJENOPPRETTING_ALDERSOVERGANG && !it.erAvsluttet() }?.let {
-                                oppgaveService.hentOgFerdigstillOppgaveById(it.id, brukerTokenInfo)
+                                oppgaveService.ferdigstillOppgave(it.id, brukerTokenInfo)
                             }
                     }
                 } ?: throw IllegalStateException("Kunne ikke opprette behandling")
@@ -296,7 +296,7 @@ class BehandlingFactory(
     ): Behandling? {
         harBehandlingUnderbehandling.forEach {
             behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
-            oppgaveService.avbrytAapneOppgaverForBehandling(it.id.toString())
+            oppgaveService.avbrytAapneOppgaverMedReferanse(it.id.toString())
         }
 
         return OpprettBehandling(

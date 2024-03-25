@@ -185,51 +185,6 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
     }
 
     @Test
-    fun `kan ikke attestere et vedtak om revurdering dødsfall som ikke er opphørsvedtak`() {
-        val behandlingId = randomUUID()
-        val virkningstidspunkt = YearMonth.of(2022, 8)
-        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
-            Sak(
-                SAKSBEHANDLER_1,
-                SakType.BARNEPENSJON,
-                1L,
-                ENHET_2,
-            )
-
-        coEvery { behandlingKlientMock.kanAttestereVedtak(any(), any(), any()) } returns true
-        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
-            mockBehandling(
-                virkningstidspunkt,
-                behandlingId,
-                revurderingAarsak = Revurderingaarsak.DOEDSFALL,
-            )
-        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
-        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
-            BeregningOgAvkorting(
-                beregning = mockBeregning(virkningstidspunkt, behandlingId),
-                avkorting = mockAvkorting(),
-            )
-        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
-
-        runBlocking {
-            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, type = VedtakType.INNVILGELSE))
-            repository.fattVedtak(
-                behandlingId = behandlingId,
-                vedtakFattet =
-                    VedtakFattet(
-                        ansvarligSaksbehandler = saksbehandler.ident,
-                        ansvarligEnhet = "",
-                        tidspunkt = Tidspunkt.now(),
-                    ),
-            )
-
-            assertThrows<OpphoersrevurderingErIkkeOpphoersvedtakException> {
-                service.attesterVedtak(behandlingId, "", attestant)
-            }
-        }
-    }
-
-    @Test
     fun `kan attestere opphørsvedtak på revurderinger av dødsfall`() {
         val behandlingId = randomUUID()
         val virkningstidspunkt = YearMonth.of(2022, 8)

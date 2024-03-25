@@ -34,7 +34,7 @@ private sealed class KanBrukesIMiljoe {
 }
 
 sealed class Utfall {
-    abstract val girOpphoer: Boolean
+    abstract val girOpphoer: Boolean // TODO Fjern?
     abstract val skalSendeBrev: Boolean
 
     data object OpphoerUtenBrev : Utfall() {

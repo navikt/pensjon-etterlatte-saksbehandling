@@ -92,8 +92,7 @@ class RevurderingDao(private val connectionAutoclosing: ConnectionAutoclosing) {
             revurderingInfo = revurderingInfo,
             begrunnelse = rs.getString("begrunnelse"),
             relatertBehandlingId = rs.getString("relatert_behandling"),
-            // TODO
-            sendeBrev = true,
+            sendeBrev = rs.getBoolean("sende_brev"),
         )
     }
 }

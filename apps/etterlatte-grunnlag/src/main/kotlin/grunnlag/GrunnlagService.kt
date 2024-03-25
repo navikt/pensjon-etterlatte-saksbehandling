@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.I
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.BrevMottaker
@@ -221,10 +222,16 @@ class RealGrunnlagService(
         }
 
     override fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller {
-        return opplysningDao.finnAllePersongalleriHvorPersonFinnes(fnr)
-            .map { it.sakId to deserialize<Persongalleri>(it.opplysning.opplysning.toJson()) }
-            .map { (sakId, persongalleri) -> SakidOgRolle(sakId, rolle = mapTilRolle(fnr.value, persongalleri)) }
-            .let { PersonMedSakerOgRoller(fnr.value, it) }
+        val result =
+            opplysningDao.finnAllePersongalleriHvorPersonFinnes(fnr)
+                .map { it.sakId to deserialize<Persongalleri>(it.opplysning.opplysning.toJson()) }
+                .map { (sakId, persongalleri) -> SakidOgRolle(sakId, rolle = mapTilRolle(fnr.value, persongalleri)) }
+                .let { PersonMedSakerOgRoller(fnr.value, it) }
+
+        result.sakiderOgRoller.filter { it.rolle == Saksrolle.UKJENT }.forEach {
+            sikkerlogger().warn("Fant ukjent rolle for sakId=${it.sakId} og fnr=${fnr.value}")
+        }
+        return result
     }
 
     // TODO: Fjerne når grunnlag er versjonert (EY-2567)

@@ -65,8 +65,6 @@ function KlageTabell(props: { klager: Array<Klage> }) {
     return null
   }
 
-  klager.sort((a, b) => (new Date(a.opprettet) < new Date(b.opprettet) ? 1 : -1))
-
   return (
     <KlageWrapper>
       <Heading size="medium">Klager</Heading>
@@ -113,7 +111,10 @@ export function KlageListe(props: { sakId: number }) {
     klager,
     <Spinner visible label="Henter klager i saken" />,
     () => <ApiErrorAlert>Kunne ikke hente klager</ApiErrorAlert>,
-    (klageliste) => <KlageTabell klager={klageliste} />
+    (klageliste) => {
+      klageliste.sort((a, b) => (new Date(a.opprettet) < new Date(b.opprettet) ? 1 : -1))
+      return <KlageTabell klager={klageliste} />
+    }
   )
 }
 

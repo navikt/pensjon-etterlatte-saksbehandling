@@ -128,7 +128,7 @@ enum class Kanal(val beskrivelse: String) {
     SDP("SDP"),
     SKAN_NETS("Skanning - NETS"),
     SKAN_PEN("Skanning - Pensjon"),
-    SKAN_IM("Skanning - Iron Moutain"),
+    SKAN_IM("Skanning - Iron Mountain"),
     TRYGDERETTEN("Trygderetten"),
     HELSENETTET("Helsenettet"),
     INGEN_DISTRIBUSJON("Ingen distribusjon"),

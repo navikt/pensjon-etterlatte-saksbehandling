@@ -214,19 +214,13 @@ class VedtakBehandlingService(
                 behandlingId = behandlingId,
                 extraParams =
                     mapOf(
-                        SKAL_SENDE_BREV to
-                            when {
-                                behandling.revurderingsaarsak.skalIkkeSendeBrev() -> false
-                                else -> true
-                            },
+                        SKAL_SENDE_BREV to behandling.sendeBrev,
                         KILDE_KEY to behandling.kilde,
                         REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
                     ),
             ),
         )
     }
-
-    private fun Revurderingaarsak?.skalIkkeSendeBrev() = this != null && !utfall.skalSendeBrev
 
     suspend fun underkjennVedtak(
         behandlingId: UUID,

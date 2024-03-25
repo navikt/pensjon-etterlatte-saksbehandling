@@ -313,6 +313,7 @@ fun behandling(
     utlandstilknytning = null,
     revurderingInfo = null,
     kilde = Vedtaksloesning.GJENNY,
+    sendeBrev = true,
 )
 
 fun BeregningsMetode.toGrunnlag() = BeregningsMetodeBeregningsgrunnlag(this, null)

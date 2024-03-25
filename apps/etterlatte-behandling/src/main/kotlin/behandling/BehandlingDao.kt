@@ -153,6 +153,8 @@ class BehandlingDao(
             kommerBarnetTilgode = kommerBarnetTilGodeDao.hentKommerBarnetTilGode(id),
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
             kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
+            // TODO
+            sendeBrev = true,
         )
     }
 

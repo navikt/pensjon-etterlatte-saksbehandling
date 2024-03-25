@@ -552,6 +552,7 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
                 prosesstype = Prosesstype.MANUELL,
                 revurderingInfo = null,
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = false,
             )
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
             Sak(
@@ -1175,6 +1176,7 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
             revurderingInfo = revurderingInfo,
             prosesstype = Prosesstype.MANUELL,
             kilde = Vedtaksloesning.GJENNY,
+            sendeBrev = true,
         )
 
     private companion object {

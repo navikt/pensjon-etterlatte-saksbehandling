@@ -169,8 +169,6 @@ class VedtakBehandlingService(
 
         val (behandling, _, _, sak) = hentDataForVedtak(behandlingId, brukerTokenInfo)
 
-        verifiserGyldigVedtakForRevurdering(behandling, vedtak)
-
         val attestertVedtak =
             repository.inTransaction { tx ->
                 val attestertVedtak =
@@ -444,15 +442,6 @@ class VedtakBehandlingService(
         }
     }
 
-    private fun verifiserGyldigVedtakForRevurdering(
-        behandling: DetaljertBehandling,
-        vedtak: Vedtak,
-    ) {
-        if (!behandling.kanVedta(vedtak.type)) {
-            throw OpphoersrevurderingErIkkeOpphoersvedtakException(behandling.revurderingsaarsak, vedtak.type)
-        }
-    }
-
     private fun opprettVedtak(
         behandling: DetaljertBehandling,
         vedtakType: VedtakType,
@@ -647,12 +636,6 @@ class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: Li
 
 class BehandlingstilstandException(vedtak: Vedtak) :
     IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")
-
-class OpphoersrevurderingErIkkeOpphoersvedtakException(revurderingAarsak: Revurderingaarsak?, vedtakType: VedtakType) :
-    IllegalStateException(
-        "Vedtaket er av type $vedtakType, men dette er " +
-            "ikke gyldig for revurderingen med årsak $revurderingAarsak",
-    )
 
 class ManglerAvkortetYtelse :
     UgyldigForespoerselException(

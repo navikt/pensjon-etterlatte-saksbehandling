@@ -3,19 +3,19 @@ import { Personopplysning } from '~components/person/personopplysninger/Personop
 import { PersonIcon } from '@navikt/aksel-icons'
 import { Heading, Table, Tag } from '@navikt/ds-react'
 import { SpaceChildren } from '~shared/styled'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formattering'
 import { AlderTag } from '~components/person/personopplysninger/components/AlderTag'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { IPdlPerson } from '~shared/types/Person'
+import { PersonopplysningPerson } from '~shared/api/pdltjenester'
 
 export const Foreldre = ({
   avdoed,
   gjenlevende,
   foreldreansvar,
 }: {
-  avdoed?: IPdlPerson[]
-  gjenlevende?: IPdlPerson[]
+  avdoed?: PersonopplysningPerson[]
+  gjenlevende?: PersonopplysningPerson[]
   foreldreansvar?: string[]
 }) => {
   const harForeldreansvar = (fnr: string): boolean => {
@@ -36,14 +36,14 @@ export const Foreldre = ({
         <Table.Body>
           {!!avdoed?.length ? (
             <>
-              {avdoed.map((doed: IPdlPerson, index: number) => (
+              {avdoed.map((doed: PersonopplysningPerson, index: number) => (
                 <Table.Row key={index}>
                   <Table.DataCell>
                     <SpaceChildren direction="row">
                       {`${doed.fornavn} ${doed.etternavn}`}
                       {!!doed.doedsdato && (
                         <Tag variant="error-filled" size="small">
-                          Død {formaterStringDato(doed.doedsdato)}
+                          Død {formaterDato(doed.doedsdato)}
                         </Tag>
                       )}
                     </SpaceChildren>
@@ -51,7 +51,7 @@ export const Foreldre = ({
                   <Table.DataCell>
                     <SpaceChildren direction="row">
                       <KopierbarVerdi value={doed.foedselsnummer} iconPosition="right" />
-                      <AlderTag foedselsdato={doed.foedselsdato} />
+                      {!!doed.foedselsdato && <AlderTag foedselsdato={doed.foedselsdato} />}
                     </SpaceChildren>
                   </Table.DataCell>
                   <BostedsadresseDataCell bostedsadresse={doed.bostedsadresse} index={0} />
@@ -68,7 +68,7 @@ export const Foreldre = ({
           )}
           {!!gjenlevende?.length ? (
             <>
-              {gjenlevende.map((levende: IPdlPerson, index: number) => (
+              {gjenlevende.map((levende: PersonopplysningPerson, index: number) => (
                 <Table.Row key={index}>
                   <Table.DataCell>
                     <SpaceChildren direction="row">
@@ -78,7 +78,7 @@ export const Foreldre = ({
                   <Table.DataCell>
                     <SpaceChildren direction="row">
                       <KopierbarVerdi value={levende.foedselsnummer} iconPosition="right" />
-                      <AlderTag foedselsdato={levende.foedselsdato} />
+                      {!!levende.foedselsdato && <AlderTag foedselsdato={levende.foedselsdato} />}
                     </SpaceChildren>
                   </Table.DataCell>
                   {!!levende.bostedsadresse ? (

@@ -1,27 +1,27 @@
 import React, { ReactNode } from 'react'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { HeartIcon } from '@navikt/aksel-icons'
-import { IPdlPerson, Sivilstand } from '~shared/types/Person'
 import { Heading, Table, Tag } from '@navikt/ds-react'
-import { formaterDato, formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formattering'
 import { SpaceChildren } from '~shared/styled'
 import styled from 'styled-components'
 import { lowerCase, startCase } from 'lodash'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { PersonopplysningPerson, Sivilstand } from '~shared/api/pdltjenester'
 export const Sivilstatus = ({
   sivilstand,
   avdoede,
 }: {
   sivilstand?: Sivilstand[]
-  avdoede?: IPdlPerson[]
+  avdoede?: PersonopplysningPerson[]
 }): ReactNode => {
   const relatertVedSivilstandDoedsdato = (
     relatertVedSiviltilstand: string,
-    avdoede: IPdlPerson[]
+    avdoede: PersonopplysningPerson[]
   ): string | undefined => {
     const relaterteAvdoed = avdoede.find((val) => val.foedselsnummer === relatertVedSiviltilstand)
 
-    if (!!relaterteAvdoed?.doedsdato) return formaterStringDato(relaterteAvdoed.doedsdato)
+    if (!!relaterteAvdoed?.doedsdato) return formaterDato(relaterteAvdoed.doedsdato)
     else return undefined
   }
 
@@ -44,15 +44,15 @@ export const Sivilstatus = ({
                   <Table.DataCell>{!!stand.gyldigFraOgMed && formaterDato(stand.gyldigFraOgMed)}</Table.DataCell>
                   <Table.DataCell>
                     <SpaceChildren direction="row">
-                      {!!stand.relatertVedSiviltilstand && (
+                      {!!stand.relatertVedSivilstand && (
                         <>
-                          <KopierbarVerdi value={stand.relatertVedSiviltilstand} iconPosition="right" />
+                          <KopierbarVerdi value={stand.relatertVedSivilstand} iconPosition="right" />
                           {avdoede && avdoede.length >= 0 && (
                             <>
-                              {!!relatertVedSivilstandDoedsdato(stand.relatertVedSiviltilstand, avdoede) && (
+                              {!!relatertVedSivilstandDoedsdato(stand.relatertVedSivilstand, avdoede) && (
                                 <DoedsDatoWrapper>
                                   <Tag variant="error-filled" size="small">
-                                    Død {relatertVedSivilstandDoedsdato(stand.relatertVedSiviltilstand, avdoede)}
+                                    Død {relatertVedSivilstandDoedsdato(stand.relatertVedSivilstand, avdoede)}
                                   </Tag>
                                 </DoedsDatoWrapper>
                               )}

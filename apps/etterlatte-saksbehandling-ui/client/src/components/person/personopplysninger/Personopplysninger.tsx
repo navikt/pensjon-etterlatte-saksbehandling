@@ -60,7 +60,7 @@ export const Personopplysninger = ({
                         <Foreldre
                           avdoed={personopplysninger.avdoede}
                           gjenlevende={personopplysninger.gjenlevende}
-                          foreldreansvar={personopplysninger.soeker?.familieRelasjon?.ansvarligeForeldre}
+                          foreldreansvar={personopplysninger.soeker?.familierelasjon?.ansvarligeForeldre}
                         />
                       )}
                       {sak.sak.sakType === SakType.OMSTILLINGSSTOENAD && (
@@ -75,7 +75,6 @@ export const Personopplysninger = ({
                           <Statsborgerskap
                             statsborgerskap={personopplysninger.soeker?.statsborgerskap}
                             pdlStatsborgerskap={personopplysninger.soeker?.pdlStatsborgerskap}
-                            bosattLand={personopplysninger.soeker?.bostedsadresse?.at(0)?.land}
                             landListe={landListe}
                           />
                           <Innflytting

@@ -10,12 +10,10 @@ import { ILand } from '~shared/api/trygdetid'
 export const Statsborgerskap = ({
   statsborgerskap,
   pdlStatsborgerskap,
-  bosattLand,
   landListe,
 }: {
   statsborgerskap?: string
   pdlStatsborgerskap?: PdlStatsborgerskap[]
-  bosattLand?: string
   landListe: ILand[]
 }): ReactNode => {
   return (
@@ -26,7 +24,6 @@ export const Statsborgerskap = ({
             <Table.ColumnHeader scope="col">Land</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Fra</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Til</Table.ColumnHeader>
-            <Table.ColumnHeader scope="col">Personstatus</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -40,15 +37,11 @@ export const Statsborgerskap = ({
                 <Table.DataCell>
                   {!!borgerskap.gyldigTilOgMed ? formaterStringDato(borgerskap.gyldigTilOgMed) : ''}
                 </Table.DataCell>
-                <Table.DataCell>
-                  {finnLandSomTekst(borgerskap.land, landListe) === bosattLand && 'Bosatt'}
-                </Table.DataCell>
               </Table.Row>
             ))
           ) : (
             <Table.Row>
               <Table.DataCell>{!!statsborgerskap && finnLandSomTekst(statsborgerskap, landListe)}</Table.DataCell>
-              <Table.DataCell>-</Table.DataCell>
               <Table.DataCell>-</Table.DataCell>
               <Table.DataCell>-</Table.DataCell>
             </Table.Row>

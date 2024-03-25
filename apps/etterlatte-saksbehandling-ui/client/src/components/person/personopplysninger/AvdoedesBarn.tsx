@@ -6,9 +6,9 @@ import { AlderTag } from '~components/person/personopplysninger/components/Alder
 import { SpaceChildren } from '~shared/styled'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { IPdlPerson } from '~shared/types/Person'
+import { PersonopplysningPerson } from '~shared/api/pdltjenester'
 
-export const AvdoedesBarn = ({ avdoede }: { avdoede?: IPdlPerson[] }): ReactNode => {
+export const AvdoedesBarn = ({ avdoede }: { avdoede?: PersonopplysningPerson[] }): ReactNode => {
   return (
     <Personopplysning heading="Søsken (avdødes barn)" icon={<ChildEyesIcon />}>
       <Table>
@@ -31,7 +31,7 @@ export const AvdoedesBarn = ({ avdoede }: { avdoede?: IPdlPerson[] }): ReactNode
                     <Table.DataCell>
                       <SpaceChildren direction="row">
                         <KopierbarVerdi value={barn.foedselsnummer} iconPosition="right" />
-                        <AlderTag foedselsdato={barn.foedselsdato} />
+                        {!!barn.foedselsdato && <AlderTag foedselsdato={barn.foedselsdato} />}
                       </SpaceChildren>
                     </Table.DataCell>
                     <BostedsadresseDataCell bostedsadresse={doed.bostedsadresse} index={0} />

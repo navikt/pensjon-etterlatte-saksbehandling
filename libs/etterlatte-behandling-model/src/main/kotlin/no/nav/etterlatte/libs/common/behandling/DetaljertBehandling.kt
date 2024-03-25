@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.util.UUID
 
 data class DetaljertBehandling(
@@ -18,13 +17,7 @@ data class DetaljertBehandling(
     val revurderingInfo: RevurderingInfo?,
     val prosesstype: Prosesstype,
     val kilde: Vedtaksloesning,
-) {
-    fun kanVedta(type: VedtakType): Boolean {
-        return !(revurderingsaarsak.girOpphoer() && type != VedtakType.OPPHOER)
-    }
-}
-
-fun Revurderingaarsak?.girOpphoer() = this != null && utfall.girOpphoer
+)
 
 fun DetaljertBehandling.virkningstidspunkt() =
     requireNotNull(virkningstidspunkt) {

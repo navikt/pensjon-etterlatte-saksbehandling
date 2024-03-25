@@ -306,6 +306,7 @@ class BehandlingFactory(
             soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
             kilde = kilde,
             prosesstype = prosessType,
+            sendeBrev = true,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
             hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())

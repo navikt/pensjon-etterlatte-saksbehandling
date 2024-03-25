@@ -42,5 +42,6 @@ class DetaljertBehandlingTest {
             prosesstype = Prosesstype.MANUELL,
             revurderingInfo = null,
             kilde = Vedtaksloesning.GJENNY,
+            sendeBrev = true,
         )
 }

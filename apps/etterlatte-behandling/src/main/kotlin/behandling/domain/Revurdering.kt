@@ -53,6 +53,7 @@ sealed class Revurdering(
             revurderingInfo: RevurderingInfoMedBegrunnelse?,
             relatertBehandlingId: String?,
             begrunnelse: String?,
+            sendeBrev: Boolean,
         ) = when (prosesstype) {
             Prosesstype.MANUELL ->
                 ManuellRevurdering(
@@ -70,6 +71,7 @@ sealed class Revurdering(
                     kilde = kilde,
                     begrunnelse = begrunnelse,
                     relatertBehandlingId = relatertBehandlingId,
+                    sendeBrev = sendeBrev,
                 )
 
             Prosesstype.AUTOMATISK ->
@@ -88,6 +90,7 @@ sealed class Revurdering(
                     kilde = kilde,
                     begrunnelse = begrunnelse,
                     relatertBehandlingId = relatertBehandlingId,
+                    sendeBrev = sendeBrev,
                 )
         }
     }

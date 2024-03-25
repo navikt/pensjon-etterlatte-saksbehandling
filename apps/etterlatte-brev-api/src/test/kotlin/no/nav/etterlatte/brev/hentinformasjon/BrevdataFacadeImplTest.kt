@@ -265,6 +265,7 @@ internal class BrevdataFacadeImplTest {
             prosesstype = Prosesstype.MANUELL,
             revurderingInfo = null,
             kilde = Vedtaksloesning.GJENNY,
+            sendeBrev = true,
         )
 
     private fun opprettTrygdetid() = null

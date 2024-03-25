@@ -48,6 +48,7 @@ internal class BehandlingTest {
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
             gyldighetsproeving = null,
             kilde = Vedtaksloesning.GJENNY,
+            sendeBrev = true,
         )
 
     private val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler, "begrunnelse")

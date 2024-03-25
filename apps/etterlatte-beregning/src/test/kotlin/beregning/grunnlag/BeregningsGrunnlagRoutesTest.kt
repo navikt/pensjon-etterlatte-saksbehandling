@@ -84,6 +84,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 utlandstilknytning = null,
                 revurderingInfo = null,
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
             )
 
         every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
@@ -134,6 +135,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 utlandstilknytning = null,
                 revurderingInfo = null,
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
             )
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
@@ -280,6 +282,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 utlandstilknytning = null,
                 revurderingInfo = null,
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
             )
 
         testApplication {
@@ -335,6 +338,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 utlandstilknytning = null,
                 revurderingInfo = null,
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
             )
 
         testApplication {
@@ -599,6 +603,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 utlandstilknytning = null,
                 revurderingInfo = null,
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
             )
 
         every { repository.lagreOverstyrBeregningGrunnlagForBehandling(behandlingId, capture(slot)) } just runs

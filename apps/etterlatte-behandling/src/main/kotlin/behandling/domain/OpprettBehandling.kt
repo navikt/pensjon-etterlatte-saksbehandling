@@ -27,6 +27,7 @@ data class OpprettBehandling(
     val kilde: Vedtaksloesning,
     val begrunnelse: String? = null,
     val relatertBehandlingId: String? = null,
+    val sendeBrev: Boolean,
 ) {
     val id: UUID = UUID.randomUUID()
     val opprettet: Tidspunkt = Tidspunkt.now()

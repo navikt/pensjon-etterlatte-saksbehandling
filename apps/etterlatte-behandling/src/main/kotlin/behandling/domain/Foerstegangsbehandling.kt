@@ -30,6 +30,7 @@ data class Foerstegangsbehandling(
     val gyldighetsproeving: GyldighetsResultat?,
     override val prosesstype: Prosesstype = Prosesstype.MANUELL,
     override val kilde: Vedtaksloesning,
+    override val sendeBrev: Boolean,
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
 

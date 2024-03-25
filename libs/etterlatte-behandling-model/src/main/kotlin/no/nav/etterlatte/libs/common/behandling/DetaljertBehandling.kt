@@ -18,6 +18,7 @@ data class DetaljertBehandling(
     val revurderingInfo: RevurderingInfo?,
     val prosesstype: Prosesstype,
     val kilde: Vedtaksloesning,
+    val sendeBrev: Boolean,
 ) {
     fun kanVedta(type: VedtakType): Boolean {
         return !(revurderingsaarsak.girOpphoer() && type != VedtakType.OPPHOER)

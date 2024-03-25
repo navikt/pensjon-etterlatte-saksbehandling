@@ -43,6 +43,7 @@ fun behandling(
     revurderingInfo = null,
     prosesstype = Prosesstype.AUTOMATISK,
     kilde = Vedtaksloesning.GJENNY,
+    sendeBrev = true,
 )
 
 fun trygdetid(

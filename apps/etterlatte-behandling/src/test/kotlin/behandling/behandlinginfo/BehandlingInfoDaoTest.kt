@@ -167,5 +167,6 @@ internal class BehandlingInfoDaoTest(val dataSource: DataSource) {
             sakId = sak.id,
             status = BehandlingStatus.OPPRETTET,
             kilde = Vedtaksloesning.GJENNY,
+            sendeBrev = true,
         )
 }

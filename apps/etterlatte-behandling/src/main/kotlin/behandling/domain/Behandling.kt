@@ -48,6 +48,7 @@ sealed class Behandling {
     abstract val utlandstilknytning: Utlandstilknytning?
     abstract val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?
     abstract val kilde: Vedtaksloesning
+    abstract val sendeBrev: Boolean
 
     open val relatertBehandlingId: String? = null
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
@@ -243,6 +244,7 @@ internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Pe
         prosesstype = prosesstype,
         revurderingInfo = revurderingInfo()?.revurderingInfo,
         kilde = kilde,
+        sendeBrev = sendeBrev,
     )
 }
 

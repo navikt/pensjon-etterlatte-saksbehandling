@@ -24,7 +24,7 @@ class GrunnlagKlient(
 
     fun hentSakerForDoedsfall(doedsfallsmaaned: YearMonth): List<Long> {
         return runBlocking {
-            grunnlagHttpClient.get("$grunnlagUrl/api/grunnlag/doedsfall/$doedsfallsmaaned") {
+            grunnlagHttpClient.get("$grunnlagUrl/api/grunnlag/doedsdato/$doedsfallsmaaned") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
             }.body()

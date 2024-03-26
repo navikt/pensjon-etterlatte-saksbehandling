@@ -1,4 +1,5 @@
 import {
+  Alert,
   BodyShort,
   Button,
   ErrorMessage,
@@ -57,11 +58,14 @@ export const AvkortingInntekt = ({
   // Er det utregnet avkorting finnes det grunnlag lagt til i denne behandlingen
   const finnesRedigerbartGrunnlag = () => avkorting?.avkortetYtelse && avkorting?.avkortetYtelse.length !== 0
 
+  const mismatchGrunnlagsperioderOgVirkningstidspunkt = (sisteGrunnlag: IAvkortingGrunnlag) =>
+    sisteGrunnlag.fom !== behandling.virkningstidspunkt?.dato
+
   const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlag => {
     if (finnesRedigerbartGrunnlag()) {
       // Returnerer grunnlagsperiode som er opprettet i denne behandlingen
       const redigerbartGrunnlag = avkortingGrunnlag[0]
-      if (redigerbartGrunnlag.fom !== behandling.virkningstidspunkt?.dato) {
+      if (mismatchGrunnlagsperioderOgVirkningstidspunkt(redigerbartGrunnlag)) {
         // Korrigerer fom hvis virkningstidspunkt er endret
         return {
           ...redigerbartGrunnlag,
@@ -346,6 +350,11 @@ export const AvkortingInntekt = ({
           </Rows>
         </InntektAvkortingForm>
       )}
+      {mismatchGrunnlagsperioderOgVirkningstidspunkt(avkortingGrunnlag[0]) && (
+        <WarningAlert variant="warning">
+          Siste inntektsperiode stemmer ikke overens med virkningstidspunkt. Du må redigere for å korrigere.
+        </WarningAlert>
+      )}
       {isFailureHandler({
         apiResult: inntektGrunnlagStatus,
         errorMessage: 'En feil har oppstått',
@@ -402,4 +411,8 @@ const SpesifikasjonLabel = styled.div``
 
 const Rows = styled.div`
   flex-direction: column;
+`
+
+const WarningAlert = styled(Alert)`
+  max-width: fit-content;
 `

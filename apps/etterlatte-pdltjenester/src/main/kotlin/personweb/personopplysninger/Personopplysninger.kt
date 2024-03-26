@@ -2,6 +2,7 @@ package no.nav.etterlatte.personweb.dto
 
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.common.person.Statsborgerskap
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import java.time.LocalDate
@@ -22,7 +23,7 @@ data class PersonopplysningPerson(
     val bostedsadresse: List<Bostedsadresse>?,
     val sivilstand: List<Sivilstand>?,
     val statsborgerskap: String?,
-    val pdlStatsborgerskap: List<PdlStatsborgerskap>?,
+    val pdlStatsborgerskap: List<Statsborgerskap>?,
     val utland: Utland?,
     val familierelasjon: Familierelasjon?,
     val avdoedesBarn: List<PersonopplysningPerson?>?,
@@ -41,12 +42,6 @@ data class Sivilstand(
     val sivilstatus: Sivilstatus,
     val relatertVedSivilstand: Folkeregisteridentifikator?,
     val gyldigFraOgMed: LocalDate?,
-)
-
-data class PdlStatsborgerskap(
-    val land: String,
-    val gyldigFraOgMed: LocalDate?,
-    val gyldigTilOgMed: LocalDate?,
 )
 
 data class Familierelasjon(

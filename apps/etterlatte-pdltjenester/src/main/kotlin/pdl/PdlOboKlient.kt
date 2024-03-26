@@ -62,10 +62,10 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
         }
     }
 
-    suspend fun hentPerson(
+    suspend fun hentPersonopplysningPerson(
         fnr: Folkeregisteridentifikator,
         rolle: PersonRolle,
-        saktyper: List<SakType>,
+        sakType: SakType,
         bruker: BrukerTokenInfo,
     ): PdlPersonResponse {
         val request =
@@ -77,7 +77,7 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
         return retry<PdlPersonResponse>(times = 3) {
             httpClient.post(apiUrl) {
                 bearerAuth(getOboToken(bruker))
-                behandlingsnummer(saktyper)
+                behandlingsnummer(sakType)
                 header(PdlKlient.HEADER_TEMA, PdlKlient.HEADER_TEMA_VALUE)
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)

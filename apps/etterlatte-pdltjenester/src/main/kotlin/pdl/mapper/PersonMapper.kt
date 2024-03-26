@@ -11,11 +11,17 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Statsborgerskap
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlHentPersonNavn
 import no.nav.etterlatte.pdl.PdlKlient
+import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
+import no.nav.etterlatte.personweb.dto.Bostedsadresse
+import no.nav.etterlatte.personweb.dto.Familierelasjon
+import no.nav.etterlatte.personweb.dto.PersonopplysningPerson
+import no.nav.etterlatte.personweb.dto.Sivilstand
 import org.slf4j.LoggerFactory
 import personweb.dto.PersonNavn
 
@@ -94,6 +100,70 @@ object PersonMapper {
                     },
             )
         }
+
+    fun mapPersonopplysningPerson(
+        ppsKlient: ParallelleSannheterKlient,
+        pdlOboKlient: PdlOboKlient,
+        hentPerson: PdlHentPerson,
+        ident: Folkeregisteridentifikator,
+        sakType: SakType,
+        brukerTokenInfo: BrukerTokenInfo,
+        personRolle: PersonRolle,
+    ): PersonopplysningPerson {
+        return runBlocking {
+            val navn = ppsKlient.avklarNavn(hentPerson.navn)
+            val (statsborgerskap, pdlStatsborgerskap) =
+                kanskjeAvklarStatsborgerskap(
+                    ppsKlient,
+                    hentPerson.statsborgerskap,
+                )
+            val sivilstand = hentPerson.sivilstand?.let { SivilstandMapper.mapSivilstand(it) }
+            val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
+            val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
+            val bostedsadresse = hentPerson.bostedsadresse?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) }
+            val barnekull =
+                BarnekullMapper.mapBarnekullWeb(
+                    ppsKlient,
+                    pdlOboKlient,
+                    brukerTokenInfo = brukerTokenInfo,
+                    forelder = hentPerson,
+                    sakType = sakType,
+                )
+
+            PersonopplysningPerson(
+                fornavn = navn.fornavn,
+                etternavn = navn.etternavn,
+                foedselsnummer = ident,
+                foedselsdato = foedsel.foedselsdato,
+                doedsdato = doedsfall?.doedsdato,
+                bostedsadresse =
+                    bostedsadresse?.map {
+                        Bostedsadresse(it.adresseLinje1, it.postnr, it.gyldigFraOgMed, it.gyldigTilOgMed, it.aktiv)
+                    },
+                statsborgerskap = statsborgerskap?.land,
+                pdlStatsborgerskap = pdlStatsborgerskap,
+                sivilstand =
+                    sivilstand?.map {
+                        Sivilstand(it.sivilstatus, it.relatertVedSiviltilstand, it.gyldigFraOgMed)
+                    },
+                utland = UtlandMapper.mapUtland(hentPerson),
+                avdoedesBarn = barnekull?.barn,
+                vergemaalEllerFremtidsfullmakt =
+                    hentPerson.vergemaalEllerFremtidsfullmakt?.let {
+                        VergeMapper.mapVerge(
+                            it,
+                        )
+                    },
+                familierelasjon =
+                    FamilieRelasjonMapper.mapFamilieRelasjon(
+                        hentPerson,
+                        personRolle,
+                    ).let {
+                        Familierelasjon(it.ansvarligeForeldre, it.barn)
+                    },
+            )
+        }
+    }
 
     fun mapPersonNavn(
         ppsKlient: ParallelleSannheterKlient,

@@ -4,7 +4,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.maskerFnr
@@ -14,12 +13,8 @@ import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlResponseError
 import no.nav.etterlatte.pdl.mapper.PersonMapper
-import no.nav.etterlatte.personweb.dto.Bostedsadresse
-import no.nav.etterlatte.personweb.dto.Familierelasjon
-import no.nav.etterlatte.personweb.dto.PdlStatsborgerskap
 import no.nav.etterlatte.personweb.dto.PersonopplysningPerson
 import no.nav.etterlatte.personweb.dto.Personopplysninger
-import no.nav.etterlatte.personweb.dto.Sivilstand
 import org.slf4j.LoggerFactory
 import personweb.dto.PersonNavn
 
@@ -81,19 +76,19 @@ class PersonWebService(
         bruker: BrukerTokenInfo,
     ): Personopplysninger {
         val mottaker =
-            hentPerson(
+            hentPersonopplysningPerson(
                 fnr = Folkeregisteridentifikator.of(ident),
                 rolle = PersonRolle.BARN,
-                saktyper = listOf(SakType.BARNEPENSJON),
+                sakType = SakType.BARNEPENSJON,
                 bruker = bruker,
             )
 
         val foreldre =
-            mottaker.familieRelasjon?.foreldre?.map {
-                hentPerson(
+            mottaker.familierelasjon?.ansvarligeForeldre?.map {
+                hentPersonopplysningPerson(
                     fnr = it,
                     rolle = PersonRolle.AVDOED,
-                    saktyper = listOf(SakType.BARNEPENSJON),
+                    sakType = SakType.BARNEPENSJON,
                     bruker,
                 )
             } ?: emptyList()
@@ -101,9 +96,9 @@ class PersonWebService(
         val (avdoede, gjenlevende) = foreldre.partition { it.doedsdato != null }
 
         return Personopplysninger(
-            soeker = personTilPersonopplysningPerson(mottaker),
-            avdoede = avdoede.map { personTilPersonopplysningPerson(it) },
-            gjenlevende = gjenlevende.map { personTilPersonopplysningPerson(it) },
+            soeker = mottaker,
+            avdoede = avdoede,
+            gjenlevende = gjenlevende,
         )
     }
 
@@ -112,10 +107,10 @@ class PersonWebService(
         bruker: BrukerTokenInfo,
     ): Personopplysninger {
         val mottaker =
-            hentPerson(
+            hentPersonopplysningPerson(
                 fnr = Folkeregisteridentifikator.of(ident),
                 rolle = PersonRolle.GJENLEVENDE,
-                saktyper = listOf(SakType.OMSTILLINGSSTOENAD),
+                sakType = SakType.OMSTILLINGSSTOENAD,
                 bruker,
             )
 
@@ -126,34 +121,34 @@ class PersonWebService(
                     Sivilstatus.GJENLEVENDE_PARTNER,
                     Sivilstatus.ENKE_ELLER_ENKEMANN,
                 ).contains(it.sivilstatus)
-            }?.mapNotNull { it.relatertVedSiviltilstand } ?: emptyList()
+            }?.mapNotNull { it.relatertVedSivilstand } ?: emptyList()
 
         val (avdoede, levende) =
             partnerVedSivilstand.map {
-                hentPerson(
+                hentPersonopplysningPerson(
                     fnr = it,
                     rolle = PersonRolle.AVDOED,
-                    saktyper = listOf(SakType.OMSTILLINGSSTOENAD),
+                    sakType = SakType.OMSTILLINGSSTOENAD,
                     bruker,
                 )
             }.partition { it.doedsdato != null }
 
         return Personopplysninger(
-            soeker = personTilPersonopplysningPerson(mottaker),
-            avdoede = avdoede.map { personTilPersonopplysningPerson(it) },
-            gjenlevende = levende.map { personTilPersonopplysningPerson(it) },
+            soeker = mottaker,
+            avdoede = avdoede,
+            gjenlevende = levende,
         )
     }
 
-    private suspend fun hentPerson(
+    private suspend fun hentPersonopplysningPerson(
         fnr: Folkeregisteridentifikator,
         rolle: PersonRolle,
-        saktyper: List<SakType>,
+        sakType: SakType,
         bruker: BrukerTokenInfo,
-    ): Person {
+    ): PersonopplysningPerson {
         logger.info("Henter person med fnr=$fnr fra PDL")
 
-        return pdlOboKlient.hentPerson(fnr, rolle, saktyper, bruker).let {
+        return pdlOboKlient.hentPersonopplysningPerson(fnr, rolle, sakType, bruker).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.joinToString(", ")
                 if (it.errors?.personIkkeFunnet() == true) {
@@ -164,46 +159,16 @@ class PersonWebService(
                     )
                 }
             } else {
-                // TODO: lage egen mapper for person, slik at vi ikke bruker pdlKlient, VERY bad security
-                PersonMapper.mapPerson(
+                PersonMapper.mapPersonopplysningPerson(
                     ppsKlient = ppsKlient,
-                    pdlKlient = pdlKlient,
-                    fnr = fnr,
-                    personRolle = rolle,
+                    pdlOboKlient = pdlOboKlient,
+                    ident = fnr,
                     hentPerson = it.data.hentPerson,
-                    saktyper = saktyper,
+                    sakType = sakType,
+                    brukerTokenInfo = bruker,
+                    personRolle = rolle,
                 )
             }
-        }
-    }
-
-    private fun personTilPersonopplysningPerson(person: Person?): PersonopplysningPerson? {
-        if (person != null) {
-            return PersonopplysningPerson(
-                person.fornavn,
-                person.etternavn,
-                person.foedselsnummer,
-                person.foedselsdato,
-                person.doedsdato,
-                person.bostedsadresse?.map {
-                    Bostedsadresse(it.adresseLinje1, it.postnr, it.gyldigFraOgMed, it.gyldigTilOgMed, it.aktiv)
-                },
-                person.sivilstand?.map {
-                    Sivilstand(it.sivilstatus, it.relatertVedSiviltilstand, it.gyldigFraOgMed)
-                },
-                person.statsborgerskap,
-                person.pdlStatsborgerskap?.map {
-                    PdlStatsborgerskap(it.land, it.gyldigFraOgMed, it.gyldigTilOgMed)
-                },
-                person.utland,
-                Familierelasjon(person.familieRelasjon?.ansvarligeForeldre, person.familieRelasjon?.barn),
-                person.avdoedesBarn?.map {
-                    personTilPersonopplysningPerson(it)
-                },
-                person.vergemaalEllerFremtidsfullmakt,
-            )
-        } else {
-            return null
         }
     }
 

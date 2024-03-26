@@ -48,7 +48,11 @@ export const AvdoedesBarn = ({ avdoede }: { avdoede?: PersonopplysningPerson[] }
               )
             )
           ) : (
-            <Heading size="small">Ingen avdøde</Heading>
+            <Table.Row>
+              <Table.DataCell colSpan={3}>
+                <Heading size="small">Ingen avdøde</Heading>
+              </Table.DataCell>
+            </Table.Row>
           )}
         </Table.Body>
       </Table>

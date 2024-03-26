@@ -35,8 +35,8 @@ export const Person = () => {
 
   const [search, setSearch] = useSearchParams()
 
-  const [personNavnResult, hentPersonNavnFetch] = useApiCall(hentPersonNavn)
-  const [sakResult, hentSakFetch] = useApiCall(hentSakMedBehandlnger)
+  const [personNavnResult, personNavnFetch] = useApiCall(hentPersonNavn)
+  const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
 
   const velgFane = (value: string) => {
@@ -50,8 +50,8 @@ export const Person = () => {
 
   useEffect(() => {
     if (fnrHarGyldigFormat(fnr)) {
-      hentPersonNavnFetch(fnr!!)
-      hentSakFetch(fnr!!)
+      personNavnFetch(fnr!!)
+      sakFetch(fnr!!)
     }
   }, [fnr])
 

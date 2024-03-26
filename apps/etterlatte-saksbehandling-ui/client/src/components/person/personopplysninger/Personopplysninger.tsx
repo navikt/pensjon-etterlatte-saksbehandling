@@ -26,18 +26,18 @@ export const Personopplysninger = ({
   sakResult: Result<SakMedBehandlinger>
   fnr: string
 }): ReactNode => {
-  const [personopplysningerResult, hentPersonopplysningerFetch] = useApiCall(hentPersonopplysninger)
+  const [personopplysningerResult, personopplysningerFetch] = useApiCall(hentPersonopplysninger)
 
-  const [landListeResult, hentLandListe] = useApiCall(hentAlleLand)
+  const [landListeResult, landListeFetch] = useApiCall(hentAlleLand)
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
-      hentPersonopplysningerFetch({ ident: fnr, sakType: sakResult.data.sak.sakType })
+      personopplysningerFetch({ ident: fnr, sakType: sakResult.data.sak.sakType })
     }
   }, [fnr, sakResult])
 
   useEffect(() => {
-    hentLandListe(null)
+    landListeFetch(null)
   }, [])
 
   return (

@@ -151,7 +151,7 @@ const BrevutfallContent = styled.div`
   margin-bottom: 2em;
   max-width: 500px;
 `
-const InfoAlert = styled(Alert).attrs({ variant: 'info' })`
+const InfoAlert = styled(Alert)`
   margin-top: 4rem;
   margin-bottom: 2rem;
   max-width: fit-content;

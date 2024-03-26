@@ -14,8 +14,13 @@ import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { mapApiResult } from '~shared/api/apiUtils'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 
-export const Avkorting = (props: { behandling: IBehandlingReducer; resetBrevutfallvalidering: () => void }) => {
-  const { behandling } = props
+export const Avkorting = ({
+  behandling,
+  resetBrevutfallvalidering,
+}: {
+  behandling: IBehandlingReducer
+  resetBrevutfallvalidering: () => void
+}) => {
   const dispatch = useAppDispatch()
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
   const [avkorting, setAvkorting] = useState<IAvkorting>()
@@ -64,7 +69,7 @@ export const Avkorting = (props: { behandling: IBehandlingReducer; resetBrevutfa
           setAvkorting={setAvkorting}
         />
       )}
-      {avkorting && <Brevutfall behandling={behandling} resetBrevutfallvalidering={props.resetBrevutfallvalidering} />}
+      {avkorting && <Brevutfall behandling={behandling} resetBrevutfallvalidering={resetBrevutfallvalidering} />}
     </AvkortingWrapper>
   )
 }

@@ -69,9 +69,11 @@ data class Avkorting(
     fun oppdaterMedInntektsgrunnlag(nyttGrunnlag: AvkortingGrunnlag): Avkorting {
         val inntektsavkorting =
             aarsoppgjoer.inntektsavkorting
+                // Fjerner hvis det finnes fra før for å erstatte/redigere
                 .filter { it.grunnlag.id != nyttGrunnlag.id }
                 .map {
                     when (it.grunnlag.periode.tom) {
+                        // Lukker grunnlag fra forrige behandling
                         null ->
                             it.copy(
                                 grunnlag =

@@ -122,7 +122,7 @@ object PersonMapper {
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
             val bostedsadresse = hentPerson.bostedsadresse?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) }
             val barnekull =
-                BarnekullMapper.mapBarnekullWeb(
+                BarnekullMapper.mapBarnekullPersonopplysning(
                     ppsKlient,
                     pdlOboKlient,
                     brukerTokenInfo = brukerTokenInfo,

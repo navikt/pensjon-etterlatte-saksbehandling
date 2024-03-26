@@ -22,8 +22,8 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.utils.toPdlVariables
 import org.slf4j.LoggerFactory
 
-class PdlOboKlient(private val httpClient: HttpClient, private val config: Config) {
-    private val logger = LoggerFactory.getLogger(PdlKlient::class.java)
+class PdlOboKlient(private val httpClient: HttpClient, config: Config) {
+    private val logger = LoggerFactory.getLogger(PdlOboKlient::class.java)
 
     private val apiUrl = config.getString("pdl.url")
     private val pdlScope = config.getString("pdl.scope")

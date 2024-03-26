@@ -19,7 +19,7 @@ data class Barnekull(
     val barnUtenIdent: List<PersonUtenIdent>? = null,
 )
 
-data class BarnekullWeb(
+data class BarnekullPersonopplysning(
     val barn: List<PersonopplysningPerson?>,
 )
 
@@ -70,13 +70,13 @@ object BarnekullMapper {
         return personer?.let { Barnekull(it, personerUtenIdent) }
     }
 
-    suspend fun mapBarnekullWeb(
+    suspend fun mapBarnekullPersonopplysning(
         ppsKlient: ParallelleSannheterKlient,
         pdlOboKlient: PdlOboKlient,
         forelder: PdlHentPerson,
         sakType: SakType,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BarnekullWeb? {
+    ): BarnekullPersonopplysning? {
         val barnFnr =
             forelder.forelderBarnRelasjon
                 ?.filter {
@@ -109,6 +109,6 @@ object BarnekullMapper {
                 }
             }
 
-        return personer?.let { BarnekullWeb(it) }
+        return personer?.let { BarnekullPersonopplysning(it) }
     }
 }

@@ -1,4 +1,5 @@
 <configuration>
+    <conversionRule conversionWord="msg" converterClass="no.nav.etterlatte.libs.common.person.FnrCoverConverter"/>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{YYYY-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
@@ -17,4 +18,5 @@
     <logger name="org.apache.kafka" level="INFO"/>
     <logger name="io.netty" level="INFO"/>
     <logger name="no.nav.helse.rapids_rivers.PingPong" level="DEBUG"/>
+    <logger name="no.nav.etterlatte" level="DEBUG"/>
 </configuration>

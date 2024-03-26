@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.route.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.route.PersonTilgangsSjekk
 import no.nav.etterlatte.libs.ktor.route.SakTilgangsSjekk
+import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import org.slf4j.LoggerFactory
@@ -41,6 +42,8 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient, private val h
 
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
+
+    private val tilgangssjekker = Tilgangssjekker(config, httpClient)
 
     override suspend fun hentBehandling(
         behandlingId: UUID,
@@ -77,72 +80,17 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient, private val h
         behandlingId: UUID,
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
-    ): Boolean {
-        try {
-            return downstreamResourceClient
-                .get(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$resourceUrl/tilgang/behandling/$behandlingId?skrivetilgang=$skrivetilgang",
-                        ),
-                    brukerTokenInfo = bruker,
-                )
-                .mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
-                )
-        } catch (e: Exception) {
-            throw BehandlingKlientException("Sjekking av tilgang for behandling feilet", e)
-        }
-    }
+    ): Boolean = tilgangssjekker.harTilgangTilBehandling(behandlingId, skrivetilgang, bruker)
 
     override suspend fun harTilgangTilSak(
         sakId: Long,
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
-    ): Boolean {
-        try {
-            return downstreamResourceClient
-                .get(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$resourceUrl/tilgang/sak/$sakId?skrivetilgang=$skrivetilgang",
-                        ),
-                    brukerTokenInfo = bruker,
-                )
-                .mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
-                )
-        } catch (e: Exception) {
-            throw BehandlingKlientException("Sjekking av tilgang for sak feilet", e)
-        }
-    }
+    ): Boolean = tilgangssjekker.harTilgangTilSak(sakId, skrivetilgang, bruker)
 
     override suspend fun harTilgangTilPerson(
         foedselsnummer: Folkeregisteridentifikator,
         skrivetilgang: Boolean,
         bruker: Saksbehandler,
-    ): Boolean {
-        try {
-            return downstreamResourceClient
-                .post(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$resourceUrl/tilgang/person?skrivetilgang=$skrivetilgang",
-                        ),
-                    brukerTokenInfo = bruker,
-                    postBody = foedselsnummer.value,
-                )
-                .mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
-                )
-        } catch (e: Exception) {
-            throw BehandlingKlientException("Sjekking av tilgang for person feilet", e)
-        }
-    }
+    ): Boolean = tilgangssjekker.harTilgangTilPerson(foedselsnummer, skrivetilgang, bruker)
 }

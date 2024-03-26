@@ -5,9 +5,9 @@ import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/
 import { BodyShort, Button, Heading } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
-import { Klage } from '~shared/types/Klage'
+import { erKlageRedigerbar, Klage } from '~shared/types/Klage'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { BrevProsessType, BrevStatus, kanBrevRedigeres } from '~shared/types/Brev'
+import { BrevProsessType, BrevStatus } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { hentBrev } from '~shared/api/brev'
@@ -50,6 +50,8 @@ export function KlageBrev() {
     return <Spinner visible label="Henter klage" />
   }
 
+  const redigerbar = erKlageRedigerbar(klage)
+
   return (
     <Content>
       <BrevContent>
@@ -71,10 +73,10 @@ export function KlageBrev() {
                   brevId={hentetBrev.data.id}
                   sakId={hentetBrev.data.sakId}
                   tittel={hentetBrev.data.tittel}
-                  kanRedigeres={true}
+                  kanRedigeres={redigerbar}
                 />
                 <br />
-                <BrevMottaker brev={hentetBrev.data} kanRedigeres={true} />
+                <BrevMottaker brev={hentetBrev.data} kanRedigeres={redigerbar} />
               </>
             )}
           </ContentHeader>
@@ -92,7 +94,7 @@ export function KlageBrev() {
             if (brev.status === BrevStatus.DISTRIBUERT || brev.prosessType !== BrevProsessType.REDIGERBAR) {
               return <ForhaandsvisningBrev brev={brev} />
             } else {
-              return <RedigerbartBrev brev={brev} kanRedigeres={kanBrevRedigeres(brev.status)} />
+              return <RedigerbartBrev brev={brev} kanRedigeres={redigerbar} />
             }
           }
         )}

@@ -16,7 +16,6 @@ import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -138,12 +137,10 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgang =
-                inTransaction {
-                    tilgangService.harTilgangTilPerson(
-                        foedselsnummer.value,
-                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
-                    )
-                }
+                tilgangService.harTilgangTilPerson(
+                    foedselsnummer.value,
+                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                )
             if (harTilgang) {
                 onSuccess(foedselsnummer)
             } else {
@@ -164,12 +161,10 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGrad
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilPerson =
-                inTransaction {
-                    tilgangService.harTilgangTilPerson(
-                        foedselsnummer.value,
-                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
-                    )
-                }
+                tilgangService.harTilgangTilPerson(
+                    foedselsnummer.value,
+                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                )
             if (harTilgangTilPerson) {
                 onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
             } else {

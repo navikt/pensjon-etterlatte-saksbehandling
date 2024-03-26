@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model.bp
 
+import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
@@ -47,6 +48,8 @@ data class BarnepensjonRevurdering(
             utlandstilknytning: UtlandstilknytningType?,
             brevutfall: BrevutfallDto,
             revurderingaarsak: Revurderingaarsak?,
+            erForeldreloes: Boolean,
+            avdoede: List<Avdoed>,
         ): BarnepensjonRevurdering {
             val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
             val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
@@ -63,7 +66,22 @@ data class BarnepensjonRevurdering(
                 erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
                 // TODO klage kobler seg på her
                 datoVedtakOmgjoering = null,
-                beregning = barnepensjonBeregning(innhold, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
+                beregning =
+                    barnepensjonBeregning(
+                        innhold,
+                        utbetalingsinfo,
+                        grunnbeloep,
+                        beregningsperioder,
+                        trygdetid,
+                        erForeldreloes,
+                        bruktAvdoed =
+                            avdoede.find {
+                                val fnr =
+                                    utbetalingsinfo.beregningsperioder.last().trygdetidForIdent
+                                        ?: throw ManglerAvdoedBruktTilTrygdetid()
+                                it.fnr.value == fnr
+                            }?.navn ?: throw ManglerAvdoedBruktTilTrygdetid(),
+                    ),
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },

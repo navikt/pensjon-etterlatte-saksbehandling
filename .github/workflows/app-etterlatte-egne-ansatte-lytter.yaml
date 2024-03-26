@@ -24,6 +24,7 @@ on:
       - main
     paths:
       - apps/etterlatte-egne-ansatte-lytter/**
+      - "!apps/etterlatte-egne-ansatte-lytter/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml

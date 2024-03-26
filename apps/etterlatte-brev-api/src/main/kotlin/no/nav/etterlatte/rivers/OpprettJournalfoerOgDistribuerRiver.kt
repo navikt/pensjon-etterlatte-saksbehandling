@@ -16,8 +16,10 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.rapidsandrivers.BOR_I_UTLAND_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_KODE
+import no.nav.etterlatte.rapidsandrivers.ER_OVER_18_AAR
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.sakId
@@ -41,6 +43,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         initialiserRiver(rapidsConnection, BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BREVMAL_RIVER_KEY) }
+            validate { it.interestedIn(BOR_I_UTLAND_KEY) }
         }
     }
 
@@ -50,7 +53,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     ) {
         runBlocking {
             val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
-            val brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, Systembruker.brev)
+            val brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, Systembruker.brev, packet)
             rapidsConnection.svarSuksess(packet.sakId, brevId, brevkode)
         }
     }
@@ -59,6 +62,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         sakId: Long,
         brevKode: Brevkoder,
         brukerTokenInfo: BrukerTokenInfo,
+        packet: JsonMessage,
     ): BrevID {
         logger.info("Oppretter $brevKode-brev i sak $sakId")
 
@@ -73,11 +77,18 @@ class OpprettJournalfoerOgDistribuerRiver(
                         brevtype = brevKode.redigering.brevtype,
                     ) {
                         when (brevKode.redigering) {
-                            EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL -> opprettBarnepensjonInformasjonDoedsfall(sakId)
-                            EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL ->
+                            EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL -> {
+                                val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
+                                val erOver18aar = packet.hentVerdiEllerKastFeil(ER_OVER_18_AAR).toBoolean()
+                                opprettBarnepensjonInformasjonDoedsfall(sakId, borIutland, erOver18aar)
+                            }
+                            EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL -> {
+                                val borIutland = packet.hentVerdiEllerKastFeil(BOR_I_UTLAND_KEY).toBoolean()
                                 opprettOmstillingsstoenadInformasjonDoedsfall(
                                     sakId,
+                                    borIutland,
                                 )
+                            }
                             else -> ManueltBrevData()
                         }
                     }
@@ -127,23 +138,40 @@ class OpprettJournalfoerOgDistribuerRiver(
         )
     }
 
-    private suspend fun opprettBarnepensjonInformasjonDoedsfall(sakId: Long) =
-        BarnepensjonInformasjonDoedsfall.fra(
-            generellBrevData =
-                brevdataFacade.hentGenerellBrevData(
-                    sakId = sakId,
-                    behandlingId = null,
-                    brukerTokenInfo = Systembruker.brev,
-                ),
-        )
+    private suspend fun opprettBarnepensjonInformasjonDoedsfall(
+        sakId: Long,
+        borIutland: Boolean,
+        erOver18aar: Boolean,
+    ) = BarnepensjonInformasjonDoedsfall.fra(
+        generellBrevData =
+            brevdataFacade.hentGenerellBrevData(
+                sakId = sakId,
+                behandlingId = null,
+                brukerTokenInfo = Systembruker.brev,
+            ),
+        borIutland,
+        erOver18aar,
+    )
 
-    private suspend fun opprettOmstillingsstoenadInformasjonDoedsfall(sakId: Long) =
-        OmstillingsstoenadInformasjonDoedsfall.fra(
-            generellBrevData =
-                brevdataFacade.hentGenerellBrevData(
-                    sakId = sakId,
-                    behandlingId = null,
-                    brukerTokenInfo = Systembruker.brev,
-                ),
-        )
+    private suspend fun opprettOmstillingsstoenadInformasjonDoedsfall(
+        sakId: Long,
+        borIutland: Boolean,
+    ) = OmstillingsstoenadInformasjonDoedsfall.fra(
+        generellBrevData =
+            brevdataFacade.hentGenerellBrevData(
+                sakId = sakId,
+                behandlingId = null,
+                brukerTokenInfo = Systembruker.brev,
+            ),
+        borIutland,
+    )
+}
+
+private fun JsonMessage.hentVerdiEllerKastFeil(key: String): String {
+    val verdi = this[key].toString()
+    if (verdi.isEmpty()) {
+        throw RuntimeException("Må ha verdi for key $key")
+    } else {
+        return verdi
+    }
 }

@@ -25,6 +25,7 @@ on:
       - main
     paths:
       - apps/etterlatte-fordeler/**
+      - "!apps/etterlatte-fordeler/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-database/**
       - libs/etterlatte-ktor/**

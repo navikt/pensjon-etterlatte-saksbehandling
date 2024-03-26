@@ -179,12 +179,15 @@ class DoedshendelseService(
     private fun finnSamboereForAvdoedMedFellesBarn(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
         val avdoedesBarn = avdoed.avdoedesBarn
         val andreForeldreForAvdoedesBarn =
-            avdoedesBarn?.mapNotNull { barn ->
-                barn.familieRelasjon?.foreldre?.filter { it.value != avdoed.foedselsnummer.verdi.value }
-                    ?.map { it }
-                    ?.map { forelder -> forelder.value }
-            }
-        return harSammeAdresseSomAvdoed(avdoed, andreForeldreForAvdoedesBarn?.flatten())
+            avdoedesBarn
+                ?.mapNotNull { barn ->
+                    barn.familieRelasjon?.foreldre?.filter { it.value != avdoed.foedselsnummer.verdi.value }
+                        ?.map { it.value }
+                }
+                ?.flatten()
+                ?.filterNot { varEktefelleVedDoedsfall(avdoed, it) }
+
+        return harSammeAdresseSomAvdoed(avdoed, andreForeldreForAvdoedesBarn)
     }
 
     private fun harSammeAdresseSomAvdoed(
@@ -209,7 +212,7 @@ class DoedshendelseService(
                 .gjenlevendeForelder.bostedsadresse?.map { it.verdi }?.filter { it.aktiv }
         val avdoedBosteder =
             avdoedOgAnnenForelderMedFellesbarn
-                .avdoedPerson.bostedsadresse?.map { it.verdi }?.filter { it.aktiv }
+                .avdoedPerson.bostedsadresse?.map { it.verdi }?.sortedByDescending { it.gyldigFraOgMed }
 
         return isAdresserLike(gjenlevendeBosteder?.first(), avdoedBosteder?.first())
     }
@@ -228,12 +231,15 @@ class DoedshendelseService(
                 it.verdi.sivilstatus in
                     listOf(
                         Sivilstatus.GIFT,
-                        Sivilstatus.UGIFT,
-                        Sivilstatus.SKILT,
-                        Sivilstatus.ENKE_ELLER_ENKEMANN,
                         Sivilstatus.SEPARERT,
+                        Sivilstatus.SKILT,
+                        Sivilstatus.REGISTRERT_PARTNER,
+                        Sivilstatus.SEPARERT_PARTNER,
+                        Sivilstatus.SKILT_PARTNER,
                     )
-            }?.map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EKTEFELLE) } ?: emptyList()
+            }?.map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EKTEFELLE) }
+            ?.distinct()
+            ?: emptyList()
     }
 }
 

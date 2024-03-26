@@ -60,9 +60,14 @@ class HendelsePoller(
 
                 logger.info(markers, "Behandler hendelse: [id=${it.id}, sakId=${it.sakId}]")
 
-                hendelsePublisher.publish(hendelse = it, jobb = jobsById[it.jobbId]!!)
-
                 hendelseDao.oppdaterHendelseStatus(it.id, HendelseStatus.SENDT)
+
+                try {
+                    hendelsePublisher.publish(hendelse = it, jobb = jobsById[it.jobbId]!!)
+                } catch (e: Exception) {
+                    logger.error(markers, "Feil ved publisering av hendelse", e)
+                    hendelseDao.oppdaterHendelseStatus(it.id, HendelseStatus.FEILET)
+                }
             }
         }
     }

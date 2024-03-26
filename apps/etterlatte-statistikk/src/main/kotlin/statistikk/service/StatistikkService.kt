@@ -285,7 +285,7 @@ class StatistikkService(
         type = "TILBAKEKREVING",
         status = hendelse.name,
         ansvarligEnhet = statistikkTilbakekreving.tilbakekreving.sak.enhet,
-        resultat = statistikkTilbakekreving.tilbakekreving.tilbakekreving.vurdering.konklusjon,
+        resultat = statistikkTilbakekreving.tilbakekreving.tilbakekreving.vurdering?.vedtak,
         tekniskTid = tekniskTid.toTidspunkt(),
         sakYtelse = statistikkTilbakekreving.tilbakekreving.sak.sakType.name,
         behandlingMetode = BehandlingMetode.MANUELL,

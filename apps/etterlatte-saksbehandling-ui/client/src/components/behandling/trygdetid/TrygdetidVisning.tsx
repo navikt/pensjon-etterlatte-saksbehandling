@@ -67,6 +67,7 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
       <Trygdetid
         redigerbar={redigerbar}
         behandling={behandling}
+        vedtaksresultat={vedtaksresultat}
         virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato()}
       />
 

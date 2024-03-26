@@ -162,7 +162,7 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
     fom: Date | undefined = new Date(behandling.virkningstidspunkt!.dato),
     tom: Date | undefined
   ): Date => {
-    return addMonths(tom || fom, 1)
+    return tom ? addMonths(tom, 1) : fom
   }
 
   return (
@@ -192,6 +192,7 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
                       <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
                       <Table.HeaderCell scope="col">Utbetalt beløp</Table.HeaderCell>
                       <Table.HeaderCell scope="col">Trygdetid</Table.HeaderCell>
+                      <Table.HeaderCell scope="col">Tilhører FNR</Table.HeaderCell>
                       <Table.HeaderCell scope="col">Prorata</Table.HeaderCell>
                       <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
                     </Table.Row>
@@ -229,6 +230,7 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
                         data: {
                           utbetaltBeloep: '0',
                           trygdetid: '0',
+                          trygdetidForIdent: '',
                           prorataBroekNevner: '',
                           prorataBroekTeller: '',
                           beskrivelse: '',
@@ -296,6 +298,10 @@ function feilIOverstyrBeregningperiode(
     feil.push('TRYGDETID_MANGLER')
   }
 
+  if (!grunnlag.data.trygdetidForIdent) {
+    feil.push('TRYGDETID_MANGLER_FNR')
+  }
+
   const prorataBroekNevner = parseInt(grunnlag.data.prorataBroekNevner ?? '')
   const prorataBroekTeller = parseInt(grunnlag.data.prorataBroekTeller ?? '')
 
@@ -309,7 +315,7 @@ function feilIOverstyrBeregningperiode(
     feil.push('TOM_FOER_FOM')
   }
 
-  if (grunnlag.data.beskrivelse === undefined || grunnlag.data.beskrivelse === '') {
+  if (!grunnlag.data.beskrivelse) {
     feil.push('BESKRIVELSE_MANGLER')
   }
 
@@ -338,6 +344,7 @@ export type FeilIPeriodeGrunnlagAlle =
   | FeilIPeriodeOverstyrBeregning
   | 'BELOEP_MANGLER'
   | 'TRYGDETID_MANGLER'
+  | 'TRYGDETID_MANGLER_FNR'
   | 'BESKRIVELSE_MANGLER'
   | 'PRORATA_MANGLER'
 
@@ -350,6 +357,7 @@ export const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
   TOM_FOER_FOM: 'Til og med kan ikke være før fra og med',
   BELOEP_MANGLER: 'Utbetalt beløp er påkrevd',
   TRYGDETID_MANGLER: 'Trygdetid er påkrevd',
+  TRYGDETID_MANGLER_FNR: 'Trygdetid tilhører FNR er påkrevd',
   BESKRIVELSE_MANGLER: 'Beskrivelse er påkrevd',
   PRORATA_MANGLER: 'Prorata brøk må ha begge felter fyllt ut hvis det er i bruk',
 } as const

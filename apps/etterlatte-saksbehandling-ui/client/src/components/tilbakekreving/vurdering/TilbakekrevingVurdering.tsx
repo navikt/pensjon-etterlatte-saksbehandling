@@ -4,11 +4,7 @@ import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/
 import { useNavigate } from 'react-router-dom'
 import React from 'react'
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
-import { TilbakekrevingVurderingOverordnet } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingOverordnet'
-import { TilbakekrevingVurderingPerioder } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingPerioder'
-import { TilbakekrevingVurderingOppsummering } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingOppsummering'
-import { TilbakekrevingVurderingPerioderVisning } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingPerioderVisning'
-import { TilbakekrevingVurderingOverordnetVisning } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingOverordnetVisning'
+import { TilbakekrevingVurderingSkjema } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingSkjema'
 
 export function TilbakekrevingVurdering({
   behandling,
@@ -27,22 +23,11 @@ export function TilbakekrevingVurdering({
           </Heading>
         </HeadingWrapper>
       </ContentHeader>
-      {redigerbar ? (
-        <>
-          <TilbakekrevingVurderingOverordnet behandling={behandling} redigerbar={redigerbar} />
-          <TilbakekrevingVurderingPerioder behandling={behandling} redigerbar={redigerbar} />
-        </>
-      ) : (
-        <>
-          <TilbakekrevingVurderingOverordnetVisning behandling={behandling} />
-          <TilbakekrevingVurderingPerioderVisning behandling={behandling} />
-        </>
-      )}
-      <TilbakekrevingVurderingOppsummering behandling={behandling} />
-      <Border />
+      <TilbakekrevingVurderingSkjema behandling={behandling} redigerbar={redigerbar} />
+      <Border style={{ marginTop: '3em' }} />
       <FlexRow $spacing={true} justify="center">
-        <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/brev`)}>
-          {redigerbar ? 'Opprett vedtak' : 'Gå til vedtak'}
+        <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/utbetalinger`)}>
+          Neste
         </Button>
       </FlexRow>
     </Content>

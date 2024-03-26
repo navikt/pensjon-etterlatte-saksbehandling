@@ -105,6 +105,7 @@ class BeregningRepository(private val dataSource: DataSource) {
             "sakId" to beregning.grunnlagMetadata.sakId,
             "grunnlagVersjon" to beregning.grunnlagMetadata.versjon,
             "trygdetid" to beregningsperiode.trygdetid,
+            "trygdetidForIdent" to beregningsperiode.trygdetidForIdent,
             "beregningsMetode" to beregningsperiode.beregningsMetode?.name,
             "samletNorskTrygdetid" to beregningsperiode.samletNorskTrygdetid,
             "samletTeoretiskTrygdetid" to beregningsperiode.samletTeoretiskTrygdetid,
@@ -152,6 +153,7 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO =
                     versjon = long(BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn),
                 ),
             trygdetid = int(BeregningsperiodeDatabaseColumns.Trygdetid.navn),
+            trygdetidForIdent = stringOrNull(BeregningsperiodeDatabaseColumns.TrygdetidForIdent.navn),
             beregningsMetode =
                 stringOrNull(BeregningsperiodeDatabaseColumns.BeregningsMetode.navn)?.let {
                     BeregningsMetode.valueOf(it)
@@ -210,6 +212,7 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
                     grunnbelopMnd = it.grunnbelopMnd,
                     grunnbelop = it.grunnbelop,
                     trygdetid = it.trygdetid,
+                    trygdetidForIdent = it.trygdetidForIdent,
                     beregningsMetode = it.beregningsMetode,
                     samletNorskTrygdetid = it.samletNorskTrygdetid,
                     samletTeoretiskTrygdetid = it.samletTeoretiskTrygdetid,
@@ -238,6 +241,7 @@ private enum class BeregningsperiodeDatabaseColumns(val navn: String) {
     SakId("sakId"),
     GrunnlagVersjon("grunnlagVersjon"),
     Trygdetid("trygdetid"),
+    TrygdetidForIdent("trygdetid_for_ident"),
     BeregningsMetode("beregnings_metode"),
     SamletNorskTrygdetid("samlet_norsk_trygdetid"),
     SamletTeoretiskTrygdetid("samlet_teoretisk_trygdetid"),
@@ -272,6 +276,7 @@ private object Queries {
             ${BeregningsperiodeDatabaseColumns.SakId.navn}, 
             ${BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn}, 
             ${BeregningsperiodeDatabaseColumns.Trygdetid.navn},
+            ${BeregningsperiodeDatabaseColumns.TrygdetidForIdent.navn},
             ${BeregningsperiodeDatabaseColumns.BeregningsMetode.navn},
             ${BeregningsperiodeDatabaseColumns.SamletNorskTrygdetid.navn},
             ${BeregningsperiodeDatabaseColumns.SamletTeoretiskTrygdetid.navn},
@@ -283,9 +288,9 @@ private object Queries {
             ${BeregningsperiodeDatabaseColumns.Institusjonsopphold.navn})
         VALUES(:id::UUID, :beregningId::UUID, :behandlingId::UUID, :type::TEXT, :beregnetDato::TIMESTAMP, 
             :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, 
-            :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT, :trygdetid::BIGINT, :beregningsMetode::TEXT,
-            :samletNorskTrygdetid::BIGINT, :samletTeoretiskTrygdetid::BIGINT, :prorataBroekTeller::BIGINT,
-            :prorataBroekNevner::BIGINT, :regelResultat::JSONB, :regelVersjon::TEXT, :kilde::TEXT,
+            :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT, :trygdetid::BIGINT, :trygdetidForIdent::TEXT,
+            :beregningsMetode::TEXT, :samletNorskTrygdetid::BIGINT, :samletTeoretiskTrygdetid::BIGINT,
+            :prorataBroekTeller::BIGINT, :prorataBroekNevner::BIGINT, :regelResultat::JSONB, :regelVersjon::TEXT, :kilde::TEXT,
             :institusjonsopphold::JSONB) 
     """
 
@@ -322,6 +327,7 @@ private data class BeregningsperiodeDAO(
     val grunnbelop: Int,
     val grunnlagMetadata: Metadata,
     val trygdetid: Int,
+    val trygdetidForIdent: String?,
     val beregningsMetode: BeregningsMetode? = null,
     val samletNorskTrygdetid: Int? = null,
     val samletTeoretiskTrygdetid: Int? = null,

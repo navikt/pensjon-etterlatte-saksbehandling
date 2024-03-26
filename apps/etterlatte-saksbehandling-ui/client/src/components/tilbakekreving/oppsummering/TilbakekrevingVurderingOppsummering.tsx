@@ -1,6 +1,6 @@
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import React from 'react'
-import { Heading, Table } from '@navikt/ds-react'
+import { Table } from '@navikt/ds-react'
 import { NOK } from '~utils/formattering'
 import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 
@@ -12,6 +12,7 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
 
   const tilbakekreving = behandling.tilbakekreving
   const sumFeilutbetaling = sum(tilbakekreving.perioder.map((it) => it.ytelse.beregnetFeilutbetaling))
+  const sumNettoTilbakekreving = sum(tilbakekreving.perioder.map((it) => it.ytelse.nettoTilbakekreving))
   const sumTilbakekreving = sum(tilbakekreving.perioder.map((it) => it.ytelse.bruttoTilbakekreving))
   const sumRenter = sum(tilbakekreving.perioder.map((it) => it.ytelse.rentetillegg))
   const sumSkatt = sum(tilbakekreving.perioder.map((it) => it.ytelse.skatt))
@@ -19,9 +20,6 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
 
   return (
     <InnholdPadding>
-      <Heading level="3" size="medium">
-        Oppsummering
-      </Heading>
       <Table className="table" zebraStripes style={{ width: '40%' }}>
         <Table.Header>
           <Table.Row>
@@ -33,28 +31,34 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
         </Table.Header>
         <Table.Body>
           <Table.Row key="Beloep">
-            <Table.HeaderCell>Beløp</Table.HeaderCell>
+            <Table.DataCell></Table.DataCell>
             <Table.DataCell>{NOK(sumFeilutbetaling)}</Table.DataCell>
             <Table.DataCell></Table.DataCell>
             <Table.DataCell></Table.DataCell>
           </Table.Row>
-          <Table.Row key="tilbakekreving">
-            <Table.HeaderCell>Brutto tilbakekreving</Table.HeaderCell>
+          <Table.Row key="Brutto">
+            <Table.DataCell>Brutto tilbakekreving</Table.DataCell>
             <Table.DataCell></Table.DataCell>
             <Table.DataCell></Table.DataCell>
             <Table.DataCell>{NOK(sumTilbakekreving)}</Table.DataCell>
           </Table.Row>
-          <Table.Row key="Renter">
-            <Table.HeaderCell>Renter</Table.HeaderCell>
-            <Table.DataCell></Table.DataCell>
-            <Table.DataCell>+</Table.DataCell>
-            <Table.DataCell>{NOK(sumRenter)}</Table.DataCell>
-          </Table.Row>
           <Table.Row key="Skatt">
-            <Table.HeaderCell>Skatt</Table.HeaderCell>
+            <Table.DataCell>Fradrag skatt</Table.DataCell>
             <Table.DataCell></Table.DataCell>
             <Table.DataCell>-</Table.DataCell>
             <Table.DataCell>{NOK(sumSkatt)}</Table.DataCell>
+          </Table.Row>
+          <Table.Row key="Netto">
+            <Table.DataCell>Netto tilbakekreving</Table.DataCell>
+            <Table.DataCell></Table.DataCell>
+            <Table.DataCell>=</Table.DataCell>
+            <Table.DataCell>{NOK(sumNettoTilbakekreving)}</Table.DataCell>
+          </Table.Row>
+          <Table.Row key="Renter">
+            <Table.DataCell>Rentetillegg</Table.DataCell>
+            <Table.DataCell></Table.DataCell>
+            <Table.DataCell>+</Table.DataCell>
+            <Table.DataCell>{NOK(sumRenter)}</Table.DataCell>
           </Table.Row>
           <Table.Row key="SumInnkreving">
             <Table.HeaderCell>Sum til innkreving</Table.HeaderCell>

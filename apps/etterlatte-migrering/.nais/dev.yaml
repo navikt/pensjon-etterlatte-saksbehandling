@@ -21,6 +21,10 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   gcp:
     sqlInstances:
       - type: POSTGRES_14

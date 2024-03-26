@@ -17,6 +17,7 @@ import java.nio.file.Paths
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import javax.sql.DataSource
+import kotlin.system.exitProcess
 
 object DataSourceBuilder {
     private const val MAX_POOL_SIZE = 10
@@ -71,6 +72,9 @@ fun DataSource.migrate(): MigrateResult {
             }
             .load()
             .migrate()
+    } catch (e: InvalidMigrationScriptVersion) {
+        logger.error("Ugyldig versjon på migreringsscript", e)
+        exitProcess(1)
     } catch (e: Exception) {
         logger.error("Fikk feil under Flyway-migrering", e)
         throw e
@@ -154,11 +158,9 @@ fun validateMigrationScriptVersions(files: List<String>) {
             }
 
     val grupperte = allMigrationVersions.groupingBy { it }.eachCount()
-    grupperte.forEach {
-        if (it.value > 1) {
-            throw RuntimeException(
-                "Kan ikke ha flere migreringer med samme versjon! Sjekk alle mapper under /resources/db. Versjon: ${it.key}",
-            )
+    grupperte.forEach { (key, value) ->
+        if (value > 1) {
+            throw InvalidMigrationScriptVersion(key, value)
         }
     }
 }
@@ -168,3 +170,7 @@ fun jdbcUrl(
     port: Int,
     databaseName: String,
 ): String = "jdbc:postgresql://$host:$port/$databaseName"
+
+class InvalidMigrationScriptVersion(versjon: String, antall: Int) : RuntimeException(
+    "Kan ikke ha flere migreringer med samme versjon! Sjekk alle mapper under /resources/db. Versjon: $versjon, Antall: $antall",
+)

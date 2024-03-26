@@ -55,6 +55,7 @@ data class OmstillingsstoenadBeregningsperiode(
     val relevantMaanederInnAar: Int,
     val grunnbeloep: Kroner,
     val ytelseFoerAvkorting: Kroner,
+    val restanse: Kroner,
     val utbetaltBeloep: Kroner,
     val trygdetid: Int,
     val beregningsMetodeAnvendt: BeregningsMetode,

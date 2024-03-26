@@ -4,7 +4,7 @@ import { Behandling } from '~components/behandling/Behandling'
 import { HeaderBanner } from '~shared/header/HeaderBanner'
 import { Person } from '~components/person/Person'
 import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
-import nb from 'date-fns/locale/nb'
+import { nb } from 'date-fns/locale'
 import { registerLocale } from 'react-datepicker'
 import ErrorBoundary from '~ErrorBoundary'
 import NyttBrev from '~components/person/brev/NyttBrev'
@@ -24,9 +24,11 @@ import BehandleJournalfoeringOppgave from '~components/person/journalfoeringsopp
 import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { FlyttJournalpost } from '~components/person/flyttjournalpost/FlyttJournalpost'
+import { setDefaultOptions } from 'date-fns'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
+  setDefaultOptions({ locale: nb })
   registerLocale('nb', nb)
   const dispatch = useAppDispatch()
 

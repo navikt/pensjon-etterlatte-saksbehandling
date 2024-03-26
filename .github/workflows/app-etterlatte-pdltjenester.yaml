@@ -27,6 +27,7 @@ on:
       - main
     paths:
       - apps/etterlatte-pdltjenester/**
+      - "!apps/etterlatte-pdltjenester/.nais/*"
       - libs/etterlatte-sporingslogg/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-ktor/**

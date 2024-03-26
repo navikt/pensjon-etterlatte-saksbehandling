@@ -36,7 +36,7 @@ spec:
   resources:
     requests:
       cpu: 15m
-      memory: 256Mi
+      memory: 320Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -49,7 +49,7 @@ spec:
     - name: JOBB_POLLER_INITIAL_DELAY
       value: "60"
     - name: JOBB_POLLER_INTERVAL
-      value: "PT30S"
+      value: "PT2M"
     - name: JOBB_POLLER_OPENING_HOURS
       value: "06-23"
     - name: HENDELSE_POLLER_INITIAL_DELAY

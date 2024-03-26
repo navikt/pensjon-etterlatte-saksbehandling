@@ -26,6 +26,7 @@ on:
       - main
     paths:
       - apps/etterlatte-vilkaarsvurdering-kafka/**
+      - "!apps/etterlatte-vilkaarsvurdering-kafka/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**

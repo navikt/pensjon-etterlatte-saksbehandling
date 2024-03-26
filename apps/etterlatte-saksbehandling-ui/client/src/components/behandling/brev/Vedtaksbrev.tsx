@@ -12,6 +12,7 @@ import {
   behandlingErRedigerbar,
   behandlingSkalSendeBrev,
   sisteBehandlingHendelse,
+  statusErRedigerbar,
 } from '~components/behandling/felles/utils'
 import {
   IBehandlingStatus,
@@ -112,7 +113,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       !behandlingId ||
       !sakId ||
       !behandlingSkalSendeBrev(props.behandling.behandlingType, props.behandling.revurderingsaarsak) ||
-      behandling?.kilde === Vedtaksloesning.GJENOPPRETTA
+      (behandling?.kilde === Vedtaksloesning.GJENOPPRETTA && statusErRedigerbar(props.behandling.status))
     )
       return
 
@@ -123,7 +124,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   useEffect(() => {
     if (behandlingId) {
-      if (props.behandling.kilde === Vedtaksloesning.GJENOPPRETTA) {
+      if (props.behandling.kilde === Vedtaksloesning.GJENOPPRETTA && statusErRedigerbar(props.behandling.status)) {
         oppdaterVedtakRequest(props.behandling.id, () => {
           hentBrevPaaNytt()
         })

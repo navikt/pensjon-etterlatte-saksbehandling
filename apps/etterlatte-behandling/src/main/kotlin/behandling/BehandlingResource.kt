@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -25,4 +26,5 @@ data class BehandlingSammendrag(
     val aarsak: String?,
     val virkningstidspunkt: Virkningstidspunkt?,
     val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
+    val kilde: Vedtaksloesning,
 )

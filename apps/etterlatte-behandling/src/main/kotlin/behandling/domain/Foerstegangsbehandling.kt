@@ -116,6 +116,7 @@ data class Foerstegangsbehandling(
             listOf(
                 // TODO EY-2927
                 BehandlingStatus.VILKAARSVURDERT,
+                BehandlingStatus.TRYGDETID_OPPDATERT,
                 BehandlingStatus.BEREGNET,
                 BehandlingStatus.AVKORTET,
                 BehandlingStatus.RETURNERT,

@@ -62,9 +62,14 @@ const OverstyrBeregningPeriode = (props: OverstyrBeregningPerioder) => {
         <MinimimBeregningsperiodeWrapper>
           <VerdiFelt>
             <TextField label="Anvendt Trygdetid" {...register(`overstyrBeregningForm.${index}.data.trygdetid`)} />
+            <TextField
+              label="Trygdetid tilhører FNR"
+              {...register(`overstyrBeregningForm.${index}.data.trygdetidForIdent`)}
+            />
           </VerdiFelt>
           <VerdiFelt>
             <TextField
+              required
               label="Prorata Broek (valgfritt)"
               {...register(`overstyrBeregningForm.${index}.data.prorataBroekTeller`)}
             />

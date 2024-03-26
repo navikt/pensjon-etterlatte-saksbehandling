@@ -24,12 +24,11 @@ export const AttesterTilbakekreving = ({
   const [attesterVedtakStatus, apiAttesterVedtak] = useApiCall(attesterVedtak)
 
   const attester = () => {
-    // TODO EY-2806 Ferdigstill brev?
     apiAttesterVedtak(
       { behandlingsId: tilbakekreving.id, kommentar },
       () => navigate(`/person/${tilbakekreving.sak.ident}`),
-      () => {
-        setError(`Ukjent feil oppsto ved attestering av vedtaket... Prøv igjen.`)
+      (error) => {
+        setError(`Ukjent feil oppsto ved attestering av vedtaket: ${error.detail}`)
         setModalisOpen(false)
       }
     )
@@ -38,7 +37,7 @@ export const AttesterTilbakekreving = ({
   return (
     <BeslutningWrapper>
       {error && (
-        <Alert variant="error" style={{ marginTop: '1rem' }}>
+        <Alert variant="error" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
           {error}
         </Alert>
       )}
@@ -49,7 +48,7 @@ export const AttesterTilbakekreving = ({
       </FlexRow>
       <GeneriskModal
         tittel="Er du sikker på at du vil attestere vedtaket?"
-        beskrivelse="FYLL INN BESKRIVELSE"
+        beskrivelse="Vedtaket vil sendes økonomi og brev sendes til bruker."
         tekstKnappJa="Ja, attester vedtak"
         tekstKnappNei="Nei, gå tilbake"
         onYesClick={attester}

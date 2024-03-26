@@ -8,8 +8,8 @@ import { formaterEnumTilLesbarString, formaterSakstype, formaterStringDato } fro
 import { KlageListe } from '~components/person/KlageListe'
 import { tagColors } from '~shared/Tags'
 import { SakMedBehandlinger } from '~components/person/typer'
-import { isSuccess, mapApiResult, Result } from '~shared/api/apiUtils'
-import { useEffect } from 'react'
+import { isSuccess, mapApiResult, mapResult, Result } from '~shared/api/apiUtils'
+import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { EndreEnhet } from '~components/person/EndreEnhet'
 import { hentFlyktningStatusForSak, hentNavkontorForPerson } from '~shared/api/sak'
@@ -18,17 +18,33 @@ import { useAppSelector } from '~store/Store'
 import { TilbakekrevingListe } from '~components/person/TilbakekrevingListe'
 import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
+import { SakType } from '~shared/types/sak'
+import { hentMigrertYrkesskadeFordel } from '~shared/api/vilkaarsvurdering'
+import { Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
+
+const ETTERLATTEREFORM_DATO = '2024-01'
 
 export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandlinger>; fnr: string }) => {
   const [hentNavkontorStatus, hentNavkontor] = useApiCall(hentNavkontorForPerson)
   const [hentFlyktningStatus, hentFlyktning] = useApiCall(hentFlyktningStatusForSak)
+  const [yrkesskadefordelStatus, hentYrkesskadefordel] = useApiCall(hentMigrertYrkesskadeFordel)
 
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
       hentNavkontor(fnr)
-      hentFlyktning(sakResult.data.sak.id)
+      hentFlyktning(sakStatus.data.sak.id)
+
+      const migrertBehandling =
+        sakStatus.data.sak.sakType === SakType.BARNEPENSJON &&
+        sakStatus.data.behandlinger.find(
+          (behandling) =>
+            behandling.kilde === Vedtaksloesning.PESYS && behandling.virkningstidspunkt?.dato === ETTERLATTEREFORM_DATO
+        )
+      if (migrertBehandling) {
+        hentYrkesskadefordel(migrertBehandling.id)
+      }
     }
   }, [fnr, sakResult])
 
@@ -77,7 +93,21 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 apiResult: hentFlyktningStatus,
                 errorMessage: 'Klarte ikke hente informasjon om flyktningstatus',
               })}
-
+              {mapResult(yrkesskadefordelStatus, {
+                success: (yrkesskadefordelSvar) =>
+                  yrkesskadefordelSvar.migrertYrkesskadefordel && (
+                    <>
+                      <FlexRow>
+                        <Alert variant="info">
+                          Søker har yrkesskadefordel fra før 01.01.2024 og har rett til stønad til fylte 21 år.
+                        </Alert>
+                      </FlexRow>
+                      <hr />
+                    </>
+                  ),
+                pending: <Spinner visible={true} label="Henter status yrkesskadefordel" />,
+                error: () => <ApiErrorAlert>Klarte ikke hente informasjon om yrkesskadefordel</ApiErrorAlert>,
+              })}
               {mapApiResult(
                 hentNavkontorStatus,
                 <Spinner visible label="Laster navkontor ..." />,

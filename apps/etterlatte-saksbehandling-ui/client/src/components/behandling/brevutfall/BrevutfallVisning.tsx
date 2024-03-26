@@ -7,7 +7,6 @@ import {
   LavEllerIngenInntekt,
 } from '~components/behandling/brevutfall/Brevutfall'
 import { format, parseISO } from 'date-fns'
-import nb from 'date-fns/locale/nb'
 import { SakType } from '~shared/types/sak'
 import { PencilIcon } from '@navikt/aksel-icons'
 
@@ -47,7 +46,7 @@ export function feilutbetalingToString(feilutbetaling?: FeilutbetalingValg | nul
 }
 
 function formaterDatoSomMaaned(dato: string) {
-  return format(parseISO(dato), 'MMMM yyyy', { locale: nb })
+  return format(parseISO(dato), 'MMMM yyyy')
 }
 
 export const BrevutfallVisning = (props: {

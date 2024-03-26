@@ -20,7 +20,7 @@ export const BostedsadresseDataCell = ({
             {`${!!bostedsadresse[index].adresse ? bostedsadresse[index].adresse : '-'}, ${!!bostedsadresse[index].postnr ? bostedsadresse[index].postnr : ''}`}
             {bostedsadresse[index].aktiv && visAktiv && (
               <Tag variant="success" size="small">
-                Gjeldene
+                Gjeldende
               </Tag>
             )}
           </SpaceChildren>

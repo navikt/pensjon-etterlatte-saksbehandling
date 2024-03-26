@@ -35,6 +35,7 @@ on:
       - main
     paths:
       - apps/etterlatte-behandling/**
+      - "!apps/etterlatte-behandling/.nais/*"
       - libs/saksbehandling-common/**
       - libs/etterlatte-jobs/**
       - libs/etterlatte-institusjonsopphold-model/**

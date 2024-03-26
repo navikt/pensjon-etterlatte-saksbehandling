@@ -1,11 +1,10 @@
-package no.nav.etterlatte.institusjonsopphold.institusjonsopphold
+package institusjonsopphold.institusjonsopphold
 
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdBegrunnelse
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.libs.common.behandling.JaNei
-import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -32,21 +31,25 @@ internal class InstitusjonsoppholdDaoTest(val dataSource: DataSource) {
         val grunnlagshendelseId = UUID.randomUUID().toString()
         val institusjonsoppholdBegrunnelse =
             InstitusjonsoppholdBegrunnelse(
-                JaNeiMedBegrunnelse(JaNei.JA, "kommentaren"),
-                JaNeiMedBegrunnelse(JaNei.NEI, "kommentarto"),
+                JaNei.JA,
+                "kommentaren",
+                JaNei.NEI,
+                "kommentarto",
                 grunnlagshendelseId,
             )
         institusjonsoppholdDao.lagreInstitusjonsopphold(sakId, saksbehandler, institusjonsoppholdBegrunnelse)
         val hentBegrunnelse = institusjonsoppholdDao.hentBegrunnelse(grunnlagshendelseId)
         Assertions.assertEquals(saksbehandler.ident, hentBegrunnelse?.saksbehandler?.ident)
-        Assertions.assertEquals("kommentaren", hentBegrunnelse?.kanGiReduksjonAvYtelse?.begrunnelse)
-        Assertions.assertEquals(JaNei.JA, hentBegrunnelse?.kanGiReduksjonAvYtelse?.svar)
+        Assertions.assertEquals("kommentaren", hentBegrunnelse?.kanGiReduksjonAvYtelseBegrunnelse)
+        Assertions.assertEquals(JaNei.JA, hentBegrunnelse?.kanGiReduksjonAvYtelse)
 
         val grunnlagshendelseIdTo = UUID.randomUUID().toString()
         val institusjonsoppholdBegrunnelseNummerTo =
             InstitusjonsoppholdBegrunnelse(
-                JaNeiMedBegrunnelse(JaNei.JA, "kommentaren"),
-                JaNeiMedBegrunnelse(JaNei.NEI, "kommentarto"),
+                JaNei.JA,
+                "kommentaren",
+                JaNei.NEI,
+                "kommentarto",
                 grunnlagshendelseIdTo,
             )
         institusjonsoppholdDao.lagreInstitusjonsopphold(sakId, saksbehandler, institusjonsoppholdBegrunnelseNummerTo)

@@ -22,7 +22,7 @@ export default function BrevutfallModal(props: {
     >
       <Modal.Header>Registrer eller rediger brevutfall</Modal.Header>
       <Modal.Body>
-        <Brevutfall behandling={props.behandling} erOpphoer={false} resetBrevutfallvalidering={() => {}} />
+        <Brevutfall behandling={props.behandling} resetBrevutfallvalidering={() => {}} />
       </Modal.Body>
     </Modal>
   )

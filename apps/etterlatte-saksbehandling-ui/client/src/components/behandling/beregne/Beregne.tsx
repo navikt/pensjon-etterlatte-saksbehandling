@@ -23,13 +23,13 @@ import { Avkorting } from '~components/behandling/avkorting/Avkorting'
 import { SakType } from '~shared/types/sak'
 import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
 
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
+import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -43,7 +43,6 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     : undefined
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
-  const erOpphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const vedtaksresultat = useVedtaksResultat()
 
   const redigerbar = behandlingErRedigerbar(
@@ -55,6 +54,8 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     (state) => state.behandlingReducer.behandling?.brevutfallOgEtterbetaling
   )
   const [manglerBrevutfall, setManglerbrevutfall] = useState(false)
+
+  const erOpphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
   useEffect(() => {
     if (!erOpphoer) {
@@ -102,18 +103,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
       </ContentHeader>
       {erOpphoer ? (
         <BeregningWrapper>
-          {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? (
-            <>
-              <Brevutfall
-                behandling={behandling}
-                erOpphoer={erOpphoer}
-                resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
-              />
-              {manglerBrevutfall && <Alert variant="error">Du må fylle ut utfall i brev</Alert>}
-            </>
-          ) : (
-            <InfoAlert variant="info">Det sendes ikke vedtaksbrev for denne behandlingen.</InfoAlert>
-          )}
+          <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
         </BeregningWrapper>
       ) : (
         <>
@@ -128,29 +118,28 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                 {(() => {
                   switch (beregning.type) {
                     case Beregningstype.BP:
-                      return <BarnepensjonSammendrag beregning={beregning} />
+                      return (
+                        <>
+                          <BarnepensjonSammendrag beregning={beregning} />
+                          <Brevutfall
+                            behandling={behandling}
+                            resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
+                          />
+                        </>
+                      )
                     case Beregningstype.OMS:
                       return (
                         <>
                           <OmstillingsstoenadSammendrag beregning={beregning} />
-                          <Avkorting behandling={behandling} />
+                          <Avkorting
+                            behandling={behandling}
+                            resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
+                          />
                         </>
                       )
                   }
                 })()}
-
-                {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? (
-                  <>
-                    <Brevutfall
-                      behandling={behandling}
-                      erOpphoer={erOpphoer}
-                      resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
-                    />
-                    {manglerBrevutfall && <Alert variant="error">Du må fylle ut utfall i brev</Alert>}
-                  </>
-                ) : (
-                  <InfoAlert variant="info">Det sendes ikke vedtaksbrev for denne behandlingen.</InfoAlert>
-                )}
+                {manglerBrevutfall && <Alert variant="error">Du må fylle ut utfall i brev</Alert>}
               </BeregningWrapper>
             )
           )}
@@ -187,12 +176,6 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     </Content>
   )
 }
-
-const InfoAlert = styled(Alert).attrs({ variant: 'info' })`
-  margin-top: 4rem;
-  margin-bottom: 2rem;
-  max-width: fit-content;
-`
 
 const BeregningWrapper = styled.div`
   padding: 0 4em;

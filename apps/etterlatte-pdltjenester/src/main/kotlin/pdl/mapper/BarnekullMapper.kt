@@ -90,7 +90,7 @@ object BarnekullMapper {
         val personer =
             barnFnr?.let { fnr ->
                 fnr.map { ident ->
-                    pdlOboKlient.hentPersonopplysningPerson(
+                    pdlOboKlient.hentPerson(
                         ident,
                         PersonRolle.TILKNYTTET_BARN,
                         bruker = brukerTokenInfo,

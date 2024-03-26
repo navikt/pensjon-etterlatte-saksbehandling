@@ -146,7 +146,7 @@ class PersonWebService(
     ): PersonopplysningPerson {
         logger.info("Henter person med fnr=$fnr fra PDL")
 
-        return pdlOboKlient.hentPersonopplysningPerson(fnr, rolle, sakType, bruker).let {
+        return pdlOboKlient.hentPerson(fnr, rolle, sakType, bruker).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.joinToString(", ")
                 if (it.errors?.personIkkeFunnet() == true) {

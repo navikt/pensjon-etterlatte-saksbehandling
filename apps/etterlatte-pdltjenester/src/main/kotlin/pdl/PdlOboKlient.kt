@@ -62,7 +62,7 @@ class PdlOboKlient(private val httpClient: HttpClient, config: Config) {
         }
     }
 
-    suspend fun hentPersonopplysningPerson(
+    suspend fun hentPerson(
         fnr: Folkeregisteridentifikator,
         rolle: PersonRolle,
         sakType: SakType,

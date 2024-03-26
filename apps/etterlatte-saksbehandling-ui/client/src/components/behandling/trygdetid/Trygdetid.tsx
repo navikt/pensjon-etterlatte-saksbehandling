@@ -1,36 +1,33 @@
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import {
-  hentAlleLand,
-  hentTrygdetid,
-  ILand,
-  ITrygdetid,
-  ITrygdetidGrunnlagType,
-  opprettTrygdetid,
-  overstyrTrygdetid,
-  setTrygdetidYrkesskade,
-  sorterLand,
-} from '~shared/api/trygdetid'
+import { hentAlleLand, hentTrygdetider, ILand, ITrygdetid, opprettTrygdetider, sorterLand } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
-import { BodyShort, ErrorMessage, Heading } from '@navikt/ds-react'
-import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
-import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/TrygdetidGrunnlagListe'
+import { BodyShort, ErrorMessage, Heading, Tabs } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { TrygdetidDetaljer } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
-import { OverstyrtTrygdetid } from './OverstyrtTrygdetid'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import { TrygdetidManueltOverstyrt } from '~components/behandling/trygdetid/TrygdetidManueltOverstyrt'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingErIverksattEllerSamordnet } from '~components/behandling/felles/utils'
-import { YrkesskadeTrygdetid } from '~components/behandling/trygdetid/YrkesskadeTrygdetid'
 import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
+import { EnkelPersonTrygdetid } from '~components/behandling/trygdetid/EnkelPersonTrygdetid'
+import { BeregnetSamletTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetSamletTrygdetid'
+
+const TrygdetidMelding = ({ overskrift, beskrivelse }: { overskrift: string; beskrivelse: string }) => {
+  return (
+    <TrygdetidWrapper>
+      <Heading size="small" level="3">
+        {overskrift}
+      </Heading>
+      <BodyShort>{beskrivelse}</BodyShort>
+    </TrygdetidWrapper>
+  )
+}
 
 interface Props {
   redigerbar: boolean
@@ -49,72 +46,29 @@ const visTrydeavtale = (behandling: IDetaljertBehandling): Boolean => {
 
 export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningstidspunktEtterNyRegelDato }: Props) => {
   const dispatch = useAppDispatch()
-  const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
-  const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
-  const [overstyrTrygdetidRequest, requestOverstyrTrygdetid] = useApiCall(overstyrTrygdetid)
-  const [oppdaterYrkesskadeRequest, requestOppdaterYrkesskade] = useApiCall(setTrygdetidYrkesskade)
+  const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetider)
+  const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetider)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
-  const [trygdetid, setTrygdetid] = useState<ITrygdetid>()
+  const [trygdetider, setTrygdetider] = useState<ITrygdetid[]>([])
   const [landListe, setLandListe] = useState<ILand[]>()
   const [harPilotTrygdetid, setHarPilotTrygdetid] = useState<boolean>(false)
   const [behandlingsIdMangler, setBehandlingsIdMangler] = useState(false)
   const [trygdetidIdMangler, setTrygdetidIdMangler] = useState(false)
   const [trygdetidManglerVedAvslag, setTrygdetidManglerVedAvslag] = useState(false)
 
-  const oppdaterTrygdetid = (trygdetid: ITrygdetid) => {
-    setTrygdetid(trygdetid)
+  const oppdaterTrygdetider = (trygdetid: ITrygdetid[]) => {
+    setTrygdetider(trygdetid)
     dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
   }
 
-  const overstyrTrygdetidPoengaar = (trygdetid: ITrygdetid) => {
-    requestOverstyrTrygdetid(
-      {
-        id: trygdetid.id,
-        behandlingId: trygdetid.behandlingId,
-        overstyrtNorskPoengaar: trygdetid.overstyrtNorskPoengaar,
-      },
-      (trygdetid: ITrygdetid) => {
-        oppdaterTrygdetid(trygdetid)
-      }
-    )
-  }
-
-  const oppdaterYrkesskade = (yrkesskade: boolean) => {
-    if (!trygdetid?.id) {
-      setTrygdetidIdMangler(true)
-      throw new Error('Mangler trygdetidid')
-    }
-
-    if (!behandling?.id) {
-      setBehandlingsIdMangler(true)
-      throw new Error('Mangler behandlingsid')
-    }
-
-    requestOppdaterYrkesskade(
-      {
-        id: trygdetid.id,
-        behandlingId: trygdetid.behandlingId,
-        yrkesskade: yrkesskade,
-      },
-      (trygdetid: ITrygdetid) => {
-        oppdaterTrygdetid(trygdetid)
-      }
-    )
-  }
-
-  useEffect(() => {
-    if (!behandling?.id) {
-      setBehandlingsIdMangler(true)
-      throw new Error('Mangler behandlingsid')
-    }
-
-    fetchTrygdetid(behandling.id, (trygdetid: ITrygdetid) => {
-      if (trygdetid === null) {
+  const fetchTrygdetider = (behandlingId: string) => {
+    fetchTrygdetid(behandlingId, (trygdetider: ITrygdetid[]) => {
+      if (trygdetider === null || trygdetider.length == 0) {
         if (behandlingErIverksattEllerSamordnet(behandling.status)) {
           setHarPilotTrygdetid(true)
         } else if (redigerbar) {
-          requestOpprettTrygdetid(behandling.id, (trygdetid: ITrygdetid) => {
-            oppdaterTrygdetid(trygdetid)
+          requestOpprettTrygdetid(behandling.id, (trygdetider: ITrygdetid[]) => {
+            oppdaterTrygdetider(trygdetider)
           })
         } else if (vedtaksresultat === 'avslag') {
           setTrygdetidManglerVedAvslag(true)
@@ -123,9 +77,18 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
           throw new Error('Kan ikke opprette trygdetid når readonly')
         }
       } else {
-        setTrygdetid(trygdetid)
+        setTrygdetider(trygdetider)
       }
     })
+  }
+
+  useEffect(() => {
+    if (!behandling?.id) {
+      setBehandlingsIdMangler(true)
+      throw new Error('Mangler behandlingsid')
+    }
+
+    fetchTrygdetider(behandling.id)
   }, [])
 
   useEffect(() => {
@@ -136,36 +99,19 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
   if (harPilotTrygdetid) {
     return (
-      <TrygdetidWrapper>
-        <Heading size="small" level="3">
-          Personen har fått 40 års trygdetid
-        </Heading>
-        <BodyShort>Denne søknaden ble satt automatisk til 40 års trygdetid</BodyShort>
-      </TrygdetidWrapper>
+      <TrygdetidMelding
+        overskrift="Personen har fått 40 års trygdetid"
+        beskrivelse="Denne søknaden ble satt automatisk til 40 års trygdetid"
+      />
     )
   }
 
   if (trygdetidManglerVedAvslag) {
     return (
-      <TrygdetidWrapper>
-        <Heading size="small" level="3">
-          Informasjon om trygdetid mangler
-        </Heading>
-        <BodyShort>Det kan være fordi saken har blitt avslått uten å oppgi trygdetid.</BodyShort>
-      </TrygdetidWrapper>
-    )
-  }
-
-  if (trygdetid?.beregnetTrygdetid?.resultat.overstyrt) {
-    return (
-      <TrygdetidWrapper>
-        <TrygdetidManueltOverstyrt
-          behandlingId={behandling.id}
-          oppdaterTrygdetid={oppdaterTrygdetid}
-          beregnetTrygdetid={trygdetid.beregnetTrygdetid}
-        />
-        <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
-      </TrygdetidWrapper>
+      <TrygdetidMelding
+        overskrift="Informasjon om trygdetid mangler"
+        beskrivelse="Dette er fordi avslag er gjort før trygdetidsbildet fantes"
+      />
     )
   }
 
@@ -199,51 +145,82 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
           uføretrygden benyttes.
         </BodyShort>
       </LovtekstMedLenke>
-      {trygdetid && landListe && (
+
+      {landListe && (
         <>
-          <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />
+          {trygdetider.length == 1 && (
+            <EnkelPersonTrygdetid
+              redigerbar={redigerbar}
+              behandling={behandling}
+              trygdetid={trygdetider[0]}
+              landListe={landListe}
+              virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
+              fetchTrygdetider={fetchTrygdetider}
+            />
+          )}
+          {trygdetider.length > 1 && (
+            <>
+              <HeadingWrapper size="medium" level="2">
+                Det finnes flere avdøde - husk å oppdatere begge to
+              </HeadingWrapper>
 
-          <YrkesskadeTrygdetid redigerbar={redigerbar} trygdetid={trygdetid} oppdaterYrkesskade={oppdaterYrkesskade} />
+              <Tabs defaultValue={trygdetider[0].ident}>
+                <Tabs.List>
+                  {trygdetider.map((trygdetid) => (
+                    <Tabs.Tab key={trygdetid.ident} value={trygdetid.ident} label={trygdetid.ident} />
+                  ))}
+                </Tabs.List>
+                {trygdetider.map((trygdetid) => (
+                  <Tabs.Panel value={trygdetid.ident} key={trygdetid.ident}>
+                    <HeadingWrapper size="small" level="3">
+                      Trygdetid for {trygdetid.ident}
+                    </HeadingWrapper>
 
-          <TrygdetidGrunnlagListe
-            trygdetid={trygdetid}
-            setTrygdetid={oppdaterTrygdetid}
-            landListe={landListe}
-            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
-            redigerbar={redigerbar}
-          />
-          <TrygdetidGrunnlagListe
-            trygdetid={trygdetid}
-            setTrygdetid={oppdaterTrygdetid}
-            landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
-            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
-            redigerbar={redigerbar}
-          />
-          <OverstyrtTrygdetid
-            redigerbar={redigerbar}
-            sakType={behandling.sakType}
-            trygdetid={trygdetid}
-            overstyrTrygdetidPoengaar={overstyrTrygdetidPoengaar}
-            virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
-          />
-          {isPending(overstyrTrygdetidRequest) && <Spinner visible={true} label="Oppdatere poengår" />}
-          {trygdetid.beregnetTrygdetid && (
-            <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
+                    <EnkelPersonTrygdetid
+                      redigerbar={redigerbar}
+                      behandling={behandling}
+                      trygdetid={trygdetid}
+                      landListe={landListe}
+                      virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
+                      fetchTrygdetider={fetchTrygdetider}
+                    />
+                  </Tabs.Panel>
+                ))}
+              </Tabs>
+
+              <OppsummeringWrapper>
+                <HeadingWrapper size="medium" level="2">
+                  Oppsummering av trygdetid for flere avdøde
+                </HeadingWrapper>
+
+                {trygdetider.map((trygdetid) => (
+                  <div key={trygdetid.ident}>
+                    {trygdetid.beregnetTrygdetid?.resultat ? (
+                      <>
+                        <HeadingWrapper size="small" level="3">
+                          Trygdetid for {trygdetid.ident}
+                        </HeadingWrapper>
+                        <BeregnetSamletTrygdetid beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
+                      </>
+                    ) : (
+                      <BodyShort>Trygdetid for {trygdetid.ident} mangler</BodyShort>
+                    )}
+                  </div>
+                ))}
+              </OppsummeringWrapper>
+            </>
           )}
         </>
       )}
+
       {(isPending(hentTrygdetidRequest) || isPending(hentAlleLandRequest)) && (
         <Spinner visible={true} label="Henter trygdetid" />
       )}
       {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label="Oppretter trygdetid" />}
-      {isPending(oppdaterYrkesskadeRequest) && <Spinner visible={true} label="Oppdater yrkesskade" />}
+
       {isFailureHandler({
         apiResult: hentTrygdetidRequest,
         errorMessage: 'En feil har oppstått ved henting av trygdetid',
-      })}
-      {isFailureHandler({
-        apiResult: overstyrTrygdetidRequest,
-        errorMessage: 'En feil har oppstått ved lagring av norsk poengår',
       })}
       {isFailureHandler({
         apiResult: opprettTrygdetidRequest,
@@ -253,16 +230,23 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         apiResult: hentAlleLandRequest,
         errorMessage: 'Hent feil har oppstått ved henting av landliste',
       })}
-      {isFailureHandler({
-        apiResult: oppdaterYrkesskadeRequest,
-        errorMessage: 'En feil har oppstått ved oppdatering av yrkesskade',
-      })}
+
       {behandlingsIdMangler && <ErrorMessage>Finner ikke behandling - ID mangler</ErrorMessage>}
       {trygdetidIdMangler && <ErrorMessage>Finner ikke trygdetid - ID mangler</ErrorMessage>}
     </TrygdetidWrapper>
   )
 }
+
 const TrygdetidWrapper = styled.div`
   padding: 0 4em;
   max-width: 69em;
+`
+
+const HeadingWrapper = styled(Heading)`
+  margin-top: 2em;
+  margin-bottom: 1em;
+`
+
+const OppsummeringWrapper = styled.div`
+  margin-bottom: 2em;
 `

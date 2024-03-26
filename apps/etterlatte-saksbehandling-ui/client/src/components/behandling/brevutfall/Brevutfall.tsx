@@ -3,7 +3,7 @@ import { Alert, BodyLong, Heading } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevutfallOgEtterbetalingApi } from '~shared/api/behandling'
-import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar, behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import { BrevutfallSkjema } from '~components/behandling/brevutfall/BrevutfallSkjema'
 import { BrevutfallVisning } from '~components/behandling/brevutfall/BrevutfallVisning'
 import Spinner from '~shared/Spinner'
@@ -11,6 +11,7 @@ import { MapApiResult } from '~shared/components/MapApiResult'
 import { SakType } from '~shared/types/sak'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { IBehandlingReducer, updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
+import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 
 export interface BrevutfallOgEtterbetaling {
   opphoer?: boolean | null
@@ -69,13 +70,9 @@ const initialBrevutfallOgEtterbetaling = (saktype: SakType, opphoer: boolean) =>
   }
 }
 
-export const Brevutfall = (props: {
-  behandling: IBehandlingReducer
-  erOpphoer: boolean
-  resetBrevutfallvalidering: () => void
-}) => {
+export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutfallvalidering: () => void }) => {
   const behandling = props.behandling
-  const behandlingErOpphoer = props.erOpphoer
+  const behandlingErOpphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const dispatch = useAppDispatch()
   const redigerbar = behandlingErRedigerbar(
@@ -108,7 +105,7 @@ export const Brevutfall = (props: {
     hentBrevutfall()
   }, [behandling.id])
 
-  return (
+  return behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? (
     <BrevutfallContent id="brevutfall">
       <Heading size="medium" spacing>
         Valg av utfall i brev
@@ -144,6 +141,8 @@ export const Brevutfall = (props: {
         }
       />
     </BrevutfallContent>
+  ) : (
+    <InfoAlert variant="info">Det sendes ikke vedtaksbrev for denne behandlingen.</InfoAlert>
   )
 }
 
@@ -151,4 +150,9 @@ const BrevutfallContent = styled.div`
   margin-top: 4em;
   margin-bottom: 2em;
   max-width: 500px;
+`
+const InfoAlert = styled(Alert).attrs({ variant: 'info' })`
+  margin-top: 4rem;
+  margin-bottom: 2rem;
+  max-width: fit-content;
 `

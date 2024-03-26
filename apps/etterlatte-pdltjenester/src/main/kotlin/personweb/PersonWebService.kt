@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
-import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlResponseError
 import no.nav.etterlatte.pdl.mapper.PersonMapper
@@ -26,7 +25,6 @@ class PdlForesporselFeilet(message: String) : ForespoerselException(
 
 class PersonWebService(
     private val pdlOboKlient: PdlOboKlient,
-    private val pdlKlient: PdlKlient,
     private val ppsKlient: ParallelleSannheterKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)

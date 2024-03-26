@@ -44,7 +44,7 @@ class ApplicationContext(env: Map<String, String>) {
             ppsKlient = parallelleSannheterKlient,
         )
 
-    val personWebService = PersonWebService(pdlOboKlient, pdlKlient, parallelleSannheterKlient)
+    val personWebService = PersonWebService(pdlOboKlient, parallelleSannheterKlient)
 }
 
 private fun featureToggleProperties(config: Config) =

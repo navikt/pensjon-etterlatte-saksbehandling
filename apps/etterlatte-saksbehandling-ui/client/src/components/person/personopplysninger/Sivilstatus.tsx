@@ -7,7 +7,8 @@ import { SpaceChildren } from '~shared/styled'
 import styled from 'styled-components'
 import { lowerCase, startCase } from 'lodash'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { PersonopplysningPerson, Sivilstand } from '~shared/api/pdltjenester'
+import { PersonopplysningPerson, Sivilstand } from '~shared/types/personopplysninger'
+
 export const Sivilstatus = ({
   sivilstand,
   avdoede,

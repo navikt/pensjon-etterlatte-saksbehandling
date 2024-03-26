@@ -6,7 +6,7 @@ import { AlderTag } from '~components/person/personopplysninger/components/Alder
 import { SpaceChildren } from '~shared/styled'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { PersonopplysningPerson } from '~shared/api/pdltjenester'
+import { PersonopplysningPerson } from '~shared/types/personopplysninger'
 
 export const AvdoedesBarn = ({ avdoede }: { avdoede?: PersonopplysningPerson[] }): ReactNode => {
   return (

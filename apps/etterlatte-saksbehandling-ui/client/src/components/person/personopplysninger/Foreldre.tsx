@@ -7,7 +7,7 @@ import { formaterDato } from '~utils/formattering'
 import { AlderTag } from '~components/person/personopplysninger/components/AlderTag'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { PersonopplysningPerson } from '~shared/api/pdltjenester'
+import { PersonopplysningPerson } from '~shared/types/personopplysninger'
 
 export const Foreldre = ({
   avdoed,

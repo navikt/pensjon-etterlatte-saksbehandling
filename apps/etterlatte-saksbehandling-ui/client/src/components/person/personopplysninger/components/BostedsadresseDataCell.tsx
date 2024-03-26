@@ -1,7 +1,7 @@
 import React from 'react'
 import { SpaceChildren } from '~shared/styled'
 import { Table, Tag } from '@navikt/ds-react'
-import { Bostedsadresse } from '~shared/api/pdltjenester'
+import { Bostedsadresse } from '~shared/types/personopplysninger'
 
 export const BostedsadresseDataCell = ({
   bostedsadresse,

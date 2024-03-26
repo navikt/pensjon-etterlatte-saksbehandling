@@ -34,11 +34,11 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
   useEffect(() => {
     if (isSuccess(sakResult)) {
       hentNavkontor(fnr)
-      hentFlyktning(sakStatus.data.sak.id)
+      hentFlyktning(sakResult.data.sak.id)
 
       const migrertBehandling =
-        sakStatus.data.sak.sakType === SakType.BARNEPENSJON &&
-        sakStatus.data.behandlinger.find(
+        sakResult.data.sak.sakType === SakType.BARNEPENSJON &&
+        sakResult.data.behandlinger.find(
           (behandling) =>
             behandling.kilde === Vedtaksloesning.PESYS && behandling.virkningstidspunkt?.dato === ETTERLATTEREFORM_DATO
         )

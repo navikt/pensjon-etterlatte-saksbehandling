@@ -238,6 +238,11 @@ interface NyTrygdetidService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid>
+
+    suspend fun sjekkGyldighetOgOppdaterBehandlingStatus(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
 }
 
 class TrygdetidServiceImpl(

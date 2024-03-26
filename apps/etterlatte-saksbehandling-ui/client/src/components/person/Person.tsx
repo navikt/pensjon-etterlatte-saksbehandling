@@ -13,7 +13,6 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
-
 import { isSuccess, mapAllApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
 import { hentPersonNavn } from '~shared/api/pdltjenester'
@@ -36,8 +35,8 @@ export const Person = () => {
 
   const [search, setSearch] = useSearchParams()
 
-  const [personStatus, hentPerson] = useApiCall(hentPersonNavn)
-  const [sakStatus, hentSak] = useApiCall(hentSakMedBehandlnger)
+  const [personNavnResult, personNavnFetch] = useApiCall(hentPersonNavn)
+  const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
 
   const velgFane = (value: string) => {
@@ -51,8 +50,8 @@ export const Person = () => {
 
   useEffect(() => {
     if (fnrHarGyldigFormat(fnr)) {
-      hentPerson(fnr!!)
-      hentSak(fnr!!)
+      personNavnFetch(fnr!!)
+      sakFetch(fnr!!)
     }
   }, [fnr])
 
@@ -74,13 +73,13 @@ export const Person = () => {
 
   return (
     <>
-      {mapSuccess(personStatus, (person) => (
+      {mapSuccess(personNavnResult, (person) => (
         <PdlPersonStatusBar person={person} />
       ))}
 
       <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
       {mapAllApiResult(
-        personStatus,
+        personNavnResult,
         <Spinner visible label="Laster personinfo ..." />,
         null,
         (error) => (
@@ -97,25 +96,25 @@ export const Person = () => {
               />
               <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
               <Tabs.Tab value={PersonOversiktFane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
-              {isOmstillingsstoenad(sakStatus) && (
+              {isOmstillingsstoenad(sakResult) && (
                 <Tabs.Tab value={PersonOversiktFane.SAMORDNING} label="Samordning" icon={<CogRotationIcon />} />
               )}
             </Tabs.List>
 
             <Tabs.Panel value={PersonOversiktFane.SAKER}>
-              <SakOversikt sakStatus={sakStatus} fnr={person.foedselsnummer} />
+              <SakOversikt sakResult={sakResult} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
-              <Personopplysninger sakStatus={sakStatus} fnr={person.foedselsnummer} />
+              <Personopplysninger sakResult={sakResult} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.DOKUMENTER}>
-              <Dokumentliste sakStatus={sakStatus} fnr={person.foedselsnummer} />
+              <Dokumentliste sakResult={sakResult} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.BREV}>
-              <BrevOversikt sakStatus={sakStatus} />
+              <BrevOversikt sakResult={sakResult} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.SAMORDNING}>
-              <SamordningSak sakStatus={sakStatus} />
+              <SamordningSak sakResult={sakResult} />
             </Tabs.Panel>
           </Tabs>
         )

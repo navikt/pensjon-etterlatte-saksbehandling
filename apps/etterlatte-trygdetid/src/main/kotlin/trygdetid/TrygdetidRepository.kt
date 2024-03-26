@@ -89,7 +89,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             trygdetid.trygdetidGrunnlag.forEach { opprettTrygdetidGrunnlag(trygdetid.id, it, tx) }
 
             if (trygdetid.beregnetTrygdetid != null) {
-                oppdaterBeregnetTrygdetid(trygdetid.behandlingId, trygdetid.beregnetTrygdetid, tx)
+                oppdaterBeregnetTrygdetid(trygdetid.behandlingId, trygdetid.id, trygdetid.beregnetTrygdetid, tx)
             }
         }.let { hentTrygdetidMedIdNotNull(behandlingId = trygdetid.behandlingId, trygdetidId = trygdetid.id) }
 
@@ -141,6 +141,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             if (oppdatertTrygdetid.beregnetTrygdetid != null) {
                 oppdaterBeregnetTrygdetid(
                     oppdatertTrygdetid.behandlingId,
+                    oppdatertTrygdetid.id,
                     oppdatertTrygdetid.beregnetTrygdetid,
                     tx,
                     overstyrt,
@@ -373,6 +374,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
 
     private fun oppdaterBeregnetTrygdetid(
         behandlingId: UUID,
+        trygdetidId: UUID,
         beregnetTrygdetid: DetaljertBeregnetTrygdetid,
         tx: TransactionalSession,
         overstyrt: Boolean = false,
@@ -407,11 +409,12 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                   trygdetid_regelresultat = :trygdetidRegelresultat,
                   beregnet_trygdetid_overstyrt = :overstyrt,
                   yrkesskade = :yrkesskade
-                WHERE behandling_id = :behandlingId
+                WHERE behandling_id = :behandlingId AND id = :trygdetidId
                 """.trimIndent(),
             paramMap =
                 mapOf(
                     "behandlingId" to behandlingId,
+                    "trygdetidId" to trygdetidId,
                     "faktiskTrygdetidNorgeTotal" to beregnetVerdi.faktiskTrygdetidNorge?.periode?.toString(),
                     "faktiskTrygdetidNorgeAntallMaaneder" to beregnetVerdi.faktiskTrygdetidNorge?.antallMaaneder,
                     "faktiskTrygdetidTeoretiskTotal" to beregnetVerdi.faktiskTrygdetidTeoretisk?.periode?.toString(),

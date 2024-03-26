@@ -56,9 +56,19 @@ class BeregnOmstillingsstoenadService(
         tilDato: LocalDate? = null,
     ): Beregning {
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo)
+
         val trygdetid =
-            trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo)
-                ?: throw TrygdetidMangler(behandling.id)
+            try {
+                val trygdetidListe = trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo)
+
+                when (trygdetidListe.size) {
+                    0 -> throw TrygdetidMangler(behandling.id)
+                    1 -> trygdetidListe.first()
+                    else -> throw ForeldreloesTrygdetid(behandling.id)
+                }
+            } catch (e: Exception) {
+                throw TrygdetidMangler(behandling.id)
+            }
 
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = behandling.virkningstidspunkt().dato

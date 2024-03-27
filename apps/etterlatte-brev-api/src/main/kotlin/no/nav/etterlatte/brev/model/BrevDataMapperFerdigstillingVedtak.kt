@@ -81,6 +81,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         }
     }
 
+    // TODO På tide å fjerne?
     private suspend fun fraPesys(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,

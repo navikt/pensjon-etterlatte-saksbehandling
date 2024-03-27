@@ -131,4 +131,8 @@ Dette oppretter en envFile som lastes i app/*/.nais/(dev|prod).yaml filene og so
 
 * UNLEASH_SERVER_API_URL (husk å legge til /api)
 * UNLEASH_SERVER_API_TOKEN (API token for miljøet)
-* 
+
+
+# Kode generert av GitHub Copilot
+
+Dette repoet bruker GitHub Copilot til å generere kode.

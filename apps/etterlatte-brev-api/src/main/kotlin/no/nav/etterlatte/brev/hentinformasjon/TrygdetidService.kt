@@ -2,9 +2,7 @@ package no.nav.etterlatte.brev.hentinformasjon
 
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
-import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
-import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.TrygdetidType
@@ -17,77 +15,28 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient, private val
     suspend fun finnTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid? {
-        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)!!
-
-        return finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
-    }
-
-    suspend fun finnTrygdetidsgrunnlag(
-        behandlingId: UUID,
-        beregning: BeregningDTO,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid? {
-        val trygdetiderIBehandling: List<TrygdetidDto> =
-            trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
-        if (trygdetiderIBehandling.isEmpty()) {
-            return null
-        }
-
-        // Trygdetid anvendt kan variere mellom beregningsperiodene, i tilfeller med mer enn en avdød.
-        // Dette spesialtilfellet er litt uheldig for oss, men tilnærmingen er
-        // foreløpig å bruke første beregningsperiode som grunnlag. Da kan man håndtere skiller i trygdetid vi
-        // dokumenterer i brevet ved å først innvilge, og så gjøre en revurdering.
-        // Hvis vi har lyst til å støtte mer komplekse førstegangsinnvilgelser / behandlinger som går over
-        // over flere perioder med ulike trygdetider må man håndtere dette i brevet, men det er ikke noe som er
-        // lagt opp til annet enn en eventuell redigering av fritekst i trygdetidsvedlegget.
-        // det vil uansett bli riktig for alle saker der vi kun benytter en trygdetid, som er overveiende flesteparten
-        val foersteBeregningsperiode = beregning.beregningsperioder.minBy { it.datoFOM }
-        val (anvendtTrygdetid, prorataBroek) = hentBenyttetTrygdetidOgProratabroek(foersteBeregningsperiode)
-
-        val trygdetidgrunnlagForAnvendtTrygdetid =
-            trygdetiderIBehandling.find { it.ident == foersteBeregningsperiode.trygdetidForIdent }
-                ?: trygdetiderIBehandling.first().also {
-                    logger.warn(
-                        "Fant ikke riktig trygdetid for identen som er brukt i beregning, benytter den" +
-                            " første av den vi fant i brevet, med id=${it.id} for behandlingId=${it.behandlingId}." +
-                            " Vi fant total ${trygdetiderIBehandling.size} trygdetider for behandlingen",
-                    )
-                }
-
-        if (trygdetidgrunnlagForAnvendtTrygdetid.beregnetTrygdetid?.resultat?.overstyrt == true) {
-            // vi har en overstyrt trygdetid fra pesys, og vi kan dermed ikke gi ut noe detaljert grunnlag på hvordan
-            // vi har kommet frem til trygdetiden
-            return Trygdetid(
-                ident = trygdetidgrunnlagForAnvendtTrygdetid.ident,
+    ): List<Trygdetid> {
+        val beregning = requireNotNull(beregningKlient.hentBeregning(behandlingId, brukerTokenInfo))
+        return trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo).map { trygdetid ->
+            // Trygdetid, proratabrøk og beregningsmetode brukt for en avdød vil alltid være det samme
+            val beregningsperiode = beregning.beregningsperioder.first { it.trygdetidForIdent == trygdetid.ident }
+            val (anvendtTrygdetid, prorataBroek) = hentBenyttetTrygdetidOgProratabroek(beregningsperiode)
+            Trygdetid(
+                ident = trygdetid.ident,
                 aarTrygdetid = anvendtTrygdetid,
-                prorataBroek = prorataBroek,
                 maanederTrygdetid = 0,
-                perioder = listOf(),
-                overstyrt = true,
+                prorataBroek = prorataBroek,
+                perioder =
+                    finnTrygdetidsperioderForTabell(
+                        trygdetid.trygdetidGrunnlag,
+                        beregningsperiode.beregningsMetode,
+                    ),
+                overstyrt = trygdetid.beregnetTrygdetid?.resultat?.overstyrt == true,
                 mindreEnnFireFemtedelerAvOpptjeningstiden =
-                    trygdetidgrunnlagForAnvendtTrygdetid.beregnetTrygdetid
+                    trygdetid.beregnetTrygdetid
                         ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
             )
         }
-
-        val trygdetidsperioder =
-            finnTrygdetidsperioderForTabell(
-                trygdetidgrunnlagForAnvendtTrygdetid.trygdetidGrunnlag,
-                foersteBeregningsperiode.beregningsMetode,
-            )
-
-        return Trygdetid(
-            ident = trygdetidgrunnlagForAnvendtTrygdetid.ident,
-            aarTrygdetid = anvendtTrygdetid,
-            maanederTrygdetid = 0,
-            prorataBroek = prorataBroek,
-            perioder = trygdetidsperioder,
-            overstyrt = false,
-            mindreEnnFireFemtedelerAvOpptjeningstiden =
-                trygdetidgrunnlagForAnvendtTrygdetid.beregnetTrygdetid
-                    ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
-        )
     }
 
     private fun finnTrygdetidsperioderForTabell(

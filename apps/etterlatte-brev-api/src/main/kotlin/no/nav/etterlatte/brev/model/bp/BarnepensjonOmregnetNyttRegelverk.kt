@@ -42,6 +42,8 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
                                     generellBrevData.personerISak.verge !is ForelderVerge
                             ),
                 )
+
+            // TODO På tide å fjerne?
             if (generellBrevData.loependeIPesys()) {
                 val pesysUtbetaltFoerReform = migreringRequest?.brutto ?: 0
                 val pesysUtenlandstilknytning =
@@ -68,7 +70,6 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
     }
 }
 
-// TODO Kan slettes?
 data class BarnepensjonOmregnetNyttRegelverk(
     override val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,

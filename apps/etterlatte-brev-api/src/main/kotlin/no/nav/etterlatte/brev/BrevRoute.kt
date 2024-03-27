@@ -168,8 +168,26 @@ fun Route.brevRoute(
                     service.opprettBrev(
                         sakId,
                         brukerTokenInfo,
-                        Brevkoder.TOMT_INFORMASJONSBREV,
+                        Brevkoder.TOMT_INFORMASJONSBREV.redigering,
                     ) { ManueltBrevData() }
+                }.let { (brev, varighet) ->
+                    logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    call.respond(HttpStatusCode.Created, brev)
+                }
+            }
+        }
+
+        post("spesifikk") {
+            withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
+                logger.info("Oppretter nytt brev på sak=$sakId)")
+                val brevParametre = call.receive<BrevParametre>()
+
+                measureTimedValue {
+                    service.opprettBrev(
+                        sakId,
+                        brukerTokenInfo,
+                        brevParametre.brevkode,
+                    ) { redigerbarTekstRequest -> brevParametre.brevDataMapping(redigerbarTekstRequest) }
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(HttpStatusCode.Created, brev)

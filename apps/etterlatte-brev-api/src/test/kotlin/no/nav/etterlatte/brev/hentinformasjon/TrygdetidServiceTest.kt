@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import org.junit.jupiter.api.Assertions
@@ -31,9 +32,10 @@ internal class TrygdetidServiceTest {
     @Test
     fun `henter trygdetid nasjonal beregning`() {
         val behandlingId = UUID.randomUUID()
+        val bruker = mockk<BrukerTokenInfo>()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetidDto(behandlingId))
 
-        val beregning =
+        coEvery { beregningKlient.hentBeregning(behandlingId, bruker) } returns
             mockk<BeregningDTO> {
                 every { beregningsperioder } returns
                     listOf(
@@ -44,7 +46,7 @@ internal class TrygdetidServiceTest {
                         },
                     )
             }
-        val trygdetid = runBlocking { service.finnTrygdetidsgrunnlag(behandlingId, beregning, mockk()) }.single()
+        val trygdetid = runBlocking { service.finnTrygdetid(behandlingId, bruker) }.single()
         Assertions.assertEquals(23, trygdetid.aarTrygdetid)
         Assertions.assertEquals(0, trygdetid.maanederTrygdetid)
         Assertions.assertEquals(BeregnetTrygdetidGrunnlagDto(dager = 0, maaneder = 10, aar = 2), trygdetid.perioder[0].opptjeningsperiode)
@@ -53,9 +55,10 @@ internal class TrygdetidServiceTest {
     @Test
     fun `henter ut prorata riktig`() {
         val behandlingId = UUID.randomUUID()
+        val bruker = mockk<BrukerTokenInfo>()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetidDto(behandlingId))
 
-        val beregning =
+        coEvery { beregningKlient.hentBeregning(behandlingId, bruker) } returns
             mockk<BeregningDTO> {
                 every { beregningsperioder } returns
                     listOf(
@@ -67,7 +70,7 @@ internal class TrygdetidServiceTest {
                         },
                     )
             }
-        val trygdetid = runBlocking { service.finnTrygdetidsgrunnlag(behandlingId, beregning, mockk()) }.single()
+        val trygdetid = runBlocking { service.finnTrygdetid(behandlingId, bruker) }.single()
         Assertions.assertEquals(40, trygdetid.aarTrygdetid)
         Assertions.assertEquals(13, trygdetid.prorataBroek?.teller)
         Assertions.assertEquals(37, trygdetid.prorataBroek?.nevner)
@@ -78,6 +81,7 @@ internal class TrygdetidServiceTest {
     @Test
     fun `setter overstyrt trygdetid uten trygdetidsgrunnlag`() {
         val behandlingId = UUID.randomUUID()
+        val bruker = mockk<BrukerTokenInfo>()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns
             listOf(
                 trygdetidDto(
@@ -87,7 +91,7 @@ internal class TrygdetidServiceTest {
                 ),
             )
 
-        val beregning =
+        coEvery { beregningKlient.hentBeregning(behandlingId, bruker) } returns
             mockk<BeregningDTO> {
                 every { beregningsperioder } returns
                     listOf(
@@ -99,7 +103,7 @@ internal class TrygdetidServiceTest {
                         },
                     )
             }
-        val trygdetid = runBlocking { service.finnTrygdetidsgrunnlag(behandlingId, beregning, mockk()) }.single()
+        val trygdetid = runBlocking { service.finnTrygdetid(behandlingId, bruker) }.single()
 
         Assertions.assertTrue(trygdetid.overstyrt)
         Assertions.assertTrue(trygdetid.perioder.isEmpty())

@@ -2,9 +2,7 @@ package no.nav.etterlatte.brev.hentinformasjon
 
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
-import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
-import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.TrygdetidType
@@ -18,39 +16,11 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient, private val
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> {
-        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)!!
-
-        return finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
-    }
-
-    suspend fun finnTrygdetidsgrunnlag(
-        behandlingId: UUID,
-        beregning: BeregningDTO,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): List<Trygdetid> {
-        val trygdetiderIBehandling: List<TrygdetidDto> =
-            trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
-        if (trygdetiderIBehandling.isEmpty()) {
-            // return null
-            return emptyList()
-        }
-
-        // TODO kaste feil hvis mangler elns?
-        return trygdetiderIBehandling.map { trygdetid ->
-
-            // Trygdetid anvendt kan variere mellom beregningsperiodene, i tilfeller med mer enn en avdød.
-            // Dette spesialtilfellet er litt uheldig for oss, men tilnærmingen er
-            // foreløpig å bruke første beregningsperiode som grunnlag. Da kan man håndtere skiller i trygdetid vi
-            // dokumenterer i brevet ved å først innvilge, og så gjøre en revurdering.
-            // Hvis vi har lyst til å støtte mer komplekse førstegangsinnvilgelser / behandlinger som går over
-            // over flere perioder med ulike trygdetider må man håndtere dette i brevet, men det er ikke noe som er
-            // lagt opp til annet enn en eventuell redigering av fritekst i trygdetidsvedlegget.
-            // det vil uansett bli riktig for alle saker der vi kun benytter en trygdetid, som er overveiende flesteparten
-            // TODO doc her fortsatt relevent??
-            val foersteBeregningsperiode = beregning.beregningsperioder.first { it.trygdetidForIdent == trygdetid.ident }
-            // TODO Vi har avklart at det ikke vil være ulike metoder i de ulike periodene til EN avdød? Så første er trygt å anta?
-            val (anvendtTrygdetid, prorataBroek) = hentBenyttetTrygdetidOgProratabroek(foersteBeregningsperiode)
-
+        val beregning = requireNotNull(beregningKlient.hentBeregning(behandlingId, brukerTokenInfo))
+        return trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo).map { trygdetid ->
+            // Trygdetid, proratabrøk og beregningsmetode brukt for en avdød vil alltid være det samme
+            val beregningsperiode = beregning.beregningsperioder.first { it.trygdetidForIdent == trygdetid.ident }
+            val (anvendtTrygdetid, prorataBroek) = hentBenyttetTrygdetidOgProratabroek(beregningsperiode)
             Trygdetid(
                 ident = trygdetid.ident,
                 aarTrygdetid = anvendtTrygdetid,
@@ -59,7 +29,7 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient, private val
                 perioder =
                     finnTrygdetidsperioderForTabell(
                         trygdetid.trygdetidGrunnlag,
-                        foersteBeregningsperiode.beregningsMetode,
+                        beregningsperiode.beregningsMetode,
                     ),
                 overstyrt = trygdetid.beregnetTrygdetid?.resultat?.overstyrt == true,
                 mindreEnnFireFemtedelerAvOpptjeningstiden =

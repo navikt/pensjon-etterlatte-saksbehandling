@@ -150,6 +150,14 @@ export const HandlingerForOppgave = ({
           )}
         </>
       )
+    case 'AKTIVITETSPLIKT_OPPFOELGING':
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <Button size="small" href={`/behandling/${referanse}`} as="a">
+            Gå til behandling
+          </Button>
+        )
+      )
     default:
       return null
   }

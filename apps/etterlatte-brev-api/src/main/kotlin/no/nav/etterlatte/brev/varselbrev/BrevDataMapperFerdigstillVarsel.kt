@@ -8,7 +8,6 @@ import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
 import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonVarsel
-import no.nav.etterlatte.brev.model.bp.ManglerAvdoedBruktTilTrygdetid
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregning
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregningsperioder
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -46,24 +45,17 @@ class BrevDataMapperFerdigstillVarsel(
                         request.generellBrevData.sak.sakType,
                     )
                 }
-            val avdoede = request.generellBrevData.personerISak.avdoede
             BarnepensjonVarsel(
                 innhold = request.innholdMedVedlegg.innhold(),
                 beregning =
                     barnepensjonBeregning(
                         innhold = request.innholdMedVedlegg,
+                        avdoede = request.generellBrevData.personerISak.avdoede,
                         utbetalingsinfo = utbetalingsinfo.await(),
                         grunnbeloep = grunnbeloep.await(),
                         beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo.await()),
                         trygdetid = requireNotNull(trygdetid.await()),
                         erForeldreloes = request.generellBrevData.erForeldreloes(),
-                        bruktAvdoed =
-                            if (request.generellBrevData.erForeldreloes()) {
-                                avdoede.find { it.fnr.value == trygdetid.await()?.ident }?.navn
-                                    ?: throw ManglerAvdoedBruktTilTrygdetid()
-                            } else {
-                                null
-                            },
                     ),
                 erUnder18Aar = request.generellBrevData.personerISak.soeker.under18 ?: true,
                 erBosattUtlandet = request.generellBrevData.utlandstilknytning?.erBosattUtland() ?: false,

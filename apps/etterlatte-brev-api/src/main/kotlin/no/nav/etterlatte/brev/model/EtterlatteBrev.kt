@@ -25,9 +25,9 @@ data class BarnepensjonBeregning(
     val grunnbeloep: Kroner,
     val beregningsperioder: List<BarnepensjonBeregningsperiode>,
     val sisteBeregningsperiode: BarnepensjonBeregningsperiode,
-    val trygdetid: TrygdetidMedBeregningsmetode,
+    val bruktTrygdetid: TrygdetidMedBeregningsmetode,
+    val trygdetid: List<TrygdetidMedBeregningsmetode>,
     val erForeldreloes: Boolean = false,
-    val bruktAvdoed: String? = null,
 ) : BrevdataMedInnhold
 
 data class BarnepensjonBeregningsperiode(
@@ -63,6 +63,7 @@ data class OmstillingsstoenadBeregningsperiode(
 )
 
 data class TrygdetidMedBeregningsmetode(
+    val navnAvdoed: String,
     val trygdetidsperioder: List<Trygdetidsperiode>,
     val beregnetTrygdetidAar: Int,
     val beregnetTrygdetidMaaneder: Int,

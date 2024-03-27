@@ -43,6 +43,7 @@ data class OmstillingsstoenadRevurdering(
             trygdetid: Trygdetid,
             brevutfall: BrevutfallDto,
             revurderingaarsak: Revurderingaarsak?,
+            navnAvdoed: String,
         ): OmstillingsstoenadRevurdering {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -86,6 +87,7 @@ data class OmstillingsstoenadRevurdering(
                         sisteBeregningsperiode = sisteBeregningsperiode,
                         trygdetid =
                             TrygdetidMedBeregningsmetode(
+                                navnAvdoed = navnAvdoed,
                                 trygdetidsperioder = trygdetid.perioder,
                                 beregnetTrygdetidAar = trygdetid.aarTrygdetid,
                                 beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,

@@ -17,7 +17,7 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient, private val
     suspend fun finnTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid? {
+    ): List<Trygdetid> {
         val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)!!
 
         return finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
@@ -27,67 +27,65 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient, private val
         behandlingId: UUID,
         beregning: BeregningDTO,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid? {
+    ): List<Trygdetid> {
         val trygdetiderIBehandling: List<TrygdetidDto> =
             trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
         if (trygdetiderIBehandling.isEmpty()) {
-            return null
+            // return null
+            return emptyList()
         }
 
-        // Trygdetid anvendt kan variere mellom beregningsperiodene, i tilfeller med mer enn en avdød.
-        // Dette spesialtilfellet er litt uheldig for oss, men tilnærmingen er
-        // foreløpig å bruke første beregningsperiode som grunnlag. Da kan man håndtere skiller i trygdetid vi
-        // dokumenterer i brevet ved å først innvilge, og så gjøre en revurdering.
-        // Hvis vi har lyst til å støtte mer komplekse førstegangsinnvilgelser / behandlinger som går over
-        // over flere perioder med ulike trygdetider må man håndtere dette i brevet, men det er ikke noe som er
-        // lagt opp til annet enn en eventuell redigering av fritekst i trygdetidsvedlegget.
-        // det vil uansett bli riktig for alle saker der vi kun benytter en trygdetid, som er overveiende flesteparten
-        val foersteBeregningsperiode = beregning.beregningsperioder.minBy { it.datoFOM }
-        val (anvendtTrygdetid, prorataBroek) = hentBenyttetTrygdetidOgProratabroek(foersteBeregningsperiode)
+        // TODO kaste feil hvis mangler elns?
+        return trygdetiderIBehandling.map { trygdetid ->
 
-        val trygdetidgrunnlagForAnvendtTrygdetid =
-            trygdetiderIBehandling.find { it.ident == foersteBeregningsperiode.trygdetidForIdent }
-                ?: trygdetiderIBehandling.first().also {
-                    logger.warn(
-                        "Fant ikke riktig trygdetid for identen som er brukt i beregning, benytter den" +
-                            " første av den vi fant i brevet, med id=${it.id} for behandlingId=${it.behandlingId}." +
-                            " Vi fant total ${trygdetiderIBehandling.size} trygdetider for behandlingen",
+            // Trygdetid anvendt kan variere mellom beregningsperiodene, i tilfeller med mer enn en avdød.
+            // Dette spesialtilfellet er litt uheldig for oss, men tilnærmingen er
+            // foreløpig å bruke første beregningsperiode som grunnlag. Da kan man håndtere skiller i trygdetid vi
+            // dokumenterer i brevet ved å først innvilge, og så gjøre en revurdering.
+            // Hvis vi har lyst til å støtte mer komplekse førstegangsinnvilgelser / behandlinger som går over
+            // over flere perioder med ulike trygdetider må man håndtere dette i brevet, men det er ikke noe som er
+            // lagt opp til annet enn en eventuell redigering av fritekst i trygdetidsvedlegget.
+            // det vil uansett bli riktig for alle saker der vi kun benytter en trygdetid, som er overveiende flesteparten
+            // TODO doc her fortsatt relevent??
+            val foersteBeregningsperiode = beregning.beregningsperioder.first { it.trygdetidForIdent == trygdetid.ident }
+            // TODO Vi har avklart at det ikke vil være ulike metoder i de ulike periodene til EN avdød? Så første er trygt å anta?
+            val (anvendtTrygdetid, prorataBroek) = hentBenyttetTrygdetidOgProratabroek(foersteBeregningsperiode)
+
+            if (trygdetid.beregnetTrygdetid?.resultat?.overstyrt == true) {
+                // TODO Kan dette fjernes?
+                // vi har en overstyrt trygdetid fra pesys, og vi kan dermed ikke gi ut noe detaljert grunnlag på hvordan
+                // vi har kommet frem til trygdetiden
+                Trygdetid(
+                    ident = trygdetid.ident,
+                    aarTrygdetid = anvendtTrygdetid,
+                    prorataBroek = prorataBroek,
+                    maanederTrygdetid = 0,
+                    perioder = listOf(),
+                    overstyrt = true,
+                    mindreEnnFireFemtedelerAvOpptjeningstiden =
+                        trygdetid.beregnetTrygdetid
+                            ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
+                )
+            } else {
+                val trygdetidsperioder =
+                    finnTrygdetidsperioderForTabell(
+                        trygdetid.trygdetidGrunnlag,
+                        foersteBeregningsperiode.beregningsMetode,
                     )
-                }
 
-        if (trygdetidgrunnlagForAnvendtTrygdetid.beregnetTrygdetid?.resultat?.overstyrt == true) {
-            // vi har en overstyrt trygdetid fra pesys, og vi kan dermed ikke gi ut noe detaljert grunnlag på hvordan
-            // vi har kommet frem til trygdetiden
-            return Trygdetid(
-                ident = trygdetidgrunnlagForAnvendtTrygdetid.ident,
-                aarTrygdetid = anvendtTrygdetid,
-                prorataBroek = prorataBroek,
-                maanederTrygdetid = 0,
-                perioder = listOf(),
-                overstyrt = true,
-                mindreEnnFireFemtedelerAvOpptjeningstiden =
-                    trygdetidgrunnlagForAnvendtTrygdetid.beregnetTrygdetid
-                        ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
-            )
+                Trygdetid(
+                    ident = trygdetid.ident,
+                    aarTrygdetid = anvendtTrygdetid,
+                    maanederTrygdetid = 0,
+                    prorataBroek = prorataBroek,
+                    perioder = trygdetidsperioder,
+                    overstyrt = false,
+                    mindreEnnFireFemtedelerAvOpptjeningstiden =
+                        trygdetid.beregnetTrygdetid
+                            ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
+                )
+            }
         }
-
-        val trygdetidsperioder =
-            finnTrygdetidsperioderForTabell(
-                trygdetidgrunnlagForAnvendtTrygdetid.trygdetidGrunnlag,
-                foersteBeregningsperiode.beregningsMetode,
-            )
-
-        return Trygdetid(
-            ident = trygdetidgrunnlagForAnvendtTrygdetid.ident,
-            aarTrygdetid = anvendtTrygdetid,
-            maanederTrygdetid = 0,
-            prorataBroek = prorataBroek,
-            perioder = trygdetidsperioder,
-            overstyrt = false,
-            mindreEnnFireFemtedelerAvOpptjeningstiden =
-                trygdetidgrunnlagForAnvendtTrygdetid.beregnetTrygdetid
-                    ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
-        )
     }
 
     private fun finnTrygdetidsperioderForTabell(

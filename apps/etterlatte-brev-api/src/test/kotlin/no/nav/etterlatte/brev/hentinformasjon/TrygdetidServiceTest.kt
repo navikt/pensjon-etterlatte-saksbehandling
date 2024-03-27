@@ -44,8 +44,8 @@ internal class TrygdetidServiceTest {
                         },
                     )
             }
-        val trygdetid = runBlocking { service.finnTrygdetidsgrunnlag(behandlingId, beregning, mockk()) }
-        Assertions.assertEquals(23, trygdetid!!.aarTrygdetid)
+        val trygdetid = runBlocking { service.finnTrygdetidsgrunnlag(behandlingId, beregning, mockk()) }.single()
+        Assertions.assertEquals(23, trygdetid.aarTrygdetid)
         Assertions.assertEquals(0, trygdetid.maanederTrygdetid)
         Assertions.assertEquals(BeregnetTrygdetidGrunnlagDto(dager = 0, maaneder = 10, aar = 2), trygdetid.perioder[0].opptjeningsperiode)
     }
@@ -68,8 +68,8 @@ internal class TrygdetidServiceTest {
                         },
                     )
             }
-        val trygdetid = runBlocking { service.finnTrygdetidsgrunnlag(behandlingId, beregning, mockk()) }
-        Assertions.assertEquals(40, trygdetid!!.aarTrygdetid)
+        val trygdetid = runBlocking { service.finnTrygdetidsgrunnlag(behandlingId, beregning, mockk()) }.single()
+        Assertions.assertEquals(40, trygdetid.aarTrygdetid)
         Assertions.assertEquals(13, trygdetid.prorataBroek?.teller)
         Assertions.assertEquals(37, trygdetid.prorataBroek?.nevner)
         Assertions.assertEquals(0, trygdetid.maanederTrygdetid)

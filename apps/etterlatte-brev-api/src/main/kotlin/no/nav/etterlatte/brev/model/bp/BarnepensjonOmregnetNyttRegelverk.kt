@@ -68,6 +68,7 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
     }
 }
 
+// TODO Kan slettes?
 data class BarnepensjonOmregnetNyttRegelverk(
     override val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,
@@ -80,7 +81,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
             innhold: InnholdMedVedlegg,
             erUnder18Aar: Boolean?,
             utbetalingsinfo: Utbetalingsinfo,
-            trygdetid: Trygdetid,
+            trygdetid: List<Trygdetid>,
             grunnbeloep: Grunnbeloep,
             etterbetaling: EtterbetalingDTO?,
             migreringRequest: MigreringBrevRequest?,
@@ -96,7 +97,15 @@ data class BarnepensjonOmregnetNyttRegelverk(
             return BarnepensjonOmregnetNyttRegelverk(
                 innhold = innhold.innhold(),
                 erUnder18Aar = erUnder18AarNonNull,
-                beregning = barnepensjonBeregning(innhold, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
+                beregning =
+                    barnepensjonBeregning(
+                        innhold,
+                        emptyList(),
+                        utbetalingsinfo,
+                        grunnbeloep,
+                        beregningsperioder,
+                        trygdetid,
+                    ),
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },

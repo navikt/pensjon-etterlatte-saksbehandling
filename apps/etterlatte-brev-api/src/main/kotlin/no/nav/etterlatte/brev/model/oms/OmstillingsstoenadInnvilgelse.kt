@@ -58,7 +58,7 @@ data class OmstillingsstoenadInnvilgelse(
                     )
                 }
 
-            val avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato }
+            val avdoed = generellBrevData.personerISak.avdoede.single()
             val sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM }
 
             return OmstillingsstoenadInnvilgelse(
@@ -72,6 +72,7 @@ data class OmstillingsstoenadInnvilgelse(
                         sisteBeregningsperiode = sisteBeregningsperiode,
                         trygdetid =
                             TrygdetidMedBeregningsmetode(
+                                navnAvdoed = avdoed.navn,
                                 trygdetidsperioder = trygdetid.perioder,
                                 beregnetTrygdetidAar = trygdetid.aarTrygdetid,
                                 beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,

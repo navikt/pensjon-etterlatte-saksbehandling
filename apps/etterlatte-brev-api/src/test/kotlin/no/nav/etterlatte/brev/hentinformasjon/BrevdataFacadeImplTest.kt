@@ -95,7 +95,7 @@ internal class BrevdataFacadeImplTest {
         coEvery { grunnlagKlient.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns grunnlag
         coEvery { beregningService.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { beregningService.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
-        coEvery { trygdetidService.finnTrygdetidsgrunnlag(any(), any(), any()) } returns opprettTrygdetid()
+        coEvery { trygdetidService.finnTrygdetidsgrunnlag(any(), any(), any()) } returns emptyList()
 
         val generellBrevData =
             runBlocking {
@@ -266,8 +266,6 @@ internal class BrevdataFacadeImplTest {
             revurderingInfo = null,
             kilde = Vedtaksloesning.GJENNY,
         )
-
-    private fun opprettTrygdetid() = null
 
     private fun hentBrevutfall() = null
 

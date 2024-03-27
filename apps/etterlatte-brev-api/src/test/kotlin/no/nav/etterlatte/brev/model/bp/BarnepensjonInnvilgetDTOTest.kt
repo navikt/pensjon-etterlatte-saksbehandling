@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model.bp
 
+import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
@@ -15,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -52,14 +54,16 @@ internal class BarnepensjonInnvilgetDTOTest {
                         datoTom = LocalDate.of(2022, Month.MARCH, 31),
                     ),
                 trygdetid =
-                    Trygdetid(
-                        ident = "",
-                        aarTrygdetid = 10,
-                        maanederTrygdetid = 0,
-                        perioder = listOf(),
-                        overstyrt = false,
-                        prorataBroek = null,
-                        mindreEnnFireFemtedelerAvOpptjeningstiden = false,
+                    listOf(
+                        Trygdetid(
+                            ident = "123",
+                            aarTrygdetid = 10,
+                            maanederTrygdetid = 0,
+                            perioder = listOf(),
+                            overstyrt = false,
+                            prorataBroek = null,
+                            mindreEnnFireFemtedelerAvOpptjeningstiden = false,
+                        ),
                     ),
                 grunnbeloep =
                     Grunnbeloep(
@@ -81,10 +85,14 @@ internal class BarnepensjonInnvilgetDTOTest {
                         ),
                         null,
                     ),
-                erGjenoppretting = false,
+                        Avdoed(
+                            fnr = Foedselsnummer("123"),
+                            navn = "HubbaBubba",
+                            doedsdato = LocalDate.now(),
+                        ),
+                    ),
             )
 
-        Assertions.assertEquals(
             listOf(
                 beregningsperiodeMars2022().toBarnepensjonBeregningsperiode(),
                 beregningsperiodeFebruar2022().toBarnepensjonBeregningsperiode(),
@@ -154,6 +162,7 @@ internal class BarnepensjonInnvilgetDTOTest {
         institusjon = false,
         beregningsMetodeAnvendt = BeregningsMetode.NASJONAL,
         beregningsMetodeFraGrunnlag = BeregningsMetode.BEST,
+        trygdetidForIdent = "123",
     )
 
     private fun lagInnholdMedVedlegg() =

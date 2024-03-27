@@ -43,7 +43,7 @@ data class BarnepensjonRevurdering(
             utbetalingsinfo: Utbetalingsinfo,
             forrigeUtbetalingsinfo: Utbetalingsinfo?,
             etterbetaling: EtterbetalingDTO?,
-            trygdetid: Trygdetid,
+            trygdetid: List<Trygdetid>,
             grunnbeloep: Grunnbeloep,
             utlandstilknytning: UtlandstilknytningType?,
             brevutfall: BrevutfallDto,
@@ -69,18 +69,12 @@ data class BarnepensjonRevurdering(
                 beregning =
                     barnepensjonBeregning(
                         innhold,
+                        avdoede,
                         utbetalingsinfo,
                         grunnbeloep,
                         beregningsperioder,
                         trygdetid,
                         erForeldreloes,
-                        bruktAvdoed =
-                            avdoede.find {
-                                val fnr =
-                                    utbetalingsinfo.beregningsperioder.last().trygdetidForIdent
-                                        ?: throw ManglerAvdoedBruktTilTrygdetid()
-                                it.fnr.value == fnr
-                            }?.navn ?: throw ManglerAvdoedBruktTilTrygdetid(),
                     ),
                 etterbetaling =
                     etterbetaling

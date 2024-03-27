@@ -39,9 +39,10 @@ data class BarnepensjonInnvilgelse(
 
         fun fra(
             innhold: InnholdMedVedlegg,
+            avdoede: List<Avdoed>,
             utbetalingsinfo: Utbetalingsinfo,
             etterbetaling: EtterbetalingDTO?,
-            trygdetid: Trygdetid,
+            trygdetid: List<Trygdetid>,
             grunnbeloep: Grunnbeloep,
             utlandstilknytning: UtlandstilknytningType?,
             brevutfall: BrevutfallDto,
@@ -52,7 +53,8 @@ data class BarnepensjonInnvilgelse(
 
             return BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
-                beregning = barnepensjonBeregning(innhold, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
+                beregning =
+                    barnepensjonBeregning(innhold, avdoede, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },
@@ -125,32 +127,50 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
 
 internal fun barnepensjonBeregning(
     innhold: InnholdMedVedlegg,
+    avdoede: List<Avdoed>,
     utbetalingsinfo: Utbetalingsinfo,
     grunnbeloep: Grunnbeloep,
     beregningsperioder: List<BarnepensjonBeregningsperiode>,
-    trygdetid: Trygdetid,
+    trygdetid: List<Trygdetid>,
     erForeldreloes: Boolean = false,
-    bruktAvdoed: String? = null,
-) = BarnepensjonBeregning(
-    innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),
-    antallBarn = utbetalingsinfo.antallBarn,
-    virkningsdato = utbetalingsinfo.virkningsdato,
-    grunnbeloep = Kroner(grunnbeloep.grunnbeloep),
-    beregningsperioder = beregningsperioder,
-    sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM },
-    trygdetid =
-        TrygdetidMedBeregningsmetode(
-            trygdetidsperioder = trygdetid.perioder,
-            beregnetTrygdetidAar = trygdetid.aarTrygdetid,
-            beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
-            prorataBroek = trygdetid.prorataBroek,
-            mindreEnnFireFemtedelerAvOpptjeningstiden = trygdetid.mindreEnnFireFemtedelerAvOpptjeningstiden,
-            beregningsMetodeFraGrunnlag = utbetalingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
-            beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
-        ),
-    erForeldreloes = erForeldreloes,
-    bruktAvdoed = bruktAvdoed,
-)
+): BarnepensjonBeregning {
+    // TODO Må avklare et det er greit å anta at nyligste periode er "brukt avdød"..
+    val bruktTrygdetid =
+        trygdetid.find {
+            it.ident == utbetalingsinfo.beregningsperioder.maxBy { periode -> periode.datoFOM }.trygdetidForIdent
+        } ?: throw ManglerAvdoedBruktTilTrygdetid()
+    return BarnepensjonBeregning(
+        innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),
+        antallBarn = utbetalingsinfo.antallBarn,
+        virkningsdato = utbetalingsinfo.virkningsdato,
+        grunnbeloep = Kroner(grunnbeloep.grunnbeloep),
+        beregningsperioder = beregningsperioder,
+        sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM },
+        trygdetid = trygdetid.map { it.toTrygdetid(utbetalingsinfo, avdoede) },
+        bruktTrygdetid = bruktTrygdetid.toTrygdetid(utbetalingsinfo, avdoede),
+        erForeldreloes = erForeldreloes,
+    )
+}
+
+private fun Trygdetid.toTrygdetid(
+    utbetalingsinfo: Utbetalingsinfo,
+    avdoede: List<Avdoed>,
+): TrygdetidMedBeregningsmetode {
+    val relevantBeregningsPeriode =
+        utbetalingsinfo.beregningsperioder.find {
+            it.trygdetidForIdent == ident
+        } ?: throw ManglerAvdoedBruktTilTrygdetid()
+    return TrygdetidMedBeregningsmetode(
+        navnAvdoed = avdoede.find { it.fnr.value == ident }?.navn ?: throw ManglerAvdoedBruktTilTrygdetid(),
+        trygdetidsperioder = perioder,
+        beregnetTrygdetidAar = aarTrygdetid,
+        beregnetTrygdetidMaaneder = maanederTrygdetid,
+        prorataBroek = prorataBroek,
+        mindreEnnFireFemtedelerAvOpptjeningstiden = mindreEnnFireFemtedelerAvOpptjeningstiden,
+        beregningsMetodeFraGrunnlag = relevantBeregningsPeriode.beregningsMetodeFraGrunnlag,
+        beregningsMetodeAnvendt = relevantBeregningsPeriode.beregningsMetodeAnvendt,
+    )
+}
 
 internal fun barnepensjonBeregningsperioder(utbetalingsinfo: Utbetalingsinfo) =
     utbetalingsinfo.beregningsperioder.map {
@@ -162,3 +182,8 @@ internal fun barnepensjonBeregningsperioder(utbetalingsinfo: Utbetalingsinfo) =
             antallBarn = it.antallBarn,
         )
     }
+
+class ManglerAvdoedBruktTilTrygdetid : UgyldigForespoerselException(
+    code = "MANGLER_AVDOED_INFO_I_BEREGNING",
+    detail = "Det er mangler i beregning. Utfør beregning på nytt og prøv igjen.",
+)

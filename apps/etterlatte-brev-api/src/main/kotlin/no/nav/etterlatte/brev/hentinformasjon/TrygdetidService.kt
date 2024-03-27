@@ -51,40 +51,21 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient, private val
             // TODO Vi har avklart at det ikke vil være ulike metoder i de ulike periodene til EN avdød? Så første er trygt å anta?
             val (anvendtTrygdetid, prorataBroek) = hentBenyttetTrygdetidOgProratabroek(foersteBeregningsperiode)
 
-            if (trygdetid.beregnetTrygdetid?.resultat?.overstyrt == true) {
-                // TODO Kan dette fjernes?
-                // vi har en overstyrt trygdetid fra pesys, og vi kan dermed ikke gi ut noe detaljert grunnlag på hvordan
-                // vi har kommet frem til trygdetiden
-                Trygdetid(
-                    ident = trygdetid.ident,
-                    aarTrygdetid = anvendtTrygdetid,
-                    prorataBroek = prorataBroek,
-                    maanederTrygdetid = 0,
-                    perioder = listOf(),
-                    overstyrt = true,
-                    mindreEnnFireFemtedelerAvOpptjeningstiden =
-                        trygdetid.beregnetTrygdetid
-                            ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
-                )
-            } else {
-                val trygdetidsperioder =
+            Trygdetid(
+                ident = trygdetid.ident,
+                aarTrygdetid = anvendtTrygdetid,
+                maanederTrygdetid = 0,
+                prorataBroek = prorataBroek,
+                perioder =
                     finnTrygdetidsperioderForTabell(
                         trygdetid.trygdetidGrunnlag,
                         foersteBeregningsperiode.beregningsMetode,
-                    )
-
-                Trygdetid(
-                    ident = trygdetid.ident,
-                    aarTrygdetid = anvendtTrygdetid,
-                    maanederTrygdetid = 0,
-                    prorataBroek = prorataBroek,
-                    perioder = trygdetidsperioder,
-                    overstyrt = false,
-                    mindreEnnFireFemtedelerAvOpptjeningstiden =
-                        trygdetid.beregnetTrygdetid
-                            ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
-                )
-            }
+                    ),
+                overstyrt = trygdetid.beregnetTrygdetid?.resultat?.overstyrt == true,
+                mindreEnnFireFemtedelerAvOpptjeningstiden =
+                    trygdetid.beregnetTrygdetid
+                        ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
+            )
         }
     }
 

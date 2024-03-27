@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.tilbakekreving
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
+import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
@@ -33,6 +34,7 @@ class TilbakekrevingService(
     private val hendelseDao: HendelseDao,
     private val oppgaveService: OppgaveService,
     private val vedtakKlient: VedtakKlient,
+    private val brevApiKlient: BrevApiKlient,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
     private val tilbakekrevinghendelser: ITilbakekrevingHendelserService,
 ) {
@@ -208,6 +210,8 @@ class TilbakekrevingService(
             throw TilbakekrevingFeilTilstandException("Tilbakekreving kan ikke attesteres fordi vedtak ikke er fattet")
         }
 
+        runBlocking { brevApiKlient.ferdigstillVedtaksbrev(tilbakekrevingId, behandling.sak.id, brukerTokenInfo) }
+
         val vedtak =
             runBlocking {
                 vedtakKlient.attesterVedtakTilbakekreving(
@@ -241,6 +245,7 @@ class TilbakekrevingService(
                 behandling,
                 Tidspunkt.now(),
             )
+
         tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.ATTESTERT)
 
         runBlocking {

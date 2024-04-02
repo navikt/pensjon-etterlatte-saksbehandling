@@ -56,18 +56,20 @@ export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Pro
       )
       if (innloggetSaksbehandler.ident === saksbehandler?.ident) {
         dispatcher.setMinOppgavelisteOppgaver(
-          filtrerKunInnloggetBrukerOppgaver(
+          sorterOppgaverEtterOpprettet(
             leggTilOppgavenIMinliste(oppgavebenkState.minOppgavelisteOppgaver, oppgave, saksbehandler, versjon)
           )
         )
       } else {
         dispatcher.setMinOppgavelisteOppgaver(
-          filtrerKunInnloggetBrukerOppgaver(
-            finnOgOppdaterSaksbehandlerTildeling(
-              oppgavebenkState.minOppgavelisteOppgaver,
-              oppgave.id,
-              saksbehandler,
-              versjon
+          sorterOppgaverEtterOpprettet(
+            filtrerKunInnloggetBrukerOppgaver(
+              finnOgOppdaterSaksbehandlerTildeling(
+                oppgavebenkState.minOppgavelisteOppgaver,
+                oppgave.id,
+                saksbehandler,
+                versjon
+              )
             )
           )
         )

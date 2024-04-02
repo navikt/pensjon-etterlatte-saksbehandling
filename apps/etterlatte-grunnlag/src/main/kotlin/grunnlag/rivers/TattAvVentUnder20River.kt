@@ -11,6 +11,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 
 class TattAvVentUnder20River(
     rapidsConnection: RapidsConnection,
@@ -28,10 +29,23 @@ class TattAvVentUnder20River(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val alder = aldersovergangService.hentAlder(packet.sakId, PersonRolle.BARN) ?: return
+        val alderVedMaanedsslutt =
+            aldersovergangService.hentAlder(packet.sakId, PersonRolle.BARN, YearMonth.now().atEndOfMonth()) ?: return
 
-        if (alder >= 20) {
-            logger.error("Søker i sak ${packet.sakId} har fylt 20 år. Tar ikke av vent. Skal ikkje skje, må følges opp manuelt")
+        if (alderVedMaanedsslutt >= 20) {
+            logger.debug(
+                "Søker i sak ${packet.sakId} har fylt 20 år innen utgangen av denne måneden, " +
+                    "og vil da være $alderVedMaanedsslutt år. " +
+                    "Oppgava er alt tatt av vent, men fatting av vedtak og oppfølging skjer manuelt av saksbehandler.",
+            )
+            return
+        }
+        if (alderVedMaanedsslutt < 18) {
+            logger.error(
+                "Forventer at søker er mellom 18 og 20, " +
+                    "men søker i sak ${packet.sakId} er $alderVedMaanedsslutt år innen utgangen av denne måneden. " +
+                    "Avbryter, dette må følges opp av en utvikler. NB: Oppgaven er alt tatt av vent.",
+            )
             return
         }
 

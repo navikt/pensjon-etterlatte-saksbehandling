@@ -125,9 +125,9 @@ class TidshendelseRiverTest {
     fun `skal haandtere hendelse som blir skippet`() {
         val hendelseId = UUID.randomUUID()
         val sakId = 321L
-        val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
+        val april2024 = YearMonth.of(2024, Month.APRIL)
 
-        val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, dryRun = false)
+        val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, april2024, dryRun = false)
         melding["yrkesskadefordel_pre_20240101"] = true
 
         val packetSlot = slot<TidshendelsePacket>()
@@ -146,15 +146,17 @@ class TidshendelseRiverTest {
         }
 
         // Verifiser det som ble sendt til service
-        packetSlot.captured.hendelseId shouldBeEqual hendelseId.toString()
-        packetSlot.captured.sakId shouldBe 321L
-        packetSlot.captured.jobbtype shouldBe AO_BP20
-        packetSlot.captured.dryrun shouldBe false
-        packetSlot.captured.behandlingsmaaned shouldBe behandlingsmaaned
-        packetSlot.captured.behandlingId shouldBe null
-        packetSlot.captured.harLoependeYtelse shouldBe true
-        packetSlot.captured.harMigrertYrkesskadeFordel shouldBe true
-        packetSlot.captured.harRettUtenTidsbegrensning shouldBe false
+        with(packetSlot.captured) {
+            this.hendelseId shouldBeEqual hendelseId.toString()
+            this.sakId shouldBe 321L
+            this.jobbtype shouldBe AO_BP20
+            this.dryrun shouldBe false
+            this.behandlingsmaaned shouldBe april2024
+            this.behandlingId shouldBe null
+            this.harLoependeYtelse shouldBe true
+            this.harMigrertYrkesskadeFordel shouldBe true
+            this.harRettUtenTidsbegrensning shouldBe false
+        }
     }
 }
 

@@ -24,13 +24,13 @@ class TidshendelseService(
 ) {
     private val logger = LoggerFactory.getLogger(TidshendelseService::class.java)
 
-    enum class TidshendelserJobbType {
-        AO_BP20,
-        AO_BP21,
-        AO_OMS67,
-        OMS_DOED_3AAR,
-        OMS_DOED_5AAR,
-        OMS_DOED_4MND,
+    enum class TidshendelserJobbType(val beskrivelse: String) {
+        AO_BP20("Aldersovergang v/20 år"),
+        AO_BP21("Aldersovergang v/21 år"),
+        AO_OMS67("Aldersovergang v/67 år"),
+        OMS_DOED_3AAR("Opphør OMS etter 3 år"),
+        OMS_DOED_5AAR("Opphør OMS etter 5 år"),
+        OMS_DOED_4MND("Varselbrev om aktivitetsplikt OMS etter 4 mnd"),
     }
 
     fun haandterHendelse(hendelse: TidshendelsePacket): TidshendelseResult {
@@ -52,13 +52,15 @@ class TidshendelseService(
             } catch (e: Exception) {
                 logger.error("Kunne ikke opprette omregning [sak=${hendelse.sakId}]", e)
                 return opprettOppgave(hendelse)
-                    ?.let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
-                    ?: throw RuntimeException("Oppgaven ble ikke opprettet!")
+                    .let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
             }
         } else {
+            if (hendelse.jobbtype == OMS_DOED_4MND && !kanOppretteOppgaveForAktivitetsplikt()) {
+                logger.info("Oppgave for varselbrev aktivitetsplikt er skrudd av.")
+                return TidshendelseResult.Skipped
+            }
             return opprettOppgave(hendelse)
-                ?.let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
-                ?: TidshendelseResult.Skipped
+                .let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
         }
     }
 
@@ -94,17 +96,13 @@ class TidshendelseService(
             oppgavefrist = hendelse.behandlingsmaaned.atEndOfMonth(),
         )
 
-    private fun opprettOppgave(hendelse: TidshendelsePacket): UUID? {
-        if (hendelse.jobbtype == OMS_DOED_4MND && !kanOppretteOppgaveForAktivitetsplikt()) {
-            logger.info("Oppgave for varselbrev aktivitetsplikt er skrudd av. Avbryter.")
-            return null
-        }
+    private fun opprettOppgave(hendelse: TidshendelsePacket): UUID {
         val oppgaveId =
             behandlingService.opprettOppgave(
                 hendelse.sakId,
                 oppgaveTypeFor(hendelse.jobbtype),
                 referanse = hendelse.behandlingId?.toString(),
-                merknad = generateMerknad(hendelse.jobbtype),
+                merknad = hendelse.jobbtype.beskrivelse,
                 frist = Tidspunkt.ofNorskTidssone(hendelse.behandlingsmaaned.atEndOfMonth(), LocalTime.NOON),
             )
         logger.info("Opprettet oppgave $oppgaveId [sak=${hendelse.sakId}]")
@@ -133,17 +131,6 @@ class TidshendelseService(
             OMS_DOED_5AAR -> REVURDERING
             OMS_DOED_4MND -> AKTIVITETSPLIKT_OPPFOELGING
         }
-
-    private fun generateMerknad(type: TidshendelserJobbType): String {
-        return when (type) {
-            AO_BP20 -> "Aldersovergang v/20 år"
-            AO_BP21 -> "Aldersovergang v/21 år"
-            AO_OMS67 -> "Aldersovergang v/67 år"
-            OMS_DOED_3AAR -> "Opphør OMS etter 3 år"
-            OMS_DOED_5AAR -> "Opphør OMS etter 5 år"
-            OMS_DOED_4MND -> "Varselbrev om aktivitetsplikt OMS etter 4 mnd"
-        }
-    }
 }
 
 sealed class TidshendelseResult {

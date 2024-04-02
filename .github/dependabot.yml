@@ -30,6 +30,7 @@ updates:
           - "com.github.tomakehurst:wiremock-jre8"
           - "io.mockk:mockk"
           - "no.nav.security:mock-oauth2-server"
+          - "org.wiremock:wiremock"
       backend:
         patterns:
           - "io.micrometer*"
@@ -54,6 +55,7 @@ updates:
           - "ca.cutterslade.analyze"
           - "io.ktor*"
           - "org.jetbrains.kotlinx*"
+          - "org.apache.commons:commons-compress"
       jms-mq:
         patterns:
           - "org.messaginghub:pooled-jms"
@@ -104,13 +106,10 @@ updates:
       diverse:
         patterns:
           - "slate*"
-          - "unleash*"
           - "vite"
           - "vite-tsconfig-paths"
           - "vitest"
           - "@vitejs/plugin-react-swc"
-          - "prom-client"
-          - "unleash-klient"
           - "@types/node"
           - "jsdom"
       react:
@@ -156,6 +155,8 @@ updates:
           - "@types/cors"
           - "winston*"
           - "@types/request"
+          - "prom-client"
+          - "unleash-client"
 
 
   # ==============

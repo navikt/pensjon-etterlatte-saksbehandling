@@ -404,9 +404,9 @@ object OmstillingstoenadVilkaar {
                         """
                         Omstillingsstønaden kan eksporteres hvis avdøde eller gjenlvende har minst 20 års samlet botid i Norge, eller hvis avdøde eller gjenlevende har mindre enn 20 års botid, men da redusert etter en trygdetid lik avdødes antall poengår i Norge.
                         
-                        Skyldes dødsfallet en godkjent yrkesskade kan omstllingsstønaden eksporteres i sin helhet, jf. folketrygdloven § 17-12. Omstillingsstønaden kan også fritt eksporteres til EØS-land, og til noen land Norge har bilaterale trygdeavtaler med.
+                        Skyldes dødsfallet en godkjent yrkesskade kan omstillingsstønaden eksporteres i sin helhet, jf. folketrygdloven § 17-12. Omstillingsstønaden kan også fritt eksporteres til EØS-land, og til noen land Norge har bilaterale trygdeavtaler med.
                         
-                        Omstllingsstønad etter unntaksbestemmelsene i § 17-2 tredje, fjerde og sjette ledd beholdes bare så lenge gjenlevende er medlem i trygden. Den beholdes likevel hvis gjenlevende bor i EØS-land, eller i et land Norge har trygdeavtale med der eksport er tillatt, eller hvis gjenlevende er tredjelandsborger med rettigheter med hjemmel i C-55/00 Gottardo, jf. Rekommandasjon nr. H1 og forholdet omfattes av aktuell avtale.
+                        Omstillingsstønad etter unntaksbestemmelsene i § 17-2 tredje, fjerde og sjette ledd beholdes bare så lenge gjenlevende er medlem i trygden. Den beholdes likevel hvis gjenlevende bor i EØS-land, eller i et land Norge har trygdeavtale med der eksport er tillatt, eller hvis gjenlevende er tredjelandsborger med rettigheter med hjemmel i C-55/00 Gottardo, jf. Rekommandasjon nr. H1 og forholdet omfattes av aktuell avtale.
                         
                         Andre hjemler:
                         EØS - rådsforordning 883/2004

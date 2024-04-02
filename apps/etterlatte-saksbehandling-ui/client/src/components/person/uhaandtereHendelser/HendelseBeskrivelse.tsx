@@ -27,7 +27,7 @@ import { institusjonstype } from '~components/behandling/beregningsgrunnlag/Inst
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
 import { SakType } from '~shared/types/sak'
 
-const AnsvarligeForeldreSamsvar = (props: { samsvar: AnsvarligeForeldreSamsvar }) => {
+const VisAnsvarligeForeldreSamsvar = (props: { samsvar: AnsvarligeForeldreSamsvar }) => {
   const navneMap = useContext(FnrTilNavnMapContext)
   return (
     <GrunnlagSammenligningWrapper>
@@ -145,7 +145,7 @@ const GrunnlagVergemaal = (props: { vergemaal: VergemaalEllerFremtidsfullmakt })
   )
 }
 
-const Sivilstand = (props: { samsvar: SivilstandSamsvar }) => {
+const VisSivilstand = (props: { samsvar: SivilstandSamsvar }) => {
   const { samsvar } = props
 
   const sivilstandWrapper = (sivilstand: Sivilstand, i: number) => {
@@ -269,7 +269,7 @@ export const HendelseBeskrivelse = (props: { hendelse: Grunnlagsendringshendelse
       return (
         <Header>
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
-          <AnsvarligeForeldreSamsvar samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
+          <VisAnsvarligeForeldreSamsvar samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
         </Header>
       )
     case 'DOEDSDATO':
@@ -297,7 +297,7 @@ export const HendelseBeskrivelse = (props: { hendelse: Grunnlagsendringshendelse
       return (
         <Header>
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
-          <Sivilstand samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
+          <VisSivilstand samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
         </Header>
       )
     case 'INSTITUSJONSOPPHOLD':

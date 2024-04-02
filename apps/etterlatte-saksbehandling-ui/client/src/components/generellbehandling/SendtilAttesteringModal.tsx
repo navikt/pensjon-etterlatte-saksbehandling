@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { Alert, BodyShort, Button, Modal } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { sendTilAttesteringGenerellBehandling } from '~shared/api/generellbehandling'
-import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtland'
+import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtlandBehandling'
 
 import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'

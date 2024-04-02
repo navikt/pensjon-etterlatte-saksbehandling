@@ -1,9 +1,9 @@
 package no.nav.etterlatte.tidshendelser
 
-import jobs.TimerJob
 import net.logstash.logback.marker.Markers
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
+import no.nav.etterlatte.libs.common.TimerJob
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer

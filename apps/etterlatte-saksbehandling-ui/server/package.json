@@ -30,7 +30,7 @@
     "mocha": "^10.3.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.3"
   },
   "scripts": {
     "dev": "ts-node-dev ./src/index.ts",

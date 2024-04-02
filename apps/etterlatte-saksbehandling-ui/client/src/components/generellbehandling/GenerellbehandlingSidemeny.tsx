@@ -1,8 +1,6 @@
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { Generellbehandling, KravpakkeUtland, Status } from '~shared/types/Generellbehandling'
 import { AttesteringMedUnderkjenning } from '~components/generellbehandling/AttesteringMedUnderkjenning'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentSaksbehandlerForReferanseOppgaveUnderArbeid } from '~shared/api/oppgaver'
 import React, { useEffect, useState } from 'react'
 import { useAppSelector } from '~store/Store'
 import Spinner from '~shared/Spinner'
@@ -12,30 +10,22 @@ import { ReturnertVisning } from '~components/generellbehandling/ReturnertVisnin
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useSelectorSaksbehandlerGjeldendeOppgaveBehandling } from '~store/selectors/useSelectorSaksbehandlerGjeldendeOppgaveBehandling'
+import { useGjeldendeSaksbehandlerForReferanse } from '~shared/hooks/useGjeldendeSaksbehandlerForReferanse'
 
 export const GenerellbehandlingSidemeny = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
 }) => {
   const { utlandsBehandling } = props
-  const [saksbehandlerForOppgaveStatus, hentSaksbehandlerForOppgaveUnderArbeid] = useApiCall(
-    hentSaksbehandlerForReferanseOppgaveUnderArbeid
-  )
+  const [saksbehandlerForOppgaveStatus] = useGjeldendeSaksbehandlerForReferanse({
+    referanse: utlandsBehandling.id,
+    sakId: utlandsBehandling.sakId,
+  })
 
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  const [saksbehandlerForGjeldendeOppgave, setGeldendeSaksbehandler] = useState<string | null>(null)
   const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)
 
-  useEffect(() => {
-    hentSaksbehandlerForOppgaveUnderArbeid(
-      { referanse: utlandsBehandling.id, sakId: utlandsBehandling.sakId },
-      (saksbehandler, statusCode) => {
-        if (statusCode === 200) {
-          setGeldendeSaksbehandler(saksbehandler?.ident)
-        }
-      },
-      () => setGeldendeSaksbehandler(null)
-    )
-  }, [utlandsBehandling.id])
+  const saksbehandlerForGjeldendeOppgave = useSelectorSaksbehandlerGjeldendeOppgaveBehandling()
 
   useEffect(() => {
     setOppgaveErTildeltInnloggetBruker(innloggetSaksbehandler.ident === saksbehandlerForGjeldendeOppgave)

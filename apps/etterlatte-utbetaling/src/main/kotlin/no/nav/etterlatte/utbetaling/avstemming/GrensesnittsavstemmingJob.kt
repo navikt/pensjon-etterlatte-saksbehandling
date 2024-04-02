@@ -1,8 +1,8 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
 import no.nav.etterlatte.jobs.LoggerInfo
-import no.nav.etterlatte.jobs.TimerJob
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
+import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype

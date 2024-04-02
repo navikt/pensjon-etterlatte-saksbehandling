@@ -1,7 +1,7 @@
 import { Alert, Button } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { attesterGenerellbehandling } from '~shared/api/generellbehandling'
-import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtland'
+import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtlandBehandling'
 import { useNavigate } from 'react-router-dom'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 

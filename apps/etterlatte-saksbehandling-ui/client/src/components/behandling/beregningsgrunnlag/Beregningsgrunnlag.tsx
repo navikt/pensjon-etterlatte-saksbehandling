@@ -9,7 +9,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 import { hentOverstyrBeregning, opprettOverstyrBeregning } from '~shared/api/beregning'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { OverstyrBeregning as IOverstyrBeregning } from '~shared/types/Beregning'
+import { OverstyrBeregning } from '~shared/types/Beregning'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import OverstyrBeregningGrunnlag from './OverstyrBeregningGrunnlag'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
@@ -23,7 +23,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
 
   const [overstyrtBeregning, getOverstyrtBeregning] = useApiCall(hentOverstyrBeregning)
-  const [overstyrt, setOverstyrt] = useState<IOverstyrBeregning | undefined>(undefined)
+  const [overstyrt, setOverstyrt] = useState<OverstyrBeregning | undefined>(undefined)
   const vedtaksresultat = useVedtaksResultat()
   const visOverstyrKnapp = useFeatureEnabledMedDefault('overstyr-beregning-knapp', false)
 
@@ -53,7 +53,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
         {isSuccess(overstyrtBeregning) && (
           <>
             {visOverstyrKnapp && !overstyrt && (
-              <OverstyrBeregning behandlingId={behandling.id} setOverstyrt={setOverstyrt} />
+              <OverstyrBeregningForGrunnlag behandlingId={behandling.id} setOverstyrt={setOverstyrt} />
             )}
             {overstyrt && <OverstyrBeregningGrunnlag behandling={behandling} overstyrBeregning={overstyrt} />}
             {!overstyrt &&
@@ -68,9 +68,9 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   )
 }
 
-const OverstyrBeregning = (props: {
+const OverstyrBeregningForGrunnlag = (props: {
   behandlingId: string
-  setOverstyrt: Dispatch<SetStateAction<IOverstyrBeregning | undefined>>
+  setOverstyrt: Dispatch<SetStateAction<OverstyrBeregning | undefined>>
 }) => {
   const { behandlingId, setOverstyrt } = props
   const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)

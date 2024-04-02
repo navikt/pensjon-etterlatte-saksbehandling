@@ -37,7 +37,7 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/rygdetid_v2/$behandlingId",
+                            url = "$resourceUrl/api/trygdetid_v2/$behandlingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )

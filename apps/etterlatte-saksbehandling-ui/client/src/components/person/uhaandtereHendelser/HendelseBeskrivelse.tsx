@@ -9,12 +9,12 @@ import {
 } from '~components/person/uhaandtereHendelser/utils'
 import {
   AdresseSamsvar,
-  AnsvarligeForeldreSamsvar,
+  AnsvarligeForeldreSamsvar as IAnsvarligeForeldreSamsvar,
   BarnSamsvar,
   DoedsdatoSamsvar,
   Grunnlagsendringshendelse,
   InstitusjonsoppholdSamsvar,
-  Sivilstand,
+  Sivilstand as ISivilstand,
   SivilstandSamsvar,
   UtlandSamsvar,
   VergemaalEllerFremtidsfullmakt,
@@ -27,7 +27,7 @@ import { institusjonstype } from '~components/behandling/beregningsgrunnlag/Inst
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
 import { SakType } from '~shared/types/sak'
 
-const AnsvarligeForeldreSamsvar = (props: { samsvar: AnsvarligeForeldreSamsvar }) => {
+const AnsvarligeForeldreSamsvar = (props: { samsvar: IAnsvarligeForeldreSamsvar }) => {
   const navneMap = useContext(FnrTilNavnMapContext)
   return (
     <GrunnlagSammenligningWrapper>
@@ -148,7 +148,7 @@ const GrunnlagVergemaal = (props: { vergemaal: VergemaalEllerFremtidsfullmakt })
 const Sivilstand = (props: { samsvar: SivilstandSamsvar }) => {
   const { samsvar } = props
 
-  const sivilstandWrapper = (sivilstand: Sivilstand, i: number) => {
+  const sivilstandWrapper = (sivilstand: ISivilstand, i: number) => {
     return (
       <ListeWrapper key={i}>
         <li>

@@ -1,6 +1,6 @@
 import {
   Generellbehandling,
-  KravpakkeUtland,
+  KravpakkeUtland as IKravpakkeUtland,
   DokumentSendtMedDato,
   generellbehandlingErRedigerbar,
 } from '~shared/types/Generellbehandling'
@@ -76,7 +76,7 @@ export const hentSakOgNavigerTilSaksoversikt = (sakId: number, navigate: Navigat
     })
 }
 
-const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null } }) => {
+const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innhold: IKravpakkeUtland | null } }) => {
   const { utlandsBehandling } = props
   const innhold = utlandsBehandling.innhold
   const [putOppdaterGenerellBehandlingStatus, putOppdaterGenerellBehandling] = useApiCall(oppdaterGenerellBehandling)
@@ -138,7 +138,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
     })
   }, [])
 
-  const generellBehandlingMedLocalState: Generellbehandling & { innhold: KravpakkeUtland } = {
+  const generellBehandlingMedLocalState: Generellbehandling & { innhold: IKravpakkeUtland } = {
     ...utlandsBehandling,
     innhold: {
       type: 'KRAVPAKKE_UTLAND',

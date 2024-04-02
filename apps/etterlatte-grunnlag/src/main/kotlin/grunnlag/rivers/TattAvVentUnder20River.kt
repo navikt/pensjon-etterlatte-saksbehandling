@@ -11,6 +11,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 
 class TattAvVentUnder20River(
     rapidsConnection: RapidsConnection,
@@ -28,9 +29,10 @@ class TattAvVentUnder20River(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val alder = aldersovergangService.hentAlder(packet.sakId, PersonRolle.BARN) ?: return
+        val alderVedMaanedsslutt =
+            aldersovergangService.hentAlder(packet.sakId, PersonRolle.BARN, YearMonth.now().atEndOfMonth()) ?: return
 
-        if (alder >= 20) {
+        if (alderVedMaanedsslutt >= 20) {
             logger.error("Søker i sak ${packet.sakId} har fylt 20 år. Tar ikke av vent. Skal ikkje skje, må følges opp manuelt")
             return
         }

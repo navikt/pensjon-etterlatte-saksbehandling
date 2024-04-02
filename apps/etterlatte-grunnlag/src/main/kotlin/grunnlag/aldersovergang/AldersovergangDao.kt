@@ -92,6 +92,7 @@ class AldersovergangDao(private val datasource: DataSource) : Transactions<Alder
     fun hentAlder(
         sakId: Long,
         opplysningType: Opplysningstype,
+        paaDato: LocalDate,
         tx: TransactionalSession? = null,
     ): Alder? {
         val sql =
@@ -111,7 +112,7 @@ class AldersovergangDao(private val datasource: DataSource) : Transactions<Alder
             """.trimIndent()
         return tx.session {
             hent(sql, mapOf("sak_id" to sakId, "opplysningType" to opplysningType.name)) {
-                it.localDate("foedselsdato").until(LocalDate.now()).years
+                it.localDate("foedselsdato").until(paaDato).years
             }
         }
     }

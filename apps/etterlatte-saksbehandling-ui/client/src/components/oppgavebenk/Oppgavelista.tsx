@@ -3,6 +3,7 @@ import { isPending, mapResult } from '~shared/api/apiUtils'
 import { hentOppgaverMedStatus, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
+  leggTilOppgavenIMinliste,
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveutils'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
@@ -40,6 +41,10 @@ export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Pro
 
   const [oppgavelistaOppgaverResult, hentOppgavelistaOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
 
+  const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
+    return oppgaver.filter((o) => o.saksbehandler?.ident === innloggetSaksbehandler.ident)
+  }
+
   const oppdaterSaksbehandlerTildeling = (
     oppgave: OppgaveDTO,
     saksbehandler: OppgaveSaksbehandler | null,
@@ -49,6 +54,24 @@ export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Pro
       dispatcher.setOppgavelistaOppgaver(
         finnOgOppdaterSaksbehandlerTildeling(oppgavebenkState.oppgavelistaOppgaver, oppgave.id, saksbehandler, versjon)
       )
+      if (innloggetSaksbehandler.ident === saksbehandler?.ident) {
+        dispatcher.setMinOppgavelisteOppgaver(
+          filtrerKunInnloggetBrukerOppgaver(
+            leggTilOppgavenIMinliste(oppgavebenkState.minOppgavelisteOppgaver, oppgave, saksbehandler, versjon)
+          )
+        )
+      } else {
+        dispatcher.setMinOppgavelisteOppgaver(
+          filtrerKunInnloggetBrukerOppgaver(
+            finnOgOppdaterSaksbehandlerTildeling(
+              oppgavebenkState.minOppgavelisteOppgaver,
+              oppgave.id,
+              saksbehandler,
+              versjon
+            )
+          )
+        )
+      }
     }, 2000)
   }
 

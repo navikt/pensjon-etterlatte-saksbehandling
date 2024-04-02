@@ -25,7 +25,12 @@ export const leggTilOppgavenIMinliste = (
   saksbehandler: OppgaveSaksbehandler | null,
   versjon: number | null
 ): OppgaveDTO[] => {
-  return [...oppgaver, { ...oppgave, saksbehandler: saksbehandler, status: 'UNDER_BEHANDLING', versjon: versjon }]
+  return oppgaver.concat({
+    ...oppgave,
+    saksbehandler: saksbehandler,
+    status: 'UNDER_BEHANDLING',
+    versjon: versjon,
+  })
 }
 
 export const oppdaterFrist = (

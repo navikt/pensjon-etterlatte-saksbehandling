@@ -9,7 +9,7 @@ import { useAppDispatch } from '~store/Store'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { Result } from '~shared/api/apiUtils'
 
-export const useGjeldendeSaksbehandlerForReferanse = ({
+export const useSaksbehandlerPaaOppgaveUnderArbeidForReferanse = ({
   referanse,
   sakId,
 }: {

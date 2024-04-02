@@ -11,13 +11,13 @@ import { ReturnertVisning } from '~components/generellbehandling/ReturnertVisnin
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useSelectorSaksbehandlerGjeldendeOppgaveBehandling } from '~store/selectors/useSelectorSaksbehandlerGjeldendeOppgaveBehandling'
-import { useGjeldendeSaksbehandlerForReferanse } from '~shared/hooks/useGjeldendeSaksbehandlerForReferanse'
+import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
 
 export const GenerellbehandlingSidemeny = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
 }) => {
   const { utlandsBehandling } = props
-  const [saksbehandlerForOppgaveStatus] = useGjeldendeSaksbehandlerForReferanse({
+  const [saksbehandlerForOppgaveStatus] = useSaksbehandlerPaaOppgaveUnderArbeidForReferanse({
     referanse: utlandsBehandling.id,
     sakId: utlandsBehandling.sakId,
   })

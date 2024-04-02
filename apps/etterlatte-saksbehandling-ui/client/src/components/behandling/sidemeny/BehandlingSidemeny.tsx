@@ -29,7 +29,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
-import { useGjeldendeSaksbehandlerForReferanse } from '~shared/hooks/useGjeldendeSaksbehandlerForReferanse'
+import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtlandstilknytningType | null => {
   if (behandling.utlandstilknytning?.type) {
@@ -66,7 +66,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   const [beslutning, setBeslutning] = useState<IBeslutning>()
   const fane = useSelectorBehandlingSidemenyFane()
 
-  const [saksbehandlerForOppgaveResult] = useGjeldendeSaksbehandlerForReferanse({
+  const [saksbehandlerForOppgaveResult] = useSaksbehandlerPaaOppgaveUnderArbeidForReferanse({
     referanse: behandling.id,
     sakId: behandling.sakId,
   })

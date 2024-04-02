@@ -19,7 +19,7 @@ import { AttesteringEllerUnderkjenning } from '~components/behandling/attesterin
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { FlexRow } from '~shared/styled'
-import { useGjeldendeSaksbehandlerForReferanse } from '~shared/hooks/useGjeldendeSaksbehandlerForReferanse'
+import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
 
 export function KlageSidemeny() {
   const klage = useKlage()
@@ -45,7 +45,7 @@ export function KlageSidemeny() {
       </Sidebar>
     )
   }
-  const [saksbehandlerForOppgaveResult] = useGjeldendeSaksbehandlerForReferanse({
+  const [saksbehandlerForOppgaveResult] = useSaksbehandlerPaaOppgaveUnderArbeidForReferanse({
     referanse: klage.id,
     sakId: klage.sak.id,
   })

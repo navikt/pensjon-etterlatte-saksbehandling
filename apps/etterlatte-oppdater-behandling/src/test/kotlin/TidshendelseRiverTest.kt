@@ -1,18 +1,13 @@
+package no.nav.etterlatte
+
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.etterlatte.BehandlingServiceImpl
-import no.nav.etterlatte.TidshendelsePacket
-import no.nav.etterlatte.TidshendelseResult
-import no.nav.etterlatte.TidshendelseRiver
-import no.nav.etterlatte.TidshendelseService
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.AO_BP20
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_5AAR
-import no.nav.etterlatte.TidshendelserFeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
@@ -34,9 +29,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 class TidshendelseRiverTest {
-    private val featureToggleService =
-        DummyFeatureToggleService()
-            .also { it.settBryter(TidshendelserFeatureToggle.OpprettOppgaveForVarselbrevAktivitetsplikt, true) }
     private val behandlingService = mockk<BehandlingServiceImpl>()
     private val tidshendelseService = mockk<TidshendelseService>()
     private val inspector = TestRapid().apply { TidshendelseRiver(this, tidshendelseService) }

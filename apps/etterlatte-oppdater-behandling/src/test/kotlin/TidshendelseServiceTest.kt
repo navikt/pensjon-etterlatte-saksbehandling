@@ -1,17 +1,13 @@
+package no.nav.etterlatte
+
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.BehandlingService
-import no.nav.etterlatte.OpprettOmregningResponse
-import no.nav.etterlatte.TidshendelsePacket
-import no.nav.etterlatte.TidshendelseResult
-import no.nav.etterlatte.TidshendelseService
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.AO_BP20
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_3AAR
-import no.nav.etterlatte.TidshendelserFeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -58,7 +54,7 @@ class TidshendelseServiceTest {
             )
 
         every { behandlingService.opprettOmregning(omregningshendelse) } returns
-            opprettOmregningResponse(sakType = SakType.BARNEPENSJON)
+            OpprettOmregningResponse(behandlingId, forrigeBehandlingId, sakType = SakType.BARNEPENSJON)
 
         tidshendelseService.haandterHendelse(TidshendelsePacket(melding)) shouldBe
             TidshendelseResult.OpprettetOmregning(behandlingId, forrigeBehandlingId)
@@ -179,9 +175,5 @@ class TidshendelseServiceTest {
         verify(exactly = 0) {
             behandlingService.opprettOppgave(any(), any(), any(), any(), any())
         }
-    }
-
-    fun opprettOmregningResponse(sakType: SakType): OpprettOmregningResponse {
-        return OpprettOmregningResponse(behandlingId, forrigeBehandlingId, sakType)
     }
 }

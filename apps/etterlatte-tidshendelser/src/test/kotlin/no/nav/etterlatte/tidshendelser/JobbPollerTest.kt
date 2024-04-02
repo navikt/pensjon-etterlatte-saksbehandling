@@ -1,6 +1,7 @@
 package no.nav.etterlatte.tidshendelser
 
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

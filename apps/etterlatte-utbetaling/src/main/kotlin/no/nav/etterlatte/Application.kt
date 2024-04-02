@@ -19,17 +19,17 @@ fun main() {
 
 fun jobs(applicationContext: ApplicationContext) {
     val jobs = mutableSetOf<Timer>()
-    with(applicationContext.grensesnittavstemmingJob) {
-        if (applicationContext.properties.grensesnittavstemmingEnabled) schedule().also { jobs.add(it) }
+    if (applicationContext.properties.grensesnittavstemmingEnabled) {
+        applicationContext.grensesnittavstemmingJob.schedule().also { jobs.add(it) }
     }
-    with(applicationContext.grensesnittavstemmingJobOMS) {
-        if (applicationContext.properties.grensesnittavstemmingOMSEnabled) schedule().also { jobs.add(it) }
+    if (applicationContext.properties.grensesnittavstemmingOMSEnabled) {
+        applicationContext.grensesnittavstemmingJobOMS.schedule().also { jobs.add(it) }
     }
-    with(applicationContext.konsistensavstemmingJob) {
-        if (applicationContext.properties.konsistensavstemmingEnabled) schedule().also { jobs.add(it) }
+    if (applicationContext.properties.konsistensavstemmingEnabled) {
+        applicationContext.konsistensavstemmingJob.schedule().also { jobs.add(it) }
     }
-    with(applicationContext.konsistensavstemmingJobOMS) {
-        if (applicationContext.properties.konsistensavstemmingOMSEnabled) schedule().also { jobs.add(it) }
+    if (applicationContext.properties.konsistensavstemmingOMSEnabled) {
+        applicationContext.konsistensavstemmingJobOMS.schedule().also { jobs.add(it) }
     }
     addShutdownHook(jobs)
 }

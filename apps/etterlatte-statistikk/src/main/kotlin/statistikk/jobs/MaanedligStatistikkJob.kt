@@ -1,8 +1,8 @@
 package no.nav.etterlatte.statistikk.jobs
 
 import no.nav.etterlatte.jobs.LoggerInfo
-import no.nav.etterlatte.jobs.TimerJob
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
+import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection

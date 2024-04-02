@@ -25,7 +25,7 @@ class Server(private val context: ApplicationContext) {
             initEmbeddedServer(
                 httpPort = context.httpPort,
                 applicationConfig = context.config,
-                shutdownHooks = listOf(context.metrikkerJob.schedule()),
+                cronJobs = listOf(context.metrikkerJob),
             ) {
                 vedtaksvurderingRoute(
                     vedtaksvurderingService,

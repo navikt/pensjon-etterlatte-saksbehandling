@@ -33,6 +33,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.doedshendelseRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
+import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
@@ -48,7 +49,6 @@ import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
 import no.nav.etterlatte.tilgangsstyring.PluginConfiguration
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
-import java.util.Timer
 import javax.sql.DataSource
 
 val sikkerLogg: Logger = sikkerlogger()
@@ -66,7 +66,7 @@ private class Server(private val context: ApplicationContext) {
         initEmbeddedServer(
             httpPort = context.httpPort,
             applicationConfig = context.config,
-            shutdownHooks = shutdownHooks(context),
+            cronJobs = timerJobs(context),
         ) {
             settOppApplikasjonen(context)
         }
@@ -78,13 +78,13 @@ private class Server(private val context: ApplicationContext) {
         }
 }
 
-private fun shutdownHooks(context: ApplicationContext): List<Timer> =
+private fun timerJobs(context: ApplicationContext): List<TimerJob> =
     listOf(
-        context.metrikkerJob.schedule(),
-        context.doedsmeldingerJob.schedule(),
-        context.doedsmeldingerReminderJob.schedule(),
-        context.saksbehandlerJob.schedule(),
-        context.fristGaarUtJobb.schedule(),
+        context.metrikkerJob,
+        context.doedsmeldingerJob,
+        context.doedsmeldingerReminderJob,
+        context.saksbehandlerJob,
+        context.fristGaarUtJobb,
     )
 
 @Deprecated("Denne blir brukt i veldig mange testar. Bør rydde opp, men tar det etter denne endringa er inne")

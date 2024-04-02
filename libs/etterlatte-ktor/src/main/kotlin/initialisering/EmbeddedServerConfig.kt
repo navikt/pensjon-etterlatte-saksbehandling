@@ -12,20 +12,20 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.addShutdownHook
+import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.ktor.shutdownPolicyEmbeddedServer
 import no.nav.etterlatte.libs.ktor.metricsRoute
 import no.nav.etterlatte.libs.ktor.restModule
-import java.util.Timer
 
 fun initEmbeddedServer(
     httpPort: Int,
     applicationConfig: Config,
     withMetrics: Boolean = true,
-    shutdownHooks: List<Timer> = listOf(),
+    cronJobs: List<TimerJob> = listOf(),
     routes: Route.() -> Unit,
-) = settOppEmbeddedServer(httpPort, applicationConfig, shutdownHooks) {
+) = settOppEmbeddedServer(httpPort, applicationConfig, cronJobs) {
     restModule(sikkerlogger(), withMetrics = withMetrics) {
         routes()
     }
@@ -44,7 +44,7 @@ fun initEmbeddedServerUtenRest(
 private fun settOppEmbeddedServer(
     httpPort: Int,
     applicationConfig: Config,
-    shutdownHooks: List<Timer> = listOf(),
+    cronjobs: List<TimerJob> = listOf(),
     body: Application.() -> Unit,
 ): CIOApplicationEngine =
     embeddedServer(
@@ -58,7 +58,8 @@ private fun settOppEmbeddedServer(
                 }
                 module {
                     environment.monitor.subscribe(ServerReady) {
-                        shutdownHooks.forEach { addShutdownHook(it) }
+                        val scheduledJobs = cronjobs.map { it.schedule() }
+                        addShutdownHook(scheduledJobs)
                     }
                 }
                 connector { port = httpPort }

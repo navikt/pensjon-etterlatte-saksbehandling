@@ -94,6 +94,7 @@ data class Sivilstand(
     val relatertVedSiviltilstand: Folkeregisteridentifikator?,
     val gyldigFraOgMed: LocalDate?,
     val bekreftelsesdato: LocalDate?,
+    val historisk: Boolean,
     val kilde: String,
 )
 

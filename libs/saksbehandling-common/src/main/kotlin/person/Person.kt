@@ -94,7 +94,9 @@ data class Sivilstand(
     val relatertVedSiviltilstand: Folkeregisteridentifikator?,
     val gyldigFraOgMed: LocalDate?,
     val bekreftelsesdato: LocalDate?,
-    val historisk: Boolean,
+    // Alle sivilstander hentet frem til nå har vært aktive
+    // Setter default til false for å støtte sivilstander uten dette feltet frem til en migrering er gjennomført
+    val historisk: Boolean = false,
     val kilde: String,
 )
 

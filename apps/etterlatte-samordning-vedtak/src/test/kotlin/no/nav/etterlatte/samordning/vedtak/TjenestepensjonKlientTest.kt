@@ -15,7 +15,6 @@ import io.mockk.clearAllMocks
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Month
@@ -33,80 +32,13 @@ class TjenestepensjonKlientTest {
     }
 
     @Test
-    fun `har TP-forhold`() {
-        val httpClient =
-            createHttpClient { request ->
-                request.headers["fnr"] shouldBe "17057554321"
-                request.headers["tpnr"] shouldBe "3010"
-
-                when (request.url.fullPath) {
-                    "/api/tjenestepensjon/finnForholdForBruker?datoFom=2024-03-01" -> {
-                        respond(
-                            SamhandlerPersonDto(
-                                fnr = "17057554321",
-                                forhold =
-                                    listOf(
-                                        TjenestepensjonForhold(
-                                            tpNr = "3010",
-                                            kilde = "PP01",
-                                        ),
-                                    ),
-                            ).toJson(),
-                            headers = headers,
-                        )
-                    }
-                    else -> error(request.url.fullPath)
-                }
-            }
-
-        val tpKlient = TjenestepensjonKlient(config, httpClient)
-
-        runBlocking {
-            tpKlient.harTpForholdByDate("17057554321", tpnr = Tjenestepensjonnummer("3010"), datoHarTpYtelse)
-        } shouldBe true
-    }
-
-    @Test
-    fun `har ikke TP-forhold`() {
-        val httpClient =
-            createHttpClient { request ->
-                request.headers["fnr"] shouldBe "17057554321"
-                request.headers["tpnr"] shouldBe "4100"
-
-                when (request.url.fullPath) {
-                    "/api/tjenestepensjon/finnForholdForBruker?datoFom=2024-02-01" -> {
-                        respond(
-                            SamhandlerPersonDto(
-                                fnr = "17057554321",
-                                forhold = emptyList(),
-                            ).toJson(),
-                            headers = headers,
-                        )
-                    }
-
-                    else -> error(request.url.fullPath)
-                }
-            }
-
-        val tpKlient = TjenestepensjonKlient(config, httpClient)
-
-        runBlocking {
-            tpKlient.harTpForholdByDate("17057554321", Tjenestepensjonnummer("4100"), datoHarIkkeTpYtelse)
-        } shouldBe false
-    }
-
-    @Test
-    fun `har ikke TP-ytelse - verifisere api path, param og headers`() {
+    fun `har ikke TP-ytelse`() {
         val httpClient =
             createHttpClient { request ->
                 request.headers["fnr"] shouldBe "01018012345"
 
                 when (request.url.fullPath) {
-                    "/api/tjenestepensjon/tpNrWithYtelse?fomDate=2024-03-01" -> {
-                        respond("{\"tpNr\": [ \"3010\", \"4100\" ]}", headers = headers)
-                    }
-
-                    "/api/tjenestepensjon/tpNrWithYtelse?fomDate=2024-02-01" -> {
+                    "/api/tjenestepensjon/tpNrWithYtelse?fomDate=$datoHarIkkeTpYtelse" -> {
                         respond("{\"tpNr\": []}", headers = headers)
                     }
 
@@ -119,6 +51,24 @@ class TjenestepensjonKlientTest {
         runBlocking {
             tpKlient.harTpYtelseOnDate("01018012345", Tjenestepensjonnummer("3010"), datoHarIkkeTpYtelse)
         } shouldBe false
+    }
+
+    @Test
+    fun `har TP-ytelse`() {
+        val httpClient =
+            createHttpClient { request ->
+                request.headers["fnr"] shouldBe "01018012345"
+
+                when (request.url.fullPath) {
+                    "/api/tjenestepensjon/tpNrWithYtelse?fomDate=$datoHarTpYtelse" -> {
+                        respond("{\"tpNr\": [ \"3010\", \"4100\" ]}", headers = headers)
+                    }
+
+                    else -> error(request.url.fullPath)
+                }
+            }
+
+        val tpKlient = TjenestepensjonKlient(config, httpClient)
 
         runBlocking {
             tpKlient.harTpYtelseOnDate("01018012345", Tjenestepensjonnummer("3010"), datoHarTpYtelse)

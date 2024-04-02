@@ -1,6 +1,6 @@
 package no.nav.etterlatte.jobs
 
-import no.nav.etterlatte.libs.common.TimerJob
+import jobs.TimerJob
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common
+package jobs
 
 import java.util.Timer
 

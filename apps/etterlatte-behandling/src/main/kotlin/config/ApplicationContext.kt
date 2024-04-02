@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.HttpClient
+import jobs.OpeningHours
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingFactory
@@ -496,6 +497,7 @@ internal class ApplicationContext(
             interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
+            openingHours = env.requireEnvValue("JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS").let { OpeningHours.of(it) },
         )
     }
 
@@ -505,6 +507,7 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(1, ChronoUnit.SECONDS).toMillis(),
             interval = Duration.of(20, ChronoUnit.MINUTES),
+            openingHours = env.requireEnvValue("JOBB_SAKSBEHANDLER_OPENING_HOURS").let { OpeningHours.of(it) },
         )
     }
 

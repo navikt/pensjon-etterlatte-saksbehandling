@@ -13,6 +13,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 data class Avkorting(
+    // TODO skal bli List<Aarsoppgjoer> når vi implementerer revurdering tilbake til tidligere år og etteroppgjør
     val aarsoppgjoer: Aarsoppgjoer = Aarsoppgjoer(),
     val avkortetYtelseFraVirkningstidspunkt: List<AvkortetYtelse> = emptyList(),
     val avkortetYtelseForrigeVedtak: List<AvkortetYtelse> = emptyList(),
@@ -69,9 +70,11 @@ data class Avkorting(
     fun oppdaterMedInntektsgrunnlag(nyttGrunnlag: AvkortingGrunnlag): Avkorting {
         val inntektsavkorting =
             aarsoppgjoer.inntektsavkorting
+                // Fjerner hvis det finnes fra før for å erstatte/redigere
                 .filter { it.grunnlag.id != nyttGrunnlag.id }
                 .map {
                     when (it.grunnlag.periode.tom) {
+                        // Lukker grunnlag fra forrige behandling
                         null ->
                             it.copy(
                                 grunnlag =

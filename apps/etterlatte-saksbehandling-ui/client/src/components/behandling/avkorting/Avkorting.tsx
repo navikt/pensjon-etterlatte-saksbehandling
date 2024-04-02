@@ -55,7 +55,7 @@ export const Avkorting = ({
         () => (
           <AvkortingInntekt
             behandling={behandling}
-            avkortingGrunnlag={avkorting == null ? [] : avkorting.avkortingGrunnlag}
+            avkorting={avkorting}
             setAvkorting={setAvkorting}
             redigerbar={redigerbar}
           />

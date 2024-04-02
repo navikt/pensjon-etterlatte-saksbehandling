@@ -4,7 +4,8 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentGenerellBehandling } from '~shared/api/generellbehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
-import KravpakkeUtland from '~components/generellbehandling/KravpakkeUtland'
+import KravpakkeUtlandBehandling from '~components/generellbehandling/KravpakkeUtlandBehandling'
+import { KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { Alert } from '@navikt/ds-react'
 import { Generellbehandling } from '~shared/types/Generellbehandling'
 import { StatusBar } from '~shared/statusbar/Statusbar'
@@ -55,7 +56,7 @@ const GenerellBehandling = () => {
                 errorMessage: 'Vi klarte ikke å hente sak og derfor vil navn baren være borte',
               })}
               <StatusBar result={personStatus} />
-              <KravpakkeUtland
+              <KravpakkeUtlandBehandling
                 utlandsBehandling={generellBehandling as Generellbehandling & { innhold: KravpakkeUtland | null }}
               />
             </>

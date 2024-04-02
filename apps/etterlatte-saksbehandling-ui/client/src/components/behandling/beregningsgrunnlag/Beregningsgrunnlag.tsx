@@ -53,7 +53,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
         {isSuccess(overstyrtBeregning) && (
           <>
             {visOverstyrKnapp && !overstyrt && (
-              <OverstyrBeregning behandlingId={behandling.id} setOverstyrt={setOverstyrt} />
+              <OverstyrBeregningForGrunnlag behandlingId={behandling.id} setOverstyrt={setOverstyrt} />
             )}
             {overstyrt && <OverstyrBeregningGrunnlag behandling={behandling} overstyrBeregning={overstyrt} />}
             {!overstyrt &&
@@ -68,7 +68,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   )
 }
 
-const OverstyrBeregning = (props: {
+const OverstyrBeregningForGrunnlag = (props: {
   behandlingId: string
   setOverstyrt: Dispatch<SetStateAction<OverstyrBeregning | undefined>>
 }) => {

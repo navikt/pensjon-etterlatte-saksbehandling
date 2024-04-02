@@ -350,7 +350,7 @@ export const AvkortingInntekt = ({
           </Rows>
         </InntektAvkortingForm>
       )}
-      {mismatchGrunnlagsperioderOgVirkningstidspunkt(avkortingGrunnlag[0]) && (
+      {avkortingGrunnlag.length > 0 && mismatchGrunnlagsperioderOgVirkningstidspunkt(avkortingGrunnlag[0]) && (
         <WarningAlert variant="warning">
           Siste inntektsperiode stemmer ikke overens med virkningstidspunkt. Du må redigere for å korrigere.
         </WarningAlert>

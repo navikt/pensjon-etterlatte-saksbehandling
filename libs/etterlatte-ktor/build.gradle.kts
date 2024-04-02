@@ -30,7 +30,7 @@ dependencies {
     api(libs.ktor2.clientauth)
     api(libs.ktor2.clientloggingjvm)
     api(libs.navfelles.tokenclientcore)
-    api("com.michael-bull.kotlin-result:kotlin-result:1.1.20")
+    api("com.michael-bull.kotlin-result:kotlin-result:2.0.0")
 
     implementation(libs.logging.logstashlogbackencoder) {
         exclude("com.fasterxml.jackson.core")

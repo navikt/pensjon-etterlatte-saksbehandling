@@ -40,6 +40,7 @@ on:
       - libs/etterlatte-database/**
       - libs/etterlatte-pdl-model/**
       - gradle/libs.versions.toml
+      - .github/workflows/*
 
 permissions:
   contents: read

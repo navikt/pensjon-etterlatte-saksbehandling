@@ -42,6 +42,7 @@ on:
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/testdata/**
       - gradle/libs.versions.toml
+      - .github/workflows/*
 
 permissions:
   contents: read

@@ -34,6 +34,7 @@ on:
       - libs/etterlatte-migrering-model/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
+      - .github/workflows/*
 
 permissions:
   contents: read

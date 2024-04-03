@@ -32,6 +32,7 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**
       - gradle/libs.versions.toml
+      - .github/workflows/*
 
 permissions:
   contents: read

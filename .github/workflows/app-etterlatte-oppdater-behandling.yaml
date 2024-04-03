@@ -38,6 +38,7 @@ on:
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - gradle/libs.versions.toml
+      - .github/workflows/*
 
 permissions:
   contents: read

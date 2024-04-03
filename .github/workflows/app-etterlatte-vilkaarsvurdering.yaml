@@ -36,7 +36,7 @@ on:
       - libs/etterlatte-database/**
       - libs/testdata/**
       - gradle/libs.versions.toml
-
+      - .github/workflows/*
 permissions:
   contents: read
   id-token: write

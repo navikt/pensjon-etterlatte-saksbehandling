@@ -210,7 +210,7 @@ export function KlageFormkravRedigering() {
             <JaNeiRadiogruppe
               name="erKlagenFramsattInnenFrist"
               legend="Er klagen framsatt innenfor klagefristen?"
-              neiDetail="Klagen er heller ikke framsatt innenfor ytre klagefrist jf forvaltningsloven § 31"
+              detail="Vurder også ytre klagefrist jf forv.loven § 31"
               control={control}
             />
           </FlexRow>
@@ -279,9 +279,9 @@ export function KlageFormkravRedigering() {
     control: Control<FormDataFormkrav>
     name: Path<FormDataFormkrav>
     legend: string
-    neiDetail?: string
+    detail?: string
   }) {
-    const { name, control, legend, neiDetail } = props
+    const { name, control, legend, detail } = props
     return (
       <Controller
         name={name}
@@ -293,15 +293,14 @@ export function KlageFormkravRedigering() {
             <RadioGroup
               readOnly={!redigerModus}
               legend={legend}
+              description={detail}
               className="radioGroup"
               {...field}
               error={error && (error.message || 'Du må svare på spørsmålet: ' + legend)}
             >
               <div className="flex">
                 <Radio value={JaNei.JA}>Ja</Radio>
-                <Radio value={JaNei.NEI} description={neiDetail}>
-                  Nei
-                </Radio>
+                <Radio value={JaNei.NEI}>Nei</Radio>
               </div>
             </RadioGroup>
           </VurderingWrapper>

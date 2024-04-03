@@ -24,16 +24,12 @@ import { visFane } from '~store/reducers/BehandlingSidemenyReducer'
 import { updateSjekkliste } from '~store/reducers/SjekklisteReducer'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
-import { hentSaksbehandlerForReferanseOppgaveUnderArbeid } from '~shared/api/oppgaver'
-import {
-  resetSaksbehandlerGjeldendeOppgave,
-  setSaksbehandlerGjeldendeOppgave,
-} from '~store/reducers/SaksbehandlerGjeldendeOppgaveForBehandlingReducer'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
+import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtlandstilknytningType | null => {
   if (behandling.utlandstilknytning?.type) {
@@ -69,9 +65,11 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
   const [beslutning, setBeslutning] = useState<IBeslutning>()
   const fane = useSelectorBehandlingSidemenyFane()
-  const [saksbehandlerForOppgaveResult, hentSaksbehandlerForOppgave] = useApiCall(
-    hentSaksbehandlerForReferanseOppgaveUnderArbeid
-  )
+
+  const [saksbehandlerForOppgaveResult] = useSaksbehandlerPaaOppgaveUnderArbeidForReferanse({
+    referanse: behandling.id,
+    sakId: behandling.sakId,
+  })
 
   const behandlingsinfo = mapTilBehandlingInfo(behandling, vedtak)
 
@@ -83,18 +81,6 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
       dispatch(updateVedtakSammendrag(vedtakSammendrag))
     })
   }, [])
-
-  useEffect(() => {
-    hentSaksbehandlerForOppgave(
-      { referanse: behandling.id, sakId: behandling.sakId },
-      (saksbehandler, statusCode) => {
-        if (statusCode === 200) {
-          dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler.ident))
-        }
-      },
-      () => dispatch(resetSaksbehandlerGjeldendeOppgave())
-    )
-  }, [behandling.id])
 
   const erFoerstegangsbehandling = behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
 

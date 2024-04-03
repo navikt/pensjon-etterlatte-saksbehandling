@@ -6,7 +6,7 @@ import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppga
 import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentOppgavebenkStats } from '~shared/api/oppgaver'
-import { isPending, mapResult } from '~shared/api/apiUtils'
+import { mapResult } from '~shared/api/apiUtils'
 
 interface Props {
   oppgavelisteValg: OppgavelisteValg
@@ -15,62 +15,48 @@ interface Props {
 
 export const VelgOppgaveliste = ({ oppgavelisteValg, setOppgavelisteValg }: Props): ReactNode => {
   const dispatcher = useOppgavebenkStateDispatcher()
-  const { antallOppgavelistaOppgaver, antallMinOppgavelisteOppgaver } = useOppgaveBenkState().oppgpavebenkStats
+  const oppgaveBenkState = useOppgaveBenkState()
 
   const [oppgavebenkStatsResult, oppgavebenkStatsFetch] = useApiCall(hentOppgavebenkStats)
 
   useEffect(() => {
-    if (!!antallOppgavelistaOppgaver) {
+    if (!!oppgaveBenkState.oppgpavebenkStats.antallOppgavelistaOppgaver) {
       oppgavebenkStatsFetch({}, (result) => dispatcher.setOppgavebenkStats(result))
     }
-  }, [antallOppgavelistaOppgaver])
+  }, [oppgaveBenkState.oppgpavebenkStats.antallOppgavelistaOppgaver])
 
-  return antallOppgavelistaOppgaver >= 0 && !isPending(oppgavebenkStatsResult) ? (
+  return (
     <VelgOppgavelisteTabs value={oppgavelisteValg} onChange={(e) => setOppgavelisteValg(e as OppgavelisteValg)}>
       <Tabs.List>
         <Tabs.Tab
           value={OppgavelisteValg.OPPGAVELISTA}
-          label={`Oppgavelisten (${antallOppgavelistaOppgaver})`}
+          label={
+            <>
+              Oppgavelisten{' '}
+              {mapResult(oppgavebenkStatsResult, {
+                pending: <Loader />,
+                success: ({ antallOppgavelistaOppgaver }) => <>{`(${antallOppgavelistaOppgaver})`}</>,
+              })}
+            </>
+          }
           icon={<InboxIcon aria-hidden />}
         />
         <Tabs.Tab
           value={OppgavelisteValg.MIN_OPPGAVELISTE}
-          label={`Min oppgaveliste (${antallMinOppgavelisteOppgaver})`}
+          label={
+            <>
+              Min oppgaveliste{' '}
+              {mapResult(oppgavebenkStatsResult, {
+                pending: <Loader />,
+                success: ({ antallMinOppgavelisteOppgaver }) => <>{`(${antallMinOppgavelisteOppgaver})`}</>,
+              })}
+            </>
+          }
           icon={<PersonIcon aria-hidden />}
         />
         <Tabs.Tab value={OppgavelisteValg.GOSYS_OPPGAVER} label="Gosys-oppgaver" icon={<InboxIcon aria-hidden />} />
       </Tabs.List>
     </VelgOppgavelisteTabs>
-  ) : (
-    mapResult(oppgavebenkStatsResult, {
-      pending: (
-        <VelgOppgavelisteTabs value={oppgavelisteValg}>
-          <Tabs.List>
-            <Tabs.Tab
-              value={OppgavelisteValg.OPPGAVELISTA}
-              label={
-                <>
-                  Oppgavelisten
-                  <Loader />
-                </>
-              }
-              icon={<InboxIcon aria-hidden />}
-            />
-            <Tabs.Tab
-              value={OppgavelisteValg.MIN_OPPGAVELISTE}
-              label={
-                <>
-                  Min oppgaveliste
-                  <Loader />
-                </>
-              }
-              icon={<PersonIcon aria-hidden />}
-            />
-            <Tabs.Tab value={OppgavelisteValg.GOSYS_OPPGAVER} label="Gosys-oppgaver" icon={<InboxIcon aria-hidden />} />
-          </Tabs.List>
-        </VelgOppgavelisteTabs>
-      ),
-    })
   )
 }
 

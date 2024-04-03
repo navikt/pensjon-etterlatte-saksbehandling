@@ -100,6 +100,16 @@ open class Grunnlagsopplysning<T>(
         }
     }
 
+    data class Gjenoppretting(val tidspunkt: Tidspunkt) : Kilde("gjenoppretting") {
+        companion object {
+            fun create() = Gjenoppretting(Tidspunkt.now())
+        }
+
+        override fun toString(): String {
+            return "gjenoppretting"
+        }
+    }
+
     data class Privatperson(val fnr: String, val mottatDato: Tidspunkt) : Kilde("privatperson")
 
     data class Pdl(

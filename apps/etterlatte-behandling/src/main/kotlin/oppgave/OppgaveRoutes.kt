@@ -260,6 +260,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 inTransaction {
                     val oppgaver = service.hentFristGaarUt(request)
                     oppgaver.forEach {
+                        service.fjernSaksbehandler(it.oppgaveID)
                         service.oppdaterStatusOgMerknad(
                             it.oppgaveID,
                             "",

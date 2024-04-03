@@ -9,8 +9,8 @@ import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.application.hooks.ResponseSent
 import io.ktor.server.auth.principal
 import io.ktor.server.request.httpMethod
-import io.ktor.server.request.path
 import io.ktor.server.request.uri
+import io.ktor.server.routing.RoutingApplicationCall
 import io.ktor.util.AttributeKey
 import io.ktor.util.logging.KtorSimpleLogger
 import io.ktor.util.pipeline.PipelinePhase
@@ -84,6 +84,7 @@ val serverRequestLoggerPlugin =
                 val duration = call.attributes[startTimeAttribute].let { System.currentTimeMillis() - it }
                 val method = call.request.httpMethod.value
                 val responseCode = call.response.status()?.value
+                val requestUriTemplate = extractUrlTemplate(call)
 
                 val markers =
                     Markers.appendEntries(
@@ -91,7 +92,7 @@ val serverRequestLoggerPlugin =
                             "method" to method,
                             "response_code" to responseCode,
                             "response_time" to duration,
-                            "request_uri" to sanitizedPath(call.request.path()),
+                            "request_uri" to requestUriTemplate,
                             "user" to (call.attributes.getOrNull(userAttribute) ?: "unknown"),
                         ),
                     )
@@ -105,15 +106,17 @@ val serverRequestLoggerPlugin =
     }
 
 /**
- * For å kunne gruppere i relevant verktøy
- * - "/api/vedtak/123" -> "/api/vedtak/{id}"
- * - "/api/vedtak?noe=annet" -> "/api/vedtak"
- * @param path allerede strippet for queryparams
+ * For å kunne gruppere i relevant verktøy uten unike identifikatorer, og med path params sine faktiske navn i koden.
+ * - "/api/vedtak/123" -> "/api/vedtak/{vedtakId}"
+ * - "/api/vedtak?fomdato=2024-01-01&noe=annet" -> "/api/vedtak?fomdato,noe"
  */
-private fun sanitizedPath(path: String): String {
-    return if (path.last().isDigit()) {
-        path.replaceAfterLast("/", "{id}")
-    } else {
-        path
+private fun extractUrlTemplate(call: ApplicationCall): String? {
+    return when (call) {
+        is RoutingApplicationCall ->
+            (call.route.parent ?: call.route) // Drop METHOD part
+                .toString()
+                .replace("/(authenticate \"default\")", "", true) // Alle sikrede endepunkter wrappes av authenticate
+                .plus(call.request.queryParameters.entries().joinToString(prefix = "?", separator = ",") { it.key })
+        else -> null
     }
 }

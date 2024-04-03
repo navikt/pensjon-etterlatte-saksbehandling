@@ -8,12 +8,14 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
+import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.OppdaterMerknadRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.EndrePaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
@@ -217,6 +219,13 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 kunSkrivetilgang {
                     val redigerFrist = call.receive<RedigerFristRequest>()
                     inTransaction { service.redigerFrist(oppgaveId, redigerFrist.frist) }
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+            patch("merknad") {
+                kunSkrivetilgang {
+                    val merknad = call.receive<OppdaterMerknadRequest>()
+                    inTransaction { service.oppdaterMerknad(oppgaveId, merknad.merknad) }
                     call.respond(HttpStatusCode.OK)
                 }
             }

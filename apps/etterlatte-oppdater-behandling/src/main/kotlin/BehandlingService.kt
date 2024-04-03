@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -14,6 +15,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
+import no.nav.etterlatte.libs.common.behandling.OppdaterMerknadRequest
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -82,6 +84,11 @@ interface BehandlingService {
     ): UUID
 
     fun taAvVent(request: VentefristGaarUtRequest): VentefristerGaarUtResponse
+
+    fun oppdaterMerknad(
+        oppgaveId: UUID,
+        merknad: String,
+    )
 }
 
 data class ReguleringFeiletHendelse(val sakId: Long)
@@ -263,6 +270,18 @@ class BehandlingServiceImpl(
                 setBody(request)
             }.body()
         }
+
+    override fun oppdaterMerknad(
+        oppgaveId: UUID,
+        merknad: String,
+    ) {
+        runBlocking {
+            behandlingKlient.patch("$url/api/oppgaver/$oppgaveId/merknad") {
+                contentType(ContentType.Application.Json)
+                setBody(OppdaterMerknadRequest(merknad))
+            }
+        }
+    }
 }
 
 data class OpprettOmregningResponse(val behandlingId: UUID, val forrigeBehandlingId: UUID, val sakType: SakType)

@@ -168,6 +168,17 @@ class OppgaveService(
         oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, status)
     }
 
+    fun oppdaterMerknad(
+        oppgaveId: UUID,
+        merknad: String,
+    ) {
+        val hentetOppgave =
+            oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+        val eksisterendeMerknad = hentetOppgave.merknad?.let { " | $it" }
+        oppgaveDao.oppdaterMerknad(oppgaveId, merknad + eksisterendeMerknad)
+    }
+
     fun endreTilKildeBehandlingOgOppdaterReferanse(
         oppgaveId: UUID,
         referanse: String,

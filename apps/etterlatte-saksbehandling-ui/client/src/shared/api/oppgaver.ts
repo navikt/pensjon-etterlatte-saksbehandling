@@ -100,6 +100,11 @@ export const hentOppgaverMedReferanse = async (referanse: string): Promise<ApiRe
 export const hentOppgaveForReferanseUnderBehandling = async (referanse: string): Promise<ApiResponse<OppgaveDTO>> =>
   apiClient.get(`/oppgaver/referanse/${referanse}/underbehandling`)
 
+export const hentSaksbehandlerForOppgaveUnderBehandling = async (
+  referanse: string
+): Promise<ApiResponse<Saksbehandler>> =>
+  apiClient.get(`/oppgaver/referanse/${referanse}/saksbehandler-underbehandling`)
+
 export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver/gosys')
 
 export const hentOppgavebenkStats = async (): Promise<ApiResponse<OppgavebenkStats>> => apiClient.get('/oppgaver/stats')

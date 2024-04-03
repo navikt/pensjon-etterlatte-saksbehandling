@@ -17,13 +17,9 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { AttesteringEllerUnderkjenning } from '~components/behandling/attestering/attestering/attesteringEllerUnderkjenning'
 import { IBeslutning } from '~components/behandling/attestering/types'
-import {
-  resetSaksbehandlerGjeldendeOppgave,
-  setSaksbehandlerGjeldendeOppgave,
-} from '~store/reducers/SaksbehandlerGjeldendeOppgaveForBehandlingReducer'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { FlexRow } from '~shared/styled'
-import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
+import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
 
 export function KlageSidemeny() {
   const klage = useKlage()
@@ -31,9 +27,6 @@ export function KlageSidemeny() {
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const [beslutning, setBeslutning] = useState<IBeslutning>()
-  const [saksbehandlerForOppgaveResult, hentSaksbehandlerForOppgave] = useApiCall(
-    hentOppgaveForReferanseUnderBehandling
-  )
   const kanAttestere = !!klage && innloggetSaksbehandler.kanAttestere && klage.status === KlageStatus.FATTET_VEDTAK
 
   useEffect(() => {
@@ -45,19 +38,6 @@ export function KlageSidemeny() {
     })
   }, [klage?.id, klage?.status])
 
-  useEffect(() => {
-    if (!klage) return
-    hentSaksbehandlerForOppgave(
-      klage.id,
-      ({ saksbehandler }, statusCode) => {
-        if (statusCode === 200 && !!saksbehandler) {
-          dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler.ident))
-        }
-      },
-      () => dispatch(resetSaksbehandlerGjeldendeOppgave())
-    )
-  }, [])
-
   if (!klage) {
     return (
       <Sidebar>
@@ -65,6 +45,10 @@ export function KlageSidemeny() {
       </Sidebar>
     )
   }
+  const [saksbehandlerForOppgaveResult] = useSaksbehandlerPaaOppgaveUnderArbeidForReferanse({
+    referanse: klage.id,
+    sakId: klage.sak.id,
+  })
 
   return (
     <Sidebar>

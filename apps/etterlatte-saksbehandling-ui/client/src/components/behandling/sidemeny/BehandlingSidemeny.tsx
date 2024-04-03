@@ -24,16 +24,12 @@ import { visFane } from '~store/reducers/BehandlingSidemenyReducer'
 import { updateSjekkliste } from '~store/reducers/SjekklisteReducer'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
-import {
-  resetSaksbehandlerGjeldendeOppgave,
-  setSaksbehandlerGjeldendeOppgave,
-} from '~store/reducers/SaksbehandlerGjeldendeOppgaveForBehandlingReducer'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
-import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
+import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtlandstilknytningType | null => {
   if (behandling.utlandstilknytning?.type) {
@@ -69,7 +65,11 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
   const [beslutning, setBeslutning] = useState<IBeslutning>()
   const fane = useSelectorBehandlingSidemenyFane()
-  const [oppgaveResult, hentOppgaveUnderBehandling] = useApiCall(hentOppgaveForReferanseUnderBehandling)
+
+  const [saksbehandlerForOppgaveResult] = useSaksbehandlerPaaOppgaveUnderArbeidForReferanse({
+    referanse: behandling.id,
+    sakId: behandling.sakId,
+  })
 
   const behandlingsinfo = mapTilBehandlingInfo(behandling, vedtak)
 
@@ -81,18 +81,6 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
       dispatch(updateVedtakSammendrag(vedtakSammendrag))
     })
   }, [])
-
-  useEffect(() => {
-    hentOppgaveUnderBehandling(
-      behandling.id,
-      ({ saksbehandler }, statusCode) => {
-        if (statusCode === 200 && !!saksbehandler) {
-          dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler.ident))
-        }
-      },
-      () => dispatch(resetSaksbehandlerGjeldendeOppgave())
-    )
-  }, [behandling.id])
 
   const erFoerstegangsbehandling = behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
 
@@ -151,10 +139,10 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
       })}
 
       {isFailureHandler({
-        apiResult: oppgaveResult,
+        apiResult: saksbehandlerForOppgaveResult,
         errorMessage: 'Kunne ikke hente saksbehandler gjeldende oppgave. Husk å tildele oppgaven.',
       })}
-      {isPending(oppgaveResult) && <Spinner visible={true} label="Henter saksbehandler for oppgave" />}
+      {isPending(saksbehandlerForOppgaveResult) && <Spinner visible={true} label="Henter saksbehandler for oppgave" />}
       {erFoerstegangsbehandling && (
         <Tabs value={fane} iconPosition="top" onChange={(val) => dispatch(visFane(val as BehandlingFane))}>
           <Tabs.List>

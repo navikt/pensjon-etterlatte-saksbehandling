@@ -142,7 +142,7 @@ class SamordningVedtakServiceTest {
             )
 
         coEvery { vedtakKlient.hentVedtaksliste(fomDato, fnr = FNR, MaskinportenTpContext(tpnrSPK, ORGNO)) } returns vedtakliste
-        coEvery { tpKlient.harTpForholdByDate(FNR, tpnr = tpnrSPK, fomDato = fomDato) } returns true
+        coEvery { tpKlient.harTpYtelseOnDate(FNR, tpnr = tpnrSPK, fomDato = fomDato) } returns true
 
         val vedtaksliste =
             runBlocking {
@@ -155,7 +155,7 @@ class SamordningVedtakServiceTest {
 
         vedtaksliste shouldHaveSize 2
 
-        coVerify { tpKlient.harTpForholdByDate(FNR, tpnr = tpnrSPK, fomDato = fomDato) }
+        coVerify { tpKlient.harTpYtelseOnDate(FNR, tpnr = tpnrSPK, fomDato = fomDato) }
     }
 }
 

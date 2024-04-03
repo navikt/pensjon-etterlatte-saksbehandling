@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Alert, Button, Heading, Tag } from '@navikt/ds-react'
 import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
-import { SidebarPanel } from '~shared/components/Sidebar'
+import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { teksterTilbakekrevingStatus, TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -19,13 +19,10 @@ import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteL
 import { tagColors, TagList } from '~shared/Tags'
 import { formaterSakstype } from '~utils/formattering'
 import { Info, Tekst } from '~components/behandling/attestering/styled'
+import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
-import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
-import {
-  resetSaksbehandlerGjeldendeOppgave,
-  setSaksbehandlerGjeldendeOppgave,
-} from '~store/reducers/SaksbehandlerGjeldendeOppgaveForBehandlingReducer'
+import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
 
 export function TilbakekrevingSidemeny() {
   const tilbakekreving = useTilbakekreving()
@@ -42,15 +39,7 @@ export function TilbakekrevingSidemeny() {
 
   const hentOppgaveForBehandling = () => {
     if (tilbakekreving) {
-      requesthentOppgaveForBehandling(
-        tilbakekreving.id,
-        ({ saksbehandler }, statusCode) => {
-          if (statusCode === 200 &&  !!saksbehandler) {
-            dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler.ident))
-          }
-        },
-        () => dispatch(resetSaksbehandlerGjeldendeOppgave())
-      )
+      requesthentOppgaveForBehandling(tilbakekreving.id)
     }
   }
 
@@ -71,6 +60,15 @@ export function TilbakekrevingSidemeny() {
       }
     })
   }, [tilbakekreving?.id])
+
+  if (!tilbakekreving) {
+    return (
+      <Sidebar>
+        <SidebarPanel></SidebarPanel>
+      </Sidebar>
+    )
+  }
+  useSaksbehandlerPaaOppgaveUnderArbeidForReferanse({ referanse: tilbakekreving.id, sakId: tilbakekreving.sak.id })
 
   return (
     <CollapsibleSidebar collapsed={collapsed}>

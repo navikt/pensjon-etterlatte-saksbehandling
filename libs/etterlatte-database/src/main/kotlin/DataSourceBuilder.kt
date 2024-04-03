@@ -106,7 +106,7 @@ private fun getPathsFromResourceJAR(logger: Logger): List<String> {
     }
     val jarpath = "$runtimeDirectory/app.jar"
     logger.info("path to main jar resource $jarpath")
-    val sqlFiler: List<String> = ArrayList()
+    val sqlFiler = mutableListOf<String>()
     val zip = ZipInputStream(FileInputStream(jarpath))
     zip.use {
         var entry: ZipEntry? = zip.getNextEntry()

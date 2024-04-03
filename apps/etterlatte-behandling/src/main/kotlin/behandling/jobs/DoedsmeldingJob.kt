@@ -5,8 +5,8 @@ import no.nav.etterlatte.Self
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseJobService
 import no.nav.etterlatte.jobs.LoggerInfo
-import no.nav.etterlatte.jobs.TimerJob
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
+import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
 import java.time.Duration

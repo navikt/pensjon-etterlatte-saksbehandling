@@ -1,0 +1,1 @@
+ALTER TABLE tilbakekreving DROP COLUMN vurdering_beskrivelse, DROP COLUMN vurdering_konklusjon, DROP COLUMN vurdering_aarsak, DROP COLUMN vurdering_aktsomhet, DROP COLUMN vurdering_hjemmel, DROP COLUMN akstomhet_redusering_av_kravet, DROP COLUMN aktsomhet_strafferettslig_vurdering, DROP COLUMN aktsomhet_rentevurdering;

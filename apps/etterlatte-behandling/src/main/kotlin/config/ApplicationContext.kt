@@ -468,7 +468,6 @@ internal class ApplicationContext(
         )
 
     // Jobs
-
     val metrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
             BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao, gjenopprettingMetrikkerDao),

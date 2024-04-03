@@ -32,8 +32,9 @@ class BrevKodeMapperVedtak {
                     VedtakType.TILBAKEKREVING -> Brevkoder.TILBAKEKREVING
                     VedtakType.AVVIST_KLAGE -> Brevkoder.AVVIST_KLAGE
                     null -> throw UgyldigForespoerselException(
-                        "MANGLENDE_VEDTAKSTYPE_VEDTAKSBREV",
-                        "Skal ikke kunne komme hit med manglande vedtakstype, for request $request",
+                        code = "MANGLENDE_VEDTAKSTYPE_VEDTAKSBREV",
+                        detail = "Skal ikke kunne komme hit med manglande vedtakstype. Gå igjennom steg fra beregning på nytt.",
+                        meta = mapOf("request" to request),
                     )
                 }
             }
@@ -47,8 +48,9 @@ class BrevKodeMapperVedtak {
                     VedtakType.TILBAKEKREVING -> Brevkoder.TILBAKEKREVING
                     VedtakType.AVVIST_KLAGE -> Brevkoder.AVVIST_KLAGE
                     null -> throw UgyldigForespoerselException(
-                        "MANGLENDE_VEDTAKSTYPE_VEDTAKSBREV",
-                        "Skal ikke kunne komme hit med manglande vedtakstype, for request $request",
+                        code = "MANGLENDE_VEDTAKSTYPE_VEDTAKSBREV",
+                        detail = "Skal ikke kunne komme hit med manglande vedtakstype. Gå igjennom steg fra beregning på nytt.",
+                        meta = mapOf("request" to request),
                     )
                 }
             }

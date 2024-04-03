@@ -51,8 +51,8 @@ class BlockTilSlateKonvertererTest {
         assertEquals(3, konvertert.elements[1].children.size)
         konvertert.elements[1].children.forEach {
             assertEquals(Slate.ElementType.LIST_ITEM, it.type)
-            assertEquals(Slate.ElementType.PARAGRAPH, it.children?.first?.type)
-            assertNotNull(it.children?.first?.text)
+            assertEquals(Slate.ElementType.PARAGRAPH, it.children?.first()?.type)
+            assertNotNull(it.children?.first()?.text)
         }
         assertEquals(Slate.ElementType.PARAGRAPH, konvertert.elements[2].type)
         assertEquals(2, konvertert.elements[2].children.size)

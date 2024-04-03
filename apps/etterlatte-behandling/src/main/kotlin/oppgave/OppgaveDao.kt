@@ -149,8 +149,8 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setString(1, referanse)
                 statement.executeQuery().toList {
                     asOppgave()
-                }.also {
-                    logger.info("Hentet ${it.size} oppgave(r) for referanse: $referanse")
+                }.also { oppgaver ->
+                    logger.info("Hentet ${oppgaver.size} oppgave(r) for referanse: $referanse")
                 }
             }
         }

@@ -278,6 +278,8 @@ class OppgaveService(
         if (saksbehandler != null) {
             oppgaveDao.settNySaksbehandler(oppgave.id, saksbehandler.ident)
         } else {
+            // TODO: Endre til error når migrering er gjennomført
+            //   siden det i "alle" tilfeller skal finnes en tidligere saksbehandler
             logger.warn("Fant ikke siste saksbehandler for oppgave med referanse: $referanse")
             oppgaveDao.fjernSaksbehandler(oppgave.id)
         }
@@ -308,14 +310,12 @@ class OppgaveService(
             }
         } catch (e: NoSuchElementException) {
             throw BadRequestException(
-                "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                    " $referanse}",
+                "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID: $referanse",
                 e,
             )
         } catch (e: IllegalArgumentException) {
             throw BadRequestException(
-                "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                    " $referanse",
+                "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID: $referanse",
                 e,
             )
         }
@@ -364,9 +364,6 @@ class OppgaveService(
         }
     }
 
-    // TODO:
-    //  - Kjøre update where sakId  = ?
-    //  - IKKE oppdatere oppgaver som er lukket...?
     private fun endreEnhetForOppgaverTilknyttetSak(
         sakId: Long,
         enhetsID: String,

@@ -96,6 +96,7 @@ enum class Status {
         }
     }
 
+    // TODO: Gå gjennom navngiving her. Gir det mening med "under behandling" som status OG samlebegrep...?
     fun erUnderBehandling(): Boolean = this in listOf(UNDER_BEHANDLING, PAA_VENT, ATTESTERING, UNDERKJENT)
 
     fun erFerdigstilt(): Boolean = this == FERDIGSTILT

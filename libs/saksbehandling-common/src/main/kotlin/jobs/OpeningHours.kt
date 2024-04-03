@@ -24,7 +24,7 @@ data class OpeningHours(val start: Int, val slutt: Int) {
             timeStart: Int,
             timeStop: Int,
         ) {
-            if (timeStart > 24 || timeStop > 24 || (timeStop == timeStart)) {
+            if (timeStart > 23 || timeStop > 23 || (timeStop == timeStart)) {
                 throw UgyldigTidException("Ugydlig tid oppgitt fra start $timeStart slutt $timeStop")
             }
         }

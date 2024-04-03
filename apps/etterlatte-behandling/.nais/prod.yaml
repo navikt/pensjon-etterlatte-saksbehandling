@@ -28,10 +28,10 @@ spec:
           - name: sakogbehandlinger
             envVarPrefix: DB
   liveness:
-    initialDelay: 120 # Midlertidig økning siden migrering av oppgave (V106, V107) kan ta lang tid
+    initialDelay: 300 # Midlertidig økning siden migrering av oppgave (V106, V107) kan ta lang tid
     path: /health/isalive
   readiness:
-    initialDelay: 120 # Midlertidig økning siden migrering av oppgave (V106, V107) kan ta lang tid
+    initialDelay: 300 # Midlertidig økning siden migrering av oppgave (V106, V107) kan ta lang tid
     path: /health/isready
   leaderElection: true
   prometheus:

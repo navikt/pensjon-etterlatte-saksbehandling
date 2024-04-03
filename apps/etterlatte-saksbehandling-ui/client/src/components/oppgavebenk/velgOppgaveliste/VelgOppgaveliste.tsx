@@ -26,14 +26,14 @@ export const VelgOppgaveliste = ({ oppgavelisteValg, setOppgavelisteValg }: Prop
         <Tabs.Tab
           value={OppgavelisteValg.OPPGAVELISTA}
           label={`Oppgavelisten (${oppgavebenkStats.antallOppgavelistaOppgaver})`}
-          icon={<InboxIcon />}
+          icon={<InboxIcon aria-hidden />}
         />
         <Tabs.Tab
           value={OppgavelisteValg.MIN_OPPGAVELISTE}
           label={`Min oppgaveliste (${oppgavebenkStats.antallMinOppgavelisteOppgaver})`}
           icon={<PersonIcon aria-hidden />}
         />
-        <Tabs.Tab value={OppgavelisteValg.GOSYS_OPPGAVER} label="Gosys-oppgaver" icon={<InboxIcon />} />
+        <Tabs.Tab value={OppgavelisteValg.GOSYS_OPPGAVER} label="Gosys-oppgaver" icon={<InboxIcon aria-hidden />} />
       </Tabs.List>
     </VelgOppgavelisteTabs>
   )

@@ -83,6 +83,7 @@ export const Oppgaver = ({
     versjon: number | null
   ) => {
     setTimeout(() => {
+      // TODO: lage dispatcher kall for å oppdatere oppgavelistaStats
       dispatcher.setOppgavelistaOppgaver(
         finnOgOppdaterSaksbehandlerTildeling(oppgavebenkState.oppgavelistaOppgaver, oppgave.id, saksbehandler, versjon)
       )

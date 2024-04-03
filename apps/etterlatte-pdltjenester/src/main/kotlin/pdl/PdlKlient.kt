@@ -286,6 +286,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 oppholdsadresseHistorikk = false,
                 utland = true,
                 sivilstand = true,
+                sivilstandHistorikk = true,
                 familieRelasjon = true,
                 vergemaal = true,
             )
@@ -302,6 +303,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 oppholdsadresseHistorikk = true,
                 utland = true,
                 sivilstand = true,
+                sivilstandHistorikk = true,
                 familieRelasjon = true,
                 vergemaal = false,
             )

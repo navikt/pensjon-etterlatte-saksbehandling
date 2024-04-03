@@ -16,6 +16,7 @@ object SivilstandMapper {
                     gyldigFraOgMed = it.gyldigFraOgMed,
                     bekreftelsesdato = it.bekreftelsesdato,
                     kilde = it.metadata.master,
+                    historisk = it.metadata.historisk,
                 )
             }
         }

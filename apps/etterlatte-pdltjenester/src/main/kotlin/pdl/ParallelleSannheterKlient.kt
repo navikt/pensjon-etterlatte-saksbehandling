@@ -54,7 +54,11 @@ class ParallelleSannheterKlient(
     suspend fun avklarStatsborgerskap(pdlStatsborgerskap: List<PdlStatsborgerskap>) =
         avklarNullable(pdlStatsborgerskap, Avklaring.STATSBORGERSKAP)
 
-    suspend fun avklarSivilstand(pdlSivilstand: List<PdlSivilstand>) = avklarNullable(pdlSivilstand, Avklaring.SIVILSTAND)
+    suspend fun avklarSivilstand(pdlSivilstand: List<PdlSivilstand>) =
+        avklarNullable(
+            list = pdlSivilstand.filterNot { it.metadata.historisk },
+            avklaring = Avklaring.SIVILSTAND,
+        )
 
     suspend fun avklarFoedsel(pdlFoedsel: List<PdlFoedsel>) = avklar(pdlFoedsel, Avklaring.FOEDSEL)
 

@@ -4,7 +4,6 @@ import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.TimerJob
-import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
@@ -25,10 +24,9 @@ class JobbPollerTask(
             initialDelay = initialDelaySeconds * 1000,
             period = periode.toMillis(),
             loggerInfo = LoggerInfo(logger = logger),
+            openingHours = openingHours,
         ) {
-            if (openingHours.isOpen(norskKlokke())) {
-                jobbPoller.poll()
-            }
+            jobbPoller.poll()
         }
     }
 }

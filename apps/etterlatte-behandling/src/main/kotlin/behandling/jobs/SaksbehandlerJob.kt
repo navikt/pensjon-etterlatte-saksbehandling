@@ -5,7 +5,6 @@ import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.TimerJob
-import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
@@ -28,8 +27,9 @@ class SaksbehandlerJob(
             initialDelay = initialDelay,
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = interval.toMillis(),
+            openingHours = openingHours,
         ) {
-            if (erLeader() && openingHours.isOpen(norskKlokke())) {
+            if (erLeader()) {
                 saksbehandlerJobService.run()
             }
         }

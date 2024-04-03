@@ -76,6 +76,7 @@ export interface Sivilstand {
   relatertVedSiviltilstand?: string
   gyldigFraOgMed?: Date
   bekreftetDato?: Date
+  historisk: boolean
   kilde: string
 }
 

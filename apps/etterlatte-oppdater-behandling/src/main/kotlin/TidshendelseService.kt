@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT_OPPFOELGING
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType.AKTIVITETSPLIKT
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType.REVURDERING
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
@@ -129,7 +129,7 @@ class TidshendelseService(
             AO_OMS67 -> REVURDERING
             OMS_DOED_3AAR -> REVURDERING
             OMS_DOED_5AAR -> REVURDERING
-            OMS_DOED_4MND -> AKTIVITETSPLIKT_OPPFOELGING
+            OMS_DOED_4MND -> AKTIVITETSPLIKT
         }
 }
 

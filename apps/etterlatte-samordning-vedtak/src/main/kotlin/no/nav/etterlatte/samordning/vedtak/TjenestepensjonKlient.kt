@@ -24,25 +24,6 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
 
     private val tjenestepensjonUrl = "${config.getString("tjenestepensjon.url")}/api/tjenestepensjon"
 
-    suspend fun harTpForholdByDate(
-        fnr: String,
-        tpnr: Tjenestepensjonnummer,
-        fomDato: LocalDate,
-    ): Boolean {
-        logger.info("Sjekk om det finnes tjenestepensjonsforhold pr $fomDato for ordning '$tpnr'")
-
-        val tp: SamhandlerPersonDto =
-            handleFeil(fnr, tpnr, fomDato) {
-                httpClient.get {
-                    url("$tjenestepensjonUrl/finnForholdForBruker?datoFom=$fomDato")
-                    header("fnr", fnr)
-                    header("tpnr", tpnr.value)
-                }.body()
-            }
-
-        return tp.forhold.isNotEmpty()
-    }
-
     suspend fun harTpYtelseOnDate(
         fnr: String,
         tpnr: Tjenestepensjonnummer,

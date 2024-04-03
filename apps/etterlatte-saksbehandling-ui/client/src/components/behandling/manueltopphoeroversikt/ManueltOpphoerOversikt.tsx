@@ -12,7 +12,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { formaterBehandlingstype, formaterStringDato } from '~utils/formattering'
 import { PersonHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
-import differenceInYears from 'date-fns/differenceInYears'
+import { differenceInYears } from 'date-fns'
 import { IBehandlingsammendrag } from '~components/person/typer'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
@@ -151,7 +151,7 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
 }
 
 const Feilmelding = styled.p`
-  color: var(--navds-semantic-color-feedback-danger-text);
+  color: var(--a-text-danger);
 `
 
 const MainSection = styled.main`

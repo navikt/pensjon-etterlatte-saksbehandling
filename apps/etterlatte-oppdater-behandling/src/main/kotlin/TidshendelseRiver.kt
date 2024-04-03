@@ -1,12 +1,8 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
-import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
@@ -18,21 +14,14 @@ import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.dato
-import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
-import java.time.LocalTime
-import java.time.YearMonth
 
 class TidshendelseRiver(
     rapidsConnection: RapidsConnection,
-    private val behandlingService: BehandlingService,
+    private val tidshendelseService: TidshendelseService,
 ) : ListenerMedLogging() {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     init {
         initialiserRiver(rapidsConnection, EventNames.ALDERSOVERGANG) {
             validate { it.requireValue(ALDERSOVERGANG_STEG_KEY, "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR") }
@@ -51,82 +40,48 @@ class TidshendelseRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val type = packet[ALDERSOVERGANG_TYPE_KEY].asText()
-        val hendelseId = packet[ALDERSOVERGANG_ID_KEY].asText()
-        val dryrun = packet[DRYRUN].asBoolean()
-        val sakId = packet.sakId
+        val tidshendelse = TidshendelsePacket(packet)
 
         withLogContext(
             correlationId = getCorrelationId(),
             mapOf(
-                "hendelseId" to hendelseId,
-                "sakId" to sakId.toString(),
-                "type" to type,
-                "dryRun" to dryrun.toString(),
+                "hendelseId" to tidshendelse.hendelseId,
+                "sakId" to tidshendelse.sakId.toString(),
+                "type" to tidshendelse.jobbtype.name,
+                "dryRun" to tidshendelse.dryrun.toString(),
             ),
         ) {
-            packet[ALDERSOVERGANG_STEG_KEY] = "OPPGAVE_OPPRETTET"
-            val hendelseData = mutableMapOf<String, Any>()
-
-            if (type == "AO_BP20" && packet["yrkesskadefordel_pre_20240101"].asBoolean()) {
-                logger.info("Har migrert yrkesskadefordel: utvidet aldersgrense [sak=$sakId]")
-            } else if (type in arrayOf("OMS_DOED_3AAR", "OMS_DOED_5AAR") && packet["oms_rett_uten_tidsbegrensning"].asBoolean()) {
-                logger.info("Har omstillingsstønad med rett uten tidsbegrensning, opphører ikke [sak=$sakId]")
-            } else if (packet[HENDELSE_DATA_KEY]["loependeYtelse"]?.asBoolean() == true) {
-                val behandlingsmaaned = packet.dato.let { YearMonth.of(it.year, it.month) }
-                logger.info("Løpende ytelse: oppretter behandling/oppgave for sak $sakId, behandlingsmåned=$behandlingsmaaned")
-
-                if (!dryrun) {
-                    val frist = behandlingsmaaned.atEndOfMonth()
-
-                    try {
-                        behandlingService.opprettOmregning(
-                            Omregningshendelse(
-                                sakId = sakId,
-                                fradato = behandlingsmaaned.plusMonths(1).atDay(1),
-                                prosesstype = Prosesstype.AUTOMATISK,
-                                revurderingaarsak = Revurderingaarsak.ALDERSOVERGANG,
-                                oppgavefrist = frist,
-                            ),
-                        ).let {
-                            logger.info("Opprettet omregning ${it.behandlingId} [sak=$sakId]")
-                            packet[ALDERSOVERGANG_STEG_KEY] = "BEHANDLING_OPPRETTET"
-                            packet[BEHANDLING_ID_KEY] = it.behandlingId
-                            packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = it.forrigeBehandlingId
-                        }
-                    } catch (e: Exception) {
-                        logger.error("Kunne ikke opprette omregning [sak=$sakId]", e)
-
-                        val oppgaveId =
-                            behandlingService.opprettOppgave(
-                                sakId,
-                                OppgaveType.REVURDERING,
-                                merknad = generateMerknad(type),
-                                frist = Tidspunkt.ofNorskTidssone(frist, LocalTime.NOON),
-                            )
-                        logger.info("Opprettet oppgave $oppgaveId [sak=$sakId]")
-                        hendelseData["opprettetOppgaveId"] = oppgaveId
-                    }
-                } else {
-                    logger.info("Dry run: skipper behandling/oppgave")
-                }
-            } else {
-                logger.info("Ingen løpende ytelse funnet for sak $sakId")
-            }
-
-            packet[HENDELSE_DATA_KEY] = hendelseData
+            haandterHendelse(tidshendelse)
+                .forEach { (key, value) -> packet[key] = value }
             context.publish(packet.toJson())
         }
     }
 
-    private fun generateMerknad(type: String): String {
-        return when (type) {
-            "AO_BP20" -> "Aldersovergang v/20 år"
-            "AO_BP21" -> "Aldersovergang v/21 år"
-            "AO_OMS67" -> "Aldersovergang v/67 år"
-            "OMS_DOED_3AAR" -> "Opphør OMS etter 3 år"
-            "OMS_DOED_5AAR" -> "Opphør OMS etter 5 år"
-            else -> throw IllegalArgumentException("Ikke-støttet type: $type")
+    private fun haandterHendelse(hendelse: TidshendelsePacket): MutableMap<String, Any> {
+        val packetUpdates = mutableMapOf<String, Any>()
+        packetUpdates[ALDERSOVERGANG_STEG_KEY] = "OPPGAVE_OPPRETTET"
+        packetUpdates[HENDELSE_DATA_KEY] = emptyMap<String, Any>()
+
+        when (val result = tidshendelseService.haandterHendelse(hendelse)) {
+            is TidshendelseResult.OpprettetOmregning -> {
+                packetUpdates[ALDERSOVERGANG_STEG_KEY] = "BEHANDLING_OPPRETTET"
+                packetUpdates[BEHANDLING_ID_KEY] = result.behandlingId
+                packetUpdates[BEHANDLING_VI_OMREGNER_FRA_KEY] = result.forrigeBehandlingId
+            }
+
+            is TidshendelseResult.OpprettetOppgave -> {
+                packetUpdates[HENDELSE_DATA_KEY] = mapOf("opprettetOppgaveId" to result.opprettetOppgaveId)
+            }
+
+            is TidshendelseResult.Skipped -> {}
         }
+        return packetUpdates
     }
+}
+
+enum class TidshendelserFeatureToggle(private val key: String) : FeatureToggle {
+    OpprettOppgaveForVarselbrevAktivitetsplikt("opprett-oppgave-for-varselbrev-aktivitetsplikt"),
+    ;
+
+    override fun key() = key
 }

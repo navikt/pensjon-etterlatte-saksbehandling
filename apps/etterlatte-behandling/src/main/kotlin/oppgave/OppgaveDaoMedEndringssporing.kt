@@ -88,7 +88,7 @@ class OppgaveDaoMedEndringssporingImpl(
     private fun ResultSet.asOppgaveEndring(): OppgaveEndring {
         return OppgaveEndring(
             id = getObject("id") as UUID,
-            oppgaveId = getObject("id") as UUID,
+            oppgaveId = getObject("oppgaveId") as UUID,
             oppgaveFoer = getString("oppgaveFoer").let { objectMapper.readValue(it) },
             oppgaveEtter = getString("oppgaveEtter").let { objectMapper.readValue(it) },
             tidspunkt = getTidspunkt("tidspunkt"),
@@ -112,20 +112,19 @@ class OppgaveDaoMedEndringssporingImpl(
     }
 
     override fun hentOppgaver(
-        oppgaveTyper: List<OppgaveType>,
         enheter: List<String>,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String?,
     ): List<OppgaveIntern> {
-        return oppgaveDao.hentOppgaver(oppgaveTyper, enheter, oppgaveStatuser, minOppgavelisteIdentFilter)
+        return oppgaveDao.hentOppgaver(enheter, oppgaveStatuser, minOppgavelisteIdentFilter)
     }
 
     override fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats {
         return oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)
     }
 
-    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern> {
-        return oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper)
+    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(): List<OppgaveIntern> {
+        return oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland()
     }
 
     override fun settNySaksbehandler(

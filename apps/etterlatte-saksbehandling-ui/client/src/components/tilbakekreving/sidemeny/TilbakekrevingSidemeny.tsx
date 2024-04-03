@@ -19,7 +19,7 @@ import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteL
 import { tagColors, TagList } from '~shared/Tags'
 import { formaterSakstype } from '~utils/formattering'
 import { Info, Tekst } from '~components/behandling/attestering/styled'
-import { hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave } from '~shared/api/oppgaver'
+import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
@@ -34,12 +34,12 @@ export function TilbakekrevingSidemeny() {
   const [beslutning, setBeslutning] = useState<IBeslutning>()
 
   const [oppgaveForBehandlingenStatus, requesthentOppgaveForBehandling] = useApiCall(
-    hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave
+    hentOppgaveForReferanseUnderBehandling
   )
 
   const hentOppgaveForBehandling = () => {
     if (tilbakekreving) {
-      requesthentOppgaveForBehandling({ referanse: tilbakekreving.id, sakId: tilbakekreving.sak.id })
+      requesthentOppgaveForBehandling(tilbakekreving.id)
     }
   }
 

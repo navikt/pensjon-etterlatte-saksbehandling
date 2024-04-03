@@ -22,7 +22,6 @@ import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
-import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -98,10 +97,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     ),
                 )
             coEvery { behandlingKlient.hentOppgaverForSak(any(), any()) } returns
-                OppgaveListe(
-                    mockk(),
-                    listOf(lagOppgave(behandlingId)),
-                )
+                listOf(lagOppgave(behandlingId, Status.ATTESTERING))
             coEvery { behandlingKlient.tildelSaksbehandler(any(), any()) } returns true
             coEvery {
                 vedtakService.attesterVedtak(
@@ -176,10 +172,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         ),
                     )
                 coEvery { behandlingKlient.hentOppgaverForSak(any(), any()) } returns
-                    OppgaveListe(
-                        mockk(),
-                        listOf(lagOppgave(behandlingId)),
-                    )
+                    listOf(lagOppgave(behandlingId, Status.ATTESTERING))
                 coEvery { behandlingKlient.tildelSaksbehandler(any(), any()) } returns true
                 coEvery {
                     vedtakService.attesterVedtak(
@@ -253,10 +246,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         ),
                     )
                 coEvery { runBlocking { behandlingKlient.hentOppgaverForSak(any(), any()) } } returns
-                    OppgaveListe(
-                        mockk(),
-                        listOf(lagOppgave(behandlingId)),
-                    )
+                    listOf(lagOppgave(behandlingId, Status.ATTESTERING))
                 coEvery { runBlocking { behandlingKlient.tildelSaksbehandler(any(), any()) } } returns true
 
                 runServer(server) {
@@ -346,20 +336,22 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
     private val token: String by lazy { server.issueSaksbehandlerToken(navIdent = SAKSBEHANDLER_1) }
 
-    private fun lagOppgave(referanse: UUID) =
-        OppgaveIntern(
-            id = UUID.randomUUID(),
-            status = Status.UNDER_BEHANDLING,
-            enhet = "",
-            sakId = 1,
-            kilde = null,
-            type = OppgaveType.ATTESTERING,
-            saksbehandler = null,
-            referanse = referanse.toString(),
-            merknad = null,
-            sakType = SakType.BARNEPENSJON,
-            fnr = null,
-            frist = null,
-            opprettet = Tidspunkt.now(),
-        )
+    private fun lagOppgave(
+        referanse: UUID,
+        status: Status = Status.UNDER_BEHANDLING,
+    ) = OppgaveIntern(
+        id = UUID.randomUUID(),
+        status = status,
+        enhet = "",
+        sakId = 1,
+        kilde = null,
+        type = OppgaveType.FOERSTEGANGSBEHANDLING,
+        saksbehandler = null,
+        referanse = referanse.toString(),
+        merknad = null,
+        sakType = SakType.BARNEPENSJON,
+        fnr = null,
+        frist = null,
+        opprettet = Tidspunkt.now(),
+    )
 }

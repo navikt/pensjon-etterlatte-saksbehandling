@@ -239,6 +239,7 @@ class RevurderingService(
                         try {
                             oppgaveService.ferdigStillOppgaveUnderBehandling(
                                 paaGrunnAvHendelse.toString(),
+                                OppgaveType.VURDER_KONSEKVENS,
                                 saksbehandler,
                             )
                         } catch (e: Exception) {
@@ -369,8 +370,7 @@ class RevurderingService(
         oppgaveIdOmgjoering: UUID,
         saksbehandler: Saksbehandler,
     ): Revurdering {
-        val omgjoeringsoppgave =
-            oppgaveService.hentOppgave(oppgaveIdOmgjoering) ?: throw FeilIOmgjoering.IngenOmgjoeringsoppgave()
+        val omgjoeringsoppgave = oppgaveService.hentOppgave(oppgaveIdOmgjoering)
         if (omgjoeringsoppgave.type != OppgaveType.OMGJOERING) {
             throw FeilIOmgjoering.IngenOmgjoeringsoppgave()
         }
@@ -417,7 +417,11 @@ class RevurderingService(
             saksbehandlerIdent = saksbehandler.ident,
             relatertBehandlingId = klagenViOmgjoerPaaGrunnAv.id.toString(),
         ).oppdater().also {
-            oppgaveService.ferdigStillOppgaveUnderBehandling(klagenViOmgjoerPaaGrunnAv.id.toString(), saksbehandler)
+            oppgaveService.ferdigStillOppgaveUnderBehandling(
+                referanse = klagenViOmgjoerPaaGrunnAv.id.toString(),
+                type = OppgaveType.OMGJOERING,
+                saksbehandler = saksbehandler,
+            )
         }
     }
 }

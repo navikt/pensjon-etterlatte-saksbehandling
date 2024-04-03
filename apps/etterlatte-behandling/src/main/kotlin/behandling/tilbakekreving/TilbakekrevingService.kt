@@ -9,7 +9,6 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.FattetVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
@@ -78,7 +77,10 @@ class TilbakekrevingService(
                     tilbakekrevingBehandling,
                     Tidspunkt.now(),
                 )
-            tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.OPPRETTET)
+            tilbakekrevinghendelser.sendTilbakekreving(
+                statistikkTilbakekrevingDto,
+                TilbakekrevingHendelseType.OPPRETTET,
+            )
 
             tilbakekrevingBehandling.id
         }
@@ -185,17 +187,15 @@ class TilbakekrevingService(
                 tilbakekreving,
                 Tidspunkt.now(),
             )
-        tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.FATTET_VEDTAK)
+        tilbakekrevinghendelser.sendTilbakekreving(
+            statistikkTilbakekrevingDto,
+            TilbakekrevingHendelseType.FATTET_VEDTAK,
+        )
 
-        oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-            fattetoppgaveReferanseOgSak =
-                SakIdOgReferanse(
-                    sakId = tilbakekreving.sak.id,
-                    referanse = tilbakekreving.id.toString(),
-                ),
-            oppgaveType = OppgaveType.ATTESTERING,
-            merknad = "Tilbakekreving",
-            saksbehandler = brukerTokenInfo,
+        oppgaveService.tilAttestering(
+            referanse = tilbakekreving.id.toString(),
+            type = OppgaveType.TILBAKEKREVING,
+            merknad = "Tilbakekreving kan attesteres",
         )
     }
 
@@ -236,6 +236,7 @@ class TilbakekrevingService(
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(
             referanse = behandling.id.toString(),
+            type = OppgaveType.TILBAKEKREVING,
             saksbehandler = brukerTokenInfo,
         )
 
@@ -309,15 +310,10 @@ class TilbakekrevingService(
             begrunnelse = valgtBegrunnelse,
         )
 
-        oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-            fattetoppgaveReferanseOgSak =
-                SakIdOgReferanse(
-                    sakId = tilbakekreving.sak.id,
-                    referanse = tilbakekreving.id.toString(),
-                ),
-            oppgaveType = OppgaveType.UNDERKJENT,
+        oppgaveService.tilUnderkjent(
+            referanse = tilbakekreving.id.toString(),
+            type = OppgaveType.TILBAKEKREVING,
             merknad = listOfNotNull(valgtBegrunnelse, kommentar).joinToString(separator = ": "),
-            saksbehandler = brukerTokenInfo,
         )
     }
 }

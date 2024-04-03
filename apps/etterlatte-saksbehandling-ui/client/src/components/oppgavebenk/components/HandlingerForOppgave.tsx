@@ -22,16 +22,6 @@ export const HandlingerForOppgave = ({
 
   if (kilde === 'GENERELL_BEHANDLING') {
     switch (type) {
-      case 'UNDERKJENT':
-        return (
-          <>
-            {erInnloggetSaksbehandlerOppgave && (
-              <Button size="small" as="a" href={`/generellbehandling/${referanse}`}>
-                Gå til kravpakke utland
-              </Button>
-            )}
-          </>
-        )
       case 'KRAVPAKKE_UTLAND':
         return (
           <>
@@ -42,22 +32,10 @@ export const HandlingerForOppgave = ({
             )}
           </>
         )
-      case 'ATTESTERING':
-        return (
-          <>
-            {erInnloggetSaksbehandlerOppgave && (
-              <Button size="small" as="a" href={`/generellbehandling/${referanse}`}>
-                Gå til attestering av generell behandling
-              </Button>
-            )}
-          </>
-        )
     }
   }
   if (kilde === 'TILBAKEKREVING') {
     switch (type) {
-      case 'ATTESTERING':
-      case 'UNDERKJENT':
       case 'TILBAKEKREVING':
         return (
           erInnloggetSaksbehandlerOppgave && (
@@ -77,7 +55,6 @@ export const HandlingerForOppgave = ({
           </Button>
         </>
       )
-    case 'UNDERKJENT':
     case 'FOERSTEGANGSBEHANDLING':
       return (
         <>
@@ -103,16 +80,6 @@ export const HandlingerForOppgave = ({
               oppgaveId={oppgave.id}
               begrunnelse={oppgave.merknad}
             />
-          )}
-        </>
-      )
-    case 'ATTESTERING':
-      return (
-        <>
-          {erInnloggetSaksbehandlerOppgave && (
-            <Button size="small" href={`/behandling/${referanse}`} as="a">
-              Gå til attestering
-            </Button>
           )}
         </>
       )

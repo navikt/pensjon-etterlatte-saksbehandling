@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.oppgave.EndrePaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -85,7 +84,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                     lestOppgave
                 }
 
-            hentOppgaver(client, sak, fnr)
+            hentOppgave(client, oppgave.id)
 
             client.post("/api/oppgaver/${oppgave.id}/tildel-saksbehandler") {
                 val dto = SaksbehandlerEndringDto(systemBruker)
@@ -113,7 +112,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
-            assertEquals(hentOppgaver(client, sak, fnr).first().status, Status.PAA_VENT)
+            assertEquals(hentOppgave(client, oppgave.id).status, Status.PAA_VENT)
 
             client.put("/oppgaver/ventefrist-gaar-ut") {
                 val dto =
@@ -129,22 +128,18 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
-            assertEquals(hentOppgaver(client, sak, fnr).first().status, Status.UNDER_BEHANDLING)
+            assertEquals(hentOppgave(client, oppgave.id).status, Status.UNDER_BEHANDLING)
         }
     }
 
-    private suspend fun hentOppgaver(
+    private suspend fun hentOppgave(
         client: HttpClient,
-        sak: Sak,
-        fnr: String,
-    ): List<OppgaveIntern> =
-        client.get("/api/oppgaver/sak/${sak.id}/oppgaver") {
+        oppgaveId: UUID,
+    ): OppgaveIntern =
+        client.get("/api/oppgaver/$oppgaveId") {
             addAuthToken(systemBruker)
         }.let {
             assertEquals(HttpStatusCode.OK, it.status)
-            val liste: OppgaveListe = it.body()
-            assertEquals(1, liste.oppgaver.size)
-            assertEquals(fnr, liste.oppgaver.first().fnr)
-            liste.oppgaver
+            it.body()
         }
 }

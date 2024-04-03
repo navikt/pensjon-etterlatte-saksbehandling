@@ -100,9 +100,8 @@ class SjekklisteService(
 
     private fun Behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler(): Boolean {
         return Kontekst.get().AppUser.name() ==
-            oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(
-                this.id.toString(),
-            )?.ident
+            oppgaveService.hentOppgaveUnderBehandling(this.id.toString())
+                ?.saksbehandler?.ident
     }
 }
 

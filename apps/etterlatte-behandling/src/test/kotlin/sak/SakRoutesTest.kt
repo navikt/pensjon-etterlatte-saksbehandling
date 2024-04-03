@@ -89,7 +89,7 @@ internal class SakRoutesTest {
                     enhet = "4808",
                     sakId = 1,
                     kilde = null,
-                    type = OppgaveType.ATTESTERING,
+                    type = OppgaveType.FOERSTEGANGSBEHANDLING,
                     saksbehandler = OppgaveSaksbehandler("Rask Spaghetti"),
                     referanse = "hmm",
                     merknad = null,

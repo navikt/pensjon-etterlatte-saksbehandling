@@ -44,16 +44,12 @@ data class OppgaveIntern(
 
     fun erAvsluttet(): Boolean = status.erAvsluttet()
 
-    fun erFerdigstilt(): Boolean = status.erFerdigstilt()
+    fun erUnderBehandling() = status.erUnderBehandling()
 
-    fun erAttestering(): Boolean {
-        return OppgaveType.ATTESTERING === type
-    }
+    fun erAttestering(): Boolean = status == Status.ATTESTERING
 }
 
 data class OppgavebenkStats(val antallOppgavelistaOppgaver: Long, val antallMinOppgavelisteOppgaver: Long)
-
-data class OppgaveListe(val sak: Sak, val oppgaver: List<OppgaveIntern>)
 
 data class GosysOppgave(
     val id: Long,
@@ -77,6 +73,8 @@ enum class Status {
     NY,
     UNDER_BEHANDLING,
     PAA_VENT,
+    ATTESTERING,
+    UNDERKJENT,
     FERDIGSTILT,
     FEILREGISTRERT,
     AVBRUTT,
@@ -87,6 +85,8 @@ enum class Status {
             NY,
             UNDER_BEHANDLING,
             PAA_VENT,
+            ATTESTERING,
+            UNDERKJENT,
             -> false
 
             FERDIGSTILT,
@@ -96,7 +96,10 @@ enum class Status {
         }
     }
 
-    fun erFerdigstilt(): Boolean = this === FERDIGSTILT
+    // TODO: Gå gjennom navngiving her. Gir det mening med "under behandling" som status OG samlebegrep...?
+    fun erUnderBehandling(): Boolean = this in listOf(UNDER_BEHANDLING, PAA_VENT, ATTESTERING, UNDERKJENT)
+
+    fun erFerdigstilt(): Boolean = this == FERDIGSTILT
 }
 
 enum class OppgaveKilde {
@@ -113,8 +116,6 @@ enum class OppgaveType {
     FOERSTEGANGSBEHANDLING,
     REVURDERING,
     VURDER_KONSEKVENS,
-    ATTESTERING,
-    UNDERKJENT,
     GOSYS,
     KRAVPAKKE_UTLAND,
     KLAGE,

@@ -22,6 +22,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -193,6 +194,7 @@ class Brevoppretter(
         with(personerISak) {
             when (verge) {
                 is Vergemaal -> verge.toMottaker()
+                is ForelderVerge -> adresseService.hentMottakerAdresse(sakType, verge.foedselsnummer.value)
 
                 else -> {
                     val mottakerFnr =

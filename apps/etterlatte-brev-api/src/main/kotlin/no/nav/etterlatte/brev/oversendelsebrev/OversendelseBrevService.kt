@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -155,6 +156,7 @@ class OversendelseBrevServiceImpl(
         with(personerISak) {
             when (verge) {
                 is Vergemaal -> verge.toMottaker()
+                is ForelderVerge -> adresseService.hentMottakerAdresse(sakType, verge.foedselsnummer.value)
 
                 else -> {
                     val mottakerFnr =

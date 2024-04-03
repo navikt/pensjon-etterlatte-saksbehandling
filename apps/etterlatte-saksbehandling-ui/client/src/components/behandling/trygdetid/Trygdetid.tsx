@@ -161,7 +161,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
               fetchTrygdetider={fetchTrygdetider}
             />
           )}
-          {trygdetider.length > 1 && (
+          {trygdetider.length > 1 && visFlereTrygdetider && (
             <>
               <HeadingWrapper size="medium" level="2">
                 Det finnes flere avdøde - husk å oppdatere begge to

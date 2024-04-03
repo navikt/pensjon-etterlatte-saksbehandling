@@ -12,7 +12,7 @@ import { OverstyrtTrygdetid } from '~components/behandling/trygdetid/OverstyrtTr
 import { isPending } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { TrygdetidDetaljer } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { TrygdetidManueltOverstyrt } from '~components/behandling/trygdetid/TrygdetidManueltOverstyrt'
@@ -33,9 +33,15 @@ interface Props {
 export const EnkelPersonTrygdetid = (props: Props) => {
   const dispatch = useAppDispatch()
   const { redigerbar, behandling, virkningstidspunktEtterNyRegelDato, landListe, fetchTrygdetider } = props
-  const [trygdetid, setTrygdetid] = useState<ITrygdetid>(props.trygdetid)
+  const [trygdetid, setTrygdetid] = useState<ITrygdetid | undefined>()
   const [overstyrTrygdetidRequest, requestOverstyrTrygdetid] = useApiCall(overstyrTrygdetid)
   const [oppdaterYrkesskadeRequest, requestOppdaterYrkesskade] = useApiCall(setTrygdetidYrkesskade)
+
+  useEffect(() => {
+    if (props.trygdetid) {
+      setTrygdetid(props.trygdetid)
+    }
+  }, [props.trygdetid])
 
   const oppdaterTrygdetid = (trygdetid: ITrygdetid) => {
     setTrygdetid(trygdetid)
@@ -57,16 +63,18 @@ export const EnkelPersonTrygdetid = (props: Props) => {
   }
 
   const oppdaterYrkesskade = (yrkesskade: boolean) => {
-    requestOppdaterYrkesskade(
-      {
-        id: trygdetid.id,
-        behandlingId: trygdetid.behandlingId,
-        yrkesskade: yrkesskade,
-      },
-      (trygdetid: ITrygdetid) => {
-        oppdaterTrygdetid(trygdetid)
-      }
-    )
+    if (trygdetid) {
+      requestOppdaterYrkesskade(
+        {
+          id: trygdetid.id,
+          behandlingId: trygdetid.behandlingId,
+          yrkesskade: yrkesskade,
+        },
+        (trygdetid: ITrygdetid) => {
+          oppdaterTrygdetid(trygdetid)
+        }
+      )
+    }
   }
 
   if (trygdetid?.beregnetTrygdetid?.resultat.overstyrt) {
@@ -84,42 +92,48 @@ export const EnkelPersonTrygdetid = (props: Props) => {
 
   return (
     <>
-      <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />
+      {trygdetid && (
+        <>
+          <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />
 
-      <YrkesskadeTrygdetid redigerbar={redigerbar} trygdetid={trygdetid} oppdaterYrkesskade={oppdaterYrkesskade} />
+          <YrkesskadeTrygdetid redigerbar={redigerbar} trygdetid={trygdetid} oppdaterYrkesskade={oppdaterYrkesskade} />
 
-      <TrygdetidGrunnlagListe
-        trygdetid={trygdetid}
-        setTrygdetid={oppdaterTrygdetid}
-        landListe={landListe}
-        trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
-        redigerbar={redigerbar}
-      />
-      <TrygdetidGrunnlagListe
-        trygdetid={trygdetid}
-        setTrygdetid={oppdaterTrygdetid}
-        landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
-        trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
-        redigerbar={redigerbar}
-      />
-      <OverstyrtTrygdetid
-        redigerbar={redigerbar}
-        sakType={behandling.sakType}
-        trygdetid={trygdetid}
-        overstyrTrygdetidPoengaar={overstyrTrygdetidPoengaar}
-        virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
-      />
-      {isPending(overstyrTrygdetidRequest) && <Spinner visible={true} label="Oppdatere poengår" />}
-      {isPending(oppdaterYrkesskadeRequest) && <Spinner visible={true} label="Oppdater yrkesskade" />}
-      {isFailureHandler({
-        apiResult: overstyrTrygdetidRequest,
-        errorMessage: 'En feil har oppstått ved lagring av norsk poengår',
-      })}
-      {isFailureHandler({
-        apiResult: oppdaterYrkesskadeRequest,
-        errorMessage: 'En feil har oppstått ved oppdatering av yrkesskade',
-      })}
-      {trygdetid.beregnetTrygdetid && <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />}
+          <TrygdetidGrunnlagListe
+            trygdetid={trygdetid}
+            setTrygdetid={oppdaterTrygdetid}
+            landListe={landListe}
+            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
+            redigerbar={redigerbar}
+          />
+          <TrygdetidGrunnlagListe
+            trygdetid={trygdetid}
+            setTrygdetid={oppdaterTrygdetid}
+            landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
+            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
+            redigerbar={redigerbar}
+          />
+          <OverstyrtTrygdetid
+            redigerbar={redigerbar}
+            sakType={behandling.sakType}
+            trygdetid={trygdetid}
+            overstyrTrygdetidPoengaar={overstyrTrygdetidPoengaar}
+            virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
+          />
+          {isPending(overstyrTrygdetidRequest) && <Spinner visible={true} label="Oppdatere poengår" />}
+          {isPending(oppdaterYrkesskadeRequest) && <Spinner visible={true} label="Oppdater yrkesskade" />}
+          {isFailureHandler({
+            apiResult: overstyrTrygdetidRequest,
+            errorMessage: 'En feil har oppstått ved lagring av norsk poengår',
+          })}
+          {isFailureHandler({
+            apiResult: oppdaterYrkesskadeRequest,
+            errorMessage: 'En feil har oppstått ved oppdatering av yrkesskade',
+          })}
+          {trygdetid.beregnetTrygdetid && (
+            <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
+          )}
+        </>
+      )}
     </>
   )
 }

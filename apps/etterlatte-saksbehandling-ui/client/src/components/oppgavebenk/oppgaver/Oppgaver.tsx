@@ -15,10 +15,14 @@ import { filtrerOppgaver } from '~components/oppgavebenk/filtreringAvOppgaver/fi
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 
-export interface OppgavelisteProps {
+export interface Props {
   oppgaver: OppgaveDTO[]
-  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null, versjon: number | null) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
+  oppdaterSaksbehandlerTildeling: (
+    oppgave: OppgaveDTO,
+    saksbehandler: OppgaveSaksbehandler | null,
+    versjon: number | null
+  ) => void
   oppdaterFrist?: (id: string, nyfrist: string, versjon: number | null) => void
   filter?: Filter
   revurderingsaarsaker: RevurderingsaarsakerBySakstype
@@ -26,12 +30,12 @@ export interface OppgavelisteProps {
 
 export const Oppgaver = ({
   oppgaver,
-  oppdaterTildeling,
   saksbehandlereIEnhet,
+  oppdaterSaksbehandlerTildeling,
   oppdaterFrist,
   filter,
   revurderingsaarsaker,
-}: OppgavelisteProps): ReactNode => {
+}: Props): ReactNode => {
   const [sortering, setSortering] = useState<OppgaveSortering>(hentSorteringFraLocalStorage())
   const filtrerteOppgaver = filter
     ? filtrerOppgaver(
@@ -73,7 +77,7 @@ export const Oppgaver = ({
 
       <OppgaverTable
         oppgaver={paginerteOppgaver}
-        oppdaterTildeling={oppdaterTildeling}
+        oppdaterTildeling={oppdaterSaksbehandlerTildeling}
         oppdaterFrist={oppdaterFrist}
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         setSortering={setSortering}

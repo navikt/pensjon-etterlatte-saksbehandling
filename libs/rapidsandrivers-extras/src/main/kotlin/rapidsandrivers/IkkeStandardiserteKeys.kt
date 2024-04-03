@@ -28,6 +28,7 @@ const val NY_OPPLYSNING_KEY = "OPPLYSNING:NY"
 const val DRYRUN = "dry_run"
 const val BOR_I_UTLAND_KEY = "bor_i_utland"
 const val ER_OVER_18_AAR = "er_over_18_aar"
+const val AUTOMATISK_GJENOPPRETTING = "automatisk_gjenoppretting"
 
 var JsonMessage.sakId: Long
     get() = this[SAK_ID_KEY].asLong()

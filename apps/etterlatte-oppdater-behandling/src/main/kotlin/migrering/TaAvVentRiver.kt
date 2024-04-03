@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.rapidsandrivers.AUTOMATISK_GJENOPPRETTING
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.OPPGAVE_ID_FLERE_KEY
@@ -52,6 +53,7 @@ internal class TaAvVentRiver(
             packet.behandlingId = UUID.fromString(it.referanse)
             packet[OPPGAVEKILDE_KEY] = it.oppgavekilde
             packet.eventName = Ventehendelser.TATT_AV_VENT.lagEventnameForType()
+            packet[AUTOMATISK_GJENOPPRETTING] = true
             context.publish(packet.toJson())
         }
     }

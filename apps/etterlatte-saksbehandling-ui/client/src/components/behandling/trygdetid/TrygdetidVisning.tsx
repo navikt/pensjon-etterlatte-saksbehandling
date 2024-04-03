@@ -46,7 +46,7 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
 
   const sjekkGyldighetOgOppdaterStatus = () => {
     oppdaterStatusRequest(behandling.id, (result) => {
-      if (result.statusOppdatert && vedtaksresultat != 'avslag') {
+      if (result.statusOppdatert && vedtaksresultat !== 'avslag') {
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
       }
       next()

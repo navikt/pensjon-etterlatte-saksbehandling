@@ -10,14 +10,20 @@ import {
   sorterDato,
 } from '~components/oppgavebenk/utils/oppgaveSortering'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils/oppgaveutils'
+import {
+  finnOgOppdaterSaksbehandlerTildeling,
+  hentPagineringSizeFraLocalStorage,
+  leggTilOppgavenIMinliste,
+  sorterOppgaverEtterOpprettet,
+} from '~components/oppgavebenk/utils/oppgaveutils'
 import { filtrerOppgaver } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
+import { useAppSelector } from '~store/Store'
 
 export interface OppgavelisteProps {
   oppgaver: OppgaveDTO[]
-  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null, versjon: number | null) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterFrist?: (id: string, nyfrist: string, versjon: number | null) => void
   filter?: Filter
@@ -26,12 +32,13 @@ export interface OppgavelisteProps {
 
 export const Oppgaver = ({
   oppgaver,
-  oppdaterTildeling,
   saksbehandlereIEnhet,
   oppdaterFrist,
   filter,
   revurderingsaarsaker,
 }: OppgavelisteProps): ReactNode => {
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+
   const [sortering, setSortering] = useState<OppgaveSortering>(hentSorteringFraLocalStorage())
   const filtrerteOppgaver = filter
     ? filtrerOppgaver(
@@ -53,6 +60,9 @@ export const Oppgaver = ({
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(hentPagineringSizeFraLocalStorage())
 
+  const oppgavebenkState = useOppgaveBenkState()
+  const dispatcher = useOppgavebenkStateDispatcher()
+
   let paginerteOppgaver = sorterteOppgaver
 
   useEffect(() => {
@@ -62,6 +72,42 @@ export const Oppgaver = ({
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
   if (!paginerteOppgaver.length) return <Alert variant="info">Ingen oppgaver</Alert>
+
+  const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
+    return oppgaver.filter((o) => o.saksbehandler?.ident === innloggetSaksbehandler.ident)
+  }
+
+  const oppdaterSaksbehandlerTildeling = (
+    oppgave: OppgaveDTO,
+    saksbehandler: OppgaveSaksbehandler | null,
+    versjon: number | null
+  ) => {
+    setTimeout(() => {
+      dispatcher.setOppgavelistaOppgaver(
+        finnOgOppdaterSaksbehandlerTildeling(oppgavebenkState.oppgavelistaOppgaver, oppgave.id, saksbehandler, versjon)
+      )
+      if (innloggetSaksbehandler.ident === saksbehandler?.ident) {
+        dispatcher.setMinOppgavelisteOppgaver(
+          sorterOppgaverEtterOpprettet(
+            leggTilOppgavenIMinliste(oppgavebenkState.minOppgavelisteOppgaver, oppgave, saksbehandler, versjon)
+          )
+        )
+      } else {
+        dispatcher.setMinOppgavelisteOppgaver(
+          sorterOppgaverEtterOpprettet(
+            filtrerKunInnloggetBrukerOppgaver(
+              finnOgOppdaterSaksbehandlerTildeling(
+                oppgavebenkState.minOppgavelisteOppgaver,
+                oppgave.id,
+                saksbehandler,
+                versjon
+              )
+            )
+          )
+        )
+      }
+    }, 2000)
+  }
 
   return (
     <>
@@ -73,7 +119,7 @@ export const Oppgaver = ({
 
       <OppgaverTable
         oppgaver={paginerteOppgaver}
-        oppdaterTildeling={oppdaterTildeling}
+        oppdaterTildeling={oppdaterSaksbehandlerTildeling}
         oppdaterFrist={oppdaterFrist}
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         setSortering={setSortering}

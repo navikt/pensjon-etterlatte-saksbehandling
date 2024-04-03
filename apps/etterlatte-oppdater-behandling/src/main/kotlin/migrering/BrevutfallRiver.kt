@@ -38,7 +38,7 @@ internal class BrevutfallRiver(
         val request =
             BrevutfallOgEtterbetalingDto(
                 behandlingId = packet.behandlingId,
-                opphoer = null,
+                opphoer = false,
                 etterbetaling =
                     EtterbetalingDto(
                         behandlingId = packet.behandlingId,

@@ -62,6 +62,7 @@ open class Grunnlagsopplysning<T>(
         JsonSubTypes.Type(value = Pdl::class, name = "pdl"),
         JsonSubTypes.Type(value = Persondata::class, name = "persondata"),
         JsonSubTypes.Type(value = RegelKilde::class, name = "regel"),
+        JsonSubTypes.Type(value = Gjenoppretting::class, name = "gjenoppretting"),
         JsonSubTypes.Type(value = Pesys::class, name = "pesys"),
         JsonSubTypes.Type(value = UkjentInnsender::class, name = "ukjentinnsender"),
         JsonSubTypes.Type(value = Gjenny::class, name = "gjenny"),

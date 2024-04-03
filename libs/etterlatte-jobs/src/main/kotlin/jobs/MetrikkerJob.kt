@@ -26,7 +26,6 @@ class MetrikkerJob(
             initialDelay = initialDelay,
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = periode.toMillis(),
-            openingHours = null, // TODO: remove and set opening hours to default null later
         ) {
             if (erLeader()) {
                 uthenter.run()

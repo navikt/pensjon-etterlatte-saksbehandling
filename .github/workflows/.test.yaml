@@ -18,9 +18,7 @@ jobs:
           java-version: 21
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: wrapper
       - name: Gradle test and build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gradle :apps:${{ github.workflow }}:test --stacktrace
+        run: ./gradlew :apps:${{ github.workflow }}:test --stacktrace

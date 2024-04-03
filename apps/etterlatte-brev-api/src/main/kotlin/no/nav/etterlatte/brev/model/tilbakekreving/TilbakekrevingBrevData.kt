@@ -45,8 +45,8 @@ data class TilbakekrevingBrevDTO(
                 datoTilsvarBruker = tilbakekreving.vurdering?.tilsvar?.dato,
                 tilbakekreving =
                     TilbakekrevingData(
-                        fraOgMed = perioderSortert.first.maaned.atDay(1),
-                        tilOgMed = perioderSortert.last.maaned.atEndOfMonth(),
+                        fraOgMed = perioderSortert.first().maaned.atDay(1),
+                        tilOgMed = perioderSortert.last().maaned.atEndOfMonth(),
                         skalTilbakekreve =
                             tilbakekreving.perioder.any {
                                 it.ytelse.resultat == TilbakekrevingResultat.FULL_TILBAKEKREV ||

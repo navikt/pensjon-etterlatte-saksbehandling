@@ -20,7 +20,7 @@ export const VelgOppgaveliste = ({ oppgavelisteValg, setOppgavelisteValg }: Prop
   const [oppgavebenkStatsResult, oppgavebenkStatsFetch] = useApiCall(hentOppgavebenkStats)
 
   useEffect(() => {
-    if (antallOppgavelistaOppgaver === 0) {
+    if (!!antallOppgavelistaOppgaver) {
       oppgavebenkStatsFetch({}, (result) => dispatcher.setOppgavebenkStats(result))
     }
   }, [antallOppgavelistaOppgaver])

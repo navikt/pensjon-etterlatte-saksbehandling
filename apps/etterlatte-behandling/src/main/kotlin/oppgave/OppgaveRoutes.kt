@@ -8,6 +8,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
+import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
@@ -217,6 +218,16 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 kunSkrivetilgang {
                     val redigerFrist = call.receive<RedigerFristRequest>()
                     inTransaction { service.redigerFrist(oppgaveId, redigerFrist.frist) }
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+            patch("merknad") {
+                kunSkrivetilgang {
+                    val merknad = call.receive<EndrePaaVentRequest>()
+                    inTransaction {
+                        service.oppdaterStatusOgMerknad(oppgaveId, merknad.merknad, Status.UNDER_BEHANDLING)
+                        service.fjernSaksbehandler(oppgaveId)
+                    }
                     call.respond(HttpStatusCode.OK)
                 }
             }

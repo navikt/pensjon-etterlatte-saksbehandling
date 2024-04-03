@@ -27,6 +27,9 @@ data class OpeningHours(val start: Int, val slutt: Int) {
             if (timeStart > 23 || timeStop > 23 || (timeStop == timeStart)) {
                 throw UgyldigTidException("Ugydlig tid oppgitt fra start $timeStart slutt $timeStop")
             }
+            if (timeStop < timeStart) {
+                throw UgyldigTidException("Ugydlig tid oppgitt. Start må være før slutt, fra start $timeStart slutt $timeStop")
+            }
         }
     }
 

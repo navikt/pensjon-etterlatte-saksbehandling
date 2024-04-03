@@ -47,7 +47,6 @@ export const Oppgavebenk = () => {
         setSaksbehandlereIEnheter(saksbehandlere)
       })
     }
-    // TODO: gjøre sjekk på om oppgavelistaStats er satt, hvis ikke gjør kall
   }, [])
 
   useEffect(() => {

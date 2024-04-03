@@ -1,11 +1,16 @@
 import React, { createContext, ReactNode, useContext, useState } from 'react'
-import { initialOppgavebenkState, OppgavebenkState } from '~components/oppgavebenk/state/oppgavebenkState'
+import {
+  initialOppgavebenkState,
+  OppgavebenkState,
+  OppgavebenkStats,
+} from '~components/oppgavebenk/state/oppgavebenkState'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 
 export interface OppgavebenkStateDispatcher {
   setOppgavelistaOppgaver: (oppgaver: OppgaveDTO[]) => void
   setMinOppgavelisteOppgaver: (oppgaver: OppgaveDTO[]) => void
   setGosysOppgavelisteOppgaver: (oppgaver: OppgaveDTO[]) => void
+  setOppgavebenkStats: (stats: OppgavebenkStats) => void
 }
 
 const oppgavebenkContext = createContext(initialOppgavebenkState)
@@ -18,6 +23,7 @@ const ProvideOppgavebenkContext = ({ children }: { children: ReactNode | Array<R
     setOppgavelistaOppgaver: (oppgaver) => setState({ ...state, oppgavelistaOppgaver: oppgaver }),
     setMinOppgavelisteOppgaver: (oppgaver) => setState({ ...state, minOppgavelisteOppgaver: oppgaver }),
     setGosysOppgavelisteOppgaver: (oppgaver) => setState({ ...state, gosysOppgavelisteOppgaver: oppgaver }),
+    setOppgavebenkStats: (stats) => setState({ ...state, opgpavebenkStats: stats }),
   }
 
   return (

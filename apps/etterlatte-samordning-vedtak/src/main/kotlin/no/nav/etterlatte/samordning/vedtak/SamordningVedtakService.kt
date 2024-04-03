@@ -46,7 +46,7 @@ class SamordningVedtakService(
         fnr: Folkeregisteridentifikator,
         context: CallerContext,
     ): List<SamordningVedtakDto> {
-        if (context is MaskinportenTpContext && !tjenestepensjonKlient.harTpForholdByDate(fnr.value, context.tpnr, fomDato)
+        if (context is MaskinportenTpContext && !tjenestepensjonKlient.harTpYtelseOnDate(fnr.value, context.tpnr, fomDato)
         ) {
             logger.info("Avslår forespørsel, manglende/ikke gyldig TP-forhold")
             throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpforhold")

@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -30,6 +31,7 @@ data class BarnepensjonInnvilgelse(
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
     val kunNyttRegelverk: Boolean,
+    val erGjenoppretting: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
@@ -42,6 +44,7 @@ data class BarnepensjonInnvilgelse(
             grunnbeloep: Grunnbeloep,
             utlandstilknytning: UtlandstilknytningType?,
             brevutfall: BrevutfallDto,
+            erGjenoppretting: Boolean,
         ): BarnepensjonInnvilgelse {
             val beregningsperioder =
                 barnepensjonBeregningsperioder(utbetalingsinfo)
@@ -58,6 +61,7 @@ data class BarnepensjonInnvilgelse(
                     utbetalingsinfo.beregningsperioder.all {
                         it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
                     },
+                erGjenoppretting = erGjenoppretting,
             )
         }
     }
@@ -70,6 +74,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
     val sisteBeregningsperiodeBeloep: Kroner,
     val erEtterbetaling: Boolean,
     val harFlereUtbetalingsperioder: Boolean,
+    val erGjenoppretting: Boolean,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -110,6 +115,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
                         ),
                 erEtterbetaling = etterbetaling != null,
                 harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
+                erGjenoppretting = generellBrevData.systemkilde == Vedtaksloesning.GJENOPPRETTA,
             )
         }
     }

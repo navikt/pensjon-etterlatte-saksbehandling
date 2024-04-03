@@ -81,6 +81,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                         ),
                         null,
                     ),
+                erGjenoppretting = false,
             )
 
         Assertions.assertEquals(

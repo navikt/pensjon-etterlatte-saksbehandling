@@ -2,6 +2,7 @@ package no.nav.etterlatte.no.nav.etterlatte
 
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.rapidsandrivers.AUTOMATISK_GJENOPPRETTING
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
@@ -25,7 +26,7 @@ class FattVedtakEtterVentRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Ventehendelser.TATT_AV_VENT_UNDER_20_SJEKKA) {
+        initialiserRiver(rapidsConnection, Ventehendelser.TATT_AV_VENT_UNDER_20_SJEKKA_OG_BREVUTFALL_LAGT_INN) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireValue(OPPGAVEKILDE_KEY, OppgaveKilde.GJENOPPRETTING.name) }
@@ -48,6 +49,8 @@ class FattVedtakEtterVentRiver(
                     packet.migreringKjoringVariant,
                 )
             logger.info("Opprettet vedtak ${respons.vedtak.id} for migrert behandling: $behandlingId")
+
+            packet[AUTOMATISK_GJENOPPRETTING] = true
             RapidUtsender.sendUt(respons, packet, context)
         }
     }

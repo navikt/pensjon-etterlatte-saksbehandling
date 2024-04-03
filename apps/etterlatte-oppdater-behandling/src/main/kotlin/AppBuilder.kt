@@ -10,11 +10,19 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
 class AppBuilder(props: Miljoevariabler) {
-    fun createBehandlingService(): BehandlingService =
+    val behandlingService: BehandlingService by lazy {
         BehandlingServiceImpl(
             behandlingApp,
             "http://etterlatte-behandling",
         )
+    }
+
+    val tidshendelserService: TidshendelseService by lazy {
+        TidshendelseService(
+            behandlingService,
+            featureToggleService,
+        )
+    }
 
     private val behandlingApp: HttpClient by lazy {
         httpClientClientCredentials(

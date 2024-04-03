@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { useAppSelector } from '~store/Store'
-import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { hentOppgaverMedStatus, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
@@ -20,6 +18,7 @@ import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useApiCall } from '~shared/hooks/useApiCall'
+import { useAppSelector } from '~store/Store'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -28,9 +27,6 @@ interface Props {
 
 export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  if (!innloggetSaksbehandler.skriveEnheter.length) {
-    return <Tilgangsmelding />
-  }
 
   const [filter, setFilter] = useState<Filter>(minOppgavelisteFiltre())
 
@@ -49,18 +45,25 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
     versjon: number | null
   ) => {
     setTimeout(() => {
+      dispatcher.setOppgavelistaOppgaver(
+        finnOgOppdaterSaksbehandlerTildeling(oppgavebenkState.oppgavelistaOppgaver, oppgave.id, saksbehandler, versjon)
+      )
       if (innloggetSaksbehandler.ident === saksbehandler?.ident) {
         dispatcher.setMinOppgavelisteOppgaver(
-          leggTilOppgavenIMinliste(oppgavebenkState.minOppgavelisteOppgaver, oppgave, saksbehandler, versjon)
+          sorterOppgaverEtterOpprettet(
+            leggTilOppgavenIMinliste(oppgavebenkState.minOppgavelisteOppgaver, oppgave, saksbehandler, versjon)
+          )
         )
       } else {
         dispatcher.setMinOppgavelisteOppgaver(
-          filtrerKunInnloggetBrukerOppgaver(
-            finnOgOppdaterSaksbehandlerTildeling(
-              oppgavebenkState.minOppgavelisteOppgaver,
-              oppgave.id,
-              saksbehandler,
-              versjon
+          sorterOppgaverEtterOpprettet(
+            filtrerKunInnloggetBrukerOppgaver(
+              finnOgOppdaterSaksbehandlerTildeling(
+                oppgavebenkState.minOppgavelisteOppgaver,
+                oppgave.id,
+                saksbehandler,
+                versjon
+              )
             )
           )
         )
@@ -93,7 +96,7 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
       />
       <Oppgaver
         oppgaver={oppgavebenkState.minOppgavelisteOppgaver}
-        oppdaterTildeling={oppdaterSaksbehandlerTildeling}
+        oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
         oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
           oppdaterFrist(
             dispatcher.setMinOppgavelisteOppgaver,

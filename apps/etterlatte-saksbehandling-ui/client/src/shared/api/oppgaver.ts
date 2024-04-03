@@ -2,7 +2,7 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { SakType } from '~shared/types/sak'
 import { konverterOppgavestatusFilterValuesTilKeys } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { OppgavebenkStats } from '~components/oppgavebenk/utils/oppgavebenkStats'
+import { OppgavebenkStats } from '~components/oppgavebenk/state/oppgavebenkState'
 
 export interface OppgaveDTO {
   id: string
@@ -68,6 +68,7 @@ export type Oppgavetype =
   | 'OMGJOERING'
   | 'JOURNALFOERING'
   | 'GJENOPPRETTING_ALDERSOVERGANG'
+  | 'AKTIVITETSPLIKT'
 
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean =>
   ['NY', 'UNDER_BEHANDLING', 'ATTESTERING', 'UNDERKJENT', 'PAA_VENT'].includes(status)

@@ -666,6 +666,7 @@ private fun Grunnlagsopplysning.Kilde.tilGenerellKilde() =
                 detalj = this.registersReferanse,
             )
 
+        is Grunnlagsopplysning.Gjenoppretting -> GenerellKilde(type = this.type, tidspunkt = this.tidspunkt)
         is Grunnlagsopplysning.Pesys -> GenerellKilde(type = this.type, tidspunkt = this.tidspunkt)
         is Grunnlagsopplysning.Privatperson ->
             GenerellKilde(

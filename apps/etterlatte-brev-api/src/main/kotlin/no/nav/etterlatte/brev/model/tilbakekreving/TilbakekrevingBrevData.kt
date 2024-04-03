@@ -31,6 +31,9 @@ data class TilbakekrevingBrevDTO(
             val tilbakekreving =
                 generellBrevData.forenkletVedtak?.tilbakekreving
                     ?: throw BrevDataTilbakerevingHarManglerException("Vedtak mangler tilbakekreving")
+
+            val perioderSortert = tilbakekreving.perioder.sortedBy { it.maaned }
+
             return TilbakekrevingBrevDTO(
                 innhold = redigerbart,
                 sakType = generellBrevData.sak.sakType,
@@ -42,8 +45,8 @@ data class TilbakekrevingBrevDTO(
                 datoTilsvarBruker = tilbakekreving.vurdering?.tilsvar?.dato,
                 tilbakekreving =
                     TilbakekrevingData(
-                        fraOgMed = tilbakekreving.perioder.first().maaned.atDay(1),
-                        tilOgMed = tilbakekreving.perioder.last().maaned.atEndOfMonth(),
+                        fraOgMed = perioderSortert.first().maaned.atDay(1),
+                        tilOgMed = perioderSortert.last().maaned.atEndOfMonth(),
                         skalTilbakekreve =
                             tilbakekreving.perioder.any {
                                 it.ytelse.resultat == TilbakekrevingResultat.FULL_TILBAKEKREV ||

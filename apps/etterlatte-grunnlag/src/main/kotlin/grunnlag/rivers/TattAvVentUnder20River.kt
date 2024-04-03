@@ -38,6 +38,8 @@ class TattAvVentUnder20River(
                     "og vil da være $alderVedMaanedsslutt år. " +
                     "Oppgava er alt tatt av vent, men fatting av vedtak og oppfølging skjer manuelt av saksbehandler.",
             )
+            packet.setEventNameForHendelseType(Ventehendelser.TATT_AV_VENT_FYLT_20)
+            context.publish(packet.toJson())
             return
         }
         if (alderVedMaanedsslutt < 18) {

@@ -18,7 +18,7 @@ type Props = {
 }
 
 export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
-  const sivilstand = familieforhold.gjenlevende.flatMap((it) => it.opplysning.sivilstand) ?? []
+  const sivilstand = familieforhold.soeker?.opplysning.sivilstand?.filter((ss) => !ss.historisk)
 
   return (
     <SivilstandWrapper>
@@ -42,7 +42,7 @@ export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
           </Table.Header>
           <Table.Body>
             {sivilstand ? (
-              sivilstand?.flatMap(
+              sivilstand.map(
                 (ss, index) =>
                   ss && (
                     <Table.Row key={index}>

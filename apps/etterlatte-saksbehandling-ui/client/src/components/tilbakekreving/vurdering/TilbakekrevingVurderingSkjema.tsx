@@ -24,7 +24,7 @@ import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { Toast } from '~shared/alerts/Toast'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
-import { parseISO } from 'date-fns'
+import { formatISO, parseISO } from 'date-fns'
 
 export const initialVurdering = {
   aarsak: null,
@@ -141,7 +141,7 @@ export function TilbakekrevingVurderingSkjema({
           onChange={(e) =>
             setVurdering({
               ...vurdering,
-              forhaandsvarselDato: e?.toISOString() ?? null,
+              forhaandsvarselDato: e != null ? formatISO(e, { representation: 'date' }) : null,
             })
           }
           label="Forhåndsvarsel dato"
@@ -234,7 +234,7 @@ export function TilbakekrevingVurderingSkjema({
                     ...vurdering.tilsvar,
                     beskrivelse: vurdering.tilsvar?.beskrivelse ?? null,
                     tilsvar: vurdering.tilsvar?.tilsvar ?? null,
-                    dato: e?.toISOString() ?? null,
+                    dato: e != null ? formatISO(e, { representation: 'date' }) : null,
                   },
                 })
               }

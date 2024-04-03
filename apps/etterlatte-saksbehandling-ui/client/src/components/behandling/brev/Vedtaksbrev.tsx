@@ -157,9 +157,13 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   return (
     <Content>
-      {visBrevutfall && behandling && behandling.kilde === Vedtaksloesning.GJENOPPRETTA && (
-        <BrevutfallModal behandling={behandling} onLagre={hentBrevPaaNytt} setVis={setVisBrevutfall} />
-      )}
+      {behandling?.status &&
+        statusErRedigerbar(behandling?.status) &&
+        visBrevutfall &&
+        behandling &&
+        behandling.kilde === Vedtaksloesning.GJENOPPRETTA && (
+          <BrevutfallModal behandling={behandling} onLagre={hentBrevPaaNytt} setVis={setVisBrevutfall} />
+        )}
       <BrevContent>
         <Sidebar>
           <ContentHeader>

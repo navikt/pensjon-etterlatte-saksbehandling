@@ -73,6 +73,8 @@ spec:
     max: 4
     min: 2
   env:
+    - name: JOBB_METRIKKER_OPENING_HOURS
+      value: "07-18"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser
     - name: ETTERLATTE_BEREGNING_CLIENT_ID

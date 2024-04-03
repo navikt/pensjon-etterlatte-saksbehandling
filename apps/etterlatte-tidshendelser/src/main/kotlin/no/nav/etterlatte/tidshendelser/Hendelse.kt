@@ -36,6 +36,7 @@ enum class JobbType(val beskrivelse: String, val kategori: JobbKategori) {
     AO_OMS67("Aldersovergang omstillingsstønad ved 67 år", JobbKategori.ALDERSOVERGANG),
     OMS_DOED_3AAR("Omstillingsstønad opphør 3 år etter dødsdato", JobbKategori.OMS_DOEDSDATO),
     OMS_DOED_5AAR("Omstillingsstønad opphør 5 år etter dødsdato", JobbKategori.OMS_DOEDSDATO),
+    OMS_DOED_4MND("Omstillingsstønad varselbrev om aktivitetsplikt 4 mnd etter dødsdato", JobbKategori.OMS_DOEDSDATO),
 }
 
 enum class JobbKategori {

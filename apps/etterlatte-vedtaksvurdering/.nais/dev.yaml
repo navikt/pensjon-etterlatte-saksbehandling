@@ -63,6 +63,8 @@ spec:
     max: 1
     min: 1
   env:
+    - name: JOBB_METRIKKER_OPENING_HOURS
+      value: "07-18"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
     - name: ETTERLATTE_BEREGNING_CLIENT_ID

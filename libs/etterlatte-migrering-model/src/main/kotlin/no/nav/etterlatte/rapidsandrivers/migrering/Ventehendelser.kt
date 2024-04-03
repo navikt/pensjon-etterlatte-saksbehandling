@@ -6,6 +6,8 @@ enum class Ventehendelser : EventnameHendelseType {
     TA_AV_VENT,
     TATT_AV_VENT,
     TATT_AV_VENT_UNDER_20_SJEKKA,
+    TATT_AV_VENT_UNDER_20_SJEKKA_OG_BREVUTFALL_LAGT_INN,
+    TATT_AV_VENT_FYLT_20,
     ;
 
     override fun lagEventnameForType() = "VENT:${this.name}"

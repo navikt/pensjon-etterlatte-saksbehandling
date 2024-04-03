@@ -120,7 +120,7 @@ internal class DoedshendelseServiceTest {
                 PersonRolle.AVDOED,
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
             )
-        } returns avdoed.copy(avdoedesBarn = listOf(fellesbarn), bostedsadresse = bostedsadresse)
+        } returns avdoed.copy(avdoedesBarn = listOf(fellesbarn, fellesbarn), bostedsadresse = bostedsadresse)
 
         every {
             pdlTjenesterKlient.hentPdlModellFlereSaktyper(

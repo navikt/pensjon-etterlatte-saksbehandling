@@ -185,6 +185,7 @@ class DoedshendelseService(
                         ?.map { it.value }
                 }
                 ?.flatten()
+                ?.distinct()
                 ?.filterNot { varEktefelleVedDoedsfall(avdoed, it) }
 
         return harSammeAdresseSomAvdoed(avdoed, andreForeldreForAvdoedesBarn)

@@ -91,7 +91,7 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
       />
       <Oppgaver
         oppgaver={oppgavebenkState.gosysOppgavelisteOppgaver}
-        oppdaterTildeling={oppdaterSaksbehandlerTildeling}
+        oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         revurderingsaarsaker={new RevurderingsaarsakerDefault()}
         filter={filter}

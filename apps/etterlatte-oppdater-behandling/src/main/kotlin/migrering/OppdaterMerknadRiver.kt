@@ -27,7 +27,7 @@ internal class OppdaterMerknadRiver(
         context: MessageContext,
     ) {
         logger.info("Oppdaterer merknad for oppgave ${packet.oppgaveId}")
-        behandlingService.oppdaterMerknad(packet.oppgaveId, "Gjenopptak - Manuell behandling pga aldersovergang")
+        behandlingService.oppdaterStatusOgMerknad(packet.oppgaveId, "Gjenopptak - Manuell behandling pga aldersovergang")
         logger.info("Oppdaterte merknad for oppgave ${packet.oppgaveId}")
     }
 }

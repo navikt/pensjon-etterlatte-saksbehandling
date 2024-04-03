@@ -225,7 +225,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             patch("merknad") {
                 kunSkrivetilgang {
                     val merknad = call.receive<OppdaterMerknadRequest>()
-                    inTransaction { service.oppdaterMerknad(oppgaveId, merknad.merknad) }
+                    inTransaction { service.oppdaterStatusOgMerknad(oppgaveId, merknad.merknad, Status.UNDER_BEHANDLING) }
                     call.respond(HttpStatusCode.OK)
                 }
             }

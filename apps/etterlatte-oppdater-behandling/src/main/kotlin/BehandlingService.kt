@@ -85,7 +85,7 @@ interface BehandlingService {
 
     fun taAvVent(request: VentefristGaarUtRequest): VentefristerGaarUtResponse
 
-    fun oppdaterMerknad(
+    fun oppdaterStatusOgMerknad(
         oppgaveId: UUID,
         merknad: String,
     )
@@ -271,7 +271,7 @@ class BehandlingServiceImpl(
             }.body()
         }
 
-    override fun oppdaterMerknad(
+    override fun oppdaterStatusOgMerknad(
         oppgaveId: UUID,
         merknad: String,
     ) {

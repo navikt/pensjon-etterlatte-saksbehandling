@@ -83,11 +83,6 @@ interface OppgaveDao {
         kilde: Collection<OppgaveKilde>,
         oppgaver: List<UUID>,
     ): List<VentefristGaarUt>
-
-    fun oppdaterMerknad(
-        oppgaveId: UUID,
-        merknad: String,
-    )
 }
 
 class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) : OppgaveDao {
@@ -405,28 +400,6 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setString(1, merknad)
                 statement.setString(2, oppgaveStatus.name)
                 statement.setObject(3, oppgaveId)
-
-                statement.executeUpdate()
-            }
-        }
-    }
-
-    override fun oppdaterMerknad(
-        oppgaveId: UUID,
-        merknad: String,
-    ) {
-        connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
-                        UPDATE oppgave
-                        SET merknad = ?
-                        where id = ?::UUID
-                        """.trimIndent(),
-                    )
-                statement.setString(1, merknad)
-                statement.setObject(2, oppgaveId)
 
                 statement.executeUpdate()
             }

@@ -180,15 +180,6 @@ class OppgaveDaoMedEndringssporingImpl(
         }
     }
 
-    override fun oppdaterMerknad(
-        oppgaveId: UUID,
-        merknad: String,
-    ) {
-        lagreEndringerPaaOppgave(oppgaveId) {
-            oppgaveDao.oppdaterMerknad(oppgaveId, merknad)
-        }
-    }
-
     override fun endreTilKildeBehandlingOgOppdaterReferanse(
         oppgaveId: UUID,
         referanse: String,

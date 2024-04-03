@@ -15,24 +15,26 @@ fun main() {
     val rapidEnv = getRapidEnv()
     val appBuilder = AppBuilder(Miljoevariabler(rapidEnv))
     RapidApplication.create(rapidEnv).also { rapidsConnection ->
-        val behandlingservice = appBuilder.createBehandlingService()
-        settOppRivers(rapidsConnection, behandlingservice, appBuilder)
+        settOppRivers(rapidsConnection, appBuilder)
     }.start()
 }
 
 private fun settOppRivers(
     rapidsConnection: RapidsConnection,
-    behandlingservice: BehandlingService,
     appBuilder: AppBuilder,
 ) {
+    val behandlingservice = appBuilder.behandlingService
+    val tidshendelseService = appBuilder.tidshendelserService
+    val featureToggleService = appBuilder.featureToggleService
+
     PdlHendelserRiver(rapidsConnection, behandlingservice)
     OmregningsHendelserRiver(rapidsConnection, behandlingservice)
-    ReguleringsforespoerselRiver(rapidsConnection, behandlingservice, appBuilder.featureToggleService)
+    ReguleringsforespoerselRiver(rapidsConnection, behandlingservice, featureToggleService)
     MigrerEnEnkeltSakRiver(rapidsConnection, behandlingservice)
     ReguleringFeiletRiver(rapidsConnection, behandlingservice)
     AvbrytBehandlingHvisMigreringFeilaRiver(rapidsConnection, behandlingservice)
-    OpprettBrevRiver(rapidsConnection, behandlingservice, appBuilder.featureToggleService)
-    TidshendelseRiver(rapidsConnection, behandlingservice)
+    OpprettBrevRiver(rapidsConnection, behandlingservice, featureToggleService)
+    TidshendelseRiver(rapidsConnection, tidshendelseService)
     OppdaterDoedshendelseBrevDistribuert(rapidsConnection, behandlingservice)
     TaAvVentRiver(rapidsConnection, behandlingservice)
 }

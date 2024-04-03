@@ -271,6 +271,7 @@ class TrygdetidServiceImpl(
     ): List<Trygdetid> {
         return trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
             .mapNotNull { trygdetid -> sjekkTrygdetidMotGrunnlag(trygdetid, brukerTokenInfo) }
+            .sortedBy { it.ident }
     }
 
     override suspend fun hentTrygdetidIBehandlingMedId(

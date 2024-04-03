@@ -17,6 +17,7 @@ import { behandlingErIverksattEllerSamordnet } from '~components/behandling/fell
 import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
 import { EnkelPersonTrygdetid } from '~components/behandling/trygdetid/EnkelPersonTrygdetid'
 import { BeregnetSamletTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetSamletTrygdetid'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 const TrygdetidMelding = ({ overskrift, beskrivelse }: { overskrift: string; beskrivelse: string }) => {
   return (
@@ -55,6 +56,8 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const [behandlingsIdMangler, setBehandlingsIdMangler] = useState(false)
   const [trygdetidIdMangler, setTrygdetidIdMangler] = useState(false)
   const [trygdetidManglerVedAvslag, setTrygdetidManglerVedAvslag] = useState(false)
+
+  const visFlereTrygdetider = useFeatureEnabledMedDefault('foreldreloes', false)
 
   const oppdaterTrygdetider = (trygdetid: ITrygdetid[]) => {
     setTrygdetider(trygdetid)
@@ -148,7 +151,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
       {landListe && (
         <>
-          {trygdetider.length == 1 && (
+          {(trygdetider.length == 1 || !visFlereTrygdetider) && (
             <EnkelPersonTrygdetid
               redigerbar={redigerbar}
               behandling={behandling}

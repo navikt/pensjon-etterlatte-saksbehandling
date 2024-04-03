@@ -31,7 +31,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.AUTOMATISK_GJENOPPRETTING
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
@@ -63,20 +63,19 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
     fun after() = confirmVerified(vedtaksbrevService)
 
     @Test
-    fun `oppretter for migrering nytt brev, genererer pdf og sender videre`() {
+    fun `oppretter for gjenoppretting nytt brev, genererer pdf og sender videre`() {
         val vedtak = opprettVedtak()
-        val migreringRequest = migreringRequest()
-        val melding = opprettMelding(vedtak, migreringRequest, VedtakKafkaHendelseHendelseType.FATTET)
+        val melding = opprettMelding(vedtak, Vedtaksloesning.GJENOPPRETTA, VedtakKafkaHendelseHendelseType.FATTET)
         val brev = opprettBrev()
 
-        coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any(), any()) } returns brev
-        coEvery { vedtaksbrevService.genererPdf(brev.id, any(), any()) } returns mockk<Pdf>()
+        coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any()) } returns brev
+        coEvery { vedtaksbrevService.genererPdf(brev.id, any()) } returns mockk<Pdf>()
         coEvery { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) } just runs
 
         val inspektoer = opprettBrevRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
-        coVerify(exactly = 1) { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any(), any()) }
-        coVerify(exactly = 1) { vedtaksbrevService.genererPdf(brev.id, any(), any()) }
+        coVerify(exactly = 1) { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any()) }
+        coVerify(exactly = 1) { vedtaksbrevService.genererPdf(brev.id, any()) }
         coVerify(exactly = 1) { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) }
 
         val meldingSendt = inspektoer.message(0)
@@ -86,7 +85,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
     @Test
     fun `plukker ikke opp sak med opphav i Gjenny`() {
         val vedtak = opprettVedtak()
-        val melding = opprettMelding(vedtak, null)
+        val melding = opprettMelding(vedtak, Vedtaksloesning.GJENNY)
         opprettBrev()
 
         val inspektoer = opprettBrevRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
@@ -112,14 +111,9 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
 
     private fun opprettMelding(
         vedtak: VedtakDto,
-        migreringRequest: MigreringRequest?,
+        kilde: Vedtaksloesning,
         hendelse: VedtakKafkaHendelseHendelseType = VedtakKafkaHendelseHendelseType.FATTET,
     ): JsonMessage {
-        val kilde =
-            when (migreringRequest) {
-                null -> Vedtaksloesning.GJENNY
-                else -> Vedtaksloesning.PESYS
-            }
         val messageKeys =
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
@@ -127,10 +121,10 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
                 "vedtak" to vedtak,
                 KILDE_KEY to kilde,
             )
-        if (migreringRequest == null) {
+        if (kilde == Vedtaksloesning.GJENNY) {
             return JsonMessage.newMessage(messageKeys)
         }
-        return JsonMessage.newMessage(messageKeys + mapOf(HENDELSE_DATA_KEY to migreringRequest))
+        return JsonMessage.newMessage(messageKeys + mapOf(AUTOMATISK_GJENOPPRETTING to true))
     }
 
     private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING) =

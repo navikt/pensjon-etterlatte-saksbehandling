@@ -53,7 +53,7 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   OMGJOERING: 'Omgjøring',
   JOURNALFOERING: 'Journalføring',
   GJENOPPRETTING_ALDERSOVERGANG: 'Gjenoppretting',
-  AKTIVITETSPLIKT_OPPFOELGING: 'Aktivitetsplikt oppfølging',
+  AKTIVITETSPLIKT: 'Aktivitetsplikt oppfølging',
 } as const
 
 export const FRISTFILTER = {

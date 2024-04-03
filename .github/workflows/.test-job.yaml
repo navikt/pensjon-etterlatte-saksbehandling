@@ -17,7 +17,11 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: gradle
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: wrapper
       - name: Gradle test and build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew :jobs:${{ github.workflow }}:test --stacktrace
+        run: gradle :jobs:${{ github.workflow }}:test --stacktrace

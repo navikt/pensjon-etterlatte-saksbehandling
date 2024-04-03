@@ -15,7 +15,7 @@ interface Props {
 
 export const VelgOppgaveliste = ({ oppgavelisteValg, setOppgavelisteValg }: Props): ReactNode => {
   const dispatcher = useOppgavebenkStateDispatcher()
-  const { antallOppgavelistaOppgaver, antallMinOppgavelisteOppgaver } = useOppgaveBenkState().opgpavebenkStats
+  const { antallOppgavelistaOppgaver, antallMinOppgavelisteOppgaver } = useOppgaveBenkState().oppgpavebenkStats
 
   const [oppgavebenkStatsResult, oppgavebenkStatsFetch] = useApiCall(hentOppgavebenkStats)
 

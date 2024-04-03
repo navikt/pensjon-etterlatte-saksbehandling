@@ -4,7 +4,7 @@ export interface OppgavebenkState {
   oppgavelistaOppgaver: OppgaveDTO[]
   minOppgavelisteOppgaver: OppgaveDTO[]
   gosysOppgavelisteOppgaver: OppgaveDTO[]
-  opgpavebenkStats: OppgavebenkStats
+  oppgpavebenkStats: OppgavebenkStats
 }
 export interface OppgavebenkStats {
   antallOppgavelistaOppgaver: number
@@ -20,5 +20,5 @@ export const initialOppgavebenkState: OppgavebenkState = {
   oppgavelistaOppgaver: [],
   minOppgavelisteOppgaver: [],
   gosysOppgavelisteOppgaver: [],
-  opgpavebenkStats: initalOppgavebenkStats,
+  oppgpavebenkStats: initalOppgavebenkStats,
 }

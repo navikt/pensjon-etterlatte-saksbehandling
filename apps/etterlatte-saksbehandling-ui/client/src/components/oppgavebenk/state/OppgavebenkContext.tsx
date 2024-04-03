@@ -12,7 +12,6 @@ export interface OppgavebenkStateDispatcher {
   setMinOppgavelisteOppgaver: (oppgaver: OppgaveDTO[]) => void
   setGosysOppgavelisteOppgaver: (oppgaver: OppgaveDTO[]) => void
   setOppgavebenkStats: (stats: OppgavebenkStats) => void
-  oppdaterOppgavebenkStats: () => void
 }
 
 const oppgavebenkContext = createContext(initialOppgavebenkState)
@@ -24,12 +23,18 @@ const ProvideOppgavebenkContext = ({ children }: { children: ReactNode | Array<R
   const [, oppgavebenkStatsFetch] = useApiCall(hentOppgavebenkStats)
 
   const dispatcher: OppgavebenkStateDispatcher = {
-    setOppgavelistaOppgaver: (oppgaver) => setState({ ...state, oppgavelistaOppgaver: oppgaver }),
-    setMinOppgavelisteOppgaver: (oppgaver) => setState({ ...state, minOppgavelisteOppgaver: oppgaver }),
+    setOppgavelistaOppgaver: (oppgaver) => {
+      oppgavebenkStatsFetch({}, (result) =>
+        setState({ ...state, oppgavelistaOppgaver: oppgaver, oppgpavebenkStats: result })
+      )
+    },
+    setMinOppgavelisteOppgaver: (oppgaver) => {
+      oppgavebenkStatsFetch({}, (result) =>
+        setState({ ...state, minOppgavelisteOppgaver: oppgaver, oppgpavebenkStats: result })
+      )
+    },
     setGosysOppgavelisteOppgaver: (oppgaver) => setState({ ...state, gosysOppgavelisteOppgaver: oppgaver }),
-    setOppgavebenkStats: (stats) => setState({ ...state, opgpavebenkStats: stats }),
-    oppdaterOppgavebenkStats: () =>
-      oppgavebenkStatsFetch({}, (result) => setState({ ...state, opgpavebenkStats: result })),
+    setOppgavebenkStats: (stats) => setState({ ...state, oppgpavebenkStats: stats }),
   }
 
   return (

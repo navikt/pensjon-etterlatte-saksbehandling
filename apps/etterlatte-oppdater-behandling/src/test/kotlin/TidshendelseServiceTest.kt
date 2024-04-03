@@ -81,7 +81,7 @@ class TidshendelseServiceTest {
         verify {
             behandlingService.opprettOppgave(
                 sakId = 2,
-                oppgaveType = OppgaveType.AKTIVITETSPLIKT_OPPFOELGING,
+                oppgaveType = OppgaveType.AKTIVITETSPLIKT,
                 referanse = behandlingId.toString(),
                 merknad = "Varselbrev om aktivitetsplikt OMS etter 4 mnd",
                 frist = withArg { it shouldNotBe null },

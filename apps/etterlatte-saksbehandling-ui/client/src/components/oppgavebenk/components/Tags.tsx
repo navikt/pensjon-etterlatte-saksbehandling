@@ -27,7 +27,7 @@ const OPPGAVETYPE_TIL_TAGDATA: Record<Oppgavetype, { variant: Variants; text: st
   TILBAKEKREVING: { variant: Variants.ALT2, text: 'Tilbakekreving' },
   JOURNALFOERING: { variant: Variants.ALT2, text: 'Journalføring' },
   GJENOPPRETTING_ALDERSOVERGANG: { variant: Variants.ALT3_FILLED, text: 'Gjenoppretting' },
-  AKTIVITETSPLIKT_OPPFOELGING: { variant: Variants.ALT3_FILLED, text: 'Oppf. aktivitetsplikt' },
+  AKTIVITETSPLIKT: { variant: Variants.ALT3_FILLED, text: 'Aktivitetsplikt' },
 } as const
 
 export const OppgavetypeTag = (props: { oppgavetype: Oppgavetype }) => {

@@ -150,7 +150,7 @@ export const HandlingerForOppgave = ({
           )}
         </>
       )
-    case 'AKTIVITETSPLIKT_OPPFOELGING':
+    case 'AKTIVITETSPLIKT':
       return (
         erInnloggetSaksbehandlerOppgave && (
           <Button size="small" href={`/behandling/${referanse}`} as="a">

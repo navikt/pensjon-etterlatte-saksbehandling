@@ -44,6 +44,7 @@ class OpprettJournalfoerOgDistribuerRiver(
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BREVMAL_RIVER_KEY) }
             validate { it.interestedIn(BOR_I_UTLAND_KEY) }
+            validate { it.interestedIn(ER_OVER_18_AAR) }
         }
     }
 

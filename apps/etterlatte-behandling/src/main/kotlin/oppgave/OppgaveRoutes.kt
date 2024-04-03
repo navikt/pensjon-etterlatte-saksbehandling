@@ -224,7 +224,10 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             patch("merknad") {
                 kunSkrivetilgang {
                     val merknad = call.receive<EndrePaaVentRequest>()
-                    inTransaction { service.oppdaterStatusOgMerknad(oppgaveId, merknad.merknad, Status.UNDER_BEHANDLING) }
+                    inTransaction {
+                        service.oppdaterStatusOgMerknad(oppgaveId, merknad.merknad, Status.UNDER_BEHANDLING)
+                        service.fjernSaksbehandler(oppgaveId)
+                    }
                     call.respond(HttpStatusCode.OK)
                 }
             }
@@ -268,7 +271,6 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 inTransaction {
                     val oppgaver = service.hentFristGaarUt(request)
                     oppgaver.forEach {
-                        service.fjernSaksbehandler(it.oppgaveID)
                         service.oppdaterStatusOgMerknad(
                             it.oppgaveID,
                             "",

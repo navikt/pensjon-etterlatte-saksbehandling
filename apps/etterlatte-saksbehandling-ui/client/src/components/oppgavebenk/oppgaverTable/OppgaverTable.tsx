@@ -86,7 +86,7 @@ export const OppgaverTable = ({
       <Table.Body>
         {oppgaver?.map((oppgave: OppgaveDTO) => (
           <OppgaverTableRow
-            key={`${oppgave.id}`}
+            key={oppgave.id}
             oppgave={oppgave}
             saksbehandlereIEnhet={saksbehandlereIEnhet}
             oppdaterTildeling={oppdaterTildeling}

@@ -71,6 +71,7 @@ export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Pro
           )
         )
       }
+      dispatcher.oppdaterOppgavebenkStats()
     }, 2000)
   }
 

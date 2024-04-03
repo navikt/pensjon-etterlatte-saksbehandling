@@ -54,6 +54,7 @@ export const VelgOppgaveliste = ({ oppgavelisteValg, setOppgavelisteValg }: Prop
                   <Loader />
                 </>
               }
+              icon={<InboxIcon aria-hidden />}
             />
             <Tabs.Tab
               value={OppgavelisteValg.MIN_OPPGAVELISTE}
@@ -63,8 +64,9 @@ export const VelgOppgaveliste = ({ oppgavelisteValg, setOppgavelisteValg }: Prop
                   <Loader />
                 </>
               }
+              icon={<PersonIcon aria-hidden />}
             />
-            <Tabs.Tab value={OppgavelisteValg.GOSYS_OPPGAVER} label="Gosys-oppgaver" />
+            <Tabs.Tab value={OppgavelisteValg.GOSYS_OPPGAVER} label="Gosys-oppgaver" icon={<InboxIcon aria-hidden />} />
           </Tabs.List>
         </VelgOppgavelisteTabs>
       ),

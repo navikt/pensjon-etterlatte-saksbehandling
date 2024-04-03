@@ -68,6 +68,7 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
           )
         )
       }
+      dispatcher.oppdaterOppgavebenkStats()
     }, 2000)
   }
 

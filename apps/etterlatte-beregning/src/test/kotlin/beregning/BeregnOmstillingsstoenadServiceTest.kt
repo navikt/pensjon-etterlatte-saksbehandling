@@ -63,7 +63,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val trygdetid = mockTrygdetid(behandling.id)
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
                 any(),
@@ -102,7 +102,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val trygdetid = mockTrygdetid(behandling.id)
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
                 any(),
@@ -141,7 +141,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val trygdetid = mockTrygdetid(behandling.id)
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
                 any(),
@@ -184,7 +184,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
             mockk {
                 every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
             }
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
 
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
@@ -225,7 +225,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
             mockk {
                 every { resultat?.utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
             }
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
                 any(),
@@ -261,7 +261,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val trygdetid = mockTrygdetidUtenBeregnetTrygdetid(behandling.id)
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
                 any(),
@@ -282,7 +282,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns emptyList()
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
                 any(),

@@ -15,7 +15,6 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.behandling.OppdaterMerknadRequest
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.EndrePaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
@@ -224,7 +223,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             }
             patch("merknad") {
                 kunSkrivetilgang {
-                    val merknad = call.receive<OppdaterMerknadRequest>()
+                    val merknad = call.receive<EndrePaaVentRequest>()
                     inTransaction { service.oppdaterStatusOgMerknad(oppgaveId, merknad.merknad, Status.UNDER_BEHANDLING) }
                     call.respond(HttpStatusCode.OK)
                 }

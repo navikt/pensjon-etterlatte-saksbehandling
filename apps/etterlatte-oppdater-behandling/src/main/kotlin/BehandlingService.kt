@@ -15,8 +15,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
-import no.nav.etterlatte.libs.common.behandling.OppdaterMerknadRequest
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgave.EndrePaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -278,7 +278,7 @@ class BehandlingServiceImpl(
         runBlocking {
             behandlingKlient.patch("$url/api/oppgaver/$oppgaveId/merknad") {
                 contentType(ContentType.Application.Json)
-                setBody(OppdaterMerknadRequest(merknad))
+                setBody(EndrePaaVentRequest(merknad, true))
             }
         }
     }

@@ -271,7 +271,7 @@ class OppgaveService(
         val saksbehandler =
             oppgaveDao.hentEndringerForOppgave(oppgave.id)
                 .sortedByDescending { it.tidspunkt }
-                .firstOrNull { it.oppgaveEtter.erAttestering() }
+                .firstOrNull(OppgaveEndring::sendtTilAttestering)
                 ?.oppgaveFoer
                 ?.saksbehandler
 

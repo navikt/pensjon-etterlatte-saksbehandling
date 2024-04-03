@@ -1,5 +1,6 @@
 package no.nav.etterlatte.jobs
 
+import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.TimerJob
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -14,6 +15,7 @@ class MetrikkerJob(
     private val erLeader: () -> Boolean,
     private val initialDelay: Long,
     private val periode: Duration,
+    private val openingHours: OpeningHours,
 ) : TimerJob {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
@@ -26,6 +28,7 @@ class MetrikkerJob(
             initialDelay = initialDelay,
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = periode.toMillis(),
+            openingHours = openingHours,
         ) {
             if (erLeader()) {
                 uthenter.run()

@@ -47,6 +47,9 @@
       <env name="KRR_SCOPE" value="api://dev-gcp.team-rocket.digdir-krr-proxy/.default" />
       <env name="AXSYS_URL" value="https://axsys.dev-fss-pub.nais.io" />
       <env name="AXSYS_SCOPE" value="api://dev-fss.org.axsys/.default" />
+      <env name="JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS" value="00-23" />
+      <env name="JOBB_SAKSBEHANDLER_OPENING_HOURS" value="00-23" />
+      <env name="JOBB_METRIKKER_OPENING_HOURS" value="00-23" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-behandling.main" />

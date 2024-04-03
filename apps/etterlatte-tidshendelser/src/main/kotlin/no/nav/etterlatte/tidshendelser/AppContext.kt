@@ -4,7 +4,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.Miljoevariabler
-import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
+import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
@@ -43,7 +43,6 @@ class AppContext(
             initialDelaySeconds = env.requireEnvValue("JOBB_POLLER_INITIAL_DELAY").toLong(),
             periode = env.requireEnvValue("JOBB_POLLER_INTERVAL").let { Duration.parse(it) } ?: Duration.ofMinutes(5),
             openingHours = env.requireEnvValue("JOBB_POLLER_OPENING_HOURS").let { OpeningHours.of(it) },
-            klokke = norskKlokke(),
             jobbPoller = JobbPoller(hendelseDao, aldersovergangerService, omstillingsstoenadService),
         )
 

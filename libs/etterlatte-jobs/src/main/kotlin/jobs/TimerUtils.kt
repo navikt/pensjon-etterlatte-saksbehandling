@@ -1,9 +1,12 @@
 package no.nav.etterlatte.jobs
 
+import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.shuttingDown
 import org.slf4j.Logger
 import java.util.Date
+import java.util.Timer
 import java.util.UUID
 import kotlin.concurrent.fixedRateTimer
 
@@ -14,14 +17,19 @@ fun fixedRateCancellableTimer(
     initialDelay: Long,
     period: Long,
     loggerInfo: LoggerInfo,
+    openingHours: OpeningHours? = null,
     action: (correlationId: String) -> Unit,
-) = fixedRateTimer(
-    name = name,
-    daemon = true,
-    initialDelay = initialDelay,
-    period = period,
-) {
-    run(action, loggerInfo.logger, name, loggerInfo.sikkerLogg, loggerInfo.loggTilSikkerLogg)
+): Timer {
+    return fixedRateTimer(
+        name = name,
+        daemon = true,
+        initialDelay = initialDelay,
+        period = period,
+    ) {
+        if (openingHours == null || openingHours.isOpen(norskKlokke())) {
+            run(action, loggerInfo.logger, name, loggerInfo.sikkerLogg, loggerInfo.loggTilSikkerLogg)
+        }
+    }
 }
 
 fun fixedRateCancellableTimer(

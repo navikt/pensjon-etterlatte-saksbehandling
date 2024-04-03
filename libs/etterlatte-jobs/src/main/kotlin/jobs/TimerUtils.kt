@@ -26,9 +26,7 @@ fun fixedRateCancellableTimer(
         initialDelay = initialDelay,
         period = period,
     ) {
-        if (openingHours == null) {
-            run(action, loggerInfo.logger, name, loggerInfo.sikkerLogg, loggerInfo.loggTilSikkerLogg)
-        } else if (openingHours.isOpen(norskKlokke())) {
+        if (openingHours == null || openingHours.isOpen(norskKlokke())) {
             run(action, loggerInfo.logger, name, loggerInfo.sikkerLogg, loggerInfo.loggTilSikkerLogg)
         }
     }

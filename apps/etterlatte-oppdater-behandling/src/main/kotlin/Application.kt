@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.migrering.AvbrytBehandlingHvisMigreringFeilaRiver
+import no.nav.etterlatte.migrering.BrevutfallRiver
 import no.nav.etterlatte.migrering.MigrerEnEnkeltSakRiver
 import no.nav.etterlatte.migrering.OppdaterMerknadRiver
 import no.nav.etterlatte.migrering.TaAvVentRiver
@@ -39,4 +40,5 @@ private fun settOppRivers(
     OppdaterDoedshendelseBrevDistribuert(rapidsConnection, behandlingservice)
     TaAvVentRiver(rapidsConnection, behandlingservice)
     OppdaterMerknadRiver(rapidsConnection, behandlingservice)
+    BrevutfallRiver(rapidsConnection, behandlingservice)
 }

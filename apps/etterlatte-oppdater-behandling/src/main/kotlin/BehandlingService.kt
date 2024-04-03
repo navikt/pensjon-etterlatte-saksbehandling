@@ -12,6 +12,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
@@ -89,6 +90,8 @@ interface BehandlingService {
         oppgaveId: UUID,
         merknad: String,
     )
+
+    fun leggInnBrevutfall(request: BrevutfallOgEtterbetalingDto)
 }
 
 data class ReguleringFeiletHendelse(val sakId: Long)
@@ -279,6 +282,15 @@ class BehandlingServiceImpl(
             behandlingKlient.patch("$url/api/oppgaver/$oppgaveId/merknad") {
                 contentType(ContentType.Application.Json)
                 setBody(EndrePaaVentRequest(merknad, true))
+            }
+        }
+    }
+
+    override fun leggInnBrevutfall(request: BrevutfallOgEtterbetalingDto) {
+        runBlocking {
+            behandlingKlient.post("$url/api/behandling/${request.behandlingId}/info/brevutfall") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
             }
         }
     }

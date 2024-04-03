@@ -25,7 +25,7 @@ class FattVedtakEtterVentRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Ventehendelser.TATT_AV_VENT_UNDER_20_SJEKKA) {
+        initialiserRiver(rapidsConnection, Ventehendelser.TATT_AV_VENT_UNDER_20_SJEKKA_OG_BREVUTFALL_LAGT_INN) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireValue(OPPGAVEKILDE_KEY, OppgaveKilde.GJENOPPRETTING.name) }

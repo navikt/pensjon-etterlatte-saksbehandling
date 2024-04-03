@@ -1,8 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering.klienter
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
@@ -192,7 +191,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         logger.info("Tildeler oppgave $oppgaveTilAttestering til systembruker")
-        val response =
+        val response: Result<Resource, Throwable> =
             downstreamResourceClient
                 .post(
                     resource =
@@ -204,9 +203,9 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     postBody = SaksbehandlerEndringDto(saksbehandler = Fagsaksystem.EY.navn),
                 )
 
-        return when (response) {
-            is Ok -> true
-            is Err -> {
+        return when {
+            response.isOk -> true
+            else -> {
                 logger.error(
                     "Tildeling av $oppgaveTilAttestering til systembruker for attestering feilet",
                     response.error,
@@ -234,9 +233,9 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     postBody = vedtakEndringDTO,
                 )
             }
-        return when (response) {
-            is Ok -> true
-            is Err -> {
+        return when {
+            response.isOk -> true
+            else -> {
                 logger.error(
                     "Kan ikke fatte oppgaver og commite vedtak av type for behandling " +
                         vedtakEndringDTO.sakIdOgReferanse.referanse,
@@ -262,9 +261,9 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = vedtakEndringDTO,
             )
-        return when (response) {
-            is Ok -> true
-            is Err -> {
+        return when {
+            response.isOk -> true
+            else -> {
                 logger.error(
                     "Kan ikke underkjenne oppgaver og commite vedtak av type for behandling " +
                         vedtakEndringDTO.sakIdOgReferanse.referanse,
@@ -290,9 +289,9 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = vedtakEndringDTO,
             )
-        return when (response) {
-            is Ok -> true
-            is Err -> {
+        return when {
+            response.isOk -> true
+            else -> {
                 logger.error(
                     "Kan ikke attestere oppgaver og commite vedtak av type for behandling " +
                         vedtakEndringDTO.sakIdOgReferanse.referanse,

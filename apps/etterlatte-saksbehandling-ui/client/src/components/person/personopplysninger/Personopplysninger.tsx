@@ -18,6 +18,7 @@ import { hentAlleLand } from '~shared/api/trygdetid'
 import { Utflytting } from '~components/person/personopplysninger/Utflytting'
 import { Vergemaal } from '~components/person/personopplysninger/Vergemaal'
 import { hentPersonopplysninger } from '~shared/api/pdltjenester'
+import { PDLInfoAlert } from '~components/person/personopplysninger/components/PDLInfoAlert'
 
 export const Personopplysninger = ({
   sakResult,
@@ -43,51 +44,41 @@ export const Personopplysninger = ({
   return (
     <Container>
       <SpaceChildren>
-        {mapSuccess(sakResult, (sak) => (
+        {mapSuccess(sakResult, ({ sak }) => (
           <>
+            <PDLInfoAlert />
             <LenkeTilAndreSystemer fnr={fnr} />
-            {!!sak.sak ? (
+            {!!sak ? (
               <>
                 {mapResult(personopplysningerResult, {
                   pending: <Spinner visible={true} label="Henter personopplysninger" />,
                   error: (error) => (
                     <ApiErrorAlert>{error.detail || 'Kunne ikke hente personopplysninger'}</ApiErrorAlert>
                   ),
-                  success: (personopplysninger) => (
+                  success: ({ soeker, avdoede, gjenlevende }) => (
                     <>
-                      <Bostedsadresser bostedsadresse={personopplysninger.soeker?.bostedsadresse} />
-                      {sak.sak.sakType === SakType.BARNEPENSJON && (
+                      <Bostedsadresser bostedsadresse={soeker?.bostedsadresse} />
+                      {sak.sakType === SakType.BARNEPENSJON && (
                         <Foreldre
-                          avdoed={personopplysninger.avdoede}
-                          gjenlevende={personopplysninger.gjenlevende}
-                          foreldreansvar={personopplysninger.soeker?.familierelasjon?.ansvarligeForeldre}
+                          avdoed={avdoede}
+                          gjenlevende={gjenlevende}
+                          foreldreansvar={soeker?.familierelasjon?.ansvarligeForeldre}
                         />
                       )}
-                      {sak.sak.sakType === SakType.OMSTILLINGSSTOENAD && (
-                        <Sivilstatus
-                          sivilstand={personopplysninger.soeker?.sivilstand}
-                          avdoede={personopplysninger.avdoede}
-                        />
+                      {sak.sakType === SakType.OMSTILLINGSSTOENAD && (
+                        <Sivilstatus sivilstand={soeker?.sivilstand} avdoede={avdoede} />
                       )}
-                      <AvdoedesBarn avdoede={personopplysninger.avdoede} />
+                      <AvdoedesBarn avdoede={avdoede} />
                       {mapSuccess(landListeResult, (landListe) => (
                         <>
                           <Statsborgerskap
-                            statsborgerskap={personopplysninger.soeker?.statsborgerskap}
-                            pdlStatsborgerskap={personopplysninger.soeker?.pdlStatsborgerskap}
+                            statsborgerskap={soeker?.statsborgerskap}
+                            pdlStatsborgerskap={soeker?.pdlStatsborgerskap}
                             landListe={landListe}
                           />
-                          <Innflytting
-                            innflytting={personopplysninger.soeker?.utland?.innflyttingTilNorge}
-                            landListe={landListe}
-                          />
-                          <Utflytting
-                            utflytting={personopplysninger.soeker?.utland?.utflyttingFraNorge}
-                            landListe={landListe}
-                          />
-                          <Vergemaal
-                            vergemaalEllerFremtidsfullmakt={personopplysninger.soeker?.vergemaalEllerFremtidsfullmakt}
-                          />
+                          <Innflytting innflytting={soeker?.utland?.innflyttingTilNorge} landListe={landListe} />
+                          <Utflytting utflytting={soeker?.utland?.utflyttingFraNorge} landListe={landListe} />
+                          <Vergemaal vergemaalEllerFremtidsfullmakt={soeker?.vergemaalEllerFremtidsfullmakt} />
                         </>
                       ))}
                     </>

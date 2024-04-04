@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.OPPGAVE_ID_FLERE_KEY
+import no.nav.etterlatte.rapidsandrivers.OPPGAVE_KEY
 import no.nav.etterlatte.rapidsandrivers.asUUID
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.dato
@@ -51,6 +52,7 @@ internal class TaAvVentRiver(
             packet.sakId = it.sakId
             packet.behandlingId = UUID.fromString(it.referanse)
             packet[OPPGAVEKILDE_KEY] = it.oppgavekilde
+            packet[OPPGAVE_KEY] = it.oppgaveID
             packet.eventName = Ventehendelser.TATT_AV_VENT.lagEventnameForType()
             context.publish(packet.toJson())
         }

@@ -24,11 +24,14 @@ import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.ktor.PingResult
+import no.nav.etterlatte.libs.ktor.Pingable
+import no.nav.etterlatte.libs.ktor.ping
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-interface PdlTjenesterKlient {
+interface PdlTjenesterKlient : Pingable {
     fun hentPdlModellFlereSaktyper(
         foedselsnummer: String,
         rolle: PersonRolle,
@@ -51,7 +54,7 @@ interface PdlTjenesterKlient {
     suspend fun hentAdressebeskyttelseForPerson(hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest): AdressebeskyttelseGradering
 }
 
-class PdlTjenesterKlientImpl(config: Config, private val pdl_app: HttpClient) : PdlTjenesterKlient {
+class PdlTjenesterKlientImpl(config: Config, private val client: HttpClient) : PdlTjenesterKlient {
     private val url = config.getString("pdltjenester.url")
 
     companion object {
@@ -62,11 +65,27 @@ class PdlTjenesterKlientImpl(config: Config, private val pdl_app: HttpClient) : 
         hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest,
     ): AdressebeskyttelseGradering {
         logger.info("Henter person med ${hentAdressebeskyttelseRequest.ident.value.maskerFnr()} fra pdltjenester")
-        return pdl_app.post("$url/person/adressebeskyttelse") {
+        return client.post("$url/person/adressebeskyttelse") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             setBody(hentAdressebeskyttelseRequest)
         }.body<AdressebeskyttelseGradering>()
+    }
+
+    override val serviceName: String
+        get() = "Pdl tjenester klient"
+    override val beskrivelse: String
+        get() = "Henter data fra pdl via vår pdl-proxy mapper"
+    override val endpoint: String
+        get() = this.url
+
+    override suspend fun ping(konsument: String?): PingResult {
+        return client.ping(
+            pingUrl = url.plus("/internal/isready"),
+            logger = logger,
+            serviceName = serviceName,
+            beskrivelse = beskrivelse,
+        )
     }
 
     override fun hentPdlModellFlereSaktyper(
@@ -78,7 +97,7 @@ class PdlTjenesterKlientImpl(config: Config, private val pdl_app: HttpClient) : 
         val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, saktyper)
         val response =
             runBlocking {
-                pdl_app.post("$url/person/v2") {
+                client.post("$url/person/v2") {
                     contentType(ContentType.Application.Json)
                     setBody(personRequest)
                 }.body<PersonDTO>()
@@ -95,7 +114,7 @@ class PdlTjenesterKlientImpl(config: Config, private val pdl_app: HttpClient) : 
         val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, listOf(saktype))
         val response =
             runBlocking {
-                pdl_app.post("$url/person/v2") {
+                client.post("$url/person/v2") {
                     contentType(ContentType.Application.Json)
                     setBody(personRequest)
                 }.body<PersonDTO>()
@@ -110,7 +129,7 @@ class PdlTjenesterKlientImpl(config: Config, private val pdl_app: HttpClient) : 
         val request = HentGeografiskTilknytningRequest(Folkeregisteridentifikator.of(foedselsnummer), saktype)
         val response =
             runBlocking {
-                pdl_app.post("$url/geografisktilknytning") {
+                client.post("$url/geografisktilknytning") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }.body<GeografiskTilknytning>()
@@ -123,7 +142,7 @@ class PdlTjenesterKlientImpl(config: Config, private val pdl_app: HttpClient) : 
         val request = HentFolkeregisterIdenterForAktoerIdBolkRequest(aktoerIds)
         val response =
             runBlocking {
-                pdl_app.post("$url/folkeregisteridenter") {
+                client.post("$url/folkeregisteridenter") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }.body<Map<String, String?>>()

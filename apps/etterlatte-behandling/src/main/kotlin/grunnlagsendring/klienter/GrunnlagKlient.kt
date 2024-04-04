@@ -17,10 +17,14 @@ import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.ktor.PingResult
+import no.nav.etterlatte.libs.ktor.Pingable
+import no.nav.etterlatte.libs.ktor.ping
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
-interface GrunnlagKlient {
+interface GrunnlagKlient : Pingable {
     suspend fun hentGrunnlag(sakId: Long): Grunnlag?
 
     suspend fun hentAlleSakIder(fnr: String): Set<Long>
@@ -57,15 +61,16 @@ interface GrunnlagKlient {
 
 class GrunnlagKlientImpl(
     config: Config,
-    private val grunnlagHttpClient: HttpClient,
+    private val client: HttpClient,
 ) : GrunnlagKlient {
     private val url = config.getString("grunnlag.resource.url")
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override suspend fun leggInnNyttGrunnlag(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
     ) {
-        return grunnlagHttpClient
+        return client
             .post("$url/grunnlag/behandling/$behandlingId/opprett-grunnlag") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
@@ -77,7 +82,7 @@ class GrunnlagKlientImpl(
         sakId: Long,
         opplysningsbehov: Opplysningsbehov,
     ) {
-        return grunnlagHttpClient
+        return client
             .post("$url/grunnlag/sak/$sakId/opprett-grunnlag") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
@@ -89,7 +94,7 @@ class GrunnlagKlientImpl(
         behandlingId: UUID,
         request: OppdaterGrunnlagRequest,
     ) {
-        return grunnlagHttpClient
+        return client
             .post("$url/grunnlag/behandling/$behandlingId/oppdater-grunnlag") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
@@ -101,7 +106,7 @@ class GrunnlagKlientImpl(
         behandlingId: UUID,
         saksopplysninger: NyeSaksopplysninger,
     ) {
-        return grunnlagHttpClient
+        return client
             .post("$url/grunnlag/behandling/$behandlingId/nye-opplysninger") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
@@ -113,7 +118,7 @@ class GrunnlagKlientImpl(
         sakId: Long,
         saksopplysninger: NyeSaksopplysninger,
     ) {
-        return grunnlagHttpClient
+        return client
             .post("$url/grunnlag/sak/$sakId/nye-opplysninger") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
@@ -125,19 +130,19 @@ class GrunnlagKlientImpl(
      * Henter komplett grunnlag for sak
      **/
     override suspend fun hentGrunnlag(sakId: Long): Grunnlag? {
-        return grunnlagHttpClient.get("$url/grunnlag/sak/$sakId") {
+        return client.get("$url/grunnlag/sak/$sakId") {
             accept(ContentType.Application.Json)
         }.body()
     }
 
     override suspend fun hentPersongalleri(behandlingId: UUID): Grunnlagsopplysning<Persongalleri>? {
-        return grunnlagHttpClient.get("$url/grunnlag/behandling/$behandlingId/${Opplysningstype.PERSONGALLERI_V1}") {
+        return client.get("$url/grunnlag/behandling/$behandlingId/${Opplysningstype.PERSONGALLERI_V1}") {
             accept(ContentType.Application.Json)
         }.body()
     }
 
     override suspend fun hentAlleSakIder(fnr: String): Set<Long> {
-        return grunnlagHttpClient.post("$url/grunnlag/person/saker") {
+        return client.post("$url/grunnlag/person/saker") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             setBody(FoedselsnummerDTO(fnr))
@@ -145,10 +150,26 @@ class GrunnlagKlientImpl(
     }
 
     override suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller {
-        return grunnlagHttpClient.post("$url/grunnlag/person/roller") {
+        return client.post("$url/grunnlag/person/roller") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             setBody(FoedselsnummerDTO(fnr))
         }.body()
+    }
+
+    override val serviceName: String
+        get() = "Grunnlagklient"
+    override val beskrivelse: String
+        get() = "Henter lagret grunnlag for sak eller behandling"
+    override val endpoint: String
+        get() = this.url
+
+    override suspend fun ping(konsument: String?): PingResult {
+        return client.ping(
+            pingUrl = url.plus("/internal/isready"),
+            logger = logger,
+            serviceName = serviceName,
+            beskrivelse = beskrivelse,
+        )
     }
 }

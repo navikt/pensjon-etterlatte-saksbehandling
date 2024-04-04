@@ -279,6 +279,7 @@ internal class ApplicationContext(
     val bosattUtlandDao = BosattUtlandDao(autoClosingDatabase)
     val saksbehandlerInfoDao = SaksbehandlerInfoDao(autoClosingDatabase)
     val doedshendelseDao = DoedshendelseDao(autoClosingDatabase)
+    val sakTilgangDao = SakTilgangDao(dataSource)
 
     // Klient
     val pdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)
@@ -286,16 +287,17 @@ internal class ApplicationContext(
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
     val leaderElectionKlient = LeaderElection(env.maybeEnvValue("ELECTOR_PATH"), leaderElectionHttpClient)
 
-    val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
-    val klageHendelser = KlageHendelserServiceImpl(rapid)
-    val tilbakekreving = TilbakekrevingHendelserServiceImpl(rapid)
-    val klageKlient = KlageKlientImpl(klageHttpClient, resourceUrl = env.getValue("ETTERLATTE_KLAGE_API_URL"))
+    val klageKlient = KlageKlientImpl(klageHttpClient, url = env.getValue("ETTERLATTE_KLAGE_API_URL"))
     val tilbakekrevingKlient =
-        TilbakekrevingKlientImpl(tilbakekrevingHttpClient, resourceUrl = env.getValue("ETTERLATTE_TILBAKEKREVING_URL"))
+        TilbakekrevingKlientImpl(tilbakekrevingHttpClient, url = env.getValue("ETTERLATTE_TILBAKEKREVING_URL"))
     val migreringKlient = MigreringKlient(migreringHttpClient, env.getValue("ETTERLATTE_MIGRERING_URL"))
     val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
 
+    val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
+
     // Service
+    val klageHendelser = KlageHendelserServiceImpl(rapid)
+    val tilbakekreving = TilbakekrevingHendelserServiceImpl(rapid)
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, behandlingsHendelser)
 
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlTjenesterKlient)
@@ -371,9 +373,18 @@ internal class ApplicationContext(
             revurderingService = automatiskRevurderingService,
         )
 
-    val sakTilgangDao = SakTilgangDao(dataSource)
     val tilgangService = TilgangServiceImpl(sakTilgangDao)
-    val selfTestService = SelfTestService(axsysKlient, navAnsattKlient, skjermingKlient)
+
+    val selfTestService =
+        SelfTestService(
+            axsysKlient,
+            navAnsattKlient,
+            skjermingKlient,
+            grunnlagKlient,
+            pdlTjenesterKlient,
+            klageKlient,
+            tilbakekrevingKlient,
+        )
     val enhetService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
     val sakService =
         SakServiceImpl(

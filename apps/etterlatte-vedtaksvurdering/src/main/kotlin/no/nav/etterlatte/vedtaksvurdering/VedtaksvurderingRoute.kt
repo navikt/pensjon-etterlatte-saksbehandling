@@ -60,8 +60,8 @@ fun Route.vedtaksvurderingRoute(
         get("/sak/{$SAKID_CALL_PARAMETER}") {
             withSakId(behandlingKlient) { sakId ->
                 logger.info("Henter alle vedtak for sak $sakId")
-                val attesterteVedtak = vedtakService.hentVedtakISak(sakId)
-                call.respond(attesterteVedtak.map { it.toVedtakSammendragDto() })
+                val vedtak = vedtakService.hentVedtakISak(sakId)
+                call.respond(vedtak.map { it.toVedtakSammendragDto() })
             }
         }
 

@@ -11,7 +11,7 @@ import { Control, Controller, Path, useForm } from 'react-hook-form'
 import { Formkrav, Klage, VedtaketKlagenGjelder } from '~shared/types/Klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
-import { hentIverksatteVedtakISak } from '~shared/api/vedtaksvurdering'
+import { hentAlleVedtakISak } from '~shared/api/vedtaksvurdering'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterKanskjeStringDato, formaterVedtakType } from '~utils/formattering'
@@ -79,7 +79,7 @@ export function KlageFormkravRedigering() {
   const klage = useKlage()
   const [lagreFormkravStatus, lagreFormkrav] = useApiCall(oppdaterFormkravIKlage)
   const dispatch = useAppDispatch()
-  const [iverksatteVedtak, hentIverksatteVedtak] = useApiCall(hentIverksatteVedtakISak)
+  const [vedtakISak, hentVedtakISak] = useApiCall(hentAlleVedtakISak)
   const [redigerModus, setRedigerModus] = React.useState(!klage?.formkrav?.formkrav)
 
   const {
@@ -97,10 +97,11 @@ export function KlageFormkravRedigering() {
     if (!klage?.sak.id) {
       return
     }
-    void hentIverksatteVedtak(klage.sak.id)
+    void hentVedtakISak(klage.sak.id)
   }, [klage?.sak.id])
 
-  const kjenteVedtak = mapSuccess(iverksatteVedtak, (vedtak) => vedtak) ?? []
+  const kjenteVedtak =
+    mapSuccess(vedtakISak, (alleVedtak) => alleVedtak.filter((vedtak) => !!vedtak.datoAttestert)) ?? []
 
   function sendInnFormkrav(krav: FormDataFormkrav) {
     if (!klage) {
@@ -128,11 +129,11 @@ export function KlageFormkravRedigering() {
     })
   }
 
-  if (isPendingOrInitial(iverksatteVedtak)) {
-    return <Spinner visible={true} label={`Laster iverksatte vedtak på saken med sakId=${klage?.sak.id}`} />
+  if (isPendingOrInitial(vedtakISak)) {
+    return <Spinner visible label={`Laster fattede vedtak på saken med sakId=${klage?.sak.id}`} />
   }
 
-  if (isFailure(iverksatteVedtak)) {
+  if (isFailure(vedtakISak)) {
     return (
       <ApiErrorAlert>
         Kunne ikke laste iverksatte vedtak på saken, så klagen kan ikke knyttes opp mot et konkret vedtak. Prøv å last

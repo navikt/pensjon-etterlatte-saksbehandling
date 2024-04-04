@@ -181,12 +181,19 @@ class DoedshendelseService(
         val andreForeldreForAvdoedesBarn =
             avdoedesBarn
                 ?.mapNotNull { barn ->
-                    barn.familieRelasjon?.foreldre?.filter { it.value != avdoed.foedselsnummer.verdi.value }
-                        ?.map { it.value }
+                    val annenForelder =
+                        barn.familieRelasjon?.foreldre?.filter { it.value != avdoed.foedselsnummer.verdi.value }
+                            ?.map { it.value }
+                    logger.info("Fant annen forelder til barn ${barn.foedselsnummer.value}: $annenForelder")
+                    annenForelder
                 }
                 ?.flatten()
                 ?.distinct()
-                ?.filterNot { varEktefelleVedDoedsfall(avdoed, it) }
+                ?.filterNot {
+                    varEktefelleVedDoedsfall(avdoed, it).also { varEktefelle ->
+                        logger.info("$it var ektefelle med avdød (${avdoed.foedselsnummer.verdi}): $varEktefelle")
+                    }
+                }
 
         logger.info("Fant ${andreForeldreForAvdoedesBarn?.size} andre foreldre for avdødes (${avdoed.foedselsnummer.verdi}) barn.")
 

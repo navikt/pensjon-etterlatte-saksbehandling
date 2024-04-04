@@ -6,8 +6,8 @@ export const hentVedtakSammendrag = async (behandlingId: string): Promise<ApiRes
   return apiClient.get(`vedtak/${behandlingId}/sammendrag`)
 }
 
-export const hentIverksatteVedtakISak = async (sakId: number): Promise<ApiResponse<Array<VedtaketKlagenGjelder>>> => {
-  return apiClient.get(`vedtak/sak/${sakId}/iverksatte`)
+export const hentAlleVedtakISak = async (sakId: number): Promise<ApiResponse<Array<VedtaketKlagenGjelder>>> => {
+  return apiClient.get(`vedtak/sak/${sakId}`)
 }
 
 export const fattVedtak = async (behandlingId: string): Promise<ApiResponse<unknown>> => {

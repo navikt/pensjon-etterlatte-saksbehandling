@@ -16,24 +16,27 @@ class VentRepository(val dataSource: DataSource) : Transactions<VentRepository> 
             this.block(it)
         }
 
-    fun hentSakerSomSkalAvVent(tx: TransactionalSession? = null) =
-        tx.session {
-            with(Databasetabell) {
-                hent(
-                    "SELECT $ID, $DATO, $OPPGAVER, $KJOERING FROM $TABELLNAVN WHERE $HAANDTERT=FALSE",
-                    mapOf(),
-                ) {
-                    SkalAvVentDTO(
-                        id = it.uuid(ID),
-                        dato = it.localDate(DATO),
-                        kjoringVariant = MigreringKjoringVariant.valueOf(it.string(KJOERING)),
-                        oppgaver =
-                            it.string(OPPGAVER).split(";")
-                                .filter { id -> id.isNotEmpty() },
-                    )
-                }
+    fun hentSakerSomSkalAvVent(
+        grense: Int = 100,
+        tx: TransactionalSession? = null,
+    ) = tx.session {
+        with(Databasetabell) {
+            hent(
+                "SELECT $ID, $DATO, $OPPGAVER, $KJOERING FROM $TABELLNAVN WHERE $HAANDTERT=FALSE",
+                mapOf(),
+            ) {
+                SkalAvVentDTO(
+                    id = it.uuid(ID),
+                    dato = it.localDate(DATO),
+                    kjoringVariant = MigreringKjoringVariant.valueOf(it.string(KJOERING)),
+                    oppgaver =
+                        it.string(OPPGAVER).split(";")
+                            .filter { id -> id.isNotEmpty() }
+                            .take(grense),
+                )
             }
         }
+    }
 
     fun settSakerAvVent(
         avVent: SkalAvVentDTO,

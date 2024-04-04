@@ -2,6 +2,7 @@ package no.nav.etterlatte.person
 
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
@@ -117,7 +118,7 @@ internal class PersonServiceTest {
     }
 
     @Test
-    fun `skal mappe avdoed med barnekull og ikke ta med barnas relasjoner`() {
+    fun `skal mappe avdoed med barnekull og ta med barnas foreldrerelasjoner`() {
         val person =
             runBlocking {
                 personService.hentPerson(
@@ -132,8 +133,8 @@ internal class PersonServiceTest {
 
         avdoedesBarn.forEach { barn ->
             barn.familieRelasjon!!.barn shouldBe null
-            barn.familieRelasjon!!.foreldre shouldBe null
-            barn.familieRelasjon!!.ansvarligeForeldre shouldBe null
+            barn.familieRelasjon!!.foreldre shouldNotBe null
+            barn.familieRelasjon!!.ansvarligeForeldre shouldNotBe null
         }
     }
 

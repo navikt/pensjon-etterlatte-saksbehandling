@@ -73,17 +73,21 @@ export const formaterVedtakType = (type: VedtakType): string => {
 
 export const formaterOppgaveStatus = (status: Oppgavestatus): string => {
   switch (status) {
-    case 'NY':
+    case Oppgavestatus.NY:
       return 'Ny'
-    case 'UNDER_BEHANDLING':
+    case Oppgavestatus.UNDER_BEHANDLING:
       return 'Under behandling'
-    case 'PAA_VENT':
+    case Oppgavestatus.PAA_VENT:
       return 'På Vent'
-    case 'FERDIGSTILT':
+    case Oppgavestatus.FERDIGSTILT:
       return 'Ferdigstilt'
-    case 'FEILREGISTRERT':
+    case Oppgavestatus.ATTESTERING:
+      return 'Attestering'
+    case Oppgavestatus.UNDERKJENT:
+      return 'Underkjent'
+    case Oppgavestatus.FEILREGISTRERT:
       return 'Feilregistrert'
-    case 'AVBRUTT':
+    case Oppgavestatus.AVBRUTT:
       return 'Avbrutt'
   }
 }

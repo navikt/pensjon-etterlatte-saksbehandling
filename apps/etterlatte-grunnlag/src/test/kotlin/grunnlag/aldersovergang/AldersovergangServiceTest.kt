@@ -22,13 +22,13 @@ class AldersovergangServiceTest(private val dataSource: DataSource) {
     @Test
     fun `foedt for 20 aar siden er 20`() {
         lagSakMedSoekerFoedtPaaGittDato(LocalDate.now().minusYears(20))
-        assertEquals(20, service.hentAlder(1, PersonRolle.BARN))
+        assertEquals(20, service.hentAlder(1, PersonRolle.BARN, LocalDate.now()))
     }
 
     @Test
     fun `foedt for 20 aar siden i morgen er 19`() {
         lagSakMedSoekerFoedtPaaGittDato(LocalDate.now().minusYears(20).plusDays(1))
-        assertEquals(19, service.hentAlder(1, PersonRolle.BARN))
+        assertEquals(19, service.hentAlder(1, PersonRolle.BARN, LocalDate.now()))
     }
 
     private fun lagSakMedSoekerFoedtPaaGittDato(foedselsdato: LocalDate) {

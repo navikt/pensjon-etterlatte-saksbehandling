@@ -45,12 +45,16 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
   }
 
   const sjekkGyldighetOgOppdaterStatus = () => {
-    oppdaterStatusRequest(behandling.id, (result) => {
-      if (result.statusOppdatert) {
-        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
-      }
+    if (vedtaksresultat === 'avslag') {
       next()
-    })
+    } else {
+      oppdaterStatusRequest(behandling.id, (result) => {
+        if (result.statusOppdatert) {
+          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
+        }
+        next()
+      })
+    }
   }
 
   return (

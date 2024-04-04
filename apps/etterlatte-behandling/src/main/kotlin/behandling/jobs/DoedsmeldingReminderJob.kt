@@ -5,8 +5,9 @@ import no.nav.etterlatte.Self
 import no.nav.etterlatte.behandling.doedshendelse.DoedshendelseReminderService
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.jobs.LoggerInfo
-import no.nav.etterlatte.jobs.TimerJob
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
+import no.nav.etterlatte.libs.common.OpeningHours
+import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -20,6 +21,7 @@ class DoedsmeldingReminderJob(
     private val interval: Duration,
     dataSource: DataSource,
     val sakTilgangDao: SakTilgangDao,
+    private val openingHours: OpeningHours,
 ) : TimerJob {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
@@ -35,6 +37,7 @@ class DoedsmeldingReminderJob(
             initialDelay = initialDelay,
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = interval.toMillis(),
+            openingHours = openingHours,
         ) {
             if (erLeader()) {
                 doedshendelseReminderService.setupKontekstAndRun(jobContext)

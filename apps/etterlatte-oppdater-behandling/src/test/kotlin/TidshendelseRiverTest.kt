@@ -1,18 +1,14 @@
+package no.nav.etterlatte
+
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
-import no.nav.etterlatte.BehandlingServiceImpl
-import no.nav.etterlatte.OpprettOmregningResponse
-import no.nav.etterlatte.TidshendelseRiver
-import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
-import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import io.mockk.slot
+import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.AO_BP20
+import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_5AAR
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
@@ -26,39 +22,38 @@ import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.asUUID
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalTime
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
 class TidshendelseRiverTest {
     private val behandlingService = mockk<BehandlingServiceImpl>()
-    private val inspector = TestRapid().apply { TidshendelseRiver(this, behandlingService) }
+    private val tidshendelseService = mockk<TidshendelseService>()
+    private val inspector = TestRapid().apply { TidshendelseRiver(this, tidshendelseService) }
+
+    private val opprettetOppgaveID = UUID.randomUUID()
+
+    @BeforeEach
+    fun setUp() {
+        every {
+            behandlingService.opprettOppgave(any(), any(), any(), any(), any())
+        } returns opprettetOppgaveID
+    }
 
     @Test
-    fun `skal opprette oppgave og returnere dens id`() {
+    fun `skal haandtere hendelse og sette oppgave id paa meldingen`() {
         val hendelseId = UUID.randomUUID()
         val sakId = 321L
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
-        val frist = Tidspunkt.ofNorskTidssone(behandlingsmaaned.atEndOfMonth(), LocalTime.NOON)
-        val nyOppgaveID = UUID.randomUUID()
+        val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned)
 
-        val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, dryRun = false)
-
+        val packetSlot = slot<TidshendelsePacket>()
         every {
-            behandlingService.opprettOmregning(any())
-        } throws IllegalArgumentException("Feil i opprettelse av omregning")
-
-        every {
-            behandlingService.opprettOppgave(
-                sakId,
-                OppgaveType.REVURDERING,
-                any(),
-                "Aldersovergang v/20 år",
-                frist,
-            )
-        } returns nyOppgaveID
+            tidshendelseService.haandterHendelse(capture(packetSlot))
+        } returns
+            TidshendelseResult.OpprettetOppgave(opprettetOppgaveID)
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
@@ -68,87 +63,78 @@ class TidshendelseRiverTest {
             field(0, ALDERSOVERGANG_ID_KEY).asUUID() shouldBe hendelseId
             field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 1
-            field(0, HENDELSE_DATA_KEY)["opprettetOppgaveId"].asUUID() shouldBe nyOppgaveID
+            field(0, HENDELSE_DATA_KEY)["opprettetOppgaveId"].asUUID() shouldBe opprettetOppgaveID
         }
 
-        verify { behandlingService.opprettOmregning(any()) }
-        verify { behandlingService.opprettOppgave(sakId, OppgaveType.REVURDERING, any(), "Aldersovergang v/20 år", frist) }
+        // Verifiser det som ble sendt til service
+        packetSlot.captured.hendelseId shouldBeEqual hendelseId.toString()
+        packetSlot.captured.sakId shouldBe sakId
+        packetSlot.captured.jobbtype shouldBe AO_BP20
+        packetSlot.captured.dryrun shouldBe false
+        packetSlot.captured.behandlingsmaaned shouldBe behandlingsmaaned
+        packetSlot.captured.behandlingId shouldBe null
+        packetSlot.captured.harLoependeYtelse shouldBe true
+        packetSlot.captured.harMigrertYrkesskadeFordel shouldBe false
+        packetSlot.captured.harRettUtenTidsbegrensning shouldBe false
     }
 
     @Test
-    fun `skal opprette behandling og returnere dens id`() {
+    fun `skal haandtere hendelse og sette omregning id paa meldingen`() {
         val hendelseId = UUID.randomUUID()
-        val sakId = 321L
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
-        val frist = behandlingsmaaned.atEndOfMonth()
-        val forrigeBehandlingID = UUID.randomUUID()
-        val nyBehandlingID = UUID.randomUUID()
-
-        val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, dryRun = false)
-
-        val omregningshendelse =
-            Omregningshendelse(
-                sakId = sakId,
-                fradato = behandlingsmaaned.plusMonths(1).atDay(1),
-                prosesstype = Prosesstype.AUTOMATISK,
-                revurderingaarsak = Revurderingaarsak.ALDERSOVERGANG,
-                oppgavefrist = frist,
+        val melding =
+            lagMeldingForVurdertLoependeYtelse(
+                hendelseId = hendelseId,
+                sakId = 321L,
+                behandlingsmaaned = behandlingsmaaned,
+                type = OMS_DOED_5AAR,
             )
+        val forrigeBehandlingId = UUID.randomUUID()
+        val nyBehandlingId = UUID.randomUUID()
 
+        val packetSlot = slot<TidshendelsePacket>()
         every {
-            behandlingService.opprettOmregning(omregningshendelse)
-        } returns
-            OpprettOmregningResponse(
-                behandlingId = nyBehandlingID,
-                forrigeBehandlingId = forrigeBehandlingID,
-                sakType = SakType.BARNEPENSJON,
-            )
+            tidshendelseService.haandterHendelse(capture(packetSlot))
+        } returns TidshendelseResult.OpprettetOmregning(nyBehandlingId, forrigeBehandlingId)
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
             field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "BEHANDLING_OPPRETTET"
-            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "AO_BP20"
+            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "OMS_DOED_5AAR"
             field(0, ALDERSOVERGANG_ID_KEY).asUUID() shouldBe hendelseId
             field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
-            field(0, BEHANDLING_ID_KEY).asUUID() shouldBe nyBehandlingID
-            field(0, BEHANDLING_VI_OMREGNER_FRA_KEY).asUUID() shouldBe forrigeBehandlingID
+            field(0, BEHANDLING_ID_KEY).asUUID() shouldBe nyBehandlingId
+            field(0, BEHANDLING_VI_OMREGNER_FRA_KEY).asUUID() shouldBe forrigeBehandlingId
         }
 
-        verify { behandlingService.opprettOmregning(omregningshendelse) }
+        // Verifiser det som ble sendt til service
+        packetSlot.captured.hendelseId shouldBeEqual hendelseId.toString()
+        packetSlot.captured.sakId shouldBe 321L
+        packetSlot.captured.jobbtype shouldBe OMS_DOED_5AAR
+        packetSlot.captured.dryrun shouldBe false
+        packetSlot.captured.behandlingsmaaned shouldBe behandlingsmaaned
+        packetSlot.captured.behandlingId shouldBe null
+        packetSlot.captured.harLoependeYtelse shouldBe true
+        packetSlot.captured.harMigrertYrkesskadeFordel shouldBe false
+        packetSlot.captured.harRettUtenTidsbegrensning shouldBe false
     }
 
     @Test
-    fun `skal ikke kalle tjeneste for aa opprette behandling hvis dry-run`() {
+    fun `skal haandtere hendelse som blir skippet`() {
         val hendelseId = UUID.randomUUID()
-        val sakId = 37465L
-        val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
+        val sakId = 321L
+        val april2024 = YearMonth.of(2024, Month.APRIL)
 
-        val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, dryRun = true)
-
-        with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
-            size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
-            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "OPPGAVE_OPPRETTET"
-            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "AO_BP20"
-            field(0, ALDERSOVERGANG_ID_KEY).asUUID() shouldBe hendelseId
-            field(0, DRYRUN).asBoolean() shouldBe true
-            field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
-        }
-
-        verify(exactly = 0) { behandlingService.opprettOmregning(any()) }
-    }
-
-    @Test
-    fun `skal ikke kalle tjeneste for aa opprette oppgave hvis BP20 og yrkesskadefordel`() {
-        val hendelseId = UUID.randomUUID()
-        val sakId = 37465L
-        val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
-
-        val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned)
+        val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, april2024, dryRun = false)
         melding["yrkesskadefordel_pre_20240101"] = true
 
+        val packetSlot = slot<TidshendelsePacket>()
+        every {
+            tidshendelseService.haandterHendelse(capture(packetSlot))
+        } returns TidshendelseResult.Skipped
+
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
@@ -159,50 +145,64 @@ class TidshendelseRiverTest {
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
         }
 
-        verify(exactly = 0) { behandlingService.opprettOppgave(sakId, any(), any(), "Aldersovergang", any()) }
-    }
-
-    @Test
-    fun `OMS tre aar siden doedsfall, skal ikke opprette oppgave hvis rett uten tidsbegrensning`() {
-        val hendelseId = UUID.randomUUID()
-        val sakId = 93L
-        val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
-
-        val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned)
-        melding[ALDERSOVERGANG_TYPE_KEY] = "OMS_DOED_3AAR"
-        melding["oms_rett_uten_tidsbegrensning"] = true
-
-        with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
-            size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
-            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "OPPGAVE_OPPRETTET"
-            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "OMS_DOED_3AAR"
-            field(0, ALDERSOVERGANG_ID_KEY).asUUID() shouldBe hendelseId
-            field(0, DRYRUN).asBoolean() shouldBe false
-            field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
+        // Verifiser det som ble sendt til service
+        with(packetSlot.captured) {
+            this.hendelseId shouldBeEqual hendelseId.toString()
+            this.sakId shouldBe 321L
+            this.jobbtype shouldBe AO_BP20
+            this.dryrun shouldBe false
+            this.behandlingsmaaned shouldBe april2024
+            this.behandlingId shouldBe null
+            this.harLoependeYtelse shouldBe true
+            this.harMigrertYrkesskadeFordel shouldBe true
+            this.harRettUtenTidsbegrensning shouldBe false
         }
-
-        verify(exactly = 0) { behandlingService.opprettOppgave(sakId, any(), any(), "Aldersovergang", any()) }
     }
-
-    private fun lagMeldingForVurdertLoependeYtelse(
-        hendelseId: UUID,
-        sakId: Long,
-        behandlingsmaaned: YearMonth,
-        dryRun: Boolean = false,
-    ) = JsonMessage.newMessage(
-        EventNames.ALDERSOVERGANG.lagEventnameForType(),
-        mapOf(
-            ALDERSOVERGANG_STEG_KEY to "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR",
-            ALDERSOVERGANG_TYPE_KEY to "AO_BP20",
-            ALDERSOVERGANG_ID_KEY to hendelseId,
-            SAK_ID_KEY to sakId,
-            DATO_KEY to behandlingsmaaned.atDay(1),
-            DRYRUN to dryRun,
-            HENDELSE_DATA_KEY to
-                mapOf(
-                    "loependeYtelse" to true,
-                ),
-        ),
-    )
 }
+
+fun lagMeldingForVurdertLoependeYtelse(
+    hendelseId: UUID = UUID.randomUUID(),
+    sakId: Long,
+    behandlingsmaaned: YearMonth,
+    type: TidshendelseService.TidshendelserJobbType = AO_BP20,
+    dryRun: Boolean = false,
+    behandlingId: UUID? = null,
+): JsonMessage {
+    val newMessage =
+        JsonMessage.newMessage(
+            EventNames.ALDERSOVERGANG.lagEventnameForType(),
+            emptyMap(),
+        )
+
+    newMessage[ALDERSOVERGANG_STEG_KEY] = "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
+    newMessage[ALDERSOVERGANG_TYPE_KEY] = type.name
+    newMessage[ALDERSOVERGANG_ID_KEY] = hendelseId
+    newMessage[SAK_ID_KEY] = sakId
+    newMessage[DATO_KEY] = behandlingsmaaned.atDay(1)
+    newMessage[DRYRUN] = dryRun
+    newMessage[HENDELSE_DATA_KEY] =
+        listOfNotNull(
+            "loependeYtelse" to true,
+            behandlingId?.let { "loependeYtelse_behandlingId" to behandlingId },
+        ).toMap()
+    newMessage.interestedIn("yrkesskadefordel_pre_20240101")
+    newMessage.interestedIn("oms_rett_uten_tidsbegrensning")
+
+    return newMessage
+}
+
+fun lagMeldingForVurdertLoependeYtelse(
+    sakId: Long,
+    behandlingsmaaned: YearMonth,
+    type: TidshendelseService.TidshendelserJobbType = AO_BP20,
+    dryRun: Boolean = false,
+    behandlingId: UUID? = null,
+): JsonMessage =
+    lagMeldingForVurdertLoependeYtelse(
+        hendelseId = UUID.randomUUID(),
+        sakId = sakId,
+        behandlingsmaaned = behandlingsmaaned,
+        type = type,
+        dryRun = dryRun,
+        behandlingId = behandlingId,
+    )

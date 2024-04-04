@@ -27,7 +27,7 @@ export function TilbakekrevingBrev({
   redigerbar: boolean
 }) {
   const kanAttesteres = erUnderBehandling(behandling.status)
-  const [, hentVedtak] = useApiCall(hentVedtakSammendrag)
+  const [hentVedtakStatus, hentVedtak] = useApiCall(hentVedtakSammendrag)
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
   const [hentBrevStatus, hentBrevRequest] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
@@ -95,6 +95,10 @@ export function TilbakekrevingBrev({
           apiResult: opprettBrevStatus,
           errorMessage: 'Kunne ikke opprette brev',
         })}
+        {isFailureHandler({
+          apiResult: hentVedtakStatus,
+          errorMessage: 'Kunne ikke hente vedtak',
+        })}
       </BrevContent>
       <Border />
       <FlexRow justify="center">
@@ -102,7 +106,6 @@ export function TilbakekrevingBrev({
           <SendTilAttesteringModal
             behandlingId={behandling.id}
             fattVedtakApi={fattVedtak}
-            sakId={behandling.sak.id}
             validerKanSendeTilAttestering={() => true}
           />
         )}

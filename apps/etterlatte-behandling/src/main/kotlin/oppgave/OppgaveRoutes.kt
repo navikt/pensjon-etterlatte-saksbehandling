@@ -8,6 +8,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
+import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
@@ -91,6 +92,29 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             }
         }
 
+        get("/referanse/{referanse}/underbehandling") {
+            kunSaksbehandler {
+                val oppgave =
+                    inTransaction {
+                        service.hentOppgaveUnderBehandling(referanse)
+                    }
+
+                call.respond(oppgave ?: HttpStatusCode.NoContent)
+            }
+        }
+
+        // TODO: Slå sammen med den over
+        get("/referanse/{referanse}/saksbehandler-underbehandling") {
+            kunSaksbehandler {
+                val oppgave =
+                    inTransaction {
+                        service.hentOppgaveUnderBehandling(referanse)?.saksbehandler
+                    }
+
+                call.respond(oppgave ?: HttpStatusCode.NoContent)
+            }
+        }
+
         route("/stats") {
             get {
                 kunSaksbehandler {
@@ -106,10 +130,11 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get("/oppgaver") {
                 kunSystembruker {
-                    call.respond(inTransaction { service.hentSakOgOppgaverForSak(sakId) })
+                    call.respond(inTransaction { service.hentOppgaverForSak(sakId) })
                 }
             }
 
+            // TODO: Standardisere opprettelse av oppgave
             post("/opprett") {
                 kunSaksbehandlerMedSkrivetilgang {
                     val nyOppgaveDto = call.receive<NyOppgaveDto>()
@@ -128,32 +153,6 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                     call.respond(nyOppgave)
                 }
             }
-
-            get("/oppgaveunderbehandling/{referanse}") {
-                kunSaksbehandler {
-                    val saksbehandler =
-                        inTransaction {
-                            service.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(referanse)
-                        }
-                    call.respond(saksbehandler ?: HttpStatusCode.NoContent)
-                }
-            }
-
-            get("/ikkeattestert/{referanse}") {
-                kunSaksbehandler {
-                    val saksbehandler =
-                        inTransaction {
-                            service.hentSisteSaksbehandlerIkkeAttestertOppgave(referanse)
-                        }
-                    call.respond(saksbehandler ?: HttpStatusCode.NoContent)
-                }
-            }
-            get("/ikkeattestertOppgave/{referanse}") {
-                kunSaksbehandler {
-                    val oppgave = inTransaction { service.hentSisteIkkeAttestertOppgave(referanse) }
-                    call.respond(oppgave)
-                }
-            }
         }
 
         route("{$OPPGAVEID_CALL_PARAMETER}") {
@@ -163,14 +162,14 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                         service.hentOppgave(oppgaveId)
                     }
 
-                call.respond(oppgave ?: HttpStatusCode.NoContent)
+                call.respond(oppgave)
             }
 
             put("ferdigstill") {
                 kunSkrivetilgang {
                     val merknad = call.receive<FerdigstillRequest>().merknad
                     inTransaction {
-                        service.hentOgFerdigstillOppgaveById(oppgaveId, brukerTokenInfo, merknad)
+                        service.ferdigstillOppgave(oppgaveId, brukerTokenInfo, merknad)
                     }
                     call.respond(HttpStatusCode.OK)
                 }
@@ -217,6 +216,16 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 kunSkrivetilgang {
                     val redigerFrist = call.receive<RedigerFristRequest>()
                     inTransaction { service.redigerFrist(oppgaveId, redigerFrist.frist) }
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+            patch("merknad") {
+                kunSkrivetilgang {
+                    val merknad = call.receive<EndrePaaVentRequest>()
+                    inTransaction {
+                        service.oppdaterStatusOgMerknad(oppgaveId, merknad.merknad, Status.UNDER_BEHANDLING)
+                        service.fjernSaksbehandler(oppgaveId)
+                    }
                     call.respond(HttpStatusCode.OK)
                 }
             }

@@ -4,25 +4,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import java.time.LocalDate
-
-data class SamhandlerPersonDto(
-    val fnr: String,
-    val forhold: List<TjenestepensjonForhold> = emptyList(),
-)
-
-class TjenestepensjonForhold(
-    val tpNr: String,
-    val kilde: String,
-    val ytelser: List<SamhandlerYtelseDto> = emptyList(),
-)
-
-data class SamhandlerYtelseDto(
-    val ytelseType: String,
-    val datoInnmeldtYtelseFom: LocalDate? = null,
-    val datoYtelseIverksattFom: LocalDate? = null,
-    val datoYtelseIverksattTom: LocalDate? = null,
-)
 
 data class Tjenestepensjonnummer(val value: String) {
     init {

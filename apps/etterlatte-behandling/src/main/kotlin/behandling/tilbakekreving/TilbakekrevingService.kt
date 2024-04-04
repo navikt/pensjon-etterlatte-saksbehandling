@@ -3,12 +3,12 @@ package no.nav.etterlatte.behandling.tilbakekreving
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
+import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.FattetVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
@@ -33,6 +33,7 @@ class TilbakekrevingService(
     private val hendelseDao: HendelseDao,
     private val oppgaveService: OppgaveService,
     private val vedtakKlient: VedtakKlient,
+    private val brevApiKlient: BrevApiKlient,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
     private val tilbakekrevinghendelser: ITilbakekrevingHendelserService,
 ) {
@@ -76,7 +77,10 @@ class TilbakekrevingService(
                     tilbakekrevingBehandling,
                     Tidspunkt.now(),
                 )
-            tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.OPPRETTET)
+            tilbakekrevinghendelser.sendTilbakekreving(
+                statistikkTilbakekrevingDto,
+                TilbakekrevingHendelseType.OPPRETTET,
+            )
 
             tilbakekrevingBehandling.id
         }
@@ -183,17 +187,15 @@ class TilbakekrevingService(
                 tilbakekreving,
                 Tidspunkt.now(),
             )
-        tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.FATTET_VEDTAK)
+        tilbakekrevinghendelser.sendTilbakekreving(
+            statistikkTilbakekrevingDto,
+            TilbakekrevingHendelseType.FATTET_VEDTAK,
+        )
 
-        oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-            fattetoppgaveReferanseOgSak =
-                SakIdOgReferanse(
-                    sakId = tilbakekreving.sak.id,
-                    referanse = tilbakekreving.id.toString(),
-                ),
-            oppgaveType = OppgaveType.ATTESTERING,
-            merknad = "Tilbakekreving",
-            saksbehandler = brukerTokenInfo,
+        oppgaveService.tilAttestering(
+            referanse = tilbakekreving.id.toString(),
+            type = OppgaveType.TILBAKEKREVING,
+            merknad = "Tilbakekreving kan attesteres",
         )
     }
 
@@ -207,6 +209,8 @@ class TilbakekrevingService(
         if (behandling.status != TilbakekrevingStatus.FATTET_VEDTAK) {
             throw TilbakekrevingFeilTilstandException("Tilbakekreving kan ikke attesteres fordi vedtak ikke er fattet")
         }
+
+        runBlocking { brevApiKlient.ferdigstillVedtaksbrev(tilbakekrevingId, behandling.sak.id, brukerTokenInfo) }
 
         val vedtak =
             runBlocking {
@@ -232,6 +236,7 @@ class TilbakekrevingService(
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(
             referanse = behandling.id.toString(),
+            type = OppgaveType.TILBAKEKREVING,
             saksbehandler = brukerTokenInfo,
         )
 
@@ -241,6 +246,7 @@ class TilbakekrevingService(
                 behandling,
                 Tidspunkt.now(),
             )
+
         tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.ATTESTERT)
 
         runBlocking {
@@ -304,15 +310,10 @@ class TilbakekrevingService(
             begrunnelse = valgtBegrunnelse,
         )
 
-        oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-            fattetoppgaveReferanseOgSak =
-                SakIdOgReferanse(
-                    sakId = tilbakekreving.sak.id,
-                    referanse = tilbakekreving.id.toString(),
-                ),
-            oppgaveType = OppgaveType.UNDERKJENT,
+        oppgaveService.tilUnderkjent(
+            referanse = tilbakekreving.id.toString(),
+            type = OppgaveType.TILBAKEKREVING,
             merknad = listOfNotNull(valgtBegrunnelse, kommentar).joinToString(separator = ": "),
-            saksbehandler = brukerTokenInfo,
         )
     }
 }

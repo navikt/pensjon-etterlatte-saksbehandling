@@ -1,11 +1,12 @@
-import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import React, { Dispatch, ReactNode, SetStateAction, useEffect } from 'react'
 import styled from 'styled-components'
-import { Tabs } from '@navikt/ds-react'
+import { Loader, Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
-import { initalOppgavebenkStats, OppgavebenkStats } from '~components/oppgavebenk/utils/oppgavebenkStats'
-import { hentOppgavebenkStats } from '~shared/api/oppgaver'
+import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentOppgavebenkStats } from '~shared/api/oppgaver'
+import { mapResult } from '~shared/api/apiUtils'
 
 interface Props {
   oppgavelisteValg: OppgavelisteValg
@@ -13,27 +14,47 @@ interface Props {
 }
 
 export const VelgOppgaveliste = ({ oppgavelisteValg, setOppgavelisteValg }: Props): ReactNode => {
-  const [oppgavebenkStats, setOppgavebenkStats] = useState<OppgavebenkStats>(initalOppgavebenkStats)
-  const [, hentOppgavebenkStatsFetch] = useApiCall(hentOppgavebenkStats)
+  const dispatcher = useOppgavebenkStateDispatcher()
+  const oppgaveBenkState = useOppgaveBenkState()
+
+  const [oppgavebenkStatsResult, oppgavebenkStatsFetch] = useApiCall(hentOppgavebenkStats)
 
   useEffect(() => {
-    hentOppgavebenkStatsFetch({}, setOppgavebenkStats)
-  }, [])
+    if (!!oppgaveBenkState.oppgpavebenkStats.antallOppgavelistaOppgaver) {
+      oppgavebenkStatsFetch({}, (result) => dispatcher.setOppgavebenkStats(result))
+    }
+  }, [oppgaveBenkState.oppgpavebenkStats.antallOppgavelistaOppgaver])
 
   return (
     <VelgOppgavelisteTabs value={oppgavelisteValg} onChange={(e) => setOppgavelisteValg(e as OppgavelisteValg)}>
       <Tabs.List>
         <Tabs.Tab
           value={OppgavelisteValg.OPPGAVELISTA}
-          label={`Oppgavelisten (${oppgavebenkStats.antallOppgavelistaOppgaver})`}
-          icon={<InboxIcon />}
+          label={
+            <>
+              Oppgavelisten{' '}
+              {mapResult(oppgavebenkStatsResult, {
+                pending: <Loader />,
+                success: ({ antallOppgavelistaOppgaver }) => <>{`(${antallOppgavelistaOppgaver})`}</>,
+              })}
+            </>
+          }
+          icon={<InboxIcon aria-hidden />}
         />
         <Tabs.Tab
           value={OppgavelisteValg.MIN_OPPGAVELISTE}
-          label={`Min oppgaveliste (${oppgavebenkStats.antallMinOppgavelisteOppgaver})`}
+          label={
+            <>
+              Min oppgaveliste{' '}
+              {mapResult(oppgavebenkStatsResult, {
+                pending: <Loader />,
+                success: ({ antallMinOppgavelisteOppgaver }) => <>{`(${antallMinOppgavelisteOppgaver})`}</>,
+              })}
+            </>
+          }
           icon={<PersonIcon aria-hidden />}
         />
-        <Tabs.Tab value={OppgavelisteValg.GOSYS_OPPGAVER} label="Gosys-oppgaver" icon={<InboxIcon />} />
+        <Tabs.Tab value={OppgavelisteValg.GOSYS_OPPGAVER} label="Gosys-oppgaver" icon={<InboxIcon aria-hidden />} />
       </Tabs.List>
     </VelgOppgavelisteTabs>
   )

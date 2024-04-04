@@ -1,4 +1,5 @@
 import {
+  Alert,
   BodyShort,
   Button,
   ErrorMessage,
@@ -30,33 +31,51 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppSelector } from '~store/Store'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 
-export const AvkortingInntekt = (props: {
+export const AvkortingInntekt = ({
+  behandling,
+  avkorting,
+  redigerbar,
+  setAvkorting,
+}: {
   behandling: IBehandlingReducer
-  avkortingGrunnlag: IAvkortingGrunnlag[]
+  avkorting: IAvkorting | undefined
   redigerbar: boolean
   setAvkorting: (avkorting: IAvkorting) => void
 }) => {
-  const { behandling } = props
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  const redigerbar = props.redigerbar && enhetErSkrivbar(behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
-  const avkortingGrunnlag = [...props.avkortingGrunnlag]
-  avkortingGrunnlag?.sort((a, b) => new Date(b.fom!).getTime() - new Date(a.fom!).getTime())
-
   if (!behandling) throw new Error('Mangler behandling')
+
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
+
+  const avkortingGrunnlag = avkorting == null ? [] : [...avkorting.avkortingGrunnlag]
+  avkortingGrunnlag?.sort((a, b) => new Date(b.fom!).getTime() - new Date(a.fom!).getTime())
 
   const virkningstidspunkt = () => {
     if (!behandling.virkningstidspunkt) throw new Error('Mangler virkningstidspunkt')
     return behandling.virkningstidspunkt.dato
   }
-  const finnesRedigerbartGrunnlag = () => {
-    const nyligste = avkortingGrunnlag[0]
-    return nyligste && nyligste.fom === behandling.virkningstidspunkt?.dato
-  }
+
+  // Er det utregnet avkorting finnes det grunnlag lagt til i denne behandlingen
+  const finnesRedigerbartGrunnlag = () => avkorting?.avkortetYtelse && avkorting?.avkortetYtelse.length !== 0
+
+  const mismatchGrunnlagsperioderOgVirkningstidspunkt = (sisteGrunnlag: IAvkortingGrunnlag) =>
+    sisteGrunnlag.fom !== behandling.virkningstidspunkt?.dato
+
   const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlag => {
     if (finnesRedigerbartGrunnlag()) {
-      return avkortingGrunnlag[0]
+      // Returnerer grunnlagsperiode som er opprettet i denne behandlingen
+      const redigerbartGrunnlag = avkortingGrunnlag[0]
+      if (mismatchGrunnlagsperioderOgVirkningstidspunkt(redigerbartGrunnlag)) {
+        // Korrigerer fom hvis virkningstidspunkt er endret
+        return {
+          ...redigerbartGrunnlag,
+          fom: virkningstidspunkt(),
+        }
+      }
+      return redigerbartGrunnlag
     }
     if (avkortingGrunnlag.length > 0) {
+      // Preutfyller ny grunnlagsperiode med tidligere verdier
       const nyligste = avkortingGrunnlag[0]
       return {
         fom: virkningstidspunkt(),
@@ -66,6 +85,7 @@ export const AvkortingInntekt = (props: {
         spesifikasjon: nyligste.spesifikasjon,
       }
     }
+    // Første grunnlagsperiode
     return {
       fom: virkningstidspunkt(),
       spesifikasjon: '',
@@ -103,7 +123,7 @@ export const AvkortingInntekt = (props: {
       (respons) => {
         const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[respons.avkortingGrunnlag.length - 1]
         nyttAvkortingGrunnlag && setInntektGrunnlagForm(nyttAvkortingGrunnlag)
-        props.setAvkorting(respons)
+        setAvkorting(respons)
         setFormToggle(false)
       }
     )
@@ -202,7 +222,7 @@ export const AvkortingInntekt = (props: {
         </InntektAvkortingTabell>
       )}
       {avkortingGrunnlag.length > 1 && <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />}
-      {redigerbar && (
+      {erRedigerbar && (
         <InntektAvkortingForm onSubmit={onSubmit}>
           <Rows>
             {formToggle && (
@@ -330,6 +350,11 @@ export const AvkortingInntekt = (props: {
           </Rows>
         </InntektAvkortingForm>
       )}
+      {avkortingGrunnlag.length > 0 && mismatchGrunnlagsperioderOgVirkningstidspunkt(avkortingGrunnlag[0]) && (
+        <WarningAlert variant="warning">
+          Siste inntektsperiode stemmer ikke overens med virkningstidspunkt. Du må redigere for å korrigere.
+        </WarningAlert>
+      )}
       {isFailureHandler({
         apiResult: inntektGrunnlagStatus,
         errorMessage: 'En feil har oppstått',
@@ -386,4 +411,8 @@ const SpesifikasjonLabel = styled.div``
 
 const Rows = styled.div`
   flex-direction: column;
+`
+
+const WarningAlert = styled(Alert)`
+  max-width: fit-content;
 `

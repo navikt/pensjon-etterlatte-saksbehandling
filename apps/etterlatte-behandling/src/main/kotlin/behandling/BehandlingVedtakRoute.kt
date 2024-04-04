@@ -8,12 +8,14 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.oppgave.referanse
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -53,15 +55,18 @@ internal fun Route.behandlingVedtakRoute(
 
                         behandlingsstatusService.settFattetVedtak(behandling, fattVedtak.vedtakHendelse)
                         try {
-                            oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                                fattetoppgaveReferanseOgSak = fattVedtak.sakIdOgReferanse,
-                                oppgaveType = OppgaveType.ATTESTERING,
-                                saksbehandler = brukerTokenInfo,
+                            val oppgaveType =
+                                when (behandling.type) {
+                                    BehandlingType.FØRSTEGANGSBEHANDLING -> OppgaveType.FOERSTEGANGSBEHANDLING
+                                    BehandlingType.REVURDERING -> OppgaveType.REVURDERING
+                                }
+
+                            oppgaveService.tilAttestering(
+                                referanse = fattVedtak.sakIdOgReferanse.referanse,
+                                type = oppgaveType,
                                 merknad =
-                                    listOfNotNull(
-                                        merknadBehandling,
-                                        fattVedtak.vedtakHendelse.kommentar,
-                                    ).joinToString(separator = ": "),
+                                    listOfNotNull(merknadBehandling, fattVedtak.vedtakHendelse.kommentar)
+                                        .joinToString(separator = ": "),
                             )
                         } catch (e: Exception) {
                             haandterFeilIOppgaveService(e)
@@ -93,29 +98,17 @@ internal fun Route.behandlingVedtakRoute(
                                 listOfNotNull(it.valgtBegrunnelse, it.kommentar).joinToString(separator = ": ")
                             }
                         try {
-                            val sisteSaksbehandlerIkkeAttestering =
-                                oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(
-                                    underkjennVedtakOppgave.sakIdOgReferanse.referanse,
-                                )
+                            val oppgaveType =
+                                when (behandling.type) {
+                                    BehandlingType.FØRSTEGANGSBEHANDLING -> OppgaveType.FOERSTEGANGSBEHANDLING
+                                    BehandlingType.REVURDERING -> OppgaveType.REVURDERING
+                                }
 
-                            val ferdigstillOppgaveUnderbehandlingOgLagNyMedType =
-                                oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                                    fattetoppgaveReferanseOgSak = underkjennVedtakOppgave.sakIdOgReferanse,
-                                    oppgaveType = OppgaveType.UNDERKJENT,
-                                    merknad = merknadFraAttestant,
-                                    saksbehandler = brukerTokenInfo,
-                                )
-                            if (sisteSaksbehandlerIkkeAttestering?.ident != null) {
-                                oppgaveService.tildelSaksbehandler(
-                                    ferdigstillOppgaveUnderbehandlingOgLagNyMedType.id,
-                                    sisteSaksbehandlerIkkeAttestering.ident,
-                                )
-                            } else {
-                                logger.warn(
-                                    "Fant ikke siste saksbehandler for behandling:" +
-                                        " ${underkjennVedtakOppgave.sakIdOgReferanse.referanse}. ",
-                                )
-                            }
+                            oppgaveService.tilUnderkjent(
+                                referanse = underkjennVedtakOppgave.sakIdOgReferanse.referanse,
+                                type = oppgaveType,
+                                merknad = merknadFraAttestant,
+                            )
                         } catch (e: Exception) {
                             haandterFeilIOppgaveService(e)
                         }
@@ -144,6 +137,11 @@ internal fun Route.behandlingVedtakRoute(
                         try {
                             oppgaveService.ferdigStillOppgaveUnderBehandling(
                                 referanse = attesterVedtakOppgave.sakIdOgReferanse.referanse,
+                                type =
+                                    when (behandling.type) {
+                                        BehandlingType.FØRSTEGANGSBEHANDLING -> OppgaveType.FOERSTEGANGSBEHANDLING
+                                        BehandlingType.REVURDERING -> OppgaveType.REVURDERING
+                                    },
                                 saksbehandler = brukerTokenInfo,
                             )
                         } catch (e: Exception) {

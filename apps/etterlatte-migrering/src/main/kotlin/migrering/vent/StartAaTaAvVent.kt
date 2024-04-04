@@ -2,11 +2,13 @@ package no.nav.etterlatte.migrering.vent
 
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.OPPGAVE_ID_FLERE_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
 import no.nav.etterlatte.rapidsandrivers.migrering.OPPGAVEKILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.OPPGAVETYPE_KEY
@@ -55,6 +57,7 @@ class StartAaTaAvVent(
                 OPPGAVEKILDE_KEY to OppgaveKilde.GJENOPPRETTING,
                 OPPGAVETYPE_KEY to OppgaveType.FOERSTEGANGSBEHANDLING,
                 MIGRERING_KJORING_VARIANT to avVent.kjoringVariant,
+                KILDE_KEY to Vedtaksloesning.GJENOPPRETTA.name,
             ),
         ).toJson()
 }

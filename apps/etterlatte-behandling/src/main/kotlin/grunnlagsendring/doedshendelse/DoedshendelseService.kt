@@ -185,7 +185,10 @@ class DoedshendelseService(
                         ?.map { it.value }
                 }
                 ?.flatten()
+                ?.distinct()
                 ?.filterNot { varEktefelleVedDoedsfall(avdoed, it) }
+
+        logger.info("Fant ${andreForeldreForAvdoedesBarn?.size} andre foreldre for avdødes (${avdoed.foedselsnummer.verdi}) barn.")
 
         return harSammeAdresseSomAvdoed(avdoed, andreForeldreForAvdoedesBarn)
     }
@@ -214,7 +217,12 @@ class DoedshendelseService(
             avdoedOgAnnenForelderMedFellesbarn
                 .avdoedPerson.bostedsadresse?.map { it.verdi }?.sortedByDescending { it.gyldigFraOgMed }
 
-        return isAdresserLike(gjenlevendeBosteder?.first(), avdoedBosteder?.first())
+        val adresserLike = isAdresserLike(gjenlevendeBosteder?.first(), avdoedBosteder?.first())
+        logger.info(
+            "Avdød (${avdoedOgAnnenForelderMedFellesbarn.avdoedPerson.foedselsnummer.verdi}) og annen forelder " +
+                "(${avdoedOgAnnenForelderMedFellesbarn.gjenlevendeForelder.foedselsnummer.verdi}) har samme adresse: $adresserLike",
+        )
+        return adresserLike
     }
 
     private fun isAdresserLike(

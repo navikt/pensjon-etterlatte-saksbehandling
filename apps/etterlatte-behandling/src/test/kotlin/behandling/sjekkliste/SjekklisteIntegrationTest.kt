@@ -11,6 +11,7 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -43,8 +44,11 @@ class SjekklisteIntegrationTest(val dataSource: DataSource) {
 
         every { user.name() } returns "Sak B. Handlersen"
         every {
-            oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(any())
-        } returns OppgaveSaksbehandler(user.name(), "Sak B. Handlersen")
+            oppgaveService.hentOppgaveUnderBehandling(any())
+        } returns
+            mockk<OppgaveIntern> {
+                every { saksbehandler } returns OppgaveSaksbehandler(user.name(), "Sak B. Handlersen")
+            }
     }
 
     @AfterAll

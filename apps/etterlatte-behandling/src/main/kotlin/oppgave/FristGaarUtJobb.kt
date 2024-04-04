@@ -3,8 +3,8 @@ package no.nav.etterlatte.oppgave
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.LoggerInfo
-import no.nav.etterlatte.jobs.TimerJob
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
+import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status

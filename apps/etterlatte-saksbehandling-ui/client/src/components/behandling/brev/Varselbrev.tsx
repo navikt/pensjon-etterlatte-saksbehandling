@@ -23,10 +23,8 @@ import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
-import {
-  hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave,
-  settOppgavePaaVentApi,
-} from '~shared/api/oppgaver'
+import { hentOppgaveForReferanseUnderBehandling, settOppgavePaaVentApi } from '~shared/api/oppgaver'
+
 export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
@@ -44,9 +42,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [opprettBrevStatus, opprettNyttVarselbrev] = useApiCall(opprettVarselbrev)
   const [, fetchBehandling] = useApiCall(hentBehandling)
 
-  const [, requesthentOppgaveForBehandlingEkte] = useApiCall(
-    hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave
-  )
+  const [, requesthentOppgaveForBehandlingEkte] = useApiCall(hentOppgaveForReferanseUnderBehandling)
   const [, requestSettPaaVent] = useApiCall(settOppgavePaaVentApi)
 
   const onSubmit = () => {
@@ -54,7 +50,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   }
 
   const settPaaVent = async () => {
-    requesthentOppgaveForBehandlingEkte({ referanse: behandlingId!!, sakId: sakId }, (oppgave) => {
+    requesthentOppgaveForBehandlingEkte(behandlingId!!, (oppgave) => {
       requestSettPaaVent({
         oppgaveId: oppgave.id,
         settPaaVentRequest: {

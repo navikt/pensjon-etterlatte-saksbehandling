@@ -35,7 +35,6 @@ import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.route.FeatureIkkeStoettetException
@@ -329,7 +328,11 @@ class KlageServiceImpl(
             )
         klageDao.lagreKlage(klageMedResultat)
 
-        oppgaveService.ferdigStillOppgaveUnderBehandling(klageMedResultat.id.toString(), saksbehandler)
+        oppgaveService.ferdigStillOppgaveUnderBehandling(
+            referanse = klageMedResultat.id.toString(),
+            type = OppgaveType.KLAGE,
+            saksbehandler = saksbehandler,
+        )
         opprettKlageHendelse(klageMedResultat, KlageHendelseType.FERDIGSTILT, saksbehandler)
 
         klageHendelser.sendKlageHendelseRapids(
@@ -391,14 +394,11 @@ class KlageServiceImpl(
 
         opprettVedtakHendelse(klage, vedtak, HendelseType.FATTET, saksbehandler)
 
-        oppgaveService.hentOppgaveUnderBehandlingForReferanse(klageId.toString()).let { oppgave ->
-            oppgaveService.oppdaterStatusOgMerknad(
-                oppgave.id,
-                "Vedtak om avvist klage til attestering",
-                Status.UNDER_BEHANDLING,
-            )
-            oppgaveService.fjernSaksbehandler(oppgave.id)
-        }
+        oppgaveService.tilAttestering(
+            referanse = klageId.toString(),
+            type = OppgaveType.KLAGE,
+            "Vedtak om avvist klage til attestering",
+        )
 
         return oppdatertKlage
     }
@@ -429,7 +429,11 @@ class KlageServiceImpl(
 
         opprettVedtakHendelse(oppdatertKlage, vedtak, HendelseType.ATTESTERT, saksbehandler, kommentar)
 
-        oppgaveService.ferdigStillOppgaveUnderBehandling(klageId.toString(), saksbehandler, "Vedtak attestert")
+        oppgaveService.ferdigStillOppgaveUnderBehandling(
+            referanse = klageId.toString(),
+            type = OppgaveType.KLAGE,
+            saksbehandler = saksbehandler,
+        )
 
         klageBrevService.slettUferdigeBrev(oppdatertKlage.id, saksbehandler)
         return oppdatertKlage
@@ -458,14 +462,11 @@ class KlageServiceImpl(
 
         opprettVedtakHendelse(oppdatertKlage, vedtak, HendelseType.UNDERKJENT, saksbehandler, kommentar)
 
-        oppgaveService.hentOppgaveUnderBehandlingForReferanse(klageId.toString()).let { oppgave ->
-            oppgaveService.oppdaterStatusOgMerknad(
-                oppgave.id,
-                "Vedtak er underkjent",
-                Status.UNDER_BEHANDLING,
-            )
-            oppgaveService.fjernSaksbehandler(oppgave.id)
-        }
+        oppgaveService.tilUnderkjent(
+            referanse = klageId.toString(),
+            type = OppgaveType.KLAGE,
+            "Vedtak er underkjent",
+        )
 
         return oppdatertKlage
     }
@@ -574,7 +575,7 @@ class KlageServiceImpl(
         handling: String,
     ) {
         val saksbehandlerForKlageOppgave =
-            oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(klageId.toString())
+            oppgaveService.hentOppgaveUnderBehandling(klageId.toString())?.saksbehandler
                 ?: throw ManglerSaksbehandlerException("Fant ingen saksbehandler på oppgave relatert til klageid $klageId")
 
         if (saksbehandlerForKlageOppgave.ident != saksbehandler.ident) {

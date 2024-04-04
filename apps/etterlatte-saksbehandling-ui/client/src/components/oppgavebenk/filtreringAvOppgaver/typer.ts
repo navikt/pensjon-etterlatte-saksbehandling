@@ -32,6 +32,8 @@ export const OPPGAVESTATUSFILTER: Record<OppgavestatusFilterKeys, string> = {
   visAlle: 'Vis alle',
   NY: 'Ny',
   UNDER_BEHANDLING: 'Under behandling',
+  ATTESTERING: 'Attestering',
+  UNDERKJENT: 'Underkjent',
   PAA_VENT: 'På Vent',
   FERDIGSTILT: 'Ferdigstilt',
   FEILREGISTRERT: 'Feilregistrert',
@@ -43,9 +45,7 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   visAlle: 'Vis alle',
   FOERSTEGANGSBEHANDLING: 'Førstegangsbehandling',
   REVURDERING: 'Revurdering',
-  ATTESTERING: 'Attestering',
   VURDER_KONSEKVENS: 'Hendelse',
-  UNDERKJENT: 'Underkjent behandling',
   GOSYS: 'Gosys',
   KRAVPAKKE_UTLAND: 'Kravpakke utland',
   KLAGE: 'Klage',
@@ -53,6 +53,7 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   OMGJOERING: 'Omgjøring',
   JOURNALFOERING: 'Journalføring',
   GJENOPPRETTING_ALDERSOVERGANG: 'Gjenoppretting',
+  AKTIVITETSPLIKT: 'Aktivitetsplikt oppfølging',
 } as const
 
 export const FRISTFILTER = {

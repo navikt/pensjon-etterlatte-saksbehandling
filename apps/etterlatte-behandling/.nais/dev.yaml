@@ -66,6 +66,12 @@ spec:
     max: 2
     min: 2
   env:
+    - name: JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS
+      value: "06-23"
+    - name: JOBB_SAKSBEHANDLER_OPENING_HOURS
+      value: "06-23"
+    - name: JOBB_METRIKKER_OPENING_HOURS
+      value: "07-18"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
     - name: GRUNNLAG_AZURE_SCOPE

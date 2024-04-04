@@ -18,8 +18,6 @@ const OPPGAVETYPE_TIL_TAGDATA: Record<Oppgavetype, { variant: Variants; text: st
   FOERSTEGANGSBEHANDLING: { variant: Variants.INFO, text: 'Førstegangsbehandling' },
   REVURDERING: { variant: Variants.NEUTRAL, text: 'Revurdering' },
   VURDER_KONSEKVENS: { variant: Variants.ALT1, text: 'Hendelse' },
-  ATTESTERING: { variant: Variants.ALT3_FILLED, text: 'Attestering' },
-  UNDERKJENT: { variant: Variants.ALT3, text: 'Underkjent' },
   GOSYS: { variant: Variants.INFO_FILLED, text: 'Gosys-oppgave' },
   KRAVPAKKE_UTLAND: { variant: Variants.ALT2_FILLED, text: 'Kravpakke utland' },
   KLAGE: { variant: Variants.ALT2, text: 'Klage' },
@@ -27,6 +25,7 @@ const OPPGAVETYPE_TIL_TAGDATA: Record<Oppgavetype, { variant: Variants; text: st
   TILBAKEKREVING: { variant: Variants.ALT2, text: 'Tilbakekreving' },
   JOURNALFOERING: { variant: Variants.ALT2, text: 'Journalføring' },
   GJENOPPRETTING_ALDERSOVERGANG: { variant: Variants.ALT3_FILLED, text: 'Gjenoppretting' },
+  AKTIVITETSPLIKT: { variant: Variants.ALT3_FILLED, text: 'Aktivitetsplikt' },
 } as const
 
 export const OppgavetypeTag = (props: { oppgavetype: Oppgavetype }) => {

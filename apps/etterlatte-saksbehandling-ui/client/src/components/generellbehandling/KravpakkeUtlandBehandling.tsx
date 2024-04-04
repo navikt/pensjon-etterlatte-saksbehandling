@@ -76,7 +76,9 @@ export const hentSakOgNavigerTilSaksoversikt = (sakId: number, navigate: Navigat
     })
 }
 
-const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null } }) => {
+const KravpakkeUtlandBehandling = (props: {
+  utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
+}) => {
   const { utlandsBehandling } = props
   const innhold = utlandsBehandling.innhold
   const [putOppdaterGenerellBehandlingStatus, putOppdaterGenerellBehandling] = useApiCall(oppdaterGenerellBehandling)
@@ -487,4 +489,4 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
     </GridContainer>
   )
 }
-export default KravpakkeUtland
+export default KravpakkeUtlandBehandling

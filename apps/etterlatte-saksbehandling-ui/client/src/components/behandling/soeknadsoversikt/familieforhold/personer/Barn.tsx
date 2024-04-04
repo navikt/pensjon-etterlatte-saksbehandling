@@ -3,7 +3,7 @@ import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { PersonDetailWrapper } from '../../styled'
 import { IPdlPerson } from '~shared/types/Person'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
-import differenceInYears from 'date-fns/differenceInYears'
+import { differenceInYears } from 'date-fns'
 import { hentAdresserEtterDoedsdato } from '~components/behandling/felles/utils'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
 

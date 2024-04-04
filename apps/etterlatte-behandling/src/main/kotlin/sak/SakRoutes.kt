@@ -26,7 +26,6 @@ import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Saker
@@ -272,19 +271,6 @@ internal fun Route.sakWebRoutes(
                             }
                         }.also { requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak/type") }
                     call.respond(sak ?: HttpStatusCode.NoContent)
-                }
-            }
-
-            post("oppgaver") {
-                withFoedselsnummerInternal(tilgangService) { fnr ->
-                    val oppgaver =
-                        inTransaction {
-                            sakService.finnSaker(fnr.value)
-                                .map { sak ->
-                                    OppgaveListe(sak, oppgaveService.hentOppgaverForSak(sak.id))
-                                }
-                        }.also { requestLogger.loggRequest(brukerTokenInfo, fnr, "oppgaver") }
-                    call.respond(oppgaver)
                 }
             }
 

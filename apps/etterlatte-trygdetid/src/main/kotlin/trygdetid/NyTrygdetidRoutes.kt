@@ -13,6 +13,7 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.MigreringOverstyringDto
+import no.nav.etterlatte.libs.common.trygdetid.StatusOppdatertDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidOverstyringDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidYrkesskadeDto
@@ -167,6 +168,14 @@ fun Route.trygdetidV2(
                         )
                     }
                 }
+            }
+        }
+
+        post("/oppdater-status") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                val statusOppdatert =
+                    trygdetidService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
             }
         }
 

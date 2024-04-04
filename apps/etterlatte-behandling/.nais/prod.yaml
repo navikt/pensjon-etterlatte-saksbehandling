@@ -71,6 +71,12 @@ spec:
     max: 4
     min: 2
   env:
+    - name: JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS
+      value: "07-18"
+    - name: JOBB_SAKSBEHANDLER_OPENING_HOURS
+      value: "07-18"
+    - name: JOBB_METRIKKER_OPENING_HOURS
+      value: "07-18"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser
     - name: KAFKA_RESET_POLICY

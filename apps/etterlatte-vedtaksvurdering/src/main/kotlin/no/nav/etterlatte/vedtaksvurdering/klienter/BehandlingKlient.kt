@@ -1,8 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering.klienter
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
@@ -10,7 +9,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
-import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.retryOgPakkUt
@@ -93,7 +91,7 @@ interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
     suspend fun hentOppgaverForSak(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OppgaveListe
+    ): List<OppgaveIntern>
 
     suspend fun tildelSaksbehandler(
         oppgaveTilAttestering: OppgaveIntern,
@@ -166,7 +164,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     override suspend fun hentOppgaverForSak(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OppgaveListe {
+    ): List<OppgaveIntern> {
         logger.info("Henter oppgaver for sak med id $sakId")
         try {
             return downstreamResourceClient
@@ -192,7 +190,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         logger.info("Tildeler oppgave $oppgaveTilAttestering til systembruker")
-        val response =
+        val response: Result<Resource, Throwable> =
             downstreamResourceClient
                 .post(
                     resource =
@@ -204,9 +202,9 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     postBody = SaksbehandlerEndringDto(saksbehandler = Fagsaksystem.EY.navn),
                 )
 
-        return when (response) {
-            is Ok -> true
-            is Err -> {
+        return when {
+            response.isOk -> true
+            else -> {
                 logger.error(
                     "Tildeling av $oppgaveTilAttestering til systembruker for attestering feilet",
                     response.error,
@@ -234,9 +232,9 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     postBody = vedtakEndringDTO,
                 )
             }
-        return when (response) {
-            is Ok -> true
-            is Err -> {
+        return when {
+            response.isOk -> true
+            else -> {
                 logger.error(
                     "Kan ikke fatte oppgaver og commite vedtak av type for behandling " +
                         vedtakEndringDTO.sakIdOgReferanse.referanse,
@@ -262,9 +260,9 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = vedtakEndringDTO,
             )
-        return when (response) {
-            is Ok -> true
-            is Err -> {
+        return when {
+            response.isOk -> true
+            else -> {
                 logger.error(
                     "Kan ikke underkjenne oppgaver og commite vedtak av type for behandling " +
                         vedtakEndringDTO.sakIdOgReferanse.referanse,
@@ -290,9 +288,9 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                 brukerTokenInfo = brukerTokenInfo,
                 postBody = vedtakEndringDTO,
             )
-        return when (response) {
-            is Ok -> true
-            is Err -> {
+        return when {
+            response.isOk -> true
+            else -> {
                 logger.error(
                     "Kan ikke attestere oppgaver og commite vedtak av type for behandling " +
                         vedtakEndringDTO.sakIdOgReferanse.referanse,

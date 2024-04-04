@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { underkjennGenerellbehandling } from '~shared/api/generellbehandling'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { useNavigate } from 'react-router-dom'
-import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtland'
+import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtlandBehandling'
 
 import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'

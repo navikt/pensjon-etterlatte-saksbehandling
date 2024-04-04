@@ -37,7 +37,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Assemble
-        run: ./gradlew assemble --no-build-cache --no-configuration-cache
+        run: ./gradlew assemble
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

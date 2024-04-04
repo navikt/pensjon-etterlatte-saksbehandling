@@ -69,28 +69,30 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
         oppgaveDao.opprettOppgave(oppgaveto)
         oppgaveDao.settNySaksbehandler(oppgaveto.id, "Z000000")
 
-        oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)))
+        oppgaveDao.opprettOppgave(
+            lagNyOppgave(
+                sakDao.opprettSak(
+                    "fnr",
+                    SakType.BARNEPENSJON,
+                    Enheter.AALESUND.enhetNr,
+                ),
+            ),
+        )
 
         val alleOppgavera =
             oppgaveDao.hentOppgaver(
-                OppgaveType.entries,
                 listOf(Enheter.AALESUND.enhetNr),
-                Status.entries.map {
-                    it.name
-                },
+                Status.entries.map { it.name },
                 null,
             )
         println(alleOppgavera.size)
 
         val oppgaverKunForSaksbehandler =
             oppgaveDao.hentOppgaver(
-                OppgaveType.entries,
                 listOf(
                     Enheter.AALESUND.enhetNr,
                 ),
-                Status.entries.map {
-                    it.name
-                },
+                Status.entries.map { it.name },
                 saksbehandlerIdent,
             )
         assertEquals(1, oppgaverKunForSaksbehandler.size)
@@ -99,11 +101,8 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
 
         val alleOppgaver =
             oppgaveDao.hentOppgaver(
-                OppgaveType.entries,
                 listOf(Enheter.AALESUND.enhetNr),
-                Status.entries.map {
-                    it.name
-                },
+                Status.entries.map { it.name },
                 null,
             )
         assertEquals(3, alleOppgaver.size)
@@ -115,10 +114,26 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveNy)
         oppgaveDao.endreStatusPaaOppgave(oppgaveNy.id, Status.FEILREGISTRERT)
-        oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)))
-        oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)))
+        oppgaveDao.opprettOppgave(
+            lagNyOppgave(
+                sakDao.opprettSak(
+                    "fnr",
+                    SakType.BARNEPENSJON,
+                    Enheter.AALESUND.enhetNr,
+                ),
+            ),
+        )
+        oppgaveDao.opprettOppgave(
+            lagNyOppgave(
+                sakDao.opprettSak(
+                    "fnr",
+                    SakType.BARNEPENSJON,
+                    Enheter.AALESUND.enhetNr,
+                ),
+            ),
+        )
 
-        val hentOppgaver = oppgaveDao.hentOppgaver(OppgaveType.entries, listOf(Enheter.AALESUND.enhetNr), listOf(Status.NY.name))
+        val hentOppgaver = oppgaveDao.hentOppgaver(listOf(Enheter.AALESUND.enhetNr), listOf(Status.NY.name))
         assertEquals(2, hentOppgaver.size)
     }
 
@@ -128,13 +143,29 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveNy)
         oppgaveDao.endreStatusPaaOppgave(oppgaveNy.id, Status.FEILREGISTRERT)
-        oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)))
-        oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)))
+        oppgaveDao.opprettOppgave(
+            lagNyOppgave(
+                sakDao.opprettSak(
+                    "fnr",
+                    SakType.BARNEPENSJON,
+                    Enheter.AALESUND.enhetNr,
+                ),
+            ),
+        )
+        oppgaveDao.opprettOppgave(
+            lagNyOppgave(
+                sakDao.opprettSak(
+                    "fnr",
+                    SakType.BARNEPENSJON,
+                    Enheter.AALESUND.enhetNr,
+                ),
+            ),
+        )
 
-        val hentOppgaver = oppgaveDao.hentOppgaver(OppgaveType.entries, listOf(Enheter.AALESUND.enhetNr), emptyList())
+        val hentOppgaver = oppgaveDao.hentOppgaver(listOf(Enheter.AALESUND.enhetNr), emptyList())
         assertEquals(3, hentOppgaver.size)
 
-        val hentOppgaverVisAlle = oppgaveDao.hentOppgaver(OppgaveType.entries, listOf(Enheter.AALESUND.enhetNr), listOf(VISALLE))
+        val hentOppgaverVisAlle = oppgaveDao.hentOppgaver(listOf(Enheter.AALESUND.enhetNr), listOf(VISALLE))
         assertEquals(3, hentOppgaverVisAlle.size)
     }
 
@@ -143,12 +174,27 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
         val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveNy)
-        oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)))
-        oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)))
+        oppgaveDao.opprettOppgave(
+            lagNyOppgave(
+                sakDao.opprettSak(
+                    "fnr",
+                    SakType.BARNEPENSJON,
+                    Enheter.STEINKJER.enhetNr,
+                ),
+            ),
+        )
+        oppgaveDao.opprettOppgave(
+            lagNyOppgave(
+                sakDao.opprettSak(
+                    "fnr",
+                    SakType.BARNEPENSJON,
+                    Enheter.PORSGRUNN.enhetNr,
+                ),
+            ),
+        )
 
         val hentOppgaver =
             oppgaveDao.hentOppgaver(
-                OppgaveType.entries,
                 listOf(Enheter.AALESUND.enhetNr),
                 Status.entries.map { it.name },
             )
@@ -165,27 +211,10 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
 
         val hentOppgaver =
             oppgaveDao.hentOppgaver(
-                OppgaveType.entries,
                 listOf(Enheter.AALESUND.enhetNr),
                 Status.entries.map { it.name },
             )
         assertEquals(3, hentOppgaver.size)
-    }
-
-    @Test
-    fun `opprett oppgave av type ATTESTERING`() {
-        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val oppgaveNy = lagNyOppgave(sakAalesund, OppgaveKilde.BEHANDLING, OppgaveType.ATTESTERING)
-        oppgaveDao.opprettOppgave(oppgaveNy)
-
-        val hentOppgaver =
-            oppgaveDao.hentOppgaver(
-                OppgaveType.entries,
-                listOf(Enheter.AALESUND.enhetNr),
-                Status.entries.map { it.name },
-            )
-        assertEquals(1, hentOppgaver.size)
-        assertEquals(OppgaveType.ATTESTERING, hentOppgaver[0].type)
     }
 
     @Test
@@ -198,7 +227,7 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
         oppgaveDao.settNySaksbehandler(oppgaveNy.id, nySaksbehandler)
         val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
         assertEquals(nySaksbehandler, hentetOppgave?.saksbehandler?.ident)
-        assertEquals(Status.UNDER_BEHANDLING, hentetOppgave?.status)
+        assertEquals(Status.NY, hentetOppgave?.status)
     }
 
     @Test
@@ -224,7 +253,6 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
 
         val hentetOppgave =
             oppgaveDao.hentOppgaver(
-                OppgaveType.entries,
                 listOf(Enheter.AALESUND.enhetNr),
                 Status.entries.map { it.name },
             )
@@ -238,9 +266,11 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
         oppgaveDao.opprettOppgave(oppgaveNy)
         sakDao.oppdaterAdresseBeskyttelse(sakAalesund.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
-        val hentetOppgave =
-            oppgaveDao
-                .finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(OppgaveType.entries)
+        val ikkeGradertSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val ikkeGradertOppgave = lagNyOppgave(ikkeGradertSak)
+        oppgaveDao.opprettOppgave(ikkeGradertOppgave)
+
+        val hentetOppgave = oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland()
         assertEquals(1, hentetOppgave.size)
     }
 }

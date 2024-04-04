@@ -84,6 +84,7 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -434,6 +435,7 @@ internal class ApplicationContext(
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,
             vedtakKlient = vedtakKlient,
+            brevApiKlient = brevApiKlient,
             tilbakekrevingKlient = tilbakekrevingKlient,
             tilbakekrevinghendelser = tilbakekreving,
         )
@@ -467,13 +469,13 @@ internal class ApplicationContext(
         )
 
     // Jobs
-
     val metrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
             BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao, gjenopprettingMetrikkerDao),
             { leaderElectionKlient.isLeader() },
             Duration.of(3, ChronoUnit.MINUTES).toMillis(),
-            periode = Duration.of(5, ChronoUnit.MINUTES),
+            periode = Duration.of(10, ChronoUnit.MINUTES),
+            openingHours = env.requireEnvValue("JOBB_METRIKKER_OPENING_HOURS").let { OpeningHours.of(it) },
         )
     }
 
@@ -496,6 +498,7 @@ internal class ApplicationContext(
             interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
+            openingHours = env.requireEnvValue("JOBB_DOEDSMELDINGER_REMINDER_OPENING_HOURS").let { OpeningHours.of(it) },
         )
     }
 
@@ -505,6 +508,7 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(1, ChronoUnit.SECONDS).toMillis(),
             interval = Duration.of(20, ChronoUnit.MINUTES),
+            openingHours = env.requireEnvValue("JOBB_SAKSBEHANDLER_OPENING_HOURS").let { OpeningHours.of(it) },
         )
     }
 

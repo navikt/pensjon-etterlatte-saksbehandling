@@ -13,6 +13,8 @@ import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdeti
 import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.regler.finnAnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.toSamlet
+import no.nav.etterlatte.config.BeregningFeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -53,6 +55,7 @@ class BeregnBarnepensjonService(
     private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val trygdetidKlient: TrygdetidKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
 
@@ -69,7 +72,9 @@ class BeregnBarnepensjonService(
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id, brukerTokenInfo)
                 ?: throw BeregningsgrunnlagMangler(behandling.id)
 
-        val trygdetid =
+        val foreldreloesFlag = featureToggleService.isEnabled(BeregningFeatureToggle.Foreldreloes, false)
+
+        val trygdetidListe =
             try {
                 trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo)
             } catch (e: Exception) {
@@ -77,7 +82,23 @@ class BeregnBarnepensjonService(
                     "Kunne ikke hente ut trygdetid for behandlingen med id=${behandling.id}. " +
                         "Dette er ikke kritisk siden vi ikke har krav om trygdetid enda.",
                 )
-                null
+                emptyList()
+            }
+
+        val trygdetid =
+            when (foreldreloesFlag) {
+                true -> {
+                    // Frem til vi endre beregning til å bruke hele liste
+                    trygdetidListe.firstOrNull()
+                }
+
+                false -> {
+                    if (trygdetidListe.size > 1) {
+                        throw ForeldreloesTrygdetid(behandling.id)
+                    }
+
+                    trygdetidListe.firstOrNull()
+                }
             }
 
         val barnepensjonGrunnlag =
@@ -317,6 +338,7 @@ class BeregnBarnepensjonService(
                             beskrivelse = "Avdød er ukjent. Trygdetid er satt manuelt.",
                         ),
                     )
+
                 else -> {
                     if (grunnlag.hentAvdoede().any { it.hentDoedsdato() == null }) {
                         KonstantGrunnlag(

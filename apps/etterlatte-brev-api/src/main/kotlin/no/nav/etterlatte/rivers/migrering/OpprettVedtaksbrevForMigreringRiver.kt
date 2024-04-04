@@ -1,16 +1,15 @@
 package no.nav.etterlatte.rivers.migrering
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.ktor.token.Systembruker
-import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.AUTOMATISK_GJENOPPRETTING
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
-import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -27,8 +26,8 @@ internal class OpprettVedtaksbrevForMigreringRiver(
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.FATTET) {
             validate { it.requireKey("vedtak.behandlingId") }
             validate { it.requireKey("vedtak.sak.id") }
-            validate { it.requireKey(HENDELSE_DATA_KEY) }
-            validate { it.requireValue(KILDE_KEY, Vedtaksloesning.PESYS.name) }
+            validate { it.requireValue(AUTOMATISK_GJENOPPRETTING, true) }
+            validate { it.requireValue(KILDE_KEY, Vedtaksloesning.GJENOPPRETTA.name) }
             validate { it.rejectValue(PDF_GENERERT, true) }
         }
     }
@@ -42,35 +41,20 @@ internal class OpprettVedtaksbrevForMigreringRiver(
         val behandlingId = UUID.fromString(packet["vedtak.behandlingId"].asText())
         val brukerTokenInfo = Systembruker.migrering
         runBlocking {
-            val hendelseData = packet.hendelseData
-            val migreringBrevRequest =
-                with(hendelseData) {
-                    MigreringBrevRequest(
-                        brutto = beregning.brutto,
-                        utlandstilknytningType = utlandstilknytningType,
-                        yrkesskade = dodAvYrkesskade,
+            val vedtaksbrev: Brev =
+                retryOgPakkUt {
+                    service.opprettVedtaksbrev(
+                        sakId,
+                        behandlingId,
+                        brukerTokenInfo,
                     )
                 }
-            if (migreringBrevRequest.utlandstilknytningType == null) {
-                logger.warn(
-                    "Fikk null i utenlandstilknytningstype for migreringrequest med " +
-                        "pesysId=${hendelseData.pesysId}.",
-                )
-            } else {
-                logger.info(
-                    "Fikk utlandstilknytningstype=${migreringBrevRequest.utlandstilknytningType} for " +
-                        "migreringrequesten med pesysId=${hendelseData.pesysId}",
-                )
+            retryOgPakkUt {
+                service.genererPdf(vedtaksbrev.id, brukerTokenInfo)
             }
-            val vedtaksbrev: Brev =
-                service.opprettVedtaksbrev(
-                    sakId,
-                    behandlingId,
-                    brukerTokenInfo,
-                    migreringBrevRequest,
-                )
-            service.genererPdf(vedtaksbrev.id, brukerTokenInfo, migreringBrevRequest)
-            service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo, true)
+            retryOgPakkUt {
+                service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo, true)
+            }
         }
         logger.info("Har oppretta vedtaksbrev i sak $sakId")
         packet[PDF_GENERERT] = true

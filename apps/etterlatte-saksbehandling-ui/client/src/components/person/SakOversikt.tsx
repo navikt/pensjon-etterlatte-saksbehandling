@@ -21,6 +21,7 @@ import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { SakType } from '~shared/types/sak'
 import { hentMigrertYrkesskadeFordel } from '~shared/api/vilkaarsvurdering'
 import { Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
+import { OpprettSakModal } from '~components/person/OpprettSakModal'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -56,7 +57,11 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
         (error) => (
           <MainContent>
             {error.status === 404 ? (
-              <ApiWarningAlert>{error.detail}</ApiWarningAlert>
+              <>
+                <ApiWarningAlert>{error.detail}</ApiWarningAlert>
+
+                <OpprettSakModal fnr={fnr} />
+              </>
             ) : (
               <ApiErrorAlert>{error.detail || 'Feil ved henting av sak'}</ApiErrorAlert>
             )}

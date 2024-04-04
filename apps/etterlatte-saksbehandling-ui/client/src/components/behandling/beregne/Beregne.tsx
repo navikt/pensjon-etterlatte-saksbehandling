@@ -159,7 +159,6 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
             <SendTilAttesteringModal
               behandlingId={behandling.id}
               fattVedtakApi={fattVedtak}
-              sakId={behandling.sakId}
               validerKanSendeTilAttestering={() => true}
             />
           ) : (

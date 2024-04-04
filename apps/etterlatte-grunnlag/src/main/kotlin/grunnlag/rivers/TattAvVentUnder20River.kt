@@ -47,7 +47,6 @@ class TattAvVentUnder20River(
                     "men søker i sak ${packet.sakId} er $alderVedMaanedsslutt år innen utgangen av denne måneden. " +
                     "Avbryter, dette må følges opp av en utvikler. NB: Oppgaven er alt tatt av vent.",
             )
-            return
         } else {
             packet.setEventNameForHendelseType(Ventehendelser.TATT_AV_VENT_UNDER_20_SJEKKA)
             context.publish(packet.toJson())

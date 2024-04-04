@@ -40,6 +40,7 @@ class TattAvVentUnder20River(
             )
             packet.setEventNameForHendelseType(Ventehendelser.TATT_AV_VENT_FYLT_20)
             context.publish(packet.toJson())
+            logger.info("Publiserte melding for ${Ventehendelser.TATT_AV_VENT_FYLT_20} for ${packet.sakId}")
         } else if (alderVedMaanedsslutt < 18) {
             logger.error(
                 "Forventer at søker er mellom 18 og 20, " +

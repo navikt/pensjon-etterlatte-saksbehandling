@@ -83,9 +83,6 @@ export const HaandterAvvikModal = ({
               {journalpost.journalstatus === Journalstatus.FEILREGISTRERT ? 'Opphev feilregistrering' : 'Feilregistrer'}
             </Radio>
             <Radio value={AvvikHandling.OPPRETT_OPPGAVE}>Opprett oppgave</Radio>
-
-            {/* TODO: Skal lage støtte for den fortløpende, men prioriterer overføring til annen sak */}
-            {/*<option value={Aarsak.UTGAAR}>Sett til utgår</option>*/}
           </RadioGroup>
 
           <br />

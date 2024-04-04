@@ -32,6 +32,7 @@ data class BarnepensjonInnvilgelse(
     val bosattUtland: Boolean,
     val kunNyttRegelverk: Boolean,
     val erGjenoppretting: Boolean,
+    val harUtbetaling: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
@@ -62,6 +63,7 @@ data class BarnepensjonInnvilgelse(
                         it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
                     },
                 erGjenoppretting = erGjenoppretting,
+                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
             )
         }
     }

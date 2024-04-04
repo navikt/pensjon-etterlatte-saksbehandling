@@ -1,6 +1,7 @@
 package no.nav.etterlatte.rivers.migrering
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -50,7 +51,8 @@ internal class OpprettVedtaksbrevForMigreringRiver(
                     )
                 }
             retryOgPakkUt {
-                service.genererPdf(vedtaksbrev.id, brukerTokenInfo)
+                service.genererPdf(vedtaksbrev.id, brukerTokenInfo, MigreringBrevRequest(0, true, null))
+                // Midlertidig hack for å seie at dette er migrering
             }
             retryOgPakkUt {
                 service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo, true)

@@ -14,12 +14,10 @@ export const SettPaaVent = ({
   redigerbar,
   refreshOppgave,
 }: {
-  oppgave?: OppgaveDTO
+  oppgave: OppgaveDTO
   redigerbar: boolean
   refreshOppgave: () => void
 }) => {
-  if (!oppgave) return null
-
   const [frist, setFrist] = useState<string>(oppgave.frist)
   const [merknad, setMerknad] = useState<string>(oppgave.merknad || '')
   const [settPaaVent, setVisPaaVent] = useState(false)

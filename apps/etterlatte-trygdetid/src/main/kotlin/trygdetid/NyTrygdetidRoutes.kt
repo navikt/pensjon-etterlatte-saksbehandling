@@ -127,7 +127,7 @@ fun Route.trygdetidV2(
             }
         }
 
-        route("{${TRYGDETIDID_CALL_PARAMETER}}") {
+        route("{$TRYGDETIDID_CALL_PARAMETER}") {
             post("grunnlag") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     logger.info("Legger til trygdetidsgrunnlag for behandling $behandlingId")

@@ -104,6 +104,7 @@ export const TrygdetidGrunnlagListe = ({
                   <PeriodeRow
                     trygdetidGrunnlag={periode}
                     behandlingId={trygdetid.behandlingId}
+                    trygdetidId={trygdetid.id}
                     setTrygdetid={setTrygdetid}
                     endrePeriode={(trygdetidGrunnlagId) => {
                       setEndreModus({ status: true, trygdetidGrunnlagId: trygdetidGrunnlagId })
@@ -123,6 +124,7 @@ export const TrygdetidGrunnlagListe = ({
       <NyEllerOppdatertPeriode>
         {endreModus.status && (
           <TrygdetidGrunnlag
+            trygdetidId={trygdetid.id}
             setTrygdetid={oppdaterStateOgSettTrygdetid}
             avbryt={() => setEndreModus({ status: false, trygdetidGrunnlagId: '' })}
             eksisterendeGrunnlag={trygdetidGrunnlagListe.find((tg) => tg.id == endreModus.trygdetidGrunnlagId)}
@@ -142,6 +144,7 @@ export const TrygdetidGrunnlagListe = ({
 
 const PeriodeRow = ({
   trygdetidGrunnlag,
+  trygdetidId,
   behandlingId,
   setTrygdetid,
   endrePeriode,
@@ -151,6 +154,7 @@ const PeriodeRow = ({
 }: {
   trygdetidGrunnlag: ITrygdetidGrunnlag
   behandlingId: string
+  trygdetidId: string
   setTrygdetid: (trygdetid: ITrygdetid) => void
   endrePeriode: (trygdetidGrunnlagId: string) => void
   landListe: ILand[]
@@ -159,11 +163,12 @@ const PeriodeRow = ({
 }) => {
   const [slettTrygdetidStatus, slettTrygdetidsgrunnlagRequest] = useApiCall(slettTrygdetidsgrunnlag)
 
-  const slettGrunnlag = (grunnlagId: string) => {
+  const slettGrunnlag = (trygdetidGrunnlagId: string) => {
     slettTrygdetidsgrunnlagRequest(
       {
-        behandlingId: behandlingId,
-        trygdetidGrunnlagId: grunnlagId,
+        trygdetidId,
+        behandlingId,
+        trygdetidGrunnlagId,
       },
       (oppdatertTrygdetid) => {
         setTrygdetid(oppdatertTrygdetid)

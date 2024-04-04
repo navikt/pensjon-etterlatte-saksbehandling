@@ -19,6 +19,7 @@ import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDa
 
 type Props = {
   eksisterendeGrunnlag: ITrygdetidGrunnlag | undefined
+  trygdetidId: string
   setTrygdetid: (trygdetid: ITrygdetid) => void
   avbryt: () => void
   trygdetidGrunnlagType: ITrygdetidGrunnlagType
@@ -30,6 +31,7 @@ const initialState = (type: ITrygdetidGrunnlagType) => {
 }
 
 export const TrygdetidGrunnlag = ({
+  trygdetidId,
   eksisterendeGrunnlag,
   setTrygdetid,
   avbryt,
@@ -56,7 +58,8 @@ export const TrygdetidGrunnlag = ({
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     requestLagreTrygdetidgrunnlag(
       {
-        behandlingId: behandlingId,
+        behandlingId,
+        trygdetidId,
         // Flippe verdi av prorata for å matche backend
         trygdetidgrunnlag: { ...data, prorata: !data.prorata },
       },

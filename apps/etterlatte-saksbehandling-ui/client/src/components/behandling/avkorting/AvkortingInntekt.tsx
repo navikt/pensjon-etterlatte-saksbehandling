@@ -53,7 +53,7 @@ export const AvkortingInntekt = ({
 
   const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
 
-  const [formToggle, setFormToggle] = useState(false)
+  const [visForm, setVisForm] = useState(false)
   const [visHistorikk, setVisHistorikk] = useState(false)
 
   // Er det utregnet avkorting finnes det grunnlag lagt til i denne behandlingen
@@ -78,13 +78,7 @@ export const AvkortingInntekt = ({
     if (avkortingGrunnlag.length > 0) {
       // Preutfyller ny grunnlagsperiode med tidligere verdier
       const nyligste = avkortingGrunnlag[0]
-      return {
-        fom: virkningstidspunkt(behandling).dato,
-        fratrekkInnAar: nyligste.fratrekkInnAar,
-        fratrekkInnAarUtland: nyligste.fratrekkInnAarUtland,
-        relevanteMaanederInnAar: nyligste.relevanteMaanederInnAar,
-        spesifikasjon: nyligste.spesifikasjon,
-      }
+      return { ...nyligste, fom: virkningstidspunkt(behandling).dato }
     }
     // Første grunnlagsperiode
     return {
@@ -117,7 +111,7 @@ export const AvkortingInntekt = ({
         const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[respons.avkortingGrunnlag.length - 1]
         nyttAvkortingGrunnlag && reset(nyttAvkortingGrunnlag)
         setAvkorting(respons)
-        setFormToggle(false)
+        setVisForm(false)
       }
     )
 
@@ -217,7 +211,7 @@ export const AvkortingInntekt = ({
       {erRedigerbar && (
         <InntektAvkortingForm>
           <Rows>
-            {formToggle && (
+            {visForm && (
               <>
                 <FormWrapper>
                   <HStack gap="4">
@@ -290,7 +284,7 @@ export const AvkortingInntekt = ({
               </>
             )}
             <FormKnapper>
-              {formToggle ? (
+              {visForm ? (
                 <>
                   <Button size="small" loading={isPending(inntektGrunnlagStatus)} onClick={handleSubmit(onSubmit)}>
                     Lagre
@@ -300,7 +294,7 @@ export const AvkortingInntekt = ({
                     variant="tertiary"
                     onClick={(e) => {
                       e.preventDefault()
-                      setFormToggle(false)
+                      setVisForm(false)
                     }}
                   >
                     Avbryt
@@ -313,7 +307,7 @@ export const AvkortingInntekt = ({
                   icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
                   onClick={(e) => {
                     e.preventDefault()
-                    setFormToggle(true)
+                    setVisForm(true)
                   }}
                 >
                   {finnesRedigerbartGrunnlag() ? 'Rediger' : 'Legg til'}

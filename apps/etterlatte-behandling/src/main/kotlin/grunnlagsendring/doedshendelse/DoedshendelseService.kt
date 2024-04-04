@@ -189,7 +189,11 @@ class DoedshendelseService(
                 }
                 ?.flatten()
                 ?.distinct()
-                ?.filterNot { varEktefelleVedDoedsfall(avdoed, it) }
+                ?.filterNot {
+                    varEktefelleVedDoedsfall(avdoed, it).also { varEktefelle ->
+                        logger.info("$it var ektefelle med avdød (${avdoed.foedselsnummer.verdi}): $varEktefelle")
+                    }
+                }
 
         logger.info("Fant ${andreForeldreForAvdoedesBarn?.size} andre foreldre for avdødes (${avdoed.foedselsnummer.verdi}) barn.")
 

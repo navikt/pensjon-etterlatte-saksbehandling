@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Sivilstatus
-import no.nav.etterlatte.libs.ktor.route.logger
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.time.temporal.Temporal
@@ -80,9 +79,7 @@ fun varEktefelleVedDoedsfall(
                     Sivilstatus.SEPARERT_PARTNER,
                 )
             ) {
-                val varEkteFelleVedDoedsfall = it.relatertVedSiviltilstand?.value == eps
-                logger.info("Annen forelder ($eps) var ektefelle ved dødsfall: $varEkteFelleVedDoedsfall")
-                return varEkteFelleVedDoedsfall
+                return it.relatertVedSiviltilstand?.value == eps
             }
             return false
         }

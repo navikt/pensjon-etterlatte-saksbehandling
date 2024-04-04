@@ -33,7 +33,7 @@ class TattAvVentUnder20River(
             aldersovergangService.hentAlder(packet.sakId, PersonRolle.BARN, YearMonth.now().atEndOfMonth()) ?: return
 
         if (alderVedMaanedsslutt >= 20) {
-            logger.debug(
+            logger.info(
                 "Søker i sak ${packet.sakId} har fylt 20 år innen utgangen av denne måneden, " +
                     "og vil da være $alderVedMaanedsslutt år. " +
                     "Oppgava er alt tatt av vent, men fatting av vedtak og oppfølging skjer manuelt av saksbehandler.",

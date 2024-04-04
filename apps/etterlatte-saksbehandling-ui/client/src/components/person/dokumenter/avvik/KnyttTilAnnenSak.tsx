@@ -13,6 +13,7 @@ import { MagnifyingGlassIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
 import { useNavigate } from 'react-router-dom'
 import { SakOverfoeringDetailjer } from 'src/components/person/dokumenter/avvik/common/SakOverfoeringDetailjer'
+import { opprettOppgave } from '~shared/api/oppgaver'
 
 const erSammeSak = (sak: ISak, journalpost: Journalpost): boolean => {
   const { sak: journalpostSak, tema } = journalpost
@@ -48,6 +49,8 @@ export const KnyttTilAnnenSak = ({
   const [knyttTilAnnenSakStatus, apiKnyttTilAnnenSak] = useApiCall(knyttTilAnnenSak)
   const [feilregSakstilknytningStatus, apiFeilregistrerSakstilknytning] = useApiCall(feilregistrerSakstilknytning)
 
+  const [oppgaveResult, apiOpprettOppgave] = useApiCall(opprettOppgave)
+
   const flyttJournalpost = (sak: ISak) => {
     apiKnyttTilAnnenSak({
       journalpostId: journalpost.journalpostId,
@@ -75,12 +78,34 @@ export const KnyttTilAnnenSak = ({
     }
   }
 
+  const opprettJournalfoeringsoppgave = (sakId: number, journalpostId: string) =>
+    apiOpprettOppgave(
+      {
+        sakId,
+        request: {
+          oppgaveType: 'JOURNALFOERING',
+          referanse: journalpostId,
+          merknad: `Journalpost flyttet til sak ${sakId}`,
+          oppgaveKilde: 'SAKSBEHANDLER',
+        },
+      },
+      (oppgave) => {
+        navigate(`/oppgave/${oppgave.id}`)
+      }
+    )
+
   if (isSuccess(knyttTilAnnenSakStatus) && isSuccess(feilregSakstilknytningStatus)) {
-    return (
+    return mapSuccess(annenSakStatus, (sak) => (
       <>
         <Alert variant="success">
-          Journalposten ble feilregistrert og flyttet til annen sak{' '}
-          {mapSuccess(annenSakStatus, (sak) => `(sakid=${sak.id}, fnr=${sak.ident}, saktype=${sak.sakType})`)}
+          Journalposten ble feilregistrert og flyttet til annen sak (sakid={sak.id}, fnr={sak.ident}, saktype=
+          {sak.sakType})
+        </Alert>
+
+        <br />
+
+        <Alert variant="info" inline>
+          Om du oppretter oppgave vil den bli knyttet til den <i>nye</i> saken og journalposten
         </Alert>
 
         <br />
@@ -89,12 +114,19 @@ export const KnyttTilAnnenSak = ({
           <Button variant="tertiary" onClick={() => window.location.reload()}>
             Avslutt
           </Button>
-          {mapSuccess(annenSakStatus, (sak) => (
-            <Button onClick={() => navigate(`/person/${sak.ident}`)}>Gå til sak {sak.id}</Button>
-          ))}
+
+          <Button variant="secondary" onClick={() => navigate(`/person/${sak.ident}`)}>
+            Gå til sak {sak.id}
+          </Button>
+          <Button
+            onClick={() => opprettJournalfoeringsoppgave(sak.id, knyttTilAnnenSakStatus.data.nyJournalpostId)}
+            loading={isPending(oppgaveResult)}
+          >
+            Opprett oppgave
+          </Button>
         </FlexRow>
       </>
-    )
+    ))
   }
 
   return (

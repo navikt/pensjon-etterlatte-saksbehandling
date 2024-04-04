@@ -11,11 +11,13 @@ import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { kanEndreJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/validering'
 import { KnyttTilAnnentBruker } from './KnyttTilAnnenBruker'
+import { OpprettJournalfoeringsoppgave } from './OpprettJournalfoeringsoppgave'
 
-enum Aarsak {
+enum AvvikHandling {
   UTGAAR = 'UTGAAR',
   OVERFOER = 'OVERFOER',
   FEILREGISTRER = 'FEILREGISTRER',
+  OPPRETT_OPPGAVE = 'OPPRETT_OPPGAVE',
 }
 
 export const HaandterAvvikModal = ({
@@ -26,7 +28,7 @@ export const HaandterAvvikModal = ({
   sakStatus: Result<SakMedBehandlinger>
 }) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [aarsak, setAarsak] = useState<Aarsak>()
+  const [aarsak, setAarsak] = useState<AvvikHandling>()
 
   return (
     <>
@@ -71,11 +73,16 @@ export const HaandterAvvikModal = ({
           </Box>
           <br />
 
-          <RadioGroup legend="Velg handling" value={aarsak || ''} onChange={(checked) => setAarsak(checked as Aarsak)}>
-            <Radio value={Aarsak.OVERFOER}>Overfør til annen sak</Radio>
-            <Radio value={Aarsak.FEILREGISTRER}>
+          <RadioGroup
+            legend="Velg handling"
+            value={aarsak || ''}
+            onChange={(checked) => setAarsak(checked as AvvikHandling)}
+          >
+            <Radio value={AvvikHandling.OVERFOER}>Overfør til annen sak</Radio>
+            <Radio value={AvvikHandling.FEILREGISTRER}>
               {journalpost.journalstatus === Journalstatus.FEILREGISTRERT ? 'Opphev feilregistrering' : 'Feilregistrer'}
             </Radio>
+            <Radio value={AvvikHandling.OPPRETT_OPPGAVE}>Opprett oppgave</Radio>
 
             {/* TODO: Skal lage støtte for den fortløpende, men prioriterer overføring til annen sak */}
             {/*<option value={Aarsak.UTGAAR}>Sett til utgår</option>*/}
@@ -83,16 +90,14 @@ export const HaandterAvvikModal = ({
 
           <br />
 
-          {aarsak === Aarsak.UTGAAR && <>{/*TODO*/}</>}
-
-          {aarsak === Aarsak.FEILREGISTRER &&
+          {aarsak === AvvikHandling.FEILREGISTRER &&
             (journalpost.journalstatus === Journalstatus.FEILREGISTRERT ? (
               <OpphevFeilregistreringJournalpost journalpost={journalpost} />
             ) : (
               <FeilregistrerJournalpost journalpost={journalpost} />
             ))}
 
-          {aarsak === Aarsak.OVERFOER &&
+          {aarsak === AvvikHandling.OVERFOER &&
             (kanEndreJournalpost(journalpost) ? (
               <KnyttTilAnnentBruker
                 journalpost={journalpost}
@@ -102,6 +107,10 @@ export const HaandterAvvikModal = ({
             ) : (
               <KnyttTilAnnenSak journalpost={journalpost} sakStatus={sakStatus} lukkModal={() => setIsOpen(false)} />
             ))}
+
+          {aarsak === AvvikHandling.OPPRETT_OPPGAVE && (
+            <OpprettJournalfoeringsoppgave journalpost={journalpost} sakStatus={sakStatus} />
+          )}
         </Modal.Body>
       </Modal>
     </>

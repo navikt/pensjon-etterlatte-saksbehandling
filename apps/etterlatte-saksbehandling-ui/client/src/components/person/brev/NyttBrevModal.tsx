@@ -3,37 +3,35 @@ import { DocPencilIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBrevAvSpesifikkTypeForSak } from '~shared/api/brev'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { FlexRow } from '~shared/styled'
 import { isPending } from '~shared/api/apiUtils'
+import { useNavigate } from 'react-router-dom'
 
 export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
-  const [nyttBrevStatus, opprettBrev] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
+  const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
   const [open, setOpen] = useState(false)
+  const navigate = useNavigate()
 
   const defaultData: FilledFormData = {
-    type: 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV',
-    aktivitetsgrad: '100%',
+    type: 'TOMT_BREV',
   }
 
   const {
-    formState: { isDirty, errors },
+    formState: { errors },
     handleSubmit,
-    control,
     watch,
+    register,
   } = useForm({ defaultValues: defaultData })
 
-  const heleSkjemaet = watch()
+  const skjemaet = watch()
 
-  const lagre = (formData: FilledFormData) => {
-    if (!isDirty) {
-      setOpen(false)
-      return
-    }
+  const opprettBrev = (formData: FilledFormData) => {
     const brevParametre = mapFormdataToBrevParametre(formData)
 
-    opprettBrev({ sakId: sakId, body: brevParametre }, () => {
+    opprettBrevApiCall({ sakId: sakId, body: brevParametre }, (brev) => {
       setOpen(false)
+      navigate(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`)
     })
   }
 
@@ -60,50 +58,46 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
           </Heading>
         </Modal.Header>
 
-        <form onSubmit={handleSubmit((data) => lagre(data))}>
+        <form onSubmit={handleSubmit(opprettBrev)}>
           <Modal.Body>
             <FlexRow $spacing>
-              <Controller
-                rules={{
-                  required: true,
-                }}
-                name="type"
-                control={control}
-                render={({ field }) => (
-                  <Select {...field} label="Type" error={errors.type?.message}>
-                    <option value="OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV">Varselbrev om aktivitetsplikt</option>
-                    <option value="TOMT_BREV">Tomt brev</option>
-                  </Select>
-                )}
-              />
+              <Select
+                error={errors?.type?.message}
+                label="Type"
+                {...register('type', {
+                  required: { value: true, message: 'Feltet er påkrevd' },
+                })}
+              >
+                <option value="OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV">Varselbrev om aktivitetsplikt</option>
+                <option value="TOMT_BREV">Manuelt brev</option>
+              </Select>
             </FlexRow>
 
-            {heleSkjemaet.type === 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV' && (
+            {skjemaet.type === 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV' && (
               <FlexRow $spacing>
-                <Controller
-                  rules={{
-                    required: true,
-                  }}
-                  name="aktivitetsgrad"
-                  control={control}
-                  render={({ field }) => (
-                    <Select {...field} label="Aktivitetsgrad" error={errors.aktivitetsgrad?.message}>
-                      <option value="IKKE_I_AKTIVITET">Ikke i aktivitet</option>
-                      <option value="UNDER_50_PROSENT">Under 50%</option>
-                      <option value="OVER_50_PROSENT">Over 50%</option>
-                    </Select>
-                  )}
-                />
+                <Select
+                  error={errors?.aktivitetsgrad?.message}
+                  label="Aktivitetsgrad"
+                  {...register('aktivitetsgrad', {
+                    required: { value: true, message: 'Du må velge aktivitetsgrad' },
+                    validate: { notDefault: (value) => !!value },
+                  })}
+                >
+                  <option value="">Velg aktivitetsgrad</option>
+                  <option value="IKKE_I_AKTIVITET">Ikke i aktivitet</option>
+                  <option value="UNDER_50_PROSENT">Under 50%</option>
+                  <option value="OVER_50_PROSENT">Over 50%</option>
+                </Select>
               </FlexRow>
             )}
           </Modal.Body>
 
           <Modal.Footer>
             <FlexRow justify="right">
-              <Button variant="secondary" type="button" disabled={isPending(nyttBrevStatus)} onClick={avbryt}>
+              <Button variant="secondary" type="button" disabled={isPending(opprettBrevStatus)} onClick={avbryt}>
                 Avbryt
               </Button>
-              <Button variant="primary" type="submit" loading={isPending(nyttBrevStatus)}>
+              <Button variant="primary" type="submit" loading={isPending(opprettBrevStatus)}>
                 Opprett brev
               </Button>
             </FlexRow>

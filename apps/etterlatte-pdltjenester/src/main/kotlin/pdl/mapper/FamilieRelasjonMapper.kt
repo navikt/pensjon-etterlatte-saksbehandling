@@ -22,7 +22,9 @@ object FamilieRelasjonMapper {
         // TODO finn ut om det er riktig å hente ut basert på sisteRegistrertDato
         val ansvarligeForeldre =
             when (personRolle) {
-                PersonRolle.BARN ->
+                PersonRolle.TILKNYTTET_BARN,
+                PersonRolle.BARN,
+                ->
                     hentPerson.foreldreansvar
                         ?.filter { it.ansvarlig != null }
                         ?.groupBy { it.ansvarlig }
@@ -35,7 +37,9 @@ object FamilieRelasjonMapper {
             }
         val foreldre =
             when (personRolle) {
-                PersonRolle.BARN ->
+                PersonRolle.TILKNYTTET_BARN,
+                PersonRolle.BARN,
+                ->
                     hentPerson.forelderBarnRelasjon
                         ?.filter { it.relatertPersonsRolle != PdlForelderBarnRelasjonRolle.BARN }
                         ?.groupBy { it.relatertPersonsIdent }

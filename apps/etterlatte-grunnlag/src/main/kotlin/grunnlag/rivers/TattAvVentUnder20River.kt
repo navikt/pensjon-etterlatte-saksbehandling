@@ -40,18 +40,16 @@ class TattAvVentUnder20River(
             )
             packet.setEventNameForHendelseType(Ventehendelser.TATT_AV_VENT_FYLT_20)
             context.publish(packet.toJson())
-            return
-        }
-        if (alderVedMaanedsslutt < 18) {
+        } else if (alderVedMaanedsslutt < 18) {
             logger.error(
                 "Forventer at søker er mellom 18 og 20, " +
                     "men søker i sak ${packet.sakId} er $alderVedMaanedsslutt år innen utgangen av denne måneden. " +
                     "Avbryter, dette må følges opp av en utvikler. NB: Oppgaven er alt tatt av vent.",
             )
             return
+        } else {
+            packet.setEventNameForHendelseType(Ventehendelser.TATT_AV_VENT_UNDER_20_SJEKKA)
+            context.publish(packet.toJson())
         }
-
-        packet.setEventNameForHendelseType(Ventehendelser.TATT_AV_VENT_UNDER_20_SJEKKA)
-        context.publish(packet.toJson())
     }
 }

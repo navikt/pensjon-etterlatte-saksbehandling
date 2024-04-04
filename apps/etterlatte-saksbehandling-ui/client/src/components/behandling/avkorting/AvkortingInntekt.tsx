@@ -102,7 +102,7 @@ export const AvkortingInntekt = ({
     reset,
     handleSubmit,
     formState: { errors },
-    getValues,
+    watch,
   } = useForm<IAvkortingGrunnlag>({
     defaultValues: finnRedigerbartGrunnlagEllerOpprettNytt(),
   })
@@ -224,50 +224,50 @@ export const AvkortingInntekt = ({
                     <TextField
                       {...register('aarsinntekt', {
                         required: { value: true, message: 'Må fylles ut' },
+                        pattern: { value: /[0-9]/, message: 'Kun tall' },
                       })}
                       label="Forventet årsinntekt Norge"
                       size="medium"
                       type="text"
                       inputMode="numeric"
-                      pattern="[0-9]*"
                       error={errors.aarsinntekt?.message}
                     />
                     <TextField
                       {...register('fratrekkInnAar', {
                         required: { value: true, message: 'Må fylles ut' },
+                        pattern: { value: /[0-9]/, message: 'Kun tall' },
                       })}
                       label="Fratrekk inn-år"
                       size="medium"
                       type="text"
                       inputMode="numeric"
-                      pattern="[0-9]*"
                       error={errors.fratrekkInnAar?.message}
                     />
                     <TextField
                       {...register('inntektUtland', {
                         required: { value: true, message: 'Må fylles ut' },
+                        pattern: { value: /[0-9]/, message: 'Kun tall' },
                       })}
                       label="Forventet årsinntekt utland"
                       size="medium"
                       type="text"
                       inputMode="numeric"
-                      pattern="[0-9]*"
                       error={errors.inntektUtland?.message}
                     />
                     <TextField
                       {...register('fratrekkInnAarUtland', {
                         required: { value: true, message: 'Må fylles ut' },
+                        pattern: { value: /[0-9]/, message: 'Kun tall' },
                       })}
                       label="Fratrekk inn-år"
                       size="medium"
                       type="text"
                       inputMode="numeric"
-                      pattern="[0-9]*"
                       error={errors.fratrekkInnAarUtland?.message}
                     />
                     <VStack gap="4">
                       <Label>Fra og med dato</Label>
-                      <BodyShort>{formaterStringDato(getValues().fom!)}</BodyShort>
+                      <BodyShort>{formaterStringDato(watch('fom')!)}</BodyShort>
                     </VStack>
                   </HStack>
                 </FormWrapper>

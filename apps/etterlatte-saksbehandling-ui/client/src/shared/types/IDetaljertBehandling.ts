@@ -28,6 +28,11 @@ export interface IDetaljertBehandling {
   kilde: Vedtaksloesning
 }
 
+export const virkningstidspunkt = (behandling: IDetaljertBehandling) => {
+  if (!behandling.virkningstidspunkt) throw new Error('Mangler virkningstidspunkt')
+  return behandling.virkningstidspunkt
+}
+
 export interface NyBehandlingRequest {
   sakType?: SakType
   persongalleri?: Persongalleri

@@ -2,7 +2,6 @@ import {
   Alert,
   BodyShort,
   Button,
-  ErrorMessage,
   Heading,
   HelpText,
   HStack,
@@ -14,7 +13,7 @@ import {
   VStack,
 } from '@navikt/ds-react'
 import styled from 'styled-components'
-import React, { FormEvent, useState } from 'react'
+import React, { useState } from 'react'
 import { IAvkorting, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
@@ -30,6 +29,8 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppSelector } from '~store/Store'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
+import { useForm } from 'react-hook-form'
+import { virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 
 export const AvkortingInntekt = ({
   behandling,
@@ -50,10 +51,10 @@ export const AvkortingInntekt = ({
   const avkortingGrunnlag = avkorting == null ? [] : [...avkorting.avkortingGrunnlag]
   avkortingGrunnlag?.sort((a, b) => new Date(b.fom!).getTime() - new Date(a.fom!).getTime())
 
-  const virkningstidspunkt = () => {
-    if (!behandling.virkningstidspunkt) throw new Error('Mangler virkningstidspunkt')
-    return behandling.virkningstidspunkt.dato
-  }
+  const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
+
+  const [formToggle, setFormToggle] = useState(false)
+  const [visHistorikk, setVisHistorikk] = useState(false)
 
   // Er det utregnet avkorting finnes det grunnlag lagt til i denne behandlingen
   const finnesRedigerbartGrunnlag = () => avkorting?.avkortetYtelse && avkorting?.avkortetYtelse.length !== 0
@@ -69,7 +70,7 @@ export const AvkortingInntekt = ({
         // Korrigerer fom hvis virkningstidspunkt er endret
         return {
           ...redigerbartGrunnlag,
-          fom: virkningstidspunkt(),
+          fom: virkningstidspunkt(behandling).dato,
         }
       }
       return redigerbartGrunnlag
@@ -78,7 +79,7 @@ export const AvkortingInntekt = ({
       // Preutfyller ny grunnlagsperiode med tidligere verdier
       const nyligste = avkortingGrunnlag[0]
       return {
-        fom: virkningstidspunkt(),
+        fom: virkningstidspunkt(behandling).dato,
         fratrekkInnAar: nyligste.fratrekkInnAar,
         fratrekkInnAarUtland: nyligste.fratrekkInnAarUtland,
         relevanteMaanederInnAar: nyligste.relevanteMaanederInnAar,
@@ -87,7 +88,7 @@ export const AvkortingInntekt = ({
     }
     // Første grunnlagsperiode
     return {
-      fom: virkningstidspunkt(),
+      fom: virkningstidspunkt(behandling).dato,
       spesifikasjon: '',
     }
   }
@@ -96,38 +97,29 @@ export const AvkortingInntekt = ({
     return avkortingGrunnlag.length > 0 ? [avkortingGrunnlag[0]] : []
   }
 
-  const [inntektGrunnlagForm, setInntektGrunnlagForm] = useState<IAvkortingGrunnlag>(
-    finnRedigerbartGrunnlagEllerOpprettNytt()
-  )
-  const [inntektGrunnlagStatus, requestLagreAvkortingGrunnlag] = useApiCall(lagreAvkortingGrunnlag)
-  const [errorTekst, setErrorTekst] = useState<string | null>(null)
+  const {
+    register,
+    reset,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+  } = useForm<IAvkortingGrunnlag>({
+    defaultValues: finnRedigerbartGrunnlagEllerOpprettNytt(),
+  })
 
-  const [formToggle, setFormToggle] = useState(false)
-  const [visHistorikk, setVisHistorikk] = useState(false)
-  const onSubmit = (e: FormEvent) => {
-    e.preventDefault()
-
-    setErrorTekst('')
-    if (inntektGrunnlagForm.aarsinntekt == null) return setErrorTekst('Årsinntekt må fylles ut')
-    if (inntektGrunnlagForm.fratrekkInnAar == null) return setErrorTekst('Fratrekk inn-år må fylles ut')
-    if (inntektGrunnlagForm.inntektUtland == null) return setErrorTekst('Årsinntekt utland må fylles ut')
-    if (inntektGrunnlagForm.fratrekkInnAarUtland == null) return setErrorTekst('Fratrekk inn-år utland må fylles ut')
-    if (inntektGrunnlagForm.fom !== virkningstidspunkt())
-      return setErrorTekst('Fra og med for forventet årsinntekt må være fra virkningstidspunkt')
-
+  const onSubmit = (data: IAvkortingGrunnlag) =>
     requestLagreAvkortingGrunnlag(
       {
         behandlingId: behandling.id,
-        avkortingGrunnlag: inntektGrunnlagForm,
+        avkortingGrunnlag: data,
       },
       (respons) => {
         const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[respons.avkortingGrunnlag.length - 1]
-        nyttAvkortingGrunnlag && setInntektGrunnlagForm(nyttAvkortingGrunnlag)
+        nyttAvkortingGrunnlag && reset(nyttAvkortingGrunnlag)
         setAvkorting(respons)
         setFormToggle(false)
       }
     )
-  }
 
   return (
     <AvkortingInntektWrapper>
@@ -223,76 +215,65 @@ export const AvkortingInntekt = ({
       )}
       {avkortingGrunnlag.length > 1 && <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />}
       {erRedigerbar && (
-        <InntektAvkortingForm onSubmit={onSubmit}>
+        <InntektAvkortingForm>
           <Rows>
             {formToggle && (
               <>
                 <FormWrapper>
                   <HStack gap="4">
                     <TextField
+                      {...register('aarsinntekt', {
+                        required: { value: true, message: 'Må fylles ut' },
+                      })}
                       label="Forventet årsinntekt Norge"
                       size="medium"
                       type="text"
                       inputMode="numeric"
                       pattern="[0-9]*"
-                      value={inntektGrunnlagForm.aarsinntekt}
-                      onChange={(e) =>
-                        setInntektGrunnlagForm({
-                          ...inntektGrunnlagForm,
-                          aarsinntekt: e.target.value === '' ? undefined : Number(e.target.value),
-                        })
-                      }
+                      error={errors.aarsinntekt?.message}
                     />
                     <TextField
+                      {...register('fratrekkInnAar', {
+                        required: { value: true, message: 'Må fylles ut' },
+                      })}
                       label="Fratrekk inn-år"
                       size="medium"
                       type="text"
                       inputMode="numeric"
                       pattern="[0-9]*"
-                      value={inntektGrunnlagForm.fratrekkInnAar}
-                      onChange={(e) =>
-                        setInntektGrunnlagForm({
-                          ...inntektGrunnlagForm,
-                          fratrekkInnAar: Number(e.target.value),
-                        })
-                      }
+                      error={errors.fratrekkInnAar?.message}
                     />
                     <TextField
+                      {...register('inntektUtland', {
+                        required: { value: true, message: 'Må fylles ut' },
+                      })}
                       label="Forventet årsinntekt utland"
                       size="medium"
                       type="text"
                       inputMode="numeric"
                       pattern="[0-9]*"
-                      value={inntektGrunnlagForm.inntektUtland}
-                      onChange={(e) =>
-                        setInntektGrunnlagForm({
-                          ...inntektGrunnlagForm,
-                          inntektUtland: Number(e.target.value),
-                        })
-                      }
+                      error={errors.inntektUtland?.message}
                     />
                     <TextField
+                      {...register('fratrekkInnAarUtland', {
+                        required: { value: true, message: 'Må fylles ut' },
+                      })}
                       label="Fratrekk inn-år"
                       size="medium"
                       type="text"
                       inputMode="numeric"
                       pattern="[0-9]*"
-                      value={inntektGrunnlagForm.fratrekkInnAarUtland}
-                      onChange={(e) =>
-                        setInntektGrunnlagForm({
-                          ...inntektGrunnlagForm,
-                          fratrekkInnAarUtland: Number(e.target.value),
-                        })
-                      }
+                      error={errors.fratrekkInnAarUtland?.message}
                     />
                     <VStack gap="4">
                       <Label>Fra og med dato</Label>
-                      <BodyShort>{formaterStringDato(inntektGrunnlagForm.fom!)}</BodyShort>
+                      <BodyShort>{formaterStringDato(getValues().fom!)}</BodyShort>
                     </VStack>
                   </HStack>
                 </FormWrapper>
                 <TextAreaWrapper>
                   <Textarea
+                    {...register('spesifikasjon')}
                     label={
                       <SpesifikasjonLabel>
                         <Label>Spesifikasjon av inntekt</Label>
@@ -304,22 +285,14 @@ export const AvkortingInntekt = ({
                         </ReadMore>
                       </SpesifikasjonLabel>
                     }
-                    value={inntektGrunnlagForm.spesifikasjon}
-                    onChange={(e) =>
-                      setInntektGrunnlagForm({
-                        ...inntektGrunnlagForm,
-                        spesifikasjon: e.target.value,
-                      })
-                    }
                   />
                 </TextAreaWrapper>
-                {errorTekst == null ? null : <ErrorMessage>{errorTekst}</ErrorMessage>}
               </>
             )}
             <FormKnapper>
               {formToggle ? (
                 <>
-                  <Button size="small" loading={isPending(inntektGrunnlagStatus)} type="submit">
+                  <Button size="small" loading={isPending(inntektGrunnlagStatus)} onClick={handleSubmit(onSubmit)}>
                     Lagre
                   </Button>
                   <Button

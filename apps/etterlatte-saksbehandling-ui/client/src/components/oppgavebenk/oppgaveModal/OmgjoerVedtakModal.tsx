@@ -1,4 +1,4 @@
-import { OppgaveDTO } from '~shared/api/oppgaver'
+import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
 import { Alert, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -39,11 +39,12 @@ function erBehandlingVedtakOmgjoering(klage: Klage): boolean {
   }
 }
 
-export function OmgjoerVedtakModal(props: { oppgave: OppgaveDTO }) {
-  const { oppgave } = props
+export function OmgjoerVedtakModal({ oppgave }: { oppgave: OppgaveDTO }) {
   const [open, setOpen] = useState(false)
   const [opprettRevurderingStatus, opprettRevurdering] = useApiCall(opprettOmgjoeringKlage)
   const [klageResult, fetchKlage] = useApiCall(hentKlage)
+
+  if (!erOppgaveRedigerbar(oppgave?.status)) return null
 
   useEffect(() => {
     if (oppgave.referanse) {

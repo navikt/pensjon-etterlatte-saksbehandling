@@ -54,6 +54,7 @@ import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
+import no.nav.etterlatte.behandling.selftest.SelfTestService
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteDao
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
@@ -372,6 +373,7 @@ internal class ApplicationContext(
 
     val sakTilgangDao = SakTilgangDao(dataSource)
     val tilgangService = TilgangServiceImpl(sakTilgangDao)
+    val selfTestService = SelfTestService(axsysKlient, navAnsattKlient, skjermingKlient)
     val enhetService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
     val sakService =
         SakServiceImpl(

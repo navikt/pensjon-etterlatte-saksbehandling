@@ -25,9 +25,9 @@ suspend fun HttpClient.ping(
             navConsumerId(konsumentEndelig)
         }
         logger.info("$serviceName svarer OK")
-        PingResultUp(serviceName, endpoint = pingUrl, beskrivelse = beskrivelse)
+        PingResultUp(serviceName, endpoint = pingUrl, message = beskrivelse)
     } catch (e: Exception) {
-        PingResultDown(serviceName, endpoint = pingUrl, errorMessage = e.message, beskrivelse = beskrivelse).also {
+        PingResultDown(serviceName, endpoint = pingUrl, errorMessage = e.message, message = beskrivelse).also {
             logger.warn("$serviceName svarer IKKE ok. ${it.toStringServiceDown()}")
         }
     }
@@ -52,25 +52,25 @@ sealed class PingResult {
     abstract val serviceName: String
     abstract val status: ServiceStatus
     abstract val endpoint: String
-    abstract val beskrivelse: String
+    abstract val message: String
 }
 
 class PingResultUp(
     override val serviceName: String,
     override val status: ServiceStatus = ServiceStatus.UP,
     override val endpoint: String,
-    override val beskrivelse: String,
+    override val message: String,
 ) : PingResult()
 
 class PingResultDown(
     override val serviceName: String,
     override val status: ServiceStatus = ServiceStatus.DOWN,
     override val endpoint: String,
-    override val beskrivelse: String,
-    private val errorMessage: String?,
+    override val message: String,
+    val errorMessage: String?,
 ) : PingResult() {
     fun toStringServiceDown(): String {
-        return "Servicename: $serviceName endpoint: $endpoint beskrivelse $beskrivelse errorMessage: $errorMessage "
+        return "Servicename: $serviceName endpoint: $endpoint beskrivelse $message errorMessage: $errorMessage "
     }
 }
 

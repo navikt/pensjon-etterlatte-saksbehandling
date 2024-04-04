@@ -20,6 +20,7 @@ import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
 import no.nav.etterlatte.behandling.revurdering.revurderingRoutes
+import no.nav.etterlatte.behandling.selftest.selfTestRoute
 import no.nav.etterlatte.behandling.sjekklisteRoute
 import no.nav.etterlatte.behandling.statistikk.statistikkRoutes
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
@@ -197,6 +198,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     saksbehandlerRoutes(saksbehandlerService = applicationContext.saksbehandlerService)
 
     tilgangRoutes(applicationContext.tilgangService)
+    selfTestRoute(applicationContext.selfTestService)
 }
 
 private fun Route.settOppTilganger(

@@ -35,13 +35,13 @@ class SkjermingKlient(
                 setBody(SkjermetDataRequestDTO(personident = "dummy")) // Det er meningen å sende inn "dummy"
             }.body<Boolean>()
         } catch (e: Exception) {
-            return PingResultDown(serviceName, endpoint = endpoint, errorMessage = e.message, beskrivelse = beskrivelse)
+            return PingResultDown(serviceName, endpoint = endpoint, errorMessage = e.message, message = beskrivelse)
                 .also {
                     logger.warn("$serviceName svarer IKKE ok. ${it.toStringServiceDown()}")
                 }
         }
         logger.info("$serviceName svarer OK")
-        return PingResultUp(serviceName, endpoint = endpoint, beskrivelse = beskrivelse)
+        return PingResultUp(serviceName, endpoint = endpoint, message = beskrivelse)
     }
 
     override val serviceName: String

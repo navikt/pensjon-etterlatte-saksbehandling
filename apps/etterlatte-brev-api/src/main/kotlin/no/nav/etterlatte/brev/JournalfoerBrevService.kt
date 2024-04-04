@@ -53,6 +53,11 @@ class JournalfoerBrevService(
             service.hentVedtaksbrev(behandlingId)
                 ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
 
+        if (brev.id == 15552L) {
+            logger.info("Vedtaksbrev fra migrering som er i feil tilstand. Avbryter denne.")
+            return null
+        }
+
         // TODO: Forbedre denne "fiksen". Gjøres nå for å lappe sammen
         if (brev.status in listOf(Status.JOURNALFOERT, Status.DISTRIBUERT, Status.SLETTET)) {
             logger.warn("Vedtaksbrev (id=${brev.id}) er allerede ${brev.status}.")

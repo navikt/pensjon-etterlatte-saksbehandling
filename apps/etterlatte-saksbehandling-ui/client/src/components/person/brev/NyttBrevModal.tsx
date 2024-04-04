@@ -5,8 +5,9 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBrevAvSpesifikkTypeForSak } from '~shared/api/brev'
 import { useForm } from 'react-hook-form'
 import { FlexRow } from '~shared/styled'
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { useNavigate } from 'react-router-dom'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
@@ -103,6 +104,9 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
             </FlexRow>
           </Modal.Footer>
         </form>
+        {mapFailure(opprettBrevStatus, (error) => (
+          <ApiErrorAlert>{error.detail || 'Ukjent feil oppsto ved oppretting av brev'}</ApiErrorAlert>
+        ))}
       </Modal>
     </>
   )

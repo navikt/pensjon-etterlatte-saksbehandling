@@ -15,15 +15,21 @@ export const setTrygdetidYrkesskade = async (yrkesskade: ITrygdetidYrkesskade): 
 
 export const lagreTrygdetidgrunnlag = async (args: {
   behandlingId: string
+  trygdetidId: string
   trygdetidgrunnlag: OppdaterTrygdetidGrunnlag
 }): Promise<ApiResponse<ITrygdetid>> =>
-  apiClient.post(`/trygdetid_v2/${args.behandlingId}/grunnlag`, { ...args.trygdetidgrunnlag })
+  apiClient.post(`/trygdetid_v2/${args.behandlingId}/${args.trygdetidId}/grunnlag`, {
+    ...args.trygdetidgrunnlag,
+  })
 
 export const slettTrygdetidsgrunnlag = async (args: {
   behandlingId: string
+  trygdetidId: string
   trygdetidGrunnlagId: string
 }): Promise<ApiResponse<ITrygdetid>> =>
-  apiClient.delete<ITrygdetid>(`/trygdetid_v2/${args.behandlingId}/grunnlag/${args.trygdetidGrunnlagId}`)
+  apiClient.delete<ITrygdetid>(
+    `/trygdetid_v2/${args.behandlingId}/${args.trygdetidId}/grunnlag/${args.trygdetidGrunnlagId}`
+  )
 
 export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> =>
   apiClient.get<ILand[]>('/trygdetid/kodeverk/land')

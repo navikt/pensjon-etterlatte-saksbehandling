@@ -5,9 +5,14 @@ import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.LagreAvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -54,7 +59,7 @@ class AvkortingService(
     suspend fun beregnAvkortingMedNyttGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        avkortingGrunnlag: AvkortingGrunnlag,
+        avkortingGrunnlag: LagreAvkortingGrunnlagDto,
     ): Avkorting {
         tilstandssjekk(behandlingId, brukerTokenInfo)
         logger.info("Lagre og beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
@@ -64,7 +69,11 @@ class AvkortingService(
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val beregnetAvkorting =
             avkorting.beregnAvkortingMedNyttGrunnlag(
-                avkortingGrunnlag,
+                avkortingGrunnlag.fromDto(
+                    brukerTokenInfo,
+                    behandling.virkningstidspunkt!!,
+                    behandling.behandlingType,
+                ),
                 behandling.behandlingType,
                 beregning,
             )
@@ -164,6 +173,27 @@ class AvkortingService(
         }
     }
 }
+
+fun LagreAvkortingGrunnlagDto.fromDto(
+    brukerTokenInfo: BrukerTokenInfo,
+    virkningstidspunkt: Virkningstidspunkt,
+    behandlingstype: BehandlingType,
+) = AvkortingGrunnlag(
+    id = id,
+    periode = Periode(fom = fom, tom = tom),
+    aarsinntekt = aarsinntekt,
+    fratrekkInnAar = fratrekkInnAar,
+    relevanteMaanederInnAar =
+        when (behandlingstype) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> (12 - fom.monthValue + 1)
+            BehandlingType.REVURDERING -> relevanteMaanederInnAar ?: (12 - fom.monthValue + 1)
+        },
+    inntektUtland = inntektUtland,
+    fratrekkInnAarUtland = fratrekkInnAarUtland,
+    spesifikasjon = spesifikasjon,
+    kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now()),
+    // virkVedLagring = virkningstidspunkt.dato
+)
 
 class AvkortingFinnesIkkeException(behandlingId: UUID) : IkkeFunnetException(
     code = "AVKORTING_IKKE_FUNNET",

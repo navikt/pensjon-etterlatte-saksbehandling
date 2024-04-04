@@ -15,14 +15,11 @@ import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.beregning.LagreAvkortingGrunnlagDto
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
 fun Route.avkorting(
     avkortingService: AvkortingService,
@@ -45,12 +42,12 @@ fun Route.avkorting(
         post {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Lagre avkorting for behandlingId=$it")
-                val avkortingGrunnlag = call.receive<AvkortingGrunnlagDto>()
+                val avkortingGrunnlag = call.receive<LagreAvkortingGrunnlagDto>()
                 val avkorting =
                     avkortingService.beregnAvkortingMedNyttGrunnlag(
                         it,
                         brukerTokenInfo,
-                        avkortingGrunnlag.fromDto(brukerTokenInfo),
+                        avkortingGrunnlag,
                     )
                 call.respond(avkorting.toDto())
             }
@@ -98,17 +95,4 @@ fun AvkortetYtelse.toDto() =
         avkortingsbeloep = avkortingsbeloep,
         restanse = restanse?.fordeltRestanse ?: 0,
         ytelseEtterAvkorting = ytelseEtterAvkorting,
-    )
-
-fun AvkortingGrunnlagDto.fromDto(brukerTokenInfo: BrukerTokenInfo) =
-    AvkortingGrunnlag(
-        id = id,
-        periode = Periode(fom = fom, tom = tom),
-        aarsinntekt = aarsinntekt,
-        fratrekkInnAar = fratrekkInnAar,
-        relevanteMaanederInnAar = relevanteMaanederInnAar ?: (12 - fom.monthValue + 1),
-        inntektUtland = inntektUtland,
-        fratrekkInnAarUtland = fratrekkInnAarUtland,
-        spesifikasjon = spesifikasjon,
-        kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now()),
     )

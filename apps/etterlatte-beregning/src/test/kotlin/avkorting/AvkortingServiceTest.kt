@@ -10,13 +10,13 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.BeregningService
-import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
+import no.nav.etterlatte.libs.common.beregning.LagreAvkortingGrunnlagDto
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -320,7 +320,6 @@ internal class AvkortingServiceTest {
 
     @Nested
     inner class LagreAvkorting {
-        val endretGrunnlag = mockk<AvkortingGrunnlag>()
         val beregning = mockk<Beregning>()
 
         val eksisterendeAvkorting = mockk<Avkorting>()
@@ -328,13 +327,24 @@ internal class AvkortingServiceTest {
         val lagretAvkorting = mockk<Avkorting>()
 
         @Test
-        fun `Skal beregne og lagre avkorting for førstegangsbehandling`() {
+        fun `Skal beregne og lagre avkorting for foerstegangsbehandling`() {
+            val endretGrunnlagDto =
+                LagreAvkortingGrunnlagDto(
+                    fom = YearMonth.of(2024, 3),
+                    tom = null,
+                    aarsinntekt = 500000,
+                    fratrekkInnAar = 0,
+                    inntektUtland = 0,
+                    fratrekkInnAarUtland = 0,
+                    spesifikasjon = "",
+                    relevanteMaanederInnAar = 12,
+                )
             val behandlingId = UUID.randomUUID()
             val behandling =
                 behandling(
                     id = behandlingId,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 3)),
                 )
 
             every { avkortingRepository.hentAvkorting(any()) } returns eksisterendeAvkorting andThen lagretAvkorting
@@ -348,7 +358,7 @@ internal class AvkortingServiceTest {
             every { lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(any()) } returns lagretAvkorting
 
             runBlocking {
-                service.beregnAvkortingMedNyttGrunnlag(behandlingId, bruker, endretGrunnlag) shouldBe lagretAvkorting
+                service.beregnAvkortingMedNyttGrunnlag(behandlingId, bruker, endretGrunnlagDto) shouldBe lagretAvkorting
             }
 
             coVerify(exactly = 1) {
@@ -356,12 +366,16 @@ internal class AvkortingServiceTest {
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 beregningService.hentBeregningNonnull(behandlingId)
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
-                    endretGrunnlag,
+                    withArg {
+                        it.id shouldBe endretGrunnlagDto.id
+                        it.kilde.ident shouldBe bruker.ident
+                        it.relevanteMaanederInnAar shouldBe 10
+                    },
                     behandling.behandlingType,
                     beregning,
                 )
                 avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
-                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 1))
+                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 3))
                 behandlingKlient.avkort(behandlingId, bruker, true)
             }
             coVerify(exactly = 2) {
@@ -371,6 +385,17 @@ internal class AvkortingServiceTest {
 
         @Test
         fun `Lagre avkorting for revurdering henter og legger til avkorting fra forrige vedtak`() {
+            val endretGrunnlagDto =
+                LagreAvkortingGrunnlagDto(
+                    fom = YearMonth.of(2024, 4),
+                    tom = null,
+                    aarsinntekt = 600000,
+                    fratrekkInnAar = 0,
+                    inntektUtland = 0,
+                    fratrekkInnAarUtland = 0,
+                    spesifikasjon = "",
+                    relevanteMaanederInnAar = 10,
+                )
             val revurderingId = UUID.randomUUID()
             val sakId = 123L
             val revurdering =
@@ -378,7 +403,7 @@ internal class AvkortingServiceTest {
                     id = revurderingId,
                     behandlingType = BehandlingType.REVURDERING,
                     sak = sakId,
-                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 3)),
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 4)),
                 )
             val forrigeBehandling = UUID.randomUUID()
             val forrigeAvkorting = mockk<Avkorting>()
@@ -399,7 +424,7 @@ internal class AvkortingServiceTest {
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
 
             runBlocking {
-                service.beregnAvkortingMedNyttGrunnlag(revurderingId, bruker, endretGrunnlag) shouldBe lagretAvkorting
+                service.beregnAvkortingMedNyttGrunnlag(revurderingId, bruker, endretGrunnlagDto) shouldBe lagretAvkorting
             }
 
             coVerify(exactly = 1) {
@@ -407,14 +432,18 @@ internal class AvkortingServiceTest {
                 behandlingKlient.hentBehandling(revurderingId, bruker)
                 beregningService.hentBeregningNonnull(revurderingId)
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
-                    endretGrunnlag,
+                    withArg {
+                        it.id shouldBe endretGrunnlagDto.id
+                        it.kilde.ident shouldBe bruker.ident
+                        it.relevanteMaanederInnAar shouldBe 10
+                    },
                     revurdering.behandlingType,
                     beregning,
                 )
                 avkortingRepository.lagreAvkorting(revurderingId, beregnetAvkorting)
                 behandlingKlient.hentSisteIverksatteBehandling(sakId, bruker)
                 avkortingRepository.hentAvkorting(forrigeBehandling)
-                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 3), forrigeAvkorting)
+                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 4), forrigeAvkorting)
                 behandlingKlient.avkort(revurderingId, bruker, true)
             }
             coVerify(exactly = 2) {
@@ -429,7 +458,7 @@ internal class AvkortingServiceTest {
 
             runBlocking {
                 assertThrows<Exception> {
-                    service.beregnAvkortingMedNyttGrunnlag(behandlingId, bruker, avkortinggrunnlag())
+                    service.beregnAvkortingMedNyttGrunnlag(behandlingId, bruker, mockk())
                 }
             }
 

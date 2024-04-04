@@ -2,9 +2,28 @@
 
 NAME=`basename $0`
 
+info() {
+    echo -e "\033[1;32mINFO:\033[0m\t$1"
+}
+
+warn() {
+    echo -e "\033[1;33mWARN:\033[0m\t$1"
+}
+
 error() {
-    echo -e "$1" >&2
-    exit 1
+    echo -e "\033[1;31mERROR:\033[0m\t$1" >&2
+    exit;
+}
+
+ps_loader() {
+  PID=$!
+
+  while ps -p $PID &>/dev/null; do
+    echo -ne "."
+    sleep 1
+  done
+
+  echo "" # newline
 }
 
 help() {
@@ -41,12 +60,10 @@ while getopts ":d:p:u:" opt; do
       PROXY_USER="$OPTARG"
       ;;
     \?)
-      echo "Invalid option: -$OPTARG" >&2
-      exit 1
+      error "Invalid option: -$OPTARG" >&2
       ;;
     *)
-      echo -e "No arguments provided -- \n  Try \"$NAME --help\" for more information" >&2
-      exit 1
+      error "No arguments provided -- \n  Try \"$NAME --help\" for more information" >&2
       ;;
   esac
 done
@@ -61,31 +78,62 @@ elif [[ -z "$LOCAL_PORT" ]]; then
 fi
 
 
+DOCKER_HOST="host.docker.internal"
 CURRENT_CONTEXT=$(kubectl config current-context)
 
+# Denne sjekken må IKKE kommenteres ut!
 if [ "$CURRENT_CONTEXT" != "dev-gcp" ]; then
     error "Current context is $CURRENT_CONTEXT, but should be 'dev-gcp'"
 fi
 
 NOW=$(date +%s)
-DUMP_FILE="${PROXY_DB}_$(date +%s).sql"
+DUMP_FILE="${PROXY_DB}_$(date +%s).dump"
 
-echo "Starting pg_dump (this can take a minute)"
-pg_dump -x -a -h localhost -p 5432 -U $PROXY_USER -d $PROXY_DB -f $DUMP_FILE &
-DUMP_PID=$!
+info "Database cloning from dev-gcp started!"
+info "Running pg_dump on [$PROXY_DB] with username [$PROXY_USER]"
 
-while ps -p $DUMP_PID &>/dev/null; do
-  echo -ne "."
-  sleep 1
-done
+pg_dump \
+  --format=custom \
+  --no-privileges \
+  --host=localhost \
+  --port=5432 \
+  --username=$PROXY_USER \
+  --dbname=$PROXY_DB \
+   > $DUMP_FILE &
+
+ps_loader
 
 if [ $? -eq 0 ]; then
-  echo -e "\n\npg_dump was successful. Restoring to local database.\n"
-  psql -h host.docker.internal -p $LOCAL_PORT -U postgres -d postgres -f $DUMP_FILE
-
-  echo -e "\n\nDump and restore completed!"
+  info "pg_dump was successful!"
 else
-  error "\nUnexpected error occurred while running pg_dump"
+  rm $DUMP_FILE 2> /dev/null
+  error "Unexpected error occurred while running pg_dump"
+fi
+
+
+info "Dropping database 'postgres' on [$DOCKER_HOST:$LOCAL_PORT]"
+dropdb --force -h $DOCKER_HOST -p $LOCAL_PORT -U postgres postgres
+info "Creating database 'postgres' on [$DOCKER_HOST:$LOCAL_PORT]"
+createdb -h $DOCKER_HOST -p $LOCAL_PORT -U postgres postgres
+
+info "Running pg_restore"
+pg_restore \
+  --no-owner \
+  --no-privileges \
+  --host=$DOCKER_HOST \
+  --port=$LOCAL_PORT \
+  --username=postgres \
+  --dbname=postgres \
+  $DUMP_FILE &
+
+ps_loader
+
+if [ $? -eq 0 ]; then
+  info "pg_restore was successful!"
+  info "Database cloning from dev-gcp completed!"
+else
+  rm $DUMP_FILE 2> /dev/null
+  error "Unexpected error occurred while running pg_restore"
 fi
 
 rm $DUMP_FILE 2> /dev/null

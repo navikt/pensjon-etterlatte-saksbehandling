@@ -62,7 +62,7 @@ fun DataSource.migrate(): MigrateResult {
                 if (appIsInGCP()) {
                     dblocationsMiljoe.add("db/gcp")
                 }
-                if (isDev()) {
+                if (isDev() || !appIsInGCP()) {
                     dblocationsMiljoe.add("db/dev")
                 }
                 if (isProd()) {

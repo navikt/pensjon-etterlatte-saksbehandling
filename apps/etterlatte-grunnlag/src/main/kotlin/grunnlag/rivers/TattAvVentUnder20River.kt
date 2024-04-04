@@ -33,25 +33,23 @@ class TattAvVentUnder20River(
             aldersovergangService.hentAlder(packet.sakId, PersonRolle.BARN, YearMonth.now().atEndOfMonth()) ?: return
 
         if (alderVedMaanedsslutt >= 20) {
-            logger.debug(
+            logger.info(
                 "Søker i sak ${packet.sakId} har fylt 20 år innen utgangen av denne måneden, " +
                     "og vil da være $alderVedMaanedsslutt år. " +
                     "Oppgava er alt tatt av vent, men fatting av vedtak og oppfølging skjer manuelt av saksbehandler.",
             )
             packet.setEventNameForHendelseType(Ventehendelser.TATT_AV_VENT_FYLT_20)
             context.publish(packet.toJson())
-            return
-        }
-        if (alderVedMaanedsslutt < 18) {
+            logger.info("Publiserte melding for ${Ventehendelser.TATT_AV_VENT_FYLT_20} for ${packet.sakId}")
+        } else if (alderVedMaanedsslutt < 18) {
             logger.error(
                 "Forventer at søker er mellom 18 og 20, " +
                     "men søker i sak ${packet.sakId} er $alderVedMaanedsslutt år innen utgangen av denne måneden. " +
                     "Avbryter, dette må følges opp av en utvikler. NB: Oppgaven er alt tatt av vent.",
             )
-            return
+        } else {
+            packet.setEventNameForHendelseType(Ventehendelser.TATT_AV_VENT_UNDER_20_SJEKKA)
+            context.publish(packet.toJson())
         }
-
-        packet.setEventNameForHendelseType(Ventehendelser.TATT_AV_VENT_UNDER_20_SJEKKA)
-        context.publish(packet.toJson())
     }
 }

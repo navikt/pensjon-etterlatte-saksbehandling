@@ -181,8 +181,11 @@ class DoedshendelseService(
         val andreForeldreForAvdoedesBarn =
             avdoedesBarn
                 ?.mapNotNull { barn ->
-                    barn.familieRelasjon?.foreldre?.filter { it.value != avdoed.foedselsnummer.verdi.value }
-                        ?.map { it.value }
+                    val annenForelder =
+                        barn.familieRelasjon?.foreldre?.filter { it.value != avdoed.foedselsnummer.verdi.value }
+                            ?.map { it.value }
+                    logger.info("Fant annen forelder til barn ${barn.foedselsnummer.value}: $annenForelder")
+                    annenForelder
                 }
                 ?.flatten()
                 ?.distinct()

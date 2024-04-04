@@ -27,9 +27,7 @@ const validerKontrollsiffer = (value: string): boolean => {
  * Avansert validering for å se om fnr. er et ekte/gyldig.
  * Bruker kontrollsiffer for å validere gyldigheten.
  **/
-export const fnrErGyldig = (input: string | undefined): boolean => {
-  const value = input?.trim()
-
+export const fnrErGyldig = (value: string | undefined): boolean => {
   if (!/^\d{11}$/.test(value ?? ''))
     // hvis fnr ikke består av 11 siffer
     return false

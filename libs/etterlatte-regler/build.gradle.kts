@@ -27,19 +27,19 @@ tasks {
     }
 }
 
-val generatedVersionDir = "$buildDir/generated-version"
+val generatedVersionDir = layout.buildDirectory.dir("generated-version")
 
 sourceSets {
     main {
         kotlin {
-            output.dir(generatedVersionDir)
+            output.dir(generatedVersionDir.get())
         }
     }
 }
 
 tasks.register("generateVersionProperties") {
     doLast {
-        val propertiesFile = file("$generatedVersionDir/version.properties")
+        val propertiesFile = file("${generatedVersionDir.get()}/version.properties")
         propertiesFile.parentFile.mkdirs()
         val properties = Properties()
         properties.setProperty("version", "$version")

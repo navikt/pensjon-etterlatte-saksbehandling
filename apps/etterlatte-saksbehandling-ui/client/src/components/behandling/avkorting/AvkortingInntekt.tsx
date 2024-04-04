@@ -43,7 +43,7 @@ export const AvkortingInntekt = ({
   redigerbar: boolean
   setAvkorting: (avkorting: IAvkorting) => void
 }) => {
-  if (!behandling) throw new Error('Mangler behandling')
+  if (!behandling) return <Alert variant="error">Manlge behandling</Alert>
 
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)

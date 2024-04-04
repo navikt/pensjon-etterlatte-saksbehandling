@@ -13,7 +13,7 @@ import { tagColors, TagList } from '~shared/Tags'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
+import { erOppgaveRedigerbar, hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
@@ -153,9 +153,13 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
       </FlexRow>
 
-      {mapSuccess(oppgaveForBehandlingenStatus, (oppgave) => (
-        <SettPaaVent oppgave={oppgave} redigerbar={redigerbar} refreshOppgave={hentOppgaveForBehandling} />
-      ))}
+      {mapSuccess(
+        oppgaveForBehandlingenStatus,
+        (oppgave) =>
+          erOppgaveRedigerbar(oppgave?.status) && (
+            <SettPaaVent oppgave={oppgave} redigerbar={redigerbar} refreshOppgave={hentOppgaveForBehandling} />
+          )
+      )}
     </SidebarPanel>
   )
 }

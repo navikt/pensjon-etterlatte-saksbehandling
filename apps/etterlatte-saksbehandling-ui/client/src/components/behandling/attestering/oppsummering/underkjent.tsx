@@ -8,7 +8,7 @@ import { mapSuccess } from '~shared/api/apiUtils'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
+import { erOppgaveRedigerbar, hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 
 export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const innloggetId = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler.ident)
@@ -55,9 +55,13 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingIn
         </>
       )}
       <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
-      {mapSuccess(oppgaveForBehandlingenStatus, (oppgave) => (
-        <SettPaaVent oppgave={oppgave} redigerbar={true} refreshOppgave={hentOppgaveForBehandling} />
-      ))}
+      {mapSuccess(
+        oppgaveForBehandlingenStatus,
+        (oppgave) =>
+          erOppgaveRedigerbar(oppgave?.status) && (
+            <SettPaaVent oppgave={oppgave} redigerbar={true} refreshOppgave={hentOppgaveForBehandling} />
+          )
+      )}
     </Wrapper>
   )
 }

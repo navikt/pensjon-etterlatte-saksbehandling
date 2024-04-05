@@ -189,6 +189,7 @@ class JournalfoerBrevServiceTest {
                 VedtakSak("ident", type, forventetBrev.sakId),
                 UUID.randomUUID(),
                 "ansvarligEnhet",
+                "EY",
             )
 
         val service = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
@@ -324,6 +325,7 @@ class JournalfoerBrevServiceTest {
             sak = VedtakSak("Z123456", SakType.BARNEPENSJON, 2L),
             behandlingId = UUID.randomUUID(),
             ansvarligEnhet = "1234",
+            saksbehandler = "EY",
         )
 
     private companion object {

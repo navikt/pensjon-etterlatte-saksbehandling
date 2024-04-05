@@ -92,6 +92,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -375,8 +376,8 @@ internal class ApplicationContext(
 
     val tilgangService = TilgangServiceImpl(sakTilgangDao)
 
-    val selfTestService =
-        SelfTestService(
+    val externalServices: List<Pingable> =
+        listOf(
             axsysKlient,
             navAnsattKlient,
             skjermingKlient,
@@ -385,6 +386,7 @@ internal class ApplicationContext(
             klageKlient,
             tilbakekrevingKlient,
         )
+    val selfTestService = SelfTestService(externalServices)
     val enhetService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
     val sakService =
         SakServiceImpl(

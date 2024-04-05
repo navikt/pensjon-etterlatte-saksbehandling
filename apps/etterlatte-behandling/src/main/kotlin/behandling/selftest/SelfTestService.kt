@@ -2,38 +2,14 @@ package no.nav.etterlatte.behandling.selftest
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.behandling.klienter.AxsysKlient
-import no.nav.etterlatte.behandling.klienter.KlageKlient
-import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
-import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
-import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.common.klienter.SkjermingKlient
-import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.ServiceStatus
 import java.time.LocalTime
 
 class SelfTestService(
-    axsysKlient: AxsysKlient,
-    navAnsattKlient: NavAnsattKlient,
-    skjermingKlient: SkjermingKlient,
-    grunnlagKlient: GrunnlagKlient,
-    pdlTjenesterKlient: PdlTjenesterKlient,
-    klageKlient: KlageKlient,
-    tilbakekrevingKlient: TilbakekrevingKlient,
+    val externalServices: List<Pingable>,
 ) {
-    val externalServices: List<Pingable> =
-        listOf(
-            axsysKlient,
-            navAnsattKlient,
-            skjermingKlient,
-            grunnlagKlient,
-            pdlTjenesterKlient,
-            klageKlient,
-            tilbakekrevingKlient,
-        )
-
     /**
      * Returns result of self-test in HTML format.
      */

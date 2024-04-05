@@ -68,7 +68,7 @@ private class Server(private val context: ApplicationContext) {
             httpPort = context.httpPort,
             applicationConfig = context.config,
             cronJobs = timerJobs(context),
-            routes = { settOppSelftestroute(context) },
+            routes = { selfTestRoute(context.selfTestService) },
         ) {
             settOppApplikasjonen(context)
         }
@@ -78,10 +78,6 @@ private class Server(private val context: ApplicationContext) {
             dataSource.migrate()
             setReady().also { engine.start(true) }
         }
-}
-
-internal fun Route.settOppSelftestroute(context: ApplicationContext) {
-    selfTestRoute(context.selfTestService)
 }
 
 private fun timerJobs(context: ApplicationContext): List<TimerJob> =
@@ -203,7 +199,6 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     saksbehandlerRoutes(saksbehandlerService = applicationContext.saksbehandlerService)
 
     tilgangRoutes(applicationContext.tilgangService)
-    selfTestRoute(applicationContext.selfTestService)
 }
 
 private fun Route.settOppTilganger(

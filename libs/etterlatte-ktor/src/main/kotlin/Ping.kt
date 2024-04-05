@@ -86,11 +86,10 @@ enum class ServiceStatus(private val code: Int) {
         return code
     }
 
-    fun codeToColour(): String {
-        return when (code) {
+    fun codeToColour(): String =
+        when (code) {
             1 -> "red"
             2 -> "green"
-            else -> throw IllegalStateException("Ugyldig kode $code")
+            else -> throw IllegalStateException("Ugyldig kode: $code for status til tjeneste")
         }
-    }
 }

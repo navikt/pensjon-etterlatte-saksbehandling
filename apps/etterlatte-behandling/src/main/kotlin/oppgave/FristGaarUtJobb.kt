@@ -1,7 +1,5 @@
 package no.nav.etterlatte.oppgave
 
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
@@ -20,7 +18,6 @@ class FristGaarUtJobb(
     private val starttidspunkt: Date,
     private val periode: Duration,
     private val service: OppgaveService,
-    private val featureToggleService: FeatureToggleService,
 ) : TimerJob {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
@@ -42,32 +39,17 @@ class FristGaarUtJobb(
                         oppgaveKilde = (OppgaveKilde.entries - OppgaveKilde.GJENOPPRETTING),
                         oppgaver = listOf(),
                     )
-                val automatiskAvskrivFrist = featureToggleService.isEnabled(FristFeatureToggle.AutomatiskAvskrivFrist, false)
                 service.hentFristGaarUt(request).forEach {
-                    if (automatiskAvskrivFrist) {
-                        logger.info("Frist er gått ut for ${it.oppgaveID}, tar av vent")
-                        service.oppdaterStatusOgMerknad(
-                            it.oppgaveID,
-                            it.merknad ?: "",
-                            Status.UNDER_BEHANDLING,
-                        )
-                        logger.info("Tok ${it.oppgaveID} av vent")
-                    } else {
-                        logger.debug(
-                            "Automatisk avskriv frist er skrudd av, gjør derfor ingenting for {}",
-                            it.oppgaveID,
-                        )
-                    }
+                    logger.info("Frist er gått ut for ${it.oppgaveID}, tar av vent")
+                    service.oppdaterStatusOgMerknad(
+                        it.oppgaveID,
+                        it.merknad ?: "",
+                        Status.UNDER_BEHANDLING,
+                    )
+                    logger.info("Tok ${it.oppgaveID} av vent")
                 }
                 logger.info("Ferdig med å ta oppgaver av vent")
             }
         }
     }
-}
-
-enum class FristFeatureToggle(private val key: String) : FeatureToggle {
-    AutomatiskAvskrivFrist("automatisk-avskriv-frist"),
-    ;
-
-    override fun key() = key
 }

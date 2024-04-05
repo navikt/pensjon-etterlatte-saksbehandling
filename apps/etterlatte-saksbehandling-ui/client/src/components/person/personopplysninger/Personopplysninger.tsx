@@ -8,7 +8,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Statsborgerskap } from '~components/person/personopplysninger/Statsborgerskap'
-import { Heading } from '@navikt/ds-react'
+import { Heading, ReadMore } from '@navikt/ds-react'
 import { SakType } from '~shared/types/sak'
 import { Foreldre } from '~components/person/personopplysninger/Foreldre'
 import { AvdoedesBarn } from '~components/person/personopplysninger/AvdoedesBarn'
@@ -18,7 +18,7 @@ import { hentAlleLand } from '~shared/api/trygdetid'
 import { Utflytting } from '~components/person/personopplysninger/Utflytting'
 import { Vergemaal } from '~components/person/personopplysninger/Vergemaal'
 import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
-import { PDLInfoAlert } from '~components/person/personopplysninger/components/PDLInfoAlert'
+import styled from 'styled-components'
 
 export const Personopplysninger = ({
   sakResult,
@@ -46,7 +46,11 @@ export const Personopplysninger = ({
       <SpaceChildren>
         {mapSuccess(sakResult, ({ sak }) => (
           <>
-            <PDLInfoAlert />
+            <PDLInfoReadMore header="Personopplysningene kommer i sanntid fra PDL, hva betyr dette for meg?">
+              Personopplysningene som vises på denne siden kommer i sanntid fra PDL. Dette betyr at hvis PDL oppdaterer
+              informasjonen for en person, vil denne siden også endre seg til å speile det. Det kan derfor være
+              forskjell i informasjonen på denne siden og den som er gitt i en behandling.
+            </PDLInfoReadMore>
             <LenkeTilAndreSystemer fnr={fnr} />
             {!!sak ? (
               <>
@@ -92,3 +96,7 @@ export const Personopplysninger = ({
     </Container>
   )
 }
+
+const PDLInfoReadMore = styled(ReadMore)`
+  max-width: 43.5rem;
+`

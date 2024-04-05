@@ -48,6 +48,7 @@ class TattAvVentUnder20River(
                     "Avbryter, dette må følges opp av en utvikler. NB: Oppgaven er alt tatt av vent.",
             )
         } else {
+            logger.debug("Søker i sak ${packet.sakId} er mellom 18 og 20, fortsetter flyten.")
             packet.setEventNameForHendelseType(Ventehendelser.TATT_AV_VENT_UNDER_20_SJEKKA)
             context.publish(packet.toJson())
         }

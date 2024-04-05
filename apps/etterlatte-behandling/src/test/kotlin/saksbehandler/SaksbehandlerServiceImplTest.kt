@@ -9,6 +9,7 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
+import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
@@ -24,13 +25,14 @@ import javax.sql.DataSource
 class SaksbehandlerServiceImplTest(val dataSource: DataSource) {
     private lateinit var dao: SaksbehandlerInfoDao
     private val axsysKlient: AxsysKlient = mockk<AxsysKlient>()
+    private val navansattKlient: NavAnsattKlient = mockk<NavAnsattKlient>()
     private lateinit var service: SaksbehandlerService
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     @BeforeAll
     fun beforeAll() {
         dao = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
-        service = SaksbehandlerServiceImpl(dao, axsysKlient)
+        service = SaksbehandlerServiceImpl(dao, axsysKlient, navansattKlient)
         nyKontekstMedBrukerOgDatabase(user, dataSource)
     }
 

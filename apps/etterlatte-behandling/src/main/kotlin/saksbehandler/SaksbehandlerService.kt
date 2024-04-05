@@ -5,6 +5,7 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
+import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.inTransaction
 
@@ -33,6 +34,7 @@ interface SaksbehandlerService {
 class SaksbehandlerServiceImpl(
     private val dao: SaksbehandlerInfoDao,
     private val axsysKlient: AxsysKlient,
+    private val navAnsattKlient: NavAnsattKlient,
 ) : SaksbehandlerService {
     override fun hentKomplettSaksbehandler(ident: String): Saksbehandler {
         val innloggetSaksbehandler = Kontekst.get().appUserAsSaksbehandler()
@@ -60,7 +62,14 @@ class SaksbehandlerServiceImpl(
                     runBlocking {
                         axsysKlient.hentEnheterForIdent(ident)
                     }
+
                 dao.upsertSaksbehandlerEnheter(Pair(ident, enheterForSaksbehandler))
+                val saksbehandlerInfo = navAnsattKlient.hentSaksbehanderNavn(ident)
+                if (saksbehandlerInfo == null) {
+                    dao.upsertSaksbehandlerNavn(SaksbehandlerInfo(ident, ident))
+                } else {
+                    dao.upsertSaksbehandlerNavn(saksbehandlerInfo)
+                }
             }
         }
     }

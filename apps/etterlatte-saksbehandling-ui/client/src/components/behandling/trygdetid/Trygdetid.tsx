@@ -19,6 +19,7 @@ import { EnkelPersonTrygdetid } from '~components/behandling/trygdetid/EnkelPers
 import { BeregnetSamletTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetSamletTrygdetid'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { formaterNavn } from '~shared/types/Person'
 
 const TrygdetidMelding = ({ overskrift, beskrivelse }: { overskrift: string; beskrivelse: string }) => {
   return (
@@ -71,7 +72,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
       return fnr
     }
 
-    return `${opplysning.fornavn} ${opplysning.etternavn} (${fnr})`
+    return `${formaterNavn(opplysning)} (${fnr})`
   }
 
   const oppdaterTrygdetider = (trygdetid: ITrygdetid[]) => {
@@ -216,12 +217,12 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
                     {trygdetid.beregnetTrygdetid?.resultat ? (
                       <>
                         <HeadingWrapper size="small" level="3">
-                          Trygdetid for {trygdetid.ident}
+                          Trygdetid for {mapNavn(trygdetid.ident)}
                         </HeadingWrapper>
                         <BeregnetSamletTrygdetid beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
                       </>
                     ) : (
-                      <BodyShort>Trygdetid for {trygdetid.ident} mangler</BodyShort>
+                      <BodyShort>Trygdetid for {mapNavn(trygdetid.ident)} mangler</BodyShort>
                     )}
                   </div>
                 ))}

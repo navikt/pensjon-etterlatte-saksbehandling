@@ -36,6 +36,7 @@ export interface NyOppgaveDto {
   oppgaveType: Oppgavetype
   merknad?: string
   referanse?: string
+  saksbehandler?: string
 }
 
 export enum Oppgavestatus {
@@ -146,18 +147,6 @@ export const feilregistrerGosysOppgave = async (args: {
     versjon: args.versjon,
     beskrivelse: args.beskrivelse,
   })
-
-export const tildelSaksbehandlerApi = async (args: {
-  oppgaveId: string
-  type: string
-  nysaksbehandler: SaksbehandlerEndringDto
-}): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
-  if (args.type == 'GOSYS') {
-    return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
-  } else {
-    return apiClient.post(`/oppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
-  }
-}
 
 export const saksbehandlereIEnhetApi = async (args: {
   enheter: string[]

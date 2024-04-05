@@ -1,4 +1,4 @@
-import { feilregistrerGosysOppgave, OppgaveDTO, opprettOppgave, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
+import { feilregistrerGosysOppgave, OppgaveDTO, opprettOppgave } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentSakForPerson } from '~shared/api/sak'
 import { isInitial, isPending, isSuccess, mapResult, mapSuccess } from '~shared/api/apiUtils'
@@ -9,6 +9,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formaterSakstype } from '~utils/formattering'
 import { ResultAlert } from '~shared/alerts/ResultAlert'
+import { useAppSelector } from '~store/Store'
 
 export const OverfoerOppgaveTilGjenny = ({
   oppgave,
@@ -18,11 +19,11 @@ export const OverfoerOppgaveTilGjenny = ({
   setToggle: (toggle: GosysActionToggle) => void
 }) => {
   const navigate = useNavigate()
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const [skalOppretteSak, setSkalOppretteSak] = useState(false)
 
   const [opprettOppgaveStatus, apiOpprettOppgave] = useApiCall(opprettOppgave)
-  const [tildelSaksbehandlerStatus, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
   const [feilregistrerStatus, feilregistrerOppgave] = useApiCall(feilregistrerGosysOppgave)
   const [sakStatus, hentSak] = useApiCall(hentSakForPerson)
 
@@ -40,18 +41,10 @@ export const OverfoerOppgaveTilGjenny = ({
             referanse: oppgave.journalpostId!!,
             merknad: oppgave.beskrivelse || 'Journalføringsoppgave konvertert fra Gosys',
             oppgaveKilde: 'SAKSBEHANDLER',
+            saksbehandler: innloggetSaksbehandler.ident,
           },
         },
-        (opprettetOppgave) => {
-          tildelSaksbehandler({
-            oppgaveId: opprettetOppgave.id,
-            type: 'JOURNALFOERING',
-            nysaksbehandler: {
-              saksbehandler: oppgave.saksbehandler!!.ident,
-              versjon: null,
-            },
-          })
-
+        () => {
           feilregistrerOppgave({
             oppgaveId: oppgave.id,
             versjon: oppgave.versjon!!,
@@ -62,11 +55,7 @@ export const OverfoerOppgaveTilGjenny = ({
     })
   }
 
-  const loading =
-    isPending(sakStatus) ||
-    isPending(opprettOppgaveStatus) ||
-    isPending(tildelSaksbehandlerStatus) ||
-    isPending(feilregistrerStatus)
+  const loading = isPending(sakStatus) || isPending(opprettOppgaveStatus) || isPending(feilregistrerStatus)
 
   return (
     <>
@@ -103,12 +92,11 @@ export const OverfoerOppgaveTilGjenny = ({
         ),
       })}
       <ResultAlert result={opprettOppgaveStatus} success="Opprettet ny oppgave" />
-      <ResultAlert result={tildelSaksbehandlerStatus} success={`Ny oppgave tildelt ${oppgave.saksbehandler?.navn}`} />
       <ResultAlert result={feilregistrerStatus} success="Gosys-oppgave markert som feilregistrert" />
 
       <br />
 
-      {isSuccess(tildelSaksbehandlerStatus) && isSuccess(opprettOppgaveStatus) && (
+      {isSuccess(opprettOppgaveStatus) && (
         <FlexRow justify="right">
           <Button variant="tertiary" onClick={() => window.location.reload()}>
             Avslutt

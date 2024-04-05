@@ -14,6 +14,7 @@ import Spinner from '~shared/Spinner'
 import { useNavigate } from 'react-router-dom'
 import { SakOverfoeringDetailjer } from 'src/components/person/dokumenter/avvik/common/SakOverfoeringDetailjer'
 import { opprettOppgave } from '~shared/api/oppgaver'
+import { useAppSelector } from '~store/Store'
 
 const erSammeSak = (sak: ISak, journalpost: Journalpost): boolean => {
   const { sak: journalpostSak, tema } = journalpost
@@ -42,6 +43,7 @@ export const KnyttTilAnnenSak = ({
   lukkModal: () => void
 }) => {
   const navigate = useNavigate()
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const [sakid, setSakid] = useState<string>()
 
@@ -87,6 +89,7 @@ export const KnyttTilAnnenSak = ({
           referanse: journalpostId,
           merknad: `Journalpost flyttet til sak ${sakId}`,
           oppgaveKilde: 'SAKSBEHANDLER',
+          saksbehandler: innloggetSaksbehandler.ident,
         },
       },
       (oppgave) => {

@@ -17,7 +17,10 @@ export const BostedsadresseDataCell = ({
       {!!bostedsadresse && !!bostedsadresse[index] ? (
         <Table.DataCell>
           <SpaceChildren direction="row">
-            {`${!!bostedsadresse[index].adresse ? bostedsadresse[index].adresse : '-'}, ${!!bostedsadresse[index].postnr ? bostedsadresse[index].postnr : ''}`}
+            <>
+              {!!bostedsadresse[index].adresse ? bostedsadresse[index].adresse : '-'},
+              {!!bostedsadresse[index].postnr ? bostedsadresse[index].postnr : ''}
+            </>
             {bostedsadresse[index].aktiv && visAktiv && (
               <Tag variant="success" size="small">
                 Gjeldende

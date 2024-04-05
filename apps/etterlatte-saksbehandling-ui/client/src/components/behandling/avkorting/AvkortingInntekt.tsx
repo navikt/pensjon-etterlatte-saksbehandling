@@ -60,7 +60,7 @@ export const AvkortingInntekt = ({
   const finnesRedigerbartGrunnlag = () => avkorting?.avkortetYtelse && avkorting?.avkortetYtelse.length !== 0
 
   const mismatchGrunnlagsperioderOgVirkningstidspunkt = (sisteGrunnlag: IAvkortingGrunnlag) =>
-    sisteGrunnlag.virkVedLagring !== behandling.virkningstidspunkt?.dato
+    sisteGrunnlag.lagretPaaBehandling === behandling.id && sisteGrunnlag.fom !== behandling.virkningstidspunkt?.dato
 
   const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlag => {
     if (finnesRedigerbartGrunnlag()) {

@@ -253,7 +253,7 @@ data class AvkortingGrunnlag(
     val spesifikasjon: String,
     val kilde: Grunnlagsopplysning.Saksbehandler,
     // TODO Fjerne nullable når alle behandlinger har fått feltet utfylt
-    val virkVedLagring: YearMonth?,
+    val lagretPaaBehandling: UUID?,
 )
 
 data class Aarsoppgjoer(

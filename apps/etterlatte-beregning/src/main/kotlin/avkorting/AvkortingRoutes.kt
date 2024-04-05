@@ -83,7 +83,7 @@ fun AvkortingGrunnlag.toDto() =
         fratrekkInnAarUtland = fratrekkInnAarUtland,
         spesifikasjon = spesifikasjon,
         kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident),
-        virkVedLagring = virkVedLagring,
+        lagretPaaBehandling = lagretPaaBehandling,
     )
 
 fun AvkortetYtelse.toDto() =

@@ -5,7 +5,6 @@ import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.LagreAvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -71,7 +70,7 @@ class AvkortingService(
             avkorting.beregnAvkortingMedNyttGrunnlag(
                 avkortingGrunnlag.fromDto(
                     brukerTokenInfo,
-                    behandling.virkningstidspunkt!!,
+                    behandling.id,
                     behandling.behandlingType,
                 ),
                 behandling.behandlingType,
@@ -176,7 +175,7 @@ class AvkortingService(
 
 fun LagreAvkortingGrunnlagDto.fromDto(
     brukerTokenInfo: BrukerTokenInfo,
-    virkningstidspunkt: Virkningstidspunkt,
+    behandlingId: UUID,
     behandlingstype: BehandlingType,
 ) = AvkortingGrunnlag(
     id = id,
@@ -192,7 +191,7 @@ fun LagreAvkortingGrunnlagDto.fromDto(
     fratrekkInnAarUtland = fratrekkInnAarUtland,
     spesifikasjon = spesifikasjon,
     kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now()),
-    virkVedLagring = virkningstidspunkt.dato,
+    lagretPaaBehandling = behandlingId,
 )
 
 class AvkortingFinnesIkkeException(behandlingId: UUID) : IkkeFunnetException(

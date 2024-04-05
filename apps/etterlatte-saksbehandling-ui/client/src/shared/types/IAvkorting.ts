@@ -19,7 +19,7 @@ export interface IAvkortingGrunnlag {
     tidspunkt: ''
     ident: ''
   }
-  virkVedLagring?: string
+  lagretPaaBehandling?: string
 }
 
 export interface IAvkortetYtelse {

@@ -40,7 +40,8 @@ fun Application.restModule(
     additionalMetrics: List<MeterBinder> = emptyList(),
     config: ApplicationConfig = environment.config,
     additionalValidation: ((TokenValidationContext) -> Boolean)? = null,
-    routes: Route.() -> Unit,
+    routes: (Route.() -> Unit)? = null,
+    authenticatedRoutes: Route.() -> Unit,
 ) {
     sikkerLogg.info("Sikkerlogg logger fra restModule")
 
@@ -96,8 +97,11 @@ fun Application.restModule(
         healthApi()
         authenticate {
             route(routePrefix ?: "") {
-                routes()
+                authenticatedRoutes()
             }
+        }
+        if (routes != null) {
+            routes()
         }
     }
 

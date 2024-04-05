@@ -1,6 +1,8 @@
 package no.nav.etterlatte.migrering
 
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
@@ -25,6 +27,7 @@ import java.util.UUID
 internal class TaAvVentRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
+    private val featureToggleService: FeatureToggleService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -41,6 +44,10 @@ internal class TaAvVentRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
+        if (!featureToggleService.isEnabled(VentFeatureToggle.TaAvVent, false)) {
+            logger.warn("Ta av vent er skrudd av. Avbryter fra TaAvVentRiver")
+            return
+        }
         val oppgavetyper = setOf(OppgaveType.valueOf(packet[OPPGAVETYPE_KEY].asText()))
         val oppgavekilder = setOf(OppgaveKilde.valueOf(packet[OPPGAVEKILDE_KEY].asText()))
         logger.info("Tar av vent med oppgavetyper $oppgavetyper og oppgavekilder $oppgavekilder for ${packet.dato}")
@@ -54,7 +61,12 @@ internal class TaAvVentRiver(
                 ),
             )
         logger.info("Tok ${respons.behandlinger.size} oppgaver av vent")
+        logger.debug("Oppgavene tatt av vent er {}", respons.behandlinger.map { it.oppgaveID })
         respons.behandlinger.forEach {
+            if (!featureToggleService.isEnabled(VentFeatureToggle.TaAvVent, false)) {
+                logger.warn("Ta av vent er skrudd av. Avbryter fra TaAvVentRiver for oppgave ${it.oppgaveID} i sak ${packet.sakId}")
+                return
+            }
             packet.sakId = it.sakId
             packet.behandlingId = UUID.fromString(it.referanse)
             packet[OPPGAVEKILDE_KEY] = it.oppgavekilde
@@ -64,4 +76,11 @@ internal class TaAvVentRiver(
             context.publish(packet.toJson())
         }
     }
+}
+
+enum class VentFeatureToggle(private val key: String) : FeatureToggle {
+    TaAvVent("ta-av-vent"),
+    ;
+
+    override fun key() = key
 }

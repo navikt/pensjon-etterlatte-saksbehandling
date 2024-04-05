@@ -10,8 +10,6 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.ktor.PingResult
-import no.nav.etterlatte.libs.ktor.PingResultDown
-import no.nav.etterlatte.libs.ktor.PingResultUp
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.ServiceStatus
 import java.time.LocalTime
@@ -41,24 +39,23 @@ class SelfTestService(
      */
     suspend fun performSelfTestAndReportAsHtml(): String = htmlPage(htmlStatusRows(performSelfTest()))
 
-    /**
-     * Returns result of self-test in JSON format.
-     */
-    suspend fun performSelfTestAndReportAsJson(): String {
+    suspend fun performSelfTestAndReportAsJson(): SelfTestReport {
         val pingResults = performSelfTest()
-        val aggregateCode = getAggregateResult(pingResults.values).code()
-        val checks = json(pingResults)
-        return """{"application":"$APPLICATION_NAME","timestamp":"${now()}","aggregateResult":$aggregateCode,"checks":[$checks]}"""
+        val numberOfServicesDown = getAggregateResult(pingResults).code()
+
+        return SelfTestReport(
+            application = APPLICATION_NAME,
+            timestamp = LocalTime.now(),
+            aggregateResult = numberOfServicesDown,
+            checks = pingResults,
+        )
     }
 
-    protected fun now(): LocalTime = LocalTime.now()
-
-    private suspend fun performSelfTest(): Map<String, PingResult> {
+    private suspend fun performSelfTest(): List<PingResult> {
         return coroutineScope {
             externalServices
                 .map { async { it.ping() } }
                 .map { it.await() }
-                .associateBy { it.serviceName }
         }
     }
 
@@ -67,22 +64,8 @@ class SelfTestService(
 
         private fun getAggregateResult(pingResults: Collection<PingResult>) =
             pingResults
-                .map { it.status }
+                .map { it.result }
                 .firstOrNull { it == ServiceStatus.DOWN } ?: ServiceStatus.UP
-
-        private fun json(resultsByService: Map<String, PingResult>) = resultsByService.values.joinToString { json(it) }
-
-        private fun json(result: PingResult): String {
-            val errorMessageEntry =
-                when (result) {
-                    is PingResultDown -> result.errorMessage
-                    is PingResultUp -> ""
-                }
-
-            return """{"endpoint":"${result.endpoint}","description":"
-                ${result.serviceName}"$errorMessageEntry,"result":${result.status.code()}}
-                """.trimMargin()
-        }
 
         private fun htmlPage(tableRows: String) =
             """
@@ -115,18 +98,19 @@ class SelfTestService(
             </html>
             """.trimIndent()
 
-        private fun htmlStatusRows(resultsByService: Map<String, PingResult>) =
-            resultsByService.entries.joinToString(separator = "", transform = ::htmlRow)
+        private fun htmlStatusRows(resultsByService: List<PingResult>) =
+            resultsByService.joinToString(separator = "", transform = ::htmlRow)
 
+        // TODO:
         private fun htmlRow(entry: Map.Entry<String, PingResult>) = htmlRow(entry.value)
 
         private fun htmlRow(result: PingResult) =
-            "<tr>${htmlCell(result.serviceName)}${htmlStatusCell(result.status)}${htmlCell(result.message)}" +
+            "<tr>${htmlCell(result.serviceName)}${htmlStatusCell(result.result)}${htmlCell(result.description)}" +
                 "${htmlCell(result.endpoint)}</tr>"
 
         private fun htmlCell(content: String) = "<td>$content</td>"
 
         private fun htmlStatusCell(status: ServiceStatus) =
-            """<td style="background-color:${status.color()};text-align:center;">${status.name}</td>"""
+            """<td style="background-color:${status.codeToColour()};text-align:center;">${status.name}</td>"""
     }
 }

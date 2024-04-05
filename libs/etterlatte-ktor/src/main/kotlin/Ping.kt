@@ -25,9 +25,9 @@ suspend fun HttpClient.ping(
             navConsumerId(konsumentEndelig)
         }
         logger.info("$serviceName svarer OK")
-        PingResultUp(serviceName, endpoint = pingUrl, message = beskrivelse)
+        PingResultUp(serviceName, endpoint = pingUrl, description = beskrivelse)
     } catch (e: Exception) {
-        PingResultDown(serviceName, endpoint = pingUrl, errorMessage = e.message, message = beskrivelse).also {
+        PingResultDown(serviceName, endpoint = pingUrl, errorMessage = e.message, description = beskrivelse).also {
             logger.warn("$serviceName svarer IKKE ok. ${it.toStringServiceDown()}")
         }
     }
@@ -50,33 +50,33 @@ interface Pingable {
 
 sealed class PingResult {
     abstract val serviceName: String
-    abstract val status: ServiceStatus
+    abstract val result: ServiceStatus
     abstract val endpoint: String
-    abstract val message: String
+    abstract val description: String
 }
 
 class PingResultUp(
     override val serviceName: String,
-    override val status: ServiceStatus = ServiceStatus.UP,
+    override val result: ServiceStatus = ServiceStatus.UP,
     override val endpoint: String,
-    override val message: String,
+    override val description: String,
 ) : PingResult()
 
 class PingResultDown(
     override val serviceName: String,
-    override val status: ServiceStatus = ServiceStatus.DOWN,
+    override val result: ServiceStatus = ServiceStatus.DOWN,
     override val endpoint: String,
-    override val message: String,
+    override val description: String,
     val errorMessage: String?,
 ) : PingResult() {
     fun toStringServiceDown(): String {
-        return "Servicename: $serviceName endpoint: $endpoint beskrivelse $message errorMessage: $errorMessage "
+        return "Servicename: $serviceName endpoint: $endpoint beskrivelse $description errorMessage: $errorMessage "
     }
 }
 
-enum class ServiceStatus(private val code: Int, private val color: String) {
-    DOWN(1, "red"),
-    UP(0, "green"),
+enum class ServiceStatus(private val code: Int) {
+    DOWN(1), // red
+    UP(0), // green
     ;
 
     /**
@@ -86,7 +86,11 @@ enum class ServiceStatus(private val code: Int, private val color: String) {
         return code
     }
 
-    fun color(): String {
-        return color
+    fun codeToColour(): String {
+        return when (code) {
+            1 -> "red"
+            2 -> "green"
+            else -> throw IllegalStateException("Ugyldig kode $code")
+        }
     }
 }

@@ -119,6 +119,7 @@ fun avkortinggrunnlag(
     relevanteMaanederInnAar: Int = 12,
     periode: Periode = Periode(fom = YearMonth.now(), tom = null),
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
+    virkVedLagring: YearMonth = YearMonth.now(),
 ) = AvkortingGrunnlag(
     id = id,
     periode = periode,
@@ -129,6 +130,7 @@ fun avkortinggrunnlag(
     relevanteMaanederInnAar = relevanteMaanederInnAar,
     spesifikasjon = "Spesifikasjon",
     kilde = kilde,
+    virkVedLagring = virkVedLagring,
 )
 
 fun inntektAvkortingGrunnlag(

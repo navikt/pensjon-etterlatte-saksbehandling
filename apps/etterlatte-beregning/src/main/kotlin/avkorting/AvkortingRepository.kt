@@ -140,10 +140,10 @@ class AvkortingRepository(private val dataSource: DataSource) {
             """
             INSERT INTO avkortingsgrunnlag(
                 id, behandling_id, fom, tom, aarsinntekt, fratrekk_inn_ut, inntekt_utland, fratrekk_inn_aar_utland,
-                relevante_maaneder, spesifikasjon, kilde
+                relevante_maaneder, spesifikasjon, kilde, virk_ved_lagring
             ) VALUES (
                 :id, :behandlingId, :fom, :tom, :aarsinntekt, :fratrekkInnAar, :inntektUtland, :fratrekkInnAarUtland,
-                :relevanteMaanederInnAar, :spesifikasjon, :kilde
+                :relevanteMaanederInnAar, :spesifikasjon, :kilde, :virkVedLagring
             )
             """.trimIndent(),
         paramMap =
@@ -159,6 +159,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 "relevanteMaanederInnAar" to avkortingsgrunnlag.relevanteMaanederInnAar,
                 "spesifikasjon" to avkortingsgrunnlag.spesifikasjon,
                 "kilde" to avkortingsgrunnlag.kilde.toJson(),
+                "virkVedLagring" to avkortingsgrunnlag.virkVedLagring.atDay(1),
             ),
     ).let { query -> tx.run(query.asUpdate) }
 
@@ -296,6 +297,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
             fratrekkInnAarUtland = int("fratrekk_inn_aar_utland"),
             spesifikasjon = string("spesifikasjon"),
             kilde = string("kilde").let { objectMapper.readValue(it) },
+            virkVedLagring = sqlDate("virk_ved_lagring").let { YearMonth.from(it.toLocalDate()) },
         )
 
     private fun Row.toYtelseFoerAvkorting() =

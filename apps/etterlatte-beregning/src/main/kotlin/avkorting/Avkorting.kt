@@ -252,6 +252,7 @@ data class AvkortingGrunnlag(
     val fratrekkInnAarUtland: Int,
     val spesifikasjon: String,
     val kilde: Grunnlagsopplysning.Saksbehandler,
+    val virkVedLagring: YearMonth,
 )
 
 data class Aarsoppgjoer(

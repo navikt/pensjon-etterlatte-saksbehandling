@@ -192,7 +192,7 @@ fun LagreAvkortingGrunnlagDto.fromDto(
     fratrekkInnAarUtland = fratrekkInnAarUtland,
     spesifikasjon = spesifikasjon,
     kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now()),
-    // virkVedLagring = virkningstidspunkt.dato
+    virkVedLagring = virkningstidspunkt.dato,
 )
 
 class AvkortingFinnesIkkeException(behandlingId: UUID) : IkkeFunnetException(

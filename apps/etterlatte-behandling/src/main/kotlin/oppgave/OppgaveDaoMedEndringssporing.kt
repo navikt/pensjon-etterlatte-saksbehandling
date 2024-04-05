@@ -193,5 +193,6 @@ class OppgaveDaoMedEndringssporingImpl(
         type: Collection<OppgaveType>,
         kilde: Collection<OppgaveKilde>,
         oppgaver: List<UUID>,
-    ) = oppgaveDao.hentFristGaarUt(dato, type, kilde, oppgaver)
+        grense: Int,
+    ) = oppgaveDao.hentFristGaarUt(dato, type, kilde, oppgaver, grense)
 }

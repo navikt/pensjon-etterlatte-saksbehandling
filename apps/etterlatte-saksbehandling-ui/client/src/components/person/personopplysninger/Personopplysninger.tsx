@@ -5,11 +5,10 @@ import { Bostedsadresser } from '~components/person/personopplysninger/Bostedsad
 import { isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentPersonopplysningerForBehandling } from '~shared/api/grunnlag'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Statsborgerskap } from '~components/person/personopplysninger/Statsborgerskap'
-import { Alert, Heading } from '@navikt/ds-react'
+import { Heading, ReadMore } from '@navikt/ds-react'
 import { SakType } from '~shared/types/sak'
 import { Foreldre } from '~components/person/personopplysninger/Foreldre'
 import { AvdoedesBarn } from '~components/person/personopplysninger/AvdoedesBarn'
@@ -18,87 +17,70 @@ import { Innflytting } from '~components/person/personopplysninger/Innflytting'
 import { hentAlleLand } from '~shared/api/trygdetid'
 import { Utflytting } from '~components/person/personopplysninger/Utflytting'
 import { Vergemaal } from '~components/person/personopplysninger/Vergemaal'
+import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
+import styled from 'styled-components'
 
 export const Personopplysninger = ({
-  sakStatus,
+  sakResult,
   fnr,
 }: {
-  sakStatus: Result<SakMedBehandlinger>
+  sakResult: Result<SakMedBehandlinger>
   fnr: string
 }): ReactNode => {
-  const [personopplysningerResult, hentPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
-  const [landListeResult, hentLandListe] = useApiCall(hentAlleLand)
+  const [familieOpplysningerResult, familieOpplysningerFetch] = useApiCall(hentFamilieOpplysninger)
+
+  const [landListeResult, landListeFetch] = useApiCall(hentAlleLand)
 
   useEffect(() => {
-    if (isSuccess(sakStatus)) {
-      if (!!sakStatus.data.behandlinger?.length) {
-        hentPersonopplysninger({
-          behandlingId: sakStatus.data.behandlinger[0].id,
-          sakType: sakStatus.data.behandlinger[0].sakType,
-        })
-      }
+    if (isSuccess(sakResult)) {
+      familieOpplysningerFetch({ ident: fnr, sakType: sakResult.data.sak.sakType })
     }
-  }, [fnr, sakStatus])
+  }, [fnr, sakResult])
 
   useEffect(() => {
-    hentLandListe(null)
+    landListeFetch(null)
   }, [])
 
   return (
     <Container>
       <SpaceChildren>
-        {mapSuccess(sakStatus, (sak) => (
+        {mapSuccess(sakResult, ({ sak }) => (
           <>
-            <Alert variant="warning">
-              Denne informasjonen baserer seg på når en behandling var opprettet på brukeren, vi jobber med å få
-              informasjonen til å oppdatere seg i sanntid.
-            </Alert>
+            <PDLInfoReadMore header="Personopplysningene kommer i sanntid fra PDL, hva betyr dette for meg?">
+              Personopplysningene som vises på denne siden kommer i sanntid fra PDL. Dette betyr at hvis PDL oppdaterer
+              informasjonen for en person, vil denne siden også endre seg til å speile det. Det kan derfor være
+              forskjell i informasjonen på denne siden og den som er gitt i en behandling.
+            </PDLInfoReadMore>
             <LenkeTilAndreSystemer fnr={fnr} />
-            {!!sak.behandlinger?.length ? (
+            {!!sak ? (
               <>
-                {mapResult(personopplysningerResult, {
-                  pending: <Spinner visible={true} label="Henter personopplysninger" />,
-                  error: (error) => (
-                    <ApiErrorAlert>{error.detail || 'Kunne ikke hente personopplysninger'}</ApiErrorAlert>
-                  ),
-                  success: (personopplysninger) => (
+                {mapResult(familieOpplysningerResult, {
+                  pending: <Spinner visible={true} label="Henter opplysninger" />,
+                  error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente opplysninger'}</ApiErrorAlert>,
+                  success: ({ soeker, avdoede, gjenlevende }) => (
                     <>
-                      <Bostedsadresser bostedsadresse={personopplysninger.soeker?.opplysning.bostedsadresse} />
-                      {sak.sak.sakType === SakType.BARNEPENSJON && (
+                      <Bostedsadresser bostedsadresse={soeker?.bostedsadresse} />
+                      {sak.sakType === SakType.BARNEPENSJON && (
                         <Foreldre
-                          avdoed={personopplysninger.avdoede}
-                          gjenlevende={personopplysninger.gjenlevende}
-                          foreldreansvar={personopplysninger.soeker?.opplysning.familieRelasjon?.ansvarligeForeldre}
+                          avdoed={avdoede}
+                          gjenlevende={gjenlevende}
+                          foreldreansvar={soeker?.familierelasjon?.ansvarligeForeldre}
                         />
                       )}
-                      {sak.sak.sakType === SakType.OMSTILLINGSSTOENAD && (
-                        <Sivilstatus
-                          sivilstand={personopplysninger.soeker?.opplysning.sivilstand}
-                          avdoede={personopplysninger.avdoede}
-                        />
+                      {sak.sakType === SakType.OMSTILLINGSSTOENAD && (
+                        <Sivilstatus sivilstand={soeker?.sivilstand} avdoede={avdoede} />
                       )}
-                      <AvdoedesBarn avdoede={personopplysninger.avdoede} />
+                      <AvdoedesBarn avdoede={avdoede} />
                       {mapSuccess(landListeResult, (landListe) => (
                         <>
                           <Statsborgerskap
-                            statsborgerskap={personopplysninger.soeker?.opplysning.statsborgerskap}
-                            pdlStatsborgerskap={personopplysninger.soeker?.opplysning.pdlStatsborgerskap}
-                            bosattLand={personopplysninger.soeker?.opplysning.bostedsadresse?.at(0)?.land}
+                            statsborgerskap={soeker?.statsborgerskap}
+                            pdlStatsborgerskap={soeker?.pdlStatsborgerskap}
                             landListe={landListe}
                           />
-                          <Innflytting
-                            innflytting={personopplysninger.soeker?.opplysning.utland?.innflyttingTilNorge}
-                            landListe={landListe}
-                          />
-                          <Utflytting
-                            utflytting={personopplysninger.soeker?.opplysning.utland?.utflyttingFraNorge}
-                            landListe={landListe}
-                          />
-                          <Vergemaal
-                            vergemaalEllerFremtidsfullmakt={
-                              personopplysninger.soeker?.opplysning.vergemaalEllerFremtidsfullmakt
-                            }
-                          />
+                          <Innflytting innflytting={soeker?.utland?.innflyttingTilNorge} landListe={landListe} />
+                          <Utflytting utflytting={soeker?.utland?.utflyttingFraNorge} landListe={landListe} />
+                          <Vergemaal vergemaalEllerFremtidsfullmakt={soeker?.vergemaalEllerFremtidsfullmakt} />
                         </>
                       ))}
                     </>
@@ -106,7 +88,7 @@ export const Personopplysninger = ({
                 })}
               </>
             ) : (
-              <Heading size="medium">Bruker har ingen behandling i Gjenny</Heading>
+              <Heading size="medium">Bruker har ingen sak i Gjenny</Heading>
             )}
           </>
         ))}
@@ -114,3 +96,7 @@ export const Personopplysninger = ({
     </Container>
   )
 }
+
+const PDLInfoReadMore = styled(ReadMore)`
+  max-width: 43.5rem;
+`

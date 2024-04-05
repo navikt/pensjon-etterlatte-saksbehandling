@@ -2,6 +2,7 @@ package no.nav.etterlatte.saksbehandler
 
 import com.nimbusds.jwt.JWTClaimsSet
 import io.kotest.matchers.shouldBe
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
@@ -48,6 +49,7 @@ class SaksbehandlerServiceImplTest(val dataSource: DataSource) {
         dataSource.connection.use {
             it.prepareStatement("TRUNCATE saksbehandler_info CASCADE;").execute()
         }
+        clearMocks(navansattKlient, axsysKlient)
     }
 
     @Test
@@ -74,8 +76,8 @@ class SaksbehandlerServiceImplTest(val dataSource: DataSource) {
         every { user.kanSeOppgaveBenken() } returns true
 
         service.hentKomplettSaksbehandler(nyidentSaksbehandler)
-        coVerify { axsysKlient.hentEnheterForIdent(nyidentSaksbehandler) }
-        coVerify { navansattKlient.hentSaksbehanderNavn(nyidentSaksbehandler) }
+        coVerify(exactly = 1) { axsysKlient.hentEnheterForIdent(nyidentSaksbehandler) }
+        coVerify(exactly = 1) { navansattKlient.hentSaksbehanderNavn(nyidentSaksbehandler) }
         confirmVerified(axsysKlient, navansattKlient)
     }
 
@@ -128,13 +130,11 @@ class SaksbehandlerServiceImplTest(val dataSource: DataSource) {
         val navMoldeNavn = "NAV Molde"
         val molde = SaksbehandlerEnhet(navMoldeEnhetsnr, navMoldeNavn)
         coEvery { axsysKlient.hentEnheterForIdent(ident) } returns listOf(molde)
-        val enheterForSaksbehandlerIDb = Pair(ident, listOf(molde))
         dao.upsertSaksbehandlerNavn(SaksbehandlerInfo(ident, "Legitim gate"))
-        dao.upsertSaksbehandlerEnheter(enheterForSaksbehandlerIDb)
         val hentetEnhetForSaksbehandler = service.hentEnheterForSaksbehandlerIdentWrapper(ident)
         hentetEnhetForSaksbehandler shouldBe listOf(molde)
 
-        coVerify { axsysKlient.hentEnheterForIdent(ident) }
+        coVerify(exactly = 1) { axsysKlient.hentEnheterForIdent(ident) }
         confirmVerified(axsysKlient)
     }
 

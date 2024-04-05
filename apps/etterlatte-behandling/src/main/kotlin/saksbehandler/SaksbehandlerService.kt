@@ -1,5 +1,7 @@
 package no.nav.etterlatte.saksbehandler
 
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
@@ -36,7 +38,9 @@ class SaksbehandlerServiceImpl(
         val innloggetSaksbehandler = Kontekst.get().appUserAsSaksbehandler()
 
         val saksbehandlerNavn: String? = dao.hentSaksbehandlerNavn(ident)
-
+        if (saksbehandlerNavn.isNullOrBlank()) {
+            updateNySaksbehandlerAsync(ident)
+        }
         return Saksbehandler(
             ident,
             if (!saksbehandlerNavn.isNullOrEmpty()) saksbehandlerNavn else ident,
@@ -45,6 +49,20 @@ class SaksbehandlerServiceImpl(
             skriveEnheter = innloggetSaksbehandler.enheterMedSkrivetilgang(),
             kanSeOppgaveliste = innloggetSaksbehandler.kanSeOppgaveBenken(),
         )
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun updateNySaksbehandlerAsync(ident: String) {
+        newSingleThreadContext("oppdaternysaksbehandler").use { ctx ->
+            Runtime.getRuntime().addShutdownHook(Thread { ctx.close() })
+            runBlocking(ctx) {
+                val enheterForSaksbehandler =
+                    runBlocking {
+                        axsysKlient.hentEnheterForIdent(ident)
+                    }
+                dao.upsertSaksbehandlerEnheter(Pair(ident, enheterForSaksbehandler))
+            }
+        }
     }
 
     override fun hentSaksbehandlereForEnhet(enhet: List<String>): Set<SaksbehandlerInfo> =

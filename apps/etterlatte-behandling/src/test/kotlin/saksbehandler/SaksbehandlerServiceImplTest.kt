@@ -1,18 +1,25 @@
 package no.nav.etterlatte.saksbehandler
 
+import com.nimbusds.jwt.JWTClaimsSet
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
+import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -41,6 +48,66 @@ class SaksbehandlerServiceImplTest(val dataSource: DataSource) {
         dataSource.connection.use {
             it.prepareStatement("TRUNCATE saksbehandler_info CASCADE;").execute()
         }
+    }
+
+    @Test
+    fun `Skal legge inn enheter og navn for ny ukjent saksbehandler`() {
+        val nyidentSaksbehandler = "S12345"
+        val porsgrunn = SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn)
+        coEvery { axsysKlient.hentEnheterForIdent(nyidentSaksbehandler) } returns listOf(porsgrunn)
+        coEvery {
+            navansattKlient.hentSaksbehanderNavn(
+                nyidentSaksbehandler,
+            )
+        } returns SaksbehandlerInfo(nyidentSaksbehandler, "navn navnesen")
+        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+
+        val jwtclaimsEgenAnsatt = JWTClaimsSet.Builder().claim("groups", azureAdSaksbehandlerClaim).build()
+        val saksbehandlerMedRoller =
+            SaksbehandlerMedRoller(
+                Saksbehandler("", "ident", JwtTokenClaims(jwtclaimsEgenAnsatt)),
+                mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim),
+            )
+        every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
+        every { user.enheterMedLesetilgang(any()) } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { user.enheterMedSkrivetilgang() } returns emptyList()
+        every { user.kanSeOppgaveBenken() } returns true
+
+        service.hentKomplettSaksbehandler(nyidentSaksbehandler)
+        coVerify { axsysKlient.hentEnheterForIdent(nyidentSaksbehandler) }
+        coVerify { navansattKlient.hentSaksbehanderNavn(nyidentSaksbehandler) }
+        confirmVerified(axsysKlient, navansattKlient)
+    }
+
+    @Test
+    fun `Skal ikke legge inn enheter og navn for kjent saksbehandler`() {
+        val nyidentSaksbehandler = "S12345"
+        val porsgrunn = SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn)
+        coEvery { axsysKlient.hentEnheterForIdent(nyidentSaksbehandler) } returns listOf(porsgrunn)
+        coEvery {
+            navansattKlient.hentSaksbehanderNavn(
+                nyidentSaksbehandler,
+            )
+        } returns SaksbehandlerInfo(nyidentSaksbehandler, "navn navnesen")
+        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+
+        val jwtclaimsEgenAnsatt = JWTClaimsSet.Builder().claim("groups", azureAdSaksbehandlerClaim).build()
+        val saksbehandlerMedRoller =
+            SaksbehandlerMedRoller(
+                Saksbehandler("", "ident", JwtTokenClaims(jwtclaimsEgenAnsatt)),
+                mapOf(AzureGroup.SAKSBEHANDLER to azureAdSaksbehandlerClaim),
+            )
+        every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
+        every { user.enheterMedLesetilgang(any()) } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { user.enheterMedSkrivetilgang() } returns emptyList()
+        every { user.kanSeOppgaveBenken() } returns true
+
+        dao.upsertSaksbehandlerNavn(SaksbehandlerInfo(nyidentSaksbehandler, "navn navnesen"))
+        dao.upsertSaksbehandlerEnheter(Pair(nyidentSaksbehandler, listOf(porsgrunn)))
+        service.hentKomplettSaksbehandler(nyidentSaksbehandler)
+        coVerify(exactly = 0) { axsysKlient.hentEnheterForIdent(nyidentSaksbehandler) }
+        coVerify(exactly = 0) { navansattKlient.hentSaksbehanderNavn(nyidentSaksbehandler) }
+        confirmVerified(axsysKlient, navansattKlient)
     }
 
     @Test

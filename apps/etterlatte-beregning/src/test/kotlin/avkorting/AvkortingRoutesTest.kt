@@ -79,6 +79,7 @@ class AvkortingRoutesTest {
                 id = avkortingsgrunnlagId,
                 periode = Periode(fom = dato, tom = dato),
                 kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", tidspunkt),
+                virkVedLagring = dato,
             )
         val avkortetYtelseId = UUID.randomUUID()
         val avkortetYtelse =
@@ -123,6 +124,7 @@ class AvkortingRoutesTest {
                                     tidspunkt = tidspunkt.toString(),
                                     ident = "Saksbehandler01",
                                 ),
+                            virkVedLagring = dato,
                         ),
                     ),
                 avkortetYtelse =

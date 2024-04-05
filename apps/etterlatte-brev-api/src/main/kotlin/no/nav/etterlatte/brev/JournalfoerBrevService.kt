@@ -53,7 +53,7 @@ class JournalfoerBrevService(
             service.hentVedtaksbrev(behandlingId)
                 ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
 
-        if (brev.id == 14882L) {
+        if (brev.id == 15949L) {
             logger.info("Vedtaksbrev fra migrering som er i feil tilstand. Avbryter denne.")
             return null
         }

@@ -29,9 +29,9 @@ fun Route.personWebRoute(
             }
         }
 
-        post("/opplysninger") {
+        post("/familieOpplysninger") {
             kunSaksbehandler {
-                val request = call.receive<HentPersonopplysningerRequest>()
+                val request = call.receive<HentFamilieOpplysningerRequest>()
 
                 val personopplysninger = service.hentFamilieOpplysninger(request.ident, request.sakType, brukerTokenInfo)
 
@@ -39,7 +39,7 @@ fun Route.personWebRoute(
                     brukerTokenInfo,
                     Folkeregisteridentifikator.of(request.ident),
                     call.request.path(),
-                    "Hentet persongalleri på person",
+                    "Hentet familie opplysninger på person",
                 )
 
                 call.respond(personopplysninger)
@@ -52,7 +52,7 @@ private data class HentPersonNavnRequest(
     val ident: String,
 )
 
-private data class HentPersonopplysningerRequest(
+private data class HentFamilieOpplysningerRequest(
     val ident: String,
     val sakType: SakType,
 )

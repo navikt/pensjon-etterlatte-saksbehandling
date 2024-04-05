@@ -17,7 +17,7 @@ import { Innflytting } from '~components/person/personopplysninger/Innflytting'
 import { hentAlleLand } from '~shared/api/trygdetid'
 import { Utflytting } from '~components/person/personopplysninger/Utflytting'
 import { Vergemaal } from '~components/person/personopplysninger/Vergemaal'
-import { hentPersonopplysninger } from '~shared/api/pdltjenester'
+import { hentFamilieOpplysninger } from '~shared/api/pdltjenester'
 import { PDLInfoAlert } from '~components/person/personopplysninger/components/PDLInfoAlert'
 
 export const Personopplysninger = ({
@@ -27,13 +27,13 @@ export const Personopplysninger = ({
   sakResult: Result<SakMedBehandlinger>
   fnr: string
 }): ReactNode => {
-  const [personopplysningerResult, personopplysningerFetch] = useApiCall(hentPersonopplysninger)
+  const [familieOpplysningerResult, familieOpplysningerFetch] = useApiCall(hentFamilieOpplysninger)
 
   const [landListeResult, landListeFetch] = useApiCall(hentAlleLand)
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
-      personopplysningerFetch({ ident: fnr, sakType: sakResult.data.sak.sakType })
+      familieOpplysningerFetch({ ident: fnr, sakType: sakResult.data.sak.sakType })
     }
   }, [fnr, sakResult])
 
@@ -50,11 +50,9 @@ export const Personopplysninger = ({
             <LenkeTilAndreSystemer fnr={fnr} />
             {!!sak ? (
               <>
-                {mapResult(personopplysningerResult, {
-                  pending: <Spinner visible={true} label="Henter personopplysninger" />,
-                  error: (error) => (
-                    <ApiErrorAlert>{error.detail || 'Kunne ikke hente personopplysninger'}</ApiErrorAlert>
-                  ),
+                {mapResult(familieOpplysningerResult, {
+                  pending: <Spinner visible={true} label="Henter opplysninger" />,
+                  error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente opplysninger'}</ApiErrorAlert>,
                   success: ({ soeker, avdoede, gjenlevende }) => (
                     <>
                       <Bostedsadresser bostedsadresse={soeker?.bostedsadresse} />

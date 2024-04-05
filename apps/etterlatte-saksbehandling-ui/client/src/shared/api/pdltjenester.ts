@@ -13,7 +13,7 @@ import { FamilieOpplysninger } from '~shared/types/familieOpplysninger'
 export const hentPersonNavn = async (ident: string): Promise<ApiResponse<IPdlPersonNavn>> =>
   apiClient.post(`/pdltjenester/person/navn`, { ident })
 
-export const hentPersonopplysninger = async (args: {
+export const hentFamilieOpplysninger = async (args: {
   ident: string
   sakType: SakType
-}): Promise<ApiResponse<FamilieOpplysninger>> => apiClient.post('/pdltjenester/person/opplysninger', args)
+}): Promise<ApiResponse<FamilieOpplysninger>> => apiClient.post('/pdltjenester/person/familieOpplysninger', args)

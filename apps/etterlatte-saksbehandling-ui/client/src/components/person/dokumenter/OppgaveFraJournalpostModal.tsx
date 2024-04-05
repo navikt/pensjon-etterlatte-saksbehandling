@@ -10,7 +10,7 @@ import { FlexRow } from '~shared/styled'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { useNavigate } from 'react-router-dom'
 import { useAppSelector } from '~store/Store'
-import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 
 // TODO: Må på sikt gjøre noe for å støtte tilfeller hvor sak mangler.
 export const OppgaveFraJournalpostModal = ({
@@ -36,9 +36,7 @@ export const OppgaveFraJournalpostModal = ({
   useEffect(() => {
     if (isOpen) {
       hentOppgaver(journalpost.journalpostId, (oppgaver) => {
-        const finnesUbehandletOppgave = oppgaver.filter(
-          ({ status }) => !['FERDIGSTILT', 'FEILREGISTRERT', 'AVBRUTT'].includes(status)
-        )
+        const finnesUbehandletOppgave = oppgaver.filter(({ status }) => erOppgaveRedigerbar(status))
 
         setKanOppretteOppgave(!finnesUbehandletOppgave.length)
       })

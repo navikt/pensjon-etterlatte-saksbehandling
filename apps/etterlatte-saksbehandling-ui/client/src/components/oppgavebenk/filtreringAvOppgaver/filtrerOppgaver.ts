@@ -1,4 +1,3 @@
-import { OppgaveDTO } from '~shared/api/oppgaver'
 import { isBefore } from 'date-fns'
 import {
   EnhetFilterKeys,
@@ -11,6 +10,7 @@ import {
   SAKSBEHANDLERFILTER,
   YtelseFilterKeys,
 } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import { OppgaveDTO } from '~shared/types/oppgave'
 
 function filtrerEnhet(enhetsFilter: EnhetFilterKeys, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
   if (enhetsFilter === 'visAlle') {

@@ -1,4 +1,4 @@
-import { feilregistrerGosysOppgave, OppgaveDTO, opprettOppgave, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
+import { feilregistrerGosysOppgave, opprettOppgave, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentSakForPerson } from '~shared/api/sak'
 import { isInitial, isPending, isSuccess, mapResult, mapSuccess } from '~shared/api/apiUtils'
@@ -9,6 +9,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formaterSakstype } from '~utils/formattering'
 import { ResultAlert } from '~shared/alerts/ResultAlert'
+import { OppgaveDTO, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 
 export const OverfoerOppgaveTilGjenny = ({
   oppgave,
@@ -36,16 +37,16 @@ export const OverfoerOppgaveTilGjenny = ({
         {
           sakId: sak.id,
           request: {
-            oppgaveType: 'JOURNALFOERING',
+            oppgaveType: Oppgavetype.JOURNALFOERING,
             referanse: oppgave.journalpostId!!,
             merknad: oppgave.beskrivelse || 'Journalføringsoppgave konvertert fra Gosys',
-            oppgaveKilde: 'SAKSBEHANDLER',
+            oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
           },
         },
         (opprettetOppgave) => {
           tildelSaksbehandler({
             oppgaveId: opprettetOppgave.id,
-            type: 'JOURNALFOERING',
+            type: Oppgavetype.JOURNALFOERING,
             nysaksbehandler: {
               saksbehandler: oppgave.saksbehandler!!.ident,
               versjon: null,

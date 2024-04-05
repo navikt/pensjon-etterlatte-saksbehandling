@@ -3,17 +3,12 @@ import { Button, Dropdown, Label, UNSAFE_Combobox } from '@navikt/ds-react'
 import { PersonCrossIcon, PersonPencilIcon, PersonPlusIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
-import {
-  byttSaksbehandlerApi,
-  erOppgaveRedigerbar,
-  fjernSaksbehandlerApi,
-  OppgaveDTO,
-  OppgaveSaksbehandler,
-} from '~shared/api/oppgaver'
+import { byttSaksbehandlerApi, fjernSaksbehandlerApi } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { isPending } from '~shared/api/apiUtils'
+import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>

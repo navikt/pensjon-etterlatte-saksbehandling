@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
-import { ferdigstillOppgave, OppgaveDTO } from '~shared/api/oppgaver'
+import { ferdigstillOppgave } from '~shared/api/oppgaver'
 import { FlexRow } from '~shared/styled'
 
 import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { OppgaveDTO } from '~shared/types/oppgave'
 
 export default function FerdigstillOppgaveModal({ oppgave }: { oppgave: OppgaveDTO }) {
   const [open, setOpen] = useState(false)

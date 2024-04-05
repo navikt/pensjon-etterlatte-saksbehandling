@@ -11,9 +11,9 @@ import { FlexRow } from '~shared/styled'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgaveHandling, settOppgaveHandling } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { FormWrapper } from '../BehandleJournalfoeringOppgave'
-import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
+import { OppgaveDTO, erOppgaveRedigerbar } from '~shared/types/oppgave'
 
 export default function StartOppgavebehandling({ antallBehandlinger }: { antallBehandlinger: number }) {
   const { oppgave, journalpost, oppgaveHandling } = useJournalfoeringOppgave()

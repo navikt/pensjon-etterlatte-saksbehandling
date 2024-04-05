@@ -14,6 +14,7 @@ import Spinner from '~shared/Spinner'
 import { useNavigate } from 'react-router-dom'
 import { SakOverfoeringDetailjer } from 'src/components/person/dokumenter/avvik/common/SakOverfoeringDetailjer'
 import { opprettOppgave } from '~shared/api/oppgaver'
+import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 
 const erSammeSak = (sak: ISak, journalpost: Journalpost): boolean => {
   const { sak: journalpostSak, tema } = journalpost
@@ -83,10 +84,10 @@ export const KnyttTilAnnenSak = ({
       {
         sakId,
         request: {
-          oppgaveType: 'JOURNALFOERING',
+          oppgaveType: Oppgavetype.JOURNALFOERING,
           referanse: journalpostId,
           merknad: `Journalpost flyttet til sak ${sakId}`,
-          oppgaveKilde: 'SAKSBEHANDLER',
+          oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
         },
       },
       (oppgave) => {

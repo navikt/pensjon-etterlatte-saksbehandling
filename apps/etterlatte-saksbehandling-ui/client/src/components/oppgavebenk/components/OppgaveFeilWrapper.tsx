@@ -1,8 +1,8 @@
 import { mapApiResult, Result } from '~shared/api/apiUtils'
-import { OppgaveDTO } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ReactNode } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { OppgaveDTO } from '~shared/types/oppgave'
 
 export const OppgaveFeilWrapper = (props: { oppgaver: Result<Array<OppgaveDTO>>; children: ReactNode }) => {
   const { oppgaver, children } = props

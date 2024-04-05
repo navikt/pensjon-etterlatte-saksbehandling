@@ -15,7 +15,7 @@ import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useParams } from 'react-router-dom'
-import { hentOppgave, Oppgavestatus } from '~shared/api/oppgaver'
+import { hentOppgave } from '~shared/api/oppgaver'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import { FormProvider, useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
@@ -24,6 +24,7 @@ import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
 import { GRADERING, GraderingFilterKeys } from '~shared/types/Gradering'
 import GjenopprettingModal from '~components/manuelbehandling/GjenopprettingModal'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
+import { Oppgavestatus } from '~shared/types/oppgave'
 
 interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   kilde: string

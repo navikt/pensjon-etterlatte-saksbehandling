@@ -1,4 +1,3 @@
-import { OppgaveDTO } from '~shared/api/oppgaver'
 import { Button } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { useAppSelector } from '~store/Store'
@@ -7,6 +6,7 @@ import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/Omgjoer
 import React from 'react'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 import { OpprettNyRevurdering } from '~components/person/OpprettNyRevurdering'
+import { OppgaveDTO } from '~shared/types/oppgave'
 
 export const HandlingerForOppgave = ({
   oppgave,

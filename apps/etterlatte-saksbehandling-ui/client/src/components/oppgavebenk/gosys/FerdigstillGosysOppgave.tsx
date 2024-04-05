@@ -1,10 +1,11 @@
-import { ferdigstilleGosysOppgave, OppgaveDTO } from '~shared/api/oppgaver'
+import { ferdigstilleGosysOppgave } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { mapResult } from '~shared/api/apiUtils'
 import { Alert, Button, Loader } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { GosysActionToggle } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
 import Spinner from '~shared/Spinner'
+import { OppgaveDTO } from '~shared/types/oppgave'
 
 export const FerdigstillGosysOppgave = ({
   oppgave,

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.selftest
 
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.KlageKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
@@ -38,12 +39,12 @@ class SelfTestService(
     /**
      * Returns result of self-test in HTML format.
      */
-    fun performSelfTestAndReportAsHtml(): String = htmlPage(htmlStatusRows(performSelfTest()))
+    suspend fun performSelfTestAndReportAsHtml(): String = htmlPage(htmlStatusRows(performSelfTest()))
 
     /**
      * Returns result of self-test in JSON format.
      */
-    fun performSelfTestAndReportAsJson(): String {
+    suspend fun performSelfTestAndReportAsJson(): String {
         val pingResults = performSelfTest()
         val aggregateCode = getAggregateResult(pingResults.values).code()
         val checks = json(pingResults)
@@ -52,13 +53,17 @@ class SelfTestService(
 
     protected fun now(): LocalTime = LocalTime.now()
 
-    private fun performSelfTest(): Map<String, PingResult> =
-        externalServices
-            .map { runBlocking { it.ping() } } // TODO: pings kan kjøre async forbedring mulig her
-            .associateBy { it.serviceName }
+    private suspend fun performSelfTest(): Map<String, PingResult> {
+        return coroutineScope {
+            externalServices
+                .map { async { it.ping() } }
+                .map { it.await() }
+                .associateBy { it.serviceName }
+        }
+    }
 
     private companion object {
-        private const val APPLICATION_NAME = "pensjonskalkulator-backend"
+        private const val APPLICATION_NAME = "etterlatte-behandling"
 
         private fun getAggregateResult(pingResults: Collection<PingResult>) =
             pingResults

@@ -57,7 +57,9 @@ export const AvkortingInntekt = ({
   const [visHistorikk, setVisHistorikk] = useState(false)
 
   // Er det utregnet avkorting finnes det grunnlag lagt til i denne behandlingen
-  const finnesRedigerbartGrunnlag = () => avkorting?.avkortetYtelse && avkorting?.avkortetYtelse.length !== 0
+  const finnesRedigerbartGrunnlag = () =>
+    avkorting?.avkortingGrunnlag &&
+    avkorting.avkortingGrunnlag.filter((inntekt) => inntekt.lagretPaaBehandling === behandling.id).length !== 0
 
   const mismatchGrunnlagsperioderOgVirkningstidspunkt = (sisteGrunnlag: IAvkortingGrunnlag) =>
     sisteGrunnlag.lagretPaaBehandling === behandling.id && sisteGrunnlag.fom !== behandling.virkningstidspunkt?.dato
@@ -78,7 +80,13 @@ export const AvkortingInntekt = ({
     if (avkortingGrunnlag.length > 0) {
       // Preutfyller ny grunnlagsperiode med tidligere verdier
       const nyligste = avkortingGrunnlag[0]
-      return { ...nyligste, fom: virkningstidspunkt(behandling).dato }
+      return {
+        fom: virkningstidspunkt(behandling).dato,
+        fratrekkInnAar: nyligste.fratrekkInnAar,
+        fratrekkInnAarUtland: nyligste.fratrekkInnAarUtland,
+        relevanteMaanederInnAar: nyligste.relevanteMaanederInnAar,
+        spesifikasjon: nyligste.spesifikasjon,
+      }
     }
     // Første grunnlagsperiode
     return {

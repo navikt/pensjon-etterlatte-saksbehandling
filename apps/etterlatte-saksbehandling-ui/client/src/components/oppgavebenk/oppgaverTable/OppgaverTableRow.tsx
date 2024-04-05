@@ -1,6 +1,5 @@
 import React, { ReactNode } from 'react'
 import { Table } from '@navikt/ds-react'
-import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import { formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import SaksoversiktLenke from '~components/oppgavebenk/components/SaksoversiktLenke'
@@ -11,6 +10,7 @@ import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbeh
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 
 interface Props {
   oppgave: OppgaveDTO

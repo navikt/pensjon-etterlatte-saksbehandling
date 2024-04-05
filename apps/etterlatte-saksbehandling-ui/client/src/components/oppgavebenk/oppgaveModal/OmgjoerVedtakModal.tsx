@@ -1,4 +1,3 @@
-import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
 import { Alert, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -10,6 +9,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { Klage, Omgjoering, VedtaketKlagenGjelder } from '~shared/types/Klage'
 import { formaterKanskjeStringDato, formaterVedtakType } from '~utils/formattering'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { OppgaveDTO, erOppgaveRedigerbar } from '~shared/types/oppgave'
 
 function hentOmgjoering(klage: Klage): Omgjoering | null {
   if (klage.utfall?.utfall === 'DELVIS_OMGJOERING' || klage.utfall?.utfall === 'OMGJOERING') {

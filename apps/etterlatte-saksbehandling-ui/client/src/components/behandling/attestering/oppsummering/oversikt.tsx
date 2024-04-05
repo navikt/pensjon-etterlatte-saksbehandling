@@ -13,7 +13,7 @@ import { tagColors, TagList } from '~shared/Tags'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { erOppgaveRedigerbar, hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
+import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
@@ -23,6 +23,7 @@ import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosat
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useAppSelector } from '~store/Store'
+import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar

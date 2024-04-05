@@ -1,4 +1,4 @@
-import { OppgaveDTO } from '~shared/api/oppgaver'
+import { OppgaveDTO } from '~shared/types/oppgave'
 
 export interface OppgavebenkState {
   oppgavelistaOppgaver: OppgaveDTO[]

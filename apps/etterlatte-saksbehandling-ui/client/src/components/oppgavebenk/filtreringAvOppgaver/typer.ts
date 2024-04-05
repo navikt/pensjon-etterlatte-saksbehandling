@@ -1,4 +1,4 @@
-import { Oppgavestatus, Oppgavetype } from '~shared/api/oppgaver'
+import { Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
 
 type visAlle = 'visAlle'
 

@@ -8,7 +8,8 @@ import { mapSuccess } from '~shared/api/apiUtils'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { erOppgaveRedigerbar, hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
+import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
+import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 
 export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const innloggetId = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler.ident)

@@ -9,6 +9,7 @@ import { opprettOppgave } from '~shared/api/oppgaver'
 import { useNavigate } from 'react-router-dom'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 
 export const OpprettJournalfoeringsoppgave = ({
   journalpost,
@@ -26,10 +27,10 @@ export const OpprettJournalfoeringsoppgave = ({
       {
         sakId,
         request: {
-          oppgaveType: 'JOURNALFOERING',
+          oppgaveType: Oppgavetype.JOURNALFOERING,
           referanse: journalpostId,
           merknad: `Journalpost flyttet til sak ${sakId}`,
-          oppgaveKilde: 'SAKSBEHANDLER',
+          oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
         },
       },
       (oppgave) => {

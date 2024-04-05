@@ -1,5 +1,4 @@
 import { Alert } from '@navikt/ds-react'
-import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { PagineringsKontroller } from '~components/oppgavebenk/oppgaver/PagineringsKontroller'
@@ -14,6 +13,7 @@ import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils
 import { filtrerOppgaver } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 
 export interface Props {
   oppgaver: OppgaveDTO[]

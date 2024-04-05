@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { isPending, mapResult } from '~shared/api/apiUtils'
-import { hentOppgaverMedStatus, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
+import { hentOppgaverMedStatus } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
@@ -19,6 +19,7 @@ import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useAppSelector } from '~store/Store'
+import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>

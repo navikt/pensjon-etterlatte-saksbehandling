@@ -1,7 +1,6 @@
 import React, { ReactNode, useEffect, useState } from 'react'
 import { SortState, Table } from '@navikt/ds-react'
 import { OppgaverTableHeader } from '~components/oppgavebenk/oppgaverTable/OppgaverTableHeader'
-import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import { OppgaverTableRow } from '~components/oppgavebenk/oppgaverTable/OppgaverTableRow'
 import {
   initialSortering,
@@ -10,6 +9,7 @@ import {
 } from '~components/oppgavebenk/utils/oppgaveSortering'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
+import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 
 export enum SortKey {
   REGISTRERINGSDATO = 'registreringsdato',

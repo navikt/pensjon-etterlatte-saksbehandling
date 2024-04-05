@@ -74,7 +74,9 @@ export const ReleaseAlerts = () => {
                     {formaterDatoMedKlokkeslett(utgivelse.published_at)}{' '}
                     {isToday(new Date(utgivelse.published_at)) && '(i dag)'}
                   </Detail>
-                  <UtgivelseBody size="small">{utgivelse.body}</UtgivelseBody>
+                  <UtgivelseBody size="small" spacing>
+                    {utgivelse.body}
+                  </UtgivelseBody>
                 </UtgivelseInfo>
               ))}
             </>
@@ -86,7 +88,6 @@ export const ReleaseAlerts = () => {
 }
 
 const DropdownMenu = styled(Dropdown.Menu)`
-  position: absolute;
   min-width: fit-content;
   max-width: fit-content;
 `
@@ -119,5 +120,4 @@ const UtgivelseInfo = styled.div`
 
 const UtgivelseBody = styled(BodyShort)`
   white-space: pre-wrap;
-  padding-bottom: 0.5rem;
 `

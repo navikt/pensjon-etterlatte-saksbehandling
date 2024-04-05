@@ -24,10 +24,11 @@ fun initEmbeddedServer(
     applicationConfig: Config,
     withMetrics: Boolean = true,
     cronJobs: List<TimerJob> = listOf(),
-    routes: Route.() -> Unit,
+    routes: (Route.() -> Unit)? = null,
+    authenticatedRoutes: Route.() -> Unit,
 ) = settOppEmbeddedServer(httpPort, applicationConfig, cronJobs) {
-    restModule(sikkerlogger(), withMetrics = withMetrics) {
-        routes()
+    restModule(sikkerlogger(), withMetrics = withMetrics, routes = routes) {
+        authenticatedRoutes()
     }
 }
 

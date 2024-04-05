@@ -101,9 +101,6 @@ class SelfTestService(
         private fun htmlStatusRows(resultsByService: List<PingResult>) =
             resultsByService.joinToString(separator = "", transform = ::htmlRow)
 
-        // TODO:
-        private fun htmlRow(entry: Map.Entry<String, PingResult>) = htmlRow(entry.value)
-
         private fun htmlRow(result: PingResult) =
             "<tr>${htmlCell(result.serviceName)}${htmlStatusCell(result.result)}${htmlCell(result.description)}" +
                 "${htmlCell(result.endpoint)}</tr>"

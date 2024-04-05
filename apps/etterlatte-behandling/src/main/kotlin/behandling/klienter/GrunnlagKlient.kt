@@ -7,6 +7,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ResponseException
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
@@ -19,11 +20,17 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 interface GrunnlagKlient {
+    @Deprecated("Denne metoden håndterer ikke flere av samme opplysningsperson")
     suspend fun finnPersonOpplysning(
         behandlingId: UUID,
         opplysningsType: Opplysningstype,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Person>?
+
+    suspend fun hentGrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlag?
 
     suspend fun hentPersongalleri(
         behandlingId: UUID,
@@ -42,6 +49,7 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
     private val clientId = config.getString("grunnlag.client.id")
     private val resourceUrl = config.getString("grunnlag.resource.url")
 
+    @Deprecated("Tar ikke høyde for flere avdøde riktig")
     override suspend fun finnPersonOpplysning(
         behandlingId: UUID,
         opplysningsType: Opplysningstype,
@@ -75,6 +83,25 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
                 e,
             )
         }
+    }
+
+    override suspend fun hentGrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlag? {
+        return downstreamResourceClient.get(
+            resource = Resource(clientId = clientId, url = "$resourceUrl/grunnlag/behandling/$behandlingId"),
+            brukerTokenInfo = brukerTokenInfo,
+        ).mapBoth(
+            success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
+            failure = { errorResponse ->
+                if (errorResponse is ResponseException && errorResponse.response.status == HttpStatusCode.NotFound) {
+                    return null
+                } else {
+                    throw errorResponse
+                }
+            },
+        )
     }
 
     override suspend fun hentPersongalleri(

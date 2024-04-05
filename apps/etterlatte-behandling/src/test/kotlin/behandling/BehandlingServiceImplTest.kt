@@ -31,11 +31,14 @@ import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -95,7 +98,11 @@ class BehandlingServiceImplTest {
             mockk<BehandlingDao> {
                 every { alleBehandlingerISak(1) } returns
                     listOf(
-                        revurdering(sakId = 1, revurderingAarsak = Revurderingaarsak.REGULERING, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                        revurdering(
+                            sakId = 1,
+                            revurderingAarsak = Revurderingaarsak.REGULERING,
+                            enhet = Enheter.EGNE_ANSATTE.enhetNr,
+                        ),
                         foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
                     )
             }
@@ -222,7 +229,11 @@ class BehandlingServiceImplTest {
             mockk<BehandlingDao> {
                 every { alleBehandlingerISak(1) } returns
                     listOf(
-                        revurdering(sakId = 1, revurderingAarsak = Revurderingaarsak.REGULERING, enhet = Enheter.EGNE_ANSATTE.enhetNr),
+                        revurdering(
+                            sakId = 1,
+                            revurderingAarsak = Revurderingaarsak.REGULERING,
+                            enhet = Enheter.EGNE_ANSATTE.enhetNr,
+                        ),
                         foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
                     )
             }
@@ -457,7 +468,12 @@ class BehandlingServiceImplTest {
 
         assertFalse(didRollback)
         assertThrows<RuntimeException> {
-            inTransaction { behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null)) }
+            inTransaction {
+                behandlingService.avbrytBehandling(
+                    nyFoerstegangsbehandling.id,
+                    Saksbehandler("", "saksbehandler", null),
+                )
+            }
         }
 
         assertTrue(didRollback)
@@ -956,6 +972,20 @@ class BehandlingServiceImplTest {
                 coEvery {
                     finnPersonOpplysning(behandling.id, Opplysningstype.AVDOED_PDL_V1, TOKEN)
                 } returns grunnlagsopplysningMedPersonopplysning
+                coEvery {
+                    hentGrunnlag(behandling.id, any())
+                } returns
+                    GrunnlagTestData(
+                        opplysningsmapAvdoedOverrides =
+                            mapOf(
+                                Opplysningstype.DOEDSDATO to
+                                    Opplysning.Konstant(
+                                        id = UUID.randomUUID(),
+                                        kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
+                                        verdi = doedsdato?.toJsonNode() ?: com.fasterxml.jackson.databind.node.NullNode.instance,
+                                    ),
+                            ),
+                    ).hentOpplysningsgrunnlag()
                 coEvery { hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
             }
 

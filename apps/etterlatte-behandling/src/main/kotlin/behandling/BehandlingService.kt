@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -280,7 +281,13 @@ internal class BehandlingServiceImpl(
 
         return when (behandling.type) {
             BehandlingType.REVURDERING -> erGyldigVirkningstidspunktRevurdering(request, behandling)
-            BehandlingType.FØRSTEGANGSBEHANDLING -> erGyldigVirkningstidspunktFoerstegangsbehandling(request, behandling, brukerTokenInfo)
+            BehandlingType.FØRSTEGANGSBEHANDLING ->
+                erGyldigVirkningstidspunktFoerstegangsbehandling(
+                    request,
+                    behandling,
+                    brukerTokenInfo,
+                )
+
             else -> throw Exception("BehandlingType ${behandling.type} er ikke støttet")
         }
     }
@@ -292,7 +299,7 @@ internal class BehandlingServiceImpl(
     ): Boolean {
         val virkningstidspunkt = request.dato
         val harGyldigFormat = virkningstidspunkt.year in (0..9999) && request.begrunnelse != null
-        val doedsdato = hentDoedsdato(behandling.id, brukerTokenInfo)?.let { YearMonth.from(it) }
+        val doedsdato = hentTidligsteDoedsdatoAvdoed(behandling.id, brukerTokenInfo)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
 
         // For BP er makstidspunkt 3 år - dette gjelder også unntaksvis for OMS
@@ -318,14 +325,17 @@ internal class BehandlingServiceImpl(
                         SakType.OMSTILLINGSSTOENAD ->
                             // For omstillingsstønad vil virkningstidspunktet tidligst være mnd etter makstidspunkt
                             virkningstidspunkt.isAfter(makstidspunktFoerSoeknad)
+
                         SakType.BARNEPENSJON ->
                             // For barnepensjon vil virkningstidspunktet tidligst være samme mnd som makstidspunkt
                             virkningstidspunkt.isAfter(makstidspunktFoerSoeknad) || virkningstidspunkt == makstidspunktFoerSoeknad
                     }
                 }
+
                 else -> virkningstidspunkt.isAfter(doedsdato)
             }
 
+        println(doedsdato)
         return harGyldigFormat && datoForVirkningstidspunktErGydligInnenforMaksBegrensninger
     }
 
@@ -341,17 +351,14 @@ internal class BehandlingServiceImpl(
         return harGyldigFormat && virkningstidspunkt.isAfter(foersteVirkDato) || virkningstidspunkt == foersteVirkDato
     }
 
-    private suspend fun hentDoedsdato(
+    private suspend fun hentTidligsteDoedsdatoAvdoed(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): LocalDate? {
-        return grunnlagKlient.finnPersonOpplysning(behandlingId, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
-            .also {
-                it?.fnr?.let {
-                        fnr ->
-                    behandlingRequestLogger.loggRequest(brukerTokenInfo, fnr, "behandling")
-                }
-            }?.opplysning?.doedsdato
+        val grunnlag =
+            grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
+                ?: throw InternfeilException("Fant ikke grunnlag for behandling med id=$behandlingId")
+        return grunnlag.hentAvdoede().mapNotNull { it.hentDoedsdato()?.verdi }.minOrNull()
     }
 
     override fun hentFoersteVirk(sakId: Long): YearMonth? {

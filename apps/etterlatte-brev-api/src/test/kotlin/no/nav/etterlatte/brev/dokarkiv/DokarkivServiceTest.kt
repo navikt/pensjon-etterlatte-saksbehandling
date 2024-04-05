@@ -103,6 +103,7 @@ internal class DokarkivServiceTest {
                 VedtakSak("ident", type, sakId),
                 UUID.randomUUID(),
                 "ansvarligEnhet",
+                "A123",
             )
 
         val request =

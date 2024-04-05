@@ -55,6 +55,7 @@ internal class JournalfoerVedtaksbrevRiver(
                     sak = deserialize(packet["vedtak.sak"].toJson()),
                     behandlingId = hentBehandling(packet),
                     ansvarligEnhet = packet["vedtak.vedtakFattet.ansvarligEnhet"].asText(),
+                    saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText(),
                 )
 
             val response = runBlocking { journalfoerBrevService.journalfoerVedtaksbrev(vedtak) } ?: return
@@ -92,4 +93,5 @@ data class VedtakTilJournalfoering(
     val sak: VedtakSak,
     val behandlingId: UUID,
     val ansvarligEnhet: String,
+    val saksbehandler: String,
 )

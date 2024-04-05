@@ -56,7 +56,7 @@ export default function ManuellBehandling() {
         setOppgaveStatus(oppgave.status)
         oppgave.fnr && methods.setValue('persongalleri.soeker', oppgave.fnr)
         oppgave.referanse && methods.setValue('pesysId', Number(oppgave.referanse))
-        if (oppgave.type == Oppgavetype.GJENOPPRETTING_ALDERSOVERGANG) {
+        if (oppgave.type === Oppgavetype.GJENOPPRETTING_ALDERSOVERGANG) {
           methods.setValue('kilde', 'GJENOPPRETTA')
         }
       })

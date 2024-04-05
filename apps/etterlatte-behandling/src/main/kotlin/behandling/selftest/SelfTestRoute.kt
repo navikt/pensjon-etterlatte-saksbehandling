@@ -13,11 +13,14 @@ import io.ktor.server.routing.get
 internal fun Route.selfTestRoute(selfTestService: SelfTestService) {
     get("internal/selftest") {
         val accept = call.request.header(HttpHeaders.Accept)
-
-        if ("application/json" == accept) {
-            call.respond(selfTestService.performSelfTestAndReportAsJson())
-        } else if (accept == "TEXT_HTML") {
-            call.respondText(selfTestService.performSelfTestAndReportAsHtml(), ContentType.Text.Html, HttpStatusCode.OK)
+        if (accept == null) {
+            call.respond(HttpStatusCode.BadRequest)
+        } else {
+            if (accept.contains(ContentType.Application.Json.contentType)) {
+                call.respond(selfTestService.performSelfTestAndReportAsJson())
+            } else if (accept == ContentType.Text.Html.contentType) {
+                call.respondText(selfTestService.performSelfTestAndReportAsHtml(), ContentType.Text.Html, HttpStatusCode.OK)
+            }
         }
     }
 }

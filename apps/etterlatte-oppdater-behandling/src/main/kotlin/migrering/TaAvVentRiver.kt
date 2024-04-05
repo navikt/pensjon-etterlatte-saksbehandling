@@ -19,13 +19,15 @@ import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class TaAvVentRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
-) :
-    ListenerMedLoggingOgFeilhaandtering() {
+) : ListenerMedLoggingOgFeilhaandtering() {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     init {
         initialiserRiver(rapidsConnection, Ventehendelser.TA_AV_VENT) {
             validate { it.interestedIn(OPPGAVE_ID_FLERE_KEY) }
@@ -39,21 +41,26 @@ internal class TaAvVentRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
+        val oppgavetyper = setOf(OppgaveType.valueOf(packet[OPPGAVETYPE_KEY].asText()))
+        val oppgavekilder = setOf(OppgaveKilde.valueOf(packet[OPPGAVEKILDE_KEY].asText()))
+        logger.info("Tar av vent med oppgavetyper $oppgavetyper og oppgavekilder $oppgavekilder for ${packet.dato}")
         val respons =
             behandlingService.taAvVent(
                 VentefristGaarUtRequest(
                     dato = packet.dato,
-                    type = setOf(OppgaveType.valueOf(packet[OPPGAVETYPE_KEY].asText())),
-                    oppgaveKilde = setOf(OppgaveKilde.valueOf(packet[OPPGAVEKILDE_KEY].asText())),
+                    type = oppgavetyper,
+                    oppgaveKilde = oppgavekilder,
                     oppgaver = packet[OPPGAVE_ID_FLERE_KEY].map { it.asUUID() },
                 ),
             )
+        logger.info("Tok ${respons.behandlinger.size} oppgaver av vent")
         respons.behandlinger.forEach {
             packet.sakId = it.sakId
             packet.behandlingId = UUID.fromString(it.referanse)
             packet[OPPGAVEKILDE_KEY] = it.oppgavekilde
             packet[OPPGAVE_KEY] = it.oppgaveID
             packet.eventName = Ventehendelser.TATT_AV_VENT.lagEventnameForType()
+            logger.debug("Oppgave {} for behandling {} tatt av vent. Sender melding videre", packet[OPPGAVE_KEY], packet.behandlingId)
             context.publish(packet.toJson())
         }
     }

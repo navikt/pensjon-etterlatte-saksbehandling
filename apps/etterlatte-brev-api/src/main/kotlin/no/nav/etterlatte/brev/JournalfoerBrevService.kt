@@ -61,7 +61,7 @@ class JournalfoerBrevService(
 
         // Spesialhandtering for gjenoppretting.
         if (vedtak.saksbehandler == "EY" && brev.status == Status.OPPRETTET) {
-            logger.info(
+            logger.warn(
                 "Vedtaksbrev fra migrering som er i feil tilstand: ${brev.id}. Avbryter denne, må følges opp manuelt av utviklerne.",
             )
             return null

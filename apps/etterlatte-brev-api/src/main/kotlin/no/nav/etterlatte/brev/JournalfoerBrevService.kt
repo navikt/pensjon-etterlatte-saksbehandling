@@ -106,7 +106,7 @@ class JournalfoerBrevService(
 
 class FeilStatusForJournalfoering(brevID: BrevID, status: Status) : UgyldigForespoerselException(
     code = "FEIL_STATUS_FOR_JOURNALFOERING",
-    detail = "Kan ikke journalføre brev med status ${status.name.lowercase()}",
+    detail = "Kan ikke journalføre brev $brevID med status ${status.name.lowercase()}",
     meta =
         mapOf(
             "brevId" to brevID,

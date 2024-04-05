@@ -353,7 +353,10 @@ class OppgaveService(
         oppgaveUnderBehandling: OppgaveIntern,
         saksbehandler: BrukerTokenInfo,
     ) {
-        if (!saksbehandler.kanEndreOppgaverFor(oppgaveUnderBehandling.saksbehandler?.ident)) {
+        if (oppgaveUnderBehandling.status == Status.NY && oppgaveUnderBehandling.saksbehandler == null) {
+            logger.info("Oppgave (id=${oppgaveUnderBehandling.id}) er ikke tildelt - tildeles ${saksbehandler.ident()}")
+            tildelSaksbehandler(oppgaveUnderBehandling.id, saksbehandler.ident())
+        } else if (!saksbehandler.kanEndreOppgaverFor(oppgaveUnderBehandling.saksbehandler?.ident)) {
             throw OppgaveTilhoererAnnenSaksbehandler(oppgaveUnderBehandling.id)
         }
     }

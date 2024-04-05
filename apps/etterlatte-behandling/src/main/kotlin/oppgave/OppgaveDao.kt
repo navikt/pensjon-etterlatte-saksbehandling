@@ -81,6 +81,7 @@ interface OppgaveDao {
         type: Collection<OppgaveType>,
         kilde: Collection<OppgaveKilde>,
         oppgaver: List<UUID>,
+        grense: Int,
     ): List<VentefristGaarUt>
 }
 
@@ -424,6 +425,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
         type: Collection<OppgaveType>,
         kilde: Collection<OppgaveKilde>,
         oppgaver: List<UUID>,
+        grense: Int,
     ): List<VentefristGaarUt> =
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -436,11 +438,13 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                         and type = ANY(?)
                         and kilde = ANY(?)
                         and status = 'PAA_VENT'
+                        LIMIT ?
                         """.trimIndent(),
                     )
                 statement.setTidspunkt(1, dato.atTime(LocalTime.NOON).toTidspunkt())
                 statement.setArray(2, createArrayOf("text", type.map { i -> i.name }.toTypedArray()))
                 statement.setArray(3, createArrayOf("text", kilde.map { i -> i.name }.toTypedArray()))
+                statement.setInt(4, grense)
                 statement.executeQuery().toList {
                     VentefristGaarUt(
                         oppgaveID = getUUID("id"),

@@ -26,9 +26,8 @@ data class BarnepensjonInnvilgelseForeldreloes(
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
     val kunNyttRegelverk: Boolean,
-    val bareEnPeriode: Boolean,
     val flerePerioder: Boolean,
-    val ingenUtbetaling: Boolean,
+    val harUtbetaling: Boolean,
     val vedtattIPesys: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
@@ -75,9 +74,8 @@ data class BarnepensjonInnvilgelseForeldreloes(
                     utbetalingsinfo.beregningsperioder.all {
                         it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
                     },
-                bareEnPeriode = utbetalingsinfo.beregningsperioder.size < 2,
                 flerePerioder = utbetalingsinfo.beregningsperioder.size > 1,
-                ingenUtbetaling = utbetalingsinfo.beregningsperioder.none { it.utbetaltBeloep.value > 0 },
+                harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 vedtattIPesys = vedtattIPesys,
             )
         }

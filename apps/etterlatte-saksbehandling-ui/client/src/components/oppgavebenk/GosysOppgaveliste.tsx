@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { hentGosysOppgaver, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
+import { hentGosysOppgaver } from '~shared/api/oppgaver'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -20,6 +20,7 @@ import {
 } from '~components/oppgavebenk/utils/oppgaveutils'
 import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useApiCall } from '~shared/hooks/useApiCall'
+import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>

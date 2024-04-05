@@ -4,8 +4,9 @@ import { FlexRow } from '~shared/styled'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { erOppgaveRedigerbar, ferdigstillOppgaveMedMerknad, Oppgavestatus } from '~shared/api/oppgaver'
+import { ferdigstillOppgaveMedMerknad } from '~shared/api/oppgaver'
 import { useNavigate } from 'react-router-dom'
+import { Oppgavestatus, erOppgaveRedigerbar } from '~shared/types/oppgave'
 
 export default function GjenopprettingModal(props: { oppgaveId: string; oppgaveStatus: Oppgavestatus }) {
   const { oppgaveId, oppgaveStatus } = props

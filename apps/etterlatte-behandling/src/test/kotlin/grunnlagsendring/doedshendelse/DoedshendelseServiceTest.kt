@@ -201,7 +201,8 @@ internal class DoedshendelseServiceTest {
             )
         } returns
             avdoed.copy(
-                avdoedesBarn = listOf(fellesbarn), bostedsadresse = bostedsadresse,
+                avdoedesBarn = listOf(fellesbarn),
+                bostedsadresse = bostedsadresse,
                 sivilstand =
                     listOf(
                         OpplysningDTO(

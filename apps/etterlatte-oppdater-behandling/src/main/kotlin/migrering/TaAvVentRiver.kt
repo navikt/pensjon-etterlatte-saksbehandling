@@ -1,6 +1,8 @@
 package no.nav.etterlatte.migrering
 
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
@@ -19,13 +21,16 @@ import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 internal class TaAvVentRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
-) :
-    ListenerMedLoggingOgFeilhaandtering() {
+    private val featureToggleService: FeatureToggleService,
+) : ListenerMedLoggingOgFeilhaandtering() {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     init {
         initialiserRiver(rapidsConnection, Ventehendelser.TA_AV_VENT) {
             validate { it.interestedIn(OPPGAVE_ID_FLERE_KEY) }
@@ -39,22 +44,43 @@ internal class TaAvVentRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
+        if (!featureToggleService.isEnabled(VentFeatureToggle.TaAvVent, false)) {
+            logger.warn("Ta av vent er skrudd av. Avbryter fra TaAvVentRiver")
+            return
+        }
+        val oppgavetyper = setOf(OppgaveType.valueOf(packet[OPPGAVETYPE_KEY].asText()))
+        val oppgavekilder = setOf(OppgaveKilde.valueOf(packet[OPPGAVEKILDE_KEY].asText()))
+        logger.info("Tar av vent med oppgavetyper $oppgavetyper og oppgavekilder $oppgavekilder for ${packet.dato}")
         val respons =
             behandlingService.taAvVent(
                 VentefristGaarUtRequest(
                     dato = packet.dato,
-                    type = setOf(OppgaveType.valueOf(packet[OPPGAVETYPE_KEY].asText())),
-                    oppgaveKilde = setOf(OppgaveKilde.valueOf(packet[OPPGAVEKILDE_KEY].asText())),
+                    type = oppgavetyper,
+                    oppgaveKilde = oppgavekilder,
                     oppgaver = packet[OPPGAVE_ID_FLERE_KEY].map { it.asUUID() },
                 ),
             )
+        logger.info("Tok ${respons.behandlinger.size} oppgaver av vent")
+        logger.debug("Oppgavene tatt av vent er {}", respons.behandlinger.map { it.oppgaveID })
         respons.behandlinger.forEach {
+            if (!featureToggleService.isEnabled(VentFeatureToggle.TaAvVent, false)) {
+                logger.warn("Ta av vent er skrudd av. Avbryter fra TaAvVentRiver for oppgave ${it.oppgaveID} i sak ${packet.sakId}")
+                return
+            }
             packet.sakId = it.sakId
             packet.behandlingId = UUID.fromString(it.referanse)
             packet[OPPGAVEKILDE_KEY] = it.oppgavekilde
             packet[OPPGAVE_KEY] = it.oppgaveID
             packet.eventName = Ventehendelser.TATT_AV_VENT.lagEventnameForType()
+            logger.debug("Oppgave {} for behandling {} tatt av vent. Sender melding videre", packet[OPPGAVE_KEY], packet.behandlingId)
             context.publish(packet.toJson())
         }
     }
+}
+
+enum class VentFeatureToggle(private val key: String) : FeatureToggle {
+    TaAvVent("ta-av-vent"),
+    ;
+
+    override fun key() = key
 }

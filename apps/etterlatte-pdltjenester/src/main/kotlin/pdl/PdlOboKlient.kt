@@ -6,20 +6,24 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktor.behandlingsnummer
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.utils.toPdlVariables
 import org.slf4j.LoggerFactory
 
-class PdlOboKlient(private val httpClient: HttpClient, private val config: Config) {
-    private val logger = LoggerFactory.getLogger(PdlKlient::class.java)
+class PdlOboKlient(private val httpClient: HttpClient, config: Config) {
+    private val logger = LoggerFactory.getLogger(PdlOboKlient::class.java)
 
     private val apiUrl = config.getString("pdl.url")
     private val pdlScope = config.getString("pdl.scope")
@@ -49,6 +53,41 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
                 is RetryResult.Success ->
                     it.content.also { result ->
                         result.errors?.joinToString()?.let { feil ->
+                            logger.error("Fikk data fra PDL, men også følgende feil: $feil")
+                        }
+                    }
+
+                is RetryResult.Failure -> throw it.samlaExceptions()
+            }
+        }
+    }
+
+    suspend fun hentPerson(
+        fnr: Folkeregisteridentifikator,
+        rolle: PersonRolle,
+        sakType: SakType,
+        bruker: BrukerTokenInfo,
+    ): PdlPersonResponse {
+        val request =
+            PdlGraphqlRequest(
+                query = getQuery("/pdl/hentPerson.graphql"),
+                variables = toPdlVariables(fnr, rolle),
+            )
+
+        return retry<PdlPersonResponse>(times = 3) {
+            httpClient.post(apiUrl) {
+                bearerAuth(getOboToken(bruker))
+                behandlingsnummer(sakType)
+                header(PdlKlient.HEADER_TEMA, PdlKlient.HEADER_TEMA_VALUE)
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }.body()
+        }.let {
+            when (it) {
+                is RetryResult.Success ->
+                    it.content.also { result ->
+                        result.errors?.joinToString(",")?.let { feil ->
                             logger.error("Fikk data fra PDL, men også følgende feil: $feil")
                         }
                     }

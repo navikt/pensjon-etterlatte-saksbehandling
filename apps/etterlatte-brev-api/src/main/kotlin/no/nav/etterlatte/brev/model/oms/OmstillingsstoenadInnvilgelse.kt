@@ -28,6 +28,7 @@ data class OmstillingsstoenadInnvilgelse(
     val innvilgetMindreEnnFireMndEtterDoedsfall: Boolean,
     val lavEllerIngenInntekt: Boolean,
     val etterbetaling: OmstillingsstoenadEtterbetaling?,
+    val harUtbetaling: Boolean,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
@@ -85,6 +86,7 @@ data class OmstillingsstoenadInnvilgelse(
                         .plusMonths(4)
                         .isAfter(avkortingsinfo.virkningsdato),
                 lavEllerIngenInntekt = brevutfall.lavEllerIngenInntekt == LavEllerIngenInntekt.JA,
+                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, beregningsperioder) },

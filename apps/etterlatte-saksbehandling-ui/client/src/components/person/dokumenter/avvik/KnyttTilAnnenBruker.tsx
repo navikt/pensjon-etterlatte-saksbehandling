@@ -12,9 +12,10 @@ import { oppdaterJournalpost } from '~shared/api/dokument'
 import { MagnifyingGlassIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
 import { useNavigate } from 'react-router-dom'
-import { Oppgavetype, opprettOppgave } from '~shared/api/oppgaver'
+import { opprettOppgave } from '~shared/api/oppgaver'
 import { useAppSelector } from '~store/Store'
 import { SakOverfoeringDetailjer } from 'src/components/person/dokumenter/avvik/common/SakOverfoeringDetailjer'
+import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 
 export const KnyttTilAnnentBruker = ({
   journalpost,
@@ -52,7 +53,7 @@ export const KnyttTilAnnentBruker = ({
         },
       },
       ({ journalpostId }) => {
-        const oppgaveType: Oppgavetype = 'JOURNALFOERING'
+        const oppgaveType = Oppgavetype.JOURNALFOERING
 
         apiOpprettOppgave({
           sakId: sak.id,
@@ -60,7 +61,7 @@ export const KnyttTilAnnentBruker = ({
             oppgaveType,
             referanse: journalpostId,
             merknad: `Journalpost flyttet fra bruker ${journalpost.bruker?.id}`,
-            oppgaveKilde: 'SAKSBEHANDLER',
+            oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
             saksbehandler: innloggetSaksbehandler.ident,
           },
         })

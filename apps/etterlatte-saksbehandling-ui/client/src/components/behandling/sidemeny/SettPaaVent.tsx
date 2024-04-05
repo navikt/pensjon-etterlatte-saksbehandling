@@ -1,13 +1,14 @@
 import { Alert, Button, Heading, Label, Textarea } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
-import { erOppgaveRedigerbar, OppgaveDTO, settOppgavePaaVentApi } from '~shared/api/oppgaver'
+import { settOppgavePaaVentApi } from '~shared/api/oppgaver'
 import { ClockDashedIcon, ClockIcon } from '@navikt/aksel-icons'
 import { formaterStringDato } from '~utils/formattering'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { isPending } from '~shared/api/apiUtils'
+import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
 
 export const SettPaaVent = ({
   oppgave,

@@ -18,6 +18,8 @@ import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
 import { EnkelPersonTrygdetid } from '~components/behandling/trygdetid/EnkelPersonTrygdetid'
 import { BeregnetSamletTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetSamletTrygdetid'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { formaterNavn } from '~shared/types/Person'
 
 const TrygdetidMelding = ({ overskrift, beskrivelse }: { overskrift: string; beskrivelse: string }) => {
   return (
@@ -58,6 +60,20 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   const [trygdetidManglerVedAvslag, setTrygdetidManglerVedAvslag] = useState(false)
 
   const visFlereTrygdetider = useFeatureEnabledMedDefault('foreldreloes', false)
+
+  const personopplysninger = usePersonopplysninger()
+
+  const mapNavn = (fnr: string): string => {
+    const opplysning = personopplysninger?.avdoede?.find(
+      (personOpplysning) => personOpplysning.opplysning.foedselsnummer === fnr
+    )?.opplysning
+
+    if (!opplysning) {
+      return fnr
+    }
+
+    return `${formaterNavn(opplysning)} (${fnr})`
+  }
 
   const oppdaterTrygdetider = (trygdetid: ITrygdetid[]) => {
     setTrygdetider(trygdetid)
@@ -170,13 +186,13 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
               <Tabs defaultValue={trygdetider[0].ident}>
                 <Tabs.List>
                   {trygdetider.map((trygdetid) => (
-                    <Tabs.Tab key={trygdetid.ident} value={trygdetid.ident} label={trygdetid.ident} />
+                    <Tabs.Tab key={trygdetid.ident} value={trygdetid.ident} label={mapNavn(trygdetid.ident)} />
                   ))}
                 </Tabs.List>
                 {trygdetider.map((trygdetid) => (
                   <Tabs.Panel value={trygdetid.ident} key={trygdetid.ident}>
                     <HeadingWrapper size="small" level="3">
-                      Trygdetid for {trygdetid.ident}
+                      Trygdetid for {mapNavn(trygdetid.ident)}
                     </HeadingWrapper>
 
                     <EnkelPersonTrygdetid
@@ -201,12 +217,12 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
                     {trygdetid.beregnetTrygdetid?.resultat ? (
                       <>
                         <HeadingWrapper size="small" level="3">
-                          Trygdetid for {trygdetid.ident}
+                          Trygdetid for {mapNavn(trygdetid.ident)}
                         </HeadingWrapper>
                         <BeregnetSamletTrygdetid beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
                       </>
                     ) : (
-                      <BodyShort>Trygdetid for {trygdetid.ident} mangler</BodyShort>
+                      <BodyShort>Trygdetid for {mapNavn(trygdetid.ident)} mangler</BodyShort>
                     )}
                   </div>
                 ))}

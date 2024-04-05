@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { isPending, mapResult } from '~shared/api/apiUtils'
-import { hentOppgaverMedStatus, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
+import { hentOppgaverMedStatus } from '~shared/api/oppgaver'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
   leggTilOppgavenIMinliste,
@@ -21,6 +21,7 @@ import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useAppSelector } from '~store/Store'
+import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>

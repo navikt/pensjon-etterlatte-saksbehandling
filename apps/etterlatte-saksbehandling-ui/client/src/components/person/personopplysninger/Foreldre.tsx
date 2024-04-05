@@ -3,19 +3,19 @@ import { Personopplysning } from '~components/person/personopplysninger/Personop
 import { PersonIcon } from '@navikt/aksel-icons'
 import { Heading, Table, Tag } from '@navikt/ds-react'
 import { SpaceChildren } from '~shared/styled'
-import { Personopplysning as PdlPersonopplysning } from '~shared/types/grunnlag'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterDato } from '~utils/formattering'
 import { AlderTag } from '~components/person/personopplysninger/components/AlderTag'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { Familiemedlem } from '~shared/types/familieOpplysninger'
 
 export const Foreldre = ({
   avdoed,
   gjenlevende,
   foreldreansvar,
 }: {
-  avdoed?: PdlPersonopplysning[]
-  gjenlevende?: PdlPersonopplysning[]
+  avdoed?: Familiemedlem[]
+  gjenlevende?: Familiemedlem[]
   foreldreansvar?: string[]
 }) => {
   const harForeldreansvar = (fnr: string): boolean => {
@@ -36,25 +36,25 @@ export const Foreldre = ({
         <Table.Body>
           {!!avdoed?.length ? (
             <>
-              {avdoed.map((doed: PdlPersonopplysning, index: number) => (
+              {avdoed.map((doed: Familiemedlem, index: number) => (
                 <Table.Row key={index}>
                   <Table.DataCell>
                     <SpaceChildren direction="row">
-                      {`${doed.opplysning.fornavn} ${doed.opplysning.etternavn}`}
-                      {!!doed.opplysning.doedsdato && (
+                      {`${doed.fornavn} ${doed.etternavn}`}
+                      {!!doed.doedsdato && (
                         <Tag variant="error-filled" size="small">
-                          Død {formaterStringDato(doed.opplysning.doedsdato)}
+                          Død {formaterDato(doed.doedsdato)}
                         </Tag>
                       )}
                     </SpaceChildren>
                   </Table.DataCell>
                   <Table.DataCell>
                     <SpaceChildren direction="row">
-                      <KopierbarVerdi value={doed.opplysning.foedselsnummer} iconPosition="right" />
-                      <AlderTag foedselsdato={doed.opplysning.foedselsdato} />
+                      <KopierbarVerdi value={doed.foedselsnummer} iconPosition="right" />
+                      {!!doed.foedselsdato && <AlderTag foedselsdato={doed.foedselsdato} />}
                     </SpaceChildren>
                   </Table.DataCell>
-                  <BostedsadresseDataCell bostedsadresse={doed.opplysning.bostedsadresse} index={0} />
+                  <BostedsadresseDataCell bostedsadresse={doed.bostedsadresse} index={0} />
                   <Table.DataCell>-</Table.DataCell>
                 </Table.Row>
               ))}
@@ -68,25 +68,25 @@ export const Foreldre = ({
           )}
           {!!gjenlevende?.length ? (
             <>
-              {gjenlevende.map((levende: PdlPersonopplysning, index: number) => (
+              {gjenlevende.map((levende: Familiemedlem, index: number) => (
                 <Table.Row key={index}>
                   <Table.DataCell>
                     <SpaceChildren direction="row">
-                      {levende.opplysning.fornavn} {levende.opplysning.etternavn}
+                      {levende.fornavn} {levende.etternavn}
                     </SpaceChildren>
                   </Table.DataCell>
                   <Table.DataCell>
                     <SpaceChildren direction="row">
-                      <KopierbarVerdi value={levende.opplysning.foedselsnummer} iconPosition="right" />
-                      <AlderTag foedselsdato={levende.opplysning.foedselsdato} />
+                      <KopierbarVerdi value={levende.foedselsnummer} iconPosition="right" />
+                      {!!levende.foedselsdato && <AlderTag foedselsdato={levende.foedselsdato} />}
                     </SpaceChildren>
                   </Table.DataCell>
-                  {!!levende.opplysning.bostedsadresse ? (
-                    <BostedsadresseDataCell bostedsadresse={levende.opplysning.bostedsadresse} index={0} />
+                  {!!levende.bostedsadresse ? (
+                    <BostedsadresseDataCell bostedsadresse={levende.bostedsadresse} index={0} />
                   ) : (
                     <Table.DataCell>Ingen bostedsadresse tilgjengelig</Table.DataCell>
                   )}
-                  <Table.DataCell>{harForeldreansvar(levende.opplysning.foedselsnummer) ? 'Ja' : 'Nei'}</Table.DataCell>
+                  <Table.DataCell>{harForeldreansvar(levende.foedselsnummer) ? 'Ja' : 'Nei'}</Table.DataCell>
                 </Table.Row>
               ))}
             </>

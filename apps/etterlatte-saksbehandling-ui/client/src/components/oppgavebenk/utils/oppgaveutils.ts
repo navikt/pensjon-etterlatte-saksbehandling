@@ -1,5 +1,5 @@
-import { OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/api/oppgaver'
 import { logger } from '~utils/logger'
+import { OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/oppgave'
 
 export const finnOgOppdaterSaksbehandlerTildeling = (
   oppgaver: OppgaveDTO[],

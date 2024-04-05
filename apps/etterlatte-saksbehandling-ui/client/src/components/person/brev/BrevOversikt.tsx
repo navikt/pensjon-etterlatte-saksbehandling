@@ -10,7 +10,6 @@ import { Container, FlexRow } from '~shared/styled'
 import BrevModal from '~components/person/brev/BrevModal'
 import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
 import { SakMedBehandlinger } from '~components/person/typer'
-
 import { isFailure, isPending, isSuccess, mapApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { LastOppBrev } from '~components/person/brev/LastOppBrev'
 import { NyttBrevModal } from '~components/person/brev/NyttBrevModal'
@@ -70,23 +69,23 @@ const handlingKnapp = (brev: IBrev) => {
   return <BrevModal brev={brev} />
 }
 
-export default function BrevOversikt({ sakStatus }: { sakStatus: Result<SakMedBehandlinger> }) {
+export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBehandlinger> }) {
   const navigate = useNavigate()
 
   const [brevListe, hentBrev] = useApiCall(hentBrevForSak)
-
   const [nyttBrevStatus, opprettBrev] = useApiCall(opprettBrevForSak)
+
   const kanOppretteBrevMedGittType = useFeatureEnabledMedDefault('kan-opprette-brev-med-data-for-spesifikk-type', false)
 
   useEffect(() => {
-    if (isSuccess(sakStatus)) {
-      hentBrev(Number(sakStatus.data.sak.id))
+    if (isSuccess(sakResult)) {
+      hentBrev(Number(sakResult.data.sak.id))
     }
-  }, [sakStatus])
+  }, [sakResult])
 
   const opprettNyttBrevOgRedirect = () => {
-    if (isSuccess(sakStatus)) {
-      opprettBrev(Number(sakStatus.data.sak.id), (brev) => {
+    if (isSuccess(sakResult)) {
+      opprettBrev(Number(sakResult.data.sak.id), (brev) => {
         navigate(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`)
       })
     } else {
@@ -94,13 +93,13 @@ export default function BrevOversikt({ sakStatus }: { sakStatus: Result<SakMedBe
     }
   }
 
-  if (isFailure(sakStatus)) {
+  if (isFailure(sakResult)) {
     return (
       <Container>
-        {sakStatus.error.status === 404 ? (
-          <ApiWarningAlert>Kan ikke opprette brev: {sakStatus.error.detail}</ApiWarningAlert>
+        {sakResult.error.status === 404 ? (
+          <ApiWarningAlert>Kan ikke opprette brev: {sakResult.error.detail}</ApiWarningAlert>
         ) : (
-          <ApiErrorAlert>{sakStatus.error.detail || 'Feil ved henting av brev'}</ApiErrorAlert>
+          <ApiErrorAlert>{sakResult.error.detail || 'Feil ved henting av brev'}</ApiErrorAlert>
         )}
       </Container>
     )
@@ -159,7 +158,7 @@ export default function BrevOversikt({ sakStatus }: { sakStatus: Result<SakMedBe
       <br />
 
       <FlexRow>
-        {mapSuccess(sakStatus, (sak) => (
+        {mapSuccess(sakResult, (sak) => (
           <>
             {kanOppretteBrevMedGittType ? (
               <NyttBrevModal sakId={sak.sak.id} />

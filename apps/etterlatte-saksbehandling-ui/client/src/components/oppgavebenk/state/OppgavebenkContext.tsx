@@ -4,8 +4,9 @@ import {
   OppgavebenkState,
   OppgavebenkStats,
 } from '~components/oppgavebenk/state/oppgavebenkState'
-import { hentOppgavebenkStats, OppgaveDTO } from '~shared/api/oppgaver'
+import { hentOppgavebenkStats } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
+import { OppgaveDTO } from '~shared/types/oppgave'
 
 export interface OppgavebenkStateDispatcher {
   setOppgavelistaOppgaver: (oppgaver: OppgaveDTO[]) => void

@@ -505,7 +505,7 @@ class OppgaveService(
     }
 
     fun hentFristGaarUt(request: VentefristGaarUtRequest): List<VentefristGaarUt> =
-        oppgaveDao.hentFristGaarUt(request.dato, request.type, request.oppgaveKilde, request.oppgaver)
+        oppgaveDao.hentFristGaarUt(request.dato, request.type, request.oppgaveKilde, request.oppgaver, request.grense)
 }
 
 class BrukerManglerAttestantRolleException(ident: String) : UgyldigForespoerselException(

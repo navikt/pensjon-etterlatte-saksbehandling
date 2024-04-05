@@ -8,6 +8,7 @@ data class VentefristGaarUtRequest(
     val type: Collection<OppgaveType>,
     val oppgaveKilde: Collection<OppgaveKilde>,
     val oppgaver: List<UUID>,
+    val grense: Int = 100,
 )
 
 data class VentefristerGaarUtResponse(

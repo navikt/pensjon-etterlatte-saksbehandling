@@ -1,7 +1,7 @@
-import { Oppgavetype } from '~shared/api/oppgaver'
 import { Tag } from '@navikt/ds-react'
 import { Variants } from '~shared/Tags'
 import { SakType } from '~shared/types/sak'
+import { Oppgavetype } from '~shared/types/oppgave'
 
 const SAKTYPE_TIL_TAGDATA: Record<SakType, { variant: Variants; text: string }> = {
   BARNEPENSJON: { variant: Variants.INFO, text: 'Barnepensjon' },

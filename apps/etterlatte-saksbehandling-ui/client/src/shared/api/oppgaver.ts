@@ -1,78 +1,8 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { SakType } from '~shared/types/sak'
 import { konverterOppgavestatusFilterValuesTilKeys } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { OppgavebenkStats } from '~components/oppgavebenk/state/oppgavebenkState'
-
-export interface OppgaveDTO {
-  id: string
-  status: Oppgavestatus
-  enhet: string
-  sakId: number
-  type: Oppgavetype
-  kilde: OppgaveKilde
-  referanse: string | null
-  merknad?: string
-  opprettet: string
-  sakType: SakType
-  fnr: string | null
-  frist: string
-  saksbehandler: OppgaveSaksbehandler | null
-
-  // GOSYS-spesifikt
-  beskrivelse: string | null
-  journalpostId: string | null
-  gjelder: string | null
-  versjon: number | null
-}
-
-export interface OppgaveSaksbehandler {
-  ident: string
-  navn?: string
-}
-
-export interface NyOppgaveDto {
-  oppgaveKilde?: OppgaveKilde
-  oppgaveType: Oppgavetype
-  merknad?: string
-  referanse?: string
-  saksbehandler?: string
-}
-
-export enum Oppgavestatus {
-  NY = 'NY',
-  UNDER_BEHANDLING = 'UNDER_BEHANDLING',
-  ATTESTERING = 'ATTESTERING',
-  UNDERKJENT = 'UNDERKJENT',
-  PAA_VENT = 'PAA_VENT',
-  FERDIGSTILT = 'FERDIGSTILT',
-  FEILREGISTRERT = 'FEILREGISTRERT',
-  AVBRUTT = 'AVBRUTT',
-}
-
-export type OppgaveKilde =
-  | 'HENDELSE'
-  | 'BEHANDLING'
-  | 'EKSTERN'
-  | 'GENERELL_BEHANDLING'
-  | 'TILBAKEKREVING'
-  | 'SAKSBEHANDLER'
-
-export type Oppgavetype =
-  | 'FOERSTEGANGSBEHANDLING'
-  | 'REVURDERING'
-  | 'VURDER_KONSEKVENS'
-  | 'GOSYS'
-  | 'KRAVPAKKE_UTLAND'
-  | 'KLAGE'
-  | 'TILBAKEKREVING'
-  | 'OMGJOERING'
-  | 'JOURNALFOERING'
-  | 'GJENOPPRETTING_ALDERSOVERGANG'
-  | 'AKTIVITETSPLIKT'
-
-export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean =>
-  ['NY', 'UNDER_BEHANDLING', 'ATTESTERING', 'UNDERKJENT', 'PAA_VENT'].includes(status)
+import { NyOppgaveDto, OppgaveDTO, Oppgavetype } from '~shared/types/oppgave'
 
 export const hentOppgaverMedStatus = async (args: {
   oppgavestatusFilter: Array<string>
@@ -156,10 +86,10 @@ export const saksbehandlereIEnhetApi = async (args: {
 
 export const byttSaksbehandlerApi = async (args: {
   oppgaveId: string
-  type: string
+  type: Oppgavetype
   nysaksbehandler: SaksbehandlerEndringDto
 }): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
-  if (args.type == 'GOSYS') {
+  if (args.type == Oppgavetype.GOSYS) {
     return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
   } else {
     return apiClient.post(`/oppgaver/${args.oppgaveId}/bytt-saksbehandler`, { ...args.nysaksbehandler })
@@ -169,10 +99,10 @@ export const byttSaksbehandlerApi = async (args: {
 export const fjernSaksbehandlerApi = async (args: {
   oppgaveId: string
   sakId: number
-  type: string
+  type: Oppgavetype
   versjon: number | null
 }): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
-  if (args.type == 'GOSYS') {
+  if (args.type == Oppgavetype.GOSYS) {
     return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, {
       saksbehandler: '',
       versjon: args.versjon,
@@ -194,10 +124,10 @@ export interface EndrePaaVentRequest {
 
 export const redigerFristApi = async (args: {
   oppgaveId: string
-  type: string
+  type: Oppgavetype
   redigerFristRequest: RedigerFristRequest
 }): Promise<ApiResponse<void>> => {
-  if (args.type == 'GOSYS') {
+  if (args.type == Oppgavetype.GOSYS) {
     return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/endre-frist`, { ...args.redigerFristRequest })
   } else {
     return apiClient.put(`/oppgaver/${args.oppgaveId}/frist`, { ...args.redigerFristRequest })

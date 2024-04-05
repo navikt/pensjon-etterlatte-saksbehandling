@@ -2,9 +2,9 @@ import { format } from 'date-fns'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { VedtakType } from '~components/vedtak/typer'
-import { Oppgavestatus } from '~shared/api/oppgaver'
 import { Spraak } from '~shared/types/Brev'
 import { Journalposttype, Journalstatus, Sakstype } from '~shared/types/Journalpost'
+import { Oppgavestatus } from '~shared/types/oppgave'
 
 export const capitalize = (s?: string) => {
   if (!s) return ''

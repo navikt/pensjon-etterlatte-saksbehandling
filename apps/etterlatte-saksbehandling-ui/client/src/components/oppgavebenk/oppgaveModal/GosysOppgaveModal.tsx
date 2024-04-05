@@ -7,9 +7,9 @@ import { formaterFnr, formaterStringDato } from '~utils/formattering'
 import { ConfigContext } from '~clientConfig'
 import { FlexRow } from '~shared/styled'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
-import { OppgaveDTO } from '~shared/api/oppgaver'
 import { FerdigstillGosysOppgave } from '../gosys/FerdigstillGosysOppgave'
 import { OverfoerOppgaveTilGjenny } from '../gosys/OverfoerOppgaveTilGjenny'
+import { OppgaveDTO, Oppgavetype } from '~shared/types/oppgave'
 
 const TagRow = styled.div`
   display: flex;
@@ -58,7 +58,7 @@ export const GosysOppgaveModal = ({
         <Modal.Body>
           <TagRow>
             <SaktypeTag sakType={sakType} />
-            <OppgavetypeTag oppgavetype="GOSYS" />
+            <OppgavetypeTag oppgavetype={Oppgavetype.GOSYS} />
           </TagRow>
           <InfoGrid>
             <div>

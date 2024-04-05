@@ -1,12 +1,12 @@
 import React, { ReactNode } from 'react'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { HouseIcon } from '@navikt/aksel-icons'
-import { IAdresse } from '~shared/types/IAdresse'
 import { Heading, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
+import { Bostedsadresse } from '~shared/types/familieOpplysninger'
 
-export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: IAdresse[] }): ReactNode => {
+export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: Bostedsadresse[] }): ReactNode => {
   return (
     <Personopplysning heading="Bostedsadresser" icon={<HouseIcon />}>
       <Table>
@@ -20,10 +20,12 @@ export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: IAdresse[
         <Table.Body>
           {!!bostedsadresse?.length ? (
             <>
-              {bostedsadresse.map((adresse: IAdresse, index: number) => (
+              {bostedsadresse.map((adresse: Bostedsadresse, index: number) => (
                 <Table.Row key={index}>
                   <BostedsadresseDataCell bostedsadresse={bostedsadresse} index={index} visAktiv />
-                  <Table.DataCell>{formaterStringDato(adresse.gyldigFraOgMed)}</Table.DataCell>
+                  <Table.DataCell>
+                    {!!adresse.gyldigFraOgMed ? formaterStringDato(adresse.gyldigFraOgMed) : ''}
+                  </Table.DataCell>
                   <Table.DataCell>
                     {!!adresse.gyldigTilOgMed ? formaterStringDato(adresse.gyldigTilOgMed) : ''}
                   </Table.DataCell>

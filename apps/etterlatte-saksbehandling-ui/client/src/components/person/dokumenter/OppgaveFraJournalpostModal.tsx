@@ -2,7 +2,7 @@ import { Journalpost } from '~shared/types/Journalpost'
 import { Alert, Button, Detail, Heading, Link, Modal } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaverMedReferanse, Oppgavetype, opprettOppgave } from '~shared/api/oppgaver'
+import { hentOppgaverMedReferanse, opprettOppgave } from '~shared/api/oppgaver'
 import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
@@ -10,6 +10,7 @@ import { FlexRow } from '~shared/styled'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { useNavigate } from 'react-router-dom'
 import { useAppSelector } from '~store/Store'
+import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 
 // TODO: Må på sikt gjøre noe for å støtte tilfeller hvor sak mangler.
 export const OppgaveFraJournalpostModal = ({
@@ -45,7 +46,7 @@ export const OppgaveFraJournalpostModal = ({
 
   const opprettJournalfoeringsoppgave = () => {
     if (isSuccess(sakStatus)) {
-      const oppgaveType: Oppgavetype = 'JOURNALFOERING'
+      const oppgaveType = Oppgavetype.JOURNALFOERING
 
       apiOpprettOppgave(
         {
@@ -54,7 +55,7 @@ export const OppgaveFraJournalpostModal = ({
             oppgaveType,
             referanse: journalpost.journalpostId,
             merknad: 'Manuell redigering av journalpost',
-            oppgaveKilde: 'SAKSBEHANDLER',
+            oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
             saksbehandler: innloggetSaksbehandler.ident,
           },
         },

@@ -9,6 +9,7 @@ import { opprettOppgave } from '~shared/api/oppgaver'
 import { useNavigate } from 'react-router-dom'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useAppSelector } from '~store/Store'
 
 export const OpprettJournalfoeringsoppgave = ({
@@ -28,10 +29,10 @@ export const OpprettJournalfoeringsoppgave = ({
       {
         sakId,
         request: {
-          oppgaveType: 'JOURNALFOERING',
+          oppgaveType: Oppgavetype.JOURNALFOERING,
           referanse: journalpostId,
           merknad: `Manuelt opprettet oppgave`,
-          oppgaveKilde: 'SAKSBEHANDLER',
+          oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
           saksbehandler: innloggetSaksbehandler.ident,
         },
       },

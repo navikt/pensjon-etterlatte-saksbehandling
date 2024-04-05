@@ -78,16 +78,32 @@ elif [[ -z "$LOCAL_PORT" ]]; then
 fi
 
 
+NOW=$(date +%s)
+DUMP_FILE="${PROXY_DB}_$(date +%s).dump"
 DOCKER_HOST="host.docker.internal"
 CURRENT_CONTEXT=$(kubectl config current-context)
+
+nais device status | grep -q -i "naisdevice status: Disconnected" &> /dev/null
+if [ $? -eq 0 ]; then # Grep returns 0 if there is a match
+  error "Naisdevice is not connected. Please run:\n\n\t$ nais device connect \n\nOr use the naisdevice.app"
+fi
+
+gcloud auth print-identity-token &> /dev/null
+if [ $? -gt 0 ]; then
+  error "Not logged into gcloud... Please run:\n\n\t$ gcloud auth login"
+fi
 
 # Denne sjekken må IKKE kommenteres ut!
 if [ "$CURRENT_CONTEXT" != "dev-gcp" ]; then
     error "Current context is $CURRENT_CONTEXT, but should be 'dev-gcp'"
 fi
 
-NOW=$(date +%s)
-DUMP_FILE="${PROXY_DB}_$(date +%s).dump"
+# Check if connected to dev proxy
+if psql -h localhost -p 5432 -U $PROXY_USER -l  | grep -q 'cloudsqladmin'; then
+  info "Connected to proxy on [localhost:5432]"
+else
+  error "Unable to connect to [localhost:5432]. Are you sure the proxy is up and running?"
+fi
 
 info "Database cloning from dev-gcp started!"
 info "Running pg_dump on [$PROXY_DB] with username [$PROXY_USER]"

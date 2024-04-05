@@ -64,6 +64,7 @@ class GrunnlagKlientImpl(
     private val client: HttpClient,
 ) : GrunnlagKlient {
     private val url = config.getString("grunnlag.resource.url")
+    private val apiUrl = url.plus("/api")
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override suspend fun leggInnNyttGrunnlag(
@@ -71,7 +72,7 @@ class GrunnlagKlientImpl(
         opplysningsbehov: Opplysningsbehov,
     ) {
         return client
-            .post("$url/grunnlag/behandling/$behandlingId/opprett-grunnlag") {
+            .post("$apiUrl/grunnlag/behandling/$behandlingId/opprett-grunnlag") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(opplysningsbehov)
@@ -83,7 +84,7 @@ class GrunnlagKlientImpl(
         opplysningsbehov: Opplysningsbehov,
     ) {
         return client
-            .post("$url/grunnlag/sak/$sakId/opprett-grunnlag") {
+            .post("$apiUrl/grunnlag/sak/$sakId/opprett-grunnlag") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(opplysningsbehov)
@@ -95,7 +96,7 @@ class GrunnlagKlientImpl(
         request: OppdaterGrunnlagRequest,
     ) {
         return client
-            .post("$url/grunnlag/behandling/$behandlingId/oppdater-grunnlag") {
+            .post("$apiUrl/grunnlag/behandling/$behandlingId/oppdater-grunnlag") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(request)
@@ -107,7 +108,7 @@ class GrunnlagKlientImpl(
         saksopplysninger: NyeSaksopplysninger,
     ) {
         return client
-            .post("$url/grunnlag/behandling/$behandlingId/nye-opplysninger") {
+            .post("$apiUrl/grunnlag/behandling/$behandlingId/nye-opplysninger") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(saksopplysninger)
@@ -119,7 +120,7 @@ class GrunnlagKlientImpl(
         saksopplysninger: NyeSaksopplysninger,
     ) {
         return client
-            .post("$url/grunnlag/sak/$sakId/nye-opplysninger") {
+            .post("$apiUrl/grunnlag/sak/$sakId/nye-opplysninger") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(saksopplysninger)
@@ -130,19 +131,19 @@ class GrunnlagKlientImpl(
      * Henter komplett grunnlag for sak
      **/
     override suspend fun hentGrunnlag(sakId: Long): Grunnlag? {
-        return client.get("$url/grunnlag/sak/$sakId") {
+        return client.get("$apiUrl/grunnlag/sak/$sakId") {
             accept(ContentType.Application.Json)
         }.body()
     }
 
     override suspend fun hentPersongalleri(behandlingId: UUID): Grunnlagsopplysning<Persongalleri>? {
-        return client.get("$url/grunnlag/behandling/$behandlingId/${Opplysningstype.PERSONGALLERI_V1}") {
+        return client.get("$apiUrl/grunnlag/behandling/$behandlingId/${Opplysningstype.PERSONGALLERI_V1}") {
             accept(ContentType.Application.Json)
         }.body()
     }
 
     override suspend fun hentAlleSakIder(fnr: String): Set<Long> {
-        return client.post("$url/grunnlag/person/saker") {
+        return client.post("$apiUrl/grunnlag/person/saker") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             setBody(FoedselsnummerDTO(fnr))
@@ -150,7 +151,7 @@ class GrunnlagKlientImpl(
     }
 
     override suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller {
-        return client.post("$url/grunnlag/person/roller") {
+        return client.post("$apiUrl/grunnlag/person/roller") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             setBody(FoedselsnummerDTO(fnr))
@@ -166,7 +167,7 @@ class GrunnlagKlientImpl(
 
     override suspend fun ping(konsument: String?): PingResult {
         return client.ping(
-            pingUrl = url.plus("/internal/isready"),
+            pingUrl = url.plus("/health/isready"),
             logger = logger,
             serviceName = serviceName,
             beskrivelse = beskrivelse,

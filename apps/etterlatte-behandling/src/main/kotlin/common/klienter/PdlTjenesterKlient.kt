@@ -81,7 +81,7 @@ class PdlTjenesterKlientImpl(config: Config, private val client: HttpClient) : P
 
     override suspend fun ping(konsument: String?): PingResult {
         return client.ping(
-            pingUrl = url.plus("/internal/isready"),
+            pingUrl = url.plus("/health/isready"),
             logger = logger,
             serviceName = serviceName,
             beskrivelse = beskrivelse,

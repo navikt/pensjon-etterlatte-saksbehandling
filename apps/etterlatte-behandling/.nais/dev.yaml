@@ -85,7 +85,7 @@ spec:
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
       value: ce96a301-13db-4409-b277-5b27f464d08b
     - name: ETTERLATTE_GRUNNLAG_URL
-      value: http://etterlatte-grunnlag/api
+      value: http://etterlatte-grunnlag
     - name: ETTERLATTE_VEDTAK_CLIENT_ID
       value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
     - name: ETTERLATTE_VEDTAK_URL

@@ -6,9 +6,9 @@ import { AlderTag } from '~components/person/personopplysninger/components/Alder
 import { SpaceChildren } from '~shared/styled'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { PersonopplysningPerson } from '~shared/types/personopplysninger'
+import { Familiemedlem } from '~shared/types/familieOpplysninger'
 
-export const AvdoedesBarn = ({ avdoede }: { avdoede?: PersonopplysningPerson[] }): ReactNode => {
+export const AvdoedesBarn = ({ avdoede }: { avdoede?: Familiemedlem[] }): ReactNode => {
   return (
     <Personopplysning heading="Søsken (avdødes barn)" icon={<ChildEyesIcon />}>
       <Table>
@@ -22,8 +22,8 @@ export const AvdoedesBarn = ({ avdoede }: { avdoede?: PersonopplysningPerson[] }
         <Table.Body>
           {!!avdoede?.length ? (
             avdoede.map((doed, i) =>
-              !!doed.avdoedesBarn?.length ? (
-                doed.avdoedesBarn.map((barn, index) => (
+              !!doed.barn?.length ? (
+                doed.barn.map((barn, index) => (
                   <Table.Row key={index}>
                     <Table.DataCell>
                       {barn.fornavn} {barn.etternavn}

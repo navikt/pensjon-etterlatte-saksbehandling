@@ -33,7 +33,7 @@ fun Route.personWebRoute(
             kunSaksbehandler {
                 val request = call.receive<HentPersonopplysningerRequest>()
 
-                val personopplysninger = service.hentPersonopplysninger(request.ident, request.sakType, brukerTokenInfo)
+                val personopplysninger = service.hentFamilieOpplysninger(request.ident, request.sakType, brukerTokenInfo)
 
                 sporing.logg(
                     brukerTokenInfo,

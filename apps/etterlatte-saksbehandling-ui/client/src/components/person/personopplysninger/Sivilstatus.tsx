@@ -7,18 +7,18 @@ import { SpaceChildren } from '~shared/styled'
 import styled from 'styled-components'
 import { lowerCase, startCase } from 'lodash'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { PersonopplysningPerson, Sivilstand } from '~shared/types/personopplysninger'
+import { Familiemedlem, Sivilstand } from '~shared/types/familieOpplysninger'
 
 export const Sivilstatus = ({
   sivilstand,
   avdoede,
 }: {
   sivilstand?: Sivilstand[]
-  avdoede?: PersonopplysningPerson[]
+  avdoede?: Familiemedlem[]
 }): ReactNode => {
   const relatertVedSivilstandDoedsdato = (
     relatertVedSiviltilstand: string,
-    avdoede: PersonopplysningPerson[]
+    avdoede: Familiemedlem[]
   ): string | undefined => {
     const relaterteAvdoed = avdoede.find((val) => val.foedselsnummer === relatertVedSiviltilstand)
 

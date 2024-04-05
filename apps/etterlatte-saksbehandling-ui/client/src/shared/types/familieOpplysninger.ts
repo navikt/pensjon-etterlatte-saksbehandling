@@ -1,13 +1,13 @@
 import { Utland } from '~shared/types/Person'
 import { VergemaalEllerFremtidsfullmakt } from '~components/person/typer'
 
-export interface Personopplysninger {
-  soeker?: PersonopplysningPerson
-  avdoede?: PersonopplysningPerson[]
-  gjenlevende?: PersonopplysningPerson[]
+export interface FamilieOpplysninger {
+  soeker?: Familiemedlem
+  avdoede?: Familiemedlem[]
+  gjenlevende?: Familiemedlem[]
 }
 
-export interface PersonopplysningPerson {
+export interface Familiemedlem {
   fornavn: string
   etternavn: string
   foedselsnummer: string
@@ -19,7 +19,7 @@ export interface PersonopplysningPerson {
   pdlStatsborgerskap?: PdlStatsborgerskap[]
   utland?: Utland
   familierelasjon?: Familierelasjon
-  avdoedesBarn?: PersonopplysningPerson[]
+  barn?: Familiemedlem[]
   vergemaalEllerFremtidsfullmakt?: VergemaalEllerFremtidsfullmakt[]
 }
 

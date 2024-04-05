@@ -12,8 +12,8 @@ import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlResponseError
 import no.nav.etterlatte.pdl.mapper.PersonMapper
-import no.nav.etterlatte.personweb.dto.PersonopplysningPerson
-import no.nav.etterlatte.personweb.dto.Personopplysninger
+import no.nav.etterlatte.personweb.familieOpplysninger.FamilieOpplysninger
+import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
 import org.slf4j.LoggerFactory
 import personweb.dto.PersonNavn
 
@@ -56,25 +56,25 @@ class PersonWebService(
         }
     }
 
-    suspend fun hentPersonopplysninger(
+    suspend fun hentFamilieOpplysninger(
         ident: String,
         sakType: SakType,
         bruker: BrukerTokenInfo,
-    ): Personopplysninger {
+    ): FamilieOpplysninger {
         logger.info("Henter persongalleri for ident=${ident.maskerFnr()} fra PDL")
 
         return when (sakType) {
-            SakType.BARNEPENSJON -> hentPersonopplysningerBarnepensjon(ident, bruker)
-            SakType.OMSTILLINGSSTOENAD -> hentPersonopplysningerForOmstillingsstoenad(ident, bruker)
+            SakType.BARNEPENSJON -> hentFamilieOpplysningerBarnepensjon(ident, bruker)
+            SakType.OMSTILLINGSSTOENAD -> hentFamilieOpplysningerOmstillingsstoenad(ident, bruker)
         }
     }
 
-    private suspend fun hentPersonopplysningerBarnepensjon(
+    private suspend fun hentFamilieOpplysningerBarnepensjon(
         ident: String,
         bruker: BrukerTokenInfo,
-    ): Personopplysninger {
+    ): FamilieOpplysninger {
         val mottaker =
-            hentPersonopplysningPerson(
+            hentFamiliemedlem(
                 fnr = Folkeregisteridentifikator.of(ident),
                 rolle = PersonRolle.BARN,
                 sakType = SakType.BARNEPENSJON,
@@ -83,7 +83,7 @@ class PersonWebService(
 
         val foreldre =
             mottaker.familierelasjon?.ansvarligeForeldre?.map {
-                hentPersonopplysningPerson(
+                hentFamiliemedlem(
                     fnr = it,
                     rolle = PersonRolle.AVDOED,
                     sakType = SakType.BARNEPENSJON,
@@ -93,19 +93,19 @@ class PersonWebService(
 
         val (avdoede, gjenlevende) = foreldre.partition { it.doedsdato != null }
 
-        return Personopplysninger(
+        return FamilieOpplysninger(
             soeker = mottaker,
             avdoede = avdoede,
             gjenlevende = gjenlevende,
         )
     }
 
-    private suspend fun hentPersonopplysningerForOmstillingsstoenad(
+    private suspend fun hentFamilieOpplysningerOmstillingsstoenad(
         ident: String,
         bruker: BrukerTokenInfo,
-    ): Personopplysninger {
+    ): FamilieOpplysninger {
         val mottaker =
-            hentPersonopplysningPerson(
+            hentFamiliemedlem(
                 fnr = Folkeregisteridentifikator.of(ident),
                 rolle = PersonRolle.GJENLEVENDE,
                 sakType = SakType.OMSTILLINGSSTOENAD,
@@ -123,7 +123,7 @@ class PersonWebService(
 
         val (avdoede, levende) =
             partnerVedSivilstand.map {
-                hentPersonopplysningPerson(
+                hentFamiliemedlem(
                     fnr = it,
                     rolle = PersonRolle.AVDOED,
                     sakType = SakType.OMSTILLINGSSTOENAD,
@@ -131,19 +131,19 @@ class PersonWebService(
                 )
             }.partition { it.doedsdato != null }
 
-        return Personopplysninger(
+        return FamilieOpplysninger(
             soeker = mottaker,
             avdoede = avdoede,
             gjenlevende = levende,
         )
     }
 
-    private suspend fun hentPersonopplysningPerson(
+    private suspend fun hentFamiliemedlem(
         fnr: Folkeregisteridentifikator,
         rolle: PersonRolle,
         sakType: SakType,
         bruker: BrukerTokenInfo,
-    ): PersonopplysningPerson {
+    ): Familiemedlem {
         logger.info("Henter person med fnr=$fnr fra PDL")
 
         return pdlOboKlient.hentPerson(fnr, rolle, sakType, bruker).let {
@@ -157,7 +157,7 @@ class PersonWebService(
                     )
                 }
             } else {
-                PersonMapper.mapPersonopplysningPerson(
+                PersonMapper.mapFamiliemedlem(
                     ppsKlient = ppsKlient,
                     pdlOboKlient = pdlOboKlient,
                     ident = fnr,

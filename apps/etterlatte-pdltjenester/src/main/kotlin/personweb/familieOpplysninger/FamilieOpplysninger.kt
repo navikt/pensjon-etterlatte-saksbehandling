@@ -1,4 +1,4 @@
-package no.nav.etterlatte.personweb.dto
+package no.nav.etterlatte.personweb.familieOpplysninger
 
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Sivilstatus
@@ -8,13 +8,13 @@ import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-data class Personopplysninger(
-    val soeker: PersonopplysningPerson?,
-    val avdoede: List<PersonopplysningPerson?>,
-    val gjenlevende: List<PersonopplysningPerson?>,
+data class FamilieOpplysninger(
+    val soeker: Familiemedlem?,
+    val avdoede: List<Familiemedlem?>,
+    val gjenlevende: List<Familiemedlem?>,
 )
 
-data class PersonopplysningPerson(
+data class Familiemedlem(
     val fornavn: String,
     val etternavn: String,
     val foedselsnummer: Folkeregisteridentifikator,
@@ -26,7 +26,7 @@ data class PersonopplysningPerson(
     val pdlStatsborgerskap: List<Statsborgerskap>?,
     val utland: Utland?,
     val familierelasjon: Familierelasjon?,
-    val avdoedesBarn: List<PersonopplysningPerson?>?,
+    val barn: List<Familiemedlem?>?,
     val vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>?,
 )
 

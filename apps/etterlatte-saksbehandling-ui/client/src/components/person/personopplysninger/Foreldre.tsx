@@ -7,15 +7,15 @@ import { formaterDato } from '~utils/formattering'
 import { AlderTag } from '~components/person/personopplysninger/components/AlderTag'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { PersonopplysningPerson } from '~shared/types/personopplysninger'
+import { Familiemedlem } from '~shared/types/familieOpplysninger'
 
 export const Foreldre = ({
   avdoed,
   gjenlevende,
   foreldreansvar,
 }: {
-  avdoed?: PersonopplysningPerson[]
-  gjenlevende?: PersonopplysningPerson[]
+  avdoed?: Familiemedlem[]
+  gjenlevende?: Familiemedlem[]
   foreldreansvar?: string[]
 }) => {
   const harForeldreansvar = (fnr: string): boolean => {
@@ -36,7 +36,7 @@ export const Foreldre = ({
         <Table.Body>
           {!!avdoed?.length ? (
             <>
-              {avdoed.map((doed: PersonopplysningPerson, index: number) => (
+              {avdoed.map((doed: Familiemedlem, index: number) => (
                 <Table.Row key={index}>
                   <Table.DataCell>
                     <SpaceChildren direction="row">
@@ -68,7 +68,7 @@ export const Foreldre = ({
           )}
           {!!gjenlevende?.length ? (
             <>
-              {gjenlevende.map((levende: PersonopplysningPerson, index: number) => (
+              {gjenlevende.map((levende: Familiemedlem, index: number) => (
                 <Table.Row key={index}>
                   <Table.DataCell>
                     <SpaceChildren direction="row">

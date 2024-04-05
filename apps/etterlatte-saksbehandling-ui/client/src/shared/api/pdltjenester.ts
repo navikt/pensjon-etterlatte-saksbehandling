@@ -1,7 +1,7 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { IPdlPersonNavn } from '~shared/types/Person'
 import { SakType } from '~shared/types/sak'
-import { Personopplysninger } from '~shared/types/personopplysninger'
+import { FamilieOpplysninger } from '~shared/types/familieOpplysninger'
 
 /**
  * Hent navn til person med ident.
@@ -16,4 +16,4 @@ export const hentPersonNavn = async (ident: string): Promise<ApiResponse<IPdlPer
 export const hentPersonopplysninger = async (args: {
   ident: string
   sakType: SakType
-}): Promise<ApiResponse<Personopplysninger>> => apiClient.post('/pdltjenester/person/opplysninger', args)
+}): Promise<ApiResponse<FamilieOpplysninger>> => apiClient.post('/pdltjenester/person/opplysninger', args)

@@ -18,10 +18,10 @@ import no.nav.etterlatte.pdl.PdlHentPersonNavn
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
-import no.nav.etterlatte.personweb.dto.Bostedsadresse
-import no.nav.etterlatte.personweb.dto.Familierelasjon
-import no.nav.etterlatte.personweb.dto.PersonopplysningPerson
-import no.nav.etterlatte.personweb.dto.Sivilstand
+import no.nav.etterlatte.personweb.familieOpplysninger.Bostedsadresse
+import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
+import no.nav.etterlatte.personweb.familieOpplysninger.Familierelasjon
+import no.nav.etterlatte.personweb.familieOpplysninger.Sivilstand
 import org.slf4j.LoggerFactory
 import personweb.dto.PersonNavn
 
@@ -101,7 +101,7 @@ object PersonMapper {
             )
         }
 
-    fun mapPersonopplysningPerson(
+    fun mapFamiliemedlem(
         ppsKlient: ParallelleSannheterKlient,
         pdlOboKlient: PdlOboKlient,
         hentPerson: PdlHentPerson,
@@ -109,7 +109,7 @@ object PersonMapper {
         sakType: SakType,
         brukerTokenInfo: BrukerTokenInfo,
         personRolle: PersonRolle,
-    ): PersonopplysningPerson {
+    ): Familiemedlem {
         return runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
             val (statsborgerskap, pdlStatsborgerskap) =
@@ -130,7 +130,7 @@ object PersonMapper {
                     sakType = sakType,
                 )
 
-            PersonopplysningPerson(
+            Familiemedlem(
                 fornavn = navn.fornavn,
                 etternavn = navn.etternavn,
                 foedselsnummer = ident,
@@ -147,7 +147,7 @@ object PersonMapper {
                         Sivilstand(it.sivilstatus, it.relatertVedSiviltilstand, it.gyldigFraOgMed)
                     },
                 utland = UtlandMapper.mapUtland(hentPerson),
-                avdoedesBarn = barnekull?.barn,
+                barn = barnekull?.barn,
                 vergemaalEllerFremtidsfullmakt =
                     hentPerson.vergemaalEllerFremtidsfullmakt?.let {
                         VergeMapper.mapVerge(

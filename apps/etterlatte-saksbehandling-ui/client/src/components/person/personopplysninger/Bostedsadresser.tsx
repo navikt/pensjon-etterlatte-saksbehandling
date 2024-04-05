@@ -4,7 +4,7 @@ import { HouseIcon } from '@navikt/aksel-icons'
 import { Heading, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
-import { Bostedsadresse } from '~shared/types/personopplysninger'
+import { Bostedsadresse } from '~shared/types/familieOpplysninger'
 
 export const Bostedsadresser = ({ bostedsadresse }: { bostedsadresse?: Bostedsadresse[] }): ReactNode => {
   return (

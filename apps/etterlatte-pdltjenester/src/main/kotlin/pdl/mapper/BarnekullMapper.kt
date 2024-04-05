@@ -12,7 +12,7 @@ import no.nav.etterlatte.pdl.PdlForelderBarnRelasjonRolle
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
-import no.nav.etterlatte.personweb.dto.PersonopplysningPerson
+import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
 
 data class Barnekull(
     val barn: List<Person>,
@@ -20,7 +20,7 @@ data class Barnekull(
 )
 
 data class BarnekullPersonopplysning(
-    val barn: List<PersonopplysningPerson?>,
+    val barn: List<Familiemedlem?>,
 )
 
 object BarnekullMapper {
@@ -96,7 +96,7 @@ object BarnekullMapper {
                         bruker = brukerTokenInfo,
                         sakType = sakType,
                     ).data?.hentPerson?.let {
-                        PersonMapper.mapPersonopplysningPerson(
+                        PersonMapper.mapFamiliemedlem(
                             ppsKlient,
                             pdlOboKlient,
                             it,

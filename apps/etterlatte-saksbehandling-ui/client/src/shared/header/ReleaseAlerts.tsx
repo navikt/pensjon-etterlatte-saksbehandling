@@ -6,7 +6,6 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentUtgivelser, Release } from '~shared/api/github'
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import { formaterDatoMedKlokkeslett } from '~utils/formattering'
-import { InfoElement } from '~components/behandling/soeknadsoversikt/styled'
 import { isToday } from 'date-fns'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
@@ -68,18 +67,14 @@ export const ReleaseAlerts = () => {
 
               {utgivelser.map((utgivelse, i) => (
                 <UtgivelseInfo key={`utgivelse-${i}`}>
-                  <InfoElement>
-                    <Label size="small" as="p">
-                      {utgivelse.name}
-                    </Label>
-                    <Detail spacing>
-                      {formaterDatoMedKlokkeslett(utgivelse.published_at)}{' '}
-                      {isToday(new Date(utgivelse.published_at)) && '(i dag)'}
-                    </Detail>
-                    <BodyShort as="div" style={{ whiteSpace: 'pre-wrap' }} size="small">
-                      {utgivelse.body}
-                    </BodyShort>
-                  </InfoElement>
+                  <Label size="small" as="p">
+                    {utgivelse.name}
+                  </Label>
+                  <Detail spacing>
+                    {formaterDatoMedKlokkeslett(utgivelse.published_at)}{' '}
+                    {isToday(new Date(utgivelse.published_at)) && '(i dag)'}
+                  </Detail>
+                  <UtgivelseBody size="small">{utgivelse.body}</UtgivelseBody>
                 </UtgivelseInfo>
               ))}
             </>
@@ -91,7 +86,9 @@ export const ReleaseAlerts = () => {
 }
 
 const DropdownMenu = styled(Dropdown.Menu)`
-  width: 300px;
+  position: absolute;
+  min-width: fit-content;
+  max-width: fit-content;
 `
 
 const UnreadCircle = styled.div`
@@ -113,9 +110,14 @@ const UnreadCircle = styled.div`
 `
 
 const UtgivelseInfo = styled.div`
-  padding: 1rem 0;
+  width: 25rem;
 
   :not(:last-child) {
     border-bottom: 1px solid gray;
   }
+`
+
+const UtgivelseBody = styled(BodyShort)`
+  white-space: pre-wrap;
+  padding-bottom: 0.5rem;
 `

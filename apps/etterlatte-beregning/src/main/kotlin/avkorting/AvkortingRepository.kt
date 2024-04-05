@@ -159,7 +159,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 "relevanteMaanederInnAar" to avkortingsgrunnlag.relevanteMaanederInnAar,
                 "spesifikasjon" to avkortingsgrunnlag.spesifikasjon,
                 "kilde" to avkortingsgrunnlag.kilde.toJson(),
-                "virkVedLagring" to avkortingsgrunnlag.virkVedLagring.atDay(1),
+                "virkVedLagring" to avkortingsgrunnlag.virkVedLagring?.atDay(1),
             ),
     ).let { query -> tx.run(query.asUpdate) }
 
@@ -297,7 +297,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
             fratrekkInnAarUtland = int("fratrekk_inn_aar_utland"),
             spesifikasjon = string("spesifikasjon"),
             kilde = string("kilde").let { objectMapper.readValue(it) },
-            virkVedLagring = sqlDate("virk_ved_lagring").let { YearMonth.from(it.toLocalDate()) },
+            virkVedLagring = sqlDateOrNull("virk_ved_lagring")?.let { YearMonth.from(it.toLocalDate()) },
         )
 
     private fun Row.toYtelseFoerAvkorting() =

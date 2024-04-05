@@ -252,7 +252,8 @@ data class AvkortingGrunnlag(
     val fratrekkInnAarUtland: Int,
     val spesifikasjon: String,
     val kilde: Grunnlagsopplysning.Saksbehandler,
-    val virkVedLagring: YearMonth,
+    // TODO Fjerne nullable når alle behandlinger har fått feltet utfylt
+    val virkVedLagring: YearMonth?,
 )
 
 data class Aarsoppgjoer(

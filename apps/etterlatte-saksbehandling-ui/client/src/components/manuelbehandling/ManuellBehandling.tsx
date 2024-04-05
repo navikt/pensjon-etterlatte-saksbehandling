@@ -24,7 +24,7 @@ import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
 import { GRADERING, GraderingFilterKeys } from '~shared/types/Gradering'
 import GjenopprettingModal from '~components/manuelbehandling/GjenopprettingModal'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
-import { Oppgavestatus } from '~shared/types/oppgave'
+import { Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
 
 interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   kilde: string
@@ -56,7 +56,7 @@ export default function ManuellBehandling() {
         setOppgaveStatus(oppgave.status)
         oppgave.fnr && methods.setValue('persongalleri.soeker', oppgave.fnr)
         oppgave.referanse && methods.setValue('pesysId', Number(oppgave.referanse))
-        if (oppgave.type == 'GJENOPPRETTING_ALDERSOVERGANG') {
+        if (oppgave.type == Oppgavetype.GJENOPPRETTING_ALDERSOVERGANG) {
           methods.setValue('kilde', 'GJENOPPRETTA')
         }
       })

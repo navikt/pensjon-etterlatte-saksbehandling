@@ -15,7 +15,7 @@ import {
   UstiletListe,
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import styled from 'styled-components'
-import { useAppSelector } from '~store/Store'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 type SoeskenjusteringPeriodeProps = {
   control: Control<{ soeskenMedIBeregning: SoeskengrunnlagUtfylling }>
@@ -36,7 +36,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
     name: `soeskenMedIBeregning.${index}.data`,
     control,
   })
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const behandles = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,

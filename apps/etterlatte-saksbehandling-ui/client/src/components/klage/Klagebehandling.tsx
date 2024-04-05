@@ -1,7 +1,7 @@
 import { useKlage, useKlageRedigerbar } from '~components/klage/useKlage'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { addKlage, resetKlage } from '~store/reducers/KlageReducer'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
@@ -20,6 +20,7 @@ import { KlageFormkrav } from '~components/klage/formkrav/KlageFormkrav'
 import { KlageVurdering } from '~components/klage/vurdering/KlageVurdering'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export function Klagebehandling() {
   useSidetittel('Klage')
@@ -29,7 +30,7 @@ export function Klagebehandling() {
   const dispatch = useAppDispatch()
   const [fetchKlageStatus, fetchKlage] = useApiCall(hentKlage)
   const [personStatus, hentPerson] = useApiCall(getPerson)
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [kanRedigere, setKanRedigere] = useState(false)
 
   const klageIdFraUrl = match?.params.klageId

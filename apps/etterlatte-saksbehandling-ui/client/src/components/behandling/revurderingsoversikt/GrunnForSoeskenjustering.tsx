@@ -19,7 +19,8 @@ import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsover
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -31,7 +32,7 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
   const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
   const [begrunnelse, setBegrunnelse] = useState(behandling.revurderinginfo?.begrunnelse ?? '')
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,

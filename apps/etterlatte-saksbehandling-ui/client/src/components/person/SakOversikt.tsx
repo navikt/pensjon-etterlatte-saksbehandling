@@ -14,7 +14,6 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { EndreEnhet } from '~components/person/EndreEnhet'
 import { hentFlyktningStatusForSak, hentNavkontorForPerson } from '~shared/api/sak'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useAppSelector } from '~store/Store'
 import { TilbakekrevingListe } from '~components/person/TilbakekrevingListe'
 import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
@@ -22,6 +21,7 @@ import { SakType } from '~shared/types/sak'
 import { hentMigrertYrkesskadeFordel } from '~shared/api/vilkaarsvurdering'
 import { Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import { OpprettSakModal } from '~components/person/OpprettSakModal'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -30,7 +30,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
   const [hentFlyktningStatus, hentFlyktning] = useApiCall(hentFlyktningStatusForSak)
   const [yrkesskadefordelStatus, hentYrkesskadefordel] = useApiCall(hentMigrertYrkesskadeFordel)
 
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   useEffect(() => {
     if (isSuccess(sakResult)) {

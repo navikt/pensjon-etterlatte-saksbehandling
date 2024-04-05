@@ -27,10 +27,10 @@ import { ToolTip } from '~components/behandling/felles/ToolTip'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useAppSelector } from '~store/Store'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useForm } from 'react-hook-form'
 import { virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 export const AvkortingInntekt = ({
   behandling,
@@ -45,7 +45,7 @@ export const AvkortingInntekt = ({
 }) => {
   if (!behandling) return <Alert variant="error">Manlge behandling</Alert>
 
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
 
   const avkortingGrunnlag = avkorting == null ? [] : [...avkorting.avkortingGrunnlag]

@@ -21,7 +21,7 @@ import {
 import InstitusjonsoppholdTableWrapper from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdTableWrapper'
 import styled from 'styled-components'
 import { BP_INSTITUSJONSOPPHOLD_HJEMLER } from '~components/behandling/virkningstidspunkt/utils'
-import { useAppSelector } from '~store/Store'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 const ReadMoreMarginBottom = styled(ReadMore)`
   margin-bottom: 1rem;
@@ -34,7 +34,7 @@ type InstitusjonsoppholdProps = {
 
 const InstitusjonsoppholdBP = (props: InstitusjonsoppholdProps) => {
   const { behandling, onSubmit } = props
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const behandles = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,

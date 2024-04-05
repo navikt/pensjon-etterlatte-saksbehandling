@@ -60,6 +60,7 @@ data class AvkortingGrunnlagDto(
     val fratrekkInnAarUtland: Int,
     val spesifikasjon: String,
     val kilde: AvkortingGrunnlagKildeDto?,
+    val virkVedLagring: YearMonth,
 )
 
 data class LagreAvkortingGrunnlagDto(

@@ -19,6 +19,7 @@ export interface IAvkortingGrunnlag {
     tidspunkt: ''
     ident: ''
   }
+  virkVedLagring?: string
 }
 
 export interface IAvkortetYtelse {

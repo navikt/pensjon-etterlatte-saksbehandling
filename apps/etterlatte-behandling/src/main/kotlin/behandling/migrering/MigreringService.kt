@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.omregning
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
@@ -48,104 +49,109 @@ class MigreringService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun migrer(request: MigreringRequest) =
-        retryMedPause(times = 3) {
-            val sak =
-                inTransaction {
-                    finnEllerOpprettSak(request)
-                }
+    suspend fun migrer(
+        request: MigreringRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = retryMedPause(times = 3) {
+        val sak =
             inTransaction {
-                val behandlinger =
-                    behandlingService.hentBehandlingerForSak(sak.id)
-                        .filter { it.status != BehandlingStatus.AVBRUTT }
-                if (behandlinger.isNotEmpty()) {
-                    throw FinnesLoependeEllerIverksattBehandlingForFnr()
+                finnEllerOpprettSak(request)
+            }
+        inTransaction {
+            val behandlinger =
+                behandlingService.hentBehandlingerForSak(sak.id)
+                    .filter { it.status != BehandlingStatus.AVBRUTT }
+            if (behandlinger.isNotEmpty()) {
+                throw FinnesLoependeEllerIverksattBehandlingForFnr()
+            }
+
+            opprettSakOgBehandling(request, sak)?.let { behandlingOgOppgave ->
+                val behandling = behandlingOgOppgave.behandling
+                if (behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) {
+                    throw IllegalArgumentException(
+                        "Finnes allerede behandling for sak=${behandling.sak.id}. Stopper migrering for pesysId=${request.pesysId}",
+                    )
                 }
+                kommerBarnetTilGodeService.lagreKommerBarnetTilgode(
+                    KommerBarnetTilgode(
+                        JaNei.JA,
+                        "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
+                        Grunnlagsopplysning.Pesys.create(),
+                        behandlingId = behandling.id,
+                    ),
+                )
+                gyldighetsproevingService.lagreGyldighetsproeving(
+                    behandling.id,
+                    Fagsaksystem.EY.navn,
+                    JaNeiMedBegrunnelse(JaNei.JA, "Automatisk gjenoppretta basert på opphørt sak fra Pesys"),
+                )
 
-                opprettSakOgBehandling(request, sak)?.let { behandlingOgOppgave ->
-                    val behandling = behandlingOgOppgave.behandling
-                    if (behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) {
-                        throw IllegalArgumentException(
-                            "Finnes allerede behandling for sak=${behandling.sak.id}. Stopper migrering for pesysId=${request.pesysId}",
-                        )
-                    }
-                    kommerBarnetTilGodeService.lagreKommerBarnetTilgode(
-                        KommerBarnetTilgode(
-                            JaNei.JA,
-                            "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
-                            Grunnlagsopplysning.Pesys.create(),
-                            behandlingId = behandling.id,
-                        ),
-                    )
-                    gyldighetsproevingService.lagreGyldighetsproeving(
-                        behandling.id,
-                        Fagsaksystem.EY.navn,
-                        JaNeiMedBegrunnelse(JaNei.JA, "Automatisk gjenoppretta basert på opphørt sak fra Pesys"),
-                    )
-
-                    val virkningstidspunktForMigrering = YearMonth.of(2024, 1)
+                val virkningstidspunktForMigrering = YearMonth.of(2024, 1)
+                runBlocking {
                     behandlingService.oppdaterVirkningstidspunkt(
                         behandling.id,
                         virkningstidspunktForMigrering,
                         Fagsaksystem.EY.navn,
+                        brukerTokenInfo,
                         "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
                     )
+                }
 
-                    sakService.oppdaterFlyktning(
-                        sakId = behandling.sak.id,
-                        flyktning =
-                            Flyktning(
-                                erFlyktning = request.flyktningStatus,
-                                virkningstidspunkt = request.foersteVirkningstidspunkt.atDay(1),
-                                begrunnelse = "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
+                sakService.oppdaterFlyktning(
+                    sakId = behandling.sak.id,
+                    flyktning =
+                        Flyktning(
+                            erFlyktning = request.flyktningStatus,
+                            virkningstidspunkt = request.foersteVirkningstidspunkt.atDay(1),
+                            begrunnelse = "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
+                            kilde = Grunnlagsopplysning.Pesys.create(),
+                        ),
+                )
+
+                request.utlandstilknytningType?.let { utlandstilknytning ->
+                    behandlingService.oppdaterUtlandstilknytning(
+                        behandlingId = behandling.id,
+                        utlandstilknytning =
+                            Utlandstilknytning(
+                                type = utlandstilknytning,
                                 kilde = Grunnlagsopplysning.Pesys.create(),
+                                begrunnelse = "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
                             ),
                     )
+                }
 
-                    request.utlandstilknytningType?.let { utlandstilknytning ->
-                        behandlingService.oppdaterUtlandstilknytning(
-                            behandlingId = behandling.id,
-                            utlandstilknytning =
-                                Utlandstilknytning(
-                                    type = utlandstilknytning,
-                                    kilde = Grunnlagsopplysning.Pesys.create(),
-                                    begrunnelse = "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
-                                ),
-                        )
-                    }
-
-                    if (request.harMindreEnn40AarsTrygdetid() || request.erEoesBeregnet()) {
-                        behandlingService.oppdaterBoddEllerArbeidetUtlandet(
-                            behandlingId = behandling.id,
-                            boddEllerArbeidetUtlandet =
-                                BoddEllerArbeidetUtlandet(
-                                    boddEllerArbeidetUtlandet = true,
-                                    boddArbeidetEosNordiskKonvensjon = request.erEoesBeregnet().takeIf { it },
-                                    kilde = Grunnlagsopplysning.Pesys.create(),
-                                    begrunnelse =
-                                        "Automatisk vurdert ved gjenoppretting fra Pesys. Vurdering av utlandsopphold kan være mangelfull.",
-                                ),
-                        )
-                    }
-
-                    val nyopprettaOppgave =
-                        requireNotNull(behandlingOgOppgave.oppgave) {
-                            "Mangler oppgave for behandling=${behandling.id}. Stopper gjenoppretting for pesysId=${request.pesysId}"
-                        }
-                    oppgaveService.tildelSaksbehandler(nyopprettaOppgave.id, Fagsaksystem.EY.navn)
-
-                    behandlingsHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                        behandling.toStatistikkBehandling(request.opprettPersongalleri(), pesysId = request.pesysId.id),
-                        BehandlingHendelseType.OPPRETTET,
-                    )
-                    MigreringRespons(
+                if (request.harMindreEnn40AarsTrygdetid() || request.erEoesBeregnet()) {
+                    behandlingService.oppdaterBoddEllerArbeidetUtlandet(
                         behandlingId = behandling.id,
-                        sakId = behandling.sak.id,
-                        oppgaveId = nyopprettaOppgave.id,
+                        boddEllerArbeidetUtlandet =
+                            BoddEllerArbeidetUtlandet(
+                                boddEllerArbeidetUtlandet = true,
+                                boddArbeidetEosNordiskKonvensjon = request.erEoesBeregnet().takeIf { it },
+                                kilde = Grunnlagsopplysning.Pesys.create(),
+                                begrunnelse =
+                                    "Automatisk vurdert ved gjenoppretting fra Pesys. Vurdering av utlandsopphold kan være mangelfull.",
+                            ),
                     )
                 }
+
+                val nyopprettaOppgave =
+                    requireNotNull(behandlingOgOppgave.oppgave) {
+                        "Mangler oppgave for behandling=${behandling.id}. Stopper gjenoppretting for pesysId=${request.pesysId}"
+                    }
+                oppgaveService.tildelSaksbehandler(nyopprettaOppgave.id, Fagsaksystem.EY.navn)
+
+                behandlingsHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                    behandling.toStatistikkBehandling(request.opprettPersongalleri(), pesysId = request.pesysId.id),
+                    BehandlingHendelseType.OPPRETTET,
+                )
+                MigreringRespons(
+                    behandlingId = behandling.id,
+                    sakId = behandling.sak.id,
+                    oppgaveId = nyopprettaOppgave.id,
+                )
             }
         }
+    }
 
     fun opprettOppgaveManuellGjenoppretting(request: MigreringRequest) =
         inTransaction {

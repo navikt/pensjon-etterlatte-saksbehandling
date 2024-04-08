@@ -100,6 +100,10 @@ spec:
       value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
+    - name: ETTERLATTE_BEREGNING_CLIENT_ID
+      value: prod-gcp.etterlatte.etterlatte-beregning
+    - name: ETTERLATTE_BEREGNING_URL
+      value: http://etterlatte-beregning
     - name: ETTERLATTE_TILBAKEKREVING_URL
       value: http://etterlatte-tilbakekreving
     - name: AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING
@@ -167,6 +171,7 @@ spec:
           cluster: prod-gcp
         - application: etterlatte-migrering
         - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-beregning
         - application: etterlatte-tilbakekreving
         - application: etterlatte-klage
       external:

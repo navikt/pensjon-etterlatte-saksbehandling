@@ -112,6 +112,7 @@ class BehandlingServiceImplTest {
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 grunnlagService = mockk(),
+                beregningKlient = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerForSak(1)
@@ -163,6 +164,7 @@ class BehandlingServiceImplTest {
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 grunnlagService = mockk(),
+                beregningKlient = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerForSak(1)
@@ -203,6 +205,7 @@ class BehandlingServiceImplTest {
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 grunnlagService = mockk(),
+                beregningKlient = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerForSak(1)
@@ -239,6 +242,7 @@ class BehandlingServiceImplTest {
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 grunnlagService = mockk(),
+                beregningKlient = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerForSak(1)
@@ -275,6 +279,7 @@ class BehandlingServiceImplTest {
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 grunnlagService = mockk(),
+                beregningKlient = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerForSak(1)
@@ -835,6 +840,7 @@ class BehandlingServiceImplTest {
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 grunnlagService = mockk(),
+                beregningKlient = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerForSak(1)
@@ -882,6 +888,7 @@ class BehandlingServiceImplTest {
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 grunnlagService = mockk(),
+                beregningKlient = mockk(),
             )
 
         inTransaction {
@@ -989,6 +996,7 @@ class BehandlingServiceImplTest {
             kommerBarnetTilGodeDao = mockk(),
             oppgaveService = oppgaveService,
             grunnlagService = mockk(),
+            beregningKlient = mockk(),
         )
 
     companion object {

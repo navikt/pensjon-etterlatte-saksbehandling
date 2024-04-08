@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 
 val feilhaandteringLogger = LoggerFactory.getLogger("feilhaandtering-kafka")
 
-fun <T> withFeilhaandtering(
+internal fun <T> withFeilhaandtering(
     packet: JsonMessage,
     context: MessageContext,
     feilendeSteg: String,

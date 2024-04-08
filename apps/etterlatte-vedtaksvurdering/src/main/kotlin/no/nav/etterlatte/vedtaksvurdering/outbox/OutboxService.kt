@@ -31,6 +31,14 @@ class OutboxService(
         item: OutboxItem,
         vedtak: Vedtak,
     ) {
+        val markers =
+            Markers.appendEntries(
+                mapOf(
+                    "behandlingId" to vedtak.behandlingId,
+                    "outboxId" to item.id,
+                ),
+            )
+
         if (vedtak.innhold is VedtakInnhold.Behandling) {
             publiserEksternHendelse(
                 item.id,
@@ -43,15 +51,8 @@ class OutboxService(
                     virkningFom = vedtak.innhold.virkningstidspunkt.atDay(1),
                 ).toJson(),
             )
+            logger.info(markers, "Publisert vedtakshendelse for vedtak=${vedtak.id}")
         } else {
-            val markers =
-                Markers.appendEntries(
-                    mapOf(
-                        "behandlingId" to vedtak.behandlingId,
-                        "outboxId" to item.id,
-                    ),
-                )
-
             logger.warn(markers, "Støtter ikke vedtakshendelse for vedtak=${vedtak.id}, skipper")
         }
     }

@@ -335,7 +335,6 @@ internal class BehandlingServiceImpl(
                 else -> virkningstidspunkt.isAfter(doedsdato)
             }
 
-        println(doedsdato)
         return harGyldigFormat && datoForVirkningstidspunktErGydligInnenforMaksBegrensninger
     }
 

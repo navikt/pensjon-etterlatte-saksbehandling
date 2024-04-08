@@ -8,6 +8,7 @@ import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.harAktivAdresse
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
@@ -34,7 +35,7 @@ class DoedshendelseKontrollpunktService(
                 val (sak, avdoed, barn) = hentDataForBeroert(hendelse, PersonRolle.BARN)
                 val barnKontrollpunkter = kontrollpunktBarnService.identifiser(hendelse, avdoed, sak, barn)
                 val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
-                val duplikatKontrollpunkt = listOfNotNull(kontrollerDuplikatHendelse(hendelse, sak))
+                val duplikatKontrollpunkt = fellesKontrollpunkter(hendelse, sak, barn)
 
                 barnKontrollpunkter + avdoedKontrollpunkter + duplikatKontrollpunkt
             }
@@ -45,7 +46,7 @@ class DoedshendelseKontrollpunktService(
                 val ektefelleKontrollpunkter = kontrollpunktEktefelleService.identifiser(eps, avdoed)
                 val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
                 val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, eps, avdoed)
-                val duplikatKontrollpunkt = listOfNotNull(kontrollerDuplikatHendelse(hendelse, sak))
+                val duplikatKontrollpunkt = fellesKontrollpunkter(hendelse, sak, eps)
 
                 ektefelleKontrollpunkter + avdoedKontrollpunkter + omsKontrollpunkter + duplikatKontrollpunkt
             }
@@ -55,7 +56,7 @@ class DoedshendelseKontrollpunktService(
 
                 val avdoedKontrollpunkter = kontrollpunktAvdoedService.identifiser(avdoed)
                 val omsKontrollpunkter = kontrollpunktOMSService.identifiser(hendelse, sak, samboer, avdoed)
-                val duplikatKontrollpunkt = listOfNotNull(kontrollerDuplikatHendelse(hendelse, sak))
+                val duplikatKontrollpunkt = fellesKontrollpunkter(hendelse, sak, samboer)
 
                 avdoedKontrollpunkter + omsKontrollpunkter + duplikatKontrollpunkt
             }
@@ -87,15 +88,31 @@ class DoedshendelseKontrollpunktService(
             val sisteIverksatteBehandling = behandlingService.hentSisteIverksatte(sakerForAvdoed[0].id)
             if (sisteIverksatteBehandling != null) {
                 val duplikat =
-                    sakerForAvdoed.map {
+                    sakerForAvdoed.firstNotNullOfOrNull {
                         kontrollerDuplikatHendelse(hendelse, it)
-                    }.first()
+                    }
                 listOfNotNull(DoedshendelseKontrollpunkt.AvdoedHarYtelse(sakerForAvdoed.first()), duplikat)
             } else {
                 listOf(DoedshendelseKontrollpunkt.AvdoedHarIkkeYtelse)
             }
         }
     }
+
+    private fun fellesKontrollpunkter(
+        hendelse: DoedshendelseInternal,
+        sak: Sak?,
+        gjenlevende: PersonDTO,
+    ): List<DoedshendelseKontrollpunkt> {
+        val duplikatKontrollpunkt = kontrollerDuplikatHendelse(hendelse, sak)
+        val adresseKontrollpunkt = kontrollerAktivAdresse(gjenlevende)
+        return listOfNotNull(duplikatKontrollpunkt, adresseKontrollpunkt)
+    }
+
+    private fun kontrollerAktivAdresse(gjenlevende: PersonDTO): DoedshendelseKontrollpunkt? =
+        when (harAktivAdresse(gjenlevende)) {
+            true -> null
+            false -> DoedshendelseKontrollpunkt.GjenlevendeManglerAdresse
+        }
 
     private fun kontrollerDuplikatHendelse(
         hendelse: DoedshendelseInternal,

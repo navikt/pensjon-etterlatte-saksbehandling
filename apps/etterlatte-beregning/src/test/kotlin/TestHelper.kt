@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -129,6 +130,19 @@ fun avkortinggrunnlag(
     relevanteMaanederInnAar = relevanteMaanederInnAar,
     spesifikasjon = "Spesifikasjon",
     kilde = kilde,
+)
+
+fun avkortinggrunnlagLagre(
+    id: UUID = UUID.randomUUID(),
+    aarsinntekt: Int = 100000,
+    fratrekkInnAar: Int = 10000,
+) = AvkortingGrunnlagLagreDto(
+    id = id,
+    aarsinntekt = aarsinntekt,
+    fratrekkInnAar = fratrekkInnAar,
+    inntektUtland = 0,
+    fratrekkInnAarUtland = 0,
+    spesifikasjon = "Spesifikasjon",
 )
 
 fun inntektAvkortingGrunnlag(

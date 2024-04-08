@@ -50,16 +50,25 @@ data class AvkortingDto(
 )
 
 data class AvkortingGrunnlagDto(
-    val id: UUID = UUID.randomUUID(),
+    val id: UUID,
     val fom: YearMonth,
     val tom: YearMonth?,
     val aarsinntekt: Int,
     val fratrekkInnAar: Int,
-    val relevanteMaanederInnAar: Int?,
+    val relevanteMaanederInnAar: Int,
     val inntektUtland: Int,
     val fratrekkInnAarUtland: Int,
     val spesifikasjon: String,
-    val kilde: AvkortingGrunnlagKildeDto?,
+    val kilde: AvkortingGrunnlagKildeDto,
+)
+
+data class AvkortingGrunnlagLagreDto(
+    val id: UUID = UUID.randomUUID(),
+    val aarsinntekt: Int,
+    val fratrekkInnAar: Int,
+    val inntektUtland: Int,
+    val fratrekkInnAarUtland: Int,
+    val spesifikasjon: String,
 )
 
 data class AvkortingGrunnlagKildeDto(

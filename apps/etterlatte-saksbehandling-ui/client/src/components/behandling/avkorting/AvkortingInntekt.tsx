@@ -14,7 +14,7 @@ import {
 } from '@navikt/ds-react'
 import styled from 'styled-components'
 import React, { useState } from 'react'
-import { IAvkorting, IAvkortingGrunnlag, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
+import { IAvkorting, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
 import { formaterStringDato, NOK } from '~utils/formattering'
@@ -58,10 +58,7 @@ export const AvkortingInntekt = ({
 
   // Er det utregnet avkorting finnes det grunnlag lagt til i denne behandlingen
   const finnesRedigerbartGrunnlag = () =>
-    avkorting?.avkortingGrunnlag && avkorting?.avkortingGrunnlag[0].fom === virkningstidspunkt(behandling).dato
-
-  const mismatchGrunnlagsperioderOgVirkningstidspunkt = (sisteGrunnlag: IAvkortingGrunnlag) =>
-    sisteGrunnlag.fom !== behandling.virkningstidspunkt?.dato
+    avkorting?.avkortingGrunnlag && avkortingGrunnlag[0].fom === virkningstidspunkt(behandling).dato
 
   const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlagLagre => {
     if (finnesRedigerbartGrunnlag()) {
@@ -309,11 +306,6 @@ export const AvkortingInntekt = ({
           </Rows>
         </InntektAvkortingForm>
       )}
-      {avkortingGrunnlag.length > 0 && mismatchGrunnlagsperioderOgVirkningstidspunkt(avkortingGrunnlag[0]) && (
-        <WarningAlert variant="warning">
-          Siste inntektsperiode stemmer ikke overens med virkningstidspunkt. Du må redigere for å korrigere.
-        </WarningAlert>
-      )}
       {isFailureHandler({
         apiResult: inntektGrunnlagStatus,
         errorMessage: 'En feil har oppstått',
@@ -370,8 +362,4 @@ const SpesifikasjonLabel = styled.div``
 
 const Rows = styled.div`
   flex-direction: column;
-`
-
-const WarningAlert = styled(Alert)`
-  max-width: fit-content;
 `

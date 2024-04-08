@@ -346,7 +346,7 @@ internal class DoedshendelseServiceTest {
                 doedsdato = avdoed.doedsdato!!.verdi,
             ),
         )
-        // En for avdød og en for ektefelle
+        // En for avdød og en for samboer
         verify(exactly = 2) {
             dao.opprettDoedshendelse(any())
         }

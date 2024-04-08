@@ -82,7 +82,11 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
 
   const fetchTrygdetider = (behandlingId: string) => {
     fetchTrygdetid(behandlingId, (trygdetider: ITrygdetid[]) => {
-      if (trygdetider === null || trygdetider.length == 0) {
+      if (
+        trygdetider === null ||
+        trygdetider.length == 0 ||
+        (personopplysninger && trygdetider.length !== personopplysninger?.avdoede.length)
+      ) {
         if (behandlingErIverksattEllerSamordnet(behandling.status)) {
           setHarPilotTrygdetid(true)
         } else if (redigerbar) {

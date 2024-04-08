@@ -7,6 +7,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -59,6 +60,14 @@ fun Route.avkorting(
                 val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
                 val avkorting = avkortingService.kopierAvkorting(it, forrigeBehandlingId, brukerTokenInfo)
                 call.respond(avkorting.toDto())
+            }
+        }
+
+        delete {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                logger.info("Sletter avkorting for behandlingId=$it")
+                avkortingService.slettAvkorting(it)
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

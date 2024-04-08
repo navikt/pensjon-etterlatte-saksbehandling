@@ -93,6 +93,8 @@ class AvkortingService(
         return lagretAvkorting
     }
 
+    fun slettAvkorting(behandlingId: UUID) = avkortingRepository.slettForBehandling(behandlingId)
+
     /*
      * Brukes ved automatisk regulering
      */

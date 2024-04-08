@@ -79,8 +79,12 @@ export function TilbakekrevingVurderingSkjema({
     })
   }
 
-  const vilkaarOppfyltEllerDelvisOppfylt = (vilkaarsresultat?: TilbakekrevingVilkaar | null) =>
-    vilkaarsresultat && [TilbakekrevingVilkaar.OPPFYLT, TilbakekrevingVilkaar.DELVIS_OPPFYLT].includes(vilkaarsresultat)
+  const vilkaarOppfylt = () =>
+    watch().vilkaarsresultat &&
+    [TilbakekrevingVilkaar.OPPFYLT, TilbakekrevingVilkaar.DELVIS_OPPFYLT].includes(watch().vilkaarsresultat!)
+
+  const beloepIBehold = () =>
+    watch().beloepBehold && watch().beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD
 
   return (
     <InnholdPadding>
@@ -250,7 +254,7 @@ export function TilbakekrevingVurderingSkjema({
                 }
               />
 
-              {watch().vilkaarsresultat == TilbakekrevingVilkaar.IKKE_OPPFYLT && (
+              {!vilkaarOppfylt() && (
                 <>
                   <Textarea
                     {...register('beloepBehold.beskrivelse')}
@@ -275,44 +279,41 @@ export function TilbakekrevingVurderingSkjema({
                     }
                   />
 
-                  {watch().beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_IKKE_I_BEHOLD && (
-                    <Textarea {...register('vedtak')} label="Vedtak" readOnly={!redigerbar} />
-                  )}
+                  {!beloepIBehold() && <Textarea {...register('vedtak')} label="Vedtak" readOnly={!redigerbar} />}
                 </>
               )}
-              {vilkaarOppfyltEllerDelvisOppfylt(watch().vilkaarsresultat) ||
-                (watch().beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD && (
-                  <>
-                    <Textarea
-                      {...register('reduseringAvKravet')}
-                      label="Er det særlige grunner til å frafalle eller redusere kravet?"
-                      description="Det legges blant annet vekt på graden av uaktsomhet hos brukeren, størrelsen på det feilutbetalte beløpet, hvor lang tid det er gått siden utbetalingen fant sted og om noe av feilen helt eller delvis kan tilskrives NAV. Kravet kan frafalles helt, eller settes til en del av det feilutbetalte beløpet. Ved utvist forsett skal krav alltid fremmes, og beløpet kan ikke settes ned."
-                      readOnly={!redigerbar}
-                    />
+              {(vilkaarOppfylt() || beloepIBehold()) && (
+                <>
+                  <Textarea
+                    {...register('reduseringAvKravet')}
+                    label="Er det særlige grunner til å frafalle eller redusere kravet?"
+                    description="Det legges blant annet vekt på graden av uaktsomhet hos brukeren, størrelsen på det feilutbetalte beløpet, hvor lang tid det er gått siden utbetalingen fant sted og om noe av feilen helt eller delvis kan tilskrives NAV. Kravet kan frafalles helt, eller settes til en del av det feilutbetalte beløpet. Ved utvist forsett skal krav alltid fremmes, og beløpet kan ikke settes ned."
+                    readOnly={!redigerbar}
+                  />
 
-                    <Textarea
-                      {...register('foreldet')}
-                      label="Er noen deler av kravet foreldet?"
-                      description="Det er bestemt i folketrygdloven § 22-14 første ledd at våre krav om tilbakebetaling i utgangspunktet foreldes etter foreldelsesloven. Etter foreldelsesloven § 2, jf. § 3 nr. 1 er den alminnelige foreldelsesfristen tre år. Fristen løper særskilt for hver månedsutbetaling. Vurder også om foreldelsesloven § 10 om ett års tilleggsfrist får anvendelse."
-                      readOnly={!redigerbar}
-                    />
+                  <Textarea
+                    {...register('foreldet')}
+                    label="Er noen deler av kravet foreldet?"
+                    description="Det er bestemt i folketrygdloven § 22-14 første ledd at våre krav om tilbakebetaling i utgangspunktet foreldes etter foreldelsesloven. Etter foreldelsesloven § 2, jf. § 3 nr. 1 er den alminnelige foreldelsesfristen tre år. Fristen løper særskilt for hver månedsutbetaling. Vurder også om foreldelsesloven § 10 om ett års tilleggsfrist får anvendelse."
+                    readOnly={!redigerbar}
+                  />
 
-                    <Textarea
-                      {...register('rentevurdering')}
-                      label="Skal det ilegges renter?"
-                      description="Det følger av folketrygdloven § 22-17 a at det skal beregnes et rentetillegg på 10 prosent av det beløpet som kreves tilbake når brukeren har opptrådt grovt uaktsomt eller med forsett."
-                      readOnly={!redigerbar}
-                    />
+                  <Textarea
+                    {...register('rentevurdering')}
+                    label="Skal det ilegges renter?"
+                    description="Det følger av folketrygdloven § 22-17 a at det skal beregnes et rentetillegg på 10 prosent av det beløpet som kreves tilbake når brukeren har opptrådt grovt uaktsomt eller med forsett."
+                    readOnly={!redigerbar}
+                  />
 
-                    <Textarea {...register('vedtak')} label="Vedtak" readOnly={!redigerbar} />
+                  <Textarea {...register('vedtak')} label="Vedtak" readOnly={!redigerbar} />
 
-                    <Textarea
-                      {...register('vurderesForPaatale')}
-                      label="Skal saken vurderes for påtale?"
-                      readOnly={!redigerbar}
-                    />
-                  </>
-                ))}
+                  <Textarea
+                    {...register('vurderesForPaatale')}
+                    label="Skal saken vurderes for påtale?"
+                    readOnly={!redigerbar}
+                  />
+                </>
+              )}
             </>
           )}
 

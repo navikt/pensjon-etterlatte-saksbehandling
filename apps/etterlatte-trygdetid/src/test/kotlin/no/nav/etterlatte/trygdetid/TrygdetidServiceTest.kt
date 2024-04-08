@@ -29,10 +29,12 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.FaktiskTrygdetid
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.eldreAvdoedTestopplysningerMap
@@ -112,6 +114,7 @@ internal class TrygdetidServiceTest {
                 every { sak } returns sakId
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             }
+
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val forventetFoedselsdato = grunnlag.hentAvdoede().first().hentFoedselsdato()!!.verdi
         val forventetDoedsdato = grunnlag.hentAvdoede().first().hentDoedsdato()!!.verdi
@@ -445,6 +448,91 @@ internal class TrygdetidServiceTest {
         coVerify(exactly = 1) {
             repository.hentTrygdetiderForBehandling(behandlingId)
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
+        }
+    }
+
+    @Test
+    fun `skal opprette manglende trygdetid ved opprettelse naar det allerede finnes men ikke for alle avdoede`() {
+        val behandlingId = randomUUID()
+        val sakId = 123L
+
+        val behandling =
+            mockk<DetaljertBehandling>().apply {
+                every { id } returns behandlingId
+                every { sak } returns sakId
+                every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+            }
+
+        val doedsdato = LocalDate.of(2023, 11, 12)
+        val foedselsdato = doedsdato.minusYears(30)
+
+        val grunnlag = grunnlagMedEkstraAvdoedForelder(foedselsdato, doedsdato)
+
+        val trygdetid = trygdetid(behandlingId)
+
+        every { repository.hentTrygdetiderForBehandling(any()) } returns listOf(trygdetid)
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns
+            grunnlag
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        every { repository.opprettTrygdetid(any()) } returns trygdetid
+        every { repository.hentTrygdetidMedId(behandlingId, any()) } returns trygdetid
+        every { repository.oppdaterTrygdetid(any()) } returnsArgument 0
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
+
+        runBlocking {
+            (service as TrygdetidServiceImpl).opprettTrygdetiderForBehandling(behandlingId, saksbehandler)
+        }
+
+        coVerify(exactly = 1) {
+            grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
+            repository.hentTrygdetiderForBehandling(behandlingId)
+            repository.hentTrygdetidMedId(behandlingId, any())
+            repository.oppdaterTrygdetid(any(), any())
+            behandlingKlient.hentBehandling(behandlingId, saksbehandler)
+
+            repository.opprettTrygdetid(
+                withArg { trygdetid ->
+                    trygdetid.ident shouldBe AVDOED2_FOEDSELSNUMMER.value
+                    trygdetid.sakId shouldBe sakId
+                    trygdetid.behandlingId shouldBe behandlingId
+
+                    trygdetid.opplysninger.let { opplysninger ->
+                        with(opplysninger[0]) {
+                            type shouldBe TrygdetidOpplysningType.FOEDSELSDATO
+                            opplysning shouldBe foedselsdato.toJsonNode()
+                            kilde shouldNotBe null
+                        }
+                        with(opplysninger[1]) {
+                            type shouldBe TrygdetidOpplysningType.FYLT_16
+                            opplysning shouldBe foedselsdato.plusYears(16).toJsonNode()
+                            kilde shouldNotBe null
+                        }
+                        with(opplysninger[2]) {
+                            type shouldBe TrygdetidOpplysningType.FYLLER_66
+                            opplysning shouldBe foedselsdato.plusYears(66).toJsonNode()
+                            kilde shouldNotBe null
+                        }
+                        with(opplysninger[3]) {
+                            type shouldBe TrygdetidOpplysningType.DOEDSDATO
+                            opplysning shouldBe doedsdato!!.toJsonNode()
+                            kilde shouldNotBe null
+                        }
+                    }
+                },
+            )
+            beregningService.beregnTrygdetidGrunnlag(any())
+            beregningService.beregnTrygdetid(any(), any(), any(), any(), any())
+        }
+
+        coVerify(exactly = 2) {
+            behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
+            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
+        }
+
+        verify {
+            behandling.id
+            behandling.sak
+            behandling.behandlingType
         }
     }
 
@@ -1215,4 +1303,27 @@ internal class TrygdetidServiceTest {
             tidspunkt = Tidspunkt.now(),
             regelResultat = "".toJsonNode(),
         )
+
+    private fun <T : Any> konstantOpplysning(a: T): Opplysning.Konstant<JsonNode> {
+        val kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), "", "")
+        return Opplysning.Konstant(randomUUID(), kilde, a.toJsonNode())
+    }
+
+    private fun grunnlagMedEkstraAvdoedForelder(
+        foedselsdato: LocalDate,
+        doedsdato: LocalDate,
+    ): Grunnlag {
+        val grunnlagEnAvdoed = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val nyligAvdoedFoedselsnummer = AVDOED2_FOEDSELSNUMMER
+        val nyligAvdoed: Grunnlagsdata<JsonNode> =
+            mapOf(
+                Opplysningstype.DOEDSDATO to konstantOpplysning(doedsdato),
+                Opplysningstype.PERSONROLLE to konstantOpplysning(PersonRolle.AVDOED),
+                Opplysningstype.FOEDSELSNUMMER to konstantOpplysning(nyligAvdoedFoedselsnummer),
+                Opplysningstype.FOEDSELSDATO to konstantOpplysning(foedselsdato),
+            )
+        return GrunnlagTestData(
+            opplysningsmapAvdoedeOverrides = listOf(nyligAvdoed) + grunnlagEnAvdoed.hentAvdoede(),
+        ).hentOpplysningsgrunnlag()
+    }
 }

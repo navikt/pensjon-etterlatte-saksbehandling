@@ -78,7 +78,7 @@ export const AvkortingInntekt = ({
     if (avkortingGrunnlag.length > 0) {
       // Preutfyller ny grunnlagsperiode med tidligere verdier
       const nyligste = avkortingGrunnlag[0]
-      return { ...nyligste, fom: virkningstidspunkt(behandling).dato }
+      return { ...nyligste, id: undefined, fom: virkningstidspunkt(behandling).dato }
     }
     // Første grunnlagsperiode
     return {

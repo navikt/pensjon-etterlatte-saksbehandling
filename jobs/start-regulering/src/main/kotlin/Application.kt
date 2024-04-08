@@ -38,7 +38,7 @@ fun main() {
 private fun createRecord(dato: LocalDate) =
     JsonMessage.newMessage(
         mapOf(
-            ReguleringHendelseType.START_REGULERING.lagParMedEventNameKey(),
+            ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
             ReguleringEvents.DATO to dato.toString(),
         ),
     ).toJson()

@@ -23,7 +23,7 @@ internal class ReguleringsforespoerselRiver(
     private val logger = LoggerFactory.getLogger(ReguleringsforespoerselRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringHendelseType.START_REGULERING) {
+        initialiserRiver(rapidsConnection, ReguleringHendelseType.REGULERING_STARTA) {
             validate { it.requireKey(DATO_KEY) }
         }
     }

@@ -32,7 +32,7 @@ internal class ReguleringsforespoerselRiverTest {
     private fun genererReguleringMelding(dato: LocalDate) =
         JsonMessage.newMessage(
             mapOf(
-                ReguleringHendelseType.START_REGULERING.lagParMedEventNameKey(),
+                ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
                 DATO_KEY to dato,
             ),
         )

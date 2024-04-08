@@ -67,6 +67,8 @@ spec:
       value: "07-18"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
+    - name: KAFKA_VEDTAKSHENDELSER_TOPIC
+      value: etterlatte.vedtakshendelser
     - name: ETTERLATTE_BEREGNING_CLIENT_ID
       value: b07cf335-11fb-4efa-bd46-11f51afd5052
     - name: ETTERLATTE_BEREGNING_URL

@@ -79,7 +79,7 @@ export function TilbakekrevingVurderingSkjema({
     })
   }
 
-  const vilkaarOppfylt = (vilkaarsresultat?: TilbakekrevingVilkaar | null) =>
+  const vilkaarOppfyltEllerDelvisOppfylt = (vilkaarsresultat?: TilbakekrevingVilkaar | null) =>
     vilkaarsresultat && [TilbakekrevingVilkaar.OPPFYLT, TilbakekrevingVilkaar.DELVIS_OPPFYLT].includes(vilkaarsresultat)
 
   return (
@@ -101,13 +101,13 @@ export function TilbakekrevingVurderingSkjema({
           size="small"
           className="radioGroup"
         >
-          <div className="flex">
+          <>
             {Object.values(TilbakekrevingVarsel).map((varsel) => (
               <Radio key={varsel} value={varsel}>
                 {teksterTilbakekrevingVarsel[varsel]}
               </Radio>
             ))}
-          </div>
+          </>
         </RadioGroup>
 
         <ControlledDatoVelger
@@ -280,7 +280,7 @@ export function TilbakekrevingVurderingSkjema({
                   )}
                 </>
               )}
-              {vilkaarOppfylt(watch().vilkaarsresultat) ||
+              {vilkaarOppfyltEllerDelvisOppfylt(watch().vilkaarsresultat) ||
                 (watch().beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD && (
                   <>
                     <Textarea

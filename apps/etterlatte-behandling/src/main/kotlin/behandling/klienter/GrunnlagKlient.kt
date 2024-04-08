@@ -40,7 +40,7 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
     private val clientId = config.getString("grunnlag.client.id")
-    private val resourceUrl = config.getString("grunnlag.resource.url")
+    private val resourceUrl = config.getString("grunnlag.resource.url").plus("/api")
 
     override suspend fun finnPersonOpplysning(
         behandlingId: UUID,

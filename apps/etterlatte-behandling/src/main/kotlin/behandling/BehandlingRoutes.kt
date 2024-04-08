@@ -134,7 +134,6 @@ internal fun Route.behandlingRoutes(
                     if (!erGyldigVirkningstidspunkt) {
                         return@post call.respond(HttpStatusCode.BadRequest, "Ugyldig virkningstidspunkt")
                     }
-                    val bruker = brukerTokenInfo
                     try {
                         val virkningstidspunkt =
                             inTransaction {
@@ -143,7 +142,7 @@ internal fun Route.behandlingRoutes(
                                         behandlingId,
                                         body.dato,
                                         navIdent,
-                                        bruker,
+                                        brukerTokenInfo,
                                         body.begrunnelse!!,
                                         kravdato = body.kravdato,
                                     )

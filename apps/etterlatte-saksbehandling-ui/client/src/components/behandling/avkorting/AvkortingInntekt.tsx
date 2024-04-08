@@ -72,7 +72,6 @@ export const AvkortingInntekt = ({
     }
     // Første grunnlagsperiode
     return {
-      //fom: virkningstidspunkt(behandling).dato,
       spesifikasjon: '',
     }
   }

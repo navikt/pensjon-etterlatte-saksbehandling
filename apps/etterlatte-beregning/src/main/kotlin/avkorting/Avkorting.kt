@@ -266,10 +266,19 @@ data class Aarsoppgjoer(
     val inntektsavkorting: List<Inntektsavkorting> = emptyList(),
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) {
-    fun utledRelevanteMaaneder(virkningstidspunkt: YearMonth) =
-        inntektsavkorting.firstOrNull {
-            it.grunnlag.periode.fom.year == virkningstidspunkt.year
-        }?.grunnlag?.relevanteMaanederInnAar ?: (12 - virkningstidspunkt.monthValue + 1)
+	/*
+	 * Relevante månder (innvilga måneder i gjeldende år) viderføres i alle grunnlagsperioder. så når man skal
+	 * utlede det til ny inntektsperiode kan man ta fra hvilken som helst periode i gjeldende år.
+	 * Hvis det ikke finnes noen inntekt for gjeldende år enda (førstegangsbehandling) regnes den ut basert på
+	 *  ny virk/innvilgelsesdato.
+	 */
+    fun utledRelevanteMaaneder(virkningstidspunkt: YearMonth): Int {
+        val aaretsFoersteForventaInntekt =
+            inntektsavkorting.sortedBy { it.grunnlag.periode.fom }.firstOrNull {
+                it.grunnlag.periode.fom.year == virkningstidspunkt.year
+            }?.grunnlag
+        return aaretsFoersteForventaInntekt?.relevanteMaanederInnAar ?: (12 - virkningstidspunkt.monthValue + 1)
+    }
 }
 
 /**

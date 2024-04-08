@@ -16,4 +16,5 @@
 
     <logger name="no.nav.etterlatte" level="DEBUG"/>
     <include resource="logback-secure.xml"/>
+    <include resource="logback-sporing.xml"/>
 </configuration>

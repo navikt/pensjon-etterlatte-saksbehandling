@@ -31,7 +31,7 @@ internal class LoependeYtelserforespoerselRiverTest {
     private fun genererReguleringMelding(dato: LocalDate) =
         JsonMessage.newMessage(
             mapOf(
-                ReguleringHendelseType.FINN_LOEPENDE_YTELSER.lagParMedEventNameKey(),
+                ReguleringHendelseType.SAK_FUNNET.lagParMedEventNameKey(),
                 SAK_ID_KEY to 1,
                 DATO_KEY to dato,
                 TILBAKESTILTE_BEHANDLINGER_KEY to "",
@@ -95,7 +95,7 @@ internal class LoependeYtelserforespoerselRiverTest {
         val behandlinger = listOf(UUID.randomUUID(), UUID.randomUUID())
         val melding =
             mapOf(
-                ReguleringHendelseType.FINN_LOEPENDE_YTELSER.lagParMedEventNameKey(),
+                ReguleringHendelseType.SAK_FUNNET.lagParMedEventNameKey(),
                 SAK_ID_KEY to 1,
                 DATO_KEY to foersteMai2023,
                 TILBAKESTILTE_BEHANDLINGER_KEY to "${behandlinger[0]};${behandlinger[1]}",

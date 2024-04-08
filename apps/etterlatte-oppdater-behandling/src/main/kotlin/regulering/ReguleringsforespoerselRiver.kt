@@ -51,7 +51,7 @@ internal class ReguleringsforespoerselRiver(
                 }
 
         sakerTilOmregning.saker.forEach {
-            packet.setEventNameForHendelseType(ReguleringHendelseType.FINN_LOEPENDE_YTELSER)
+            packet.setEventNameForHendelseType(ReguleringHendelseType.SAK_FUNNET)
             packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)
             packet.sakId = it.id
             context.publish(packet.toJson())

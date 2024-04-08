@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 
 enum class ReguleringHendelseType : EventnameHendelseType {
     REGULERING_STARTA,
-    FINN_LOEPENDE_YTELSER,
+    SAK_FUNNET,
     LOEPENDE_YTELSE_FUNNET,
     BEHANDLING_OPPRETTA,
     VILKAARSVURDERT,

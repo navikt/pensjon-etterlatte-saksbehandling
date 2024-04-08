@@ -113,8 +113,7 @@ interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
-        opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo)
-        val trygdetid = hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo).minByOrNull { it.ident }
+        val trygdetid = opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo).minByOrNull { it.ident }
 
         return checkNotNull(trygdetid) {
             "Kunne ikke opprette trygdetid for behandling=$behandlingId"
@@ -193,7 +192,7 @@ interface NyTrygdetidService {
     suspend fun opprettTrygdetiderForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): List<Trygdetid>
 
     suspend fun lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
         behandlingId: UUID,
@@ -287,65 +286,61 @@ class TrygdetidServiceImpl(
     override suspend fun opprettTrygdetiderForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+    ) = kanOppdatereTrygdetid(
+        behandlingId,
+        brukerTokenInfo,
     ) {
-        kanOppdatereTrygdetid(
-            behandlingId,
-            brukerTokenInfo,
-        ) {
-            val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
+        val avdoede = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
 
-            if (avdoede.isEmpty()) {
-                logger.warn("Kan ikke opprette trygdetid når det mangler avdøde (behandling=$behandlingId)")
-                throw GrunnlagManglerAvdoede()
+        if (avdoede.isEmpty()) {
+            logger.warn("Kan ikke opprette trygdetid når det mangler avdøde (behandling=$behandlingId)")
+            throw GrunnlagManglerAvdoede()
+        }
+
+        val eksisterendeTrygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
+
+        if (eksisterendeTrygdetider.isNotEmpty() && avdoede.size == eksisterendeTrygdetider.size) {
+            throw TrygdetidAlleredeOpprettetException()
+        }
+
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+        when (behandling.behandlingType) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                logger.info("Oppretter trygdetid for behandling $behandlingId")
+                opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
             }
 
-            val eksisterendeTrygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
-
-            if (eksisterendeTrygdetider.isNotEmpty() && avdoede.size == eksisterendeTrygdetider.size) {
-                throw TrygdetidAlleredeOpprettetException()
-            }
-
-            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-
-            when (behandling.behandlingType) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    logger.info("Oppretter trygdetid for behandling $behandlingId")
-                    opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
-                }
-
-                BehandlingType.REVURDERING -> {
-                    logger.info("Oppretter trygdetid for behandling $behandlingId for revurdering")
-                    val forrigeBehandling =
-                        behandlingKlient.hentSisteIverksatteBehandling(
-                            behandling.sak,
-                            brukerTokenInfo,
-                        )
-                    val forrigeTrygdetider = hentTrygdetiderIBehandling(forrigeBehandling.id, brukerTokenInfo)
-                    if (forrigeTrygdetider.isEmpty()) {
-                        opprettTrygdetiderForRevurdering(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
-                    } else {
-                        kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetider)
-                    }
+            BehandlingType.REVURDERING -> {
+                logger.info("Oppretter trygdetid for behandling $behandlingId for revurdering")
+                val forrigeBehandling =
+                    behandlingKlient.hentSisteIverksatteBehandling(
+                        behandling.sak,
+                        brukerTokenInfo,
+                    )
+                val forrigeTrygdetider = hentTrygdetiderIBehandling(forrigeBehandling.id, brukerTokenInfo)
+                if (forrigeTrygdetider.isEmpty()) {
+                    opprettTrygdetiderForRevurdering(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
+                } else {
+                    kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetider)
                 }
             }
-        }.also { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo) }
-    }
+        }
+    }.also { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo) }
 
     private suspend fun opprettTrygdetiderForRevurdering(
         behandling: DetaljertBehandling,
         eksisterendeTrygdetider: List<Trygdetid>,
         avdoede: List<Grunnlagsdata<JsonNode>>,
         brukerTokenInfo: BrukerTokenInfo,
+    ) = if (behandling.revurderingsaarsak == Revurderingaarsak.REGULERING &&
+        behandling.prosesstype == Prosesstype.AUTOMATISK
     ) {
-        if (behandling.revurderingsaarsak == Revurderingaarsak.REGULERING &&
-            behandling.prosesstype == Prosesstype.AUTOMATISK
-        ) {
-            logger.info("Forrige trygdetid for ${behandling.id} finnes ikke - må reguleres manuelt")
-            throw ManglerForrigeTrygdetidMaaReguleresManuelt()
-        } else {
-            logger.info("Oppretter trygdetid for behandling ${behandling.id} revurdering")
-            opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
-        }
+        logger.info("Forrige trygdetid for ${behandling.id} finnes ikke - må reguleres manuelt")
+        throw ManglerForrigeTrygdetidMaaReguleresManuelt()
+    } else {
+        logger.info("Oppretter trygdetid for behandling ${behandling.id} revurdering")
+        opprettTrygdetiderForBehandling(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
     }
 
     private suspend fun opprettTrygdetiderForBehandling(
@@ -353,35 +348,33 @@ class TrygdetidServiceImpl(
         eksisterendeTrygdetider: List<Trygdetid>,
         avdoede: List<Grunnlagsdata<JsonNode>>,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        avdoede.map { avdoed ->
-            val fnr =
-                requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
-                    "Kunne ikke hente identifikator for avdød til trygdetid i " +
-                        "behandlingen med id=${behandling.id}"
-                }
+    ) = avdoede.map { avdoed ->
+        val fnr =
+            requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                "Kunne ikke hente identifikator for avdød til trygdetid i " +
+                    "behandlingen med id=${behandling.id}"
+            }
 
-            Pair(fnr, avdoed)
-        }.filter { avdoedMedFnr ->
-            eksisterendeTrygdetider.none { avdoedMedFnr.first == it.ident }
-        }.map { avdoedMedFnr ->
-            val trygdetid =
-                Trygdetid(
-                    sakId = behandling.sak,
-                    behandlingId = behandling.id,
-                    opplysninger = hentOpplysninger(avdoedMedFnr.second, behandling.id),
-                    ident = avdoedMedFnr.first,
-                    yrkesskade = false,
-                )
-            val opprettetTrygdetid = trygdetidRepository.opprettTrygdetid(trygdetid)
+        Pair(fnr, avdoed)
+    }.filter { avdoedMedFnr ->
+        eksisterendeTrygdetider.none { avdoedMedFnr.first == it.ident }
+    }.map { avdoedMedFnr ->
+        val trygdetid =
+            Trygdetid(
+                sakId = behandling.sak,
+                behandlingId = behandling.id,
+                opplysninger = hentOpplysninger(avdoedMedFnr.second, behandling.id),
+                ident = avdoedMedFnr.first,
+                yrkesskade = false,
+            )
+        val opprettetTrygdetid = trygdetidRepository.opprettTrygdetid(trygdetid)
 
-            val oppdatertTrygdetid =
-                opprettFremtidigTrygdetidForAvdoed(opprettetTrygdetid, avdoedMedFnr.second, brukerTokenInfo)
+        val oppdatertTrygdetid =
+            opprettFremtidigTrygdetidForAvdoed(opprettetTrygdetid, avdoedMedFnr.second, brukerTokenInfo)
 
-            oppdatertTrygdetid ?: opprettetTrygdetid
-        }.also {
-            logger.info("Opprettet ${it.size} trygdetider for behandling=${behandling.id}")
-        }
+        oppdatertTrygdetid ?: opprettetTrygdetid
+    }.also {
+        logger.info("Opprettet ${it.size} trygdetider for behandling=${behandling.id}")
     }
 
     private suspend fun opprettFremtidigTrygdetidForAvdoed(

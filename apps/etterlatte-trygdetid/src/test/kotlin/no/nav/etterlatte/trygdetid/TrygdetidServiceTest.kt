@@ -233,7 +233,6 @@ internal class TrygdetidServiceTest {
             behandlingKlient.hentSisteIverksatteBehandling(sakId, saksbehandler)
             repository.hentTrygdetiderForBehandling(forrigebehandlingId)
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
-            grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
 
             repository.opprettTrygdetid(oppdatertTrygdetidCaptured.captured)
             with(oppdatertTrygdetidCaptured.captured) {
@@ -244,6 +243,9 @@ internal class TrygdetidServiceTest {
                     this.opplysninger[i].type shouldBe trygdetid.opplysninger[i].type
                 }
             }
+        }
+        coVerify {
+            grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
         }
         verify {
             behandling.id
@@ -333,6 +335,8 @@ internal class TrygdetidServiceTest {
                 every { prosesstype } returns Prosesstype.AUTOMATISK
             }
         val forrigeBehandlingId = randomUUID()
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
@@ -341,6 +345,7 @@ internal class TrygdetidServiceTest {
             )
         every { repository.hentTrygdetiderForBehandling(forrigeBehandlingId) } returns emptyList()
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
 
         runBlocking {
             assertThrows<ManglerForrigeTrygdetidMaaReguleresManuelt> {
@@ -354,6 +359,9 @@ internal class TrygdetidServiceTest {
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             behandlingKlient.hentSisteIverksatteBehandling(sakId, saksbehandler)
             repository.hentTrygdetiderForBehandling(forrigeBehandlingId)
+        }
+        coVerify {
+            grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
         }
         verify {
             behandling.revurderingsaarsak
@@ -437,7 +445,10 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal feile ved opprettelse av trygdetid naar det allerede finnes for behandling`() {
         val behandlingId = randomUUID()
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
         every { repository.hentTrygdetiderForBehandling(any()) } returns listOf(trygdetid(behandlingId))
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
 
         runBlocking {
             assertThrows<TrygdetidAlleredeOpprettetException> {
@@ -445,6 +456,9 @@ internal class TrygdetidServiceTest {
             }
         }
 
+        coVerify {
+            grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
+        }
         coVerify(exactly = 1) {
             repository.hentTrygdetiderForBehandling(behandlingId)
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)

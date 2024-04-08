@@ -1,11 +1,13 @@
 package no.nav.etterlatte.avkorting
 
+import no.nav.etterlatte.avkorting.regler.virkningstidspunkt
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -54,7 +56,7 @@ class AvkortingService(
     suspend fun beregnAvkortingMedNyttGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        avkortingGrunnlag: AvkortingGrunnlag,
+        avkortingGrunnlagLagre: AvkortingGrunnlagLagreDto,
     ): Avkorting {
         tilstandssjekk(behandlingId, brukerTokenInfo)
         logger.info("Lagre og beregne avkorting og avkortet ytelse for behandlingId=$behandlingId")
@@ -64,8 +66,13 @@ class AvkortingService(
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val beregnetAvkorting =
             avkorting.beregnAvkortingMedNyttGrunnlag(
-                avkortingGrunnlag,
+                avkortingGrunnlagLagre,
                 behandling.behandlingType,
+                behandling.virkningstidspunkt?.dato ?: throw IkkeTillattException(
+                    code = "MANGLER_VIRK",
+                    detail = "Behandling mangler virkningstidspunkt",
+                ),
+                brukerTokenInfo,
                 beregning,
             )
 

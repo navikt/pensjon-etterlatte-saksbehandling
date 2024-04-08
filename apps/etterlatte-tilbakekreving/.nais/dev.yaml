@@ -9,7 +9,7 @@ spec:
   image: "{{image}}"
   port: 8080
   ingresses:
-    "https://etterlatte-tilbakekreving.intern.dev.nav.no"
+    - "https://etterlatte-tilbakekreving.intern.dev.nav.no"
   liveness:
     initialDelay: 5
     path: /health/isalive

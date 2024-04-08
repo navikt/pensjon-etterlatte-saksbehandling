@@ -11,13 +11,12 @@
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="STDOUT_JSON"/>
+        <appender-ref ref="${LOGBACK_APPENDER:-STDOUT_JSON}"/>
     </root>
 
     <logger name="org.eclipse.jetty" level="INFO"/>
     <logger name="org.apache.kafka" level="INFO"/>
     <logger name="io.netty" level="INFO"/>
-    <logger name="no.nav.helse.rapids_rivers.PingPong" level="DEBUG"/>
     <logger name="no.nav.etterlatte" level="DEBUG"/>
     <include resource="logback-secure.xml"/>
 </configuration>

@@ -1,4 +1,4 @@
-import { Behandlingsliste } from '../Behandlingsliste'
+import { BehandlingTable } from './BehandlingTable'
 import styled from 'styled-components'
 import { Container, FlexRow, GridContainer, SpaceChildren } from '~shared/styled'
 import Spinner from '~shared/Spinner'
@@ -58,7 +58,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
       {mapResult(sakResult, {
         pending: <Spinner visible label="Henter sak og behandlinger" />,
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
-        success: ({ sak }) => (
+        success: ({ sak, behandlinger }) => (
           <SpaceChildren gap="2rem">
             <SakOversiktHeader sak={sak} navkontorResult={navkontorResult} />
 
@@ -70,43 +70,21 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
               </Heading>
               <ForenkletOppgaverTable sakId={sak.id} />
             </div>
+
+            <div>
+              <Heading size="medium" spacing>
+                Behandlinger
+              </Heading>
+              <BehandlingTable sakOgBehandlinger={{ sak, behandlinger }} />
+            </div>
           </SpaceChildren>
         ),
       })}
     </Container>
     // <GridContainer>
-    //   {mapApiResult(
-    //     sakResult,
-    //     <Spinner visible={true} label="Henter sak og behandlinger" />,
-    //     (error) => (
-    //       <MainContent>
-    //         {error.status === 404 ? (
-    //           <>
-    //             <ApiWarningAlert>{error.detail}</ApiWarningAlert>
-    //
-    //             <OpprettSakModal fnr={fnr} />
-    //           </>
-    //         ) : (
-    //           <ApiErrorAlert>{error.detail || 'Feil ved henting av sak'}</ApiErrorAlert>
-    //         )}
-    //       </MainContent>
-    //     ),
     //     (sakOgBehandlinger) => (
     //       <>
     //         <MainContent>
-    //           <Heading size="medium" spacing>
-    //             <HStack gap="2">
-    //               Saknummer {sakOgBehandlinger.sak.id}{' '}
-    //               <Tag variant="success" size="medium">
-    //                 {formaterSakstype(sakOgBehandlinger.sak.sakType)}
-    //               </Tag>
-    //               {sakOgBehandlinger.sak.utlandstilknytning && (
-    //                 <Tag variant={tagColors[sakOgBehandlinger.sak.utlandstilknytning.type]} size="medium">
-    //                   {formaterEnumTilLesbarString(sakOgBehandlinger.sak.utlandstilknytning.type)}
-    //                 </Tag>
-    //               )}
-    //             </HStack>
-    //           </Heading>
     //           {isSuccess(hentFlyktningStatus) && hentFlyktningStatus.data?.erFlyktning && (
     //             <>
     //               <FlexRow>
@@ -137,16 +115,6 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
     //             pending: <Spinner visible={true} label="Henter status yrkesskadefordel" />,
     //             error: () => <ApiErrorAlert>Klarte ikke hente informasjon om yrkesskadefordel</ApiErrorAlert>,
     //           })}
-    //           {mapApiResult(
-    //             hentNavkontorStatus,
-    //             <Spinner visible label="Laster navkontor ..." />,
-    //             () => (
-    //               <ApiErrorAlert>Kunne ikke hente navkontor</ApiErrorAlert>
-    //             ),
-    //             (navkontor) => (
-    //               <BodyShort spacing>Navkontor er: {navkontor.navn}</BodyShort>
-    //             )
-    //           )}
     //           <SelectWrapper>
     //             <BodyShort spacing>Denne saken tilhører enhet {sakOgBehandlinger.sak.enhet}.</BodyShort>
     //             {enhetErSkrivbar(sakOgBehandlinger.sak.enhet, innloggetSaksbehandler.skriveEnheter) && (
@@ -161,8 +129,6 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
     //               </FlexRow>
     //             )}
     //           </SelectWrapper>
-    //           <hr />
-    //           <Behandlingsliste sakOgBehandlinger={sakOgBehandlinger} />
     //
     //           <KlageListe sakId={sakOgBehandlinger.sak.id} />
     //           <TilbakekrevingListe sakId={sakOgBehandlinger.sak.id} />

@@ -1,5 +1,5 @@
 import { Heading, Link, Table } from '@navikt/ds-react'
-import { IBehandlingsammendrag, SakMedBehandlinger } from './typer'
+import { IBehandlingsammendrag, SakMedBehandlinger } from '../typer'
 import { formaterBehandlingstype, formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import React, { useEffect } from 'react'
 import styled from 'styled-components'
@@ -15,15 +15,10 @@ import {
   mapAarsak,
 } from '~components/person/behandlingsslistemappere'
 import { VedtakKolonner } from '~components/person/VedtakKoloner'
-
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
-
-const BehandlingPanel = styled.div`
-  margin: 3rem 0;
-`
 
 const BehandlingstypeWrapper = styled.div`
   display: flex;
@@ -33,19 +28,19 @@ const BehandlingstypeWrapper = styled.div`
 
 type alleBehandlingsTyper = IBehandlingsammendrag | Generellbehandling
 
-function isVanligBehandling(behandling: alleBehandlingsTyper): behandling is IBehandlingsammendrag {
+function erVanligBehandling(behandling: alleBehandlingsTyper): behandling is IBehandlingsammendrag {
   return (behandling as IBehandlingsammendrag).soeknadMottattDato !== undefined
 }
 
 function hentDato(behandling: alleBehandlingsTyper): string {
-  if (isVanligBehandling(behandling)) {
+  if (erVanligBehandling(behandling)) {
     return behandling.behandlingOpprettet
   } else {
     return behandling.opprettet
   }
 }
 
-export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: SakMedBehandlinger }) => {
+export const BehandlingTable = ({ sakOgBehandlinger }: { sakOgBehandlinger: SakMedBehandlinger }) => {
   const [generellbehandlingStatus, hentGenerellbehandlinger] = useApiCall(hentGenerelleBehandlingForSak)
 
   const { sak, behandlinger } = sakOgBehandlinger
@@ -63,9 +58,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
   allebehandlinger.sort((a, b) => (new Date(hentDato(a)) < new Date(hentDato(b)) ? 1 : -1))
 
   return (
-    <BehandlingPanel>
-      <Heading size="medium">Behandlinger</Heading>
-
+    <>
       <Table zebraStripes>
         <Table.Header>
           <Table.Row>
@@ -81,9 +74,9 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
         </Table.Header>
         <Table.Body>
           {allebehandlinger.map((behandling, i) => {
-            if (isVanligBehandling(behandling)) {
+            if (erVanligBehandling(behandling)) {
               return (
-                <Table.Row key={i} shadeOnHover={false}>
+                <Table.Row key={i}>
                   <Table.DataCell>{formaterStringDato(behandling.behandlingOpprettet)}</Table.DataCell>
                   <Table.DataCell>
                     <BehandlingstypeWrapper>
@@ -109,7 +102,7 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
               )
             } else {
               return (
-                <Table.Row key={i} shadeOnHover={false}>
+                <Table.Row key={i}>
                   <Table.DataCell>{formaterStringDato(behandling.opprettet)}</Table.DataCell>
                   <Table.DataCell>
                     <BehandlingstypeWrapper>
@@ -136,6 +129,6 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
         apiResult: generellbehandlingStatus,
         errorMessage: 'Vi klarte ikke å hente generelle behandligner',
       })}
-    </BehandlingPanel>
+    </>
   )
 }

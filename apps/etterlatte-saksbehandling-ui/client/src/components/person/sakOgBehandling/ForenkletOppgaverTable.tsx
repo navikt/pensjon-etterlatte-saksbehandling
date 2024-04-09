@@ -34,7 +34,7 @@ export const ForenkletOppgaverTable = ({ sakId }: { sakId: number }): ReactNode 
   }, [])
 
   return (
-    <Table size="small">
+    <Table zebraStripes size="small">
       <Table.Header>
         <Table.Row>
           <Table.HeaderCell scope="col">Reg.dato</Table.HeaderCell>

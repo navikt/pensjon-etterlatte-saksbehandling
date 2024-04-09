@@ -20,6 +20,7 @@ import { BeregnetSamletTrygdetid } from '~components/behandling/trygdetid/detalj
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { formaterNavn } from '~shared/types/Person'
+import { Personopplysning } from '~shared/types/grunnlag'
 
 const TrygdetidMelding = ({ overskrift, beskrivelse }: { overskrift: string; beskrivelse: string }) => {
   return (
@@ -45,6 +46,13 @@ const visTrydeavtale = (behandling: IDetaljertBehandling): Boolean => {
     (behandling.behandlingType === IBehandlingsType.REVURDERING &&
       behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING_UTLAND)
   )
+}
+
+const manglerTrygdetid = (trygdetider: ITrygdetid[], avdoede?: Personopplysning[]): boolean => {
+  const avdoedIdenter = (avdoede || []).map((avdoed) => avdoed.opplysning.foedselsnummer)
+  const trygdetidIdenter = trygdetider.map((trygdetid) => trygdetid.ident)
+
+  return !avdoedIdenter.every((ident) => trygdetidIdenter.includes(ident))
 }
 
 export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningstidspunktEtterNyRegelDato }: Props) => {
@@ -85,7 +93,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
       if (
         trygdetider === null ||
         trygdetider.length == 0 ||
-        (personopplysninger && trygdetider.length !== personopplysninger?.avdoede.length)
+        manglerTrygdetid(trygdetider, personopplysninger?.avdoede)
       ) {
         if (behandlingErIverksattEllerSamordnet(behandling.status)) {
           setHarPilotTrygdetid(true)

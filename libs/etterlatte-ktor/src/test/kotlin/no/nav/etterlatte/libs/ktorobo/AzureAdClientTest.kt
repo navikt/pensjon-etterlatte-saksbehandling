@@ -4,11 +4,16 @@ import com.github.benmanes.caffeine.cache.AsyncCache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.michaelbull.result.Ok
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.statement.HttpResponse
+import io.ktor.server.testing.ApplicationTestBuilder
+import io.ktor.server.testing.testApplication
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -18,15 +23,24 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AccessToken
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdOpenIdConfiguration
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.ClientCredentialsTokenRequest
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.OboTokenRequest
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.security.mock.oauth2.MockOAuth2Server
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.util.concurrent.TimeUnit
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AzureAdClientTest {
     private val configMap =
         mapOf(
@@ -50,21 +64,57 @@ internal class AzureAdClientTest {
         )
     }
 
+    @BeforeAll
+    fun before() {
+        mockOAuth2Server.start()
+    }
+
+    @AfterEach
+    fun afterEach() {
+        clearAllMocks()
+    }
+
+    @AfterAll
+    fun after() {
+        mockOAuth2Server.shutdown()
+    }
+
+    private val mockOAuth2Server = MockOAuth2Server()
+
+    private fun ApplicationTestBuilder.httpClient(): HttpClient =
+        runServer(mockOAuth2Server, "") {
+        }
+
     @Test
     fun `henter open id configuration fra well known url i config ved oppstart`() {
-        AzureAdClient(config, mockHttpClient)
-        mockServer.verify(getRequestedFor(urlEqualTo("/wellKnownUrl")))
+        testApplication {
+            val adConfig = objectMapper.readValue(openIdConfigurationMockResponse(), AzureAdOpenIdConfiguration::class.java)
+            val respons = mockk<HttpResponse>().also { coEvery { it.body<AzureAdOpenIdConfiguration>() } returns adConfig }
+            val client = httpClient()
+            AzureAdClient(config, client, httpGetter = { respons })
+        }
     }
 
     @Test
     fun `henter OBO access token hvis det ikke finnes noe i cache`() {
-        val response =
-            runBlocking {
-                AzureAdClient(config, mockHttpClient).getOnBehalfOfAccessTokenForResource(listOf(), "")
-            }
+        testApplication {
+            val adConfig = objectMapper.readValue(openIdConfigurationMockResponse(), AzureAdOpenIdConfiguration::class.java)
+            val adConfigResponse = mockk<HttpResponse>().also { coEvery { it.body<AzureAdOpenIdConfiguration>() } returns adConfig }
+            val accessToken = objectMapper.readValue(accessTokenMockResponse(), AccessToken::class.java)
+            val tokenResponse = mockk<HttpResponse>().also { coEvery { it.body<AccessToken>() } returns accessToken }
 
-        response shouldBe Ok(AccessToken("token", 60, "testToken"))
-        mockServer.verify(postRequestedFor(urlEqualTo("/token_endpoint")))
+            val client = httpClient()
+            val azureAdClient =
+                AzureAdClient(
+                    config,
+                    client,
+                    httpGetter = { adConfigResponse },
+                    httpSubmitForm =
+                        { _, _ -> tokenResponse },
+                )
+            val resp = azureAdClient.getOnBehalfOfAccessTokenForResource(listOf(), "")
+            resp shouldBe Ok(AccessToken("token", 60, "testToken"))
+        }
     }
 
     @Test

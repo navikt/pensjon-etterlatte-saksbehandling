@@ -17,6 +17,7 @@ import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Parameters
 import io.ktor.serialization.jackson.jackson
@@ -68,17 +69,23 @@ class AzureAdClient(
             .newBuilder()
             .expireAfter(TokenBasedExpiration())
             .buildAsync(),
+    private val httpGetter: suspend HttpClient.(url: String) -> HttpResponse = { httpClient.get(it) },
+    private val httpSubmitForm: suspend HttpClient.(
+        url: String,
+        params: Parameters,
+    ) -> HttpResponse = { url: String, params: Parameters -> httpClient.submitForm(url, params) },
 ) {
     private val openIdConfiguration: AzureAdOpenIdConfiguration =
         runBlocking {
-            httpClient.get(config.getString("azure.app.well.known.url")).body()
+            httpGetter(httpClient, config.getString("azure.app.well.known.url")).body()
         }
 
     private suspend inline fun fetchAccessToken(formParameters: Parameters): AccessToken =
         try {
-            httpClient.submitForm(
-                url = openIdConfiguration.tokenEndpoint,
-                formParameters = formParameters,
+            httpSubmitForm(
+                httpClient,
+                openIdConfiguration.tokenEndpoint,
+                formParameters,
             ).body()
         } catch (ex: Throwable) {
             val responseBody: String? =

@@ -50,11 +50,20 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
                     }
                 }
             }
+            put("/valider") {
+                kunSkrivetilgang {
+                    try {
+                        call.respond(service.validerVurderingOgPerioder(behandlingId))
+                    } catch (e: TilbakekrevingFinnesIkkeException) {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                }
+            }
 
             route("vedtak") {
                 post("opprett") {
                     kunSkrivetilgang {
-                        service.opprettVedtak(behandlingId, brukerTokenInfo)
+                        service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
                         call.respond(HttpStatusCode.OK)
                     }
                 }

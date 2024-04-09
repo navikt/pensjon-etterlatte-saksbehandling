@@ -184,8 +184,8 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
                   },
                   pattern: erNorskAdresse
                     ? {
-                        value: /\d{4}/,
-                        message: 'Norsk postnummer må være fire siffer',
+                        value: /^\d{4}$/,
+                        message: 'Ugyldig tegn i postnummeret. Norske postnummer kan kun bestå av fire siffer.',
                       }
                     : undefined,
                 })}
@@ -212,8 +212,8 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
                     message: 'Landkode må være satt (2 tegn)',
                   },
                   pattern: {
-                    value: /[A-Z]{2}/,
-                    message: 'Landkode skal kun bestå av 2 bokstaver (eks. NO)',
+                    value: /^[A-Z]{2}$/,
+                    message: 'Ugyldig tegn i landkoden. Landkode skal kun bestå av 2 store bokstaver (eks. NO)',
                   },
                 })}
                 label="Landkode"
@@ -223,7 +223,7 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
                 {...register('adresse.land', {
                   required: {
                     value: true,
-                    message: 'Land må være satt (2 tegn)',
+                    message: 'Land må være satt',
                   },
                 })}
                 label="Land"

@@ -21,6 +21,7 @@ import { SakType } from '~shared/types/sak'
 import TrygdetidVisning from '~components/behandling/trygdetid/TrygdetidVisning'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { Varselbrev } from '~components/behandling/brev/Varselbrev'
+import { erOpphoer } from '~shared/types/Revurderingaarsak'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -206,7 +207,9 @@ export function soeknadRoutes(behandling: IBehandlingReducer, lagVarselbrev: boo
 }
 
 export function revurderingRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteTypes> {
-  const opphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
+  const opphoer =
+    erOpphoer(behandling.revurderingsaarsak!!) ||
+    behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
   const defaultRoutes: Array<BehandlingRouteTypes> = opphoer
     ? [routeTypes.revurderingsoversikt, routeTypes.vilkaarsvurdering, routeTypes.beregning]

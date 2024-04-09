@@ -30,7 +30,7 @@ import {
   OMS_REVURDERING_BESKRIVELSE,
 } from '~components/behandling/virkningstidspunkt/utils'
 import { SakType } from '~shared/types/sak'
-import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
+import { erOpphoer, Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import styled from 'styled-components'
 import { GrunnForSoeskenjustering } from '~components/behandling/revurderingsoversikt/GrunnForSoeskenjustering'
 import { GrunnlagForVirkningstidspunkt } from '~components/behandling/revurderingsoversikt/GrunnlagForVirkningstidspunkt'
@@ -117,7 +117,8 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           <BodyShort spacing>Revurdering på grunn av annen årsak (spesifiseres nedenfor).</BodyShort>
         ) : (
           <BodyShort spacing>
-            Revurdering på grunn av <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
+            {erOpphoer(revurderingsaarsak) ? 'Opphør' : 'Revurdering'} på grunn av på grunn av{' '}
+            <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
           </BodyShort>
         )}
       </ContentHeader>

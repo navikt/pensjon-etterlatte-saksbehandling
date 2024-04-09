@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
 import { StatusBar } from '~shared/statusbar/Statusbar'
@@ -21,6 +21,7 @@ import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { TilbakekrevingUtbetalinger } from '~components/tilbakekreving/utbetalinger/TilbakekrevingUtbetalinger'
 import { TilbakekrevingOppsummering } from '~components/tilbakekreving/oppsummering/TilbakekrevingOppsummering'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export function Tilbakekrevingsbehandling() {
   useSidetittel('Tilbakekreving')
@@ -31,7 +32,7 @@ export function Tilbakekrevingsbehandling() {
   const [fetchTilbakekrevingStatus, fetchTilbakekreving] = useApiCall(hentTilbakekreving)
   const [personStatus, hentPerson] = useApiCall(getPerson)
   const viHarLastetRiktigTilbakekreving = tilbakekrevingId === tilbakekreving?.id.toString()
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [redigerbar, setRedigerbar] = useState(false)
 
   useEffect(() => {

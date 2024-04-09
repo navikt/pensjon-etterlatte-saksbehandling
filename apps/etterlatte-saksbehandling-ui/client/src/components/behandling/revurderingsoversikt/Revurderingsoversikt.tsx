@@ -39,9 +39,9 @@ import SluttbehandlingUtland from '~components/behandling/revurderingsoversikt/s
 import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utlandstilknytning/Utlandstilknytning'
-import { useAppSelector } from '~store/Store'
 import { Familieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -92,7 +92,7 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingaarsak)
 
 export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,

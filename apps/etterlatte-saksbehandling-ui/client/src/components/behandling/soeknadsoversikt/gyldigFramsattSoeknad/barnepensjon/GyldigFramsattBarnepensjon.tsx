@@ -20,7 +20,7 @@ import { getPersongalleriFraSoeknad } from '~shared/api/grunnlag'
 import { Familieforhold } from '~shared/types/Person'
 
 import { isSuccess } from '~shared/api/apiUtils'
-import { useAppSelector } from '~store/Store'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const GyldigFramsattBarnepensjon = ({
   behandling,
@@ -36,7 +36,7 @@ export const GyldigFramsattBarnepensjon = ({
   if (gyldigFramsatt == null) {
     return <div style={{ color: 'red' }}>Kunne ikke hente ut data om søknaden er gyldig framsatt</div>
   }
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,

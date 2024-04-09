@@ -15,8 +15,9 @@ import styled from 'styled-components'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { Toast } from '~shared/alerts/Toast'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; behandling: IDetaljertBehandling }) => {
   const { type, behandling } = props
@@ -29,7 +30,7 @@ export const RevurderingAnnen = (props: { type: 'ANNEN' | 'ANNEN_UTEN_BREV'; beh
   const [begrunnelse, setBegrunnelse] = useState(behandling.revurderinginfo?.begrunnelse ?? '')
   const [feilmelding, setFeilmelding] = useState<string | null>(null)
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,

@@ -30,6 +30,7 @@ import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -41,7 +42,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
     : undefined
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const vedtaksresultat = useVedtaksResultat()
 

@@ -1,12 +1,12 @@
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { IBeslutning } from '../types'
 import { Beslutningsvalg } from './beslutningsvalg'
-import { useAppSelector } from '~store/Store'
 import { Alert, BodyShort } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { VedtakSammendrag } from '~components/vedtak/typer'
 import { useSelectorSaksbehandlerGjeldendeOppgaveBehandling } from '~store/selectors/useSelectorSaksbehandlerGjeldendeOppgaveBehandling'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 type Props = {
   setBeslutning: (value: IBeslutning) => void
@@ -17,7 +17,7 @@ type Props = {
 
 export const AttesteringEllerUnderkjenning = ({ setBeslutning, beslutning, vedtak, erFattet }: Props) => {
   const { lastPage } = useBehandlingRoutes()
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const saksbehandlerForGjeldendeOppgave = useSelectorSaksbehandlerGjeldendeOppgaveBehandling()
   const attestantOgSaksbehandlerErSammePerson = vedtak?.behandlendeSaksbehandler === innloggetSaksbehandler.ident
   const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)

@@ -20,8 +20,8 @@ import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppga
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { useAppSelector } from '~store/Store'
 import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -29,7 +29,7 @@ interface Props {
 }
 
 export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [filter, setFilter] = useState<Filter>(hentFilterFraLocalStorage())
 

@@ -13,9 +13,9 @@ import { MagnifyingGlassIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
 import { useNavigate } from 'react-router-dom'
 import { opprettOppgave, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
-import { useAppSelector } from '~store/Store'
 import { SakOverfoeringDetailjer } from 'src/components/person/dokumenter/avvik/common/SakOverfoeringDetailjer'
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const KnyttTilAnnentBruker = ({
   journalpost,
@@ -27,7 +27,7 @@ export const KnyttTilAnnentBruker = ({
   lukkModal: () => void
 }) => {
   const navigate = useNavigate()
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [sakid, setSakid] = useState<string>()
 

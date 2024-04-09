@@ -22,7 +22,7 @@ import { hentStoettedeRevurderinger } from '~shared/api/revurdering'
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
-import { useAppSelector } from '~store/Store'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 type Props = {
   sak: ISak
@@ -31,7 +31,7 @@ type Props = {
 
 export default function RelevanteHendelser(props: Props) {
   const { sak, behandlingliste } = props
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [visOpprettRevurderingsmodal, setVisOpprettRevurderingsmodal] = useState<boolean>(false)
   const [valgtHendelse, setValgtHendelse] = useState<Grunnlagsendringshendelse | undefined>(undefined)

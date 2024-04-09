@@ -1,8 +1,8 @@
 import {
-  Generellbehandling,
-  KravpakkeUtland,
   DokumentSendtMedDato,
+  Generellbehandling,
   generellbehandlingErRedigerbar,
+  KravpakkeUtland,
 } from '~shared/types/Generellbehandling'
 import { Content, ContentHeader, GridContainer, MainContent } from '~shared/styled'
 import { HeadingWrapper, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
@@ -45,9 +45,9 @@ import { GenerellbehandlingSidemeny } from '~components/generellbehandling/Gener
 
 import { isPending, isPendingOrInitial, isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useAppSelector } from '~store/Store'
 import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;
@@ -84,7 +84,7 @@ const KravpakkeUtlandBehandling = (props: {
   const [putOppdaterGenerellBehandlingStatus, putOppdaterGenerellBehandling] = useApiCall(oppdaterGenerellBehandling)
   const [avdoedeStatus, avdoedeFetch] = useApiCall(getGrunnlagsAvOpplysningstype)
   const [avdoed, setAvdoed] = useState<Grunnlagsopplysning<IPdlPerson, KildePdl> | null>(null)
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
 

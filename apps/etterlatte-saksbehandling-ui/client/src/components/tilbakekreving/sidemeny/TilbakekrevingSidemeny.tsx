@@ -4,7 +4,7 @@ import { Alert, Button, Heading, Tag } from '@navikt/ds-react'
 import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { teksterTilbakekrevingStatus, TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -23,11 +23,12 @@ import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export function TilbakekrevingSidemeny() {
   const tilbakekreving = useTilbakekreving()
   const dispatch = useAppDispatch()
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [collapsed, setCollapsed] = useState(false)
 
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)

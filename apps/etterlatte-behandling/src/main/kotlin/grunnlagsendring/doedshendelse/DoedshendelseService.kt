@@ -217,14 +217,14 @@ class DoedshendelseService(
     }
 
     private fun erSamboere(avdoedOgAnnenForelderMedFellesbarn: AvdoedOgAnnenForelderMedFellesbarn): Boolean {
-        val gjenlevendeBosteder =
+        val gjenlevendeBosted =
             avdoedOgAnnenForelderMedFellesbarn
-                .gjenlevendeForelder.bostedsadresse?.map { it.verdi }?.filter { it.aktiv }
-        val avdoedBosteder =
+                .gjenlevendeForelder.bostedsadresse?.map { it.verdi }?.firstOrNull { it.aktiv }
+        val avdoedBosted =
             avdoedOgAnnenForelderMedFellesbarn
-                .avdoedPerson.bostedsadresse?.map { it.verdi }?.sortedByDescending { it.gyldigFraOgMed }
+                .avdoedPerson.bostedsadresse?.map { it.verdi }?.sortedByDescending { it.gyldigFraOgMed }?.firstOrNull()
 
-        val adresserLike = isAdresserLike(gjenlevendeBosteder?.first(), avdoedBosteder?.first())
+        val adresserLike = isAdresserLike(gjenlevendeBosted, avdoedBosted)
         logger.info(
             "Avdød (${avdoedOgAnnenForelderMedFellesbarn.avdoedPerson.foedselsnummer.verdi}) og annen forelder " +
                 "(${avdoedOgAnnenForelderMedFellesbarn.gjenlevendeForelder.foedselsnummer.verdi}) har samme adresse: $adresserLike",

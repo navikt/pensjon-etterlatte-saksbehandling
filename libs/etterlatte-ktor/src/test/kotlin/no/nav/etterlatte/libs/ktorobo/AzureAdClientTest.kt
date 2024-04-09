@@ -20,7 +20,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AccessToken
@@ -29,45 +28,27 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdOpenIdConfiguration
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.ClientCredentialsTokenRequest
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.OboTokenRequest
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.security.mock.oauth2.MockOAuth2Server
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import java.util.concurrent.TimeUnit
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AzureAdClientTest {
-    private val configMap =
-        mapOf(
-            "azure.app.well.known.url" to "wellKnownUrl",
-            "azure.app.client.id" to "clientId",
-            "azure.app.client.secret" to "secret",
+    private val config =
+        ConfigFactory.parseMap(
+            mapOf(
+                "azure.app.well.known.url" to "wellKnownUrl",
+                "azure.app.client.id" to "clientId",
+                "azure.app.client.secret" to "secret",
+            ),
         )
-    private val config = ConfigFactory.parseMap(configMap)
-
-    @BeforeAll
-    fun before() {
-        mockOAuth2Server.start()
-    }
 
     @AfterEach
     fun afterEach() {
         clearAllMocks()
     }
 
-    @AfterAll
-    fun after() {
-        mockOAuth2Server.shutdown()
-    }
-
-    private val mockOAuth2Server = MockOAuth2Server()
-
-    private fun ApplicationTestBuilder.httpClient(): HttpClient =
-        runServer(mockOAuth2Server, "") {
-        }
+    private fun ApplicationTestBuilder.httpClient(): HttpClient = createClient { }
 
     @Test
     fun `henter open id configuration fra well known url i config ved oppstart`() {
@@ -93,8 +74,7 @@ internal class AzureAdClientTest {
 
     private fun hentAccessToken(): HttpResponse {
         val accessToken = objectMapper.readValue(accessTokenMockResponse(), AccessToken::class.java)
-        val tokenResponse = mockk<HttpResponse>().also { coEvery { it.body<AccessToken>() } returns accessToken }
-        return tokenResponse
+        return mockk<HttpResponse>().also { coEvery { it.body<AccessToken>() } returns accessToken }
     }
 
     private fun adConfigResponse(): HttpResponse {

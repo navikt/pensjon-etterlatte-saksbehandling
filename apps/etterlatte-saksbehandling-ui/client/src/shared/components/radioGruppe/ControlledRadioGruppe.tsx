@@ -10,6 +10,7 @@ interface Props<T extends FieldValues> {
   hideLegend?: boolean
   radios: ReactNode | Array<ReactNode>
   size?: 'medium' | 'small'
+  readOnly?: boolean
 }
 
 export const ControlledRadioGruppe = <T extends FieldValues>({
@@ -20,6 +21,7 @@ export const ControlledRadioGruppe = <T extends FieldValues>({
   legend,
   hideLegend,
   size,
+  readOnly,
 }: Props<T>): ReactNode => {
   return (
     <Controller
@@ -41,6 +43,7 @@ export const ControlledRadioGruppe = <T extends FieldValues>({
           legend={legend}
           hideLegend={hideLegend}
           size={size}
+          readOnly={readOnly}
         >
           {radios}
         </RadioGroup>

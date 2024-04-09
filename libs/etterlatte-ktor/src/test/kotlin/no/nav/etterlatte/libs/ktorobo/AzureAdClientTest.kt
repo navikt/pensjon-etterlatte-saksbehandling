@@ -1,16 +1,13 @@
 
-import WireMockBase.Companion.mockServer
 import com.github.benmanes.caffeine.cache.AsyncCache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.michaelbull.result.Ok
-import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.Parameters
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
@@ -25,6 +22,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AccessToken
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdOpenIdConfiguration
@@ -34,8 +32,8 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.util.concurrent.TimeUnit
@@ -49,20 +47,6 @@ internal class AzureAdClientTest {
             "azure.app.client.secret" to "secret",
         )
     private val config = ConfigFactory.parseMap(configMap)
-    private val mockHttpClient = WireMockBase.mockHttpClient
-
-    @BeforeEach
-    fun initMockServer() {
-        mockServer.resetAll()
-        mockServer.stubFor(
-            WireMock.get(WireMock.urlPathMatching("/wellKnownUrl"))
-                .willReturn(WireMock.okJson(openIdConfigurationMockResponse())),
-        )
-        mockServer.stubFor(
-            WireMock.post(WireMock.urlPathMatching("/token_endpoint"))
-                .willReturn(WireMock.okJson(accessTokenMockResponse())),
-        )
-    }
 
     @BeforeAll
     fun before() {
@@ -100,8 +84,7 @@ internal class AzureAdClientTest {
                     config,
                     httpClient(),
                     httpGetter = { adConfigResponse() },
-                    httpSubmitForm =
-                        { _, _ -> hentAccessToken() },
+                    httpSubmitForm = { _, _ -> hentAccessToken() },
                 )
             val resp = azureAdClient.getOnBehalfOfAccessTokenForResource(listOf(), "")
             resp shouldBe Ok(AccessToken("token", 60, "testToken"))
@@ -128,7 +111,14 @@ internal class AzureAdClientTest {
                 .buildAsync()
 
         runBlocking {
-            AzureAdClient(config, mockHttpClient, cache).getOnBehalfOfAccessTokenForResource(
+            AzureAdClient(
+                config,
+                httpClient(),
+                cache,
+                httpGetter = { adConfigResponse() },
+                httpSubmitForm =
+                    { _, _ -> hentAccessToken() },
+            ).getOnBehalfOfAccessTokenForResource(
                 listOf("testScope"),
                 "saksbehandlerToken",
             )
@@ -149,15 +139,24 @@ internal class AzureAdClientTest {
                 .expireAfterAccess(5, TimeUnit.SECONDS)
                 .buildAsync()
 
+        var called = 0
+        val httpSubmitForm: suspend HttpClient.(url: String, params: Parameters) -> HttpResponse =
+            { _, _ -> hentAccessToken().also { called++ } }
         runBlocking {
-            AzureAdClient(config, mockHttpClient, cache).run {
-                getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")
-                getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")
-                getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")
-            }
+            AzureAdClient(
+                config,
+                httpClient(),
+                cache,
+                httpGetter = { adConfigResponse() },
+                httpSubmitForm = httpSubmitForm,
+            )
+                .run {
+                    getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")
+                    getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")
+                    getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")
+                }
         }
-
-        mockServer.verify(1, postRequestedFor(urlEqualTo("/token_endpoint")))
+        assertEquals(1, called)
     }
 
     @Test
@@ -169,24 +168,38 @@ internal class AzureAdClientTest {
                     .expireAfterAccess(5, TimeUnit.SECONDS)
                     .buildAsync()
 
-            val client = AzureAdClient(config, mockHttpClient, cache)
+            var called = 0
+            val httpSubmitForm: suspend HttpClient.(url: String, params: Parameters) -> HttpResponse =
+                { _, _ -> hentAccessToken().also { called++ } }
+            val client =
+                AzureAdClient(
+                    config,
+                    httpClient(),
+                    cache,
+                    httpGetter = { adConfigResponse() },
+                    httpSubmitForm = httpSubmitForm,
+                )
             generateSequence {
                 async { client.getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken") }
             }.take(3).toList().awaitAll()
 
-            mockServer.verify(1, postRequestedFor(urlEqualTo("/token_endpoint")))
+            assertEquals(1, called)
         }
     }
 
     @Test
     fun `henter client credentials access token hvis det ikke finnes noe i cache`() {
-        val response =
-            runBlocking {
-                AzureAdClient(config, mockHttpClient).getAccessTokenForResource(listOf())
-            }
-
-        response shouldBe Ok(AccessToken("token", 60, "testToken"))
-        mockServer.verify(postRequestedFor(urlEqualTo("/token_endpoint")))
+        testApplication {
+            val azureAdClient =
+                AzureAdClient(
+                    config,
+                    httpClient(),
+                    httpGetter = { adConfigResponse() },
+                    httpSubmitForm = { _, _ -> hentAccessToken() },
+                )
+            val resp = azureAdClient.getAccessTokenForResource(listOf())
+            resp shouldBe Ok(AccessToken("token", 60, "testToken"))
+        }
     }
 
     @Test
@@ -198,7 +211,14 @@ internal class AzureAdClientTest {
                 .buildAsync()
 
         runBlocking {
-            AzureAdClient(config, mockHttpClient, clientCredentialsCache = cache).getAccessTokenForResource(
+            AzureAdClient(
+                config,
+                httpClient(),
+                clientCredentialsCache = cache,
+                httpGetter = { adConfigResponse() },
+                httpSubmitForm =
+                    { _, _ -> hentAccessToken() },
+            ).getAccessTokenForResource(
                 listOf("testScope"),
             )
         }
@@ -218,15 +238,24 @@ internal class AzureAdClientTest {
                 .expireAfterAccess(5, TimeUnit.SECONDS)
                 .buildAsync()
 
+        var called = 0
+        val httpSubmitForm: suspend HttpClient.(url: String, params: Parameters) -> HttpResponse =
+            { _, _ -> hentAccessToken().also { called++ } }
         runBlocking {
-            AzureAdClient(config, mockHttpClient, clientCredentialsCache = cache).run {
-                getAccessTokenForResource(listOf("testScope"))
-                getAccessTokenForResource(listOf("testScope"))
-                getAccessTokenForResource(listOf("testScope"))
-            }
+            AzureAdClient(
+                config,
+                httpClient(),
+                clientCredentialsCache = cache,
+                httpGetter = { adConfigResponse() },
+                httpSubmitForm = httpSubmitForm,
+            )
+                .run {
+                    getAccessTokenForResource(listOf("testScope"))
+                    getAccessTokenForResource(listOf("testScope"))
+                    getAccessTokenForResource(listOf("testScope"))
+                }
         }
-
-        mockServer.verify(1, postRequestedFor(urlEqualTo("/token_endpoint")))
+        assertEquals(1, called)
     }
 
     @Test
@@ -238,19 +267,29 @@ internal class AzureAdClientTest {
                     .expireAfterAccess(5, TimeUnit.SECONDS)
                     .buildAsync()
 
-            val client = AzureAdClient(config, mockHttpClient, clientCredentialsCache = cache)
+            var called = 0
+            val httpSubmitForm: suspend HttpClient.(url: String, params: Parameters) -> HttpResponse =
+                { _, _ -> hentAccessToken().also { called++ } }
+            val client =
+                AzureAdClient(
+                    config,
+                    httpClient(),
+                    clientCredentialsCache = cache,
+                    httpGetter = { adConfigResponse() },
+                    httpSubmitForm = httpSubmitForm,
+                )
             generateSequence {
                 async { client.getAccessTokenForResource(listOf("testScope")) }
             }.take(3).toList().awaitAll()
 
-            mockServer.verify(1, postRequestedFor(urlEqualTo("/token_endpoint")))
+            assertEquals(1, called)
         }
     }
 
     @Test
     fun `bruker client credentials viss JWT-claims sub og oid er like`() {
         val client =
-            spyk(AzureAdClient(config, mockHttpClient)).also {
+            spyk(AzureAdClient(config, httpClient(), httpGetter = { adConfigResponse() })).also {
                 coEvery { it.getAccessTokenForResource(any()) } returns Ok(mockk())
             }
         runBlocking {
@@ -266,7 +305,7 @@ internal class AzureAdClientTest {
     @Test
     fun `bruker OBO viss JWT-claims sub og oid er ulike`() {
         val client =
-            spyk(AzureAdClient(config, mockHttpClient)).also {
+            spyk(AzureAdClient(config, httpClient(), httpGetter = { adConfigResponse() })).also {
                 coEvery { it.getAccessTokenForResource(any()) } returns Ok(mockk())
             }
         every { runBlocking { client.getOnBehalfOfAccessTokenForResource(any(), any()) } } returns Ok(mockk())

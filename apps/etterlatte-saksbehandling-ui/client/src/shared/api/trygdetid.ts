@@ -35,7 +35,7 @@ export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> =>
   apiClient.get<ILand[]>('/trygdetid/kodeverk/land')
 
 export const oppdaterStatus = async (behandlingId: string): Promise<ApiResponse<StatusOppdatert>> =>
-  apiClient.post(`/trygdetid/${behandlingId}/oppdater-status`, {})
+  apiClient.post(`/trygdetid_v2/${behandlingId}/oppdater-status`, {})
 
 export const oppdaterOpplysningsgrunnlag = async (behandlingId: string): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid_v2/${behandlingId}/oppdater-opplysningsgrunnlag`, {})

@@ -20,7 +20,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AccessToken
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
@@ -67,8 +66,8 @@ internal class AzureAdClientTest {
                     httpGetter = { adConfigResponse() },
                     httpSubmitForm = { _, _ -> hentAccessToken() },
                 )
-            val resp = azureAdClient.getOnBehalfOfAccessTokenForResource(listOf(), "")
-            resp shouldBe Ok(AccessToken("token", 60, "testToken"))
+            val response = azureAdClient.getOnBehalfOfAccessTokenForResource(listOf(), "")
+            response shouldBe Ok(AccessToken("token", 60, "testToken"))
         }
     }
 
@@ -167,8 +166,8 @@ internal class AzureAdClientTest {
                     httpGetter = { adConfigResponse() },
                     httpSubmitForm = { _, _ -> hentAccessToken() },
                 )
-            val resp = azureAdClient.getAccessTokenForResource(listOf())
-            resp shouldBe Ok(AccessToken("token", 60, "testToken"))
+            val response = azureAdClient.getAccessTokenForResource(listOf())
+            response shouldBe Ok(AccessToken("token", 60, "testToken"))
         }
     }
 
@@ -292,30 +291,17 @@ internal class AzureAdClientTest {
 }
 
 private fun hentAccessToken(): HttpResponse {
-    val accessToken = objectMapper.readValue(accessTokenMockResponse(), AccessToken::class.java)
+    val accessToken = AccessToken(accessToken = "token", expiresIn = 60, tokenType = "testToken")
     return mockk<HttpResponse>().also { coEvery { it.body<AccessToken>() } returns accessToken }
 }
 
 private fun adConfigResponse(): HttpResponse {
-    val adConfig = objectMapper.readValue(openIdConfigurationMockResponse(), AzureAdOpenIdConfiguration::class.java)
+    val adConfig =
+        AzureAdOpenIdConfiguration(
+            jwksUri = "jwks_uri",
+            issuer = "issuer",
+            tokenEndpoint = "token_endpoint",
+            authorizationEndpoint = "authorization_endpoint",
+        )
     return mockk<HttpResponse>().also { coEvery { it.body<AzureAdOpenIdConfiguration>() } returns adConfig }
 }
-
-private fun openIdConfigurationMockResponse() =
-    """
-    {
-        "jwks_uri": "jwks_uri",
-        "issuer": "issuer",
-        "token_endpoint": "token_endpoint",
-        "authorization_endpoint": "authorization_endpoint"
-    }
-    """.trimIndent()
-
-private fun accessTokenMockResponse() =
-    """
-       {
-        "access_token": "token",
-        "expires_in": "60",
-        "token_type": "testToken"
-    } 
-    """.trimIndent()

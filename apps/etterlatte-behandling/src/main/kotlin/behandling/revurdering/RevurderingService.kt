@@ -308,7 +308,7 @@ class RevurderingService(
             begrunnelse = begrunnelse,
             fritekstAarsak = fritekstAarsak,
             relatertBehandlingId = relatertBehandlingId,
-            sendeBrev = revurderingAarsak.utfall.skalSendeBrev,
+            sendeBrev = revurderingAarsak.skalSendeBrev,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
 

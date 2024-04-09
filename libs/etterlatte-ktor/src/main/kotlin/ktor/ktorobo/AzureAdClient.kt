@@ -59,16 +59,9 @@ data class AzureAdOpenIdConfiguration(
 class AzureAdClient(
     private val config: Config,
     private val httpClient: HttpClient = defaultHttpClient,
-    private val cache: AsyncCache<OboTokenRequest, AccessToken> =
-        Caffeine
-            .newBuilder()
-            .expireAfter(TokenBasedExpiration())
-            .buildAsync(),
+    private val cache: AsyncCache<OboTokenRequest, AccessToken> = asyncCache(),
     private val clientCredentialsCache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> =
-        Caffeine
-            .newBuilder()
-            .expireAfter(TokenBasedExpiration())
-            .buildAsync(),
+        asyncCache(),
     private val httpGetter: suspend HttpClient.(url: String) -> HttpResponse = { httpClient.get(it) },
     private val httpSubmitForm: suspend HttpClient.(
         url: String,
@@ -166,6 +159,12 @@ class AzureAdClient(
         return hentAccessToken(params, cache, OboTokenRequest(scopes, accessToken))
     }
 }
+
+private fun <T : TokenRequest> asyncCache(): AsyncCache<T, AccessToken> =
+    Caffeine
+        .newBuilder()
+        .expireAfter(TokenBasedExpiration())
+        .buildAsync()
 
 // Benytte tokenets faktisk expiration i stedet for f.eks. hardkodet, med litt fratrekk som "leeway"
 class TokenBasedExpiration : Expiry<TokenRequest, AccessToken> {

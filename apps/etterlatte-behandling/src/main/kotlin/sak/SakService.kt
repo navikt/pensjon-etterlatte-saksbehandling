@@ -13,6 +13,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -157,6 +158,8 @@ class SakServiceImpl(
 
     override fun hentStatusPaaSak(sakId: Long): SakStatus {
         val behandlingerISak = behandlingDao.alleBehandlingerISak(sakId)
+
+        if (behandlingerISak.isEmpty()) throw IkkeFunnetException(code = "INGEN_SAK_STATUS", detail = "Fant ingen behandlinger for sak")
 
         return SakStatus(
             behandlingStatus = behandlingerISak.last().status,

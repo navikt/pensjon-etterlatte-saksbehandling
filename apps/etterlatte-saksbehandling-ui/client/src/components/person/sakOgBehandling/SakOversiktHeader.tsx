@@ -39,6 +39,15 @@ export const SakOversiktHeader = ({ sak, fnr }: { sak: ISakMedUtlandstilknytning
         )}
         {mapResult(statusPaaSakResult, {
           pending: <Spinner visible label="Henter status..." />,
+          error: (error) => (
+            <>
+              {error.status === 404 ? (
+                <Tag variant="neutral">Ingen behandlinger for sak</Tag>
+              ) : (
+                <Tag variant="error">Feil i henting av status</Tag>
+              )}
+            </>
+          ),
           success: ({ behandlingStatus, virkningstidspunkt }) => (
             <SakStatus behandlingStatus={behandlingStatus} virkningstidspunkt={virkningstidspunkt} />
           ),

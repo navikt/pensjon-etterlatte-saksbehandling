@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
@@ -36,7 +37,7 @@ class SafKlient(
 
     private val configLocation: String? = null
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
-    private val azureAdClient = AzureAdClient(config, httpClient)
+    private val azureAdClient = AzureAdClient(config, AzureAdHttpClient(httpClient))
 
     suspend fun hentDokumentPDF(
         journalpostId: String,

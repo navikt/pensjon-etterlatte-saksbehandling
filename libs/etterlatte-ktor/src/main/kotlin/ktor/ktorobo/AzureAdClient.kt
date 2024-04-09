@@ -56,27 +56,39 @@ data class AzureAdOpenIdConfiguration(
     val authorizationEndpoint: String,
 )
 
+interface IAzureAdHttpClient {
+    suspend fun doGet(url: String): HttpResponse
+
+    suspend fun submitForm(
+        url: String,
+        params: Parameters,
+    ): HttpResponse
+}
+
+class AzureAdHttpClient(val httpClient: HttpClient) : IAzureAdHttpClient {
+    override suspend fun doGet(url: String) = httpClient.get(url)
+
+    override suspend fun submitForm(
+        url: String,
+        params: Parameters,
+    ) = httpClient.submitForm(url, params)
+}
+
 class AzureAdClient(
     private val config: Config,
-    private val httpClient: HttpClient = defaultHttpClient,
+    private val httpClient: IAzureAdHttpClient = AzureAdHttpClient(defaultHttpClient),
     private val cache: AsyncCache<OboTokenRequest, AccessToken> = asyncCache(),
     private val clientCredentialsCache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> =
         asyncCache(),
-    private val httpGetter: suspend HttpClient.(url: String) -> HttpResponse = { httpClient.get(it) },
-    private val httpSubmitForm: suspend HttpClient.(
-        url: String,
-        params: Parameters,
-    ) -> HttpResponse = { url: String, params: Parameters -> httpClient.submitForm(url, params) },
 ) {
     private val openIdConfiguration: AzureAdOpenIdConfiguration =
         runBlocking {
-            httpGetter(httpClient, config.getString("azure.app.well.known.url")).body()
+            httpClient.doGet(config.getString("azure.app.well.known.url")).body()
         }
 
     private suspend inline fun fetchAccessToken(formParameters: Parameters): AccessToken =
         try {
-            httpSubmitForm(
-                httpClient,
+            httpClient.submitForm(
                 openIdConfiguration.tokenEndpoint,
                 formParameters,
             ).body()

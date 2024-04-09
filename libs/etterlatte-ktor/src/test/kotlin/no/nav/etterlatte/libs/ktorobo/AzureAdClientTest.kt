@@ -72,16 +72,6 @@ internal class AzureAdClientTest {
         }
     }
 
-    private fun hentAccessToken(): HttpResponse {
-        val accessToken = objectMapper.readValue(accessTokenMockResponse(), AccessToken::class.java)
-        return mockk<HttpResponse>().also { coEvery { it.body<AccessToken>() } returns accessToken }
-    }
-
-    private fun adConfigResponse(): HttpResponse {
-        val adConfig = objectMapper.readValue(openIdConfigurationMockResponse(), AzureAdOpenIdConfiguration::class.java)
-        return mockk<HttpResponse>().also { coEvery { it.body<AzureAdOpenIdConfiguration>() } returns adConfig }
-    }
-
     @Test
     fun `lagrer OBO access token i cache ved api-kall`() {
         val cache: AsyncCache<OboTokenRequest, AccessToken> =
@@ -299,6 +289,16 @@ internal class AzureAdClientTest {
         coVerify { client.getOnBehalfOfAccessTokenForResource(any(), "a") }
         coVerify(exactly = 0) { client.getAccessTokenForResource(any()) }
     }
+}
+
+private fun hentAccessToken(): HttpResponse {
+    val accessToken = objectMapper.readValue(accessTokenMockResponse(), AccessToken::class.java)
+    return mockk<HttpResponse>().also { coEvery { it.body<AccessToken>() } returns accessToken }
+}
+
+private fun adConfigResponse(): HttpResponse {
+    val adConfig = objectMapper.readValue(openIdConfigurationMockResponse(), AzureAdOpenIdConfiguration::class.java)
+    return mockk<HttpResponse>().also { coEvery { it.body<AzureAdOpenIdConfiguration>() } returns adConfig }
 }
 
 private fun openIdConfigurationMockResponse() =

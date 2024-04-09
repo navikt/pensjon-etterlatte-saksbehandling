@@ -243,6 +243,25 @@ interface NyTrygdetidService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
+
+    suspend fun reberegnUtenFremtidigTrygdetid(
+        behandlingId: UUID,
+        trygdetidId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid
+
+    suspend fun kopierSisteTrygdetidberegning(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid
+
+    suspend fun overstyrNorskPoengaar(
+        trygdetidId: UUID,
+        behandlingId: UUID,
+        overstyrtNorskPoengaar: Int?,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid
 }
 
 class TrygdetidServiceImpl(

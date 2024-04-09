@@ -86,7 +86,7 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
                       Oppgaven er ikke tildelt en saksbehandler. Om du lukker hendelsen vil den automatisk tildeles deg.
                     </Alert>
                   )
-                } else if (!!tildeltIdent && tildeltIdent !== innloggetSaksbehandler.ident) {
+                } else if (tildeltIdent !== innloggetSaksbehandler.ident) {
                   return <Alert variant="warning">Oppgaven tilhører {oppgave?.saksbehandler?.navn}</Alert>
                 }
               })}

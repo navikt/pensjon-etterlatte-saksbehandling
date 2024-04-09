@@ -88,34 +88,33 @@ internal class AzureAdClientTest {
     @Test
     fun `henter open id configuration fra well known url i config ved oppstart`() {
         testApplication {
-            val adConfigResponse = httpResponse()
-            val client = httpClient()
-            AzureAdClient(config, client, httpGetter = { adConfigResponse })
+            AzureAdClient(config, httpClient(), httpGetter = { adConfigResponse() })
         }
     }
 
     @Test
     fun `henter OBO access token hvis det ikke finnes noe i cache`() {
         testApplication {
-            val adConfigResponse = httpResponse()
-            val accessToken = objectMapper.readValue(accessTokenMockResponse(), AccessToken::class.java)
-            val tokenResponse = mockk<HttpResponse>().also { coEvery { it.body<AccessToken>() } returns accessToken }
-
-            val client = httpClient()
             val azureAdClient =
                 AzureAdClient(
                     config,
-                    client,
-                    httpGetter = { adConfigResponse },
+                    httpClient(),
+                    httpGetter = { adConfigResponse() },
                     httpSubmitForm =
-                        { _, _ -> tokenResponse },
+                        { _, _ -> hentAccessToken() },
                 )
             val resp = azureAdClient.getOnBehalfOfAccessTokenForResource(listOf(), "")
             resp shouldBe Ok(AccessToken("token", 60, "testToken"))
         }
     }
 
-    private fun httpResponse(): HttpResponse {
+    private fun hentAccessToken(): HttpResponse {
+        val accessToken = objectMapper.readValue(accessTokenMockResponse(), AccessToken::class.java)
+        val tokenResponse = mockk<HttpResponse>().also { coEvery { it.body<AccessToken>() } returns accessToken }
+        return tokenResponse
+    }
+
+    private fun adConfigResponse(): HttpResponse {
         val adConfig = objectMapper.readValue(openIdConfigurationMockResponse(), AzureAdOpenIdConfiguration::class.java)
         return mockk<HttpResponse>().also { coEvery { it.body<AzureAdOpenIdConfiguration>() } returns adConfig }
     }

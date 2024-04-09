@@ -12,12 +12,12 @@ import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 
-import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { isFailure, isPending, isPendingOrInitial } from '~shared/api/apiUtils'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { VedtakSammendrag } from '~components/vedtak/typer'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export function TilbakekrevingBrev({
   behandling,
@@ -27,9 +27,10 @@ export function TilbakekrevingBrev({
   redigerbar: boolean
 }) {
   const kanAttesteres = erUnderBehandling(behandling.status)
-  const [hentVedtakStatus, hentVedtak] = useApiCall(hentVedtakSammendrag)
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
+  const [hentVedtakStatus, hentVedtak] = useApiCall(hentVedtakSammendrag)
   const [hentBrevStatus, hentBrevRequest] = useApiCall(hentVedtaksbrev)
+  const [opprettVedtakStatus, opprettVedtakRequest] = useApiCall(opprettVedtak)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
 
   const hentBrev = () => {
@@ -49,15 +50,39 @@ export function TilbakekrevingBrev({
       if (vedtak?.datoFattet) {
         hentBrev()
       } else {
-        opprettVedtak(behandling.id).then(() => hentBrev())
+        opprettVedtakRequest(behandling.id, () => {
+          hentBrev()
+        })
       }
     })
   }, [behandling])
 
-  if (isPendingOrInitial(hentBrevStatus)) {
+  // TODO se på alternativer for å gjøre dette penere
+
+  if (isPendingOrInitial(hentVedtakStatus)) {
+    return <Spinner visible label="Henter vedtak ..." />
+  }
+  if (isPending(opprettVedtakStatus)) {
+    return <Spinner visible label="Vedtak ikke fattet, oppdaterer vedtak ..." />
+  }
+  if (isPending(hentBrevStatus)) {
     return <Spinner visible label="Henter brev ..." />
-  } else if (isPending(opprettBrevStatus)) {
+  }
+  if (isPending(opprettBrevStatus)) {
     return <Spinner visible label="Ingen brev funnet. Oppretter brev ..." />
+  }
+
+  if (isFailure(hentVedtakStatus)) {
+    return <ApiErrorAlert>{hentVedtakStatus.error.detail}</ApiErrorAlert>
+  }
+  if (isFailure(opprettVedtakStatus)) {
+    return <ApiErrorAlert>{opprettVedtakStatus.error.detail}</ApiErrorAlert>
+  }
+  if (isFailure(hentBrevStatus)) {
+    return <ApiErrorAlert>{hentBrevStatus.error.detail}</ApiErrorAlert>
+  }
+  if (isFailure(opprettBrevStatus)) {
+    return <ApiErrorAlert>{opprettBrevStatus.error.detail}</ApiErrorAlert>
   }
 
   return (
@@ -87,18 +112,6 @@ export function TilbakekrevingBrev({
         </Sidebar>
 
         {vedtaksbrev && <RedigerbartBrev brev={vedtaksbrev} kanRedigeres={redigerbar} />}
-        {isFailureHandler({
-          apiResult: hentBrevStatus,
-          errorMessage: 'Feil ved henting av brev',
-        })}
-        {isFailureHandler({
-          apiResult: opprettBrevStatus,
-          errorMessage: 'Kunne ikke opprette brev',
-        })}
-        {isFailureHandler({
-          apiResult: hentVedtakStatus,
-          errorMessage: 'Kunne ikke hente vedtak',
-        })}
       </BrevContent>
       <Border />
       <FlexRow justify="center">

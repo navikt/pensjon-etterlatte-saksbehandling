@@ -16,7 +16,7 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
   const sumTilbakekreving = sum(tilbakekreving.perioder.map((it) => it.ytelse.bruttoTilbakekreving))
   const sumRenter = sum(tilbakekreving.perioder.map((it) => it.ytelse.rentetillegg))
   const sumSkatt = sum(tilbakekreving.perioder.map((it) => it.ytelse.skatt))
-  const oppsummertInnkreving = sumTilbakekreving + sumRenter - sumSkatt
+  const oppsummertInnkreving = sumNettoTilbakekreving + sumRenter - sumSkatt
 
   return (
     <InnholdPadding>

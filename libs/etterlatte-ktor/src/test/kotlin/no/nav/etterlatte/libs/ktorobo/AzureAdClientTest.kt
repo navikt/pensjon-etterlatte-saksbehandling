@@ -88,18 +88,16 @@ internal class AzureAdClientTest {
     @Test
     fun `henter open id configuration fra well known url i config ved oppstart`() {
         testApplication {
-            val adConfig = objectMapper.readValue(openIdConfigurationMockResponse(), AzureAdOpenIdConfiguration::class.java)
-            val respons = mockk<HttpResponse>().also { coEvery { it.body<AzureAdOpenIdConfiguration>() } returns adConfig }
+            val adConfigResponse = httpResponse()
             val client = httpClient()
-            AzureAdClient(config, client, httpGetter = { respons })
+            AzureAdClient(config, client, httpGetter = { adConfigResponse })
         }
     }
 
     @Test
     fun `henter OBO access token hvis det ikke finnes noe i cache`() {
         testApplication {
-            val adConfig = objectMapper.readValue(openIdConfigurationMockResponse(), AzureAdOpenIdConfiguration::class.java)
-            val adConfigResponse = mockk<HttpResponse>().also { coEvery { it.body<AzureAdOpenIdConfiguration>() } returns adConfig }
+            val adConfigResponse = httpResponse()
             val accessToken = objectMapper.readValue(accessTokenMockResponse(), AccessToken::class.java)
             val tokenResponse = mockk<HttpResponse>().also { coEvery { it.body<AccessToken>() } returns accessToken }
 
@@ -115,6 +113,11 @@ internal class AzureAdClientTest {
             val resp = azureAdClient.getOnBehalfOfAccessTokenForResource(listOf(), "")
             resp shouldBe Ok(AccessToken("token", 60, "testToken"))
         }
+    }
+
+    private fun httpResponse(): HttpResponse {
+        val adConfig = objectMapper.readValue(openIdConfigurationMockResponse(), AzureAdOpenIdConfiguration::class.java)
+        return mockk<HttpResponse>().also { coEvery { it.body<AzureAdOpenIdConfiguration>() } returns adConfig }
     }
 
     @Test

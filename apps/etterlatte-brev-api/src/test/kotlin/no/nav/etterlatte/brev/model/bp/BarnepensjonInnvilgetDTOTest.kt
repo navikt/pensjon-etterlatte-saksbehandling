@@ -85,6 +85,9 @@ internal class BarnepensjonInnvilgetDTOTest {
                         ),
                         null,
                     ),
+                erGjenoppretting = false,
+                avdoede =
+                    listOf(
                         Avdoed(
                             fnr = Foedselsnummer("123"),
                             navn = "HubbaBubba",
@@ -93,6 +96,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                     ),
             )
 
+        Assertions.assertEquals(
             listOf(
                 beregningsperiodeMars2022().toBarnepensjonBeregningsperiode(),
                 beregningsperiodeFebruar2022().toBarnepensjonBeregningsperiode(),

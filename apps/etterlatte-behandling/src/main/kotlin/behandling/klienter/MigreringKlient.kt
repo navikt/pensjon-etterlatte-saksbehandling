@@ -8,16 +8,22 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.ktor.PingResult
+import no.nav.etterlatte.libs.ktor.Pingable
+import no.nav.etterlatte.libs.ktor.ping
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class MigreringKlient(private val httpClient: HttpClient, private val apiUrl: String) {
+class MigreringKlient(private val client: HttpClient, private val url: String) : Pingable {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     suspend fun opprettManuellMigrering(
         behandlingId: UUID,
         pesysId: Long,
         sakId: Long,
     ) {
         retry {
-            httpClient.post("$apiUrl/migrering/$sakId/$behandlingId") {
+            client.post("$url/migrering/$sakId/$behandlingId") {
                 contentType(ContentType.Application.Json)
                 setBody(pesysId)
             }
@@ -32,6 +38,22 @@ class MigreringKlient(private val httpClient: HttpClient, private val apiUrl: St
                 }
             }
         }
+    }
+
+    override val serviceName: String
+        get() = this.javaClass.simpleName
+    override val beskrivelse: String
+        get() = "Oppretter manuell migrering for GJENNY"
+    override val endpoint: String
+        get() = this.url
+
+    override suspend fun ping(konsument: String?): PingResult {
+        return client.ping(
+            pingUrl = url.plus("/internal/isready"),
+            logger = logger,
+            serviceName = serviceName,
+            beskrivelse = beskrivelse,
+        )
     }
 }
 

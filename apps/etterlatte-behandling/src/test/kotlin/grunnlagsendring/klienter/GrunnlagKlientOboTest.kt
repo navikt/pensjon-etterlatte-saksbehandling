@@ -41,7 +41,7 @@ internal class GrunnlagKlientOboTest {
                 engine {
                     addHandler { request ->
                         when (request.url.fullPath) {
-                            "/grunnlag/sak/1" ->
+                            "/api/grunnlag/sak/1" ->
                                 respond(
                                     grunnlagResponse.toJson(),
                                     HttpStatusCode.OK,

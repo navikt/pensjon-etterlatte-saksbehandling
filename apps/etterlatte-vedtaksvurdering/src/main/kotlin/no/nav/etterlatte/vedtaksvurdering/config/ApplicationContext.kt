@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
@@ -31,6 +32,9 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.TrygdetidKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
+import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxJob
+import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxRepository
+import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxService
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -101,7 +105,7 @@ class ApplicationContext {
         )
     }
 
-    val rapid: KafkaProdusent<String, String> =
+    private val rapid: KafkaProdusent<String, String> =
         if (appIsInGCP()) {
             GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))
         } else {
@@ -113,5 +117,39 @@ class ApplicationContext {
         melding: String,
     ) {
         rapid.publiser(key.toString(), verdi = melding)
+    }
+
+    private val vedtakshendelserProdusent: KafkaProdusent<String, String> =
+        if (appIsInGCP()) {
+            GcpKafkaConfig.fromEnv(env).standardProducer(env.getValue("KAFKA_VEDTAKSHENDELSER_TOPIC"))
+        } else {
+            object : KafkaProdusent<String, String> {
+                override fun publiser(
+                    noekkel: String,
+                    verdi: String,
+                    headers: Map<String, ByteArray>?,
+                ): Pair<Int, Long> {
+                    logger.info("Publiserer melding til vedtakshendelser-topic: $verdi")
+                    return 0 to 0L
+                }
+            }
+        }
+
+    private val outboxService =
+        OutboxService(
+            outboxRepository = OutboxRepository(dataSource),
+            vedtaksvurderingService = vedtaksvurderingService,
+            publiserEksternHendelse = { key, melding ->
+                vedtakshendelserProdusent.publiser(key.toString(), verdi = melding)
+            },
+        )
+
+    val outboxJob: OutboxJob by lazy {
+        OutboxJob(
+            outboxService = outboxService,
+            erLeader = { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+            periode = Duration.of(1, ChronoUnit.MINUTES),
+        )
     }
 }

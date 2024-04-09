@@ -7,19 +7,22 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
+import no.nav.etterlatte.libs.ktor.PingResult
+import no.nav.etterlatte.libs.ktor.Pingable
+import no.nav.etterlatte.libs.ktor.ping
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
-interface TilbakekrevingKlient {
+interface TilbakekrevingKlient : Pingable {
     suspend fun sendTilbakekrevingsvedtak(
         brukerTokenInfo: BrukerTokenInfo,
         tilbakekrevingVedtak: TilbakekrevingVedtak,
     )
 }
 
-class TilbakekrevingKlientImpl(private val httpClient: HttpClient, private val resourceUrl: String) :
+class TilbakekrevingKlientImpl(private val client: HttpClient, private val url: String) :
     TilbakekrevingKlient {
-    private val logger = LoggerFactory.getLogger(TilbakekrevingKlientImpl::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override suspend fun sendTilbakekrevingsvedtak(
         brukerTokenInfo: BrukerTokenInfo,
@@ -27,7 +30,7 @@ class TilbakekrevingKlientImpl(private val httpClient: HttpClient, private val r
     ) {
         logger.info("Sender tilbakekrevingsvedtak til tilbakekreving med vedtakId=${tilbakekrevingVedtak.vedtakId}")
         val response =
-            httpClient.post("$resourceUrl/api/tilbakekreving/tilbakekrevingsvedtak") {
+            client.post("$url/api/tilbakekreving/tilbakekrevingsvedtak") {
                 contentType(ContentType.Application.Json)
                 setBody(
                     tilbakekrevingVedtak,
@@ -38,6 +41,22 @@ class TilbakekrevingKlientImpl(private val httpClient: HttpClient, private val r
                 "Lagre tilbakekrevingsvedtak for tilbakekreving med vedtakId=${tilbakekrevingVedtak.vedtakId} feilet",
             )
         }
+    }
+
+    override val serviceName: String
+        get() = this.javaClass.simpleName
+    override val beskrivelse: String
+        get() = "Sender tilbakekrevingsvedtak til tilbakekreving"
+    override val endpoint: String
+        get() = this.url
+
+    override suspend fun ping(konsument: String?): PingResult {
+        return client.ping(
+            pingUrl = url.plus("/internal/isready"),
+            logger = logger,
+            serviceName = serviceName,
+            beskrivelse = beskrivelse,
+        )
     }
 }
 

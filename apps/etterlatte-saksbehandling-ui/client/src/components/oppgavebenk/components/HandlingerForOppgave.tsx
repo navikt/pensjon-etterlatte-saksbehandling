@@ -5,7 +5,7 @@ import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/Omgjoer
 import React from 'react'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 import { OpprettNyRevurdering } from '~components/person/OpprettNyRevurdering'
-import { OppgaveDTO } from '~shared/types/oppgave'
+import { OppgaveDTO, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const HandlingerForOppgave = ({
@@ -20,9 +20,9 @@ export const HandlingerForOppgave = ({
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
   const erInnloggetSaksbehandlerOppgave = saksbehandler?.ident === innloggetsaksbehandler.ident
 
-  if (kilde === 'GENERELL_BEHANDLING') {
+  if (kilde === OppgaveKilde.GENERELL_BEHANDLING) {
     switch (type) {
-      case 'KRAVPAKKE_UTLAND':
+      case Oppgavetype.KRAVPAKKE_UTLAND:
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
@@ -34,9 +34,9 @@ export const HandlingerForOppgave = ({
         )
     }
   }
-  if (kilde === 'TILBAKEKREVING') {
+  if (kilde === OppgaveKilde.TILBAKEKREVING) {
     switch (type) {
-      case 'TILBAKEKREVING':
+      case Oppgavetype.TILBAKEKREVING:
         return (
           erInnloggetSaksbehandlerOppgave && (
             <Button size="small" href={`/tilbakekreving/${referanse}`} as="a">
@@ -47,7 +47,7 @@ export const HandlingerForOppgave = ({
     }
   }
   switch (type) {
-    case 'VURDER_KONSEKVENS':
+    case Oppgavetype.VURDER_KONSEKVENS:
       return (
         <>
           <Button size="small" icon={<EyeIcon />} href={`/person/${fnr}`} as="a">
@@ -55,7 +55,7 @@ export const HandlingerForOppgave = ({
           </Button>
         </>
       )
-    case 'FOERSTEGANGSBEHANDLING':
+    case Oppgavetype.FOERSTEGANGSBEHANDLING:
       return (
         <>
           {erInnloggetSaksbehandlerOppgave && (
@@ -65,7 +65,7 @@ export const HandlingerForOppgave = ({
           )}
         </>
       )
-    case 'REVURDERING':
+    case Oppgavetype.REVURDERING:
       return (
         <>
           {erInnloggetSaksbehandlerOppgave && referanse && (
@@ -83,21 +83,21 @@ export const HandlingerForOppgave = ({
           )}
         </>
       )
-    case 'GOSYS':
+    case Oppgavetype.GOSYS:
       return <GosysOppgaveModal oppgave={oppgave} tilhoererInnloggetSaksbehandler={erInnloggetSaksbehandlerOppgave} />
-    case 'KLAGE':
+    case Oppgavetype.KLAGE:
       return erInnloggetSaksbehandlerOppgave ? (
         <Button size="small" href={`/klage/${referanse}`} as="a">
           Gå til klage
         </Button>
       ) : null
-    case 'KRAVPAKKE_UTLAND':
+    case Oppgavetype.KRAVPAKKE_UTLAND:
       return erInnloggetSaksbehandlerOppgave ? (
         <Button size="small" href={`/generellbehandling/${referanse}`} as="a">
           Gå til utlandssak
         </Button>
       ) : null
-    case 'JOURNALFOERING':
+    case Oppgavetype.JOURNALFOERING:
       return (
         erInnloggetSaksbehandlerOppgave && (
           <Button size="small" href={`/oppgave/${oppgave.id}`} as="a">
@@ -105,9 +105,9 @@ export const HandlingerForOppgave = ({
           </Button>
         )
       )
-    case 'OMGJOERING':
+    case Oppgavetype.OMGJOERING:
       return erInnloggetSaksbehandlerOppgave && <OmgjoerVedtakModal oppgave={oppgave} />
-    case 'GJENOPPRETTING_ALDERSOVERGANG':
+    case Oppgavetype.GJENOPPRETTING_ALDERSOVERGANG:
       return (
         <>
           {erInnloggetSaksbehandlerOppgave && (
@@ -117,7 +117,7 @@ export const HandlingerForOppgave = ({
           )}
         </>
       )
-    case 'AKTIVITETSPLIKT':
+    case Oppgavetype.AKTIVITETSPLIKT:
       return (
         erInnloggetSaksbehandlerOppgave && (
           <Button size="small" href={`/behandling/${referanse}`} as="a">

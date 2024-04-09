@@ -21,6 +21,8 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.vedtaksvurdering.database.DatabaseExtension
+import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxItemType
+import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -261,6 +263,12 @@ internal class VedtaksvurderingRepositoryTest(private val dataSource: DataSource
             attestant shouldBe SAKSBEHANDLER_2
             attesterendeEnhet shouldBe ENHET_2
             tidspunkt shouldNotBe null
+        }
+
+        with(OutboxRepository(dataSource).hentUpubliserte()) {
+            size shouldBeExactly 1
+            first().vedtakId shouldBe vedtak.id
+            first().type shouldBe OutboxItemType.ATTESTERT
         }
     }
 

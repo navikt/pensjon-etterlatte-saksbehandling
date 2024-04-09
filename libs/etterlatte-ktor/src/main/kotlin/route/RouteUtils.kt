@@ -9,6 +9,7 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
@@ -144,6 +145,7 @@ suspend inline fun <reified T : Any> PipelineContext<*, ApplicationCall>.medBody
         try {
             call.receive<T>()
         } catch (e: Exception) {
+            sikkerlogger().error("Feil under deserialisering", e)
             call.respond(HttpStatusCode.BadRequest, "Feil under deserialiseringen av objektet")
             return
         }

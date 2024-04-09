@@ -322,7 +322,8 @@ class TrygdetidServiceImpl(
                 if (forrigeTrygdetider.isEmpty()) {
                     opprettTrygdetiderForRevurdering(behandling, eksisterendeTrygdetider, avdoede, brukerTokenInfo)
                 } else {
-                    kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetider)
+                    val kopierteTrygdetider = kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetider)
+                    opprettTrygdetiderForRevurdering(behandling, kopierteTrygdetider, avdoede, brukerTokenInfo)
                 }
             }
         }
@@ -486,7 +487,6 @@ class TrygdetidServiceImpl(
         behandling: DetaljertBehandling,
         forrigeTrygdetider: List<Trygdetid>,
     ): List<Trygdetid> {
-        // TODO: Ta høyde for nye avdøde her
         logger.info(
             "Kopierer trygdetid for behandling ${behandling.id} fra " +
                 "trygdetider med id ${forrigeTrygdetider.joinToString { it.id.toString() }}",

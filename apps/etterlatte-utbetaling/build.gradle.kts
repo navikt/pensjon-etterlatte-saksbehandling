@@ -29,9 +29,6 @@ dependencies {
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.test.kotest.assertionscore)
-    testImplementation(libs.test.wiremock) {
-        exclude("com.github.jknack.handlebars")
-    }
     testImplementation(project(":libs:testdata"))
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))
     testImplementation(testFixtures(project(":libs:etterlatte-mq")))

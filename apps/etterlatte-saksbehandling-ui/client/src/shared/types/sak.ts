@@ -1,4 +1,4 @@
-import { IUtlandstilknytning } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IUtlandstilknytning } from '~shared/types/IDetaljertBehandling'
 
 export interface ISak {
   id: number
@@ -18,6 +18,11 @@ export interface ISakMedUtlandstilknytning {
 export enum SakType {
   BARNEPENSJON = 'BARNEPENSJON',
   OMSTILLINGSSTOENAD = 'OMSTILLINGSSTOENAD',
+}
+
+export interface SakStatus {
+  behandlingStatus: IBehandlingStatus
+  virkningstidspunkt?: string
 }
 
 export interface FoersteVirk {

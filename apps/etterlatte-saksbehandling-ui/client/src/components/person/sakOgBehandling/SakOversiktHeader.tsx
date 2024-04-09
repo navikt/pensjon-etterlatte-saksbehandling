@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { mapResult } from '~shared/api/apiUtils'
-import { hentNavkontorForPerson } from '~shared/api/sak'
+import { hentNavkontorForPerson, hentStatusPaaSak } from '~shared/api/sak'
 import { BodyShort, Heading, ReadMore, Tag } from '@navikt/ds-react'
 import { FlexRow, SpaceChildren } from '~shared/styled'
 import { tagColors } from '~shared/Tags'
@@ -13,13 +13,17 @@ import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
+import { SakStatus } from '~components/person/sakOgBehandling/SakStatus'
 
 export const SakOversiktHeader = ({ sak, fnr }: { sak: ISakMedUtlandstilknytning; fnr: string }) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
+  const [statusPaaSakResult, statusPaaSakFetch] = useApiCall(hentStatusPaaSak)
+
   const [navkontorResult, hentNavkontor] = useApiCall(hentNavkontorForPerson)
 
   useEffect(() => {
+    statusPaaSakFetch(sak.id)
     hentNavkontor(fnr)
   }, [])
 
@@ -33,6 +37,12 @@ export const SakOversiktHeader = ({ sak, fnr }: { sak: ISakMedUtlandstilknytning
             {formaterEnumTilLesbarString(sak.utlandstilknytning?.type)}
           </Tag>
         )}
+        {mapResult(statusPaaSakResult, {
+          pending: <Spinner visible label="Henter status..." />,
+          success: ({ behandlingStatus, virkningstidspunkt }) => (
+            <SakStatus behandlingStatus={behandlingStatus} virkningstidspunkt={virkningstidspunkt} />
+          ),
+        })}
       </SpaceChildren>
       <SpaceChildren direction="row">
         <FlexRow align="center">

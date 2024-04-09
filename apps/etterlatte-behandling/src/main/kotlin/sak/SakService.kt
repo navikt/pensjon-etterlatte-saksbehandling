@@ -3,12 +3,14 @@ package no.nav.etterlatte.sak
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -16,6 +18,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 
 interface SakService {
     fun hentSaker(): List<Sak>
@@ -65,6 +68,8 @@ interface SakService {
     fun hentEnkeltSakForPerson(fnr: String): Sak
 
     suspend fun finnNavkontorForPerson(fnr: String): Navkontor
+
+    fun hentStatusPaaSak(sakId: Long): SakStatus
 }
 
 class ManglerTilgangTilEnhet(enheter: List<String>) :
@@ -75,6 +80,7 @@ class ManglerTilgangTilEnhet(enheter: List<String>) :
 
 class SakServiceImpl(
     private val dao: SakDao,
+    private val behandlingDao: BehandlingDao,
     private val skjermingKlient: SkjermingKlient,
     private val brukerService: BrukerService,
 ) : SakService {
@@ -147,6 +153,15 @@ class SakServiceImpl(
 
         sjekkGraderingOgEnhetStemmer(dao.finnSakMedGraderingOgSkjerming(sak.id))
         return sak
+    }
+
+    override fun hentStatusPaaSak(sakId: Long): SakStatus {
+        val behandlingerISak = behandlingDao.alleBehandlingerISak(sakId)
+
+        return SakStatus(
+            behandlingStatus = behandlingerISak.last().status,
+            virkningstidspunkt = behandlingerISak.last().virkningstidspunkt?.dato,
+        )
     }
 
     private fun sjekkGraderingOgEnhetStemmer(sak: SakMedGraderingOgSkjermet) {
@@ -289,3 +304,5 @@ class SakServiceImpl(
         return saker.filter { it.enhet !in enheterSomSkalFiltreres }
     }
 }
+
+data class SakStatus(val behandlingStatus: BehandlingStatus, val virkningstidspunkt: YearMonth?)

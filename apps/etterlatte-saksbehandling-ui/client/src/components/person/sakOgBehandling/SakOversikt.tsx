@@ -25,6 +25,7 @@ import { OpprettSakModal } from '~components/person/sakOgBehandling/OpprettSakMo
 import { Buildings3Icon, LocationPinIcon } from '@navikt/aksel-icons'
 import { SakOversiktHeader } from '~components/person/sakOgBehandling/SakOversiktHeader'
 import { SakIkkeFunnet } from '~components/person/sakOgBehandling/SakIkkeFunnet'
+import { ForenkletOppgaverTable } from '~components/person/sakOgBehandling/ForenkletOppgaverTable'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -57,7 +58,20 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
       {mapResult(sakResult, {
         pending: <Spinner visible label="Henter sak og behandlinger" />,
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
-        success: ({ sak }) => <SakOversiktHeader sak={sak} navkontorResult={navkontorResult} />,
+        success: ({ sak }) => (
+          <SpaceChildren gap="2rem">
+            <SakOversiktHeader sak={sak} navkontorResult={navkontorResult} />
+
+            <Skille />
+
+            <div>
+              <Heading size="medium" spacing>
+                Oppgaver
+              </Heading>
+              <ForenkletOppgaverTable sakId={sak.id} />
+            </div>
+          </SpaceChildren>
+        ),
       })}
     </Container>
     // <GridContainer>
@@ -162,6 +176,12 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
     // </GridContainer>
   )
 }
+
+const Skille = styled.hr`
+  border-color: var(--a-surface-active);
+  width: 100%;
+  align-self: center;
+`
 
 const MainContent = styled.div`
   flex: 1 0 auto;

@@ -172,7 +172,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/oppgaver/sak/$sakId/oppgaver",
+                            url = "$resourceUrl/oppgaver/sak/$sakId/oppgaver",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )

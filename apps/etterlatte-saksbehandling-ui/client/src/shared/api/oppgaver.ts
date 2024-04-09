@@ -41,6 +41,10 @@ export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> =>
 
 export const hentOppgavebenkStats = async (): Promise<ApiResponse<OppgavebenkStats>> => apiClient.get('/oppgaver/stats')
 
+export const hentOppgaverTilknyttetSak = async (sakId: number): Promise<ApiResponse<Array<OppgaveDTO>>> => {
+  return apiClient.get(`/oppgaver/sak/${sakId}/oppgaver`)
+}
+
 export const opprettOppgave = async (args: {
   sakId: number
   request: NyOppgaveDto

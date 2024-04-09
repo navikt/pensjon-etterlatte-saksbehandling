@@ -1,6 +1,7 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { ISak, SakType } from '~shared/types/sak'
 import { SakMedBehandlinger } from '~components/person/typer'
+import { OppgaveDTO } from '~shared/types/oppgave'
 
 export interface Navkontor {
   navn: string

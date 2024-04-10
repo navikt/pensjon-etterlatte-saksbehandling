@@ -9,6 +9,7 @@ fun hentAntallKjerner(): Int {
     return Runtime.getRuntime().availableProcessors() / 2
 }
 plugins {
+    alias(libs.plugins.license) apply true
     alias(libs.plugins.versions) apply true
 }
 

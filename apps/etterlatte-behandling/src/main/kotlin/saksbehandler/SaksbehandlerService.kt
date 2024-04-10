@@ -3,6 +3,7 @@ package no.nav.etterlatte.saksbehandler
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
+import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.inTransaction
 
@@ -31,11 +32,15 @@ interface SaksbehandlerService {
 class SaksbehandlerServiceImpl(
     private val dao: SaksbehandlerInfoDao,
     private val axsysKlient: AxsysKlient,
+    private val navAnsattKlient: NavAnsattKlient,
 ) : SaksbehandlerService {
     override fun hentKomplettSaksbehandler(ident: String): Saksbehandler {
         val innloggetSaksbehandler = Kontekst.get().appUserAsSaksbehandler()
 
         val saksbehandlerNavn: String? = dao.hentSaksbehandlerNavn(ident)
+        if (saksbehandlerNavn.isNullOrBlank()) {
+            updateNySaksbehandler(ident)
+        }
 
         return Saksbehandler(
             ident,
@@ -45,6 +50,21 @@ class SaksbehandlerServiceImpl(
             skriveEnheter = innloggetSaksbehandler.enheterMedSkrivetilgang(),
             kanSeOppgaveliste = innloggetSaksbehandler.kanSeOppgaveBenken(),
         )
+    }
+
+    private fun updateNySaksbehandler(ident: String) {
+        val enheterForSaksbehandler =
+            runBlocking {
+                axsysKlient.hentEnheterForIdent(ident)
+            }
+
+        dao.upsertSaksbehandlerEnheter(Pair(ident, enheterForSaksbehandler))
+        val saksbehandlerInfo = runBlocking { navAnsattKlient.hentSaksbehanderNavn(ident) }
+        if (saksbehandlerInfo == null) {
+            dao.upsertSaksbehandlerNavn(SaksbehandlerInfo(ident, ident))
+        } else {
+            dao.upsertSaksbehandlerNavn(saksbehandlerInfo)
+        }
     }
 
     override fun hentSaksbehandlereForEnhet(enhet: List<String>): Set<SaksbehandlerInfo> =

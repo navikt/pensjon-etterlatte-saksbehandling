@@ -141,7 +141,7 @@ class TilbakekrevingService(
                 throw TilbakekrevingFeilTilstandException("Tilbakekreving er ikke under behandling")
             }
 
-            eksisterende.validerGyldigTilbakekreving()
+            eksisterende.validerVurderingOgPerioder()
 
             tilbakekrevingDao.lagreTilbakekreving(
                 eksisterende.copy(

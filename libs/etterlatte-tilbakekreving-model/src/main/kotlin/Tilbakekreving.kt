@@ -3,7 +3,6 @@ package no.nav.etterlatte.libs.common.tilbakekreving
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 data class Tilbakekreving(
@@ -33,64 +32,7 @@ data class TilbakekrevingVurdering(
     val vedtak: String?,
     val vurderesForPaatale: String?,
     val hjemmel: TilbakekrevingHjemmel?,
-) {
-    fun valider(): List<String> {
-        val manglendeFelter: MutableList<String> = mutableListOf()
-
-        if (aarsak == null) manglendeFelter.add("Årsak")
-        if (forhaandsvarsel == null) manglendeFelter.add("Forhåndsvarsel")
-        if (forhaandsvarselDato == null) manglendeFelter.add("Forhåndsvarsel dato")
-        if (beskrivelse.isNullOrBlank()) manglendeFelter.add("Beskrivelse")
-        if (doedsbosak == null) manglendeFelter.add("Dødsbosak")
-        if (foraarsaketAv.isNullOrBlank()) manglendeFelter.add("Forårsaket av")
-
-        if (tilsvar == null) {
-            manglendeFelter.add("Tilsvar")
-        } else if (tilsvar.tilsvar == JaNei.JA) {
-            if (tilsvar.dato == null) manglendeFelter.add("Tilsvar dato")
-            if (tilsvar.beskrivelse.isNullOrBlank()) manglendeFelter.add("Tilsvar beskrivelse")
-        }
-
-        if (objektivtVilkaarOppfylt.isNullOrBlank()) manglendeFelter.add("Objektivt vilkår")
-
-        when (rettsligGrunnlag) {
-            null -> manglendeFelter.add("Rettslig grunnlag")
-            TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM ->
-                if (burdeBrukerForstaatt.isNullOrBlank()) manglendeFelter.add("Subjektivt vilkår")
-            TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM ->
-                if (uaktsomtForaarsaketFeilutbetaling.isNullOrBlank()) manglendeFelter.add("Subjektivt vilkår")
-            TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM ->
-                if (burdeBrukerForstaattEllerUaktsomtForaarsaket.isNullOrBlank()) manglendeFelter.add("Subjektivt vilkår")
-            else -> throw RuntimeException("Ugyldig hjemmel for rettslig grunnlag")
-        }
-
-        if (vilkaarsresultat == null) {
-            manglendeFelter.add("Vilkårsresultat")
-        } else {
-            if (vilkaarsresultat == TilbakekrevingVilkaar.IKKE_OPPFYLT) {
-                if (beloepBehold?.behold == null) {
-                    manglendeFelter.add("Beløp i behold")
-                } else {
-                    if (beloepBehold.beskrivelse.isNullOrBlank()) manglendeFelter.add("Beskrivelse for beløp i behold")
-                }
-            }
-
-            if (vilkaarsresultat == TilbakekrevingVilkaar.OPPFYLT ||
-                vilkaarsresultat == TilbakekrevingVilkaar.DELVIS_OPPFYLT ||
-                beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD
-            ) {
-                if (reduseringAvKravet.isNullOrBlank()) manglendeFelter.add("Redusering av kravet")
-                if (foreldet.isNullOrBlank()) manglendeFelter.add("Foreldet")
-                if (rentevurdering.isNullOrBlank()) manglendeFelter.add("Rentevurdering")
-                if (vurderesForPaatale.isNullOrBlank()) manglendeFelter.add("Vurderes for påtale")
-            }
-        }
-
-        if (vedtak.isNullOrBlank()) manglendeFelter.add("Vedtak")
-
-        return manglendeFelter
-    }
-}
+)
 
 enum class TilbakekrevingVarsel {
     EGET_BREV,
@@ -128,24 +70,7 @@ data class TilbakekrevingPeriode(
     val maaned: YearMonth,
     val ytelse: Tilbakekrevingsbelop,
     val feilkonto: Tilbakekrevingsbelop,
-) {
-    fun valider(): List<String> {
-        val manglendeFelter: MutableList<String> = mutableListOf()
-        with(ytelse) {
-            if (beregnetFeilutbetaling == null) manglendeFelter.add("Beregnet feilutbetaling")
-            if (bruttoTilbakekreving == null) manglendeFelter.add("Brutto tilbakekreving")
-            if (nettoTilbakekreving == null) manglendeFelter.add("Netto tilbakekreving")
-            if (skatt == null) manglendeFelter.add("Skatt")
-            if (skyld == null) manglendeFelter.add("Skyld")
-            if (resultat == null) manglendeFelter.add("Resultat")
-            if (tilbakekrevingsprosent == null) manglendeFelter.add("Tilbakekrevingsprosent")
-            if (rentetillegg == null) manglendeFelter.add("Rentetillegg")
-        }
-
-        // Legger på tilhørende periode
-        return manglendeFelter.map { "$it (${maaned.format(DateTimeFormatter.ofPattern("MMMM yyyy"))})" }
-    }
-}
+)
 
 data class Tilbakekrevingsbelop(
     val id: UUID,

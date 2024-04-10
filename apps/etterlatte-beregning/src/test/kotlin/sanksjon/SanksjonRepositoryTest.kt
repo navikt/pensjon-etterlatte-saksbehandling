@@ -92,8 +92,6 @@ internal class SanksjonRepositoryTest(ds: DataSource) {
 
         val lagretOppdatertSanksjon = sanksjonRepository.hentSanksjon(behandlingId)
 
-        println(lagretOppdatertSanksjon)
-
         lagretOppdatertSanksjon!!.asClue {
             it[0].asClue { sanksjonLagret ->
                 sanksjonLagret.beskrivelse shouldNotBe sanksjon.beskrivelse

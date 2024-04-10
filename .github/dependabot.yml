@@ -106,8 +106,6 @@ updates:
           - "@vitejs/plugin-react-swc"
           - "@types/node"
           - "jsdom"
-      react:
-        patterns:
           - "react"
           - "react*"
           - "redux"

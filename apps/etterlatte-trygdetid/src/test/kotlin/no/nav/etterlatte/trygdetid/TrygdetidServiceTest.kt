@@ -53,7 +53,7 @@ internal class TrygdetidServiceTest {
     private val behandlingKlient: BehandlingKlient = mockk()
     private val grunnlagKlient: GrunnlagKlient = mockk()
     private val beregningService: TrygdetidBeregningService = spyk(TrygdetidBeregningService)
-    private val service: NyTrygdetidService =
+    private val service: TrygdetidService =
         TrygdetidServiceImpl(
             repository,
             behandlingKlient,
@@ -971,7 +971,7 @@ internal class TrygdetidServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
 
         runBlocking {
-            service.kopierSisteTrygdetidberegning(behandlingId, forrigeBehandlingId, saksbehandler)
+            service.kopierSisteTrygdetidberegninger(behandlingId, forrigeBehandlingId, saksbehandler)
         }
 
         coVerify(exactly = 1) {
@@ -1141,7 +1141,7 @@ internal class TrygdetidServiceTest {
 
         val trygdetid =
             runBlocking {
-                service.overstyrNorskPoengaar(eksisterendeTrygdetid.id, behandlingId, 10, saksbehandler)
+                service.overstyrNorskPoengaaarForTrygdetid(eksisterendeTrygdetid.id, behandlingId, 10, saksbehandler)
             }
 
         trygdetid shouldNotBe null

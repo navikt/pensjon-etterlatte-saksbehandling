@@ -111,7 +111,7 @@ updates:
           - "redux"
           - "@types/react*"
           - "@reduxjs/toolkit"
-
+          - "typescript"
 
   # ===============
   # FRONTEND SERVER
@@ -149,6 +149,7 @@ updates:
           - "@types/request"
           - "prom-client"
           - "unleash-client"
+          - "typescript"
 
 
   # ==============

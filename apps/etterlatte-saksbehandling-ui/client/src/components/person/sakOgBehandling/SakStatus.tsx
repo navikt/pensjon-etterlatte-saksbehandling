@@ -5,6 +5,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentIverksatteVedtakISak } from '~shared/api/vedtaksvurdering'
 import { mapResult } from '~shared/api/apiUtils'
 import { VedtakSammendrag, VedtakType } from '~components/vedtak/typer'
+import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 
 export const SakStatus = ({ sakId }: { sakId: number }) => {
   const [iverksatteVedtakResult, iverksatteVedtakFetch] = useApiCall(hentIverksatteVedtakISak)
@@ -15,27 +16,57 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
     switch (sisteIversatteVedtak?.vedtakType) {
       case VedtakType.INNVILGELSE:
         return (
-          <Tag key={VedtakType.INNVILGELSE} variant="success">
-            Løpende
-          </Tag>
+          <SpaceChildren direction="row">
+            <Tag variant="neutral">
+              {formaterEnumTilLesbarString(sisteIversatteVedtak.vedtakType)}{' '}
+              {!!sisteIversatteVedtak.datoFattet && formaterStringDato(sisteIversatteVedtak.datoFattet)}
+            </Tag>
+            <Tag key={VedtakType.INNVILGELSE} variant="success">
+              Løpende
+            </Tag>
+          </SpaceChildren>
         )
       case VedtakType.AVSLAG:
         return (
-          <Tag key={VedtakType.AVSLAG} variant="error">
-            Avslått
-          </Tag>
+          <SpaceChildren direction="row">
+            <Tag variant="neutral">
+              {formaterEnumTilLesbarString(sisteIversatteVedtak.vedtakType)}{' '}
+              {!!sisteIversatteVedtak.datoFattet && formaterStringDato(sisteIversatteVedtak.datoFattet)}
+            </Tag>
+            <Tag key={VedtakType.AVSLAG} variant="error">
+              Avslått
+            </Tag>
+          </SpaceChildren>
         )
       case VedtakType.OPPHOER:
         return (
-          <Tag key={VedtakType.AVSLAG} variant="alt2">
-            Ytelse opphørt
-          </Tag>
+          <SpaceChildren direction="row">
+            <Tag variant="neutral">
+              {formaterEnumTilLesbarString(sisteIversatteVedtak.vedtakType)}{' '}
+              {!!sisteIversatteVedtak.datoFattet && formaterStringDato(sisteIversatteVedtak.datoFattet)}
+            </Tag>
+            <Tag key={VedtakType.AVSLAG} variant="alt2">
+              Ytelse opphørt
+            </Tag>
+          </SpaceChildren>
         )
       default:
         return (
-          <Tag key="annen-type" variant="warning">
-            Ubehandlet
-          </Tag>
+          <SpaceChildren direction="row">
+            <Tag variant="neutral">
+              <>
+                {!!sisteIversatteVedtak && !!sisteIversatteVedtak.vedtakType && (
+                  <>
+                    {formaterEnumTilLesbarString(sisteIversatteVedtak.vedtakType)}{' '}
+                    {sisteIversatteVedtak.datoFattet && formaterStringDato(sisteIversatteVedtak.datoFattet)}
+                  </>
+                )}
+              </>
+            </Tag>
+            <Tag key="annen-type" variant="warning">
+              Ubehandlet
+            </Tag>
+          </SpaceChildren>
         )
     }
   }

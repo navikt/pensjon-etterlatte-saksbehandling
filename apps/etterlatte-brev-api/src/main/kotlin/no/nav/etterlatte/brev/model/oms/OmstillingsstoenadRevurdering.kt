@@ -13,7 +13,6 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
 import no.nav.etterlatte.brev.model.toFeilutbetalingType
 import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -86,15 +85,10 @@ data class OmstillingsstoenadRevurdering(
                         beregningsperioder = beregningsperioder,
                         sisteBeregningsperiode = sisteBeregningsperiode,
                         trygdetid =
-                            TrygdetidMedBeregningsmetode(
-                                navnAvdoed = navnAvdoed,
-                                trygdetidsperioder = trygdetid.perioder,
-                                beregnetTrygdetidAar = trygdetid.aarTrygdetid,
-                                beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
-                                prorataBroek = trygdetid.prorataBroek,
-                                mindreEnnFireFemtedelerAvOpptjeningstiden = trygdetid.mindreEnnFireFemtedelerAvOpptjeningstiden,
+                            trygdetid.toTrygdetidMedBeregningsmetode(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
+                                navnAvdoed = navnAvdoed,
                             ),
                     ),
                 etterbetaling =

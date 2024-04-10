@@ -9,12 +9,10 @@ import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
-import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
@@ -48,9 +46,7 @@ data class BarnepensjonInnvilgelse(
             brevutfall: BrevutfallDto,
             erGjenoppretting: Boolean,
         ): BarnepensjonInnvilgelse {
-            val beregningsperioder =
-                barnepensjonBeregningsperioder(utbetalingsinfo)
-
+            val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
             return BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
                 beregning =
@@ -124,66 +120,3 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
         }
     }
 }
-
-internal fun barnepensjonBeregning(
-    innhold: InnholdMedVedlegg,
-    avdoede: List<Avdoed>,
-    utbetalingsinfo: Utbetalingsinfo,
-    grunnbeloep: Grunnbeloep,
-    beregningsperioder: List<BarnepensjonBeregningsperiode>,
-    trygdetid: List<Trygdetid>,
-    erForeldreloes: Boolean = false,
-): BarnepensjonBeregning {
-    // TODO Må avklare et det er greit å anta at nyligste periode er "brukt avdød"..
-    val bruktTrygdetid =
-        trygdetid.find {
-            it.ident == utbetalingsinfo.beregningsperioder.maxBy { periode -> periode.datoFOM }.trygdetidForIdent
-        } ?: throw ManglerAvdoedBruktTilTrygdetid()
-    return BarnepensjonBeregning(
-        innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),
-        antallBarn = utbetalingsinfo.antallBarn,
-        virkningsdato = utbetalingsinfo.virkningsdato,
-        grunnbeloep = Kroner(grunnbeloep.grunnbeloep),
-        beregningsperioder = beregningsperioder,
-        sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM },
-        trygdetid = trygdetid.map { it.toTrygdetid(utbetalingsinfo, avdoede) },
-        bruktTrygdetid = bruktTrygdetid.toTrygdetid(utbetalingsinfo, avdoede),
-        erForeldreloes = erForeldreloes,
-    )
-}
-
-private fun Trygdetid.toTrygdetid(
-    utbetalingsinfo: Utbetalingsinfo,
-    avdoede: List<Avdoed>,
-): TrygdetidMedBeregningsmetode {
-    val relevantBeregningsPeriode =
-        utbetalingsinfo.beregningsperioder.find {
-            it.trygdetidForIdent == ident
-        } ?: throw ManglerAvdoedBruktTilTrygdetid()
-    return TrygdetidMedBeregningsmetode(
-        navnAvdoed = avdoede.find { it.fnr.value == ident }?.navn ?: throw ManglerAvdoedBruktTilTrygdetid(),
-        trygdetidsperioder = perioder,
-        beregnetTrygdetidAar = aarTrygdetid,
-        beregnetTrygdetidMaaneder = maanederTrygdetid,
-        prorataBroek = prorataBroek,
-        mindreEnnFireFemtedelerAvOpptjeningstiden = mindreEnnFireFemtedelerAvOpptjeningstiden,
-        beregningsMetodeFraGrunnlag = relevantBeregningsPeriode.beregningsMetodeFraGrunnlag,
-        beregningsMetodeAnvendt = relevantBeregningsPeriode.beregningsMetodeAnvendt,
-    )
-}
-
-internal fun barnepensjonBeregningsperioder(utbetalingsinfo: Utbetalingsinfo) =
-    utbetalingsinfo.beregningsperioder.map {
-        BarnepensjonBeregningsperiode(
-            datoFOM = it.datoFOM,
-            datoTOM = it.datoTOM,
-            grunnbeloep = it.grunnbeloep,
-            utbetaltBeloep = it.utbetaltBeloep,
-            antallBarn = it.antallBarn,
-        )
-    }
-
-class ManglerAvdoedBruktTilTrygdetid : UgyldigForespoerselException(
-    code = "MANGLER_AVDOED_INFO_I_BEREGNING",
-    detail = "Det er mangler i beregning. Utfør beregning på nytt og prøv igjen.",
-)

@@ -121,7 +121,7 @@ class ApplicationBuilder {
     private val beregningKlient = BeregningKlient(config, httpClient())
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
-    private val trygdetidService = TrygdetidService(trygdetidKlient, beregningKlient)
+    private val trygdetidService = TrygdetidService(trygdetidKlient)
 
     private val sakService = SakService(behandlingKlient)
 

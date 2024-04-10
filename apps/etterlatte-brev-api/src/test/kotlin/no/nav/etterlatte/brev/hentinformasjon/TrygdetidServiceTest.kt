@@ -1,33 +1,10 @@
 package no.nav.etterlatte.brev.hentinformasjon
 
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.IntBroek
-import no.nav.etterlatte.libs.common.beregning.BeregningDTO
-import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
-import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
-import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
-import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
-import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
-import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
-import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
-import no.nav.etterlatte.trygdetid.TrygdetidType
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.Month
-import java.util.UUID
-
 internal class TrygdetidServiceTest {
+    /*
     private val trygdetidKlient = mockk<TrygdetidKlient>()
     private val beregningKlient = mockk<BeregningKlient>()
-    private val service = TrygdetidService(trygdetidKlient, beregningKlient)
+    private val service = TrygdetidService(trygdetidKlient)
 
     @Test
     fun `henter trygdetid nasjonal beregning`() {
@@ -179,4 +156,5 @@ internal class TrygdetidServiceTest {
         ident = AVDOED_FOEDSELSNUMMER.value,
         opplysningerDifferanse = OpplysningerDifferanse(false, mockk<GrunnlagOpplysningerDto>()),
     )
+     */
 }

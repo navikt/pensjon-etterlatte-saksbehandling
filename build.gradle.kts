@@ -1,3 +1,4 @@
+setupRepositories()
 setupTestLogging()
 
 fun hentAntallKjerner(): Int {
@@ -9,6 +10,21 @@ fun hentAntallKjerner(): Int {
 }
 plugins {
     alias(libs.plugins.versions) apply true
+}
+
+fun Project.setupRepositories() {
+    for (sub in subprojects) {
+        sub.repositories {
+            mavenCentral()
+            maven {
+                url = uri("https://maven.pkg.github.com/navikt/pensjon-etterlatte-libs")
+                credentials {
+                    username = "token"
+                    password = System.getenv("GITHUB_TOKEN")
+                }
+            }
+        }
+    }
 }
 
 fun Project.setupTestLogging() {

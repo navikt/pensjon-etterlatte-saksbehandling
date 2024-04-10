@@ -43,6 +43,7 @@ import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.metricsRoute
 import no.nav.etterlatte.libs.ktor.skjulAllePotensielleFnr
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -70,7 +71,7 @@ val logger: Logger = LoggerFactory.getLogger("testdata")
 val localDevelopment = env["DEV"].toBoolean()
 val httpClient = httpClient(forventSuksess = true)
 val config: Config = ConfigFactory.load()
-val azureAdClient = AzureAdClient(config, httpClient)
+val azureAdClient = AzureAdClient(config, AzureAdHttpClient(httpClient))
 
 val producer =
     if (localDevelopment) {

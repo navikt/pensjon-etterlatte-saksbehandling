@@ -17,6 +17,7 @@ import io.ktor.client.plugins.ResponseException
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Parameters
 import io.ktor.serialization.jackson.jackson
@@ -55,30 +56,41 @@ data class AzureAdOpenIdConfiguration(
     val authorizationEndpoint: String,
 )
 
+interface IAzureAdHttpClient {
+    suspend fun doGet(url: String): HttpResponse
+
+    suspend fun submitForm(
+        url: String,
+        params: Parameters,
+    ): HttpResponse
+}
+
+class AzureAdHttpClient(val httpClient: HttpClient) : IAzureAdHttpClient {
+    override suspend fun doGet(url: String) = httpClient.get(url)
+
+    override suspend fun submitForm(
+        url: String,
+        params: Parameters,
+    ) = httpClient.submitForm(url, params)
+}
+
 class AzureAdClient(
     private val config: Config,
-    private val httpClient: HttpClient = defaultHttpClient,
-    private val cache: AsyncCache<OboTokenRequest, AccessToken> =
-        Caffeine
-            .newBuilder()
-            .expireAfter(TokenBasedExpiration())
-            .buildAsync(),
+    private val httpClient: IAzureAdHttpClient = AzureAdHttpClient(defaultHttpClient),
+    private val cache: AsyncCache<OboTokenRequest, AccessToken> = asyncCache(),
     private val clientCredentialsCache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> =
-        Caffeine
-            .newBuilder()
-            .expireAfter(TokenBasedExpiration())
-            .buildAsync(),
+        asyncCache(),
 ) {
     private val openIdConfiguration: AzureAdOpenIdConfiguration =
         runBlocking {
-            httpClient.get(config.getString("azure.app.well.known.url")).body()
+            httpClient.doGet(config.getString("azure.app.well.known.url")).body()
         }
 
     private suspend inline fun fetchAccessToken(formParameters: Parameters): AccessToken =
         try {
             httpClient.submitForm(
-                url = openIdConfiguration.tokenEndpoint,
-                formParameters = formParameters,
+                openIdConfiguration.tokenEndpoint,
+                formParameters,
             ).body()
         } catch (ex: Throwable) {
             val responseBody: String? =
@@ -159,6 +171,12 @@ class AzureAdClient(
         return hentAccessToken(params, cache, OboTokenRequest(scopes, accessToken))
     }
 }
+
+private fun <T : TokenRequest> asyncCache(): AsyncCache<T, AccessToken> =
+    Caffeine
+        .newBuilder()
+        .expireAfter(TokenBasedExpiration())
+        .buildAsync()
 
 // Benytte tokenets faktisk expiration i stedet for f.eks. hardkodet, med litt fratrekk som "leeway"
 class TokenBasedExpiration : Expiry<TokenRequest, AccessToken> {

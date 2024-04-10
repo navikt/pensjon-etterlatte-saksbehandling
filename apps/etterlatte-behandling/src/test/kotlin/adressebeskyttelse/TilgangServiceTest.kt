@@ -9,6 +9,7 @@ import no.nav.etterlatte.azureAdFortroligClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BrukerService
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.klage.KlageDao
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -50,13 +51,14 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
     private lateinit var klageDao: KlageDao
     private val brukerService = mockk<BrukerService>()
     private val skjermingKlient = mockk<SkjermingKlient>()
+    private val grunnlagservice = mockk<GrunnlagService>()
 
     @BeforeAll
     fun beforeAll() {
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
 
-        sakService = SakServiceImpl(sakRepo, skjermingKlient, brukerService)
+        sakService = SakServiceImpl(sakRepo, skjermingKlient, brukerService, grunnlagservice)
         behandlingRepo =
             BehandlingDao(
                 KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),

@@ -4,12 +4,14 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BrukerService
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Flyktning
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -21,6 +23,13 @@ interface SakService {
     fun hentSaker(): List<Sak>
 
     fun finnSaker(person: String): List<Sak>
+
+    fun opprettSakMedGrunnlag(
+        fnr: String,
+        type: SakType,
+        overstyrendeEnhet: String? = null,
+        gradering: AdressebeskyttelseGradering? = null,
+    ): Sak
 
     fun finnEllerOpprettSak(
         fnr: String,
@@ -77,6 +86,7 @@ class SakServiceImpl(
     private val dao: SakDao,
     private val skjermingKlient: SkjermingKlient,
     private val brukerService: BrukerService,
+    private val grunnlagService: GrunnlagService,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -126,6 +136,17 @@ class SakServiceImpl(
         skjermet: Boolean,
     ) {
         dao.markerSakerMedSkjerming(sakIder, skjermet)
+    }
+
+    override fun opprettSakMedGrunnlag(
+        fnr: String,
+        type: SakType,
+        overstyrendeEnhet: String?,
+        gradering: AdressebeskyttelseGradering?,
+    ): Sak {
+        val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet, gradering)
+        grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident))
+        return sak
     }
 
     override fun finnEllerOpprettSak(

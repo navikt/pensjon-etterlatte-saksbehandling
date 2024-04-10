@@ -11,6 +11,7 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BrukerServiceImpl
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
@@ -60,6 +61,7 @@ internal class EgenAnsattServiceTest(val dataSource: DataSource) {
     fun beforeAll() {
         val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
         val norg2Klient = mockk<Norg2Klient>()
+        val grunnlagservice = mockk<GrunnlagService>()
         val featureToggleService = mockk<FeatureToggleService>()
         val skjermingKlient = mockk<SkjermingKlient>()
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
@@ -68,7 +70,7 @@ internal class EgenAnsattServiceTest(val dataSource: DataSource) {
         val brukerService = BrukerServiceImpl(pdltjenesterKlient, norg2Klient)
         sakService =
             spyk(
-                SakServiceImpl(sakRepo, skjermingKlient, brukerService),
+                SakServiceImpl(sakRepo, skjermingKlient, brukerService, grunnlagservice),
             )
         oppgaveService =
             spyk(

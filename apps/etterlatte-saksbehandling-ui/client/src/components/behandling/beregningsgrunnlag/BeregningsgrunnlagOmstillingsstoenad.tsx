@@ -3,7 +3,7 @@ import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapp
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import {
   hentBeregningsGrunnlagOMS,
   lagreBeregningsGrunnlagOMS,
@@ -34,12 +34,13 @@ import { handlinger } from '~components/behandling/handlinger/typer'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
   const dispatch = useAppDispatch()
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const redigerbar = behandlingErRedigerbar(
     behandling.status,

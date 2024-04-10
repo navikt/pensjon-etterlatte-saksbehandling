@@ -14,7 +14,7 @@ import {
 } from '@navikt/ds-react'
 import styled from 'styled-components'
 import React, { useState } from 'react'
-import { IAvkorting, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
+import { IAvkorting, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
 import { formaterStringDato, NOK } from '~utils/formattering'
@@ -27,10 +27,10 @@ import { ToolTip } from '~components/behandling/felles/ToolTip'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useAppSelector } from '~store/Store'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useForm } from 'react-hook-form'
 import { virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 export const AvkortingInntekt = ({
   behandling,
@@ -45,7 +45,7 @@ export const AvkortingInntekt = ({
 }) => {
   if (!behandling) return <Alert variant="error">Manlge behandling</Alert>
 
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
 
   const avkortingGrunnlag = avkorting == null ? [] : [...avkorting.avkortingGrunnlag]
@@ -57,32 +57,21 @@ export const AvkortingInntekt = ({
   const [visHistorikk, setVisHistorikk] = useState(false)
 
   // Er det utregnet avkorting finnes det grunnlag lagt til i denne behandlingen
-  const finnesRedigerbartGrunnlag = () => avkorting?.avkortetYtelse && avkorting?.avkortetYtelse.length !== 0
+  const finnesRedigerbartGrunnlag = () =>
+    avkorting?.avkortingGrunnlag && avkortingGrunnlag[0].fom === virkningstidspunkt(behandling).dato
 
-  const mismatchGrunnlagsperioderOgVirkningstidspunkt = (sisteGrunnlag: IAvkortingGrunnlag) =>
-    sisteGrunnlag.fom !== behandling.virkningstidspunkt?.dato
-
-  const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlag => {
+  const finnRedigerbartGrunnlagEllerOpprettNytt = (): IAvkortingGrunnlagLagre => {
     if (finnesRedigerbartGrunnlag()) {
       // Returnerer grunnlagsperiode som er opprettet i denne behandlingen
-      const redigerbartGrunnlag = avkortingGrunnlag[0]
-      if (mismatchGrunnlagsperioderOgVirkningstidspunkt(redigerbartGrunnlag)) {
-        // Korrigerer fom hvis virkningstidspunkt er endret
-        return {
-          ...redigerbartGrunnlag,
-          fom: virkningstidspunkt(behandling).dato,
-        }
-      }
-      return redigerbartGrunnlag
+      return avkortingGrunnlag[0]
     }
     if (avkortingGrunnlag.length > 0) {
       // Preutfyller ny grunnlagsperiode med tidligere verdier
       const nyligste = avkortingGrunnlag[0]
-      return { ...nyligste, id: undefined, fom: virkningstidspunkt(behandling).dato }
+      return { ...nyligste, id: undefined }
     }
     // Første grunnlagsperiode
     return {
-      fom: virkningstidspunkt(behandling).dato,
       spesifikasjon: '',
     }
   }
@@ -96,12 +85,11 @@ export const AvkortingInntekt = ({
     reset,
     handleSubmit,
     formState: { errors },
-    watch,
-  } = useForm<IAvkortingGrunnlag>({
+  } = useForm<IAvkortingGrunnlagLagre>({
     defaultValues: finnRedigerbartGrunnlagEllerOpprettNytt(),
   })
 
-  const onSubmit = (data: IAvkortingGrunnlag) =>
+  const onSubmit = (data: IAvkortingGrunnlagLagre) =>
     requestLagreAvkortingGrunnlag(
       {
         behandlingId: behandling.id,
@@ -218,7 +206,7 @@ export const AvkortingInntekt = ({
                     <TextField
                       {...register('aarsinntekt', {
                         required: { value: true, message: 'Må fylles ut' },
-                        pattern: { value: /[0-9]/, message: 'Kun tall' },
+                        pattern: { value: /^\d+$/, message: 'Kun tall' },
                       })}
                       label="Forventet årsinntekt Norge"
                       size="medium"
@@ -229,7 +217,7 @@ export const AvkortingInntekt = ({
                     <TextField
                       {...register('fratrekkInnAar', {
                         required: { value: true, message: 'Må fylles ut' },
-                        pattern: { value: /[0-9]/, message: 'Kun tall' },
+                        pattern: { value: /^\d+$/, message: 'Kun tall' },
                       })}
                       label="Fratrekk inn-år"
                       size="medium"
@@ -240,7 +228,7 @@ export const AvkortingInntekt = ({
                     <TextField
                       {...register('inntektUtland', {
                         required: { value: true, message: 'Må fylles ut' },
-                        pattern: { value: /[0-9]/, message: 'Kun tall' },
+                        pattern: { value: /^\d+$/, message: 'Kun tall' },
                       })}
                       label="Forventet årsinntekt utland"
                       size="medium"
@@ -251,7 +239,7 @@ export const AvkortingInntekt = ({
                     <TextField
                       {...register('fratrekkInnAarUtland', {
                         required: { value: true, message: 'Må fylles ut' },
-                        pattern: { value: /[0-9]/, message: 'Kun tall' },
+                        pattern: { value: /^\d+$/, message: 'Kun tall' },
                       })}
                       label="Fratrekk inn-år"
                       size="medium"
@@ -261,7 +249,7 @@ export const AvkortingInntekt = ({
                     />
                     <VStack gap="4">
                       <Label>Fra og med dato</Label>
-                      <BodyShort>{formaterStringDato(watch('fom')!)}</BodyShort>
+                      <BodyShort>{formaterStringDato(virkningstidspunkt(behandling).dato)}</BodyShort>
                     </VStack>
                   </HStack>
                 </FormWrapper>
@@ -316,11 +304,6 @@ export const AvkortingInntekt = ({
             </FormKnapper>
           </Rows>
         </InntektAvkortingForm>
-      )}
-      {avkortingGrunnlag.length > 0 && mismatchGrunnlagsperioderOgVirkningstidspunkt(avkortingGrunnlag[0]) && (
-        <WarningAlert variant="warning">
-          Siste inntektsperiode stemmer ikke overens med virkningstidspunkt. Du må redigere for å korrigere.
-        </WarningAlert>
       )}
       {isFailureHandler({
         apiResult: inntektGrunnlagStatus,
@@ -378,8 +361,4 @@ const SpesifikasjonLabel = styled.div``
 
 const Rows = styled.div`
   flex-direction: column;
-`
-
-const WarningAlert = styled(Alert)`
-  max-width: fit-content;
 `

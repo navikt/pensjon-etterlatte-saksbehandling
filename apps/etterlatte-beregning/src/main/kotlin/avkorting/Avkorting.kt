@@ -6,9 +6,11 @@ import no.nav.etterlatte.avkorting.AvkortetYtelseType.ETTEROPPJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.time.YearMonth
 import java.util.UUID
 
@@ -18,12 +20,12 @@ data class Avkorting(
     val avkortetYtelseFraVirkningstidspunkt: List<AvkortetYtelse> = emptyList(),
     val avkortetYtelseForrigeVedtak: List<AvkortetYtelse> = emptyList(),
 ) {
-    /*
-     * avkortetYtelseFraVirkningstidspunkt - Årsoppgjør inneholder ytelsen sine perioder for hele år
-     * og for behandlinger/vedtak er det kun virknigstidspunkt og fremover som er relevant.
-     *
-     * avkortetYtelseForrigeVedtak - brukes til å sammenligne med beløper til nye beregna perioder under behandlingen
-     */
+	/*
+	 * avkortetYtelseFraVirkningstidspunkt - Årsoppgjør inneholder ytelsen sine perioder for hele år
+	 * og for behandlinger/vedtak er det kun virknigstidspunkt og fremover som er relevant.
+	 *
+	 * avkortetYtelseForrigeVedtak - brukes til å sammenligne med beløper til nye beregna perioder under behandlingen
+	 */
     fun medYtelseFraOgMedVirkningstidspunkt(
         virkningstidspunkt: YearMonth,
         forrigeAvkorting: Avkorting? = null,
@@ -42,9 +44,9 @@ data class Avkorting(
             avkortetYtelseForrigeVedtak = forrigeAvkorting?.aarsoppgjoer?.avkortetYtelseAar ?: emptyList(),
         )
 
-    /*
-     * Skal kun benyttes ved opprettelse av ny avkorting ved revurdering.
-     */
+	/*
+	 * Skal kun benyttes ved opprettelse av ny avkorting ved revurdering.
+	 */
     fun kopierAvkorting(): Avkorting =
         Avkorting(
             aarsoppgjoer =
@@ -58,42 +60,47 @@ data class Avkorting(
         )
 
     fun beregnAvkortingMedNyttGrunnlag(
-        nyttGrunnlag: AvkortingGrunnlag,
+        nyttGrunnlag: AvkortingGrunnlagLagreDto,
         behandlingstype: BehandlingType,
+        virkningstidspunkt: YearMonth,
+        bruker: BrukerTokenInfo,
         beregning: Beregning,
     ) = if (behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
-        oppdaterMedInntektsgrunnlag(nyttGrunnlag).beregnAvkortingForstegangs(beregning)
+        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, bruker).beregnAvkortingForstegangs(beregning)
     } else {
-        oppdaterMedInntektsgrunnlag(nyttGrunnlag).beregnAvkortingRevurdering(beregning)
+        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, bruker).beregnAvkortingRevurdering(beregning)
     }
 
-    fun oppdaterMedInntektsgrunnlag(nyttGrunnlag: AvkortingGrunnlag): Avkorting {
-        val inntektsavkorting =
+    fun oppdaterMedInntektsgrunnlag(
+        nyttGrunnlag: AvkortingGrunnlagLagreDto,
+        virkningstidspunkt: YearMonth,
+        bruker: BrukerTokenInfo,
+    ): Avkorting {
+        val oppdatert =
             aarsoppgjoer.inntektsavkorting
                 // Fjerner hvis det finnes fra før for å erstatte/redigere
                 .filter { it.grunnlag.id != nyttGrunnlag.id }
-                .map {
-                    when (it.grunnlag.periode.tom) {
-                        // Lukker grunnlag fra forrige behandling
-                        null ->
-                            it.copy(
-                                grunnlag =
-                                    it.grunnlag.copy(
-                                        periode =
-                                            Periode(
-                                                fom = it.grunnlag.periode.fom,
-                                                tom = nyttGrunnlag.periode.fom.minusMonths(1),
-                                            ),
-                                    ),
-                            )
-
-                        else -> it
-                    }
-                } + listOf(Inntektsavkorting(grunnlag = nyttGrunnlag))
+                .map { it.lukkSisteInntektsperiode(virkningstidspunkt) } +
+                listOf(
+                    Inntektsavkorting(
+                        grunnlag =
+                            AvkortingGrunnlag(
+                                id = nyttGrunnlag.id,
+                                periode = Periode(fom = virkningstidspunkt, tom = null),
+                                aarsinntekt = nyttGrunnlag.aarsinntekt,
+                                fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
+                                relevanteMaanederInnAar = aarsoppgjoer.utledRelevanteMaaneder(virkningstidspunkt),
+                                inntektUtland = nyttGrunnlag.inntektUtland,
+                                fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland,
+                                spesifikasjon = nyttGrunnlag.spesifikasjon,
+                                kilde = Grunnlagsopplysning.Saksbehandler(bruker.ident(), Tidspunkt.now()),
+                            ),
+                    ),
+                )
         return this.copy(
             aarsoppgjoer =
                 aarsoppgjoer.copy(
-                    inntektsavkorting = inntektsavkorting,
+                    inntektsavkorting = oppdatert,
                 ),
         )
     }
@@ -232,10 +239,10 @@ data class Avkorting(
         return avkortetYtelseMedAllForventetInntekt
     }
 
-    /*
-     * Det er tilfeller hvor det er nødvendig å vite når første periode i inneværende begynner.
-     * Ved inngangsår så vil ikke første måned nødvendgivis være januar så det må baseres på fom første periode.
-     */
+	/*
+	 * Det er tilfeller hvor det er nødvendig å vite når første periode i inneværende begynner.
+	 * Ved inngangsår så vil ikke første måned nødvendgivis være januar så det må baseres på fom første periode.
+	 */
     private fun foersteMaanedDetteAar() = this.aarsoppgjoer.ytelseFoerAvkorting.first().periode.fom
 }
 
@@ -258,7 +265,21 @@ data class Aarsoppgjoer(
     val ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     val inntektsavkorting: List<Inntektsavkorting> = emptyList(),
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
-)
+) {
+	/*
+	 * Relevante månder (innvilga måneder i gjeldende år) viderføres i alle grunnlagsperioder. så når man skal
+	 * utlede det til ny inntektsperiode kan man ta fra hvilken som helst periode i gjeldende år.
+	 * Hvis det ikke finnes noen inntekt for gjeldende år enda (førstegangsbehandling) regnes den ut basert på
+	 *  ny virk/innvilgelsesdato.
+	 */
+    fun utledRelevanteMaaneder(virkningstidspunkt: YearMonth): Int {
+        val aaretsFoersteForventaInntekt =
+            inntektsavkorting.sortedBy { it.grunnlag.periode.fom }.firstOrNull {
+                it.grunnlag.periode.fom.year == virkningstidspunkt.year
+            }?.grunnlag
+        return aaretsFoersteForventaInntekt?.relevanteMaanederInnAar ?: (12 - virkningstidspunkt.monthValue + 1)
+    }
+}
 
 /**
  * [avkortingsperioder] utregnet basert på en årsinntekt ([grunnlag]).
@@ -271,7 +292,24 @@ data class Inntektsavkorting(
     val grunnlag: AvkortingGrunnlag,
     val avkortingsperioder: List<Avkortingsperiode> = emptyList(),
     val avkortetYtelseForventetInntekt: List<AvkortetYtelse> = emptyList(),
-)
+) {
+    fun lukkSisteInntektsperiode(virkningstidspunkt: YearMonth) =
+        when (grunnlag.periode.tom) {
+            null ->
+                copy(
+                    grunnlag =
+                        grunnlag.copy(
+                            periode =
+                                Periode(
+                                    fom = grunnlag.periode.fom,
+                                    tom = virkningstidspunkt.minusMonths(1),
+                                ),
+                        ),
+                )
+
+            else -> this
+        }
+}
 
 /**
  * Beregnet ytelse (ytelse før avkorting / [Beregning]) persisteres for hele år for å kunne

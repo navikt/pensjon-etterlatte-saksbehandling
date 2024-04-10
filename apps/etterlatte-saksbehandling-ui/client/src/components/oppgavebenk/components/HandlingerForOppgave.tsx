@@ -1,13 +1,12 @@
 import { Button } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
-import { useAppSelector } from '~store/Store'
 import { GosysOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
 import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/OmgjoerVedtakModal'
 import React from 'react'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 import { OpprettNyRevurdering } from '~components/person/OpprettNyRevurdering'
-import { OppgaveDTO, OppgaveKilde } from '~shared/types/oppgave'
-import { Oppgavetype } from '~shared/types/oppgave'
+import { OppgaveDTO, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -16,7 +15,7 @@ export const HandlingerForOppgave = ({
   oppgave: OppgaveDTO
   revurderingsaarsaker: RevurderingsaarsakerBySakstype
 }) => {
-  const innloggetsaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetsaksbehandler = useInnloggetSaksbehandler()
 
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
   const erInnloggetSaksbehandlerOppgave = saksbehandler?.ident === innloggetsaksbehandler.ident

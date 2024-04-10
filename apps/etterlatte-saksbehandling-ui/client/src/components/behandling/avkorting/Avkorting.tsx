@@ -8,11 +8,12 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtterAvkorting'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { mapApiResult } from '~shared/api/apiUtils'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 export const Avkorting = ({
   behandling,
@@ -24,7 +25,7 @@ export const Avkorting = ({
   const dispatch = useAppDispatch()
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
   const [avkorting, setAvkorting] = useState<IAvkorting>()
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const redigerbar = behandlingErRedigerbar(
     behandling.status,

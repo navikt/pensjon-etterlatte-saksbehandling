@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { BehandlingFane, IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { IBehandlingStatus, IBehandlingsType, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
@@ -30,6 +30,7 @@ import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
 import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtlandstilknytningType | null => {
   if (behandling.utlandstilknytning?.type) {
@@ -61,7 +62,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   const soeker = usePersonopplysninger()?.soeker?.opplysning
   const vedtak = useVedtak()
   const dispatch = useAppDispatch()
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
   const [beslutning, setBeslutning] = useState<IBeslutning>()
   const fane = useSelectorBehandlingSidemenyFane()

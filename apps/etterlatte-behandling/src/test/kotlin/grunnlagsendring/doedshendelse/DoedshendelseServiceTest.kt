@@ -245,6 +245,114 @@ internal class DoedshendelseServiceTest {
     }
 
     @Test
+    fun `Skal ikke opprette doedshendelse for tidligere ektefelle hvis man naa er samboer`() {
+        val annenForelder = JOVIAL_LAMA
+        val fellesbarn =
+            avdoed.avdoedesBarn!![0].copy(
+                familieRelasjon = FamilieRelasjon(foreldre = listOf(annenForelder), ansvarligeForeldre = emptyList(), barn = emptyList()),
+            )
+
+        val bostedsadresse =
+            listOf(
+                OpplysningDTO(
+                    Adresse(
+                        type = AdresseType.VEGADRESSE,
+                        aktiv = false,
+                        coAdresseNavn = "Hos Geir",
+                        adresseLinje1 = "Testveien 4",
+                        adresseLinje2 = null,
+                        adresseLinje3 = null,
+                        postnr = "1234",
+                        poststed = null,
+                        land = "NOR",
+                        kilde = "FREG",
+                        gyldigFraOgMed = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
+                        gyldigTilOgMed = null,
+                    ),
+                    UUID.randomUUID().toString(),
+                ),
+                OpplysningDTO(
+                    Adresse(
+                        type = AdresseType.VEGADRESSE,
+                        aktiv = true,
+                        coAdresseNavn = "Hos Svein",
+                        adresseLinje1 = "Gjemmeveien 4",
+                        adresseLinje2 = null,
+                        adresseLinje3 = null,
+                        postnr = "1212",
+                        poststed = null,
+                        land = "NOR",
+                        kilde = "FREG",
+                        gyldigFraOgMed = Tidspunkt.now().toLocalDatetimeUTC().minusYears(4),
+                        gyldigTilOgMed = null,
+                    ),
+                    UUID.randomUUID().toString(),
+                ),
+            )
+
+        every {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                avdoed.foedselsnummer.verdi.value,
+                PersonRolle.AVDOED,
+                listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
+            )
+        } returns
+            avdoed.copy(
+                avdoedesBarn = listOf(fellesbarn),
+                bostedsadresse = bostedsadresse,
+                sivilstand =
+                    listOf(
+                        OpplysningDTO(
+                            verdi =
+                                Sivilstand(
+                                    sivilstatus = Sivilstatus.GIFT,
+                                    relatertVedSiviltilstand = annenForelder,
+                                    gyldigFraOgMed = LocalDate.now().minusYears(20),
+                                    bekreftelsesdato = null,
+                                    kilde = "",
+                                ),
+                            opplysningsid = "sivilstand",
+                        ),
+                        OpplysningDTO(
+                            verdi =
+                                Sivilstand(
+                                    sivilstatus = Sivilstatus.SKILT,
+                                    relatertVedSiviltilstand = null,
+                                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                                    bekreftelsesdato = null,
+                                    kilde = "",
+                                ),
+                            opplysningsid = "sivilstand",
+                        ),
+                    ),
+            )
+
+        every {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                annenForelder.value,
+                PersonRolle.TILKNYTTET_BARN,
+                SakType.OMSTILLINGSSTOENAD,
+            )
+        } returns avdoed.copy(foedselsnummer = OpplysningDTO(annenForelder, "fødselsnummer"))
+
+        every { dao.opprettDoedshendelse(any()) } just runs
+        every { dao.hentDoedshendelserForPerson(any()) } returns emptyList()
+
+        service.opprettDoedshendelseForBeroertePersoner(
+            DoedshendelsePdl(
+                UUID.randomUUID().toString(),
+                Endringstype.OPPRETTET,
+                fnr = avdoed.foedselsnummer.verdi.value,
+                doedsdato = avdoed.doedsdato!!.verdi,
+            ),
+        )
+        // En for avdød og en for samboer
+        verify(exactly = 2) {
+            dao.opprettDoedshendelse(any())
+        }
+    }
+
+    @Test
     fun `Skal opprette doedshendelse for alle ektefeller`() {
         every {
             pdlTjenesterKlient.hentPdlModellFlereSaktyper(

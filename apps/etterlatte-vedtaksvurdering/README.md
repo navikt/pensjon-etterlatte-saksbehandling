@@ -14,6 +14,21 @@ Oppdateringer av ACL er ikke automatisk, og må kjøres inn manuelt med `kubectl
 | dev-gcp  | .nais/topic-vedtakshendelser-dev.yaml   |
 | prod-gcp | .nais/topic-vedtakshendelser-prod.yaml  |
 
+### Meldingsinnhold
+
+| Felt        | Datatype   | Beskrivelse                                                 |
+|:------------|:-----------|-------------------------------------------------------------|
+| ident       | String     | Fødselsnummer hendelsen gjelder                             |
+| sakstype    | String     | Sakstype: OMS, BP                                           |
+| type        | String     | Hva vedtaket gjelder: AVSLAG, INNVILGELSE, ENDRING, OPPHOER |
+| vedtakId    | Long       | Unik identifikator for vedtaket                             |
+| vedtaksdato | yyyy-mm-dd | Dato vedtaket ble fattet                                    |
+| virkningFom | yyyy-mm-dd | Dato vedtaket gjelder fra                                   |
+
+Se [Vedtakshendelse](./src/main/kotlin/no/nav/etterlatte/vedtaksvurdering/outbox/OutboxService.kt) for implementasjon.
+
+Dette er designet til å gå i tospann med denne [vedtaksinformasjonstjenesten](../etterlatte-samordning-vedtak/README.md), dersom en trenger informasjon om utbetalt ytelse.
+
 ## Kom i gang
 
 ### Hvordan kjøre lokalt mot dev-gcp

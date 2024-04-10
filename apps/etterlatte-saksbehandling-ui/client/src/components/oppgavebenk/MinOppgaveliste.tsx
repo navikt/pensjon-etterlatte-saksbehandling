@@ -18,8 +18,8 @@ import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { useAppSelector } from '~store/Store'
 import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -27,7 +27,7 @@ interface Props {
 }
 
 export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [filter, setFilter] = useState<Filter>(minOppgavelisteFiltre())
 

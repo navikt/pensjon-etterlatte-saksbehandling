@@ -18,21 +18,27 @@ fun Person.under18aarPaaDato(dato: LocalDate): Boolean {
     return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue < aar18
 }
 
+fun harAktivAdresse(person: PersonDTO): Boolean = person.alleAdresser().any { it.aktiv }
+
 fun personBorIUtlandet(person: PersonDTO): Boolean {
-    val person = person.toPerson()
-    val kontaktadresse = person.kontaktadresse ?: emptyList()
-    val bostedsadresse = person.bostedsadresse ?: emptyList()
-    val oppholdsadresse = person.oppholdsadresse ?: emptyList()
-    val adresserforPerson = kontaktadresse + bostedsadresse + oppholdsadresse
-    val harAktivAdresse = adresserforPerson.any { it.aktiv }
-    return if (harAktivAdresse) {
-        val adresse = adresserforPerson.filter { it.aktiv }.sortedByDescending { it.gyldigFraOgMed }.first()
+    val alleAdresser = person.alleAdresser()
+    return if (alleAdresser.any { it.aktiv }) {
+        val adresse = alleAdresser.filter { it.aktiv }.sortedByDescending { it.gyldigFraOgMed }.first()
         borIUtlandet(adresse)
     } else {
-        val adresse = adresserforPerson.filter { !it.aktiv }.sortedByDescending { it.gyldigFraOgMed }.first()
+        val adresse = alleAdresser.filter { !it.aktiv }.sortedByDescending { it.gyldigFraOgMed }.first()
         borIUtlandet(adresse)
     }
 }
+
+private fun PersonDTO.alleAdresser(): List<Adresse> =
+    this.toPerson().let { person ->
+        val kontaktadresse = person.kontaktadresse ?: emptyList()
+        val bostedsadresse = person.bostedsadresse ?: emptyList()
+        val oppholdsadresse = person.oppholdsadresse ?: emptyList()
+
+        kontaktadresse + bostedsadresse + oppholdsadresse
+    }
 
 private fun borIUtlandet(adresse: Adresse): Boolean {
     return adresse.land == null || adresse.land?.uppercase() != "NOR"

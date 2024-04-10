@@ -23,7 +23,7 @@ fun Route.migreringRoutes(migreringService: MigreringService) {
             kunSkrivetilgang(enhetNr = migreringRequest.enhet.nr) {
                 val behandling =
                     try {
-                        migreringService.migrer(migreringRequest).let {
+                        migreringService.migrer(migreringRequest, brukerTokenInfo).let {
                             when (it) {
                                 is RetryResult.Success -> it.content
                                 is RetryResult.Failure -> throw it.samlaExceptions()

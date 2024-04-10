@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
+import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
 import java.sql.Date
 import java.time.YearMonth
@@ -326,7 +327,21 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                     ),
                 loggtekst = "Attesterer vedtak $behandlingId",
             )
-                .also { require(it == 1) }
+                .also {
+                    require(it == 1)
+                }
+
+            opprett(
+                query = """
+                    INSERT INTO outbox_vedtakshendelse (vedtakId, type) 
+                    SELECT v.id, 'ATTESTERT'
+                    FROM vedtak v
+                    WHERE v.behandlingId = :behandlingId
+                    """,
+                params = mapOf("behandlingId" to behandlingId),
+                loggtekst = "Lagt til innslag for attestert vedtak i outbox",
+            )
+
             return@session hentVedtakNonNull(behandlingId, this)
         }
 

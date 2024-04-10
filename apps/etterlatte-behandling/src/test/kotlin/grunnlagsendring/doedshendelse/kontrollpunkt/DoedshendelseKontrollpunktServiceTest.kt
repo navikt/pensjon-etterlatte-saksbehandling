@@ -26,6 +26,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -328,6 +330,35 @@ class DoedshendelseKontrollpunktServiceTest {
                     oppgaveId = oppgaveIntern.id,
                 ),
             )
+    }
+
+    @Test
+    fun `Skal gi kontrollpunkt dersom gjenlevende ikke har aktiv adresse`() {
+        every {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                foedselsnummer = doedshendelseInternalBP.beroertFnr,
+                rolle = PersonRolle.BARN,
+                saktype = SakType.BARNEPENSJON,
+            )
+        } returns
+            mockPerson().copy(
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalBP.beroertFnr), null),
+                bostedsadresse = listOf(OpplysningDTO(Adresse(AdresseType.VEGADRESSE, false, kilde = "FREG"), null)),
+                kontaktadresse = emptyList(),
+                oppholdsadresse = emptyList(),
+                familieRelasjon =
+                    OpplysningDTO(
+                        FamilieRelasjon(
+                            ansvarligeForeldre = emptyList(),
+                            foreldre = listOf(KONTANT_FOT, JOVIAL_LAMA),
+                            barn = emptyList(),
+                        ),
+                        null,
+                    ),
+            )
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.GjenlevendeManglerAdresse)
     }
 
     @Test

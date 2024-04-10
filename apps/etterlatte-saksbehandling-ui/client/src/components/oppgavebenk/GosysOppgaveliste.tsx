@@ -11,7 +11,6 @@ import { Filter, SAKSBEHANDLERFILTER } from '~components/oppgavebenk/filtreringA
 import { defaultFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 import { Switch } from '@navikt/ds-react'
-import { useAppSelector } from '~store/Store'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import styled from 'styled-components'
 import {
@@ -21,13 +20,14 @@ import {
 import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
 }
 
 export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   if (!innloggetSaksbehandler.skriveEnheter.length) {
     return <Tilgangsmelding />

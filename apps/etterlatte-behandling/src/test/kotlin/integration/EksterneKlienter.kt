@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.BrevStatus
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
@@ -75,6 +76,13 @@ class GrunnlagKlientTest : GrunnlagKlient {
                 ),
         )
     }
+}
+
+class BeregningKlientTest : BeregningKlient {
+    override suspend fun slettAvkorting(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {}
 }
 
 class VedtakKlientTest : VedtakKlient {
@@ -223,7 +231,8 @@ class BrevApiKlientTest : BrevApiKlient {
     override suspend fun slettOversendelsesbrev(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {}
+    ) {
+    }
 
     override suspend fun hentVedtaksbrev(
         behandlingId: UUID,

@@ -1,5 +1,4 @@
 import React, { ReactNode, useEffect, useState } from 'react'
-import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -19,11 +18,12 @@ import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { ProvideOppgavebenkContext } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const Oppgavebenk = () => {
   useSidetittel('Oppgavebenk')
 
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   if (!innloggetSaksbehandler.skriveEnheter.length) {
     return <Tilgangsmelding />
   }

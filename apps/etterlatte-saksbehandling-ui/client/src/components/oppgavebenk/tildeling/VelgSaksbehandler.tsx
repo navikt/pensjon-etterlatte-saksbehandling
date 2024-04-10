@@ -2,13 +2,13 @@ import React, { ReactNode, useState } from 'react'
 import { Button, Dropdown, Label, UNSAFE_Combobox } from '@navikt/ds-react'
 import { PersonCrossIcon, PersonPencilIcon, PersonPlusIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
-import { useAppSelector } from '~store/Store'
 import { byttSaksbehandlerApi, fjernSaksbehandlerApi } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { isPending } from '~shared/api/apiUtils'
 import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -26,7 +26,7 @@ const mapSaksbehandler = (oppgave: OppgaveDTO): Saksbehandler | undefined =>
 
 export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, oppgave }: Props): ReactNode => {
   const { sakId, id: oppgaveId, type, versjon, status } = oppgave
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const erRedigerbar =
     erOppgaveRedigerbar(status) && enhetErSkrivbar(oppgave.enhet, innloggetSaksbehandler.skriveEnheter)
   const saksbehandler = mapSaksbehandler(oppgave)

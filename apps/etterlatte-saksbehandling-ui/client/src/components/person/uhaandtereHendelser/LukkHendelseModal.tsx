@@ -9,7 +9,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { lukkGrunnlagshendelse } from '~shared/api/behandling'
 import { XMarkIcon } from '@navikt/aksel-icons'
 import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
-import { useAppSelector } from '~store/Store'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshendelse }) => {
   const [open, setOpen] = useState(false)
@@ -17,7 +17,7 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
   const [lukkHendelseResult, lukkGrunnlagshendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)
   const [oppgaveResult, hentOppgave] = useApiCall(hentOppgaveForReferanseUnderBehandling)
 
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const aapneModal = () => {
     hentOppgave(hendelse.id)
@@ -86,7 +86,7 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
                       Oppgaven er ikke tildelt en saksbehandler. Om du lukker hendelsen vil den automatisk tildeles deg.
                     </Alert>
                   )
-                } else if (!!tildeltIdent && tildeltIdent !== innloggetSaksbehandler.ident) {
+                } else if (tildeltIdent !== innloggetSaksbehandler.ident) {
                   return <Alert variant="warning">Oppgaven tilhører {oppgave?.saksbehandler?.navn}</Alert>
                 }
               })}

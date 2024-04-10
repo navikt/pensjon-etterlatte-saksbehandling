@@ -34,6 +34,8 @@ import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
 import no.nav.etterlatte.behandling.klage.KlageServiceImpl
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.AxsysKlientImpl
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
+import no.nav.etterlatte.behandling.klienter.BeregningKlientImpl
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlientObo
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
@@ -236,6 +238,7 @@ internal class ApplicationContext(
     val norg2Klient: Norg2Klient = Norg2KlientImpl(httpClient(), env.getValue("NORG2_URL")),
     val leaderElectionHttpClient: HttpClient = httpClient(),
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
+    val beregningsKlient: BeregningKlient = BeregningKlientImpl(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
@@ -314,6 +317,7 @@ internal class ApplicationContext(
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagsService,
+            beregningKlient = beregningsKlient,
         )
     val generellBehandlingService =
         GenerellBehandlingService(
@@ -457,7 +461,7 @@ internal class ApplicationContext(
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
-    val saksbehandlerService: SaksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient)
+    val saksbehandlerService: SaksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
 
     val behandlingFactory =
         BehandlingFactory(

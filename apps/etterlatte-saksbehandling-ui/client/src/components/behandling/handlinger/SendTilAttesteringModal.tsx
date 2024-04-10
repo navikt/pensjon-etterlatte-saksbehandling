@@ -9,9 +9,9 @@ import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-import { useAppSelector } from '~store/Store'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 export const SendTilAttesteringModal = ({
   behandlingId,
@@ -24,7 +24,7 @@ export const SendTilAttesteringModal = ({
 }) => {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [fattVedtakStatus, fattVedtak] = useApiCall(fattVedtakApi)
 
   const [oppgaveForBehandlingStatus, requesthentOppgaveForBehandling] = useApiCall(

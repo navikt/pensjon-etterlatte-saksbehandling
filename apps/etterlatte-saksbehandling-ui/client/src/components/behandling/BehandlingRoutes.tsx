@@ -20,8 +20,8 @@ import { Aktivitetsplikt } from '~components/behandling/aktivitetsplikt/Aktivite
 import { SakType } from '~shared/types/sak'
 import TrygdetidVisning from '~components/behandling/trygdetid/TrygdetidVisning'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
-import { erOpphoer } from '~shared/types/Revurderingaarsak'
 import { Varselbrev } from '~components/behandling/brev/Varselbrev'
+import { erOpphoer } from '~shared/types/Revurderingaarsak'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'

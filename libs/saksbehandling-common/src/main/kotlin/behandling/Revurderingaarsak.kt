@@ -34,26 +34,21 @@ private sealed class KanBrukesIMiljoe {
 }
 
 sealed class Utfall {
-    abstract val girOpphoer: Boolean
     abstract val skalSendeBrev: Boolean
 
     data object OpphoerUtenBrev : Utfall() {
-        override val girOpphoer = true
         override val skalSendeBrev = false
     }
 
     data object OpphoerMedBrev : Utfall() {
-        override val girOpphoer = true
         override val skalSendeBrev = true
     }
 
     data object IkkeOpphoerSkalSendeBrev : Utfall() {
-        override val girOpphoer = false
         override val skalSendeBrev = true
     }
 
     data object IkkeOpphoerSkalIkkeSendeBrev : Utfall() {
-        override val girOpphoer = false
         override val skalSendeBrev = false
     }
 }

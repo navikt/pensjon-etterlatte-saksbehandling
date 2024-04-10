@@ -6,7 +6,7 @@ import { useApiCall } from './useApiCall'
 
 import { isSuccess } from '~shared/api/apiUtils'
 
-const useInnloggetSaksbehandler = () => {
+const useSettInnloggetSaksbehandler = () => {
   const dispatch = useAppDispatch()
   const [saksbehandler, hentSaksbehandler] = useApiCall(hentInnloggetSaksbehandler)
 
@@ -21,4 +21,4 @@ const useInnloggetSaksbehandler = () => {
   return isSuccess(saksbehandler)
 }
 
-export default useInnloggetSaksbehandler
+export default useSettInnloggetSaksbehandler

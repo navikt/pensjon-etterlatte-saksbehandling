@@ -10,7 +10,7 @@ import {
   oppdaterBehandlingsstatus,
   updateVilkaarsvurdering,
 } from '~store/reducers/BehandlingReducer'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { Alert, BodyLong, Button, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
@@ -25,6 +25,7 @@ import {
 
 import { isFailure, isInitial, isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -33,7 +34,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
   const vilkaarsvurdering = behandling.vilkaarsvurdering
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,

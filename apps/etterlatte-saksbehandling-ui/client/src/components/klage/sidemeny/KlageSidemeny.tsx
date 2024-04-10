@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react'
 import { updateVedtakSammendrag } from '~store/reducers/VedtakReducer'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { mapApiResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -20,12 +20,13 @@ import { IBeslutning } from '~components/behandling/attestering/types'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { FlexRow } from '~shared/styled'
 import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export function KlageSidemeny() {
   const klage = useKlage()
   const dispatch = useAppDispatch()
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [beslutning, setBeslutning] = useState<IBeslutning>()
   const kanAttestere = !!klage && innloggetSaksbehandler.kanAttestere && klage.status === KlageStatus.FATTET_VEDTAK
 

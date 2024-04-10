@@ -134,17 +134,19 @@ internal fun Route.behandlingRoutes(
                     if (!erGyldigVirkningstidspunkt) {
                         return@post call.respond(HttpStatusCode.BadRequest, "Ugyldig virkningstidspunkt")
                     }
-
                     try {
                         val virkningstidspunkt =
                             inTransaction {
-                                behandlingService.oppdaterVirkningstidspunkt(
-                                    behandlingId,
-                                    body.dato,
-                                    navIdent,
-                                    body.begrunnelse!!,
-                                    kravdato = body.kravdato,
-                                )
+                                runBlocking {
+                                    behandlingService.oppdaterVirkningstidspunkt(
+                                        behandlingId,
+                                        body.dato,
+                                        navIdent,
+                                        brukerTokenInfo,
+                                        body.begrunnelse!!,
+                                        kravdato = body.kravdato,
+                                    )
+                                }
                             }
 
                         call.respondText(

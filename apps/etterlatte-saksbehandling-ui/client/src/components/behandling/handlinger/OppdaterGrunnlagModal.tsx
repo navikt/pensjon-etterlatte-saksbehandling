@@ -9,7 +9,7 @@ import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useAppSelector } from '~store/Store'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 export default function OppdaterGrunnlagModal({
   behandlingId,
@@ -22,7 +22,7 @@ export default function OppdaterGrunnlagModal({
 }) {
   const [isOpen, setIsOpen] = useState(false)
 
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const behandles = behandlingErRedigerbar(behandlingStatus, enhetId, innloggetSaksbehandler.skriveEnheter)
   const [oppdatert, apiOppdaterGrunnlag] = useApiCall(oppdaterGrunnlag)
 

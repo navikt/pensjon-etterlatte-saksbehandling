@@ -2,6 +2,7 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -30,6 +31,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.SamordningsvedtakWrapper
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
+import no.nav.etterlatte.vedtaksvurdering.config.VedtaksvurderingFeatureToggle
 import no.nav.etterlatte.vedtaksvurdering.grunnlag.GrunnlagVersjonValidering.validerVersjon
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
@@ -48,6 +50,7 @@ class VedtakBehandlingService(
     private val behandlingKlient: BehandlingKlient,
     private val samKlient: SamKlient,
     private val trygdetidKlient: TrygdetidKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(VedtakBehandlingService::class.java)
 
@@ -168,8 +171,6 @@ class VedtakBehandlingService(
         attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
 
         val (behandling, _, _, sak) = hentDataForVedtak(behandlingId, brukerTokenInfo)
-
-        verifiserGyldigVedtakForRevurdering(behandling, vedtak)
 
         val attestertVedtak =
             repository.inTransaction { tx ->
@@ -444,15 +445,6 @@ class VedtakBehandlingService(
         }
     }
 
-    private fun verifiserGyldigVedtakForRevurdering(
-        behandling: DetaljertBehandling,
-        vedtak: Vedtak,
-    ) {
-        if (!behandling.kanVedta(vedtak.type)) {
-            throw OpphoersrevurderingErIkkeOpphoersvedtakException(behandling.revurderingsaarsak, vedtak.type)
-        }
-    }
-
     private fun opprettVedtak(
         behandling: DetaljertBehandling,
         vedtakType: VedtakType,
@@ -604,10 +596,29 @@ class VedtakBehandlingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakData {
+        val foreldreloesFlag = featureToggleService.isEnabled(VedtaksvurderingFeatureToggle.Foreldreloes, false)
+
         return coroutineScope {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
             val sak = behandlingKlient.hentSak(behandling.sak, brukerTokenInfo)
-            val trygdetid = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
+
+            val trygdetidListe = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
+
+            val trygdetid =
+                when (foreldreloesFlag) {
+                    true -> {
+                        // Frem til vi endre beregning til å bruke hele liste
+                        trygdetidListe.firstOrNull()
+                    }
+
+                    false -> {
+                        if (trygdetidListe.size > 1) {
+                            throw ForeldreloesTrygdetid(behandling.id)
+                        }
+
+                        trygdetidListe.firstOrNull()
+                    }
+                }
 
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
@@ -648,15 +659,14 @@ class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: Li
 class BehandlingstilstandException(vedtak: Vedtak) :
     IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")
 
-class OpphoersrevurderingErIkkeOpphoersvedtakException(revurderingAarsak: Revurderingaarsak?, vedtakType: VedtakType) :
-    IllegalStateException(
-        "Vedtaket er av type $vedtakType, men dette er " +
-            "ikke gyldig for revurderingen med årsak $revurderingAarsak",
-    )
-
 class ManglerAvkortetYtelse :
     UgyldigForespoerselException(
         code = "VEDTAKSVURDERING_MANGLER_AVKORTET_YTELSE",
         detail =
             "Det må legges til inntektsavkorting selv om mottaker ikke har inntekt. Legg inn \"0\" kr i alle felter.",
     )
+
+class ForeldreloesTrygdetid(behandlingId: UUID) : UgyldigForespoerselException(
+    code = "FORELDRELOES_TRYGDETID",
+    detail = "Flere avdødes trygdetid er ikke støttet for vedtaksvurdering $behandlingId",
+)

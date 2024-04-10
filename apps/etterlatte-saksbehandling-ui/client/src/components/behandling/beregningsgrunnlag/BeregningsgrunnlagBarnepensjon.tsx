@@ -3,7 +3,7 @@ import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapp
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
@@ -37,13 +37,14 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingGjelderBarnepensjonPaaNyttRegelverk } from '~components/behandling/vilkaarsvurdering/utils'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
   const personopplysninger = usePersonopplysninger()
   const avdoede = personopplysninger?.avdoede.find((po) => po)
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const redigerbar = behandlingErRedigerbar(
     behandling.status,

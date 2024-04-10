@@ -22,12 +22,12 @@ import { FlexRow } from '~shared/styled'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { useAppSelector } from '~store/Store'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const redigerbar = behandlingErRedigerbar(
     behandlingsInfo.status,

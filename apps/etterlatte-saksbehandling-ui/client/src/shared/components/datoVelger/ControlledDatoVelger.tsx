@@ -16,7 +16,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
   label: string
   description?: string
   control: Control<T>
-  errorVedTomInput: string
+  errorVedTomInput?: string
   defaultValue?: string
 }): ReactNode => {
   const [, setDateError] = useState<DateValidationT | null>(null)
@@ -29,7 +29,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
     control,
     rules: {
       validate: (value) => {
-        if (!value) {
+        if (errorVedTomInput && !value) {
           return errorVedTomInput
         }
         return undefined

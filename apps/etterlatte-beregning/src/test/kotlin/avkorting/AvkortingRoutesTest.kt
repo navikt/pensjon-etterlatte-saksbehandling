@@ -16,7 +16,6 @@ import io.mockk.mockk
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
-import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
@@ -171,41 +170,13 @@ class AvkortingRoutesTest {
                     behandlingsId,
                     any(),
                     withArg {
-                        it.periode shouldBe avkortingsgrunnlag.periode
                         it.aarsinntekt shouldBe avkortingsgrunnlag.aarsinntekt
                         it.fratrekkInnAar shouldBe avkortingsgrunnlag.fratrekkInnAar
-                        it.relevanteMaanederInnAar shouldBe 12
                         it.spesifikasjon shouldBe avkortingsgrunnlag.spesifikasjon
-                        it.kilde.ident shouldBe avkortingsgrunnlag.kilde.ident
                     },
                 )
             }
         }
-    }
-
-    @Test
-    fun `skal regne ut relevant antall maaneder inkludert innevaerende hvis det ikke finnes fra foer`() {
-        val startenAvAaret =
-            AvkortingGrunnlagDto(
-                relevanteMaanederInnAar = null,
-                id = UUID.randomUUID(),
-                fom = YearMonth.of(2023, 1),
-                tom = null,
-                aarsinntekt = 100000,
-                fratrekkInnAar = 10000,
-                inntektUtland = 0,
-                fratrekkInnAarUtland = 0,
-                spesifikasjon = "Spesifikasjon",
-                kilde =
-                    AvkortingGrunnlagKildeDto(
-                        tidspunkt = Tidspunkt.now().toString(),
-                        ident = "Saksbehandler01",
-                    ),
-            )
-        val sluttenavAaret = startenAvAaret.copy(fom = YearMonth.of(2023, 12))
-
-        startenAvAaret.fromDto(bruker).relevanteMaanederInnAar shouldBe 12
-        sluttenavAaret.fromDto(bruker).relevanteMaanederInnAar shouldBe 1
     }
 
     private fun testApplication(block: suspend ApplicationTestBuilder.() -> Unit) {

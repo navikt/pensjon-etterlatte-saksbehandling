@@ -44,6 +44,7 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 const stripWhitespace = (s: string | number): string => {
   if (typeof s === 'string') return s.replace(/\s+/g, '')
@@ -65,7 +66,7 @@ function fjernWhitespaceFraUtbetaltBeloep(
 
 const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; overstyrBeregning: OverstyrBeregning }) => {
   const { behandling, overstyrBeregning } = props
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const behandles = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,

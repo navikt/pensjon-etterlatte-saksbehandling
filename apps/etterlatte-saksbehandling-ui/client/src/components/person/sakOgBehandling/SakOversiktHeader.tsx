@@ -49,13 +49,13 @@ export const SakOversiktHeader = ({ sak, fnr }: { sak: ISakMedUtlandstilknytning
           </BodyShort>
         </FlexRow>
       </SpaceChildren>
-      <SpaceChildren direction="row" gap="0">
+      <FlexRow gap="0">
         <FlexRow align="center">
           <Buildings3Icon aria-hidden width="1.75rem" height="1.75rem" />
           <BodyShort>Denne saken tilhører enhet {sak.enhet}</BodyShort>
-          {enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter) && <EndreEnhet sakId={sak.id} />}
         </FlexRow>
-      </SpaceChildren>
+        {enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter) && <EndreEnhet sakId={sak.id} />}
+      </FlexRow>
       {enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter) && (
         <ByttEnhetReadMore header="Ønsker du å bytte enhet?">
           <ol>

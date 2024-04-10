@@ -33,7 +33,13 @@ internal class TrygdetidServiceTest {
     fun `henter trygdetid nasjonal beregning`() {
         val behandlingId = UUID.randomUUID()
         val bruker = mockk<BrukerTokenInfo>()
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetidDto(behandlingId))
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns
+            listOf(
+                trygdetidDto(
+                    behandlingId,
+                    samletNorge = 23,
+                ),
+            )
 
         coEvery { beregningKlient.hentBeregning(behandlingId, bruker) } returns
             mockk<BeregningDTO> {
@@ -41,7 +47,6 @@ internal class TrygdetidServiceTest {
                     listOf(
                         mockk {
                             every { trygdetidForIdent } returns AVDOED_FOEDSELSNUMMER.value
-                            every { samletNorskTrygdetid } returns 23
                             every { beregningsMetode } returns BeregningsMetode.NASJONAL
                         },
                     )
@@ -56,7 +61,14 @@ internal class TrygdetidServiceTest {
     fun `henter ut prorata riktig`() {
         val behandlingId = UUID.randomUUID()
         val bruker = mockk<BrukerTokenInfo>()
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetidDto(behandlingId))
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns
+            listOf(
+                trygdetidDto(
+                    behandlingId,
+                    samletTrygdetidTeoretisk = 40,
+                    prorataBroek = IntBroek(13, 37),
+                ),
+            )
 
         coEvery { beregningKlient.hentBeregning(behandlingId, bruker) } returns
             mockk<BeregningDTO> {
@@ -64,8 +76,6 @@ internal class TrygdetidServiceTest {
                     listOf(
                         mockk {
                             every { trygdetidForIdent } returns AVDOED_FOEDSELSNUMMER.value
-                            every { samletTeoretiskTrygdetid } returns 40
-                            every { broek } returns IntBroek(13, 37)
                             every { beregningsMetode } returns BeregningsMetode.PRORATA
                         },
                     )
@@ -88,6 +98,8 @@ internal class TrygdetidServiceTest {
                     behandlingId = behandlingId,
                     overstyrt = true,
                     trygdetidsgrunnlag = emptyList(),
+                    samletTrygdetidTeoretisk = 40,
+                    prorataBroek = IntBroek(13, 37),
                 ),
             )
 
@@ -97,8 +109,6 @@ internal class TrygdetidServiceTest {
                     listOf(
                         mockk {
                             every { trygdetidForIdent } returns AVDOED_FOEDSELSNUMMER.value
-                            every { samletTeoretiskTrygdetid } returns 40
-                            every { broek } returns IntBroek(13, 37)
                             every { beregningsMetode } returns BeregningsMetode.PRORATA
                         },
                     )
@@ -134,6 +144,9 @@ internal class TrygdetidServiceTest {
                     prorata = true,
                 ),
             ),
+        samletNorge: Int? = null,
+        samletTrygdetidTeoretisk: Int? = null,
+        prorataBroek: IntBroek? = null,
     ) = TrygdetidDto(
         id = UUID.randomUUID(),
         behandlingId = behandlingId,
@@ -145,9 +158,9 @@ internal class TrygdetidServiceTest {
                         faktiskTrygdetidTeoretisk = null,
                         fremtidigTrygdetidNorge = null,
                         fremtidigTrygdetidTeoretisk = null,
-                        samletTrygdetidNorge = 42,
-                        samletTrygdetidTeoretisk = null,
-                        prorataBroek = null,
+                        samletTrygdetidNorge = samletNorge,
+                        samletTrygdetidTeoretisk = samletTrygdetidTeoretisk,
+                        prorataBroek = prorataBroek,
                         overstyrt = overstyrt,
                         yrkesskade = false,
                         beregnetSamletTrygdetidNorge = null,

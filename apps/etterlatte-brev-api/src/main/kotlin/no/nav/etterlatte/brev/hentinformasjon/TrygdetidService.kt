@@ -2,7 +2,10 @@ package no.nav.etterlatte.brev.hentinformasjon
 
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.TrygdetidType
@@ -17,25 +20,48 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient, private val
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> {
         val beregning = requireNotNull(beregningKlient.hentBeregning(behandlingId, brukerTokenInfo))
-        return trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo).map { trygdetid ->
-            // Trygdetid, proratabrøk og beregningsmetode brukt for en avdød vil alltid være det samme
-            val beregningsperiode = beregning.beregningsperioder.first { it.trygdetidForIdent == trygdetid.ident }
-            val (anvendtTrygdetid, prorataBroek) = hentBenyttetTrygdetidOgProratabroek(beregningsperiode)
+        val trygdetider = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
+
+        // Beregningsmetode per nå er det samme på tvers av trygdetider
+        val beregningsmetode =
+            beregning.beregningsperioder.first { beregningsperiode ->
+                trygdetider.any { it.ident == beregningsperiode.trygdetidForIdent }
+            }.beregningsMetode
+
+        return trygdetider.map { trygdetid ->
+            val (samletTrygdetid, prorataBroek) = utledTrygdetid(trygdetid, beregningsmetode)
             Trygdetid(
                 ident = trygdetid.ident,
-                aarTrygdetid = anvendtTrygdetid,
+                aarTrygdetid = samletTrygdetid,
                 maanederTrygdetid = 0,
                 prorataBroek = prorataBroek,
-                perioder =
-                    finnTrygdetidsperioderForTabell(
-                        trygdetid.trygdetidGrunnlag,
-                        beregningsperiode.beregningsMetode,
-                    ),
+                perioder = finnTrygdetidsperioderForTabell(trygdetid.trygdetidGrunnlag, beregningsmetode),
                 overstyrt = trygdetid.beregnetTrygdetid?.resultat?.overstyrt == true,
                 mindreEnnFireFemtedelerAvOpptjeningstiden =
                     trygdetid.beregnetTrygdetid
                         ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
             )
+        }
+    }
+
+    private fun utledTrygdetid(
+        trygdetid: TrygdetidDto,
+        beregningsmetode: BeregningsMetode?,
+    ): Pair<Int, IntBroek?> {
+        val trygdetidResultat = trygdetid.beregnetTrygdetid?.resultat ?: throw ManglerMedTrygdetidVeBrukIBrev()
+        return when (beregningsmetode) {
+            BeregningsMetode.NASJONAL ->
+                Pair(
+                    trygdetidResultat.samletTrygdetidNorge ?: throw ManglerMedTrygdetidVeBrukIBrev(),
+                    null,
+                )
+            BeregningsMetode.PRORATA ->
+                Pair(
+                    trygdetidResultat.samletTrygdetidTeoretisk ?: throw ManglerMedTrygdetidVeBrukIBrev(),
+                    trygdetidResultat.prorataBroek,
+                )
+            BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
+            else -> throw ManglerMedTrygdetidVeBrukIBrev()
         }
     }
 
@@ -69,3 +95,8 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient, private val
             type = TrygdetidType.valueOf(grunnlag.type),
         )
 }
+
+class ManglerMedTrygdetidVeBrukIBrev : UgyldigForespoerselException(
+    code = "MANGLER_TRYGDETID_VED_BREV",
+    detail = "Trygdetid har mangler ved bruk til brev",
+)

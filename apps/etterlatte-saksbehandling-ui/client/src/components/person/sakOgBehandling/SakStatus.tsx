@@ -2,24 +2,31 @@ import React, { ReactNode, useEffect } from 'react'
 import { SpaceChildren } from '~shared/styled'
 import { Loader, Tag } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentIverksatteVedtakISak } from '~shared/api/vedtaksvurdering'
+import { hentAlleVedtakISak } from '~shared/api/vedtaksvurdering'
 import { mapResult } from '~shared/api/apiUtils'
-import { VedtakSammendrag, VedtakType } from '~components/vedtak/typer'
+import { VedtakType } from '~components/vedtak/typer'
 import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
+import { VedtaketKlagenGjelder } from '~shared/types/Klage'
 
 export const SakStatus = ({ sakId }: { sakId: number }) => {
-  const [iverksatteVedtakResult, iverksatteVedtakFetch] = useApiCall(hentIverksatteVedtakISak)
+  const [vedtakISakResult, vedtakISakFetch] = useApiCall(hentAlleVedtakISak)
 
-  const visStatusPaaSisteVedtak = (iverksatteVedtak: VedtakSammendrag[]): ReactNode => {
-    const sisteIversatteVedtak = [...iverksatteVedtak].pop()
+  const visStatusPaaSisteVedtak = (vedtakISak: VedtaketKlagenGjelder[]): ReactNode => {
+    const sisteVedtak = vedtakISak
+      .filter((vedtak) => ![VedtakType.AVVIST_KLAGE, VedtakType.TILBAKEKREVING].includes(vedtak.vedtakType!))
+      .filter((vedtak) => !!vedtak.datoAttestert)
+      .sort((a, b) => {
+        return new Date(a.datoAttestert!).valueOf() - new Date(b.datoAttestert!).valueOf()
+      })
+      .pop()
 
-    switch (sisteIversatteVedtak?.vedtakType) {
+    switch (sisteVedtak?.vedtakType) {
       case VedtakType.INNVILGELSE:
         return (
           <SpaceChildren direction="row">
             <Tag variant="neutral">
-              {formaterEnumTilLesbarString(sisteIversatteVedtak.vedtakType)}{' '}
-              {!!sisteIversatteVedtak.datoFattet && formaterStringDato(sisteIversatteVedtak.datoFattet)}
+              {formaterEnumTilLesbarString(sisteVedtak.vedtakType)}{' '}
+              {!!sisteVedtak.datoAttestert && formaterStringDato(sisteVedtak.datoAttestert)}
             </Tag>
             <Tag key={VedtakType.INNVILGELSE} variant="success">
               Løpende
@@ -30,8 +37,8 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
         return (
           <SpaceChildren direction="row">
             <Tag variant="neutral">
-              {formaterEnumTilLesbarString(sisteIversatteVedtak.vedtakType)}{' '}
-              {!!sisteIversatteVedtak.datoFattet && formaterStringDato(sisteIversatteVedtak.datoFattet)}
+              {formaterEnumTilLesbarString(sisteVedtak.vedtakType)}{' '}
+              {!!sisteVedtak.datoAttestert && formaterStringDato(sisteVedtak.datoAttestert)}
             </Tag>
             <Tag key={VedtakType.AVSLAG} variant="error">
               Avslått
@@ -42,8 +49,8 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
         return (
           <SpaceChildren direction="row">
             <Tag variant="neutral">
-              {formaterEnumTilLesbarString(sisteIversatteVedtak.vedtakType)}{' '}
-              {!!sisteIversatteVedtak.datoFattet && formaterStringDato(sisteIversatteVedtak.datoFattet)}
+              {formaterEnumTilLesbarString(sisteVedtak.vedtakType)}{' '}
+              {!!sisteVedtak.datoAttestert && formaterStringDato(sisteVedtak.datoAttestert)}
             </Tag>
             <Tag key={VedtakType.AVSLAG} variant="alt2">
               Ytelse opphørt
@@ -52,40 +59,24 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
         )
       default:
         return (
-          <SpaceChildren direction="row">
-            <Tag variant="neutral">
-              <>
-                {!!sisteIversatteVedtak && !!sisteIversatteVedtak.vedtakType && (
-                  <>
-                    {formaterEnumTilLesbarString(sisteIversatteVedtak.vedtakType)}{' '}
-                    {sisteIversatteVedtak.datoFattet && formaterStringDato(sisteIversatteVedtak.datoFattet)}
-                  </>
-                )}
-              </>
-            </Tag>
-            <Tag key="annen-type" variant="warning">
-              Ubehandlet
-            </Tag>
-          </SpaceChildren>
+          <Tag key="annen-type" variant="warning">
+            Ubehandlet
+          </Tag>
         )
     }
   }
 
   useEffect(() => {
-    iverksatteVedtakFetch(sakId)
+    vedtakISakFetch(sakId)
   }, [])
 
   return (
     <SpaceChildren direction="row">
-      {mapResult(iverksatteVedtakResult, {
+      {mapResult(vedtakISakResult, {
         pending: <Loader />,
         error: <Tag variant="error">Kunne ikke hente status</Tag>,
-        success: (iverksatteVedtak) =>
-          !!iverksatteVedtak?.length ? (
-            visStatusPaaSisteVedtak(iverksatteVedtak)
-          ) : (
-            <Tag variant="neutral">Ingen vedtak på sak</Tag>
-          ),
+        success: (vedtakISak) =>
+          !!vedtakISak?.length ? visStatusPaaSisteVedtak(vedtakISak) : <Tag variant="neutral">Ingen vedtak på sak</Tag>,
       })}
     </SpaceChildren>
   )

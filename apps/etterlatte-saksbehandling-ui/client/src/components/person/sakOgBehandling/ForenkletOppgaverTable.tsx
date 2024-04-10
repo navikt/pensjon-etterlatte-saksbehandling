@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useState } from 'react'
-import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
 import { Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
@@ -14,8 +14,6 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { saksbehandlereIEnhetApi } from '~shared/api/oppgaver'
 import { OppgaveValg } from '~components/person/sakOgBehandling/SakOversikt'
 
-const aktiveOppgavestatuser = [Oppgavestatus.NY, Oppgavestatus.UNDER_BEHANDLING]
-
 export const ForenkletOppgaverTable = ({
   oppgaver,
   oppgaveValg,
@@ -27,9 +25,9 @@ export const ForenkletOppgaverTable = ({
   const filtrerOppgaverPaaOppgaveValg = (): OppgaveDTO[] => {
     switch (oppgaveValg) {
       case OppgaveValg.AKTIVE:
-        return [...oppgaver].filter((oppgave) => aktiveOppgavestatuser.some((el) => oppgave.status.includes(el)))
+        return [...oppgaver].filter((oppgave) => erOppgaveRedigerbar(oppgave.status))
       case OppgaveValg.FERDIGSTILTE:
-        return [...oppgaver].filter((oppgave) => !aktiveOppgavestatuser.some((el) => oppgave.status.includes(el)))
+        return [...oppgaver].filter((oppgave) => !erOppgaveRedigerbar(oppgave.status))
     }
   }
 

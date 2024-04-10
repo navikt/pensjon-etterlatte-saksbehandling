@@ -1,3 +1,6 @@
+import com.github.jk1.license.render.InventoryReportRenderer
+import com.github.jk1.license.render.JsonReportRenderer
+
 setupRepositories()
 setupTestLogging()
 
@@ -11,6 +14,10 @@ fun hentAntallKjerner(): Int {
 plugins {
     alias(libs.plugins.license) apply true
     alias(libs.plugins.versions) apply true
+}
+
+licenseReport {
+    renderers = arrayOf(JsonReportRenderer(), InventoryReportRenderer())
 }
 
 fun Project.setupRepositories() {

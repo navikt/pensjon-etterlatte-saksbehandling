@@ -206,7 +206,7 @@ export const AvkortingInntekt = ({
                     <TextField
                       {...register('aarsinntekt', {
                         required: { value: true, message: 'Må fylles ut' },
-                        pattern: { value: /[0-9]/, message: 'Kun tall' },
+                        pattern: { value: /^\d+$/, message: 'Kun tall' },
                       })}
                       label="Forventet årsinntekt Norge"
                       size="medium"
@@ -217,7 +217,7 @@ export const AvkortingInntekt = ({
                     <TextField
                       {...register('fratrekkInnAar', {
                         required: { value: true, message: 'Må fylles ut' },
-                        pattern: { value: /[0-9]/, message: 'Kun tall' },
+                        pattern: { value: /^\d+$/, message: 'Kun tall' },
                       })}
                       label="Fratrekk inn-år"
                       size="medium"
@@ -228,7 +228,7 @@ export const AvkortingInntekt = ({
                     <TextField
                       {...register('inntektUtland', {
                         required: { value: true, message: 'Må fylles ut' },
-                        pattern: { value: /[0-9]/, message: 'Kun tall' },
+                        pattern: { value: /^\d+$/, message: 'Kun tall' },
                       })}
                       label="Forventet årsinntekt utland"
                       size="medium"
@@ -239,7 +239,7 @@ export const AvkortingInntekt = ({
                     <TextField
                       {...register('fratrekkInnAarUtland', {
                         required: { value: true, message: 'Må fylles ut' },
-                        pattern: { value: /[0-9]/, message: 'Kun tall' },
+                        pattern: { value: /^\d+$/, message: 'Kun tall' },
                       })}
                       label="Fratrekk inn-år"
                       size="medium"

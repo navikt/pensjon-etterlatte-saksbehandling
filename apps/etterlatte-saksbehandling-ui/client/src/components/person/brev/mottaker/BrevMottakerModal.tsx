@@ -101,7 +101,7 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
                       message: 'Orgnummer må være satt når mottaker er bedrift',
                     },
                     pattern: {
-                      value: /[0-9]{9}/,
+                      value: /^\d{9}$/,
                       message: 'Et gyldig orgnummer har kun ni siffer',
                     },
                   })}
@@ -117,7 +117,7 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
                       message: 'Fødselsnummer må være satt',
                     },
                     pattern: {
-                      value: /[0-9]{11}/,
+                      value: /^\d{11}$/,
                       message: 'Fødselsnummer kan kun bestå av 11 siffer',
                     },
                   })}

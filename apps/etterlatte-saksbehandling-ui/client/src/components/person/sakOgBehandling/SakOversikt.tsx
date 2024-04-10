@@ -14,6 +14,8 @@ import { Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import { SakOversiktHeader } from '~components/person/sakOgBehandling/SakOversiktHeader'
 import { SakIkkeFunnet } from '~components/person/sakOgBehandling/SakIkkeFunnet'
 import { ForenkletOppgaverTable } from '~components/person/sakOgBehandling/ForenkletOppgaverTable'
+import { hentOppgaverTilknyttetSak } from '~shared/api/oppgaver'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -24,6 +26,8 @@ export enum OppgaveValg {
 
 export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandlinger>; fnr: string }) => {
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
+
+  const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
 
   const [flyktningResult, hentFlyktning] = useApiCall(hentFlyktningStatusForSak)
   const [yrkesskadefordelResult, hentYrkesskadefordel] = useApiCall(hentMigrertYrkesskadeFordel)
@@ -41,6 +45,8 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
       if (migrertBehandling) {
         hentYrkesskadefordel(migrertBehandling.id)
       }
+
+      oppgaverFetch(sakResult.data.sak.id)
     }
   }, [fnr, sakResult])
 
@@ -96,7 +102,11 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 <ToggleGroup.Item value={OppgaveValg.AKTIVE}>Aktive</ToggleGroup.Item>
                 <ToggleGroup.Item value={OppgaveValg.FERDIGSTILTE}>Ferdigstilte</ToggleGroup.Item>
               </ToggleGroup>
-              <ForenkletOppgaverTable sakId={sak.id} />
+              {mapResult(oppgaverResult, {
+                pending: <Spinner visible label="Henter oppgaver for sak..." />,
+                error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+                success: (oppgaver) => <ForenkletOppgaverTable oppgaver={oppgaver} oppgaveValg={oppgaveValg} />,
+              })}
             </SpaceChildren>
           </SpaceChildren>
         ),

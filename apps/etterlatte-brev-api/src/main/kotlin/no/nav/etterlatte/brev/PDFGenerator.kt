@@ -36,7 +36,11 @@ class PDFGenerator(
         brevData: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
-        sjekkOmBrevKanEndres(id)
+        val brev = sjekkOmBrevKanEndres(id)
+        if (!brev.mottaker.erGyldig()) {
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id)
+        }
+
         val pdf =
             genererPdf(
                 id,
@@ -121,10 +125,11 @@ class PDFGenerator(
             "Fant ikke payloadvedlegg for brev ${brev.id}"
         }
 
-    private fun sjekkOmBrevKanEndres(brevID: BrevID) {
+    private fun sjekkOmBrevKanEndres(brevID: BrevID): Brev {
         val brev = db.hentBrev(brevID)
         if (!brev.kanEndres()) {
             throw IllegalStateException("Brev med id=$brevID kan ikke endres, siden det har status ${brev.status}")
         }
+        return brev
     }
 }

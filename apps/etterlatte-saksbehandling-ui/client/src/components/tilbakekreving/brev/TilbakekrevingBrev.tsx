@@ -3,7 +3,7 @@ import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
 import { erUnderBehandling, TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
-import { fattVedtak, opprettVedtak } from '~shared/api/tilbakekreving'
+import { fattVedtak } from '~shared/api/tilbakekreving'
 import React, { useEffect, useState } from 'react'
 import { IBrev } from '~shared/types/Brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -12,10 +12,8 @@ import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 
-import { isFailure, isPending, isPendingOrInitial } from '~shared/api/apiUtils'
+import { isFailure, isPending } from '~shared/api/apiUtils'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
-import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
-import { VedtakSammendrag } from '~components/vedtak/typer'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
@@ -28,12 +26,10 @@ export function TilbakekrevingBrev({
 }) {
   const kanAttesteres = erUnderBehandling(behandling.status)
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
-  const [hentVedtakStatus, hentVedtak] = useApiCall(hentVedtakSammendrag)
   const [hentBrevStatus, hentBrevRequest] = useApiCall(hentVedtaksbrev)
-  const [opprettVedtakStatus, opprettVedtakRequest] = useApiCall(opprettVedtak)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
 
-  const hentBrev = () => {
+  useEffect(() => {
     hentBrevRequest(behandling.id, (brev, statusCode) => {
       if (statusCode === 200) {
         setVedtaksbrev(brev)
@@ -43,28 +39,8 @@ export function TilbakekrevingBrev({
         })
       }
     })
-  }
-
-  useEffect(() => {
-    hentVedtak(behandling.id, (vedtak: VedtakSammendrag | null) => {
-      if (vedtak?.datoFattet) {
-        hentBrev()
-      } else {
-        opprettVedtakRequest(behandling.id, () => {
-          hentBrev()
-        })
-      }
-    })
   }, [behandling])
 
-  // TODO se på alternativer for å gjøre dette penere
-
-  if (isPendingOrInitial(hentVedtakStatus)) {
-    return <Spinner visible label="Henter vedtak ..." />
-  }
-  if (isPending(opprettVedtakStatus)) {
-    return <Spinner visible label="Vedtak ikke fattet, oppdaterer vedtak ..." />
-  }
   if (isPending(hentBrevStatus)) {
     return <Spinner visible label="Henter brev ..." />
   }
@@ -72,12 +48,6 @@ export function TilbakekrevingBrev({
     return <Spinner visible label="Ingen brev funnet. Oppretter brev ..." />
   }
 
-  if (isFailure(hentVedtakStatus)) {
-    return <ApiErrorAlert>{hentVedtakStatus.error.detail}</ApiErrorAlert>
-  }
-  if (isFailure(opprettVedtakStatus)) {
-    return <ApiErrorAlert>{opprettVedtakStatus.error.detail}</ApiErrorAlert>
-  }
   if (isFailure(hentBrevStatus)) {
     return <ApiErrorAlert>{hentBrevStatus.error.detail}</ApiErrorAlert>
   }

@@ -53,7 +53,7 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
             put("/valider") {
                 kunSkrivetilgang {
                     try {
-                        call.respond(service.validerVurderingOgPerioder(behandlingId))
+                        call.respond(service.validerVurderingOgPerioder(behandlingId, brukerTokenInfo))
                     } catch (e: TilbakekrevingFinnesIkkeException) {
                         call.respond(HttpStatusCode.NotFound)
                     }
@@ -61,12 +61,6 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
             }
 
             route("vedtak") {
-                post("opprett") {
-                    kunSkrivetilgang {
-                        service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
-                        call.respond(HttpStatusCode.OK)
-                    }
-                }
                 post("fatt") {
                     kunSkrivetilgang {
                         service.fattVedtak(behandlingId, brukerTokenInfo)

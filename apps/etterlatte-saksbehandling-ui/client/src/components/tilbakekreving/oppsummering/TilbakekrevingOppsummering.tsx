@@ -12,6 +12,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
 import { ApiError } from '~shared/api/apiClient'
+import { isPending } from '@reduxjs/toolkit'
 
 export function TilbakekrevingOppsummering({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const dispatch = useAppDispatch()
@@ -40,7 +41,7 @@ export function TilbakekrevingOppsummering({ behandling }: { behandling: Tilbake
       )}
       <Border style={{ marginTop: '3em' }} />
       <FlexRow $spacing={true} justify="center">
-        <Button variant="primary" onClick={validerVurderingOgPerioder}>
+        <Button variant="primary" onClick={validerVurderingOgPerioder} loading={isPending(validerTilbakekrevingStatus)}>
           Neste
         </Button>
       </FlexRow>

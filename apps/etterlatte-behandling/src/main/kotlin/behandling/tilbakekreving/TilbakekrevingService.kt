@@ -133,40 +133,37 @@ class TilbakekrevingService(
             )
         }
 
-    fun validerVurderingOgPerioder(tilbakekrevingId: UUID): TilbakekrevingBehandling =
+    fun validerVurderingOgPerioder(
+        tilbakekrevingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Sjekker at vurdering og perioder er gyldig for tilbakekreving=$tilbakekrevingId")
-            val eksisterende = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
-            if (!eksisterende.underBehandling()) {
+            val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+            if (!tilbakekreving.underBehandling()) {
                 throw TilbakekrevingFeilTilstandException("Tilbakekreving er ikke under behandling")
             }
 
-            eksisterende.validerVurderingOgPerioder()
+            tilbakekreving.validerVurderingOgPerioder()
 
-            tilbakekrevingDao.lagreTilbakekreving(
-                eksisterende.copy(
-                    status = TilbakekrevingStatus.VALIDERT,
-                ),
-            )
-        }
+            val lagretTilbakekreving =
+                tilbakekrevingDao.lagreTilbakekreving(
+                    tilbakekreving.copy(
+                        status = TilbakekrevingStatus.VALIDERT,
+                    ),
+                )
 
-    suspend fun opprettEllerOppdaterVedtak(
-        tilbakekrevingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = inTransaction {
-        logger.info("Oppretter eller oppdaterer vedtak for tilbakekreving=$tilbakekrevingId")
-        val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
-        if (!tilbakekreving.underBehandling()) {
-            throw TilbakekrevingFeilTilstandException("Tilbakekreving er ikke under behandling")
+            logger.info("Oppretter eller oppdaterer vedtak for tilbakekreving=$tilbakekrevingId")
+            runBlocking {
+                vedtakKlient.lagreVedtakTilbakekreving(
+                    tilbakekrevingBehandling = lagretTilbakekreving,
+                    brukerTokenInfo = brukerTokenInfo,
+                    enhet = lagretTilbakekreving.sak.enhet,
+                )
+            }
+
+            lagretTilbakekreving
         }
-        runBlocking {
-            vedtakKlient.lagreVedtakTilbakekreving(
-                tilbakekrevingBehandling = tilbakekreving,
-                brukerTokenInfo = brukerTokenInfo,
-                enhet = tilbakekreving.sak.enhet,
-            )
-        }
-    }
 
     suspend fun fattVedtak(
         tilbakekrevingId: UUID,

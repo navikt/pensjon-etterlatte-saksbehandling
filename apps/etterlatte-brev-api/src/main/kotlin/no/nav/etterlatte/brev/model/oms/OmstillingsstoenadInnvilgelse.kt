@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.model.oms
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
@@ -15,8 +14,10 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
@@ -35,7 +36,7 @@ data class OmstillingsstoenadInnvilgelse(
             generellBrevData: GenerellBrevData,
             avkortingsinfo: Avkortingsinfo,
             etterbetaling: EtterbetalingDTO?,
-            trygdetid: Trygdetid,
+            trygdetid: TrygdetidDto,
             brevutfall: BrevutfallDto,
         ): OmstillingsstoenadInnvilgelse {
             val beregningsperioder =
@@ -70,7 +71,7 @@ data class OmstillingsstoenadInnvilgelse(
                         beregningsperioder = beregningsperioder,
                         sisteBeregningsperiode = sisteBeregningsperiode,
                         trygdetid =
-                            trygdetid.toTrygdetidMedBeregningsmetode(
+                            trygdetid.fromDto(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
                                 navnAvdoed = avdoed.navn,

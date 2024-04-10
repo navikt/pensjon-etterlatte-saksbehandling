@@ -1,9 +1,7 @@
 package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
-import no.nav.etterlatte.brev.hentinformasjon.UgyldigBeregningsMetode
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Klage
@@ -11,14 +9,11 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
-import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 import java.time.YearMonth
@@ -56,67 +51,6 @@ data class GenerellBrevData(
                 avdoede.size > 1
         }
 }
-
-data class Trygdetid(
-    val ident: String,
-    val samletTrygdetidNorge: Int?,
-    val samletTrygdetidTeoretisk: Int?,
-    val prorataBroek: IntBroek?,
-    val maanederTrygdetid: Int,
-    val perioder: List<Trygdetidsperiode>,
-    val overstyrt: Boolean,
-    val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
-) {
-    fun toTrygdetidMedBeregningsmetode(
-        beregningsMetodeAnvendt: BeregningsMetode,
-        beregningsMetodeFraGrunnlag: BeregningsMetode,
-        avdoede: List<Avdoed>,
-    ) = this.toTrygdetidMedBeregningsmetode(
-        beregningsMetodeAnvendt,
-        beregningsMetodeFraGrunnlag,
-        avdoede.find { it.fnr.value == ident }?.navn ?: throw ManglerAvdoedBruktTilTrygdetid(),
-    )
-
-    fun toTrygdetidMedBeregningsmetode(
-        beregningsMetodeAnvendt: BeregningsMetode,
-        beregningsMetodeFraGrunnlag: BeregningsMetode,
-        navnAvdoed: String,
-    ): TrygdetidMedBeregningsmetode {
-        return TrygdetidMedBeregningsmetode(
-            navnAvdoed = navnAvdoed,
-            trygdetidsperioder =
-                when (beregningsMetodeAnvendt) {
-                    BeregningsMetode.NASJONAL -> perioder.filter { it.land == "NOR" }
-                    BeregningsMetode.PRORATA -> {
-                        // Kun ta med de som er avtaleland
-                        perioder.filter { it.prorata }
-                    }
-                    else -> throw IllegalArgumentException("$beregningsMetodeAnvendt er ikke en gyldig beregningsmetode")
-                },
-            beregnetTrygdetidAar =
-                when (beregningsMetodeAnvendt) {
-                    BeregningsMetode.NASJONAL -> samletTrygdetidNorge ?: throw ManglerMedTrygdetidVeBrukIBrev()
-                    BeregningsMetode.PRORATA -> samletTrygdetidTeoretisk ?: throw ManglerMedTrygdetidVeBrukIBrev()
-                    BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
-                    else -> throw ManglerMedTrygdetidVeBrukIBrev()
-                },
-            beregnetTrygdetidMaaneder = maanederTrygdetid,
-            prorataBroek = prorataBroek,
-            mindreEnnFireFemtedelerAvOpptjeningstiden = mindreEnnFireFemtedelerAvOpptjeningstiden,
-            beregningsMetodeFraGrunnlag = beregningsMetodeFraGrunnlag,
-            beregningsMetodeAnvendt = beregningsMetodeAnvendt,
-        )
-    }
-}
-
-data class Trygdetidsperiode(
-    val datoFOM: LocalDate,
-    val datoTOM: LocalDate?,
-    val land: String,
-    val opptjeningsperiode: BeregnetTrygdetidGrunnlagDto?,
-    val type: TrygdetidType,
-    val prorata: Boolean,
-)
 
 data class ForenkletVedtak(
     val id: Long,
@@ -179,14 +113,3 @@ fun List<Beregningsperiode>.hentUtbetaltBeloep(): Int {
     // TODO: Håndter grunnbeløpsendringer
     return this.last().utbetaltBeloep.value
 }
-
-// Brukes der mangler med trygdetid ikke skal kunne skje men felt likevel er nullable
-class ManglerMedTrygdetidVeBrukIBrev : UgyldigForespoerselException(
-    code = "MANGLER_TRYGDETID_VED_BREV",
-    detail = "Trygdetid har mangler ved bruk til brev",
-)
-
-class ManglerAvdoedBruktTilTrygdetid : UgyldigForespoerselException(
-    code = "MANGLER_AVDOED_INFO_I_BEREGNING",
-    detail = "Det er mangler avdød i beregning. Utfør beregning på nytt og prøv igjen.",
-)

@@ -1,8 +1,8 @@
 package no.nav.etterlatte.brev.model.bp
 
+import io.mockk.mockk
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
-import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
@@ -16,6 +16,10 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Assertions
@@ -55,15 +59,31 @@ internal class BarnepensjonInnvilgetDTOTest {
                     ),
                 trygdetid =
                     listOf(
-                        Trygdetid(
+                        TrygdetidDto(
+                            id = UUID.randomUUID(),
                             ident = "123",
-                            samletTrygdetidNorge = 10,
-                            samletTrygdetidTeoretisk = null,
-                            maanederTrygdetid = 0,
-                            perioder = listOf(),
-                            overstyrt = false,
-                            prorataBroek = null,
-                            mindreEnnFireFemtedelerAvOpptjeningstiden = false,
+                            behandlingId = UUID.randomUUID(),
+                            beregnetTrygdetid =
+                                DetaljertBeregnetTrygdetidDto(
+                                    resultat =
+                                        DetaljertBeregnetTrygdetidResultat(
+                                            samletTrygdetidNorge = 40,
+                                            samletTrygdetidTeoretisk = null,
+                                            faktiskTrygdetidNorge = null,
+                                            fremtidigTrygdetidNorge = null,
+                                            faktiskTrygdetidTeoretisk = null,
+                                            fremtidigTrygdetidTeoretisk = null,
+                                            beregnetSamletTrygdetidNorge = null,
+                                            prorataBroek = null,
+                                            overstyrt = false,
+                                            yrkesskade = false,
+                                        ),
+                                    tidspunkt = Tidspunkt.now(),
+                                ),
+                            trygdetidGrunnlag = emptyList(),
+                            overstyrtNorskPoengaar = null,
+                            opplysningerDifferanse = mockk(),
+                            opplysninger = mockk(),
                         ),
                     ),
                 grunnbeloep =

@@ -30,6 +30,6 @@ function kanSeBrev(tilbakekrevingBehandling: TilbakekrevingBehandling | null): b
       TilbakekrevingStatus.UNDERKJENT,
       TilbakekrevingStatus.ATTESTERT,
       TilbakekrevingStatus.FATTET_VEDTAK,
-    ].includes(tilbakekrevingBehandling.status!)
+    ].includes(tilbakekrevingBehandling.status)
   )
 }

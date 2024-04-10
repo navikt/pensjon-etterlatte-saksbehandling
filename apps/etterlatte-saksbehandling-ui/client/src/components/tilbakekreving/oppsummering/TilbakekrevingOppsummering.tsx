@@ -18,7 +18,7 @@ export function TilbakekrevingOppsummering({ behandling }: { behandling: Tilbake
   const navigate = useNavigate()
   const [validerTilbakekrevingStatus, validerTilbakekrevingRequest] = useApiCall(validerTilbakekreving)
 
-  const valider = () => {
+  const validerVurderingOgPerioder = () => {
     validerTilbakekrevingRequest(behandling.id, (lagretTilbakekreving) => {
       dispatch(addTilbakekreving(lagretTilbakekreving))
       navigate(`/tilbakekreving/${behandling?.id}/brev`)
@@ -40,7 +40,7 @@ export function TilbakekrevingOppsummering({ behandling }: { behandling: Tilbake
       )}
       <Border style={{ marginTop: '3em' }} />
       <FlexRow $spacing={true} justify="center">
-        <Button variant="primary" onClick={valider}>
+        <Button variant="primary" onClick={validerVurderingOgPerioder}>
           Neste
         </Button>
       </FlexRow>
@@ -59,7 +59,7 @@ function TilbakekrevingValideringsfeil({ error }: { error: ApiError }) {
           <BodyLong style={{ fontWeight: 'bold' }}>{error.detail}</BodyLong>
           {ugyldigeFelterVurdering.length > 0 && (
             <div>
-              <BodyLong>Manglende felter i vurdering:</BodyLong>
+              <BodyLong>Manglende felter i Vurdering:</BodyLong>
               <ul>
                 {ugyldigeFelterVurdering.map((felt, index) => (
                   <li key={index} style={{ marginLeft: '1.4rem' }}>
@@ -71,7 +71,7 @@ function TilbakekrevingValideringsfeil({ error }: { error: ApiError }) {
           )}
           {ugyldigeFelterPerioder.length > 0 && (
             <div>
-              <BodyLong>Manglende felter i utbetalinger:</BodyLong>
+              <BodyLong>Manglende felter i Utbetalinger:</BodyLong>
               <ul>
                 {ugyldigeFelterPerioder.map((felt, index) => (
                   <li key={index} style={{ marginLeft: '1.4rem' }}>

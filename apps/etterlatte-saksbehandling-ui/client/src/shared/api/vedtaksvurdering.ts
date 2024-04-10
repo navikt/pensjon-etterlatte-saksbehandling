@@ -10,6 +10,10 @@ export const hentAlleVedtakISak = async (sakId: number): Promise<ApiResponse<Arr
   return apiClient.get(`vedtak/sak/${sakId}`)
 }
 
+export const hentIverksatteVedtakISak = async (sakId: number): Promise<ApiResponse<Array<VedtakSammendrag>>> => {
+  return apiClient.get(`vedtak/sak/${sakId}/iverksatte`)
+}
+
 export const fattVedtak = async (behandlingId: string): Promise<ApiResponse<unknown>> => {
   return apiClient.post(`/vedtak/${behandlingId}/fattvedtak`, {})
 }

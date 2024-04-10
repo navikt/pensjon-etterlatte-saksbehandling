@@ -219,14 +219,6 @@ internal fun Route.sakWebRoutes(
                 logger.info("Henter behandlingshendelser i sak med sakId=$sakId")
                 call.respond(hendelseDao.hentHendelserISak(sakId))
             }
-
-            get("status") {
-                kunSaksbehandler {
-                    logger.info("Henter status for sak med sakId=$sakId")
-                    val status = inTransaction { sakService.hentStatusPaaSak(sakId) }
-                    call.respond(status)
-                }
-            }
         }
 
         route("/personer/") {

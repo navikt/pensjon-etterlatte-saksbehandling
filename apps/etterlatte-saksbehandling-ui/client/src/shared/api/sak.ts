@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { ISak, SakStatus, SakType } from '~shared/types/sak'
+import { ISak, SakType } from '~shared/types/sak'
 import { SakMedBehandlinger } from '~components/person/typer'
 
 export interface Navkontor {
@@ -21,10 +21,6 @@ export const hentSakMedBehandlnger = async (fnr: string): Promise<ApiResponse<Sa
 
 export const hentSak = async (sakId: number): Promise<ApiResponse<ISak>> => {
   return apiClient.get(`sak/${sakId}`)
-}
-
-export const hentStatusPaaSak = async (sakId: number): Promise<ApiResponse<SakStatus>> => {
-  return apiClient.get(`/sak/${sakId}/status`)
 }
 
 export const hentFlyktningStatusForSak = async (sakId: number): Promise<ApiResponse<Flyktning>> => {

@@ -1,12 +1,11 @@
 import React, { useEffect } from 'react'
 import { mapResult } from '~shared/api/apiUtils'
-import { hentNavkontorForPerson, hentStatusPaaSak } from '~shared/api/sak'
-import { BodyShort, Heading, ReadMore, Tag } from '@navikt/ds-react'
+import { hentNavkontorForPerson } from '~shared/api/sak'
+import { BodyShort, Heading, Loader, ReadMore, Tag } from '@navikt/ds-react'
 import { FlexRow, SpaceChildren } from '~shared/styled'
 import { tagColors } from '~shared/Tags'
 import { formaterEnumTilLesbarString } from '~utils/formattering'
 import { Buildings3Icon, LocationPinIcon } from '@navikt/aksel-icons'
-import Spinner from '~shared/Spinner'
 import { EndreEnhet } from '~components/person/sakOgBehandling/EndreEnhet'
 import { ISakMedUtlandstilknytning } from '~shared/types/sak'
 import styled from 'styled-components'
@@ -18,12 +17,9 @@ import { SakStatus } from '~components/person/sakOgBehandling/SakStatus'
 export const SakOversiktHeader = ({ sak, fnr }: { sak: ISakMedUtlandstilknytning; fnr: string }) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
-  const [statusPaaSakResult, statusPaaSakFetch] = useApiCall(hentStatusPaaSak)
-
   const [navkontorResult, hentNavkontor] = useApiCall(hentNavkontorForPerson)
 
   useEffect(() => {
-    statusPaaSakFetch(sak.id)
     hentNavkontor(fnr)
   }, [])
 
@@ -37,21 +33,8 @@ export const SakOversiktHeader = ({ sak, fnr }: { sak: ISakMedUtlandstilknytning
             {formaterEnumTilLesbarString(sak.utlandstilknytning?.type)}
           </Tag>
         )}
-        {mapResult(statusPaaSakResult, {
-          pending: <Spinner visible label="Henter status..." />,
-          error: (error) => (
-            <>
-              {error.status === 404 ? (
-                <Tag variant="neutral">Ingen behandlinger for sak</Tag>
-              ) : (
-                <Tag variant="error">Feil i henting av status</Tag>
-              )}
-            </>
-          ),
-          success: ({ behandlingStatus, virkningstidspunkt }) => (
-            <SakStatus behandlingStatus={behandlingStatus} virkningstidspunkt={virkningstidspunkt} />
-          ),
-        })}
+
+        <SakStatus sakId={sak.id} />
       </SpaceChildren>
       <SpaceChildren direction="row">
         <FlexRow align="center">
@@ -59,7 +42,7 @@ export const SakOversiktHeader = ({ sak, fnr }: { sak: ISakMedUtlandstilknytning
           <BodyShort>
             Navkontor:{' '}
             {mapResult(navkontorResult, {
-              pending: <Spinner visible label="" />,
+              pending: <Loader />,
               error: <>Kunne ikke hente kontor</>,
               success: (navKontor) => <>{navKontor.navn}</>,
             })}

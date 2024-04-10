@@ -1,46 +1,61 @@
-import React, { ReactNode } from 'react'
-import { SakStatus as SakStatusProps } from '~shared/types/sak'
+import React, { ReactNode, useEffect } from 'react'
 import { SpaceChildren } from '~shared/styled'
-import { Variants } from '~shared/Tags'
-import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
-import { Tag } from '@navikt/ds-react'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import { CheckmarkIcon, XMarkIcon } from '@navikt/aksel-icons'
+import { Loader, Tag } from '@navikt/ds-react'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentIverksatteVedtakISak } from '~shared/api/vedtaksvurdering'
+import { mapResult } from '~shared/api/apiUtils'
+import { VedtakSammendrag, VedtakType } from '~components/vedtak/typer'
 
-const Loepende = (): ReactNode => (
-  <Tag variant="success" icon={<CheckmarkIcon aria-hidden />}>
-    Løpende
-  </Tag>
-)
+export const SakStatus = ({ sakId }: { sakId: number }) => {
+  const [iverksatteVedtakResult, iverksatteVedtakFetch] = useApiCall(hentIverksatteVedtakISak)
 
-const Avbrutt = (): ReactNode => (
-  <Tag variant="error" icon={<XMarkIcon aria-hidden />}>
-    Avbrutt
-  </Tag>
-)
+  const visStatusPaaSisteVedtak = (iverksatteVedtak: VedtakSammendrag[]): ReactNode => {
+    const sisteIversatteVedtak = [...iverksatteVedtak].pop()
 
-const IkkeIverksatt = (): ReactNode => <Tag variant="neutral">Ikke iverksatt</Tag>
-
-export const SakStatus = ({ behandlingStatus, virkningstidspunkt }: SakStatusProps) => {
-  const velgBehandlingStatusTag = () => {
-    switch (behandlingStatus) {
-      case IBehandlingStatus.IVERKSATT:
-        return <Loepende />
-      case IBehandlingStatus.SAMORDNET:
-        return <Loepende />
-      case IBehandlingStatus.AVBRUTT:
-        return <Avbrutt />
+    switch (sisteIversatteVedtak?.vedtakType) {
+      case VedtakType.INNVILGELSE:
+        return (
+          <Tag key={VedtakType.INNVILGELSE} variant="success">
+            Løpende
+          </Tag>
+        )
+      case VedtakType.AVSLAG:
+        return (
+          <Tag key={VedtakType.AVSLAG} variant="error">
+            Avslått
+          </Tag>
+        )
+      case VedtakType.OPPHOER:
+        return (
+          <Tag key={VedtakType.AVSLAG} variant="alt2">
+            Ytelse opphørt
+          </Tag>
+        )
       default:
-        return <IkkeIverksatt />
+        return (
+          <Tag key="annen-type" variant="warning">
+            Ubehandlet
+          </Tag>
+        )
     }
   }
 
+  useEffect(() => {
+    iverksatteVedtakFetch(sakId)
+  }, [])
+
   return (
     <SpaceChildren direction="row">
-      <Tag variant={Variants.NEUTRAL}>
-        {formaterEnumTilLesbarString(behandlingStatus)} {!!virkningstidspunkt && formaterStringDato(virkningstidspunkt)}
-      </Tag>
-      {velgBehandlingStatusTag()}
+      {mapResult(iverksatteVedtakResult, {
+        pending: <Loader />,
+        error: <Tag variant="error">Kunne ikke hente status</Tag>,
+        success: (iverksatteVedtak) =>
+          !!iverksatteVedtak?.length ? (
+            visStatusPaaSisteVedtak(iverksatteVedtak)
+          ) : (
+            <Tag variant="neutral">Ingen vedtak på sak</Tag>
+          ),
+      })}
     </SpaceChildren>
   )
 }

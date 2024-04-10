@@ -1,11 +1,11 @@
 import styled from 'styled-components'
 import { Container, SpaceChildren } from '~shared/styled'
 import Spinner from '~shared/Spinner'
-import { Alert, Heading } from '@navikt/ds-react'
+import { Alert, Heading, ToggleGroup } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentFlyktningStatusForSak } from '~shared/api/sak'
 import { SakType } from '~shared/types/sak'
@@ -17,7 +17,14 @@ import { ForenkletOppgaverTable } from '~components/person/sakOgBehandling/Foren
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
+export enum OppgaveValg {
+  AKTIVE = 'AKTIVE',
+  FERDIGSTILTE = 'FERDIGSTILTE',
+}
+
 export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandlinger>; fnr: string }) => {
+  const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
+
   const [flyktningResult, hentFlyktning] = useApiCall(hentFlyktningStatusForSak)
   const [yrkesskadefordelResult, hentYrkesskadefordel] = useApiCall(hentMigrertYrkesskadeFordel)
 
@@ -79,12 +86,18 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 ),
             })}
 
-            <div>
-              <Heading size="medium" spacing>
-                Oppgaver
-              </Heading>
+            <SpaceChildren>
+              <Heading size="medium">Oppgaver</Heading>
+              <ToggleGroup
+                defaultValue={OppgaveValg.AKTIVE}
+                onChange={(val) => setOppgaveValg(val as OppgaveValg)}
+                size="small"
+              >
+                <ToggleGroup.Item value={OppgaveValg.AKTIVE}>Aktive</ToggleGroup.Item>
+                <ToggleGroup.Item value={OppgaveValg.FERDIGSTILTE}>Ferdigstilte</ToggleGroup.Item>
+              </ToggleGroup>
               <ForenkletOppgaverTable sakId={sak.id} />
-            </div>
+            </SpaceChildren>
           </SpaceChildren>
         ),
       })}

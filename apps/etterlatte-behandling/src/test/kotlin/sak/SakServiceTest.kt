@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
+import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
@@ -51,8 +52,9 @@ internal class SakServiceTest {
     private val saksbehandlerService = mockk<SaksbehandlerService>()
     private val skjermingKlient = mockk<SkjermingKlient>()
     private val grunnlagservice = mockk<GrunnlagService>()
+    private val krrKlient = mockk<KrrKlient>()
 
-    private val service = SakServiceImpl(sakDao, skjermingKlient, brukerService, grunnlagservice)
+    private val service = SakServiceImpl(sakDao, skjermingKlient, brukerService, grunnlagservice, krrKlient)
 
     @BeforeEach
     fun before() {

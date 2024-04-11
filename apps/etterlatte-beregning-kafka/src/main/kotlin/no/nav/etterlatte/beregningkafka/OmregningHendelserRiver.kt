@@ -64,17 +64,26 @@ internal class OmregningHendelserRiver(
         behandlingViOmregnerFra: UUID,
         packet: JsonMessage,
     ) {
-        if (sakType == SakType.BARNEPENSJON) {
+        if (sakType == SakType.BARNEPENSJON) { // TODO: I EY-3760, sjekk om denne også bør gjelde for OMS
             beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
-            val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
-            packet[BEREGNING_KEY] = beregning
-        } else {
-            val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
-            packet[BEREGNING_KEY] = beregning
+        }
+        val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
+        val forrigeBeregning = beregningService.beregn(behandlingViOmregnerFra).body<BeregningDTO>()
+        verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning)
+        packet[BEREGNING_KEY] = beregning
+
+        if (sakType == SakType.OMSTILLINGSSTOENAD) {
             val avkorting =
                 beregningService.regulerAvkorting(behandlingId, behandlingViOmregnerFra)
                     .body<AvkortingDto>()
             packet[AVKORTING_KEY] = avkorting
         }
+    }
+
+    private fun verifiserToleransegrenser(
+        ny: BeregningDTO,
+        gammel: BeregningDTO,
+    ) {
+        return
     }
 }

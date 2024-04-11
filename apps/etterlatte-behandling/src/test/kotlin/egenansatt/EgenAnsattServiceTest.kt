@@ -30,6 +30,7 @@ import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceImpl
@@ -56,6 +57,7 @@ internal class EgenAnsattServiceTest(val dataSource: DataSource) {
     private lateinit var egenAnsattService: EgenAnsattService
     private lateinit var user: SaksbehandlerMedEnheterOgRoller
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
+    private val krrKlient = mockk<KrrKlient>()
 
     @BeforeAll
     fun beforeAll() {
@@ -70,7 +72,7 @@ internal class EgenAnsattServiceTest(val dataSource: DataSource) {
         val brukerService = BrukerServiceImpl(pdltjenesterKlient, norg2Klient)
         sakService =
             spyk(
-                SakServiceImpl(sakRepo, skjermingKlient, brukerService, grunnlagservice),
+                SakServiceImpl(sakRepo, skjermingKlient, brukerService, grunnlagservice, krrKlient),
             )
         oppgaveService =
             spyk(

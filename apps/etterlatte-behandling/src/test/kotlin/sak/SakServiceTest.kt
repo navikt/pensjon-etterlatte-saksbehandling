@@ -16,6 +16,7 @@ import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BrukerServiceImpl
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.IngenEnhetFunnetException
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
@@ -49,8 +50,9 @@ internal class SakServiceTest {
     private val brukerService = BrukerServiceImpl(pdltjenesterKlient, norg2Klient)
     private val saksbehandlerService = mockk<SaksbehandlerService>()
     private val skjermingKlient = mockk<SkjermingKlient>()
+    private val grunnlagservice = mockk<GrunnlagService>()
 
-    private val service = SakServiceImpl(sakDao, skjermingKlient, brukerService)
+    private val service = SakServiceImpl(sakDao, skjermingKlient, brukerService, grunnlagservice)
 
     @BeforeEach
     fun before() {

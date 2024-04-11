@@ -3,7 +3,7 @@ package no.nav.etterlatte.brev.varselbrev
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.EtterlatteBrevKode
-import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
+import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
 import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
@@ -15,7 +15,7 @@ import java.time.YearMonth
 
 class BrevDataMapperFerdigstillVarsel(
     private val beregningService: BeregningService,
-    private val trygdetidService: TrygdetidService,
+    private val trygdetidKlient: TrygdetidKlient,
 ) {
     suspend fun hentBrevDataFerdigstilling(request: BrevDataFerdigstillingRequest) =
         coroutineScope {
@@ -33,7 +33,7 @@ class BrevDataMapperFerdigstillVarsel(
         coroutineScope {
             val behandlingId = requireNotNull(request.generellBrevData.behandlingId)
             val grunnbeloep = async { beregningService.hentGrunnbeloep(request.bruker) }
-            val trygdetid = async { trygdetidService.finnTrygdetid(behandlingId, request.bruker) }
+            val trygdetid = async { trygdetidKlient.hentTrygdetid(behandlingId, request.bruker) }
             val utbetalingsinfo =
                 async {
                     beregningService.finnUtbetalingsinfo(

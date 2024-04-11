@@ -3,7 +3,6 @@ package no.nav.etterlatte.sak
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
-import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.common.Enheter
@@ -76,7 +75,6 @@ class ManglerTilgangTilEnhet(enheter: List<String>) :
 
 class SakServiceImpl(
     private val dao: SakDao,
-    private val behandlingDao: BehandlingDao,
     private val skjermingKlient: SkjermingKlient,
     private val brukerService: BrukerService,
 ) : SakService {

@@ -395,7 +395,6 @@ internal class ApplicationContext(
     val sakService =
         SakServiceImpl(
             sakDao,
-            behandlingDao,
             skjermingKlient,
             enhetService,
         )

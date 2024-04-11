@@ -24,39 +24,23 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
     route("/api/tilbakekreving") {
         route("{$BEHANDLINGID_CALL_PARAMETER}") {
             get {
-                try {
-                    call.respond(service.hentTilbakekreving(behandlingId))
-                } catch (e: TilbakekrevingFinnesIkkeException) {
-                    call.respond(HttpStatusCode.NotFound)
-                }
+                call.respond(service.hentTilbakekreving(behandlingId))
             }
             put("/vurdering") {
                 kunSkrivetilgang {
                     val vurdering = call.receive<TilbakekrevingVurdering>()
-                    try {
-                        call.respond(service.lagreVurdering(behandlingId, vurdering))
-                    } catch (e: TilbakekrevingFinnesIkkeException) {
-                        call.respond(HttpStatusCode.NotFound)
-                    }
+                    call.respond(service.lagreVurdering(behandlingId, vurdering))
                 }
             }
             put("/perioder") {
                 kunSkrivetilgang {
                     val request = call.receive<TilbakekrevingLagreRequest>()
-                    try {
-                        call.respond(service.lagrePerioder(behandlingId, request.perioder))
-                    } catch (e: TilbakekrevingFinnesIkkeException) {
-                        call.respond(HttpStatusCode.NotFound)
-                    }
+                    call.respond(service.lagrePerioder(behandlingId, request.perioder))
                 }
             }
             put("/valider") {
                 kunSkrivetilgang {
-                    try {
-                        call.respond(service.validerVurderingOgPerioder(behandlingId, brukerTokenInfo))
-                    } catch (e: TilbakekrevingFinnesIkkeException) {
-                        call.respond(HttpStatusCode.NotFound)
-                    }
+                    call.respond(service.validerVurderingOgPerioder(behandlingId, brukerTokenInfo))
                 }
             }
 

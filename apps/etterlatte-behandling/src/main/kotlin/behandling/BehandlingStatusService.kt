@@ -189,7 +189,7 @@ class BehandlingStatusServiceImpl(
             referanse = vedtak.sakIdOgReferanse.referanse,
             type = OppgaveType.fra(behandling.type),
             merknad =
-                listOfNotNull(merknadBehandling, vedtak.vedtakHendelse.kommentar)
+                listOfNotNull(vedtak.vedtakType.tilLesbarString(), merknadBehandling, vedtak.vedtakHendelse.kommentar)
                     .joinToString(separator = ": "),
         )
     }

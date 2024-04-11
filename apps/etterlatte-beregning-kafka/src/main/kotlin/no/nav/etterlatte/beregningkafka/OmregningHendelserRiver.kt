@@ -49,7 +49,6 @@ internal class OmregningHendelserRiver(
         val behandlingId = packet.behandlingId
         val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
         val sakType = objectMapper.treeToValue<SakType>(packet[SAK_TYPE])
-        trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         runBlocking {
             val pair = beregn(sakType, behandlingId, behandlingViOmregnerFra)
             packet[BEREGNING_KEY] = pair.first
@@ -65,6 +64,7 @@ internal class OmregningHendelserRiver(
         behandlingId: UUID,
         behandlingViOmregnerFra: UUID,
     ): Pair<BeregningDTO, AvkortingDto?> {
+        trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         if (sakType == SakType.BARNEPENSJON) { // TODO: I EY-3760, sjekk om denne også bør gjelde for OMS
             beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         }

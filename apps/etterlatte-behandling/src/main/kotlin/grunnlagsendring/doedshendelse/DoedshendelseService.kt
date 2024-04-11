@@ -233,12 +233,12 @@ class DoedshendelseService(
     }
 
     private fun isAdresserLike(
-        adresse1: Adresse?,
-        adresse2: Adresse?,
-    ) = adresse1?.adresseLinje1 == adresse2?.adresseLinje1 &&
-        adresse1?.adresseLinje2 == adresse2?.adresseLinje2 &&
-        adresse1?.adresseLinje3 == adresse2?.adresseLinje3 &&
-        adresse1?.postnr == adresse2?.postnr
+        adresse1: Adresse,
+        adresse2: Adresse,
+    ) = adresse1.adresseLinje1 == adresse2.adresseLinje1 &&
+        adresse1.adresseLinje2 == adresse2.adresseLinje2 &&
+        adresse1.adresseLinje3 == adresse2.adresseLinje3 &&
+        adresse1.postnr == adresse2.postnr
 
     private fun finnBeroerteEktefeller(
         avdoed: PersonDTO,

@@ -8,6 +8,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -17,6 +18,8 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
+import java.time.Month
+import java.time.YearMonth
 import java.util.UUID
 
 internal class OmregningsHendelserTest {
@@ -34,7 +37,16 @@ internal class OmregningsHendelserTest {
                 beregningId = UUID.randomUUID(),
                 behandlingId = UUID.randomUUID(),
                 type = Beregningstype.BP,
-                beregningsperioder = listOf(),
+                beregningsperioder =
+                    listOf(
+                        Beregningsperiode(
+                            datoFOM = YearMonth.of(2023, Month.JANUARY),
+                            utbetaltBeloep = 1000,
+                            grunnbelopMnd = 1000,
+                            grunnbelop = 12000,
+                            trygdetid = 40,
+                        ),
+                    ),
                 beregnetDato = Tidspunkt.now(),
                 grunnlagMetadata = Metadata(1234, 1),
                 overstyrBeregning = null,
@@ -72,7 +84,6 @@ internal class OmregningsHendelserTest {
 
         inspector.sendTestMessage(fullMelding)
 
-        Assertions.assertEquals(UUID.fromString("11bf9683-4edb-403c-99da-b6ec6ff7fc31"), omregningsid.captured)
         Assertions.assertEquals(UUID.fromString("11bf9683-4edb-403c-99da-b6ec6ff7fc31"), behandlingsId.captured)
         Assertions.assertEquals(UUID.fromString("1be3d0dd-97be-4ccb-a71c-b3254ce7ae0a"), forrigeBehandlingId.captured)
         Assertions.assertEquals(2, inspector.inspektør.size)

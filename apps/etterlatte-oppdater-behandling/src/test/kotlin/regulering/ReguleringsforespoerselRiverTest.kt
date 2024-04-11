@@ -32,7 +32,7 @@ internal class ReguleringsforespoerselRiverTest {
     private fun genererReguleringMelding(dato: LocalDate) =
         JsonMessage.newMessage(
             mapOf(
-                ReguleringHendelseType.START_REGULERING.lagParMedEventNameKey(),
+                ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
                 DATO_KEY to dato,
             ),
         )
@@ -72,7 +72,7 @@ internal class ReguleringsforespoerselRiverTest {
 
         for (i in 0 until inspector.inspektør.size) {
             Assertions.assertEquals(
-                ReguleringHendelseType.FINN_LOEPENDE_YTELSER.lagEventnameForType(),
+                ReguleringHendelseType.SAK_FUNNET.lagEventnameForType(),
                 inspector.inspektør.message(i).get(EVENT_NAME_KEY).asText(),
             )
             Assertions.assertEquals(foersteMai2023.toString(), inspector.inspektør.message(i).get(DATO_KEY).asText())

@@ -102,7 +102,7 @@ internal class OmregningHendelserRiver(
         }
     }
 
-    fun List<Beregningsperiode>.paaDato(dato: LocalDate) =
+    private fun List<Beregningsperiode>.paaDato(dato: LocalDate) =
         filter { it.datoFOM.atDay(1) <= dato }
-            .first { it.datoTOM == null || it.datoTOM?.atEndOfMonth()?.isBefore(dato) == false }
+            .first { it.datoTOM == null || it.datoTOM?.plusMonths(1)?.atDay(1)?.isAfter(dato) == true }
 }

@@ -38,7 +38,7 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
                     call.respond(service.lagrePerioder(behandlingId, request.perioder))
                 }
             }
-            put("/valider") {
+            post("/valider") {
                 kunSkrivetilgang {
                     call.respond(service.validerVurderingOgPerioder(behandlingId, brukerTokenInfo))
                 }

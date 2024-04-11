@@ -18,6 +18,7 @@ import { hentOppgaverTilknyttetSak } from '~shared/api/oppgaver'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Behandlingsliste } from '~components/person/sakOgBehandling/Behandlingsliste'
 import { KlageListe } from '~components/person/sakOgBehandling/KlageListe'
+import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -58,68 +59,76 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
         pending: <Spinner visible label="Henter sak og behandlinger" />,
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
         success: ({ sak, behandlinger }) => (
-          <SpaceChildren gap="2rem">
-            <SakOversiktHeader fnr={fnr} sak={sak} />
+          <SpaceChildren direction="row">
+            <SpaceChildren gap="2rem">
+              <SakOversiktHeader fnr={fnr} sak={sak} />
 
-            <Skille />
+              <HorisontaltSkille />
 
-            {mapResult(flyktningResult, {
-              success: (data) =>
-                !!data?.erFlyktning && (
-                  <>
-                    <div>
-                      <Alert variant="info" size="small">
-                        Saken er markert med flyktning i Pesys og første virkningstidspunkt var{' '}
-                        {formaterStringDato(data.virkningstidspunkt)}
-                      </Alert>
-                    </div>
+              {mapResult(flyktningResult, {
+                success: (data) =>
+                  !!data?.erFlyktning && (
+                    <>
+                      <div>
+                        <Alert variant="info" size="small">
+                          Saken er markert med flyktning i Pesys og første virkningstidspunkt var{' '}
+                          {formaterStringDato(data.virkningstidspunkt)}
+                        </Alert>
+                      </div>
 
-                    <Skille />
-                  </>
-                ),
-            })}
-
-            {mapResult(yrkesskadefordelResult, {
-              success: (data) =>
-                !!data && (
-                  <>
-                    <div>
-                      <Alert variant="info" size="small">
-                        Søker har yrkesskadefordel fra før 01.01.2024 og har rett til stønad til fylte 21 år.
-                      </Alert>
-                    </div>
-
-                    <Skille />
-                  </>
-                ),
-            })}
-
-            <SpaceChildren>
-              <Heading size="medium">Oppgaver</Heading>
-              <ToggleGroup
-                defaultValue={OppgaveValg.AKTIVE}
-                onChange={(val) => setOppgaveValg(val as OppgaveValg)}
-                size="small"
-              >
-                <ToggleGroup.Item value={OppgaveValg.AKTIVE}>Aktive</ToggleGroup.Item>
-                <ToggleGroup.Item value={OppgaveValg.FERDIGSTILTE}>Ferdigstilte</ToggleGroup.Item>
-              </ToggleGroup>
-              {mapResult(oppgaverResult, {
-                pending: <Spinner visible label="Henter oppgaver for sak..." />,
-                error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
-                success: (oppgaver) => <ForenkletOppgaverTable oppgaver={oppgaver} oppgaveValg={oppgaveValg} />,
+                      <HorisontaltSkille />
+                    </>
+                  ),
               })}
+
+              {mapResult(yrkesskadefordelResult, {
+                success: (data) =>
+                  !!data && (
+                    <>
+                      <div>
+                        <Alert variant="info" size="small">
+                          Søker har yrkesskadefordel fra før 01.01.2024 og har rett til stønad til fylte 21 år.
+                        </Alert>
+                      </div>
+
+                      <HorisontaltSkille />
+                    </>
+                  ),
+              })}
+
+              <SpaceChildren>
+                <Heading size="medium">Oppgaver</Heading>
+                <ToggleGroup
+                  defaultValue={OppgaveValg.AKTIVE}
+                  onChange={(val) => setOppgaveValg(val as OppgaveValg)}
+                  size="small"
+                >
+                  <ToggleGroup.Item value={OppgaveValg.AKTIVE}>Aktive</ToggleGroup.Item>
+                  <ToggleGroup.Item value={OppgaveValg.FERDIGSTILTE}>Ferdigstilte</ToggleGroup.Item>
+                </ToggleGroup>
+                {mapResult(oppgaverResult, {
+                  pending: <Spinner visible label="Henter oppgaver for sak..." />,
+                  error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+                  success: (oppgaver) => <ForenkletOppgaverTable oppgaver={oppgaver} oppgaveValg={oppgaveValg} />,
+                })}
+              </SpaceChildren>
+
+              <SpaceChildren>
+                <Heading size="medium">Behandlinger</Heading>
+                <Behandlingsliste sakOgBehandlinger={{ sak, behandlinger }} />
+              </SpaceChildren>
+
+              <SpaceChildren>
+                <Heading size="medium">Klager</Heading>
+                <KlageListe sakId={sak.id} />
+              </SpaceChildren>
             </SpaceChildren>
 
-            <SpaceChildren>
-              <Heading size="medium">Behandlinger</Heading>
-              <Behandlingsliste sakOgBehandlinger={{ sak, behandlinger }} />
-            </SpaceChildren>
+            <LoddrettSkille />
 
-            <SpaceChildren>
-              <Heading size="medium">Klager</Heading>
-              <KlageListe sakId={sak.id} />
-            </SpaceChildren>
+            <HendelseWrapper>
+              <RelevanteHendelser sak={sak} behandlingliste={behandlinger} />
+            </HendelseWrapper>
           </SpaceChildren>
         ),
       })}
@@ -127,9 +136,20 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
   )
 }
 
-const Skille = styled.hr`
+const HendelseWrapper = styled.div`
+  max-width: 33rem;
+`
+
+const HorisontaltSkille = styled.hr`
   border-color: var(--a-surface-active);
   width: 100%;
+`
+
+const LoddrettSkille = styled.div`
+  border-color: var(--a-surface-active);
+  border-width: 1px;
+  border-style: solid;
+  min-height: 100%;
 `
 
 export const HeadingWrapper = styled.div`

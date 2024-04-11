@@ -7,4 +7,15 @@ enum class VedtakType {
     ENDRING,
     TILBAKEKREVING,
     AVVIST_KLAGE,
+    ;
+
+    fun tilLesbarString() =
+        when (this) {
+            INNVILGELSE -> "Innvilgelse"
+            OPPHOER -> "Opphør"
+            AVSLAG -> "Avslag"
+            ENDRING -> "Endring"
+            TILBAKEKREVING -> "Tilbakekreving"
+            AVVIST_KLAGE -> "Avvist klage"
+        }
 }

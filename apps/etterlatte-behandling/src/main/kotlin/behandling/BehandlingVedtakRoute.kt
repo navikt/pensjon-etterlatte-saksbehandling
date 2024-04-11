@@ -8,14 +8,9 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Saksbehandler
-import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.oppgave.referanse
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -34,43 +29,20 @@ internal fun Route.behandlingVedtakRoute(
 
     route("/fattvedtak") {
         post {
-            val fattVedtak = call.receive<VedtakEndringDTO>()
+            val vedtak = call.receive<VedtakEndringDTO>()
 
-            kunSkrivetilgang(sakId = fattVedtak.sakIdOgReferanse.sakId) {
+            kunSkrivetilgang(sakId = vedtak.sakIdOgReferanse.sakId) {
                 val behandling =
                     inTransaction {
                         behandlingService.hentBehandling(
-                            UUID.fromString(fattVedtak.sakIdOgReferanse.referanse),
+                            UUID.fromString(vedtak.sakIdOgReferanse.referanse),
                         )
                     }
                 if (behandling == null) {
                     call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
                 } else {
                     inTransaction {
-                        val merknadBehandling =
-                            when (val bruker = brukerTokenInfo) {
-                                is Saksbehandler -> "Behandlet av ${bruker.ident}"
-                                is Systembruker -> "Behandlet av systemet"
-                            }
-
-                        behandlingsstatusService.settFattetVedtak(behandling, fattVedtak.vedtakHendelse)
-                        try {
-                            val oppgaveType =
-                                when (behandling.type) {
-                                    BehandlingType.FØRSTEGANGSBEHANDLING -> OppgaveType.FOERSTEGANGSBEHANDLING
-                                    BehandlingType.REVURDERING -> OppgaveType.REVURDERING
-                                }
-
-                            oppgaveService.tilAttestering(
-                                referanse = fattVedtak.sakIdOgReferanse.referanse,
-                                type = oppgaveType,
-                                merknad =
-                                    listOfNotNull(merknadBehandling, fattVedtak.vedtakHendelse.kommentar)
-                                        .joinToString(separator = ": "),
-                            )
-                        } catch (e: Exception) {
-                            haandterFeilIOppgaveService(e)
-                        }
+                        behandlingsstatusService.settFattetVedtak(behandling, vedtak, brukerTokenInfo)
                     }
                     call.respond(HttpStatusCode.OK)
                 }
@@ -92,26 +64,7 @@ internal fun Route.behandlingVedtakRoute(
                     call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
                 } else {
                     inTransaction {
-                        behandlingsstatusService.settReturnertVedtak(behandling, underkjennVedtakOppgave.vedtakHendelse)
-                        val merknadFraAttestant =
-                            underkjennVedtakOppgave.vedtakHendelse.let {
-                                listOfNotNull(it.valgtBegrunnelse, it.kommentar).joinToString(separator = ": ")
-                            }
-                        try {
-                            val oppgaveType =
-                                when (behandling.type) {
-                                    BehandlingType.FØRSTEGANGSBEHANDLING -> OppgaveType.FOERSTEGANGSBEHANDLING
-                                    BehandlingType.REVURDERING -> OppgaveType.REVURDERING
-                                }
-
-                            oppgaveService.tilUnderkjent(
-                                referanse = underkjennVedtakOppgave.sakIdOgReferanse.referanse,
-                                type = oppgaveType,
-                                merknad = merknadFraAttestant,
-                            )
-                        } catch (e: Exception) {
-                            haandterFeilIOppgaveService(e)
-                        }
+                        behandlingsstatusService.settReturnertVedtak(behandling, underkjennVedtakOppgave)
                     }
                     call.respond(HttpStatusCode.OK)
                 }
@@ -133,20 +86,7 @@ internal fun Route.behandlingVedtakRoute(
                     call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
                 } else {
                     inTransaction {
-                        behandlingsstatusService.settAttestertVedtak(behandling, attesterVedtakOppgave)
-                        try {
-                            oppgaveService.ferdigStillOppgaveUnderBehandling(
-                                referanse = attesterVedtakOppgave.sakIdOgReferanse.referanse,
-                                type =
-                                    when (behandling.type) {
-                                        BehandlingType.FØRSTEGANGSBEHANDLING -> OppgaveType.FOERSTEGANGSBEHANDLING
-                                        BehandlingType.REVURDERING -> OppgaveType.REVURDERING
-                                    },
-                                saksbehandler = brukerTokenInfo,
-                            )
-                        } catch (e: Exception) {
-                            haandterFeilIOppgaveService(e)
-                        }
+                        behandlingsstatusService.settAttestertVedtak(behandling, attesterVedtakOppgave, brukerTokenInfo)
                     }
                     call.respond(HttpStatusCode.OK)
                 }

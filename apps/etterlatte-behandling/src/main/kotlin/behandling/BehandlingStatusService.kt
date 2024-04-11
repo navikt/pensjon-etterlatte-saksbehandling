@@ -9,6 +9,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
@@ -16,6 +17,9 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -56,7 +60,8 @@ interface BehandlingStatusService {
 
     fun settFattetVedtak(
         behandling: Behandling,
-        vedtakHendelse: VedtakHendelse,
+        vedtak: VedtakEndringDTO,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     fun sjekkOmKanAttestere(behandlingId: UUID)
@@ -64,13 +69,14 @@ interface BehandlingStatusService {
     fun settAttestertVedtak(
         behandling: Behandling,
         vedtak: VedtakEndringDTO,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     fun sjekkOmKanReturnereVedtak(behandlingId: UUID)
 
     fun settReturnertVedtak(
         behandling: Behandling,
-        vedtakHendelse: VedtakHendelse,
+        vedtak: VedtakEndringDTO,
     )
 
     fun settTilSamordnetVedtak(
@@ -94,6 +100,7 @@ interface BehandlingStatusService {
 class BehandlingStatusServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val behandlingService: BehandlingService,
+    private val oppgaveService: OppgaveService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     private val generellBehandlingService: GenerellBehandlingService,
 ) : BehandlingStatusService {
@@ -161,7 +168,8 @@ class BehandlingStatusServiceImpl(
 
     override fun settFattetVedtak(
         behandling: Behandling,
-        vedtakHendelse: VedtakHendelse,
+        vedtak: VedtakEndringDTO,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         if (behandling is ManuellRevurdering) {
             lagreNyBehandlingStatus(behandling.tilFattetVedtakUtvidet())
@@ -169,7 +177,21 @@ class BehandlingStatusServiceImpl(
             lagreNyBehandlingStatus(behandling.tilFattetVedtak())
         }
 
-        registrerVedtakHendelse(behandling.id, vedtakHendelse, HendelseType.FATTET)
+        registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.FATTET)
+
+        val merknadBehandling =
+            when (val bruker = brukerTokenInfo) {
+                is Saksbehandler -> "Behandlet av ${bruker.ident}"
+                is Systembruker -> "Behandlet av systemet"
+            }
+
+        oppgaveService.tilAttestering(
+            referanse = vedtak.sakIdOgReferanse.referanse,
+            type = OppgaveType.fra(behandling.type),
+            merknad =
+                listOfNotNull(vedtak.vedtakType.tilLesbarString(), merknadBehandling, vedtak.vedtakHendelse.kommentar)
+                    .joinToString(separator = ": "),
+        )
     }
 
     override fun sjekkOmKanAttestere(behandlingId: UUID) {
@@ -179,6 +201,7 @@ class BehandlingStatusServiceImpl(
     override fun settAttestertVedtak(
         behandling: Behandling,
         vedtak: VedtakEndringDTO,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         if (vedtak.vedtakType == VedtakType.AVSLAG) {
             lagreNyBehandlingStatus(behandling.tilAvslag())
@@ -187,6 +210,13 @@ class BehandlingStatusServiceImpl(
             lagreNyBehandlingStatus(behandling.tilAttestert())
         }
         registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.ATTESTERT)
+
+        oppgaveService.ferdigStillOppgaveUnderBehandling(
+            referanse = vedtak.sakIdOgReferanse.referanse,
+            type = OppgaveType.fra(behandling.type),
+            saksbehandler = brukerTokenInfo,
+            merknad = "${vedtak.vedtakType.tilLesbarString()}: ${vedtak.vedtakHendelse.kommentar ?: ""}",
+        )
     }
 
     override fun sjekkOmKanReturnereVedtak(behandlingId: UUID) {
@@ -195,10 +225,19 @@ class BehandlingStatusServiceImpl(
 
     override fun settReturnertVedtak(
         behandling: Behandling,
-        vedtakHendelse: VedtakHendelse,
+        vedtak: VedtakEndringDTO,
     ) {
         lagreNyBehandlingStatus(behandling.tilReturnert())
-        registrerVedtakHendelse(behandling.id, vedtakHendelse, HendelseType.UNDERKJENT)
+        registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.UNDERKJENT)
+
+        oppgaveService.tilUnderkjent(
+            referanse = vedtak.sakIdOgReferanse.referanse,
+            type = OppgaveType.fra(behandling.type),
+            merknad =
+                vedtak.vedtakHendelse.let {
+                    listOfNotNull(it.valgtBegrunnelse, it.kommentar).joinToString(separator = ": ")
+                },
+        )
     }
 
     override fun settTilSamordnetVedtak(

@@ -27,6 +27,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -102,6 +103,10 @@ internal class OmregningHendelserRiver(
         if (nyttBeloep < gammeltBeloep) {
             throw MindreEnnForrigeBehandling(ny.behandlingId)
         }
+        val endring = BigDecimal(nyttBeloep).divide(BigDecimal(gammeltBeloep))
+        if (endring >= BigDecimal(1.50)) {
+            throw ForStorOekning(ny.behandlingId, endring)
+        }
     }
 
     private fun List<Beregningsperiode>.paaDato(dato: LocalDate) =
@@ -112,5 +117,11 @@ internal class OmregningHendelserRiver(
 class MindreEnnForrigeBehandling(behandlingId: UUID) : ForespoerselException(
     code = "OMREGNING_UTENFOR_TOLERANSEGRENSE_MINDRE",
     detail = "Ny beregning for behandling $behandlingId gir lavere sum enn forrige beregning. Skal ikke skje under omregning.",
+    status = HttpStatusCode.ExpectationFailed.value,
+)
+
+class ForStorOekning(behandlingId: UUID, endring: BigDecimal) : ForespoerselException(
+    code = "OMREGNING_UTENFOR_TOLERANSEGRENSE_FOR_STOR_OEKNING",
+    detail = "Ny beregning for behandling $behandlingId gir for stor økning fra forrige omregning. Endringa var $endring",
     status = HttpStatusCode.ExpectationFailed.value,
 )

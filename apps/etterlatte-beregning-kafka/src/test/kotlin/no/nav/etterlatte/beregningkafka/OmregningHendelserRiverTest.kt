@@ -33,7 +33,7 @@ class OmregningHendelserRiverTest {
 
         every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
         every { beregningService.beregn(gammelBehandling) } returns beregningDTO(gammelBehandling, 500)
-        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 1000)
+        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 600)
 
         runBlocking {
             river.beregn(
@@ -58,6 +58,29 @@ class OmregningHendelserRiverTest {
 
         runBlocking {
             assertThrows<MindreEnnForrigeBehandling> {
+                river.beregn(
+                    SakType.BARNEPENSJON,
+                    behandlingId = nyBehandling,
+                    behandlingViOmregnerFra = gammelBehandling,
+                    LocalDate.of(2024, Month.MAY, 10),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `ny beregning skal ikke kunne vaere mer enn X prosent hoeyere enn gammel`() {
+        val (beregningService, river) = initialiserRiver()
+
+        val nyBehandling = UUID.randomUUID()
+        val gammelBehandling = UUID.randomUUID()
+
+        every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
+        every { beregningService.beregn(gammelBehandling) } returns beregningDTO(gammelBehandling, 1000)
+        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 1500)
+
+        runBlocking {
+            assertThrows<ForStorOekning> {
                 river.beregn(
                     SakType.BARNEPENSJON,
                     behandlingId = nyBehandling,

@@ -59,7 +59,7 @@ internal class OmregningHendelserRiver(
         logger.info("Publiserte oppdatert omregningshendelse")
     }
 
-    private suspend fun beregn(
+    internal suspend fun beregn(
         sakType: SakType,
         behandlingId: UUID,
         behandlingViOmregnerFra: UUID,

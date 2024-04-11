@@ -51,7 +51,9 @@ internal class OmregningHendelserRiver(
         val sakType = objectMapper.treeToValue<SakType>(packet[SAK_TYPE])
         trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         runBlocking {
-            beregn(sakType, behandlingId, behandlingViOmregnerFra, packet)
+            val pair = beregn(sakType, behandlingId, behandlingViOmregnerFra)
+            packet[BEREGNING_KEY] = pair.first
+            pair.second?.let { packet[AVKORTING_KEY] = it }
         }
         packet.setEventNameForHendelseType(ReguleringHendelseType.BEREGNA)
         context.publish(packet.toJson())
@@ -62,21 +64,21 @@ internal class OmregningHendelserRiver(
         sakType: SakType,
         behandlingId: UUID,
         behandlingViOmregnerFra: UUID,
-        packet: JsonMessage,
-    ) {
+    ): Pair<BeregningDTO, AvkortingDto?> {
         if (sakType == SakType.BARNEPENSJON) { // TODO: I EY-3760, sjekk om denne også bør gjelde for OMS
             beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         }
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
         val forrigeBeregning = beregningService.beregn(behandlingViOmregnerFra).body<BeregningDTO>()
         verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning)
-        packet[BEREGNING_KEY] = beregning
 
-        if (sakType == SakType.OMSTILLINGSSTOENAD) {
+        return if (sakType == SakType.OMSTILLINGSSTOENAD) {
             val avkorting =
                 beregningService.regulerAvkorting(behandlingId, behandlingViOmregnerFra)
                     .body<AvkortingDto>()
-            packet[AVKORTING_KEY] = avkorting
+            Pair(beregning, avkorting)
+        } else {
+            Pair(beregning, null)
         }
     }
 

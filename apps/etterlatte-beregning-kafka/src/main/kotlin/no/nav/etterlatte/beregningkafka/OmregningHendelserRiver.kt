@@ -22,6 +22,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class OmregningHendelserRiver(
     rapidsConnection: RapidsConnection,
@@ -50,21 +51,30 @@ internal class OmregningHendelserRiver(
         val sakType = objectMapper.treeToValue<SakType>(packet[SAK_TYPE])
         trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         runBlocking {
-            if (sakType == SakType.BARNEPENSJON) {
-                beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
-                val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
-                packet[BEREGNING_KEY] = beregning
-            } else {
-                val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
-                packet[BEREGNING_KEY] = beregning
-                val avkorting =
-                    beregningService.regulerAvkorting(behandlingId, behandlingViOmregnerFra)
-                        .body<AvkortingDto>()
-                packet[AVKORTING_KEY] = avkorting
-            }
-            packet.setEventNameForHendelseType(ReguleringHendelseType.BEREGNA)
-            context.publish(packet.toJson())
+            beregn(sakType, behandlingId, behandlingViOmregnerFra, packet)
         }
+        packet.setEventNameForHendelseType(ReguleringHendelseType.BEREGNA)
+        context.publish(packet.toJson())
         logger.info("Publiserte oppdatert omregningshendelse")
+    }
+
+    private suspend fun beregn(
+        sakType: SakType,
+        behandlingId: UUID,
+        behandlingViOmregnerFra: UUID,
+        packet: JsonMessage,
+    ) {
+        if (sakType == SakType.BARNEPENSJON) {
+            beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
+            val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
+            packet[BEREGNING_KEY] = beregning
+        } else {
+            val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
+            packet[BEREGNING_KEY] = beregning
+            val avkorting =
+                beregningService.regulerAvkorting(behandlingId, behandlingViOmregnerFra)
+                    .body<AvkortingDto>()
+            packet[AVKORTING_KEY] = avkorting
+        }
     }
 }

@@ -21,7 +21,6 @@ data class TilbakekrevingVurdering(
     val tilsvar: TilbakekrevingTilsvar?,
     val rettsligGrunnlag: TilbakekrevingHjemmel?,
     val objektivtVilkaarOppfylt: String?,
-    val subjektivtVilkaarOppfylt: String?,
     val uaktsomtForaarsaketFeilutbetaling: String?,
     val burdeBrukerForstaatt: String?,
     val burdeBrukerForstaattEllerUaktsomtForaarsaket: String?,

@@ -23,6 +23,10 @@ export function lagreTilbakekrevingsperioder(args: {
   return apiClient.put(`/tilbakekreving/${args.behandlingsId}/perioder`, { perioder: args.perioder })
 }
 
+export const validerTilbakekreving = async (behandlingsId: string): Promise<ApiResponse<TilbakekrevingBehandling>> => {
+  return apiClient.put(`/tilbakekreving/${behandlingsId}/valider`, {})
+}
+
 export const opprettVedtak = async (behandlingsId: string): Promise<ApiResponse<unknown>> => {
   return apiClient.post(`/tilbakekreving/${behandlingsId}/vedtak/opprett`, {})
 }

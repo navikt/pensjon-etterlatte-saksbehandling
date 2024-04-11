@@ -94,6 +94,7 @@ spec:
       rules:
         - application: etterlatte-grunnlag
         - application: etterlatte-vilkaarsvurdering
+        - application: etterlatte-vedtaksvurdering
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid
       external:

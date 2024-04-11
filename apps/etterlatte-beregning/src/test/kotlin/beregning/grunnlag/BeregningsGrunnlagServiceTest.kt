@@ -15,10 +15,10 @@ import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlient
+import no.nav.etterlatte.klienter.VedtaksvurderingKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
@@ -31,6 +31,8 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregn
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
@@ -52,6 +54,7 @@ import java.util.UUID.randomUUID
 
 internal class BeregningsGrunnlagServiceTest {
     private val behandlingKlient = mockk<BehandlingKlientImpl>()
+    private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlientImpl>()
     private val beregningsGrunnlagRepository = mockk<BeregningsGrunnlagRepository>()
     private val beregningRepository = mockk<BeregningRepository>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
@@ -60,6 +63,7 @@ internal class BeregningsGrunnlagServiceTest {
             beregningsGrunnlagRepository,
             beregningRepository,
             behandlingKlient,
+            vedtaksvurderingKlient,
             grunnlagKlient,
         )
 
@@ -263,11 +267,8 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
         coEvery { behandlingKlient.kanBeregnes(revurdering.id, any(), any()) } returns true
         coEvery {
-            behandlingKlient.hentSisteIverksatteBehandling(
-                sakId,
-                any(),
-            )
-        } returns SisteIverksatteBehandling(foerstegangsbehandling.id)
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+        } returns listOf(mockVedtak(foerstegangsbehandling.id, VedtakType.INNVILGELSE))
         coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
 
         every {
@@ -340,11 +341,8 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
         coEvery { behandlingKlient.kanBeregnes(revurdering.id, any(), any()) } returns true
         coEvery {
-            behandlingKlient.hentSisteIverksatteBehandling(
-                sakId,
-                any(),
-            )
-        } returns SisteIverksatteBehandling(foerstegangsbehandling.id)
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+        } returns listOf(mockVedtak(foerstegangsbehandling.id, VedtakType.INNVILGELSE))
         coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
 
         every {
@@ -764,4 +762,9 @@ internal class BeregningsGrunnlagServiceTest {
             beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
         )
     }
+
+    private fun mockVedtak(
+        behandlingId: UUID,
+        type: VedtakType,
+    ) = VedtakSammendragDto(UUID.randomUUID().toString(), behandlingId, type, null, null, null, null)
 }

@@ -18,6 +18,7 @@ import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
+import no.nav.etterlatte.klienter.VedtaksvurderingKlientImpl
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -51,6 +52,7 @@ class ApplicationContext {
         )
 
     val vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient())
+    val vedtaksvurderingKlient = VedtaksvurderingKlientImpl(config, httpClient())
     val grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
     val trygdetidKlient = TrygdetidKlient(config, httpClient())
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
@@ -62,6 +64,7 @@ class ApplicationContext {
             beregningsGrunnlagRepository = beregningsGrunnlagRepository,
             beregningRepository = beregningRepository,
             behandlingKlient = behandlingKlient,
+            vedtaksvurderingKlient = vedtaksvurderingKlient,
             grunnlagKlient = grunnlagKlient,
         )
 

@@ -23,7 +23,6 @@ import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosat
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { Tekst } from '~components/behandling/attestering/styled'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar

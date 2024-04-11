@@ -46,7 +46,6 @@ fun tilbakekrevingvurdering() =
         tilsvar = null,
         rettsligGrunnlag = TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
         objektivtVilkaarOppfylt = null,
-        subjektivtVilkaarOppfylt = null,
         uaktsomtForaarsaketFeilutbetaling = null,
         burdeBrukerForstaatt = null,
         burdeBrukerForstaattEllerUaktsomtForaarsaket = null,

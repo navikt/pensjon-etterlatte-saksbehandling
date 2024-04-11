@@ -86,6 +86,10 @@ internal class OmregningHendelserRiver(
         ny: BeregningDTO,
         gammel: BeregningDTO,
     ) {
-        return
+        val nyttBeloep = ny.beregningsperioder.maxBy { it.datoFOM }.utbetaltBeloep
+        val gammeltBeloep = gammel.beregningsperioder.maxBy { it.datoFOM }.utbetaltBeloep
+        if (nyttBeloep < gammeltBeloep) {
+            throw RuntimeException("Nytt mindre enn gammelt")
+        }
     }
 }

@@ -224,7 +224,7 @@ class DoedshendelseService(
             avdoedOgAnnenForelderMedFellesbarn
                 .avdoedPerson.bostedsadresse?.map { it.verdi }?.sortedByDescending { it.gyldigFraOgMed }?.firstOrNull()
 
-        val adresserLike = isAdresserLike(gjenlevendeBosted, avdoedBosted)
+        val adresserLike = gjenlevendeBosted != null && avdoedBosted != null && isAdresserLike(gjenlevendeBosted, avdoedBosted)
         logger.info(
             "Avdød (${avdoedOgAnnenForelderMedFellesbarn.avdoedPerson.foedselsnummer.verdi}) og annen forelder " +
                 "(${avdoedOgAnnenForelderMedFellesbarn.gjenlevendeForelder.foedselsnummer.verdi}) har samme adresse: $adresserLike",

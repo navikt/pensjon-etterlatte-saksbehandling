@@ -11,9 +11,6 @@ updates:
       day: "sunday"
     open-pull-requests-limit: 10
     groups:
-      tjenestespesifikasjoner:
-        patterns:
-          - "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner*"
       avro-og-kafka:
         patterns:
           - "org.apache.avro*"
@@ -22,13 +19,6 @@ updates:
           - "com.github.davidmc24.gradle.plugin.avro"
           - "javax.el:javax.el-api"
           - "org.glassfish:jakarta.el"
-      test:
-        patterns:
-          - "org.junit*"
-          - "io.kotest*"
-          - "org.testcontainers*"
-          - "io.mockk:mockk"
-          - "no.nav.security:mock-oauth2-server"
       backend:
         patterns:
           - "io.micrometer*"
@@ -54,6 +44,12 @@ updates:
           - "io.ktor*"
           - "org.jetbrains.kotlinx*"
           - "org.apache.commons:commons-compress"
+          - "org.junit*"
+          - "io.kotest*"
+          - "org.testcontainers*"
+          - "io.mockk:mockk"
+          - "no.nav.security:mock-oauth2-server"
+          - "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner*"
       jms-mq:
         patterns:
           - "org.messaginghub:pooled-jms"
@@ -110,14 +106,12 @@ updates:
           - "@vitejs/plugin-react-swc"
           - "@types/node"
           - "jsdom"
-      react:
-        patterns:
           - "react"
           - "react*"
           - "redux"
           - "@types/react*"
           - "@reduxjs/toolkit"
-
+          - "typescript"
 
   # ===============
   # FRONTEND SERVER
@@ -155,6 +149,7 @@ updates:
           - "@types/request"
           - "prom-client"
           - "unleash-client"
+          - "typescript"
 
 
   # ==============

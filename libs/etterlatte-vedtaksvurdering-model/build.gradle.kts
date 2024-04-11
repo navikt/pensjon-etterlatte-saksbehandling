@@ -3,10 +3,6 @@ plugins {
     id("etterlatte.libs")
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
 }

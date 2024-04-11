@@ -1,3 +1,7 @@
+import com.github.jk1.license.render.InventoryReportRenderer
+import com.github.jk1.license.render.JsonReportRenderer
+
+setupRepositories()
 setupTestLogging()
 
 fun hentAntallKjerner(): Int {
@@ -8,7 +12,27 @@ fun hentAntallKjerner(): Int {
     return Runtime.getRuntime().availableProcessors() / 2
 }
 plugins {
+    alias(libs.plugins.license) apply true
     alias(libs.plugins.versions) apply true
+}
+
+licenseReport {
+    renderers = arrayOf(JsonReportRenderer(), InventoryReportRenderer())
+}
+
+fun Project.setupRepositories() {
+    for (sub in subprojects) {
+        sub.repositories {
+            mavenCentral()
+            maven {
+                url = uri("https://maven.pkg.github.com/navikt/pensjon-etterlatte-libs")
+                credentials {
+                    username = "token"
+                    password = System.getenv("GITHUB_TOKEN")
+                }
+            }
+        }
+    }
 }
 
 fun Project.setupTestLogging() {

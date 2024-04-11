@@ -17,6 +17,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -24,9 +26,7 @@ class OmregningHendelserRiverTest {
     @Test
     fun verifiserer() {
         val rapidsConnection = mockk<RapidsConnection>().also { every { it.register(any<River>()) } just runs }
-        val beregningService =
-            mockk<BeregningService>().also {
-            }
+        val beregningService = mockk<BeregningService>()
         val trygdetidService =
             mockk<TrygdetidService>().also {
                 every {
@@ -46,7 +46,12 @@ class OmregningHendelserRiverTest {
         every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 1000)
 
         runBlocking {
-            river.beregn(SakType.BARNEPENSJON, behandlingId = nyBehandling, behandlingViOmregnerFra = gammelBehandling)
+            river.beregn(
+                SakType.BARNEPENSJON,
+                behandlingId = nyBehandling,
+                behandlingViOmregnerFra = gammelBehandling,
+                LocalDate.of(2024, Month.APRIL, 10),
+            )
         }
     }
 
@@ -62,7 +67,8 @@ class OmregningHendelserRiverTest {
                 beregningsperioder =
                     listOf(
                         mockk<Beregningsperiode>().also {
-                            every { it.datoFOM } returns YearMonth.now()
+                            every { it.datoFOM } returns YearMonth.of(2024, Month.MARCH)
+                            every { it.datoTOM } returns null
                             every { it.utbetaltBeloep } returns nySum
                         },
                     ),

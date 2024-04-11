@@ -6,22 +6,26 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.AVKORTING_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.BEREGNING_KEY
+import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
 import no.nav.etterlatte.rapidsandrivers.behandlingId
+import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.UUID
 
 internal class OmregningHendelserRiver(
@@ -38,6 +42,7 @@ internal class OmregningHendelserRiver(
             validate { it.rejectKey(BEREGNING_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }
+            validate { it.requireKey(DATO_KEY) }
         }
     }
 
@@ -50,7 +55,7 @@ internal class OmregningHendelserRiver(
         val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
         val sakType = objectMapper.treeToValue<SakType>(packet[SAK_TYPE])
         runBlocking {
-            val pair = beregn(sakType, behandlingId, behandlingViOmregnerFra)
+            val pair = beregn(sakType, behandlingId, behandlingViOmregnerFra, packet.dato)
             packet[BEREGNING_KEY] = pair.first
             pair.second?.let { packet[AVKORTING_KEY] = it }
         }
@@ -63,6 +68,7 @@ internal class OmregningHendelserRiver(
         sakType: SakType,
         behandlingId: UUID,
         behandlingViOmregnerFra: UUID,
+        dato: LocalDate,
     ): Pair<BeregningDTO, AvkortingDto?> {
         trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         if (sakType == SakType.BARNEPENSJON) { // TODO: I EY-3760, sjekk om denne også bør gjelde for OMS
@@ -70,7 +76,7 @@ internal class OmregningHendelserRiver(
         }
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
         val forrigeBeregning = beregningService.beregn(behandlingViOmregnerFra).body<BeregningDTO>()
-        verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning)
+        verifiserToleransegrenser(dato, ny = beregning, gammel = forrigeBeregning)
 
         return if (sakType == SakType.OMSTILLINGSSTOENAD) {
             val avkorting =
@@ -83,13 +89,20 @@ internal class OmregningHendelserRiver(
     }
 
     private fun verifiserToleransegrenser(
+        dato: LocalDate,
         ny: BeregningDTO,
         gammel: BeregningDTO,
     ) {
-        val nyttBeloep = ny.beregningsperioder.maxBy { it.datoFOM }.utbetaltBeloep
-        val gammeltBeloep = gammel.beregningsperioder.maxBy { it.datoFOM }.utbetaltBeloep
+        val nyttBeloep =
+            ny.beregningsperioder.paaDato(dato)
+                .utbetaltBeloep
+        val gammeltBeloep = gammel.beregningsperioder.paaDato(dato).utbetaltBeloep
         if (nyttBeloep < gammeltBeloep) {
             throw RuntimeException("Nytt mindre enn gammelt")
         }
     }
+
+    fun List<Beregningsperiode>.paaDato(dato: LocalDate) =
+        filter { it.datoFOM.atDay(1) <= dato }
+            .first { it.datoTOM == null || it.datoTOM?.atEndOfMonth()?.isBefore(dato) == false }
 }

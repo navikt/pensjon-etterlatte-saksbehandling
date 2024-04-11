@@ -88,7 +88,9 @@ export const ForenkletOppgaverTable = ({
         ) : (
           <Table.Row>
             <Table.DataCell colSpan={8}>
-              <Heading size="medium">Ingen {formaterEnumTilLesbarString(oppgaveValg).toLowerCase()} oppgaver</Heading>
+              <Heading size="small">
+                Ingen {formaterEnumTilLesbarString(oppgaveValg).toLowerCase()} oppgaver på sak
+              </Heading>
             </Table.DataCell>
           </Table.Row>
         )}

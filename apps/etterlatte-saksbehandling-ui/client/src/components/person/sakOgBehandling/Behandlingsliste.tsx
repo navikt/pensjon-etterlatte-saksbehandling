@@ -1,4 +1,4 @@
-import { Link, Table } from '@navikt/ds-react'
+import { Heading, Link, Table } from '@navikt/ds-react'
 import { IBehandlingsammendrag, SakMedBehandlinger } from '../typer'
 import { formaterBehandlingstype, formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import React, { useEffect } from 'react'
@@ -74,55 +74,63 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {allebehandlinger.map((behandling, i) => {
-            if (isVanligBehandling(behandling)) {
-              return (
-                <Table.Row key={i} shadeOnHover={false}>
-                  <Table.DataCell>{formaterStringDato(behandling.behandlingOpprettet)}</Table.DataCell>
-                  <Table.DataCell>
-                    <BehandlingstypeWrapper>
-                      {formaterBehandlingstype(behandling.behandlingType)}
-                      {(sak.utlandstilknytning?.type === UtlandstilknytningType.UTLANDSTILSNITT ||
-                        sak.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND) && (
+          {!!allebehandlinger?.length ? (
+            allebehandlinger.map((behandling) => {
+              if (isVanligBehandling(behandling)) {
+                return (
+                  <Table.Row key={behandling.id}>
+                    <Table.DataCell>{formaterStringDato(behandling.behandlingOpprettet)}</Table.DataCell>
+                    <Table.DataCell>
+                      <BehandlingstypeWrapper>
+                        {formaterBehandlingstype(behandling.behandlingType)}
+                        {(sak.utlandstilknytning?.type === UtlandstilknytningType.UTLANDSTILSNITT ||
+                          sak.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND) && (
+                          <EessiPensjonLenke sakId={sak.id} behandlingId={behandling.id} sakType={sak.sakType} />
+                        )}
+                      </BehandlingstypeWrapper>
+                    </Table.DataCell>
+                    <Table.DataCell>{mapAarsak(behandling.aarsak)}</Table.DataCell>
+                    <Table.DataCell>
+                      {formaterEnumTilLesbarString(behandlingStatusTilLesbartnavn(behandling.status))}
+                    </Table.DataCell>
+                    <Table.DataCell>
+                      {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt!!.dato) : ''}
+                    </Table.DataCell>
+                    <VedtakKolonner behandlingId={behandling.id} />
+                    <Table.DataCell>
+                      <Link href={lenkeTilBehandling(behandling)}>Gå til behandling</Link>
+                    </Table.DataCell>
+                  </Table.Row>
+                )
+              } else {
+                return (
+                  <Table.Row key={behandling.id}>
+                    <Table.DataCell>{formaterStringDato(behandling.opprettet)}</Table.DataCell>
+                    <Table.DataCell>
+                      <BehandlingstypeWrapper>
+                        {genbehandlingTypeTilLesbartNavn(behandling.type)}
                         <EessiPensjonLenke sakId={sak.id} behandlingId={behandling.id} sakType={sak.sakType} />
-                      )}
-                    </BehandlingstypeWrapper>
-                  </Table.DataCell>
-                  <Table.DataCell>{mapAarsak(behandling.aarsak)}</Table.DataCell>
-                  <Table.DataCell>
-                    {formaterEnumTilLesbarString(behandlingStatusTilLesbartnavn(behandling.status))}
-                  </Table.DataCell>
-                  <Table.DataCell>
-                    {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt!!.dato) : ''}
-                  </Table.DataCell>
-                  <VedtakKolonner behandlingId={behandling.id} />
-                  <Table.DataCell>
-                    <Link href={lenkeTilBehandling(behandling)}>Gå til behandling</Link>
-                  </Table.DataCell>
-                </Table.Row>
-              )
-            } else {
-              return (
-                <Table.Row key={i} shadeOnHover={false}>
-                  <Table.DataCell>{formaterStringDato(behandling.opprettet)}</Table.DataCell>
-                  <Table.DataCell>
-                    <BehandlingstypeWrapper>
-                      {genbehandlingTypeTilLesbartNavn(behandling.type)}
-                      <EessiPensjonLenke sakId={sak.id} behandlingId={behandling.id} sakType={sak.sakType} />
-                    </BehandlingstypeWrapper>
-                  </Table.DataCell>
-                  <Table.DataCell>-</Table.DataCell>
-                  <Table.DataCell>{generellBehandlingsStatusTilLesbartNavn(behandling.status)}</Table.DataCell>
-                  <Table.DataCell>-</Table.DataCell>
-                  <Table.DataCell>-</Table.DataCell>
-                  <Table.DataCell>-</Table.DataCell>
-                  <Table.DataCell>
-                    <Link href={`/generellbehandling/${behandling.id}`}>Gå til behandling</Link>
-                  </Table.DataCell>
-                </Table.Row>
-              )
-            }
-          })}
+                      </BehandlingstypeWrapper>
+                    </Table.DataCell>
+                    <Table.DataCell>-</Table.DataCell>
+                    <Table.DataCell>{generellBehandlingsStatusTilLesbartNavn(behandling.status)}</Table.DataCell>
+                    <Table.DataCell>-</Table.DataCell>
+                    <Table.DataCell>-</Table.DataCell>
+                    <Table.DataCell>-</Table.DataCell>
+                    <Table.DataCell>
+                      <Link href={`/generellbehandling/${behandling.id}`}>Gå til behandling</Link>
+                    </Table.DataCell>
+                  </Table.Row>
+                )
+              }
+            })
+          ) : (
+            <Table.Row>
+              <Table.DataCell colSpan={8}>
+                <Heading size="small">Ingen behandlinger på sak</Heading>
+              </Table.DataCell>
+            </Table.Row>
+          )}
         </Table.Body>
       </Table>
       {isPending(generellbehandlingStatus) && <Spinner visible={true} label="Henter generelle behandlinger" />}

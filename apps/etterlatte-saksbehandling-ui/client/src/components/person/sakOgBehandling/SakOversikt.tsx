@@ -17,6 +17,7 @@ import { ForenkletOppgaverTable } from '~components/person/sakOgBehandling/Foren
 import { hentOppgaverTilknyttetSak } from '~shared/api/oppgaver'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Behandlingsliste } from '~components/person/sakOgBehandling/Behandlingsliste'
+import { KlageListe } from '~components/person/sakOgBehandling/KlageListe'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -109,9 +110,15 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 success: (oppgaver) => <ForenkletOppgaverTable oppgaver={oppgaver} oppgaveValg={oppgaveValg} />,
               })}
             </SpaceChildren>
+
             <SpaceChildren>
               <Heading size="medium">Behandlinger</Heading>
               <Behandlingsliste sakOgBehandlinger={{ sak, behandlinger }} />
+            </SpaceChildren>
+
+            <SpaceChildren>
+              <Heading size="medium">Klager</Heading>
+              <KlageListe sakId={sak.id} />
             </SpaceChildren>
           </SpaceChildren>
         ),

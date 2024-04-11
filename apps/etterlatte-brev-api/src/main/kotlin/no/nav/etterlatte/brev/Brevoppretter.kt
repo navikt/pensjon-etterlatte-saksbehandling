@@ -76,6 +76,7 @@ class Brevoppretter(
         brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         brevtype: Brevtype,
+        overstyrSpraak: Spraak? = null,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): Pair<Brev, GenerellBrevData> =
         with(
@@ -85,6 +86,7 @@ class Brevoppretter(
                 bruker,
                 brevKode,
                 automatiskMigreringRequest,
+                overstyrSpraak,
                 brevDataMapping,
             ),
         ) {
@@ -121,8 +123,8 @@ class Brevoppretter(
                 bruker,
                 brevKode,
                 automatiskMigreringRequest,
-                brevDataMapping,
                 spraak,
+                brevDataMapping,
             ),
         ) {
             if (innhold.payload != null) {
@@ -146,8 +148,8 @@ class Brevoppretter(
         bruker: BrukerTokenInfo,
         brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
         overstyrSpraak: Spraak? = null,
+        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): OpprettBrevRequest {
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, overstyrSpraak, bruker) }

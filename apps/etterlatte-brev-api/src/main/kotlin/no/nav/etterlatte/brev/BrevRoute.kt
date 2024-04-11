@@ -182,11 +182,18 @@ fun Route.brevRoute(
                 logger.info("Oppretter nytt brev på sak=$sakId)")
                 val brevParametre = call.receive<BrevParametre>()
 
+                val spraak =
+                    when (brevParametre) {
+                        is BrevParametre.Aktivitetsplikt -> null
+                        is BrevParametre.TomtBrev -> Spraak.NB
+                    }
+
                 measureTimedValue {
                     service.opprettBrev(
                         sakId,
                         brukerTokenInfo,
                         brevParametre.brevkode,
+                        overstyrSpraak = spraak,
                     ) { redigerbarTekstRequest -> brevParametre.brevDataMapping(redigerbarTekstRequest) }
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")

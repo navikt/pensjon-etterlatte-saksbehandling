@@ -36,6 +36,7 @@ class BrevService(
         sakId: Long,
         bruker: BrukerTokenInfo,
         brevkode: EtterlatteBrevKode,
+        overstyrSpraak: Spraak? = null,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): Brev =
         brevoppretter.opprettBrev(
@@ -46,6 +47,7 @@ class BrevService(
             brevKode = { brevkode },
             brevtype = brevkode.brevtype,
             brevDataMapping = brevDataMapping,
+            overstyrSpraak = overstyrSpraak,
         ).first
 
     data class BrevPayload(

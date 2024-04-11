@@ -16,6 +16,7 @@ import { SakIkkeFunnet } from '~components/person/sakOgBehandling/SakIkkeFunnet'
 import { ForenkletOppgaverTable } from '~components/person/sakOgBehandling/ForenkletOppgaverTable'
 import { hentOppgaverTilknyttetSak } from '~shared/api/oppgaver'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { Behandlingsliste } from '~components/person/sakOgBehandling/Behandlingsliste'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -55,7 +56,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
       {mapResult(sakResult, {
         pending: <Spinner visible label="Henter sak og behandlinger" />,
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
-        success: ({ sak }) => (
+        success: ({ sak, behandlinger }) => (
           <SpaceChildren gap="2rem">
             <SakOversiktHeader fnr={fnr} sak={sak} />
 
@@ -107,6 +108,10 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
                 success: (oppgaver) => <ForenkletOppgaverTable oppgaver={oppgaver} oppgaveValg={oppgaveValg} />,
               })}
+            </SpaceChildren>
+            <SpaceChildren>
+              <Heading size="medium">Behandlinger</Heading>
+              <Behandlingsliste sakOgBehandlinger={{ sak, behandlinger }} />
             </SpaceChildren>
           </SpaceChildren>
         ),

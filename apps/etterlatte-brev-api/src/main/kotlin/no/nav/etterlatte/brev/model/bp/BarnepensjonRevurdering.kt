@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.behandling.Avdoed
-import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
@@ -20,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import java.time.LocalDate
 
 data class BarnepensjonRevurdering(
@@ -43,7 +43,7 @@ data class BarnepensjonRevurdering(
             utbetalingsinfo: Utbetalingsinfo,
             forrigeUtbetalingsinfo: Utbetalingsinfo?,
             etterbetaling: EtterbetalingDTO?,
-            trygdetid: Trygdetid,
+            trygdetid: List<TrygdetidDto>,
             grunnbeloep: Grunnbeloep,
             utlandstilknytning: UtlandstilknytningType?,
             brevutfall: BrevutfallDto,
@@ -69,18 +69,12 @@ data class BarnepensjonRevurdering(
                 beregning =
                     barnepensjonBeregning(
                         innhold,
+                        avdoede,
                         utbetalingsinfo,
                         grunnbeloep,
                         beregningsperioder,
                         trygdetid,
                         erForeldreloes,
-                        bruktAvdoed =
-                            avdoede.find {
-                                val fnr =
-                                    utbetalingsinfo.beregningsperioder.last().trygdetidForIdent
-                                        ?: throw ManglerAvdoedBruktTilTrygdetid()
-                                it.fnr.value == fnr
-                            }?.navn ?: throw ManglerAvdoedBruktTilTrygdetid(),
                     ),
                 etterbetaling =
                     etterbetaling

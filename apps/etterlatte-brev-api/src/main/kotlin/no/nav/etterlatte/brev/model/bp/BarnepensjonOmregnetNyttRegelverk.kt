@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
@@ -15,6 +14,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.person.ForelderVerge
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
@@ -42,6 +42,8 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
                                     generellBrevData.personerISak.verge !is ForelderVerge
                             ),
                 )
+
+            // TODO På tide å fjerne?
             if (generellBrevData.loependeIPesys()) {
                 val pesysUtbetaltFoerReform = migreringRequest?.brutto ?: 0
                 val pesysUtenlandstilknytning =
@@ -80,7 +82,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
             innhold: InnholdMedVedlegg,
             erUnder18Aar: Boolean?,
             utbetalingsinfo: Utbetalingsinfo,
-            trygdetid: Trygdetid,
+            trygdetid: List<TrygdetidDto>,
             grunnbeloep: Grunnbeloep,
             etterbetaling: EtterbetalingDTO?,
             migreringRequest: MigreringBrevRequest?,
@@ -96,7 +98,15 @@ data class BarnepensjonOmregnetNyttRegelverk(
             return BarnepensjonOmregnetNyttRegelverk(
                 innhold = innhold.innhold(),
                 erUnder18Aar = erUnder18AarNonNull,
-                beregning = barnepensjonBeregning(innhold, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
+                beregning =
+                    barnepensjonBeregning(
+                        innhold,
+                        emptyList(),
+                        utbetalingsinfo,
+                        grunnbeloep,
+                        beregningsperioder,
+                        trygdetid,
+                    ),
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },

@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
@@ -16,7 +15,7 @@ import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import java.time.LocalDate
 
 data class BarnepensjonInnvilgelseForeldreloes(
@@ -37,7 +36,7 @@ data class BarnepensjonInnvilgelseForeldreloes(
             innhold: InnholdMedVedlegg,
             utbetalingsinfo: Utbetalingsinfo,
             etterbetaling: EtterbetalingDTO?,
-            trygdetid: Trygdetid,
+            trygdetid: List<TrygdetidDto>,
             grunnbeloep: Grunnbeloep,
             utlandstilknytning: UtlandstilknytningType?,
             brevutfall: BrevutfallDto,
@@ -52,18 +51,12 @@ data class BarnepensjonInnvilgelseForeldreloes(
                 beregning =
                     barnepensjonBeregning(
                         innhold,
+                        avdoede,
                         utbetalingsinfo,
                         grunnbeloep,
                         beregningsperioder,
                         trygdetid,
                         erForeldreloes = true,
-                        bruktAvdoed =
-                            avdoede.find {
-                                val fnr =
-                                    utbetalingsinfo.beregningsperioder.last().trygdetidForIdent
-                                        ?: throw ManglerAvdoedBruktTilTrygdetid()
-                                it.fnr.value == fnr
-                            }?.navn ?: throw ManglerAvdoedBruktTilTrygdetid(),
                     ),
                 etterbetaling =
                     etterbetaling
@@ -97,8 +90,3 @@ data class BarnepensjonForeldreloesRedigerbar(
             )
     }
 }
-
-class ManglerAvdoedBruktTilTrygdetid : UgyldigForespoerselException(
-    code = "MANGLER_AVDOED_INFO_I_BEREGNING",
-    detail = "Det er mangler i beregning. Utfør beregning på nytt og prøv igjen.",
-)

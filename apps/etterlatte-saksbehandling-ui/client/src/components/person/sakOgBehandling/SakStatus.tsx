@@ -7,6 +7,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import { VedtakType } from '~components/vedtak/typer'
 import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { VedtaketKlagenGjelder } from '~shared/types/Klage'
+import { RecordFillIcon, XMarkIcon } from '@navikt/aksel-icons'
 
 export const SakStatus = ({ sakId }: { sakId: number }) => {
   const [vedtakISakResult, vedtakISakFetch] = useApiCall(hentAlleVedtakISak)
@@ -28,7 +29,7 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
               {formaterEnumTilLesbarString(sisteVedtak.vedtakType)}{' '}
               {!!sisteVedtak.datoAttestert && formaterStringDato(sisteVedtak.datoAttestert)}
             </Tag>
-            <Tag key={VedtakType.INNVILGELSE} variant="success">
+            <Tag key={VedtakType.INNVILGELSE} variant="success" icon={<RecordFillIcon aria-hidden color="#06893A" />}>
               Løpende
             </Tag>
           </SpaceChildren>
@@ -40,7 +41,7 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
               {formaterEnumTilLesbarString(sisteVedtak.vedtakType)}{' '}
               {!!sisteVedtak.datoAttestert && formaterStringDato(sisteVedtak.datoAttestert)}
             </Tag>
-            <Tag key={VedtakType.AVSLAG} variant="error">
+            <Tag key={VedtakType.AVSLAG} variant="error" icon={<XMarkIcon aria-hidden color="#C30000" />}>
               Avslått
             </Tag>
           </SpaceChildren>

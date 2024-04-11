@@ -1,7 +1,7 @@
 import React, { ReactNode, useEffect, useState } from 'react'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
-import { Table } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { Heading, Table } from '@navikt/ds-react'
+import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/components/Tags'
 import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
@@ -62,7 +62,7 @@ export const ForenkletOppgaverTable = ({
         </Table.Row>
       </Table.Header>
       <Table.Body>
-        {!!filtrerteOpgpaver?.length &&
+        {!!filtrerteOpgpaver?.length ? (
           filtrerteOpgpaver.map((oppgave: OppgaveDTO) => (
             <Table.Row key={oppgave.id}>
               <Table.DataCell>{formaterStringDato(oppgave.opprettet)}</Table.DataCell>
@@ -84,7 +84,14 @@ export const ForenkletOppgaverTable = ({
                 <HandlingerForOppgave oppgave={oppgave} revurderingsaarsaker={new RevurderingsaarsakerDefault()} />
               </Table.DataCell>
             </Table.Row>
-          ))}
+          ))
+        ) : (
+          <Table.Row>
+            <Table.DataCell colSpan={8}>
+              <Heading size="medium">Ingen {formaterEnumTilLesbarString(oppgaveValg).toLowerCase()} oppgaver</Heading>
+            </Table.DataCell>
+          </Table.Row>
+        )}
       </Table.Body>
     </Table>
   )

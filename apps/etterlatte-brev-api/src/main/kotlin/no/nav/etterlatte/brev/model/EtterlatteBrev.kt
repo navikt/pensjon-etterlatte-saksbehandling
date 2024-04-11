@@ -71,7 +71,6 @@ data class TrygdetidMedBeregningsmetode(
     val navnAvdoed: String,
     val trygdetidsperioder: List<Trygdetidsperiode>,
     val beregnetTrygdetidAar: Int,
-    val beregnetTrygdetidMaaneder: Int,
     val prorataBroek: IntBroek?,
     val beregningsMetodeAnvendt: BeregningsMetode,
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
@@ -133,8 +132,6 @@ fun TrygdetidDto.fromDto(
             BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
             else -> throw ManglerMedTrygdetidVeBrukIBrev()
         },
-    // TODO ubrukt kan fjernes
-    beregnetTrygdetidMaaneder = 0,
     prorataBroek = beregnetTrygdetid?.resultat?.prorataBroek,
     mindreEnnFireFemtedelerAvOpptjeningstiden =
         beregnetTrygdetid

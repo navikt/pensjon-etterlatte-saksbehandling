@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -24,19 +25,8 @@ import java.util.UUID
 
 class OmregningHendelserRiverTest {
     @Test
-    fun verifiserer() {
-        val rapidsConnection = mockk<RapidsConnection>().also { every { it.register(any<River>()) } just runs }
-        val beregningService = mockk<BeregningService>()
-        val trygdetidService =
-            mockk<TrygdetidService>().also {
-                every {
-                    it.kopierTrygdetidFraForrigeBehandling(
-                        any(),
-                        any(),
-                    )
-                } returns mockk()
-            }
-        val river = OmregningHendelserRiver(rapidsConnection, beregningService, trygdetidService)
+    fun `verifiserer naar alt er ok`() {
+        val (beregningService, river) = initialiserRiver()
 
         val nyBehandling = UUID.randomUUID()
         val gammelBehandling = UUID.randomUUID()
@@ -53,6 +43,45 @@ class OmregningHendelserRiverTest {
                 LocalDate.of(2024, Month.APRIL, 10),
             )
         }
+    }
+
+    @Test
+    fun `feiler naar ny beregning er lavere enn gammel`() {
+        val (beregningService, river) = initialiserRiver()
+
+        val nyBehandling = UUID.randomUUID()
+        val gammelBehandling = UUID.randomUUID()
+
+        every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
+        every { beregningService.beregn(gammelBehandling) } returns beregningDTO(gammelBehandling, 1000)
+        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 500)
+
+        runBlocking {
+            assertThrows<MindreEnnForrigeBehandling> {
+                river.beregn(
+                    SakType.BARNEPENSJON,
+                    behandlingId = nyBehandling,
+                    behandlingViOmregnerFra = gammelBehandling,
+                    LocalDate.of(2024, Month.MAY, 10),
+                )
+            }
+        }
+    }
+
+    private fun initialiserRiver(): Pair<BeregningService, OmregningHendelserRiver> {
+        val rapidsConnection = mockk<RapidsConnection>().also { every { it.register(any<River>()) } just runs }
+        val beregningService = mockk<BeregningService>()
+        val trygdetidService =
+            mockk<TrygdetidService>().also {
+                every {
+                    it.kopierTrygdetidFraForrigeBehandling(
+                        any(),
+                        any(),
+                    )
+                } returns mockk()
+            }
+        val river = OmregningHendelserRiver(rapidsConnection, beregningService, trygdetidService)
+        return Pair(beregningService, river)
     }
 
     private fun beregningDTO(

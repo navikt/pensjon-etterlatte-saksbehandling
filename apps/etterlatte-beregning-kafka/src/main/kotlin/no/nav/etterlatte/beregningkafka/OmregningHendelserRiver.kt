@@ -2,11 +2,13 @@ package no.nav.etterlatte.beregningkafka
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.call.body
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.AVKORTING_KEY
@@ -98,7 +100,7 @@ internal class OmregningHendelserRiver(
                 .utbetaltBeloep
         val gammeltBeloep = gammel.beregningsperioder.paaDato(dato).utbetaltBeloep
         if (nyttBeloep < gammeltBeloep) {
-            throw RuntimeException("Nytt mindre enn gammelt")
+            throw MindreEnnForrigeBehandling(ny.behandlingId)
         }
     }
 
@@ -106,3 +108,9 @@ internal class OmregningHendelserRiver(
         filter { it.datoFOM.atDay(1) <= dato }
             .first { it.datoTOM == null || it.datoTOM?.plusMonths(1)?.atDay(1)?.isAfter(dato) == true }
 }
+
+class MindreEnnForrigeBehandling(behandlingId: UUID) : ForespoerselException(
+    code = "OMREGNING_UTENFOR_TOLERANSEGRENSE_MINDRE",
+    detail = "Ny beregning for behandling $behandlingId gir lavere sum enn forrige beregning. Skal ikke skje under omregning.",
+    status = HttpStatusCode.ExpectationFailed.value,
+)

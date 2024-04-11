@@ -25,7 +25,7 @@ sealed class BrevParametre {
     }
 
     @JsonTypeName("TOMT_BREV")
-    class TomtBrev() : BrevParametre() {
+    class TomtBrev : BrevParametre() {
         override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.TOM_DELMAL
 
         override fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar {

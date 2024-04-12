@@ -58,17 +58,6 @@ export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   RETT_UTEN_TIDSBEGRENSNING: 'Stønad uten tidsbegrensning',
 } as const
 
-// TODO Fjerne?
-export const erOpphoer = (revurderingsaarsak: Revurderingaarsak) =>
-  [
-    Revurderingaarsak.DOEDSFALL,
-    Revurderingaarsak.ADOPSJON,
-    Revurderingaarsak.OMGJOERING_AV_FARSKAP,
-    Revurderingaarsak.SIVILSTAND,
-    Revurderingaarsak.OPPHOER_UTEN_BREV,
-    Revurderingaarsak.ALDERSOVERGANG,
-  ].includes(revurderingsaarsak)
-
 export type RevurderingsaarsakerBySakstype = {
   [key in SakType]: Array<Revurderingaarsak>
 }

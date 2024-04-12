@@ -9,10 +9,10 @@ import { RevurderingsaarsakerDefault } from '~shared/types/Revurderingaarsak'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
 import { HandlingerForOppgave } from '~components/oppgavebenk/components/HandlingerForOppgave'
-import { useAppSelector } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { saksbehandlereIEnhetApi } from '~shared/api/oppgaver'
 import { OppgaveValg } from '~components/person/sakOgBehandling/SakOversikt'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const ForenkletOppgaverTable = ({
   oppgaver,
@@ -21,7 +21,7 @@ export const ForenkletOppgaverTable = ({
   oppgaver: OppgaveDTO[]
   oppgaveValg: OppgaveValg
 }): ReactNode => {
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const filtrerOppgaverPaaOppgaveValg = (): OppgaveDTO[] => {
     switch (oppgaveValg) {
       case OppgaveValg.AKTIVE:

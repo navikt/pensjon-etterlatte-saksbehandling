@@ -17,6 +17,7 @@ data class DetaljertBehandling(
     val revurderingInfo: RevurderingInfo?,
     val prosesstype: Prosesstype,
     val kilde: Vedtaksloesning,
+    val sendeBrev: Boolean,
 )
 
 fun DetaljertBehandling.virkningstidspunkt() =

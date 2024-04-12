@@ -164,6 +164,7 @@ class BehandlingFactoryTest {
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
             )
 
         val persongalleri =
@@ -256,6 +257,7 @@ class BehandlingFactoryTest {
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
             )
 
         val persongalleri =
@@ -337,6 +339,7 @@ class BehandlingFactoryTest {
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
             )
 
         val persongalleri =
@@ -441,6 +444,7 @@ class BehandlingFactoryTest {
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
             )
 
         val persongalleri =
@@ -519,6 +523,7 @@ class BehandlingFactoryTest {
                         iverksattBehandlingId,
                     ),
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
             )
 
         every {
@@ -591,6 +596,7 @@ class BehandlingFactoryTest {
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
             )
 
         every { sakServiceMock.finnEllerOpprettSak(any(), any(), gradering = any()) } returns sak

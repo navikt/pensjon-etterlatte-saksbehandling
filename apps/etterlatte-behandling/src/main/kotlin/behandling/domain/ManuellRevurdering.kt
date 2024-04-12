@@ -31,6 +31,7 @@ data class ManuellRevurdering(
     override val kilde: Vedtaksloesning,
     override val begrunnelse: String?,
     override val relatertBehandlingId: String?,
+    override val sendeBrev: Boolean,
 ) : Revurdering(
         id = id,
         sak = sak,

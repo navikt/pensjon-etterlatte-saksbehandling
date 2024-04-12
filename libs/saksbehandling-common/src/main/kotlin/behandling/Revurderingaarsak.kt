@@ -3,10 +3,6 @@ package no.nav.etterlatte.libs.common.behandling
 import no.nav.etterlatte.libs.common.behandling.KanBrukesIMiljoe.DevOgProd
 import no.nav.etterlatte.libs.common.behandling.KanBrukesIMiljoe.IngenMiljoe
 import no.nav.etterlatte.libs.common.behandling.KanBrukesIMiljoe.KunIDev
-import no.nav.etterlatte.libs.common.behandling.Utfall.IkkeOpphoerSkalIkkeSendeBrev
-import no.nav.etterlatte.libs.common.behandling.Utfall.IkkeOpphoerSkalSendeBrev
-import no.nav.etterlatte.libs.common.behandling.Utfall.OpphoerMedBrev
-import no.nav.etterlatte.libs.common.behandling.Utfall.OpphoerUtenBrev
 import no.nav.etterlatte.libs.common.clusterNavn
 
 private val SAKTYPE_OMS = listOf(SakType.OMSTILLINGSSTOENAD)
@@ -33,66 +29,46 @@ private sealed class KanBrukesIMiljoe {
     }
 }
 
-sealed class Utfall {
-    abstract val skalSendeBrev: Boolean
-
-    data object OpphoerUtenBrev : Utfall() {
-        override val skalSendeBrev = false
-    }
-
-    data object OpphoerMedBrev : Utfall() {
-        override val skalSendeBrev = true
-    }
-
-    data object IkkeOpphoerSkalSendeBrev : Utfall() {
-        override val skalSendeBrev = true
-    }
-
-    data object IkkeOpphoerSkalIkkeSendeBrev : Utfall() {
-        override val skalSendeBrev = false
-    }
-}
-
 // Disse må ha en oversettelse i frontend Revurderingaarsak.ts
 enum class Revurderingaarsak(
     private val gyldigFor: List<SakType>,
     private val miljoe: KanBrukesIMiljoe,
-    val utfall: Utfall,
+    val skalSendeBrev: Boolean,
 ) {
     // Endring
-    NY_SOEKNAD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
-    SOESKENJUSTERING(SAKTYPE_BP, DevOgProd, IkkeOpphoerSkalSendeBrev),
-    REGULERING(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalIkkeSendeBrev),
-    INNTEKTSENDRING(SAKTYPE_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
-    INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
-    YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
-    RETT_UTEN_TIDSBEGRENSNING(SAKTYPE_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
+    NY_SOEKNAD(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    SOESKENJUSTERING(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
+    REGULERING(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
+    INNTEKTSENDRING(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
+    INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    RETT_UTEN_TIDSBEGRENSNING(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
 
     // Opphør
-    ALDERSOVERGANG(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
-    DOEDSFALL(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
-    OPPHOER_UTEN_BREV(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
-    ADOPSJON(SAKTYPE_BP, DevOgProd, OpphoerMedBrev),
-    SIVILSTAND(SAKTYPE_OMS, DevOgProd, OpphoerMedBrev),
-    OMGJOERING_AV_FARSKAP(SAKTYPE_BP, DevOgProd, OpphoerMedBrev),
+    ALDERSOVERGANG(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
+    DOEDSFALL(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
+    OPPHOER_UTEN_BREV(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
+    ADOPSJON(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
+    SIVILSTAND(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
+    OMGJOERING_AV_FARSKAP(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
 
     // Opphør og endring
-    EKSPORT(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
-    IMPORT(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
-    ANNEN(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
-    ANNEN_UTEN_BREV(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalIkkeSendeBrev),
+    EKSPORT(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    IMPORT(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    ANNEN(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    ANNEN_UTEN_BREV(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
 
     // TODO vurdere disse
-    OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
-    SLUTTBEHANDLING_UTLAND(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+    OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
+    SLUTTBEHANDLING_UTLAND(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
 
     // TODO ikke i noe miljø ennå
-    FENGSELSOPPHOLD(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
-    UT_AV_FENGSEL(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
-    UTLAND(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
-    BARN(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
-    ANSVARLIGE_FORELDRE(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
-    VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
+    FENGSELSOPPHOLD(SAKTYPE_BP, IngenMiljoe, skalSendeBrev = true),
+    UT_AV_FENGSEL(SAKTYPE_BP, IngenMiljoe, skalSendeBrev = true),
+    UTLAND(SAKTYPE_BP, IngenMiljoe, skalSendeBrev = true),
+    BARN(SAKTYPE_BP, IngenMiljoe, skalSendeBrev = true),
+    ANSVARLIGE_FORELDRE(SAKTYPE_BP, IngenMiljoe, skalSendeBrev = true),
+    VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, IngenMiljoe, skalSendeBrev = true),
     ;
 
     fun kanBrukesIMiljo(): Boolean =

@@ -24,6 +24,7 @@ import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 
 export function TilbakekrevingSidemeny() {
   const tilbakekreving = useTilbakekreving()
@@ -114,14 +115,7 @@ export function TilbakekrevingSidemeny() {
             <KopierbarVerdi value={tilbakekreving!!.sak.id.toString()} />
           </div>
           {mapSuccess(oppgaveForBehandlingenStatus, (oppgave) => {
-            if (
-              [
-                TilbakekrevingStatus.OPPRETTET,
-                TilbakekrevingStatus.UNDER_ARBEID,
-                TilbakekrevingStatus.UNDERKJENT,
-                TilbakekrevingStatus.FATTET_VEDTAK,
-              ].includes(tilbakekreving!!.status)
-            ) {
+            if (erOppgaveRedigerbar(oppgave?.status)) {
               return <SettPaaVent oppgave={oppgave} redigerbar={true} refreshOppgave={hentOppgaveForBehandling} />
             }
             return null

@@ -22,7 +22,6 @@ import { FlexRow } from '~shared/styled'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
@@ -154,13 +153,9 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
       </FlexRow>
 
-      {mapSuccess(
-        oppgaveForBehandlingenStatus,
-        (oppgave) =>
-          erOppgaveRedigerbar(oppgave?.status) && (
-            <SettPaaVent oppgave={oppgave} redigerbar={redigerbar} refreshOppgave={hentOppgaveForBehandling} />
-          )
-      )}
+      {mapSuccess(oppgaveForBehandlingenStatus, (oppgave) => (
+        <SettPaaVent oppgave={oppgave} redigerbar={redigerbar} refreshOppgave={hentOppgaveForBehandling} />
+      ))}
     </SidebarPanel>
   )
 }

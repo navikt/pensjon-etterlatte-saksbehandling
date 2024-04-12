@@ -6,6 +6,7 @@ import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -31,11 +32,79 @@ class BeregningsGrunnlagService(
 ) {
     private val logger = LoggerFactory.getLogger(BeregningsGrunnlagService::class.java)
 
-    private suspend fun validerBeregningsgrunnlagBarnepensjon(
+    suspend fun lagreBeregningsGrunnlag(
         behandlingId: UUID,
-        barnepensjonBeregningsGrunnlag: BarnepensjonBeregningsGrunnlag,
+        beregningsGrunnlag: LagreBeregningsGrunnlag,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean =
+        when {
+            behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false) -> {
+                val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+                if (behandling.sakType == SakType.BARNEPENSJON) {
+                    validerSoeskenMedIBeregning(behandlingId, beregningsGrunnlag, brukerTokenInfo)
+                }
+                val kanLagreDetteGrunnlaget =
+                    if (behandling.behandlingType == BehandlingType.REVURDERING) {
+                        // Her vil vi sjekke opp om det vi lagrer ned ikke er modifisert før virk på revurderingen
+                        val sisteIverksatteBehandling =
+                            behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
+                        grunnlagErIkkeEndretFoerVirk(
+                            behandling,
+                            sisteIverksatteBehandling.id,
+                            beregningsGrunnlag,
+                        )
+                    } else {
+                        true
+                    }
+
+                val soeskenMedIBeregning =
+                    if (behandling.sakType == SakType.BARNEPENSJON) {
+                        beregningsGrunnlag.soeskenMedIBeregning.ifEmpty {
+                            when (val virk = behandling.virkningstidspunkt) {
+                                null -> throw ManglerVirkningstidspunktBP()
+                                else -> {
+                                    if (virk.dato.isBefore(REFORM_TIDSPUNKT_BP)) {
+                                        // Her burde man egentlig ha en sjekk på om avdøde har noen barn.
+                                        // Hvis avdøde har barn og vi er før reformtidspunkt må disse barnene søskenjusteres
+                                        listOf(
+                                            GrunnlagMedPeriode(
+                                                data = emptyList(),
+                                                fom = virk.dato.atDay(1),
+                                                tom = null,
+                                            ),
+                                        )
+                                    } else {
+                                        emptyList()
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        emptyList()
+                    }
+
+                kanLagreDetteGrunnlaget &&
+                    beregningsGrunnlagRepository.lagreBeregningsGrunnlag(
+                        BeregningsGrunnlag(
+                            behandlingId = behandlingId,
+                            kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
+                            soeskenMedIBeregning = soeskenMedIBeregning,
+                            institusjonsoppholdBeregningsgrunnlag =
+                                beregningsGrunnlag.institusjonsopphold ?: emptyList(),
+                            beregningsMetode = beregningsGrunnlag.beregningsMetode,
+                        ),
+                    )
+            }
+
+            else -> false
+        }
+
+    private suspend fun validerSoeskenMedIBeregning(
+        behandlingId: UUID,
+        barnepensjonBeregningsGrunnlag: LagreBeregningsGrunnlag,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        // TODO Skal vekk..
         val grunnlag = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
         if (grunnlag.hentAvdoede().size > 1) {
             throw BPBeregningsgrunnlagMerEnnEnAvdoedException(behandlingId)
@@ -62,108 +131,10 @@ class BeregningsGrunnlagService(
         }
     }
 
-    suspend fun lagreBarnepensjonBeregningsGrunnlag(
-        behandlingId: UUID,
-        barnepensjonBeregningsGrunnlag: BarnepensjonBeregningsGrunnlag,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean =
-        when {
-            behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false) -> {
-                validerBeregningsgrunnlagBarnepensjon(behandlingId, barnepensjonBeregningsGrunnlag, brukerTokenInfo)
-                val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-                val kanLagreDetteGrunnlaget =
-                    if (behandling.behandlingType == BehandlingType.REVURDERING) {
-                        // Her vil vi sjekke opp om det vi lagrer ned ikke er modifisert før virk på revurderingen
-                        val sisteIverksatteBehandling =
-                            behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
-                        grunnlagErIkkeEndretFoerVirk(
-                            behandling,
-                            sisteIverksatteBehandling.id,
-                            barnepensjonBeregningsGrunnlag,
-                        )
-                    } else {
-                        true
-                    }
-
-                val soeskenMedIBeregning =
-                    barnepensjonBeregningsGrunnlag.soeskenMedIBeregning.ifEmpty {
-                        when (val virk = behandling.virkningstidspunkt) {
-                            null -> throw ManglerVirkningstidspunktBP()
-                            else -> {
-                                if (virk.dato.isBefore(REFORM_TIDSPUNKT_BP)) {
-                                    // Her burde man egentlig ha en sjekk på om avdøde har noen barn.
-                                    // Hvis avdøde har barn og vi er før reformtidspunkt må disse barnene søskenjusteres
-                                    listOf(
-                                        GrunnlagMedPeriode(
-                                            data = emptyList(),
-                                            fom = virk.dato.atDay(1),
-                                            tom = null,
-                                        ),
-                                    )
-                                } else {
-                                    emptyList()
-                                }
-                            }
-                        }
-                    }
-
-                kanLagreDetteGrunnlaget &&
-                    beregningsGrunnlagRepository.lagreBeregningsGrunnlag(
-                        BeregningsGrunnlag(
-                            behandlingId = behandlingId,
-                            kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
-                            soeskenMedIBeregning = soeskenMedIBeregning,
-                            institusjonsoppholdBeregningsgrunnlag =
-                                barnepensjonBeregningsGrunnlag.institusjonsopphold ?: emptyList(),
-                            beregningsMetode = barnepensjonBeregningsGrunnlag.beregningsMetode,
-                        ),
-                    )
-            }
-
-            else -> false
-        }
-
-    suspend fun lagreOMSBeregningsGrunnlag(
-        behandlingId: UUID,
-        omstillingstoenadBeregningsGrunnlag: OmstillingstoenadBeregningsGrunnlag,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean =
-        when {
-            behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false) -> {
-                val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-                val kanLagreDetteGrunnlaget =
-                    if (behandling.behandlingType == BehandlingType.REVURDERING) {
-                        // Her vil vi sjekke opp om det vi lagrer ned ikke er modifisert før virk på revurderingen
-                        val sisteIverksatteBehandling =
-                            behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
-                        grunnlagErIkkeEndretFoerVirkOMS(
-                            behandling,
-                            sisteIverksatteBehandling.id,
-                            omstillingstoenadBeregningsGrunnlag,
-                        )
-                    } else {
-                        true
-                    }
-
-                kanLagreDetteGrunnlaget &&
-                    beregningsGrunnlagRepository.lagreBeregningsGrunnlag(
-                        BeregningsGrunnlag(
-                            behandlingId = behandlingId,
-                            kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
-                            institusjonsoppholdBeregningsgrunnlag =
-                                omstillingstoenadBeregningsGrunnlag.institusjonsopphold ?: emptyList(),
-                            beregningsMetode = omstillingstoenadBeregningsGrunnlag.beregningsMetode,
-                        ),
-                    )
-            }
-
-            else -> false
-        }
-
     private fun grunnlagErIkkeEndretFoerVirk(
         revurdering: DetaljertBehandling,
         forrigeIverksatteBehandlingId: UUID,
-        barnepensjonBeregningsGrunnlag: BarnepensjonBeregningsGrunnlag,
+        beregningsGrunnlag: LagreBeregningsGrunnlag,
     ): Boolean {
         val forrigeGrunnlag =
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(
@@ -172,35 +143,24 @@ class BeregningsGrunnlagService(
         val revurderingVirk = revurdering.virkningstidspunkt().dato.atDay(1)
 
         val soeskenjusteringErLiktFoerVirk =
-            erGrunnlagLiktFoerEnDato(
-                barnepensjonBeregningsGrunnlag.soeskenMedIBeregning,
-                forrigeGrunnlag!!.soeskenMedIBeregning,
-                revurderingVirk,
-            )
+            if (revurdering.sakType == SakType.BARNEPENSJON) {
+                erGrunnlagLiktFoerEnDato(
+                    beregningsGrunnlag.soeskenMedIBeregning,
+                    forrigeGrunnlag!!.soeskenMedIBeregning,
+                    revurderingVirk,
+                )
+            } else {
+                true
+            }
+
         val institusjonsoppholdErLiktFoerVirk =
             erGrunnlagLiktFoerEnDato(
-                barnepensjonBeregningsGrunnlag.institusjonsopphold ?: emptyList(),
-                forrigeGrunnlag.institusjonsoppholdBeregningsgrunnlag,
+                beregningsGrunnlag.institusjonsopphold ?: emptyList(),
+                forrigeGrunnlag!!.institusjonsoppholdBeregningsgrunnlag,
                 revurderingVirk,
             )
 
         return soeskenjusteringErLiktFoerVirk && institusjonsoppholdErLiktFoerVirk
-    }
-
-    private fun grunnlagErIkkeEndretFoerVirkOMS(
-        revurdering: DetaljertBehandling,
-        forrigeIverksatteBehandlingId: UUID,
-        omstillingstoenadBeregningsGrunnlag: OmstillingstoenadBeregningsGrunnlag,
-    ): Boolean {
-        val forrigeGrunnlag =
-            beregningsGrunnlagRepository.finnBeregningsGrunnlag(forrigeIverksatteBehandlingId)
-        val revurderingVirk = revurdering.virkningstidspunkt().dato.atDay(1)
-
-        return erGrunnlagLiktFoerEnDato(
-            omstillingstoenadBeregningsGrunnlag.institusjonsopphold ?: emptyList(),
-            forrigeGrunnlag?.institusjonsoppholdBeregningsgrunnlag ?: emptyList(),
-            revurderingVirk,
-        )
     }
 
     suspend fun hentBeregningsGrunnlag(

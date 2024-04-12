@@ -7,7 +7,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.LagreBeregningsGrunnlag
 import java.util.UUID
 
 class BeregningService(
@@ -29,7 +29,7 @@ class BeregningService(
 
     fun opprettBeregningsgrunnlag(
         behandlingId: UUID,
-        request: BarnepensjonBeregningsGrunnlag,
+        request: LagreBeregningsGrunnlag,
     ) = runBlocking {
         beregningApp.post("$url/api/beregning/beregningsgrunnlag/$behandlingId/barnepensjon") {
             contentType(ContentType.Application.Json)

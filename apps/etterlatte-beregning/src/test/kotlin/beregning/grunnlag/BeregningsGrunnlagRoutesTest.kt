@@ -237,7 +237,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody(
-                    BarnepensjonBeregningsGrunnlag(
+                    LagreBeregningsGrunnlag(
                         emptyList(),
                         emptyList(),
                     ),
@@ -292,7 +292,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody(
-                    BarnepensjonBeregningsGrunnlag(
+                    LagreBeregningsGrunnlag(
                         emptyList(),
                         emptyList(),
                     ),
@@ -358,7 +358,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody(
-                    BarnepensjonBeregningsGrunnlag(
+                    LagreBeregningsGrunnlag(
                         soeskenMedIBeregning,
                         emptyList(),
                     ),

@@ -97,6 +97,10 @@ internal class BeregningsGrunnlagServiceTest {
                 ),
             )
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            mockk {
+                coEvery { sakType } returns SakType.BARNEPENSJON
+            }
         val behandlingId = randomUUID()
         val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null)
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, brukertokeninfo) } returns
@@ -105,9 +109,9 @@ internal class BeregningsGrunnlagServiceTest {
             )
         assertThrows<BPBeregningsgrunnlagMerEnnEnAvdoedException> {
             runBlocking {
-                beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
                     behandlingId,
-                    BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, null),
+                    LagreBeregningsGrunnlag(soeskenMedIBeregning, null),
                     brukertokeninfo,
                 )
             }
@@ -128,6 +132,10 @@ internal class BeregningsGrunnlagServiceTest {
                 ),
             )
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            mockk {
+                coEvery { sakType } returns SakType.BARNEPENSJON
+            }
         val behandlingId = randomUUID()
         val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null)
 
@@ -135,9 +143,9 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, brukertokeninfo) } returns hentOpplysningsgrunnlag
         assertThrows<BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException> {
             runBlocking {
-                beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
                     behandlingId,
-                    BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, null),
+                    LagreBeregningsGrunnlag(soeskenMedIBeregning, null),
                     brukertokeninfo,
                 )
             }
@@ -158,6 +166,10 @@ internal class BeregningsGrunnlagServiceTest {
                 ),
             )
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            mockk {
+                coEvery { sakType } returns SakType.BARNEPENSJON
+            }
         val behandlingId = randomUUID()
         val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null)
 
@@ -166,9 +178,9 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, brukertokeninfo) } returns hentOpplysningsgrunnlag
         assertThrows<BPBeregningsgrunnlagSoeskenMarkertDoedException> {
             runBlocking {
-                beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
                     behandlingId,
-                    BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, null),
+                    LagreBeregningsGrunnlag(soeskenMedIBeregning, null),
                     brukertokeninfo,
                 )
             }
@@ -206,9 +218,9 @@ internal class BeregningsGrunnlagServiceTest {
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.lagreBeregningsGrunnlag(
                 randomUUID(),
-                BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, institusjonsoppholdBeregningsgrunnlag),
+                LagreBeregningsGrunnlag(soeskenMedIBeregning, institusjonsoppholdBeregningsgrunnlag),
                 mockk {
                     every { ident() } returns "Z123456"
                 },
@@ -280,10 +292,10 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             val lagret =
-                beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
                     behandlingId = revurdering.id,
-                    barnepensjonBeregningsGrunnlag =
-                        BarnepensjonBeregningsGrunnlag(
+                    beregningsGrunnlag =
+                        LagreBeregningsGrunnlag(
                             soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
                             institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag,
                         ),
@@ -358,10 +370,10 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             val lagret =
-                beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
                     behandlingId = revurdering.id,
-                    barnepensjonBeregningsGrunnlag =
-                        BarnepensjonBeregningsGrunnlag(
+                    beregningsGrunnlag =
+                        LagreBeregningsGrunnlag(
                             soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
                             institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag,
                         ),
@@ -507,9 +519,9 @@ internal class BeregningsGrunnlagServiceTest {
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.lagreBeregningsGrunnlag(
                 randomUUID(),
-                BarnepensjonBeregningsGrunnlag(
+                LagreBeregningsGrunnlag(
                     emptyList(),
                     emptyList(),
                     BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.BEST),
@@ -551,9 +563,9 @@ internal class BeregningsGrunnlagServiceTest {
             )
 
         runBlocking {
-            beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.lagreBeregningsGrunnlag(
                 randomUUID(),
-                BarnepensjonBeregningsGrunnlag(
+                LagreBeregningsGrunnlag(
                     soeskenMedIBeregning,
                     emptyList(),
                     BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.BEST),
@@ -583,9 +595,9 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
 
         runBlocking {
-            beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.lagreBeregningsGrunnlag(
                 randomUUID(),
-                BarnepensjonBeregningsGrunnlag(
+                LagreBeregningsGrunnlag(
                     emptyList(),
                     emptyList(),
                     BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.BEST),

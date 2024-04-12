@@ -27,7 +27,6 @@ fun Route.beregningsGrunnlag(
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
 
-                // TODO
                 beregningsGrunnlagService.dupliserBeregningsGrunnlag(behandlingId, forrigeBehandlingId, brukerTokenInfo)
 
                 call.respond(HttpStatusCode.NoContent)
@@ -36,10 +35,10 @@ fun Route.beregningsGrunnlag(
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/barnepensjon") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                val body = call.receive<BarnepensjonBeregningsGrunnlag>()
+                val body = call.receive<LagreBeregningsGrunnlag>()
 
                 when {
-                    beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                    beregningsGrunnlagService.lagreBeregningsGrunnlag(
                         behandlingId,
                         body,
                         brukerTokenInfo,
@@ -52,10 +51,10 @@ fun Route.beregningsGrunnlag(
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/omstillingstoenad") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                val body = call.receive<OmstillingstoenadBeregningsGrunnlag>()
+                val body = call.receive<LagreBeregningsGrunnlag>()
 
                 when {
-                    beregningsGrunnlagService.lagreOMSBeregningsGrunnlag(
+                    beregningsGrunnlagService.lagreBeregningsGrunnlag(
                         behandlingId,
                         body,
                         brukerTokenInfo,

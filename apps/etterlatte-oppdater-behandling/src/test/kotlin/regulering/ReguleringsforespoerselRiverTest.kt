@@ -47,7 +47,7 @@ internal class ReguleringsforespoerselRiverTest {
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) {
             vedtakServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(any())
-            vedtakServiceMock.hentAlleSaker()
+            vedtakServiceMock.hentAlleSaker("Regulering2023")
         }
     }
 
@@ -55,7 +55,7 @@ internal class ReguleringsforespoerselRiverTest {
     fun `skal lage ny melding for hver sak den faar tilbake`() {
         val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
-        every { vedtakServiceMock.hentAlleSaker() } returns
+        every { vedtakServiceMock.hentAlleSaker("Regulering2023") } returns
             Saker(
                 listOf(
                     Sak("saksbehandler1", SakType.BARNEPENSJON, 1L, "4808"),
@@ -83,7 +83,7 @@ internal class ReguleringsforespoerselRiverTest {
     fun `skal sende med sakId for alle saker i basen`() {
         val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
-        every { behandlingServiceMock.hentAlleSaker() } returns
+        every { behandlingServiceMock.hentAlleSaker("Regulering2023") } returns
             Saker(
                 listOf(
                     Sak("saksbehandler1", SakType.BARNEPENSJON, 1000L, "4808"),
@@ -109,7 +109,7 @@ internal class ReguleringsforespoerselRiverTest {
         val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
         val sakId = 1000L
-        every { behandlingServiceMock.hentAlleSaker() } returns
+        every { behandlingServiceMock.hentAlleSaker("Regulering2023") } returns
             Saker(
                 listOf(
                     Sak("saksbehandler1", SakType.BARNEPENSJON, sakId, "4808"),

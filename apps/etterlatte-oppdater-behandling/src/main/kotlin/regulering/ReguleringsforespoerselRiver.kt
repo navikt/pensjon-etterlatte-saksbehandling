@@ -14,6 +14,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.Kontekst
 
 internal class ReguleringsforespoerselRiver(
     rapidsConnection: RapidsConnection,
@@ -27,6 +28,8 @@ internal class ReguleringsforespoerselRiver(
             validate { it.requireKey(DATO_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.REGULERING
 
     override fun haandterPakke(
         packet: JsonMessage,

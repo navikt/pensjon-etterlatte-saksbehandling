@@ -15,6 +15,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.Kontekst
 import java.util.UUID
 
 internal class OpprettBrevRiver(
@@ -31,6 +32,8 @@ internal class OpprettBrevRiver(
             validate { it.requireKey(SAK_TYPE_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.BREV
 
     override fun haandterPakke(
         packet: JsonMessage,

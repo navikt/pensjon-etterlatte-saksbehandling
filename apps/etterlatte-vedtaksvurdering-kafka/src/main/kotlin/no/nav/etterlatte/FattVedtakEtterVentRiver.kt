@@ -17,6 +17,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.Kontekst
 
 class FattVedtakEtterVentRiver(
     rapidsConnection: RapidsConnection,
@@ -32,6 +33,8 @@ class FattVedtakEtterVentRiver(
             validate { it.requireKey(MIGRERING_KJORING_VARIANT) }
         }
     }
+
+    override fun kontekst() = Kontekst.VENT
 
     override fun haandterPakke(
         packet: JsonMessage,

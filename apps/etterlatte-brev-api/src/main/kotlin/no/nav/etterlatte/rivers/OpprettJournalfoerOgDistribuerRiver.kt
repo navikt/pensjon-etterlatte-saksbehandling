@@ -27,6 +27,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.Kontekst
 
 class OpprettJournalfoerOgDistribuerRiverException(override val detail: String, override val cause: Throwable?) :
     InternfeilException(detail, cause)
@@ -47,6 +48,8 @@ class OpprettJournalfoerOgDistribuerRiver(
             validate { it.interestedIn(ER_OVER_18_AAR) }
         }
     }
+
+    override fun kontekst() = Kontekst.BREV
 
     override fun haandterPakke(
         packet: JsonMessage,

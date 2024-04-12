@@ -13,6 +13,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.Kontekst
 
 internal class LagreKoblingRiver(rapidsConnection: RapidsConnection, private val pesysRepository: PesysRepository) :
     ListenerMedLoggingOgFeilhaandtering() {
@@ -25,6 +26,8 @@ internal class LagreKoblingRiver(rapidsConnection: RapidsConnection, private val
             validate { it.requireKey(SAK_ID_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.MIGRERING
 
     override fun haandterPakke(
         packet: JsonMessage,

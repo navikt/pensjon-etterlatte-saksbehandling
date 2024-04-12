@@ -15,6 +15,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.Kontekst
 import java.time.LocalDate
 import java.time.Month
 
@@ -29,6 +30,8 @@ internal class BrevutfallRiver(
             validate { it.requireKey(BEHANDLING_ID_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.MIGRERING
 
     override fun haandterPakke(
         packet: JsonMessage,

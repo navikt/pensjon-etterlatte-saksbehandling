@@ -35,6 +35,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.Kontekst
 
 internal class MigrerSpesifikkSakRiver(
     rapidsConnection: RapidsConnection,
@@ -53,6 +54,8 @@ internal class MigrerSpesifikkSakRiver(
             validate { it.requireKey(MIGRERING_KJORING_VARIANT) }
         }
     }
+
+    override fun kontekst() = Kontekst.MIGRERING
 
     override fun haandterPakke(
         packet: JsonMessage,

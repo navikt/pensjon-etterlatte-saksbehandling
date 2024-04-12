@@ -11,6 +11,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.Kontekst
 import java.time.YearMonth
 
 class TattAvVentUnder20River(
@@ -24,6 +25,8 @@ class TattAvVentUnder20River(
             validate { it.requireKey(SAK_ID_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.VENT
 
     override fun haandterPakke(
         packet: JsonMessage,

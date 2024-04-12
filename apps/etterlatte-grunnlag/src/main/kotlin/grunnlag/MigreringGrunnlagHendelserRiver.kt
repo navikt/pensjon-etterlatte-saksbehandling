@@ -23,6 +23,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import rapidsandrivers.Kontekst
 import java.util.UUID
 
 class MigreringGrunnlagHendelserRiver(
@@ -40,6 +41,8 @@ class MigreringGrunnlagHendelserRiver(
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.MIGRERING
 
     override fun haandterPakke(
         packet: JsonMessage,

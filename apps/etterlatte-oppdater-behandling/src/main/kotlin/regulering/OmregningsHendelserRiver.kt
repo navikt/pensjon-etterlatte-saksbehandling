@@ -16,6 +16,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.Kontekst
 
 internal class OmregningsHendelserRiver(rapidsConnection: RapidsConnection, private val behandlinger: BehandlingService) :
     ListenerMedLoggingOgFeilhaandtering() {
@@ -27,6 +28,8 @@ internal class OmregningsHendelserRiver(rapidsConnection: RapidsConnection, priv
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.REGULERING
 
     override fun haandterPakke(
         packet: JsonMessage,

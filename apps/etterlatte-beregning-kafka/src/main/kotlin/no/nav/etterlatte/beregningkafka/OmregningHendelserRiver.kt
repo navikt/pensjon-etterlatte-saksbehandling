@@ -22,6 +22,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
+import rapidsandrivers.Kontekst
 
 internal class OmregningHendelserRiver(
     rapidsConnection: RapidsConnection,
@@ -39,6 +40,8 @@ internal class OmregningHendelserRiver(
             validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.REGULERING
 
     override fun haandterPakke(
         packet: JsonMessage,

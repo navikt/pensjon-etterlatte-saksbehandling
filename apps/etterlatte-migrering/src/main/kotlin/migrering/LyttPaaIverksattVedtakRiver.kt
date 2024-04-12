@@ -16,6 +16,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import rapidsandrivers.Kontekst
 
 internal class LyttPaaIverksattVedtakRiver(
     rapidsConnection: RapidsConnection,
@@ -30,6 +31,8 @@ internal class LyttPaaIverksattVedtakRiver(
             validate { it.requireKey(UTBETALING_RESPONSE) }
         }
     }
+
+    override fun kontekst() = Kontekst.MIGRERING
 
     override fun haandterPakke(
         packet: JsonMessage,

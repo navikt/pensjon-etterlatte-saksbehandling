@@ -9,6 +9,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import rapidsandrivers.Kontekst
 
 internal class AlleredeGjenopprettaRiver(
     rapidsConnection: RapidsConnection,
@@ -21,6 +22,8 @@ internal class AlleredeGjenopprettaRiver(
             validate { it.requireKey(PESYS_ID_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.MIGRERING
 
     override fun haandterPakke(
         packet: JsonMessage,

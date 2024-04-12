@@ -12,11 +12,11 @@ object GrunnlagVersjonValidering {
     fun validerVersjon(
         vilkaarsvurdering: VilkaarsvurderingDto?,
         beregningOgAvkorting: BeregningOgAvkorting?,
-        trygdetid: TrygdetidDto?,
+        trygdetider: List<TrygdetidDto>,
     ) {
         logger.info("Sjekker at grunnlagsversjon er konsekvent på tvers av appene")
 
-        if (trygdetid?.opplysningerDifferanse?.differanse == true) {
+        if (trygdetider.any { it.opplysningerDifferanse.differanse }) {
             throw UlikVersjonGrunnlag("Ulik versjon av grunnlag brukt i trygdetid og behandling")
         }
         if (vilkaarsvurdering?.grunnlagVersjon == null || beregningOgAvkorting == null) {

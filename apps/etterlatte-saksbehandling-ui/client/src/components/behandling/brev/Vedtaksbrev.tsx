@@ -10,7 +10,6 @@ import styled from 'styled-components'
 import { SendTilAttesteringModal } from '../handlinger/SendTilAttesteringModal'
 import {
   behandlingErRedigerbar,
-  behandlingSkalSendeBrev,
   sisteBehandlingHendelse,
   statusErRedigerbar,
 } from '~components/behandling/felles/utils'
@@ -113,7 +112,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     if (
       !behandlingId ||
       !sakId ||
-      !behandlingSkalSendeBrev(props.behandling.behandlingType, props.behandling.revurderingsaarsak) ||
+      !props.behandling.sendeBrev ||
       (behandling?.kilde === Vedtaksloesning.GJENOPPRETTA && statusErRedigerbar(props.behandling.status))
     )
       return

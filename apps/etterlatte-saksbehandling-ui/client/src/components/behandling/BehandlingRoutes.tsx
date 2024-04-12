@@ -14,7 +14,7 @@ import { Vedtaksbrev } from './brev/Vedtaksbrev'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { Revurderingsoversikt } from '~components/behandling/revurderingsoversikt/Revurderingsoversikt'
-import { behandlingSkalSendeBrev, soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
+import { soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { Aktivitetsplikt } from '~components/behandling/aktivitetsplikt/Aktivitetsplikt'
 import { SakType } from '~shared/types/sak'
@@ -231,7 +231,8 @@ const leggTilBrevHvisKrevesAvBehandling = (
   routes: Array<BehandlingRouteTypes>,
   behandling: IBehandlingReducer
 ): Array<BehandlingRouteTypes> => {
-  if (behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)) {
+  if (behandling.sendeBrev) {
+    //if (behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)) {
     return [...routes, behandling.sakType == SakType.OMSTILLINGSSTOENAD ? routeTypes.brevOms : routeTypes.brevBp]
   }
   return routes

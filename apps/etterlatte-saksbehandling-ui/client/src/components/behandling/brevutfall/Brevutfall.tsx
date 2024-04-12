@@ -3,7 +3,7 @@ import { Alert, BodyLong, Heading } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevutfallOgEtterbetalingApi } from '~shared/api/behandling'
-import { behandlingErRedigerbar, behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { BrevutfallSkjema } from '~components/behandling/brevutfall/BrevutfallSkjema'
 import { BrevutfallVisning } from '~components/behandling/brevutfall/BrevutfallVisning'
 import Spinner from '~shared/Spinner'
@@ -106,7 +106,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
     hentBrevutfall()
   }, [behandling.id])
 
-  return behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? (
+  return behandling.sendeBrev ? (
     <BrevutfallContent id="brevutfall">
       <Heading size="medium" spacing>
         Valg av utfall i brev

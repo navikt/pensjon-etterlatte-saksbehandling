@@ -466,6 +466,7 @@ internal class BehandlingServiceImpl(
             revurderinginfo = behandling.revurderingInfo(),
             begrunnelse = behandling.begrunnelse(),
             kilde = behandling.kilde,
+            sendeBrev = behandling.sendeBrev,
         )
     }
 

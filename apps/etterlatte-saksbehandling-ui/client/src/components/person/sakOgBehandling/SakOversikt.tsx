@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Container, SpaceChildren } from '~shared/styled'
+import { Container, GridContainer, SpaceChildren } from '~shared/styled'
 import Spinner from '~shared/Spinner'
 import { Alert, Heading, ToggleGroup } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
@@ -54,102 +54,98 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
   }, [fnr, sakResult])
 
   return (
-    <Container>
+    <GridContainer>
       {mapResult(sakResult, {
         pending: <Spinner visible label="Henter sak og behandlinger" />,
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
         success: ({ sak, behandlinger }) => (
-          <SpaceChildren direction="row">
-            <SpaceChildren gap="2rem">
-              <SakOversiktHeader fnr={fnr} sak={sak} />
+          <>
+            <Container>
+              <SpaceChildren gap="2rem">
+                <SakOversiktHeader fnr={fnr} sak={sak} />
 
-              <HorisontaltSkille />
+                <HorisontaltSkille />
 
-              {mapResult(flyktningResult, {
-                success: (data) =>
-                  !!data?.erFlyktning && (
-                    <>
-                      <div>
-                        <Alert variant="info" size="small">
-                          Saken er markert med flyktning i Pesys og første virkningstidspunkt var{' '}
-                          {formaterStringDato(data.virkningstidspunkt)}
-                        </Alert>
-                      </div>
+                {mapResult(flyktningResult, {
+                  success: (data) =>
+                    !!data?.erFlyktning && (
+                      <>
+                        <div>
+                          <Alert variant="info" size="small">
+                            Saken er markert med flyktning i Pesys og første virkningstidspunkt var{' '}
+                            {formaterStringDato(data.virkningstidspunkt)}
+                          </Alert>
+                        </div>
 
-                      <HorisontaltSkille />
-                    </>
-                  ),
-              })}
-
-              {mapResult(yrkesskadefordelResult, {
-                success: (data) =>
-                  !!data && (
-                    <>
-                      <div>
-                        <Alert variant="info" size="small">
-                          Søker har yrkesskadefordel fra før 01.01.2024 og har rett til stønad til fylte 21 år.
-                        </Alert>
-                      </div>
-
-                      <HorisontaltSkille />
-                    </>
-                  ),
-              })}
-
-              <SpaceChildren>
-                <Heading size="medium">Oppgaver</Heading>
-                <ToggleGroup
-                  defaultValue={OppgaveValg.AKTIVE}
-                  onChange={(val) => setOppgaveValg(val as OppgaveValg)}
-                  size="small"
-                >
-                  <ToggleGroup.Item value={OppgaveValg.AKTIVE}>Aktive</ToggleGroup.Item>
-                  <ToggleGroup.Item value={OppgaveValg.FERDIGSTILTE}>Ferdigstilte</ToggleGroup.Item>
-                </ToggleGroup>
-                {mapResult(oppgaverResult, {
-                  pending: <Spinner visible label="Henter oppgaver for sak..." />,
-                  error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
-                  success: (oppgaver) => <ForenkletOppgaverTable oppgaver={oppgaver} oppgaveValg={oppgaveValg} />,
+                        <HorisontaltSkille />
+                      </>
+                    ),
                 })}
+
+                {mapResult(yrkesskadefordelResult, {
+                  success: (data) =>
+                    !!data && (
+                      <>
+                        <div>
+                          <Alert variant="info" size="small">
+                            Søker har yrkesskadefordel fra før 01.01.2024 og har rett til stønad til fylte 21 år.
+                          </Alert>
+                        </div>
+
+                        <HorisontaltSkille />
+                      </>
+                    ),
+                })}
+
+                <SpaceChildren>
+                  <Heading size="medium">Oppgaver</Heading>
+                  <ToggleGroup
+                    defaultValue={OppgaveValg.AKTIVE}
+                    onChange={(val) => setOppgaveValg(val as OppgaveValg)}
+                    size="small"
+                  >
+                    <ToggleGroup.Item value={OppgaveValg.AKTIVE}>Aktive</ToggleGroup.Item>
+                    <ToggleGroup.Item value={OppgaveValg.FERDIGSTILTE}>Ferdigstilte</ToggleGroup.Item>
+                  </ToggleGroup>
+                  {mapResult(oppgaverResult, {
+                    pending: <Spinner visible label="Henter oppgaver for sak..." />,
+                    error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+                    success: (oppgaver) => <ForenkletOppgaverTable oppgaver={oppgaver} oppgaveValg={oppgaveValg} />,
+                  })}
+                </SpaceChildren>
+
+                <SpaceChildren>
+                  <Heading size="medium">Behandlinger</Heading>
+                  <Behandlingsliste sakOgBehandlinger={{ sak, behandlinger }} />
+                </SpaceChildren>
+
+                <SpaceChildren>
+                  <Heading size="medium">Klager</Heading>
+                  <KlageListe sakId={sak.id} />
+                </SpaceChildren>
               </SpaceChildren>
+            </Container>
 
-              <SpaceChildren>
-                <Heading size="medium">Behandlinger</Heading>
-                <Behandlingsliste sakOgBehandlinger={{ sak, behandlinger }} />
-              </SpaceChildren>
-
-              <SpaceChildren>
-                <Heading size="medium">Klager</Heading>
-                <KlageListe sakId={sak.id} />
-              </SpaceChildren>
-            </SpaceChildren>
-
-            <LoddrettSkille />
-
-            <HendelseWrapper>
+            <HendelseSidebar>
               <RelevanteHendelser sak={sak} behandlingliste={behandlinger} />
-            </HendelseWrapper>
-          </SpaceChildren>
+            </HendelseSidebar>
+          </>
         ),
       })}
-    </Container>
+    </GridContainer>
   )
 }
 
-const HendelseWrapper = styled.div`
-  max-width: 33rem;
+const HendelseSidebar = styled.div`
+  min-width: 40rem;
+  border-left: 1px solid var(--a-surface-active);
+  padding: 3em 2rem;
+  margin: 0 1em;
 `
 
 const HorisontaltSkille = styled.hr`
   border-color: var(--a-surface-active);
   width: 100%;
-`
-
-const LoddrettSkille = styled.div`
-  border-color: var(--a-surface-active);
-  border-width: 1px;
-  border-style: solid;
-  min-height: 100%;
 `
 
 export const HeadingWrapper = styled.div`

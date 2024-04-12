@@ -57,7 +57,10 @@ interface BehandlingService {
 
     fun sendReguleringFeiletHendelse(reguleringFeilethendelse: ReguleringFeiletHendelse)
 
-    fun hentAlleSaker(kjoering: String): Saker
+    fun hentAlleSaker(
+        kjoering: String,
+        antall: Int,
+    ): Saker
 
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
 
@@ -214,7 +217,10 @@ class BehandlingServiceImpl(
         }
     }
 
-    override fun hentAlleSaker(kjoering: String): Saker =
+    override fun hentAlleSaker(
+        kjoering: String,
+        antall: Int,
+    ): Saker =
         runBlocking {
             behandlingKlient.get("$url/saker").body()
         }

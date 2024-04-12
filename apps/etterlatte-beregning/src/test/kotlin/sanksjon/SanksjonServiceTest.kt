@@ -8,7 +8,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.bruker
-import no.nav.etterlatte.beregning.regler.sanksjon
+import no.nav.etterlatte.beregning.regler.lagreSanksjon
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -19,6 +19,7 @@ import no.nav.etterlatte.sanksjon.SanksjonService
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -26,6 +27,7 @@ internal class SanksjonServiceTest {
     private val sanksjonRepository: SanksjonRepository = mockk()
     private val behandlingKlient: BehandlingKlient = mockk()
     private val service = SanksjonService(sanksjonRepository = sanksjonRepository, behandlingKlient = behandlingKlient)
+    private val sakId = 123L
 
     @Nested
     inner class HentSanksjon {
@@ -61,7 +63,7 @@ internal class SanksjonServiceTest {
         @Test
         fun `Skal opprette en sanksjon`() {
             val behandlingId = UUID.randomUUID()
-            val sanksjon = sanksjon()
+            val sanksjon = lagreSanksjon()
 
             val behandling =
                 behandling(
@@ -70,7 +72,7 @@ internal class SanksjonServiceTest {
                     status = BehandlingStatus.BEREGNET,
                 )
 
-            every { sanksjonRepository.opprettSanksjon(behandlingId, sanksjon) } returns Unit
+            every { sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon) } returns Unit
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
 
             runBlocking {
@@ -78,14 +80,14 @@ internal class SanksjonServiceTest {
             }
 
             coVerify {
-                sanksjonRepository.opprettSanksjon(behandlingId, sanksjon)
+                sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon)
             }
         }
 
         @Test
         fun `Skal oppdatere en sanksjon`() {
             val behandlingId = UUID.randomUUID()
-            val sanksjon = sanksjon(id = UUID.randomUUID())
+            val sanksjon = lagreSanksjon(id = UUID.randomUUID())
 
             val behandling =
                 behandling(
@@ -94,7 +96,7 @@ internal class SanksjonServiceTest {
                     status = BehandlingStatus.BEREGNET,
                 )
 
-            every { sanksjonRepository.oppdaterSanksjon(sanksjon) } returns Unit
+            every { sanksjonRepository.oppdaterSanksjon(sanksjon, bruker.ident) } returns Unit
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
 
             runBlocking {
@@ -102,14 +104,14 @@ internal class SanksjonServiceTest {
             }
 
             coVerify {
-                sanksjonRepository.oppdaterSanksjon(sanksjon)
+                sanksjonRepository.oppdaterSanksjon(sanksjon, bruker.ident)
             }
         }
 
         @Test
         fun `Feil sak id skal gi feilmelding`() {
             val behandlingId = UUID.randomUUID()
-            val sanksjon = sanksjon(sakId = 321)
+            val sanksjon = lagreSanksjon(sakId = 321)
 
             val behandling =
                 behandling(
@@ -118,7 +120,7 @@ internal class SanksjonServiceTest {
                     status = BehandlingStatus.BEREGNET,
                 )
 
-            every { sanksjonRepository.opprettSanksjon(behandlingId, sanksjon) } returns Unit
+            every { sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon) } returns Unit
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
 
             runBlocking {
@@ -132,9 +134,9 @@ internal class SanksjonServiceTest {
         fun `Til og med kan ikke være før fra og med`() {
             val behandlingId = UUID.randomUUID()
             val sanksjon =
-                sanksjon(
-                    fom = YearMonth.of(2024, 2),
-                    tom = YearMonth.of(2024, 1),
+                lagreSanksjon(
+                    fom = LocalDate.of(2024, 2, 1),
+                    tom = LocalDate.of(2024, 1, 1),
                 )
 
             val behandling =
@@ -144,7 +146,7 @@ internal class SanksjonServiceTest {
                     status = BehandlingStatus.BEREGNET,
                 )
 
-            every { sanksjonRepository.opprettSanksjon(behandlingId, sanksjon) } returns Unit
+            every { sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon) } returns Unit
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
 
             runBlocking {
@@ -157,7 +159,7 @@ internal class SanksjonServiceTest {
         @Test
         fun `Fra og med kan ikke være før virkningstidspunkt`() {
             val behandlingId = UUID.randomUUID()
-            val sanksjon = sanksjon()
+            val sanksjon = lagreSanksjon()
 
             val behandling =
                 behandling(
@@ -167,7 +169,7 @@ internal class SanksjonServiceTest {
                     virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 3)),
                 )
 
-            every { sanksjonRepository.opprettSanksjon(behandlingId, sanksjon) } returns Unit
+            every { sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon) } returns Unit
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
 
             runBlocking {
@@ -180,7 +182,7 @@ internal class SanksjonServiceTest {
         @Test
         fun `Virkningstidspunkt må være satt`() {
             val behandlingId = UUID.randomUUID()
-            val sanksjon = sanksjon()
+            val sanksjon = lagreSanksjon()
 
             val behandling =
                 behandling(
@@ -190,7 +192,7 @@ internal class SanksjonServiceTest {
                     virkningstidspunkt = null,
                 )
 
-            every { sanksjonRepository.opprettSanksjon(behandlingId, sanksjon) } returns Unit
+            every { sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon) } returns Unit
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
 
             runBlocking {

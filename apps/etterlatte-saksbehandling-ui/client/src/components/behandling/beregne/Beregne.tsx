@@ -31,6 +31,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -136,6 +137,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                             behandling={behandling}
                             resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
                           />
+                          <Sanksjon behandling={behandling} />
                         </>
                       )
                   }

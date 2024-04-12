@@ -4,11 +4,11 @@ import io.kotest.assertions.asClue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.beregning.regler.DatabaseExtension
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.beregning.regler.lagreSanksjon
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
-import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -16,6 +16,7 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SanksjonRepositoryTest(ds: DataSource) {
     private val sanksjonRepository = SanksjonRepository(ds)
+    private val sakId = 123L
 
     @Test
     fun `skal returnere null hvis mangler sanksjon`() {
@@ -25,20 +26,9 @@ internal class SanksjonRepositoryTest(ds: DataSource) {
     @Test
     fun `Skal opprette sanksjon`() {
         val behandlingId: UUID = UUID.randomUUID()
-        val sanksjon =
-            Sanksjon(
-                id = null,
-                behandlingId = behandlingId,
-                sakId = 123,
-                fom = YearMonth.of(2024, 1),
-                tom = YearMonth.of(2024, 2),
-                saksbehandler = "A12345",
-                opprettet = Tidspunkt.now(),
-                endret = Tidspunkt.now(),
-                beskrivelse = "Ikke i jobb",
-            )
+        val sanksjon = lagreSanksjon()
 
-        sanksjonRepository.opprettSanksjon(behandlingId, sanksjon)
+        sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon)
 
         val lagretSanksjon = sanksjonRepository.hentSanksjon(behandlingId)
 
@@ -52,20 +42,9 @@ internal class SanksjonRepositoryTest(ds: DataSource) {
     @Test
     fun `Skal oppdatere sanksjon`() {
         val behandlingId: UUID = UUID.randomUUID()
-        val sanksjon =
-            Sanksjon(
-                id = null,
-                behandlingId = behandlingId,
-                sakId = 123,
-                fom = YearMonth.of(2024, 1),
-                tom = YearMonth.of(2024, 2),
-                saksbehandler = "A12345",
-                opprettet = Tidspunkt.now(),
-                endret = Tidspunkt.now(),
-                beskrivelse = "Ikke i jobb",
-            )
+        val sanksjon = lagreSanksjon()
 
-        sanksjonRepository.opprettSanksjon(behandlingId, sanksjon)
+        sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon)
 
         val lagretSanksjon = sanksjonRepository.hentSanksjon(behandlingId)
 
@@ -76,19 +55,12 @@ internal class SanksjonRepositoryTest(ds: DataSource) {
         }
 
         val oppdatertSanksjon =
-            Sanksjon(
+            lagreSanksjon(
                 id = lagretSanksjon.first().id,
-                behandlingId = lagretSanksjon.first().behandlingId,
-                sakId = lagretSanksjon.first().sakId,
-                fom = lagretSanksjon.first().fom,
-                tom = lagretSanksjon.first().tom,
-                saksbehandler = lagretSanksjon.first().saksbehandler,
-                opprettet = lagretSanksjon.first().opprettet,
-                endret = lagretSanksjon.first().endret,
                 beskrivelse = "Er nå i full jobb",
             )
 
-        sanksjonRepository.oppdaterSanksjon(oppdatertSanksjon)
+        sanksjonRepository.oppdaterSanksjon(oppdatertSanksjon, bruker.ident)
 
         val lagretOppdatertSanksjon = sanksjonRepository.hentSanksjon(behandlingId)
 

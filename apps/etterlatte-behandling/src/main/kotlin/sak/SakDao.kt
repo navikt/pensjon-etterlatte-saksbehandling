@@ -86,10 +86,13 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
         }
     }
 
-    fun hentSaker(): List<Sak> {
+    fun hentSaker(
+        kjoering: String,
+        antall: Int,
+    ): List<Sak> {
         return connectionAutoclosing.hentConnection { connection ->
             with(connection) {
-                val statement = prepareStatement("SELECT id, sakType, fnr, enhet from sak")
+                val statement = prepareStatement("SELECT id, sakType, fnr, enhet from sak LIMIT $antall")
                 statement.executeQuery().toList { this.toSak() }
             }
         }

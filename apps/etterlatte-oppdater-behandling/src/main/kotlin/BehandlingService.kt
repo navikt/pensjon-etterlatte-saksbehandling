@@ -222,7 +222,7 @@ class BehandlingServiceImpl(
         antall: Int,
     ): Saker =
         runBlocking {
-            behandlingKlient.get("$url/saker").body()
+            behandlingKlient.get("$url/saker/$kjoering/$antall").body()
         }
 
     override fun avbryt(behandlingId: UUID) =

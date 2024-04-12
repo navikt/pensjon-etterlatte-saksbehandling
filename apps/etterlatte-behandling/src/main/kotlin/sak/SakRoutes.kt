@@ -41,6 +41,9 @@ import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
+const val KJOERING = "kjoering"
+const val ANTALL = "antall"
+
 internal fun Route.sakSystemRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
@@ -50,9 +53,11 @@ internal fun Route.sakSystemRoutes(
     val logger = LoggerFactory.getLogger(this::class.java)
 
     route("/saker") {
-        get {
+        get("/$KJOERING/$ANTALL") {
             kunSystembruker {
-                call.respond(Saker(inTransaction { sakService.hentSaker() }))
+                val kjoering = call.parameters[KJOERING]!!
+                val antall = call.parameters[ANTALL]!!.toInt()
+                call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall) }))
             }
         }
 

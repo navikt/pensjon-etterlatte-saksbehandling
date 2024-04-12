@@ -16,9 +16,7 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
     const sisteVedtak = vedtakISak
       .filter((vedtak) => ![VedtakType.AVVIST_KLAGE, VedtakType.TILBAKEKREVING].includes(vedtak.vedtakType!))
       .filter((vedtak) => !!vedtak.datoAttestert)
-      .sort((a, b) => {
-        return new Date(a.datoAttestert!).valueOf() - new Date(b.datoAttestert!).valueOf()
-      })
+      .sort((a, b) => new Date(a.datoAttestert!).valueOf() - new Date(b.datoAttestert!).valueOf())
       .pop()
 
     switch (sisteVedtak?.vedtakType) {

@@ -32,7 +32,7 @@ internal class ReguleringsforespoerselRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        logger.info("Leser reguleringsfoerespoersel for dato ${packet.dato}")
+        logger.info("Leser reguleringsforespørsel for dato ${packet.dato}")
 
         if (!featureToggleService.isEnabled(ReguleringFeatureToggle.START_REGULERING, false)) {
             logger.info("Regulering er deaktivert ved funksjonsbryter. Avbryter reguleringsforespørsel.")
@@ -45,7 +45,7 @@ internal class ReguleringsforespoerselRiver(
             behandlingService.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
                 .also { sakIdListe ->
                     logger.info(
-                        "Tilbakemigrert ${sakIdListe.ider.size} behandlinger:\n" +
+                        "Tilbakeført ${sakIdListe.ider.size} behandlinger til trygdetid oppdatert:\n" +
                             sakIdListe.ider.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" },
                     )
                 }

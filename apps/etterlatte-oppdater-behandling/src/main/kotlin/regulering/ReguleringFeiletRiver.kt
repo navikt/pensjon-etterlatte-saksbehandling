@@ -21,7 +21,7 @@ internal class ReguleringFeiletRiver(
     init {
         initialiserRiver(rapidsConnection, FEILA) {
             validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.requireValue(ReguleringEvents.AARSAK, ReguleringEvents.EVENT_NAME) }
+            validate { it.requireValue(ReguleringEvents.FEILAARSAK, ReguleringEvents.EVENT_NAME) }
         }
     }
 

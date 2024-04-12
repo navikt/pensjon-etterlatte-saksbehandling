@@ -112,6 +112,8 @@ For frontend-appen _saksbehandling-ui_ gjør vi det litt annerledes, så den har
 ## Sjekker
 Vi bruker gradle.pluginen `Gradle License Report` for å sjekke lisensene til avhengighetene våre. Denne kjøres per nå manuelt, med kommandoen `gradle generateLicenseReport`.
 
+I frontend bruker vi `license-checker`, som kjøres manuelt med `yarn license-checker`.
+
 # Varsling
 Det legges ut varsler om feilmeldinger i appene på Slack i kanalen `#team-etterlatte-alerts-dev` og `#team-etterlatte-alerts-prod`
 

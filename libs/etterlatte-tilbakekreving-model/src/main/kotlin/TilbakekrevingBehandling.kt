@@ -15,7 +15,16 @@ data class TilbakekrevingBehandling(
         when (status) {
             TilbakekrevingStatus.UNDERKJENT,
             TilbakekrevingStatus.UNDER_ARBEID,
+            TilbakekrevingStatus.VALIDERT,
             TilbakekrevingStatus.OPPRETTET,
+            -> true
+            else -> false
+        }
+
+    fun gyldigForVedtak() =
+        when (status) {
+            TilbakekrevingStatus.UNDERKJENT,
+            TilbakekrevingStatus.VALIDERT,
             -> true
             else -> false
         }
@@ -42,11 +51,12 @@ data class TilbakekrevingBehandling(
 enum class TilbakekrevingStatus {
     OPPRETTET,
     UNDER_ARBEID,
+    VALIDERT,
     FATTET_VEDTAK,
     ATTESTERT,
     UNDERKJENT, ;
 
     fun kanEndres(): Boolean {
-        return this in listOf(OPPRETTET, UNDER_ARBEID, UNDERKJENT)
+        return this in listOf(OPPRETTET, UNDER_ARBEID, VALIDERT, UNDERKJENT)
     }
 }

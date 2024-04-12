@@ -45,7 +45,7 @@ export const EndreAvsenderMottaker = ({
           <TextField
             {...register('id', {
               pattern: {
-                value: /[0-9]{11}/,
+                value: /^\d{11}$/,
                 message: 'Fødselsnummer må bestå av 11 siffer',
               },
             })}

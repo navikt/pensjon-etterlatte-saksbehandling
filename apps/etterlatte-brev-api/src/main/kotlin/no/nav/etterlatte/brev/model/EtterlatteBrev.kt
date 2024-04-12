@@ -1,8 +1,13 @@
 package no.nav.etterlatte.brev.model
 
-import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
+import no.nav.etterlatte.brev.behandling.Avdoed
+import no.nav.etterlatte.brev.hentinformasjon.UgyldigBeregningsMetode
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
@@ -25,9 +30,9 @@ data class BarnepensjonBeregning(
     val grunnbeloep: Kroner,
     val beregningsperioder: List<BarnepensjonBeregningsperiode>,
     val sisteBeregningsperiode: BarnepensjonBeregningsperiode,
-    val trygdetid: TrygdetidMedBeregningsmetode,
+    val bruktTrygdetid: TrygdetidMedBeregningsmetode,
+    val trygdetid: List<TrygdetidMedBeregningsmetode>,
     val erForeldreloes: Boolean = false,
-    val bruktAvdoed: String? = null,
 ) : BrevdataMedInnhold
 
 data class BarnepensjonBeregningsperiode(
@@ -63,13 +68,76 @@ data class OmstillingsstoenadBeregningsperiode(
 )
 
 data class TrygdetidMedBeregningsmetode(
+    val navnAvdoed: String,
     val trygdetidsperioder: List<Trygdetidsperiode>,
     val beregnetTrygdetidAar: Int,
-    val beregnetTrygdetidMaaneder: Int,
     val prorataBroek: IntBroek?,
     val beregningsMetodeAnvendt: BeregningsMetode,
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
     val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
+)
+
+data class Trygdetidsperiode(
+    val datoFOM: LocalDate,
+    val datoTOM: LocalDate?,
+    val land: String,
+    val opptjeningsperiode: BeregnetTrygdetidGrunnlagDto?,
+    val type: TrygdetidType,
+)
+
+fun TrygdetidDto.fromDto(
+    beregningsMetodeAnvendt: BeregningsMetode,
+    beregningsMetodeFraGrunnlag: BeregningsMetode,
+    avdoede: List<Avdoed>,
+) = this.fromDto(
+    beregningsMetodeAnvendt,
+    beregningsMetodeFraGrunnlag,
+    avdoede.find { it.fnr.value == ident }?.navn ?: throw ManglerAvdoedBruktTilTrygdetid(),
+)
+
+fun TrygdetidDto.fromDto(
+    beregningsMetodeAnvendt: BeregningsMetode,
+    beregningsMetodeFraGrunnlag: BeregningsMetode,
+    navnAvdoed: String,
+) = TrygdetidMedBeregningsmetode(
+    navnAvdoed = navnAvdoed,
+    trygdetidsperioder =
+        when (beregningsMetodeAnvendt) {
+            BeregningsMetode.NASJONAL -> trygdetidGrunnlag.filter { it.bosted == "NOR" }
+            BeregningsMetode.PRORATA -> {
+                // Kun ta med de som er avtaleland
+                trygdetidGrunnlag.filter { it.prorata }
+            }
+
+            else -> throw IllegalArgumentException("$beregningsMetodeAnvendt er ikke en gyldig beregningsmetode")
+        }.map { grunnlag ->
+            Trygdetidsperiode(
+                datoFOM = grunnlag.periodeFra,
+                datoTOM = grunnlag.periodeTil,
+                land = grunnlag.bosted,
+                opptjeningsperiode = grunnlag.beregnet,
+                type = TrygdetidType.valueOf(grunnlag.type),
+            )
+        },
+    beregnetTrygdetidAar =
+        when (beregningsMetodeAnvendt) {
+            BeregningsMetode.NASJONAL ->
+                beregnetTrygdetid?.resultat?.samletTrygdetidNorge
+                    ?: throw ManglerMedTrygdetidVeBrukIBrev()
+
+            BeregningsMetode.PRORATA ->
+                beregnetTrygdetid?.resultat?.samletTrygdetidTeoretisk
+                    ?: throw ManglerMedTrygdetidVeBrukIBrev()
+
+            BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
+            else -> throw ManglerMedTrygdetidVeBrukIBrev()
+        },
+    prorataBroek = beregnetTrygdetid?.resultat?.prorataBroek,
+    mindreEnnFireFemtedelerAvOpptjeningstiden =
+        beregnetTrygdetid
+            ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
+    beregningsMetodeFraGrunnlag = beregningsMetodeFraGrunnlag,
+    beregningsMetodeAnvendt = beregningsMetodeAnvendt,
 )
 
 enum class FeilutbetalingType {
@@ -77,3 +145,14 @@ enum class FeilutbetalingType {
     FEILUTBETALING_MED_VARSEL,
     INGEN_FEILUTBETALING,
 }
+
+// Brukes der mangler med trygdetid ikke skal kunne skje men felt likevel er nullable
+class ManglerMedTrygdetidVeBrukIBrev : UgyldigForespoerselException(
+    code = "MANGLER_TRYGDETID_VED_BREV",
+    detail = "Trygdetid har mangler ved bruk til brev",
+)
+
+class ManglerAvdoedBruktTilTrygdetid : UgyldigForespoerselException(
+    code = "MANGLER_AVDOED_INFO_I_BEREGNING",
+    detail = "Det er mangler avdød i beregning. Utfør beregning på nytt og prøv igjen.",
+)

@@ -103,8 +103,6 @@ import no.nav.etterlatte.metrics.BehandlingMetrics
 import no.nav.etterlatte.metrics.BehandlingMetrikkerDao
 import no.nav.etterlatte.metrics.GjenopprettingMetrikkerDao
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
-import no.nav.etterlatte.migrering.person.krr.KrrKlient
-import no.nav.etterlatte.migrering.person.krr.KrrKlientImpl
 import no.nav.etterlatte.oppgave.FristGaarUtJobb
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
@@ -112,6 +110,8 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveServiceImpl
+import no.nav.etterlatte.person.krr.KrrKlient
+import no.nav.etterlatte.person.krr.KrrKlientImpl
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakTilgangDao
@@ -397,6 +397,8 @@ internal class ApplicationContext(
             sakDao,
             skjermingKlient,
             enhetService,
+            grunnlagsService,
+            krrKlient,
         )
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
 
@@ -439,6 +441,7 @@ internal class ApplicationContext(
         BehandlingStatusServiceImpl(
             behandlingDao,
             behandlingService,
+            oppgaveService,
             grunnlagsendringshendelseService,
             generellBehandlingService,
         )

@@ -2,7 +2,7 @@ import { StegMenyWrapper } from '~components/behandling/StegMeny/stegmeny'
 import React from 'react'
 import { TilbakekrevingNavLenke } from '~components/tilbakekreving/stegmeny/TilbakekrevingNavLenke'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
-import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
+import { TilbakekrevingBehandling, TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
 
 export function TilbakekrevingStegmeny() {
   const tilbakekrevingBehandling = useTilbakekreving()
@@ -23,5 +23,13 @@ export function TilbakekrevingStegmeny() {
 }
 
 function kanSeBrev(tilbakekrevingBehandling: TilbakekrevingBehandling | null): boolean {
-  return !!tilbakekrevingBehandling?.tilbakekreving?.vurdering?.vedtak
+  return (
+    tilbakekrevingBehandling != null &&
+    [
+      TilbakekrevingStatus.VALIDERT,
+      TilbakekrevingStatus.UNDERKJENT,
+      TilbakekrevingStatus.ATTESTERT,
+      TilbakekrevingStatus.FATTET_VEDTAK,
+    ].includes(tilbakekrevingBehandling.status)
+  )
 }

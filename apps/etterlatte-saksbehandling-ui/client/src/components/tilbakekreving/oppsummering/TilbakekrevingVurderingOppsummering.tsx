@@ -13,10 +13,10 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
   const tilbakekreving = behandling.tilbakekreving
   const sumFeilutbetaling = sum(tilbakekreving.perioder.map((it) => it.ytelse.beregnetFeilutbetaling))
   const sumNettoTilbakekreving = sum(tilbakekreving.perioder.map((it) => it.ytelse.nettoTilbakekreving))
-  const sumTilbakekreving = sum(tilbakekreving.perioder.map((it) => it.ytelse.bruttoTilbakekreving))
+  const sumBruttoTilbakekreving = sum(tilbakekreving.perioder.map((it) => it.ytelse.bruttoTilbakekreving))
   const sumRenter = sum(tilbakekreving.perioder.map((it) => it.ytelse.rentetillegg))
   const sumSkatt = sum(tilbakekreving.perioder.map((it) => it.ytelse.skatt))
-  const oppsummertInnkreving = sumTilbakekreving + sumRenter - sumSkatt
+  const oppsummertInnkreving = sumNettoTilbakekreving + sumRenter
 
   return (
     <InnholdPadding>
@@ -40,7 +40,7 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
             <Table.DataCell>Brutto tilbakekreving</Table.DataCell>
             <Table.DataCell></Table.DataCell>
             <Table.DataCell></Table.DataCell>
-            <Table.DataCell>{NOK(sumTilbakekreving)}</Table.DataCell>
+            <Table.DataCell>{NOK(sumBruttoTilbakekreving)}</Table.DataCell>
           </Table.Row>
           <Table.Row key="Skatt">
             <Table.DataCell>Fradrag skatt</Table.DataCell>

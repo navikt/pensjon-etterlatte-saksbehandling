@@ -81,6 +81,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         }
     }
 
+    // TODO På tide å fjerne?
     private suspend fun fraPesys(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
@@ -164,6 +165,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         } else {
             BarnepensjonInnvilgelse.fra(
                 innholdMedVedlegg,
+                generellBrevData.personerISak.avdoede,
                 utbetalingsinfo.await(),
                 etterbetaling.await(),
                 requireNotNull(trygdetid.await()),
@@ -218,7 +220,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
             generellBrevData,
             avkortingsinfo.await(),
             etterbetaling.await(),
-            requireNotNull(trygdetid.await()),
+            requireNotNull(trygdetid.await()).single(),
             requireNotNull(brevutfall.await()),
         )
     }
@@ -240,9 +242,10 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
             avkortingsinfo.await(),
             forrigeAvkortingsinfo.await(),
             etterbetaling.await(),
-            requireNotNull(trygdetid.await()),
+            requireNotNull(trygdetid.await()).single(),
             requireNotNull(brevutfall.await()),
             generellBrevData.revurderingsaarsak,
+            generellBrevData.personerISak.avdoede.single().navn,
         )
     }
 

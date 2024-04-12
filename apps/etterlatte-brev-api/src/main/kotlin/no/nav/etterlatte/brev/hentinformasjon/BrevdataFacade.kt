@@ -39,7 +39,7 @@ class BrevdataFacade(
     private val beregningService: BeregningService,
     private val behandlingKlient: BehandlingKlient,
     private val sakService: SakService,
-    private val trygdetidService: TrygdetidService,
+    private val trygdetidKlient: TrygdetidKlient,
 ) {
     suspend fun hentBrevutfall(
         behandlingId: UUID,
@@ -267,7 +267,7 @@ class BrevdataFacade(
     suspend fun finnTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = trygdetidService.finnTrygdetid(behandlingId, brukerTokenInfo)
+    ) = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
 
     suspend fun hentVedtaksbehandlingKanRedigeres(
         behandlingId: UUID,

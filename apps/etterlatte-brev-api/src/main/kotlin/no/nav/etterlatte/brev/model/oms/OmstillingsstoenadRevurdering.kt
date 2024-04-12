@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevVedleggKey
@@ -13,12 +12,13 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
+import no.nav.etterlatte.brev.model.fromDto
 import no.nav.etterlatte.brev.model.toFeilutbetalingType
 import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import java.time.LocalDate
 
 data class OmstillingsstoenadRevurdering(
@@ -40,9 +40,10 @@ data class OmstillingsstoenadRevurdering(
             avkortingsinfo: Avkortingsinfo,
             forrigeAvkortingsinfo: Avkortingsinfo?,
             etterbetalingDTO: EtterbetalingDTO?,
-            trygdetid: Trygdetid,
+            trygdetid: TrygdetidDto,
             brevutfall: BrevutfallDto,
             revurderingaarsak: Revurderingaarsak?,
+            navnAvdoed: String,
         ): OmstillingsstoenadRevurdering {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -85,14 +86,10 @@ data class OmstillingsstoenadRevurdering(
                         beregningsperioder = beregningsperioder,
                         sisteBeregningsperiode = sisteBeregningsperiode,
                         trygdetid =
-                            TrygdetidMedBeregningsmetode(
-                                trygdetidsperioder = trygdetid.perioder,
-                                beregnetTrygdetidAar = trygdetid.aarTrygdetid,
-                                beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
-                                prorataBroek = trygdetid.prorataBroek,
-                                mindreEnnFireFemtedelerAvOpptjeningstiden = trygdetid.mindreEnnFireFemtedelerAvOpptjeningstiden,
+                            trygdetid.fromDto(
                                 beregningsMetodeFraGrunnlag = sisteBeregningsperiode.beregningsMetodeFraGrunnlag,
                                 beregningsMetodeAnvendt = sisteBeregningsperiode.beregningsMetodeAnvendt,
+                                navnAvdoed = navnAvdoed,
                             ),
                     ),
                 etterbetaling =

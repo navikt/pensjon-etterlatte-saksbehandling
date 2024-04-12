@@ -2,25 +2,23 @@ package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
-import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
@@ -39,20 +37,20 @@ data class BarnepensjonInnvilgelse(
 
         fun fra(
             innhold: InnholdMedVedlegg,
+            avdoede: List<Avdoed>,
             utbetalingsinfo: Utbetalingsinfo,
             etterbetaling: EtterbetalingDTO?,
-            trygdetid: Trygdetid,
+            trygdetid: List<TrygdetidDto>,
             grunnbeloep: Grunnbeloep,
             utlandstilknytning: UtlandstilknytningType?,
             brevutfall: BrevutfallDto,
             erGjenoppretting: Boolean,
         ): BarnepensjonInnvilgelse {
-            val beregningsperioder =
-                barnepensjonBeregningsperioder(utbetalingsinfo)
-
+            val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
             return BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
-                beregning = barnepensjonBeregning(innhold, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
+                beregning =
+                    barnepensjonBeregning(innhold, avdoede, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },
@@ -122,43 +120,3 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
         }
     }
 }
-
-internal fun barnepensjonBeregning(
-    innhold: InnholdMedVedlegg,
-    utbetalingsinfo: Utbetalingsinfo,
-    grunnbeloep: Grunnbeloep,
-    beregningsperioder: List<BarnepensjonBeregningsperiode>,
-    trygdetid: Trygdetid,
-    erForeldreloes: Boolean = false,
-    bruktAvdoed: String? = null,
-) = BarnepensjonBeregning(
-    innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),
-    antallBarn = utbetalingsinfo.antallBarn,
-    virkningsdato = utbetalingsinfo.virkningsdato,
-    grunnbeloep = Kroner(grunnbeloep.grunnbeloep),
-    beregningsperioder = beregningsperioder,
-    sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM },
-    trygdetid =
-        TrygdetidMedBeregningsmetode(
-            trygdetidsperioder = trygdetid.perioder,
-            beregnetTrygdetidAar = trygdetid.aarTrygdetid,
-            beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
-            prorataBroek = trygdetid.prorataBroek,
-            mindreEnnFireFemtedelerAvOpptjeningstiden = trygdetid.mindreEnnFireFemtedelerAvOpptjeningstiden,
-            beregningsMetodeFraGrunnlag = utbetalingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
-            beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
-        ),
-    erForeldreloes = erForeldreloes,
-    bruktAvdoed = bruktAvdoed,
-)
-
-internal fun barnepensjonBeregningsperioder(utbetalingsinfo: Utbetalingsinfo) =
-    utbetalingsinfo.beregningsperioder.map {
-        BarnepensjonBeregningsperiode(
-            datoFOM = it.datoFOM,
-            datoTOM = it.datoTOM,
-            grunnbeloep = it.grunnbeloep,
-            utbetaltBeloep = it.utbetaltBeloep,
-            antallBarn = it.antallBarn,
-        )
-    }

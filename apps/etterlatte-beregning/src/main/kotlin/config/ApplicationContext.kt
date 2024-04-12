@@ -23,6 +23,8 @@ import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.no.nav.etterlatte.grunnbeloep.GrunnbeloepService
+import no.nav.etterlatte.sanksjon.SanksjonRepository
+import no.nav.etterlatte.sanksjon.SanksjonService
 import no.nav.etterlatte.ytelseMedGrunnlag.YtelseMedGrunnlagService
 
 private fun featureToggleProperties(config: Config) =
@@ -108,4 +110,9 @@ class ApplicationContext {
             behandlingKlient = behandlingKlient,
         )
     val grunnbeloepService = GrunnbeloepService(repository = GrunnbeloepRepository)
+    val sanksjonService =
+        SanksjonService(
+            sanksjonRepository = SanksjonRepository(dataSource),
+            behandlingKlient = behandlingKlient,
+        )
 }

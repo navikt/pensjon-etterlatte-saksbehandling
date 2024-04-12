@@ -24,7 +24,6 @@ export interface TilbakekrevingVurdering {
   tilsvar: TilbakekrevingTilsvar | null
   rettsligGrunnlag: TilbakekrevingHjemmel | null
   objektivtVilkaarOppfylt: string | null
-  subjektivtVilkaarOppfylt: string | null
   uaktsomtForaarsaketFeilutbetaling: string | null
   burdeBrukerForstaatt: string | null
   burdeBrukerForstaattEllerUaktsomtForaarsaket: string | null
@@ -119,6 +118,7 @@ export const teksterTilbakekrevingAarsak: Record<TilbakekrevingAarsak, string> =
 export enum TilbakekrevingStatus {
   OPPRETTET = 'OPPRETTET',
   UNDER_ARBEID = 'UNDER_ARBEID',
+  VALIDERT = 'VALIDERT',
   FATTET_VEDTAK = 'FATTET_VEDTAK',
   ATTESTERT = 'ATTESTERT',
   UNDERKJENT = 'UNDERKJENT',
@@ -126,6 +126,7 @@ export enum TilbakekrevingStatus {
 export const teksterTilbakekrevingStatus: Record<TilbakekrevingStatus, string> = {
   OPPRETTET: 'Opprettet',
   UNDER_ARBEID: 'Under arbeid',
+  VALIDERT: 'Validert',
   FATTET_VEDTAK: 'Fattet vedtak',
   ATTESTERT: 'Attestert',
   UNDERKJENT: 'Underkjent',
@@ -134,6 +135,7 @@ export const teksterTilbakekrevingStatus: Record<TilbakekrevingStatus, string> =
 export const erUnderBehandling = (status: TilbakekrevingStatus) =>
   status === TilbakekrevingStatus.OPPRETTET ||
   status === TilbakekrevingStatus.UNDER_ARBEID ||
+  status === TilbakekrevingStatus.VALIDERT ||
   status === TilbakekrevingStatus.UNDERKJENT
 
 export enum TilbakekrevingSkyld {

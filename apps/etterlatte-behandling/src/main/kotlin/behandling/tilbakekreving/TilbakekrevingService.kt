@@ -103,6 +103,7 @@ class TilbakekrevingService(
             }
             tilbakekrevingDao.lagreTilbakekreving(
                 eksisterende.copy(
+                    status = TilbakekrevingStatus.UNDER_ARBEID,
                     tilbakekreving =
                         eksisterende.tilbakekreving.copy(
                             vurdering = vurdering,
@@ -123,6 +124,7 @@ class TilbakekrevingService(
             }
             tilbakekrevingDao.lagreTilbakekreving(
                 eksisterende.copy(
+                    status = TilbakekrevingStatus.UNDER_ARBEID,
                     tilbakekreving =
                         eksisterende.tilbakekreving.copy(
                             perioder = perioder,
@@ -131,23 +133,37 @@ class TilbakekrevingService(
             )
         }
 
-    suspend fun opprettVedtak(
+    fun validerVurderingOgPerioder(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = inTransaction {
-        logger.info("Oppretter vedtak for tilbakekreving=$tilbakekrevingId")
-        val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
-        if (!tilbakekreving.underBehandling()) {
-            throw TilbakekrevingFeilTilstandException("Tilbakekreving er ikke under behandling")
+    ): TilbakekrevingBehandling =
+        inTransaction {
+            logger.info("Sjekker at vurdering og perioder er gyldig for tilbakekreving=$tilbakekrevingId")
+            val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+            if (!tilbakekreving.underBehandling()) {
+                throw TilbakekrevingFeilTilstandException("Tilbakekreving er ikke under behandling")
+            }
+
+            tilbakekreving.validerVurderingOgPerioder()
+
+            val lagretTilbakekreving =
+                tilbakekrevingDao.lagreTilbakekreving(
+                    tilbakekreving.copy(
+                        status = TilbakekrevingStatus.VALIDERT,
+                    ),
+                )
+
+            logger.info("Oppretter eller oppdaterer vedtak for tilbakekreving=$tilbakekrevingId")
+            runBlocking {
+                vedtakKlient.lagreVedtakTilbakekreving(
+                    tilbakekrevingBehandling = lagretTilbakekreving,
+                    brukerTokenInfo = brukerTokenInfo,
+                    enhet = lagretTilbakekreving.sak.enhet,
+                )
+            }
+
+            lagretTilbakekreving
         }
-        runBlocking {
-            vedtakKlient.lagreVedtakTilbakekreving(
-                tilbakekrevingBehandling = tilbakekreving,
-                brukerTokenInfo = brukerTokenInfo,
-                enhet = tilbakekreving.sak.enhet,
-            )
-        }
-    }
 
     suspend fun fattVedtak(
         tilbakekrevingId: UUID,
@@ -155,8 +171,10 @@ class TilbakekrevingService(
     ) = inTransaction {
         logger.info("Fatter vedtak for tilbakekreving=$tilbakekrevingId")
         val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
-        if (!tilbakekreving.underBehandling()) {
-            throw TilbakekrevingFeilTilstandException("Tilbakekreving er ikke under behandling")
+        if (!tilbakekreving.gyldigForVedtak()) {
+            throw TilbakekrevingFeilTilstandException(
+                "Tilbakekreving har ikke gyldig status for vedtak (${tilbakekreving.status}",
+            )
         }
 
         val vedtakId =

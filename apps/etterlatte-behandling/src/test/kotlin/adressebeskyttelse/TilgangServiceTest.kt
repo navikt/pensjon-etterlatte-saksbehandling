@@ -9,6 +9,7 @@ import no.nav.etterlatte.azureAdFortroligClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BrukerService
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.klage.KlageDao
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -23,6 +24,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.opprettBehandling
+import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceImpl
@@ -50,13 +52,15 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
     private lateinit var klageDao: KlageDao
     private val brukerService = mockk<BrukerService>()
     private val skjermingKlient = mockk<SkjermingKlient>()
+    private val grunnlagservice = mockk<GrunnlagService>()
+    private val krrKlient = mockk<KrrKlient>()
 
     @BeforeAll
     fun beforeAll() {
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
 
-        sakService = SakServiceImpl(sakRepo, skjermingKlient, brukerService)
+        sakService = SakServiceImpl(sakRepo, skjermingKlient, brukerService, grunnlagservice, krrKlient)
         behandlingRepo =
             BehandlingDao(
                 KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),

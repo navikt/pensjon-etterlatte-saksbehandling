@@ -28,7 +28,7 @@ abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
         packet: JsonMessage,
         context: MessageContext,
     ) = withLogContext(packet.correlationId) {
-        withFeilhaandtering(packet, context, this.name()) {
+        withFeilhaandtering(packet, context, feilendeSteg = this.name(), kontekst = kontekst()) {
             haandterPakke(packet, context)
         }
     }

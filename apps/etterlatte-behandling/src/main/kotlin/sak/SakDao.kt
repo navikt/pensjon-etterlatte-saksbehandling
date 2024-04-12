@@ -92,7 +92,13 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
     ): List<Sak> {
         return connectionAutoclosing.hentConnection { connection ->
             with(connection) {
-                val statement = prepareStatement("SELECT id, sakType, fnr, enhet from sak LIMIT $antall")
+                val statement =
+                    prepareStatement(
+                        """SELECT id, sakType, fnr, enhet from sak s 
+                    where not exists(select 1 from kjoering k where k.sak_id=s.id and k.kjoering='$kjoering')
+                    LIMIT $antall"""
+                            .trimMargin(),
+                    )
                 statement.executeQuery().toList { this.toSak() }
             }
         }

@@ -88,7 +88,7 @@ export const ForenkletOppgaverTable = ({
     </Table>
   ) : (
     <Alert variant="info" inline>
-      {formaterEnumTilLesbarString(oppgaveValg).toLowerCase()} oppgaver på sak
+      Ingen {formaterEnumTilLesbarString(oppgaveValg).toLowerCase()} oppgaver på sak
     </Alert>
   )
 }

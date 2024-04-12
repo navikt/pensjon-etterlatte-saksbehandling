@@ -71,6 +71,12 @@ interface OppgaveDao {
         oppgaveStatus: Status,
     )
 
+    fun oppdaterReferanseOgMerknad(
+        oppgaveId: UUID,
+        referanse: String,
+        merknad: String,
+    )
+
     fun endreTilKildeBehandlingOgOppdaterReferanse(
         oppgaveId: UUID,
         referanse: String,
@@ -390,6 +396,30 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                     )
                 statement.setString(1, merknad)
                 statement.setString(2, oppgaveStatus.name)
+                statement.setObject(3, oppgaveId)
+
+                statement.executeUpdate()
+            }
+        }
+    }
+
+    override fun oppdaterReferanseOgMerknad(
+        oppgaveId: UUID,
+        referanse: String,
+        merknad: String,
+    ) {
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        UPDATE oppgave
+                        SET referanse = ?, merknad = ?
+                        where id = ?::UUID
+                        """.trimIndent(),
+                    )
+                statement.setString(1, referanse)
+                statement.setString(2, merknad)
                 statement.setObject(3, oppgaveId)
 
                 statement.executeUpdate()

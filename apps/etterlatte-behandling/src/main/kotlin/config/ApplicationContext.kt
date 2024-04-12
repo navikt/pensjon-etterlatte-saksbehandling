@@ -441,6 +441,7 @@ internal class ApplicationContext(
         BehandlingStatusServiceImpl(
             behandlingDao,
             behandlingService,
+            behandlingInfoDao,
             oppgaveService,
             grunnlagsendringshendelseService,
             generellBehandlingService,

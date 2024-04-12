@@ -13,6 +13,7 @@ import { useAppDispatch } from '~store/Store'
 import { IBehandlingReducer, updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { SkalSendeBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
 
 export interface BrevutfallOgEtterbetaling {
   opphoer?: boolean | null
@@ -108,6 +109,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
 
   return behandling.sendeBrev ? (
     <BrevutfallContent id="brevutfall">
+      <SkalSendeBrev behandling={behandling} />
       <Heading size="medium" spacing>
         Valg av utfall i brev
       </Heading>
@@ -143,7 +145,10 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
       />
     </BrevutfallContent>
   ) : (
-    <InfoAlert variant="info">Det sendes ikke vedtaksbrev for denne behandlingen.</InfoAlert>
+    <>
+      <SkalSendeBrev behandling={behandling} />
+      <InfoAlert variant="info">Det sendes ikke vedtaksbrev for denne behandlingen.</InfoAlert>
+    </>
   )
 }
 

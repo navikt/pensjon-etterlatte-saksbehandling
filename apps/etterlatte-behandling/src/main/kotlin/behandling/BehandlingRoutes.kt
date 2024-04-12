@@ -11,6 +11,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
@@ -26,6 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
+import no.nav.etterlatte.libs.common.behandling.SendBrev
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -269,6 +271,14 @@ internal fun Route.behandlingRoutes(
             kunSkrivetilgang {
                 val redigertFamilie = call.receive<RedigertFamilieforhold>()
                 behandlingService.endrePersongalleri(behandlingId, brukerTokenInfo, redigertFamilie)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        put("/skal-sende-brev") {
+            kunSkrivetilgang {
+                val request = call.receive<SendBrev>()
+                behandlingService.endreSkalSendeBrev(behandlingId, request.sendBrev)
                 call.respond(HttpStatusCode.OK)
             }
         }

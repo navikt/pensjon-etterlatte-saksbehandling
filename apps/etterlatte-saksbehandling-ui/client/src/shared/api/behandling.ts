@@ -17,6 +17,7 @@ import { format } from 'date-fns'
 import { DatoFormat } from '~utils/formattering'
 import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
 import { RedigertFamilieforhold } from '~shared/types/grunnlag'
+import { ISendBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
 
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number
@@ -154,6 +155,14 @@ export const redigerFamilieforhold = async (args: {
   return apiClient.post(`/behandling/${args.behandlingId}/rediger-familieforhold`, {
     ...args.redigert,
   })
+}
+
+export const redigerSendeBrev = async (args: {
+  behandlingId: string
+  sendBrev: ISendBrev
+}): Promise<ApiResponse<void>> => {
+  const { behandlingId, sendBrev } = args
+  return apiClient.put(`/behandling/${behandlingId}/skal-sende-brev`, { ...sendBrev })
 }
 
 export const lagreBrevutfallApi = async (args: {

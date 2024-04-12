@@ -150,6 +150,11 @@ interface BehandlingService {
         redigertFamilieforhold: RedigertFamilieforhold,
     )
 
+    fun endreSkalSendeBrev(
+        behandlingId: UUID,
+        skalSendeBrev: Boolean,
+    )
+
     fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning?
 }
 
@@ -408,6 +413,15 @@ internal class BehandlingServiceImpl(
                     grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType)
                     behandlingDao.lagreStatus(behandling)
                 }
+        }
+    }
+
+    override fun endreSkalSendeBrev(
+        behandlingId: UUID,
+        skalSendeBrev: Boolean,
+    ) {
+        inTransaction {
+            behandlingDao.updateSendeBrev(behandlingId, skalSendeBrev)
         }
     }
 

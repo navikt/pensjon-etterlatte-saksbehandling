@@ -74,11 +74,11 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     const tom = startOfDay(new Date(getValues().datoTom!))
 
     if (!value) {
-      return 'Fra-måned må settes'
+      return 'Fra dato må settes'
     } else if (fom > tom) {
-      return 'Fra-måned kan ikke være etter til-måned.'
+      return 'Fra dato kan ikke være etter Til dato.'
     } else if (behandling.virkningstidspunkt?.dato && fom < startOfDay(new Date(behandling.virkningstidspunkt.dato))) {
-      return 'Fra-måned før virkningstidspunkt.'
+      return 'Fra dato før virkningstidspunkt.'
     }
     return undefined
   }
@@ -88,7 +88,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     const tom = startOfDay(new Date(value))
 
     if (fom > tom) {
-      return 'Til-måned kan ikke være før Fra-måned'
+      return 'Til dato kan ikke være før Fra dato'
     }
     return undefined
   }

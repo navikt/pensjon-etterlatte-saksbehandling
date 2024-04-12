@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useState } from 'react'
-import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, OppgaveDTO, Oppgavetype } from '~shared/types/oppgave'
 import { Alert, Table } from '@navikt/ds-react'
 import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
@@ -80,7 +80,9 @@ export const ForenkletOppgaverTable = ({
               <VelgSaksbehandler saksbehandlereIEnhet={saksbehandlereIEnheter} oppgave={oppgave} />
             </Table.DataCell>
             <Table.DataCell>
-              <HandlingerForOppgave oppgave={oppgave} revurderingsaarsaker={new RevurderingsaarsakerDefault()} />
+              {oppgave.type !== Oppgavetype.VURDER_KONSEKVENS && (
+                <HandlingerForOppgave oppgave={oppgave} revurderingsaarsaker={new RevurderingsaarsakerDefault()} />
+              )}
             </Table.DataCell>
           </Table.Row>
         ))}

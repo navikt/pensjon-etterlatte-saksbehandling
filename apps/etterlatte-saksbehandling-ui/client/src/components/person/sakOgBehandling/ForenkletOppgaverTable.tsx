@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useState } from 'react'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
-import { Heading, Table } from '@navikt/ds-react'
+import { Alert, Table } from '@navikt/ds-react'
 import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/components/Tags'
@@ -47,7 +47,7 @@ export const ForenkletOppgaverTable = ({
     }
   }, [])
 
-  return (
+  return !!filtrerteOpgpaver?.length ? (
     <Table zebraStripes size="small">
       <Table.Header>
         <Table.Row>
@@ -62,39 +62,33 @@ export const ForenkletOppgaverTable = ({
         </Table.Row>
       </Table.Header>
       <Table.Body>
-        {!!filtrerteOpgpaver?.length ? (
-          filtrerteOpgpaver.map((oppgave: OppgaveDTO) => (
-            <Table.Row key={oppgave.id}>
-              <Table.DataCell>{formaterStringDato(oppgave.opprettet)}</Table.DataCell>
-              <Table.DataCell>
-                <FristWrapper dato={oppgave.frist} />
-              </Table.DataCell>
-              <Table.DataCell>
-                <SaktypeTag sakType={oppgave.sakType} />
-              </Table.DataCell>
-              <Table.DataCell>
-                <OppgavetypeTag oppgavetype={oppgave.type} />
-              </Table.DataCell>
-              <Table.DataCell>{oppgave.merknad}</Table.DataCell>
-              <Table.DataCell>{oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] : 'Ukjent status'}</Table.DataCell>
-              <Table.DataCell>
-                <VelgSaksbehandler saksbehandlereIEnhet={saksbehandlereIEnheter} oppgave={oppgave} />
-              </Table.DataCell>
-              <Table.DataCell>
-                <HandlingerForOppgave oppgave={oppgave} revurderingsaarsaker={new RevurderingsaarsakerDefault()} />
-              </Table.DataCell>
-            </Table.Row>
-          ))
-        ) : (
-          <Table.Row>
-            <Table.DataCell colSpan={8}>
-              <Heading size="small">
-                Ingen {formaterEnumTilLesbarString(oppgaveValg).toLowerCase()} oppgaver på sak
-              </Heading>
+        {filtrerteOpgpaver.map((oppgave: OppgaveDTO) => (
+          <Table.Row key={oppgave.id}>
+            <Table.DataCell>{formaterStringDato(oppgave.opprettet)}</Table.DataCell>
+            <Table.DataCell>
+              <FristWrapper dato={oppgave.frist} />
+            </Table.DataCell>
+            <Table.DataCell>
+              <SaktypeTag sakType={oppgave.sakType} />
+            </Table.DataCell>
+            <Table.DataCell>
+              <OppgavetypeTag oppgavetype={oppgave.type} />
+            </Table.DataCell>
+            <Table.DataCell>{oppgave.merknad}</Table.DataCell>
+            <Table.DataCell>{oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] : 'Ukjent status'}</Table.DataCell>
+            <Table.DataCell>
+              <VelgSaksbehandler saksbehandlereIEnhet={saksbehandlereIEnheter} oppgave={oppgave} />
+            </Table.DataCell>
+            <Table.DataCell>
+              <HandlingerForOppgave oppgave={oppgave} revurderingsaarsaker={new RevurderingsaarsakerDefault()} />
             </Table.DataCell>
           </Table.Row>
-        )}
+        ))}
       </Table.Body>
     </Table>
+  ) : (
+    <Alert variant="info" inline>
+      {formaterEnumTilLesbarString(oppgaveValg).toLowerCase()} oppgaver på sak
+    </Alert>
   )
 }

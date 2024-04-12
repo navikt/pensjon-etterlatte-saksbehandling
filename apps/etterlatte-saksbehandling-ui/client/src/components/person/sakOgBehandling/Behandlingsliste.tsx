@@ -1,4 +1,4 @@
-import { Heading, Link, Table } from '@navikt/ds-react'
+import { Alert, Link, Table } from '@navikt/ds-react'
 import { IBehandlingsammendrag, SakMedBehandlinger } from '../typer'
 import { formaterBehandlingstype, formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import React, { useEffect } from 'react'
@@ -60,22 +60,22 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
 
   return (
     <>
-      <Table zebraStripes>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell>Reg. dato</Table.HeaderCell>
-            <Table.HeaderCell>Behandlingstype</Table.HeaderCell>
-            <Table.HeaderCell>Årsak</Table.HeaderCell>
-            <Table.HeaderCell>Status</Table.HeaderCell>
-            <Table.HeaderCell>Virkningstidspunkt</Table.HeaderCell>
-            <Table.HeaderCell>Vedtaksdato</Table.HeaderCell>
-            <Table.HeaderCell>Resultat</Table.HeaderCell>
-            <Table.HeaderCell></Table.HeaderCell>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {!!allebehandlinger?.length ? (
-            allebehandlinger.map((behandling) => {
+      {!!allebehandlinger?.length ? (
+        <Table zebraStripes>
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell>Reg. dato</Table.HeaderCell>
+              <Table.HeaderCell>Behandlingstype</Table.HeaderCell>
+              <Table.HeaderCell>Årsak</Table.HeaderCell>
+              <Table.HeaderCell>Status</Table.HeaderCell>
+              <Table.HeaderCell>Virkningstidspunkt</Table.HeaderCell>
+              <Table.HeaderCell>Vedtaksdato</Table.HeaderCell>
+              <Table.HeaderCell>Resultat</Table.HeaderCell>
+              <Table.HeaderCell></Table.HeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {allebehandlinger.map((behandling) => {
               if (isVanligBehandling(behandling)) {
                 return (
                   <Table.Row key={behandling.id}>
@@ -123,16 +123,14 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                   </Table.Row>
                 )
               }
-            })
-          ) : (
-            <Table.Row>
-              <Table.DataCell colSpan={8}>
-                <Heading size="small">Ingen behandlinger på sak</Heading>
-              </Table.DataCell>
-            </Table.Row>
-          )}
-        </Table.Body>
-      </Table>
+            })}
+          </Table.Body>
+        </Table>
+      ) : (
+        <Alert variant="info" inline>
+          Ingen behandlinger på sak
+        </Alert>
+      )}
       {isPending(generellbehandlingStatus) && <Spinner visible={true} label="Henter generelle behandlinger" />}
       {isFailureHandler({
         apiResult: generellbehandlingStatus,

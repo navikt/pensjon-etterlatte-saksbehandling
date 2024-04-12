@@ -13,7 +13,7 @@ import { hentKlagerISak } from '~shared/api/klage'
 import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { Heading, Link, Table } from '@navikt/ds-react'
+import { Alert, Link, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { JaNei } from '~shared/types/ISvar'
 
@@ -60,7 +60,7 @@ function formaterKabalUtfall(kabalResultat: KabalResultat | undefined): string {
 function KlageTabell(props: { klager: Array<Klage> }) {
   const { klager } = props
 
-  return (
+  return !!klager?.length ? (
     <Table zebraStripes>
       <Table.Header>
         <Table.Row>
@@ -73,28 +73,24 @@ function KlageTabell(props: { klager: Array<Klage> }) {
         </Table.Row>
       </Table.Header>
       <Table.Body>
-        {!!klager?.length ? (
-          klager.map((klage) => (
-            <Table.Row key={klage.id}>
-              <Table.DataCell>{formaterStringDato(klage.opprettet)}</Table.DataCell>
-              <Table.DataCell>{formaterKlagestatus(klage.status)}</Table.DataCell>
-              <Table.DataCell>{formaterKlageResultat(klage)}</Table.DataCell>
-              <Table.DataCell>{formaterKabalstatus(klage.kabalStatus)}</Table.DataCell>
-              <Table.DataCell>{formaterKabalUtfall(klage.kabalResultat)}</Table.DataCell>
-              <Table.DataCell>
-                <Link href={lenkeTilKlageMedId(klage.id)}>Vis behandling</Link>
-              </Table.DataCell>
-            </Table.Row>
-          ))
-        ) : (
-          <Table.Row>
-            <Table.DataCell colSpan={6}>
-              <Heading size="small">Ingen klager på sak</Heading>
+        {klager.map((klage) => (
+          <Table.Row key={klage.id}>
+            <Table.DataCell>{formaterStringDato(klage.opprettet)}</Table.DataCell>
+            <Table.DataCell>{formaterKlagestatus(klage.status)}</Table.DataCell>
+            <Table.DataCell>{formaterKlageResultat(klage)}</Table.DataCell>
+            <Table.DataCell>{formaterKabalstatus(klage.kabalStatus)}</Table.DataCell>
+            <Table.DataCell>{formaterKabalUtfall(klage.kabalResultat)}</Table.DataCell>
+            <Table.DataCell>
+              <Link href={lenkeTilKlageMedId(klage.id)}>Vis behandling</Link>
             </Table.DataCell>
           </Table.Row>
-        )}
+        ))}
       </Table.Body>
     </Table>
+  ) : (
+    <Alert variant="info" inline>
+      Ingen klager på sak
+    </Alert>
   )
 }
 

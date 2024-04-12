@@ -4,7 +4,6 @@ CREATE TABLE kjoering
     tidspunkt TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     kjoering  VARCHAR                  NOT NULL,
     status    VARCHAR                           DEFAULT 'KLAR',
-    dato      DATE                     NOT NULL,
     sak_id    BIGINT                   NOT NULL
         CONSTRAINT kjoering_sak_id_fk
             REFERENCES sak (id),

@@ -39,7 +39,7 @@ export const HandlingerForOppgave = ({
       case Oppgavetype.TILBAKEKREVING:
         return (
           erInnloggetSaksbehandlerOppgave &&
-          oppgave.merknad == 'Kravgrunnlag mottatt' && (
+          oppgave.merknad != 'Venter på kravgrunnlag' && (
             <Button size="small" href={`/tilbakekreving/${referanse}`} as="a">
               Gå til tilbakekreving
             </Button>

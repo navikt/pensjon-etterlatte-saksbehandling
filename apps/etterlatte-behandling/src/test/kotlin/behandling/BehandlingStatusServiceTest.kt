@@ -3,9 +3,12 @@ package no.nav.etterlatte.behandling
 import io.mockk.clearAllMocks
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.foerstegangsbehandling
@@ -13,21 +16,28 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
+import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
+import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toUUID30
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -35,6 +45,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -44,6 +55,7 @@ internal class BehandlingStatusServiceTest {
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
+    private val behandlingInfoDao = mockk<BehandlingInfoDao>(relaxUnitFun = true)
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>()
     private val generellBehandlingService = mockk<GenerellBehandlingService>()
     private val behandlingdao = mockk<BehandlingDao>(relaxUnitFun = true)
@@ -54,6 +66,7 @@ internal class BehandlingStatusServiceTest {
         BehandlingStatusServiceImpl(
             behandlingdao,
             behandlingService,
+            behandlingInfoDao,
             oppgaveService,
             grunnlagsendringshendelseService,
             generellBehandlingService,
@@ -70,6 +83,7 @@ internal class BehandlingStatusServiceTest {
             behandlingdao,
             behandlingService,
             oppgaveService,
+            behandlingInfoDao,
             grunnlagsendringshendelseService,
             generellBehandlingService,
         )
@@ -141,6 +155,7 @@ internal class BehandlingStatusServiceTest {
         val iverksettVedtak = VedtakHendelse(1L, Tidspunkt.now(), "sbl")
 
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
+        every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId)
 
         inTransaction {
             sut.settIverksattVedtak(behandlingId, iverksettVedtak)
@@ -150,6 +165,7 @@ internal class BehandlingStatusServiceTest {
             behandlingdao.lagreStatus(behandlingId, BehandlingStatus.IVERKSATT, any())
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
+            behandlingInfoDao.hentBrevutfall(behandlingId)
         }
     }
 
@@ -196,6 +212,7 @@ internal class BehandlingStatusServiceTest {
         val iverksattVedtak = VedtakHendelse(1L, Tidspunkt.now(), saksbehandler)
 
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
+        every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId)
 
         val generellBehandlingUtland =
             GenerellBehandling.opprettUtland(
@@ -214,6 +231,7 @@ internal class BehandlingStatusServiceTest {
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksattVedtak, HendelseType.IVERKSATT)
             generellBehandlingService.opprettBehandling(any(), any())
+            behandlingInfoDao.hentBrevutfall(behandlingId)
         }
     }
 
@@ -306,4 +324,53 @@ internal class BehandlingStatusServiceTest {
             )
         }
     }
+
+    @ParameterizedTest()
+    @EnumSource(FeilutbetalingValg::class, names = ["JA_VARSEL", "JA_INGEN_TK"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal opprette tilbakekrevingsoppgave naar behandling med feilutbetaling blir iverksatt`(feilutbetalingValg: FeilutbetalingValg) {
+        val sakId = 1L
+        val behandling =
+            revurdering(
+                sakId = sakId,
+                revurderingAarsak = Revurderingaarsak.ANNEN,
+                status = BehandlingStatus.ATTESTERT,
+            )
+        val behandlingId = behandling.id
+        val iverksettVedtak = VedtakHendelse(1L, Tidspunkt.now(), "sbl")
+
+        every { behandlingService.hentBehandling(behandlingId) } returns behandling
+        every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId, feilutbetalingValg)
+        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), sakId, any(), any(), any()) } returns mockk()
+        every { grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId) } just runs
+
+        inTransaction {
+            sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+        }
+
+        verify {
+            behandlingdao.lagreStatus(behandlingId, BehandlingStatus.IVERKSATT, any())
+            behandlingService.hentBehandling(behandlingId)
+            behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
+            behandlingInfoDao.hentBrevutfall(behandlingId)
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse = behandlingId.toUUID30().value,
+                sakId = sakId,
+                oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
+                oppgaveType = OppgaveType.TILBAKEKREVING,
+                merknad = "Venter på kravgrunnlag",
+            )
+            grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
+        }
+    }
+
+    private fun brevutfall(
+        behandlingId: UUID,
+        feilutbetalingValg: FeilutbetalingValg = FeilutbetalingValg.NEI,
+    ) = Brevutfall(
+        behandlingId = behandlingId,
+        aldersgruppe = null,
+        lavEllerIngenInntekt = null,
+        feilutbetaling = Feilutbetaling(feilutbetalingValg, "kommentar"),
+        kilde = Grunnlagsopplysning.Saksbehandler("123456", Tidspunkt.now()),
+    )
 }

@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Container, GridContainer, SpaceChildren } from '~shared/styled'
+import { Container, SpaceChildren } from '~shared/styled'
 import Spinner from '~shared/Spinner'
 import { Alert, Heading, ToggleGroup } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
@@ -54,7 +54,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
   }, [fnr, sakResult])
 
   return (
-    <GridContainer>
+    <SakOversiktWrapper>
       {mapResult(sakResult, {
         pending: <Spinner visible label="Henter sak og behandlinger" />,
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
@@ -132,15 +132,14 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
           </>
         ),
       })}
-    </GridContainer>
+    </SakOversiktWrapper>
   )
 }
 
 const HendelseSidebar = styled.div`
-  min-width: 40rem;
+  width: 100%;
   border-left: 1px solid var(--a-surface-active);
   padding: 3em 2rem;
-  margin: 0 1em;
 `
 
 const HorisontaltSkille = styled.hr`
@@ -155,4 +154,11 @@ export const HeadingWrapper = styled.div`
   .details {
     padding: 0.6em;
   }
+`
+
+const SakOversiktWrapper = styled.div`
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 67% 33%;
 `

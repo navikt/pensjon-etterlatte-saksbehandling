@@ -1,6 +1,6 @@
 package no.nav.etterlatte.beregning
 
-import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagOMS
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
@@ -73,7 +73,7 @@ class BeregnOmstillingsstoenadService(
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
         val beregningsgrunnlag =
-            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(behandling.id, brukerTokenInfo)
+            beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id, brukerTokenInfo)
                 ?: throw BeregningsgrunnlagMangler(behandling.id)
 
         logger.info("Beregner omstillingsstønad for behandlingId=${behandling.id} med behandlingType=$behandlingType")
@@ -218,7 +218,7 @@ class BeregnOmstillingsstoenadService(
 
     private fun opprettBeregningsgrunnlagOmstillingsstoenad(
         trygdetid: TrygdetidDto,
-        beregningsGrunnlagOMS: BeregningsGrunnlagOMS,
+        beregningsGrunnlagOMS: BeregningsGrunnlag,
     ): PeriodisertOmstillingstoenadGrunnlag {
         val samletTrygdetid =
             trygdetid.toSamlet(beregningsGrunnlagOMS.beregningsMetode.beregningsMetode)

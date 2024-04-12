@@ -108,7 +108,7 @@ class BeregningsGrunnlagService(
                     }
 
                 kanLagreDetteGrunnlaget &&
-                    beregningsGrunnlagRepository.lagre(
+                    beregningsGrunnlagRepository.lagreBeregningsGrunnlag(
                         BeregningsGrunnlag(
                             behandlingId = behandlingId,
                             kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
@@ -146,8 +146,8 @@ class BeregningsGrunnlagService(
                     }
 
                 kanLagreDetteGrunnlaget &&
-                    beregningsGrunnlagRepository.lagreOMS(
-                        BeregningsGrunnlagOMS(
+                    beregningsGrunnlagRepository.lagreBeregningsGrunnlag(
+                        BeregningsGrunnlag(
                             behandlingId = behandlingId,
                             kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
                             institusjonsoppholdBeregningsgrunnlag =
@@ -166,7 +166,7 @@ class BeregningsGrunnlagService(
         barnepensjonBeregningsGrunnlag: BarnepensjonBeregningsGrunnlag,
     ): Boolean {
         val forrigeGrunnlag =
-            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(
                 forrigeIverksatteBehandlingId,
             )
         val revurderingVirk = revurdering.virkningstidspunkt().dato.atDay(1)
@@ -193,7 +193,7 @@ class BeregningsGrunnlagService(
         omstillingstoenadBeregningsGrunnlag: OmstillingstoenadBeregningsGrunnlag,
     ): Boolean {
         val forrigeGrunnlag =
-            beregningsGrunnlagRepository.finnOmstillingstoenadGrunnlagForBehandling(forrigeIverksatteBehandlingId)
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(forrigeIverksatteBehandlingId)
         val revurderingVirk = revurdering.virkningstidspunkt().dato.atDay(1)
 
         return erGrunnlagLiktFoerEnDato(
@@ -203,12 +203,12 @@ class BeregningsGrunnlagService(
         )
     }
 
-    suspend fun hentBarnepensjonBeregningsGrunnlag(
+    suspend fun hentBeregningsGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningsGrunnlag? {
         logger.info("Henter grunnlag $behandlingId")
-        val grunnlag = beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(behandlingId)
+        val grunnlag = beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId)
         if (grunnlag != null) {
             return grunnlag
         }
@@ -221,47 +221,23 @@ class BeregningsGrunnlagService(
                     behandling.sak,
                     brukerTokenInfo,
                 )
-            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(sisteIverksatteBehandling.id)
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(sisteIverksatteBehandling.id)
         } else {
             null
         }
     }
 
-    suspend fun hentOmstillingstoenadBeregningsGrunnlag(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): BeregningsGrunnlagOMS? {
-        logger.info("Henter grunnlag $behandlingId")
-        val grunnlag = beregningsGrunnlagRepository.finnOmstillingstoenadGrunnlagForBehandling(behandlingId)
-        if (grunnlag != null) {
-            return grunnlag
-        }
-
-        // Det kan hende behandlingen er en revurdering, og da må vi finne forrige grunnlag for saken
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        return if (behandling.behandlingType == BehandlingType.REVURDERING) {
-            val sisteIverksatteBehandling =
-                behandlingKlient.hentSisteIverksatteBehandling(
-                    behandling.sak,
-                    brukerTokenInfo,
-                )
-            beregningsGrunnlagRepository.finnOmstillingstoenadGrunnlagForBehandling(sisteIverksatteBehandling.id)
-        } else {
-            null
-        }
-    }
-
-    fun dupliserBeregningsGrunnlagBP(
+    fun dupliserBeregningsGrunnlag(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         logger.info("Dupliser grunnlag for $behandlingId fra $forrigeBehandlingId")
 
-        val forrigeGrunnlagBP =
-            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(forrigeBehandlingId)
+        val forrigeGrunnlag =
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(forrigeBehandlingId)
 
-        if (forrigeGrunnlagBP == null) {
+        if (forrigeGrunnlag == null) {
             val behandling =
                 runBlocking {
                     behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
@@ -274,11 +250,11 @@ class BeregningsGrunnlagService(
             }
         }
 
-        if (beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(behandlingId) != null) {
+        if (beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingId) != null) {
             throw RuntimeException("Eksisterende grunnlag funnet for $behandlingId")
         }
 
-        beregningsGrunnlagRepository.lagre(forrigeGrunnlagBP.copy(behandlingId = behandlingId))
+        beregningsGrunnlagRepository.lagreBeregningsGrunnlag(forrigeGrunnlag.copy(behandlingId = behandlingId))
 
         dupliserOverstyrBeregningGrunnlag(behandlingId, forrigeBehandlingId)
     }

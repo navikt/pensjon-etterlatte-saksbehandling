@@ -1,4 +1,4 @@
-import { BodyLong, Button, Heading, VStack } from '@navikt/ds-react'
+import { BodyLong, Button, Heading, HStack, VStack } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
@@ -58,30 +58,32 @@ function TilbakekrevingValideringsfeil({ error }: { error: ApiError }) {
       <ApiErrorAlert>
         <VStack gap="4">
           <BodyLong style={{ fontWeight: 'bold' }}>{error.detail}</BodyLong>
-          {ugyldigeFelterVurdering.length > 0 && (
-            <div>
-              <BodyLong>Manglende felter i Vurdering:</BodyLong>
-              <ul>
-                {ugyldigeFelterVurdering.map((felt, index) => (
-                  <li key={index} style={{ marginLeft: '1.4rem' }}>
-                    {felt}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {ugyldigeFelterPerioder.length > 0 && (
-            <div>
-              <BodyLong>Manglende felter i Utbetalinger:</BodyLong>
-              <ul>
-                {ugyldigeFelterPerioder.map((felt, index) => (
-                  <li key={index} style={{ marginLeft: '1.4rem' }}>
-                    {felt}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <HStack gap="20">
+            {ugyldigeFelterVurdering.length > 0 && (
+              <div>
+                <BodyLong style={{ fontWeight: 'bold' }}>Manglende felter i Vurdering:</BodyLong>
+                <ul>
+                  {ugyldigeFelterVurdering.map((felt, index) => (
+                    <li key={index} style={{ marginLeft: '1.4rem' }}>
+                      {felt}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {ugyldigeFelterPerioder.length > 0 && (
+              <div>
+                <BodyLong style={{ fontWeight: 'bold' }}>Manglende felter i Utbetalinger:</BodyLong>
+                <ul>
+                  {ugyldigeFelterPerioder.map((felt, index) => (
+                    <li key={index} style={{ marginLeft: '1.4rem' }}>
+                      {felt}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </HStack>
         </VStack>
       </ApiErrorAlert>
     )

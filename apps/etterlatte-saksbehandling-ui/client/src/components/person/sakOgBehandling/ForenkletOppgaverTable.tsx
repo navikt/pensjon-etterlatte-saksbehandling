@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useState } from 'react'
-import { erOppgaveRedigerbar, OppgaveDTO, Oppgavetype } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler, Oppgavetype } from '~shared/types/oppgave'
 import { Alert, Table } from '@navikt/ds-react'
 import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
@@ -13,6 +13,10 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { saksbehandlereIEnhetApi } from '~shared/api/oppgaver'
 import { OppgaveValg } from '~components/person/sakOgBehandling/SakOversikt'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import {
+  finnOgOppdaterSaksbehandlerTildeling,
+  sorterOppgaverEtterOpprettet,
+} from '~components/oppgavebenk/utils/oppgaveutils'
 
 export const ForenkletOppgaverTable = ({
   oppgaver,
@@ -25,17 +29,27 @@ export const ForenkletOppgaverTable = ({
   const filtrerOppgaverPaaOppgaveValg = (): OppgaveDTO[] => {
     switch (oppgaveValg) {
       case OppgaveValg.AKTIVE:
-        return [...oppgaver].filter((oppgave) => erOppgaveRedigerbar(oppgave.status))
+        return sorterOppgaverEtterOpprettet([...oppgaver].filter((oppgave) => erOppgaveRedigerbar(oppgave.status)))
       case OppgaveValg.FERDIGSTILTE:
-        return [...oppgaver].filter((oppgave) => !erOppgaveRedigerbar(oppgave.status))
+        return sorterOppgaverEtterOpprettet([...oppgaver].filter((oppgave) => !erOppgaveRedigerbar(oppgave.status)))
     }
   }
 
-  const [filtrerteOpgpaver, setFiltrerteOppgaver] = useState<OppgaveDTO[]>(filtrerOppgaverPaaOppgaveValg())
+  const [filtrerteOppgaver, setFiltrerteOppgaver] = useState<OppgaveDTO[]>(filtrerOppgaverPaaOppgaveValg())
 
   const [saksbehandlereIEnheter, setSaksbehandlereIEnheter] = useState<Array<Saksbehandler>>([])
 
   const [, saksbehandlereIEnheterFetch] = useApiCall(saksbehandlereIEnhetApi)
+
+  const oppdaterSaksbehandlerTildeling = (
+    oppgave: OppgaveDTO,
+    saksbehandler: OppgaveSaksbehandler | null,
+    versjon: number | null
+  ) => {
+    setTimeout(() => {
+      setFiltrerteOppgaver(finnOgOppdaterSaksbehandlerTildeling(filtrerteOppgaver, oppgave.id, saksbehandler, versjon))
+    }, 2000)
+  }
 
   useEffect(() => {
     setFiltrerteOppgaver(filtrerOppgaverPaaOppgaveValg())
@@ -47,7 +61,7 @@ export const ForenkletOppgaverTable = ({
     }
   }, [])
 
-  return !!filtrerteOpgpaver?.length ? (
+  return !!filtrerteOppgaver?.length ? (
     <Table zebraStripes size="small">
       <Table.Header>
         <Table.Row>
@@ -62,7 +76,7 @@ export const ForenkletOppgaverTable = ({
         </Table.Row>
       </Table.Header>
       <Table.Body>
-        {filtrerteOpgpaver.map((oppgave: OppgaveDTO) => (
+        {filtrerteOppgaver.map((oppgave: OppgaveDTO) => (
           <Table.Row key={oppgave.id}>
             <Table.DataCell>{formaterStringDato(oppgave.opprettet)}</Table.DataCell>
             <Table.DataCell>
@@ -77,7 +91,11 @@ export const ForenkletOppgaverTable = ({
             <Table.DataCell>{oppgave.merknad}</Table.DataCell>
             <Table.DataCell>{oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] : 'Ukjent status'}</Table.DataCell>
             <Table.DataCell>
-              <VelgSaksbehandler saksbehandlereIEnhet={saksbehandlereIEnheter} oppgave={oppgave} />
+              <VelgSaksbehandler
+                saksbehandlereIEnhet={saksbehandlereIEnheter}
+                oppgave={oppgave}
+                oppdaterTildeling={oppdaterSaksbehandlerTildeling}
+              />
             </Table.DataCell>
             <Table.DataCell>
               {oppgave.type !== Oppgavetype.VURDER_KONSEKVENS && (

@@ -12,7 +12,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
-  oppdaterTildeling?: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null, versjon: number | null) => void
+  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null, versjon: number | null) => void
   oppgave: OppgaveDTO
 }
 
@@ -48,8 +48,8 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
         byttSaksbehandler(
           { oppgaveId, type, nysaksbehandler: { saksbehandler: selectedSaksbehandler.ident!, versjon } },
           (result) => {
-            oppdaterTildeling && oppdaterTildeling(oppgave, selectedSaksbehandler, result.versjon)
-            setValgtSaksbehandler(saksbehandler)
+            oppdaterTildeling(oppgave, selectedSaksbehandler, result.versjon)
+            setValgtSaksbehandler(selectedSaksbehandler)
             setOpenDropdown(false)
           },
           (error) => console.log(error)
@@ -62,7 +62,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
     byttSaksbehandler(
       { oppgaveId, type, nysaksbehandler: { saksbehandler: innloggetSaksbehandler.ident, versjon } },
       (result) => {
-        oppdaterTildeling && oppdaterTildeling(oppgave, innloggetSaksbehandler, result.versjon)
+        oppdaterTildeling(oppgave, innloggetSaksbehandler, result.versjon)
         setValgtSaksbehandler({
           ident: innloggetSaksbehandler.ident,
           navn: innloggetSaksbehandler.navn,
@@ -79,7 +79,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
     fjernSaksbehandler(
       { oppgaveId, sakId, type, versjon },
       (result) => {
-        oppdaterTildeling && oppdaterTildeling(oppgave, null, result.versjon)
+        oppdaterTildeling(oppgave, null, result.versjon)
         setValgtSaksbehandler(undefined)
         setOpenDropdown(false)
       },

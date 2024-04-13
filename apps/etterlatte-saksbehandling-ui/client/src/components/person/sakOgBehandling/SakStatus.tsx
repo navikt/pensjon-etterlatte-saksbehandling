@@ -5,7 +5,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlleVedtakISak } from '~shared/api/vedtaksvurdering'
 import { mapResult } from '~shared/api/apiUtils'
 import { VedtakType } from '~components/vedtak/typer'
-import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
+import { formaterStringDato } from '~utils/formattering'
 import { VedtaketKlagenGjelder } from '~shared/types/Klage'
 import { RecordFillIcon, XMarkIcon } from '@navikt/aksel-icons'
 
@@ -22,39 +22,21 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
     switch (sisteVedtak?.vedtakType) {
       case VedtakType.INNVILGELSE:
         return (
-          <SpaceChildren direction="row">
-            <Tag variant="neutral">
-              {formaterEnumTilLesbarString(sisteVedtak.vedtakType)}{' '}
-              {!!sisteVedtak.datoAttestert && formaterStringDato(sisteVedtak.datoAttestert)}
-            </Tag>
-            <Tag key={VedtakType.INNVILGELSE} variant="success" icon={<RecordFillIcon aria-hidden color="#06893A" />}>
-              Løpende
-            </Tag>
-          </SpaceChildren>
+          <Tag key={VedtakType.INNVILGELSE} variant="success" icon={<RecordFillIcon aria-hidden color="#06893A" />}>
+            Løpende fra {!!sisteVedtak.datoAttestert && formaterStringDato(sisteVedtak.datoAttestert)}
+          </Tag>
         )
       case VedtakType.AVSLAG:
         return (
-          <SpaceChildren direction="row">
-            <Tag variant="neutral">
-              {formaterEnumTilLesbarString(sisteVedtak.vedtakType)}{' '}
-              {!!sisteVedtak.datoAttestert && formaterStringDato(sisteVedtak.datoAttestert)}
-            </Tag>
-            <Tag key={VedtakType.AVSLAG} variant="error" icon={<XMarkIcon aria-hidden color="#C30000" />}>
-              Avslått
-            </Tag>
-          </SpaceChildren>
+          <Tag key={VedtakType.AVSLAG} variant="error" icon={<XMarkIcon aria-hidden color="#C30000" />}>
+            Avslått den {!!sisteVedtak.datoAttestert && formaterStringDato(sisteVedtak.datoAttestert)}
+          </Tag>
         )
       case VedtakType.OPPHOER:
         return (
-          <SpaceChildren direction="row">
-            <Tag variant="neutral">
-              {formaterEnumTilLesbarString(sisteVedtak.vedtakType)}{' '}
-              {!!sisteVedtak.datoAttestert && formaterStringDato(sisteVedtak.datoAttestert)}
-            </Tag>
-            <Tag key={VedtakType.AVSLAG} variant="alt2">
-              Ytelse opphørt
-            </Tag>
-          </SpaceChildren>
+          <Tag key={VedtakType.OPPHOER} variant="alt2">
+            Ytelse opphørte den {!!sisteVedtak.datoAttestert && formaterStringDato(sisteVedtak.datoAttestert)}
+          </Tag>
         )
       default:
         return (

@@ -129,7 +129,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
 
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get("/oppgaver") {
-                kunSystembruker {
+                kunSaksbehandler {
                     call.respond(inTransaction { service.hentOppgaverForSak(sakId) })
                 }
             }
@@ -233,6 +233,12 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
     }
 
     route("/oppgaver") {
+        get("/sak/{$SAKID_CALL_PARAMETER}/oppgaver") {
+                kunSystembruker {
+                    call.respond(inTransaction { service.hentOppgaverForSak(sakId) })
+                }
+            }
+
         post("/sak/{$SAKID_CALL_PARAMETER}/opprett") {
             kunSystembruker {
                 val nyOppgaveDto = call.receive<NyOppgaveDto>()

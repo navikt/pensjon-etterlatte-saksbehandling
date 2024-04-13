@@ -7,7 +7,7 @@ import Virkningstidspunkt, { Hjemmel } from '~components/behandling/virkningstid
 import { Start } from '~components/behandling/handlinger/Start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { HeadingWrapper } from '~components/person/SakOversikt'
+import { HeadingWrapper } from '~components/person/sakOgBehandling/SakOversikt'
 import {
   BP_INSTITUSJONSOPPHOLD_BESKRIVELSE,
   BP_INSTITUSJONSOPPHOLD_HJEMLER,

@@ -28,6 +28,7 @@ export enum Revurderingaarsak {
   OPPHOER_UTEN_BREV = 'OPPHOER_UTEN_BREV',
   ALDERSOVERGANG = 'ALDERSOVERGANG',
   RETT_UTEN_TIDSBEGRENSNING = 'RETT_UTEN_TIDSBEGRENSNING',
+  FORELDRELOES = 'FORELDRELOES',
 }
 
 export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
@@ -56,6 +57,7 @@ export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   OPPHOER_UTEN_BREV: 'Opphør (uten brev)',
   ALDERSOVERGANG: 'Aldersovergang',
   RETT_UTEN_TIDSBEGRENSNING: 'Stønad uten tidsbegrensning',
+  FORELDRELOES: 'Fra en forelder død til foreldreløs',
 } as const
 
 export type RevurderingsaarsakerBySakstype = {

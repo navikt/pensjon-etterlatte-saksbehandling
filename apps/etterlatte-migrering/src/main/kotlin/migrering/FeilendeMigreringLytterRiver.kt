@@ -43,7 +43,6 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
                 it.rejectValues(
                     FEILENDE_STEG,
                     listOf(
-                        Migreringshendelser.VERIFISER.lagEventnameForType(),
                         "AvbrytBehandlingHvisMigreringFeilaRiver",
                     ),
                 )

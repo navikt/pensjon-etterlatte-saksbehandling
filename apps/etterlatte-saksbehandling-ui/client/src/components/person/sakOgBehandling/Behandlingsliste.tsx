@@ -109,7 +109,6 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                     <Table.DataCell>
                       <BehandlingstypeWrapper>
                         {genbehandlingTypeTilLesbartNavn(behandling.type)}
-                        <EessiPensjonLenke sakId={sak.id} behandlingId={behandling.id} sakType={sak.sakType} />
                       </BehandlingstypeWrapper>
                     </Table.DataCell>
                     <Table.DataCell>-</Table.DataCell>

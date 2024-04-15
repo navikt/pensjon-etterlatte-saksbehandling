@@ -10,10 +10,12 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const TrygdetidManueltOverstyrt = ({
   behandlingId,
+  trygdetidId,
   beregnetTrygdetid,
   oppdaterTrygdetid,
 }: {
   behandlingId: string
+  trygdetidId: string
   beregnetTrygdetid: IDetaljertBeregnetTrygdetid
   oppdaterTrygdetid: (trygdetid: ITrygdetid) => void
 }) => {
@@ -34,6 +36,7 @@ export const TrygdetidManueltOverstyrt = ({
     oppdaterTrygdetidRequest(
       {
         behandlingId: behandlingId,
+        trygdetidId: trygdetidId,
         anvendtTrygdetid: anvendtTrygdetid!!,
         prorataBroek: skalHaProrata
           ? {

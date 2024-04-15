@@ -13,9 +13,8 @@ export interface ISendBrev {
   sendBrev: boolean
 }
 
-export const SkalSendeBrev = (props: { behandling: IBehandlingReducer }) => {
-  // TODO redigerbart
-  const { behandling } = props
+export const SkalSendeBrev = (props: { behandling: IBehandlingReducer; behandlingRedigerbart: boolean }) => {
+  const { behandling, behandlingRedigerbart } = props
 
   const dispatch = useAppDispatch()
   const [requestStatus, redigereRequest] = useApiCall(redigerSendeBrev)
@@ -71,14 +70,16 @@ export const SkalSendeBrev = (props: { behandling: IBehandlingReducer }) => {
           <InnholdWrapper>
             <BodyShort>{behandling.sendeBrev ? 'Ja' : 'Nei'}</BodyShort>
           </InnholdWrapper>
-          <Button
-            variant="secondary"
-            icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
-            size="small"
-            onClick={() => setRedigere(true)}
-          >
-            Rediger
-          </Button>
+          {behandlingRedigerbart && (
+            <Button
+              variant="secondary"
+              icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+              size="small"
+              onClick={() => setRedigere(true)}
+            >
+              Rediger
+            </Button>
+          )}
         </>
       )}
     </SkalSendeBrevContent>

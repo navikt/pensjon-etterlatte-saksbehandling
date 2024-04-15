@@ -109,7 +109,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
 
   return behandling.sendeBrev ? (
     <BrevutfallContent id="brevutfall">
-      <SkalSendeBrev behandling={behandling} />
+      <SkalSendeBrev behandling={behandling} behandlingRedigerbart={redigerbar} />
       <Heading size="medium" spacing>
         Valg av utfall i brev
       </Heading>
@@ -146,7 +146,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
     </BrevutfallContent>
   ) : (
     <>
-      <SkalSendeBrev behandling={behandling} />
+      <SkalSendeBrev behandling={behandling} behandlingRedigerbart={redigerbar} />
       <InfoAlert variant="info">Det sendes ikke vedtaksbrev for denne behandlingen.</InfoAlert>
     </>
   )

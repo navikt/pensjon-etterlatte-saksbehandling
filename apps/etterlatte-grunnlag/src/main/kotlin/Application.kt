@@ -7,7 +7,6 @@ import io.ktor.client.HttpClient
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.GrunnlagHenter
-import no.nav.etterlatte.grunnlag.MigreringGrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.VergeService
@@ -113,7 +112,6 @@ class ApplicationBuilder {
                 GrunnlagsversjoneringRiver(this, grunnlagService)
                 InitBehandlingVersjonRiver(this, behandlingKlient, grunnlagService)
                 GrunnlagHendelserRiver(this, grunnlagService)
-                MigreringGrunnlagHendelserRiver(this, grunnlagService)
                 TattAvVentUnder20River(this, aldersovergangService)
             }
 

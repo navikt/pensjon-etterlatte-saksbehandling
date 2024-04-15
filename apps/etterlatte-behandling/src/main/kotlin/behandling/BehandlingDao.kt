@@ -280,6 +280,18 @@ class BehandlingDao(
         }
     }
 
+    fun lagreSendeBrev(
+        behandlingId: UUID,
+        skalSendeBrev: Boolean,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement = prepareStatement("UPDATE behandling set sende_brev = ? where id = ?")
+            statement.setBoolean(1, skalSendeBrev)
+            statement.setObject(2, behandlingId)
+            require(statement.executeUpdate() == 1)
+        }
+    }
+
     private fun ResultSet.behandlingsListe(): List<Behandling> = toList { tilBehandling(getString("behandlingstype")) }.filterNotNull()
 
     private fun ResultSet.tilBehandling(key: String?) =

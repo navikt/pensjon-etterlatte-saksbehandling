@@ -17,6 +17,7 @@ import {
 } from '~shared/types/IDetaljertBehandling'
 import { RevurderingMedBegrunnelse } from '~shared/types/RevurderingInfo'
 import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
+import { ISendBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
 
 export const setBehandling = createAction<IDetaljertBehandling>('behandling/set')
 export const resetBehandling = createAction('behandling/reset')
@@ -35,6 +36,7 @@ export const oppdaterKommerBarnetTilgode = createAction<IKommerBarnetTilgode>('b
 export const oppdaterBoddEllerArbeidetUtlandet = createAction<IBoddEllerArbeidetUtlandet>(
   'behandling/boddellerarbeidetutlandet'
 )
+export const oppdaterSendeBrev = createAction<ISendBrev>('behandling/sendBrev')
 export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
 export const oppdaterBehandlingsstatus = createAction<IBehandlingStatus>('behandling/status')
 export const oppdaterUtlandstilknytning = createAction<IUtlandstilknytning>('behandling/utlandstilknytning')
@@ -89,6 +91,9 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(oppdaterBoddEllerArbeidetUtlandet, (state, action) => {
     state.behandling!!.boddEllerArbeidetUtlandet = action.payload
+  })
+  builder.addCase(oppdaterSendeBrev, (state, action) => {
+    state.behandling!!.sendeBrev = action.payload.sendBrev
   })
   builder.addCase(oppdaterBeregning, (state, action) => {
     state.behandling!!.beregning = action.payload

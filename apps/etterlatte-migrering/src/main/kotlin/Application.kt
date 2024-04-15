@@ -15,7 +15,6 @@ import no.nav.etterlatte.migrering.LyttPaaIverksattVedtakRiver
 import no.nav.etterlatte.migrering.PauseMigreringRiver
 import no.nav.etterlatte.migrering.migreringRoute
 import no.nav.etterlatte.migrering.start.MigrerSpesifikkSakRiver
-import no.nav.etterlatte.migrering.start.StartMigrering
 import no.nav.etterlatte.migrering.vent.StartAaTaAvVent
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -56,7 +55,6 @@ internal class Server(private val context: ApplicationContext) {
                     LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository, penklient, featureToggleService)
                     LyttPaaDistribuerBrevRiver(rapidsConnection, pesysRepository)
                     FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)
-                    StartMigrering(startMigreringRepository, rapidsConnection, featureToggleService)
                     StartAaTaAvVent(ventRepository, rapidsConnection, featureToggleService)
                     AlleredeGjenopprettaRiver(rapidsConnection, pesysRepository)
                 }.start()

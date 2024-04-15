@@ -11,7 +11,6 @@ import no.nav.etterlatte.migrering.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
-import no.nav.etterlatte.migrering.start.StartMigreringRepository
 import no.nav.etterlatte.migrering.vent.VentRepository
 import no.nav.etterlatte.migrering.verifisering.GjenlevendeForelderPatcher
 import no.nav.etterlatte.migrering.verifisering.PdlTjenesterKlient
@@ -74,7 +73,6 @@ internal class ApplicationContext {
             url = config.getString("krr.url"),
         )
 
-    val startMigreringRepository = StartMigreringRepository(dataSource)
     val ventRepository = VentRepository(dataSource)
 }
 

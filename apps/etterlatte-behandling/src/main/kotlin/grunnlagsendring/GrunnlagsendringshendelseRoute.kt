@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.common.sak.ReguleringFeiletHendelse
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
@@ -134,5 +135,3 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
 }
 
 data class GrunnlagsendringsListe(val hendelser: List<Grunnlagsendringshendelse>)
-
-data class ReguleringFeiletHendelse(val sakId: Long)

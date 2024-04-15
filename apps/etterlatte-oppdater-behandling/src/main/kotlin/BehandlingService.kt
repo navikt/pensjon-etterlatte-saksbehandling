@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
+import no.nav.etterlatte.libs.common.sak.ReguleringFeiletHendelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
@@ -104,8 +105,6 @@ interface BehandlingService {
         kjoering: String,
     )
 }
-
-data class ReguleringFeiletHendelse(val sakId: Long)
 
 class BehandlingServiceImpl(
     private val behandlingKlient: HttpClient,

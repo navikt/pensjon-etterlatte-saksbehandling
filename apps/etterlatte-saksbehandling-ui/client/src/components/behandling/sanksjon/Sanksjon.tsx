@@ -230,12 +230,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                     >
                       Avbryt
                     </Button>
-                    <Button
-                      size="small"
-                      variant="primary"
-                      icon={<PencilIcon aria-hidden fontSize="1.5rem" />}
-                      type="submit"
-                    >
+                    <Button size="small" variant="primary" type="submit">
                       Lagre
                     </Button>
                   </HStack>

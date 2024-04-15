@@ -11,7 +11,6 @@ import no.nav.etterlatte.migrering.ApplicationContext
 import no.nav.etterlatte.migrering.FeilendeMigreringLytterRiver
 import no.nav.etterlatte.migrering.LyttPaaDistribuerBrevRiver
 import no.nav.etterlatte.migrering.LyttPaaIverksattVedtakRiver
-import no.nav.etterlatte.migrering.PauseMigreringRiver
 import no.nav.etterlatte.migrering.migreringRoute
 import no.nav.etterlatte.migrering.vent.StartAaTaAvVent
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
@@ -40,7 +39,6 @@ internal class Server(private val context: ApplicationContext) {
                 }
                 .build()
                 .also { rapidsConnection ->
-                    PauseMigreringRiver(rapidsConnection, pesysRepository)
                     LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository, penklient, featureToggleService)
                     LyttPaaDistribuerBrevRiver(rapidsConnection, pesysRepository)
                     FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)

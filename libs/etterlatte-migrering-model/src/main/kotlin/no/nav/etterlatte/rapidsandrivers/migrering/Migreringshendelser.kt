@@ -4,7 +4,6 @@ import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 
 enum class Migreringshendelser : EventnameHendelseType {
     BEREGNET_FERDIG,
-    PAUSE,
     IVERKSATT,
     AVBRYT_BEHANDLING,
     FIKS_ENKELTBREV,

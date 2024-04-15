@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.migrering.AlleredeGjenopprettaRiver
 import no.nav.etterlatte.migrering.ApplicationContext
 import no.nav.etterlatte.migrering.FeilendeMigreringLytterRiver
-import no.nav.etterlatte.migrering.LagreKoblingRiver
 import no.nav.etterlatte.migrering.LyttPaaDistribuerBrevRiver
 import no.nav.etterlatte.migrering.LyttPaaIverksattVedtakRiver
 import no.nav.etterlatte.migrering.PauseMigreringRiver
@@ -41,7 +40,6 @@ internal class Server(private val context: ApplicationContext) {
                 }
                 .build()
                 .also { rapidsConnection ->
-                    LagreKoblingRiver(rapidsConnection, pesysRepository)
                     PauseMigreringRiver(rapidsConnection, pesysRepository)
                     LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository, penklient, featureToggleService)
                     LyttPaaDistribuerBrevRiver(rapidsConnection, pesysRepository)

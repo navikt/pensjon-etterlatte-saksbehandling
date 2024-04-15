@@ -80,7 +80,7 @@ class FeilendeMigreringLytterRiverTestRiver(private val datasource: DataSource) 
                             PESYS_ID_KEY to pesysid,
                             HENDELSE_DATA_KEY to pesyssak.tilMigreringsrequest(),
                             FEILMELDING_KEY to IllegalStateException("her feiler det"),
-                            FEILENDE_STEG to Migreringshendelser.TRYGDETID.lagEventnameForType(),
+                            FEILENDE_STEG to Migreringshendelser.IVERKSATT.lagEventnameForType(),
                         ),
                     ).toJson(),
                 )

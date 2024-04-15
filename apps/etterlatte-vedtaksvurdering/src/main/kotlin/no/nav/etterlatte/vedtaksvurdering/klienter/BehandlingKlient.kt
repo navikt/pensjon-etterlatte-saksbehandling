@@ -416,7 +416,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): TilbakekrevingBehandling {
-        logger.info("Henter tilbakekreving med behandlingId=$tilbakekrevingId")
+        logger.info("Henter tilbakekreving med tilbakekrevingId=$tilbakekrevingId")
         try {
             return downstreamResourceClient
                 .get(
@@ -432,7 +432,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
-            throw BehandlingKlientException("Henting av tilbakekreving med behandlingId=$tilbakekrevingId feilet", e)
+            throw BehandlingKlientException("Henting av tilbakekreving med tilbakekrevingId=$tilbakekrevingId feilet", e)
         }
     }
 }

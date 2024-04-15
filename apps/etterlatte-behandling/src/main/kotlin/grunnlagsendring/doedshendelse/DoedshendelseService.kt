@@ -247,7 +247,7 @@ class DoedshendelseService(
         val avdoedesSivilstander = avdoed.sivilstand ?: emptyList()
 
         return avdoedesSivilstander.asSequence()
-            .filter { it.verdi.relatertVedSiviltilstand?.value !== null }
+            .filter { it.verdi.relatertVedSiviltilstand?.value != null }
             .filter {
                 it.verdi.sivilstatus in
                     listOf(

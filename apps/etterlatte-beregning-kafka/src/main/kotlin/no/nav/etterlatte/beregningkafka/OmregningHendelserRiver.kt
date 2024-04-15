@@ -50,13 +50,10 @@ internal class OmregningHendelserRiver(
         val sakType = objectMapper.treeToValue<SakType>(packet[SAK_TYPE])
         trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         runBlocking {
-            if (sakType == SakType.BARNEPENSJON) {
-                beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
-                val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
-                packet[BEREGNING_KEY] = beregning
-            } else {
-                val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
-                packet[BEREGNING_KEY] = beregning
+            beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
+            val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
+            packet[BEREGNING_KEY] = beregning
+            if (sakType == SakType.OMSTILLINGSSTOENAD) {
                 val avkorting =
                     beregningService.regulerAvkorting(behandlingId, behandlingViOmregnerFra)
                         .body<AvkortingDto>()

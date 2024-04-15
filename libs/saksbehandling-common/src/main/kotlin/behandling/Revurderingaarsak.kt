@@ -43,6 +43,7 @@ enum class Revurderingaarsak(
     INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     RETT_UTEN_TIDSBEGRENSNING(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
+    FORELDRELOES(SAKTYPE_BP, KunIDev, skalSendeBrev = true),
 
     // Opphør
     ALDERSOVERGANG(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),

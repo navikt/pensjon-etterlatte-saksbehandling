@@ -76,6 +76,11 @@ export const BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER: Array<Hjemmel> = B
   ]
 )
 
+export const BP_FORELDRELOES_HJEMLER: Array<Hjemmel> = [
+  { lenke: 'https://lovdata.no/lov/1997-02-28-19/§18-5', tittel: 'Folketrygdloven § 18-5' },
+  { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12', tittel: '§ 22-12 første ledd' },
+]
+
 export const BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE =
   'Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for opptil tre år før den måneden søknaden er satt fram. \n\nHvis bosatt utland: bruk kravdato i bostedslandet, eventuelt landet søker sist var medlem.'
 
@@ -96,6 +101,8 @@ export const BP_OPPHOER_BESKRIVELSE =
 
 export const BP_INSTITUSJONSOPPHOLD_BESKRIVELSE =
   'Barnepensjon gis uten reduksjon i innleggelsesmåneden og de tre påfølgende månedene. Deretter kan stønaden bli redusert. Blir man innlagt igjen innen tre måneder etter utskrivelsen skal stønaden reduseres fra måneden etter innleggelse. Barnepensjon gis uten reduksjon for institusjonsopphold f.o.m. utskrivingsmåneden.'
+
+export const BP_FORELDRELOES_BESKRIVELSE = 'Barnepensjon til foreldreløs kan gis fra måneden etter det siste dødsfallet'
 
 // OMSTILLINGSSTØNAD
 

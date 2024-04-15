@@ -9,6 +9,8 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { HeadingWrapper } from '~components/person/sakOgBehandling/SakOversikt'
 import {
+  BP_FORELDRELOES_BESKRIVELSE,
+  BP_FORELDRELOES_HJEMLER,
   BP_INSTITUSJONSOPPHOLD_BESKRIVELSE,
   BP_INSTITUSJONSOPPHOLD_HJEMLER,
   BP_OPPHOER_BESKRIVELSE,
@@ -85,6 +87,8 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingaarsak)
       return [BP_INSTITUSJONSOPPHOLD_HJEMLER, BP_INSTITUSJONSOPPHOLD_BESKRIVELSE]
     case Revurderingaarsak.SLUTTBEHANDLING_UTLAND:
       return [FELLES_SLUTTBEHANDLING_HJEMLER, FELLES_SLUTTBEHANDLING_BESKRIVELSE]
+    case Revurderingaarsak.FORELDRELOES:
+      return [BP_FORELDRELOES_HJEMLER, BP_FORELDRELOES_BESKRIVELSE]
     default:
       return [FELLES_REVURDERING_HJEMLER, BP_REVURDERING_BESKRIVELSE]
   }

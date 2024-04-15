@@ -224,7 +224,7 @@ class DoedshendelseService(
             avdoedOgAnnenForelderMedFellesbarn
                 .avdoedPerson.bostedsadresse?.map { it.verdi }?.sortedByDescending { it.gyldigFraOgMed }?.firstOrNull()
 
-        val adresserLike = isAdresserLike(gjenlevendeBosted, avdoedBosted)
+        val adresserLike = gjenlevendeBosted != null && avdoedBosted != null && isAdresserLike(gjenlevendeBosted, avdoedBosted)
         logger.info(
             "Avdød (${avdoedOgAnnenForelderMedFellesbarn.avdoedPerson.foedselsnummer.verdi}) og annen forelder " +
                 "(${avdoedOgAnnenForelderMedFellesbarn.gjenlevendeForelder.foedselsnummer.verdi}) har samme adresse: $adresserLike",
@@ -233,12 +233,12 @@ class DoedshendelseService(
     }
 
     private fun isAdresserLike(
-        adresse1: Adresse?,
-        adresse2: Adresse?,
-    ) = adresse1?.adresseLinje1 == adresse2?.adresseLinje1 &&
-        adresse1?.adresseLinje2 == adresse2?.adresseLinje2 &&
-        adresse1?.adresseLinje3 == adresse2?.adresseLinje3 &&
-        adresse1?.postnr == adresse2?.postnr
+        adresse1: Adresse,
+        adresse2: Adresse,
+    ) = adresse1.adresseLinje1 == adresse2.adresseLinje1 &&
+        adresse1.adresseLinje2 == adresse2.adresseLinje2 &&
+        adresse1.adresseLinje3 == adresse2.adresseLinje3 &&
+        adresse1.postnr == adresse2.postnr
 
     private fun finnBeroerteEktefeller(
         avdoed: PersonDTO,

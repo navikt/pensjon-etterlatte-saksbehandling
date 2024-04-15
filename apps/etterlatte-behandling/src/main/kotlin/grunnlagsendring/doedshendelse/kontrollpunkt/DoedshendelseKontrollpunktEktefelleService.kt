@@ -61,15 +61,14 @@ internal class DoedshendelseKontrollpunktEktefelleService {
         val giftSivilstander =
             avdoed.sivilstand
                 ?.map { it.verdi }
-                ?.filter { it.relatertVedSiviltilstand == eps.foedselsnummer.verdi }
-                ?.filter { it.sivilstatus in listOf(GIFT, REGISTRERT_PARTNER) }
+                ?.filter { it.sivilstatus in listOf(GIFT, SEPARERT, REGISTRERT_PARTNER, SEPARERT_PARTNER) }
                 ?.sortedBy { it.gyldigFraOgMed }
 
         if (giftSivilstander.isNullOrEmpty()) {
-            throw IllegalStateException("Fant ingen gift sivilstander for avdoed med tidligere ektefelle")
+            return DoedshendelseKontrollpunkt.AvdoedHarIkkeVaertGift
         }
 
-        val gift = giftSivilstander.first().gyldigFraOgMed
+        val gift = giftSivilstander.firstOrNull { it.relatertVedSiviltilstand == eps.foedselsnummer.verdi }?.gyldigFraOgMed
 
         val skiltSivilstander =
             avdoed.sivilstand

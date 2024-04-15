@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.mockPerson
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class DoedshendelseKontrollpunktEktefelleServiceTest {
@@ -273,10 +272,13 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
     }
 
     @Test
-    fun `Skal kaste feil hvis vi ikke finner noen relaterte sivilstander`() {
-        assertThrows<IllegalStateException> {
-            kontrollpunktService.identifiser(gjenlevende, avdoed)
-        }
+    fun `Skal returnere AvdoedHarIkkeVaertGift hvis avdoed ikke har vaert registert som gift eller partner`() {
+        val kontrollpunkter = kontrollpunktService.identifiser(gjenlevende, avdoed)
+
+        kontrollpunkter shouldContainExactly
+            listOf(
+                DoedshendelseKontrollpunkt.AvdoedHarIkkeVaertGift,
+            )
     }
 
     companion object {

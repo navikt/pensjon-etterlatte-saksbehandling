@@ -1,6 +1,5 @@
 package no.nav.etterlatte.trygdetid.kafka
 
-import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
@@ -125,7 +124,6 @@ internal class MigreringTrygdetidHendelserRiver(
         behandlingId: UUID,
     ) {
         packet[TRYGDETID_KEY] = beregnetTrygdetid.toJson()
-        packet.setEventNameForHendelseType(Migreringshendelser.BEREGN)
         context.publish(packet.toJson())
         logger.info(
             "Publiserte oppdatert migreringshendelse fra trygdetid for behandling $behandlingId",

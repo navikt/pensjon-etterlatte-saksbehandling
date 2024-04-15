@@ -1,7 +1,6 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.beregningkafka.AppBuilder
-import no.nav.etterlatte.beregningkafka.MigreringBeregningHendelserRiver
 import no.nav.etterlatte.beregningkafka.OmregningHendelserRiver
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
@@ -16,6 +15,5 @@ fun main() {
             beregningService,
             AppBuilder(Miljoevariabler(rapidEnv)).createTrygdetidService(),
         )
-        MigreringBeregningHendelserRiver(rapidsConnection, beregningService)
     }.start()
 }

@@ -81,7 +81,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         }
     }
 
-    // TODO På tide å fjerne?
+    // TODO På tide å fjerne? Nei
     private suspend fun fraPesys(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
@@ -106,6 +106,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
                 grunnbeloep = grunnbeloep.await(),
                 migreringRequest = automatiskMigreringRequest,
                 utlandstilknytning = generellBrevData.utlandstilknytning?.type,
+                avdoede = generellBrevData.personerISak.avdoede,
             )
         }
     }

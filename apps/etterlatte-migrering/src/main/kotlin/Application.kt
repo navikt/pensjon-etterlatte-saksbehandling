@@ -14,7 +14,6 @@ import no.nav.etterlatte.migrering.LyttPaaDistribuerBrevRiver
 import no.nav.etterlatte.migrering.LyttPaaIverksattVedtakRiver
 import no.nav.etterlatte.migrering.PauseMigreringRiver
 import no.nav.etterlatte.migrering.migreringRoute
-import no.nav.etterlatte.migrering.start.MigrerSpesifikkSakRiver
 import no.nav.etterlatte.migrering.vent.StartAaTaAvVent
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -42,14 +41,6 @@ internal class Server(private val context: ApplicationContext) {
                 }
                 .build()
                 .also { rapidsConnection ->
-                    MigrerSpesifikkSakRiver(
-                        rapidsConnection,
-                        penklient,
-                        pesysRepository,
-                        featureToggleService,
-                        verifiserer,
-                        krrKlient,
-                    )
                     LagreKoblingRiver(rapidsConnection, pesysRepository)
                     PauseMigreringRiver(rapidsConnection, pesysRepository)
                     LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository, penklient, featureToggleService)

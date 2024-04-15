@@ -58,13 +58,28 @@ class TilbakekrevingService(
                     TilbakekrevingBehandling.ny(kravgrunnlag, sak),
                 )
 
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = tilbakekrevingBehandling.id.toString(),
-                sakId = tilbakekrevingBehandling.sak.id,
-                oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
-                oppgaveType = OppgaveType.TILBAKEKREVING,
-                merknad = null,
-            )
+            oppgaveService.hentOppgaverForReferanse(kravgrunnlag.sisteUtbetalingslinjeId.value)
+                .filter { it.type == OppgaveType.TILBAKEKREVING }.let {
+                    if (it.isEmpty()) {
+                        logger.info("Fant ingen tilbakekrevingsoppgave, oppretter ny")
+                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                            referanse = tilbakekrevingBehandling.id.toString(),
+                            sakId = tilbakekrevingBehandling.sak.id,
+                            oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
+                            oppgaveType = OppgaveType.TILBAKEKREVING,
+                            merknad = "Kravgrunnlag mottatt",
+                        )
+                    } else {
+                        val eksisterendeOppgave = it.single()
+
+                        logger.info("Kobler nytt kravgrunnlag med eksisterende oppgave ${eksisterendeOppgave.id}")
+                        oppgaveService.oppdaterReferanseOgMerknad(
+                            oppgaveId = eksisterendeOppgave.id,
+                            referanse = tilbakekrevingBehandling.id.toString(),
+                            merknad = "Kravgrunnlag mottatt",
+                        )
+                    }
+                }
 
             hendelseDao.tilbakekrevingOpprettet(
                 tilbakekrevingId = tilbakekrevingBehandling.id,

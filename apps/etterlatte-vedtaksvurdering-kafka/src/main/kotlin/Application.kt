@@ -18,7 +18,6 @@ fun main() {
         val vedtakKlient = AppBuilder(Miljoevariabler(rapidEnv)).lagVedtakKlient()
         LoependeYtelserforespoerselRiver(rapidsConnection, vedtakKlient)
         OpprettVedtakforespoerselRiver(rapidsConnection, vedtakKlient)
-        MigreringHendelserRiver(rapidsConnection, vedtakKlient)
         LagreIverksattVedtakRiver(rapidsConnection, vedtakKlient)
         AttestertVedtakRiver(rapidsConnection, vedtakKlient)
         SamordningMottattRiver(rapidsConnection, vedtakKlient)

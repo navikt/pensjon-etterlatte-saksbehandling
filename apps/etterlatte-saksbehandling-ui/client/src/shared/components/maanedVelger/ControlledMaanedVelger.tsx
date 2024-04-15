@@ -9,7 +9,7 @@ interface Props<T extends FieldValues> {
   control: Control<T>
   fromDate?: Date
   toDate?: Date
-  validate: (maaned: Date) => string | undefined
+  validate?: (maaned: Date) => string | undefined
   required?: boolean
 }
 
@@ -19,8 +19,7 @@ export const ControlledMaanedVelger = <T extends FieldValues>({
   control,
   fromDate,
   toDate,
-  validate,
-  required = false,
+  validate = undefined,
 }: Props<T>): ReactNode => {
   const {
     field,
@@ -41,8 +40,10 @@ export const ControlledMaanedVelger = <T extends FieldValues>({
     fromDate: fromDate ?? undefined,
     toDate: toDate ?? undefined,
     locale: 'nb',
-    onValidate: setDateError,
-    required: required,
+    onValidate: (val) => {
+      if (val.isEmpty) field.onChange(null)
+      else setDateError(val)
+    },
   } as UseMonthPickerOptions)
 
   return (

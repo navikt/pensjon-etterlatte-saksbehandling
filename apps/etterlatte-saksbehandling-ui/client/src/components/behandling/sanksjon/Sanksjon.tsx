@@ -58,8 +58,8 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     register,
     handleSubmit,
     control,
-    getValues,
     reset,
+    setError,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -69,39 +69,29 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     },
   })
 
-  const validerFom = (value: Date): string | undefined => {
-    if (!value) {
-      return 'Fra dato må settes'
-    }
-
-    const fom = startOfDay(new Date(value))
-    const tom = getValues().datoTom ? startOfDay(new Date(getValues().datoTom!)) : null
-
-    if (tom && fom > tom) {
-      return 'Fra dato kan ikke være etter Til dato.'
-    } else if (behandling.virkningstidspunkt?.dato && fom < startOfDay(new Date(behandling.virkningstidspunkt.dato))) {
-      return 'Fra dato før virkningstidspunkt.'
-    }
-    return undefined
-  }
-
-  const validerTom = (value: Date): string | undefined => {
-    const fom = getValues().datoFom ? startOfDay(new Date(getValues().datoFom!)) : null
-    const tom = startOfDay(new Date(value))
-
-    if (fom && fom > tom) {
-      return 'Til dato kan ikke være før Fra dato'
-    }
-    return undefined
-  }
-
   const submitSanksjon = (data: { datoFom?: Date; datoTom?: Date; beskrivelse: string }) => {
+    const { datoFom, datoTom, beskrivelse } = data
+
+    if (datoFom) {
+      if (behandling.virkningstidspunkt?.dato && datoFom < startOfDay(new Date(behandling.virkningstidspunkt.dato))) {
+        setError('datoFom', { type: 'manual', message: 'Fra dato før virkningstidspunkt' })
+        return
+      }
+      if (datoTom && datoFom > datoTom) {
+        setError('datoTom', { type: 'manual', message: 'Til dato må være etter Fra dato' })
+        return
+      }
+    } else {
+      setError('datoFom', { type: 'manual', message: 'Fra dato må settes' })
+      return
+    }
+
     const lagreSanksjon: ISanksjonLagre = {
       id: undefined,
       sakId: behandling.sakId,
-      fom: formatISO(data.datoFom!, { representation: 'date' }),
-      tom: data.datoTom ? formatISO(data.datoTom!, { representation: 'date' }) : undefined,
-      beskrivelse: data.beskrivelse,
+      fom: formatISO(datoFom!, { representation: 'date' }),
+      tom: datoTom ? formatISO(datoTom!, { representation: 'date' }) : undefined,
+      beskrivelse: beskrivelse,
     }
 
     lagreSanksjonRequest(
@@ -200,19 +190,8 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                 </Heading>
                 <VStack gap="4">
                   <HStack gap="4">
-                    <ControlledMaanedVelger
-                      label="Dato fra og med"
-                      name="datoFom"
-                      control={control}
-                      validate={validerFom}
-                      required
-                    />
-                    <ControlledMaanedVelger
-                      label="Dato til og med (valgfri)"
-                      name="datoTom"
-                      control={control}
-                      validate={validerTom}
-                    />
+                    <ControlledMaanedVelger label="Dato fra og med" name="datoFom" control={control} />
+                    <ControlledMaanedVelger label="Dato til og med (valgfri)" name="datoTom" control={control} />
                   </HStack>
                   <HStack>
                     <Textarea

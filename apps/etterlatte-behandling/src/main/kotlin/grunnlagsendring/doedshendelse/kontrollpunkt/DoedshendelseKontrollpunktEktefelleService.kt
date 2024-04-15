@@ -58,17 +58,36 @@ internal class DoedshendelseKontrollpunktEktefelleService {
         avdoed: PersonDTO,
         eps: PersonDTO,
     ): DoedshendelseKontrollpunkt {
-        val sivilstanderForEpsMedAvdoed =
-            eps.sivilstand
+        val giftSivilstander =
+            avdoed.sivilstand
                 ?.map { it.verdi }
-                ?.filter { it.relatertVedSiviltilstand == avdoed.foedselsnummer.verdi }
+                ?.filter { it.relatertVedSiviltilstand == eps.foedselsnummer.verdi }
+                ?.filter { it.sivilstatus in listOf(GIFT, REGISTRERT_PARTNER) }
+                ?.sortedBy { it.gyldigFraOgMed }
 
-        if (sivilstanderForEpsMedAvdoed.isNullOrEmpty()) {
-            throw IllegalStateException("Fant ingen sivilstander for eps med avdoed")
+        if (giftSivilstander.isNullOrEmpty()) {
+            throw IllegalStateException("Fant ingen gift sivilstander for avdoed med tidligere ektefelle")
         }
 
-        val gift = sivilstanderForEpsMedAvdoed.firstOrNull { it.sivilstatus in listOf(GIFT, REGISTRERT_PARTNER) }?.gyldigFraOgMed
-        val skilt = sivilstanderForEpsMedAvdoed.lastOrNull { it.sivilstatus in listOf(SKILT, SKILT_PARTNER) }?.gyldigFraOgMed
+        val gift = giftSivilstander.first().gyldigFraOgMed
+
+        val skiltSivilstander =
+            avdoed.sivilstand
+                ?.map { it.verdi }
+                ?.filter { it.sivilstatus in listOf(SKILT, SKILT_PARTNER) }
+                ?.filterNot { it.gyldigFraOgMed != null && gift != null && it.gyldigFraOgMed!! < gift }
+                ?.sortedBy { it.gyldigFraOgMed }
+                ?: emptyList()
+
+        val skilt =
+            when {
+                skiltSivilstander.isEmpty() -> null
+                skiltSivilstander.size == 1 -> skiltSivilstander.first().gyldigFraOgMed
+                skiltSivilstander.any { it.relatertVedSiviltilstand?.value == eps.foedselsnummer.verdi.value } -> {
+                    skiltSivilstander.first { it.relatertVedSiviltilstand?.value == eps.foedselsnummer.verdi.value }.gyldigFraOgMed
+                }
+                else -> skiltSivilstander.first().gyldigFraOgMed
+            }
 
         if (gift == null || skilt == null) {
             return DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(

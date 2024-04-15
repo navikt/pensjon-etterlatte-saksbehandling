@@ -44,13 +44,6 @@ fun Route.migreringRoutes(migreringService: MigreringService) {
                 }
             }
         }
-        post("/manuell-gjenoppretting") {
-            val migreringRequest = call.receive<MigreringRequest>()
-            kunSkrivetilgang(enhetNr = migreringRequest.enhet.nr) {
-                migreringService.opprettOppgaveManuellGjenoppretting(migreringRequest)
-                call.respond(HttpStatusCode.OK)
-            }
-        }
 
         put("/{$BEHANDLINGID_CALL_PARAMETER}/avbryt") {
             kunSkrivetilgang {

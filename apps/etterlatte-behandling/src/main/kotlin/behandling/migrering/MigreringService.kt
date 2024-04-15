@@ -23,11 +23,8 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -35,7 +32,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class MigreringService(
@@ -152,20 +148,6 @@ class MigreringService(
             }
         }
     }
-
-    fun opprettOppgaveManuellGjenoppretting(request: MigreringRequest) =
-        inTransaction {
-            val sak = finnEllerOpprettSak(request)
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = request.pesysId.id.toString(),
-                sakId = sak.id,
-                oppgaveKilde = OppgaveKilde.GJENOPPRETTING,
-                oppgaveType = OppgaveType.GJENOPPRETTING_ALDERSOVERGANG,
-                merknad =
-                    "Opprettelse av manuell behandling for gjenoppretting av opphørt sak i Pesys id=${request.pesysId.id}",
-                frist = Tidspunkt.now().plus(5, ChronoUnit.DAYS),
-            )
-        }
 
     private suspend fun <T> retryMedPause(
         times: Int = 2,

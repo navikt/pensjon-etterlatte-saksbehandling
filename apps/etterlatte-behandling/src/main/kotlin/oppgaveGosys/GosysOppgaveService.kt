@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalTime
 
@@ -57,6 +58,8 @@ class GosysOppgaveServiceImpl(
     private val gosysOppgaveKlient: GosysOppgaveKlient,
     private val pdltjenesterKlient: PdlTjenesterKlient,
 ) : GosysOppgaveService {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     private val cache =
         Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofMinutes(5))
@@ -75,6 +78,8 @@ class GosysOppgaveServiceImpl(
                 brukerTokenInfo = brukerTokenInfo,
             )
 
+        logger.info("Fant ${gosysOppgaver.antallTreffTotalt} oppgave(r) med tema: $tema")
+
         // Utveksle unike aktørIds til fnr for mapping
         val fnrByAktoerId =
             if (gosysOppgaver.oppgaver.isEmpty()) {
@@ -85,29 +90,20 @@ class GosysOppgaveServiceImpl(
             }
 
         return gosysOppgaver.oppgaver
-            .map { it.fraGosysOppgaveTilNy(fnrByAktoerId) }.filterForEnheter(Kontekst.get().AppUser)
+            .map { it.fraGosysOppgaveTilNy(fnrByAktoerId) }
+            .filterForEnheter(Kontekst.get().AppUser)
     }
 
-    private fun List<GosysOppgave>.filterForEnheter(bruker: User) = this.filterOppgaverForEnheter(bruker)
+    private fun List<GosysOppgave>.filterForEnheter(user: User) =
+        when (user) {
+            is SaksbehandlerMedEnheterOgRoller -> {
+                val enheter = user.enheter()
 
-    private fun List<GosysOppgave>.filterOppgaverForEnheter(user: User) =
-        this.filterForEnheter(
-            user,
-        ) { item, enheter ->
-            enheter.contains(item.enhet)
+                this.filter { it.enhet in enheter }
+            }
+
+            else -> this
         }
-
-    fun List<GosysOppgave>.filterForEnheter(
-        user: User,
-        filter: (item: GosysOppgave, enheter: List<String>) -> Boolean,
-    ) = when (user) {
-        is SaksbehandlerMedEnheterOgRoller -> {
-            val enheter = user.enheter()
-            this.filter { filter(it, enheter) }
-        }
-
-        else -> this
-    }
 
     override suspend fun hentOppgave(
         id: Long,

@@ -280,7 +280,7 @@ class BehandlingDao(
         }
     }
 
-    fun updateSendeBrev(
+    fun lagreSendeBrev(
         behandlingId: UUID,
         skalSendeBrev: Boolean,
     ) = connectionAutoclosing.hentConnection {

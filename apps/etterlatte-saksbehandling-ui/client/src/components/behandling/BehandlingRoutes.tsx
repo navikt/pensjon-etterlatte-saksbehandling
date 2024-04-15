@@ -232,7 +232,6 @@ const leggTilBrevHvisKrevesAvBehandling = (
   behandling: IBehandlingReducer
 ): Array<BehandlingRouteTypes> => {
   if (behandling.sendeBrev) {
-    //if (behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)) {
     return [...routes, behandling.sakType == SakType.OMSTILLINGSSTOENAD ? routeTypes.brevOms : routeTypes.brevBp]
   }
   return routes

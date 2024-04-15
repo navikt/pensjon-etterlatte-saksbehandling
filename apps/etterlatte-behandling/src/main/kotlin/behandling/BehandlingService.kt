@@ -421,7 +421,7 @@ internal class BehandlingServiceImpl(
         skalSendeBrev: Boolean,
     ) {
         inTransaction {
-            behandlingDao.updateSendeBrev(behandlingId, skalSendeBrev)
+            behandlingDao.lagreSendeBrev(behandlingId, skalSendeBrev)
         }
     }
 

@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBeloepBeholdSvar
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVarsel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVilkaar
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import java.time.format.DateTimeFormatter
@@ -23,7 +24,9 @@ private fun TilbakekrevingVurdering.valider(): List<String> {
 
     if (aarsak == null) manglendeFelter.add("Årsak")
     if (forhaandsvarsel == null) manglendeFelter.add("Forhåndsvarsel")
-    if (forhaandsvarselDato == null) manglendeFelter.add("Forhåndsvarsel dato")
+
+    validerForhaandsvarsel(manglendeFelter)
+
     if (beskrivelse.isNullOrBlank()) manglendeFelter.add("Beskrivelse")
     if (doedsbosak == null) manglendeFelter.add("Dødsbosak")
     if (foraarsaketAv.isNullOrBlank()) manglendeFelter.add("Forårsaket av")
@@ -35,6 +38,12 @@ private fun TilbakekrevingVurdering.valider(): List<String> {
     validerVilkaarsresultat(manglendeFelter)
 
     return manglendeFelter
+}
+
+private fun TilbakekrevingVurdering.validerForhaandsvarsel(manglendeFelter: MutableList<String>) {
+    if (forhaandsvarsel in listOf(TilbakekrevingVarsel.EGET_BREV, TilbakekrevingVarsel.MED_I_ENDRINGSBREV)) {
+        if (forhaandsvarselDato == null) manglendeFelter.add("Forhåndsvarsel dato")
+    }
 }
 
 private fun TilbakekrevingVurdering.validerVilkaarsresultat(manglendeFelter: MutableList<String>) {

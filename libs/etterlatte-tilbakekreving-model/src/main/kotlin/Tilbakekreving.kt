@@ -37,6 +37,7 @@ data class TilbakekrevingVurdering(
 enum class TilbakekrevingVarsel {
     EGET_BREV,
     MED_I_ENDRINGSBREV,
+    AAPENBART_UNOEDVENDIG,
 }
 
 enum class JaNei {

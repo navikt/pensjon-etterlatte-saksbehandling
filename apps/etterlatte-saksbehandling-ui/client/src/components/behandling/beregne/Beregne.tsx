@@ -32,6 +32,7 @@ import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -44,6 +45,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
     : undefined
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const visSanksjon = useFeatureEnabledMedDefault('sanksjon', false)
 
   const vedtaksresultat = useVedtaksResultat()
 
@@ -137,7 +139,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                             behandling={behandling}
                             resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
                           />
-                          <Sanksjon behandling={behandling} />
+                          {visSanksjon && <Sanksjon behandling={behandling} />}
                         </>
                       )
                   }

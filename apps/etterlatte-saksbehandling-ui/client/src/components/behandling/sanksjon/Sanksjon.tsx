@@ -7,7 +7,7 @@ import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
-import { BodyShort, Button, Detail, Heading, HStack, Table, TextField, VStack } from '@navikt/ds-react'
+import { BodyShort, Button, Detail, Heading, HStack, Table, Textarea, VStack } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { formaterStringDato } from '~utils/formattering'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
@@ -70,12 +70,14 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
   })
 
   const validerFom = (value: Date): string | undefined => {
-    const fom = startOfDay(new Date(value))
-    const tom = startOfDay(new Date(getValues().datoTom!))
-
     if (!value) {
       return 'Fra dato må settes'
-    } else if (fom > tom) {
+    }
+
+    const fom = startOfDay(new Date(value))
+    const tom = getValues().datoTom ? startOfDay(new Date(getValues().datoTom!)) : null
+
+    if (tom && fom > tom) {
       return 'Fra dato kan ikke være etter Til dato.'
     } else if (behandling.virkningstidspunkt?.dato && fom < startOfDay(new Date(behandling.virkningstidspunkt.dato))) {
       return 'Fra dato før virkningstidspunkt.'
@@ -84,10 +86,10 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
   }
 
   const validerTom = (value: Date): string | undefined => {
-    const fom = startOfDay(new Date(getValues().datoFom!))
+    const fom = getValues().datoFom ? startOfDay(new Date(getValues().datoFom!)) : null
     const tom = startOfDay(new Date(value))
 
-    if (fom > tom) {
+    if (fom && fom > tom) {
       return 'Til dato kan ikke være før Fra dato'
     }
     return undefined
@@ -206,12 +208,14 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                       required
                     />
                     <ControlledMaanedVelger
-                      label="Dato til og med"
+                      label="Dato til og med (valgfri)"
                       name="datoTom"
                       control={control}
                       validate={validerTom}
                     />
-                    <TextField
+                  </HStack>
+                  <HStack>
+                    <Textarea
                       {...register('beskrivelse', {
                         required: { value: true, message: 'Må fylles ut' },
                       })}

@@ -16,7 +16,10 @@ import java.time.Duration
 import java.time.LocalTime
 
 interface GosysOppgaveService {
-    suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<GosysOppgave>
+    suspend fun hentOppgaver(
+        tema: List<String>,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<GosysOppgave>
 
     suspend fun hentOppgave(
         id: Long,
@@ -59,11 +62,15 @@ class GosysOppgaveServiceImpl(
             .expireAfterWrite(Duration.ofMinutes(5))
             .build<Long, GosysOppgave>()
 
-    override suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<GosysOppgave> {
+    override suspend fun hentOppgaver(
+        tema: List<String>,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<GosysOppgave> {
         val saksbehandlerMedRoller = Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
 
         val gosysOppgaver =
             gosysOppgaveKlient.hentOppgaver(
+                tema,
                 enhetsnr = if (saksbehandlerMedRoller.harRolleStrengtFortrolig()) Enheter.STRENGT_FORTROLIG.enhetNr else null,
                 brukerTokenInfo = brukerTokenInfo,
             )

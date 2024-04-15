@@ -3,6 +3,7 @@ import { konverterOppgavestatusFilterValuesTilKeys } from '~components/oppgavebe
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { OppgavebenkStats } from '~components/oppgavebenk/state/oppgavebenkState'
 import { NyOppgaveDto, OppgaveDTO, Oppgavetype } from '~shared/types/oppgave'
+import { GosysTema } from '~shared/types/Gosys'
 
 export const hentOppgaverMedStatus = async (args: {
   oppgavestatusFilter: Array<string>
@@ -37,7 +38,11 @@ export const hentSaksbehandlerForOppgaveUnderBehandling = async (
 ): Promise<ApiResponse<Saksbehandler>> =>
   apiClient.get(`/oppgaver/referanse/${referanse}/saksbehandler-underbehandling`)
 
-export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver/gosys')
+export const hentGosysOppgaver = async (tema: GosysTema[]): Promise<ApiResponse<OppgaveDTO[]>> => {
+  const queryParams = tema.map((t) => `tema=${t}`).join('&')
+
+  return apiClient.get(`/oppgaver/gosys?${queryParams}`)
+}
 
 export const hentOppgavebenkStats = async (): Promise<ApiResponse<OppgavebenkStats>> => apiClient.get('/oppgaver/stats')
 

@@ -71,7 +71,6 @@ data class TrygdetidMedBeregningsmetode(
     val navnAvdoed: String,
     val trygdetidsperioder: List<Trygdetidsperiode>,
     val beregnetTrygdetidAar: Int,
-    val beregnetTrygdetidMaaneder: Int,
     val prorataBroek: IntBroek?,
     val beregningsMetodeAnvendt: BeregningsMetode,
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
@@ -93,7 +92,7 @@ fun TrygdetidDto.fromDto(
 ) = this.fromDto(
     beregningsMetodeAnvendt,
     beregningsMetodeFraGrunnlag,
-    avdoede.find { it.fnr.value == ident }?.navn ?: throw ManglerAvdoedBruktTilTrygdetid(),
+    avdoede.find { it.fnr.value == ident }?.navn ?: throw FantIkkeIdentTilTrygdetidBlantAvdoede(),
 )
 
 fun TrygdetidDto.fromDto(
@@ -133,8 +132,6 @@ fun TrygdetidDto.fromDto(
             BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
             else -> throw ManglerMedTrygdetidVeBrukIBrev()
         },
-    // TODO ubrukt kan fjernes
-    beregnetTrygdetidMaaneder = 0,
     prorataBroek = beregnetTrygdetid?.resultat?.prorataBroek,
     mindreEnnFireFemtedelerAvOpptjeningstiden =
         beregnetTrygdetid
@@ -157,5 +154,10 @@ class ManglerMedTrygdetidVeBrukIBrev : UgyldigForespoerselException(
 
 class ManglerAvdoedBruktTilTrygdetid : UgyldigForespoerselException(
     code = "MANGLER_AVDOED_INFO_I_BEREGNING",
-    detail = "Det er mangler avdød i beregning. Utfør beregning på nytt og prøv igjen.",
+    detail = "Det mangler avdød i beregning. Utfør beregning på nytt og prøv igjen.",
+)
+
+class FantIkkeIdentTilTrygdetidBlantAvdoede : UgyldigForespoerselException(
+    code = "FANT_IKKE_TRYGDETID_IDENT_BLANT_AVDOEDE",
+    detail = "Ident knyttet til trygdetid er ikke blant avdøde knyttet til sak",
 )

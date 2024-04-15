@@ -21,6 +21,8 @@ import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { MultiSelectFilter } from './filtreringAvOppgaver/MultiSelectFilter'
+import { GOSYS_TEMA_FILTER, GosysTema, konverterStringTilGosysTema } from '~shared/types/Gosys'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -34,6 +36,7 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   }
 
   const [filter, setFilter] = useState<Filter>(defaultFiltre)
+  const [temaFilter, setTemaFilter] = useState<GosysTema[]>([GosysTema.EYB, GosysTema.EYO])
 
   const oppgavebenkState = useOppgaveBenkState()
   const dispatcher = useOppgavebenkStateDispatcher()
@@ -57,17 +60,21 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
     }, 2000)
   }
 
-  const hentOppgaver = () => {
-    hentGosysOppgaverFetch({}, (oppgaver) => {
+  const hentOppgaver = (tema: GosysTema[]) => {
+    hentGosysOppgaverFetch(tema, (oppgaver) => {
       dispatcher.setGosysOppgavelisteOppgaver(sorterOppgaverEtterOpprettet(oppgaver))
     })
   }
 
   useEffect(() => {
     if (!oppgavebenkState.gosysOppgavelisteOppgaver?.length) {
-      hentOppgaver()
+      hentOppgaver(temaFilter)
     }
   }, [])
+
+  useEffect(() => {
+    hentOppgaver(temaFilter)
+  }, [temaFilter])
 
   return oppgavebenkState.gosysOppgavelisteOppgaver.length >= 0 && !isPending(gosysOppgaverResult) ? (
     <>
@@ -83,13 +90,20 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
         Vis mine Gosys-oppgaver
       </VisKunMineGosysOppgaverSwitch>
       <FilterRad
-        hentAlleOppgaver={hentOppgaver}
+        hentAlleOppgaver={() => hentOppgaver(temaFilter)}
         hentOppgaverStatus={() => {}}
         filter={filter}
         setFilter={setFilter}
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         oppgavelisteValg={OppgavelisteValg.GOSYS_OPPGAVER}
-      />
+      >
+        <MultiSelectFilter
+          label="Tema"
+          values={temaFilter.map((tema) => GOSYS_TEMA_FILTER[tema])}
+          options={Object.entries(GOSYS_TEMA_FILTER).map(([, beskrivelse]) => beskrivelse)}
+          onChange={(temaer) => setTemaFilter(temaer.map(konverterStringTilGosysTema))}
+        />
+      </FilterRad>
       <Oppgaver
         oppgaver={oppgavebenkState.gosysOppgavelisteOppgaver}
         oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}

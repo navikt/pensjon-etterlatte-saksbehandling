@@ -74,9 +74,7 @@ internal class OmregningHendelserRiver(
         dato: LocalDate,
     ): Pair<BeregningDTO, AvkortingDto?> {
         trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
-        if (sakType == SakType.BARNEPENSJON) { // TODO: I EY-3760, sjekk om denne også bør gjelde for OMS
-            beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
-        }
+        beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
         val forrigeBeregning = beregningService.beregn(behandlingViOmregnerFra).body<BeregningDTO>()
         verifiserToleransegrenser(dato, ny = beregning, gammel = forrigeBeregning)

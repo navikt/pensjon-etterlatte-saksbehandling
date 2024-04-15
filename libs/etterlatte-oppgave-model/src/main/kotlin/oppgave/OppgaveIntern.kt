@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.oppgave
 
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -124,6 +125,15 @@ enum class OppgaveType {
     JOURNALFOERING,
     GJENOPPRETTING_ALDERSOVERGANG, // Saker som ble opphørt i Pesys etter 18 år gammel regelverk
     AKTIVITETSPLIKT,
+    ;
+
+    companion object {
+        fun fra(behandlingType: BehandlingType) =
+            when (behandlingType) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> OppgaveType.FOERSTEGANGSBEHANDLING
+                BehandlingType.REVURDERING -> OppgaveType.REVURDERING
+            }
+    }
 }
 
 data class SaksbehandlerEndringDto(

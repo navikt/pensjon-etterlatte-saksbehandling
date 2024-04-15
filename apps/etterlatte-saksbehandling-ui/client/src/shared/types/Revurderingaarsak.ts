@@ -28,6 +28,7 @@ export enum Revurderingaarsak {
   OPPHOER_UTEN_BREV = 'OPPHOER_UTEN_BREV',
   ALDERSOVERGANG = 'ALDERSOVERGANG',
   RETT_UTEN_TIDSBEGRENSNING = 'RETT_UTEN_TIDSBEGRENSNING',
+  FORELDRELOES = 'FORELDRELOES',
 }
 
 export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
@@ -56,18 +57,8 @@ export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   OPPHOER_UTEN_BREV: 'Opphør (uten brev)',
   ALDERSOVERGANG: 'Aldersovergang',
   RETT_UTEN_TIDSBEGRENSNING: 'Stønad uten tidsbegrensning',
+  FORELDRELOES: 'Fra en forelder død til foreldreløs',
 } as const
-
-// TODO Fjerne?
-export const erOpphoer = (revurderingsaarsak: Revurderingaarsak) =>
-  [
-    Revurderingaarsak.DOEDSFALL,
-    Revurderingaarsak.ADOPSJON,
-    Revurderingaarsak.OMGJOERING_AV_FARSKAP,
-    Revurderingaarsak.SIVILSTAND,
-    Revurderingaarsak.OPPHOER_UTEN_BREV,
-    Revurderingaarsak.ALDERSOVERGANG,
-  ].includes(revurderingsaarsak)
 
 export type RevurderingsaarsakerBySakstype = {
   [key in SakType]: Array<Revurderingaarsak>

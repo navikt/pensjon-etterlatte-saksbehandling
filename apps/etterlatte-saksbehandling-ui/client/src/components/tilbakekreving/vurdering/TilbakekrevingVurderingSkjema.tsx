@@ -115,13 +115,18 @@ export function TilbakekrevingVurderingSkjema({
           }
         />
 
-        <ControlledDatoVelger
-          name="forhaandsvarselDato"
-          label="Forhåndsvarsel dato"
-          control={control}
-          defaultValue={getValues().forhaandsvarselDato ?? undefined}
-          readOnly={!redigerbar}
-        />
+        {watch().forhaandsvarsel &&
+          [TilbakekrevingVarsel.MED_I_ENDRINGSBREV, TilbakekrevingVarsel.EGET_BREV].includes(
+            watch().forhaandsvarsel!
+          ) && (
+            <ControlledDatoVelger
+              name="forhaandsvarselDato"
+              label="Forhåndsvarsel dato"
+              control={control}
+              defaultValue={getValues().forhaandsvarselDato ?? undefined}
+              readOnly={!redigerbar}
+            />
+          )}
 
         <Textarea
           {...register('beskrivelse')}

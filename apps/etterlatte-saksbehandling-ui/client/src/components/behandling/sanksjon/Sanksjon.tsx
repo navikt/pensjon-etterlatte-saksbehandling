@@ -223,7 +223,6 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                     <Button
                       size="small"
                       variant="secondary"
-                      icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
                       onClick={(e) => {
                         e.preventDefault()
                         setVisForm(false)
@@ -234,7 +233,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                     <Button
                       size="small"
                       variant="primary"
-                      icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+                      icon={<PencilIcon aria-hidden fontSize="1.5rem" />}
                       type="submit"
                     >
                       Lagre
@@ -249,7 +248,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                 <Button
                   size="small"
                   variant="secondary"
-                  icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+                  icon={<PencilIcon aria-hidden fontSize="1.5rem" />}
                   loading={isPending(lagreSanksjonResponse)}
                   onClick={(e) => {
                     e.preventDefault()

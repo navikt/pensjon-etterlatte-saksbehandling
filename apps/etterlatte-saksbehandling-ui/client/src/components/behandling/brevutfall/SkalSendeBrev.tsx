@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, Heading, Radio, RadioGroup, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, HStack, Radio, RadioGroup } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 import { IBehandlingReducer, oppdaterSendeBrev } from '~store/reducers/BehandlingReducer'
@@ -57,18 +57,20 @@ export const SkalSendeBrev = (props: { behandling: IBehandlingReducer }) => {
             )}
           />
           {isFailure(requestStatus) && <Alert variant="error">{requestStatus.error.detail}</Alert>}
-          <Button type="submit" loading={isPending(requestStatus)} variant="primary" size="small">
-            Lagre
-          </Button>
-          <Button variant="secondary" size="small" onClick={() => setRedigere(false)}>
-            Avbryt
-          </Button>
+          <HStack gap="4">
+            <Button type="submit" loading={isPending(requestStatus)} variant="primary" size="small">
+              Lagre
+            </Button>
+            <Button variant="secondary" size="small" onClick={() => setRedigere(false)}>
+              Avbryt
+            </Button>
+          </HStack>
         </form>
       ) : (
         <>
-          <VStack gap="2">
+          <InnholdWrapper>
             <BodyShort>{behandling.sendeBrev ? 'Ja' : 'Nei'}</BodyShort>
-          </VStack>
+          </InnholdWrapper>
           <Button
             variant="secondary"
             icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
@@ -87,4 +89,8 @@ const SkalSendeBrevContent = styled.div`
   margin-top: 4em;
   margin-bottom: 2em;
   max-width: 500px;
+`
+const InnholdWrapper = styled.div`
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
 `

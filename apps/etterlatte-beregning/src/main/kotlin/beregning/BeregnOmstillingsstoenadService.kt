@@ -79,7 +79,7 @@ class BeregnOmstillingsstoenadService(
         logger.info("Beregner omstillingsstønad for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 
         val omstillingstoenadGrunnlag =
-            opprettBeregningsgrunnlagOmstillingsstoenad(
+            opprettBeregningsgrunnlag(
                 trygdetid,
                 beregningsgrunnlag,
             )
@@ -216,12 +216,12 @@ class BeregnOmstillingsstoenadService(
         )
     }
 
-    private fun opprettBeregningsgrunnlagOmstillingsstoenad(
+    private fun opprettBeregningsgrunnlag(
         trygdetid: TrygdetidDto,
-        beregningsGrunnlagOMS: BeregningsGrunnlag,
+        beregningsgrunnlag: BeregningsGrunnlag,
     ): PeriodisertOmstillingstoenadGrunnlag {
         val samletTrygdetid =
-            trygdetid.toSamlet(beregningsGrunnlagOMS.beregningsMetode.beregningsMetode)
+            trygdetid.toSamlet(beregningsgrunnlag.beregningsMetode.beregningsMetode)
                 ?: throw TrygdetidMangler(trygdetid.behandlingId)
 
         return PeriodisertOmstillingstoenadGrunnlag(
@@ -241,14 +241,14 @@ class BeregnOmstillingsstoenadService(
                 ),
             institusjonsopphold =
                 PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-                    beregningsGrunnlagOMS.institusjonsoppholdBeregningsgrunnlag.mapVerdier { institusjonsopphold ->
+                    beregningsgrunnlag.institusjonsoppholdBeregningsgrunnlag.mapVerdier { institusjonsopphold ->
                         FaktumNode(
                             verdi = institusjonsopphold,
-                            kilde = beregningsGrunnlagOMS.kilde,
+                            kilde = beregningsgrunnlag.kilde,
                             beskrivelse = "Institusjonsopphold",
                         )
                     },
-                ) { _, _, _ -> FaktumNode(null, beregningsGrunnlagOMS.kilde, "Institusjonsopphold") },
+                ) { _, _, _ -> FaktumNode(null, beregningsgrunnlag.kilde, "Institusjonsopphold") },
         )
     }
 }

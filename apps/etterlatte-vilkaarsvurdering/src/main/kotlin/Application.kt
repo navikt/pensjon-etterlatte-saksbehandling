@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.vilkaarsvurdering.aldersovergang
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
-import no.nav.etterlatte.vilkaarsvurdering.migrering.migrering
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 
 fun main() {
@@ -26,7 +25,6 @@ class Server(private val context: ApplicationContext) {
             ) {
                 vilkaarsvurdering(vilkaarsvurderingService, behandlingKlient)
                 aldersovergang(behandlingKlient, aldersovergangService)
-                migrering(migreringService, behandlingKlient, vilkaarsvurderingService)
             }
         }
 

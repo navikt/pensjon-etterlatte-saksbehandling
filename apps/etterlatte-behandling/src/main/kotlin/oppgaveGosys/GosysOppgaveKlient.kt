@@ -52,6 +52,7 @@ data class GosysEndreFristRequest(
 
 interface GosysOppgaveKlient {
     suspend fun hentOppgaver(
+        tema: List<String>,
         enhetsnr: String? = null,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver
@@ -98,16 +99,17 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
     private val resourceUrl = config.getString("oppgave.resource.url")
 
     override suspend fun hentOppgaver(
+        tema: List<String>,
         enhetsnr: String?,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver {
         try {
             logger.info("Henter oppgaver fra Gosys")
 
+            val temaFilter = tema.map { "&tema=$it" }.joinToString(separator = "")
             val filters =
                 "statuskategori=AAPEN"
-                    .plus("&tema=EYB")
-                    .plus("&tema=EYO")
+                    .plus(temaFilter)
                     .plus("&limit=1000")
                     .plus(enhetsnr?.let { "&tildeltEnhetsnr=$it" } ?: "")
 

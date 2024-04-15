@@ -85,6 +85,7 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
         val oppdatert =
             lagret.copy(
                 status = TilbakekrevingStatus.UNDER_ARBEID,
+                sendeBrev = true,
                 tilbakekreving =
                     lagret.tilbakekreving.copy(
                         vurdering =

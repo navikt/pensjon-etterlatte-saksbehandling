@@ -45,7 +45,7 @@ class TilbakekrevingService(
             tilbakekrevingDao.hentTilbakekrevinger(sakId)
         }
 
-    fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag): UUID =
+    fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Oppretter tilbakekreving=${kravgrunnlag.kravgrunnlagId} på sak=${kravgrunnlag.sakId}")
 
@@ -82,7 +82,7 @@ class TilbakekrevingService(
                 TilbakekrevingHendelseType.OPPRETTET,
             )
 
-            tilbakekrevingBehandling.id
+            tilbakekrevingBehandling
         }
 
     fun hentTilbakekreving(tilbakekrevingId: UUID): TilbakekrevingBehandling =
@@ -129,6 +129,24 @@ class TilbakekrevingService(
                         eksisterende.tilbakekreving.copy(
                             perioder = perioder,
                         ),
+                ),
+            )
+        }
+
+    fun lagreSkalSendeBrev(
+        tilbakekrevingId: UUID,
+        sendeBrev: Boolean,
+    ): TilbakekrevingBehandling =
+        inTransaction {
+            logger.info("Lagrer om brev skal sendes for tilbakekreving=$tilbakekrevingId")
+            val eksisterende = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+            if (!eksisterende.underBehandling()) {
+                throw TilbakekrevingFeilTilstandException("Tilbakekreving er ikke under behandling")
+            }
+            tilbakekrevingDao.lagreTilbakekreving(
+                eksisterende.copy(
+                    status = TilbakekrevingStatus.UNDER_ARBEID,
+                    sendeBrev = sendeBrev,
                 ),
             )
         }

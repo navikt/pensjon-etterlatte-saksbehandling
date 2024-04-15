@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.server.plugins.NotFoundException
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -12,12 +13,14 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class VedtakTilbakekrevingService(
     private val repository: VedtaksvurderingRepository,
     private val rapidService: VedtaksvurderingRapidService,
+    private val behandlingKlient: BehandlingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(VedtakTilbakekrevingService::class.java)
 
@@ -94,6 +97,11 @@ class VedtakTilbakekrevingService(
                 ),
             )
 
+        val skalSendeBrev =
+            runBlocking {
+                behandlingKlient.hentTilbakekrevingBehandling(tilbakekrevingId, brukerTokenInfo).sendeBrev
+            }
+
         rapidService.sendToRapid(
             VedtakOgRapid(
                 attestertVedtak.toDto(),
@@ -103,9 +111,7 @@ class VedtakTilbakekrevingService(
                     tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
                     behandlingId = attestertVedtak.behandlingId,
                     extraParams =
-                        mapOf(
-                            SKAL_SENDE_BREV to true,
-                        ),
+                        mapOf(SKAL_SENDE_BREV to skalSendeBrev),
                 ),
             ),
         )

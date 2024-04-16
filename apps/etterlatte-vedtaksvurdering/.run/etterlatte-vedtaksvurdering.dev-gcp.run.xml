@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="etterlatte-vedtaksvurdering.dev-gcp" type="JetRunConfigurationType">
     <envs>
-      <env name="HTTP_PORT" value="8085" />
+      <env name="HTTP_PORT" value="8098" />
       <env name="LOGBACK_APPENDER" value="STDOUT" />
       <env name="NAIS_APP_NAME" value="etterlatte-vedtaksvurdering" />
       <env name="KAFKA_RAPID_TOPIC" value="etterlatte" />

@@ -77,7 +77,6 @@ import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
 import no.nav.etterlatte.rivers.StartBrevgenereringRepository
 import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
-import no.nav.etterlatte.rivers.migrering.OpprettVarselbrevForGjenopprettaRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -265,13 +264,6 @@ class ApplicationBuilder {
                             apiKey = config.getString("funksjonsbrytere.unleash.token"),
                         ),
                     )
-                OpprettVarselbrevForGjenopprettaRiver(
-                    this,
-                    varselbrevService,
-                    ferdigstillJournalfoerOgDistribuerBrev,
-                    behandlingKlient,
-                    featureToggleService,
-                )
                 OpprettJournalfoerOgDistribuerRiver(
                     this,
                     brevdataFacade,

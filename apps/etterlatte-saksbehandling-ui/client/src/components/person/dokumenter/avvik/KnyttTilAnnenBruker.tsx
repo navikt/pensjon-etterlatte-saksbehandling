@@ -69,7 +69,6 @@ export const KnyttTilAnnentBruker = ({
           (oppgave) => {
             tildelSaksbehandler({
               oppgaveId: oppgave.id,
-              type: oppgaveType,
               nysaksbehandler: { saksbehandler: innloggetSaksbehandler.ident, versjon: null },
             })
           }

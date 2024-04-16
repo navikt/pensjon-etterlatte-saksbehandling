@@ -10,7 +10,6 @@ import { FlexRow } from '~shared/styled'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { Oppgavetype } from '~shared/types/oppgave'
 
 const FristWrapper = styled.span<{ fristHarPassert: boolean; utenKnapp?: boolean }>`
   color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};
@@ -20,12 +19,10 @@ const FristWrapper = styled.span<{ fristHarPassert: boolean; utenKnapp?: boolean
 export const FristHandlinger = (props: {
   orginalFrist: string
   oppgaveId: string
-  oppgaveVersjon: number | null
-  type: Oppgavetype
-  oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
+  oppdaterFrist: (id: string, nyfrist: string) => void
   erRedigerbar: boolean
 }) => {
-  const { orginalFrist, oppgaveId, oppdaterFrist, erRedigerbar, oppgaveVersjon, type } = props
+  const { orginalFrist, oppgaveId, oppdaterFrist, erRedigerbar } = props
   const [open, setOpen] = useState(false)
   const [frist, setFrist] = useState<string>()
   const [nyFrist, setnyFrist] = useState<Date>(new Date())
@@ -92,7 +89,7 @@ export const FristHandlinger = (props: {
                   <Button
                     variant="secondary"
                     onClick={() => {
-                      oppdaterFrist(oppgaveId, nyFrist.toISOString(), oppgaveVersjon)
+                      oppdaterFrist(oppgaveId, nyFrist.toISOString())
                       setOpen(false)
                     }}
                   >
@@ -108,7 +105,7 @@ export const FristHandlinger = (props: {
                   loading={isPending(redigerfristSvar)}
                   disabled={!nyFrist}
                   onClick={() => {
-                    redigerFrist({ oppgaveId, type, redigerFristRequest: { frist: nyFrist, versjon: oppgaveVersjon } })
+                    redigerFrist({ oppgaveId, redigerFristRequest: { frist: nyFrist, versjon: null } })
                   }}
                 >
                   Lagre ny frist

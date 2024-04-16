@@ -61,7 +61,6 @@ export const OppgaveFraJournalpostModal = ({
           tildelSaksbehandler(
             {
               oppgaveId: oppgave.id,
-              type: oppgaveType,
               nysaksbehandler: { saksbehandler: innloggetSaksbehandler.ident, versjon: null },
             },
             () => navigate(`/oppgave/${oppgave.id}`)

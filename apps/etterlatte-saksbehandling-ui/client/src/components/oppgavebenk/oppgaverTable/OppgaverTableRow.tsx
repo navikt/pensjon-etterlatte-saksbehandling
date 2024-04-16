@@ -15,8 +15,8 @@ import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler } from '~shared/t
 interface Props {
   oppgave: OppgaveDTO
   saksbehandlereIEnhet: Array<Saksbehandler>
-  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null, versjon: number | null) => void
-  oppdaterFrist?: (id: string, nyfrist: string, versjon: number | null) => void
+  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => void
+  oppdaterFrist?: (id: string, nyfrist: string) => void
   revurderingsaarsaker: RevurderingsaarsakerBySakstype
 }
 
@@ -37,8 +37,6 @@ export const OppgaverTableRow = ({
           oppgaveId={oppgave.id}
           oppdaterFrist={oppdaterFrist}
           erRedigerbar={erOppgaveRedigerbar(oppgave.status)}
-          oppgaveVersjon={oppgave.versjon}
-          type={oppgave.type}
         />
       ) : (
         <FristWrapper dato={oppgave.frist} />

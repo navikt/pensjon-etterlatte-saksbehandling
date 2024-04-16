@@ -1,17 +1,17 @@
-import { ferdigstilleGosysOppgave } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { mapResult } from '~shared/api/apiUtils'
 import { Alert, Button, Loader } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { GosysActionToggle } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
 import Spinner from '~shared/Spinner'
-import { OppgaveDTO } from '~shared/types/oppgave'
+import { ferdigstilleGosysOppgave } from '~shared/api/gosys'
+import { GosysOppgave } from '~shared/types/Gosys'
 
 export const FerdigstillGosysOppgave = ({
   oppgave,
   setToggle,
 }: {
-  oppgave: OppgaveDTO
+  oppgave: GosysOppgave
   setToggle: (toggle: GosysActionToggle) => void
 }) => {
   const [ferdigstillResult, ferdigstillOppgave] = useApiCall(ferdigstilleGosysOppgave)

@@ -1,9 +1,10 @@
 import { OppgaveDTO } from '~shared/types/oppgave'
+import { GosysOppgave } from '~shared/types/Gosys'
 
 export interface OppgavebenkState {
   oppgavelistaOppgaver: OppgaveDTO[]
   minOppgavelisteOppgaver: OppgaveDTO[]
-  gosysOppgavelisteOppgaver: OppgaveDTO[]
+  gosysOppgavelisteOppgaver: GosysOppgave[]
   oppgpavebenkStats: OppgavebenkStats
 }
 export interface OppgavebenkStats {

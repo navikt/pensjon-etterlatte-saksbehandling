@@ -1,4 +1,5 @@
 import { Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
+import { GosysTema } from '~shared/types/Gosys'
 
 type visAlle = 'visAlle'
 
@@ -20,6 +21,13 @@ export const YTELSEFILTER = {
   OMSTILLINGSSTOENAD: 'Omstillingsstønad',
 }
 export type YtelseFilterKeys = keyof typeof YTELSEFILTER
+
+export type TemaFilterKeys = GosysTema
+export const GOSYS_TEMA_FILTER: Record<TemaFilterKeys, string> = {
+  PEN: 'Pensjon',
+  EYO: 'Omstillingsstønad',
+  EYB: 'Barnepensjon',
+}
 
 export const SAKSBEHANDLERFILTER = {
   visAlle: 'Vis alle',
@@ -46,7 +54,6 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   FOERSTEGANGSBEHANDLING: 'Førstegangsbehandling',
   REVURDERING: 'Revurdering',
   VURDER_KONSEKVENS: 'Hendelse',
-  GOSYS: 'Gosys',
   KRAVPAKKE_UTLAND: 'Kravpakke utland',
   KLAGE: 'Klage',
   TILBAKEKREVING: 'Tilbakekreving',
@@ -71,4 +78,10 @@ export interface Filter {
   ytelseFilter: YtelseFilterKeys
   oppgavestatusFilter: Array<string>
   oppgavetypeFilter: Array<string>
+}
+
+export interface GosysFilter {
+  enhetFilter?: EnhetFilterKeys
+  saksbehandlerFilter?: string
+  temaFilter?: TemaFilterKeys
 }

@@ -42,31 +42,22 @@ export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Pro
     return oppgaver.filter((o) => o.saksbehandler?.ident === innloggetSaksbehandler.ident)
   }
 
-  const oppdaterSaksbehandlerTildeling = (
-    oppgave: OppgaveDTO,
-    saksbehandler: OppgaveSaksbehandler | null,
-    versjon: number | null
-  ) => {
+  const oppdaterSaksbehandlerTildeling = (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => {
     setTimeout(() => {
       dispatcher.setOppgavelistaOppgaver(
-        finnOgOppdaterSaksbehandlerTildeling(oppgavebenkState.oppgavelistaOppgaver, oppgave.id, saksbehandler, versjon)
+        finnOgOppdaterSaksbehandlerTildeling(oppgavebenkState.oppgavelistaOppgaver, oppgave.id, saksbehandler)
       )
       if (innloggetSaksbehandler.ident === saksbehandler?.ident) {
         dispatcher.setMinOppgavelisteOppgaver(
           sorterOppgaverEtterOpprettet(
-            leggTilOppgavenIMinliste(oppgavebenkState.minOppgavelisteOppgaver, oppgave, saksbehandler, versjon)
+            leggTilOppgavenIMinliste(oppgavebenkState.minOppgavelisteOppgaver, oppgave, saksbehandler)
           )
         )
       } else {
         dispatcher.setMinOppgavelisteOppgaver(
           sorterOppgaverEtterOpprettet(
             filtrerKunInnloggetBrukerOppgaver(
-              finnOgOppdaterSaksbehandlerTildeling(
-                oppgavebenkState.minOppgavelisteOppgaver,
-                oppgave.id,
-                saksbehandler,
-                versjon
-              )
+              finnOgOppdaterSaksbehandlerTildeling(oppgavebenkState.minOppgavelisteOppgaver, oppgave.id, saksbehandler)
             )
           )
         )

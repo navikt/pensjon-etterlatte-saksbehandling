@@ -41,13 +41,9 @@ export const ForenkletOppgaverTable = ({
 
   const [, saksbehandlereIEnheterFetch] = useApiCall(saksbehandlereIEnhetApi)
 
-  const oppdaterSaksbehandlerTildeling = (
-    oppgave: OppgaveDTO,
-    saksbehandler: OppgaveSaksbehandler | null,
-    versjon: number | null
-  ) => {
+  const oppdaterSaksbehandlerTildeling = (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => {
     setTimeout(() => {
-      setFiltrerteOppgaver(finnOgOppdaterSaksbehandlerTildeling(filtrerteOppgaver, oppgave.id, saksbehandler, versjon))
+      setFiltrerteOppgaver(finnOgOppdaterSaksbehandlerTildeling(filtrerteOppgaver, oppgave.id, saksbehandler))
     }, 2000)
   }
 

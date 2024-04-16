@@ -61,8 +61,6 @@ export const SettPaaVent = ({
                   oppgaveId={oppgave.id}
                   oppdaterFrist={(_, frist: string) => setFrist(frist)}
                   erRedigerbar={erOppgaveRedigerbar(oppgave.status)}
-                  oppgaveVersjon={oppgave.versjon}
-                  type={oppgave.type}
                 />
               </FlexRow>
             </>

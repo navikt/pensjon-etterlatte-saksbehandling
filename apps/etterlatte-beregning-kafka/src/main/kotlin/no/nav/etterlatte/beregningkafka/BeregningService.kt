@@ -1,6 +1,7 @@
 package no.nav.etterlatte.beregningkafka
 
 import io.ktor.client.HttpClient
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
@@ -17,6 +18,11 @@ class BeregningService(
     fun beregn(behandlingId: UUID): HttpResponse =
         runBlocking {
             beregningApp.post("$url/api/beregning/$behandlingId")
+        }
+
+    fun hentBeregning(behandlingId: UUID): HttpResponse =
+        runBlocking {
+            beregningApp.get("$url/api/beregning/$behandlingId")
         }
 
     fun opprettBeregningsgrunnlagFraForrigeBehandling(

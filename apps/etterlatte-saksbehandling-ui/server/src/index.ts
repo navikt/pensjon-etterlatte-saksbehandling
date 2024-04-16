@@ -61,6 +61,7 @@ app.use(
     '/api/generellbehandling',
     '/api/sjekkliste',
     '/api/bosattutland',
+    '/internal/selftest',
   ],
   tokenMiddleware(ApiConfig.behandling.scope),
   proxy(ApiConfig.behandling.url)

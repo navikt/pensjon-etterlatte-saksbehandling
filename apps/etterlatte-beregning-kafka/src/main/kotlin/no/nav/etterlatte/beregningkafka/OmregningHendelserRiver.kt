@@ -79,7 +79,7 @@ internal class OmregningHendelserRiver(
         trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
-        val forrigeBeregning = beregningService.beregn(behandlingViOmregnerFra).body<BeregningDTO>()
+        val forrigeBeregning = beregningService.hentBeregning(behandlingViOmregnerFra).body<BeregningDTO>()
         verifiserToleransegrenser(dato, ny = beregning, gammel = forrigeBeregning)
 
         return if (sakType == SakType.OMSTILLINGSSTOENAD) {

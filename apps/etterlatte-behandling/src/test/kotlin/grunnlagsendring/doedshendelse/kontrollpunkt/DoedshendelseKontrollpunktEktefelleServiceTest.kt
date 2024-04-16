@@ -106,7 +106,8 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
         kontrollpunkter shouldContainExactly
             listOf(
                 DoedshendelseKontrollpunkt.TidligereEpsGiftMerEnn25Aar(
-                    doedsdato, avdoed.foedselsnummer.verdi.value,
+                    doedsdato,
+                    avdoed.foedselsnummer.verdi.value,
                 ),
             )
     }
@@ -137,7 +138,8 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
         kontrollpunkter shouldContainExactly
             listOf(
                 DoedshendelseKontrollpunkt.TidligereEpsGiftMerEnn15AarFellesBarn(
-                    doedsdato, avdoed.foedselsnummer.verdi.value,
+                    doedsdato,
+                    avdoed.foedselsnummer.verdi.value,
                 ),
             )
     }
@@ -228,7 +230,8 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
         kontrollpunkter shouldContainExactly
             listOf(
                 DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(
-                    doedsdato, avdoed.foedselsnummer.verdi.value,
+                    doedsdato,
+                    avdoed.foedselsnummer.verdi.value,
                 ),
             )
     }
@@ -266,7 +269,8 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
         kontrollpunkter shouldContainExactly
             listOf(
                 DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(
-                    doedsdato, avdoed.foedselsnummer.verdi.value,
+                    doedsdato,
+                    avdoed.foedselsnummer.verdi.value,
                 ),
             )
     }

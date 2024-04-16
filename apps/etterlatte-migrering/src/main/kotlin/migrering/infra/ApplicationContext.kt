@@ -7,7 +7,6 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.migrering.pen.PenKlient
-import no.nav.etterlatte.migrering.vent.VentRepository
 
 internal class ApplicationContext {
     val dataSource = DataSourceBuilder.createDataSource(System.getenv())
@@ -18,8 +17,6 @@ internal class ApplicationContext {
     val featureToggleService: FeatureToggleService =
         FeatureToggleService.initialiser(featureToggleProperties(ConfigFactory.load()))
     val pesysRepository = PesysRepository(dataSource)
-
-    val ventRepository = VentRepository(dataSource)
 }
 
 private fun featureToggleProperties(config: Config) =

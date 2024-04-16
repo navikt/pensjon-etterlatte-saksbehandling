@@ -2,9 +2,6 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.migrering.AvbrytBehandlingHvisMigreringFeilaRiver
-import no.nav.etterlatte.migrering.BrevutfallRiver
-import no.nav.etterlatte.migrering.OppdaterMerknadRiver
-import no.nav.etterlatte.migrering.TaAvVentRiver
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.regulering.OmregningsHendelserRiver
 import no.nav.etterlatte.regulering.ReguleringFeiletRiver
@@ -36,7 +33,4 @@ private fun settOppRivers(
     OpprettBrevRiver(rapidsConnection, behandlingservice, featureToggleService)
     TidshendelseRiver(rapidsConnection, tidshendelseService)
     OppdaterDoedshendelseBrevDistribuert(rapidsConnection, behandlingservice)
-    TaAvVentRiver(rapidsConnection, behandlingservice, featureToggleService)
-    OppdaterMerknadRiver(rapidsConnection, behandlingservice)
-    BrevutfallRiver(rapidsConnection, behandlingservice)
 }

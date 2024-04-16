@@ -6,8 +6,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && eslint src --ext .ts,.tsx && vite build",
-    "lint": "eslint src --ext .ts,.tsx",
+    "build": "tsc && eslint src && vite build",
+    "lint": "eslint src",
     "test": "vitest",
     "preview": "vite preview --port 5173",
     "coverage": "vitest run --coverage"

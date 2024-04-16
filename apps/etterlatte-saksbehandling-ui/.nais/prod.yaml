@@ -38,7 +38,7 @@ spec:
       enabled: true
       autoLogin: true
       autoLoginIgnorePaths:
-        - /internal/*
+        - /internal/**
   liveness:
     path: /health/isAlive
     initialDelay: 10

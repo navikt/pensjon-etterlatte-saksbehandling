@@ -38,7 +38,7 @@ app.use('/api/feature', unleashRouter)
 app.get(
   '/internal/selftest/behandling',
   createProxyMiddleware({
-    target: `${ApiConfig.behandling.url}/internal/selftest`,
+    target: `${ApiConfig.behandling.url}`,
     pathRewrite: {
       '^/internal/selftest/behandling': '/internal/selftest',
     },

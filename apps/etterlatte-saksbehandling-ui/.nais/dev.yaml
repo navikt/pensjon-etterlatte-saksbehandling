@@ -37,6 +37,8 @@ spec:
     sidecar:
       enabled: true
       autoLogin: true
+      autoLoginIgnorePaths:
+        - /internal/*
   liveness:
     path: /health/isAlive
     initialDelay: 10

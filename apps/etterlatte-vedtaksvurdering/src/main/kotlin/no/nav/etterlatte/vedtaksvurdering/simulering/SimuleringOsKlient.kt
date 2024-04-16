@@ -1,5 +1,10 @@
 package no.nav.etterlatte.vedtaksvurdering.simulering
 
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
@@ -17,11 +22,16 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningRequest
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningResponse
 import org.slf4j.LoggerFactory
+import java.io.IOException
 
 private typealias RequestWrapper = no.nav.system.os.tjenester.simulerfpservice.simulerfpservicegrensesnitt.SimulerBeregningRequest
 private typealias ResponseWrapper = no.nav.system.os.tjenester.simulerfpservice.simulerfpservicegrensesnitt.SimulerBeregningResponse
 
-class SimuleringOsKlient(config: Config, private val client: HttpClient) {
+fun simuleringObjectMapper(): ObjectMapper =
+    objectMapper.copy()
+        .registerModule(StringTrimModule())
+
+class SimuleringOsKlient(config: Config, private val client: HttpClient, private val objectMapper: ObjectMapper) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val url = config.getString("etterlatteproxy.resource.url")
@@ -61,3 +71,22 @@ class SimuleringOsKlientException(statusCode: HttpStatusCode, override val messa
             "tidspunkt" to Tidspunkt.now(),
         ),
 )
+
+internal class StringTrimModule : SimpleModule("string-trim-module") {
+    init {
+        addDeserializer(
+            String::class.java,
+            object : StdScalarDeserializer<String?>(
+                String::class.java,
+            ) {
+                @Throws(IOException::class)
+                override fun deserialize(
+                    jsonParser: JsonParser,
+                    ctx: DeserializationContext,
+                ): String {
+                    return jsonParser.valueAsString.trim { it <= ' ' }
+                }
+            },
+        )
+    }
+}

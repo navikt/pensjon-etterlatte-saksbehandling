@@ -81,7 +81,6 @@ import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVarselbrevForGjenopprettaRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.rivers.migrering.behandlingerAaJournalfoereBrevFor
-import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -277,7 +276,7 @@ class ApplicationBuilder {
                     behandlingKlient,
                     featureToggleService,
                 )
-                FiksEnkeltbrevRiver(this, varselbrevService, ferdigstillJournalfoerOgDistribuerBrev)
+                FiksEnkeltbrevRiver(this, vedtaksbrevService, ferdigstillJournalfoerOgDistribuerBrev)
                     .also { fiksEnkeltbrev() }
                 OpprettJournalfoerOgDistribuerRiver(
                     this,

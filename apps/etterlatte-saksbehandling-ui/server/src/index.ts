@@ -36,9 +36,9 @@ app.use('/api/logg', loggerRouter)
 app.use('/api/feature', unleashRouter)
 
 app.get(
-  '/internal/selftest/behandling',
+  '/internal/selftest',
   createProxyMiddleware({
-    target: `${ApiConfig.behandling.url}/internal/selftest`,
+    target: ApiConfig.behandling.url,
     changeOrigin: true,
   })
 )

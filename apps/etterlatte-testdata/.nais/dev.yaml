@@ -62,3 +62,8 @@ spec:
       external:
         - host: dolly-backend.intern.dev.nav.no
         - host: testnav-person-service.intern.dev.nav.no
+    inbound:
+      rules:
+        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+          namespace: aura
+          cluster: dev-gcp

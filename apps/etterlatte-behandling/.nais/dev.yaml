@@ -194,3 +194,6 @@ spec:
         - application: etterlatte-klage
         - application: etterlatte-tilbakekreving
         - application: etterlatte-brev-api
+        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+          namespace: aura
+          cluster: dev-gcp

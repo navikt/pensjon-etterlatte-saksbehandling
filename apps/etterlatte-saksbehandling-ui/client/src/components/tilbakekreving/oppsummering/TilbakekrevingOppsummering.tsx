@@ -1,6 +1,6 @@
-import { BodyLong, Button, Heading, VStack } from '@navikt/ds-react'
+import { Button, ErrorSummary, Heading } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
-import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Border, HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
 import React from 'react'
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
@@ -35,10 +35,12 @@ export function TilbakekrevingOppsummering({ behandling }: { behandling: Tilbake
           </Heading>
         </HeadingWrapper>
       </ContentHeader>
-      <TilbakekrevingVurderingOppsummering behandling={behandling} />
-      {isFailure(validerTilbakekrevingStatus) && (
-        <TilbakekrevingValideringsfeil error={validerTilbakekrevingStatus.error} />
-      )}
+      <InnholdPadding>
+        <TilbakekrevingVurderingOppsummering behandling={behandling} />
+        {isFailure(validerTilbakekrevingStatus) && (
+          <TilbakekrevingValideringsfeil error={validerTilbakekrevingStatus.error} />
+        )}
+      </InnholdPadding>
       <Border style={{ marginTop: '3em' }} />
       <FlexRow $spacing={true} justify="center">
         <Button variant="primary" onClick={validerVurderingOgPerioder} loading={isPending(validerTilbakekrevingStatus)}>
@@ -55,35 +57,28 @@ function TilbakekrevingValideringsfeil({ error }: { error: ApiError }) {
     const ugyldigeFelterPerioder = error.meta!['ugyldigeFelterPerioder'] as Array<string>
 
     return (
-      <ApiErrorAlert>
-        <VStack gap="4">
-          <BodyLong style={{ fontWeight: 'bold' }}>{error.detail}</BodyLong>
-          {ugyldigeFelterVurdering.length > 0 && (
-            <div>
-              <BodyLong>Manglende felter i Vurdering:</BodyLong>
-              <ul>
-                {ugyldigeFelterVurdering.map((felt, index) => (
-                  <li key={index} style={{ marginLeft: '1.4rem' }}>
-                    {felt}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {ugyldigeFelterPerioder.length > 0 && (
-            <div>
-              <BodyLong>Manglende felter i Utbetalinger:</BodyLong>
-              <ul>
-                {ugyldigeFelterPerioder.map((felt, index) => (
-                  <li key={index} style={{ marginLeft: '1.4rem' }}>
-                    {felt}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </VStack>
-      </ApiErrorAlert>
+      <>
+        {ugyldigeFelterVurdering.length > 0 && (
+          <ErrorSummary
+            style={{ marginTop: '5rem', maxWidth: '50rem' }}
+            heading="Et eller flere felter mangler gyldig verdi i Vurdering:"
+          >
+            {ugyldigeFelterVurdering.map((feilmelding, i) => (
+              <ErrorSummary.Item key={i}>{feilmelding}</ErrorSummary.Item>
+            ))}
+          </ErrorSummary>
+        )}
+        {ugyldigeFelterPerioder.length > 0 && (
+          <ErrorSummary
+            style={{ marginTop: '2rem', maxWidth: '50rem' }}
+            heading="Et eller flere felter mangler gyldig verdi i Utbetalinger:"
+          >
+            {ugyldigeFelterPerioder.map((feilmelding, i) => (
+              <ErrorSummary.Item key={i}>{feilmelding}</ErrorSummary.Item>
+            ))}
+          </ErrorSummary>
+        )}
+      </>
     )
   } else {
     return <ApiErrorAlert>{error.detail}</ApiErrorAlert>

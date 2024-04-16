@@ -262,6 +262,11 @@ interface NyTrygdetidService {
         overstyrtNorskPoengaar: Int?,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid
+
+    suspend fun opprettOverstyrtBeregnetTrygdetid(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 class TrygdetidServiceImpl(

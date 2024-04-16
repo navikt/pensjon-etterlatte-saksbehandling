@@ -1,11 +1,12 @@
 package no.nav.etterlatte.sanksjon
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.transaction
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
@@ -26,35 +27,39 @@ class SanksjonRepository(private val dataSource: DataSource) {
 
     fun opprettSanksjon(
         behandlingId: UUID,
-        sanksjon: Sanksjon,
+        sakId: Long,
+        saksbehandlerIdent: String,
+        sanksjon: LagreSanksjon,
     ) {
         dataSource.transaction { tx ->
             queryOf(
                 statement =
                     """
                     INSERT INTO sanksjon(
-                        id, behandling_id, sak_id, fom, tom, saksbehandler, opprettet, endret, beskrivelse
+                        id, behandling_id, sak_id, fom, tom, opprettet, endret, beskrivelse
                     ) VALUES (
-                        :id, :behandlingId, :sak_id, :fom, :tom, :saksbehandler, :opprettet, :endret, :beskrivelse
+                        :id, :behandlingId, :sak_id, :fom, :tom, :opprettet, :endret, :beskrivelse
                     )
                     """.trimIndent(),
                 paramMap =
                     mapOf(
                         "id" to UUID.randomUUID(),
                         "behandlingId" to behandlingId,
-                        "sak_id" to sanksjon.sakId,
-                        "fom" to sanksjon.fom.atDay(1),
-                        "tom" to sanksjon.tom?.atDay(1),
-                        "saksbehandler" to sanksjon.saksbehandler,
-                        "opprettet" to Tidspunkt.now().toTimestamp(),
-                        "endret" to Tidspunkt.now().toTimestamp(),
+                        "sak_id" to sakId,
+                        "fom" to sanksjon.fom,
+                        "tom" to sanksjon.tom,
+                        "opprettet" to Grunnlagsopplysning.Saksbehandler.create(saksbehandlerIdent).toJson(),
+                        "endret" to null,
                         "beskrivelse" to sanksjon.beskrivelse,
                     ),
             ).let { query -> tx.run(query.asUpdate) }
         }
     }
 
-    fun oppdaterSanksjon(sanksjon: Sanksjon) {
+    fun oppdaterSanksjon(
+        sanksjon: LagreSanksjon,
+        saksbehandlerIdent: String,
+    ) {
         dataSource.transaction { tx ->
             queryOf(
                 statement =
@@ -62,7 +67,6 @@ class SanksjonRepository(private val dataSource: DataSource) {
                     UPDATE sanksjon
                     SET fom = :fom, 
                         tom = :tom, 
-                        saksbehandler = :saksbehandler, 
                         endret = :endret, 
                         beskrivelse = :beskrivelse
                     WHERE id = :id
@@ -70,10 +74,9 @@ class SanksjonRepository(private val dataSource: DataSource) {
                 paramMap =
                     mapOf(
                         "id" to sanksjon.id,
-                        "fom" to sanksjon.fom.atDay(1),
-                        "tom" to sanksjon.tom?.atDay(1),
-                        "saksbehandler" to sanksjon.saksbehandler,
-                        "endret" to Tidspunkt.now().toTimestamp(),
+                        "fom" to sanksjon.fom,
+                        "tom" to sanksjon.tom,
+                        "endret" to Grunnlagsopplysning.Saksbehandler.create(saksbehandlerIdent).toJson(),
                         "beskrivelse" to sanksjon.beskrivelse,
                     ),
             ).let { query -> tx.run(query.asUpdate) }
@@ -87,9 +90,8 @@ class SanksjonRepository(private val dataSource: DataSource) {
             sakId = long("sak_id"),
             fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
             tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) },
-            saksbehandler = string("saksbehandler"),
-            opprettet = sqlTimestamp("opprettet").toTidspunkt(),
-            endret = sqlTimestamp("endret").toTidspunkt(),
+            opprettet = string("opprettet").let { objectMapper.readValue(it) },
+            endret = stringOrNull("endret")?.let { objectMapper.readValue(it) },
             beskrivelse = string("beskrivelse"),
         )
 }
@@ -100,8 +102,15 @@ data class Sanksjon(
     val sakId: Long,
     val fom: YearMonth,
     val tom: YearMonth?,
-    val saksbehandler: String,
-    val opprettet: Tidspunkt,
-    val endret: Tidspunkt,
+    val opprettet: Grunnlagsopplysning.Saksbehandler,
+    val endret: Grunnlagsopplysning.Saksbehandler?,
+    val beskrivelse: String,
+)
+
+data class LagreSanksjon(
+    val id: UUID?,
+    val sakId: Long,
+    val fom: LocalDate,
+    val tom: LocalDate?,
     val beskrivelse: String,
 )

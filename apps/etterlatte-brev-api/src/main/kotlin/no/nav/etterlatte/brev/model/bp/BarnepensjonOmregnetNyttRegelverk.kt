@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.MigreringBrevRequest
+import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
@@ -87,6 +88,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
             etterbetaling: EtterbetalingDTO?,
             migreringRequest: MigreringBrevRequest?,
             utlandstilknytning: UtlandstilknytningType?,
+            avdoede: List<Avdoed>,
         ): BarnepensjonOmregnetNyttRegelverk {
             val erUnder18AarNonNull =
                 requireNotNull(erUnder18Aar) {
@@ -101,7 +103,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
                 beregning =
                     barnepensjonBeregning(
                         innhold,
-                        emptyList(),
+                        avdoede,
                         utbetalingsinfo,
                         grunnbeloep,
                         beregningsperioder,

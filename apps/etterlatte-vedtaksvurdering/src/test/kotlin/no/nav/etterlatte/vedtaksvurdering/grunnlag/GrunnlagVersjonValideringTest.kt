@@ -22,13 +22,13 @@ internal class GrunnlagVersjonValideringTest {
         assertDoesNotThrow {
             val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>(relaxed = true)
             val trygdetid = mockTrygdetidDtoUtenDiff()
-            GrunnlagVersjonValidering.validerVersjon(vilkaarsvurderingDto, null, trygdetid)
+            GrunnlagVersjonValidering.validerVersjon(vilkaarsvurderingDto, null, listOf(trygdetid))
         }
 
         assertDoesNotThrow {
             val beregningOgAvkorting = mockk<BeregningOgAvkorting>()
             val trygdetid = mockTrygdetidDtoUtenDiff()
-            GrunnlagVersjonValidering.validerVersjon(null, beregningOgAvkorting, trygdetid)
+            GrunnlagVersjonValidering.validerVersjon(null, beregningOgAvkorting, listOf(trygdetid))
         }
     }
 
@@ -47,12 +47,12 @@ internal class GrunnlagVersjonValideringTest {
         val trygdetid = mockTrygdetidDtoUtenDiff()
 
         assertThrows<UlikVersjonGrunnlag> {
-            GrunnlagVersjonValidering.validerVersjon(vilkaarsvurderingDto, beregningOgAvkorting, trygdetid)
+            GrunnlagVersjonValidering.validerVersjon(vilkaarsvurderingDto, beregningOgAvkorting, listOf(trygdetid))
         }
     }
 
     @Test
-    fun `Like versjoner – skal ikke kaste feil`() {
+    fun `Like versjoner - skal ikke kaste feil`() {
         val vilkaarsvurderingDto =
             mockk<VilkaarsvurderingDto> {
                 every { grunnlagVersjon } returns 1
@@ -65,12 +65,12 @@ internal class GrunnlagVersjonValideringTest {
         val trygdetid = mockTrygdetidDtoUtenDiff()
 
         assertDoesNotThrow {
-            GrunnlagVersjonValidering.validerVersjon(vilkaarsvurderingDto, beregningOgAvkorting, trygdetid)
+            GrunnlagVersjonValidering.validerVersjon(vilkaarsvurderingDto, beregningOgAvkorting, listOf(trygdetid))
         }
     }
 
     @Test
-    fun `Differanse mellom trygdetid og behandling – skal kaste feil`() {
+    fun `Differanse mellom trygdetid og behandling - skal kaste feil`() {
         val vilkaarsvurderingDto =
             mockk<VilkaarsvurderingDto> {
                 every { grunnlagVersjon } returns 1
@@ -84,7 +84,28 @@ internal class GrunnlagVersjonValideringTest {
             mockTrygdetidDtoMedDiff()
 
         assertThrows<UlikVersjonGrunnlag> {
-            GrunnlagVersjonValidering.validerVersjon(vilkaarsvurderingDto, beregningOgAvkorting, trygdetid)
+            GrunnlagVersjonValidering.validerVersjon(vilkaarsvurderingDto, beregningOgAvkorting, listOf(trygdetid))
+        }
+    }
+
+    @Test
+    fun `Differanse mellom trygdetid og behandling paa minst en trygdetid naar det er flere - skal kaste feil`() {
+        val vilkaarsvurderingDto =
+            mockk<VilkaarsvurderingDto> {
+                every { grunnlagVersjon } returns 1
+            }
+
+        val beregningOgAvkorting =
+            mockk<BeregningOgAvkorting> {
+                every { beregning.grunnlagMetadata.versjon } returns 1
+            }
+        val trygdetid1 =
+            mockTrygdetidDtoUtenDiff()
+        val trygdetid2 =
+            mockTrygdetidDtoMedDiff()
+
+        assertThrows<UlikVersjonGrunnlag> {
+            GrunnlagVersjonValidering.validerVersjon(vilkaarsvurderingDto, beregningOgAvkorting, listOf(trygdetid1, trygdetid2))
         }
     }
 }

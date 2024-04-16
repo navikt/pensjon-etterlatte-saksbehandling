@@ -5,7 +5,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -72,9 +71,9 @@ class VedtakBehandlingService(
         if (vedtak != null) {
             verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
         }
-        val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetid) =
+        val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetider) =
             hentDataForVedtak(behandlingId, brukerTokenInfo)
-        validerGrunnlagsversjon(vilkaarsvurdering, beregningOgAvkorting, trygdetid)
+        validerGrunnlagsversjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider)
 
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
@@ -99,8 +98,8 @@ class VedtakBehandlingService(
         verifiserGyldigBehandlingStatus(behandlingKlient.kanFatteVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
-        val (_, vilkaarsvurdering, beregningOgAvkorting, _, trygdetid) = hentDataForVedtak(behandlingId, brukerTokenInfo)
-        validerGrunnlagsversjon(vilkaarsvurdering, beregningOgAvkorting, trygdetid)
+        val (_, vilkaarsvurdering, beregningOgAvkorting, _, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
+        validerGrunnlagsversjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider)
 
         val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
 
@@ -152,9 +151,9 @@ class VedtakBehandlingService(
     private fun validerGrunnlagsversjon(
         vilkaarsvurdering: VilkaarsvurderingDto?,
         beregningOgAvkorting: BeregningOgAvkorting?,
-        trygdetid: TrygdetidDto?,
+        trygdetider: List<TrygdetidDto>,
     ) {
-        validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetid)
+        validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider)
     }
 
     suspend fun attesterVedtak(
@@ -217,19 +216,13 @@ class VedtakBehandlingService(
                 behandlingId = behandlingId,
                 extraParams =
                     mapOf(
-                        SKAL_SENDE_BREV to
-                            when {
-                                behandling.revurderingsaarsak.skalIkkeSendeBrev() -> false
-                                else -> true
-                            },
+                        SKAL_SENDE_BREV to behandling.sendeBrev,
                         KILDE_KEY to behandling.kilde,
                         REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
                     ),
             ),
         )
     }
-
-    private fun Revurderingaarsak?.skalIkkeSendeBrev() = this != null && !utfall.skalSendeBrev
 
     suspend fun underkjennVedtak(
         behandlingId: UUID,
@@ -604,11 +597,10 @@ class VedtakBehandlingService(
 
             val trygdetidListe = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
 
-            val trygdetid =
+            val trygdetider =
                 when (foreldreloesFlag) {
                     true -> {
-                        // Frem til vi endre beregning til å bruke hele liste
-                        trygdetidListe.firstOrNull()
+                        trygdetidListe
                     }
 
                     false -> {
@@ -616,7 +608,7 @@ class VedtakBehandlingService(
                             throw ForeldreloesTrygdetid(behandling.id)
                         }
 
-                        trygdetidListe.firstOrNull()
+                        listOfNotNull(trygdetidListe.firstOrNull())
                     }
                 }
 
@@ -624,7 +616,7 @@ class VedtakBehandlingService(
                 BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
                     val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo)
                     when (vilkaarsvurdering?.resultat?.utfall) {
-                        VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakData(behandling, vilkaarsvurdering, null, sak, trygdetid)
+                        VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakData(behandling, vilkaarsvurdering, null, sak, trygdetider)
                         VilkaarsvurderingUtfall.OPPFYLT -> {
                             val beregningOgAvkorting =
                                 beregningKlient.hentBeregningOgAvkorting(
@@ -632,7 +624,7 @@ class VedtakBehandlingService(
                                     brukerTokenInfo,
                                     sak.sakType,
                                 )
-                            VedtakData(behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetid)
+                            VedtakData(behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetider)
                         }
 
                         null -> throw Exception("Mangler resultat av vilkårsvurdering for behandling $behandlingId")

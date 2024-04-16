@@ -109,6 +109,7 @@ spec:
         - application: etterlatte-brev-api
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-behandling
+        - application: etterlatte-beregning
         - application: etterlatte-samordning-vedtak
           permissions:
             roles:

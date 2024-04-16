@@ -8,8 +8,8 @@ import java.util.UUID
 data class BeregningsGrunnlag(
     val behandlingId: UUID,
     val kilde: Grunnlagsopplysning.Saksbehandler,
-    val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>>,
     val institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
         emptyList(),
     val beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
+    val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> = emptyList(),
 )

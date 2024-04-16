@@ -125,7 +125,7 @@ class GenerellBehandlingDao(private val connectionAutoclosing: ConnectionAutoclo
             id = getUUID("id"),
             sakId = getLong("sak_id"),
             type = GenerellBehandling.GenerellBehandlingType.valueOf(getString("type")),
-            innhold = getString("innhold").let { objectMapper.readValue(it) },
+            innhold = getString("innhold")?.let { objectMapper.readValue(it) },
             opprettet = getTidspunkt("opprettet"),
             tilknyttetBehandling = getObject("tilknyttet_behandling") as UUID?,
             status = GenerellBehandling.Status.valueOf(getString("status")),

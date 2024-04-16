@@ -64,11 +64,13 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
   )
 }
 
-export const TableWrapper = styled.div`
+export const TableWrapper = styled.div<{
+  marginBottom?: string
+}>`
   display: flex;
   flex-wrap: wrap;
   max-width: 1000px;
-  margin-bottom: 5em;
+  margin-bottom: ${(props) => props.marginBottom ?? '5em'};
 
   .table {
     max-width: 1000px;

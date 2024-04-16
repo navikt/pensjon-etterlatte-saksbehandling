@@ -7,7 +7,7 @@ import { hentVarselbrev, opprettVarselbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/Soeknadsdato'
 import styled from 'styled-components'
-import { behandlingErRedigerbar, behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import Spinner from '~shared/Spinner'
 import { BrevStatus, IBrev } from '~shared/types/Brev'
@@ -80,12 +80,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   }, [varselbrev])
 
   useEffect(() => {
-    if (
-      !behandlingId ||
-      !sakId ||
-      !behandlingSkalSendeBrev(props.behandling.behandlingType, props.behandling.revurderingsaarsak)
-    )
-      return
+    if (!behandlingId || !sakId || !props.behandling.sendeBrev) return
 
     hentBrev(behandlingId, (brev, statusCode) => {
       if (statusCode === 200) {

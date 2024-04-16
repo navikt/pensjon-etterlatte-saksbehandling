@@ -4,10 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.get
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
@@ -27,13 +24,11 @@ interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk, PersonTi
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandling
-
-    suspend fun hentBehandlinger(sakId: Long): ForenkletBehandlingListeWrapper
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
 
-class BehandlingKlientImpl(config: Config, httpClient: HttpClient, private val httpClientSystembruker: HttpClient) :
+class BehandlingKlientImpl(config: Config, httpClient: HttpClient) :
     BehandlingKlient {
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
 
@@ -70,10 +65,6 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient, private val h
                 e,
             )
         }
-    }
-
-    override suspend fun hentBehandlinger(sakId: Long): ForenkletBehandlingListeWrapper {
-        return httpClientSystembruker.get("$resourceUrl/saker/$sakId/behandlinger").body()
     }
 
     override suspend fun harTilgangTilBehandling(

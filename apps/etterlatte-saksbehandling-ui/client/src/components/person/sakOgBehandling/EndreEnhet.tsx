@@ -6,6 +6,7 @@ import { ButtonGroup } from '~components/person/VurderHendelseModal'
 import { isPending } from '~shared/api/apiUtils'
 import { byttEnhetPaaSak } from '~shared/api/sak'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
+import { PencilIcon } from '@navikt/aksel-icons'
 
 export const EndreEnhet = ({ sakId }: { sakId: number }) => {
   const [error, setError] = useState<string | null>(null)
@@ -30,8 +31,14 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
 
   return (
     <>
-      <Button size="small" variant="secondary" onClick={() => setOpen(true)}>
-        Endre Enhet
+      <Button
+        size="small"
+        variant="tertiary"
+        onClick={() => setOpen(true)}
+        icon={<PencilIcon aria-hidden />}
+        iconPosition="right"
+      >
+        Endre enhet
       </Button>
 
       <Modal open={open} onClose={closeAndReset} aria-labelledby="modal-heading">

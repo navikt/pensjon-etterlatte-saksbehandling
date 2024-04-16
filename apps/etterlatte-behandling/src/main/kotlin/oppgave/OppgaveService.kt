@@ -175,6 +175,19 @@ class OppgaveService(
         }
     }
 
+    fun oppdaterReferanseOgMerknad(
+        oppgaveId: UUID,
+        referanse: String,
+        merknad: String,
+    ) {
+        val hentetOppgave =
+            oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
+
+        sikreAktivOppgaveOgTildeltSaksbehandler(hentetOppgave) {
+            oppgaveDao.oppdaterReferanseOgMerknad(oppgaveId, referanse, merknad)
+        }
+    }
+
     fun endrePaaVent(
         oppgaveId: UUID,
         merknad: String,

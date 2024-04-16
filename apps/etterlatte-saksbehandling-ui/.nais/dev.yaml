@@ -127,3 +127,8 @@ spec:
         - application: etterlatte-grunnlag
         - application: etterlatte-trygdetid
         - application: etterlatte-pdltjenester
+    inbound:
+      rules:
+        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+          namespace: aura
+          cluster: dev-gcp

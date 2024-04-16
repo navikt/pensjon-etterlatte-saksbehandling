@@ -15,10 +15,10 @@ import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlient
+import no.nav.etterlatte.klienter.VedtaksvurderingKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
@@ -31,6 +31,8 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregn
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
@@ -52,6 +54,7 @@ import java.util.UUID.randomUUID
 
 internal class BeregningsGrunnlagServiceTest {
     private val behandlingKlient = mockk<BehandlingKlientImpl>()
+    private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlientImpl>()
     private val beregningsGrunnlagRepository = mockk<BeregningsGrunnlagRepository>()
     private val beregningRepository = mockk<BeregningRepository>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
@@ -60,6 +63,7 @@ internal class BeregningsGrunnlagServiceTest {
             beregningsGrunnlagRepository,
             beregningRepository,
             behandlingKlient,
+            vedtaksvurderingKlient,
             grunnlagKlient,
         )
 
@@ -97,6 +101,10 @@ internal class BeregningsGrunnlagServiceTest {
                 ),
             )
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            mockk {
+                coEvery { sakType } returns SakType.BARNEPENSJON
+            }
         val behandlingId = randomUUID()
         val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null)
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, brukertokeninfo) } returns
@@ -105,9 +113,9 @@ internal class BeregningsGrunnlagServiceTest {
             )
         assertThrows<BPBeregningsgrunnlagMerEnnEnAvdoedException> {
             runBlocking {
-                beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
                     behandlingId,
-                    BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, null),
+                    LagreBeregningsGrunnlag(soeskenMedIBeregning, null),
                     brukertokeninfo,
                 )
             }
@@ -128,6 +136,10 @@ internal class BeregningsGrunnlagServiceTest {
                 ),
             )
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            mockk {
+                coEvery { sakType } returns SakType.BARNEPENSJON
+            }
         val behandlingId = randomUUID()
         val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null)
 
@@ -135,9 +147,9 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, brukertokeninfo) } returns hentOpplysningsgrunnlag
         assertThrows<BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException> {
             runBlocking {
-                beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
                     behandlingId,
-                    BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, null),
+                    LagreBeregningsGrunnlag(soeskenMedIBeregning, null),
                     brukertokeninfo,
                 )
             }
@@ -158,6 +170,10 @@ internal class BeregningsGrunnlagServiceTest {
                 ),
             )
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            mockk {
+                coEvery { sakType } returns SakType.BARNEPENSJON
+            }
         val behandlingId = randomUUID()
         val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null)
 
@@ -166,9 +182,9 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(behandlingId, brukertokeninfo) } returns hentOpplysningsgrunnlag
         assertThrows<BPBeregningsgrunnlagSoeskenMarkertDoedException> {
             runBlocking {
-                beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
                     behandlingId,
-                    BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, null),
+                    LagreBeregningsGrunnlag(soeskenMedIBeregning, null),
                     brukertokeninfo,
                 )
             }
@@ -201,20 +217,20 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
-        every { beregningsGrunnlagRepository.lagre(any()) } returns true
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
+        every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.lagreBeregningsGrunnlag(
                 randomUUID(),
-                BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, institusjonsoppholdBeregningsgrunnlag),
+                LagreBeregningsGrunnlag(soeskenMedIBeregning, institusjonsoppholdBeregningsgrunnlag),
                 mockk {
                     every { ident() } returns "Z123456"
                 },
             )
 
-            verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
+            verify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
         }
     }
 
@@ -263,27 +279,24 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
         coEvery { behandlingKlient.kanBeregnes(revurdering.id, any(), any()) } returns true
         coEvery {
-            behandlingKlient.hentSisteIverksatteBehandling(
-                sakId,
-                any(),
-            )
-        } returns SisteIverksatteBehandling(foerstegangsbehandling.id)
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+        } returns listOf(mockVedtak(foerstegangsbehandling.id, VedtakType.INNVILGELSE))
         coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
 
         every {
-            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(foerstegangsbehandling.id)
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(foerstegangsbehandling.id)
         } returns grunnlagIverksatt
         every {
-            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(revurdering.id)
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(revurdering.id)
         } returns grunnlagEndring
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             val lagret =
-                beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
                     behandlingId = revurdering.id,
-                    barnepensjonBeregningsGrunnlag =
-                        BarnepensjonBeregningsGrunnlag(
+                    beregningsGrunnlag =
+                        LagreBeregningsGrunnlag(
                             soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
                             institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag,
                         ),
@@ -292,7 +305,7 @@ internal class BeregningsGrunnlagServiceTest {
             assertFalse(lagret)
         }
 
-        coVerify(exactly = 0) { beregningsGrunnlagRepository.lagre(any()) }
+        coVerify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
     }
 
     @Test
@@ -340,28 +353,25 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
         coEvery { behandlingKlient.kanBeregnes(revurdering.id, any(), any()) } returns true
         coEvery {
-            behandlingKlient.hentSisteIverksatteBehandling(
-                sakId,
-                any(),
-            )
-        } returns SisteIverksatteBehandling(foerstegangsbehandling.id)
+            vedtaksvurderingKlient.hentIverksatteVedtak(sakId, any())
+        } returns listOf(mockVedtak(foerstegangsbehandling.id, VedtakType.INNVILGELSE))
         coEvery { behandlingKlient.hentBehandling(revurdering.id, any()) } returns revurdering
 
         every {
-            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(foerstegangsbehandling.id)
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(foerstegangsbehandling.id)
         } returns grunnlagIverksatt
         every {
-            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(revurdering.id)
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(revurdering.id)
         } returns grunnlagEndring
-        every { beregningsGrunnlagRepository.lagre(any()) } returns true
+        every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             val lagret =
-                beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                beregningsGrunnlagService.lagreBeregningsGrunnlag(
                     behandlingId = revurdering.id,
-                    barnepensjonBeregningsGrunnlag =
-                        BarnepensjonBeregningsGrunnlag(
+                    beregningsGrunnlag =
+                        LagreBeregningsGrunnlag(
                             soeskenMedIBeregning = grunnlagEndring.soeskenMedIBeregning,
                             institusjonsopphold = grunnlagEndring.institusjonsoppholdBeregningsgrunnlag,
                         ),
@@ -370,7 +380,7 @@ internal class BeregningsGrunnlagServiceTest {
             assertTrue(lagret)
         }
 
-        coVerify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
+        coVerify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
     }
 
     @Test
@@ -382,26 +392,26 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(omregningsId) } returns null
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
         every {
-            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(behandlingsId)
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingsId)
         } returns
             BeregningsGrunnlag(
                 behandlingsId,
                 Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
                 emptyList(),
-                emptyList(),
                 BeregningsMetode.BEST.toGrunnlag(),
+                emptyList(),
             )
 
-        every { beregningsGrunnlagRepository.lagre(any()) } returns true
+        every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(omregningsId, behandlingsId, Systembruker.testdata)
+            beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, Systembruker.testdata)
 
-            verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
+            verify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
             verify(exactly = 0) { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) }
         }
     }
@@ -417,7 +427,7 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(omregningsId) } returns null
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(omregningsId) } returns null
         every {
             beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(
                 any(),
@@ -426,23 +436,23 @@ internal class BeregningsGrunnlagServiceTest {
         every { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) } just runs
         every { overstyrBeregningGrunnlagDao.copy(any(), any()) } returns overstyrBeregningGrunnlagDao
         every {
-            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(behandlingsId)
+            beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingsId)
         } returns
             BeregningsGrunnlag(
                 behandlingsId,
                 Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
                 emptyList(),
-                emptyList(),
                 BeregningsMetode.BEST.toGrunnlag(),
+                emptyList(),
             )
 
-        every { beregningsGrunnlagRepository.lagre(any()) } returns true
+        every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(omregningsId, behandlingsId, Systembruker.testdata)
+            beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, Systembruker.testdata)
 
-            verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
+            verify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
             verify(exactly = 1) { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) }
         }
     }
@@ -455,14 +465,14 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(behandlingsId) } returns null
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(behandlingsId) } returns null
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             assertThrows<RuntimeException> {
-                beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(randomUUID(), behandlingsId, Systembruker.testdata)
+                beregningsGrunnlagService.dupliserBeregningsGrunnlag(randomUUID(), behandlingsId, Systembruker.testdata)
 
-                verify(exactly = 0) { beregningsGrunnlagRepository.lagre(any()) }
+                verify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
             }
         }
     }
@@ -476,7 +486,7 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns
             BeregningsGrunnlag(
                 behandlingId = behandlingsId,
                 kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
@@ -488,9 +498,9 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
             assertThrows<RuntimeException> {
-                beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(omregningsId, behandlingsId, Systembruker.testdata)
+                beregningsGrunnlagService.dupliserBeregningsGrunnlag(omregningsId, behandlingsId, Systembruker.testdata)
 
-                verify(exactly = 0) { beregningsGrunnlagRepository.lagre(any()) }
+                verify(exactly = 0) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
             }
         }
     }
@@ -502,14 +512,14 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
-        every { beregningsGrunnlagRepository.lagre(capture(slot)) } returns true
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
+        every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         runBlocking {
-            beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.lagreBeregningsGrunnlag(
                 randomUUID(),
-                BarnepensjonBeregningsGrunnlag(
+                LagreBeregningsGrunnlag(
                     emptyList(),
                     emptyList(),
                     BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.BEST),
@@ -521,7 +531,7 @@ internal class BeregningsGrunnlagServiceTest {
 
             assertEquals(BeregningsMetode.BEST, slot.captured.beregningsMetode.beregningsMetode)
 
-            verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
+            verify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
         }
     }
 
@@ -533,8 +543,8 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
-        every { beregningsGrunnlagRepository.lagre(capture(slot)) } returns true
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
+        every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
 
@@ -551,9 +561,9 @@ internal class BeregningsGrunnlagServiceTest {
             )
 
         runBlocking {
-            beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.lagreBeregningsGrunnlag(
                 randomUUID(),
-                BarnepensjonBeregningsGrunnlag(
+                LagreBeregningsGrunnlag(
                     soeskenMedIBeregning,
                     emptyList(),
                     BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.BEST),
@@ -565,7 +575,7 @@ internal class BeregningsGrunnlagServiceTest {
 
             assertEquals(BeregningsMetode.BEST, slot.captured.beregningsMetode.beregningsMetode)
 
-            verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
+            verify(exactly = 1) { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(any()) }
         }
     }
 
@@ -577,15 +587,15 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
-        every { beregningsGrunnlagRepository.lagre(capture(slot)) } returns true
+        every { beregningsGrunnlagRepository.finnBeregningsGrunnlag(any()) } returns null
+        every { beregningsGrunnlagRepository.lagreBeregningsGrunnlag(capture(slot)) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
 
         runBlocking {
-            beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.lagreBeregningsGrunnlag(
                 randomUUID(),
-                BarnepensjonBeregningsGrunnlag(
+                LagreBeregningsGrunnlag(
                     emptyList(),
                     emptyList(),
                     BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.BEST),
@@ -764,4 +774,9 @@ internal class BeregningsGrunnlagServiceTest {
             beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
         )
     }
+
+    private fun mockVedtak(
+        behandlingId: UUID,
+        type: VedtakType,
+    ) = VedtakSammendragDto(UUID.randomUUID().toString(), behandlingId, type, null, null, null, null)
 }

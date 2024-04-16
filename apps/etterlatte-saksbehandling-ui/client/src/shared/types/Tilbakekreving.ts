@@ -65,11 +65,13 @@ export interface TilbakekrevingBeloep {
 export enum TilbakekrevingVarsel {
   EGET_BREV = 'EGET_BREV',
   MED_I_ENDRINGSBREV = 'MED_I_ENDRINGSBREV',
+  AAPENBART_UNOEDVENDIG = 'AAPENBART_UNOEDVENDIG',
 }
 
 export const teksterTilbakekrevingVarsel: Record<TilbakekrevingVarsel, string> = {
   EGET_BREV: 'Sendt i eget brev',
   MED_I_ENDRINGSBREV: 'Sendt som vedlegg i endringsbrev',
+  AAPENBART_UNOEDVENDIG: 'Varsel åpenbart unødvendig (jf. forvaltningsloven § 16)',
 } as const
 
 export enum TilbakekrevingAarsak {
@@ -179,6 +181,6 @@ export const teksterTilbakekrevingHjemmel: Record<TilbakekrevingHjemmel, string>
   TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM: 'Folketrygdloven § 22-15 første ledd, første punktum',
   TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM: 'Folketrygdloven § 22-15 første ledd, andre punktum',
   TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM:
-    'Kombinasjon folketrygdloven § 22-15 første ledd, første og andre punktum ',
+    'Kombinasjon folketrygdloven § 22-15 første ledd, første og andre punktum',
   TJUETO_FEMTEN_FEMTE_LEDD: 'Folketrygdloven § 22-15 femte ledd',
 } as const

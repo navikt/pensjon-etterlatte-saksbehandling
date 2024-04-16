@@ -68,3 +68,8 @@ spec:
     outbound:
       rules:
         - application: etterlatte-grunnlag
+    inbound:
+      rules:
+        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+          namespace: aura
+          cluster: dev-gcp

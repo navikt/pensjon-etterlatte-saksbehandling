@@ -9,9 +9,14 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.safeYearsBetween
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.varEktefelleVedDoedsfall
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Sivilstatus.*
+import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.sikkerLogg
+import org.slf4j.LoggerFactory
 import kotlin.math.absoluteValue
 
 internal class DoedshendelseKontrollpunktEktefelleService {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun identifiser(
         eps: PersonDTO,
         avdoed: PersonDTO,
@@ -58,17 +63,37 @@ internal class DoedshendelseKontrollpunktEktefelleService {
         avdoed: PersonDTO,
         eps: PersonDTO,
     ): DoedshendelseKontrollpunkt {
-        val sivilstanderForEpsMedAvdoed =
-            eps.sivilstand
+        val giftSivilstander =
+            avdoed.sivilstand
                 ?.map { it.verdi }
-                ?.filter { it.relatertVedSiviltilstand == avdoed.foedselsnummer.verdi }
+                ?.filter { it.sivilstatus in listOf(GIFT, SEPARERT, REGISTRERT_PARTNER, SEPARERT_PARTNER) }
+                ?.sortedBy { it.gyldigFraOgMed }
 
-        if (sivilstanderForEpsMedAvdoed.isNullOrEmpty()) {
-            throw IllegalStateException("Fant ingen sivilstander for eps med avdoed")
+        if (giftSivilstander.isNullOrEmpty()) {
+            logger.warn("Finner ikke noen GIFT sivilstand for avdød (${avdoed.foedselsnummer}). Se sikkerLog for mer detaljer.")
+            sikkerLogg.warn("Finner ikke noen GIFT sivilstand for avdød (${avdoed.foedselsnummer}): ${avdoed.toJson()}")
+            return DoedshendelseKontrollpunkt.AvdoedHarIkkeVaertGift
         }
 
-        val gift = sivilstanderForEpsMedAvdoed.firstOrNull { it.sivilstatus in listOf(GIFT, REGISTRERT_PARTNER) }?.gyldigFraOgMed
-        val skilt = sivilstanderForEpsMedAvdoed.lastOrNull { it.sivilstatus in listOf(SKILT, SKILT_PARTNER) }?.gyldigFraOgMed
+        val gift = giftSivilstander.firstOrNull { it.relatertVedSiviltilstand == eps.foedselsnummer.verdi }?.gyldigFraOgMed
+
+        val skiltSivilstander =
+            avdoed.sivilstand
+                ?.map { it.verdi }
+                ?.filter { it.sivilstatus in listOf(SKILT, SKILT_PARTNER) }
+                ?.filterNot { it.gyldigFraOgMed != null && gift != null && it.gyldigFraOgMed!! < gift }
+                ?.sortedBy { it.gyldigFraOgMed }
+                ?: emptyList()
+
+        val skilt =
+            when {
+                skiltSivilstander.isEmpty() -> null
+                skiltSivilstander.size == 1 -> skiltSivilstander.first().gyldigFraOgMed
+                skiltSivilstander.any { it.relatertVedSiviltilstand?.value == eps.foedselsnummer.verdi.value } -> {
+                    skiltSivilstander.first { it.relatertVedSiviltilstand?.value == eps.foedselsnummer.verdi.value }.gyldigFraOgMed
+                }
+                else -> skiltSivilstander.first().gyldigFraOgMed
+            }
 
         if (gift == null || skilt == null) {
             return DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(

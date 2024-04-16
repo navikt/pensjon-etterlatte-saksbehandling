@@ -38,6 +38,12 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
                     call.respond(service.lagrePerioder(behandlingId, request.perioder))
                 }
             }
+            put("/skal-sende-brev") {
+                kunSkrivetilgang {
+                    val request = call.receive<TilbakekrevingSendeBrevRequest>()
+                    call.respond(service.lagreSkalSendeBrev(behandlingId, request.skalSendeBrev))
+                }
+            }
             post("/valider") {
                 kunSkrivetilgang {
                     call.respond(service.validerVurderingOgPerioder(behandlingId, brukerTokenInfo))
@@ -79,8 +85,8 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
             medBody<Kravgrunnlag> {
                 kunSkrivetilgang(sakId = it.sakId.value) {
                     try {
-                        service.opprettTilbakekreving(it)
-                        call.respond(HttpStatusCode.OK)
+                        val tilbakekreving = service.opprettTilbakekreving(it)
+                        call.respond(HttpStatusCode.OK, tilbakekreving)
                     } catch (e: TilbakekrevingHarMangelException) {
                         call.respond(
                             HttpStatusCode.NotFound,
@@ -92,6 +98,10 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
         }
     }
 }
+
+data class TilbakekrevingSendeBrevRequest(
+    val skalSendeBrev: Boolean,
+)
 
 data class TilbakekrevingLagreRequest(
     val perioder: List<TilbakekrevingPeriode>,

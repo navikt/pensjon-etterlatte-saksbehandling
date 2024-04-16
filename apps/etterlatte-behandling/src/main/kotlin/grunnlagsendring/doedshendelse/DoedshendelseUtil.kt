@@ -85,7 +85,7 @@ fun varEktefelleVedDoedsfall(
                     Sivilstatus.SEPARERT_PARTNER,
                 )
             ) {
-                return it.relatertVedSiviltilstand?.value == eps
+                return it.relatertVedSiviltilstand?.value == eps && !harSkiltSivilstandUtenGyldigFomDato(avdoed)
             }
             return false
         }
@@ -117,3 +117,10 @@ fun finnAntallAarGiftVedDoedsfall(
                 null
             }
         }
+
+fun harSkiltSivilstandUtenGyldigFomDato(person: PersonDTO): Boolean =
+    person.sivilstand
+        ?.map { it.verdi }
+        ?.filter { it.sivilstatus in listOf(Sivilstatus.SKILT, Sivilstatus.SKILT_PARTNER) }
+        ?.any { it.gyldigFraOgMed == null }
+        ?: false

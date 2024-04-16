@@ -1,4 +1,4 @@
-import { BodyShort, Button, Detail, Heading, Table } from '@navikt/ds-react'
+import { Alert, Button, Detail, Heading, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import React, { useEffect, useState } from 'react'
 import { CheckmarkCircleIcon, ChevronDownIcon, ChevronUpIcon } from '@navikt/aksel-icons'
@@ -38,9 +38,9 @@ const HistoriskeHendelser = (props: Props) => {
       </Heading>
 
       {!historiskeHendelser.length ? (
-        <BodyShort>
-          <i>Ingen historiske hendelser</i>
-        </BodyShort>
+        <Alert variant="info" inline>
+          Ingen historiske hendelser
+        </Alert>
       ) : (
         <div>
           <Button variant="tertiary" onClick={() => setLastetBehandlingliste(!aapenhistorikk)}>

@@ -45,7 +45,7 @@ class TilbakekrevingService(
             tilbakekrevingDao.hentTilbakekrevinger(sakId)
         }
 
-    fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag): UUID =
+    fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Oppretter tilbakekreving=${kravgrunnlag.kravgrunnlagId} på sak=${kravgrunnlag.sakId}")
 
@@ -58,13 +58,28 @@ class TilbakekrevingService(
                     TilbakekrevingBehandling.ny(kravgrunnlag, sak),
                 )
 
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = tilbakekrevingBehandling.id.toString(),
-                sakId = tilbakekrevingBehandling.sak.id,
-                oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
-                oppgaveType = OppgaveType.TILBAKEKREVING,
-                merknad = null,
-            )
+            oppgaveService.hentOppgaverForReferanse(kravgrunnlag.sisteUtbetalingslinjeId.value)
+                .filter { it.type == OppgaveType.TILBAKEKREVING }.let {
+                    if (it.isEmpty()) {
+                        logger.info("Fant ingen tilbakekrevingsoppgave, oppretter ny")
+                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                            referanse = tilbakekrevingBehandling.id.toString(),
+                            sakId = tilbakekrevingBehandling.sak.id,
+                            oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
+                            oppgaveType = OppgaveType.TILBAKEKREVING,
+                            merknad = "Kravgrunnlag mottatt",
+                        )
+                    } else {
+                        val eksisterendeOppgave = it.single()
+
+                        logger.info("Kobler nytt kravgrunnlag med eksisterende oppgave ${eksisterendeOppgave.id}")
+                        oppgaveService.oppdaterReferanseOgMerknad(
+                            oppgaveId = eksisterendeOppgave.id,
+                            referanse = tilbakekrevingBehandling.id.toString(),
+                            merknad = "Kravgrunnlag mottatt",
+                        )
+                    }
+                }
 
             hendelseDao.tilbakekrevingOpprettet(
                 tilbakekrevingId = tilbakekrevingBehandling.id,
@@ -82,7 +97,7 @@ class TilbakekrevingService(
                 TilbakekrevingHendelseType.OPPRETTET,
             )
 
-            tilbakekrevingBehandling.id
+            tilbakekrevingBehandling
         }
 
     fun hentTilbakekreving(tilbakekrevingId: UUID): TilbakekrevingBehandling =
@@ -129,6 +144,24 @@ class TilbakekrevingService(
                         eksisterende.tilbakekreving.copy(
                             perioder = perioder,
                         ),
+                ),
+            )
+        }
+
+    fun lagreSkalSendeBrev(
+        tilbakekrevingId: UUID,
+        sendeBrev: Boolean,
+    ): TilbakekrevingBehandling =
+        inTransaction {
+            logger.info("Lagrer om brev skal sendes for tilbakekreving=$tilbakekrevingId")
+            val eksisterende = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+            if (!eksisterende.underBehandling()) {
+                throw TilbakekrevingFeilTilstandException("Tilbakekreving er ikke under behandling")
+            }
+            tilbakekrevingDao.lagreTilbakekreving(
+                eksisterende.copy(
+                    status = TilbakekrevingStatus.UNDER_ARBEID,
+                    sendeBrev = sendeBrev,
                 ),
             )
         }

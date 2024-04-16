@@ -2,8 +2,8 @@ package no.nav.etterlatte.beregningkafka
 
 import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
+import no.nav.etterlatte.beregning.grunnlag.LagreBeregningsGrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
@@ -100,8 +100,8 @@ private fun verifiserNyBeregning(
     }
 }
 
-private fun tilGrunnlagDTO(request: MigreringRequest): BarnepensjonBeregningsGrunnlag =
-    BarnepensjonBeregningsGrunnlag(
+private fun tilGrunnlagDTO(request: MigreringRequest): LagreBeregningsGrunnlag =
+    LagreBeregningsGrunnlag(
         soeskenMedIBeregning =
             listOf(
                 GrunnlagMedPeriode(

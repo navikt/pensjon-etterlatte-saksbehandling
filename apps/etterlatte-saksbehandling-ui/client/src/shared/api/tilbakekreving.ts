@@ -24,7 +24,7 @@ export function lagreTilbakekrevingsperioder(args: {
 }
 
 export const validerTilbakekreving = async (behandlingsId: string): Promise<ApiResponse<TilbakekrevingBehandling>> => {
-  return apiClient.put(`/tilbakekreving/${behandlingsId}/valider`, {})
+  return apiClient.post(`/tilbakekreving/${behandlingsId}/valider`, {})
 }
 
 export const opprettVedtak = async (behandlingsId: string): Promise<ApiResponse<unknown>> => {

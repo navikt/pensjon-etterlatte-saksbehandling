@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
@@ -97,6 +98,11 @@ interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
         oppgaveTilAttestering: OppgaveIntern,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
+
+    suspend fun hentTilbakekrevingBehandling(
+        tilbakekrevingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): TilbakekrevingBehandling
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable? = null) :
@@ -172,7 +178,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/oppgaver/sak/$sakId/oppgaver",
+                            url = "$resourceUrl/oppgaver/sak/$sakId/oppgaver",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )
@@ -405,4 +411,28 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             BehandlingStatus.RETURNERT -> "returner"
             else -> throw BehandlingKlientException("Ugyldig status ${status.name}")
         }
+
+    override suspend fun hentTilbakekrevingBehandling(
+        tilbakekrevingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): TilbakekrevingBehandling {
+        logger.info("Henter tilbakekreving med tilbakekrevingId=$tilbakekrevingId")
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/tilbakekreving/$tilbakekrevingId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+        } catch (e: Exception) {
+            throw BehandlingKlientException("Henting av tilbakekreving med tilbakekrevingId=$tilbakekrevingId feilet", e)
+        }
+    }
 }

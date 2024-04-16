@@ -153,6 +153,7 @@ class BehandlingDao(
             kommerBarnetTilgode = kommerBarnetTilGodeDao.hentKommerBarnetTilGode(id),
             prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
             kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
+            sendeBrev = rs.getBoolean("sende_brev"),
         )
     }
 
@@ -178,8 +179,9 @@ class BehandlingDao(
                         """
                         INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                         soeknad_mottatt_dato, virkningstidspunkt, utlandstilknytning, bodd_eller_arbeidet_utlandet, 
-                        revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, begrunnelse, relatert_behandling)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, begrunnelse, relatert_behandling,
+                        sende_brev)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
 
@@ -201,6 +203,7 @@ class BehandlingDao(
                     stmt.setString(15, kilde.toString())
                     stmt.setString(16, begrunnelse)
                     stmt.setString(17, relatertBehandlingId)
+                    stmt.setBoolean(18, sendeBrev)
                 }
                 require(stmt.executeUpdate() == 1)
             }
@@ -274,6 +277,18 @@ class BehandlingDao(
                 statement.setObject(2, behandlingId)
                 require(statement.executeUpdate() == 1)
             }
+        }
+    }
+
+    fun lagreSendeBrev(
+        behandlingId: UUID,
+        skalSendeBrev: Boolean,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement = prepareStatement("UPDATE behandling set sende_brev = ? where id = ?")
+            statement.setBoolean(1, skalSendeBrev)
+            statement.setObject(2, behandlingId)
+            require(statement.executeUpdate() == 1)
         }
     }
 

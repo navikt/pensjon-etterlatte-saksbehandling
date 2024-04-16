@@ -36,7 +36,7 @@ fun Route.sanksjon(
         post {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Oppdaterer eller oppretter sanksjon for behandlingId=$it")
-                val sanksjon = call.receive<Sanksjon>()
+                val sanksjon = call.receive<LagreSanksjon>()
                 sanksjonService.opprettEllerOppdaterSanksjon(it, sanksjon, brukerTokenInfo)
 
                 call.respond(HttpStatusCode.OK)

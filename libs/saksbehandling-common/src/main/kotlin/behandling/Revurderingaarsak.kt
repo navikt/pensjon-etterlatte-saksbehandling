@@ -71,7 +71,6 @@ enum class Revurderingaarsak(
     VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, KunIDev, skalSendeBrev = true),
 
     AVKORTING_MOT_UFOERETRYGD(SAKTYPE_BP, KunIDev, skalSendeBrev = true),
-    FRA_EN_TIL_TO_FORELDRE_DOED(SAKTYPE_BP, KunIDev, skalSendeBrev = true),
 
     ETTEROPPGJOER(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
     OPPHOER_3_AAR_ETTER_DOEDSFALL(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),

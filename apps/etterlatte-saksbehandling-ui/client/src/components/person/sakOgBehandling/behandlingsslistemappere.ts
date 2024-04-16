@@ -55,7 +55,7 @@ export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Avkorting mot uføretrygd'
     case Revurderingaarsak.ETTEROPPGJOER:
       return 'Etteroppgjør'
-    case Revurderingaarsak.FRA_EN_TIL_TO_FORELDRE_DOED:
+    case Revurderingaarsak.FORELDRELOES:
       return 'Fra en til to døde foreldre'
     case Revurderingaarsak.OMGJOERING_ETTER_ANKE:
       return 'Omgjøring etter anke'

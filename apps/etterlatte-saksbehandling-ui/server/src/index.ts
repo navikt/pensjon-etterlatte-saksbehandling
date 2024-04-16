@@ -35,7 +35,7 @@ app.get('/metrics', async (_: Request, res: Response) => {
 app.use('/api/logg', loggerRouter)
 app.use('/api/feature', unleashRouter)
 
-app.use(
+app.get(
   '/internal/selftest',
   createProxyMiddleware({
     target: ApiConfig.behandling.url,

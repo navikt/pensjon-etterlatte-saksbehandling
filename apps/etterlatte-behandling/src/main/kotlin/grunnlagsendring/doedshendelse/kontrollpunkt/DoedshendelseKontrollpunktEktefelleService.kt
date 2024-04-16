@@ -9,9 +9,14 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.safeYearsBetween
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.varEktefelleVedDoedsfall
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Sivilstatus.*
+import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.sikkerLogg
+import org.slf4j.LoggerFactory
 import kotlin.math.absoluteValue
 
 internal class DoedshendelseKontrollpunktEktefelleService {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun identifiser(
         eps: PersonDTO,
         avdoed: PersonDTO,
@@ -65,6 +70,8 @@ internal class DoedshendelseKontrollpunktEktefelleService {
                 ?.sortedBy { it.gyldigFraOgMed }
 
         if (giftSivilstander.isNullOrEmpty()) {
+            logger.warn("Finner ikke noen GIFT sivilstand for avdød (${avdoed.foedselsnummer}). Se sikkerLog for mer detaljer.")
+            sikkerLogg.warn("Finner ikke noen GIFT sivilstand for avdød (${avdoed.foedselsnummer}): ${avdoed.toJson()}")
             return DoedshendelseKontrollpunkt.AvdoedHarIkkeVaertGift
         }
 

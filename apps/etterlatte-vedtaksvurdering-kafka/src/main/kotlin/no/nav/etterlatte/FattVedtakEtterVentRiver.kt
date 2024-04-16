@@ -4,6 +4,7 @@ import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.rapidsandrivers.AUTOMATISK_GJENOPPRETTING
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.behandlingId
@@ -32,6 +33,8 @@ class FattVedtakEtterVentRiver(
             validate { it.requireKey(MIGRERING_KJORING_VARIANT) }
         }
     }
+
+    override fun kontekst() = Kontekst.VENT
 
     override fun haandterPakke(
         packet: JsonMessage,

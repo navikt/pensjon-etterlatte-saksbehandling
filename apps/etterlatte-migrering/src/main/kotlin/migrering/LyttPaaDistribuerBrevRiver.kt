@@ -1,6 +1,7 @@
 package no.nav.etterlatte.migrering
 
 import no.nav.etterlatte.brev.BrevHendelseType
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -21,6 +22,8 @@ internal class LyttPaaDistribuerBrevRiver(
             validate { it.requireKey("vedtak.behandlingId") }
         }
     }
+
+    override fun kontekst() = Kontekst.MIGRERING
 
     override fun haandterPakke(
         packet: JsonMessage,

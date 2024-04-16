@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.maps.shouldContain
 import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -18,6 +19,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.temporal.ChronoUnit
@@ -26,7 +28,8 @@ import java.util.UUID
 class VedtakTilbakekrevingServiceTest {
     private val repo = mockk<VedtaksvurderingRepository>()
     private val rapid = mockk<VedtaksvurderingRapidService>()
-    private val service = VedtakTilbakekrevingService(repo, rapid)
+    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val service = VedtakTilbakekrevingService(repo, rapid, behandlingKlient)
 
     @Test
     fun `opprettEllerOppdaterVedtak oppretter hvis ikke finnes fra foer`() {
@@ -153,6 +156,7 @@ class VedtakTilbakekrevingServiceTest {
                 tilbakekrevingId = UUID.randomUUID(),
                 enhet = "enhet",
             )
+
         every { repo.hentVedtak(attesterDto.tilbakekrevingId) } returns
             vedtakTilbakekreving(
                 status = VedtakStatus.FATTET_VEDTAK,
@@ -163,6 +167,12 @@ class VedtakTilbakekrevingServiceTest {
                         tidspunkt = Tidspunkt.now(),
                     ),
             )
+
+        coEvery { behandlingKlient.hentTilbakekrevingBehandling(attesterDto.tilbakekrevingId, any()) } returns
+            mockk {
+                every { sendeBrev } returns true
+            }
+
         val attestertVedtak =
             vedtakTilbakekreving(
                 behandlingId = attesterDto.tilbakekrevingId,

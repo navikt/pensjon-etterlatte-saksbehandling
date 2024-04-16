@@ -11,6 +11,7 @@ import { norg2Router } from './routers/norg2Router'
 import { githubRouter } from './routers/githubRouter'
 import { unleashRouter } from './routers/unleashRouter'
 import { requestLoggerMiddleware } from './middleware/logging'
+import { createProxyMiddleware } from 'http-proxy-middleware'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -33,6 +34,14 @@ app.get('/metrics', async (_: Request, res: Response) => {
 
 app.use('/api/logg', loggerRouter)
 app.use('/api/feature', unleashRouter)
+
+app.use(
+  '/internal/selftest',
+  createProxyMiddleware({
+    target: ApiConfig.behandling.url,
+    changeOrigin: true,
+  })
+)
 
 app.use(authenticateUser) // Alle ruter etter denne er authenticated
 app.use('/api/norg2', norg2Router)
@@ -61,7 +70,6 @@ app.use(
     '/api/generellbehandling',
     '/api/sjekkliste',
     '/api/bosattutland',
-    '/internal/selftest',
   ],
   tokenMiddleware(ApiConfig.behandling.scope),
   proxy(ApiConfig.behandling.url)

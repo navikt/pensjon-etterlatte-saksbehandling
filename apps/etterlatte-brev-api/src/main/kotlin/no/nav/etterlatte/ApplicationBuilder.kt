@@ -77,7 +77,6 @@ import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
 import no.nav.etterlatte.rivers.StartBrevgenereringRepository
 import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
-import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -248,7 +247,6 @@ class ApplicationBuilder {
                         }
                     },
                 )
-                OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
                 val ferdigstillJournalfoerOgDistribuerBrev =
                     FerdigstillJournalfoerOgDistribuerBrev(
                         pdfGenerator,

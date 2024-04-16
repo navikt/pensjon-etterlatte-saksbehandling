@@ -77,13 +77,18 @@ import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
 import no.nav.etterlatte.rivers.StartBrevgenereringRepository
 import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
+import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVarselbrevForGjenopprettaRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
+import no.nav.etterlatte.rivers.migrering.behandlingerAaJournalfoereBrevFor
+import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.Logger
+import java.util.UUID
+import kotlin.concurrent.thread
 
 val sikkerLogg: Logger = sikkerlogger()
 
@@ -272,6 +277,8 @@ class ApplicationBuilder {
                     behandlingKlient,
                     featureToggleService,
                 )
+                FiksEnkeltbrevRiver(this, varselbrevService, ferdigstillJournalfoerOgDistribuerBrev)
+                    .also { fiksEnkeltbrev() }
                 OpprettJournalfoerOgDistribuerRiver(
                     this,
                     brevdataFacade,
@@ -283,6 +290,19 @@ class ApplicationBuilder {
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
                 DistribuerBrevRiver(this, brevdistribuerer)
             }
+
+    private fun fiksEnkeltbrev() {
+        thread {
+            Thread.sleep(60_000)
+            behandlingerAaJournalfoereBrevFor.forEach {
+                rapidsConnection.publish(
+                    message = lagMelding(behandlingId = it),
+                    key = UUID.randomUUID().toString(),
+                )
+                Thread.sleep(3000)
+            }
+        }
+    }
 
     private fun lagMelding(behandlingId: String) =
         JsonMessage.newMessage(

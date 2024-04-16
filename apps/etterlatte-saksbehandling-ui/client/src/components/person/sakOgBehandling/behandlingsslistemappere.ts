@@ -51,6 +51,30 @@ export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Stønad uten tidsbegrensning'
     case Revurderingaarsak.OPPHOER_UTEN_BREV:
       return 'Opphør (uten brev)'
+    case Revurderingaarsak.AVKORTING_MOT_UFOERETRYGD:
+      return 'Avkorting mot uføretrygd'
+    case Revurderingaarsak.ETTEROPPGJOER:
+      return 'Etteroppgjør'
+    case Revurderingaarsak.FORELDRELOES:
+      return 'Fra en til to døde foreldre'
+    case Revurderingaarsak.OMGJOERING_ETTER_ANKE:
+      return 'Omgjøring etter anke'
+    case Revurderingaarsak.OMGJOERING_PAA_EGET_INITIATIV:
+      return 'Omgjøring på eget intitiativ'
+    case Revurderingaarsak.OMGJOERING_ETTER_KRAV_FRA_BRUKER:
+      return 'Omgjøring etter krav fra bruker'
+    case Revurderingaarsak.OPPHOER_3_AAR_ETTER_DOEDSFALL:
+      return 'Opphør 3 år etter dødsfall'
+    case Revurderingaarsak.OPPHOER_AV_2_UTVIDEDE_AAR:
+      return 'Opphør av 2 utvidede år'
+    case Revurderingaarsak.SANKSJON_PGA_MANGLENDE_OPPLYSNINGER:
+      return 'Sanksjon pga manglende opplysninger'
+    case Revurderingaarsak.SOEKNAD_OM_GJENOPPTAK:
+      return 'Søknad om gjenopptak'
+    case Revurderingaarsak.UTSENDELSE_AV_KRAVPAKKE:
+      return 'Utsendelse av kravpakke'
+    case Revurderingaarsak.UTSENDELSE_AV_SED:
+      return 'Utsendelse av SED'
   }
 }
 

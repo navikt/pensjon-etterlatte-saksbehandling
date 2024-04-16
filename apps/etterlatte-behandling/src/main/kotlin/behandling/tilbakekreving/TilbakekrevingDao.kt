@@ -50,7 +50,7 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag, vurdering
+                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag, vurdering, sende_brev 
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.sak_id = ?
                     """.trimIndent(),
@@ -81,7 +81,7 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag, vurdering
+                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag, vurdering, sende_brev 
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.id = ?
                     """.trimIndent(),
@@ -134,13 +134,14 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
             prepareStatement(
                 """
                 INSERT INTO tilbakekreving(
-                    id, status, sak_id, opprettet, kravgrunnlag, vurdering
+                    id, status, sak_id, opprettet, kravgrunnlag, vurdering, sende_brev
                 ) 
-                VALUES (?, ?, ?, ?, ?, ?) 
+                VALUES (?, ?, ?, ?, ?, ?, ?) 
                 ON CONFLICT (id) DO UPDATE SET
                     status = excluded.status,
                     kravgrunnlag = excluded.kravgrunnlag,
-                    vurdering = excluded.vurdering
+                    vurdering = excluded.vurdering,
+                    sende_brev = excluded.sende_brev
                 """.trimIndent(),
             )
         statement.setObject(1, tilbakekrevingBehandling.id)
@@ -151,6 +152,7 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
             statement.setJsonb(5, kravgrunnlag.toJsonNode())
             statement.setJsonb(6, vurdering)
         }
+        statement.setBoolean(7, tilbakekrevingBehandling.sendeBrev)
         statement.executeUpdate().also { require(it == 1) }
     }
 
@@ -239,6 +241,7 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
                     perioder = emptyList(),
                     kravgrunnlag = getString("kravgrunnlag").let { objectMapper.readValue(it) },
                 ),
+            sendeBrev = getBoolean("sende_brev"),
         )
 
     private fun ResultSet.toTilbakekrevingsperiode(): Pair<YearMonth, Tilbakekrevingsbelop> {

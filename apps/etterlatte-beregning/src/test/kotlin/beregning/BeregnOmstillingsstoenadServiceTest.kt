@@ -6,7 +6,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagOMS
+import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
@@ -65,7 +65,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
         coEvery {
-            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -104,7 +104,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
         coEvery {
-            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -143,7 +143,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
         coEvery {
-            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -187,7 +187,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
 
         coEvery {
-            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -227,7 +227,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
             }
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
         coEvery {
-            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -263,7 +263,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetid)
         coEvery {
-            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -284,7 +284,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns emptyList()
         coEvery {
-            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -345,7 +345,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
     private fun omstillingstoenadBeregningsGrunnlag(
         behandlingId: UUID,
         beregningsMetode: BeregningsMetode = BeregningsMetode.NASJONAL,
-    ) = BeregningsGrunnlagOMS(
+    ) = BeregningsGrunnlag(
         behandlingId,
         mockk {
             every { ident } returns "Z123456"

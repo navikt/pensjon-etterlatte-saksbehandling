@@ -13,9 +13,8 @@ import { hentKlagerISak } from '~shared/api/klage'
 import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { Heading, Link, Table } from '@navikt/ds-react'
+import { Alert, Link, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
-import styled from 'styled-components'
 import { JaNei } from '~shared/types/ISvar'
 
 import { mapApiResult } from '~shared/api/apiUtils'
@@ -61,41 +60,37 @@ function formaterKabalUtfall(kabalResultat: KabalResultat | undefined): string {
 function KlageTabell(props: { klager: Array<Klage> }) {
   const { klager } = props
 
-  if (klager.length === 0) {
-    return null
-  }
-
-  return (
-    <KlageWrapper>
-      <Heading size="medium">Klager</Heading>
-
-      <Table zebraStripes>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell>Reg. dato</Table.HeaderCell>
-            <Table.HeaderCell>Status</Table.HeaderCell>
-            <Table.HeaderCell>Resultat Gjenny</Table.HeaderCell>
-            <Table.HeaderCell>Status Kabal</Table.HeaderCell>
-            <Table.HeaderCell>Resultat Kabal</Table.HeaderCell>
-            <Table.HeaderCell>Handling</Table.HeaderCell>
+  return !!klager?.length ? (
+    <Table zebraStripes>
+      <Table.Header>
+        <Table.Row>
+          <Table.HeaderCell>Reg. dato</Table.HeaderCell>
+          <Table.HeaderCell>Status</Table.HeaderCell>
+          <Table.HeaderCell>Resultat Gjenny</Table.HeaderCell>
+          <Table.HeaderCell>Status Kabal</Table.HeaderCell>
+          <Table.HeaderCell>Resultat Kabal</Table.HeaderCell>
+          <Table.HeaderCell>Handling</Table.HeaderCell>
+        </Table.Row>
+      </Table.Header>
+      <Table.Body>
+        {klager.map((klage) => (
+          <Table.Row key={klage.id}>
+            <Table.DataCell>{formaterStringDato(klage.opprettet)}</Table.DataCell>
+            <Table.DataCell>{formaterKlagestatus(klage.status)}</Table.DataCell>
+            <Table.DataCell>{formaterKlageResultat(klage)}</Table.DataCell>
+            <Table.DataCell>{formaterKabalstatus(klage.kabalStatus)}</Table.DataCell>
+            <Table.DataCell>{formaterKabalUtfall(klage.kabalResultat)}</Table.DataCell>
+            <Table.DataCell>
+              <Link href={lenkeTilKlageMedId(klage.id)}>Vis behandling</Link>
+            </Table.DataCell>
           </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {klager.map((klage) => (
-            <Table.Row key={klage.id} shadeOnHover={false}>
-              <Table.DataCell>{formaterStringDato(klage.opprettet)}</Table.DataCell>
-              <Table.DataCell>{formaterKlagestatus(klage.status)}</Table.DataCell>
-              <Table.DataCell>{formaterKlageResultat(klage)}</Table.DataCell>
-              <Table.DataCell>{formaterKabalstatus(klage.kabalStatus)}</Table.DataCell>
-              <Table.DataCell>{formaterKabalUtfall(klage.kabalResultat)}</Table.DataCell>
-              <Table.DataCell>
-                <Link href={lenkeTilKlageMedId(klage.id)}>Vis behandling</Link>
-              </Table.DataCell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table>
-    </KlageWrapper>
+        ))}
+      </Table.Body>
+    </Table>
+  ) : (
+    <Alert variant="info" inline>
+      Ingen klager på sak
+    </Alert>
   )
 }
 
@@ -117,7 +112,3 @@ export function KlageListe(props: { sakId: number }) {
     }
   )
 }
-
-const KlageWrapper = styled.div`
-  margin: 3rem 0;
-`

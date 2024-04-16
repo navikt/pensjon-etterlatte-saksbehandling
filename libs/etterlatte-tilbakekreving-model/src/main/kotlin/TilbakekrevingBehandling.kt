@@ -10,6 +10,7 @@ data class TilbakekrevingBehandling(
     val sak: Sak,
     val opprettet: Tidspunkt,
     val tilbakekreving: Tilbakekreving,
+    val sendeBrev: Boolean,
 ) {
     fun underBehandling() =
         when (status) {
@@ -44,6 +45,7 @@ data class TilbakekrevingBehandling(
                     perioder = kravgrunnlag.perioder.tilTilbakekrevingPerioder(),
                     kravgrunnlag = kravgrunnlag,
                 ),
+            sendeBrev = true,
         )
     }
 }

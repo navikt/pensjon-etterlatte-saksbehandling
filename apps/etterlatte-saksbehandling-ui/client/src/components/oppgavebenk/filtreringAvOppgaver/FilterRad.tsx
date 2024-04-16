@@ -26,6 +26,7 @@ interface Props {
   setFilter: (filter: Filter) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppgavelisteValg?: OppgavelisteValg
+  children?: ReactNode
 }
 
 export const FilterRad = ({
@@ -35,6 +36,7 @@ export const FilterRad = ({
   setFilter,
   saksbehandlereIEnhet,
   oppgavelisteValg,
+  children,
 }: Props): ReactNode => {
   const [sakEllerFnr, setSakEllerFnr] = useState<string>(filter.sakEllerFnrFilter)
 
@@ -122,6 +124,8 @@ export const FilterRad = ({
             />
           </>
         )}
+
+        {children}
       </FlexRow>
 
       <FlexRow $spacing>

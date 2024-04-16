@@ -36,4 +36,5 @@ data class DetaljertBehandlingDto(
     val revurderinginfo: RevurderingInfoMedBegrunnelse?,
     val begrunnelse: String?,
     val kilde: Vedtaksloesning,
+    val sendeBrev: Boolean,
 )

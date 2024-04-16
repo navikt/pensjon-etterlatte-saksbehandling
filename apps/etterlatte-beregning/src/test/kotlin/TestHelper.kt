@@ -45,6 +45,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.regler.Beregningstall
+import no.nav.etterlatte.sanksjon.LagreSanksjon
 import no.nav.etterlatte.sanksjon.Sanksjon
 import java.math.RoundingMode
 import java.time.LocalDate
@@ -325,14 +326,28 @@ fun sanksjon(
     sakId: Long = 123,
     fom: YearMonth = YearMonth.of(2024, 1),
     tom: YearMonth = YearMonth.of(2024, 2),
+    beskrivelse: String = "Ikke i jobb",
 ) = Sanksjon(
     id = id,
     behandlingId = behandlingId,
     sakId = sakId,
     fom = fom,
     tom = tom,
-    saksbehandler = "A12345",
-    opprettet = Tidspunkt.now(),
-    endret = Tidspunkt.now(),
-    beskrivelse = "Ikke i jobb",
+    opprettet = Grunnlagsopplysning.Saksbehandler.create("A12345"),
+    endret = Grunnlagsopplysning.Saksbehandler.create("A12345"),
+    beskrivelse = beskrivelse,
+)
+
+fun lagreSanksjon(
+    id: UUID? = null,
+    sakId: Long = 123,
+    fom: LocalDate = LocalDate.of(2024, 1, 1),
+    tom: LocalDate = LocalDate.of(2024, 2, 1),
+    beskrivelse: String = "Ikke i jobb",
+) = LagreSanksjon(
+    id = id,
+    sakId = sakId,
+    fom = fom,
+    tom = tom,
+    beskrivelse = beskrivelse,
 )

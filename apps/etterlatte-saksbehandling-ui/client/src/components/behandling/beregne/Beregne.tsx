@@ -1,6 +1,6 @@
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
-import { behandlingErRedigerbar, behandlingSkalSendeBrev } from '../felles/utils'
+import { behandlingErRedigerbar } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
 import { useVedtaksResultat } from '../useVedtaksResultat'
 import { useAppDispatch, useAppSelector } from '~store/Store'
@@ -31,6 +31,8 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { Sanksjon } from '~components/behandling/sanksjon/Sanksjon'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -43,6 +45,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
     : undefined
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const visSanksjon = useFeatureEnabledMedDefault('sanksjon', false)
 
   const vedtaksresultat = useVedtaksResultat()
 
@@ -66,7 +69,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
 
   const opprettEllerOppdaterVedtak = () => {
     const erBarnepensjon = behandling.sakType === SakType.BARNEPENSJON
-    const skalSendeBrev = behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)
+    const skalSendeBrev = behandling.sendeBrev
     if (skalSendeBrev && !brevutfallOgEtterbetaling?.brevutfall) {
       setManglerbrevutfall(true)
       return
@@ -136,6 +139,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                             behandling={behandling}
                             resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
                           />
+                          {visSanksjon && <Sanksjon behandling={behandling} />}
                         </>
                       )
                   }
@@ -164,9 +168,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
             />
           ) : (
             <Button loading={isPending(vedtakStatus)} variant="primary" onClick={opprettEllerOppdaterVedtak}>
-              {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)
-                ? handlinger.NESTE.navn
-                : handlinger.FATT_VEDTAK.navn}
+              {behandling.sendeBrev ? handlinger.NESTE.navn : handlinger.FATT_VEDTAK.navn}
             </Button>
           )}
         </BehandlingHandlingKnapper>

@@ -26,6 +26,7 @@ export interface IDetaljertBehandling {
   revurderinginfo: RevurderingMedBegrunnelse | null
   begrunnelse: string | null
   kilde: Vedtaksloesning
+  sendeBrev: boolean
 }
 
 export const virkningstidspunkt = (behandling: IDetaljertBehandling) => {

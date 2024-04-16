@@ -69,7 +69,7 @@ class BeregnBarnepensjonService(
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
 
         val beregningsGrunnlag =
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id, brukerTokenInfo)
+            beregningsGrunnlagService.hentBeregningsGrunnlag(behandling.id, brukerTokenInfo)
                 ?: throw BeregningsgrunnlagMangler(behandling.id)
 
         val foreldreloesFlag = featureToggleService.isEnabled(BeregningFeatureToggle.Foreldreloes, false)

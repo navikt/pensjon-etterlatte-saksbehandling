@@ -12,31 +12,19 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
-    fun finnBarnepensjonGrunnlagForBehandling(id: UUID): BeregningsGrunnlag? =
+    fun finnBeregningsGrunnlag(id: UUID): BeregningsGrunnlag? =
         using(sessionOf(dataSource)) { session ->
             session.run(
                 queryOf(
                     statement = finnBarnepensjonsGrunnlagForBehandling,
                     paramMap = mapOf("behandlings_id" to id),
-                ).map { it.asBeregningsGrunnlagBP() }.asSingle,
+                ).map { it.asBeregningsGrunnlag() }.asSingle,
             )
         }
 
-    fun finnOmstillingstoenadGrunnlagForBehandling(id: UUID): BeregningsGrunnlagOMS? =
-        using(
-            sessionOf(dataSource),
-        ) { session ->
-            session.run(
-                queryOf(
-                    statement = finnOmstillingstoenadGrunnlagForBehandling,
-                    paramMap = mapOf("behandlings_id" to id),
-                ).map { it.asBeregningsGrunnlagOMS() }.asSingle,
-            )
-        }
-
-    fun lagre(beregningsGrunnlag: BeregningsGrunnlag): Boolean {
+    fun lagreBeregningsGrunnlag(beregningsGrunnlag: BeregningsGrunnlag): Boolean {
         val query =
-            if (finnBarnepensjonGrunnlagForBehandling(beregningsGrunnlag.behandlingId) == null) {
+            if (finnBeregningsGrunnlag(beregningsGrunnlag.behandlingId) == null) {
                 lagreGrunnlagQuery
             } else {
                 oppdaterGrunnlagQuery
@@ -60,39 +48,6 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                                         beregningsGrunnlag.beregningsMetode,
                                     ),
                                 "kilde" to beregningsGrunnlag.kilde.toJson(),
-                            ),
-                    ).asUpdate,
-                )
-            }
-
-        return count > 0
-    }
-
-    fun lagreOMS(beregningsGrunnlagOMS: BeregningsGrunnlagOMS): Boolean {
-        val query =
-            if (finnOmstillingstoenadGrunnlagForBehandling(beregningsGrunnlagOMS.behandlingId) == null) {
-                lagreGrunnlagQuery
-            } else {
-                oppdaterGrunnlagQuery
-            }
-
-        val count =
-            using(sessionOf(dataSource)) { session ->
-                session.run(
-                    queryOf(
-                        statement = query,
-                        paramMap =
-                            mapOf<String, Any>(
-                                "behandlings_id" to beregningsGrunnlagOMS.behandlingId,
-                                "institusjonsopphold" to
-                                    objectMapper.writeValueAsString(
-                                        beregningsGrunnlagOMS.institusjonsoppholdBeregningsgrunnlag,
-                                    ),
-                                "beregningsmetode" to
-                                    objectMapper.writeValueAsString(
-                                        beregningsGrunnlagOMS.beregningsMetode,
-                                    ),
-                                "kilde" to beregningsGrunnlagOMS.kilde.toJson(),
                             ),
                     ).asUpdate,
                 )
@@ -256,35 +211,19 @@ inline fun <reified T> T.somJsonb(): PGobject {
     return jsonObject
 }
 
-private fun Row.asBeregningsGrunnlagBP(): BeregningsGrunnlag {
+private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag {
     return BeregningsGrunnlag(
         behandlingId = this.uuid("behandlings_id"),
-        soeskenMedIBeregning = objectMapper.readValue(this.string("soesken_med_i_beregning_perioder")),
+        soeskenMedIBeregning =
+            this.stringOrNull("soesken_med_i_beregning_perioder")?.let {
+                objectMapper.readValue(it)
+            } ?: emptyList(),
         institusjonsoppholdBeregningsgrunnlag =
             this.stringOrNull("institusjonsopphold")?.let {
                 objectMapper.readValue(
                     it,
                 )
             } ?: emptyList(),
-        beregningsMetode =
-            this.string("beregningsmetode").let {
-                objectMapper.readValue(
-                    it,
-                )
-            },
-        kilde = objectMapper.readValue(this.string("kilde")),
-    )
-}
-
-private fun Row.asBeregningsGrunnlagOMS(): BeregningsGrunnlagOMS {
-    return BeregningsGrunnlagOMS(
-        behandlingId = this.uuid("behandlings_id"),
-        institusjonsoppholdBeregningsgrunnlag =
-            this.string("institusjonsopphold").let {
-                objectMapper.readValue(
-                    it,
-                )
-            },
         beregningsMetode =
             this.string("beregningsmetode").let {
                 objectMapper.readValue(

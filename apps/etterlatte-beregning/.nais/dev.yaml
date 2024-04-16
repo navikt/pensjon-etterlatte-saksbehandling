@@ -65,6 +65,10 @@ spec:
       value: dev-gcp.etterlatte.etterlatte-vilkaarsvurdering
     - name: ETTERLATTE_VILKAARSVURDERING_URL
       value: http://etterlatte-vilkaarsvurdering
+    - name: ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-vedtaksvurdering
+    - name: ETTERLATTE_VEDTAKSVURDERING_URL
+      value: http://etterlatte-vedtaksvurdering
     - name: ETTERLATTE_GRUNNLAG_URL
       value: http://etterlatte-grunnlag
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
@@ -84,6 +88,7 @@ spec:
       rules:
         - application: etterlatte-grunnlag
         - application: etterlatte-vilkaarsvurdering
+        - application: etterlatte-vedtaksvurdering
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid
       external:
@@ -97,3 +102,6 @@ spec:
         - application: etterlatte-statistikk
         - application: etterlatte-beregning-kafka
         - application: etterlatte-behandling
+        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+          namespace: aura
+          cluster: dev-gcp

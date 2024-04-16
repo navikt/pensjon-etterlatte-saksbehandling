@@ -21,6 +21,7 @@ import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
+import no.nav.etterlatte.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.ktor.runServer
@@ -51,10 +52,18 @@ import java.util.UUID.randomUUID
 internal class BeregningsGrunnlagRoutesTest {
     private val server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
+    private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
     private val repository = mockk<BeregningsGrunnlagRepository>()
     private val beregningRepository = mockk<BeregningRepository>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
-    private val service = BeregningsGrunnlagService(repository, beregningRepository, behandlingKlient, grunnlagKlient)
+    private val service =
+        BeregningsGrunnlagService(
+            repository,
+            beregningRepository,
+            behandlingKlient,
+            vedtaksvurderingKlient,
+            grunnlagKlient,
+        )
 
     @BeforeAll
     fun before() {
@@ -87,7 +96,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 sendeBrev = true,
             )
 
-        every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
+        every { repository.finnBeregningsGrunnlag(any()) } returns null
 
         testApplication {
             runServer(server) {
@@ -140,8 +149,8 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
         } returns SisteIverksatteBehandling(idForrigeIverksatt)
-        every { repository.finnBarnepensjonGrunnlagForBehandling(idRevurdering) } returns null
-        every { repository.finnBarnepensjonGrunnlagForBehandling(idForrigeIverksatt) } returns
+        every { repository.finnBeregningsGrunnlag(idRevurdering) } returns null
+        every { repository.finnBeregningsGrunnlag(idForrigeIverksatt) } returns
             BeregningsGrunnlag(
                 behandlingId = idForrigeIverksatt,
                 kilde =
@@ -169,8 +178,8 @@ internal class BeregningsGrunnlagRoutesTest {
         }
 
         coVerify(exactly = 1) {
-            repository.finnBarnepensjonGrunnlagForBehandling(idRevurdering)
-            repository.finnBarnepensjonGrunnlagForBehandling(idForrigeIverksatt)
+            repository.finnBeregningsGrunnlag(idRevurdering)
+            repository.finnBeregningsGrunnlag(idForrigeIverksatt)
             behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
         }
     }
@@ -181,7 +190,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
         val id = randomUUID()
 
-        every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns
+        every { repository.finnBeregningsGrunnlag(any()) } returns
             BeregningsGrunnlag(
                 behandlingId = id,
                 kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
@@ -239,7 +248,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody(
-                    BarnepensjonBeregningsGrunnlag(
+                    LagreBeregningsGrunnlag(
                         emptyList(),
                         emptyList(),
                     ),
@@ -254,8 +263,8 @@ internal class BeregningsGrunnlagRoutesTest {
     fun `skal opprettere`() {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
-        every { repository.lagre(any()) } returns true
+        every { repository.finnBeregningsGrunnlag(any()) } returns null
+        every { repository.lagreBeregningsGrunnlag(any()) } returns true
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
@@ -295,7 +304,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody(
-                    BarnepensjonBeregningsGrunnlag(
+                    LagreBeregningsGrunnlag(
                         emptyList(),
                         emptyList(),
                     ),
@@ -310,8 +319,8 @@ internal class BeregningsGrunnlagRoutesTest {
     fun `skal returnere conflict fra opprettelse `() {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
-        every { repository.lagre(any()) } returns false
+        every { repository.finnBeregningsGrunnlag(any()) } returns null
+        every { repository.lagreBeregningsGrunnlag(any()) } returns false
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
@@ -362,7 +371,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody(
-                    BarnepensjonBeregningsGrunnlag(
+                    LagreBeregningsGrunnlag(
                         soeskenMedIBeregning,
                         emptyList(),
                     ),
@@ -380,7 +389,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns
+        every { repository.finnBeregningsGrunnlag(forrige) } returns
             BeregningsGrunnlag(
                 behandlingId = forrige,
                 kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
@@ -389,8 +398,8 @@ internal class BeregningsGrunnlagRoutesTest {
                 beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
         every { repository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
-        every { repository.finnBarnepensjonGrunnlagForBehandling(nye) } returns null
-        every { repository.lagre(any()) } returns true
+        every { repository.finnBeregningsGrunnlag(nye) } returns null
+        every { repository.lagreBeregningsGrunnlag(any()) } returns true
 
         testApplication {
             runServer(server) {
@@ -413,7 +422,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns
+        every { repository.finnBeregningsGrunnlag(forrige) } returns
             BeregningsGrunnlag(
                 behandlingId = forrige,
                 kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
@@ -422,8 +431,8 @@ internal class BeregningsGrunnlagRoutesTest {
                 beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
         every { repository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
-        every { repository.finnBarnepensjonGrunnlagForBehandling(nye) } returns null
-        every { repository.lagre(any()) } returns true
+        every { repository.finnBeregningsGrunnlag(nye) } returns null
+        every { repository.lagreBeregningsGrunnlag(any()) } returns true
 
         testApplication {
             runServer(server) {
@@ -446,8 +455,8 @@ internal class BeregningsGrunnlagRoutesTest {
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns null
-        every { repository.lagre(any()) } returns true
+        every { repository.finnBeregningsGrunnlag(forrige) } returns null
+        every { repository.lagreBeregningsGrunnlag(any()) } returns true
 
         testApplication {
             runServer(server) {
@@ -470,7 +479,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns
+        every { repository.finnBeregningsGrunnlag(forrige) } returns
             BeregningsGrunnlag(
                 behandlingId = forrige,
                 kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
@@ -478,7 +487,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 institusjonsoppholdBeregningsgrunnlag = emptyList(),
                 beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
-        every { repository.finnBarnepensjonGrunnlagForBehandling(nye) } returns
+        every { repository.finnBeregningsGrunnlag(nye) } returns
             BeregningsGrunnlag(
                 behandlingId = nye,
                 kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
@@ -486,7 +495,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 institusjonsoppholdBeregningsgrunnlag = emptyList(),
                 beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
-        every { repository.lagre(any()) } returns true
+        every { repository.lagreBeregningsGrunnlag(any()) } returns true
 
         testApplication {
             runServer(server) {

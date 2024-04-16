@@ -77,11 +77,12 @@ export const EnkelPersonTrygdetid = (props: Props) => {
     }
   }
 
-  if (trygdetid?.beregnetTrygdetid?.resultat.overstyrt) {
+  if (trygdetid?.id && trygdetid?.beregnetTrygdetid?.resultat.overstyrt) {
     return (
       <TrygdetidWrapper>
         <TrygdetidManueltOverstyrt
           behandlingId={behandling.id}
+          trygdetidId={trygdetid.id}
           oppdaterTrygdetid={oppdaterTrygdetid}
           beregnetTrygdetid={trygdetid.beregnetTrygdetid}
         />

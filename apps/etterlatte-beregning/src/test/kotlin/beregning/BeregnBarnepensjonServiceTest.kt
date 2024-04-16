@@ -87,7 +87,7 @@ internal class BeregnBarnepensjonServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -126,7 +126,7 @@ internal class BeregnBarnepensjonServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -165,7 +165,7 @@ internal class BeregnBarnepensjonServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -204,7 +204,7 @@ internal class BeregnBarnepensjonServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -240,7 +240,7 @@ internal class BeregnBarnepensjonServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -280,7 +280,7 @@ internal class BeregnBarnepensjonServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -320,7 +320,7 @@ internal class BeregnBarnepensjonServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -340,7 +340,7 @@ internal class BeregnBarnepensjonServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -380,7 +380,7 @@ internal class BeregnBarnepensjonServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -438,7 +438,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns
             grunnlagMedEkstraAvdoedForelder(LocalDate.of(2023, 11, 12))
         coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -477,7 +477,7 @@ internal class BeregnBarnepensjonServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentGrunnlagMedUkjentAvdoed()
 
         coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )
@@ -526,7 +526,7 @@ internal class BeregnBarnepensjonServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )

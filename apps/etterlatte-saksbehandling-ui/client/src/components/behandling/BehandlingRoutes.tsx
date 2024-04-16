@@ -14,14 +14,13 @@ import { Vedtaksbrev } from './brev/Vedtaksbrev'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { Revurderingsoversikt } from '~components/behandling/revurderingsoversikt/Revurderingsoversikt'
-import { behandlingSkalSendeBrev, soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
+import { soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { Aktivitetsplikt } from '~components/behandling/aktivitetsplikt/Aktivitetsplikt'
 import { SakType } from '~shared/types/sak'
 import TrygdetidVisning from '~components/behandling/trygdetid/TrygdetidVisning'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { Varselbrev } from '~components/behandling/brev/Varselbrev'
-import { erOpphoer } from '~shared/types/Revurderingaarsak'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -207,9 +206,7 @@ export function soeknadRoutes(behandling: IBehandlingReducer, lagVarselbrev: boo
 }
 
 export function revurderingRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteTypes> {
-  const opphoer =
-    erOpphoer(behandling.revurderingsaarsak!!) ||
-    behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
+  const opphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
   const defaultRoutes: Array<BehandlingRouteTypes> = opphoer
     ? [routeTypes.revurderingsoversikt, routeTypes.vilkaarsvurdering, routeTypes.beregning]
@@ -234,7 +231,7 @@ const leggTilBrevHvisKrevesAvBehandling = (
   routes: Array<BehandlingRouteTypes>,
   behandling: IBehandlingReducer
 ): Array<BehandlingRouteTypes> => {
-  if (behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)) {
+  if (behandling.sendeBrev) {
     return [...routes, behandling.sakType == SakType.OMSTILLINGSSTOENAD ? routeTypes.brevOms : routeTypes.brevBp]
   }
   return routes

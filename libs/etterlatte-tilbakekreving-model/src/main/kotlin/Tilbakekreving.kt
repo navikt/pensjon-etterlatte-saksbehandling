@@ -21,7 +21,6 @@ data class TilbakekrevingVurdering(
     val tilsvar: TilbakekrevingTilsvar?,
     val rettsligGrunnlag: TilbakekrevingHjemmel?,
     val objektivtVilkaarOppfylt: String?,
-    val subjektivtVilkaarOppfylt: String?,
     val uaktsomtForaarsaketFeilutbetaling: String?,
     val burdeBrukerForstaatt: String?,
     val burdeBrukerForstaattEllerUaktsomtForaarsaket: String?,
@@ -38,6 +37,7 @@ data class TilbakekrevingVurdering(
 enum class TilbakekrevingVarsel {
     EGET_BREV,
     MED_I_ENDRINGSBREV,
+    AAPENBART_UNOEDVENDIG,
 }
 
 enum class JaNei {

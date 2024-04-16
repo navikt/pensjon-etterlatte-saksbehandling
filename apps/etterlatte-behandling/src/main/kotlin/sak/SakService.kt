@@ -1,19 +1,31 @@
 package no.nav.etterlatte.sak
 
+import io.ktor.util.toLowerCasePreservingASCIIRules
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BrukerService
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Navkontor
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Flyktning
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
+import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
@@ -21,6 +33,13 @@ interface SakService {
     fun hentSaker(): List<Sak>
 
     fun finnSaker(person: String): List<Sak>
+
+    fun opprettSakMedGrunnlag(
+        fnr: String,
+        type: SakType,
+        overstyrendeEnhet: String? = null,
+        gradering: AdressebeskyttelseGradering? = null,
+    ): Sak
 
     fun finnEllerOpprettSak(
         fnr: String,
@@ -77,6 +96,8 @@ class SakServiceImpl(
     private val dao: SakDao,
     private val skjermingKlient: SkjermingKlient,
     private val brukerService: BrukerService,
+    private val grunnlagService: GrunnlagService,
+    private val krrKlient: KrrKlient,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -126,6 +147,42 @@ class SakServiceImpl(
         skjermet: Boolean,
     ) {
         dao.markerSakerMedSkjerming(sakIder, skjermet)
+    }
+
+    override fun opprettSakMedGrunnlag(
+        fnr: String,
+        type: SakType,
+        overstyrendeEnhet: String?,
+        gradering: AdressebeskyttelseGradering?,
+    ): Sak {
+        val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet, gradering)
+        grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident))
+        val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
+        val spraak = hentSpraak(sak.ident)
+        val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
+        grunnlagService.leggTilNyeOpplysningerBareSak(
+            sakId = sak.id,
+            opplysninger = NyeSaksopplysninger(sak.id, listOf(spraakOpplysning)),
+        )
+        return sak
+    }
+
+    private fun hentSpraak(fnr: String): Spraak {
+        val kontaktInfo =
+            runBlocking {
+                krrKlient.hentDigitalKontaktinformasjon(fnr)
+            }
+
+        return kontaktInfo?.spraak
+            ?.toLowerCasePreservingASCIIRules()
+            ?.let {
+                when (it) {
+                    "nb" -> Spraak.NB
+                    "nn" -> Spraak.NN
+                    "en" -> Spraak.EN
+                    else -> Spraak.NB
+                }
+            } ?: Spraak.NB
     }
 
     override fun finnEllerOpprettSak(

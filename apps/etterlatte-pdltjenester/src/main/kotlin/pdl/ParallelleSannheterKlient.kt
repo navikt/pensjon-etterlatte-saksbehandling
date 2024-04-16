@@ -54,11 +54,22 @@ class ParallelleSannheterKlient(
     suspend fun avklarStatsborgerskap(pdlStatsborgerskap: List<PdlStatsborgerskap>) =
         avklarNullable(pdlStatsborgerskap, Avklaring.STATSBORGERSKAP)
 
-    suspend fun avklarSivilstand(pdlSivilstand: List<PdlSivilstand>) =
-        avklarNullable(
-            list = pdlSivilstand.filterNot { it.metadata.historisk },
+    suspend fun avklarSivilstand(pdlSivilstand: List<PdlSivilstand>): PdlSivilstand? {
+        val aktiveSivilstander = pdlSivilstand.filterNot { it.metadata.historisk }
+
+        if (aktiveSivilstander.size > 1) {
+            logger.warn("Fant ${aktiveSivilstander.size} aktive sivilstander")
+            if (aktiveSivilstander.all { it.type == aktiveSivilstander.first().type }) {
+                logger.warn("Fant flere aktive sivilstander av samme type")
+                return aktiveSivilstander.sortedByDescending { it.gyldigFraOgMed }.first()
+            }
+        }
+
+        return avklarNullable(
+            list = aktiveSivilstander,
             avklaring = Avklaring.SIVILSTAND,
         )
+    }
 
     suspend fun avklarFoedsel(pdlFoedsel: List<PdlFoedsel>) = avklar(pdlFoedsel, Avklaring.FOEDSEL)
 

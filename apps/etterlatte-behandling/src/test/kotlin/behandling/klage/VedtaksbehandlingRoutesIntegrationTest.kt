@@ -138,13 +138,13 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.behandlingFactory,
             )
 
-        val tilbakekrevingId =
+        val tilbakekreving =
             applicationContext.tilbakekrevingService.opprettTilbakekreving(
                 kravgrunnlag(sak),
             )
         withTestApplication { client ->
             val response =
-                client.get("/vedtaksbehandling/$tilbakekrevingId/redigerbar") {
+                client.get("/vedtaksbehandling/${tilbakekreving.id}/redigerbar") {
                     addAuthToken(fagsystemTokenEY)
                     contentType(ContentType.Application.Json)
                 }

@@ -70,7 +70,7 @@ class GosysOppgaveServiceImplTest {
 
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 
-        coEvery { gosysOppgaveKlient.hentOppgaver(any(), brukerTokenInfo) } returns
+        coEvery { gosysOppgaveKlient.hentOppgaver(listOf("EYO", "EYB"), any(), brukerTokenInfo) } returns
             GosysOppgaver(
                 antallTreffTotalt = 3,
                 oppgaver =
@@ -130,7 +130,7 @@ class GosysOppgaveServiceImplTest {
 
         val resultat =
             runBlocking {
-                service.hentOppgaver(brukerTokenInfo)
+                service.hentOppgaver(listOf("EYO", "EYB"), brukerTokenInfo)
             }
 
         resultat shouldHaveSize 3
@@ -156,7 +156,7 @@ class GosysOppgaveServiceImplTest {
 
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 
-        coEvery { gosysOppgaveKlient.hentOppgaver(Enheter.STRENGT_FORTROLIG.enhetNr, brukerTokenInfo) } returns
+        coEvery { gosysOppgaveKlient.hentOppgaver(listOf("EYO", "EYB"), Enheter.STRENGT_FORTROLIG.enhetNr, brukerTokenInfo) } returns
             enhetsfiltrererGosysOppgaver(
                 Enheter.STRENGT_FORTROLIG.enhetNr,
                 listOf(
@@ -215,7 +215,7 @@ class GosysOppgaveServiceImplTest {
 
         val resultat =
             runBlocking {
-                service.hentOppgaver(brukerTokenInfo)
+                service.hentOppgaver(listOf("EYO", "EYB"), brukerTokenInfo)
             }
 
         resultat shouldHaveSize 1

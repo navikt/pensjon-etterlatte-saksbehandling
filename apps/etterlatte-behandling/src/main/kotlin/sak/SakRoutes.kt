@@ -265,7 +265,7 @@ internal fun Route.sakWebRoutes(
                     val sak =
                         inTransaction {
                             if (opprettHvisIkkeFinnes) {
-                                sakService.finnEllerOpprettSak(fnr.value, type)
+                                sakService.opprettSakMedGrunnlag(fnr.value, type)
                             } else {
                                 sakService.finnSak(fnr.value, type)
                             }

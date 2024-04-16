@@ -174,6 +174,7 @@ fun opprettBehandling(
     fritekstAarsak = fritekstAarsak,
     prosesstype = prosesstype,
     kilde = kilde,
+    sendeBrev = true,
 )
 
 fun foerstegangsbehandling(
@@ -211,6 +212,7 @@ fun foerstegangsbehandling(
     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
     kommerBarnetTilgode = kommerBarnetTilgode,
     kilde = kilde,
+    sendeBrev = true,
 )
 
 fun revurdering(
@@ -253,6 +255,7 @@ fun revurdering(
     revurderingInfo = revurderingInfo,
     begrunnelse = begrunnelse,
     relatertBehandlingId = relatertBehandlingId,
+    sendeBrev = true,
 )
 
 fun persongalleri(

@@ -85,6 +85,7 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
         val oppdatert =
             lagret.copy(
                 status = TilbakekrevingStatus.UNDER_ARBEID,
+                sendeBrev = true,
                 tilbakekreving =
                     lagret.tilbakekreving.copy(
                         vurdering =
@@ -98,7 +99,6 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
                                 tilsvar = null,
                                 rettsligGrunnlag = TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
                                 objektivtVilkaarOppfylt = null,
-                                subjektivtVilkaarOppfylt = null,
                                 uaktsomtForaarsaketFeilutbetaling = null,
                                 burdeBrukerForstaatt = null,
                                 burdeBrukerForstaattEllerUaktsomtForaarsaket = null,

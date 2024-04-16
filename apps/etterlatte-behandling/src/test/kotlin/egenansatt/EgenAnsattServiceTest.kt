@@ -11,6 +11,7 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BrukerServiceImpl
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
@@ -29,6 +30,7 @@ import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceImpl
@@ -55,11 +57,13 @@ internal class EgenAnsattServiceTest(val dataSource: DataSource) {
     private lateinit var egenAnsattService: EgenAnsattService
     private lateinit var user: SaksbehandlerMedEnheterOgRoller
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
+    private val krrKlient = mockk<KrrKlient>()
 
     @BeforeAll
     fun beforeAll() {
         val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
         val norg2Klient = mockk<Norg2Klient>()
+        val grunnlagservice = mockk<GrunnlagService>()
         val featureToggleService = mockk<FeatureToggleService>()
         val skjermingKlient = mockk<SkjermingKlient>()
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
@@ -68,7 +72,7 @@ internal class EgenAnsattServiceTest(val dataSource: DataSource) {
         val brukerService = BrukerServiceImpl(pdltjenesterKlient, norg2Klient)
         sakService =
             spyk(
-                SakServiceImpl(sakRepo, skjermingKlient, brukerService),
+                SakServiceImpl(sakRepo, skjermingKlient, brukerService, grunnlagservice, krrKlient),
             )
         oppgaveService =
             spyk(

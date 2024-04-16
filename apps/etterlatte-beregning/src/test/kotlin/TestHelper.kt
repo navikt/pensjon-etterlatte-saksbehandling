@@ -45,6 +45,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.regler.Beregningstall
+import no.nav.etterlatte.sanksjon.Sanksjon
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
@@ -297,7 +298,7 @@ fun behandling(
     sak: Long = 123,
     sakType: SakType = SakType.OMSTILLINGSSTOENAD,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-    virkningstidspunkt: Virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
+    virkningstidspunkt: Virkningstidspunkt? = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
     status: BehandlingStatus = BehandlingStatus.BEREGNET,
 ) = DetaljertBehandling(
     id = id,
@@ -313,6 +314,25 @@ fun behandling(
     utlandstilknytning = null,
     revurderingInfo = null,
     kilde = Vedtaksloesning.GJENNY,
+    sendeBrev = true,
 )
 
 fun BeregningsMetode.toGrunnlag() = BeregningsMetodeBeregningsgrunnlag(this, null)
+
+fun sanksjon(
+    id: UUID? = null,
+    behandlingId: UUID = UUID.randomUUID(),
+    sakId: Long = 123,
+    fom: YearMonth = YearMonth.of(2024, 1),
+    tom: YearMonth = YearMonth.of(2024, 2),
+) = Sanksjon(
+    id = id,
+    behandlingId = behandlingId,
+    sakId = sakId,
+    fom = fom,
+    tom = tom,
+    saksbehandler = "A12345",
+    opprettet = Tidspunkt.now(),
+    endret = Tidspunkt.now(),
+    beskrivelse = "Ikke i jobb",
+)

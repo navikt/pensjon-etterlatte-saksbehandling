@@ -521,7 +521,7 @@ data class PdlFoedselsnumreFraAktoerIdData(
 
 data class HentIdenterBolkResult(
     val ident: String,
-    val identer: Set<IdentInformasjon>,
+    val identer: Set<IdentInformasjon>?,
     val code: String,
 )
 

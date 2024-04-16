@@ -1,4 +1,4 @@
-package no.nav.etterlatte.migrering.person.krr
+package no.nav.etterlatte.person.krr
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

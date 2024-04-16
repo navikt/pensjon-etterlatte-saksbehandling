@@ -53,20 +53,20 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
             )
         val beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag()
 
-        repository.lagre(
+        repository.lagreBeregningsGrunnlag(
             BeregningsGrunnlag(
                 id,
                 Grunnlagsopplysning.Saksbehandler(
                     ident = "Z123456",
                     Tidspunkt.now(),
                 ),
-                soeskenMedIBeregning,
                 institusjonsoppholdBeregningsgrunnlag,
                 beregningsMetode,
+                soeskenMedIBeregning,
             ),
         )
 
-        val result = repository.finnBarnepensjonGrunnlagForBehandling(id)
+        val result = repository.finnBeregningsGrunnlag(id)
 
         assertNotNull(result)
 
@@ -89,8 +89,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
             )
         val beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag()
 
-        repository.lagreOMS(
-            BeregningsGrunnlagOMS(
+        repository.lagreBeregningsGrunnlag(
+            BeregningsGrunnlag(
                 id,
                 Grunnlagsopplysning.Saksbehandler(
                     ident = "Z123456",
@@ -101,7 +101,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
             ),
         )
 
-        val result = repository.finnOmstillingstoenadGrunnlagForBehandling(id)
+        val result = repository.finnBeregningsGrunnlag(id)
 
         assertNotNull(result)
 
@@ -140,33 +140,33 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
         val initialBeregningsMetode = BeregningsMetode.BEST.toGrunnlag()
         val oppdatertBeregningsMetode = BeregningsMetode.PRORATA.toGrunnlag()
 
-        repository.lagre(
+        repository.lagreBeregningsGrunnlag(
             BeregningsGrunnlag(
                 id,
                 Grunnlagsopplysning.Saksbehandler(
                     ident = "Z123456",
                     Tidspunkt.now(),
                 ),
-                initialSoeskenMedIBeregning,
                 initialInstitusjonsoppholdBeregningsgrunnlag,
                 initialBeregningsMetode,
+                initialSoeskenMedIBeregning,
             ),
         )
 
-        repository.lagre(
+        repository.lagreBeregningsGrunnlag(
             BeregningsGrunnlag(
                 id,
                 Grunnlagsopplysning.Saksbehandler(
                     ident = "Z654321",
                     Tidspunkt.now(),
                 ),
-                oppdatertSoeskenMedIBeregning,
                 oppdatertInstitusjonsoppholdBeregningsgrunnlag,
                 oppdatertBeregningsMetode,
+                oppdatertSoeskenMedIBeregning,
             ),
         )
 
-        val result = repository.finnBarnepensjonGrunnlagForBehandling(id)
+        val result = repository.finnBeregningsGrunnlag(id)
 
         assertNotNull(result)
 
@@ -199,8 +199,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
         val initialBeregningsMetode = BeregningsMetode.BEST.toGrunnlag()
         val oppdatertBeregningsMetode = BeregningsMetode.PRORATA.toGrunnlag()
 
-        repository.lagreOMS(
-            BeregningsGrunnlagOMS(
+        repository.lagreBeregningsGrunnlag(
+            BeregningsGrunnlag(
                 id,
                 Grunnlagsopplysning.Saksbehandler(
                     ident = "Z123456",
@@ -211,8 +211,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
             ),
         )
 
-        repository.lagreOMS(
-            BeregningsGrunnlagOMS(
+        repository.lagreBeregningsGrunnlag(
+            BeregningsGrunnlag(
                 id,
                 Grunnlagsopplysning.Saksbehandler(
                     ident = "Z654321",
@@ -223,7 +223,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
             ),
         )
 
-        val result = repository.finnOmstillingstoenadGrunnlagForBehandling(id)
+        val result = repository.finnBeregningsGrunnlag(id)
 
         assertNotNull(result)
 
@@ -242,20 +242,20 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
                 SoeskenMedIBeregning(HELSOESKEN2_FOEDSELSNUMMER, true),
             ).somPeriodisertGrunnlag()
 
-        repository.lagre(
+        repository.lagreBeregningsGrunnlag(
             BeregningsGrunnlag(
                 id,
                 Grunnlagsopplysning.Saksbehandler(
                     ident = "Z654321",
                     Tidspunkt.now(),
                 ),
-                oppdatertSoeskenMedIBeregning,
                 emptyList(),
                 BeregningsMetode.BEST.toGrunnlag(),
+                oppdatertSoeskenMedIBeregning,
             ),
         )
 
-        val result = repository.finnBarnepensjonGrunnlagForBehandling(id)
+        val result = repository.finnBeregningsGrunnlag(id)
 
         assertNotNull(result)
     }

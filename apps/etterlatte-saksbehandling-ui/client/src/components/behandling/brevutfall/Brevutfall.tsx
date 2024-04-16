@@ -3,7 +3,7 @@ import { Alert, BodyLong, Heading } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevutfallOgEtterbetalingApi } from '~shared/api/behandling'
-import { behandlingErRedigerbar, behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { BrevutfallSkjema } from '~components/behandling/brevutfall/BrevutfallSkjema'
 import { BrevutfallVisning } from '~components/behandling/brevutfall/BrevutfallVisning'
 import Spinner from '~shared/Spinner'
@@ -13,6 +13,7 @@ import { useAppDispatch } from '~store/Store'
 import { IBehandlingReducer, updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { SkalSendeBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
 
 export interface BrevutfallOgEtterbetaling {
   opphoer?: boolean | null
@@ -106,8 +107,9 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
     hentBrevutfall()
   }, [behandling.id])
 
-  return behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? (
+  return behandling.sendeBrev ? (
     <BrevutfallContent id="brevutfall">
+      <SkalSendeBrev behandling={behandling} behandlingRedigerbart={redigerbar} />
       <Heading size="medium" spacing>
         Valg av utfall i brev
       </Heading>
@@ -143,7 +145,10 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
       />
     </BrevutfallContent>
   ) : (
-    <InfoAlert variant="info">Det sendes ikke vedtaksbrev for denne behandlingen.</InfoAlert>
+    <>
+      <SkalSendeBrev behandling={behandling} behandlingRedigerbart={redigerbar} />
+      <InfoAlert variant="info">Det sendes ikke vedtaksbrev for denne behandlingen.</InfoAlert>
+    </>
   )
 }
 

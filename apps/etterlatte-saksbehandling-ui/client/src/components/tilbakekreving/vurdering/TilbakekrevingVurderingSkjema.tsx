@@ -1,4 +1,4 @@
-import { Alert, BodyLong, Button, Label, Radio, RadioGroup, Select, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Label, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
 import {
   teksterTilbakekrevingAarsak,
   teksterTilbakekrevingBeloepBehold,
@@ -98,28 +98,35 @@ export function TilbakekrevingVurderingSkjema({
           ))}
         </Select>
 
-        <RadioGroup
-          {...register('forhaandsvarsel')}
-          legend={<RadioGroupLegend label="Forhåndsvarsel" />}
-          readOnly={!redigerbar}
-          size="small"
-          className="radioGroup"
-        >
-          <>
-            {Object.values(TilbakekrevingVarsel).map((varsel) => (
-              <Radio key={varsel} value={varsel}>
-                {teksterTilbakekrevingVarsel[varsel]}
-              </Radio>
-            ))}
-          </>
-        </RadioGroup>
-
-        <ControlledDatoVelger
-          name="forhaandsvarselDato"
-          label="Forhåndsvarsel dato"
+        <ControlledRadioGruppe
+          name="forhaandsvarsel"
           control={control}
-          defaultValue={getValues().forhaandsvarselDato ?? undefined}
+          legend={<RadioGroupLegend label="Forhåndsvarsel" />}
+          size="small"
+          readOnly={!redigerbar}
+          radios={
+            <>
+              {Object.values(TilbakekrevingVarsel).map((varsel) => (
+                <Radio key={varsel} value={varsel}>
+                  {teksterTilbakekrevingVarsel[varsel]}
+                </Radio>
+              ))}
+            </>
+          }
         />
+
+        {watch().forhaandsvarsel &&
+          [TilbakekrevingVarsel.MED_I_ENDRINGSBREV, TilbakekrevingVarsel.EGET_BREV].includes(
+            watch().forhaandsvarsel!
+          ) && (
+            <ControlledDatoVelger
+              name="forhaandsvarselDato"
+              label="Forhåndsvarsel dato"
+              control={control}
+              defaultValue={getValues().forhaandsvarselDato ?? undefined}
+              readOnly={!redigerbar}
+            />
+          )}
 
         <Textarea
           {...register('beskrivelse')}
@@ -128,21 +135,22 @@ export function TilbakekrevingVurderingSkjema({
           description="Gi en kort beskrivelse av bakgrunnen for feilutbetalingen og når ble den oppdaget."
         />
 
-        <RadioGroup
-          {...register('doedsbosak')}
+        <ControlledRadioGruppe
+          name="doedsbosak"
+          control={control}
           legend={<RadioGroupLegend label="Dødsbosak?" />}
-          readOnly={!redigerbar}
           size="small"
-          className="radioGroup"
-        >
-          <div className="flex">
-            {Object.values(JaNei).map((svar) => (
-              <Radio key={svar} value={svar}>
-                {JaNeiRec[svar]}
-              </Radio>
-            ))}
-          </div>
-        </RadioGroup>
+          readOnly={!redigerbar}
+          radios={
+            <>
+              {Object.values(JaNei).map((svar) => (
+                <Radio key={svar} value={svar}>
+                  {JaNeiRec[svar]}
+                </Radio>
+              ))}
+            </>
+          }
+        />
 
         <Textarea {...register('foraarsaketAv')} label="Hvem forårsaket feilutbetalingen?" readOnly={!redigerbar} />
 
@@ -151,6 +159,7 @@ export function TilbakekrevingVurderingSkjema({
           control={control}
           legend={<RadioGroupLegend label="Tilsvar til varsel om mulig tilbakekreving?" />}
           size="small"
+          readOnly={!redigerbar}
           radios={
             <>
               {Object.values(JaNei).map((svar) => (
@@ -169,6 +178,7 @@ export function TilbakekrevingVurderingSkjema({
               label="Tilsvar dato"
               control={control}
               defaultValue={getValues().tilsvar?.dato ?? undefined}
+              readOnly={!redigerbar}
             />
 
             <Textarea {...register('tilsvar.beskrivelse')} label="Beskriv tilsvar" readOnly={!redigerbar} />
@@ -180,6 +190,7 @@ export function TilbakekrevingVurderingSkjema({
           control={control}
           legend={<RadioGroupLegend label="Rettslig grunnlag" />}
           size="small"
+          readOnly={!redigerbar}
           radios={
             <>
               {Object.values(TilbakekrevingHjemmel)
@@ -243,6 +254,7 @@ export function TilbakekrevingVurderingSkjema({
                 control={control}
                 legend=""
                 size="small"
+                readOnly={!redigerbar}
                 radios={
                   <>
                     {Object.values(TilbakekrevingVilkaar).map((vilkaar) => (
@@ -268,6 +280,7 @@ export function TilbakekrevingVurderingSkjema({
                     control={control}
                     legend=""
                     size="small"
+                    readOnly={!redigerbar}
                     radios={
                       <>
                         {Object.values(TilbakekrevingBeloepBeholdSvar).map((behold) => (

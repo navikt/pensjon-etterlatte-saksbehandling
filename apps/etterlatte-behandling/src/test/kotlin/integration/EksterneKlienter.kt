@@ -37,12 +37,12 @@ import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.PingResultUp
 import no.nav.etterlatte.libs.ktor.ServiceStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
-import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
+import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
+import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import java.time.LocalDate
 import java.util.UUID
@@ -265,6 +265,7 @@ class BrevApiKlientTest : BrevApiKlient {
 
 class GosysOppgaveKlientTest : GosysOppgaveKlient {
     override suspend fun hentOppgaver(
+        tema: List<String>,
         enhetsnr: String?,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver {

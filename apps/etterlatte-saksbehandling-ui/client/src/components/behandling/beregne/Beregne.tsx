@@ -1,6 +1,6 @@
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
-import { behandlingErRedigerbar, behandlingSkalSendeBrev } from '../felles/utils'
+import { behandlingErRedigerbar } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
 import { useVedtaksResultat } from '../useVedtaksResultat'
 import { useAppDispatch, useAppSelector } from '~store/Store'
@@ -66,7 +66,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
 
   const opprettEllerOppdaterVedtak = () => {
     const erBarnepensjon = behandling.sakType === SakType.BARNEPENSJON
-    const skalSendeBrev = behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)
+    const skalSendeBrev = behandling.sendeBrev
     if (skalSendeBrev && !brevutfallOgEtterbetaling?.brevutfall) {
       setManglerbrevutfall(true)
       return
@@ -164,9 +164,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
             />
           ) : (
             <Button loading={isPending(vedtakStatus)} variant="primary" onClick={opprettEllerOppdaterVedtak}>
-              {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)
-                ? handlinger.NESTE.navn
-                : handlinger.FATT_VEDTAK.navn}
+              {behandling.sendeBrev ? handlinger.NESTE.navn : handlinger.FATT_VEDTAK.navn}
             </Button>
           )}
         </BehandlingHandlingKnapper>

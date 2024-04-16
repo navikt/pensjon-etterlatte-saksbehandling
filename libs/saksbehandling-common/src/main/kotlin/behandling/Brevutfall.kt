@@ -31,3 +31,7 @@ enum class FeilutbetalingValg {
     JA_VARSEL,
     JA_INGEN_TK,
 }
+
+data class SendBrev(
+    val sendBrev: Boolean,
+)

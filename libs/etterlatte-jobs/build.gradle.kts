@@ -3,10 +3,6 @@ plugins {
     id("etterlatte.libs")
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(libs.ktor2.clientcore)
     implementation(libs.ktor2.clientcontentnegotiation)

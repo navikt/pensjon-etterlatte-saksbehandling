@@ -19,6 +19,8 @@ export const SettPaaVent = ({
   redigerbar: boolean
   refreshOppgave: () => void
 }) => {
+  if (!oppgave || !erOppgaveRedigerbar(oppgave?.status)) return null
+
   const [frist, setFrist] = useState<string>(oppgave.frist)
   const [merknad, setMerknad] = useState<string>(oppgave.merknad || '')
   const [settPaaVent, setVisPaaVent] = useState(false)

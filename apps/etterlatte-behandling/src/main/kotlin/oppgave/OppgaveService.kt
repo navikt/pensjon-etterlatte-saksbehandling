@@ -175,6 +175,19 @@ class OppgaveService(
         }
     }
 
+    fun oppdaterReferanseOgMerknad(
+        oppgaveId: UUID,
+        referanse: String,
+        merknad: String,
+    ) {
+        val hentetOppgave =
+            oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
+
+        sikreAktivOppgaveOgTildeltSaksbehandler(hentetOppgave) {
+            oppgaveDao.oppdaterReferanseOgMerknad(oppgaveId, referanse, merknad)
+        }
+    }
+
     fun endrePaaVent(
         oppgaveId: UUID,
         merknad: String,
@@ -292,6 +305,7 @@ class OppgaveService(
         referanse: String,
         type: OppgaveType,
         saksbehandler: BrukerTokenInfo,
+        merknad: String? = null,
     ): OppgaveIntern {
         val behandlingsoppgaver = oppgaveDao.hentOppgaverForReferanse(referanse)
         if (behandlingsoppgaver.isEmpty()) {
@@ -303,7 +317,7 @@ class OppgaveService(
                     .filter { it.type == type }
                     .single { !it.erAvsluttet() }
 
-            ferdigstillOppgave(oppgaveUnderbehandling, saksbehandler)
+            ferdigstillOppgave(oppgaveUnderbehandling, saksbehandler, merknad)
 
             return requireNotNull(oppgaveDao.hentOppgave(oppgaveUnderbehandling.id)) {
                 "Oppgaven vi akkurat ferdigstilte kunne ikke hentes ut"

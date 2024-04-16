@@ -5,10 +5,6 @@ plugins {
     id("java-test-fixtures")
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(libs.mq.jakarta.client)

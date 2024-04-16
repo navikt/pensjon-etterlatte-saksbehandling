@@ -1,11 +1,11 @@
-import { createProxyMiddleware } from 'http-proxy-middleware'
+import { legacyCreateProxyMiddleware } from 'http-proxy-middleware'
 import { ClientRequest } from 'http'
 import { Request, Response } from 'express'
 import { logger } from '../monitoring/logger'
 import { randomUUID } from 'crypto'
 
 export const proxy = (host: string) =>
-  createProxyMiddleware({
+  legacyCreateProxyMiddleware({
     target: host,
     changeOrigin: true,
     onProxyReq: (proxyReq: ClientRequest, req: Request, res: Response) => {

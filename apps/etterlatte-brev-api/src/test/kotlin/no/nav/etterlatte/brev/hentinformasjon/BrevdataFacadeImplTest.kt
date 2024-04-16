@@ -57,7 +57,7 @@ internal class BrevdataFacadeImplTest {
     private val beregningService = mockk<BeregningService>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val sakService = mockk<SakService>()
-    private val trygdetidService = mockk<TrygdetidService>()
+    private val trygdetidKlient = mockk<TrygdetidKlient>()
 
     private val service =
         BrevdataFacade(
@@ -66,7 +66,7 @@ internal class BrevdataFacadeImplTest {
             beregningService,
             behandlingKlient,
             sakService,
-            trygdetidService,
+            trygdetidKlient,
         )
 
     @BeforeEach
@@ -95,7 +95,7 @@ internal class BrevdataFacadeImplTest {
         coEvery { grunnlagKlient.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns grunnlag
         coEvery { beregningService.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { beregningService.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
-        coEvery { trygdetidService.finnTrygdetidsgrunnlag(any(), any(), any()) } returns opprettTrygdetid()
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns emptyList()
 
         val generellBrevData =
             runBlocking {
@@ -265,9 +265,8 @@ internal class BrevdataFacadeImplTest {
             prosesstype = Prosesstype.MANUELL,
             revurderingInfo = null,
             kilde = Vedtaksloesning.GJENNY,
+            sendeBrev = true,
         )
-
-    private fun opprettTrygdetid() = null
 
     private fun hentBrevutfall() = null
 

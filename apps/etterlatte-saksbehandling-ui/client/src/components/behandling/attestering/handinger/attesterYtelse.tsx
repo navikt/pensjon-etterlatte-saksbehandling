@@ -4,7 +4,6 @@ import { BeslutningWrapper } from '../styled'
 import { GeneriskModal } from '~shared/modal/modal'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router'
-import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import { ferdigstillVedtaksbrev } from '~shared/api/brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { FlexRow } from '~shared/styled'
@@ -17,7 +16,7 @@ export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetalje
   const navigate = useNavigate()
   const soeker = usePersonopplysninger()?.soeker?.opplysning
   const [modalisOpen, setModalisOpen] = useState(false)
-  const skalSendeBrev = behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)
+  const skalSendeBrev = behandling.sendeBrev
   const [error, setError] = useState<string>()
   const [ferdigstillVedtaksbrevStatus, apiFerdigstillVedtaksbrev] = useApiCall(ferdigstillVedtaksbrev)
   const [attesterVedtakStatus, apiAttesterVedtak] = useApiCall(attesterVedtak)

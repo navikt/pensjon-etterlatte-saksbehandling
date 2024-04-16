@@ -3,10 +3,6 @@ plugins {
     id("etterlatte.postgres")
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-ktor"))

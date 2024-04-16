@@ -10,12 +10,22 @@ data class TilbakekrevingBehandling(
     val sak: Sak,
     val opprettet: Tidspunkt,
     val tilbakekreving: Tilbakekreving,
+    val sendeBrev: Boolean,
 ) {
     fun underBehandling() =
         when (status) {
             TilbakekrevingStatus.UNDERKJENT,
             TilbakekrevingStatus.UNDER_ARBEID,
+            TilbakekrevingStatus.VALIDERT,
             TilbakekrevingStatus.OPPRETTET,
+            -> true
+            else -> false
+        }
+
+    fun gyldigForVedtak() =
+        when (status) {
+            TilbakekrevingStatus.UNDERKJENT,
+            TilbakekrevingStatus.VALIDERT,
             -> true
             else -> false
         }
@@ -35,6 +45,7 @@ data class TilbakekrevingBehandling(
                     perioder = kravgrunnlag.perioder.tilTilbakekrevingPerioder(),
                     kravgrunnlag = kravgrunnlag,
                 ),
+            sendeBrev = true,
         )
     }
 }
@@ -42,11 +53,12 @@ data class TilbakekrevingBehandling(
 enum class TilbakekrevingStatus {
     OPPRETTET,
     UNDER_ARBEID,
+    VALIDERT,
     FATTET_VEDTAK,
     ATTESTERT,
     UNDERKJENT, ;
 
     fun kanEndres(): Boolean {
-        return this in listOf(OPPRETTET, UNDER_ARBEID, UNDERKJENT)
+        return this in listOf(OPPRETTET, UNDER_ARBEID, VALIDERT, UNDERKJENT)
     }
 }

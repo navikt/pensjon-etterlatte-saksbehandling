@@ -12,7 +12,7 @@ data class VedtakData(
     val vilkaarsvurderingDto: VilkaarsvurderingDto? = null,
     val beregningOgAvkorting: BeregningOgAvkorting? = null,
     val sak: Sak,
-    val trygdetid: TrygdetidDto?,
+    val trygdetid: List<TrygdetidDto>,
 )
 
 data class BeregningOgAvkorting(

@@ -49,7 +49,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
           { oppgaveId, type, nysaksbehandler: { saksbehandler: selectedSaksbehandler.ident!, versjon } },
           (result) => {
             oppdaterTildeling(oppgave, selectedSaksbehandler, result.versjon)
-            setValgtSaksbehandler(saksbehandler)
+            setValgtSaksbehandler(selectedSaksbehandler)
             setOpenDropdown(false)
           },
           (error) => console.log(error)

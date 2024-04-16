@@ -1,7 +1,8 @@
 package no.nav.etterlatte.brev.model.bp
 
+import io.mockk.mockk
+import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
-import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
@@ -15,6 +16,11 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -52,14 +58,33 @@ internal class BarnepensjonInnvilgetDTOTest {
                         datoTom = LocalDate.of(2022, Month.MARCH, 31),
                     ),
                 trygdetid =
-                    Trygdetid(
-                        ident = "",
-                        aarTrygdetid = 10,
-                        maanederTrygdetid = 0,
-                        perioder = listOf(),
-                        overstyrt = false,
-                        prorataBroek = null,
-                        mindreEnnFireFemtedelerAvOpptjeningstiden = false,
+                    listOf(
+                        TrygdetidDto(
+                            id = UUID.randomUUID(),
+                            ident = "123",
+                            behandlingId = UUID.randomUUID(),
+                            beregnetTrygdetid =
+                                DetaljertBeregnetTrygdetidDto(
+                                    resultat =
+                                        DetaljertBeregnetTrygdetidResultat(
+                                            samletTrygdetidNorge = 40,
+                                            samletTrygdetidTeoretisk = null,
+                                            faktiskTrygdetidNorge = null,
+                                            fremtidigTrygdetidNorge = null,
+                                            faktiskTrygdetidTeoretisk = null,
+                                            fremtidigTrygdetidTeoretisk = null,
+                                            beregnetSamletTrygdetidNorge = null,
+                                            prorataBroek = null,
+                                            overstyrt = false,
+                                            yrkesskade = false,
+                                        ),
+                                    tidspunkt = Tidspunkt.now(),
+                                ),
+                            trygdetidGrunnlag = emptyList(),
+                            overstyrtNorskPoengaar = null,
+                            opplysningerDifferanse = mockk(),
+                            opplysninger = mockk(),
+                        ),
                     ),
                 grunnbeloep =
                     Grunnbeloep(
@@ -82,6 +107,14 @@ internal class BarnepensjonInnvilgetDTOTest {
                         null,
                     ),
                 erGjenoppretting = false,
+                avdoede =
+                    listOf(
+                        Avdoed(
+                            fnr = Foedselsnummer("123"),
+                            navn = "HubbaBubba",
+                            doedsdato = LocalDate.now(),
+                        ),
+                    ),
             )
 
         Assertions.assertEquals(
@@ -154,6 +187,7 @@ internal class BarnepensjonInnvilgetDTOTest {
         institusjon = false,
         beregningsMetodeAnvendt = BeregningsMetode.NASJONAL,
         beregningsMetodeFraGrunnlag = BeregningsMetode.BEST,
+        trygdetidForIdent = "123",
     )
 
     private fun lagInnholdMedVedlegg() =

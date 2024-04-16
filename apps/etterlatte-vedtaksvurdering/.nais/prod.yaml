@@ -101,6 +101,10 @@ spec:
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-trygdetid
+    - name: ETTERLATTE_PROXY_URL
+      value: https://etterlatte-proxy.prod-fss-pub.nais.io/aad
+    - name: ETTERLATTE_PROXY_SCOPE
+      value: api://prod-fss.etterlatte.etterlatte-proxy/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

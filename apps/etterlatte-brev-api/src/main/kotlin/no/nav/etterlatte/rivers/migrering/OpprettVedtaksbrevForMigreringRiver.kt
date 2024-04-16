@@ -9,13 +9,13 @@ import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.rapidsandrivers.AUTOMATISK_GJENOPPRETTING
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.Kontekst
 import java.util.UUID
 
 internal class OpprettVedtaksbrevForMigreringRiver(

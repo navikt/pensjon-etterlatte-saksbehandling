@@ -11,6 +11,7 @@ import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.KONTEKST_KEY
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
@@ -24,7 +25,6 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
-import rapidsandrivers.Kontekst
 import java.util.UUID
 
 internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, private val repository: PesysRepository) :

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.migrering
 
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID_KEY
@@ -9,7 +10,6 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import rapidsandrivers.Kontekst
 
 internal class AlleredeGjenopprettaRiver(
     rapidsConnection: RapidsConnection,

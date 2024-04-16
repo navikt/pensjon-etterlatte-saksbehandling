@@ -7,7 +7,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import org.junit.jupiter.api.Test
-import rapidsandrivers.Kontekst
 
 internal class FeilhaandteringKtTest {
     @Test

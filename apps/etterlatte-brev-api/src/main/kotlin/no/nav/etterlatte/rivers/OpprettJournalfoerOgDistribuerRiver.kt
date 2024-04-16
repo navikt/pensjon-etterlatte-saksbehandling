@@ -20,6 +20,7 @@ import no.nav.etterlatte.rapidsandrivers.BOR_I_UTLAND_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_KODE
 import no.nav.etterlatte.rapidsandrivers.ER_OVER_18_AAR
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.sakId
@@ -27,7 +28,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.Kontekst
 
 class OpprettJournalfoerOgDistribuerRiverException(override val detail: String, override val cause: Throwable?) :
     InternfeilException(detail, cause)

@@ -11,7 +11,6 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import rapidsandrivers.Kontekst
 
 abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
     private val logger = LoggerFactory.getLogger(this::class.java)

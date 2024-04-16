@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
-import rapidsandrivers.Kontekst
 
 val feilhaandteringLogger = LoggerFactory.getLogger("feilhaandtering-kafka")
 

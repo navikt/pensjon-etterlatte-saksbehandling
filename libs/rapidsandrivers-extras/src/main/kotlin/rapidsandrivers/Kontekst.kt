@@ -1,4 +1,4 @@
-package rapidsandrivers
+package no.nav.etterlatte.rapidsandrivers
 
 enum class Kontekst {
     BREV,

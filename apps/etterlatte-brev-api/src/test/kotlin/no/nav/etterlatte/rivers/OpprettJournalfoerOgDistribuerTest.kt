@@ -31,7 +31,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -73,51 +72,6 @@ internal class OpprettJournalfoerOgDistribuer {
                     VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
                     "vedtak" to lagVedtakDto(behandlingId),
                     KILDE_KEY to Vedtaksloesning.GJENNY.name,
-                ),
-            ).toJson(),
-        )
-
-        val distribuermelding = testRapid.hentMelding(0)
-        Assertions.assertEquals(BrevHendelseType.JOURNALFOERT.lagEventnameForType(), distribuermelding.somMap()[EVENT_NAME_KEY])
-        testRapid.sendTestMessage(distribuermelding)
-
-        val distribuert = testRapid.hentMelding(1).somMap()
-        Assertions.assertEquals(BrevHendelseType.DISTRIBUERT.lagEventnameForType(), distribuert[EVENT_NAME_KEY])
-    }
-
-    @Test
-    fun `melding om attestert vedtak for migrering gjoer at vi oppretter, journalfoerer og distribuerer brevet `() {
-        val behandlingId = UUID.randomUUID()
-        val brev = lagBrev(behandlingId)
-        val journalfoerBrevService =
-            mockk<JournalfoerBrevService>().also {
-                coEvery { it.journalfoerVedtaksbrev(any()) } returns
-                    Pair(
-                        OpprettJournalpostResponse(
-                            journalpostId = "123",
-                            journalpostferdigstilt = true,
-                        ),
-                        brev.id,
-                    )
-            }
-        val distribusjonService =
-            mockk<Brevdistribuerer>().also {
-                coEvery { it.distribuer(brev.id, any(), any()) } returns ""
-            }
-        val testRapid =
-            TestRapid().apply {
-                JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
-                DistribuerBrevRiver(this, distribusjonService)
-            }
-
-        testRapid.sendTestMessage(
-            JsonMessage.newMessage(
-                mapOf(
-                    CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                    VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
-                    "vedtak" to lagVedtakDto(behandlingId),
-                    KILDE_KEY to Vedtaksloesning.PESYS.name,
-                    HENDELSE_DATA_KEY to migreringRequest(),
                 ),
             ).toJson(),
         )

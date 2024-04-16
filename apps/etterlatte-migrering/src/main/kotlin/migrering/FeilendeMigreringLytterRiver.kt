@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilendeSteg
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilmelding
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
@@ -16,7 +15,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
-import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.rapidsandrivers.migrering.pesysId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -62,9 +60,7 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
             return
         }
         repository.lagreFeilkjoering(
-            request =
-                packet.takeIf { it.harVerdi(HENDELSE_DATA_KEY) }?.hendelseData?.toJson()
-                    ?: "Har ikke requestobjektet tilgjengelig for logging",
+            request = "Har ikke requestobjektet tilgjengelig for logging",
             feilendeSteg = packet.feilendeSteg,
             feil = packet.feilmelding,
             pesysId = pesyskopling.first!!,

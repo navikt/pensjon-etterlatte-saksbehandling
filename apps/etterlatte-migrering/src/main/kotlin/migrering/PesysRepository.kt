@@ -1,19 +1,15 @@
 package no.nav.etterlatte.migrering
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.TransactionalSession
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hent
-import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.migrering.Migreringsstatus.BREVUTSENDING_OK
 import no.nav.etterlatte.migrering.Migreringsstatus.FERDIG
 import no.nav.etterlatte.migrering.Migreringsstatus.UTBETALING_OK
-import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import java.util.UUID
 import javax.sql.DataSource
@@ -31,18 +27,6 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
         }
     }
 
-    fun lagrePesyssak(
-        pesyssak: Pesyssak,
-        tx: TransactionalSession? = null,
-    ) = tx.session {
-        opprett(
-            "INSERT INTO pesyssak(id,sak,status) VALUES(:id,:sak::jsonb,:status)" +
-                " ON CONFLICT(id) DO UPDATE SET sak=excluded.sak, status=excluded.status",
-            mapOf("id" to pesyssak.id, "sak" to pesyssak.toJson(), "status" to Migreringsstatus.HENTA.name),
-            "Lagra pesyssak ${pesyssak.id} i migreringsbasen",
-        )
-    }
-
     fun lagreManuellMigrering(
         pesysId: Long,
         tx: TransactionalSession? = null,
@@ -52,18 +36,6 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
                 " ON CONFLICT(id) DO UPDATE SET sak=excluded.sak, status=excluded.status",
             mapOf("id" to pesysId, "status" to Migreringsstatus.UNDER_MIGRERING_MANUELT.name, "sak" to "{}".toJson()),
             "Lagra pesyssak $pesysId i migreringsbasen manuelt",
-        )
-    }
-
-    fun oppdaterKanGjenopprettesAutomatisk(
-        migreringRequest: MigreringRequest,
-        tx: TransactionalSession? = null,
-    ) = tx.session {
-        oppdater(
-            "UPDATE pesyssak SET gjenopprettes_automatisk = :automatisk " +
-                "WHERE id = :pesyssak",
-            mapOf("id" to migreringRequest.pesysId, "automatisk" to migreringRequest.kanAutomatiskGjenopprettes),
-            "Oppdaterer pesyssak med kan gjenopprettes automatisk",
         )
     }
 
@@ -102,7 +74,7 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
         )
     }
 
-    fun hentStatus(
+    private fun hentStatus(
         id: Long,
         tx: TransactionalSession? = null,
     ) = tx.session {
@@ -197,43 +169,6 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
             )
         }
     }
-
-    fun hentSakerMedVerge(tx: TransactionalSession? = null) =
-        tx.session {
-            hentListe(
-                """SELECT DISTINCT sak from pesyssak p
-                INNER JOIN feilkjoering f on p.id = f.pesys_id
-                AND p.status in ('${Migreringsstatus.VERIFISERING_FEILA.name}', '${Migreringsstatus.HENTA.name}')
-                """.trimMargin(),
-            ) {
-                objectMapper.readValue<Pesyssak>(it.string("sak"))
-            }
-        }
-
-    fun lagreGyldigDryRun(
-        request: MigreringRequest,
-        tx: TransactionalSession? = null,
-    ) = tx.session {
-        opprett(
-            """
-                INSERT INTO dryrun(
-                    ${DryRun.ID},
-                    ${DryRun.PESYS_ID},
-                    ${DryRun.REQUEST}
-                )
-                VALUES(
-                    :${DryRun.ID},
-                    :${DryRun.PESYS_ID},
-                    :${DryRun.REQUEST}::jsonb
-                )""",
-            mapOf(
-                DryRun.ID to UUID.randomUUID(),
-                DryRun.PESYS_ID to request.pesysId.id,
-                DryRun.REQUEST to request.toJson(),
-            ),
-            "Lagra gyldig dry run for ${request.pesysId.id}",
-        )
-    }
 }
 
 private object Pesyskoplingtabell {
@@ -249,10 +184,4 @@ private object Feilkjoering {
     const val REQUEST = "request"
     const val FEILMELDING = "feilmelding"
     const val FEILENDE_STEG = "feilendeSteg"
-}
-
-private object DryRun {
-    const val ID = "id"
-    const val PESYS_ID = "pesys_id"
-    const val REQUEST = "request"
 }

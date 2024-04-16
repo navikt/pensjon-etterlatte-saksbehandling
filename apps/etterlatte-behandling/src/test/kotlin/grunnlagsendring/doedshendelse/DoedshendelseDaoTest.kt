@@ -79,8 +79,8 @@ class DoedshendelseDaoTest(val dataSource: DataSource) {
             )
 
         doedshendelseDao.opprettDoedshendelse(doedshendelseInternal)
-        doedshendelseDao.hentDoedshendelserMedStatus(Status.NY) shouldBe listOf(doedshendelseInternal)
-        doedshendelseDao.hentDoedshendelserMedStatus(Status.OPPDATERT) shouldBe emptyList()
+        doedshendelseDao.hentDoedshendelserMedStatus(listOf(Status.NY)) shouldBe listOf(doedshendelseInternal)
+        doedshendelseDao.hentDoedshendelserMedStatus(listOf(Status.OPPDATERT)) shouldBe emptyList()
         doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr) shouldBe listOf(doedshendelseInternal)
     }
 
@@ -96,8 +96,9 @@ class DoedshendelseDaoTest(val dataSource: DataSource) {
             )
 
         doedshendelseDao.opprettDoedshendelse(doedshendelseInternal)
-        doedshendelseDao.hentDoedshendelserMedStatus(Status.NY) shouldBe listOf(doedshendelseInternal)
-        doedshendelseDao.hentDoedshendelserMedStatus(Status.OPPDATERT) shouldBe emptyList()
+        doedshendelseDao.hentDoedshendelserMedStatus(listOf(Status.NY)) shouldBe listOf(doedshendelseInternal)
+        doedshendelseDao.hentDoedshendelserMedStatus(listOf(Status.OPPDATERT)) shouldBe emptyList()
+        doedshendelseDao.hentDoedshendelserMedStatus(listOf(Status.NY, Status.OPPDATERT)) shouldBe listOf(doedshendelseInternal)
     }
 
     @Test
@@ -119,7 +120,7 @@ class DoedshendelseDaoTest(val dataSource: DataSource) {
 
         doedshendelseDao.oppdaterDoedshendelse(avbruttHendelse)
 
-        val ferdigeHendelser = doedshendelseDao.hentDoedshendelserMedStatus(FERDIG)
+        val ferdigeHendelser = doedshendelseDao.hentDoedshendelserMedStatus(listOf(FERDIG))
         ferdigeHendelser shouldContainExactly listOf(avbruttHendelse)
         with(ferdigeHendelser.first()) {
             sakId shouldBe 5L

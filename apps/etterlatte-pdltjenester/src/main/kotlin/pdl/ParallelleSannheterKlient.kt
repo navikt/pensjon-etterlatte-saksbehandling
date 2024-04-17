@@ -68,11 +68,8 @@ class ParallelleSannheterKlient(
                 logger.warn("Fant flere aktive sivilstander av samme type")
                 return aktiveSivilstander.sortedByDescending { it.gyldigFraOgMed }.first()
             } else {
-                logger.error(
-                    "Fant flere aktive sivilstander av ulik type: ${aktiveSivilstander.toJson()} for $foedselsnummer. " +
-                        "Se sikkerlogg for detaljer.",
-                )
-                sikkerLogg.info("Fant flere aktive sivilstander for ${foedselsnummer.value}")
+                logger.error("Fant flere aktive sivilstander av ulik type for $foedselsnummer. Se sikkerlogg for detaljer.")
+                sikkerLogg.info("Fant flere aktive sivilstander for ${foedselsnummer.value}: ${aktiveSivilstander.toJson()}")
             }
         }
 

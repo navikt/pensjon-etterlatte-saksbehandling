@@ -44,6 +44,9 @@ export const hentGosysOppgaver = async (tema: GosysTema[]): Promise<ApiResponse<
   return apiClient.get(`/oppgaver/gosys?${queryParams}`)
 }
 
+export const hentJournalfoeringsoppgaverFraGosys = async (journalpostId: string): Promise<ApiResponse<OppgaveDTO[]>> =>
+  apiClient.get(`/oppgaver/gosys/journalfoering/${journalpostId}`)
+
 export const hentOppgavebenkStats = async (): Promise<ApiResponse<OppgavebenkStats>> => apiClient.get('/oppgaver/stats')
 
 export const hentOppgaverTilknyttetSak = async (sakId: number): Promise<ApiResponse<Array<OppgaveDTO>>> => {

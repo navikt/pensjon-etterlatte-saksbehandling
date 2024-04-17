@@ -22,6 +22,11 @@ interface GosysOppgaveService {
         brukerTokenInfo: BrukerTokenInfo,
     ): List<GosysOppgave>
 
+    suspend fun hentJournalfoeringsoppgave(
+        journalpostId: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<GosysOppgave>
+
     suspend fun hentOppgave(
         id: Long,
         brukerTokenInfo: BrukerTokenInfo,
@@ -79,6 +84,26 @@ class GosysOppgaveServiceImpl(
             )
 
         logger.info("Fant ${gosysOppgaver.antallTreffTotalt} oppgave(r) med tema: $tema")
+
+        // Utveksle unike aktørIds til fnr for mapping
+        val fnrByAktoerId =
+            if (gosysOppgaver.oppgaver.isEmpty()) {
+                emptyMap<String, String>()
+            } else {
+                val aktoerIds = gosysOppgaver.oppgaver.mapNotNull { it.aktoerId }.toSet()
+                pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds)
+            }
+
+        return gosysOppgaver.oppgaver
+            .map { it.fraGosysOppgaveTilNy(fnrByAktoerId) }
+            .filterForEnheter(Kontekst.get().AppUser)
+    }
+
+    override suspend fun hentJournalfoeringsoppgave(
+        journalpostId: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<GosysOppgave> {
+        val gosysOppgaver = gosysOppgaveKlient.hentJournalfoeringsoppgave(journalpostId, brukerTokenInfo)
 
         // Utveksle unike aktørIds til fnr for mapping
         val fnrByAktoerId =

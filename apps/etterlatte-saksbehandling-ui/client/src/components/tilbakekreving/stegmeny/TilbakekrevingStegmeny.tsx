@@ -11,13 +11,20 @@ export function TilbakekrevingStegmeny() {
     <StegMenyWrapper>
       <TilbakekrevingNavLenke path="vurdering" description="Vurdering" enabled separator />
       <TilbakekrevingNavLenke path="utbetalinger" description="Utbetalinger" enabled separator />
-      <TilbakekrevingNavLenke path="oppsummering" description="Oppsummering" enabled separator />
       <TilbakekrevingNavLenke
-        path="brev"
-        description="Brev"
-        enabled={kanSeBrev(tilbakekrevingBehandling)}
-        separator={false}
+        path="oppsummering"
+        description="Oppsummering"
+        enabled
+        separator={!!tilbakekrevingBehandling?.sendeBrev}
       />
+      {tilbakekrevingBehandling?.sendeBrev && (
+        <TilbakekrevingNavLenke
+          path="brev"
+          description="Brev"
+          enabled={kanSeBrev(tilbakekrevingBehandling)}
+          separator={false}
+        />
+      )}
     </StegMenyWrapper>
   )
 }

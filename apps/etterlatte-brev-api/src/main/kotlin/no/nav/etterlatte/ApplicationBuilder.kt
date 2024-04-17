@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
@@ -332,6 +333,7 @@ class ApplicationBuilder {
                                 .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
                     }
                 }
+                it.install(HttpTimeout)
             }
         },
     )

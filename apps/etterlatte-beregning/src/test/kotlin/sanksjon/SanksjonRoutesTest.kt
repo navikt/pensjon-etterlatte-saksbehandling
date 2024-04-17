@@ -1,6 +1,7 @@
 package no.nav.etterlatte.beregning.regler.sanksjon
 
 import io.kotest.matchers.shouldBe
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -77,6 +78,25 @@ internal class SanksjonRoutesTest {
             val response =
                 client.post("/api/beregning/sanksjon/${UUID.randomUUID()}") {
                     setBody(sanksjon.toJson())
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+                }
+
+            response.status shouldBe HttpStatusCode.OK
+        }
+    }
+
+    @Test
+    fun `Skal returnere 200 naar sanksjon slettes`() {
+        coEvery { sanksjonService.slettSanksjon(any(), any()) } returns Unit
+
+        testApplication {
+            runServer(server) {
+                sanksjon(sanksjonService, behandlingKlient)
+            }
+
+            val response =
+                client.delete("/api/beregning/sanksjon/${UUID.randomUUID()}/${UUID.randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                 }

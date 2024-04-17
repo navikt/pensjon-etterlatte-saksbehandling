@@ -71,4 +71,22 @@ internal class SanksjonRepositoryTest(ds: DataSource) {
             }
         }
     }
+
+    @Test
+    fun `Skal slette en sanksjon basert på behandling og sanksjonid`() {
+        val behandlingId: UUID = UUID.randomUUID()
+        val sanksjon = lagreSanksjon()
+
+        sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon)
+
+        val lagretSanksjon = sanksjonRepository.hentSanksjon(behandlingId)
+
+        lagretSanksjon!!.size shouldBe 1
+
+        sanksjonRepository.slettSanksjon(behandlingId, lagretSanksjon.first().id!!)
+
+        val ingenSanksjoner = sanksjonRepository.hentSanksjon(behandlingId)
+
+        ingenSanksjoner shouldBe null
+    }
 }

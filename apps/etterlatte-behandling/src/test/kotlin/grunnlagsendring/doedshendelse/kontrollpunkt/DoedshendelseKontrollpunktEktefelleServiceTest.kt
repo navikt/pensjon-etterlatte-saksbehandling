@@ -276,12 +276,15 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
     }
 
     @Test
-    fun `Skal returnere AvdoedHarIkkeVaertGift hvis avdoed ikke har vaert registert som gift eller partner`() {
+    fun `Skal returnere EktefelleMedUkjentGiftemaalLengde dersom sivilstandstatus for naar en person ble gift mangler`() {
         val kontrollpunkter = kontrollpunktService.identifiser(gjenlevende, avdoed)
 
         kontrollpunkter shouldContainExactly
             listOf(
-                DoedshendelseKontrollpunkt.AvdoedHarIkkeVaertGift,
+                DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(
+                    doedsdato,
+                    avdoed.foedselsnummer.verdi.value,
+                ),
             )
     }
 

@@ -13,7 +13,7 @@ import { formaterStringDato } from '~utils/formattering'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { useForm } from 'react-hook-form'
 import { startOfDay, formatISO } from 'date-fns'
-import { hentSanksjon, lagreSanksjon } from '~shared/api/sanksjon'
+import { hentSanksjon, lagreSanksjon, slettSanksjon } from '~shared/api/sanksjon'
 import { TableWrapper } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 
 export interface ISanksjon {
@@ -41,11 +41,19 @@ export interface ISanksjonLagre {
   beskrivelse: string
 }
 
+interface SanksjonDefaultValue {
+  datoFom?: Date
+  datoTom?: Date | null
+  beskrivelse: string
+}
+
 export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const [lagreSanksjonResponse, lagreSanksjonRequest] = useApiCall(lagreSanksjon)
   const [sanksjonStatus, hentSanksjonRequest] = useApiCall(hentSanksjon)
+  const [, slettSanksjonRequest] = useApiCall(slettSanksjon)
   const [sanksjoner, setSanksjoner] = useState<ISanksjon[]>()
   const [visForm, setVisForm] = useState(false)
+  const [redigerSanksjonId, setRedigerSanksjonId] = useState('')
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const redigerbar = behandlingErRedigerbar(
@@ -60,16 +68,17 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     control,
     reset,
     setError,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
       datoFom: undefined,
       datoTom: undefined,
       beskrivelse: '',
-    },
+    } as SanksjonDefaultValue,
   })
 
-  const submitSanksjon = (data: { datoFom?: Date; datoTom?: Date; beskrivelse: string }) => {
+  const submitSanksjon = (data: SanksjonDefaultValue) => {
     const { datoFom, datoTom, beskrivelse } = data
 
     if (datoFom) {
@@ -77,7 +86,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
         setError('datoFom', { type: 'manual', message: 'Fra dato før virkningstidspunkt' })
         return
       }
-      if (datoTom && datoFom > datoTom) {
+      if (datoTom && startOfDay(datoFom) > startOfDay(datoTom)) {
         setError('datoTom', { type: 'manual', message: 'Til dato må være etter Fra dato' })
         return
       }
@@ -87,7 +96,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     }
 
     const lagreSanksjon: ISanksjonLagre = {
-      id: undefined,
+      id: redigerSanksjonId ? redigerSanksjonId : '',
       sakId: behandling.sakId,
       fom: formatISO(datoFom!, { representation: 'date' }),
       tom: datoTom ? formatISO(datoTom!, { representation: 'date' }) : undefined,
@@ -102,9 +111,16 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
       () => {
         reset()
         hentSanksjoner()
+        setRedigerSanksjonId('')
         setVisForm(false)
       }
     )
+  }
+
+  const slettEnkeltSanksjon = (behandlingId: string, sanksjonId: string) => {
+    slettSanksjonRequest({ behandlingId, sanksjonId }, () => {
+      hentSanksjoner()
+    })
   }
 
   const hentSanksjoner = () => {
@@ -118,6 +134,8 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
       hentSanksjoner()
     }
   }, [])
+
+  const sanksjonFraDato = behandling.virkningstidspunkt?.dato ? new Date(behandling.virkningstidspunkt.dato) : undefined
 
   return (
     <SanksjonWrapper>
@@ -143,6 +161,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                     <Table.HeaderCell>Beskrivelse</Table.HeaderCell>
                     <Table.HeaderCell>Registrert</Table.HeaderCell>
                     <Table.HeaderCell>Endret</Table.HeaderCell>
+                    {redigerbar && <Table.HeaderCell />}
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
@@ -169,6 +188,35 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                               '-'
                             )}
                           </Table.DataCell>
+                          {redigerbar && (
+                            <Table.DataCell>
+                              <HStack gap="2">
+                                <Button
+                                  size="small"
+                                  variant="tertiary"
+                                  onClick={() => {
+                                    setValue('datoFom', new Date(lagretSanksjon.fom))
+                                    setValue('beskrivelse', lagretSanksjon.beskrivelse)
+                                    if (lagretSanksjon.tom) setValue('datoTom', new Date(lagretSanksjon.tom))
+                                    else setValue('datoTom', null)
+                                    setRedigerSanksjonId(lagretSanksjon.id!!)
+                                    setVisForm(true)
+                                  }}
+                                >
+                                  Rediger
+                                </Button>
+                                <Button
+                                  size="small"
+                                  variant="tertiary"
+                                  onClick={() => {
+                                    slettEnkeltSanksjon(lagretSanksjon.behandlingId, lagretSanksjon.id!!)
+                                  }}
+                                >
+                                  Slett
+                                </Button>
+                              </HStack>
+                            </Table.DataCell>
+                          )}
                         </Table.Row>
                       ))}
                     </>
@@ -190,8 +238,18 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                 </Heading>
                 <VStack gap="4">
                   <HStack gap="4">
-                    <ControlledMaanedVelger label="Dato fra og med" name="datoFom" control={control} />
-                    <ControlledMaanedVelger label="Dato til og med (valgfri)" name="datoTom" control={control} />
+                    <ControlledMaanedVelger
+                      label="Dato fra og med"
+                      name="datoFom"
+                      control={control}
+                      fromDate={sanksjonFraDato}
+                    />
+                    <ControlledMaanedVelger
+                      label="Dato til og med (valgfri)"
+                      name="datoTom"
+                      control={control}
+                      fromDate={sanksjonFraDato}
+                    />
                   </HStack>
                   <HStack>
                     <Textarea
@@ -208,6 +266,8 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                       variant="secondary"
                       onClick={(e) => {
                         e.preventDefault()
+                        reset()
+                        setRedigerSanksjonId('')
                         setVisForm(false)
                       }}
                     >

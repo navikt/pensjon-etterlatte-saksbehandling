@@ -1,7 +1,8 @@
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { MonthPicker, MonthValidationT, useMonthpicker } from '@navikt/ds-react'
 import { Control, FieldValues, Path, useController } from 'react-hook-form'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
+import { isEqual } from 'date-fns'
 
 interface Props<T extends FieldValues> {
   name: Path<T>
@@ -32,7 +33,7 @@ export const ControlledMaanedVelger = <T extends FieldValues>({
 
   const [, setDateError] = useState<MonthValidationT | null>(null)
 
-  const { monthpickerProps, inputProps } = useMonthpicker({
+  const { monthpickerProps, inputProps, setSelected, selectedMonth } = useMonthpicker({
     onMonthChange: (date: Date) => {
       date && field.onChange(date)
     },
@@ -45,6 +46,20 @@ export const ControlledMaanedVelger = <T extends FieldValues>({
       else setDateError(val)
     },
   } as UseMonthPickerOptions)
+
+  useEffect(() => {
+    if (field.value === undefined) setSelected(undefined)
+  }, [])
+
+  // Dette tillater å sette value for feltet via setValue utenfor komponenten
+  if (
+    (selectedMonth && !isEqual(new Date(field.value), selectedMonth)) ||
+    (selectedMonth && field.value === undefined)
+  ) {
+    setSelected(field.value ? new Date(field.value) : undefined)
+  } else if (field.value && selectedMonth === undefined && inputProps.value?.toString().length === 0) {
+    setSelected(new Date(field.value))
+  }
 
   return (
     <MonthPicker {...monthpickerProps}>

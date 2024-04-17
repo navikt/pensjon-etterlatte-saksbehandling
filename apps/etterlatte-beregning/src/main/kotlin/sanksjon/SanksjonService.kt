@@ -15,7 +15,7 @@ class SanksjonService(
 
     fun hentSanksjon(behandlingId: UUID): List<Sanksjon>? {
         logger.info("Henter sanksjoner med behandlingID=$behandlingId")
-        return sanksjonRepository.hentSanksjon(behandlingId)
+        return sanksjonRepository.hentSanksjon(behandlingId)?.sortedBy { it.fom }
     }
 
     suspend fun opprettEllerOppdaterSanksjon(
@@ -43,6 +43,14 @@ class SanksjonService(
 
         logger.info("Oppdaterer sanksjon med behandlingID=$behandlingId")
         return sanksjonRepository.oppdaterSanksjon(sanksjon, brukerTokenInfo.ident())
+    }
+
+    fun slettSanksjon(
+        behandlingId: UUID,
+        sanksjonId: UUID,
+    ) {
+        logger.info("Sletter sanksjon med behandlingID=$behandlingId og sanksjonID=$sanksjonId")
+        sanksjonRepository.slettSanksjon(behandlingId, sanksjonId)
     }
 }
 

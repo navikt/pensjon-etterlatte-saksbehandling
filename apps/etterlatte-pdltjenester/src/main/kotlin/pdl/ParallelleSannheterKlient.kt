@@ -13,6 +13,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.Logger
@@ -54,7 +55,10 @@ class ParallelleSannheterKlient(
     suspend fun avklarStatsborgerskap(pdlStatsborgerskap: List<PdlStatsborgerskap>) =
         avklarNullable(pdlStatsborgerskap, Avklaring.STATSBORGERSKAP)
 
-    suspend fun avklarSivilstand(pdlSivilstand: List<PdlSivilstand>): PdlSivilstand? {
+    suspend fun avklarSivilstand(
+        pdlSivilstand: List<PdlSivilstand>,
+        foedselsnummer: Folkeregisteridentifikator,
+    ): PdlSivilstand? {
         val aktiveSivilstander = pdlSivilstand.filterNot { it.metadata.historisk }
 
         if (aktiveSivilstander.size > 1) {
@@ -62,6 +66,8 @@ class ParallelleSannheterKlient(
             if (aktiveSivilstander.all { it.type == aktiveSivilstander.first().type }) {
                 logger.warn("Fant flere aktive sivilstander av samme type")
                 return aktiveSivilstander.sortedByDescending { it.gyldigFraOgMed }.first()
+            } else {
+                logger.error("Fant flere aktive sivilstander av ulik type: ${aktiveSivilstander.toJson()} for $foedselsnummer")
             }
         }
 

@@ -61,9 +61,6 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
         pending: <Loader />,
         error: <Tag variant="error">Kunne ikke hente status</Tag>,
         success: (vedtakISak) => {
-          console.log(
-            vedtakISak.sort((a, b) => new Date(a.datoAttestert!).valueOf() - new Date(b.datoAttestert!).valueOf())
-          )
           return !!vedtakISak?.length ? (
             visStatusPaaSisteVedtak(vedtakISak)
           ) : (

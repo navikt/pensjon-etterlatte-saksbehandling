@@ -53,10 +53,7 @@ internal fun barnepensjonBeregning(
                 (it.ident == sisteBeregningsperiode.trygdetidForIdent) || (
                     it.behandlingId in
                         listOf(
-                            UUID.fromString("36fb86d4-698e-43cb-ab5f-ee7a0febda2e"),
-                            UUID.fromString("038dd6b8-c17b-482e-ae26-51ae591d5c42"),
-                            UUID.fromString("278d1bdb-2f38-484a-8d98-b74a4220dcea"),
-                            UUID.fromString("00051cfe-0405-4ebf-93f6-5775d23afcba"),
+                            UUID.fromString("6f11c98e-b6d8-4fa2-804a-ff2e375dabb3"),
                         )
                 )
             }?.fromDto(anvendtMetode, metodeFraGrunnlag, avdoede)

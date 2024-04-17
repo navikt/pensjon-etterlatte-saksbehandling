@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -67,7 +68,11 @@ class ParallelleSannheterKlient(
                 logger.warn("Fant flere aktive sivilstander av samme type")
                 return aktiveSivilstander.sortedByDescending { it.gyldigFraOgMed }.first()
             } else {
-                logger.error("Fant flere aktive sivilstander av ulik type: ${aktiveSivilstander.toJson()} for $foedselsnummer")
+                logger.error(
+                    "Fant flere aktive sivilstander av ulik type: ${aktiveSivilstander.toJson()} for $foedselsnummer. " +
+                        "Se sikkerlogg for detaljer.",
+                )
+                sikkerLogg.info("Fant flere aktive sivilstander for ${foedselsnummer.value}")
             }
         }
 

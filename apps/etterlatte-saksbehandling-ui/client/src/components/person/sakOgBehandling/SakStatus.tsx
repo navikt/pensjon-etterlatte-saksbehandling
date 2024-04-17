@@ -13,11 +13,15 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
   const [vedtakISakResult, vedtakISakFetch] = useApiCall(hentAlleVedtakISak)
 
   const visStatusPaaSisteVedtak = (vedtakISak: VedtaketKlagenGjelder[]): ReactNode => {
-    const sisteVedtak = vedtakISak
+    let sisteVedtak = vedtakISak
       .filter((vedtak) => ![VedtakType.AVVIST_KLAGE, VedtakType.TILBAKEKREVING].includes(vedtak.vedtakType!))
       .filter((vedtak) => !!vedtak.datoAttestert)
       .sort((a, b) => new Date(a.datoAttestert!).valueOf() - new Date(b.datoAttestert!).valueOf())
       .pop()
+
+    if (sisteVedtak?.vedtakType === VedtakType.ENDRING) {
+      sisteVedtak = vedtakISak.filter((vedtak) => vedtak.vedtakType === VedtakType.INNVILGELSE).pop()
+    }
 
     switch (sisteVedtak?.vedtakType) {
       case VedtakType.INNVILGELSE:
@@ -56,8 +60,16 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
       {mapResult(vedtakISakResult, {
         pending: <Loader />,
         error: <Tag variant="error">Kunne ikke hente status</Tag>,
-        success: (vedtakISak) =>
-          !!vedtakISak?.length ? visStatusPaaSisteVedtak(vedtakISak) : <Tag variant="neutral">Ingen vedtak på sak</Tag>,
+        success: (vedtakISak) => {
+          console.log(
+            vedtakISak.sort((a, b) => new Date(a.datoAttestert!).valueOf() - new Date(b.datoAttestert!).valueOf())
+          )
+          return !!vedtakISak?.length ? (
+            visStatusPaaSisteVedtak(vedtakISak)
+          ) : (
+            <Tag variant="neutral">Ingen vedtak på sak</Tag>
+          )
+        },
       })}
     </SpaceChildren>
   )

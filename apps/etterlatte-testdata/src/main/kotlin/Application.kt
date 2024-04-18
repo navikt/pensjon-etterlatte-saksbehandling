@@ -47,6 +47,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.metricsRoute
 import no.nav.etterlatte.libs.ktor.skjulAllePotensielleFnr
 import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.no.nav.etterlatte.testdata.features.OpprettOgBehandle
 import no.nav.etterlatte.testdata.dolly.DollyClientImpl
 import no.nav.etterlatte.testdata.dolly.DollyService
 import no.nav.etterlatte.testdata.dolly.TestnavClient
@@ -86,17 +87,17 @@ interface TestDataFeature {
     val routes: Route.() -> Unit
 }
 
+val dollyService = DollyService(
+    DollyClientImpl(config, httpClient),
+    TestnavClient(config, httpClient),
+)
 val features: List<TestDataFeature> =
     listOf(
         IndexFeature,
         EgendefinertMeldingFeature,
         OpprettSoeknadFeature,
-        DollyFeature(
-            DollyService(
-                DollyClientImpl(config, httpClient),
-                TestnavClient(config, httpClient),
-            ),
-        ),
+        DollyFeature(dollyService,),
+        OpprettOgBehandle(dollyService),
         SamordningMottattFeature,
     )
 

@@ -1,10 +1,15 @@
 package no.nav.etterlatte.no.nav.etterlatte.testdata.features
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.request.receiveParameters
+import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
+import no.nav.etterlatte.brukerIdFraToken
 import no.nav.etterlatte.getDollyAccessToken
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.navIdentFraToken
@@ -28,6 +33,23 @@ class OpprettOgBehandle(private val dollyService: DollyService) : TestDataFeatur
 
     override val routes: Route.() -> Unit
         get() = {
+            get {
+                val accessToken = getDollyAccessToken()
+
+                val gruppeId = dollyService.hentTestGruppeId(brukerIdFraToken()!!, accessToken)
+
+                call.respond(
+                    MustacheContent(
+                        "dolly/opprett-og-behandle.hbs",
+                        mapOf(
+                            "beskrivelse" to beskrivelse,
+                            "path" to path,
+                            "gruppeId" to gruppeId,
+                        ),
+                    ),
+                )
+            }
+
             post {
                 val familier = opprettFamilierIDolly(
                     100,
@@ -49,6 +71,7 @@ class OpprettOgBehandle(private val dollyService: DollyService) : TestDataFeatur
                         navIdent = navIdent
                     )
                 }
+                call.respond(HttpStatusCode.Created)
             }
         }
 

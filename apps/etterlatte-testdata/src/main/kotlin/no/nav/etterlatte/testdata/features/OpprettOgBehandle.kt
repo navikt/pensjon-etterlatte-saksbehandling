@@ -54,8 +54,7 @@ class OpprettOgBehandle(private val dollyService: DollyService) : TestDataFeatur
                 val familier = opprettFamilierIDolly(
                     100,
                     call.receiveParameters()["gruppeId"]!!.toLong(),
-                    Duration.ofSeconds(45)
-                )
+                ).also { logger.info("Oppretta ${it.size} familier") }
                 val soeknadType = SoeknadType.BARNEPENSJON
                 val navIdent = navIdentFraToken()
                 familier.map {
@@ -75,7 +74,7 @@ class OpprettOgBehandle(private val dollyService: DollyService) : TestDataFeatur
             }
         }
 
-    private fun opprettFamilierIDolly(antall: Int, gruppeid: Long, ventetid: Duration)
+    private fun opprettFamilierIDolly(antall: Int, gruppeid: Long)
             : List<ForenkletFamilieModell> {
         val accessToken = getDollyAccessToken()
         val baselineFamilier = dollyService.hentFamilier(gruppeid, accessToken)
@@ -87,6 +86,7 @@ class OpprettOgBehandle(private val dollyService: DollyService) : TestDataFeatur
             gruppeId = gruppeid,
         )
         val bestillinger = mutableListOf<BestillingStatus>()
+        logger.info("Sender ${antall+1} bestillinger")
         for (i in 0..antall) {
             bestillinger.add(
                 dollyService.opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
@@ -95,6 +95,7 @@ class OpprettOgBehandle(private val dollyService: DollyService) : TestDataFeatur
                     }
             )
         }
+        val ventetid = Duration.ofSeconds(antall * 2L)
         logger.info("Venter $ventetid så Dolly rekk å komme ajour")
         Thread.sleep(ventetid)
         logger.info("Ferdig med $ventetid-venting")

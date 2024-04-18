@@ -1,0 +1,110 @@
+{{> ../_fragments/header }}
+
+<div class="row gy-5">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Forsiden</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Post søknad</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-6" id="opprettGruppeInfo">
+        <div class="alert alert-warning">
+            For å kunne bruke tjenesten må du først gå inn på Dolly og opprette en gruppe med navn
+            <b>etterlatte-testdata</b> <br>
+            Du kan logge inn på Dolly via:
+            <a href="https://dolly.ekstern.dev.nav.no/login">
+                https://dolly.ekstern.dev.nav.no/login
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-6" id="soeknadInnsendtAlert">
+        <div class="alert alert-success">
+        </div>
+    </div>
+</div>
+
+<div id="main-content">
+    <div>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th style="text-align: right">Send søknad</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<script>
+
+    const opprettGruppeInfo = document.querySelector('#opprettGruppeInfo')
+    const mainContent = document.querySelector('#main-content')
+    const soeknadInnsendtAlert = document.querySelector('#soeknadInnsendtAlert')
+
+    soeknadInnsendtAlert.style.display = 'none'
+
+    if (!"{{gruppeId}}") {
+        opprettGruppeInfo.style.display = 'block'
+        mainContent.style.visibility = 'hidden'
+    } else {
+        opprettGruppeInfo.style.display = 'none'
+        mainContent.style.visibility = 'visible'
+        settOppKnapper()
+    }
+
+    function settOppKnapper() {
+        const table = document.querySelector('tbody')
+        table.innerHTML = ""
+        const tableRow = document.createElement('tr')
+
+        const buttonTableElement = document.createElement('td')
+
+        const newButton = (type, label, btnClass) => {
+            const btn = document.createElement('button')
+            btn.classList.add('btn')
+            btn.classList.add('me-1')
+            btn.classList.add(btnClass)
+            btn.innerHTML = label
+            btn.type = 'button'
+            btn.onclick = () => sendSoeknad(type)
+            return btn
+        }
+
+        buttonTableElement.appendChild(newButton('BARNEPENSJON', 'BP', 'btn-primary'))
+        buttonTableElement.appendChild(newButton('OMSTILLINGSSTOENAD', 'OMS', 'btn-info'))
+        buttonTableElement.style.textAlign = 'right'
+        buttonTableElement.style.width = '300px'
+        tableRow.appendChild(buttonTableElement)
+
+        table.appendChild(tableRow)
+    }
+
+    const sendSoeknad = async (type) => {
+        soeknadInnsendtAlert.style.display = "none"
+        await fetch('opprett-og-behandle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `type=${type}`
+        }).then(res => res.json()).then(data => {
+            if ((data.status === 200)) {
+                soeknadInnsendtAlert.firstElementChild.innerHTML = `Søknad er innsendt og registrert`
+                soeknadInnsendtAlert.style.display = "block"
+            }
+        });
+    }
+
+</script>
+
+{{> ../_fragments/footer }}

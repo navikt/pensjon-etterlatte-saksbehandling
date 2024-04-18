@@ -326,15 +326,7 @@ class StatistikkService(
         registrertTidspunkt = statistikkKlage.tidspunkt,
         type = "KLAGE",
         status = hendelse.name,
-        resultat =
-            when (statistikkKlage.klage.utfall) {
-                is KlageUtfallMedData.Omgjoering -> "OMGJOERING"
-                is KlageUtfallMedData.DelvisOmgjoering -> "DELVIS_OMGJOERING"
-                is KlageUtfallMedData.StadfesteVedtak -> "STADFESTE_VEDTAK"
-                is KlageUtfallMedData.Avvist -> "AVVIST"
-                is KlageUtfallMedData.AvvistMedOmgjoering -> "AVVIST"
-                null -> null
-            },
+        resultat = resultatKlage(statistikkKlage),
         saksbehandler = statistikkKlage.saksbehandler,
         ansvarligEnhet = statistikkKlage.klage.sak.enhet,
         ansvarligBeslutter = statistikkKlage.klage.formkrav?.saksbehandler?.ident,
@@ -351,7 +343,7 @@ class StatistikkService(
         kilde = Vedtaksloesning.GJENNY,
         ferdigbehandletTidspunkt =
             statistikkKlage.tidspunkt.takeIf {
-                statistikkKlage.klage.status == KlageStatus.FERDIGSTILT
+                statistikkKlage.klage.status in listOf(KlageStatus.AVBRUTT, KlageStatus.FERDIGSTILT)
             },
         behandlingMetode = BehandlingMetode.MANUELL,
         datoFoersteUtbetaling = null,
@@ -363,6 +355,19 @@ class StatistikkService(
         vedtakLoependeTom = null,
         relatertTil = statistikkKlage.klage.formkrav?.formkrav?.vedtaketKlagenGjelder?.behandlingId,
     )
+
+    private fun resultatKlage(statistikkKlage: StatistikkKlage): String? {
+        if (statistikkKlage.klage.status == KlageStatus.AVBRUTT) {
+            return "AVBRUTT"
+        }
+        return when (statistikkKlage.klage.utfall) {
+            is KlageUtfallMedData.Omgjoering -> "OMGJOERING"
+            is KlageUtfallMedData.DelvisOmgjoering -> "DELVIS_OMGJOERING"
+            is KlageUtfallMedData.StadfesteVedtak -> "STADFESTE_VEDTAK"
+            is KlageUtfallMedData.Avvist, is KlageUtfallMedData.AvvistMedOmgjoering -> "AVVIST"
+            null -> null
+        }
+    }
 
     private fun behandlingTilSakRad(
         statistikkBehandling: StatistikkBehandling,

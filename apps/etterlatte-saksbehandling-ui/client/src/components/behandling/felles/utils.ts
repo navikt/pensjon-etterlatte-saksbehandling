@@ -64,7 +64,6 @@ export const behandlingErRedigerbar = (status: IBehandlingStatus, enhetId: strin
   return enhetErSkrivbar(enhetId, enheter) && statusErRedigerbar(status)
 }
 
-//TODO gir denne mening?
 export const erFerdigBehandlet = (status: IBehandlingStatus): boolean => {
   return (
     status === IBehandlingStatus.ATTESTERT ||

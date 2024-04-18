@@ -68,7 +68,6 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     control,
     reset,
     setError,
-    setValue,
     formState: { errors },
   } = useForm<SanksjonDefaultValue>({
     defaultValues: {
@@ -195,10 +194,11 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                                   size="small"
                                   variant="tertiary"
                                   onClick={() => {
-                                    setValue('datoFom', new Date(lagretSanksjon.fom))
-                                    setValue('beskrivelse', lagretSanksjon.beskrivelse)
-                                    if (lagretSanksjon.tom) setValue('datoTom', new Date(lagretSanksjon.tom))
-                                    else reset({ datoTom: null })
+                                    reset({
+                                      datoFom: new Date(lagretSanksjon.fom),
+                                      datoTom: lagretSanksjon.tom ? new Date(lagretSanksjon.tom) : null,
+                                      beskrivelse: lagretSanksjon.beskrivelse,
+                                    })
                                     setRedigerSanksjonId(lagretSanksjon.id!!)
                                     setVisForm(true)
                                   }}

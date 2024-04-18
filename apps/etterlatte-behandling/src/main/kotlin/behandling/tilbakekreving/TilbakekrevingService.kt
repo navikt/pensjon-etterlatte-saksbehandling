@@ -260,7 +260,12 @@ class TilbakekrevingService(
             throw TilbakekrevingFeilTilstandException("Tilbakekreving kan ikke attesteres fordi vedtak ikke er fattet")
         }
 
-        runBlocking { brevApiKlient.ferdigstillVedtaksbrev(tilbakekrevingId, behandling.sak.id, brukerTokenInfo) }
+        if (behandling.sendeBrev) {
+            logger.info("Sender vedtaksbrev for tilbakekreving=$tilbakekrevingId")
+            runBlocking { brevApiKlient.ferdigstillVedtaksbrev(tilbakekrevingId, behandling.sak.id, brukerTokenInfo) }
+        } else {
+            logger.info("Skal ikke sende vedtaksbrev for tilbakekreving=$tilbakekrevingId")
+        }
 
         val vedtak =
             runBlocking {

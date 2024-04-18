@@ -63,5 +63,5 @@ internal class FiksEnkeltbrevRiver(
 
 val behandlingerAaJournalfoereBrevFor =
     listOf(
-        "6f11c98e-b6d8-4fa2-804a-ff2e375dabb3",
+        "8619cf28-4818-4bca-bbaf-ae07b6e96cd3",
     )

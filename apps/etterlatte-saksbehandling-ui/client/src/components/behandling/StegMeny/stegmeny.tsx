@@ -20,6 +20,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const lagVarselbrev = behandling.kilde === Vedtaksloesning.GJENOPPRETTA
   const soeknadRoutes_ = soeknadRoutes(behandling, lagVarselbrev)
   const revurderingRoutes_ = revurderingRoutes(behandling, lagVarselbrev)
+
   const erSisteRoute = (index: number, list: BehandlingRouteTypes[]) => index != list.length - 1
 
   // Trenger vilkårsvurdering for å kunne vise riktig routes etter at vv i en behandling er utført

@@ -44,6 +44,7 @@ import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utla
 import { Familieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { RevurderingKravpakke } from '~components/behandling/revurderingsoversikt/RevurderingKravpakke'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -154,6 +155,9 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         )}
         {behandling.revurderingsaarsak === Revurderingaarsak.ANNEN_UTEN_BREV && (
           <RevurderingAnnen type={Revurderingaarsak.ANNEN_UTEN_BREV} behandling={behandling} />
+        )}
+        {behandling.revurderingsaarsak === Revurderingaarsak.UTSENDELSE_AV_KRAVPAKKE && (
+          <RevurderingKravpakke behandling={behandling} />
         )}
 
         <Virkningstidspunkt

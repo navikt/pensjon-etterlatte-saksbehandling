@@ -19,6 +19,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { Behandlingsliste } from '~components/person/sakOgBehandling/Behandlingsliste'
 import { KlageListe } from '~components/person/sakOgBehandling/KlageListe'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
+import { TilbakekrevingListe } from '~components/person/sakOgBehandling/TilbakekrevingListe'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -122,6 +123,11 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 <SpaceChildren>
                   <Heading size="medium">Klager</Heading>
                   <KlageListe sakId={sak.id} />
+                </SpaceChildren>
+
+                <SpaceChildren>
+                  <Heading size="medium">Tilbakekrevinger</Heading>
+                  <TilbakekrevingListe sakId={sak.id} />
                 </SpaceChildren>
               </SpaceChildren>
             </Container>

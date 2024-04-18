@@ -10,10 +10,8 @@ import java.util.UUID
 const val SAK_ID_KEY = "sakId"
 const val BREV_ID_KEY = "brevId"
 const val BREV_KODE = "brevKode"
-const val SAK_ID_FLERE_KEY = "sakIdFlere"
 const val SAK_TYPE = "sakType"
 const val BEHANDLING_ID_KEY = "behandlingId"
-const val OPPGAVE_ID_FLERE_KEY = "oppgaveIdFlere"
 const val BEREGNING_KEY = "beregning"
 const val AVKORTING_KEY = "avkorting"
 const val DATO_KEY = "dato"
@@ -28,19 +26,12 @@ const val NY_OPPLYSNING_KEY = "OPPLYSNING:NY"
 const val DRYRUN = "dry_run"
 const val BOR_I_UTLAND_KEY = "bor_i_utland"
 const val ER_OVER_18_AAR = "er_over_18_aar"
-const val AUTOMATISK_GJENOPPRETTING = "automatisk_gjenoppretting"
 const val KONTEKST_KEY = "kontekst"
 
 var JsonMessage.sakId: Long
     get() = this[SAK_ID_KEY].asLong()
     set(name) {
         this[SAK_ID_KEY] = name
-    }
-
-var JsonMessage.sakIdFlere: List<Long>
-    get() = this[SAK_ID_FLERE_KEY].map { it.asLong() }
-    set(name) {
-        this[SAK_ID_FLERE_KEY] = name
     }
 
 var JsonMessage.behandlingId: UUID

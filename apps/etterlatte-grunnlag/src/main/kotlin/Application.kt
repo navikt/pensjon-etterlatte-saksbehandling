@@ -7,7 +7,6 @@ import io.ktor.client.HttpClient
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.GrunnlagHenter
-import no.nav.etterlatte.grunnlag.MigreringGrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.VergeService
@@ -22,7 +21,6 @@ import no.nav.etterlatte.grunnlag.migreringRoutes
 import no.nav.etterlatte.grunnlag.personRoute
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
-import no.nav.etterlatte.grunnlag.rivers.TattAvVentUnder20River
 import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -111,8 +109,6 @@ class ApplicationBuilder {
             .build().apply {
                 GrunnlagsversjoneringRiver(this, grunnlagService)
                 GrunnlagHendelserRiver(this, grunnlagService)
-                MigreringGrunnlagHendelserRiver(this, grunnlagService)
-                TattAvVentUnder20River(this, aldersovergangService)
             }
 
     fun start() = setReady().also { rapidsConnection.start() }

@@ -58,6 +58,8 @@ enum class Revurderingaarsak(
     ANNEN(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     ANNEN_UTEN_BREV(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
 
+    UTSENDELSE_AV_KRAVPAKKE(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = false),
+
     // TODO vurdere disse
     OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
     SLUTTBEHANDLING_UTLAND(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
@@ -81,7 +83,6 @@ enum class Revurderingaarsak(
     OMGJOERING_ETTER_ANKE(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
     OMGJOERING_PAA_EGET_INITIATIV(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
     OMGJOERING_ETTER_KRAV_FRA_BRUKER(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
-    UTSENDELSE_AV_KRAVPAKKE(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
     UTSENDELSE_AV_SED(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
     ;
 

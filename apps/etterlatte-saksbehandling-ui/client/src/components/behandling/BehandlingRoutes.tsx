@@ -239,5 +239,3 @@ const leggTilBrevHvisKrevesAvBehandling = (
 
 const routesAktuelleForSakstype = (sakType: SakType) => (route: BehandlingRouteTypes) =>
   route.sakstype === undefined || route.sakstype === sakType
-
-export const manueltOpphoerRoutes: Array<BehandlingRouteTypes> = [routeTypes.opphoeroversikt, routeTypes.beregning]

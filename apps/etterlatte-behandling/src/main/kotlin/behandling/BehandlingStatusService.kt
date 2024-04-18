@@ -10,6 +10,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -278,7 +279,9 @@ class BehandlingStatusServiceImpl(
     }
 
     private fun haandterUtland(behandling: Behandling) {
-        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING ||
+            (behandling.type == BehandlingType.REVURDERING && behandling.revurderingsaarsak() == Revurderingaarsak.UTSENDELSE_AV_KRAVPAKKE)
+        ) {
             if (behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true) {
                 generellBehandlingService.opprettBehandling(
                     GenerellBehandling.opprettUtland(

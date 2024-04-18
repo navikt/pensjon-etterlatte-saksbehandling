@@ -9,11 +9,7 @@ import { OpprettNyRevurdering } from '~components/person/OpprettNyRevurdering'
 import VurderHendelseModal from '~components/person/VurderHendelseModal'
 import UhaandtertHendelse from '~components/person/uhaandtereHendelser/UhaandtertHendelse'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
-import {
-  behandlingErIverksattEllerSamordnet,
-  enhetErSkrivbar,
-  erFerdigBehandlet,
-} from '~components/behandling/felles/utils'
+import { behandlingErIverksatt, enhetErSkrivbar, erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { hentGrunnlagsendringshendelserForSak } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
 import { ISak } from '~shared/types/sak'
@@ -72,7 +68,7 @@ export default function RelevanteHendelser(props: Props) {
       .filter((behandling) => !erFerdigBehandlet(behandling.status)).length > 0
 
   const revurderingKanOpprettes =
-    behandlingliste.filter((behandling) => behandlingErIverksattEllerSamordnet(behandling.status)).length > 0 &&
+    behandlingliste.filter((behandling) => behandlingErIverksatt(behandling.status)).length > 0 &&
     enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter)
 
   return (

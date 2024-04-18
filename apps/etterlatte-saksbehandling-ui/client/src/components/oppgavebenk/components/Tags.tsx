@@ -2,6 +2,7 @@ import { Tag } from '@navikt/ds-react'
 import { Variants } from '~shared/Tags'
 import { SakType } from '~shared/types/sak'
 import { Oppgavetype } from '~shared/types/oppgave'
+import { GosysTema } from '~shared/types/Gosys'
 
 const SAKTYPE_TIL_TAGDATA: Record<SakType, { variant: Variants; text: string }> = {
   BARNEPENSJON: { variant: Variants.INFO, text: 'Barnepensjon' },
@@ -18,7 +19,6 @@ const OPPGAVETYPE_TIL_TAGDATA: Record<Oppgavetype, { variant: Variants; text: st
   FOERSTEGANGSBEHANDLING: { variant: Variants.INFO, text: 'Førstegangsbehandling' },
   REVURDERING: { variant: Variants.NEUTRAL, text: 'Revurdering' },
   VURDER_KONSEKVENS: { variant: Variants.ALT1, text: 'Hendelse' },
-  GOSYS: { variant: Variants.INFO_FILLED, text: 'Gosys-oppgave' },
   KRAVPAKKE_UTLAND: { variant: Variants.ALT2_FILLED, text: 'Kravpakke utland' },
   KLAGE: { variant: Variants.ALT2, text: 'Klage' },
   OMGJOERING: { variant: Variants.ALT2_MODERATE, text: 'Omgjøring' },
@@ -36,5 +36,16 @@ export const OppgavetypeTag = (props: { oppgavetype: Oppgavetype }) => {
     return <Tag variant={tagdata.variant}>{tagdata.text}</Tag>
   } else {
     return <Tag variant={Variants.ALT1_FILLED}>Ukjent oppgave</Tag>
+  }
+}
+
+export const TemaTag = ({ tema }: { tema: GosysTema }) => {
+  switch (tema) {
+    case 'EYO':
+      return <Tag variant={Variants.ALT2}>Omstillingsstønad</Tag>
+    case 'EYB':
+      return <Tag variant={Variants.INFO}>Barnepensjon</Tag>
+    case 'PEN':
+      return <Tag variant={Variants.ALT1}>Pensjon</Tag>
   }
 }

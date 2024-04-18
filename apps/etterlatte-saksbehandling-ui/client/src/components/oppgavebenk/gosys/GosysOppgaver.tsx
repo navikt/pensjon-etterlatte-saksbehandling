@@ -1,51 +1,27 @@
 import { Alert } from '@navikt/ds-react'
 import React, { ReactNode, useEffect, useState } from 'react'
-import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { PagineringsKontroller } from '~components/oppgavebenk/oppgaver/PagineringsKontroller'
 import {
   hentSorteringFraLocalStorage,
   OppgaveSortering,
-  sorterOppgaver,
+  sorterGosysOppgaver,
 } from '~components/oppgavebenk/utils/oppgaveSortering'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils/oppgaveutils'
-import { filtrerOppgaver } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
-import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
-import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
-import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
+import { GosysOppgave } from '~shared/types/Gosys'
+import { GosysOppgaverTable } from './GosysOppgaverTable'
 
 export interface Props {
-  oppgaver: OppgaveDTO[]
+  oppgaver: GosysOppgave[]
   saksbehandlereIEnhet: Array<Saksbehandler>
-  oppdaterSaksbehandlerTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => void
-  oppdaterFrist?: (id: string, nyfrist: string) => void
-  filter?: Filter
-  revurderingsaarsaker: RevurderingsaarsakerBySakstype
+  fnrFilter?: string
 }
 
-export const Oppgaver = ({
-  oppgaver,
-  saksbehandlereIEnhet,
-  oppdaterSaksbehandlerTildeling,
-  oppdaterFrist,
-  filter,
-  revurderingsaarsaker,
-}: Props): ReactNode => {
+export const GosysOppgaver = ({ oppgaver, saksbehandlereIEnhet, fnrFilter }: Props): ReactNode => {
   const [sortering, setSortering] = useState<OppgaveSortering>(hentSorteringFraLocalStorage())
-  const filtrerteOppgaver = filter
-    ? filtrerOppgaver(
-        filter.sakEllerFnrFilter,
-        filter.enhetsFilter,
-        filter.fristFilter,
-        filter.saksbehandlerFilter,
-        filter.ytelseFilter,
-        filter.oppgavestatusFilter,
-        filter.oppgavetypeFilter,
-        [...oppgaver]
-      )
-    : oppgaver
 
-  const sorterteOppgaver = sorterOppgaver(filtrerteOppgaver, sortering)
+  const filtrerteOppgaver = fnrFilter ? oppgaver.filter(({ fnr }) => fnr === fnrFilter.trim()) : oppgaver
+  const sorterteOppgaver = sorterGosysOppgaver(filtrerteOppgaver, sortering)
 
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(hentPagineringSizeFraLocalStorage())
@@ -53,8 +29,8 @@ export const Oppgaver = ({
   let paginerteOppgaver = sorterteOppgaver
 
   useEffect(() => {
-    if (paginerteOppgaver.length === 0 && filtrerteOppgaver.length > 0) setPage(1)
-  }, [sorterteOppgaver, filtrerteOppgaver])
+    if (paginerteOppgaver.length === 0 && oppgaver.length > 0) setPage(1)
+  }, [oppgaver, sorterteOppgaver])
 
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
@@ -68,13 +44,10 @@ export const Oppgaver = ({
         antallSider={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}
       />
 
-      <OppgaverTable
+      <GosysOppgaverTable
         oppgaver={paginerteOppgaver}
-        oppdaterTildeling={oppdaterSaksbehandlerTildeling}
-        oppdaterFrist={oppdaterFrist}
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         setSortering={setSortering}
-        revurderingsaarsaker={revurderingsaarsaker}
       />
 
       <PagineringsKontroller

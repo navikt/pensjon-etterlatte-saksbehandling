@@ -8,17 +8,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import java.util.UUID
 
-abstract class Oppgave {
-    abstract val status: Status
-    abstract val type: OppgaveType
-    abstract val enhet: String
-    abstract val saksbehandler: OppgaveSaksbehandler?
-    abstract val opprettet: Tidspunkt
-    abstract val sakType: SakType
-    abstract val fnr: String?
-    abstract val frist: Tidspunkt?
-}
-
 data class OppgaveSaksbehandler(
     val ident: String,
     val navn: String? = null,
@@ -26,19 +15,19 @@ data class OppgaveSaksbehandler(
 
 data class OppgaveIntern(
     val id: UUID,
-    override val status: Status,
-    override val enhet: String,
+    val status: Status,
+    val enhet: String,
     val sakId: Long,
     val kilde: OppgaveKilde? = null,
-    override val type: OppgaveType,
-    override val saksbehandler: OppgaveSaksbehandler? = null,
+    val type: OppgaveType,
+    val saksbehandler: OppgaveSaksbehandler? = null,
     val referanse: String,
     val merknad: String? = null,
-    override val opprettet: Tidspunkt,
-    override val sakType: SakType,
-    override val fnr: String? = null,
-    override val frist: Tidspunkt?,
-) : Oppgave() {
+    val opprettet: Tidspunkt,
+    val sakType: SakType,
+    val fnr: String? = null,
+    val frist: Tidspunkt?,
+) {
     fun manglerSaksbehandler(): Boolean {
         return saksbehandler == null
     }
@@ -51,24 +40,6 @@ data class OppgaveIntern(
 }
 
 data class OppgavebenkStats(val antallOppgavelistaOppgaver: Long, val antallMinOppgavelisteOppgaver: Long)
-
-data class GosysOppgave(
-    val id: Long,
-    val versjon: Long,
-    override val status: Status,
-    override val saksbehandler: OppgaveSaksbehandler?,
-    override val enhet: String,
-    override val opprettet: Tidspunkt,
-    override val frist: Tidspunkt?,
-    override val sakType: SakType,
-    override val fnr: String? = null,
-    val gjelder: String,
-    val beskrivelse: String?,
-    val journalpostId: String?,
-) : Oppgave() {
-    override val type: OppgaveType
-        get() = OppgaveType.GOSYS
-}
 
 enum class Status {
     NY,
@@ -180,6 +151,7 @@ data class NyOppgaveDto(
     val merknad: String?,
     val referanse: String? = null,
     val frist: Tidspunkt? = null,
+    val saksbehandler: String? = null,
 )
 
 fun opprettNyOppgaveMedReferanseOgSak(

@@ -11,7 +11,6 @@ import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientImpl
-import no.nav.etterlatte.vilkaarsvurdering.migrering.MigreringService
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
@@ -26,6 +25,5 @@ class ApplicationContext {
             behandlingKlient = behandlingKlient,
             grunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
         )
-    val migreringService = MigreringService(vilkaarsvurderingRepository)
     val aldersovergangService = AldersovergangService(vilkaarsvurderingService)
 }

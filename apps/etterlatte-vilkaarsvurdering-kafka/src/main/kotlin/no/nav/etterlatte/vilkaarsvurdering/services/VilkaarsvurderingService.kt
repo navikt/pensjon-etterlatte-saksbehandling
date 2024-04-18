@@ -10,7 +10,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingMigreringRequest
 import java.util.UUID
 
 interface VilkaarsvurderingService {
@@ -20,11 +19,6 @@ interface VilkaarsvurderingService {
     ): HttpResponse
 
     fun opprettVilkaarsvurdering(behandlingId: UUID): HttpResponse
-
-    fun migrer(
-        behandlingId: UUID,
-        yrkesskadeFordel: Boolean,
-    ): HttpResponse
 
     fun opphoerAldersovergang(
         behandlingId: UUID,
@@ -54,16 +48,6 @@ class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: HttpClie
                 contentType(ContentType.Application.Json)
             }
         }
-
-    override fun migrer(
-        behandlingId: UUID,
-        yrkesskadeFordel: Boolean,
-    ) = runBlocking {
-        vilkaarsvurderingKlient.post("$url/api/vilkaarsvurdering/migrering/$behandlingId") {
-            contentType(ContentType.Application.Json)
-            setBody(VilkaarsvurderingMigreringRequest(yrkesskadeFordel))
-        }
-    }
 
     override fun opphoerAldersovergang(
         behandlingId: UUID,

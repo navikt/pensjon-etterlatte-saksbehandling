@@ -1,15 +1,13 @@
 package no.nav.etterlatte.oppgaveGosys
 
+import GosysOppgave
 import com.github.benmanes.caffeine.cache.Caffeine
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.oppgave.GosysOppgave
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
-import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -18,7 +16,9 @@ import java.time.LocalTime
 
 interface GosysOppgaveService {
     suspend fun hentOppgaver(
-        tema: List<String>,
+        saksbehandler: String?,
+        tema: String?,
+        enhet: String?,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<GosysOppgave>
 
@@ -71,15 +71,18 @@ class GosysOppgaveServiceImpl(
             .build<Long, GosysOppgave>()
 
     override suspend fun hentOppgaver(
-        tema: List<String>,
+        saksbehandler: String?,
+        tema: String?,
+        enhet: String?,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<GosysOppgave> {
         val saksbehandlerMedRoller = Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
 
         val gosysOppgaver =
             gosysOppgaveKlient.hentOppgaver(
-                tema,
-                enhetsnr = if (saksbehandlerMedRoller.harRolleStrengtFortrolig()) Enheter.STRENGT_FORTROLIG.enhetNr else null,
+                saksbehandler = saksbehandler,
+                tema = if (tema.isNullOrBlank()) listOf("EYO", "EYB") else listOf(tema),
+                enhetsnr = if (saksbehandlerMedRoller.harRolleStrengtFortrolig()) Enheter.STRENGT_FORTROLIG.enhetNr else enhet,
                 brukerTokenInfo = brukerTokenInfo,
             )
 
@@ -188,29 +191,22 @@ class GosysOppgaveServiceImpl(
     }
 
     companion object {
-        private val temaTilSakType =
-            mapOf(
-                "PEN" to SakType.BARNEPENSJON,
-                "EYB" to SakType.BARNEPENSJON,
-                "EYO" to SakType.OMSTILLINGSSTOENAD,
-            )
-
         private fun GosysApiOppgave.fraGosysOppgaveTilNy(fnrByAktoerId: Map<String, String?>): GosysOppgave {
             return GosysOppgave(
                 id = this.id,
                 versjon = this.versjon,
-                status = Status.NY,
+                status = this.status,
+                tema = this.tema,
+                oppgavetype = this.oppgavetype,
                 opprettet = this.opprettetTidspunkt,
                 frist =
                     this.fristFerdigstillelse?.let { frist ->
                         Tidspunkt.ofNorskTidssone(frist, LocalTime.MIDNIGHT)
                     },
                 fnr = fnrByAktoerId[this.aktoerId],
-                gjelder = temaTilSakType[this.tema]!!.name,
                 enhet = this.tildeltEnhetsnr,
                 saksbehandler = this.tilordnetRessurs?.let { OppgaveSaksbehandler(it) },
                 beskrivelse = this.beskrivelse,
-                sakType = temaTilSakType[this.tema]!!,
                 journalpostId = this.journalpostId,
             )
         }

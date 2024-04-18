@@ -4,15 +4,13 @@ import { OppgaveDTO, OppgaveSaksbehandler, Oppgavestatus } from '~shared/types/o
 export const finnOgOppdaterSaksbehandlerTildeling = (
   oppgaver: OppgaveDTO[],
   oppgaveId: string,
-  saksbehandler: OppgaveSaksbehandler | null,
-  versjon: number | null
+  saksbehandler: OppgaveSaksbehandler | null
 ) => {
   const index = oppgaver.findIndex((o) => o.id === oppgaveId)
   if (index > -1) {
     const oppdatertOppgaveState = [...oppgaver]
     oppdatertOppgaveState[index].saksbehandler = saksbehandler
     oppdatertOppgaveState[index].status = Oppgavestatus.UNDER_BEHANDLING
-    oppdatertOppgaveState[index].versjon = versjon
     return oppdatertOppgaveState
   } else {
     return oppgaver
@@ -22,14 +20,12 @@ export const finnOgOppdaterSaksbehandlerTildeling = (
 export const leggTilOppgavenIMinliste = (
   oppgaver: OppgaveDTO[],
   oppgave: OppgaveDTO,
-  saksbehandler: OppgaveSaksbehandler | null,
-  versjon: number | null
+  saksbehandler: OppgaveSaksbehandler | null
 ): OppgaveDTO[] => {
   return oppgaver.concat({
     ...oppgave,
     saksbehandler: saksbehandler,
     status: Oppgavestatus.UNDER_BEHANDLING,
-    versjon: versjon,
   })
 }
 
@@ -37,14 +33,12 @@ export const oppdaterFrist = (
   setHentedeOppgaver: (oppdatertListe: OppgaveDTO[]) => void,
   hentedeOppgaver: OppgaveDTO[],
   id: string,
-  frist: string,
-  versjon: number | null
+  frist: string
 ) => {
   setTimeout(() => {
     const oppdatertOppgaveState = [...hentedeOppgaver]
     const index = oppdatertOppgaveState.findIndex((o) => o.id === id)
     oppdatertOppgaveState[index].frist = frist
-    oppdatertOppgaveState[index].versjon = versjon
     setHentedeOppgaver(oppdatertOppgaveState)
   }, 2000)
 }

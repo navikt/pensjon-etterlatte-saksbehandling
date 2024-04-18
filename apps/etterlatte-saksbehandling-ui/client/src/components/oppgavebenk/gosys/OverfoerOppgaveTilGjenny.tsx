@@ -1,38 +1,42 @@
-import { feilregistrerGosysOppgave, opprettOppgave, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
+import { opprettOppgave } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentSakForPerson } from '~shared/api/sak'
 import { isInitial, isPending, isSuccess, mapResult, mapSuccess } from '~shared/api/apiUtils'
-import { Alert, Button, Checkbox } from '@navikt/ds-react'
+import { Alert, Button, Checkbox, Select } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { GosysActionToggle } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { formaterSakstype } from '~utils/formattering'
 import { ResultAlert } from '~shared/alerts/ResultAlert'
-import { OppgaveDTO, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
+import { GosysOppgave, GosysTema, sakTypeFraTema } from '~shared/types/Gosys'
+import { feilregistrerGosysOppgave } from '~shared/api/gosys'
+import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
+import { SakType } from '~shared/types/sak'
+import { formaterSakstype } from '~utils/formattering'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { GOSYS_TEMA_FILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 
 export const OverfoerOppgaveTilGjenny = ({
   oppgave,
   setToggle,
 }: {
-  oppgave: OppgaveDTO
+  oppgave: GosysOppgave
   setToggle: (toggle: GosysActionToggle) => void
 }) => {
   const navigate = useNavigate()
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [skalOppretteSak, setSkalOppretteSak] = useState(false)
+  const [sakType, setSakType] = useState<SakType | undefined>(sakTypeFraTema(oppgave.tema))
 
   const [opprettOppgaveStatus, apiOpprettOppgave] = useApiCall(opprettOppgave)
-  const [tildelSaksbehandlerStatus, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
   const [feilregistrerStatus, feilregistrerOppgave] = useApiCall(feilregistrerGosysOppgave)
   const [sakStatus, hentSak] = useApiCall(hentSakForPerson)
 
   const konverterTilGjennyoppgave = () => {
-    if (!oppgave.saksbehandler?.ident) {
-      throw Error('Kan ikke konvertere oppgave som ikke er tildelt')
-    }
+    hentSak({ fnr: oppgave.fnr!!, type: sakType!!, opprettHvisIkkeFinnes: skalOppretteSak }, (sak) => {
+      if (!sak) return
 
-    hentSak({ fnr: oppgave.fnr!!, type: oppgave.sakType, opprettHvisIkkeFinnes: skalOppretteSak }, (sak) => {
       apiOpprettOppgave(
         {
           sakId: sak.id,
@@ -41,18 +45,10 @@ export const OverfoerOppgaveTilGjenny = ({
             referanse: oppgave.journalpostId!!,
             merknad: oppgave.beskrivelse || 'Journalføringsoppgave konvertert fra Gosys',
             oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
+            saksbehandler: innloggetSaksbehandler.ident,
           },
         },
-        (opprettetOppgave) => {
-          tildelSaksbehandler({
-            oppgaveId: opprettetOppgave.id,
-            type: Oppgavetype.JOURNALFOERING,
-            nysaksbehandler: {
-              saksbehandler: oppgave.saksbehandler!!.ident,
-              versjon: null,
-            },
-          })
-
+        () => {
           feilregistrerOppgave({
             oppgaveId: oppgave.id,
             versjon: oppgave.versjon!!,
@@ -63,11 +59,10 @@ export const OverfoerOppgaveTilGjenny = ({
     })
   }
 
-  const loading =
-    isPending(sakStatus) ||
-    isPending(opprettOppgaveStatus) ||
-    isPending(tildelSaksbehandlerStatus) ||
-    isPending(feilregistrerStatus)
+  const loading = isPending(sakStatus) || isPending(opprettOppgaveStatus) || isPending(feilregistrerStatus)
+
+  if (oppgave.saksbehandler?.ident !== innloggetSaksbehandler.ident)
+    return <Alert variant="warning">Oppgaven er ikke tildelt deg!</Alert>
 
   return (
     <>
@@ -79,6 +74,20 @@ export const OverfoerOppgaveTilGjenny = ({
 
       <br />
 
+      {(!oppgave.tema || oppgave.tema === GosysTema.PEN) && (
+        <>
+          <Alert variant="warning" inline>
+            Kan ikke automatisk velge saktype fra tema {[GOSYS_TEMA_FILTER[oppgave.tema]]}!
+          </Alert>
+          <br />
+          <Select label="Velg saktype" onChange={(e) => setSakType(e.target.value as SakType)}>
+            <option value="">Velg ...</option>
+            <option value={SakType.OMSTILLINGSSTOENAD}>{formaterSakstype(SakType.OMSTILLINGSSTOENAD)}</option>
+            <option value={SakType.BARNEPENSJON}>{formaterSakstype(SakType.BARNEPENSJON)}</option>
+          </Select>
+        </>
+      )}
+
       {mapResult(sakStatus, {
         success: (sak) =>
           sak ? (
@@ -89,7 +98,7 @@ export const OverfoerOppgaveTilGjenny = ({
             <Alert variant="warning">
               Kan ikke overføre oppgave siden brukeren mangler sak i Gjenny.
               <br />
-              Vil du opprette en {formaterSakstype(oppgave.sakType)}-sak på brukeren ({oppgave.fnr})?
+              Vil du opprette en {formaterSakstype(sakType!!)}-sak på brukeren ({oppgave.fnr})?
               <br />
               <br />
               <Checkbox value={skalOppretteSak} onChange={(e) => setSkalOppretteSak(e.target.checked)}>
@@ -104,12 +113,11 @@ export const OverfoerOppgaveTilGjenny = ({
         ),
       })}
       <ResultAlert result={opprettOppgaveStatus} success="Opprettet ny oppgave" />
-      <ResultAlert result={tildelSaksbehandlerStatus} success={`Ny oppgave tildelt ${oppgave.saksbehandler?.navn}`} />
       <ResultAlert result={feilregistrerStatus} success="Gosys-oppgave markert som feilregistrert" />
 
       <br />
 
-      {isSuccess(tildelSaksbehandlerStatus) && isSuccess(opprettOppgaveStatus) && (
+      {isSuccess(opprettOppgaveStatus) && (
         <FlexRow justify="right">
           <Button variant="tertiary" onClick={() => window.location.reload()}>
             Avslutt
@@ -125,7 +133,7 @@ export const OverfoerOppgaveTilGjenny = ({
           <Button variant="secondary" onClick={() => setToggle({ ferdigstill: false })} disabled={loading}>
             Nei, avbryt
           </Button>
-          <Button onClick={konverterTilGjennyoppgave} loading={loading}>
+          <Button onClick={konverterTilGjennyoppgave} loading={loading} disabled={!sakType}>
             Ja, overfør
           </Button>
         </FlexRow>

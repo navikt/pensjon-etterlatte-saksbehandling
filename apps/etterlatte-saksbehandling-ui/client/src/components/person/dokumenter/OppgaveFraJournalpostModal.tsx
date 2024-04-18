@@ -2,25 +2,21 @@ import { Journalpost } from '~shared/types/Journalpost'
 import { Alert, Button, Detail, Heading, Link, Modal } from '@navikt/ds-react'
 import React, { useContext, useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import {
-  feilregistrerGosysOppgave,
-  hentJournalfoeringsoppgaverFraGosys,
-  hentOppgaverMedReferanse,
-  opprettOppgave,
-  tildelSaksbehandlerApi,
-} from '~shared/api/oppgaver'
-import { isFailure, isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
+import { hentOppgaverMedReferanse, opprettOppgave } from '~shared/api/oppgaver'
+import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
 import { FlexRow } from '~shared/styled'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { useNavigate } from 'react-router-dom'
-import { erOppgaveRedigerbar, OppgaveDTO, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { ConfigContext } from '~clientConfig'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { feilregistrerGosysOppgave, hentJournalfoeringsoppgaverFraGosys } from '~shared/api/gosys'
+import { GosysOppgave } from '~shared/types/Gosys'
 
 export const OppgaveFraJournalpostModal = ({
   isOpen,
@@ -42,7 +38,6 @@ export const OppgaveFraJournalpostModal = ({
 
   const [opprettOppgaveStatus, apiOpprettOppgave] = useApiCall(opprettOppgave)
   const [hentOppgaverStatus, hentOppgaver] = useApiCall(hentOppgaverMedReferanse)
-  const [tildelSaksbehandlerStatus, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
 
   const [gosysResult, hentGosysOppgave] = useApiCall(hentJournalfoeringsoppgaverFraGosys)
   const [, feilregistrerOppgave] = useApiCall(feilregistrerGosysOppgave)
@@ -73,23 +68,17 @@ export const OppgaveFraJournalpostModal = ({
             referanse: journalpost.journalpostId,
             merknad: 'Manuell redigering av journalpost',
             oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
+            saksbehandler: innloggetSaksbehandler.ident,
           },
         },
         (oppgave) => {
-          tildelSaksbehandler(
-            {
-              oppgaveId: oppgave.id,
-              type: oppgaveType,
-              nysaksbehandler: { saksbehandler: innloggetSaksbehandler.ident, versjon: null },
-            },
-            () => navigate(`/oppgave/${oppgave.id}`)
-          )
+          navigate(`/oppgave/${oppgave.id}`)
         }
       )
     }
   }
 
-  const konverterTilGjennyoppgave = (oppgave: OppgaveDTO) => {
+  const konverterTilGjennyoppgave = (oppgave: GosysOppgave) => {
     if (isSuccess(sakStatus)) {
       apiOpprettOppgave(
         {
@@ -99,18 +88,10 @@ export const OppgaveFraJournalpostModal = ({
             referanse: oppgave.journalpostId!!,
             merknad: oppgave.beskrivelse || 'Journalføringsoppgave flyttet fra Gosys',
             oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
+            saksbehandler: innloggetSaksbehandler.ident,
           },
         },
-        (opprettetOppgave) => {
-          tildelSaksbehandler({
-            oppgaveId: opprettetOppgave.id,
-            type: Oppgavetype.JOURNALFOERING,
-            nysaksbehandler: {
-              saksbehandler: innloggetSaksbehandler.ident,
-              versjon: null,
-            },
-          })
-
+        () => {
           feilregistrerOppgave({
             oppgaveId: oppgave.id,
             versjon: oppgave.versjon!!,
@@ -166,7 +147,7 @@ export const OppgaveFraJournalpostModal = ({
                       <br />
 
                       <FlexRow $spacing justify="right">
-                        {isSuccess(tildelSaksbehandlerStatus) && isSuccess(opprettOppgaveStatus) ? (
+                        {isSuccess(opprettOppgaveStatus) ? (
                           <Alert size="small" variant="success">
                             <Link href={`/oppgave/${opprettOppgaveStatus.data.id}`}>Gå til oppgave</Link>
                           </Alert>
@@ -175,7 +156,7 @@ export const OppgaveFraJournalpostModal = ({
                             size="small"
                             variant="secondary"
                             onClick={() => konverterTilGjennyoppgave(oppgave)}
-                            loading={isPending(opprettOppgaveStatus) || isPending(tildelSaksbehandlerStatus)}
+                            loading={isPending(opprettOppgaveStatus)}
                           >
                             Flytt til Gjenny
                           </Button>
@@ -213,12 +194,6 @@ export const OppgaveFraJournalpostModal = ({
           })}
         </Modal.Body>
 
-        {isFailure(tildelSaksbehandlerStatus) && (
-          <Alert variant="error">
-            Oppgaven ble opprettet, men tildeling feilet. Gå til oppgavelisten for å tildele den manuelt
-          </Alert>
-        )}
-
         <Modal.Footer>
           <FlexRow justify="right">
             <Button variant="tertiary" onClick={() => setIsOpen(false)}>
@@ -228,7 +203,7 @@ export const OppgaveFraJournalpostModal = ({
             <Button
               onClick={opprettJournalfoeringsoppgave}
               disabled={!kanOppretteOppgave || finnesGosysOppgave || !isSuccess(sakStatus)}
-              loading={isPending(opprettOppgaveStatus) || isPending(tildelSaksbehandlerStatus)}
+              loading={isPending(opprettOppgaveStatus)}
             >
               Opprett oppgave
             </Button>

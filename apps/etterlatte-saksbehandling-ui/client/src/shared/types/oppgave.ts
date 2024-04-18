@@ -14,12 +14,6 @@ export interface OppgaveDTO {
   fnr: string | null
   frist: string
   saksbehandler: OppgaveSaksbehandler | null
-
-  // GOSYS-spesifikt
-  beskrivelse: string | null
-  journalpostId: string | null
-  gjelder: string | null
-  versjon: number | null
 }
 
 export interface OppgaveSaksbehandler {
@@ -32,6 +26,7 @@ export interface NyOppgaveDto {
   oppgaveType: Oppgavetype
   merknad?: string
   referanse?: string
+  saksbehandler?: string
 }
 
 export enum Oppgavestatus {
@@ -58,7 +53,6 @@ export enum Oppgavetype {
   FOERSTEGANGSBEHANDLING = 'FOERSTEGANGSBEHANDLING',
   REVURDERING = 'REVURDERING',
   VURDER_KONSEKVENS = 'VURDER_KONSEKVENS',
-  GOSYS = 'GOSYS',
   KRAVPAKKE_UTLAND = 'KRAVPAKKE_UTLAND',
   KLAGE = 'KLAGE',
   TILBAKEKREVING = 'TILBAKEKREVING',

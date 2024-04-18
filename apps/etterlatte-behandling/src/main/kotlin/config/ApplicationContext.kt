@@ -482,13 +482,7 @@ internal class ApplicationContext(
 
     val migreringService =
         MigreringService(
-            sakService = sakService,
-            gyldighetsproevingService = gyldighetsproevingService,
-            behandlingFactory = behandlingFactory,
-            kommerBarnetTilGodeService = kommerBarnetTilGodeService,
-            behandlingsHendelser = behandlingsHendelser,
             behandlingService = behandlingService,
-            oppgaveService = oppgaveService,
         )
 
     // Jobs

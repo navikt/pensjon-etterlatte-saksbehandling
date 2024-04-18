@@ -265,6 +265,7 @@ class BrevApiKlientTest : BrevApiKlient {
 
 class GosysOppgaveKlientTest : GosysOppgaveKlient {
     override suspend fun hentOppgaver(
+        saksbehandler: String?,
         tema: List<String>,
         enhetsnr: String?,
         brukerTokenInfo: BrukerTokenInfo,

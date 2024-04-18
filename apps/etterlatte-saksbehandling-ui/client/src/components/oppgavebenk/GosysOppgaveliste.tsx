@@ -1,31 +1,26 @@
 import React, { useEffect, useState } from 'react'
-import { hentGosysOppgaver } from '~shared/api/oppgaver'
-import { isPending, mapResult } from '~shared/api/apiUtils'
+import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { RevurderingsaarsakerDefault } from '~shared/types/Revurderingaarsak'
-import { FilterRad } from '~components/oppgavebenk/filtreringAvOppgaver/FilterRad'
-import { Filter, SAKSBEHANDLERFILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
-import { defaultFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
-import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
+import { GosysFilter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { Switch } from '@navikt/ds-react'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import styled from 'styled-components'
-import {
-  finnOgOppdaterSaksbehandlerTildeling,
-  sorterOppgaverEtterOpprettet,
-} from '~components/oppgavebenk/utils/oppgaveutils'
 import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { MultiSelectFilter } from './filtreringAvOppgaver/MultiSelectFilter'
-import { GOSYS_TEMA_FILTER, GosysTema, konverterStringTilGosysTema } from '~shared/types/Gosys'
+import { GosysOppgaver } from '~components/oppgavebenk/gosys/GosysOppgaver'
+import { hentGosysOppgaver } from '~shared/api/gosys'
+import { GosysFilterRad } from './filtreringAvOppgaver/GosysFilterRad'
+import { GosysOppgave } from '~shared/types/Gosys'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
+}
+
+const sorterOppgaverEtterOpprettet = (oppgaver: GosysOppgave[]) => {
+  return oppgaver.sort((a, b) => new Date(b.opprettet).getTime() - new Date(a.opprettet).getTime())
 }
 
 export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
@@ -35,82 +30,57 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
     return <Tilgangsmelding />
   }
 
-  const [filter, setFilter] = useState<Filter>(defaultFiltre)
-  const [temaFilter, setTemaFilter] = useState<GosysTema[]>([GosysTema.EYB, GosysTema.EYO])
+  const [filter, setFilter] = useState<GosysFilter>({})
+  const [fnrFilter, setFnrFilter] = useState<string>()
 
   const oppgavebenkState = useOppgaveBenkState()
   const dispatcher = useOppgavebenkStateDispatcher()
 
   const [gosysOppgaverResult, hentGosysOppgaverFetch] = useApiCall(hentGosysOppgaver)
 
-  const oppdaterSaksbehandlerTildeling = (
-    oppgave: OppgaveDTO,
-    saksbehandler: OppgaveSaksbehandler | null,
-    versjon: number | null
-  ) => {
-    setTimeout(() => {
-      dispatcher.setGosysOppgavelisteOppgaver(
-        finnOgOppdaterSaksbehandlerTildeling(
-          oppgavebenkState.gosysOppgavelisteOppgaver,
-          oppgave.id,
-          saksbehandler,
-          versjon
-        )
-      )
-    }, 2000)
-  }
-
-  const hentOppgaver = (tema: GosysTema[]) => {
-    hentGosysOppgaverFetch(tema, (oppgaver) => {
+  const hentOppgaver = (filter: GosysFilter) => {
+    hentGosysOppgaverFetch(filter, (oppgaver) => {
       dispatcher.setGosysOppgavelisteOppgaver(sorterOppgaverEtterOpprettet(oppgaver))
     })
   }
 
   useEffect(() => {
-    hentOppgaver(temaFilter)
-  }, [temaFilter])
+    hentOppgaver(filter)
+  }, [filter])
 
-  return oppgavebenkState.gosysOppgavelisteOppgaver.length >= 0 && !isPending(gosysOppgaverResult) ? (
+  return (
     <>
       <VisKunMineGosysOppgaverSwitch
         checked={filter.saksbehandlerFilter === innloggetSaksbehandler.ident}
         onChange={(e) =>
           setFilter({
             ...filter,
-            saksbehandlerFilter: e.target.checked ? innloggetSaksbehandler.ident : SAKSBEHANDLERFILTER.visAlle,
+            saksbehandlerFilter: e.target.checked ? innloggetSaksbehandler.ident : undefined,
           })
         }
       >
         Vis mine Gosys-oppgaver
       </VisKunMineGosysOppgaverSwitch>
-      <FilterRad
-        hentAlleOppgaver={() => hentOppgaver(temaFilter)}
-        hentOppgaverStatus={() => {}}
+
+      <GosysFilterRad
+        hentAlleOppgaver={() => hentOppgaver(filter)}
         filter={filter}
         setFilter={setFilter}
-        saksbehandlereIEnhet={saksbehandlereIEnhet}
-        oppgavelisteValg={OppgavelisteValg.GOSYS_OPPGAVER}
-      >
-        <MultiSelectFilter
-          label="Tema"
-          values={temaFilter.map((tema) => GOSYS_TEMA_FILTER[tema])}
-          options={Object.entries(GOSYS_TEMA_FILTER).map(([, beskrivelse]) => beskrivelse)}
-          onChange={(temaer) => setTemaFilter(temaer.map(konverterStringTilGosysTema))}
-        />
-      </FilterRad>
-      <Oppgaver
-        oppgaver={oppgavebenkState.gosysOppgavelisteOppgaver}
-        oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
-        saksbehandlereIEnhet={saksbehandlereIEnhet}
-        revurderingsaarsaker={new RevurderingsaarsakerDefault()}
-        filter={filter}
+        filterFoedselsnummer={setFnrFilter}
       />
+
+      {mapResult(gosysOppgaverResult, {
+        pending: <Spinner label="Henter Gosys-oppgaver" visible />,
+        error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente Gosys-oppgaver'}</ApiErrorAlert>,
+        success: () => (
+          <GosysOppgaver
+            oppgaver={oppgavebenkState.gosysOppgavelisteOppgaver}
+            saksbehandlereIEnhet={saksbehandlereIEnhet}
+            fnrFilter={fnrFilter}
+          />
+        ),
+      })}
     </>
-  ) : (
-    mapResult(gosysOppgaverResult, {
-      pending: <Spinner visible={true} label="Henter nye Gosys-oppgaver" />,
-      error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente Gosys-oppgaver'}</ApiErrorAlert>,
-    })
   )
 }
 

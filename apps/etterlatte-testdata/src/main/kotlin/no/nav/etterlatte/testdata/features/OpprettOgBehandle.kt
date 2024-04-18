@@ -98,9 +98,6 @@ class OpprettOgBehandle(private val dollyService: DollyService) : TestDataFeatur
         logger.info("Venter $ventetid så Dolly rekk å komme ajour")
         Thread.sleep(ventetid)
         logger.info("Ferdig med $ventetid-venting")
-        if (bestillinger.any { !it.ferdig }) {
-            throw IllegalStateException("Ikke alle bestillinger er ferdige!")
-        }
         return dollyService.hentFamilier(gruppeid, accessToken) - baselineFamilier.toSet()
     }
 }

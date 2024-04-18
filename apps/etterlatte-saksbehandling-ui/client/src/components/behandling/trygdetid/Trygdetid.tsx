@@ -13,7 +13,7 @@ import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { behandlingErIverksattEllerSamordnet } from '~components/behandling/felles/utils'
+import { behandlingErIverksatt } from '~components/behandling/felles/utils'
 import { VedtakResultat } from '~components/behandling/useVedtaksResultat'
 import { EnkelPersonTrygdetid } from '~components/behandling/trygdetid/EnkelPersonTrygdetid'
 import { BeregnetSamletTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetSamletTrygdetid'
@@ -95,7 +95,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         trygdetider.length == 0 ||
         manglerTrygdetid(trygdetider, personopplysninger?.avdoede)
       ) {
-        if (behandlingErIverksattEllerSamordnet(behandling.status)) {
+        if (behandlingErIverksatt(behandling.status)) {
           setHarPilotTrygdetid(true)
         } else if (redigerbar) {
           requestOpprettTrygdetid(behandling.id, (trygdetider: ITrygdetid[]) => {

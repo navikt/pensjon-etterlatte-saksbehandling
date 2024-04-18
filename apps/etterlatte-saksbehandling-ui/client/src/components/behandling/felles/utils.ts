@@ -64,6 +64,7 @@ export const behandlingErRedigerbar = (status: IBehandlingStatus, enhetId: strin
   return enhetErSkrivbar(enhetId, enheter) && statusErRedigerbar(status)
 }
 
+//TODO gir denne mening?
 export const erFerdigBehandlet = (status: IBehandlingStatus): boolean => {
   return (
     status === IBehandlingStatus.ATTESTERT ||
@@ -74,11 +75,8 @@ export const erFerdigBehandlet = (status: IBehandlingStatus): boolean => {
     status === IBehandlingStatus.AVBRUTT
   )
 }
-export const behandlingErIverksattEllerSamordnet = (behandlingStatus: IBehandlingStatus): boolean =>
-  behandlingStatus === IBehandlingStatus.IVERKSATT ||
-  behandlingStatus === IBehandlingStatus.AVSLAG ||
-  behandlingStatus === IBehandlingStatus.SAMORDNET ||
-  behandlingStatus === IBehandlingStatus.TIL_SAMORDNING
+export const behandlingErIverksatt = (behandlingStatus: IBehandlingStatus): boolean =>
+  behandlingStatus === IBehandlingStatus.IVERKSATT || behandlingStatus === IBehandlingStatus.AVSLAG
 
 export function requireNotNull<T>(value: T | null, message: string): T {
   if (!!value) return value

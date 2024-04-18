@@ -15,6 +15,7 @@ import io.mockk.slot
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.toUUID30
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -135,7 +136,7 @@ class SimuleringOsRouteTest {
                 // Verifiser verdier uavhengig av periode
                 oppdragslinje.forEach {
                     it.vedtakId shouldBe vedtak.id.toString()
-                    it.henvisning shouldBe vedtak.behandlingId.toUUID30()
+                    it.henvisning shouldBe vedtak.behandlingId.toUUID30().value
                     it.utbetalesTilId shouldBe vedtak.soeker.value
                     it.saksbehId shouldBe "Z991122"
                     it.kodeEndringLinje shouldBe "ENDR"

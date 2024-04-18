@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering.simulering
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.toUUID30
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -105,7 +106,7 @@ class SimuleringOsService(
             datoVedtakFom = up.periode.fom.atDay(1).toOppdragDate()
             datoVedtakTom = up.periode.tom?.atEndOfMonth()?.toOppdragDate()
             utbetalesTilId = vedtak.soeker.value
-            henvisning = vedtak.behandlingId.toUUID30()
+            henvisning = vedtak.behandlingId.toUUID30().value
             saksbehId = brukerTokenInfo.ident()
 
             kodeEndringLinje = "ENDR"
@@ -140,8 +141,6 @@ private val Vedtak.virkningstidspunkt: YearMonth
 private fun LocalDate.toOppdragDate(): String =
     DateTimeFormatter.ofPattern("yyyy-MM-dd")
         .withZone(norskTidssone).format(this)
-
-internal fun UUID.toUUID30() = this.toString().replace("-", "").substring(0, 30)
 
 class IkkeStoettetSimulering(vedtakType: VedtakType, behandlingId: UUID) : UgyldigForespoerselException(
     code = "SIMULERING_IKKE_STOETTET",

@@ -205,7 +205,7 @@ class GosysOppgaveServiceImpl(
                     },
                 fnr = fnrByAktoerId[this.aktoerId],
                 enhet = this.tildeltEnhetsnr,
-                saksbehandler = this.tilordnetRessurs?.let { OppgaveSaksbehandler(it) },
+                saksbehandler = this.tilordnetRessurs?.let { OppgaveSaksbehandler(it, it) },
                 beskrivelse = this.beskrivelse,
                 journalpostId = this.journalpostId,
             )

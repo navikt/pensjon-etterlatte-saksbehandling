@@ -1,15 +1,16 @@
 import { BodyShort, Box, Button, Dropdown, Heading, Label, Modal } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { ChevronDownIcon, ExternalLinkIcon, EyeIcon } from '@navikt/aksel-icons'
-import { useContext, useState } from 'react'
-import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/components/Tags'
+import React, { useContext, useState } from 'react'
+import { TemaTag } from '~components/oppgavebenk/components/Tags'
 import { formaterFnr, formaterStringDato } from '~utils/formattering'
 import { ConfigContext } from '~clientConfig'
 import { FlexRow } from '~shared/styled'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { FerdigstillGosysOppgave } from '../gosys/FerdigstillGosysOppgave'
 import { OverfoerOppgaveTilGjenny } from '../gosys/OverfoerOppgaveTilGjenny'
-import { OppgaveDTO, Oppgavetype } from '~shared/types/oppgave'
+import { formaterOppgavetype, GosysOppgave } from '~shared/types/Gosys'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 const TagRow = styled.div`
   display: flex;
@@ -29,17 +30,13 @@ export interface GosysActionToggle {
   konverter?: boolean
 }
 
-export const GosysOppgaveModal = ({
-  oppgave,
-  tilhoererInnloggetSaksbehandler,
-}: {
-  oppgave: OppgaveDTO
-  tilhoererInnloggetSaksbehandler: boolean
-}) => {
+export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
+
   const [open, setOpen] = useState(false)
   const [toggle, setToggle] = useState<GosysActionToggle>({})
 
-  const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandler, beskrivelse, sakType, journalpostId } = oppgave
+  const { opprettet, frist, status, fnr, enhet, saksbehandler, beskrivelse, tema, oppgavetype, journalpostId } = oppgave
 
   const configContext = useContext(ConfigContext)
 
@@ -57,8 +54,7 @@ export const GosysOppgaveModal = ({
 
         <Modal.Body>
           <TagRow>
-            <SaktypeTag sakType={sakType} />
-            <OppgavetypeTag oppgavetype={Oppgavetype.GOSYS} />
+            <TemaTag tema={tema} />
           </TagRow>
           <InfoGrid>
             <div>
@@ -76,12 +72,12 @@ export const GosysOppgaveModal = ({
               <BodyShort>{status}</BodyShort>
             </div>
             <div>
-              <Label>Fødselsnummer</Label>
-              <BodyShort>{fnr ? formaterFnr(fnr) : <i>Mangler</i>}</BodyShort>
+              <Label>Oppgavetype</Label>
+              <BodyShort>{formaterOppgavetype(oppgavetype)}</BodyShort>
             </div>
             <div>
-              <Label>Gjelder</Label>
-              <BodyShort>{gjelder}</BodyShort>
+              <Label>Fødselsnummer</Label>
+              <BodyShort>{fnr ? formaterFnr(fnr) : <i>Mangler</i>}</BodyShort>
             </div>
             <div>
               <Label>Enhet</Label>
@@ -115,7 +111,7 @@ export const GosysOppgaveModal = ({
                 Avbryt
               </Button>
 
-              {tilhoererInnloggetSaksbehandler && (
+              {innloggetSaksbehandler.ident === oppgave.saksbehandler?.ident && (
                 <Dropdown>
                   <Button
                     size="small"

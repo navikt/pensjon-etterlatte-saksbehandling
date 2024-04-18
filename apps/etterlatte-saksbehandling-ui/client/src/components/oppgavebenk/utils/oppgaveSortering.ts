@@ -1,5 +1,6 @@
 import { logger } from '~utils/logger'
 import { OppgaveDTO } from '~shared/types/oppgave'
+import { GosysOppgave } from '~shared/types/Gosys'
 
 export interface OppgaveSortering {
   registreringsdatoSortering: Retning
@@ -15,12 +16,12 @@ export const initialSortering: OppgaveSortering = {
 
 type Retning = 'ascending' | 'descending' | 'none'
 
-const sammenlignDato = (a: OppgaveDTO, b: OppgaveDTO) => {
+const sammenlignDato = (a: OppgaveDTO | GosysOppgave, b: OppgaveDTO | GosysOppgave) => {
   // Konverterer datoene til en numerisk verdi og sammenligner dem
   return (!!a.frist ? new Date(a.frist).getTime() : 0) - (!!b.frist ? new Date(b.frist).getTime() : 0)
 }
 
-export function sorterDato(retning: Retning, oppgaver: OppgaveDTO[]) {
+function sorterDato(retning: Retning, oppgaver: OppgaveDTO[] | GosysOppgave[]) {
   switch (retning) {
     case 'ascending':
       return oppgaver.sort(sammenlignDato)
@@ -31,12 +32,12 @@ export function sorterDato(retning: Retning, oppgaver: OppgaveDTO[]) {
   }
 }
 
-const sammenlignFnr = (a: OppgaveDTO, b: OppgaveDTO) => {
+const sammenlignFnr = (a: OppgaveDTO | GosysOppgave, b: OppgaveDTO | GosysOppgave) => {
   // Sammenligner de første 6 sifrene i fødselsnummerene
   return (!!a.fnr ? Number(a.fnr.slice(0, 5)) : 0) - (!!b.fnr ? Number(b.fnr.slice(0, 5)) : 0)
 }
 
-export function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[]) {
+function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[] | GosysOppgave[]) {
   switch (retning) {
     case 'ascending':
       return oppgaver.sort(sammenlignFnr)
@@ -45,6 +46,20 @@ export function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[]) {
     case 'none':
       return oppgaver
   }
+}
+
+export function sorterOppgaver(oppgaver: OppgaveDTO[], sortering: OppgaveSortering): OppgaveDTO[] {
+  const sortertRegistreringsdato = sorterDato(sortering.registreringsdatoSortering, oppgaver)
+  const sortertFrist = sorterDato(sortering.fristSortering, sortertRegistreringsdato)
+
+  return sorterFnr(sortering.fnrSortering, sortertFrist) as OppgaveDTO[]
+}
+
+export function sorterGosysOppgaver(oppgaver: GosysOppgave[], sortering: OppgaveSortering): GosysOppgave[] {
+  const sortertRegistreringsdato = sorterDato(sortering.registreringsdatoSortering, oppgaver)
+  const sortertFrist = sorterDato(sortering.fristSortering, sortertRegistreringsdato)
+
+  return sorterFnr(sortering.fnrSortering, sortertFrist) as GosysOppgave[]
 }
 
 const SORTERING_KEY_LOCAL_STORAGE = 'OPPGAVESORTERING'

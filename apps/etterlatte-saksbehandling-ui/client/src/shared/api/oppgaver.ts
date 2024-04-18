@@ -2,8 +2,7 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { konverterOppgavestatusFilterValuesTilKeys } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { OppgavebenkStats } from '~components/oppgavebenk/state/oppgavebenkState'
-import { NyOppgaveDto, OppgaveDTO, Oppgavetype } from '~shared/types/oppgave'
-import { GosysTema } from '~shared/types/Gosys'
+import { NyOppgaveDto, OppgaveDTO } from '~shared/types/oppgave'
 
 export const hentOppgaverMedStatus = async (args: {
   oppgavestatusFilter: Array<string>
@@ -38,12 +37,6 @@ export const hentSaksbehandlerForOppgaveUnderBehandling = async (
 ): Promise<ApiResponse<Saksbehandler>> =>
   apiClient.get(`/oppgaver/referanse/${referanse}/saksbehandler-underbehandling`)
 
-export const hentGosysOppgaver = async (tema: GosysTema[]): Promise<ApiResponse<OppgaveDTO[]>> => {
-  const queryParams = tema.map((t) => `tema=${t}`).join('&')
-
-  return apiClient.get(`/oppgaver/gosys?${queryParams}`)
-}
-
 export const hentOppgavebenkStats = async (): Promise<ApiResponse<OppgavebenkStats>> => apiClient.get('/oppgaver/stats')
 
 export const hentOppgaverTilknyttetSak = async (sakId: number): Promise<ApiResponse<Array<OppgaveDTO>>> => {
@@ -71,21 +64,12 @@ export interface SaksbehandlerEndringDto {
   versjon: number | null
 }
 
-export const ferdigstilleGosysOppgave = async (args: {
+export const tildelSaksbehandlerApi = async (args: {
   oppgaveId: string
-  versjon: number
-}): Promise<ApiResponse<OppgaveDTO>> =>
-  apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/ferdigstill?versjon=${args.versjon}`, {})
-
-export const feilregistrerGosysOppgave = async (args: {
-  oppgaveId: string
-  beskrivelse: string
-  versjon: number
-}): Promise<ApiResponse<OppgaveDTO>> =>
-  apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/feilregistrer`, {
-    versjon: args.versjon,
-    beskrivelse: args.beskrivelse,
-  })
+  nysaksbehandler: SaksbehandlerEndringDto
+}): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
+  return apiClient.post(`/oppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
+}
 
 export const saksbehandlereIEnhetApi = async (args: {
   enheter: string[]
@@ -95,30 +79,16 @@ export const saksbehandlereIEnhetApi = async (args: {
 
 export const byttSaksbehandlerApi = async (args: {
   oppgaveId: string
-  type: Oppgavetype
   nysaksbehandler: SaksbehandlerEndringDto
 }): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
-  if (args.type == Oppgavetype.GOSYS) {
-    return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
-  } else {
-    return apiClient.post(`/oppgaver/${args.oppgaveId}/bytt-saksbehandler`, { ...args.nysaksbehandler })
-  }
+  return apiClient.post(`/oppgaver/${args.oppgaveId}/bytt-saksbehandler`, { ...args.nysaksbehandler })
 }
 
 export const fjernSaksbehandlerApi = async (args: {
   oppgaveId: string
   sakId: number
-  type: Oppgavetype
-  versjon: number | null
 }): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
-  if (args.type == Oppgavetype.GOSYS) {
-    return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, {
-      saksbehandler: '',
-      versjon: args.versjon,
-    })
-  } else {
-    return apiClient.delete(`/oppgaver/${args.oppgaveId}/saksbehandler`)
-  }
+  return apiClient.delete(`/oppgaver/${args.oppgaveId}/saksbehandler`)
 }
 
 export interface RedigerFristRequest {
@@ -133,14 +103,9 @@ export interface EndrePaaVentRequest {
 
 export const redigerFristApi = async (args: {
   oppgaveId: string
-  type: Oppgavetype
   redigerFristRequest: RedigerFristRequest
 }): Promise<ApiResponse<void>> => {
-  if (args.type == Oppgavetype.GOSYS) {
-    return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/endre-frist`, { ...args.redigerFristRequest })
-  } else {
-    return apiClient.put(`/oppgaver/${args.oppgaveId}/frist`, { ...args.redigerFristRequest })
-  }
+  return apiClient.put(`/oppgaver/${args.oppgaveId}/frist`, { ...args.redigerFristRequest })
 }
 
 export const settOppgavePaaVentApi = async (args: {

@@ -1,6 +1,5 @@
 import { Button } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
-import { GosysOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
 import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/OmgjoerVedtakModal'
 import React from 'react'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
@@ -84,8 +83,6 @@ export const HandlingerForOppgave = ({
           )}
         </>
       )
-    case Oppgavetype.GOSYS:
-      return <GosysOppgaveModal oppgave={oppgave} tilhoererInnloggetSaksbehandler={erInnloggetSaksbehandlerOppgave} />
     case Oppgavetype.KLAGE:
       return erInnloggetSaksbehandlerOppgave ? (
         <Button size="small" href={`/klage/${referanse}`} as="a">

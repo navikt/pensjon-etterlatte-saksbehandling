@@ -52,6 +52,7 @@ data class GosysEndreFristRequest(
 
 interface GosysOppgaveKlient {
     suspend fun hentOppgaver(
+        saksbehandler: String?,
         tema: List<String>,
         enhetsnr: String? = null,
         brukerTokenInfo: BrukerTokenInfo,
@@ -99,6 +100,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
     private val resourceUrl = config.getString("oppgave.resource.url")
 
     override suspend fun hentOppgaver(
+        saksbehandler: String?,
         tema: List<String>,
         enhetsnr: String?,
         brukerTokenInfo: BrukerTokenInfo,
@@ -112,6 +114,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                     .plus(temaFilter)
                     .plus("&limit=1000")
                     .plus(enhetsnr?.let { "&tildeltEnhetsnr=$it" } ?: "")
+                    .plus(saksbehandler?.let { "&tilordnetRessurs=$it" } ?: "")
 
             return downstreamResourceClient
                 .get(

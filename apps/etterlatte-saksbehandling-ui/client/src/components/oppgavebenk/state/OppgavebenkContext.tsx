@@ -7,11 +7,12 @@ import {
 import { hentOppgavebenkStats } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { OppgaveDTO } from '~shared/types/oppgave'
+import { GosysOppgave } from '~shared/types/Gosys'
 
 export interface OppgavebenkStateDispatcher {
   setOppgavelistaOppgaver: (oppgaver: OppgaveDTO[]) => void
   setMinOppgavelisteOppgaver: (oppgaver: OppgaveDTO[]) => void
-  setGosysOppgavelisteOppgaver: (oppgaver: OppgaveDTO[]) => void
+  setGosysOppgavelisteOppgaver: (oppgaver: GosysOppgave[]) => void
   setOppgavebenkStats: (stats: OppgavebenkStats) => void
 }
 

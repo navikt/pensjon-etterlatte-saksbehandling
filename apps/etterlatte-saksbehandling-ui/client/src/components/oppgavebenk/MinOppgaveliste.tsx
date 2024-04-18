@@ -40,31 +40,22 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
     return oppgaver.filter((o) => o.saksbehandler?.ident === innloggetSaksbehandler.ident)
   }
 
-  const oppdaterSaksbehandlerTildeling = (
-    oppgave: OppgaveDTO,
-    saksbehandler: OppgaveSaksbehandler | null,
-    versjon: number | null
-  ) => {
+  const oppdaterSaksbehandlerTildeling = (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => {
     setTimeout(() => {
       dispatcher.setOppgavelistaOppgaver(
-        finnOgOppdaterSaksbehandlerTildeling(oppgavebenkState.oppgavelistaOppgaver, oppgave.id, saksbehandler, versjon)
+        finnOgOppdaterSaksbehandlerTildeling(oppgavebenkState.oppgavelistaOppgaver, oppgave.id, saksbehandler)
       )
       if (innloggetSaksbehandler.ident === saksbehandler?.ident) {
         dispatcher.setMinOppgavelisteOppgaver(
           sorterOppgaverEtterOpprettet(
-            leggTilOppgavenIMinliste(oppgavebenkState.minOppgavelisteOppgaver, oppgave, saksbehandler, versjon)
+            leggTilOppgavenIMinliste(oppgavebenkState.minOppgavelisteOppgaver, oppgave, saksbehandler)
           )
         )
       } else {
         dispatcher.setMinOppgavelisteOppgaver(
           sorterOppgaverEtterOpprettet(
             filtrerKunInnloggetBrukerOppgaver(
-              finnOgOppdaterSaksbehandlerTildeling(
-                oppgavebenkState.minOppgavelisteOppgaver,
-                oppgave.id,
-                saksbehandler,
-                versjon
-              )
+              finnOgOppdaterSaksbehandlerTildeling(oppgavebenkState.minOppgavelisteOppgaver, oppgave.id, saksbehandler)
             )
           )
         )
@@ -98,14 +89,8 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
       <Oppgaver
         oppgaver={oppgavebenkState.minOppgavelisteOppgaver}
         oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
-        oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
-          oppdaterFrist(
-            dispatcher.setMinOppgavelisteOppgaver,
-            oppgavebenkState.minOppgavelisteOppgaver,
-            id,
-            nyfrist,
-            versjon
-          )
+        oppdaterFrist={(id: string, nyfrist: string) =>
+          oppdaterFrist(dispatcher.setMinOppgavelisteOppgaver, oppgavebenkState.minOppgavelisteOppgaver, id, nyfrist)
         }
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         revurderingsaarsaker={revurderingsaarsaker}

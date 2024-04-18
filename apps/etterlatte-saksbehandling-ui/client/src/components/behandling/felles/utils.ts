@@ -75,7 +75,7 @@ export const erFerdigBehandlet = (status: IBehandlingStatus): boolean => {
   )
 }
 export const behandlingErIverksatt = (behandlingStatus: IBehandlingStatus): boolean =>
-  behandlingStatus === IBehandlingStatus.IVERKSATT || behandlingStatus === IBehandlingStatus.AVSLAG
+  behandlingStatus === IBehandlingStatus.IVERKSATT
 
 export function requireNotNull<T>(value: T | null, message: string): T {
   if (!!value) return value

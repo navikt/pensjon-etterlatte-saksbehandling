@@ -29,7 +29,7 @@ class MigreringBrevDataService(private val brevdataFacade: BrevdataFacade) {
                     brukerTokenInfo,
                     generellBrevData.sak.sakType,
                 )
-            BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall.fra(generellBrevData, utbetalingsinfo, migreringRequest = null)
+            BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall.fra(generellBrevData, utbetalingsinfo)
         }
     }
 }

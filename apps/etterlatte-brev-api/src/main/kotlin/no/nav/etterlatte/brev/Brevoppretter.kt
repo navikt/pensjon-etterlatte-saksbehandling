@@ -162,7 +162,6 @@ class Brevoppretter(
                             generellBrevData,
                             bruker,
                             kode,
-                            migrering = null,
                             brevDataMapping,
                         ),
                     )

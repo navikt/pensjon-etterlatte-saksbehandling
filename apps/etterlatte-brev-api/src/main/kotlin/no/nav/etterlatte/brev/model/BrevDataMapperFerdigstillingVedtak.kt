@@ -14,7 +14,6 @@ import no.nav.etterlatte.brev.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE
 import no.nav.etterlatte.brev.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER
 import no.nav.etterlatte.brev.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
 import no.nav.etterlatte.brev.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
-import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.BarnepensjonAvslag
@@ -37,7 +36,6 @@ data class BrevDataFerdigstillingRequest(
     val bruker: BrukerTokenInfo,
     val innholdMedVedlegg: InnholdMedVedlegg,
     val kode: Brevkoder,
-    val automatiskMigreringRequest: MigreringBrevRequest?,
     val tittel: String? = null,
 )
 
@@ -103,7 +101,6 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
                 etterbetaling = etterbetaling.await(),
                 trygdetid = requireNotNull(trygdetid.await()),
                 grunnbeloep = grunnbeloep.await(),
-                migreringRequest = null,
                 utlandstilknytning = generellBrevData.utlandstilknytning?.type,
                 avdoede = generellBrevData.personerISak.avdoede,
             )

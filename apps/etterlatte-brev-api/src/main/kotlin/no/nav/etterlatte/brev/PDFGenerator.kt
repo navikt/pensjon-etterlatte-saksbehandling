@@ -97,7 +97,6 @@ class PDFGenerator(
                             bruker,
                             InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
                             brevkodePar,
-                            automatiskMigreringRequest = null,
                             brev.tittel,
                         ),
                     ),

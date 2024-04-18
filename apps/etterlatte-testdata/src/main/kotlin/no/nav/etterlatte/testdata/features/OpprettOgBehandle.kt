@@ -52,7 +52,7 @@ class OpprettOgBehandle(private val dollyService: DollyService) : TestDataFeatur
 
             post {
                 val familier = opprettFamilierIDolly(
-                    2,
+                    100,
                     call.receiveParameters()["gruppeId"]!!.toLong(),
                     Duration.ofSeconds(45)
                 )

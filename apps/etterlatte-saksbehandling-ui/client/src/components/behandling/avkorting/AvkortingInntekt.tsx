@@ -37,11 +37,13 @@ export const AvkortingInntekt = ({
   avkorting,
   redigerbar,
   setAvkorting,
+  resetInntektsavkortingValidering,
 }: {
   behandling: IBehandlingReducer
   avkorting: IAvkorting | undefined
   redigerbar: boolean
   setAvkorting: (avkorting: IAvkorting) => void
+  resetInntektsavkortingValidering: () => void
 }) => {
   if (!behandling) return <Alert variant="error">Manlge behandling</Alert>
 
@@ -296,6 +298,7 @@ export const AvkortingInntekt = ({
                   onClick={(e) => {
                     e.preventDefault()
                     setVisForm(true)
+                    resetInntektsavkortingValidering()
                   }}
                 >
                   {finnesRedigerbartGrunnlag() ? 'Rediger' : 'Legg til'}

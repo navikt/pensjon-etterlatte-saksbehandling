@@ -57,7 +57,11 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const brevutfallOgEtterbetaling = useAppSelector(
     (state) => state.behandlingReducer.behandling?.brevutfallOgEtterbetaling
   )
+
+  const behandlingsstatus = useAppSelector((state) => state.behandlingReducer.behandling?.status)
+
   const [manglerBrevutfall, setManglerbrevutfall] = useState(false)
+  const [manglerAvkorting, setManglerAvkorting] = useState(false)
 
   const erOpphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
@@ -70,6 +74,14 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const opprettEllerOppdaterVedtak = () => {
     const erBarnepensjon = behandling.sakType === SakType.BARNEPENSJON
     const skalSendeBrev = behandling.sendeBrev
+
+    if (!erBarnepensjon && behandlingsstatus == IBehandlingStatus.BEREGNET) {
+      setManglerAvkorting(true)
+      return
+    } else {
+      setManglerAvkorting(false)
+    }
+
     if (skalSendeBrev && !brevutfallOgEtterbetaling?.brevutfall) {
       setManglerbrevutfall(true)
       return
@@ -138,13 +150,23 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                           <Avkorting
                             behandling={behandling}
                             resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
+                            resetInntektsavkortingValidering={() => setManglerAvkorting(false)}
                           />
                           {visSanksjon && <Sanksjon behandling={behandling} />}
                         </>
                       )
                   }
                 })()}
-                {manglerBrevutfall && <Alert variant="error">Du må fylle ut utfall i brev</Alert>}
+                {manglerBrevutfall && (
+                  <Alert style={{ maxWidth: '16em' }} variant="error">
+                    Du må fylle ut utfall i brev
+                  </Alert>
+                )}
+                {manglerAvkorting && (
+                  <Alert style={{ maxWidth: '16em' }} variant="error">
+                    Du må legge til inntektsavkorting
+                  </Alert>
+                )}
               </BeregningWrapper>
             )
           )}

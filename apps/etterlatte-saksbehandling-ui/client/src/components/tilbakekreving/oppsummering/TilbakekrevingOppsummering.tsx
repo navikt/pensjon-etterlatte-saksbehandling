@@ -33,7 +33,9 @@ export function TilbakekrevingOppsummering({
   }
 
   useEffect(() => {
-    valider()
+    if (redigerbar) {
+      valider()
+    }
   }, [])
 
   const valider = () => {

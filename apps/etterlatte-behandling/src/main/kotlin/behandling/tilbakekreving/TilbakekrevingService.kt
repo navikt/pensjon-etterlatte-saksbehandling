@@ -160,7 +160,6 @@ class TilbakekrevingService(
             }
             tilbakekrevingDao.lagreTilbakekreving(
                 eksisterende.copy(
-                    status = TilbakekrevingStatus.UNDER_ARBEID,
                     sendeBrev = sendeBrev,
                 ),
             )

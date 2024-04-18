@@ -78,7 +78,10 @@ export function Tilbakekrevingsbehandling() {
                 path="utbetalinger"
                 element={<TilbakekrevingUtbetalinger behandling={tilbakekreving} redigerbar={redigerbar} />}
               />
-              <Route path="oppsummering" element={<TilbakekrevingOppsummering behandling={tilbakekreving} />} />
+              <Route
+                path="oppsummering"
+                element={<TilbakekrevingOppsummering behandling={tilbakekreving} redigerbar={redigerbar} />}
+              />
               <Route path="brev" element={<TilbakekrevingBrev behandling={tilbakekreving} redigerbar={redigerbar} />} />
               <Route path="*" element={<Navigate to="vurdering" replace />} />
             </Routes>

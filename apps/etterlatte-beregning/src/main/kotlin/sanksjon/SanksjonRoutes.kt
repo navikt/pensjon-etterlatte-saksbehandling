@@ -14,7 +14,6 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -57,8 +56,8 @@ fun Route.sanksjon(
         route("{$SANKSJONID_CALL_PARAMETER}") {
             delete {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                    logger.info("Sletter sanksjon for behandlingId=$it")
-                    sanksjonService.slettSanksjon(behandlingId, sanksjonId)
+                    logger.info("Sletter sanksjon for behandlingId=$it med sanksjonId=$sanksjonId")
+                    sanksjonService.slettSanksjon(sanksjonId)
                     call.respond(HttpStatusCode.OK)
                 }
             }

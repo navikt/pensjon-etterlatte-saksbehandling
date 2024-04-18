@@ -83,7 +83,7 @@ internal class SanksjonRepositoryTest(ds: DataSource) {
 
         lagretSanksjon!!.size shouldBe 1
 
-        sanksjonRepository.slettSanksjon(behandlingId, lagretSanksjon.first().id!!)
+        sanksjonRepository.slettSanksjon(lagretSanksjon.first().id!!)
 
         val ingenSanksjoner = sanksjonRepository.hentSanksjon(behandlingId)
 

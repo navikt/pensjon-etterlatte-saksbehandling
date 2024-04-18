@@ -204,15 +204,14 @@ internal class SanksjonServiceTest {
 
         @Test
         fun `Skal returnere null hvis det ikke finnes sanksjoner`() {
-            val behandlingId = UUID.randomUUID()
             val sanksjonId = UUID.randomUUID()
 
-            every { sanksjonRepository.slettSanksjon(behandlingId, sanksjonId) } returns 1
+            every { sanksjonRepository.slettSanksjon(sanksjonId) } returns 1
 
-            service.slettSanksjon(behandlingId, sanksjonId) shouldBe Unit
+            service.slettSanksjon(sanksjonId) shouldBe Unit
 
             coVerify {
-                sanksjonRepository.slettSanksjon(behandlingId, sanksjonId)
+                sanksjonRepository.slettSanksjon(sanksjonId)
             }
         }
     }

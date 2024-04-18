@@ -48,7 +48,7 @@ export const ControlledMaanedVelger = <T extends FieldValues>({
   } as UseMonthPickerOptions)
 
   useEffect(() => {
-    if (field.value === undefined) setSelected(undefined)
+    if (!!field.value) setSelected(undefined)
   }, [])
 
   // Dette tillater å sette value for feltet via setValue utenfor komponenten

@@ -12,7 +12,7 @@ import { PencilIcon } from '@navikt/aksel-icons'
 import { formaterStringDato } from '~utils/formattering'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { useForm } from 'react-hook-form'
-import { startOfDay, formatISO } from 'date-fns'
+import { formatISO, isBefore } from 'date-fns'
 import { hentSanksjon, lagreSanksjon, slettSanksjon } from '~shared/api/sanksjon'
 import { TableWrapper } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 
@@ -70,23 +70,23 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     setError,
     setValue,
     formState: { errors },
-  } = useForm({
+  } = useForm<SanksjonDefaultValue>({
     defaultValues: {
       datoFom: undefined,
       datoTom: undefined,
       beskrivelse: '',
-    } as SanksjonDefaultValue,
+    },
   })
 
   const submitSanksjon = (data: SanksjonDefaultValue) => {
     const { datoFom, datoTom, beskrivelse } = data
 
     if (datoFom) {
-      if (behandling.virkningstidspunkt?.dato && datoFom < startOfDay(new Date(behandling.virkningstidspunkt.dato))) {
-        setError('datoFom', { type: 'manual', message: 'Fra dato før virkningstidspunkt' })
+      if (behandling.virkningstidspunkt?.dato && isBefore(datoFom, new Date(behandling.virkningstidspunkt.dato))) {
+        setError('datoFom', { type: 'manual', message: 'Fra dato må være etter virkningstidspunkt' })
         return
       }
-      if (datoTom && startOfDay(datoFom) > startOfDay(datoTom)) {
+      if (datoTom && isBefore(datoTom, datoFom)) {
         setError('datoTom', { type: 'manual', message: 'Til dato må være etter Fra dato' })
         return
       }
@@ -198,7 +198,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                                     setValue('datoFom', new Date(lagretSanksjon.fom))
                                     setValue('beskrivelse', lagretSanksjon.beskrivelse)
                                     if (lagretSanksjon.tom) setValue('datoTom', new Date(lagretSanksjon.tom))
-                                    else setValue('datoTom', null)
+                                    else reset({ datoTom: null })
                                     setRedigerSanksjonId(lagretSanksjon.id!!)
                                     setVisForm(true)
                                   }}

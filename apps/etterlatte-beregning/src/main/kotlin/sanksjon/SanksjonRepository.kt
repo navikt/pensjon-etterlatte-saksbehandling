@@ -83,19 +83,12 @@ class SanksjonRepository(private val dataSource: DataSource) {
         }
     }
 
-    fun slettSanksjon(
-        behandlingId: UUID,
-        sanksjonId: UUID,
-    ): Int =
+    fun slettSanksjon(sanksjonId: UUID): Int =
         dataSource.transaction { tx ->
             queryOf(
                 statement =
-                    "DELETE FROM sanksjon WHERE behandling_id = :behandlingId AND id = :id",
-                paramMap =
-                    mapOf(
-                        "behandlingId" to behandlingId,
-                        "id" to sanksjonId,
-                    ),
+                    "DELETE FROM sanksjon WHERE id = ?",
+                sanksjonId,
             ).let { query -> tx.run(query.asUpdate) }
         }
 

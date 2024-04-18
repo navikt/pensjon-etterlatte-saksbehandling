@@ -88,7 +88,7 @@ internal class SanksjonRoutesTest {
 
     @Test
     fun `Skal returnere 200 naar sanksjon slettes`() {
-        coEvery { sanksjonService.slettSanksjon(any(), any()) } returns Unit
+        coEvery { sanksjonService.slettSanksjon(any()) } returns Unit
 
         testApplication {
             runServer(server) {

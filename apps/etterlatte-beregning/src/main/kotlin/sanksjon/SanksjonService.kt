@@ -45,12 +45,9 @@ class SanksjonService(
         return sanksjonRepository.oppdaterSanksjon(sanksjon, brukerTokenInfo.ident())
     }
 
-    fun slettSanksjon(
-        behandlingId: UUID,
-        sanksjonId: UUID,
-    ) {
-        logger.info("Sletter sanksjon med behandlingID=$behandlingId og sanksjonID=$sanksjonId")
-        sanksjonRepository.slettSanksjon(behandlingId, sanksjonId)
+    fun slettSanksjon(sanksjonId: UUID) {
+        logger.info("Sletter sanksjon med sanksjonID=$sanksjonId")
+        sanksjonRepository.slettSanksjon(sanksjonId)
     }
 }
 

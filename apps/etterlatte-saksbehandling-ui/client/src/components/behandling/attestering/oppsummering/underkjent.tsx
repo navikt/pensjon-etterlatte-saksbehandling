@@ -1,5 +1,4 @@
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
-import { useAppSelector } from '~store/Store'
 import { formaterBehandlingstype, formaterDatoMedKlokkeslett } from '~utils/formattering'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
@@ -9,9 +8,10 @@ import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
-  const innloggetId = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler.ident)
+  const { ident: innloggetId } = useInnloggetSaksbehandler()
   const underkjentSiste = behandlingsInfo.underkjentLogg?.slice(-1)[0]
   const fattetSiste = behandlingsInfo.fattetLogg?.slice(-1)[0]
 

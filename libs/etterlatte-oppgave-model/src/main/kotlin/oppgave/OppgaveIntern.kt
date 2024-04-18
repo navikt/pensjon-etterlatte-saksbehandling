@@ -151,6 +151,7 @@ data class NyOppgaveDto(
     val merknad: String?,
     val referanse: String? = null,
     val frist: Tidspunkt? = null,
+    val saksbehandler: String? = null,
 )
 
 fun opprettNyOppgaveMedReferanseOgSak(

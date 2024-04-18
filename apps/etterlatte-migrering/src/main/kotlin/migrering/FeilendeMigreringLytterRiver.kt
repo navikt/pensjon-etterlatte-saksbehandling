@@ -10,6 +10,8 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.KONTEKST_KEY
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
@@ -33,6 +35,7 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
         initialiserRiver(rapidsConnection, EventNames.FEILA) {
             validate { it.interestedIn(FEILENDE_STEG) }
             validate { it.requireKey(KILDE_KEY) }
+            validate { it.requireAny(KONTEKST_KEY, listOf(Kontekst.MIGRERING.name, Kontekst.VENT.name)) }
             validate { it.requireAny(KILDE_KEY, listOf(Vedtaksloesning.PESYS.name, Vedtaksloesning.GJENOPPRETTA.name)) }
             validate { it.interestedIn("vedtak.behandlingId") }
             validate { it.interestedIn(BEHANDLING_ID_KEY) }

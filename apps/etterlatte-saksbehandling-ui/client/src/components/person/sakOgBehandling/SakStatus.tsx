@@ -8,16 +8,13 @@ import { VedtakType } from '~components/vedtak/typer'
 import { formaterStringDato } from '~utils/formattering'
 import { VedtaketKlagenGjelder } from '~shared/types/Klage'
 import { RecordFillIcon, XMarkIcon } from '@navikt/aksel-icons'
+import { hentStatusPaaSak } from '~components/person/sakOgBehandling/sakStatusUtils'
 
 export const SakStatus = ({ sakId }: { sakId: number }) => {
   const [vedtakISakResult, vedtakISakFetch] = useApiCall(hentAlleVedtakISak)
 
   const visStatusPaaSisteVedtak = (vedtakISak: VedtaketKlagenGjelder[]): ReactNode => {
-    const sisteVedtak = vedtakISak
-      .filter((vedtak) => ![VedtakType.AVVIST_KLAGE, VedtakType.TILBAKEKREVING].includes(vedtak.vedtakType!))
-      .filter((vedtak) => !!vedtak.datoAttestert)
-      .sort((a, b) => new Date(a.datoAttestert!).valueOf() - new Date(b.datoAttestert!).valueOf())
-      .pop()
+    const sisteVedtak = hentStatusPaaSak(vedtakISak)
 
     switch (sisteVedtak?.vedtakType) {
       case VedtakType.INNVILGELSE:
@@ -56,8 +53,13 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
       {mapResult(vedtakISakResult, {
         pending: <Loader />,
         error: <Tag variant="error">Kunne ikke hente status</Tag>,
-        success: (vedtakISak) =>
-          !!vedtakISak?.length ? visStatusPaaSisteVedtak(vedtakISak) : <Tag variant="neutral">Ingen vedtak på sak</Tag>,
+        success: (vedtakISak) => {
+          return !!vedtakISak?.length ? (
+            visStatusPaaSisteVedtak(vedtakISak)
+          ) : (
+            <Tag variant="neutral">Ingen vedtak på sak</Tag>
+          )
+        },
       })}
     </SpaceChildren>
   )

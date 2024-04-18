@@ -9,13 +9,13 @@ import { Buildings3Icon, LocationPinIcon } from '@navikt/aksel-icons'
 import { EndreEnhet } from '~components/person/sakOgBehandling/EndreEnhet'
 import { ISakMedUtlandstilknytning } from '~shared/types/sak'
 import styled from 'styled-components'
-import { useAppSelector } from '~store/Store'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { SakStatus } from '~components/person/sakOgBehandling/SakStatus'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const SakOversiktHeader = ({ sak, fnr }: { sak: ISakMedUtlandstilknytning; fnr: string }) => {
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [navkontorResult, hentNavkontor] = useApiCall(hentNavkontorForPerson)
 

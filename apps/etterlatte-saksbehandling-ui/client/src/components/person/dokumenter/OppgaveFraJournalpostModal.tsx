@@ -2,8 +2,8 @@ import { Journalpost } from '~shared/types/Journalpost'
 import { Alert, Button, Detail, Heading, Link, Modal } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaverMedReferanse, opprettOppgave, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
-import { isFailure, isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
+import { hentOppgaverMedReferanse, opprettOppgave } from '~shared/api/oppgaver'
+import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
 import { FlexRow } from '~shared/styled'
@@ -31,7 +31,6 @@ export const OppgaveFraJournalpostModal = ({
 
   const [opprettOppgaveStatus, apiOpprettOppgave] = useApiCall(opprettOppgave)
   const [hentOppgaverStatus, hentOppgaver] = useApiCall(hentOppgaverMedReferanse)
-  const [tildelSaksbehandlerStatus, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
 
   useEffect(() => {
     if (isOpen) {
@@ -55,16 +54,11 @@ export const OppgaveFraJournalpostModal = ({
             referanse: journalpost.journalpostId,
             merknad: 'Manuell redigering av journalpost',
             oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
+            saksbehandler: innloggetSaksbehandler.ident,
           },
         },
         (oppgave) => {
-          tildelSaksbehandler(
-            {
-              oppgaveId: oppgave.id,
-              nysaksbehandler: { saksbehandler: innloggetSaksbehandler.ident, versjon: null },
-            },
-            () => navigate(`/oppgave/${oppgave.id}`)
-          )
+          navigate(`/oppgave/${oppgave.id}`)
         }
       )
     }
@@ -119,12 +113,6 @@ export const OppgaveFraJournalpostModal = ({
           ),
         })}
 
-        {isFailure(tildelSaksbehandlerStatus) && (
-          <Alert variant="error">
-            Oppgaven ble opprettet, men tildeling feilet. Gå til oppgavelisten for å tildele den manuelt
-          </Alert>
-        )}
-
         <Modal.Footer>
           <FlexRow justify="right">
             <Button variant="tertiary" onClick={() => setIsOpen(false)}>
@@ -134,7 +122,7 @@ export const OppgaveFraJournalpostModal = ({
             <Button
               onClick={opprettJournalfoeringsoppgave}
               disabled={!kanOppretteOppgave || !isSuccess(sakStatus)}
-              loading={isPending(opprettOppgaveStatus) || isPending(tildelSaksbehandlerStatus)}
+              loading={isPending(opprettOppgaveStatus)}
             >
               Opprett oppgave
             </Button>

@@ -16,6 +16,13 @@ export function lagreTilbakekrevingsvurdering(args: {
   return apiClient.put(`/tilbakekreving/${args.behandlingsId}/vurdering`, { ...args.vurdering })
 }
 
+export function lagreSkalSendeBrev(args: {
+  behandlingsId: string
+  skalSendeBrev: boolean
+}): Promise<ApiResponse<TilbakekrevingBehandling>> {
+  return apiClient.put(`/tilbakekreving/${args.behandlingsId}/skal-sende-brev`, { skalSendeBrev: args.skalSendeBrev })
+}
+
 export function lagreTilbakekrevingsperioder(args: {
   behandlingsId: string
   perioder: TilbakekrevingPeriode[]

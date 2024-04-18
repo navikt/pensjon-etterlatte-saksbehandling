@@ -2,28 +2,53 @@ import { Button, ErrorSummary, Heading } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { TilbakekrevingVurderingOppsummering } from '~components/tilbakekreving/oppsummering/TilbakekrevingVurderingOppsummering'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { validerTilbakekreving } from '~shared/api/tilbakekreving'
-import { isFailure } from '~shared/api/apiUtils'
+import { fattVedtak, validerTilbakekreving } from '~shared/api/tilbakekreving'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
 import { ApiError } from '~shared/api/apiClient'
-import { isPending } from '@reduxjs/toolkit'
+import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
+import { TilbakekrevingSkalSendeBrev } from './TilbakekrevingSkalSendeBrev'
+import Spinner from '~shared/Spinner'
 
-export function TilbakekrevingOppsummering({ behandling }: { behandling: TilbakekrevingBehandling }) {
+export function TilbakekrevingOppsummering({
+  behandling,
+  redigerbar,
+}: {
+  behandling: TilbakekrevingBehandling
+  redigerbar: boolean
+}) {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const [validerTilbakekrevingStatus, validerTilbakekrevingRequest] = useApiCall(validerTilbakekreving)
+  const [gyldigTilbakekreving, setGyldigTilbakekreving] = useState(false)
 
-  const validerVurderingOgPerioder = () => {
-    validerTilbakekrevingRequest(behandling.id, (lagretTilbakekreving) => {
-      dispatch(addTilbakekreving(lagretTilbakekreving))
-      navigate(`/tilbakekreving/${behandling?.id}/brev`)
-    })
+  const gaaTilBrev = () => {
+    navigate(`/tilbakekreving/${behandling?.id}/brev`)
+  }
+
+  useEffect(() => {
+    if (redigerbar) {
+      valider()
+    }
+  }, [])
+
+  const valider = () => {
+    validerTilbakekrevingRequest(
+      behandling.id,
+      (lagretTilbakekreving) => {
+        dispatch(addTilbakekreving(lagretTilbakekreving))
+        setGyldigTilbakekreving(true)
+      },
+      () => {
+        setGyldigTilbakekreving(false)
+      }
+    )
   }
 
   return (
@@ -37,15 +62,29 @@ export function TilbakekrevingOppsummering({ behandling }: { behandling: Tilbake
       </ContentHeader>
       <InnholdPadding>
         <TilbakekrevingVurderingOppsummering behandling={behandling} />
-        {isFailure(validerTilbakekrevingStatus) && (
-          <TilbakekrevingValideringsfeil error={validerTilbakekrevingStatus.error} />
-        )}
+        <TilbakekrevingSkalSendeBrev behandling={behandling} redigerbar={redigerbar} />
+        {mapResult(validerTilbakekrevingStatus, {
+          pending: <Spinner label="Sjekker om tilbakekreving er fylt ut" visible={true} />,
+          error: (error) => <TilbakekrevingValideringsfeil error={error} />,
+        })}
       </InnholdPadding>
       <Border style={{ marginTop: '3em' }} />
       <FlexRow $spacing={true} justify="center">
-        <Button variant="primary" onClick={validerVurderingOgPerioder} loading={isPending(validerTilbakekrevingStatus)}>
-          Neste
-        </Button>
+        {behandling.sendeBrev && gyldigTilbakekreving ? (
+          <Button variant="primary" onClick={gaaTilBrev} loading={isPending(validerTilbakekrevingStatus)}>
+            Neste
+          </Button>
+        ) : (
+          <>
+            {redigerbar && gyldigTilbakekreving && (
+              <SendTilAttesteringModal
+                behandlingId={behandling.id}
+                fattVedtakApi={fattVedtak}
+                validerKanSendeTilAttestering={() => gyldigTilbakekreving}
+              />
+            )}
+          </>
+        )}
       </FlexRow>
     </Content>
   )

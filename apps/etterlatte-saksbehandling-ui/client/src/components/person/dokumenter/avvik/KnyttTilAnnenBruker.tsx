@@ -12,7 +12,7 @@ import { oppdaterJournalpost } from '~shared/api/dokument'
 import { MagnifyingGlassIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
 import { useNavigate } from 'react-router-dom'
-import { opprettOppgave, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
+import { opprettOppgave } from '~shared/api/oppgaver'
 import { SakOverfoeringDetailjer } from 'src/components/person/dokumenter/avvik/common/SakOverfoeringDetailjer'
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
@@ -34,7 +34,6 @@ export const KnyttTilAnnentBruker = ({
   const [annenSakStatus, hentAnnenSak] = useApiCall(hentSak)
   const [oppdaterResult, apiOppdaterJournalpost] = useApiCall(oppdaterJournalpost)
   const [opprettOppgaveStatus, apiOpprettOppgave] = useApiCall(opprettOppgave)
-  const [tildelSaksbehandlerStatus, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
 
   const flyttJournalpost = (sak: ISak) => {
     apiOppdaterJournalpost(
@@ -56,28 +55,21 @@ export const KnyttTilAnnentBruker = ({
       ({ journalpostId }) => {
         const oppgaveType = Oppgavetype.JOURNALFOERING
 
-        apiOpprettOppgave(
-          {
-            sakId: sak.id,
-            request: {
-              oppgaveType,
-              referanse: journalpostId,
-              merknad: `Journalpost flyttet fra bruker ${journalpost.bruker?.id}`,
-              oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
-            },
+        apiOpprettOppgave({
+          sakId: sak.id,
+          request: {
+            oppgaveType,
+            referanse: journalpostId,
+            merknad: `Journalpost flyttet fra bruker ${journalpost.bruker?.id}`,
+            oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
+            saksbehandler: innloggetSaksbehandler.ident,
           },
-          (oppgave) => {
-            tildelSaksbehandler({
-              oppgaveId: oppgave.id,
-              nysaksbehandler: { saksbehandler: innloggetSaksbehandler.ident, versjon: null },
-            })
-          }
-        )
+        })
       }
     )
   }
 
-  if (isSuccess(oppdaterResult) && isSuccess(opprettOppgaveStatus) && isSuccess(tildelSaksbehandlerStatus)) {
+  if (isSuccess(oppdaterResult) && isSuccess(opprettOppgaveStatus)) {
     return (
       <>
         <Alert variant="success">Journalposten ble flyttet til sak {sakid} og journalføringsoppgave opprettet.</Alert>
@@ -96,7 +88,7 @@ export const KnyttTilAnnentBruker = ({
     )
   }
 
-  const isLoading = isPending(oppdaterResult) || isPending(opprettOppgaveStatus) || isPending(tildelSaksbehandlerStatus)
+  const isLoading = isPending(oppdaterResult) || isPending(opprettOppgaveStatus)
 
   return mapResult(annenSakStatus, {
     initial: (

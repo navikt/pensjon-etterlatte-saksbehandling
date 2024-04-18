@@ -26,6 +26,7 @@ export interface NyOppgaveDto {
   oppgaveType: Oppgavetype
   merknad?: string
   referanse?: string
+  saksbehandler?: string
 }
 
 export enum Oppgavestatus {

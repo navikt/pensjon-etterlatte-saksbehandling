@@ -1,6 +1,7 @@
 package no.nav.etterlatte.migrering
 
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.OPPGAVE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Ventehendelser
@@ -21,6 +22,8 @@ internal class OppdaterMerknadRiver(
             validate { it.requireKey(OPPGAVE_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.MIGRERING
 
     override fun haandterPakke(
         packet: JsonMessage,

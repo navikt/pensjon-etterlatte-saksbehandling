@@ -17,6 +17,7 @@ import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.BEREGNING_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
@@ -49,6 +50,8 @@ internal class OmregningHendelserRiver(
         }
     }
 
+    override fun kontekst() = Kontekst.REGULERING
+
     override fun haandterPakke(
         packet: JsonMessage,
         context: MessageContext,
@@ -76,7 +79,7 @@ internal class OmregningHendelserRiver(
         trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
-        val forrigeBeregning = beregningService.beregn(behandlingViOmregnerFra).body<BeregningDTO>()
+        val forrigeBeregning = beregningService.hentBeregning(behandlingViOmregnerFra).body<BeregningDTO>()
         verifiserToleransegrenser(dato, ny = beregning, gammel = forrigeBeregning)
 
         return if (sakType == SakType.OMSTILLINGSSTOENAD) {

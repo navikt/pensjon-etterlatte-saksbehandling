@@ -123,11 +123,7 @@ class GrunnlagsendringshendelseService(
 
     fun opprettDoedshendelse(doedshendelse: DoedshendelsePdl): List<Grunnlagsendringshendelse> {
         if (doedshendelseService.kanBrukeDeodshendelserJob()) {
-            try {
-                doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
-            } catch (e: Exception) {
-                logger.error("Noe gikk galt ved opprettelse av dødshendelse i behandling.", e)
-            }
+            doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
         }
 
         if (!doedshendelseService.kanSendeBrevOgOppretteOppgave()) {

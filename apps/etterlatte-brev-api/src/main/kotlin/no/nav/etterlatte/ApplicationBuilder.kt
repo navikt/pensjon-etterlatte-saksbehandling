@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
@@ -77,13 +78,17 @@ import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
 import no.nav.etterlatte.rivers.StartBrevgenereringRepository
 import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
+import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVarselbrevForGjenopprettaRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
+import no.nav.etterlatte.rivers.migrering.behandlingerAaJournalfoereBrevFor
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.Logger
+import java.util.UUID
+import kotlin.concurrent.thread
 
 val sikkerLogg: Logger = sikkerlogger()
 
@@ -272,6 +277,8 @@ class ApplicationBuilder {
                     behandlingKlient,
                     featureToggleService,
                 )
+                FiksEnkeltbrevRiver(this, vedtaksbrevService, ferdigstillJournalfoerOgDistribuerBrev)
+                    .also { fiksEnkeltbrev() }
                 OpprettJournalfoerOgDistribuerRiver(
                     this,
                     brevdataFacade,
@@ -283,6 +290,19 @@ class ApplicationBuilder {
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
                 DistribuerBrevRiver(this, brevdistribuerer)
             }
+
+    private fun fiksEnkeltbrev() {
+        thread {
+            Thread.sleep(60_000)
+            behandlingerAaJournalfoereBrevFor.forEach {
+                rapidsConnection.publish(
+                    message = lagMelding(behandlingId = it),
+                    key = UUID.randomUUID().toString(),
+                )
+                Thread.sleep(3000)
+            }
+        }
+    }
 
     private fun lagMelding(behandlingId: String) =
         JsonMessage.newMessage(
@@ -313,6 +333,7 @@ class ApplicationBuilder {
                                 .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
                     }
                 }
+                it.install(HttpTimeout)
             }
         },
     )

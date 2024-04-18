@@ -2,6 +2,7 @@ package no.nav.etterlatte.migrering
 
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -31,4 +32,6 @@ internal class AvbrytBehandlingHvisMigreringFeilaRiver(
         behandlingService.avbryt(packet.behandlingId)
         logger.info("Har avbrutt behandling ${packet.behandlingId} fordi den feila under migrering")
     }
+
+    override fun kontekst() = Kontekst.MIGRERING
 }

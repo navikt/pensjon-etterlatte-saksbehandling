@@ -18,7 +18,7 @@ export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling
   const oppsummertInnkreving = sumNettoTilbakekreving + sumRenter
 
   return (
-    <Table className="table" zebraStripes style={{ width: '40%' }}>
+    <Table className="table" zebraStripes style={{ width: '50rem' }}>
       <Table.Header>
         <Table.Row>
           <Table.HeaderCell></Table.HeaderCell>

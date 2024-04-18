@@ -52,6 +52,7 @@ fun toPdlVariables(
             oppholdsadresseHistorikk = false,
             utland = true,
             sivilstand = true,
+            sivilstandHistorikk = true,
             familieRelasjon = true,
             vergemaal = true,
         )
@@ -68,6 +69,7 @@ fun toPdlVariables(
             oppholdsadresseHistorikk = true,
             utland = true,
             sivilstand = true,
+            sivilstandHistorikk = true,
             familieRelasjon = true,
             vergemaal = false,
         )

@@ -79,6 +79,7 @@ internal class OmregningsHendelserTest {
             )
         }.returns(noContentValue)
         every { behandlingService.beregn(capture(omregningsid)) }.returns(returnValue)
+        every { behandlingService.hentBeregning(any()) }.returns(returnValue)
 
         val inspector = inspector.apply { sendTestMessage(fullMelding) }
 

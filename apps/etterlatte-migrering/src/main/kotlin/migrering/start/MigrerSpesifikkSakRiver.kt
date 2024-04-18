@@ -16,6 +16,7 @@ import no.nav.etterlatte.migrering.pen.tilVaarModell
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
@@ -53,6 +54,8 @@ internal class MigrerSpesifikkSakRiver(
             validate { it.requireKey(MIGRERING_KJORING_VARIANT) }
         }
     }
+
+    override fun kontekst() = Kontekst.MIGRERING
 
     override fun haandterPakke(
         packet: JsonMessage,

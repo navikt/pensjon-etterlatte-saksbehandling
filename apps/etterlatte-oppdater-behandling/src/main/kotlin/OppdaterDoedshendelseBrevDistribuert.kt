@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_KODE
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.brevId
@@ -31,6 +32,8 @@ internal class OppdaterDoedshendelseBrevDistribuert(
             validate { it.requireKey(BREV_KODE) }
         }
     }
+
+    override fun kontekst() = Kontekst.DOEDSHENDELSE
 
     override fun haandterPakke(
         packet: JsonMessage,

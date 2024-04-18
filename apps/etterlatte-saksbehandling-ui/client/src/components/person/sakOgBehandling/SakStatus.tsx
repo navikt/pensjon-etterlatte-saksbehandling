@@ -8,20 +8,13 @@ import { VedtakType } from '~components/vedtak/typer'
 import { formaterStringDato } from '~utils/formattering'
 import { VedtaketKlagenGjelder } from '~shared/types/Klage'
 import { RecordFillIcon, XMarkIcon } from '@navikt/aksel-icons'
+import { hentStatusPaaSak } from '~components/person/sakOgBehandling/sakStatusUtils'
 
 export const SakStatus = ({ sakId }: { sakId: number }) => {
   const [vedtakISakResult, vedtakISakFetch] = useApiCall(hentAlleVedtakISak)
 
   const visStatusPaaSisteVedtak = (vedtakISak: VedtaketKlagenGjelder[]): ReactNode => {
-    let sisteVedtak = vedtakISak
-      .filter((vedtak) => ![VedtakType.AVVIST_KLAGE, VedtakType.TILBAKEKREVING].includes(vedtak.vedtakType!))
-      .filter((vedtak) => !!vedtak.datoAttestert)
-      .sort((a, b) => new Date(a.datoAttestert!).valueOf() - new Date(b.datoAttestert!).valueOf())
-      .pop()
-
-    if (sisteVedtak?.vedtakType === VedtakType.ENDRING) {
-      sisteVedtak = vedtakISak.filter((vedtak) => vedtak.vedtakType === VedtakType.INNVILGELSE).pop()
-    }
+    const sisteVedtak = hentStatusPaaSak(vedtakISak)
 
     switch (sisteVedtak?.vedtakType) {
       case VedtakType.INNVILGELSE:

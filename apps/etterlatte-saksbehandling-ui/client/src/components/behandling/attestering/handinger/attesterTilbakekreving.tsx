@@ -48,7 +48,7 @@ export const AttesterTilbakekreving = ({
       </FlexRow>
       <GeneriskModal
         tittel="Er du sikker på at du vil attestere vedtaket?"
-        beskrivelse="Vedtaket vil sendes økonomi og brev sendes til bruker."
+        beskrivelse="Vedtak sendes økonomi, mens vedtaksbrev sendes dersom dette er valgt."
         tekstKnappJa="Ja, attester vedtak"
         tekstKnappNei="Nei, gå tilbake"
         onYesClick={attester}

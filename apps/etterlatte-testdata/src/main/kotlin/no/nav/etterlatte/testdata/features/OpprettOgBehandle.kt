@@ -6,10 +6,13 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.getDollyAccessToken
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
+import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import no.nav.etterlatte.testdata.dolly.BestillingStatus
 import no.nav.etterlatte.testdata.dolly.DollyService
 import no.nav.etterlatte.testdata.dolly.ForenkletFamilieModell
+import no.nav.etterlatte.testdata.features.dolly.NySoeknadRequest
 import no.nav.etterlatte.testdata.features.dolly.generererBestilling
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -26,11 +29,31 @@ class OpprettOgBehandle(private val dollyService: DollyService) : TestDataFeatur
     override val routes: Route.() -> Unit
         get() = {
             post {
-                opprettFamilierIDolly(100, call.receiveParameters()["gruppeId"]!!.toLong())
+                val familier = opprettFamilierIDolly(
+                    100,
+                    call.receiveParameters()["gruppeId"]!!.toLong(),
+                    Duration.ofSeconds(45)
+                )
+                val soeknadType = SoeknadType.BARNEPENSJON
+                val navIdent = navIdentFraToken()
+                familier.map {
+                    NySoeknadRequest(
+                        type = soeknadType,
+                        avdoed = it.avdoed,
+                        gjenlevende = it.gjenlevende,
+                        barn = it.barn
+                    )
+                }.forEach {
+                    dollyService.sendSoeknad(
+                        request = it,
+                        navIdent = navIdent
+                    )
+                }
             }
         }
 
-    private fun opprettFamilierIDolly(antall: Int, gruppeid: Long): List<ForenkletFamilieModell> {
+    private fun opprettFamilierIDolly(antall: Int, gruppeid: Long, ventetid: Duration)
+            : List<ForenkletFamilieModell> {
         val accessToken = getDollyAccessToken()
         val baselineFamilier = dollyService.hentFamilier(gruppeid, accessToken)
         val req = BestillingRequest(
@@ -49,13 +72,12 @@ class OpprettOgBehandle(private val dollyService: DollyService) : TestDataFeatur
                     }
             )
         }
-        logger.info("Venter 45 sekunder så Dolly rekk å komme ajour")
-        Thread.sleep(Duration.ofSeconds(45))
-        logger.info("Ferdig med 45 sekunders-venting")
+        logger.info("Venter $ventetid så Dolly rekk å komme ajour")
+        Thread.sleep(ventetid)
+        logger.info("Ferdig med $ventetid-venting")
         if (bestillinger.any { !it.ferdig }) {
             throw IllegalStateException("Ikke alle bestillinger er ferdige!")
         }
-        val nyeFamilier = dollyService.hentFamilier(gruppeid, accessToken) - baselineFamilier.toSet()
-        return nyeFamilier
+        return dollyService.hentFamilier(gruppeid, accessToken) - baselineFamilier.toSet()
     }
 }

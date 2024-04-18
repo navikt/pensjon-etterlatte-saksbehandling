@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { behandlingSkalSendeBrev, soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
+import { soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
 import {
   IBehandlingStatus,
   IBehandlingsType,
@@ -14,7 +14,6 @@ import { SakType } from '~shared/types/sak'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { JaNei } from '~shared/types/ISvar'
 import { KildeType } from '~shared/types/kilde'
-import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
   it('barnepensjon gyldig utfylt', () => {
@@ -160,27 +159,6 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
   })
 })
 
-describe('behandlingSkalSendeBrev', () => {
-  const behandling = opprettBehandling(SakType.BARNEPENSJON, null, null, mockBoddellerArbeidetIUtlandet(), undefined)
-  const revurdering = {
-    ...behandling,
-    behandlingType: IBehandlingsType.REVURDERING,
-    revurderingsaarsak: Revurderingaarsak.SOESKENJUSTERING,
-  }
-  const regulering = {
-    ...revurdering,
-    revurderingsaarsak: Revurderingaarsak.REGULERING,
-  }
-  it('skal gi false for regulering', () => {
-    expect(behandlingSkalSendeBrev(regulering.behandlingType, regulering.revurderingsaarsak)).toBeFalsy()
-  })
-
-  it('skal gi true for foerstegangsbehandling og revurderinger som ikke er regulering', () => {
-    expect(behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)).toBeTruthy()
-    expect(behandlingSkalSendeBrev(revurdering.behandlingType, behandling.revurderingsaarsak)).toBeTruthy()
-  })
-})
-
 const opprettBehandling = (
   sakType: SakType,
   kommerBarnetTilgode: IKommerBarnetTilgode | null,
@@ -206,6 +184,7 @@ const opprettBehandling = (
     begrunnelse: null,
     utlandstilknytning: null,
     kilde: Vedtaksloesning.GJENNY,
+    sendeBrev: true,
   }
 }
 

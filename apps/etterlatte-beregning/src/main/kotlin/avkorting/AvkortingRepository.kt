@@ -95,6 +95,12 @@ class AvkortingRepository(private val dataSource: DataSource) {
         }
     }
 
+    fun slettForBehandling(behandling: UUID) {
+        dataSource.transaction { tx ->
+            slettAvkorting(behandling, tx)
+        }
+    }
+
     private fun slettAvkorting(
         behandlingId: UUID,
         tx: TransactionalSession,

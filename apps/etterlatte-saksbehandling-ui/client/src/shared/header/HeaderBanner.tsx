@@ -1,10 +1,10 @@
 import { Search } from './Search'
 import { ReleaseAlerts } from './ReleaseAlerts'
 import { InternalHeader, Spacer } from '@navikt/ds-react'
-import { useAppSelector } from '~store/Store'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const HeaderBanner = () => {
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   return (
     <InternalHeader data-theme="light">
       <InternalHeader.Title href="/">Gjenny</InternalHeader.Title>

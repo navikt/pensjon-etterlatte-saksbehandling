@@ -68,11 +68,12 @@ export const FlexRow = styled.div<{
   justify?: 'left' | 'center' | 'right' | 'space-between'
   align?: 'start' | 'center' | 'end'
   $spacing?: boolean
+  gap?: string
 }>`
   display: flex;
   justify-content: ${(props) => props.justify ?? 'left'};
   align-items: ${(props) => props.align ?? 'normal'};
-  gap: 1rem;
+  gap: ${(props) => props.gap ?? '1rem'};
   ${(props) =>
     props.$spacing &&
     css`

@@ -10,7 +10,6 @@ import styled from 'styled-components'
 import { SendTilAttesteringModal } from '../handlinger/SendTilAttesteringModal'
 import {
   behandlingErRedigerbar,
-  behandlingSkalSendeBrev,
   sisteBehandlingHendelse,
   statusErRedigerbar,
 } from '~components/behandling/felles/utils'
@@ -31,7 +30,7 @@ import { SjekklisteValideringErrorSummary } from '~components/behandling/sjekkli
 import { IHendelse } from '~shared/types/IHendelse'
 import { oppdaterBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
 import { hentBehandling } from '~shared/api/behandling'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
@@ -42,12 +41,13 @@ import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 import BrevutfallModal from '~components/behandling/brevutfall/BrevutfallModal'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
   const { sakId, soeknadMottattDato } = props.behandling
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const redigerbar = behandlingErRedigerbar(
     props.behandling.status,
@@ -112,7 +112,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     if (
       !behandlingId ||
       !sakId ||
-      !behandlingSkalSendeBrev(props.behandling.behandlingType, props.behandling.revurderingsaarsak) ||
+      !props.behandling.sendeBrev ||
       (behandling?.kilde === Vedtaksloesning.GJENOPPRETTA && statusErRedigerbar(props.behandling.status))
     )
       return

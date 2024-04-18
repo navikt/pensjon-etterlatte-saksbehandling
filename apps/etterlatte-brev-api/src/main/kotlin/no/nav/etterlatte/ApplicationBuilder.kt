@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
@@ -37,7 +38,6 @@ import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
-import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
@@ -78,13 +78,17 @@ import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
 import no.nav.etterlatte.rivers.StartBrevgenereringRepository
 import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
+import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVarselbrevForGjenopprettaRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
+import no.nav.etterlatte.rivers.migrering.behandlingerAaJournalfoereBrevFor
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.Logger
+import java.util.UUID
+import kotlin.concurrent.thread
 
 val sikkerLogg: Logger = sikkerlogger()
 
@@ -121,7 +125,6 @@ class ApplicationBuilder {
     private val beregningKlient = BeregningKlient(config, httpClient())
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
-    private val trygdetidService = TrygdetidService(trygdetidKlient, beregningKlient)
 
     private val sakService = SakService(behandlingKlient)
 
@@ -133,7 +136,7 @@ class ApplicationBuilder {
             beregningService,
             behandlingKlient,
             sakService,
-            trygdetidService,
+            trygdetidKlient,
         )
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val datasource = DataSourceBuilder.createDataSource(env)
@@ -187,7 +190,7 @@ class ApplicationBuilder {
             brevDataMapperFerdigstilling,
             behandlingKlient,
         )
-    private val brevDataMapperFerdigstillVarsel = BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService)
+    private val brevDataMapperFerdigstillVarsel = BrevDataMapperFerdigstillVarsel(beregningService, trygdetidKlient)
 
     private val varselbrevService =
         VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator, brevDataMapperFerdigstillVarsel)
@@ -274,6 +277,8 @@ class ApplicationBuilder {
                     behandlingKlient,
                     featureToggleService,
                 )
+                FiksEnkeltbrevRiver(this, vedtaksbrevService, ferdigstillJournalfoerOgDistribuerBrev)
+                    .also { fiksEnkeltbrev() }
                 OpprettJournalfoerOgDistribuerRiver(
                     this,
                     brevdataFacade,
@@ -285,6 +290,19 @@ class ApplicationBuilder {
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
                 DistribuerBrevRiver(this, brevdistribuerer)
             }
+
+    private fun fiksEnkeltbrev() {
+        thread {
+            Thread.sleep(60_000)
+            behandlingerAaJournalfoereBrevFor.forEach {
+                rapidsConnection.publish(
+                    message = lagMelding(behandlingId = it),
+                    key = UUID.randomUUID().toString(),
+                )
+                Thread.sleep(3000)
+            }
+        }
+    }
 
     private fun lagMelding(behandlingId: String) =
         JsonMessage.newMessage(
@@ -315,6 +333,7 @@ class ApplicationBuilder {
                                 .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
                     }
                 }
+                it.install(HttpTimeout)
             }
         },
     )

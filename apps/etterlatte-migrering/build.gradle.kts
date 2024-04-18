@@ -4,10 +4,6 @@ plugins {
     id("etterlatte.rapids-and-rivers-ktor2")
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-ktor"))

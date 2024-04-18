@@ -21,6 +21,8 @@ spec:
     autoInstrumentation:
       enabled: true
       runtime: java
+  secureLogs:
+    enabled: true
   kafka:
     pool: nav-prod
   azure:

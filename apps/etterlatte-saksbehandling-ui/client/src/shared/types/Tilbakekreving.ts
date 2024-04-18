@@ -24,7 +24,6 @@ export interface TilbakekrevingVurdering {
   tilsvar: TilbakekrevingTilsvar | null
   rettsligGrunnlag: TilbakekrevingHjemmel | null
   objektivtVilkaarOppfylt: string | null
-  subjektivtVilkaarOppfylt: string | null
   uaktsomtForaarsaketFeilutbetaling: string | null
   burdeBrukerForstaatt: string | null
   burdeBrukerForstaattEllerUaktsomtForaarsaket: string | null
@@ -66,11 +65,13 @@ export interface TilbakekrevingBeloep {
 export enum TilbakekrevingVarsel {
   EGET_BREV = 'EGET_BREV',
   MED_I_ENDRINGSBREV = 'MED_I_ENDRINGSBREV',
+  AAPENBART_UNOEDVENDIG = 'AAPENBART_UNOEDVENDIG',
 }
 
 export const teksterTilbakekrevingVarsel: Record<TilbakekrevingVarsel, string> = {
   EGET_BREV: 'Sendt i eget brev',
   MED_I_ENDRINGSBREV: 'Sendt som vedlegg i endringsbrev',
+  AAPENBART_UNOEDVENDIG: 'Varsel åpenbart unødvendig (jf. forvaltningsloven § 16)',
 } as const
 
 export enum TilbakekrevingAarsak {
@@ -119,6 +120,7 @@ export const teksterTilbakekrevingAarsak: Record<TilbakekrevingAarsak, string> =
 export enum TilbakekrevingStatus {
   OPPRETTET = 'OPPRETTET',
   UNDER_ARBEID = 'UNDER_ARBEID',
+  VALIDERT = 'VALIDERT',
   FATTET_VEDTAK = 'FATTET_VEDTAK',
   ATTESTERT = 'ATTESTERT',
   UNDERKJENT = 'UNDERKJENT',
@@ -126,6 +128,7 @@ export enum TilbakekrevingStatus {
 export const teksterTilbakekrevingStatus: Record<TilbakekrevingStatus, string> = {
   OPPRETTET: 'Opprettet',
   UNDER_ARBEID: 'Under arbeid',
+  VALIDERT: 'Validert',
   FATTET_VEDTAK: 'Fattet vedtak',
   ATTESTERT: 'Attestert',
   UNDERKJENT: 'Underkjent',
@@ -134,6 +137,7 @@ export const teksterTilbakekrevingStatus: Record<TilbakekrevingStatus, string> =
 export const erUnderBehandling = (status: TilbakekrevingStatus) =>
   status === TilbakekrevingStatus.OPPRETTET ||
   status === TilbakekrevingStatus.UNDER_ARBEID ||
+  status === TilbakekrevingStatus.VALIDERT ||
   status === TilbakekrevingStatus.UNDERKJENT
 
 export enum TilbakekrevingSkyld {
@@ -177,6 +181,6 @@ export const teksterTilbakekrevingHjemmel: Record<TilbakekrevingHjemmel, string>
   TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM: 'Folketrygdloven § 22-15 første ledd, første punktum',
   TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM: 'Folketrygdloven § 22-15 første ledd, andre punktum',
   TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM:
-    'Kombinasjon folketrygdloven § 22-15 første ledd, første og andre punktum ',
+    'Kombinasjon folketrygdloven § 22-15 første ledd, første og andre punktum',
   TJUETO_FEMTEN_FEMTE_LEDD: 'Folketrygdloven § 22-15 femte ledd',
 } as const

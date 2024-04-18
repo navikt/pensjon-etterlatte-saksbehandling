@@ -1,9 +1,8 @@
 import { isAfter } from 'date-fns'
 import { IAdresse } from '~shared/types/IAdresse'
-import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { JaNei } from '~shared/types/ISvar'
-import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { IHendelse, IHendelseType } from '~shared/types/IHendelse'
 
 export function soeknadsoversiktErFerdigUtfylt(behandling: IDetaljertBehandling): boolean {
@@ -80,24 +79,6 @@ export const behandlingErIverksattEllerSamordnet = (behandlingStatus: IBehandlin
   behandlingStatus === IBehandlingStatus.AVSLAG ||
   behandlingStatus === IBehandlingStatus.SAMORDNET ||
   behandlingStatus === IBehandlingStatus.TIL_SAMORDNING
-
-export const behandlingSkalSendeBrev = (
-  behandlingType: IBehandlingsType,
-  revurderingsaarsak: Revurderingaarsak | null
-): boolean => {
-  switch (behandlingType) {
-    case IBehandlingsType.FØRSTEGANGSBEHANDLING:
-      return true
-    case IBehandlingsType.REVURDERING:
-      return !(
-        revurderingsaarsak === Revurderingaarsak.REGULERING ||
-        revurderingsaarsak === Revurderingaarsak.DOEDSFALL ||
-        revurderingsaarsak === Revurderingaarsak.OPPHOER_UTEN_BREV ||
-        revurderingsaarsak === Revurderingaarsak.ANNEN_UTEN_BREV ||
-        revurderingsaarsak === Revurderingaarsak.ALDERSOVERGANG
-      )
-  }
-}
 
 export function requireNotNull<T>(value: T | null, message: string): T {
   if (!!value) return value

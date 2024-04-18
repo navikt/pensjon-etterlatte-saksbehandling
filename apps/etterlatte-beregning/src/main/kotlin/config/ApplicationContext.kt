@@ -18,11 +18,14 @@ import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
+import no.nav.etterlatte.klienter.VedtaksvurderingKlientImpl
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.no.nav.etterlatte.grunnbeloep.GrunnbeloepService
+import no.nav.etterlatte.sanksjon.SanksjonRepository
+import no.nav.etterlatte.sanksjon.SanksjonService
 import no.nav.etterlatte.ytelseMedGrunnlag.YtelseMedGrunnlagService
 
 private fun featureToggleProperties(config: Config) =
@@ -51,6 +54,7 @@ class ApplicationContext {
         )
 
     val vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient())
+    val vedtaksvurderingKlient = VedtaksvurderingKlientImpl(config, httpClient())
     val grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
     val trygdetidKlient = TrygdetidKlient(config, httpClient())
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
@@ -62,6 +66,7 @@ class ApplicationContext {
             beregningsGrunnlagRepository = beregningsGrunnlagRepository,
             beregningRepository = beregningRepository,
             behandlingKlient = behandlingKlient,
+            vedtaksvurderingKlient = vedtaksvurderingKlient,
             grunnlagKlient = grunnlagKlient,
         )
 
@@ -108,4 +113,9 @@ class ApplicationContext {
             behandlingKlient = behandlingKlient,
         )
     val grunnbeloepService = GrunnbeloepService(repository = GrunnbeloepRepository)
+    val sanksjonService =
+        SanksjonService(
+            sanksjonRepository = SanksjonRepository(dataSource),
+            behandlingKlient = behandlingKlient,
+        )
 }

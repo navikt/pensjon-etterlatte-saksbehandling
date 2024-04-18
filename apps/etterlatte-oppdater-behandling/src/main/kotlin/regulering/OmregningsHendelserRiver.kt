@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
@@ -27,6 +28,8 @@ internal class OmregningsHendelserRiver(rapidsConnection: RapidsConnection, priv
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.REGULERING
 
     override fun haandterPakke(
         packet: JsonMessage,

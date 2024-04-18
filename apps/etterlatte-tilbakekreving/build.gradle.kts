@@ -42,7 +42,6 @@ dependencies {
     testImplementation(libs.navfelles.mockoauth2server) {
         exclude("org.slf4j", "slf4j-api")
     }
-    testImplementation(libs.test.wiremock)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(project(":libs:testdata"))
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))

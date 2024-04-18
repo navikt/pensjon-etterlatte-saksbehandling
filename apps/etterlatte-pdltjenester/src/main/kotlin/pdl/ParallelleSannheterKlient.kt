@@ -13,8 +13,10 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -54,11 +56,28 @@ class ParallelleSannheterKlient(
     suspend fun avklarStatsborgerskap(pdlStatsborgerskap: List<PdlStatsborgerskap>) =
         avklarNullable(pdlStatsborgerskap, Avklaring.STATSBORGERSKAP)
 
-    suspend fun avklarSivilstand(pdlSivilstand: List<PdlSivilstand>) =
-        avklarNullable(
-            list = pdlSivilstand.filterNot { it.metadata.historisk },
+    suspend fun avklarSivilstand(
+        pdlSivilstand: List<PdlSivilstand>,
+        foedselsnummer: Folkeregisteridentifikator,
+    ): PdlSivilstand? {
+        val aktiveSivilstander = pdlSivilstand.filterNot { it.metadata.historisk }
+
+        if (aktiveSivilstander.size > 1) {
+            logger.warn("Fant ${aktiveSivilstander.size} aktive sivilstander")
+            if (aktiveSivilstander.all { it.type == aktiveSivilstander.first().type }) {
+                logger.warn("Fant flere aktive sivilstander av samme type")
+                return aktiveSivilstander.sortedByDescending { it.gyldigFraOgMed }.first()
+            } else {
+                logger.error("Fant flere aktive sivilstander av ulik type for $foedselsnummer. Se sikkerlogg for detaljer.")
+                sikkerLogg.info("Fant flere aktive sivilstander for ${foedselsnummer.value}: ${aktiveSivilstander.toJson()}")
+            }
+        }
+
+        return avklarNullable(
+            list = aktiveSivilstander,
             avklaring = Avklaring.SIVILSTAND,
         )
+    }
 
     suspend fun avklarFoedsel(pdlFoedsel: List<PdlFoedsel>) = avklar(pdlFoedsel, Avklaring.FOEDSEL)
 

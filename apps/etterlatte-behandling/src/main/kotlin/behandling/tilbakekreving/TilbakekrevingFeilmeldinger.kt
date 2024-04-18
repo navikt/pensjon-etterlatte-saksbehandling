@@ -1,7 +1,10 @@
 package no.nav.etterlatte.behandling.tilbakekreving
 
-class TilbakekrevingHarMangelException(message: String?) : RuntimeException(message)
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 
-class TilbakekrevingFinnesIkkeException(message: String?) : RuntimeException(message)
+class TilbakekrevingHarMangelException(message: String) : InternfeilException(detail = message)
 
-class TilbakekrevingFeilTilstandException(message: String?) : RuntimeException(message)
+class TilbakekrevingFinnesIkkeException(message: String) : IkkeFunnetException(code = "NOT_FOUND", detail = message)
+
+class TilbakekrevingFeilTilstandException(message: String) : InternfeilException(detail = message)

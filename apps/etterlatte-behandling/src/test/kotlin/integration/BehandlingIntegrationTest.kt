@@ -85,6 +85,7 @@ abstract class BehandlingIntegrationTest {
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
                 grunnlagKlientObo = GrunnlagKlientTest(),
                 vedtakKlient = spyk(VedtakKlientTest()),
+                beregningsKlient = BeregningKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiKlient = brevApiKlient ?: BrevApiKlientTest(),
                 klageHttpClient = klageHttpClientTest(),

@@ -2,8 +2,8 @@ package no.nav.etterlatte.beregningkafka
 
 import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
+import no.nav.etterlatte.beregning.grunnlag.LagreBeregningsGrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BEREGNING_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
@@ -35,6 +36,8 @@ internal class MigreringBeregningHendelserRiver(
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.MIGRERING
 
     override fun haandterPakke(
         packet: JsonMessage,
@@ -97,8 +100,8 @@ private fun verifiserNyBeregning(
     }
 }
 
-private fun tilGrunnlagDTO(request: MigreringRequest): BarnepensjonBeregningsGrunnlag =
-    BarnepensjonBeregningsGrunnlag(
+private fun tilGrunnlagDTO(request: MigreringRequest): LagreBeregningsGrunnlag =
+    LagreBeregningsGrunnlag(
         soeskenMedIBeregning =
             listOf(
                 GrunnlagMedPeriode(

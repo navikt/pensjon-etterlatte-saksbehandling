@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.rapidsandrivers.AUTOMATISK_GJENOPPRETTING
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -32,6 +33,8 @@ internal class OpprettVedtaksbrevForMigreringRiver(
             validate { it.rejectValue(PDF_GENERERT, true) }
         }
     }
+
+    override fun kontekst() = Kontekst.MIGRERING
 
     override fun haandterPakke(
         packet: JsonMessage,

@@ -243,10 +243,33 @@ sealed class DoedshendelseKontrollpunkt {
         override val avbryt: Boolean = true
     }
 
+    @JsonTypeName("GJENLEVENDE_MANGLER_ADRESSE")
+    data object GjenlevendeManglerAdresse : DoedshendelseKontrollpunkt() {
+        override val kode = "GJENLEVENDE_MANGLER_ADRESSE"
+        override val beskrivelse: String = "Gjenlevende har ingen aktiv adresse i PDL"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = true
+        override val avbryt: Boolean = false
+        override val oppgaveTekst: String
+            get() =
+                "Informasjonsbrev om gjenlevenderettigheter er ikke sendt ut på grunn av manglende adresse. " +
+                    "Saksbehandler må sørge for å sende dette manuelt."
+    }
+
     @JsonTypeName("ANNULERT_DOEDSHENDELSE_PDL")
     data object DoedshendelseErAnnullert : DoedshendelseKontrollpunkt() {
         override val kode = "ANNULERT_DOEDSHENDELSE_PDL"
         override val beskrivelse: String = "Dødshendelsen ble annulert i PDL"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = false
+        override val oppgaveTekst: String? = null
+        override val avbryt: Boolean = true
+    }
+
+    @JsonTypeName("AVDOED_HAR_IKKE_VAERT_GIFT")
+    data object AvdoedHarIkkeVaertGift : DoedshendelseKontrollpunkt() {
+        override val kode = "AVDOED_HAR_IKKE_VAERT_GIFT"
+        override val beskrivelse: String = "Avdød er ikke tidligere gift. Gjenlevende er ikke registerert som tidligere ektefelle."
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
         override val oppgaveTekst: String? = null

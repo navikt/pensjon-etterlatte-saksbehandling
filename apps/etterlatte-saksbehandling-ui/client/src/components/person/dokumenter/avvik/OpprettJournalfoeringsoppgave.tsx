@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
-import { useAppSelector } from '~store/Store'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const OpprettJournalfoeringsoppgave = ({
   journalpost,
@@ -20,7 +20,7 @@ export const OpprettJournalfoeringsoppgave = ({
   sakStatus: Result<SakMedBehandlinger>
 }) => {
   const navigate = useNavigate()
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [oppgaveResult, apiOpprettOppgave] = useApiCall(opprettOppgave)
 

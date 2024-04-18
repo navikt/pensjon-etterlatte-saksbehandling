@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
@@ -25,12 +26,14 @@ internal class LoependeYtelserforespoerselRiver(
     private val logger = LoggerFactory.getLogger(LoependeYtelserforespoerselRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringHendelseType.FINN_LOEPENDE_YTELSER) {
+        initialiserRiver(rapidsConnection, ReguleringHendelseType.SAK_FUNNET) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(DATO_KEY) }
             validate { it.requireKey(TILBAKESTILTE_BEHANDLINGER_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.REGULERING
 
     override fun haandterPakke(
         packet: JsonMessage,

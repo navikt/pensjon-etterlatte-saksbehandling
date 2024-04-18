@@ -1,9 +1,9 @@
-import { useAppSelector } from '~store/Store'
 import { Alert, GuidePanel } from '@navikt/ds-react'
 import { Container } from '~shared/styled'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const Tilgangsmelding = () => {
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   if (!innloggetSaksbehandler.kanSeOppgaveliste) {
     return (

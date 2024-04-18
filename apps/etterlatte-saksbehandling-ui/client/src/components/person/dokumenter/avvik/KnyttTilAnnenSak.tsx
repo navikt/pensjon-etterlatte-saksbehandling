@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom'
 import { SakOverfoeringDetailjer } from 'src/components/person/dokumenter/avvik/common/SakOverfoeringDetailjer'
 import { opprettOppgave } from '~shared/api/oppgaver'
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
-import { useAppSelector } from '~store/Store'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 const erSammeSak = (sak: ISak, journalpost: Journalpost): boolean => {
   const { sak: journalpostSak, tema } = journalpost
@@ -44,7 +44,7 @@ export const KnyttTilAnnenSak = ({
   lukkModal: () => void
 }) => {
   const navigate = useNavigate()
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [sakid, setSakid] = useState<string>()
 

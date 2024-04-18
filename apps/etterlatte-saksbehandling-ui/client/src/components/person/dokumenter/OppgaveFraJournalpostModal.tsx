@@ -9,8 +9,8 @@ import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
 import { FlexRow } from '~shared/styled'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { useNavigate } from 'react-router-dom'
-import { useAppSelector } from '~store/Store'
-import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
+import { erOppgaveRedigerbar, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 // TODO: Må på sikt gjøre noe for å støtte tilfeller hvor sak mangler.
 export const OppgaveFraJournalpostModal = ({
@@ -25,7 +25,7 @@ export const OppgaveFraJournalpostModal = ({
   sakStatus: Result<SakMedBehandlinger>
 }) => {
   const navigate = useNavigate()
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [kanOppretteOppgave, setKanOppretteOppgave] = useState(false)
 
@@ -35,9 +35,7 @@ export const OppgaveFraJournalpostModal = ({
   useEffect(() => {
     if (isOpen) {
       hentOppgaver(journalpost.journalpostId, (oppgaver) => {
-        const finnesUbehandletOppgave = oppgaver.filter(
-          ({ status }) => !['FERDIGSTILT', 'FEILREGISTRERT', 'AVBRUTT'].includes(status)
-        )
+        const finnesUbehandletOppgave = oppgaver.filter(({ status }) => erOppgaveRedigerbar(status))
 
         setKanOppretteOppgave(!finnesUbehandletOppgave.length)
       })

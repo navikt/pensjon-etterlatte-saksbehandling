@@ -9,9 +9,13 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.safeYearsBetween
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.varEktefelleVedDoedsfall
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Sivilstatus.*
+import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import kotlin.math.absoluteValue
 
 internal class DoedshendelseKontrollpunktEktefelleService {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun identifiser(
         eps: PersonDTO,
         avdoed: PersonDTO,
@@ -58,24 +62,32 @@ internal class DoedshendelseKontrollpunktEktefelleService {
         avdoed: PersonDTO,
         eps: PersonDTO,
     ): DoedshendelseKontrollpunkt {
-        val sivilstanderForEpsMedAvdoed =
-            eps.sivilstand
+        val sivilstanderMedEps =
+            avdoed.sivilstand
                 ?.map { it.verdi }
-                ?.filter { it.relatertVedSiviltilstand == avdoed.foedselsnummer.verdi }
+                ?.filter { it.relatertVedSiviltilstand == eps.foedselsnummer.verdi || it.relatertVedSiviltilstand == null }
+                ?: emptyList()
 
-        if (sivilstanderForEpsMedAvdoed.isNullOrEmpty()) {
-            throw IllegalStateException("Fant ingen sivilstander for eps med avdoed")
-        }
+        val gift: LocalDate =
+            sivilstanderMedEps
+                .filter { it.sivilstatus in listOf(GIFT, SEPARERT, REGISTRERT_PARTNER, SEPARERT_PARTNER) }
+                .sortedBy { it.gyldigFraOgMed }
+                .firstOrNull()?.gyldigFraOgMed
+                ?: return DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(
+                    doedsdato = avdoed.doedsdato!!.verdi,
+                    fnr = avdoed.foedselsnummer.verdi.value,
+                )
 
-        val gift = sivilstanderForEpsMedAvdoed.firstOrNull { it.sivilstatus in listOf(GIFT, REGISTRERT_PARTNER) }?.gyldigFraOgMed
-        val skilt = sivilstanderForEpsMedAvdoed.lastOrNull { it.sivilstatus in listOf(SKILT, SKILT_PARTNER) }?.gyldigFraOgMed
-
-        if (gift == null || skilt == null) {
-            return DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(
-                doedsdato = avdoed.doedsdato!!.verdi,
-                fnr = eps.foedselsnummer.verdi.value,
-            )
-        }
+        val skilt: LocalDate =
+            sivilstanderMedEps
+                .filter { it.sivilstatus in listOf(SKILT, SKILT_PARTNER) }
+                .filterNot { it.gyldigFraOgMed != null && it.gyldigFraOgMed!! < gift }
+                .sortedByDescending { it.gyldigFraOgMed }
+                .firstOrNull()?.gyldigFraOgMed
+                ?: return DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(
+                    doedsdato = avdoed.doedsdato!!.verdi,
+                    fnr = avdoed.foedselsnummer.verdi.value,
+                )
 
         val antallAarGift = safeYearsBetween(gift, skilt).absoluteValue
 
@@ -83,7 +95,7 @@ internal class DoedshendelseKontrollpunktEktefelleService {
             return if (antallAarGift >= 15) {
                 DoedshendelseKontrollpunkt.TidligereEpsGiftMerEnn15AarFellesBarn(
                     doedsdato = avdoed.doedsdato!!.verdi,
-                    fnr = eps.foedselsnummer.verdi.value,
+                    fnr = avdoed.foedselsnummer.verdi.value,
                 )
             } else {
                 DoedshendelseKontrollpunkt.TidligereEpsGiftMindreEnn15AarFellesBarn
@@ -92,7 +104,7 @@ internal class DoedshendelseKontrollpunktEktefelleService {
             return if (antallAarGift >= 25) {
                 DoedshendelseKontrollpunkt.TidligereEpsGiftMerEnn25Aar(
                     doedsdato = avdoed.doedsdato!!.verdi,
-                    fnr = eps.foedselsnummer.verdi.value,
+                    fnr = avdoed.foedselsnummer.verdi.value,
                 )
             } else {
                 DoedshendelseKontrollpunkt.TidligereEpsGiftUnder25AarUtenFellesBarn

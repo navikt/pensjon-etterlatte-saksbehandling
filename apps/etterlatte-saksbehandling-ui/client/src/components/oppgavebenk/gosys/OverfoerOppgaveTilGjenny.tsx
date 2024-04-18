@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom'
 import { formaterSakstype } from '~utils/formattering'
 import { ResultAlert } from '~shared/alerts/ResultAlert'
 import { OppgaveDTO, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
-import { useAppSelector } from '~store/Store'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const OverfoerOppgaveTilGjenny = ({
   oppgave,
@@ -20,7 +20,7 @@ export const OverfoerOppgaveTilGjenny = ({
   setToggle: (toggle: GosysActionToggle) => void
 }) => {
   const navigate = useNavigate()
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [skalOppretteSak, setSkalOppretteSak] = useState(false)
 

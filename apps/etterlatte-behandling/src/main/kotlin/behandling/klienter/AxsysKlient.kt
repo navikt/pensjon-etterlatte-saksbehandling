@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.navConsumerId
 import no.nav.etterlatte.libs.ktor.ping
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -23,7 +22,7 @@ interface AxsysKlient : Pingable {
 }
 
 class AxsysKlientImpl(private val client: HttpClient, private val url: String) : AxsysKlient {
-    private val logger: Logger = LoggerFactory.getLogger(AxsysKlientImpl::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val enhetCache =
         Caffeine.newBuilder()

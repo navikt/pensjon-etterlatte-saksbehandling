@@ -7,6 +7,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -15,14 +16,11 @@ import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
 fun Route.avkorting(
     avkortingService: AvkortingService,
@@ -45,12 +43,12 @@ fun Route.avkorting(
         post {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Lagre avkorting for behandlingId=$it")
-                val avkortingGrunnlag = call.receive<AvkortingGrunnlagDto>()
+                val avkortingGrunnlag = call.receive<AvkortingGrunnlagLagreDto>()
                 val avkorting =
                     avkortingService.beregnAvkortingMedNyttGrunnlag(
                         it,
                         brukerTokenInfo,
-                        avkortingGrunnlag.fromDto(brukerTokenInfo),
+                        avkortingGrunnlag,
                     )
                 call.respond(avkorting.toDto())
             }
@@ -62,6 +60,14 @@ fun Route.avkorting(
                 val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
                 val avkorting = avkortingService.kopierAvkorting(it, forrigeBehandlingId, brukerTokenInfo)
                 call.respond(avkorting.toDto())
+            }
+        }
+
+        delete {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                logger.info("Sletter avkorting for behandlingId=$it")
+                avkortingService.slettAvkorting(it)
+                call.respond(HttpStatusCode.OK)
             }
         }
     }
@@ -98,17 +104,4 @@ fun AvkortetYtelse.toDto() =
         avkortingsbeloep = avkortingsbeloep,
         restanse = restanse?.fordeltRestanse ?: 0,
         ytelseEtterAvkorting = ytelseEtterAvkorting,
-    )
-
-fun AvkortingGrunnlagDto.fromDto(brukerTokenInfo: BrukerTokenInfo) =
-    AvkortingGrunnlag(
-        id = id,
-        periode = Periode(fom = fom, tom = tom),
-        aarsinntekt = aarsinntekt,
-        fratrekkInnAar = fratrekkInnAar,
-        relevanteMaanederInnAar = relevanteMaanederInnAar ?: (12 - fom.monthValue + 1),
-        inntektUtland = inntektUtland,
-        fratrekkInnAarUtland = fratrekkInnAarUtland,
-        spesifikasjon = spesifikasjon,
-        kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now()),
     )

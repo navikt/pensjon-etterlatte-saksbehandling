@@ -11,11 +11,9 @@ import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
-import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 import java.time.YearMonth
@@ -40,6 +38,7 @@ data class GenerellBrevData(
             )
         } ?: AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = sak.enhet)
 
+    // TODO På tide å fjerne?
     // Tidligere erMigrering - Vil si saker som er løpende i Pesys når det vedtas i Gjenny og opphøres etter vedtaket.
     fun loependeIPesys() = systemkilde == Vedtaksloesning.PESYS && behandlingId != null && revurderingsaarsak == null
 
@@ -52,24 +51,6 @@ data class GenerellBrevData(
                 avdoede.size > 1
         }
 }
-
-data class Trygdetid(
-    val ident: String,
-    val aarTrygdetid: Int,
-    val prorataBroek: IntBroek?,
-    val maanederTrygdetid: Int,
-    val perioder: List<Trygdetidsperiode>,
-    val overstyrt: Boolean,
-    val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
-)
-
-data class Trygdetidsperiode(
-    val datoFOM: LocalDate,
-    val datoTOM: LocalDate?,
-    val land: String,
-    val opptjeningsperiode: BeregnetTrygdetidGrunnlagDto?,
-    val type: TrygdetidType,
-)
 
 data class ForenkletVedtak(
     val id: Long,

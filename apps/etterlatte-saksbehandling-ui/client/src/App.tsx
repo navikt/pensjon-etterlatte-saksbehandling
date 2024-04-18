@@ -3,7 +3,7 @@ import '@navikt/ds-css'
 import { Behandling } from '~components/behandling/Behandling'
 import { HeaderBanner } from '~shared/header/HeaderBanner'
 import { Person } from '~components/person/Person'
-import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
+import useHentInnloggetSaksbehandler from 'src/shared/hooks/useSettInnloggetSaksbehandler'
 import { nb } from 'date-fns/locale'
 import { registerLocale } from 'react-datepicker'
 import ErrorBoundary from '~ErrorBoundary'
@@ -27,7 +27,7 @@ import { FlyttJournalpost } from '~components/person/flyttjournalpost/FlyttJourn
 import { setDefaultOptions } from 'date-fns'
 
 function App() {
-  const innloggetbrukerHentet = useInnloggetSaksbehandler()
+  const innloggetbrukerHentet = useHentInnloggetSaksbehandler()
   setDefaultOptions({ locale: nb })
   registerLocale('nb', nb)
   const dispatch = useAppDispatch()

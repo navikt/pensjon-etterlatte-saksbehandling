@@ -22,7 +22,7 @@ import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { ISjekklisteItem } from '~shared/types/Sjekkliste'
 import debounce from 'lodash/debounce'
 import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppDispatch } from '~store/Store'
 import { updateSjekkliste, updateSjekklisteItem } from '~store/reducers/SjekklisteReducer'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
@@ -31,9 +31,10 @@ import { useSelectorSaksbehandlerGjeldendeOppgaveBehandling } from '~store/selec
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) => {
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [redigerbar, setRedigerbar] = useState<boolean>(false)
   const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)
   const saksbehandlerGjeldendeOppgave = useSelectorSaksbehandlerGjeldendeOppgaveBehandling()

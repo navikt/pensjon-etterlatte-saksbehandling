@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
@@ -8,14 +9,21 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.toUUID30
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -56,7 +64,8 @@ interface BehandlingStatusService {
 
     fun settFattetVedtak(
         behandling: Behandling,
-        vedtakHendelse: VedtakHendelse,
+        vedtak: VedtakEndringDTO,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     fun sjekkOmKanAttestere(behandlingId: UUID)
@@ -64,13 +73,14 @@ interface BehandlingStatusService {
     fun settAttestertVedtak(
         behandling: Behandling,
         vedtak: VedtakEndringDTO,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 
     fun sjekkOmKanReturnereVedtak(behandlingId: UUID)
 
     fun settReturnertVedtak(
         behandling: Behandling,
-        vedtakHendelse: VedtakHendelse,
+        vedtak: VedtakEndringDTO,
     )
 
     fun settTilSamordnetVedtak(
@@ -94,6 +104,8 @@ interface BehandlingStatusService {
 class BehandlingStatusServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val behandlingService: BehandlingService,
+    private val behandlingInfoDao: BehandlingInfoDao,
+    private val oppgaveService: OppgaveService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     private val generellBehandlingService: GenerellBehandlingService,
 ) : BehandlingStatusService {
@@ -161,7 +173,8 @@ class BehandlingStatusServiceImpl(
 
     override fun settFattetVedtak(
         behandling: Behandling,
-        vedtakHendelse: VedtakHendelse,
+        vedtak: VedtakEndringDTO,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         if (behandling is ManuellRevurdering) {
             lagreNyBehandlingStatus(behandling.tilFattetVedtakUtvidet())
@@ -169,7 +182,21 @@ class BehandlingStatusServiceImpl(
             lagreNyBehandlingStatus(behandling.tilFattetVedtak())
         }
 
-        registrerVedtakHendelse(behandling.id, vedtakHendelse, HendelseType.FATTET)
+        registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.FATTET)
+
+        val merknadBehandling =
+            when (val bruker = brukerTokenInfo) {
+                is Saksbehandler -> "Behandlet av ${bruker.ident}"
+                is Systembruker -> "Behandlet av systemet"
+            }
+
+        oppgaveService.tilAttestering(
+            referanse = vedtak.sakIdOgReferanse.referanse,
+            type = OppgaveType.fra(behandling.type),
+            merknad =
+                listOfNotNull(vedtak.vedtakType.tilLesbarString(), merknadBehandling, vedtak.vedtakHendelse.kommentar)
+                    .joinToString(separator = ": "),
+        )
     }
 
     override fun sjekkOmKanAttestere(behandlingId: UUID) {
@@ -179,6 +206,7 @@ class BehandlingStatusServiceImpl(
     override fun settAttestertVedtak(
         behandling: Behandling,
         vedtak: VedtakEndringDTO,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         if (vedtak.vedtakType == VedtakType.AVSLAG) {
             lagreNyBehandlingStatus(behandling.tilAvslag())
@@ -187,6 +215,13 @@ class BehandlingStatusServiceImpl(
             lagreNyBehandlingStatus(behandling.tilAttestert())
         }
         registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.ATTESTERT)
+
+        oppgaveService.ferdigStillOppgaveUnderBehandling(
+            referanse = vedtak.sakIdOgReferanse.referanse,
+            type = OppgaveType.fra(behandling.type),
+            saksbehandler = brukerTokenInfo,
+            merknad = "${vedtak.vedtakType.tilLesbarString()}: ${vedtak.vedtakHendelse.kommentar ?: ""}",
+        )
     }
 
     override fun sjekkOmKanReturnereVedtak(behandlingId: UUID) {
@@ -195,10 +230,19 @@ class BehandlingStatusServiceImpl(
 
     override fun settReturnertVedtak(
         behandling: Behandling,
-        vedtakHendelse: VedtakHendelse,
+        vedtak: VedtakEndringDTO,
     ) {
         lagreNyBehandlingStatus(behandling.tilReturnert())
-        registrerVedtakHendelse(behandling.id, vedtakHendelse, HendelseType.UNDERKJENT)
+        registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.UNDERKJENT)
+
+        oppgaveService.tilUnderkjent(
+            referanse = vedtak.sakIdOgReferanse.referanse,
+            type = OppgaveType.fra(behandling.type),
+            merknad =
+                vedtak.vedtakHendelse.let {
+                    listOfNotNull(it.valgtBegrunnelse, it.kommentar).joinToString(separator = ": ")
+                },
+        )
     }
 
     override fun settTilSamordnetVedtak(
@@ -227,6 +271,7 @@ class BehandlingStatusServiceImpl(
         lagreNyBehandlingStatus(behandling.tilIverksatt(), Tidspunkt.now().toLocalDatetimeUTC())
         registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.IVERKSATT)
         haandterUtland(behandling)
+        haandterFeilutbetaling(behandling)
         if (behandling.type == BehandlingType.REVURDERING) {
             grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
         }
@@ -247,6 +292,22 @@ class BehandlingStatusServiceImpl(
             }
         } else {
             logger.info("Behandlingtype: ${behandling.type} får ikke utlandsoppgave")
+        }
+    }
+
+    private fun haandterFeilutbetaling(behandling: Behandling) {
+        val brevutfall = behandlingInfoDao.hentBrevutfall(behandling.id)
+        if (brevutfall?.feilutbetaling?.valg in listOf(FeilutbetalingValg.JA_VARSEL, FeilutbetalingValg.JA_INGEN_TK)) {
+            logger.info("Oppretter oppgave av type ${OppgaveType.TILBAKEKREVING} for behandling ${behandling.id}")
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse = behandling.id.toUUID30().value,
+                sakId = behandling.sak.id,
+                oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
+                oppgaveType = OppgaveType.TILBAKEKREVING,
+                merknad = "Venter på kravgrunnlag",
+            )
+        } else {
+            logger.info("Behandling ${behandling.id} har ikke feilutbetaling")
         }
     }
 

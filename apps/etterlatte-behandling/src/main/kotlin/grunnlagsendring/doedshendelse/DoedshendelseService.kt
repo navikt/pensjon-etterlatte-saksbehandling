@@ -69,10 +69,10 @@ class DoedshendelseService(
             inTransaction { doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr) }
                 .filter { it.utfall !== Utfall.AVBRUTT }
 
-        val beroerteBarn = finnBeroerteBarn(avdoed)
-        val beroerteEktefeller = if (kanLagreDoedshendelseForEPS()) finnBeroerteEktefellerSivilstand(avdoed) else emptyList()
-        val samboereMedFellesbarn = if (kanLagreDoedshendelseForEPS()) finnSamboereForAvdoedMedFellesBarn(avdoed) else emptyList()
-        val alleBeroerte = beroerteBarn + beroerteEktefeller + samboereMedFellesbarn
+        val barn = finnBeroerteBarn(avdoed)
+        val samboere = if (kanLagreDoedshendelseForEPS()) finnSamboereForAvdoedMedFellesBarn(avdoed) else emptyList()
+        val ektefeller = if (kanLagreDoedshendelseForEPS()) finnBeroerteEktefeller(avdoed, samboere) else emptyList()
+        val alleBeroerte = barn + ektefeller + samboere
 
         if (gyldigeDoedshendelserForAvdoed.isEmpty()) {
             sikkerLogg.info("Fant ${alleBeroerte.size} berørte personer for avdød (${avdoed.foedselsnummer})")
@@ -217,14 +217,14 @@ class DoedshendelseService(
     }
 
     private fun erSamboere(avdoedOgAnnenForelderMedFellesbarn: AvdoedOgAnnenForelderMedFellesbarn): Boolean {
-        val gjenlevendeBosteder =
+        val gjenlevendeBosted =
             avdoedOgAnnenForelderMedFellesbarn
-                .gjenlevendeForelder.bostedsadresse?.map { it.verdi }?.filter { it.aktiv }
-        val avdoedBosteder =
+                .gjenlevendeForelder.bostedsadresse?.map { it.verdi }?.firstOrNull { it.aktiv }
+        val avdoedBosted =
             avdoedOgAnnenForelderMedFellesbarn
-                .avdoedPerson.bostedsadresse?.map { it.verdi }?.sortedByDescending { it.gyldigFraOgMed }
+                .avdoedPerson.bostedsadresse?.map { it.verdi }?.sortedByDescending { it.gyldigFraOgMed }?.firstOrNull()
 
-        val adresserLike = isAdresserLike(gjenlevendeBosteder?.first(), avdoedBosteder?.first())
+        val adresserLike = gjenlevendeBosted != null && avdoedBosted != null && isAdresserLike(gjenlevendeBosted, avdoedBosted)
         logger.info(
             "Avdød (${avdoedOgAnnenForelderMedFellesbarn.avdoedPerson.foedselsnummer.verdi}) og annen forelder " +
                 "(${avdoedOgAnnenForelderMedFellesbarn.gjenlevendeForelder.foedselsnummer.verdi}) har samme adresse: $adresserLike",
@@ -233,16 +233,22 @@ class DoedshendelseService(
     }
 
     private fun isAdresserLike(
-        adresse1: Adresse?,
-        adresse2: Adresse?,
-    ) = adresse1?.adresseLinje1 == adresse2?.adresseLinje1 &&
-        adresse1?.adresseLinje2 == adresse2?.adresseLinje2 &&
-        adresse1?.adresseLinje3 == adresse2?.adresseLinje3 &&
-        adresse1?.postnr == adresse2?.postnr
+        adresse1: Adresse,
+        adresse2: Adresse,
+    ) = adresse1.adresseLinje1 == adresse2.adresseLinje1 &&
+        adresse1.adresseLinje2 == adresse2.adresseLinje2 &&
+        adresse1.adresseLinje3 == adresse2.adresseLinje3 &&
+        adresse1.postnr == adresse2.postnr
 
-    private fun finnBeroerteEktefellerSivilstand(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
-        return avdoed.sivilstand?.filter { it.verdi.relatertVedSiviltilstand?.value !== null }
-            ?.filter {
+    private fun finnBeroerteEktefeller(
+        avdoed: PersonDTO,
+        samboere: List<PersonFnrMedRelasjon>,
+    ): List<PersonFnrMedRelasjon> {
+        val avdoedesSivilstander = avdoed.sivilstand ?: emptyList()
+
+        return avdoedesSivilstander.asSequence()
+            .filter { it.verdi.relatertVedSiviltilstand?.value != null }
+            .filter {
                 it.verdi.sivilstatus in
                     listOf(
                         Sivilstatus.GIFT,
@@ -252,9 +258,11 @@ class DoedshendelseService(
                         Sivilstatus.SEPARERT_PARTNER,
                         Sivilstatus.SKILT_PARTNER,
                     )
-            }?.map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EKTEFELLE) }
-            ?.distinct()
-            ?: emptyList()
+            }
+            .map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EKTEFELLE) }
+            .filter { ektefelle -> samboere.none { samboer -> samboer.fnr == ektefelle.fnr } }
+            .distinct()
+            .toList()
     }
 }
 

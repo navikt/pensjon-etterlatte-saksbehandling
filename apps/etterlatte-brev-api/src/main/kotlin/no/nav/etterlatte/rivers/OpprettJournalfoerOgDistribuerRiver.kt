@@ -20,6 +20,7 @@ import no.nav.etterlatte.rapidsandrivers.BOR_I_UTLAND_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_KODE
 import no.nav.etterlatte.rapidsandrivers.ER_OVER_18_AAR
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.sakId
@@ -47,6 +48,8 @@ class OpprettJournalfoerOgDistribuerRiver(
             validate { it.interestedIn(ER_OVER_18_AAR) }
         }
     }
+
+    override fun kontekst() = Kontekst.BREV
 
     override fun haandterPakke(
         packet: JsonMessage,

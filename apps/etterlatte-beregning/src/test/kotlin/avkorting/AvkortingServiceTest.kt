@@ -10,13 +10,14 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.BeregningService
-import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
+import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagre
 import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -320,7 +321,7 @@ internal class AvkortingServiceTest {
 
     @Nested
     inner class LagreAvkorting {
-        val endretGrunnlag = mockk<AvkortingGrunnlag>()
+        val endretGrunnlag = mockk<AvkortingGrunnlagLagreDto>()
         val beregning = mockk<Beregning>()
 
         val eksisterendeAvkorting = mockk<Avkorting>()
@@ -341,7 +342,7 @@ internal class AvkortingServiceTest {
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every {
-                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any())
+                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any(), any())
             } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
@@ -358,6 +359,8 @@ internal class AvkortingServiceTest {
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,
                     behandling.behandlingType,
+                    behandling.virkningstidspunkt!!.dato,
+                    bruker,
                     beregning,
                 )
                 avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
@@ -387,7 +390,7 @@ internal class AvkortingServiceTest {
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns revurdering
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every {
-                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any())
+                eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any(), any())
             } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
             coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
@@ -409,6 +412,8 @@ internal class AvkortingServiceTest {
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,
                     revurdering.behandlingType,
+                    revurdering.virkningstidspunkt!!.dato,
+                    bruker,
                     beregning,
                 )
                 avkortingRepository.lagreAvkorting(revurderingId, beregnetAvkorting)
@@ -429,7 +434,7 @@ internal class AvkortingServiceTest {
 
             runBlocking {
                 assertThrows<Exception> {
-                    service.beregnAvkortingMedNyttGrunnlag(behandlingId, bruker, avkortinggrunnlag())
+                    service.beregnAvkortingMedNyttGrunnlag(behandlingId, bruker, avkortinggrunnlagLagre())
                 }
             }
 

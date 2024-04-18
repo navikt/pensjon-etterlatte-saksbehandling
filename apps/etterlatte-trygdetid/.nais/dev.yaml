@@ -81,6 +81,9 @@ spec:
         - application: etterlatte-trygdetid-kafka
         - application: etterlatte-beregning-kafka
         - application: etterlatte-vedtaksvurdering
+        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+          namespace: aura
+          cluster: dev-gcp
     outbound:
       rules:
         - application: etterlatte-behandling

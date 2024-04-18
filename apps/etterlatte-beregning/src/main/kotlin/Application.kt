@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.sanksjon.sanksjon
 import no.nav.etterlatte.ytelseMedGrunnlag.ytelseMedGrunnlag
 
 fun main() {
@@ -31,6 +32,7 @@ class Server(private val context: ApplicationContext) {
                 avkorting(avkortingService, behandlingKlient)
                 ytelseMedGrunnlag(ytelseMedGrunnlagService, behandlingKlient)
                 grunnbeloep(grunnbeloepService)
+                sanksjon(sanksjonService, behandlingKlient)
             }
         }
 

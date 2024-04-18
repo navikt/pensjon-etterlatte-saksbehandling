@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.common.Enheter
@@ -96,10 +97,11 @@ interface BehandlingService {
         hendelseType: HendelseType,
     )
 
-    fun oppdaterVirkningstidspunkt(
+    suspend fun oppdaterVirkningstidspunkt(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
         ident: String,
+        brukerTokenInfo: BrukerTokenInfo,
         begrunnelse: String,
         kravdato: LocalDate? = null,
     ): Virkningstidspunkt
@@ -148,6 +150,11 @@ interface BehandlingService {
         redigertFamilieforhold: RedigertFamilieforhold,
     )
 
+    fun endreSkalSendeBrev(
+        behandlingId: UUID,
+        skalSendeBrev: Boolean,
+    )
+
     fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning?
 }
 
@@ -161,6 +168,7 @@ internal class BehandlingServiceImpl(
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagServiceImpl,
+    private val beregningKlient: BeregningKlient,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -408,6 +416,15 @@ internal class BehandlingServiceImpl(
         }
     }
 
+    override fun endreSkalSendeBrev(
+        behandlingId: UUID,
+        skalSendeBrev: Boolean,
+    ) {
+        inTransaction {
+            behandlingDao.lagreSendeBrev(behandlingId, skalSendeBrev)
+        }
+    }
+
     override fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning? {
         val sisteIkkeAvbrutteBehandling =
             hentBehandlingerForSakId(sakId)
@@ -463,6 +480,7 @@ internal class BehandlingServiceImpl(
             revurderinginfo = behandling.revurderingInfo(),
             begrunnelse = behandling.begrunnelse(),
             kilde = behandling.kilde,
+            sendeBrev = behandling.sendeBrev,
         )
     }
 
@@ -495,10 +513,11 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    override fun oppdaterVirkningstidspunkt(
+    override suspend fun oppdaterVirkningstidspunkt(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
         ident: String,
+        brukerTokenInfo: BrukerTokenInfo,
         begrunnelse: String,
         kravdato: LocalDate?,
     ): Virkningstidspunkt {
@@ -521,6 +540,10 @@ internal class BehandlingServiceImpl(
                 e,
             )
             throw e
+        }
+
+        if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+            beregningKlient.slettAvkorting(behandling.id, brukerTokenInfo)
         }
 
         return virkningstidspunktData

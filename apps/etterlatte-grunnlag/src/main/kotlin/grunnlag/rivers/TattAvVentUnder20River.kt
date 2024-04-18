@@ -3,6 +3,7 @@ package no.nav.etterlatte.grunnlag.rivers
 import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Ventehendelser
@@ -24,6 +25,8 @@ class TattAvVentUnder20River(
             validate { it.requireKey(SAK_ID_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.VENT
 
     override fun haandterPakke(
         packet: JsonMessage,

@@ -98,6 +98,9 @@ spec:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
         - application: etterlatte-tidshendelser
+        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+          namespace: aura
+          cluster: dev-gcp
     outbound:
       rules:
         - application: etterlatte-behandling

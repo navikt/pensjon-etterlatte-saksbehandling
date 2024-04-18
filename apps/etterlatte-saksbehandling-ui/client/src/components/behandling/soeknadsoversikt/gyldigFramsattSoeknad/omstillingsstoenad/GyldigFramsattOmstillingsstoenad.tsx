@@ -13,7 +13,7 @@ import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { StatusIconProps } from '~shared/icons/statusIcon'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/Verger'
-import { useAppSelector } from '~store/Store'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const GyldigFramsattOmstillingsstoenad = ({
   behandling,
@@ -24,7 +24,7 @@ export const GyldigFramsattOmstillingsstoenad = ({
   behandling: IDetaljertBehandling
   innsender?: Personopplysning
 }) => {
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,

@@ -29,12 +29,12 @@ import {
 } from '~components/behandling/virkningstidspunkt/utils'
 import Virkningstidspunkt from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-import { useAppSelector } from '~store/Store'
 import { GrunnlagForVirkningstidspunkt } from '~components/behandling/soeknadsoversikt/GrunnlagForVirkningstidspunkt'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,

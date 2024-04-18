@@ -390,6 +390,7 @@ internal class GrunnlagsendringshendelseDaoTest(val dataSource: DataSource) {
                 fritekstAarsak = null,
                 prosesstype = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
             )
         val behandling2 = behandling1.copy(sakId = sak2)
         assertNotEquals(behandling1.id, behandling2.id)

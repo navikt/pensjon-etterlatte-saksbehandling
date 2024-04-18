@@ -13,7 +13,8 @@ import java.time.Month
 import java.util.UUID
 import kotlin.system.exitProcess
 
-val GRUNNBELOEP_REGULERING_DATO: LocalDate = LocalDate.of(LocalDate.now().year, Month.MAY, 1)
+val year = LocalDate.now().year
+val GRUNNBELOEP_REGULERING_DATO: LocalDate = LocalDate.of(year, Month.MAY, 1)
 
 val logger: Logger = LoggerFactory.getLogger("StartReguleringJob")
 
@@ -38,7 +39,8 @@ fun main() {
 private fun createRecord(dato: LocalDate) =
     JsonMessage.newMessage(
         mapOf(
-            ReguleringHendelseType.START_REGULERING.lagParMedEventNameKey(),
+            ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
             ReguleringEvents.DATO to dato.toString(),
+            ReguleringEvents.KJOERING to "Regulering-$year",
         ),
     ).toJson()

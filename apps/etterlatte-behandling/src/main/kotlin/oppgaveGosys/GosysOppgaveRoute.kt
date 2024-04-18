@@ -20,7 +20,9 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
     route("/api/oppgaver/gosys") {
         get {
             kunSaksbehandler {
-                call.respond(gosysService.hentOppgaver(brukerTokenInfo))
+                val tema = call.request.queryParameters.getAll("tema") ?: listOf("EYO", "EYB")
+
+                call.respond(gosysService.hentOppgaver(tema, brukerTokenInfo))
             }
         }
 

@@ -85,11 +85,15 @@ spec:
     - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
       value: ce96a301-13db-4409-b277-5b27f464d08b
     - name: ETTERLATTE_GRUNNLAG_URL
-      value: http://etterlatte-grunnlag/api
+      value: http://etterlatte-grunnlag
     - name: ETTERLATTE_VEDTAK_CLIENT_ID
       value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
+    - name: ETTERLATTE_BEREGNING_CLIENT_ID
+      value: b07cf335-11fb-4efa-bd46-11f51afd5052
+    - name: ETTERLATTE_BEREGNING_URL
+      value: http://etterlatte-beregning
     - name: ETTERLATTE_TILBAKEKREVING_URL
       value: http://etterlatte-tilbakekreving
     - name: AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING
@@ -155,6 +159,7 @@ spec:
         - application: etterlatte-grunnlag
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-migrering
+        - application: etterlatte-beregning
         - application: etterlatte-tilbakekreving
         - application: skjermede-personer-pip # namespace hører til denne. Ikke legg til ny app i mellom.
           namespace: nom
@@ -189,3 +194,6 @@ spec:
         - application: etterlatte-klage
         - application: etterlatte-tilbakekreving
         - application: etterlatte-brev-api
+        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+          namespace: aura
+          cluster: dev-gcp

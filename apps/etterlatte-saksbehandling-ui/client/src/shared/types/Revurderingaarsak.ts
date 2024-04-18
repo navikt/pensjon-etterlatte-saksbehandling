@@ -28,6 +28,18 @@ export enum Revurderingaarsak {
   OPPHOER_UTEN_BREV = 'OPPHOER_UTEN_BREV',
   ALDERSOVERGANG = 'ALDERSOVERGANG',
   RETT_UTEN_TIDSBEGRENSNING = 'RETT_UTEN_TIDSBEGRENSNING',
+  FORELDRELOES = 'FORELDRELOES',
+  AVKORTING_MOT_UFOERETRYGD = 'AVKORTING_MOT_UFOERETRYGD',
+  ETTEROPPGJOER = 'ETTEROPPGJOER',
+  OMGJOERING_ETTER_ANKE = 'OMGJOERING_ETTER_ANKE',
+  OMGJOERING_PAA_EGET_INITIATIV = 'OMGJOERING_PAA_EGET_INITIATIV',
+  OMGJOERING_ETTER_KRAV_FRA_BRUKER = 'OMGJOERING_ETTER_KRAV_FRA_BRUKER',
+  OPPHOER_3_AAR_ETTER_DOEDSFALL = 'OPPHOER_3_AAR_ETTER_DOEDSFALL',
+  OPPHOER_AV_2_UTVIDEDE_AAR = 'OPPHOER_AV_2_UTVIDEDE_AAR',
+  SANKSJON_PGA_MANGLENDE_OPPLYSNINGER = 'SANKSJON_PGA_MANGLENDE_OPPLYSNINGER',
+  SOEKNAD_OM_GJENOPPTAK = 'SOEKNAD_OM_GJENOPPTAK',
+  UTSENDELSE_AV_KRAVPAKKE = 'UTSENDELSE_AV_KRAVPAKKE',
+  UTSENDELSE_AV_SED = 'UTSENDELSE_AV_SED',
 }
 
 export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
@@ -56,17 +68,19 @@ export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   OPPHOER_UTEN_BREV: 'Opphør (uten brev)',
   ALDERSOVERGANG: 'Aldersovergang',
   RETT_UTEN_TIDSBEGRENSNING: 'Stønad uten tidsbegrensning',
+  FORELDRELOES: 'Fra en forelder død til foreldreløs',
+  AVKORTING_MOT_UFOERETRYGD: 'Avkorting mot uføretrygd',
+  ETTEROPPGJOER: 'Etteroppgjør',
+  OMGJOERING_ETTER_ANKE: 'Omgjøring etter anke',
+  OMGJOERING_PAA_EGET_INITIATIV: 'Omgjøring på eget intitiativ',
+  OMGJOERING_ETTER_KRAV_FRA_BRUKER: 'Omgjøring etter krav fra bruker',
+  OPPHOER_3_AAR_ETTER_DOEDSFALL: 'Opphør 3 år etter dødsfall',
+  OPPHOER_AV_2_UTVIDEDE_AAR: 'Opphør av 2 utvidede år',
+  SANKSJON_PGA_MANGLENDE_OPPLYSNINGER: 'Sanksjon pga manglende opplysninger',
+  SOEKNAD_OM_GJENOPPTAK: 'Søknad om gjenopptak',
+  UTSENDELSE_AV_KRAVPAKKE: 'Utsendelse av kravpakke',
+  UTSENDELSE_AV_SED: 'Utsendelse av SED',
 } as const
-
-export const erOpphoer = (revurderingsaarsak: Revurderingaarsak) =>
-  [
-    Revurderingaarsak.DOEDSFALL,
-    Revurderingaarsak.ADOPSJON,
-    Revurderingaarsak.OMGJOERING_AV_FARSKAP,
-    Revurderingaarsak.SIVILSTAND,
-    Revurderingaarsak.OPPHOER_UTEN_BREV,
-    Revurderingaarsak.ALDERSOVERGANG,
-  ].includes(revurderingsaarsak)
 
 export type RevurderingsaarsakerBySakstype = {
   [key in SakType]: Array<Revurderingaarsak>

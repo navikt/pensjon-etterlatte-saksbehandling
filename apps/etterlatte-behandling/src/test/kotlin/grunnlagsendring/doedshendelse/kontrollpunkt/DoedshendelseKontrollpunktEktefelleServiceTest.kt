@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.mockPerson
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class DoedshendelseKontrollpunktEktefelleServiceTest {
@@ -86,12 +85,20 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
 
     @Test
     fun `Skal opprette kontrollpunkt for tidligere ektefeller som har vaert gift i mer enn 25 aar`() {
-        val gjenlevende =
-            gjenlevende.copy(
+        val avdoed =
+            avdoed.copy(
                 sivilstand =
                     listOf(
-                        sivilstand(antallAarSiden = 30, sivilstatus = Sivilstatus.GIFT, relatertPerson = avdoed.foedselsnummer.verdi.value),
-                        sivilstand(antallAarSiden = 3, sivilstatus = Sivilstatus.SKILT, relatertPerson = avdoed.foedselsnummer.verdi.value),
+                        sivilstand(
+                            antallAarSiden = 30,
+                            sivilstatus = Sivilstatus.GIFT,
+                            relatertPerson = gjenlevende.foedselsnummer.verdi.value,
+                        ),
+                        sivilstand(
+                            antallAarSiden = 3,
+                            sivilstatus = Sivilstatus.SKILT,
+                            relatertPerson = gjenlevende.foedselsnummer.verdi.value,
+                        ),
                     ).flatten(),
             )
         val kontrollpunkter = kontrollpunktService.identifiser(gjenlevende, avdoed)
@@ -99,27 +106,28 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
         kontrollpunkter shouldContainExactly
             listOf(
                 DoedshendelseKontrollpunkt.TidligereEpsGiftMerEnn25Aar(
-                    doedsdato, avdoed.foedselsnummer.verdi.value,
+                    doedsdato,
+                    avdoed.foedselsnummer.verdi.value,
                 ),
             )
     }
 
     @Test
     fun `Skal opprette kontrollpunkt for tidligere ektefeller som har vaert gift i mer enn 15 aar og felles barn`() {
-        val avdoed = avdoed.copy(familieRelasjon = familieRelasjonMedBarn())
-        val gjenlevende =
+        val gjenlevende = avdoed.copy(familieRelasjon = familieRelasjonMedBarn())
+        val avdoed =
             gjenlevende.copy(
                 sivilstand =
                     listOf(
                         sivilstand(
                             antallAarSiden = 20,
                             sivilstatus = Sivilstatus.GIFT,
-                            relatertPerson = Companion.avdoed.foedselsnummer.verdi.value,
+                            relatertPerson = gjenlevende.foedselsnummer.verdi.value,
                         ),
                         sivilstand(
                             antallAarSiden = 3,
                             sivilstatus = Sivilstatus.SKILT,
-                            relatertPerson = Companion.avdoed.foedselsnummer.verdi.value,
+                            relatertPerson = gjenlevende.foedselsnummer.verdi.value,
                         ),
                     ).flatten(),
                 familieRelasjon = familieRelasjonMedBarn(),
@@ -130,22 +138,27 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
         kontrollpunkter shouldContainExactly
             listOf(
                 DoedshendelseKontrollpunkt.TidligereEpsGiftMerEnn15AarFellesBarn(
-                    doedsdato, avdoed.foedselsnummer.verdi.value,
+                    doedsdato,
+                    avdoed.foedselsnummer.verdi.value,
                 ),
             )
     }
 
     @Test
     fun `Skal opprette kontrollpunkt for tidligere ektefeller som har vaert gift i under 25 aar og uten felles barn`() {
-        val gjenlevende =
-            gjenlevende.copy(
+        val avdoed =
+            avdoed.copy(
                 sivilstand =
                     listOf(
-                        sivilstand(antallAarSiden = 30, sivilstatus = Sivilstatus.GIFT, relatertPerson = avdoed.foedselsnummer.verdi.value),
+                        sivilstand(
+                            antallAarSiden = 30,
+                            sivilstatus = Sivilstatus.GIFT,
+                            relatertPerson = gjenlevende.foedselsnummer.verdi.value,
+                        ),
                         sivilstand(
                             antallAarSiden = 10,
                             sivilstatus = Sivilstatus.SKILT,
-                            relatertPerson = avdoed.foedselsnummer.verdi.value,
+                            relatertPerson = gjenlevende.foedselsnummer.verdi.value,
                         ),
                     ).flatten(),
             )
@@ -159,20 +172,20 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
 
     @Test
     fun `Skal opprette kontrollpunkt for tidligere ektefeller som har vaert gift i under 15 aar og med felles barn`() {
-        val avdoed = avdoed.copy(familieRelasjon = familieRelasjonMedBarn())
-        val gjenlevende =
-            gjenlevende.copy(
+        val gjenlevende = avdoed.copy(familieRelasjon = familieRelasjonMedBarn())
+        val avdoed =
+            avdoed.copy(
                 sivilstand =
                     listOf(
                         sivilstand(
                             antallAarSiden = 10,
                             sivilstatus = Sivilstatus.GIFT,
-                            relatertPerson = Companion.avdoed.foedselsnummer.verdi.value,
+                            relatertPerson = gjenlevende.foedselsnummer.verdi.value,
                         ),
                         sivilstand(
                             antallAarSiden = 3,
                             sivilstatus = Sivilstatus.SKILT,
-                            relatertPerson = Companion.avdoed.foedselsnummer.verdi.value,
+                            relatertPerson = gjenlevende.foedselsnummer.verdi.value,
                         ),
                     ).flatten(),
                 familieRelasjon = familieRelasjonMedBarn(),
@@ -187,17 +200,28 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
     }
 
     @Test
-    fun `Skal opprette kontrollpunkt for tidligere ektefeller som har vaert gift naar status SKILT mangler`() {
-        val gjenlevende =
-            gjenlevende.copy(
+    fun `Skal opprette kontrollpunkt for tidligere ektefeller som har vaert gift naar status SKILT manger fom dato`() {
+        val skiltUtenDatoOgRelasjon =
+            OpplysningDTO(
+                verdi =
+                    Sivilstand(
+                        sivilstatus = Sivilstatus.SKILT,
+                        relatertVedSiviltilstand = null,
+                        gyldigFraOgMed = null,
+                        bekreftelsesdato = null,
+                        kilde = "",
+                    ),
+                opplysningsid = "sivilstand",
+            )
+
+        val avdoed =
+            avdoed.copy(
                 sivilstand =
-                    listOf(
-                        sivilstand(
-                            antallAarSiden = 10,
-                            sivilstatus = Sivilstatus.GIFT,
-                            relatertPerson = avdoed.foedselsnummer.verdi.value,
-                        ),
-                    ).flatten(),
+                    sivilstand(
+                        antallAarSiden = 10,
+                        sivilstatus = Sivilstatus.GIFT,
+                        relatertPerson = gjenlevende.foedselsnummer.verdi.value,
+                    ) + skiltUtenDatoOgRelasjon,
                 familieRelasjon = familieRelasjonMedBarn(),
             )
 
@@ -206,7 +230,8 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
         kontrollpunkter shouldContainExactly
             listOf(
                 DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(
-                    doedsdato, avdoed.foedselsnummer.verdi.value,
+                    doedsdato,
+                    avdoed.foedselsnummer.verdi.value,
                 ),
             )
     }
@@ -218,22 +243,22 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
                 verdi =
                     Sivilstand(
                         sivilstatus = Sivilstatus.GIFT,
-                        relatertVedSiviltilstand = Folkeregisteridentifikator.of(doedshendelse.avdoedFnr),
+                        relatertVedSiviltilstand = Folkeregisteridentifikator.of(doedshendelse.beroertFnr),
                         gyldigFraOgMed = null,
                         bekreftelsesdato = null,
                         kilde = "",
                     ),
                 opplysningsid = "sivilstand",
             )
-        val gjenlevende =
-            gjenlevende.copy(
+        val avdoed =
+            avdoed.copy(
                 sivilstand =
                     listOf(
                         listOf(giftUkjentDato),
                         sivilstand(
                             antallAarSiden = 3,
                             sivilstatus = Sivilstatus.SKILT,
-                            relatertPerson = avdoed.foedselsnummer.verdi.value,
+                            relatertPerson = gjenlevende.foedselsnummer.verdi.value,
                         ),
                     ).flatten(),
                 familieRelasjon = familieRelasjonMedBarn(),
@@ -244,16 +269,23 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
         kontrollpunkter shouldContainExactly
             listOf(
                 DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(
-                    doedsdato, avdoed.foedselsnummer.verdi.value,
+                    doedsdato,
+                    avdoed.foedselsnummer.verdi.value,
                 ),
             )
     }
 
     @Test
-    fun `Skal kaste feil hvis vi ikke finner noen relaterte sivilstander`() {
-        assertThrows<IllegalStateException> {
-            kontrollpunktService.identifiser(gjenlevende, avdoed)
-        }
+    fun `Skal returnere EktefelleMedUkjentGiftemaalLengde dersom sivilstandstatus for naar en person ble gift mangler`() {
+        val kontrollpunkter = kontrollpunktService.identifiser(gjenlevende, avdoed)
+
+        kontrollpunkter shouldContainExactly
+            listOf(
+                DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(
+                    doedsdato,
+                    avdoed.foedselsnummer.verdi.value,
+                ),
+            )
     }
 
     companion object {
@@ -279,13 +311,13 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
         fun sivilstand(
             antallAarSiden: Long,
             sivilstatus: Sivilstatus = Sivilstatus.GIFT,
-            relatertPerson: String = doedshendelse.beroertFnr,
+            relatertPerson: String? = doedshendelse.beroertFnr,
         ) = listOf(
             OpplysningDTO(
                 verdi =
                     Sivilstand(
                         sivilstatus = sivilstatus,
-                        relatertVedSiviltilstand = Folkeregisteridentifikator.of(relatertPerson),
+                        relatertVedSiviltilstand = relatertPerson?.let { Folkeregisteridentifikator.of(it) },
                         gyldigFraOgMed = doedsdato.minusYears(antallAarSiden),
                         bekreftelsesdato = null,
                         kilde = "",

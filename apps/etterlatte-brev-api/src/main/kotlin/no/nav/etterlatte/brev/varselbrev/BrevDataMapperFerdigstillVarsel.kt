@@ -3,12 +3,11 @@ package no.nav.etterlatte.brev.varselbrev
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.EtterlatteBrevKode
-import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
+import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
 import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonVarsel
-import no.nav.etterlatte.brev.model.bp.ManglerAvdoedBruktTilTrygdetid
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregning
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregningsperioder
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -16,7 +15,7 @@ import java.time.YearMonth
 
 class BrevDataMapperFerdigstillVarsel(
     private val beregningService: BeregningService,
-    private val trygdetidService: TrygdetidService,
+    private val trygdetidKlient: TrygdetidKlient,
 ) {
     suspend fun hentBrevDataFerdigstilling(request: BrevDataFerdigstillingRequest) =
         coroutineScope {
@@ -34,7 +33,7 @@ class BrevDataMapperFerdigstillVarsel(
         coroutineScope {
             val behandlingId = requireNotNull(request.generellBrevData.behandlingId)
             val grunnbeloep = async { beregningService.hentGrunnbeloep(request.bruker) }
-            val trygdetid = async { trygdetidService.finnTrygdetid(behandlingId, request.bruker) }
+            val trygdetid = async { trygdetidKlient.hentTrygdetid(behandlingId, request.bruker) }
             val utbetalingsinfo =
                 async {
                     beregningService.finnUtbetalingsinfo(
@@ -46,24 +45,17 @@ class BrevDataMapperFerdigstillVarsel(
                         request.generellBrevData.sak.sakType,
                     )
                 }
-            val avdoede = request.generellBrevData.personerISak.avdoede
             BarnepensjonVarsel(
                 innhold = request.innholdMedVedlegg.innhold(),
                 beregning =
                     barnepensjonBeregning(
                         innhold = request.innholdMedVedlegg,
+                        avdoede = request.generellBrevData.personerISak.avdoede,
                         utbetalingsinfo = utbetalingsinfo.await(),
                         grunnbeloep = grunnbeloep.await(),
                         beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo.await()),
                         trygdetid = requireNotNull(trygdetid.await()),
                         erForeldreloes = request.generellBrevData.erForeldreloes(),
-                        bruktAvdoed =
-                            if (request.generellBrevData.erForeldreloes()) {
-                                avdoede.find { it.fnr.value == trygdetid.await()?.ident }?.navn
-                                    ?: throw ManglerAvdoedBruktTilTrygdetid()
-                            } else {
-                                null
-                            },
                     ),
                 erUnder18Aar = request.generellBrevData.personerISak.soeker.under18 ?: true,
                 erBosattUtlandet = request.generellBrevData.utlandstilknytning?.erBosattUtland() ?: false,

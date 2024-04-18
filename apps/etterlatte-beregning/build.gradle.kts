@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":libs:etterlatte-trygdetid-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
+    implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
 
     implementation(libs.database.kotliquery)
 

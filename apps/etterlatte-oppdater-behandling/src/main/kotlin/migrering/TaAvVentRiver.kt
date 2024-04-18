@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.OPPGAVE_ID_FLERE_KEY
 import no.nav.etterlatte.rapidsandrivers.OPPGAVE_KEY
@@ -39,6 +40,8 @@ internal class TaAvVentRiver(
             validate { it.requireKey(OPPGAVETYPE_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.VENT
 
     override fun haandterPakke(
         packet: JsonMessage,

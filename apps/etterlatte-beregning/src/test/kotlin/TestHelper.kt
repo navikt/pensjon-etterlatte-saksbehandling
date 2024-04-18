@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -44,6 +45,8 @@ import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.regler.Beregningstall
+import no.nav.etterlatte.sanksjon.LagreSanksjon
+import no.nav.etterlatte.sanksjon.Sanksjon
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
@@ -129,6 +132,19 @@ fun avkortinggrunnlag(
     relevanteMaanederInnAar = relevanteMaanederInnAar,
     spesifikasjon = "Spesifikasjon",
     kilde = kilde,
+)
+
+fun avkortinggrunnlagLagre(
+    id: UUID = UUID.randomUUID(),
+    aarsinntekt: Int = 100000,
+    fratrekkInnAar: Int = 10000,
+) = AvkortingGrunnlagLagreDto(
+    id = id,
+    aarsinntekt = aarsinntekt,
+    fratrekkInnAar = fratrekkInnAar,
+    inntektUtland = 0,
+    fratrekkInnAarUtland = 0,
+    spesifikasjon = "Spesifikasjon",
 )
 
 fun inntektAvkortingGrunnlag(
@@ -283,7 +299,7 @@ fun behandling(
     sak: Long = 123,
     sakType: SakType = SakType.OMSTILLINGSSTOENAD,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-    virkningstidspunkt: Virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
+    virkningstidspunkt: Virkningstidspunkt? = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
     status: BehandlingStatus = BehandlingStatus.BEREGNET,
 ) = DetaljertBehandling(
     id = id,
@@ -299,6 +315,39 @@ fun behandling(
     utlandstilknytning = null,
     revurderingInfo = null,
     kilde = Vedtaksloesning.GJENNY,
+    sendeBrev = true,
 )
 
 fun BeregningsMetode.toGrunnlag() = BeregningsMetodeBeregningsgrunnlag(this, null)
+
+fun sanksjon(
+    id: UUID? = null,
+    behandlingId: UUID = UUID.randomUUID(),
+    sakId: Long = 123,
+    fom: YearMonth = YearMonth.of(2024, 1),
+    tom: YearMonth = YearMonth.of(2024, 2),
+    beskrivelse: String = "Ikke i jobb",
+) = Sanksjon(
+    id = id,
+    behandlingId = behandlingId,
+    sakId = sakId,
+    fom = fom,
+    tom = tom,
+    opprettet = Grunnlagsopplysning.Saksbehandler.create("A12345"),
+    endret = Grunnlagsopplysning.Saksbehandler.create("A12345"),
+    beskrivelse = beskrivelse,
+)
+
+fun lagreSanksjon(
+    id: UUID? = null,
+    sakId: Long = 123,
+    fom: LocalDate = LocalDate.of(2024, 1, 1),
+    tom: LocalDate = LocalDate.of(2024, 2, 1),
+    beskrivelse: String = "Ikke i jobb",
+) = LagreSanksjon(
+    id = id,
+    sakId = sakId,
+    fom = fom,
+    tom = tom,
+    beskrivelse = beskrivelse,
+)

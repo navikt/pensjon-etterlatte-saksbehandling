@@ -8,6 +8,8 @@ metadata:
 spec:
   image: "{{image}}"
   port: 8080
+  ingresses:
+    - "https://etterlatte-klage.intern.dev.nav.no"
   liveness:
     initialDelay: 5
     path: /health/isalive
@@ -66,3 +68,6 @@ spec:
     inbound:
       rules:
         - application: etterlatte-behandling
+        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+          namespace: aura
+          cluster: dev-gcp

@@ -1,6 +1,6 @@
 import { Info, Overskrift, Tekst, Wrapper } from '~components/behandling/attestering/styled'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
-import { genbehandlingTypeTilLesbartNavn } from '~components/person/behandlingsslistemappere'
+import { genbehandlingTypeTilLesbartNavn } from '~components/person/sakOgBehandling/behandlingsslistemappere'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
 

@@ -7,8 +7,10 @@ import Virkningstidspunkt, { Hjemmel } from '~components/behandling/virkningstid
 import { Start } from '~components/behandling/handlinger/Start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { HeadingWrapper } from '~components/person/SakOversikt'
+import { HeadingWrapper } from '~components/person/sakOgBehandling/SakOversikt'
 import {
+  BP_FORELDRELOES_BESKRIVELSE,
+  BP_FORELDRELOES_HJEMLER,
   BP_INSTITUSJONSOPPHOLD_BESKRIVELSE,
   BP_INSTITUSJONSOPPHOLD_HJEMLER,
   BP_OPPHOER_BESKRIVELSE,
@@ -30,7 +32,7 @@ import {
   OMS_REVURDERING_BESKRIVELSE,
 } from '~components/behandling/virkningstidspunkt/utils'
 import { SakType } from '~shared/types/sak'
-import { erOpphoer, Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
+import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import styled from 'styled-components'
 import { GrunnForSoeskenjustering } from '~components/behandling/revurderingsoversikt/GrunnForSoeskenjustering'
 import { GrunnlagForVirkningstidspunkt } from '~components/behandling/revurderingsoversikt/GrunnlagForVirkningstidspunkt'
@@ -39,9 +41,9 @@ import SluttbehandlingUtland from '~components/behandling/revurderingsoversikt/s
 import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utlandstilknytning/Utlandstilknytning'
-import { useAppSelector } from '~store/Store'
 import { Familieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -85,6 +87,8 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingaarsak)
       return [BP_INSTITUSJONSOPPHOLD_HJEMLER, BP_INSTITUSJONSOPPHOLD_BESKRIVELSE]
     case Revurderingaarsak.SLUTTBEHANDLING_UTLAND:
       return [FELLES_SLUTTBEHANDLING_HJEMLER, FELLES_SLUTTBEHANDLING_BESKRIVELSE]
+    case Revurderingaarsak.FORELDRELOES:
+      return [BP_FORELDRELOES_HJEMLER, BP_FORELDRELOES_BESKRIVELSE]
     default:
       return [FELLES_REVURDERING_HJEMLER, BP_REVURDERING_BESKRIVELSE]
   }
@@ -92,7 +96,7 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingaarsak)
 
 export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const redigerbar = behandlingErRedigerbar(
     behandling.status,
     behandling.sakEnhetId,
@@ -117,8 +121,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           <BodyShort spacing>Revurdering på grunn av annen årsak (spesifiseres nedenfor).</BodyShort>
         ) : (
           <BodyShort spacing>
-            {erOpphoer(revurderingsaarsak) ? 'Opphør' : 'Revurdering'} på grunn av{' '}
-            <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
+            Revurdering på grunn av på grunn av <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
           </BodyShort>
         )}
       </ContentHeader>

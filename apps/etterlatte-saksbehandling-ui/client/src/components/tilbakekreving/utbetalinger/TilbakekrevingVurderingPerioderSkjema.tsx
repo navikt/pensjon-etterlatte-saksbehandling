@@ -2,22 +2,22 @@ import {
   teksterTilbakekrevingResultat,
   teksterTilbakekrevingSkyld,
   TilbakekrevingBehandling,
-  TilbakekrevingBeloep,
   TilbakekrevingPeriode,
   TilbakekrevingResultat,
   TilbakekrevingSkyld,
 } from '~shared/types/Tilbakekreving'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreTilbakekrevingsperioder } from '~shared/api/tilbakekreving'
-import React, { useState } from 'react'
+import React from 'react'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
 import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { Button, Select, Table, TextField, VStack } from '@navikt/ds-react'
+import { Alert, Button, Select, Table, TextField, VStack } from '@navikt/ds-react'
 
-import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { Toast } from '~shared/alerts/Toast'
 import { format } from 'date-fns'
+import { useForm } from 'react-hook-form'
 
 export function TilbakekrevingVurderingPerioderSkjema({
   behandling,
@@ -28,16 +28,17 @@ export function TilbakekrevingVurderingPerioderSkjema({
 }) {
   const dispatch = useAppDispatch()
   const [lagrePerioderStatus, lagrePerioderRequest] = useApiCall(lagreTilbakekrevingsperioder)
-  const [perioder, setPerioder] = useState<TilbakekrevingPeriode[]>(behandling.tilbakekreving.perioder)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<{ values: TilbakekrevingPeriode[] }>({
+    defaultValues: { values: behandling.tilbakekreving.perioder },
+  })
 
-  const updateBeloeper = (index: number, oppdatertBeloep: TilbakekrevingBeloep) => {
-    const oppdatert = perioder.map((periode, i) => (i === index ? { ...periode, ytelse: oppdatertBeloep } : periode))
-    setPerioder(oppdatert)
-  }
-
-  const lagrePerioder = () => {
-    // TODO validering?
-    lagrePerioderRequest({ behandlingsId: behandling.id, perioder }, (lagretTilbakekreving) => {
+  const lagrePerioder = (data: { values: TilbakekrevingPeriode[] }) => {
+    lagrePerioderRequest({ behandlingsId: behandling.id, perioder: data.values }, (lagretTilbakekreving) => {
       dispatch(addTilbakekreving(lagretTilbakekreving))
     })
   }
@@ -62,7 +63,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {perioder.map((periode, index) => {
+          {watch().values.map((periode, index) => {
             const beloeper = periode.ytelse
             return (
               <Table.Row key={'beloeperRad' + index} style={{ alignItems: 'start' }}>
@@ -71,84 +72,53 @@ export function TilbakekrevingVurderingPerioderSkjema({
                 <Table.DataCell key="nyBruttoUtbetaling">{beloeper.nyBruttoUtbetaling} kr</Table.DataCell>
                 <Table.DataCell key="beregnetFeilutbetaling">
                   <TextField
+                    {...register(`values.${index}.ytelse.beregnetFeilutbetaling`, {
+                      pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
+                      maxLength: { value: 10, message: 'Beløp kan ikke ha flere enn 10 siffer' },
+                    })}
                     label=""
+                    error={errors.values && errors.values[index]?.ytelse?.beregnetFeilutbetaling?.message}
+                    inputMode="numeric"
                     hideLabel={true}
-                    value={beloeper.beregnetFeilutbetaling ?? ''}
-                    pattern="[0-9]{11}"
-                    maxLength={10}
-                    onChange={(e) =>
-                      onChangeNumber(e, (value) => {
-                        updateBeloeper(index, {
-                          ...beloeper,
-                          beregnetFeilutbetaling: value,
-                        })
-                      })
-                    }
                   />
                 </Table.DataCell>
                 <Table.DataCell key="skatteprosent">{beloeper.skatteprosent} %</Table.DataCell>
                 <Table.DataCell key="bruttoTilbakekreving">
                   <TextField
+                    {...register(`values.${index}.ytelse.bruttoTilbakekreving`, {
+                      pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
+                      maxLength: { value: 10, message: 'Beløp kan ikke ha flere enn 10 siffer' },
+                    })}
                     label=""
+                    error={errors.values && errors.values[index]?.ytelse?.bruttoTilbakekreving?.message}
+                    inputMode="numeric"
                     hideLabel={true}
-                    value={beloeper.bruttoTilbakekreving ?? ''}
-                    pattern="[0-9]"
-                    onChange={(e) =>
-                      onChangeNumber(e, (value) => {
-                        updateBeloeper(index, {
-                          ...beloeper,
-                          bruttoTilbakekreving: value,
-                        })
-                      })
-                    }
                   />
                 </Table.DataCell>
                 <Table.DataCell key="nettoTilbakekreving">
                   <TextField
+                    {...register(`values.${index}.ytelse.nettoTilbakekreving`, {
+                      pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
+                      maxLength: { value: 10, message: 'Beløp kan ikke ha flere enn 10 siffer' },
+                    })}
                     label=""
+                    error={errors.values && errors.values[index]?.ytelse?.nettoTilbakekreving?.message}
                     hideLabel={true}
-                    value={beloeper.nettoTilbakekreving ?? ''}
-                    pattern="[0-9]"
-                    readOnly={!redigerbar}
-                    onChange={(e) =>
-                      onChangeNumber(e, (value) => {
-                        updateBeloeper(index, {
-                          ...beloeper,
-                          nettoTilbakekreving: value,
-                        })
-                      })
-                    }
                   />
                 </Table.DataCell>
                 <Table.DataCell key="skatt">
                   <TextField
+                    {...register(`values.${index}.ytelse.skatt`, {
+                      pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
+                      maxLength: { value: 10, message: 'Beløp kan ikke ha flere enn 10 siffer' },
+                    })}
                     label=""
+                    error={errors.values && errors.values[index]?.ytelse?.skatt?.message}
                     hideLabel={true}
-                    value={beloeper.skatt ?? ''}
-                    pattern="[0-9]"
-                    onChange={(e) =>
-                      onChangeNumber(e, (value) => {
-                        updateBeloeper(index, {
-                          ...beloeper,
-                          skatt: value,
-                        })
-                      })
-                    }
                   />
                 </Table.DataCell>
                 <Table.DataCell key="skyld">
-                  <Select
-                    label="Skyld"
-                    hideLabel={true}
-                    value={beloeper.skyld ?? ''}
-                    onChange={(e) => {
-                      if (e.target.value === '') return
-                      updateBeloeper(index, {
-                        ...beloeper,
-                        skyld: TilbakekrevingSkyld[e.target.value as TilbakekrevingSkyld],
-                      })
-                    }}
-                  >
+                  <Select {...register(`values.${index}.ytelse.skyld`)} label="Skyld" hideLabel={true}>
                     <option value="">Velg..</option>
                     {Object.values(TilbakekrevingSkyld).map((skyld) => (
                       <option key={skyld} value={skyld}>
@@ -158,18 +128,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
                   </Select>
                 </Table.DataCell>
                 <Table.DataCell key="resultat">
-                  <Select
-                    label="Resultat"
-                    hideLabel={true}
-                    value={beloeper.resultat ?? ''}
-                    onChange={(e) => {
-                      if (e.target.value === '') return
-                      updateBeloeper(index, {
-                        ...beloeper,
-                        resultat: TilbakekrevingResultat[e.target.value as TilbakekrevingResultat],
-                      })
-                    }}
-                  >
+                  <Select {...register(`values.${index}.ytelse.resultat`)} label="Resultat" hideLabel={true}>
                     <option value="">Velg..</option>
                     {Object.values(TilbakekrevingResultat).map((resultat) => (
                       <option key={resultat} value={resultat}>
@@ -180,35 +139,25 @@ export function TilbakekrevingVurderingPerioderSkjema({
                 </Table.DataCell>
                 <Table.DataCell key="tilbakekrevingsprosent">
                   <TextField
+                    {...register(`values.${index}.ytelse.tilbakekrevingsprosent`, {
+                      pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
+                      min: { value: 0, message: 'Må være større enn 0' },
+                      max: { value: 100, message: 'Kan ikke være større enn 100' },
+                    })}
                     label=""
+                    error={errors.values && errors.values[index]?.ytelse?.tilbakekrevingsprosent?.message}
                     hideLabel={true}
-                    value={beloeper.tilbakekrevingsprosent ?? ''}
-                    pattern="[0-9]"
-                    maxLength={3}
-                    onChange={(e) =>
-                      onChangeNumber(e, (value) => {
-                        updateBeloeper(index, {
-                          ...beloeper,
-                          tilbakekrevingsprosent: value,
-                        })
-                      })
-                    }
                   />
                 </Table.DataCell>
                 <Table.DataCell key="rentetillegg">
                   <TextField
+                    {...register(`values.${index}.ytelse.rentetillegg`, {
+                      pattern: { value: /^[0-9]+$/, message: 'Kun tall' },
+                      maxLength: { value: 10, message: 'Beløp kan ikke ha flere enn 10 siffer' },
+                    })}
                     label=""
+                    error={errors.values && errors.values[index]?.ytelse?.rentetillegg?.message}
                     hideLabel={true}
-                    value={beloeper.rentetillegg ?? ''}
-                    pattern="[0-9]"
-                    onChange={(e) =>
-                      onChangeNumber(e, (value) => {
-                        updateBeloeper(index, {
-                          ...beloeper,
-                          rentetillegg: value,
-                        })
-                      })
-                    }
                   />
                 </Table.DataCell>
               </Table.Row>
@@ -222,18 +171,17 @@ export function TilbakekrevingVurderingPerioderSkjema({
             style={{ marginTop: '1em', maxWidth: '8em' }}
             variant="primary"
             size="small"
-            onClick={lagrePerioder}
+            onClick={handleSubmit(lagrePerioder)}
             loading={isPending(lagrePerioderStatus)}
           >
             Lagre perioder
           </Button>
-          {isSuccess(lagrePerioderStatus) && <Toast melding="Perioder lagret" />}
+          {mapResult(lagrePerioderStatus, {
+            success: () => <Toast melding="Perioder lagret" />,
+            error: (error) => <Alert variant="error">Kunne ikke lagre perioder: {error.detail}</Alert>,
+          })}
         </VStack>
       )}
     </InnholdPadding>
   )
-}
-
-const onChangeNumber = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: number | null) => void) => {
-  onChange(isNaN(parseInt(e.target.value)) ? null : parseInt(e.target.value))
 }

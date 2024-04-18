@@ -5,6 +5,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.dato
@@ -23,16 +24,18 @@ internal class ReguleringsforespoerselRiver(
     private val logger = LoggerFactory.getLogger(ReguleringsforespoerselRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringHendelseType.START_REGULERING) {
+        initialiserRiver(rapidsConnection, ReguleringHendelseType.REGULERING_STARTA) {
             validate { it.requireKey(DATO_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.REGULERING
 
     override fun haandterPakke(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        logger.info("Leser reguleringsfoerespoersel for dato ${packet.dato}")
+        logger.info("Leser reguleringsforespørsel for dato ${packet.dato}")
 
         if (!featureToggleService.isEnabled(ReguleringFeatureToggle.START_REGULERING, false)) {
             logger.info("Regulering er deaktivert ved funksjonsbryter. Avbryter reguleringsforespørsel.")
@@ -45,13 +48,13 @@ internal class ReguleringsforespoerselRiver(
             behandlingService.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
                 .also { sakIdListe ->
                     logger.info(
-                        "Tilbakemigrert ${sakIdListe.ider.size} behandlinger:\n" +
+                        "Tilbakeført ${sakIdListe.ider.size} behandlinger til trygdetid oppdatert:\n" +
                             sakIdListe.ider.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" },
                     )
                 }
 
         sakerTilOmregning.saker.forEach {
-            packet.setEventNameForHendelseType(ReguleringHendelseType.FINN_LOEPENDE_YTELSER)
+            packet.setEventNameForHendelseType(ReguleringHendelseType.SAK_FUNNET)
             packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)
             packet.sakId = it.id
             context.publish(packet.toJson())

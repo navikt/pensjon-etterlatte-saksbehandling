@@ -209,11 +209,12 @@ internal class BehandlingRoutesTest {
                 Grunnlagsopplysning.Saksbehandler.create(NAV_IDENT),
                 bodyBegrunnelse,
             )
-        every {
+        coEvery {
             behandlingService.oppdaterVirkningstidspunkt(
                 behandlingId,
                 parsetVirkningstidspunkt,
                 NAV_IDENT,
+                any(),
                 bodyBegrunnelse,
             )
         } returns virkningstidspunkt

@@ -50,7 +50,6 @@ dependencies {
     testImplementation(libs.test.jupiter.engine)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.test.mockk)
-    testImplementation(libs.test.wiremock)
 
     testFixturesImplementation(libs.navfelles.mockoauth2server)
     testFixturesImplementation(libs.ktor2.servertests)

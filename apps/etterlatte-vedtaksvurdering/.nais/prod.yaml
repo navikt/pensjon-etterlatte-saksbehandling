@@ -77,6 +77,8 @@ spec:
       value: "07-18"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser
+    - name: KAFKA_VEDTAKSHENDELSER_TOPIC
+      value: etterlatte.vedtakshendelser
     - name: ETTERLATTE_BEREGNING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-beregning
     - name: ETTERLATTE_BEREGNING_URL
@@ -107,6 +109,7 @@ spec:
         - application: etterlatte-brev-api
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-behandling
+        - application: etterlatte-beregning
         - application: etterlatte-samordning-vedtak
           permissions:
             roles:

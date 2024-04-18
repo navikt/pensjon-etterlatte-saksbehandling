@@ -21,6 +21,8 @@ spec:
     autoInstrumentation:
       enabled: true
       runtime: java
+  secureLogs:
+    enabled: true
   kafka:
     pool: nav-dev
   resources:
@@ -47,3 +49,8 @@ spec:
         - application: etterlatte-behandling
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+    inbound:
+      rules:
+        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+          namespace: aura
+          cluster: dev-gcp

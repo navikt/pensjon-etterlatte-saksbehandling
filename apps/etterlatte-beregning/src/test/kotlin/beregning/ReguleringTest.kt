@@ -100,7 +100,7 @@ class ReguleringTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+            beregningsGrunnlagService.hentBeregningsGrunnlag(
                 any(),
                 any(),
             )

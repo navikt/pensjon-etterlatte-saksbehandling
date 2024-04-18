@@ -48,8 +48,8 @@ class SamordningVedtakService(
     ): List<SamordningVedtakDto> {
         if (context is MaskinportenTpContext && !tjenestepensjonKlient.harTpYtelseOnDate(fnr.value, context.tpnr, fomDato)
         ) {
-            logger.info("Avslår forespørsel, manglende/ikke gyldig TP-forhold")
-            throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpforhold")
+            logger.info("Avslår forespørsel, manglende/ikke gyldig TP-ytelse")
+            throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpytelse")
         }
 
         return vedtaksvurderingKlient.hentVedtaksliste(

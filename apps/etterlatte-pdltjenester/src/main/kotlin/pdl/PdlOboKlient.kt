@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.ktor.behandlingsnummer
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdHttpClient
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.utils.toPdlVariables
 import org.slf4j.LoggerFactory
@@ -28,7 +29,7 @@ class PdlOboKlient(private val httpClient: HttpClient, config: Config) {
     private val apiUrl = config.getString("pdl.url")
     private val pdlScope = config.getString("pdl.scope")
 
-    private val azureAdClient = AzureAdClient(config, httpClient)
+    private val azureAdClient = AzureAdClient(config, AzureAdHttpClient(httpClient))
 
     suspend fun hentPersonNavn(
         ident: String,

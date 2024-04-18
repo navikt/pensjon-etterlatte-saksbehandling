@@ -35,7 +35,7 @@ export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> =>
   apiClient.get<ILand[]>('/trygdetid/kodeverk/land')
 
 export const oppdaterStatus = async (behandlingId: string): Promise<ApiResponse<StatusOppdatert>> =>
-  apiClient.post(`/trygdetid/${behandlingId}/oppdater-status`, {})
+  apiClient.post(`/trygdetid_v2/${behandlingId}/oppdater-status`, {})
 
 export const oppdaterOpplysningsgrunnlag = async (behandlingId: string): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid_v2/${behandlingId}/oppdater-opplysningsgrunnlag`, {})
@@ -125,14 +125,15 @@ export const lagreTrygdeavtaleForBehandling = async (args: {
   apiClient.post<Trygdeavtale>(`/trygdetid/avtaler/${args.behandlingId}`, { ...args.avtaleRequest })
 
 export const opprettTrygdetidOverstyrtMigrering = async (args: { behandlingId: string }): Promise<ApiResponse<void>> =>
-  apiClient.post(`/trygdetid/${args.behandlingId}/migrering/manuell/opprett`, {})
+  apiClient.post(`/trygdetid_v2/${args.behandlingId}/migrering/manuell/opprett`, {})
 
 export const oppdaterTrygdetidOverstyrtMigrering = async (args: {
   behandlingId: string
+  trygdetidId: string
   anvendtTrygdetid: number
   prorataBroek?: IProrataBroek
 }): Promise<ApiResponse<ITrygdetid>> =>
-  apiClient.post(`/trygdetid/${args.behandlingId}/migrering/manuell/lagre`, {
+  apiClient.post(`/trygdetid_v2/${args.behandlingId}/migrering/${args.trygdetidId}/manuell/lagre`, {
     samletTrygdetidNorge: args.prorataBroek ? undefined : args.anvendtTrygdetid,
     samletTrygdetidTeoretisk: args.prorataBroek ? args.anvendtTrygdetid : undefined,
     prorataBroek: args.prorataBroek,

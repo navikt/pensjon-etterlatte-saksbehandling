@@ -53,17 +53,19 @@ class JournalfoerBrevService(
             service.hentVedtaksbrev(behandlingId)
                 ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
 
-        if (brev.id == 14882L) {
-            logger.info("Vedtaksbrev fra migrering som er i feil tilstand. Avbryter denne.")
-            return null
-        }
-
         // TODO: Forbedre denne "fiksen". Gjøres nå for å lappe sammen
         if (brev.status in listOf(Status.JOURNALFOERT, Status.DISTRIBUERT, Status.SLETTET)) {
             logger.warn("Vedtaksbrev (id=${brev.id}) er allerede ${brev.status}.")
             return null
         }
 
+        // Spesialhandtering for gjenoppretting.
+        if (vedtak.saksbehandler == "EY" && brev.status == Status.OPPRETTET) {
+            logger.warn(
+                "Vedtaksbrev fra migrering som er i feil tilstand: ${brev.id}. Avbryter denne, må følges opp manuelt av utviklerne.",
+            )
+            return null
+        }
         val mappingRequest =
             JournalfoeringsMappingRequest(
                 brevId = brev.id,
@@ -106,7 +108,7 @@ class JournalfoerBrevService(
 
 class FeilStatusForJournalfoering(brevID: BrevID, status: Status) : UgyldigForespoerselException(
     code = "FEIL_STATUS_FOR_JOURNALFOERING",
-    detail = "Kan ikke journalføre brev med status ${status.name.lowercase()}",
+    detail = "Kan ikke journalføre brev $brevID med status ${status.name.lowercase()}",
     meta =
         mapOf(
             "brevId" to brevID,

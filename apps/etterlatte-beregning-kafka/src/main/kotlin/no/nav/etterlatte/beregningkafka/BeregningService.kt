@@ -1,13 +1,14 @@
 package no.nav.etterlatte.beregningkafka
 
 import io.ktor.client.HttpClient
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.LagreBeregningsGrunnlag
 import java.util.UUID
 
 class BeregningService(
@@ -17,6 +18,11 @@ class BeregningService(
     fun beregn(behandlingId: UUID): HttpResponse =
         runBlocking {
             beregningApp.post("$url/api/beregning/$behandlingId")
+        }
+
+    fun hentBeregning(behandlingId: UUID): HttpResponse =
+        runBlocking {
+            beregningApp.get("$url/api/beregning/$behandlingId")
         }
 
     fun opprettBeregningsgrunnlagFraForrigeBehandling(
@@ -29,7 +35,7 @@ class BeregningService(
 
     fun opprettBeregningsgrunnlag(
         behandlingId: UUID,
-        request: BarnepensjonBeregningsGrunnlag,
+        request: LagreBeregningsGrunnlag,
     ) = runBlocking {
         beregningApp.post("$url/api/beregning/beregningsgrunnlag/$behandlingId/barnepensjon") {
             contentType(ContentType.Application.Json)

@@ -9,10 +9,11 @@ import org.slf4j.LoggerFactory
 
 val feilhaandteringLogger = LoggerFactory.getLogger("feilhaandtering-kafka")
 
-fun <T> withFeilhaandtering(
+internal fun <T> withFeilhaandtering(
     packet: JsonMessage,
     context: MessageContext,
     feilendeSteg: String,
+    kontekst: Kontekst,
     block: () -> T,
 ): Result<T> =
     try {
@@ -22,6 +23,7 @@ fun <T> withFeilhaandtering(
         try {
             packet.setEventNameForHendelseType(EventNames.FEILA)
             packet.feilendeSteg = feilendeSteg
+            packet[KONTEKST_KEY] = kontekst.name
             packet.feilmelding = e.stackTraceToString()
             context.publish(packet.toJson())
             feilhaandteringLogger.info("Publiserte feila-melding")

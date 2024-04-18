@@ -95,6 +95,7 @@ internal class GyldighetsproevingServiceImplTest {
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
             )
 
         every {
@@ -126,6 +127,7 @@ internal class GyldighetsproevingServiceImplTest {
                 gyldighetsproeving = null,
                 prosesstype = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
             )
         every { behandlingDaoMock.hentBehandling(any()) } returns behandling
 
@@ -203,6 +205,7 @@ internal class GyldighetsproevingServiceImplTest {
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
                 kilde = Vedtaksloesning.GJENNY,
+                sendeBrev = true,
             )
 
         behandlingsService.hentFoerstegangsbehandling(id)

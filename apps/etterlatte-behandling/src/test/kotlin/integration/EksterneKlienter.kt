@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
+import no.nav.etterlatte.behandling.klienter.BeregningKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.BrevStatus
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
@@ -36,12 +37,12 @@ import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.PingResultUp
 import no.nav.etterlatte.libs.ktor.ServiceStatus
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
-import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.oppgaveGosys.EndreStatusRequest
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
+import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
+import no.nav.etterlatte.person.krr.KrrKlient
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import java.time.LocalDate
 import java.util.UUID
@@ -75,6 +76,13 @@ class GrunnlagKlientTest : GrunnlagKlient {
                 ),
         )
     }
+}
+
+class BeregningKlientTest : BeregningKlient {
+    override suspend fun slettAvkorting(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {}
 }
 
 class VedtakKlientTest : VedtakKlient {
@@ -223,7 +231,8 @@ class BrevApiKlientTest : BrevApiKlient {
     override suspend fun slettOversendelsesbrev(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {}
+    ) {
+    }
 
     override suspend fun hentVedtaksbrev(
         behandlingId: UUID,
@@ -256,6 +265,7 @@ class BrevApiKlientTest : BrevApiKlient {
 
 class GosysOppgaveKlientTest : GosysOppgaveKlient {
     override suspend fun hentOppgaver(
+        tema: List<String>,
         enhetsnr: String?,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver {

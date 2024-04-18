@@ -26,9 +26,9 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
-import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
-import no.nav.etterlatte.migrering.person.krr.KrrKlientImpl
 import no.nav.etterlatte.mockPerson
+import no.nav.etterlatte.person.krr.DigitalKontaktinformasjon
+import no.nav.etterlatte.person.krr.KrrKlientImpl
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

@@ -20,6 +20,7 @@ import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
 import no.nav.etterlatte.behandling.revurdering.revurderingRoutes
+import no.nav.etterlatte.behandling.selftest.selfTestRoute
 import no.nav.etterlatte.behandling.sjekklisteRoute
 import no.nav.etterlatte.behandling.statistikk.statistikkRoutes
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
@@ -67,6 +68,7 @@ private class Server(private val context: ApplicationContext) {
             httpPort = context.httpPort,
             applicationConfig = context.config,
             cronJobs = timerJobs(context),
+            routes = { selfTestRoute(context.selfTestService) },
         ) {
             settOppApplikasjonen(context)
         }

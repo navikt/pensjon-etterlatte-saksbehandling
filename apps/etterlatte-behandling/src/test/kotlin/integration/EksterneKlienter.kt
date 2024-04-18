@@ -273,6 +273,13 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         return GosysOppgaver(0, emptyList())
     }
 
+    override suspend fun hentJournalfoeringsoppgave(
+        journalpostId: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysOppgaver {
+        return GosysOppgaver(0, emptyList())
+    }
+
     override suspend fun hentOppgave(
         id: Long,
         brukerTokenInfo: BrukerTokenInfo,

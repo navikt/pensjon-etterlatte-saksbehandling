@@ -28,6 +28,10 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
             }
         }
 
+        get("/journalfoering/{journalpostId}") {
+            call.respond(gosysService.hentJournalfoeringsoppgave(call.parameters["journalpostId"]!!, brukerTokenInfo))
+        }
+
         route("{$OPPGAVEID_GOSYS_CALL_PARAMETER}") {
             get {
                 kunSaksbehandler {

@@ -58,6 +58,11 @@ interface GosysOppgaveKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver
 
+    suspend fun hentJournalfoeringsoppgave(
+        journalpostId: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysOppgaver
+
     suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
         oppgaveVersjon: Long,
@@ -127,6 +132,36 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: SocketTimeoutException) {
+            throw GosysTimeout()
+        } catch (e: Exception) {
+            logger.error("Feil ved henting av oppgaver fra Gosys", e)
+            throw e
+        }
+    }
+
+    override suspend fun hentJournalfoeringsoppgave(
+        journalpostId: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysOppgaver {
+        try {
+            logger.info("Henter journalføringsoppgaver for journalpostId=$journalpostId fra Gosys")
+
+            val filters = "statuskategori=AAPEN&journalpostId=$journalpostId"
+
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/v1/oppgaver?$filters",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+                .mapBoth(
+                    success = { resource -> objectMapper.readValue(resource.response.toString()) },
                     failure = { errorResponse -> throw errorResponse },
                 )
         } catch (e: SocketTimeoutException) {

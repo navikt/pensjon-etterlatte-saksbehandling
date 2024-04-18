@@ -1,6 +1,6 @@
 import { Journalpost } from '~shared/types/Journalpost'
 import { Alert, Button, Detail, Heading, Link, Modal } from '@navikt/ds-react'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentOppgaverMedReferanse, opprettOppgave } from '~shared/api/oppgaver'
 import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
@@ -11,8 +11,13 @@ import { SakMedBehandlinger } from '~components/person/typer'
 import { useNavigate } from 'react-router-dom'
 import { erOppgaveRedigerbar, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { ConfigContext } from '~clientConfig'
+import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Info } from '~components/behandling/soeknadsoversikt/Info'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import { feilregistrerGosysOppgave, hentJournalfoeringsoppgaverFraGosys } from '~shared/api/gosys'
+import { GosysOppgave } from '~shared/types/Gosys'
 
-// TODO: Må på sikt gjøre noe for å støtte tilfeller hvor sak mangler.
 export const OppgaveFraJournalpostModal = ({
   isOpen,
   setIsOpen,
@@ -26,14 +31,23 @@ export const OppgaveFraJournalpostModal = ({
 }) => {
   const navigate = useNavigate()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const configContext = useContext(ConfigContext)
 
   const [kanOppretteOppgave, setKanOppretteOppgave] = useState(false)
+  const [finnesGosysOppgave, setFinnesGosysOppgave] = useState(false)
 
   const [opprettOppgaveStatus, apiOpprettOppgave] = useApiCall(opprettOppgave)
   const [hentOppgaverStatus, hentOppgaver] = useApiCall(hentOppgaverMedReferanse)
 
+  const [gosysResult, hentGosysOppgave] = useApiCall(hentJournalfoeringsoppgaverFraGosys)
+  const [, feilregistrerOppgave] = useApiCall(feilregistrerGosysOppgave)
+
   useEffect(() => {
     if (isOpen) {
+      hentGosysOppgave(journalpost.journalpostId, (oppgaver) => {
+        setFinnesGosysOppgave(!!oppgaver?.length)
+      })
+
       hentOppgaver(journalpost.journalpostId, (oppgaver) => {
         const finnesUbehandletOppgave = oppgaver.filter(({ status }) => erOppgaveRedigerbar(status))
 
@@ -64,6 +78,30 @@ export const OppgaveFraJournalpostModal = ({
     }
   }
 
+  const konverterTilGjennyoppgave = (oppgave: GosysOppgave) => {
+    if (isSuccess(sakStatus)) {
+      apiOpprettOppgave(
+        {
+          sakId: sakStatus.data.sak.id,
+          request: {
+            oppgaveType: Oppgavetype.JOURNALFOERING,
+            referanse: oppgave.journalpostId!!,
+            merknad: oppgave.beskrivelse || 'Journalføringsoppgave flyttet fra Gosys',
+            oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
+            saksbehandler: innloggetSaksbehandler.ident,
+          },
+        },
+        () => {
+          feilregistrerOppgave({
+            oppgaveId: oppgave.id,
+            versjon: oppgave.versjon!!,
+            beskrivelse: 'Oppgave ble flyttet til Gjenny',
+          })
+        }
+      )
+    }
+  }
+
   return (
     <>
       <Button variant="secondary" size="small" icon={<PencilIcon />} onClick={() => setIsOpen(true)} title="Rediger" />
@@ -81,19 +119,63 @@ export const OppgaveFraJournalpostModal = ({
           <Detail>Journalpost {journalpost.journalpostId}</Detail>
         </Modal.Header>
 
-        {mapResult(hentOppgaverStatus, {
-          pending: <Spinner visible label="Sjekker om det allerede finnes en oppgave" />,
-          success: (oppgaver) => (
-            <Modal.Body>
-              {!oppgaver.length && (
-                <Alert variant="info">Fant ingen andre oppgaver tilknyttet denne journalposten</Alert>
-              )}
+        <Modal.Body>
+          {mapResult(gosysResult, {
+            pending: <Spinner label="Sjekker om det finnes Gosys-oppgaver tilknyttet journalposten" visible />,
+            error: (error) => (
+              <ApiErrorAlert>{error.detail || 'Feil oppsto ved henting av oppgaver fra Gosys'}</ApiErrorAlert>
+            ),
+            success: (oppgaver) =>
+              finnesGosysOppgave ? (
+                <>
+                  <Alert variant="warning">
+                    Fant {oppgaver.length} oppgave(r) tilknyttet journalposten i Gosys.
+                    <br />
+                    <Link href={`${configContext['gosysUrl']}/personoversikt/fnr=${oppgaver[0].fnr}`} target="_blank">
+                      Åpne i Gosys <ExternalLinkIcon />
+                    </Link>
+                  </Alert>
 
-              <br />
+                  <br />
 
-              {kanOppretteOppgave ? (
+                  {oppgaver.map((oppgave) => (
+                    <div key={oppgave.id}>
+                      <InfoWrapper>
+                        <Info label="ID" tekst={oppgave.id} />
+                        <Info label="Beskrivelse" tekst={oppgave.beskrivelse} />
+                      </InfoWrapper>
+                      <br />
+
+                      <FlexRow $spacing justify="right">
+                        {isSuccess(opprettOppgaveStatus) ? (
+                          <Alert size="small" variant="success">
+                            <Link href={`/oppgave/${opprettOppgaveStatus.data.id}`}>Gå til oppgave</Link>
+                          </Alert>
+                        ) : (
+                          <Button
+                            size="small"
+                            variant="secondary"
+                            onClick={() => konverterTilGjennyoppgave(oppgave)}
+                            loading={isPending(opprettOppgaveStatus)}
+                          >
+                            Flytt til Gjenny
+                          </Button>
+                        )}
+                      </FlexRow>
+                    </div>
+                  ))}
+                </>
+              ) : null,
+          })}
+
+          {mapResult(hentOppgaverStatus, {
+            pending: <Spinner visible label="Sjekker om det allerede finnes en oppgave" />,
+            success: () =>
+              kanOppretteOppgave ? (
                 isSuccess(sakStatus) ? (
-                  <Alert variant="info">Ny journalføringsoppgave kan opprettes</Alert>
+                  finnesGosysOppgave ? null : (
+                    <Alert variant="info">Ny journalføringsoppgave kan opprettes</Alert>
+                  )
                 ) : (
                   <Alert variant="warning">
                     Det finnes ingen sak på denne brukeren. Kan ikke opprette oppgave uten sak.
@@ -108,10 +190,9 @@ export const OppgaveFraJournalpostModal = ({
                     Gå til oppgavelisten <ExternalLinkIcon />
                   </Link>
                 </Alert>
-              )}
-            </Modal.Body>
-          ),
-        })}
+              ),
+          })}
+        </Modal.Body>
 
         <Modal.Footer>
           <FlexRow justify="right">
@@ -121,7 +202,7 @@ export const OppgaveFraJournalpostModal = ({
 
             <Button
               onClick={opprettJournalfoeringsoppgave}
-              disabled={!kanOppretteOppgave || !isSuccess(sakStatus)}
+              disabled={!kanOppretteOppgave || finnesGosysOppgave || !isSuccess(sakStatus)}
               loading={isPending(opprettOppgaveStatus)}
             >
               Opprett oppgave

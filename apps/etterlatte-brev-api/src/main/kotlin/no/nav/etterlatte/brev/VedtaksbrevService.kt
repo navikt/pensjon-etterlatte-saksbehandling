@@ -50,26 +50,21 @@ class VedtaksbrevService(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
-        // TODO EY-3232 - Fjerne migreringstilpasning
     ): Brev =
         brevoppretter.opprettVedtaksbrev(
             sakId = sakId,
             behandlingId = behandlingId,
             brukerTokenInfo = brukerTokenInfo,
-            automatiskMigreringRequest = automatiskMigreringRequest,
             brevKode = { brevKodeMapperVedtak.brevKode(it).redigering },
         ) { brevDataMapperRedigerbartUtfallVedtak.brevData(it) }
 
     suspend fun genererPdf(
         id: BrevID,
         bruker: BrukerTokenInfo,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
     ): Pdf =
         pdfGenerator.genererPdf(
             id = id,
             bruker = bruker,
-            automatiskMigreringRequest = automatiskMigreringRequest,
             avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
             brevKode = { brevKodeMapperVedtak.brevKode(it) },
             brevData = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
@@ -79,7 +74,6 @@ class VedtaksbrevService(
                 generellBrevData.forenkletVedtak!!,
                 pdf,
                 bruker,
-                automatiskMigreringRequest != null,
             )
         }
 
@@ -166,9 +160,8 @@ class VedtaksbrevService(
         vedtak: ForenkletVedtak,
         pdf: Pdf,
         brukerTokenInfo: BrukerTokenInfo,
-        migrering: Boolean = false,
     ) {
-        if (vedtak.status != VedtakStatus.FATTET_VEDTAK && !migrering) {
+        if (vedtak.status != VedtakStatus.FATTET_VEDTAK) {
             logger.info("Vedtak status er ${vedtak.status}. Avventer ferdigstilling av brev (id=$brevId)")
             return
         }

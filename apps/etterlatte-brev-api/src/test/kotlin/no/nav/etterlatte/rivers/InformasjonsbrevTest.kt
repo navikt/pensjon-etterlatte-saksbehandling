@@ -64,7 +64,6 @@ class InformasjonsbrevTest(private val dataSource: DataSource) {
                         any(),
                         any(),
                         any(),
-                        any(),
                     )
                 } returns Pair(mockk<Brev>().also { every { it.id } returns brevId }, mockk())
             }
@@ -73,7 +72,6 @@ class InformasjonsbrevTest(private val dataSource: DataSource) {
                 coEvery {
                     it.ferdigstillOgGenererPDF(
                         brevId,
-                        any(),
                         any(),
                         any(),
                         any(),

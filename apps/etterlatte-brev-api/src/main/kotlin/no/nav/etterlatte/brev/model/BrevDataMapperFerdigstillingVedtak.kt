@@ -45,7 +45,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
     suspend fun brevDataFerdigstilling(request: BrevDataFerdigstillingRequest): BrevDataFerdigstilling {
         with(request) {
             if (generellBrevData.loependeIPesys()) {
-                return fraPesys(bruker, generellBrevData, innholdMedVedlegg, automatiskMigreringRequest)
+                return fraPesys(bruker, generellBrevData, innholdMedVedlegg)
             }
             return when (kode.ferdigstilling) {
                 BARNEPENSJON_REVURDERING -> barnepensjonRevurdering(bruker, generellBrevData, innholdMedVedlegg)
@@ -86,7 +86,6 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
         innholdMedVedlegg: InnholdMedVedlegg,
-        automatiskMigreringRequest: MigreringBrevRequest?,
     ) = coroutineScope {
         val fetcher = BrevDatafetcherVedtak(brevdataFacade, bruker, generellBrevData)
         val utbetalingsinfo = async { fetcher.hentUtbetaling() }
@@ -104,7 +103,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
                 etterbetaling = etterbetaling.await(),
                 trygdetid = requireNotNull(trygdetid.await()),
                 grunnbeloep = grunnbeloep.await(),
-                migreringRequest = automatiskMigreringRequest,
+                migreringRequest = null,
                 utlandstilknytning = generellBrevData.utlandstilknytning?.type,
                 avdoede = generellBrevData.personerISak.avdoede,
             )

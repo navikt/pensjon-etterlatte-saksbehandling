@@ -141,7 +141,6 @@ class OversendelseBrevServiceImpl(
         return pdfGenerator.genererPdf(
             id = brev.id,
             bruker = brukerTokenInfo,
-            automatiskMigreringRequest = null,
             avsenderRequest = { bruker, generellData -> AvsenderRequest(bruker.ident(), generellData.sak.enhet) },
             brevKode = { Brevkoder.OVERSENDELSE_KLAGE },
             brevData = { req -> OversendelseBrevFerdigstillingData.fra(req, klage) },
@@ -196,7 +195,6 @@ class OversendelseBrevServiceImpl(
                 pdfGenerator.ferdigstillOgGenererPDF(
                     id = brev.id,
                     bruker = brukerTokenInfo,
-                    automatiskMigreringRequest = null,
                     avsenderRequest = { bruker, generellData ->
                         AvsenderRequest(
                             bruker.ident(),

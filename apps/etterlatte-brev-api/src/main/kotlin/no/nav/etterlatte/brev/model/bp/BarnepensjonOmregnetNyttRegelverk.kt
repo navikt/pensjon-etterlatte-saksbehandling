@@ -114,8 +114,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
                         ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },
                 erBosattUtlandet =
                     (
-                        migreringRequest?.utlandstilknytningType
-                            ?: requireNotNull(utlandstilknytning)
+                        requireNotNull(utlandstilknytning)
                     ) == UtlandstilknytningType.BOSATT_UTLAND,
             )
         }

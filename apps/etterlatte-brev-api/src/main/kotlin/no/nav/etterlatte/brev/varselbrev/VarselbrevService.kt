@@ -63,7 +63,6 @@ internal class VarselbrevService(
     ) = pdfGenerator.ferdigstillOgGenererPDF(
         id = brevId,
         bruker = bruker,
-        automatiskMigreringRequest = null,
         avsenderRequest = avsenderRequest,
         brevKode = { hentBrevkode(it.sakType) },
         brevData = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
@@ -77,7 +76,6 @@ internal class VarselbrevService(
     ) = pdfGenerator.genererPdf(
         id = brevId,
         bruker = bruker,
-        automatiskMigreringRequest = null,
         avsenderRequest = avsenderRequest,
         brevKode = { hentBrevkode(it.sakType) },
         brevData = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },

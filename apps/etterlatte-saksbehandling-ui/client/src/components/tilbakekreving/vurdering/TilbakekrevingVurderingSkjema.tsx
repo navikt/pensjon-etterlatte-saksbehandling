@@ -66,7 +66,7 @@ export function TilbakekrevingVurderingSkjema({
   })
 
   useEffect(() => {
-    if (getValues().vilkaarsresultat && getValues().vilkaarsresultat !== TilbakekrevingVilkaar.IKKE_OPPFYLT) {
+    if (getValues().vilkaarsresultat && getValues().vilkaarsresultat === TilbakekrevingVilkaar.IKKE_OPPFYLT) {
       setValue('hjemmel', TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD)
     } else {
       setValue('hjemmel', getValues().rettsligGrunnlag)

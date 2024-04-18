@@ -2,9 +2,8 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { Heading, Link, Table } from '@navikt/ds-react'
+import { Alert, Link, Table } from '@navikt/ds-react'
 import { formaterDato, formaterStringDato } from '~utils/formattering'
-import styled from 'styled-components'
 
 import {
   teksterTilbakekrevingStatus,
@@ -29,40 +28,40 @@ function formaterPeriode(perioder: TilbakekrevingPeriode[]): string {
 function TilbakekrevingTabell(props: { tilbakekrevinger: Array<TilbakekrevingBehandling> }) {
   const { tilbakekrevinger } = props
 
-  if (tilbakekrevinger.length === 0) {
-    return null
+  if (!!tilbakekrevinger?.length) {
+    return (
+      <Alert variant="info" inline>
+        Ingen tilbakekrevinger på sak
+      </Alert>
+    )
   }
 
   return (
-    <TilbakekrevingWrapper>
-      <Heading size="medium">Tilbakekrevinger</Heading>
-
-      <Table zebraStripes>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell>Reg. dato</Table.HeaderCell>
-            <Table.HeaderCell>Status</Table.HeaderCell>
-            <Table.HeaderCell>Vurderingsperiode</Table.HeaderCell>
-            <Table.HeaderCell>Vedtaksdato</Table.HeaderCell>
-            <Table.HeaderCell>Resultat</Table.HeaderCell>
-            <Table.HeaderCell>Handling</Table.HeaderCell>
+    <Table zebraStripes>
+      <Table.Header>
+        <Table.Row>
+          <Table.HeaderCell>Reg. dato</Table.HeaderCell>
+          <Table.HeaderCell>Status</Table.HeaderCell>
+          <Table.HeaderCell>Vurderingsperiode</Table.HeaderCell>
+          <Table.HeaderCell>Vedtaksdato</Table.HeaderCell>
+          <Table.HeaderCell>Resultat</Table.HeaderCell>
+          <Table.HeaderCell>Handling</Table.HeaderCell>
+        </Table.Row>
+      </Table.Header>
+      <Table.Body>
+        {tilbakekrevinger.map((tilbakekreving) => (
+          <Table.Row key={tilbakekreving.id} shadeOnHover={false}>
+            <Table.DataCell>{formaterStringDato(tilbakekreving.opprettet)}</Table.DataCell>
+            <Table.DataCell>{teksterTilbakekrevingStatus[tilbakekreving.status]}</Table.DataCell>
+            <Table.DataCell>{formaterPeriode(tilbakekreving.tilbakekreving.perioder)}</Table.DataCell>
+            <VedtakKolonner behandlingId={tilbakekreving.id} />
+            <Table.DataCell>
+              <Link href={lenkeTilTilbakekrevingMedId(tilbakekreving.id)}>Gå til behandling</Link>
+            </Table.DataCell>
           </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {tilbakekrevinger.map((tilbakekreving) => (
-            <Table.Row key={tilbakekreving.id} shadeOnHover={false}>
-              <Table.DataCell>{formaterStringDato(tilbakekreving.opprettet)}</Table.DataCell>
-              <Table.DataCell>{teksterTilbakekrevingStatus[tilbakekreving.status]}</Table.DataCell>
-              <Table.DataCell>{formaterPeriode(tilbakekreving.tilbakekreving.perioder)}</Table.DataCell>
-              <VedtakKolonner behandlingId={tilbakekreving.id} />
-              <Table.DataCell>
-                <Link href={lenkeTilTilbakekrevingMedId(tilbakekreving.id)}>Gå til behandling</Link>
-              </Table.DataCell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table>
-    </TilbakekrevingWrapper>
+        ))}
+      </Table.Body>
+    </Table>
   )
 }
 
@@ -83,7 +82,3 @@ export function TilbakekrevingListe(props: { sakId: number }) {
     />
   )
 }
-
-const TilbakekrevingWrapper = styled.div`
-  margin: 3rem 0;
-`

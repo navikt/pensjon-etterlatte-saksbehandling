@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const OpprettJournalfoeringsoppgave = ({
   journalpost,
@@ -19,6 +20,7 @@ export const OpprettJournalfoeringsoppgave = ({
   sakStatus: Result<SakMedBehandlinger>
 }) => {
   const navigate = useNavigate()
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [oppgaveResult, apiOpprettOppgave] = useApiCall(opprettOppgave)
 
@@ -29,8 +31,9 @@ export const OpprettJournalfoeringsoppgave = ({
         request: {
           oppgaveType: Oppgavetype.JOURNALFOERING,
           referanse: journalpostId,
-          merknad: `Journalpost flyttet til sak ${sakId}`,
+          merknad: `Manuelt opprettet oppgave`,
           oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
+          saksbehandler: innloggetSaksbehandler.ident,
         },
       },
       (oppgave) => {

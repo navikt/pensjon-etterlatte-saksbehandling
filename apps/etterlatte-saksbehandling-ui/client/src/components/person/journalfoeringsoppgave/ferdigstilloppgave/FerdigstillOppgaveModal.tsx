@@ -15,14 +15,6 @@ export default function FerdigstillOppgaveModal({ oppgave }: { oppgave: OppgaveD
 
   const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
 
-  const ferdigstill = () => {
-    apiFerdigstillOppgave(oppgave.id, () => {
-      setTimeout(() => {
-        navigate(`/`)
-      }, 5000)
-    })
-  }
-
   return (
     <>
       <Button variant="primary" onClick={() => setOpen(true)}>
@@ -41,13 +33,30 @@ export default function FerdigstillOppgaveModal({ oppgave }: { oppgave: OppgaveD
           </BodyLong>
 
           {isSuccess(ferdigstillOppgaveStatus) ? (
-            <Alert variant="success">Oppgaven er nå ferdigstilt. Du blir straks sendt tilbake til oppgavelisten.</Alert>
+            <>
+              <Alert variant="success">Oppgaven er nå ferdigstilt!</Alert>
+
+              <br />
+
+              <FlexRow justify="center">
+                <Button variant="secondary" onClick={() => navigate('/')}>
+                  Gå til oppgavelisten
+                </Button>
+                <Button variant="primary" onClick={() => navigate(`/person/${oppgave.fnr}`)}>
+                  Gå til sakoversikten
+                </Button>
+              </FlexRow>
+            </>
           ) : (
             <FlexRow justify="center">
               <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(ferdigstillOppgaveStatus)}>
                 Nei, avbryt
               </Button>
-              <Button variant="primary" onClick={ferdigstill} loading={isPending(ferdigstillOppgaveStatus)}>
+              <Button
+                variant="primary"
+                onClick={() => apiFerdigstillOppgave(oppgave.id)}
+                loading={isPending(ferdigstillOppgaveStatus)}
+              >
                 Ja, ferdigstill
               </Button>
             </FlexRow>

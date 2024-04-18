@@ -1,7 +1,7 @@
 import { Alert, Button, Detail, Heading, Tag } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { SakType } from '~shared/types/sak'
 import { formaterSakstype, formaterSpraak, formaterStringDato } from '~utils/formattering'
@@ -11,6 +11,7 @@ import FullfoerOppgaveModal from '~components/person/journalfoeringsoppgave/nybe
 import { FlexRow } from '~shared/styled'
 import { gyldigBehandlingRequest } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 import React from 'react'
+import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 
 export default function OppsummeringOppgavebehandling() {
   const { journalpost, oppgave, nyBehandlingRequest, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -19,13 +20,11 @@ export default function OppsummeringOppgavebehandling() {
 
   const tilbake = () => navigate('../', { relative: 'path' })
 
-  if (
-    !journalpost ||
-    !nyBehandlingRequest ||
-    !oppgave ||
-    !sakMedBehandlinger ||
-    !gyldigBehandlingRequest(nyBehandlingRequest)
-  ) {
+  if (!oppgave || !erOppgaveRedigerbar(oppgave?.status)) {
+    return <Navigate to="../" relative="path" />
+  }
+
+  if (!journalpost || !nyBehandlingRequest || !sakMedBehandlinger || !gyldigBehandlingRequest(nyBehandlingRequest)) {
     return <Alert variant="error">Noe data i journalføringen eller behandlingen er feil</Alert>
   }
 

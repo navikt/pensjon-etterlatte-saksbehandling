@@ -8,7 +8,7 @@ import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
 import { FlexRow } from '~shared/styled'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { OppgaveDTO } from '~shared/types/oppgave'
 
 interface ModalProps {
@@ -30,11 +30,7 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
         mottattDato: behandlingBehov!!.mottattDato!!.replace('Z', ''),
       },
       () => {
-        apiFerdigstillOppgave(oppgave.id, () => {
-          setTimeout(() => {
-            navigate('/')
-          }, 5000)
-        })
+        apiFerdigstillOppgave(oppgave.id)
       }
     )
   }
@@ -60,9 +56,20 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
           </BodyLong>
 
           {isSuccess(opprettBehandlingStatus) && isSuccess(ferdigstillOppgaveStatus) ? (
-            <Alert variant="success">
-              Behandling opprettet for bruker med fødselsnummer {oppgave.fnr}. Du blir straks sendt til oppgavebenken.
-            </Alert>
+            <>
+              <Alert variant="success">Behandling opprettet for bruker med fødselsnummer {oppgave.fnr}</Alert>
+
+              <br />
+
+              <FlexRow justify="center">
+                <Button variant="secondary" onClick={() => navigate('/')}>
+                  Gå til oppgavelisten
+                </Button>
+                <Button variant="primary" onClick={() => navigate(`/person/${oppgave.fnr}`)}>
+                  Gå til sakoversikten
+                </Button>
+              </FlexRow>
+            </>
           ) : (
             <FlexRow justify="center">
               <Button
@@ -81,16 +88,16 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
               </Button>
             </FlexRow>
           )}
-          {isFailure(opprettBehandlingStatus) && (
+          {mapFailure(opprettBehandlingStatus, (error) => (
             <Modal.Footer>
-              <Alert variant="error">Det oppsto en feil ved oppretting av behandlingen.</Alert>
+              <Alert variant="error">{error.detail || 'Det oppsto en feil ved oppretting av behandlingen.'}</Alert>
             </Modal.Footer>
-          )}
-          {isFailure(ferdigstillOppgaveStatus) && (
+          ))}
+          {mapFailure(ferdigstillOppgaveStatus, (error) => (
             <Modal.Footer>
-              <Alert variant="error">Det oppsto en feil ved lukking av oppgaven.</Alert>
+              <Alert variant="error">{error.detail || 'Det oppsto en feil ved lukking av oppgaven'}</Alert>
             </Modal.Footer>
-          )}
+          ))}
         </Modal.Body>
       </Modal>
     </>

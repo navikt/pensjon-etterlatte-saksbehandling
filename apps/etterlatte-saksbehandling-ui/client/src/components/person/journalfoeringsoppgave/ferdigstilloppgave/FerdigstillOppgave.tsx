@@ -2,12 +2,14 @@ import { Alert, BodyLong, Button, Heading, Link } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { FlexRow } from '~shared/styled'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import FerdigstillOppgaveModal from '~components/person/journalfoeringsoppgave/ferdigstilloppgave/FerdigstillOppgaveModal'
 import { Journalstatus } from '~shared/types/Journalpost'
 import { PersonOversiktFane } from '~components/person/Person'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
+import { erOppgaveRedigerbar } from '~shared/types/oppgave'
+import React from 'react'
 
 export default function FerdigstillOppgave() {
   const { journalpost, oppgave } = useJournalfoeringOppgave()
@@ -16,9 +18,8 @@ export default function FerdigstillOppgave() {
 
   const tilbake = () => navigate('../', { relative: 'path' })
 
-  if (!oppgave) {
-    tilbake()
-    return null
+  if (!oppgave || !erOppgaveRedigerbar(oppgave.status)) {
+    return <Navigate to="../" relative="path" />
   }
 
   const journalpostErFerdigstilt =

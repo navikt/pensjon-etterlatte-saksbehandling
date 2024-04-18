@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.mockPerson
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class DoedshendelseKontrollpunktEktefelleServiceTest {
@@ -107,7 +106,8 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
         kontrollpunkter shouldContainExactly
             listOf(
                 DoedshendelseKontrollpunkt.TidligereEpsGiftMerEnn25Aar(
-                    doedsdato, avdoed.foedselsnummer.verdi.value,
+                    doedsdato,
+                    avdoed.foedselsnummer.verdi.value,
                 ),
             )
     }
@@ -138,7 +138,8 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
         kontrollpunkter shouldContainExactly
             listOf(
                 DoedshendelseKontrollpunkt.TidligereEpsGiftMerEnn15AarFellesBarn(
-                    doedsdato, avdoed.foedselsnummer.verdi.value,
+                    doedsdato,
+                    avdoed.foedselsnummer.verdi.value,
                 ),
             )
     }
@@ -229,7 +230,8 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
         kontrollpunkter shouldContainExactly
             listOf(
                 DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(
-                    doedsdato, avdoed.foedselsnummer.verdi.value,
+                    doedsdato,
+                    avdoed.foedselsnummer.verdi.value,
                 ),
             )
     }
@@ -267,16 +269,23 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
         kontrollpunkter shouldContainExactly
             listOf(
                 DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(
-                    doedsdato, avdoed.foedselsnummer.verdi.value,
+                    doedsdato,
+                    avdoed.foedselsnummer.verdi.value,
                 ),
             )
     }
 
     @Test
-    fun `Skal kaste feil hvis vi ikke finner noen relaterte sivilstander`() {
-        assertThrows<IllegalStateException> {
-            kontrollpunktService.identifiser(gjenlevende, avdoed)
-        }
+    fun `Skal returnere EktefelleMedUkjentGiftemaalLengde dersom sivilstandstatus for naar en person ble gift mangler`() {
+        val kontrollpunkter = kontrollpunktService.identifiser(gjenlevende, avdoed)
+
+        kontrollpunkter shouldContainExactly
+            listOf(
+                DoedshendelseKontrollpunkt.EktefelleMedUkjentGiftemaalLengde(
+                    doedsdato,
+                    avdoed.foedselsnummer.verdi.value,
+                ),
+            )
     }
 
     companion object {

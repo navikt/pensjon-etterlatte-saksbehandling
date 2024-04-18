@@ -304,7 +304,7 @@ class PersonService(
         logger.info("Henter folkeregisteridenter for aktørIds=${request.aktoerIds}")
 
         val response = pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(request)
-        return response.associate { it.ident to it.identer.firstOrNull()?.ident }
+        return response.associate { it.ident to it.identer?.firstOrNull()?.ident }
     }
 
     suspend fun hentGeografiskTilknytning(request: HentGeografiskTilknytningRequest): GeografiskTilknytning {

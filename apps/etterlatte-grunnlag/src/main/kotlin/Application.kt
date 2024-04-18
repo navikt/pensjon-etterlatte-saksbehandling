@@ -21,7 +21,6 @@ import no.nav.etterlatte.grunnlag.migreringRoutes
 import no.nav.etterlatte.grunnlag.personRoute
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
-import no.nav.etterlatte.grunnlag.rivers.InitBehandlingVersjonRiver
 import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -85,7 +84,7 @@ class ApplicationBuilder {
 
     private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env["PDLTJENESTER_URL"]!!)
     private val opplysningDao = OpplysningDao(ds)
-    private val behandlingKlient = BehandlingKlientImpl(config, httpClient(), behandlingSystemClient)
+    private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val vergeService = VergeService(persondataKlient)
     private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient, vergeService)
     private val grunnlagService =
@@ -109,7 +108,6 @@ class ApplicationBuilder {
             }
             .build().apply {
                 GrunnlagsversjoneringRiver(this, grunnlagService)
-                InitBehandlingVersjonRiver(this, behandlingKlient, grunnlagService)
                 GrunnlagHendelserRiver(this, grunnlagService)
             }
 

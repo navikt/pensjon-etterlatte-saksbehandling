@@ -67,12 +67,6 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   }
 
   useEffect(() => {
-    if (!oppgavebenkState.gosysOppgavelisteOppgaver?.length) {
-      hentOppgaver(temaFilter)
-    }
-  }, [])
-
-  useEffect(() => {
     hentOppgaver(temaFilter)
   }, [temaFilter])
 

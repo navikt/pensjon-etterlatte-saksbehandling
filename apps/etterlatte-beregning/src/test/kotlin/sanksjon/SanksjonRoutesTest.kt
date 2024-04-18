@@ -11,12 +11,12 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.mockk
+import no.nav.etterlatte.beregning.regler.lagreSanksjon
+import no.nav.etterlatte.beregning.regler.sanksjon
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.sanksjon.Sanksjon
 import no.nav.etterlatte.sanksjon.SanksjonService
 import no.nav.etterlatte.sanksjon.sanksjon
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -24,7 +24,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.time.YearMonth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -66,19 +65,7 @@ internal class SanksjonRoutesTest {
     @Test
     fun `Skal kunne lagre en sanksjon`() {
         val sanksjonId: UUID = UUID.randomUUID()
-        val behandlingId: UUID = UUID.randomUUID()
-        val sanksjon =
-            Sanksjon(
-                id = sanksjonId,
-                behandlingId = behandlingId,
-                sakId = 123,
-                fom = YearMonth.of(2024, 1),
-                tom = YearMonth.of(2024, 2),
-                saksbehandler = "A12345",
-                opprettet = Tidspunkt.now(),
-                endret = Tidspunkt.now(),
-                beskrivelse = "Ikke i jobb",
-            )
+        val sanksjon = lagreSanksjon(sanksjonId)
 
         coEvery { sanksjonService.opprettEllerOppdaterSanksjon(any(), any(), any()) } returns Unit
 

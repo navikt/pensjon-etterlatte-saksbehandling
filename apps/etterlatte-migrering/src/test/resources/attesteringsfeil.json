@@ -50,6 +50,7 @@
   "teknisk_tid": "2023-10-03T08:13:43.847096",
   "skal_sende_brev": true,
   "kilde": "PESYS",
+  "kontekst": "MIGRERING",
   "pesysId": {
     "id": 1
   },

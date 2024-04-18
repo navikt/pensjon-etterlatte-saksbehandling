@@ -79,17 +79,17 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
         }
     }
 
-    fun hentDoedshendelserMedStatus(status: Status): List<DoedshendelseInternal> {
+    fun hentDoedshendelserMedStatus(status: List<Status>): List<DoedshendelseInternal> {
         return connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
                     SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype, kontrollpunkter
                     FROM doedshendelse
-                    WHERE status = ?
+                    WHERE status = any(?)
                     """.trimIndent(),
                 ).apply {
-                    setString(1, status.name)
+                    setArray(1, createArrayOf("text", status.toTypedArray()))
                 }.executeQuery().toList { asDoedshendelse() }
             }
         }

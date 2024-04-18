@@ -4,6 +4,7 @@ import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 import java.util.UUID
 
 class SanksjonService(
@@ -19,23 +20,29 @@ class SanksjonService(
 
     suspend fun opprettEllerOppdaterSanksjon(
         behandlingId: UUID,
-        sanksjon: Sanksjon,
+        sanksjon: LagreSanksjon,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
         if (behandling.virkningstidspunkt == null) ManglerVirkningstidspunktException()
         if (sanksjon.sakId != behandling.sak) throw SakidTilhoererIkkeBehandlingException()
-        if (sanksjon.fom.isBefore(behandling.virkningstidspunkt?.dato)) throw FomErFoerVirkningstidpunktException()
+        if (YearMonth.of(
+                sanksjon.fom.year,
+                sanksjon.fom.month,
+            ).isBefore(behandling.virkningstidspunkt?.dato)
+        ) {
+            throw FomErFoerVirkningstidpunktException()
+        }
         if (sanksjon.tom != null && sanksjon.tom.isBefore(sanksjon.fom)) throw TomErFoerFomException()
 
         if (sanksjon.id === null) {
             logger.info("Oppretter sanksjon med behandlingID=$behandlingId")
-            return sanksjonRepository.opprettSanksjon(behandlingId, sanksjon)
+            return sanksjonRepository.opprettSanksjon(behandlingId, behandling.sak, brukerTokenInfo.ident(), sanksjon)
         }
 
         logger.info("Oppdaterer sanksjon med behandlingID=$behandlingId")
-        return sanksjonRepository.oppdaterSanksjon(sanksjon)
+        return sanksjonRepository.oppdaterSanksjon(sanksjon, brukerTokenInfo.ident())
     }
 }
 

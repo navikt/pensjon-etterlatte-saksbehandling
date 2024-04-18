@@ -175,6 +175,19 @@ class OppgaveService(
         }
     }
 
+    fun oppdaterReferanseOgMerknad(
+        oppgaveId: UUID,
+        referanse: String,
+        merknad: String,
+    ) {
+        val hentetOppgave =
+            oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
+
+        sikreAktivOppgaveOgTildeltSaksbehandler(hentetOppgave) {
+            oppgaveDao.oppdaterReferanseOgMerknad(oppgaveId, referanse, merknad)
+        }
+    }
+
     fun endrePaaVent(
         oppgaveId: UUID,
         merknad: String,
@@ -461,6 +474,7 @@ class OppgaveService(
         oppgaveType: OppgaveType,
         merknad: String?,
         frist: Tidspunkt? = null,
+        saksbehandler: String? = null,
     ): OppgaveIntern {
         val sak = sakDao.hentSak(sakId)!!
         return opprettOppgave(
@@ -472,7 +486,11 @@ class OppgaveService(
                 merknad = merknad,
                 frist = frist,
             ),
-        )
+        ).also {
+            if (saksbehandler != null) {
+                tildelSaksbehandler(it.id, saksbehandler)
+            }
+        }
     }
 
     private fun opprettOppgave(oppgaveIntern: OppgaveIntern): OppgaveIntern {

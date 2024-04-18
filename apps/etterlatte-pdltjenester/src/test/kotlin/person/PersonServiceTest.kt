@@ -103,7 +103,7 @@ internal class PersonServiceTest {
         coEvery { ppsKlient.avklarNavn(any()) } returns hentPerson.navn.first()
         coEvery { ppsKlient.avklarAdressebeskyttelse(any()) } returns null
         coEvery { ppsKlient.avklarStatsborgerskap(any()) } returns hentPerson.statsborgerskap?.first()
-        coEvery { ppsKlient.avklarSivilstand(any()) } returns null
+        coEvery { ppsKlient.avklarSivilstand(any(), any()) } returns null
         coEvery { ppsKlient.avklarFoedsel(any()) } returns hentPerson.foedsel.first()
         coEvery { ppsKlient.avklarDoedsfall(any()) } returns null
         coEvery { ppsKlient.avklarBostedsadresse(any()) } returns hentPerson.bostedsadresse?.first()

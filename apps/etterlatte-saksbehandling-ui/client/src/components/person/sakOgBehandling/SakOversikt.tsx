@@ -84,7 +84,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
 
                 {mapResult(yrkesskadefordelResult, {
                   success: (data) =>
-                    !!data && (
+                    data.migrertYrkesskadefordel && (
                       <>
                         <div>
                           <Alert variant="info" size="small">

@@ -142,11 +142,13 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                     val nyOppgave =
                         inTransaction {
                             service.opprettNyOppgaveMedSakOgReferanse(
-                                nyOppgaveDto.referanse ?: "",
-                                sakId,
-                                nyOppgaveDto.oppgaveKilde,
-                                nyOppgaveDto.oppgaveType,
-                                nyOppgaveDto.merknad,
+                                referanse = nyOppgaveDto.referanse ?: "",
+                                sakId = sakId,
+                                oppgaveKilde = nyOppgaveDto.oppgaveKilde,
+                                oppgaveType = nyOppgaveDto.oppgaveType,
+                                merknad = nyOppgaveDto.merknad,
+                                frist = null,
+                                saksbehandler = nyOppgaveDto.saksbehandler,
                             )
                         }
 
@@ -234,10 +236,10 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
 
     route("/oppgaver") {
         get("/sak/{$SAKID_CALL_PARAMETER}/oppgaver") {
-                kunSystembruker {
-                    call.respond(inTransaction { service.hentOppgaverForSak(sakId) })
-                }
+            kunSystembruker {
+                call.respond(inTransaction { service.hentOppgaverForSak(sakId) })
             }
+        }
 
         post("/sak/{$SAKID_CALL_PARAMETER}/opprett") {
             kunSystembruker {

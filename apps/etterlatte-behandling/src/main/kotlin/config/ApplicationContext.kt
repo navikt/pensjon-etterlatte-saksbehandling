@@ -441,6 +441,7 @@ internal class ApplicationContext(
         BehandlingStatusServiceImpl(
             behandlingDao,
             behandlingService,
+            behandlingInfoDao,
             oppgaveService,
             grunnlagsendringshendelseService,
             generellBehandlingService,
@@ -499,7 +500,7 @@ internal class ApplicationContext(
         DoedsmeldingJob(
             doedshendelseJobService,
             { leaderElectionKlient.isLeader() },
-            0L,
+            Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.MINUTES),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
@@ -510,7 +511,7 @@ internal class ApplicationContext(
         DoedsmeldingReminderJob(
             doedshendelseReminderJob,
             { leaderElectionKlient.isLeader() },
-            0L,
+            Duration.of(3, ChronoUnit.MINUTES).toMillis(),
             interval = if (isProd()) Duration.of(1, ChronoUnit.DAYS) else Duration.of(1, ChronoUnit.HOURS),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,

@@ -21,6 +21,7 @@ import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
+import no.nav.etterlatte.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.ktor.runServer
@@ -51,10 +52,18 @@ import java.util.UUID.randomUUID
 internal class BeregningsGrunnlagRoutesTest {
     private val server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
+    private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
     private val repository = mockk<BeregningsGrunnlagRepository>()
     private val beregningRepository = mockk<BeregningRepository>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
-    private val service = BeregningsGrunnlagService(repository, beregningRepository, behandlingKlient, grunnlagKlient)
+    private val service =
+        BeregningsGrunnlagService(
+            repository,
+            beregningRepository,
+            behandlingKlient,
+            vedtaksvurderingKlient,
+            grunnlagKlient,
+        )
 
     @BeforeAll
     fun before() {

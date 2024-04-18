@@ -44,7 +44,7 @@ object PersonMapper {
                     ppsKlient,
                     hentPerson.statsborgerskap,
                 )
-            val ppsSivilstand = hentPerson.sivilstand?.let { ppsKlient.avklarSivilstand(it) }
+            val ppsSivilstand = hentPerson.sivilstand?.let { ppsKlient.avklarSivilstand(it, fnr) }
             val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
             val barnekull =
@@ -203,7 +203,7 @@ object PersonMapper {
                     ppsKlient,
                     hentPerson.statsborgerskap,
                 )
-            val ppsSivilstand = hentPerson.sivilstand?.let { ppsKlient.avklarSivilstand(it) }
+            val ppsSivilstand = hentPerson.sivilstand?.let { ppsKlient.avklarSivilstand(it, request.foedselsnummer) }
             val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
             val barnekull =

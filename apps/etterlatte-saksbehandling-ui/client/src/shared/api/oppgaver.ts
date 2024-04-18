@@ -87,18 +87,6 @@ export const feilregistrerGosysOppgave = async (args: {
     beskrivelse: args.beskrivelse,
   })
 
-export const tildelSaksbehandlerApi = async (args: {
-  oppgaveId: string
-  type: Oppgavetype
-  nysaksbehandler: SaksbehandlerEndringDto
-}): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
-  if (args.type == Oppgavetype.GOSYS) {
-    return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
-  } else {
-    return apiClient.post(`/oppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
-  }
-}
-
 export const saksbehandlereIEnhetApi = async (args: {
   enheter: string[]
 }): Promise<ApiResponse<Array<Saksbehandler>>> => {

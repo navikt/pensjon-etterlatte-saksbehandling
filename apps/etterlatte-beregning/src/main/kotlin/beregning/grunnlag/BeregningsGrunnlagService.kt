@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
+import no.nav.etterlatte.klienter.VedtaksvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -12,6 +13,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.Companion.automatiskSaksbehandler
 import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
@@ -28,6 +30,7 @@ class BeregningsGrunnlagService(
     private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
     private val beregningRepository: BeregningRepository,
     private val behandlingKlient: BehandlingKlient,
+    private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
 ) {
     private val logger = LoggerFactory.getLogger(BeregningsGrunnlagService::class.java)
@@ -47,10 +50,13 @@ class BeregningsGrunnlagService(
                     if (behandling.behandlingType == BehandlingType.REVURDERING) {
                         // Her vil vi sjekke opp om det vi lagrer ned ikke er modifisert før virk på revurderingen
                         val sisteIverksatteBehandling =
-                            behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
+                            vedtaksvurderingKlient.hentIverksatteVedtak(behandling.sak, brukerTokenInfo)
+                                .sortedByDescending { it.datoFattet }
+                                .first { it.vedtakType != VedtakType.OPPHOER }
+
                         grunnlagErIkkeEndretFoerVirk(
                             behandling,
-                            sisteIverksatteBehandling.id,
+                            sisteIverksatteBehandling.behandlingId,
                             beregningsGrunnlag,
                         )
                     } else {

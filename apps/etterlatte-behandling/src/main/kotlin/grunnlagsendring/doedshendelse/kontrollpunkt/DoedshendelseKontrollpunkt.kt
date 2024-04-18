@@ -265,6 +265,16 @@ sealed class DoedshendelseKontrollpunkt {
         override val oppgaveTekst: String? = null
         override val avbryt: Boolean = true
     }
+
+    @JsonTypeName("AVDOED_HAR_IKKE_VAERT_GIFT")
+    data object AvdoedHarIkkeVaertGift : DoedshendelseKontrollpunkt() {
+        override val kode = "AVDOED_HAR_IKKE_VAERT_GIFT"
+        override val beskrivelse: String = "Avdød er ikke tidligere gift. Gjenlevende er ikke registerert som tidligere ektefelle."
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = false
+        override val oppgaveTekst: String? = null
+        override val avbryt: Boolean = true
+    }
 }
 
 fun List<DoedshendelseKontrollpunkt>.finnSak(): Sak? {

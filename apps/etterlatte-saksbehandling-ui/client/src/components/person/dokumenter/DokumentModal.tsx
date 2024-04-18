@@ -49,11 +49,11 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
                   <Dropdown.Menu.GroupedList.Item
                     key={dok.dokumentInfoId}
                     onClick={() => open(dok.dokumentInfoId)}
-                    disabled={!dok.dokumentvarianter[0].saksbehandlerHarTilgang}
+                    disabled={!dok.dokumentvarianter[0]?.saksbehandlerHarTilgang}
                   >
                     {dok.tittel}
                   </Dropdown.Menu.GroupedList.Item>
-                  {!dok.dokumentvarianter[0].saksbehandlerHarTilgang && (
+                  {!dok.dokumentvarianter[0]?.saksbehandlerHarTilgang && (
                     <IkkeTilgangAlert variant="warning" size="small">
                       Ikke tilgang
                     </IkkeTilgangAlert>
@@ -63,12 +63,12 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
             </Dropdown.Menu.GroupedList>
           </DropdownMenu>
         </Dropdown>
-      ) : dokumenter[0].dokumentvarianter[0].saksbehandlerHarTilgang ? (
+      ) : dokumenter[0].dokumentvarianter[0]?.saksbehandlerHarTilgang ? (
         <Button
           icon={<EyeIcon />}
           size="small"
           onClick={() => open(dokumenter[0].dokumentInfoId)}
-          disabled={!dokumenter[0].dokumentvarianter[0].saksbehandlerHarTilgang}
+          disabled={!dokumenter[0].dokumentvarianter[0]?.saksbehandlerHarTilgang}
         >
           Åpne
         </Button>

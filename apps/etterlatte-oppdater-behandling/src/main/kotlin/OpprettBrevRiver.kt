@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.ktor.route.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.sakId
@@ -31,6 +32,8 @@ internal class OpprettBrevRiver(
             validate { it.requireKey(SAK_TYPE_KEY) }
         }
     }
+
+    override fun kontekst() = Kontekst.BREV
 
     override fun haandterPakke(
         packet: JsonMessage,

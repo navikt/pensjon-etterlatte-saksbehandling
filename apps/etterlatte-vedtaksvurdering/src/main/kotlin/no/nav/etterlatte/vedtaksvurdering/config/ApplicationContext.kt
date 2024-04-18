@@ -102,6 +102,7 @@ class ApplicationContext {
         VedtakTilbakekrevingService(
             repository = VedtaksvurderingRepository(dataSource),
             rapidService = vedtaksvurderingRapidService,
+            behandlingKlient = behandlingKlient,
         )
     val vedtakKlageService =
         VedtakKlageService(

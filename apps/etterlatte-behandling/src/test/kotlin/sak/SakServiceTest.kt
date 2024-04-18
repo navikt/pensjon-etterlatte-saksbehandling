@@ -53,8 +53,9 @@ internal class SakServiceTest {
     private val skjermingKlient = mockk<SkjermingKlient>()
     private val grunnlagservice = mockk<GrunnlagService>()
     private val krrKlient = mockk<KrrKlient>()
+    private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
 
-    private val service = SakServiceImpl(sakDao, skjermingKlient, brukerService, grunnlagservice, krrKlient)
+    private val service = SakServiceImpl(sakDao, skjermingKlient, brukerService, grunnlagservice, krrKlient, pdlTjenesterKlient)
 
     @BeforeEach
     fun before() {

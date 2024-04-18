@@ -58,6 +58,7 @@ internal class EgenAnsattServiceTest(val dataSource: DataSource) {
     private lateinit var user: SaksbehandlerMedEnheterOgRoller
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
     private val krrKlient = mockk<KrrKlient>()
+    private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
 
     @BeforeAll
     fun beforeAll() {
@@ -72,7 +73,7 @@ internal class EgenAnsattServiceTest(val dataSource: DataSource) {
         val brukerService = BrukerServiceImpl(pdltjenesterKlient, norg2Klient)
         sakService =
             spyk(
-                SakServiceImpl(sakRepo, skjermingKlient, brukerService, grunnlagservice, krrKlient),
+                SakServiceImpl(sakRepo, skjermingKlient, brukerService, grunnlagservice, krrKlient, pdlTjenesterKlient),
             )
         oppgaveService =
             spyk(

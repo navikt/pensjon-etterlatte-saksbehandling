@@ -399,6 +399,7 @@ internal class ApplicationContext(
             enhetService,
             grunnlagsService,
             krrKlient,
+            pdlTjenesterKlient,
         )
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
 

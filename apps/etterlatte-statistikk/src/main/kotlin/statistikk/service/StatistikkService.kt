@@ -364,8 +364,7 @@ class StatistikkService(
             is KlageUtfallMedData.Omgjoering -> "OMGJOERING"
             is KlageUtfallMedData.DelvisOmgjoering -> "DELVIS_OMGJOERING"
             is KlageUtfallMedData.StadfesteVedtak -> "STADFESTE_VEDTAK"
-            is KlageUtfallMedData.Avvist -> "AVVIST"
-            is KlageUtfallMedData.AvvistMedOmgjoering -> "AVVIST"
+            is KlageUtfallMedData.Avvist, is KlageUtfallMedData.AvvistMedOmgjoering -> "AVVIST"
             null -> null
         }
     }

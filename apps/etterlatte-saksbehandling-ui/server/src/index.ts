@@ -45,13 +45,13 @@ app.get(
     changeOrigin: false,
     on: {
       proxyReq: (proxyReq, req) => {
-        logger.info(`proxying ${req.url}`)
+        logger.info(`proxying selftest behandling ${req.url}`)
       },
       proxyRes: (proxyRes, req, res) => {
-        logger.info(`res: ${res.req.statusCode}`)
+        logger.info(`res from behandling selftest: ${res.req.statusCode}`)
       },
       error: (err) => {
-        logger.error('Error', err)
+        logger.error('Error from behandling - selftest', err)
       },
     },
   })

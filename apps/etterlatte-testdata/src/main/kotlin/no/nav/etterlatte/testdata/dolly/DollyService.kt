@@ -1,8 +1,13 @@
 package no.nav.etterlatte.testdata.dolly
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.getDollyAccessToken
+import no.nav.etterlatte.producer
+import no.nav.etterlatte.testdata.features.dolly.NySoeknadRequest
+import no.nav.etterlatte.testdata.features.soeknad.SoeknadMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class DollyService(
     private val dollyClient: DollyClient,
@@ -71,6 +76,28 @@ class DollyService(
                     }
             }
         }
+
+    fun sendSoeknad(
+        request: NySoeknadRequest,
+        navIdent: String?,
+    ): String {
+        val noekkel = UUID.randomUUID().toString()
+        val (partisjon, offset) =
+            producer.publiser(
+                noekkel,
+                SoeknadMapper.opprettJsonMessage(
+                    type = request.type,
+                    gjenlevendeFnr = request.gjenlevende,
+                    avdoedFnr = request.avdoed,
+                    barn = request.barn,
+                ).toJson(),
+                mapOf("NavIdent" to (navIdent!!.toByteArray())),
+            )
+        logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
+
+        markerSomIBruk(request.avdoed, getDollyAccessToken())
+        return noekkel
+    }
 
     fun markerSomIBruk(
         ident: String,

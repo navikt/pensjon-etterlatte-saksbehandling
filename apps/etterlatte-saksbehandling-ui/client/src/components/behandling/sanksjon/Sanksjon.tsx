@@ -12,7 +12,7 @@ import { PencilIcon } from '@navikt/aksel-icons'
 import { formaterStringDato } from '~utils/formattering'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { useForm } from 'react-hook-form'
-import { formatISO, isBefore } from 'date-fns'
+import { formatISO, isBefore, startOfDay } from 'date-fns'
 import { hentSanksjon, lagreSanksjon, slettSanksjon } from '~shared/api/sanksjon'
 import { TableWrapper } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 
@@ -47,6 +47,12 @@ interface SanksjonDefaultValue {
   beskrivelse: string
 }
 
+const sanksjonDefaultValue: SanksjonDefaultValue = {
+  datoFom: undefined,
+  datoTom: undefined,
+  beskrivelse: '',
+}
+
 export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const [lagreSanksjonResponse, lagreSanksjonRequest] = useApiCall(lagreSanksjon)
   const [sanksjonStatus, hentSanksjonRequest] = useApiCall(hentSanksjon)
@@ -67,32 +73,14 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     handleSubmit,
     control,
     reset,
-    setError,
+    getValues,
     formState: { errors },
   } = useForm<SanksjonDefaultValue>({
-    defaultValues: {
-      datoFom: undefined,
-      datoTom: undefined,
-      beskrivelse: '',
-    },
+    defaultValues: sanksjonDefaultValue,
   })
 
   const submitSanksjon = (data: SanksjonDefaultValue) => {
     const { datoFom, datoTom, beskrivelse } = data
-
-    if (datoFom) {
-      if (behandling.virkningstidspunkt?.dato && isBefore(datoFom, new Date(behandling.virkningstidspunkt.dato))) {
-        setError('datoFom', { type: 'manual', message: 'Fra dato må være etter virkningstidspunkt' })
-        return
-      }
-      if (datoTom && isBefore(datoTom, datoFom)) {
-        setError('datoTom', { type: 'manual', message: 'Til dato må være etter Fra dato' })
-        return
-      }
-    } else {
-      setError('datoFom', { type: 'manual', message: 'Fra dato må settes' })
-      return
-    }
 
     const lagreSanksjon: ISanksjonLagre = {
       id: redigerSanksjonId ? redigerSanksjonId : '',
@@ -108,7 +96,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
         sanksjon: lagreSanksjon,
       },
       () => {
-        reset()
+        reset(sanksjonDefaultValue)
         hentSanksjoner()
         setRedigerSanksjonId('')
         setVisForm(false)
@@ -133,6 +121,31 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
       hentSanksjoner()
     }
   }, [])
+
+  const validerFom = (value: Date): string | undefined => {
+    const fom = new Date(value)
+    const tom = getValues().datoTom ? new Date(getValues().datoTom!) : null
+
+    if (tom && isBefore(tom, fom)) {
+      return 'Til dato må være etter Fra dato'
+    } else if (
+      behandling.virkningstidspunkt?.dato &&
+      isBefore(startOfDay(fom), startOfDay(new Date(behandling.virkningstidspunkt.dato)))
+    ) {
+      return 'Fra dato kan ikke være før virkningstidspunkt'
+    }
+    return undefined
+  }
+
+  const validerTom = (value: Date): string | undefined => {
+    const tom = new Date(value)
+    const fom = getValues().datoFom ? new Date(getValues().datoFom!) : null
+
+    if (fom && isBefore(tom, fom)) {
+      return 'Til dato må være etter Fra dato'
+    }
+    return undefined
+  }
 
   const sanksjonFraDato = behandling.virkningstidspunkt?.dato ? new Date(behandling.virkningstidspunkt.dato) : undefined
 
@@ -243,12 +256,15 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                       name="datoFom"
                       control={control}
                       fromDate={sanksjonFraDato}
+                      validate={validerFom}
+                      required
                     />
                     <ControlledMaanedVelger
                       label="Dato til og med (valgfri)"
                       name="datoTom"
                       control={control}
                       fromDate={sanksjonFraDato}
+                      validate={validerTom}
                     />
                   </HStack>
                   <HStack>
@@ -266,7 +282,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                       variant="secondary"
                       onClick={(e) => {
                         e.preventDefault()
-                        reset()
+                        reset(sanksjonDefaultValue)
                         setRedigerSanksjonId('')
                         setVisForm(false)
                       }}

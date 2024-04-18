@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.regler.og
 import no.nav.etterlatte.libs.regler.velgNyesteGyldige
 import no.nav.etterlatte.regler.Beregningstall
 import java.time.LocalDate
-import java.time.YearMonth
 
 data class OverstyrGrunnlag(
     val overstyrGrunnlag: FaktumNode<OverstyrBeregningGrunnlagData>,
@@ -73,51 +72,39 @@ val beregnOverstyrRegel =
         overstyrBeregningGrunnlag
     }
 
-data class ManuellBeregningReguleringGrunnlag(
-    val virkningstidspunkt: FaktumNode<YearMonth>,
+data class RegulerManuellBeregningGrunnlag(
     val manueltBeregnetBeloep: FaktumNode<Beregningstall>,
+    val forrigeGrunnbeloep: FaktumNode<Beregningstall>,
+    val nyttGrunnbeloep: FaktumNode<Beregningstall>,
 )
 
-val historiskeGrunnbeloepNy: Regel<ManuellBeregningReguleringGrunnlag, List<Grunnbeloep>> =
-    definerKonstant(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        regelReferanse = RegelReferanse(id = ""),
-        verdi = GrunnbeloepRepository.historiskeGrunnbeloep,
-    )
-
-val reguleringsVirk: Regel<ManuellBeregningReguleringGrunnlag, YearMonth> =
+val manueltBeregnetBeloep: Regel<RegulerManuellBeregningGrunnlag, Beregningstall> =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
-        finnFaktum = ManuellBeregningReguleringGrunnlag::virkningstidspunkt,
+        finnFaktum = RegulerManuellBeregningGrunnlag::manueltBeregnetBeloep,
     ) { it }
 
-val manueltBeregnetBeloep: Regel<ManuellBeregningReguleringGrunnlag, Beregningstall> =
+val forrigeGrunnbeloep: Regel<RegulerManuellBeregningGrunnlag, Beregningstall> =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
-        finnFaktum = ManuellBeregningReguleringGrunnlag::manueltBeregnetBeloep,
+        finnFaktum = RegulerManuellBeregningGrunnlag::forrigeGrunnbeloep,
     ) { it }
 
-val toSiste: Regel<ManuellBeregningReguleringGrunnlag, Pair<Grunnbeloep, Grunnbeloep>> =
-    RegelMeta(
+val nyttGrunnbeloep: Regel<RegulerManuellBeregningGrunnlag, Beregningstall> =
+    finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
-        regelReferanse = RegelReferanse(id = ""),
-    ) benytter historiskeGrunnbeloepNy og reguleringsVirk med { grunnbeloep, virk ->
-        val foerste = grunnbeloep.first { it.dato == virk.minusYears(1) }
-        val andre = grunnbeloep.first { it.dato == virk }
-        Pair(foerste, andre)
-    }
+        finnFaktum = RegulerManuellBeregningGrunnlag::nyttGrunnbeloep,
+    ) { it }
 
+// TODO runde tall..
 val regulerOverstyrt =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
         regelReferanse = RegelReferanse(id = ""),
-    ) benytter toSiste og manueltBeregnetBeloep med { toSisteGrunnbeloep, beregnetBeloep ->
-        val gammelG = Beregningstall(toSisteGrunnbeloep.first.grunnbeloep)
-        val nyG = Beregningstall(toSisteGrunnbeloep.second.grunnbeloep)
+    ) benytter forrigeGrunnbeloep og nyttGrunnbeloep og manueltBeregnetBeloep med { gammelG, nyG, beregnetBeloep ->
         beregnetBeloep.multiply(nyG).divide(gammelG)
     }

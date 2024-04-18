@@ -17,7 +17,6 @@ import no.nav.etterlatte.grunnlag.behandlingGrunnlagRoute
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
-import no.nav.etterlatte.grunnlag.migreringRoutes
 import no.nav.etterlatte.grunnlag.personRoute
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
@@ -101,7 +100,6 @@ class ApplicationBuilder {
                         sakGrunnlagRoute(grunnlagService, behandlingKlient)
                         behandlingGrunnlagRoute(grunnlagService, behandlingKlient)
                         personRoute(grunnlagService, behandlingKlient)
-                        migreringRoutes(persondataKlient, behandlingKlient)
                         aldersovergangRoutes(aldersovergangService)
                     }
                 }

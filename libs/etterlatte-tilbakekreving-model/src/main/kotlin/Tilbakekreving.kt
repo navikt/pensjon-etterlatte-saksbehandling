@@ -179,8 +179,11 @@ enum class TilbakekrevingAarsak {
 enum class TilbakekrevingHjemmel(val kode: String) {
     TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM("22-15-1-1"),
     TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM("22-15-1-2"),
-    TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM("22-15-1-1/22-15-1-2"),
-    TJUETO_FEMTEN_FEMTE_LEDD("22-15-5"),
+
+    // Økonomi bruker ikke hjemmel-informasjonen til noe, og det finnes ingen egen kode for disse variantene.
+    // Bruker den generelle hjemmelen.
+    TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM("22-15"),
+    TJUETO_FEMTEN_FEMTE_LEDD("22-15"),
 }
 
 enum class TilbakekrevingSkyld {

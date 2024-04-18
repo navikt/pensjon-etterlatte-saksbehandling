@@ -22,7 +22,7 @@ class BehandlingKlient(
                 setBody(kravgrunnlag)
             }
         } catch (e: Exception) {
-            throw Exception("Klarte ikke å opprette behandling for tilbakekreving=${kravgrunnlag.kravgrunnlagId.value}")
+            throw Exception("Klarte ikke å opprette behandling for tilbakekreving=${kravgrunnlag.kravgrunnlagId.value}", e)
         }
     }
 }

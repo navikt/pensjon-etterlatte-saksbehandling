@@ -56,15 +56,17 @@ export function TilbakekrevingSkalSendeBrev({
               </>
             }
           />
-          <Button
-            loading={isPending(lagreSkalSendeBrevStatus)}
-            type="submit"
-            variant="primary"
-            size="small"
-            style={{ maxWidth: '7.5em' }}
-          >
-            Lagre
-          </Button>
+          {redigerbar && (
+            <Button
+              loading={isPending(lagreSkalSendeBrevStatus)}
+              type="submit"
+              variant="primary"
+              size="small"
+              style={{ maxWidth: '7.5em' }}
+            >
+              Lagre
+            </Button>
+          )}
           {mapResult(lagreSkalSendeBrevStatus, {
             success: () => <Toast melding="Brevvalg lagret" />,
             error: (error) => <Alert variant="error">Kunne ikke lagre brevvalg: {error.detail}</Alert>,

@@ -38,7 +38,6 @@ import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.FoedselsNummerMedGraderingDTO
-import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import java.util.UUID
 
 interface BehandlingService {
@@ -68,10 +67,6 @@ interface BehandlingService {
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
 
     fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe
-
-    suspend fun migrer(hendelse: MigreringRequest): HttpResponse
-
-    fun opprettOppgaveManuellGjenoppretting(hendelse: MigreringRequest)
 
     fun avbryt(behandlingId: UUID): HttpResponse
 
@@ -206,21 +201,6 @@ class BehandlingServiceImpl(
                 contentType(ContentType.Application.Json)
                 setBody(saker)
             }.body()
-        }
-    }
-
-    override suspend fun migrer(hendelse: MigreringRequest): HttpResponse =
-        behandlingKlient.post("$url/migrering") {
-            contentType(ContentType.Application.Json)
-            setBody(hendelse)
-        }
-
-    override fun opprettOppgaveManuellGjenoppretting(hendelse: MigreringRequest) {
-        runBlocking {
-            behandlingKlient.post("$url/migrering/manuell-gjenoppretting") {
-                contentType(ContentType.Application.Json)
-                setBody(hendelse)
-            }
         }
     }
 

@@ -38,7 +38,7 @@
     "build": "yarn lint && tsc",
     "lint": "eslint src --ext .ts,.tsx",
     "test": "mocha -r ts-node/register './src/tests/**/*.test.ts'",
-    "lisenssjekk": "yarn license-checker-rseidelsohn --onlyAllow \"MIT;Apache-2.0;BlueOak-1.0.0;0BSD;BSD-2-Clause;BSD-3-Clause;CC0-1.0;CC-BY-3.0;ISC;MPL-2.0;Python-2.0\" --excludePackages vedtakslosning-ui@0.1.0"
+    "lisenssjekk": "yarn license-checker-rseidelsohn --onlyAllow \"MIT;Apache-2.0;BlueOak-1.0.0;0BSD;BSD-2-Clause;BSD-3-Clause;CC0-1.0;CC-BY-3.0;ISC;MPL-2.0;Python-2.0\" --excludePackages vedtakslosning-ui@0.1.0 --summary"
   },
   "resolutions": {
     "strip-ansi": "6.0.1"

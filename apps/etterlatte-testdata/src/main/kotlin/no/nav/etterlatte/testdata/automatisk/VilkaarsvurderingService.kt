@@ -8,7 +8,7 @@ import io.ktor.http.contentType
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class VilkaarsvurderingKlient(private val klient: HttpClient, private val url: String) {
+class VilkaarsvurderingService(private val klient: HttpClient, private val url: String) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun vilkaarsvurder(behandlingId: UUID) {

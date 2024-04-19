@@ -1,6 +1,7 @@
 package no.nav.etterlatte.no.nav.etterlatte.testdata.features
 
-import no.nav.etterlatte.no.nav.etterlatte.testdata.automatisk.VilkaarsvurderingKlient
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.no.nav.etterlatte.testdata.automatisk.VilkaarsvurderingService
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory
 
 class Behandler(
     rapidsConnection: RapidsConnection,
-    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
+    private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -34,18 +35,21 @@ class Behandler(
     ) {
         val sak = packet.sakId
         val behandling = packet.behandlingId
-        vilkaarsvurderingKlient.vilkaarsvurder(behandling)
 
-        // vilkårsvurder
-        // trygdetid
-        // beregn
-        // avkorta
-        // vedtaksbrev oppretta
-        // vedtak fatta
-        // vedtak attester
-        // vedtaksbrev distribuert
-        // sendt til oppdrag
-        // iverksatt
+        runBlocking {
+            vilkaarsvurderingService.vilkaarsvurder(behandling)
+
+            // vilkårsvurder
+            // trygdetid
+            // beregn
+            // avkorta
+            // vedtaksbrev oppretta
+            // vedtak fatta
+            // vedtak attester
+            // vedtaksbrev distribuert
+            // sendt til oppdrag
+            // iverksatt
+        }
     }
 
     override fun kontekst() = Kontekst.TEST

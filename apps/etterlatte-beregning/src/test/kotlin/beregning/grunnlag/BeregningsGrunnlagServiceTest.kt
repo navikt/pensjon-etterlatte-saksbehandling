@@ -744,6 +744,19 @@ internal class BeregningsGrunnlagServiceTest {
         }
     }
 
+    @Test
+    fun `reguler overstyrt beregningsgrunnlag oppdaterer med ny G`() {
+        val behandling = UUID.randomUUID()
+        val reguleringsmaaned = YearMonth.of(2023, 5)
+
+        beregningsGrunnlagService.regulerOverstyrtBeregningsgrunnlag(
+            behandlingId = behandling,
+            reguleringsmaaned = reguleringsmaaned,
+        )
+
+        // TODO verifiser at repo har blit kalt med riktig liste med grunnlag
+    }
+
     private fun mockBehandling(
         type: SakType,
         uuid: UUID,

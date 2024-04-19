@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregning.grunnlag
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 data class OverstyrBeregningGrunnlagDao(
@@ -38,4 +39,8 @@ data class OverstyrBeregningGrunnlagDTO(
 data class OverstyrBeregningGrunnlag(
     val perioder: List<GrunnlagMedPeriode<OverstyrBeregningGrunnlagData>>,
     val kilde: Grunnlagsopplysning.Saksbehandler,
+)
+
+data class RegulerOverstyrBeregningGrunnlagDTO(
+    val reguleringsmaaned: YearMonth,
 )

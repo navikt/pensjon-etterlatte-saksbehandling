@@ -8,6 +8,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -107,7 +108,7 @@ fun Route.beregningsGrunnlag(
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                logger.info("Henter overstyr grunnlag for behandling $behandlingId")
+                logger.info("Lagre overstyr grunnlag for behandling $behandlingId")
 
                 val body = call.receive<OverstyrBeregningGrunnlagDTO>()
 
@@ -119,6 +120,17 @@ fun Route.beregningsGrunnlag(
                     )
 
                 call.respond(HttpStatusCode.OK, grunnlag)
+            }
+        }
+
+        put("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr/reguler") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                logger.info("Regulerer overstyr grunnlag for behandling $behandlingId")
+                val body = call.receive<RegulerOverstyrBeregningGrunnlagDTO>()
+
+                beregningsGrunnlagService.regulerOverstyrtBeregningsgrunnlag(behandlingId, body.reguleringsmaaned)
+
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

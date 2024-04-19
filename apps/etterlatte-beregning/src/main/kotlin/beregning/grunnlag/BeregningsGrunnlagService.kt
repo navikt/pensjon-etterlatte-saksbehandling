@@ -302,6 +302,32 @@ class BeregningsGrunnlagService(
 
         return hentOverstyrBeregningGrunnlag(behandlingId)
     }
+
+    fun regulerOverstyrtBeregningsgrunnlag(
+        behandlingId: UUID,
+        reguleringsmaaned: YearMonth,
+    ) {
+        beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId).let { grunnlag ->
+            if (grunnlag.isNotEmpty()) {
+                beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
+                    behandlingId,
+                    grunnlag.map {
+                        it.copy(
+                            datoTOM = if (it.datoTOM == null) reguleringsmaaned.minusMonths(1).atEndOfMonth() else it.datoTOM,
+                        )
+                    } +
+                        listOf(
+                            regulerOverstyrtBeregningsgrunnlag(
+                                reguleringsmaaned,
+                                // TODO godt nok?
+                                grunnlag.last(),
+                                behandlingId,
+                            ),
+                        ),
+                )
+            }
+        }
+    }
 }
 
 class BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(behandlingId: UUID) : UgyldigForespoerselException(

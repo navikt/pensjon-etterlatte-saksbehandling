@@ -20,19 +20,19 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
       case VedtakType.INNVILGELSE:
         return (
           <Tag key={VedtakType.INNVILGELSE} variant="success" icon={<RecordFillIcon aria-hidden color="#06893A" />}>
-            Løpende fra {!!sisteVedtak.datoAttestert && formaterStringDato(sisteVedtak.datoAttestert)}
+            Løpende fra {!!sisteVedtak.virkningstidspunkt && formaterStringDato(sisteVedtak.virkningstidspunkt)}
           </Tag>
         )
       case VedtakType.AVSLAG:
         return (
           <Tag key={VedtakType.AVSLAG} variant="error" icon={<XMarkIcon aria-hidden color="#C30000" />}>
-            Avslått den {!!sisteVedtak.datoAttestert && formaterStringDato(sisteVedtak.datoAttestert)}
+            Avslått den {!!sisteVedtak.virkningstidspunkt && formaterStringDato(sisteVedtak.virkningstidspunkt)}
           </Tag>
         )
       case VedtakType.OPPHOER:
         return (
           <Tag key={VedtakType.OPPHOER} variant="alt2">
-            Ytelse opphørte den {!!sisteVedtak.datoAttestert && formaterStringDato(sisteVedtak.datoAttestert)}
+            Ytelse opphørte den {!!sisteVedtak.virkningstidspunkt && formaterStringDato(sisteVedtak.virkningstidspunkt)}
           </Tag>
         )
       default:

@@ -3,7 +3,7 @@ package no.nav.etterlatte.beregning.grunnlag
 import no.nav.etterlatte.beregning.regler.overstyr.OverstyrGrunnlag
 import no.nav.etterlatte.beregning.regler.overstyr.RegulerManuellBeregningGrunnlag
 import no.nav.etterlatte.beregning.regler.overstyr.grunnbeloep
-import no.nav.etterlatte.beregning.regler.overstyr.regulerOverstyrt
+import no.nav.etterlatte.beregning.regler.overstyr.regulerOverstyrtKroneavrundet
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
@@ -19,7 +19,7 @@ fun regulerOverstyrtBeregningsgrunnlag(
     val (forrigeGrunnbeloep, nyttGrunnbeloep) = utledGrunbeloep(reguleringsmaaned)
 
     val resultat =
-        regulerOverstyrt.eksekver(
+        regulerOverstyrtKroneavrundet.eksekver(
             grunnlag =
                 KonstantGrunnlag(
                     RegulerManuellBeregningGrunnlag(
@@ -52,7 +52,7 @@ fun regulerOverstyrtBeregningsgrunnlag(
         )
     return when (resultat) {
         is RegelkjoeringResultat.Suksess -> {
-            resultat.periodiserteResultater.single().resultat.verdi.toInteger()
+            resultat.periodiserteResultater.single().resultat.verdi
         }
         is RegelkjoeringResultat.UgyldigPeriode ->
             throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")

@@ -78,28 +78,27 @@ data class RegulerManuellBeregningGrunnlag(
     val nyttGrunnbeloep: FaktumNode<Beregningstall>,
 )
 
-val manueltBeregnetBeloep: Regel<RegulerManuellBeregningGrunnlag, Beregningstall> =
+val manueltBeregnetBeloep =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
         finnFaktum = RegulerManuellBeregningGrunnlag::manueltBeregnetBeloep,
     ) { it }
 
-val forrigeGrunnbeloep: Regel<RegulerManuellBeregningGrunnlag, Beregningstall> =
+val forrigeGrunnbeloep =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
         finnFaktum = RegulerManuellBeregningGrunnlag::forrigeGrunnbeloep,
     ) { it }
 
-val nyttGrunnbeloep: Regel<RegulerManuellBeregningGrunnlag, Beregningstall> =
+val nyttGrunnbeloep =
     finnFaktumIGrunnlag(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "",
         finnFaktum = RegulerManuellBeregningGrunnlag::nyttGrunnbeloep,
     ) { it }
 
-// TODO runde tall..
 val regulerOverstyrt =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
@@ -107,4 +106,13 @@ val regulerOverstyrt =
         regelReferanse = RegelReferanse(id = ""),
     ) benytter forrigeGrunnbeloep og nyttGrunnbeloep og manueltBeregnetBeloep med { gammelG, nyG, beregnetBeloep ->
         beregnetBeloep.multiply(nyG).divide(gammelG)
+    }
+
+val regulerOverstyrtKroneavrundet =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FRA,
+        beskrivelse = "",
+        regelReferanse = RegelReferanse(id = ""),
+    ) benytter regulerOverstyrt med { regulertOverstyrt ->
+        regulertOverstyrt.round(decimals = 0).toInteger()
     }

@@ -8,7 +8,7 @@ import java.time.YearMonth
 class RegulerOverstyrtKtTest {
     @Test
     fun `beregner regulert overstyrt beregningsgrunnlag`() {
-        val resulat = regulerOverstyrtBeregningsgrunnlag(YearMonth.of(2024, 5), 1000)
-        resulat shouldBe 1101
+        val resulat = regulerOverstyrtBeregningsgrunnlag(YearMonth.of(2024, 5), 5679)
+        resulat shouldBe 6254
     }
 }

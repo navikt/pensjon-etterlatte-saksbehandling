@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregning.grunnlag
 import no.nav.etterlatte.beregning.regler.overstyr.RegulerManuellBeregningGrunnlag
 import no.nav.etterlatte.beregning.regler.overstyr.grunnbeloepUtenGrunnlag
 import no.nav.etterlatte.beregning.regler.overstyr.regulerOverstyrtKroneavrundet
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
@@ -63,15 +64,20 @@ private fun utledGrunbeloep(reguleringsmaaned: YearMonth) =
         grunnlag = KonstantGrunnlag(""),
         periode =
             RegelPeriode(
-                fraDato = reguleringsmaaned.minusMonths(1).atDay(1),
+                fraDato = reguleringsmaaned.minusYears(1).atDay(1),
                 tilDato = reguleringsmaaned.atEndOfMonth(),
             ),
     ).let { resultat ->
         when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
-                // assert(toSisteGrunnbeloep) TODO kun 2
+                assert(resultat.periodiserteResultater.size == 2)
                 resultat.periodiserteResultater.let {
-                    Pair(it[0].resultat.verdi, it[1].resultat.verdi)
+                    val gammelG: Grunnbeloep = it[0].resultat.verdi
+                    assert(gammelG.dato == reguleringsmaaned.minusYears(1))
+                    val nyG: Grunnbeloep = it[1].resultat.verdi
+                    assert(nyG.dato == reguleringsmaaned)
+
+                    Pair(gammelG, nyG)
                 }
             }
             is RegelkjoeringResultat.UgyldigPeriode ->

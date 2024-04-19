@@ -18,9 +18,11 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 export const Avkorting = ({
   behandling,
   resetBrevutfallvalidering,
+  resetInntektsavkortingValidering,
 }: {
   behandling: IBehandlingReducer
   resetBrevutfallvalidering: () => void
+  resetInntektsavkortingValidering: () => void
 }) => {
   const dispatch = useAppDispatch()
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
@@ -59,6 +61,7 @@ export const Avkorting = ({
             avkorting={avkorting}
             setAvkorting={setAvkorting}
             redigerbar={redigerbar}
+            resetInntektsavkortingValidering={resetInntektsavkortingValidering}
           />
         )
       )}

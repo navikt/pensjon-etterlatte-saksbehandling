@@ -1,6 +1,7 @@
 package no.nav.etterlatte.sanksjon
 
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -15,7 +16,7 @@ class SanksjonService(
 
     fun hentSanksjon(behandlingId: UUID): List<Sanksjon>? {
         logger.info("Henter sanksjoner med behandlingID=$behandlingId")
-        return sanksjonRepository.hentSanksjon(behandlingId)
+        return sanksjonRepository.hentSanksjon(behandlingId)?.sortedBy { it.fom }
     }
 
     suspend fun opprettEllerOppdaterSanksjon(
@@ -25,7 +26,9 @@ class SanksjonService(
     ) {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-        if (behandling.virkningstidspunkt == null) ManglerVirkningstidspunktException()
+        if (!behandling.status.kanEndres()) throw BehandlingKanIkkeEndres()
+
+        if (behandling.virkningstidspunkt == null) throw ManglerVirkningstidspunktException()
         if (sanksjon.sakId != behandling.sak) throw SakidTilhoererIkkeBehandlingException()
         if (YearMonth.of(
                 sanksjon.fom.year,
@@ -43,6 +46,19 @@ class SanksjonService(
 
         logger.info("Oppdaterer sanksjon med behandlingID=$behandlingId")
         return sanksjonRepository.oppdaterSanksjon(sanksjon, brukerTokenInfo.ident())
+    }
+
+    suspend fun slettSanksjon(
+        behandlingId: UUID,
+        sanksjonId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+        if (!behandling.status.kanEndres()) throw BehandlingKanIkkeEndres()
+
+        logger.info("Sletter sanksjon med sanksjonID=$sanksjonId")
+        sanksjonRepository.slettSanksjon(sanksjonId)
     }
 }
 
@@ -68,4 +84,10 @@ class ManglerVirkningstidspunktException :
     UgyldigForespoerselException(
         code = "MANGLER_VIRK",
         detail = "Behandling mangler virkningstidspunkt",
+    )
+
+class BehandlingKanIkkeEndres :
+    IkkeTillattException(
+        code = "BEHANDLINGEN_KAN_IKKE_ENDRES",
+        detail = "Behandlingen kan ikke endres",
     )

@@ -121,9 +121,7 @@ export const BrevutfallSkjema = ({
     const fom = startOfDay(new Date(value))
     const tom = startOfDay(new Date(getValues().datoTom!))
 
-    if (!value) {
-      return 'Fra-måned må settes'
-    } else if (fom > tom) {
+    if (fom > tom) {
       return 'Fra-måned kan ikke være etter til-måned.'
     }
     // Til og med kan ikke settes lenger frem enn inneværende måned. Inneværende måned vil måtte etterbetales
@@ -137,9 +135,7 @@ export const BrevutfallSkjema = ({
   const validerTom = (value: Date): string | undefined => {
     const tom = startOfDay(new Date(value))
 
-    if (!value) {
-      return 'Til-måned må settes'
-    } else if (tom > startOfDay(lastDayOfMonth(new Date()))) {
+    if (tom > startOfDay(lastDayOfMonth(new Date()))) {
       return 'Til-måned etter inneværende måned.'
     }
     return undefined
@@ -176,6 +172,7 @@ export const BrevutfallSkjema = ({
                   label="Fra og med"
                   control={control}
                   validate={validerFom}
+                  required
                 />
 
                 <ControlledMaanedVelger
@@ -185,6 +182,7 @@ export const BrevutfallSkjema = ({
                   toDate={add(new Date(), { months: 1 })}
                   control={control}
                   validate={validerTom}
+                  required
                 />
               </HStack>
             )}

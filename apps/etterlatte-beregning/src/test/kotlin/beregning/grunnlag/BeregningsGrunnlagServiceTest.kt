@@ -778,5 +778,5 @@ internal class BeregningsGrunnlagServiceTest {
     private fun mockVedtak(
         behandlingId: UUID,
         type: VedtakType,
-    ) = VedtakSammendragDto(UUID.randomUUID().toString(), behandlingId, type, null, null, null, null)
+    ) = VedtakSammendragDto(UUID.randomUUID().toString(), behandlingId, type, null, null, null, null, null)
 }

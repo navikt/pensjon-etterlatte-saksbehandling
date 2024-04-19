@@ -37,6 +37,16 @@ data class OppgaveIntern(
     fun erUnderBehandling() = status.erUnderBehandling()
 
     fun erAttestering(): Boolean = status == Status.ATTESTERING
+
+    fun kanSendesTilAttestering() =
+        type in
+            listOf(
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                OppgaveType.REVURDERING,
+                OppgaveType.KRAVPAKKE_UTLAND,
+                OppgaveType.TILBAKEKREVING,
+                OppgaveType.KLAGE,
+            )
 }
 
 data class OppgavebenkStats(val antallOppgavelistaOppgaver: Long, val antallMinOppgavelisteOppgaver: Long)

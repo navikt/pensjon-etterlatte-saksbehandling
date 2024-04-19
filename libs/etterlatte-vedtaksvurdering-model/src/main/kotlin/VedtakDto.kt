@@ -25,6 +25,7 @@ data class VedtakSammendragDto(
     val datoFattet: ZonedDateTime?,
     val attesterendeSaksbehandler: String?,
     val datoAttestert: ZonedDateTime?,
+    val virkningstidspunkt: YearMonth?,
 )
 
 data class VedtakDto(

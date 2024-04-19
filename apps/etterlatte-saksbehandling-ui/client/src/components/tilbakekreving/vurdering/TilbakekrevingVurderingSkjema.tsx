@@ -66,12 +66,12 @@ export function TilbakekrevingVurderingSkjema({
   })
 
   useEffect(() => {
-    if (getValues().vilkaarsresultat && getValues().vilkaarsresultat === TilbakekrevingVilkaar.IKKE_OPPFYLT) {
+    if (watch().vilkaarsresultat === TilbakekrevingVilkaar.IKKE_OPPFYLT) {
       setValue('hjemmel', TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD)
     } else {
-      setValue('hjemmel', getValues().rettsligGrunnlag)
+      setValue('hjemmel', watch().rettsligGrunnlag)
     }
-  }, [getValues().vilkaarsresultat, getValues().rettsligGrunnlag])
+  }, [watch().vilkaarsresultat, watch().rettsligGrunnlag])
 
   const lagreVurdering = (vurdering: TilbakekrevingVurdering) => {
     lagreVurderingRequest({ behandlingsId: behandling.id, vurdering }, (lagretTilbakekreving) => {

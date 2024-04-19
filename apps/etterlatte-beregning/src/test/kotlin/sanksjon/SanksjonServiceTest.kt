@@ -203,12 +203,23 @@ internal class SanksjonServiceTest {
         }
 
         @Test
-        fun `Skal returnere null hvis det ikke finnes sanksjoner`() {
+        fun `Skal returnere 1 hvis en sanksjon slettes`() {
+            val behandlingId = UUID.randomUUID()
             val sanksjonId = UUID.randomUUID()
 
-            every { sanksjonRepository.slettSanksjon(sanksjonId) } returns 1
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    status = BehandlingStatus.BEREGNET,
+                )
 
-            service.slettSanksjon(sanksjonId) shouldBe Unit
+            every { sanksjonRepository.slettSanksjon(sanksjonId) } returns 1
+            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+
+            runBlocking {
+                service.slettSanksjon(behandlingId, sanksjonId, bruker) shouldBe Unit
+            }
 
             coVerify {
                 sanksjonRepository.slettSanksjon(sanksjonId)

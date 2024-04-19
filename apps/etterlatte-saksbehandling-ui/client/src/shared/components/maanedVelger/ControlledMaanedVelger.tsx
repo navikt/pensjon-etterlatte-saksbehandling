@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { MonthPicker, MonthValidationT, useMonthpicker } from '@navikt/ds-react'
 import { Control, FieldValues, Path, useController } from 'react-hook-form'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
@@ -48,14 +48,16 @@ export const ControlledMaanedVelger = <T extends FieldValues>({
     },
   } as UseMonthPickerOptions)
 
-  // Dette tillater å sette value for feltet via setValue utenfor komponenten
-  if (selectedMonth && !field.value) {
-    setSelected(undefined)
-  } else if (selectedMonth && !isEqual(new Date(field.value), selectedMonth)) {
-    setSelected(new Date(field.value))
-  } else if (field.value && !selectedMonth && inputProps.value?.toString().length === 0) {
-    setSelected(new Date(field.value))
-  }
+  useEffect(() => {
+    // Dette tillater å sette value for feltet via setValue utenfor komponenten
+    if (selectedMonth && !field.value) {
+      setSelected(undefined)
+    } else if (selectedMonth && !isEqual(new Date(field.value), selectedMonth)) {
+      setSelected(new Date(field.value))
+    } else if (field.value && !selectedMonth && inputProps.value?.toString().length === 0) {
+      setSelected(new Date(field.value))
+    }
+  }, [field, selectedMonth])
 
   return (
     <MonthPicker {...monthpickerProps}>

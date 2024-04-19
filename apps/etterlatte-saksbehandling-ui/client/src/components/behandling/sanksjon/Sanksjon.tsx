@@ -138,10 +138,10 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
   }
 
   const validerTom = (value: Date): string | undefined => {
-    const tom = new Date(value)
+    const tom = value ? new Date(value) : null
     const fom = getValues().datoFom ? new Date(getValues().datoFom!) : null
 
-    if (fom && isBefore(tom, fom)) {
+    if (fom && tom && isBefore(tom, fom)) {
       return 'Til dato må være etter Fra dato'
     }
     return undefined

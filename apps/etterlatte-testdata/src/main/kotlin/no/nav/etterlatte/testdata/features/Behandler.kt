@@ -65,8 +65,9 @@ class Behandler(
                 avkortingService.avkort(behandling)
                 logger.info("Avkorta behandling $behandling i sak $sakId")
             }
-            vedtaksvurderingService.fattAttesterOgIverksettVedtak(behandling)
-            brevService.opprettOgDistribuerVedtaksbrev(behandling)
+            vedtaksvurderingService.fattVedtak(sakId, behandling)
+            brevService.opprettOgDistribuerVedtaksbrev(sakId, behandling)
+            vedtaksvurderingService.attesterOgIverksettVedtak(sakId, behandling)
             logger.info("Ferdig iverksatt behandling $behandling i sak $sakId")
         }
     }

@@ -5,6 +5,7 @@ import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -13,12 +14,12 @@ class VilkaarsvurderingService(private val klient: HttpClient, private val url: 
 
     suspend fun vilkaarsvurder(behandlingId: UUID) {
         logger.info("Oppretter vilkårsvurdering for gjenoppretting for $behandlingId")
-        val vilkaarsvurdering = opprettVilkaarsvurdering(behandlingId)
+        val vilkaarsvurdering = retryOgPakkUt { opprettVilkaarsvurdering(behandlingId) }
 
         logger.info("Oppdaterer vilkårene med korrekt utfall for gjenoppretting $behandlingId")
         settUtfallForAlleVilkaar(vilkaarsvurdering) // Usikker på om vi må dette, hoppar over i første omgang
 
-        settVilkaarsvurderingaSomHelhetSomOppfylt(behandlingId)
+        retryOgPakkUt { settVilkaarsvurderingaSomHelhetSomOppfylt(behandlingId) }
     }
 
     private suspend fun opprettVilkaarsvurdering(behandlingId: UUID) =
@@ -27,7 +28,6 @@ class VilkaarsvurderingService(private val klient: HttpClient, private val url: 
         }
 
     private suspend fun settUtfallForAlleVilkaar(vilkaarsvurdering: HttpResponse) {
-        TODO("Not yet implemented")
     }
 
     private suspend fun settVilkaarsvurderingaSomHelhetSomOppfylt(behandlingId: UUID) =

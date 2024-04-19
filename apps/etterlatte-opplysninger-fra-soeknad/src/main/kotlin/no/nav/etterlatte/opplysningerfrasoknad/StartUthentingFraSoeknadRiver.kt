@@ -5,10 +5,11 @@ import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsuthenter
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
-import no.nav.etterlatte.rapidsandrivers.NY_OPPLYSNING_KEY
 import no.nav.etterlatte.rapidsandrivers.OPPLYSNING_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -50,8 +51,8 @@ internal class StartUthentingFraSoeknadRiver(
             )
 
         JsonMessage.newMessage(
-            NY_OPPLYSNING_KEY,
             mapOf(
+                EventNames.NY_OPPLYSNING.lagParMedEventNameKey(),
                 SAK_ID_KEY to packet[GyldigSoeknadVurdert.sakIdKey],
                 BEHANDLING_ID_KEY to packet[GyldigSoeknadVurdert.behandlingIdKey],
                 CORRELATION_ID_KEY to packet[CORRELATION_ID_KEY],

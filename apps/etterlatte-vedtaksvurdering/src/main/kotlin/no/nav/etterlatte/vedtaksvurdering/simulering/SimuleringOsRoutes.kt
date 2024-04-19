@@ -20,7 +20,7 @@ internal fun Route.simuleringOsRoutes(
 ) {
     val logger = application.log
 
-    route("/api/simulering/os") {
+    route("/api/vedtak/simulering/os") {
         route("{$BEHANDLINGID_CALL_PARAMETER}") {
             post {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->

@@ -93,7 +93,7 @@ class SimuleringOsRouteTest {
                 virkningstidspunkt = of(2024, FEBRUARY),
                 sakId = 1000223L,
                 status = VedtakStatus.OPPRETTET,
-                revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING,
+                revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
                 utbetalingsperioder = listOf(utbetalingsperiodeFeb2024, utbetalingsperiodeMai2024),
             )
 
@@ -115,7 +115,7 @@ class SimuleringOsRouteTest {
             }
 
             val response =
-                client.post("/api/simulering/os/$behandlingId") {
+                client.post("/api/vedtak/simulering/os/$behandlingId") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
             response.status shouldBe HttpStatusCode.OK
@@ -128,7 +128,7 @@ class SimuleringOsRouteTest {
                 oppdragGjelderId shouldBe SOEKER_FOEDSELSNUMMER.value
                 saksbehId shouldBe "Z991122"
                 utbetFrekvens shouldBe "MND"
-                kodeEndring shouldBe "ENDR"
+                kodeEndring shouldBe "NY"
                 kodeFagomraade shouldBe "BARNEPE"
                 datoOppdragGjelderFom shouldBe "2024-02-01"
                 oppdragslinje shouldHaveSize 2
@@ -139,7 +139,7 @@ class SimuleringOsRouteTest {
                     it.henvisning shouldBe vedtak.behandlingId.toUUID30().value
                     it.utbetalesTilId shouldBe vedtak.soeker.value
                     it.saksbehId shouldBe "Z991122"
-                    it.kodeEndringLinje shouldBe "ENDR"
+                    it.kodeEndringLinje shouldBe "NY"
                     it.kodeKlassifik shouldBe "BARNEPENSJON-OPTP"
                     it.typeSats shouldBe "MND"
                     it.fradragTillegg shouldBe FradragTillegg.T

@@ -77,7 +77,7 @@ class SimuleringOsService(
             saksbehId = brukerTokenInfo.ident()
 
             utbetFrekvens = "MND"
-            kodeEndring = "ENDR"
+            kodeEndring = vedtak.type.toKodeEndring()
             kodeFagomraade = vedtak.sakType.toKodeFagomrade()
 
             if (vedtak.innhold is VedtakInnhold.Behandling) {
@@ -109,7 +109,7 @@ class SimuleringOsService(
             henvisning = vedtak.behandlingId.toUUID30().value
             saksbehId = brukerTokenInfo.ident()
 
-            kodeEndringLinje = "ENDR"
+            kodeEndringLinje = vedtak.type.toKodeEndring()
             kodeKlassifik = vedtak.sakType.toKodeKlassifikasjon()
             sats = up.beloep
             typeSats = "MND"
@@ -132,6 +132,14 @@ class SimuleringOsService(
         when (this) {
             SakType.BARNEPENSJON -> "BARNEPENSJON-OPTP"
             SakType.OMSTILLINGSSTOENAD -> "OMSTILLINGOR"
+        }
+
+    private fun VedtakType.toKodeEndring() =
+        when (this) {
+            VedtakType.INNVILGELSE,
+            VedtakType.AVSLAG,
+            -> "NY"
+            else -> "ENDR"
         }
 }
 

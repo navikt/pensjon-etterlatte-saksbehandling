@@ -51,6 +51,7 @@ spec:
   accessPolicy:
     outbound:
       rules:
+        - application: etterlatte-behandling
         - application: etterlatte-beregning
         - application: etterlatte-trygdetid
       external:

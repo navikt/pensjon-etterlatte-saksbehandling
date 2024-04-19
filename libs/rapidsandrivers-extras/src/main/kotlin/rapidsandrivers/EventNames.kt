@@ -6,6 +6,7 @@ enum class EventNames(val eventname: String) : EventnameHendelseType {
     FEILA("FEILA"),
     FORDELER_STATISTIKK("FORDELER:STATISTIKK"),
     ALDERSOVERGANG("ALDERSOVERGANG"),
+    NY_OPPLYSNING("OPPLYSNING:NY"),
     ;
 
     override fun lagEventnameForType(): String = this.eventname

@@ -303,7 +303,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = hendelser,
                 migreringKlient = mockk(),
-                pdltjenesterKlient = mockk(),
             )
 
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
@@ -996,6 +995,5 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             hendelseDao = applicationContext.hendelseDao,
             behandlingHendelser = applicationContext.behandlingsHendelser,
             migreringKlient = mockk(),
-            pdltjenesterKlient = mockk(),
         )
 }

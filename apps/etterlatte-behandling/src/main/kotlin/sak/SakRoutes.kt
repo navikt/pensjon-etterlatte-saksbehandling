@@ -91,10 +91,11 @@ internal fun Route.sakSystemRoutes(
     }
 
     post("personer/saker/{type}") {
+        // TODO: i neste steg fjern graderingssjekk i fordeler og alle andre som kaller denne
         withFoedselsnummerAndGradering(tilgangService) { fnr, gradering ->
             val type: SakType =
                 enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne eller opprette sak" })
-            val message = inTransaction { sakService.finnEllerOpprettSak(fnr = fnr.value, type, gradering = gradering) }
+            val message = inTransaction { sakService.finnEllerOpprettSak(fnr = fnr.value, type) }
             requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/saker")
             call.respond(message)
         }

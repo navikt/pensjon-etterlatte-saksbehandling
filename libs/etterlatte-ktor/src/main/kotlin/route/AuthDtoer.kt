@@ -12,5 +12,6 @@ data class FoedselsnummerDTO(
 
 data class FoedselsNummerMedGraderingDTO(
     override val foedselsnummer: String,
+    @Deprecated("Ikke bruk, fjernes når fordeleren sin graderingssjekk er borte")
     val gradering: AdressebeskyttelseGradering? = null,
 ) : IFoedselsnummerDTO

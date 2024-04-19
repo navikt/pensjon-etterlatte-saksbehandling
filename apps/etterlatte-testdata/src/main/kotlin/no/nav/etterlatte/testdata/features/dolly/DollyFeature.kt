@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.objectMapper
+import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import no.nav.etterlatte.testdata.dolly.DollyService
 import org.slf4j.Logger
@@ -115,7 +116,7 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                         }
 
                     val navIdent = navIdentFraToken()
-                    val noekkel = dollyService.sendSoeknad(request, navIdent)
+                    val noekkel = dollyService.sendSoeknad(request, navIdent, Behandlingssteg.BEHANDLING_OPPRETTA)
 
                     call.respond(SoeknadResponse(200, noekkel).toJson())
                 } catch (e: Exception) {

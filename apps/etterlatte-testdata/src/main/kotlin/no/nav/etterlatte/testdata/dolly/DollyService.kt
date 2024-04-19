@@ -3,6 +3,7 @@ package no.nav.etterlatte.testdata.dolly
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.getDollyAccessToken
 import no.nav.etterlatte.producer
+import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.features.dolly.NySoeknadRequest
 import no.nav.etterlatte.testdata.features.soeknad.SoeknadMapper
 import org.slf4j.Logger
@@ -80,6 +81,7 @@ class DollyService(
     fun sendSoeknad(
         request: NySoeknadRequest,
         navIdent: String?,
+        behandlingssteg: Behandlingssteg,
     ): String {
         val noekkel = UUID.randomUUID().toString()
         val (partisjon, offset) =
@@ -90,6 +92,7 @@ class DollyService(
                     gjenlevendeFnr = request.gjenlevende,
                     avdoedFnr = request.avdoed,
                     barn = request.barn,
+                    behandlingssteg = behandlingssteg,
                 ).toJson(),
                 mapOf("NavIdent" to (navIdent!!.toByteArray())),
             )

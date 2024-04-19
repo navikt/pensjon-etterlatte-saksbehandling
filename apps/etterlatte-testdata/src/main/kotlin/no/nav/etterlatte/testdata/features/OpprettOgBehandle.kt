@@ -13,6 +13,7 @@ import no.nav.etterlatte.brukerIdFraToken
 import no.nav.etterlatte.getDollyAccessToken
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.navIdentFraToken
+import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import no.nav.etterlatte.testdata.dolly.BestillingStatus
 import no.nav.etterlatte.testdata.dolly.DollyService
@@ -29,7 +30,6 @@ class OpprettOgBehandle(private val dollyService: DollyService) : TestDataFeatur
         get() = "Opprett og behandle søknad(er)"
     override val path: String
         get() = "opprett-og-behandle"
-
 
     override val routes: Route.() -> Unit
         get() = {
@@ -51,48 +51,54 @@ class OpprettOgBehandle(private val dollyService: DollyService) : TestDataFeatur
             }
 
             post {
-                val familier = opprettFamilierIDolly(
-                    100,
-                    call.receiveParameters()["gruppeId"]!!.toLong(),
-                ).also { logger.info("Oppretta ${it.size} familier") }
+                val familier =
+                    opprettFamilierIDolly(
+                        100,
+                        call.receiveParameters()["gruppeId"]!!.toLong(),
+                    ).also { logger.info("Oppretta ${it.size} familier") }
                 val soeknadType = SoeknadType.BARNEPENSJON
                 val navIdent = navIdentFraToken()
+                val behandlingssteg = Behandlingssteg.IVERKSATT
                 familier.map {
                     NySoeknadRequest(
                         type = soeknadType,
                         avdoed = it.avdoed,
                         gjenlevende = it.gjenlevende,
-                        barn = it.barn
+                        barn = it.barn,
                     )
                 }.forEach {
                     dollyService.sendSoeknad(
                         request = it,
-                        navIdent = navIdent
+                        navIdent = navIdent,
+                        behandlingssteg = behandlingssteg,
                     )
                 }
                 call.respond(HttpStatusCode.Created)
             }
         }
 
-    private fun opprettFamilierIDolly(antall: Int, gruppeid: Long)
-            : List<ForenkletFamilieModell> {
+    private fun opprettFamilierIDolly(
+        antall: Int,
+        gruppeid: Long,
+    ): List<ForenkletFamilieModell> {
         val accessToken = getDollyAccessToken()
         val baselineFamilier = dollyService.hentFamilier(gruppeid, accessToken)
-        val req = BestillingRequest(
-            erOver18 = false,
-            helsoesken = 0,
-            halvsoeskenAvdoed = 0,
-            halvsoeskenGjenlevende = 0,
-            gruppeId = gruppeid,
-        )
+        val req =
+            BestillingRequest(
+                erOver18 = false,
+                helsoesken = 0,
+                halvsoeskenAvdoed = 0,
+                halvsoeskenGjenlevende = 0,
+                gruppeId = gruppeid,
+            )
         val bestillinger = mutableListOf<BestillingStatus>()
-        logger.info("Sender ${antall+1} bestillinger")
+        logger.info("Sender ${antall + 1} bestillinger")
         for (i in 0..antall) {
             bestillinger.add(
                 dollyService.opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
                     .also { bestilling ->
                         logger.info("Bestilling med id ${bestilling.id} har status ${bestilling.ferdig}")
-                    }
+                    },
             )
         }
         val ventetid = Duration.ofSeconds(antall * 2L)

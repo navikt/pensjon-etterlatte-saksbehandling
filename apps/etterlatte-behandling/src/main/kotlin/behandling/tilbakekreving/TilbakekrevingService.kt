@@ -209,6 +209,19 @@ class TilbakekrevingService(
             )
         }
 
+        runBlocking {
+            val vedtaksbrev = brevApiKlient.hentVedtaksbrev(tilbakekrevingId, brukerTokenInfo)
+            if (tilbakekreving.sendeBrev && vedtaksbrev == null) {
+                throw TilbakekrevingManglerBrevException(
+                    "Kan ikke fatte tilbakekrevingsvedtak uten vedtaksbrev når dette er spesifisert",
+                )
+            }
+            if (!tilbakekreving.sendeBrev && vedtaksbrev != null) {
+                logger.info("Sletter ubrukt vedtaksbrev med id ${vedtaksbrev.id}")
+                brevApiKlient.slettVedtaksbrev(tilbakekrevingId, brukerTokenInfo)
+            }
+        }
+
         val vedtakId =
             runBlocking {
                 vedtakKlient.fattVedtakTilbakekreving(

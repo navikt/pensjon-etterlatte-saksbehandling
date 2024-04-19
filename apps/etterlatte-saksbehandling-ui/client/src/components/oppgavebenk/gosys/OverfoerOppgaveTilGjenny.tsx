@@ -1,16 +1,13 @@
-import { opprettOppgave } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentSakForPerson } from '~shared/api/sak'
-import { isInitial, isPending, isSuccess, mapResult, mapSuccess } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { Alert, Button, Checkbox, Select } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { GosysActionToggle } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ResultAlert } from '~shared/alerts/ResultAlert'
 import { GosysOppgave, GosysTema, sakTypeFraTema } from '~shared/types/Gosys'
-import { feilregistrerGosysOppgave } from '~shared/api/gosys'
-import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
+import { flyttTilGjenny } from '~shared/api/gosys'
 import { SakType } from '~shared/types/sak'
 import { formaterSakstype } from '~utils/formattering'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
@@ -29,37 +26,18 @@ export const OverfoerOppgaveTilGjenny = ({
   const [skalOppretteSak, setSkalOppretteSak] = useState(false)
   const [sakType, setSakType] = useState<SakType | undefined>(sakTypeFraTema(oppgave.tema))
 
-  const [opprettOppgaveStatus, apiOpprettOppgave] = useApiCall(opprettOppgave)
-  const [feilregistrerStatus, feilregistrerOppgave] = useApiCall(feilregistrerGosysOppgave)
   const [sakStatus, hentSak] = useApiCall(hentSakForPerson)
+  const [flyttOppgaveResult, flyttOppgaveTilGjenny] = useApiCall(flyttTilGjenny)
 
   const konverterTilGjennyoppgave = () => {
     hentSak({ fnr: oppgave.fnr!!, type: sakType!!, opprettHvisIkkeFinnes: skalOppretteSak }, (sak) => {
       if (!sak) return
 
-      apiOpprettOppgave(
-        {
-          sakId: sak.id,
-          request: {
-            oppgaveType: Oppgavetype.JOURNALFOERING,
-            referanse: oppgave.journalpostId!!,
-            merknad: oppgave.beskrivelse || 'Journalføringsoppgave konvertert fra Gosys',
-            oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
-            saksbehandler: innloggetSaksbehandler.ident,
-          },
-        },
-        () => {
-          feilregistrerOppgave({
-            oppgaveId: oppgave.id,
-            versjon: oppgave.versjon!!,
-            beskrivelse: 'Oppgave ble flyttet til Gjenny',
-          })
-        }
-      )
+      flyttOppgaveTilGjenny({ oppgaveId: oppgave.id, sakId: sak.id })
     })
   }
 
-  const loading = isPending(sakStatus) || isPending(opprettOppgaveStatus) || isPending(feilregistrerStatus)
+  const loading = isPending(sakStatus) || isPending(flyttOppgaveResult)
 
   if (oppgave.saksbehandler?.ident !== innloggetSaksbehandler.ident)
     return <Alert variant="warning">Oppgaven er ikke tildelt deg!</Alert>
@@ -112,32 +90,29 @@ export const OverfoerOppgaveTilGjenny = ({
           </Alert>
         ),
       })}
-      <ResultAlert result={opprettOppgaveStatus} success="Opprettet ny oppgave" />
-      <ResultAlert result={feilregistrerStatus} success="Gosys-oppgave markert som feilregistrert" />
 
       <br />
 
-      {isSuccess(opprettOppgaveStatus) && (
-        <FlexRow justify="right">
-          <Button variant="tertiary" onClick={() => window.location.reload()}>
-            Avslutt
-          </Button>
-          {mapSuccess(opprettOppgaveStatus, (oppgave) => (
+      {mapResult(flyttOppgaveResult, {
+        initial: (
+          <FlexRow justify="right">
+            <Button variant="secondary" onClick={() => setToggle({ ferdigstill: false })} disabled={loading}>
+              Nei, avbryt
+            </Button>
+            <Button onClick={konverterTilGjennyoppgave} loading={loading} disabled={!sakType}>
+              Ja, overfør
+            </Button>
+          </FlexRow>
+        ),
+        success: (oppgave) => (
+          <FlexRow justify="right">
+            <Button variant="tertiary" onClick={() => window.location.reload()}>
+              Avslutt
+            </Button>
             <Button onClick={() => navigate(`/oppgave/${oppgave.id}`)}>Gå til oppgaven</Button>
-          ))}
-        </FlexRow>
-      )}
-
-      {isInitial(opprettOppgaveStatus) && (
-        <FlexRow justify="right">
-          <Button variant="secondary" onClick={() => setToggle({ ferdigstill: false })} disabled={loading}>
-            Nei, avbryt
-          </Button>
-          <Button onClick={konverterTilGjennyoppgave} loading={loading} disabled={!sakType}>
-            Ja, overfør
-          </Button>
-        </FlexRow>
-      )}
+          </FlexRow>
+        ),
+      })}
     </>
   )
 }

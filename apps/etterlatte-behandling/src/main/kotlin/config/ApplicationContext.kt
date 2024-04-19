@@ -304,7 +304,7 @@ internal class ApplicationContext(
     val tilbakekreving = TilbakekrevingHendelserServiceImpl(rapid)
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, behandlingsHendelser)
 
-    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlTjenesterKlient)
+    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlTjenesterKlient, oppgaveService)
     val grunnlagsService = GrunnlagServiceImpl(grunnlagKlient)
     val behandlingService =
         BehandlingServiceImpl(

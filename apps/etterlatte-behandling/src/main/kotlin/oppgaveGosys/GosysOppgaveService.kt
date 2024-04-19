@@ -7,9 +7,14 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalTime
@@ -31,6 +36,12 @@ interface GosysOppgaveService {
         id: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgave?
+
+    suspend fun flyttTilGjenny(
+        oppgaveId: Long,
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OppgaveIntern
 
     suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
@@ -62,6 +73,7 @@ interface GosysOppgaveService {
 class GosysOppgaveServiceImpl(
     private val gosysOppgaveKlient: GosysOppgaveKlient,
     private val pdltjenesterKlient: PdlTjenesterKlient,
+    private val oppgaveService: OppgaveService,
 ) : GosysOppgaveService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -142,6 +154,50 @@ class GosysOppgaveServiceImpl(
         }.also { cache.put(id, it) }
     }
 
+    override suspend fun flyttTilGjenny(
+        oppgaveId: Long,
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OppgaveIntern {
+        logger.info("Starter flytting av gosys-oppgave (id=$oppgaveId) til Gjenny")
+
+        val gosysOppgave = hentOppgave(oppgaveId, brukerTokenInfo)
+
+        if (gosysOppgave.oppgavetype !in listOf("JFR", "JFR_UT")) {
+            logger.error("Fikk forespørsel om flytting av oppgavetype=${gosysOppgave.oppgavetype}. Burde det støttes?")
+            throw StoetterKunFlyttingAvJournalfoeringsoppgave()
+        }
+
+        check(!gosysOppgave.journalpostId.isNullOrBlank()) {
+            "Kan ikke flytte oppgave når journalpostId mangler (oppgaveId=${gosysOppgave.id})"
+        }
+
+        val nyOppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse = gosysOppgave.journalpostId,
+                sakId = sakId,
+                oppgaveKilde = OppgaveKilde.SAKSBEHANDLER,
+                oppgaveType = OppgaveType.JOURNALFOERING,
+                merknad = gosysOppgave.beskrivelse,
+                frist = gosysOppgave.frist,
+                saksbehandler = brukerTokenInfo.ident(),
+            )
+
+        val feilregistrertOppgaveId =
+            feilregistrer(
+                oppgaveId.toString(),
+                FeilregistrerOppgaveRequest(
+                    beskrivelse = "Oppgave overført til Gjenny",
+                    versjon = gosysOppgave.versjon,
+                ),
+                brukerTokenInfo,
+            )
+
+        logger.info("Feilregistrerte Gosys-oppgave $feilregistrertOppgaveId")
+
+        return nyOppgave
+    }
+
     override suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
         oppgaveVersjon: Long,
@@ -187,7 +243,7 @@ class GosysOppgaveServiceImpl(
                 beskrivelse = request.beskrivelse,
             )
 
-        return gosysOppgaveKlient.feilregistrer(oppgaveId, endreStatusRequest, brukerTokenInfo).versjon
+        return gosysOppgaveKlient.feilregistrer(oppgaveId, endreStatusRequest, brukerTokenInfo).id
     }
 
     companion object {
@@ -212,3 +268,8 @@ class GosysOppgaveServiceImpl(
         }
     }
 }
+
+class StoetterKunFlyttingAvJournalfoeringsoppgave : UgyldigForespoerselException(
+    code = "UGYLDIG_OPPGAVETYPE_FOR_FLYTTING",
+    detail = "Støtter foreløpig kun flytting av journalføringsoppgaver",
+)

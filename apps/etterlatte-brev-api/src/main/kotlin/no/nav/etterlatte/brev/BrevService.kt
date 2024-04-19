@@ -42,7 +42,6 @@ class BrevService(
             sakId = sakId,
             behandlingId = null,
             bruker = bruker,
-            automatiskMigreringRequest = null,
             brevKode = { brevkode },
             brevtype = brevkode.brevtype,
             brevDataMapping = brevDataMapping,
@@ -118,7 +117,6 @@ class BrevService(
         pdfGenerator.genererPdf(
             id,
             bruker,
-            null,
             avsenderRequest = { b, g -> g.avsenderRequest(b) },
             brevKode = { Brevkoder.TOMT_INFORMASJONSBREV },
             brevData = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },

@@ -30,7 +30,6 @@ class PDFGenerator(
     suspend fun ferdigstillOgGenererPDF(
         id: BrevID,
         bruker: BrukerTokenInfo,
-        automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
         brevKode: (BrevkodeRequest) -> Brevkoder,
         brevData: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
@@ -45,7 +44,6 @@ class PDFGenerator(
             genererPdf(
                 id,
                 bruker,
-                automatiskMigreringRequest,
                 avsenderRequest,
                 brevKode,
                 brevData,
@@ -58,7 +56,6 @@ class PDFGenerator(
     suspend fun genererPdf(
         id: BrevID,
         bruker: BrukerTokenInfo,
-        automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
         brevKode: (BrevkodeRequest) -> Brevkoder,
         brevData: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
@@ -100,7 +97,6 @@ class PDFGenerator(
                             bruker,
                             InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
                             brevkodePar,
-                            automatiskMigreringRequest,
                             brev.tittel,
                         ),
                     ),

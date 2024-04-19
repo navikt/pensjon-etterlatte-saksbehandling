@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 class MigreringBrevDataService(private val brevdataFacade: BrevdataFacade) {
     suspend fun opprettMigreringBrevdata(
         generellBrevData: GenerellBrevData,
-        migrering: MigreringBrevRequest?,
         brukerTokenInfo: BrukerTokenInfo,
     ): BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall {
         if (generellBrevData.systemkilde != Vedtaksloesning.PESYS) {
@@ -30,7 +29,7 @@ class MigreringBrevDataService(private val brevdataFacade: BrevdataFacade) {
                     brukerTokenInfo,
                     generellBrevData.sak.sakType,
                 )
-            BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall.fra(generellBrevData, utbetalingsinfo, migrering)
+            BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall.fra(generellBrevData, utbetalingsinfo)
         }
     }
 }

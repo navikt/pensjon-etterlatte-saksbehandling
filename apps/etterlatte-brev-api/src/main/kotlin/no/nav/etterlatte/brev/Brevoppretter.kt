@@ -41,8 +41,6 @@ class Brevoppretter(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
-        // TODO EY-3232 - Fjerne migreringstilpasning
         brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         brevDataMapper: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): Brev {
@@ -61,7 +59,6 @@ class Brevoppretter(
             sakId = sakId,
             behandlingId = behandlingId,
             bruker = brukerTokenInfo,
-            automatiskMigreringRequest = automatiskMigreringRequest,
             brevKode = brevKode,
             brevtype = Brevtype.VEDTAK,
             brevDataMapping = brevDataMapper,
@@ -74,7 +71,6 @@ class Brevoppretter(
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
         brevtype: Brevtype,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): Pair<Brev, GenerellBrevData> =
@@ -84,7 +80,6 @@ class Brevoppretter(
                 behandlingId,
                 bruker,
                 brevKode,
-                automatiskMigreringRequest,
                 brevDataMapping,
             ),
         ) {
@@ -109,7 +104,6 @@ class Brevoppretter(
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): BrevService.BrevPayload {
         val spraak = db.hentBrevInnhold(brevId)?.spraak
@@ -120,7 +114,6 @@ class Brevoppretter(
                 behandlingId,
                 bruker,
                 brevKode,
-                automatiskMigreringRequest,
                 brevDataMapping,
                 spraak,
             ),
@@ -145,7 +138,6 @@ class Brevoppretter(
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
         overstyrSpraak: Spraak? = null,
     ): OpprettBrevRequest {
@@ -170,7 +162,6 @@ class Brevoppretter(
                             generellBrevData,
                             bruker,
                             kode,
-                            automatiskMigreringRequest,
                             brevDataMapping,
                         ),
                     )

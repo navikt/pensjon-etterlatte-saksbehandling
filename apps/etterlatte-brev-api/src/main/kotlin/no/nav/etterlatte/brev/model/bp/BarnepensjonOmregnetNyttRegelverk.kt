@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.model.bp
 
-import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
@@ -29,7 +28,6 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
         fun fra(
             generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
-            migreringRequest: MigreringBrevRequest?,
         ): BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall {
             val defaultBrevdataOmregning =
                 BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
@@ -46,9 +44,9 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
 
             // TODO På tide å fjerne?
             if (generellBrevData.loependeIPesys()) {
-                val pesysUtbetaltFoerReform = migreringRequest?.brutto ?: 0
+                val pesysUtbetaltFoerReform = 0
                 val pesysUtenlandstilknytning =
-                    migreringRequest?.utlandstilknytningType ?: requireNotNull(generellBrevData.utlandstilknytning) {
+                    requireNotNull(generellBrevData.utlandstilknytning) {
                         "Mangler utlandstilknytning for behandling=${generellBrevData.behandlingId}"
                     }.type
 
@@ -86,7 +84,6 @@ data class BarnepensjonOmregnetNyttRegelverk(
             trygdetid: List<TrygdetidDto>,
             grunnbeloep: Grunnbeloep,
             etterbetaling: EtterbetalingDTO?,
-            migreringRequest: MigreringBrevRequest?,
             utlandstilknytning: UtlandstilknytningType?,
             avdoede: List<Avdoed>,
         ): BarnepensjonOmregnetNyttRegelverk {
@@ -114,8 +111,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
                         ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },
                 erBosattUtlandet =
                     (
-                        migreringRequest?.utlandstilknytningType
-                            ?: requireNotNull(utlandstilknytning)
+                        requireNotNull(utlandstilknytning)
                     ) == UtlandstilknytningType.BOSATT_UTLAND,
             )
         }

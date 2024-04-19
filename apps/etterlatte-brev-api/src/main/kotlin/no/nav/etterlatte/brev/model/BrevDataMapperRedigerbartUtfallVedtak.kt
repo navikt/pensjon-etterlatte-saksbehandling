@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.model
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.MigreringBrevDataService
-import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -27,7 +26,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
         with(redigerbarTekstRequest) {
             if (generellBrevData.loependeIPesys()) {
-                fraPesys(generellBrevData, brukerTokenInfo, migrering)
+                fraPesys(generellBrevData, brukerTokenInfo)
             } else {
                 brevData(generellBrevData, brukerTokenInfo)
             }
@@ -36,12 +35,11 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     private suspend fun fraPesys(
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
-        migrering: MigreringBrevRequest? = null,
     ): BrevDataRedigerbar {
         if (generellBrevData.erForeldreloes()) {
             return barnepensjonInnvilgelse(brukerTokenInfo, generellBrevData)
         }
-        return migreringBrevDataService.opprettMigreringBrevdata(generellBrevData, migrering, brukerTokenInfo)
+        return migreringBrevDataService.opprettMigreringBrevdata(generellBrevData, brukerTokenInfo)
     }
 
     private suspend fun brevData(

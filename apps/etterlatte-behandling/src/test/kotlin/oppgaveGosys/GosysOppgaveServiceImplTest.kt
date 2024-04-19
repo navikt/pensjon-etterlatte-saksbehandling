@@ -2,9 +2,12 @@ package no.nav.etterlatte.oppgaveGosys
 
 import com.nimbusds.jwt.JWTClaimsSet
 import io.kotest.matchers.collections.shouldHaveSize
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.azureAdAttestantClaim
@@ -12,26 +15,33 @@ import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.temporal.ChronoUnit
+import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class GosysOppgaveServiceImplTest {
     private val gosysOppgaveKlient = mockk<GosysOppgaveKlient>()
     private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
+    private val oppgaveService = mockk<OppgaveService>()
     private val brukerTokenInfo = mockk<BrukerTokenInfo>()
 
-    private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdltjenesterKlient)
+    private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdltjenesterKlient, oppgaveService)
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     val azureGroupToGroupIDMap =
@@ -58,6 +68,11 @@ class GosysOppgaveServiceImplTest {
         nyKontekstMedBruker(saksbehandler)
 
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
+    }
+
+    @AfterEach
+    fun afterEach() {
+        clearAllMocks()
     }
 
     @Test
@@ -156,7 +171,14 @@ class GosysOppgaveServiceImplTest {
 
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 
-        coEvery { gosysOppgaveKlient.hentOppgaver(any(), any(), Enheter.STRENGT_FORTROLIG.enhetNr, brukerTokenInfo) } returns
+        coEvery {
+            gosysOppgaveKlient.hentOppgaver(
+                any(),
+                any(),
+                Enheter.STRENGT_FORTROLIG.enhetNr,
+                brukerTokenInfo,
+            )
+        } returns
             enhetsfiltrererGosysOppgaver(
                 Enheter.STRENGT_FORTROLIG.enhetNr,
                 listOf(
@@ -232,25 +254,77 @@ class GosysOppgaveServiceImplTest {
                 tildeles = "A012345",
                 brukerTokenInfo,
             )
-        } returns
-            GosysApiOppgave(
-                id = 123,
-                versjon = 2,
-                tema = "EYO",
-                behandlingstema = "",
-                oppgavetype = "",
-                journalpostId = null,
-                opprettetTidspunkt = Tidspunkt.now().minus(3L, ChronoUnit.DAYS),
-                tildeltEnhetsnr = Enheter.STEINKJER.enhetNr,
-                tilordnetRessurs = "A012345",
-                aktoerId = "78324720383742",
-                beskrivelse = "Omstillingsstønad oppgavebeskrivelse",
-                status = "NY",
-                fristFerdigstillelse = LocalDate.now().plusDays(4),
-            )
+        } returns mockGosysOppgave("EYO", "GEN")
 
         runBlocking {
             service.tildelOppgaveTilSaksbehandler(oppgaveId = "123", oppgaveVersjon = 2L, "A012345", brukerTokenInfo)
         }
     }
+
+    @Test
+    fun `Flytt oppgave til Gjenny`() {
+        val sakId = Random.nextLong()
+        val gosysOppgave = mockGosysOppgave("EYO", "JFR", Random.nextLong().toString())
+        val brukerTokenInfo = BrukerTokenInfo.of("", "Z123456", null, null, null)
+
+        coEvery { gosysOppgaveKlient.hentOppgave(any(), any()) } returns gosysOppgave
+        coEvery { gosysOppgaveKlient.feilregistrer(any(), any(), any()) } returns gosysOppgave
+        coEvery {
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any(), any(), any())
+        } returns mockk()
+        every {
+            pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(gosysOppgave.aktoerId!!))
+        } returns mapOf("78324720383742" to "29048012345")
+
+        runBlocking {
+            service.flyttTilGjenny(gosysOppgave.id, sakId, brukerTokenInfo)
+        }
+
+        verify(exactly = 1) {
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                gosysOppgave.journalpostId!!,
+                sakId,
+                OppgaveKilde.SAKSBEHANDLER,
+                OppgaveType.JOURNALFOERING,
+                gosysOppgave.beskrivelse,
+                Tidspunkt.ofNorskTidssone(gosysOppgave.fristFerdigstillelse!!, LocalTime.MIDNIGHT),
+                brukerTokenInfo.ident(),
+            )
+        }
+        coVerify(exactly = 1) {
+            gosysOppgaveKlient.feilregistrer(
+                id = gosysOppgave.id.toString(),
+                request =
+                    EndreStatusRequest(
+                        versjon = gosysOppgave.versjon.toString(),
+                        status = "FEILREGISTRERT",
+                        beskrivelse = "Oppgave overført til Gjenny",
+                    ),
+                brukerTokenInfo = brukerTokenInfo,
+            )
+        }
+        coVerify(exactly = 1) {
+            pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(gosysOppgave.aktoerId!!))
+        }
+    }
+
+    private fun mockGosysOppgave(
+        tema: String,
+        oppgavetype: String,
+        journalpostId: String? = null,
+    ) = GosysApiOppgave(
+        id = Random.nextLong(),
+        versjon = Random.nextLong(),
+        tema = tema,
+        behandlingstema = "",
+        oppgavetype = oppgavetype,
+        journalpostId = journalpostId,
+        opprettetTidspunkt = Tidspunkt.now().minus(3L, ChronoUnit.DAYS),
+        tildeltEnhetsnr = Enheter.STEINKJER.enhetNr,
+        tilordnetRessurs = "A012345",
+        aktoerId = "78324720383742",
+        beskrivelse = "Beskrivelse for oppgaven",
+        status = "OPPRETTET",
+        fristFerdigstillelse = LocalDate.now().plusDays(4),
+    )
 }

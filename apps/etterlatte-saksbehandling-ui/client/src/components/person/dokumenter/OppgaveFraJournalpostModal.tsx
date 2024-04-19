@@ -15,7 +15,7 @@ import { ConfigContext } from '~clientConfig'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { feilregistrerGosysOppgave, hentJournalfoeringsoppgaverFraGosys } from '~shared/api/gosys'
+import { flyttTilGjenny, hentJournalfoeringsoppgaverFraGosys } from '~shared/api/gosys'
 import { GosysOppgave } from '~shared/types/Gosys'
 
 export const OppgaveFraJournalpostModal = ({
@@ -40,7 +40,7 @@ export const OppgaveFraJournalpostModal = ({
   const [hentOppgaverStatus, hentOppgaver] = useApiCall(hentOppgaverMedReferanse)
 
   const [gosysResult, hentGosysOppgave] = useApiCall(hentJournalfoeringsoppgaverFraGosys)
-  const [, feilregistrerOppgave] = useApiCall(feilregistrerGosysOppgave)
+  const [flyttOppgaveResult, flyttOppgaveTilGjenny] = useApiCall(flyttTilGjenny)
 
   useEffect(() => {
     if (isOpen) {
@@ -80,25 +80,9 @@ export const OppgaveFraJournalpostModal = ({
 
   const konverterTilGjennyoppgave = (oppgave: GosysOppgave) => {
     if (isSuccess(sakStatus)) {
-      apiOpprettOppgave(
-        {
-          sakId: sakStatus.data.sak.id,
-          request: {
-            oppgaveType: Oppgavetype.JOURNALFOERING,
-            referanse: oppgave.journalpostId!!,
-            merknad: oppgave.beskrivelse || 'Journalføringsoppgave flyttet fra Gosys',
-            oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,
-            saksbehandler: innloggetSaksbehandler.ident,
-          },
-        },
-        () => {
-          feilregistrerOppgave({
-            oppgaveId: oppgave.id,
-            versjon: oppgave.versjon!!,
-            beskrivelse: 'Oppgave ble flyttet til Gjenny',
-          })
-        }
-      )
+      flyttOppgaveTilGjenny({ oppgaveId: oppgave.id, sakId: sakStatus.data.sak.id }, (oppgave) => {
+        navigate(`/oppgave/${oppgave.id}`)
+      })
     }
   }
 
@@ -147,16 +131,16 @@ export const OppgaveFraJournalpostModal = ({
                       <br />
 
                       <FlexRow $spacing justify="right">
-                        {isSuccess(opprettOppgaveStatus) ? (
+                        {isSuccess(flyttOppgaveResult) ? (
                           <Alert size="small" variant="success">
-                            <Link href={`/oppgave/${opprettOppgaveStatus.data.id}`}>Gå til oppgave</Link>
+                            <Link href={`/oppgave/${flyttOppgaveResult.data.id}`}>Gå til oppgave</Link>
                           </Alert>
                         ) : (
                           <Button
                             size="small"
                             variant="secondary"
                             onClick={() => konverterTilGjennyoppgave(oppgave)}
-                            loading={isPending(opprettOppgaveStatus)}
+                            loading={isPending(flyttOppgaveResult)}
                           >
                             Flytt til Gjenny
                           </Button>

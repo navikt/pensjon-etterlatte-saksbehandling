@@ -32,6 +32,9 @@ export const redigerFristApi = async (args: {
   return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/endre-frist`, { ...args.redigerFristRequest })
 }
 
+export const flyttTilGjenny = async (args: { oppgaveId: number; sakId: number }): Promise<ApiResponse<OppgaveDTO>> =>
+  apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/flytt-til-gjenny?sakId=${args.sakId}`, {})
+
 export const ferdigstilleGosysOppgave = async (args: {
   oppgaveId: number
   versjon: number

@@ -202,7 +202,6 @@ class BeregningsGrunnlagService(
 
         val forrigeGrunnlag =
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(forrigeBehandlingId)
-
         if (forrigeGrunnlag == null) {
             val behandling =
                 runBlocking {
@@ -234,7 +233,10 @@ class BeregningsGrunnlagService(
                 beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
                     behandlingId,
                     grunnlag.map {
-                        it.copy(id = behandlingId)
+                        it.copy(
+                            id = UUID.randomUUID(),
+                            behandlingId = behandlingId,
+                        )
                     },
                 )
             }

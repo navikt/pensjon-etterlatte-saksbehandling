@@ -42,12 +42,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
+      - name: License check top level
+        working-directory: apps/${{ env.APP_NAME }}
+        run: yarn lisenssjekk
       - name: Install client
         working-directory: apps/${{ env.APP_NAME }}
-        run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build
+        run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build && yarn lisenssjekk
       - name: Install server
         working-directory: apps/${{ env.APP_NAME }}
-        run: yarn --cwd server install --frozen-lockfile && yarn --cwd server build
+        run: yarn --cwd server install --frozen-lockfile && yarn --cwd server build && yarn lisenssjekk
       - name: Run tests
         working-directory: apps/${{ env.APP_NAME }}/client
         run: CI=true yarn test
@@ -67,12 +70,15 @@ jobs:
           node-version: '20.x'
       - name: Inject slug/short variables
         uses: rlespinasse/github-slug-action@v4
+      - name: License check top level
+        working-directory: apps/${{ env.APP_NAME }}
+        run: yarn lisenssjekk
       - name: Install and build client
         working-directory: apps/${{ env.APP_NAME }}
-        run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build
+        run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build && yarn lisenssjekk
       - name: Install and build server
         working-directory: apps/${{ env.APP_NAME }}
-        run: yarn --cwd server install --frozen-lockfile && yarn --cwd server build
+        run: yarn --cwd server install --frozen-lockfile && yarn --cwd server build && yarn lisenssjekk
       - name: Run tests
         working-directory: apps/${{ env.APP_NAME }}/client
         run: CI=true yarn test

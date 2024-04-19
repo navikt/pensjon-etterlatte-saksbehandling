@@ -5,6 +5,7 @@ import no.nav.etterlatte.beregning.regler.overstyr.grunnbeloepUtenGrunnlag
 import no.nav.etterlatte.beregning.regler.overstyr.regulerOverstyrtKroneavrundet
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.regler.FaktumNode
@@ -22,7 +23,6 @@ fun regulerOverstyrtBeregningsgrunnlag(
     behandlingId: UUID,
 ): OverstyrBeregningGrunnlagDao {
     val (forrigeGrunnbeloep, nyttGrunnbeloep) = utledGrunbeloep(reguleringsmaaned)
-
     val resultat =
         regulerOverstyrtKroneavrundet.eksekver(
             grunnlag =
@@ -53,22 +53,24 @@ fun regulerOverstyrtBeregningsgrunnlag(
                     fraDato = reguleringsmaaned.minusMonths(1).atDay(1),
                     tilDato = reguleringsmaaned.atEndOfMonth(),
                 ),
-        )
-    val regulertOverstyrtBeloep =
-        when (resultat) {
-            is RegelkjoeringResultat.Suksess -> {
-                resultat.periodiserteResultater.single().resultat.verdi
+        ).let {
+            when (it) {
+                is RegelkjoeringResultat.Suksess -> {
+                    it.periodiserteResultater.single()
+                }
+                is RegelkjoeringResultat.UgyldigPeriode ->
+                    throw RuntimeException("Ugyldig regler for periode: ${it.ugyldigeReglerForPeriode}")
             }
-            is RegelkjoeringResultat.UgyldigPeriode ->
-                throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
         }
     return forrigeBeregningsgrunnlag.copy(
         id = UUID.randomUUID(),
         behandlingId = behandlingId,
         datoFOM = reguleringsmaaned.atDay(1),
         datoTOM = null,
-        utbetaltBeloep = regulertOverstyrtBeloep.toLong(),
-        // TODO regelresultat
+        utbetaltBeloep = resultat.resultat.verdi.toLong(),
+        kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+        reguleringRegelresultat = objectMapper.valueToTree(resultat.resultat),
+        reguleringRegelVersjon = resultat.reglerVersjon,
     )
 }
 

@@ -43,6 +43,8 @@ class RegulerOverstyrtKtTest {
             behandlingId shouldBe reguleringsbehandlingId
             datoFOM shouldBe virkRegulering.atDay(1)
             datoTOM shouldBe null
+            reguleringRegelresultat shouldNotBe null
+            reguleringRegelVersjon shouldBe "1.1"
         }
     }
 }

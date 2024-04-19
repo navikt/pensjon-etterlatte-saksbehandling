@@ -12,7 +12,7 @@ ktor2-version = "2.3.10"
 navfelles-token-version = "4.1.4"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.19.7"
-tjenestespesifikasjoner-version = "1.99612d7"
+tjenestespesifikasjoner-version = "1.d27898d"
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
@@ -86,6 +86,7 @@ mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = 
 navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2024041714471713358051.71746f05c18e" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tjenestespesifikasjoner-oppdragsbehandling = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon", version.ref = "tjenestespesifikasjoner-version" }
+navfelles-tjenestespesifikasjoner-oppdragsimulering = { module ="com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:nav-system-os-simuler-fp-service-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module ="com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
 navfelles-tokenvalidationktor2 = { module = "no.nav.security:token-validation-ktor-v2", version.ref = "navfelles-token-version" }

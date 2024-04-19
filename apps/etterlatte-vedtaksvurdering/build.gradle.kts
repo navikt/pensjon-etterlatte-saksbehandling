@@ -33,6 +33,7 @@ dependencies {
 
     implementation(libs.bundles.jackson)
 
+    implementation(libs.navfelles.tjenestespesifikasjoner.oppdragsimulering)
     implementation(libs.navfelles.tokenvalidationktor2)
     implementation(libs.database.kotliquery)
 

@@ -92,6 +92,10 @@ spec:
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-trygdetid
+    - name: ETTERLATTE_PROXY_URL
+      value: https://etterlatte-proxy.dev-fss-pub.nais.io/aad
+    - name: ETTERLATTE_PROXY_SCOPE
+      value: api://dev-fss.etterlatte.etterlatte-proxy/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

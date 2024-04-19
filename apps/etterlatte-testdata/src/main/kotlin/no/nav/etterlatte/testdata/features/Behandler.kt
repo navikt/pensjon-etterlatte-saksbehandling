@@ -1,6 +1,7 @@
 package no.nav.etterlatte.no.nav.etterlatte.testdata.features
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.no.nav.etterlatte.testdata.automatisk.BeregningService
 import no.nav.etterlatte.no.nav.etterlatte.testdata.automatisk.TrygdetidService
 import no.nav.etterlatte.no.nav.etterlatte.testdata.automatisk.VilkaarsvurderingService
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
@@ -20,6 +21,7 @@ class Behandler(
     rapidsConnection: RapidsConnection,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val trygdetidService: TrygdetidService,
+    private val beregningService: BeregningService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -41,6 +43,7 @@ class Behandler(
         runBlocking {
             vilkaarsvurderingService.vilkaarsvurder(behandling)
             trygdetidService.beregnTrygdetid(behandling)
+            beregningService.beregn(behandling)
 
             // vilkårsvurder
             // trygdetid

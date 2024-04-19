@@ -38,7 +38,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Setup Node client
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
@@ -47,12 +47,6 @@ jobs:
       - name: Install client
         working-directory: apps/${{ env.APP_NAME }}
         run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build
-      - name: Setup Node server
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          cache: 'yarn'
-          cache-dependency-path: apps/${{ env.APP_NAME }}/server/yarn.lock
       - name: Install server
         working-directory: apps/${{ env.APP_NAME }}
         run: yarn --cwd server install --frozen-lockfile && yarn --cwd server build

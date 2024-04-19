@@ -287,6 +287,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                     <Button
                       size="small"
                       variant="secondary"
+                      type="button"
                       onClick={(e) => {
                         e.preventDefault()
                         reset(sanksjonDefaultValue)

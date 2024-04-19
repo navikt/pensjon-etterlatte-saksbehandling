@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
@@ -21,6 +22,8 @@ import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
+import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -98,6 +101,7 @@ class SakServiceImpl(
     private val brukerService: BrukerService,
     private val grunnlagService: GrunnlagService,
     private val krrKlient: KrrKlient,
+    private val pdltjenesterKlient: PdlTjenesterKlient,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -156,6 +160,17 @@ class SakServiceImpl(
         gradering: AdressebeskyttelseGradering?,
     ): Sak {
         val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet, gradering)
+        val hentetGradering =
+            runBlocking {
+                pdltjenesterKlient.hentAdressebeskyttelseForPerson(
+                    HentAdressebeskyttelseRequest(
+                        PersonIdent(sak.ident),
+                        sak.sakType,
+                    ),
+                )
+            }
+        oppdaterAdressebeskyttelse(sak.id, hentetGradering)
+
         grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident))
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
         val spraak = hentSpraak(sak.ident)

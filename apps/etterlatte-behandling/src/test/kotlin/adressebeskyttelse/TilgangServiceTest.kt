@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
@@ -54,13 +55,14 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
     private val skjermingKlient = mockk<SkjermingKlient>()
     private val grunnlagservice = mockk<GrunnlagService>()
     private val krrKlient = mockk<KrrKlient>()
+    private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
 
     @BeforeAll
     fun beforeAll() {
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
 
-        sakService = SakServiceImpl(sakRepo, skjermingKlient, brukerService, grunnlagservice, krrKlient)
+        sakService = SakServiceImpl(sakRepo, skjermingKlient, brukerService, grunnlagservice, krrKlient, pdlTjenesterKlient)
         behandlingRepo =
             BehandlingDao(
                 KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),

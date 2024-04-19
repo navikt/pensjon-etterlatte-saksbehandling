@@ -1,8 +1,7 @@
 package no.nav.etterlatte.beregning.grunnlag
 
-import no.nav.etterlatte.beregning.regler.overstyr.OverstyrGrunnlag
 import no.nav.etterlatte.beregning.regler.overstyr.RegulerManuellBeregningGrunnlag
-import no.nav.etterlatte.beregning.regler.overstyr.grunnbeloep
+import no.nav.etterlatte.beregning.regler.overstyr.grunnbeloepUtenGrunnlag
 import no.nav.etterlatte.beregning.regler.overstyr.regulerOverstyrtKroneavrundet
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
@@ -60,26 +59,8 @@ fun regulerOverstyrtBeregningsgrunnlag(
 }
 
 private fun utledGrunbeloep(reguleringsmaaned: YearMonth) =
-    grunnbeloep.eksekver(
-        // TODO lage en regel som henter grunnbeloep med "tomt" grunnlag?
-        grunnlag =
-            KonstantGrunnlag(
-                OverstyrGrunnlag(
-                    FaktumNode(
-                        verdi =
-                            OverstyrBeregningGrunnlagData(
-                                utbetaltBeloep = 0,
-                                trygdetid = 0,
-                                trygdetidForIdent = null,
-                                prorataBroekTeller = null,
-                                prorataBroekNevner = null,
-                                beskrivelse = "",
-                            ),
-                        kilde = "",
-                        beskrivelse = "",
-                    ),
-                ),
-            ),
+    grunnbeloepUtenGrunnlag.eksekver(
+        grunnlag = KonstantGrunnlag(""),
         periode =
             RegelPeriode(
                 fraDato = reguleringsmaaned.minusMonths(1).atDay(1),

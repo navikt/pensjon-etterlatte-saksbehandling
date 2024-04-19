@@ -2,7 +2,6 @@ package no.nav.etterlatte.beregning.regler.overstyr
 
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagData
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_1967_DATO
-import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.libs.regler.FaktumNode
@@ -16,7 +15,6 @@ import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
 import no.nav.etterlatte.libs.regler.velgNyesteGyldige
-import no.nav.etterlatte.regler.Beregningstall
 import java.time.LocalDate
 
 data class OverstyrGrunnlag(
@@ -70,49 +68,4 @@ val beregnOverstyrRegel =
         regelReferanse = RegelReferanse(id = "REGEL-OVERSTYR-GRUNNLAG"),
     ) benytter overstyrtBeregning og grunnbeloep med { overstyrBeregningGrunnlag, _ ->
         overstyrBeregningGrunnlag
-    }
-
-data class RegulerManuellBeregningGrunnlag(
-    val manueltBeregnetBeloep: FaktumNode<Beregningstall>,
-    val forrigeGrunnbeloep: FaktumNode<Beregningstall>,
-    val nyttGrunnbeloep: FaktumNode<Beregningstall>,
-)
-
-val manueltBeregnetBeloep =
-    finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        finnFaktum = RegulerManuellBeregningGrunnlag::manueltBeregnetBeloep,
-    ) { it }
-
-val forrigeGrunnbeloep =
-    finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        finnFaktum = RegulerManuellBeregningGrunnlag::forrigeGrunnbeloep,
-    ) { it }
-
-val nyttGrunnbeloep =
-    finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        finnFaktum = RegulerManuellBeregningGrunnlag::nyttGrunnbeloep,
-    ) { it }
-
-val regulerOverstyrt =
-    RegelMeta(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        regelReferanse = RegelReferanse(id = ""),
-    ) benytter forrigeGrunnbeloep og nyttGrunnbeloep og manueltBeregnetBeloep med { gammelG, nyG, beregnetBeloep ->
-        beregnetBeloep.multiply(nyG).divide(gammelG)
-    }
-
-val regulerOverstyrtKroneavrundet =
-    RegelMeta(
-        gjelderFra = OMS_GYLDIG_FRA,
-        beskrivelse = "",
-        regelReferanse = RegelReferanse(id = ""),
-    ) benytter regulerOverstyrt med { regulertOverstyrt ->
-        regulertOverstyrt.round(decimals = 0).toInteger()
     }

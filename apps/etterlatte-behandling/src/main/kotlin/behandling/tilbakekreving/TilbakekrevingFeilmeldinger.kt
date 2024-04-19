@@ -8,3 +8,5 @@ class TilbakekrevingHarMangelException(message: String) : InternfeilException(de
 class TilbakekrevingFinnesIkkeException(message: String) : IkkeFunnetException(code = "NOT_FOUND", detail = message)
 
 class TilbakekrevingFeilTilstandException(message: String) : InternfeilException(detail = message)
+
+class TilbakekrevingManglerBrevException(message: String) : InternfeilException(detail = message)

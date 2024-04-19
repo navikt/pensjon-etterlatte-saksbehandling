@@ -305,10 +305,15 @@ class BeregningsGrunnlagService(
 
     fun regulerOverstyrtBeregningsgrunnlag(
         behandlingId: UUID,
-        reguleringsmaaned: YearMonth,
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId).let { grunnlag ->
             if (grunnlag.isNotEmpty()) {
+                val behandling =
+                    runBlocking {
+                        behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+                    }
+                val reguleringsmaaned = behandling.virkningstidspunkt().dato
                 beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
                     behandlingId,
                     grunnlag.map {

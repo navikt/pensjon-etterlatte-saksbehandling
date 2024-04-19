@@ -12,6 +12,7 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.BeregningRepository
+import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlient
@@ -746,12 +747,11 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `reguler overstyrt beregningsgrunnlag oppdaterer med ny G`() {
-        val behandling = UUID.randomUUID()
-        val reguleringsmaaned = YearMonth.of(2023, 5)
+        val behandling = randomUUID()
 
         beregningsGrunnlagService.regulerOverstyrtBeregningsgrunnlag(
             behandlingId = behandling,
-            reguleringsmaaned = reguleringsmaaned,
+            bruker,
         )
 
         // TODO verifiser at repo har blit kalt med riktig liste med grunnlag

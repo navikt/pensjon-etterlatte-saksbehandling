@@ -126,9 +126,8 @@ fun Route.beregningsGrunnlag(
         put("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr/reguler") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Regulerer overstyr grunnlag for behandling $behandlingId")
-                val body = call.receive<RegulerOverstyrBeregningGrunnlagDTO>()
 
-                beregningsGrunnlagService.regulerOverstyrtBeregningsgrunnlag(behandlingId, body.reguleringsmaaned)
+                beregningsGrunnlagService.regulerOverstyrtBeregningsgrunnlag(behandlingId, brukerTokenInfo)
 
                 call.respond(HttpStatusCode.OK)
             }

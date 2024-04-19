@@ -15,6 +15,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { useAppDispatch } from '~store/Store'
+import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 
 export interface NyBehandlingSkjema {
   spraak: Spraak | null
@@ -33,7 +34,7 @@ export default function OpprettNyBehandling() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
-  if (!oppgave) {
+  if (!oppgave || !erOppgaveRedigerbar(oppgave.status)) {
     return <Navigate to="../" relative="path" />
   }
 

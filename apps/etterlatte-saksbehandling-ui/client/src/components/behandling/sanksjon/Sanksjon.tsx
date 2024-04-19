@@ -5,9 +5,9 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { isPending, mapApiResult } from '~shared/api/apiUtils'
+import { isFailure, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
-import { BodyShort, Button, Detail, Heading, HStack, Table, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Detail, Heading, HStack, Table, Textarea, VStack } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { formaterStringDato } from '~utils/formattering'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
@@ -55,8 +55,8 @@ const sanksjonDefaultValue: SanksjonDefaultValue = {
 
 export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const [lagreSanksjonResponse, lagreSanksjonRequest] = useApiCall(lagreSanksjon)
-  const [sanksjonStatus, hentSanksjonRequest] = useApiCall(hentSanksjon)
-  const [, slettSanksjonRequest] = useApiCall(slettSanksjon)
+  const [hentSanksjonStatus, hentSanksjonRequest] = useApiCall(hentSanksjon)
+  const [slettSanksjonStatus, slettSanksjonRequest] = useApiCall(slettSanksjon)
   const [sanksjoner, setSanksjoner] = useState<ISanksjon[]>()
   const [visForm, setVisForm] = useState(false)
   const [redigerSanksjonId, setRedigerSanksjonId] = useState('')
@@ -152,7 +152,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
   return (
     <SanksjonWrapper>
       {mapApiResult(
-        sanksjonStatus,
+        hentSanksjonStatus,
         <Spinner visible label="Henter sanksjoner" />,
         () => (
           <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
@@ -224,6 +224,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                                   onClick={() => {
                                     slettEnkeltSanksjon(lagretSanksjon.behandlingId, lagretSanksjon.id!!)
                                   }}
+                                  loading={isPending(slettSanksjonStatus)}
                                 >
                                   Slett
                                 </Button>
@@ -243,6 +244,12 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                 </Table.Body>
               </Table>
             </TableWrapper>
+
+            {isFailure(slettSanksjonStatus) && (
+              <Alert variant="error">
+                {slettSanksjonStatus.error.detail || 'Det skjedde en feil ved sletting av sanksjon'}
+              </Alert>
+            )}
 
             {visForm && (
               <form onSubmit={handleSubmit(submitSanksjon)}>
@@ -289,10 +296,15 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                     >
                       Avbryt
                     </Button>
-                    <Button size="small" variant="primary" type="submit">
+                    <Button size="small" variant="primary" type="submit" loading={isPending(lagreSanksjonResponse)}>
                       Lagre
                     </Button>
                   </HStack>
+                  {isFailure(lagreSanksjonResponse) && (
+                    <Alert variant="error">
+                      {lagreSanksjonResponse.error.detail || 'Det skjedde en feil ved lagring av sanksjon'}
+                    </Alert>
+                  )}
                 </VStack>
               </form>
             )}

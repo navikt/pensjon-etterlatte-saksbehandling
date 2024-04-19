@@ -14,11 +14,13 @@ import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.regler.Beregningstall
 import java.time.YearMonth
+import java.util.UUID
 
 fun regulerOverstyrtBeregningsgrunnlag(
     reguleringsmaaned: YearMonth,
-    forrigeGrunnlagBeloep: Long,
-): Int {
+    forrigeBeregningsgrunnlag: OverstyrBeregningGrunnlagDao,
+    behandlingId: UUID,
+): OverstyrBeregningGrunnlagDao {
     val (forrigeGrunnbeloep, nyttGrunnbeloep) = utledGrunbeloep(reguleringsmaaned)
 
     val resultat =
@@ -28,7 +30,7 @@ fun regulerOverstyrtBeregningsgrunnlag(
                     RegulerManuellBeregningGrunnlag(
                         manueltBeregnetBeloep =
                             FaktumNode(
-                                verdi = Beregningstall(forrigeGrunnlagBeloep.toInt()),
+                                verdi = Beregningstall(forrigeBeregningsgrunnlag.utbetaltBeloep.toInt()),
                                 Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now()),
                                 beskrivelse = "Forrige manuelt overstyrte beregning",
                             ),
@@ -52,13 +54,22 @@ fun regulerOverstyrtBeregningsgrunnlag(
                     tilDato = reguleringsmaaned.atEndOfMonth(),
                 ),
         )
-    return when (resultat) {
-        is RegelkjoeringResultat.Suksess -> {
-            resultat.periodiserteResultater.single().resultat.verdi
+    val regulertOverstyrtBeloep =
+        when (resultat) {
+            is RegelkjoeringResultat.Suksess -> {
+                resultat.periodiserteResultater.single().resultat.verdi
+            }
+            is RegelkjoeringResultat.UgyldigPeriode ->
+                throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
         }
-        is RegelkjoeringResultat.UgyldigPeriode ->
-            throw RuntimeException("Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}")
-    }
+    return forrigeBeregningsgrunnlag.copy(
+        id = UUID.randomUUID(),
+        behandlingId = behandlingId,
+        datoFOM = reguleringsmaaned.atDay(1),
+        datoTOM = null,
+        utbetaltBeloep = regulertOverstyrtBeloep.toLong(),
+        // TODO regelresultat
+    )
 }
 
 private fun utledGrunbeloep(reguleringsmaaned: YearMonth) =

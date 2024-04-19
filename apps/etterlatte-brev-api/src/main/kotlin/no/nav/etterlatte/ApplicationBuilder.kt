@@ -53,8 +53,6 @@ import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
@@ -253,15 +251,6 @@ class ApplicationBuilder {
                         pdfGenerator,
                         journalfoerBrevService,
                         brevdistribuerer,
-                    )
-
-                val featureToggleService: FeatureToggleService =
-                    FeatureToggleService.initialiser(
-                        FeatureToggleProperties(
-                            applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
-                            host = config.getString("funksjonsbrytere.unleash.host"),
-                            apiKey = config.getString("funksjonsbrytere.unleash.token"),
-                        ),
                     )
                 OpprettJournalfoerOgDistribuerRiver(
                     this,

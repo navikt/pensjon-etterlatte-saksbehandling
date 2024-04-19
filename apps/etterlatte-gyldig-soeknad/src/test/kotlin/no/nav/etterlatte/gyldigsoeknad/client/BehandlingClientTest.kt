@@ -16,9 +16,8 @@ import io.ktor.utils.io.ByteReadChannel
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.gyldigsoeknad.barnepensjon.GyldigSoeknadService
+import no.nav.etterlatte.gyldigsoeknad.PersongalleriMapper
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
@@ -31,42 +30,20 @@ import java.util.UUID
 internal class BehandlingClientTest {
     @Test
     fun testInitierBehandling() {
-        val randomUUID = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
         val requestList = mutableListOf<HttpRequestData>()
-        val httpClient =
-            HttpClient(
-                MockEngine { request ->
-                    requestList.add(request)
-                    respond(
-                        content = ByteReadChannel(randomUUID.toString()),
-                        status = HttpStatusCode.OK,
-                        headers = headersOf(HttpHeaders.ContentType, "text/plain"),
-                    )
-                },
-            ) {
-                install(ContentNegotiation) { jackson {} }
-            }
-        val persongalleri = mockk<GyldigSoeknadService>()
-        val behandlingsservice = BehandlingClient(httpClient, "")
-        every { persongalleri.hentPersongalleriFraSoeknad(any()) } returns
-            Persongalleri(
-                "",
-                "",
-                emptyList(),
-                emptyList(),
-                emptyList(),
-            )
 
-        val hendelseJson = objectMapper.readTree(javaClass.getResource("/fordeltmelding.json")!!.readText())
+        val behandlingClient = createBehandlingClient(requestList, behandlingId)
+        val hendelseJson = objectMapper.readTree(javaClass.getResource("/barnepensjon.json")!!.readText())
         val soeknad = objectMapper.treeToValue<Barnepensjon>(hendelseJson[FordelerFordelt.skjemaInfoKey])
         val hentetSaksid =
-            behandlingsservice.opprettBehandling(
+            behandlingClient.opprettBehandling(
                 1,
                 soeknad.mottattDato,
-                persongalleri.hentPersongalleriFraSoeknad(soeknad),
+                PersongalleriMapper.hentPersongalleriFraSoeknad(soeknad),
             )
 
-        assertEquals(randomUUID, hentetSaksid)
+        assertEquals(behandlingId, hentetSaksid)
         assertEquals(
             1,
             objectMapper.readValue<BehandlingsBehov>(
@@ -86,5 +63,25 @@ internal class BehandlingClientTest {
         val sak = behandlingKlient.hentSak(fnr, SakType.BARNEPENSJON.toString())
 
         assertEquals(1L, sak.id)
+    }
+
+    private fun createBehandlingClient(
+        requestList: MutableList<HttpRequestData>,
+        randomUUID: UUID,
+    ): BehandlingClient {
+        val httpClient =
+            HttpClient(
+                MockEngine { request ->
+                    requestList.add(request)
+                    respond(
+                        content = ByteReadChannel(randomUUID.toString()),
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "text/plain"),
+                    )
+                },
+            ) {
+                install(ContentNegotiation) { jackson {} }
+            }
+        return BehandlingClient(httpClient, "")
     }
 }

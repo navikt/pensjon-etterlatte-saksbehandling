@@ -44,15 +44,15 @@
     },
     "soeker": {
       "fornavn": {
-        "svar": "kirsten",
+        "svar": "TOM",
         "spoersmaal": "Fornavn"
       },
       "etternavn": {
-        "svar": "jakobsen",
+        "svar": "PYSJAMASBUKSE",
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "25478323363",
+        "svar": "24111258054",
         "spoersmaal": "Barnets fødselsnummer / d-nummer"
       },
       "statsborgerskap": {

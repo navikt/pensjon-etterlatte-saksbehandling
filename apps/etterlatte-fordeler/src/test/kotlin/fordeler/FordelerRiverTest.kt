@@ -100,14 +100,6 @@ internal class FordelerRiverTest {
     }
 
     @Test
-    fun `skal ikke sjekke soknad av annen type enn barnepensjon`() {
-        val inspector = inspector.apply { sendTestMessage(GJENLEVENDE_SOKNAD) }.inspektør
-
-        assertEquals(0, inspector.size)
-        verify(exactly = 0) { fordelerService.sjekkGyldighetForBehandling(any()) }
-    }
-
-    @Test
     fun `lagStatistikkMelding lager riktig statistikkmelding`() {
         val soeknadId = 1337L
         val fordelerRiver =
@@ -171,14 +163,6 @@ internal class FordelerRiverTest {
             """,
             statistikkmeldingIkkeGyldig,
         )
-    }
-
-    @Test
-    fun `skal ikke sjekke soknad av annen versjon enn versjon 2`() {
-        val inspector = inspector.apply { sendTestMessage(UGYLDIG_VERSJON) }.inspektør
-
-        assertEquals(0, inspector.size)
-        verify(exactly = 0) { fordelerService.sjekkGyldighetForBehandling(any()) }
     }
 
     companion object {

@@ -1,5 +1,5 @@
 {
-  "@event_name": "soeknad_innsendt",
+  "@event_name": "trenger_behandling",
   "@skjema_info": {
     "imageTag": "d79803f3acb657cf657ee46af1db293a665eb0d2",
     "spraak": "nb",

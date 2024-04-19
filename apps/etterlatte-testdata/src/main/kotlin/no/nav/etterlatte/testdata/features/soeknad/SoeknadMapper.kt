@@ -44,7 +44,7 @@ object SoeknadMapper {
             SoeknadType.OMSTILLINGSSTOENAD ->
                 JsonMessage.newMessage(
                     mutableMapOf(
-                        SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagParMedEventNameKey(),
+                        SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagParMedEventNameKey(),
                         "@skjema_info" to
                             opprettOmstillingsstoenadSoeknad(
                                 soekerFnr = gjenlevendeFnr,
@@ -232,13 +232,47 @@ object SoeknadMapper {
 
     private val substantiv =
         listOf(
-            "Bil", "Gitar", "Flaske", "Kopp", "Laptop", "Kis", "Sekk", "Pille", "Handel", "Oppgave", "Traktor", "Hest",
-            "Fest", "Propp", "Lavo", "Kabel", "Pose", "Dør", "Sjekkliste",
+            "Bil",
+            "Gitar",
+            "Flaske",
+            "Kopp",
+            "Laptop",
+            "Kis",
+            "Sekk",
+            "Pille",
+            "Handel",
+            "Oppgave",
+            "Traktor",
+            "Hest",
+            "Fest",
+            "Propp",
+            "Lavo",
+            "Kabel",
+            "Pose",
+            "Dør",
+            "Sjekkliste",
         )
 
     private val adjektiv =
         listOf(
-            "Fin", "Stygg", "Liten", "Stor", "Rask", "Treg", "Rund", "Ekkel", "Ufin", "Kul", "Digg", "Synlig", "Falsk",
-            "Sinnsyk", "Ordknapp", "Taus", "Artig", "Morsom", "Skremmende",
+            "Fin",
+            "Stygg",
+            "Liten",
+            "Stor",
+            "Rask",
+            "Treg",
+            "Rund",
+            "Ekkel",
+            "Ufin",
+            "Kul",
+            "Digg",
+            "Synlig",
+            "Falsk",
+            "Sinnsyk",
+            "Ordknapp",
+            "Taus",
+            "Artig",
+            "Morsom",
+            "Skremmende",
         )
 }

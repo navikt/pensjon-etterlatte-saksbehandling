@@ -1,8 +1,7 @@
-package no.nav.etterlatte.gyldigsoeknad.omstillingsstoenad
+package no.nav.etterlatte.gyldigsoeknad
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
@@ -10,8 +9,8 @@ import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
-import no.nav.etterlatte.libs.common.innsendtsoeknad.omstillingsstoenad.Omstillingsstoenad
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -28,15 +27,8 @@ internal class InnsendtSoeknadRiver(
     private val logger = LoggerFactory.getLogger(InnsendtSoeknadRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT) {
+        initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV) {
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
-            validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.OMSTILLINGSSTOENAD.name) }
-            validate { it.demandValue(SoeknadInnsendt.skjemaInfoVersjonKey, "1") }
-            validate { it.requireKey(SoeknadInnsendt.lagretSoeknadIdKey) }
-            validate { it.requireKey(SoeknadInnsendt.hendelseGyldigTilKey) }
-            validate { it.requireKey(SoeknadInnsendt.adressebeskyttelseKey) }
-            validate { it.requireKey(SoeknadInnsendt.fnrSoekerKey) }
-            validate { it.rejectKey(SoeknadInnsendt.dokarkivReturKey) }
             validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
         }
     }
@@ -48,30 +40,31 @@ internal class InnsendtSoeknadRiver(
         try {
             val soeknad = packet.soeknad()
 
-            val personGalleri =
-                Persongalleri(
-                    soeker = soeknad.soeker.foedselsnummer.svar.value,
-                    innsender = soeknad.innsender.foedselsnummer.svar.value,
-                    avdoed = listOf(soeknad.avdoed.foedselsnummer.svar.value),
-                    soesken = soeknad.barn.map { it.foedselsnummer.svar.value },
-                )
+            val personGalleri = PersongalleriMapper.hentPersongalleriFraSoeknad(soeknad)
 
             // Skal vurderes manuelt av saksbehandler
             val gyldighetsVurdering =
                 GyldighetsResultat(
                     KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
-                    listOf(),
+                    emptyList(),
                     Tidspunkt.now().toLocalDatetimeUTC(),
                 )
 
-            val sak = behandlingClient.finnEllerOpprettSak(personGalleri.soeker, SakType.OMSTILLINGSSTOENAD.name)
+            val sakType =
+                when (soeknad.type) {
+                    SoeknadType.OMSTILLINGSSTOENAD -> SakType.OMSTILLINGSSTOENAD
+                    SoeknadType.BARNEPENSJON -> SakType.BARNEPENSJON
+                }
+
+            val sak = behandlingClient.finnEllerOpprettSak(personGalleri.soeker, sakType)
             val behandlingId = behandlingClient.opprettBehandling(sak.id, soeknad.mottattDato, personGalleri)
+
             behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)
-            logger.info("Behandling {} startet på sak {}", behandlingId, sak.id)
+
+            logger.info("Behandling $behandlingId startet på sak ${sak.id}")
 
             context.publish(
                 packet.apply {
-                    set(FordelerFordelt.soeknadFordeltKey, true)
                     set(GyldigSoeknadVurdert.sakIdKey, sak.id)
                     set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
                 }.toJson(),
@@ -83,10 +76,5 @@ internal class InnsendtSoeknadRiver(
         }
     }
 
-    private fun JsonMessage.soeknad() =
-        this[FordelerFordelt.skjemaInfoKey].let {
-            objectMapper.treeToValue<Omstillingsstoenad>(
-                it,
-            )
-        }
+    private fun JsonMessage.soeknad() = this[FordelerFordelt.skjemaInfoKey].let { objectMapper.treeToValue<InnsendtSoeknad>(it) }
 }

@@ -6,6 +6,7 @@ export interface VedtakSammendrag {
   attesterendeSaksbehandler?: string
   datoAttestert?: string
   datoFattet?: string
+  virkningstidspunkt: string
 }
 
 export enum VedtakType {

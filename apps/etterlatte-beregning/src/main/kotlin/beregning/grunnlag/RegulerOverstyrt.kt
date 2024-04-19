@@ -4,6 +4,9 @@ import no.nav.etterlatte.beregning.regler.overstyr.RegulerManuellBeregningGrunnl
 import no.nav.etterlatte.beregning.regler.overstyr.grunnbeloepUtenGrunnlag
 import no.nav.etterlatte.beregning.regler.overstyr.regulerOverstyrtKroneavrundet
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
@@ -26,21 +29,20 @@ fun regulerOverstyrtBeregningsgrunnlag(
                         manueltBeregnetBeloep =
                             FaktumNode(
                                 verdi = Beregningstall(forrigeGrunnlagBeloep.toInt()),
-                                "",
-                                "",
+                                Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now()),
+                                beskrivelse = "Forrige manuelt overstyrte beregning",
                             ),
-                        // TODO full G eller månedlig G?
                         forrigeGrunnbeloep =
                             FaktumNode(
                                 verdi = Beregningstall(forrigeGrunnbeloep.grunnbeloepPerMaaned),
-                                "",
-                                "",
+                                Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now()),
+                                beskrivelse = "Forrige grunnbeløp brukt til å manuelt utregne beregning",
                             ),
                         nyttGrunnbeloep =
                             FaktumNode(
                                 verdi = Beregningstall(nyttGrunnbeloep.grunnbeloepPerMaaned),
-                                "",
-                                "",
+                                Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now()),
+                                beskrivelse = "Nytt grunbeløp beregnins skal reguleres etter",
                             ),
                     ),
                 ),

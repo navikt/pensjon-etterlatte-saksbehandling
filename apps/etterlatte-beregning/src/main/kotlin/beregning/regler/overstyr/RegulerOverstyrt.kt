@@ -42,29 +42,29 @@ val grunnbeloepUtenGrunnlag: Regel<Any, Grunnbeloep> =
 val manueltBeregnetBeloep =
     finnFaktumIGrunnlag(
         gjelderFra = BP_1967_DATO,
-        beskrivelse = "",
+        beskrivelse = "Forrige manuelt overstyrte beregning",
         finnFaktum = RegulerManuellBeregningGrunnlag::manueltBeregnetBeloep,
     ) { it }
 
 val forrigeGrunnbeloep =
     finnFaktumIGrunnlag(
         gjelderFra = BP_1967_DATO,
-        beskrivelse = "",
+        beskrivelse = "Forrige grunnbeløp brukt til å manuelt utregne beregning",
         finnFaktum = RegulerManuellBeregningGrunnlag::forrigeGrunnbeloep,
     ) { it }
 
 val nyttGrunnbeloep =
     finnFaktumIGrunnlag(
         gjelderFra = BP_1967_DATO,
-        beskrivelse = "",
+        beskrivelse = "Nytt grunbeløp beregnins skal reguleres etter",
         finnFaktum = RegulerManuellBeregningGrunnlag::nyttGrunnbeloep,
     ) { it }
 
 val regulerOverstyrt =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
-        beskrivelse = "",
-        regelReferanse = RegelReferanse(id = ""),
+        beskrivelse = "Regulerer manuelt overstyrt beregning med nytt grunnbeløp",
+        regelReferanse = RegelReferanse(id = "REGEL-REGULER-MANUELT-OVERSTYRT-BEREGNING"),
     ) benytter forrigeGrunnbeloep og nyttGrunnbeloep og manueltBeregnetBeloep med { gammelG, nyG, beregnetBeloep ->
         beregnetBeloep.multiply(nyG).divide(gammelG)
     }
@@ -72,8 +72,8 @@ val regulerOverstyrt =
 val regulerOverstyrtKroneavrundet =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
-        beskrivelse = "",
-        regelReferanse = RegelReferanse(id = ""),
+        beskrivelse = "Gjør en kroneavrunding av regulert overstyrt beregning",
+        regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING-REGULER-OVERSTYRT"),
     ) benytter regulerOverstyrt med { regulertOverstyrt ->
         regulertOverstyrt.round(decimals = 0).toInteger()
     }

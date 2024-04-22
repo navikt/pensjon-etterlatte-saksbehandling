@@ -1,6 +1,7 @@
 package no.nav.etterlatte.beregning.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -747,14 +749,75 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `reguler overstyrt beregningsgrunnlag oppdaterer med ny G`() {
-        val behandling = randomUUID()
+        val behandlingId = UUID.randomUUID()
+        val behandling = mockk<DetaljertBehandling>()
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
+            listOf(
+                overstyrtBeregningsgrunnlag(
+                    behandlingId = behandlingId,
+                    datoFOM = LocalDate.of(2023, 1, 1),
+                    datoTOM = LocalDate.of(2023, 3, 31),
+                    utbetaltBeloep = 1000,
+                ),
+                overstyrtBeregningsgrunnlag(
+                    behandlingId = behandlingId,
+                    datoFOM = LocalDate.of(2023, 4, 1),
+                    utbetaltBeloep = 2000,
+                ),
+            )
+        coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+        every { behandling.virkningstidspunkt() } returns
+            Virkningstidspunkt(
+                dato = YearMonth.of(2023, 5),
+                kilde = Grunnlagsopplysning.Saksbehandler.create(""),
+                begrunnelse = "",
+            )
+        every { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) } returns Unit
 
         beregningsGrunnlagService.regulerOverstyrtBeregningsgrunnlag(
-            behandlingId = behandling,
+            behandlingId = behandlingId,
             bruker,
         )
 
-        // TODO verifiser at repo har blit kalt med riktig liste med grunnlag
+        verify {
+            beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
+                behandlingId,
+                withArg {
+                    it.size shouldBe 3
+                    it[0].shouldBeEqualToIgnoringFields(
+                        overstyrtBeregningsgrunnlag(
+                            behandlingId = behandlingId,
+                            datoFOM = LocalDate.of(2023, 1, 1),
+                            datoTOM = LocalDate.of(2023, 3, 31),
+                            utbetaltBeloep = 1000,
+                        ),
+                        OverstyrBeregningGrunnlagDao::id,
+                        OverstyrBeregningGrunnlagDao::kilde,
+                    )
+                    it[1].shouldBeEqualToIgnoringFields(
+                        overstyrtBeregningsgrunnlag(
+                            behandlingId = behandlingId,
+                            datoFOM = LocalDate.of(2023, 4, 1),
+                            datoTOM = LocalDate.of(2023, 4, 30),
+                            utbetaltBeloep = 2000,
+                        ),
+                        OverstyrBeregningGrunnlagDao::id,
+                        OverstyrBeregningGrunnlagDao::kilde,
+                    )
+                    it[2].shouldBeEqualToIgnoringFields(
+                        overstyrtBeregningsgrunnlag(
+                            behandlingId = behandlingId,
+                            datoFOM = LocalDate.of(2023, 5, 1),
+                            utbetaltBeloep = 2128,
+                        ),
+                        OverstyrBeregningGrunnlagDao::id,
+                        OverstyrBeregningGrunnlagDao::kilde,
+                        OverstyrBeregningGrunnlagDao::reguleringRegelresultat,
+                        OverstyrBeregningGrunnlagDao::reguleringRegelVersjon,
+                    )
+                },
+            )
+        }
     }
 
     private fun mockBehandling(
@@ -791,5 +854,25 @@ internal class BeregningsGrunnlagServiceTest {
     private fun mockVedtak(
         behandlingId: UUID,
         type: VedtakType,
-    ) = VedtakSammendragDto(UUID.randomUUID().toString(), behandlingId, type, null, null, null, null, null)
+    ) = VedtakSammendragDto(randomUUID().toString(), behandlingId, type, null, null, null, null, null)
+
+    private fun overstyrtBeregningsgrunnlag(
+        behandlingId: UUID = UUID.randomUUID(),
+        utbetaltBeloep: Long = 0L,
+        datoFOM: LocalDate,
+        datoTOM: LocalDate? = null,
+    ) = OverstyrBeregningGrunnlagDao(
+        id = UUID.randomUUID(),
+        behandlingId = behandlingId,
+        datoFOM = datoFOM,
+        datoTOM = datoTOM,
+        utbetaltBeloep = utbetaltBeloep,
+        trygdetid = 0,
+        trygdetidForIdent = "",
+        prorataBroekTeller = null,
+        prorataBroekNevner = null,
+        sakId = 123L,
+        beskrivelse = "",
+        kilde = Grunnlagsopplysning.Saksbehandler.create(""),
+    )
 }

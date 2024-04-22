@@ -318,13 +318,18 @@ class BeregningsGrunnlagService(
                     behandlingId,
                     grunnlag.map {
                         it.copy(
-                            datoTOM = if (it.datoTOM == null) reguleringsmaaned.minusMonths(1).atEndOfMonth() else it.datoTOM,
+                            // lukker siste periode
+                            datoTOM =
+                                if (it.datoTOM == null) {
+                                    reguleringsmaaned.minusMonths(1).atEndOfMonth()
+                                } else {
+                                    it.datoTOM
+                                },
                         )
                     } +
                         listOf(
                             regulerOverstyrtBeregningsgrunnlag(
                                 reguleringsmaaned,
-                                // TODO godt nok?
                                 grunnlag.last(),
                                 behandlingId,
                             ),

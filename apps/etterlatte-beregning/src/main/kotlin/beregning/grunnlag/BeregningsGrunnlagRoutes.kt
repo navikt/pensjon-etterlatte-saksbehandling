@@ -123,11 +123,11 @@ fun Route.beregningsGrunnlag(
             }
         }
 
-        put("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr/reguler") {
+        put("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr/regulering") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                logger.info("Regulerer overstyr grunnlag for behandling $behandlingId")
+                logger.info("Tilpasser overstyrt grunnlag til regulering for behandling $behandlingId")
 
-                beregningsGrunnlagService.regulerOverstyrtBeregningsgrunnlag(behandlingId, brukerTokenInfo)
+                beregningsGrunnlagService.tilpassOverstyrtBeregningsgrunnlagForRegulering(behandlingId, brukerTokenInfo)
 
                 call.respond(HttpStatusCode.OK)
             }

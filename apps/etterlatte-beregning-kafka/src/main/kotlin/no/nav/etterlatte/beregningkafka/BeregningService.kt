@@ -30,9 +30,9 @@ class BeregningService(
             beregningApp.post("$url/api/beregning/beregningsgrunnlag/$omregningsId/fra/$forrigeBehandlingId")
         }
 
-    fun regulerOverstyrtBeregningsgrunnlag(omregningsId: UUID): HttpResponse =
+    fun tilpassOverstyrtBeregningsgrunnlagForRegulering(omregningsId: UUID): HttpResponse =
         runBlocking {
-            beregningApp.put("$url/api/beregning/beregningsgrunnlag/$omregningsId/overstyr/reguler")
+            beregningApp.put("$url/api/beregning/beregningsgrunnlag/$omregningsId/overstyr/regulering")
         }
 
     fun regulerAvkorting(

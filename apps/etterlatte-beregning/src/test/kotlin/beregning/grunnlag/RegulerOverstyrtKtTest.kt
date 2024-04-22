@@ -3,7 +3,7 @@ package beregning.grunnlag
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDao
-import no.nav.etterlatte.beregning.grunnlag.regulerOverstyrtBeregningsgrunnlag
+import no.nav.etterlatte.beregning.grunnlag.tilpassOverstyrtBeregningsgrunnlagForRegulering
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -32,7 +32,7 @@ class RegulerOverstyrtKtTest {
         val reguleringsbehandlingId = UUID.randomUUID()
 
         val resultat =
-            regulerOverstyrtBeregningsgrunnlag(
+            tilpassOverstyrtBeregningsgrunnlagForRegulering(
                 virkRegulering,
                 overstyrtBeregningsgrunnlag,
                 reguleringsbehandlingId,

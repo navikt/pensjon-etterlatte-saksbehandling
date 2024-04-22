@@ -17,7 +17,7 @@ import no.nav.etterlatte.regler.Beregningstall
 import java.time.YearMonth
 import java.util.UUID
 
-fun regulerOverstyrtBeregningsgrunnlag(
+fun tilpassOverstyrtBeregningsgrunnlagForRegulering(
     reguleringsmaaned: YearMonth,
     forrigeBeregningsgrunnlag: OverstyrBeregningGrunnlagDao,
     behandlingId: UUID,

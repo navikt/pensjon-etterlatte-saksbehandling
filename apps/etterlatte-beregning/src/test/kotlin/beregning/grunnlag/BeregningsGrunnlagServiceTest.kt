@@ -774,7 +774,7 @@ internal class BeregningsGrunnlagServiceTest {
             )
         every { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) } returns Unit
 
-        beregningsGrunnlagService.regulerOverstyrtBeregningsgrunnlag(
+        beregningsGrunnlagService.tilpassOverstyrtBeregningsgrunnlagForRegulering(
             behandlingId = behandlingId,
             bruker,
         )

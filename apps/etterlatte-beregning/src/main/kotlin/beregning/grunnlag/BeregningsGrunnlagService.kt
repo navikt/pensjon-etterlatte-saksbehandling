@@ -303,7 +303,7 @@ class BeregningsGrunnlagService(
         return hentOverstyrBeregningGrunnlag(behandlingId)
     }
 
-    fun regulerOverstyrtBeregningsgrunnlag(
+    fun tilpassOverstyrtBeregningsgrunnlagForRegulering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
@@ -328,7 +328,7 @@ class BeregningsGrunnlagService(
                         )
                     } +
                         listOf(
-                            regulerOverstyrtBeregningsgrunnlag(
+                            tilpassOverstyrtBeregningsgrunnlagForRegulering(
                                 reguleringsmaaned,
                                 grunnlag.last(),
                                 behandlingId,

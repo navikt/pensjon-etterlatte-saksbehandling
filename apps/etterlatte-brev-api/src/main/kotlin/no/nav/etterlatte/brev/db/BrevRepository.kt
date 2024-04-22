@@ -37,13 +37,13 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.opprettBrevFra
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -382,7 +382,7 @@ class BrevRepository(private val ds: DataSource) {
             mottaker =
                 Mottaker(
                     navn = row.string("navn"),
-                    foedselsnummer = row.stringOrNull("foedselsnummer")?.let { Foedselsnummer(it) },
+                    foedselsnummer = row.stringOrNull("foedselsnummer")?.let { Folkeregisteridentifikator.ofNullable(it) },
                     orgnummer = row.stringOrNull("orgnummer"),
                     adresse =
                         Adresse(

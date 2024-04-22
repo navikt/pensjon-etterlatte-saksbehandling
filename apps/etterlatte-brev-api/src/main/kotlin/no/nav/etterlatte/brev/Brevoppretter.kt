@@ -28,7 +28,6 @@ import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.UUID
 
 class Brevoppretter(
@@ -206,7 +205,7 @@ fun Vergemaal.toMottaker(): Mottaker {
     if (mottaker.adresse != null) {
         return Mottaker(
             navn = if (mottaker.navn.isNullOrBlank()) "N/A" else mottaker.navn!!,
-            foedselsnummer = mottaker.foedselsnummer?.let { Foedselsnummer(it.value) },
+            foedselsnummer = mottaker.foedselsnummer?.let { Folkeregisteridentifikator.ofNullable(it.value) },
             orgnummer = null,
             adresse =
                 with(mottaker.adresse!!) {

@@ -22,11 +22,12 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -58,7 +59,7 @@ internal class DokarkivServiceTest {
     fun `Journalfoeringsrequest mappes korrekt`(type: SakType) {
         val forventetInnhold = BrevInnhold("tittel", Spraak.NB, mockk())
         val forventetPdf = Pdf("Hello world!".toByteArray())
-        val forventetBrevMottakerFnr = "01018012345"
+        val forventetBrevMottakerFnr = SOEKER2_FOEDSELSNUMMER.value
 
         val brevId = Random.nextLong()
         val sakId = Random.nextLong()
@@ -78,7 +79,7 @@ internal class DokarkivServiceTest {
                 mottaker =
                     Mottaker(
                         "Stor Snerk",
-                        Foedselsnummer(forventetBrevMottakerFnr),
+                        Folkeregisteridentifikator.of(forventetBrevMottakerFnr),
                         null,
                         Adresse(
                             adresseType = "NORSKPOSTADRESSE",

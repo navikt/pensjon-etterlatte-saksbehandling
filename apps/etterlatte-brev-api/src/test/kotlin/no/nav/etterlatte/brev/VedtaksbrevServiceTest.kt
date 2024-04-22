@@ -715,7 +715,7 @@ internal class VedtaksbrevServiceTest {
     private fun opprettMottaker() =
         Mottaker(
             "Rød Blanding",
-            foedselsnummer = Foedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+            foedselsnummer = SOEKER_FOEDSELSNUMMER,
             orgnummer = null,
             adresse =
                 Adresse(

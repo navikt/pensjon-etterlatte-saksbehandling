@@ -5,21 +5,20 @@ import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.time.LocalDate
 import java.util.UUID
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Mottaker(
     val navn: String,
-    val foedselsnummer: Foedselsnummer? = null,
+    val foedselsnummer: Folkeregisteridentifikator? = null,
     val orgnummer: String? = null,
     val adresse: Adresse,
 ) {
     fun erGyldig(): Boolean {
         return if (navn.isBlank()) {
             false
-        } else if ((foedselsnummer == null || foedselsnummer.value.isBlank()) && orgnummer.isNullOrBlank()) {
+        } else if (foedselsnummer == null && orgnummer.isNullOrBlank()) {
             false
         } else {
             adresse.erGyldig()
@@ -32,7 +31,7 @@ fun mottakerFraAdresse(
     regoppslag: RegoppslagResponseDTO,
 ) = Mottaker(
     navn = regoppslag.navn,
-    foedselsnummer = Foedselsnummer(fnr.value),
+    foedselsnummer = fnr,
     adresse =
         Adresse(
             adresseType = regoppslag.adresse.type.name,
@@ -49,7 +48,7 @@ fun mottakerFraAdresse(
 fun tomMottaker(fnr: Folkeregisteridentifikator) =
     Mottaker(
         navn = "N/A",
-        foedselsnummer = Foedselsnummer(fnr.value),
+        foedselsnummer = fnr,
         adresse =
             Adresse(
                 adresseType = "",

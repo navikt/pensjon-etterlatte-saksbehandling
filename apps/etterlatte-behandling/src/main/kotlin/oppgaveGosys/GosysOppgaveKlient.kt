@@ -55,6 +55,7 @@ interface GosysOppgaveKlient {
         saksbehandler: String?,
         tema: List<String>,
         enhetsnr: String? = null,
+        harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver
 
@@ -108,6 +109,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
         saksbehandler: String?,
         tema: List<String>,
         enhetsnr: String?,
+        harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver {
         try {
@@ -120,6 +122,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                     .plus("&limit=1000")
                     .plus(enhetsnr?.let { "&tildeltEnhetsnr=$it" } ?: "")
                     .plus(saksbehandler?.let { "&tilordnetRessurs=$it" } ?: "")
+//                    .plus("&tildeltRessurs=false")
 
             return downstreamResourceClient
                 .get(

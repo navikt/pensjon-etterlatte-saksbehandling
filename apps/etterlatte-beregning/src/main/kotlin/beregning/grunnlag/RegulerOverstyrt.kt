@@ -22,7 +22,7 @@ fun regulerOverstyrtBeregningsgrunnlag(
     forrigeBeregningsgrunnlag: OverstyrBeregningGrunnlagDao,
     behandlingId: UUID,
 ): OverstyrBeregningGrunnlagDao {
-    val (forrigeGrunnbeloep, nyttGrunnbeloep) = utledGrunbeloep(reguleringsmaaned)
+    val (forrigeGrunnbeloep, nyttGrunnbeloep) = utledGrunnbeloep(reguleringsmaaned)
     val resultat =
         regulerOverstyrtKroneavrundet.eksekver(
             grunnlag =
@@ -50,8 +50,7 @@ fun regulerOverstyrtBeregningsgrunnlag(
                 ),
             periode =
                 RegelPeriode(
-                    fraDato = reguleringsmaaned.minusMonths(1).atDay(1),
-                    tilDato = reguleringsmaaned.atEndOfMonth(),
+                    fraDato = reguleringsmaaned.atDay(1),
                 ),
         ).let {
             when (it) {
@@ -74,24 +73,30 @@ fun regulerOverstyrtBeregningsgrunnlag(
     )
 }
 
-private fun utledGrunbeloep(reguleringsmaaned: YearMonth) =
+private fun utledGrunnbeloep(reguleringsmaaned: YearMonth) =
     grunnbeloepUtenGrunnlag.eksekver(
         grunnlag = KonstantGrunnlag(""),
         periode =
             RegelPeriode(
-                fraDato = reguleringsmaaned.minusYears(1).atDay(1),
+                fraDato = reguleringsmaaned.minusMonths(1).atDay(1),
                 tilDato = reguleringsmaaned.atEndOfMonth(),
             ),
     ).let { resultat ->
         when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
-                assert(resultat.periodiserteResultater.size == 2)
+                check(resultat.periodiserteResultater.size == 2) {
+                    "Fikk uventet antall perioder for utleding av grunnlag: ${resultat.periodiserteResultater.size}"
+                }
                 resultat.periodiserteResultater.let {
                     val gammelG: Grunnbeloep = it[0].resultat.verdi
-                    assert(gammelG.dato == reguleringsmaaned.minusYears(1))
+                    val forrigeGrunnbeloepDato = reguleringsmaaned.minusYears(1)
+                    check(gammelG.dato == forrigeGrunnbeloepDato) {
+                        "Dato til utledet forrige grunnbeløp er ikke forventet dato $forrigeGrunnbeloepDato"
+                    }
                     val nyG: Grunnbeloep = it[1].resultat.verdi
-                    assert(nyG.dato == reguleringsmaaned)
-
+                    check(nyG.dato == reguleringsmaaned) {
+                        "Dato til utledet nytt grunnbeløp er ikke forventet dato $reguleringsmaaned"
+                    }
                     Pair(gammelG, nyG)
                 }
             }

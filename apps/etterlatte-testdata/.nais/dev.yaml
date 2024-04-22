@@ -57,36 +57,9 @@ spec:
       value: dev-gcp.dolly.testnav-person-service
     - name: TESTNAV_RESOURCE_URL
       value: http://testnav-person-service.dolly/api/v2
-    - name: KAFKA_RAPID_TOPIC
-      value: etterlatte.dodsmelding
-    - name: KAFKA_RESET_POLICY
-      #sette tilbake til none senere
-      value: earliest
-    - name: BEHANDLING_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
-    - name: BEREGNING_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-beregning/.default
-    - name: TRYGDETID_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-trygdetid/.default
-    - name: VILKAARSVURDERING_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-vilkaarsvurdering/.default
-    - name: ETTERLATTE_VILKAARSVURDERING_URL
-      value: http://etterlatte-vilkaarsvurdering
-    - name: VEDTAK_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
-    - name: ETTERLATTE_VEDTAK_URL
-      value: http://etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_BREV_API_URL
-      value: http://etterlatte-brev-api
   accessPolicy:
     outbound:
       rules:
-        - application: etterlatte-behandling
-        - application: etterlatte-beregning
-        - application: etterlatte-trygdetid
-        - application: etterlatte-vilkaarsvurdering
-        - application: etterlatte-vedtaksvurdering
-        - application: etterlatte-brev-api
         - application: testnav-person-service
           namespace: dolly
           cluster: dev-gcp

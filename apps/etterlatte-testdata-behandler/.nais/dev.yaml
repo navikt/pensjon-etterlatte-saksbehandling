@@ -62,7 +62,31 @@ spec:
       value: etterlatte.dodsmelding
     - name: KAFKA_RESET_POLICY
       value: earliest
+    - name: BEHANDLING_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+    - name: BEREGNING_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-beregning/.default
+    - name: TRYGDETID_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-trygdetid/.default
+    - name: VILKAARSVURDERING_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-vilkaarsvurdering/.default
+    - name: ETTERLATTE_VILKAARSVURDERING_URL
+      value: http://etterlatte-vilkaarsvurdering
+    - name: VEDTAK_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
+    - name: ETTERLATTE_VEDTAK_URL
+      value: http://etterlatte-vedtaksvurdering
+    - name: ETTERLATTE_BREV_API_URL
+      value: http://etterlatte-brev-api
   accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-behandling
+        - application: etterlatte-beregning
+        - application: etterlatte-trygdetid
+        - application: etterlatte-vilkaarsvurdering
+        - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-brev-api
     inbound:
       rules:
         - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator

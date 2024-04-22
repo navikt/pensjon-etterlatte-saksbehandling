@@ -16,13 +16,16 @@ import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingPerioderRequest
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingSendeBrevRequest
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
+import no.nav.etterlatte.libs.common.tilbakekreving.JaNei
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseKode
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kontrollfelt
@@ -33,8 +36,18 @@ import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.NavIdent
 import no.nav.etterlatte.libs.common.tilbakekreving.Periode
 import no.nav.etterlatte.libs.common.tilbakekreving.SakId
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBeloepBehold
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBeloepBeholdSvar
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingTilsvar
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVarsel
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVilkaar
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
@@ -46,6 +59,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -77,7 +91,132 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `skal endre sende brev til false`() {
+    fun `skal kunne oppdatere vurdering paa tilbakekreving`() {
+        withTestApplication { client ->
+            val sak: Sak = opprettSak(client)
+
+            val tilbakekreving = opprettTilbakekreving(sak, client)
+
+            client.putAndAssertOk(
+                "/api/tilbakekreving/${tilbakekreving.id}/vurdering",
+                tokenSaksbehandler,
+                tilbakekrevingVurdering("en ny beskrivelse"),
+            )
+
+            val oppdatertTilbakekreving: TilbakekrevingBehandling =
+                client.getAndAssertOk(
+                    "/api/tilbakekreving/${tilbakekreving.id}",
+                    tokenSaksbehandler,
+                ).body()
+
+            oppdatertTilbakekreving.tilbakekreving.vurdering?.beskrivelse shouldBe "en ny beskrivelse"
+        }
+    }
+
+    @Test
+    fun `skal kunne oppdatere perioder paa tilbakekreving`() {
+        withTestApplication { client ->
+            val sak: Sak = opprettSak(client)
+
+            val tilbakekreving = opprettTilbakekreving(sak, client)
+
+            val oppdatertPeriode =
+                tilbakekreving.tilbakekreving.perioder.first().let {
+                    it.copy(ytelse = it.ytelse.copy(nettoTilbakekreving = 100))
+                }
+
+            client.putAndAssertOk(
+                "/api/tilbakekreving/${tilbakekreving.id}/perioder",
+                tokenSaksbehandler,
+                TilbakekrevingPerioderRequest(listOf(oppdatertPeriode)),
+            )
+
+            val oppdatertTilbakekreving: TilbakekrevingBehandling =
+                client.getAndAssertOk(
+                    "/api/tilbakekreving/${tilbakekreving.id}",
+                    tokenSaksbehandler,
+                ).body()
+
+            oppdatertTilbakekreving.tilbakekreving.perioder.first().ytelse.nettoTilbakekreving shouldBe 100
+        }
+    }
+
+    @Test
+    fun `skal feile dersom ikke paakrevde felter er fylt ut`() {
+        withTestApplication { client ->
+            val sak: Sak = opprettSak(client)
+
+            val tilbakekreving = opprettTilbakekreving(sak, client)
+
+            client.putAndAssertOk(
+                "/api/tilbakekreving/${tilbakekreving.id}/vurdering",
+                tokenSaksbehandler,
+                tilbakekrevingVurdering(),
+            )
+
+            val respons =
+                client.postAndAssertOk(
+                    "/api/tilbakekreving/${tilbakekreving.id}/valider",
+                    tokenSaksbehandler,
+                )
+
+            val exceptionRespons: ExceptionResponse = respons.body()
+
+            respons.status shouldBe HttpStatusCode.BadRequest
+            exceptionRespons.code shouldBe "UGYLDIGE_FELTER"
+        }
+    }
+
+    @Test
+    fun `skal validere tilbakekreving og sette status til validert`() {
+        withTestApplication { client ->
+            val sak: Sak = opprettSak(client)
+
+            val tilbakekreving = opprettTilbakekreving(sak, client)
+
+            client.putAndAssertOk(
+                "/api/tilbakekreving/${tilbakekreving.id}/vurdering",
+                tokenSaksbehandler,
+                tilbakekrevingVurdering(),
+            )
+
+            val oppdatertPeriode =
+                tilbakekreving.tilbakekreving.perioder.first().let {
+                    it.copy(
+                        ytelse =
+                            it.ytelse.copy(
+                                beregnetFeilutbetaling = 100,
+                                bruttoTilbakekreving = 100,
+                                nettoTilbakekreving = 100,
+                                skatt = 10,
+                                skyld = TilbakekrevingSkyld.BRUKER,
+                                resultat = TilbakekrevingResultat.FULL_TILBAKEKREV,
+                                tilbakekrevingsprosent = 100,
+                                rentetillegg = 10,
+                            ),
+                    )
+                }
+
+            client.putAndAssertOk(
+                "/api/tilbakekreving/${tilbakekreving.id}/perioder",
+                tokenSaksbehandler,
+                TilbakekrevingPerioderRequest(listOf(oppdatertPeriode)),
+            )
+
+            val respons =
+                client.postAndAssertOk(
+                    "/api/tilbakekreving/${tilbakekreving.id}/valider",
+                    tokenSaksbehandler,
+                )
+
+            val validertTilbakekreving: TilbakekrevingBehandling = respons.body()
+
+            validertTilbakekreving.status shouldBe TilbakekrevingStatus.VALIDERT
+        }
+    }
+
+    @Test
+    fun `skal endre sende brev`() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
 
@@ -96,6 +235,23 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
                 ).body()
 
             oppdatertTilbakekreving.sendeBrev shouldBe false
+        }
+    }
+
+    @Test
+    fun `skal hente liste med tilbakekrevinger for sak`() {
+        withTestApplication { client ->
+            val sak: Sak = opprettSak(client)
+
+            val tilbakekreving = opprettTilbakekreving(sak, client)
+
+            val tilbakekrevinger: List<TilbakekrevingBehandling> =
+                client.getAndAssertOk(
+                    "/api/tilbakekreving/sak/${tilbakekreving.sak.id}",
+                    tokenSaksbehandler,
+                ).body()
+
+            tilbakekrevinger.size shouldBe 1
         }
     }
 
@@ -174,6 +330,41 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
                 ),
         )
 
+    private fun tilbakekrevingVurdering(
+        beskrivelse: String? = "en beskrivelse",
+        rettsligGrunnlag: TilbakekrevingHjemmel? = TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
+    ) = TilbakekrevingVurdering(
+        aarsak = TilbakekrevingAarsak.REVURDERING,
+        beskrivelse = beskrivelse,
+        forhaandsvarsel = TilbakekrevingVarsel.EGET_BREV,
+        forhaandsvarselDato = LocalDate.of(2024, 1, 1),
+        doedsbosak = JaNei.NEI,
+        foraarsaketAv = "Denne ble forårsaket av bruker.",
+        tilsvar =
+            TilbakekrevingTilsvar(
+                tilsvar = JaNei.JA,
+                beskrivelse = "Tilsvar på varsel.",
+                dato = LocalDate.of(2024, 1, 15),
+            ),
+        rettsligGrunnlag = rettsligGrunnlag,
+        objektivtVilkaarOppfylt = "Ja.",
+        uaktsomtForaarsaketFeilutbetaling = null,
+        burdeBrukerForstaatt = "Ja",
+        burdeBrukerForstaattEllerUaktsomtForaarsaket = null,
+        vilkaarsresultat = TilbakekrevingVilkaar.IKKE_OPPFYLT,
+        beloepBehold =
+            TilbakekrevingBeloepBehold(
+                behold = TilbakekrevingBeloepBeholdSvar.BELOEP_IKKE_I_BEHOLD,
+                beskrivelse = "Beløpet er ikke i behold.",
+            ),
+        reduseringAvKravet = null,
+        foreldet = null,
+        rentevurdering = null,
+        vedtak = "Bruker må betale tilbake.",
+        vurderesForPaatale = null,
+        hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD,
+    )
+
     private fun HttpClient.getAndAssertOk(
         url: String,
         token: String,
@@ -210,6 +401,18 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
                 setBody(body)
             }
         assertEquals(HttpStatusCode.OK, response.status)
+    }
+
+    private suspend fun HttpClient.postAndAssertOk(
+        s: String,
+        token: String,
+        body: Any? = null,
+    ): HttpResponse {
+        return post(s) {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+            addAuthToken(token)
+        }
     }
 
     private suspend fun HttpClient.putAndAssertOk(

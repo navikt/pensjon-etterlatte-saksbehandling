@@ -34,7 +34,7 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
             }
             put("/perioder") {
                 kunSkrivetilgang {
-                    val request = call.receive<TilbakekrevingLagreRequest>()
+                    val request = call.receive<TilbakekrevingPerioderRequest>()
                     call.respond(service.lagrePerioder(behandlingId, request.perioder))
                 }
             }
@@ -103,7 +103,7 @@ data class TilbakekrevingSendeBrevRequest(
     val skalSendeBrev: Boolean,
 )
 
-data class TilbakekrevingLagreRequest(
+data class TilbakekrevingPerioderRequest(
     val perioder: List<TilbakekrevingPeriode>,
 )
 

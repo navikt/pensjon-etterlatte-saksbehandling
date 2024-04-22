@@ -14,8 +14,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.ktor.route.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import java.util.UUID
 
@@ -43,11 +41,10 @@ class BehandlingKlient(
     suspend fun hentEllerOpprettSak(
         fnr: String,
         sakType: SakType,
-        gradering: AdressebeskyttelseGradering,
     ): Long {
         return httpClient.post("$url/personer/saker/$sakType") {
             contentType(ContentType.Application.Json)
-            setBody(FoedselsNummerMedGraderingDTO(fnr, gradering))
+            setBody(FoedselsnummerDTO(fnr))
         }.body<ObjectNode>()["id"].longValue()
     }
 

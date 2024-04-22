@@ -36,7 +36,6 @@ import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
-import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -91,8 +90,7 @@ internal fun Route.sakSystemRoutes(
     }
 
     post("personer/saker/{type}") {
-        // TODO: i neste steg fjern graderingssjekk i fordeler og alle andre som kaller denne
-        withFoedselsnummerAndGradering(tilgangService) { fnr, gradering ->
+        withFoedselsnummerInternal(tilgangService) { fnr ->
             val type: SakType =
                 enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne eller opprette sak" })
             val message = inTransaction { sakService.finnEllerOpprettSak(fnr = fnr.value, type) }

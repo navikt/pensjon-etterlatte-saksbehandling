@@ -34,7 +34,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.route.FoedselsNummerMedGraderingDTO
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import java.util.UUID
 
 interface BehandlingService {
@@ -66,7 +66,7 @@ interface BehandlingService {
 
     fun finnEllerOpprettSak(
         sakType: SakType,
-        foedselsNummerMedGraderingDTO: FoedselsNummerMedGraderingDTO,
+        foedselsNummerDTO: FoedselsnummerDTO,
     ): Sak
 
     fun hentBehandling(behandlingId: UUID): DetaljertBehandling
@@ -208,11 +208,11 @@ class BehandlingServiceImpl(
 
     override fun finnEllerOpprettSak(
         sakType: SakType,
-        foedselsNummerMedGraderingDTO: FoedselsNummerMedGraderingDTO,
+        foedselsNummerDTO: FoedselsnummerDTO,
     ) = runBlocking {
         behandlingKlient.post("$url/personer/saker/${sakType.name}") {
             contentType(ContentType.Application.Json)
-            setBody(foedselsNummerMedGraderingDTO)
+            setBody(foedselsNummerDTO)
         }.body<Sak>()
     }
 

@@ -26,7 +26,6 @@ import no.nav.etterlatte.joarkhendelser.joark.SafKlient
 import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
 import no.nav.etterlatte.joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
@@ -52,7 +51,7 @@ internal class JoarkHendelseHandlerTest {
 
     private val sut =
         JoarkHendelseHandler(
-            BehandlingService(behandlingKlientMock, pdlTjenesterKlientMock),
+            BehandlingService(behandlingKlientMock),
             safKlientMock,
             oppgaveKlient,
             pdlTjenesterKlientMock,
@@ -84,13 +83,6 @@ internal class JoarkHendelseHandlerTest {
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
                 )
-            coEvery {
-                pdlTjenesterKlientMock.hentAdressebeskyttelse(
-                    any(),
-                    any(),
-                )
-            } returns AdressebeskyttelseGradering.UGRADERT
-
             val hendelse = opprettHendelse(journalpostId, sakType.tema, HendelseType.JOURNALPOST_MOTTATT)
 
             runBlocking {
@@ -100,8 +92,7 @@ internal class JoarkHendelseHandlerTest {
             coVerify(exactly = 1) {
                 safKlientMock.hentJournalpost(journalpostId)
                 pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
-                pdlTjenesterKlientMock.hentAdressebeskyttelse(ident, sakType)
-                behandlingKlientMock.hentEllerOpprettSak(ident, sakType, AdressebeskyttelseGradering.UGRADERT)
+                behandlingKlientMock.hentEllerOpprettSak(ident, sakType)
                 behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
             }
         }
@@ -119,13 +110,6 @@ internal class JoarkHendelseHandlerTest {
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
                 )
-            coEvery {
-                pdlTjenesterKlientMock.hentAdressebeskyttelse(
-                    any(),
-                    any(),
-                )
-            } returns AdressebeskyttelseGradering.UGRADERT
-
             val hendelse = opprettHendelse(journalpostId, sakType.tema, HendelseType.TEMA_ENDRET)
 
             runBlocking {
@@ -135,8 +119,7 @@ internal class JoarkHendelseHandlerTest {
             coVerify(exactly = 1) {
                 safKlientMock.hentJournalpost(journalpostId)
                 pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
-                pdlTjenesterKlientMock.hentAdressebeskyttelse(ident, sakType)
-                behandlingKlientMock.hentEllerOpprettSak(ident, sakType, AdressebeskyttelseGradering.UGRADERT)
+                behandlingKlientMock.hentEllerOpprettSak(ident, sakType)
                 behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
             }
         }
@@ -154,12 +137,6 @@ internal class JoarkHendelseHandlerTest {
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
                 )
-            coEvery {
-                pdlTjenesterKlientMock.hentAdressebeskyttelse(
-                    any(),
-                    any(),
-                )
-            } returns AdressebeskyttelseGradering.UGRADERT
             coEvery { behandlingKlientMock.hentSak(any(), any()) } returns null
 
             val hendelse = opprettHendelse(journalpostId, sakType.tema, HendelseType.ENDELIG_JOURNALFOERT)
@@ -172,8 +149,7 @@ internal class JoarkHendelseHandlerTest {
                 safKlientMock.hentJournalpost(journalpostId)
                 pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
                 behandlingKlientMock.hentSak(ident, sakType)
-                pdlTjenesterKlientMock.hentAdressebeskyttelse(ident, sakType)
-                behandlingKlientMock.hentEllerOpprettSak(ident, sakType, AdressebeskyttelseGradering.UGRADERT)
+                behandlingKlientMock.hentEllerOpprettSak(ident, sakType)
                 behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
             }
         }

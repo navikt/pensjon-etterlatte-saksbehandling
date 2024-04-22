@@ -8,8 +8,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.ktor.route.FoedselsNummerMedGraderingDTO
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 
 class BehandlingKlient(
     private val httpClient: HttpClient,
@@ -18,11 +17,10 @@ class BehandlingKlient(
     suspend fun hentSak(
         fnr: String,
         sakType: SakType,
-        gradering: AdressebeskyttelseGradering?,
     ): Long {
         return httpClient.post("$url/personer/saker/$sakType") {
             contentType(ContentType.Application.Json)
-            setBody(FoedselsNummerMedGraderingDTO(fnr, gradering))
+            setBody(FoedselsnummerDTO(fnr))
         }.body<ObjectNode>()["id"].longValue()
     }
 }

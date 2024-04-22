@@ -68,6 +68,7 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'yarn'
+          cache-dependency-path: apps/${{ env.APP_NAME }}/client/yarn.lock
       - name: Inject slug/short variables
         uses: rlespinasse/github-slug-action@v4
       - name: License check top level

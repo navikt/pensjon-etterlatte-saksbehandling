@@ -79,10 +79,11 @@ val maanedsinntekt =
         regelReferanse = RegelReferanse(id = "REGEL-NEDRUNDET-MÅNEDSINNTEKT"),
     ) benytter inntektavkortingsgrunnlag med { inntektavkortingsgrunnlag ->
         val (inntekt, fratrekkInnAar, inntektutland, fratrekkInnAarUtland, relevanteMaaneder) = inntektavkortingsgrunnlag
-        inntekt.round(-3, RoundingMode.FLOOR)
+        inntekt
             .minus(fratrekkInnAar)
             .plus(inntektutland)
             .minus(fratrekkInnAarUtland)
+            .round(-3, RoundingMode.FLOOR)
             .divide(relevanteMaaneder)
     }
 

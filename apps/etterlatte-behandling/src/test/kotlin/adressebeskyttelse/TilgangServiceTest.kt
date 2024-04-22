@@ -2,10 +2,8 @@ package no.nav.etterlatte.adressebeskyttelse
 
 import com.nimbusds.jwt.JWTClaimsSet
 import io.mockk.mockk
-import io.mockk.spyk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.PdltjenesterKlientTest
 import no.nav.etterlatte.azureAdEgenAnsattClaim
 import no.nav.etterlatte.azureAdFortroligClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
@@ -17,6 +15,7 @@ import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
@@ -56,7 +55,7 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
     private val skjermingKlient = mockk<SkjermingKlient>()
     private val grunnlagservice = mockk<GrunnlagService>()
     private val krrKlient = mockk<KrrKlient>()
-    private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
+    private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
 
     @BeforeAll
     fun beforeAll() {

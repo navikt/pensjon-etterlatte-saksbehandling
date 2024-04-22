@@ -24,7 +24,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -258,7 +258,7 @@ internal class BrevServiceTest {
     private fun opprettMottaker() =
         Mottaker(
             "Stor Snerk",
-            foedselsnummer = Foedselsnummer("1234567890"),
+            foedselsnummer = SOEKER_FOEDSELSNUMMER,
             orgnummer = null,
             adresse =
                 Adresse(

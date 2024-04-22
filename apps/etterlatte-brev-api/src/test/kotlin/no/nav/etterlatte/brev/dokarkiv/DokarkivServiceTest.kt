@@ -22,7 +22,7 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -79,7 +79,7 @@ internal class DokarkivServiceTest {
                 mottaker =
                     Mottaker(
                         "Stor Snerk",
-                        Folkeregisteridentifikator.of(forventetBrevMottakerFnr),
+                        MottakerFoedselsnummer(forventetBrevMottakerFnr),
                         null,
                         Adresse(
                             adresseType = "NORSKPOSTADRESSE",

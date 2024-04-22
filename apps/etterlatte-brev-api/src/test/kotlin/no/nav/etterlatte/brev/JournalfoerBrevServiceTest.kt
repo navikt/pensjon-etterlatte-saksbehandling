@@ -21,7 +21,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -167,7 +167,7 @@ class JournalfoerBrevServiceTest {
                 mottaker =
                     Mottaker(
                         "Stor Snerk",
-                        Folkeregisteridentifikator.of(forventetBrevMottakerFnr),
+                        MottakerFoedselsnummer(forventetBrevMottakerFnr),
                         null,
                         Adresse(
                             adresseType = "NORSKPOSTADRESSE",
@@ -238,7 +238,7 @@ class JournalfoerBrevServiceTest {
                 mottaker =
                     Mottaker(
                         "Stor Snerk",
-                        Folkeregisteridentifikator.of(forventetBrevMottakerFnr),
+                        MottakerFoedselsnummer(forventetBrevMottakerFnr),
                         null,
                         Adresse(
                             adresseType = "NORSKPOSTADRESSE",
@@ -307,7 +307,7 @@ class JournalfoerBrevServiceTest {
     private fun opprettMottaker() =
         Mottaker(
             "Stor Snerk",
-            foedselsnummer = SOEKER_FOEDSELSNUMMER,
+            foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
             orgnummer = null,
             adresse =
                 Adresse(

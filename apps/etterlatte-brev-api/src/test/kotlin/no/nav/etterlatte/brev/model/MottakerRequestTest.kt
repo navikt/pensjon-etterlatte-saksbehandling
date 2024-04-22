@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.model
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -85,7 +86,7 @@ internal class MottakerRequestTest {
             val manglerLand =
                 Mottaker(
                     "Navn",
-                    foedselsnummer = SOEKER_FOEDSELSNUMMER,
+                    foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
                     adresse = Adresse("type", postnummer = "1234", poststed = "", landkode = "NO", land = ""),
                 )
 
@@ -94,7 +95,7 @@ internal class MottakerRequestTest {
             val manglerLandkode =
                 Mottaker(
                     "Navn",
-                    foedselsnummer = SOEKER_FOEDSELSNUMMER,
+                    foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
                     adresse = Adresse("type", postnummer = "1234", poststed = "", landkode = "", land = "Norge"),
                 )
 
@@ -106,7 +107,7 @@ internal class MottakerRequestTest {
             val manglerPoststed =
                 Mottaker(
                     "Navn",
-                    foedselsnummer = SOEKER_FOEDSELSNUMMER,
+                    foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
                     adresse = Adresse("NORSKPOSTADRESSE", postnummer = "1234", poststed = "", landkode = "NO", land = "Norge"),
                 )
 
@@ -115,7 +116,7 @@ internal class MottakerRequestTest {
             val manglerPostnummer =
                 Mottaker(
                     "Navn",
-                    foedselsnummer = SOEKER_FOEDSELSNUMMER,
+                    foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
                     adresse = Adresse("NORSKPOSTADRESSE", postnummer = "", poststed = "Oslo", landkode = "NO", land = "Norge"),
                 )
 
@@ -127,7 +128,7 @@ internal class MottakerRequestTest {
             val manglerAdresselinje =
                 Mottaker(
                     "Navn",
-                    foedselsnummer = SOEKER_FOEDSELSNUMMER,
+                    foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
                     adresse =
                         Adresse(
                             "UTENLANDSKPOSTADRESSE",

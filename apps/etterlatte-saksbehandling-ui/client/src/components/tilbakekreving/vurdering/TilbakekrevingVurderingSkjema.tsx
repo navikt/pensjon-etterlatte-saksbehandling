@@ -59,20 +59,23 @@ export function TilbakekrevingVurderingSkjema({
   behandling: TilbakekrevingBehandling
   redigerbar: boolean
 }) {
+  if (!behandling) {
+    return
+  }
   const dispatch = useAppDispatch()
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
-  const { register, handleSubmit, watch, control, getValues, setValue } = useForm<TilbakekrevingVurdering>({
-    defaultValues: behandling.tilbakekreving.vurdering ? behandling.tilbakekreving.vurdering : initialVurdering,
+  const {
+    register,
+    handleSubmit,
+    watch,
+    control,
+    getValues,
+    setValue,
+    formState: { dirtyFields },
+  } = useForm<TilbakekrevingVurdering>({
+    defaultValues: behandling.tilbakekreving.vurdering || initialVurdering,
     shouldUnregister: true,
   })
-
-  useEffect(() => {
-    if (watch().vilkaarsresultat === TilbakekrevingVilkaar.IKKE_OPPFYLT) {
-      setValue('hjemmel', TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD)
-    } else {
-      setValue('hjemmel', watch().rettsligGrunnlag)
-    }
-  }, [watch().vilkaarsresultat, watch().rettsligGrunnlag])
 
   const lagreVurdering = (vurdering: TilbakekrevingVurdering) => {
     lagreVurderingRequest({ behandlingsId: behandling.id, vurdering }, (lagretTilbakekreving) => {
@@ -89,14 +92,24 @@ export function TilbakekrevingVurderingSkjema({
 
   const throttledAutosave = useMemo(
     () =>
-      throttle((data) => {
-        lagreVurdering(data)
+      throttle((data, dirtyFields) => {
+        if (Object.keys(dirtyFields).length > 0) {
+          lagreVurdering(data)
+        }
       }, 3000),
     []
   )
   watch((data) => {
-    throttledAutosave(data as TilbakekrevingVurdering)
+    throttledAutosave(data as TilbakekrevingVurdering, dirtyFields)
   })
+
+  useEffect(() => {
+    if (watch().vilkaarsresultat === TilbakekrevingVilkaar.IKKE_OPPFYLT) {
+      setValue('hjemmel', TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD, { shouldDirty: false })
+    } else {
+      setValue('hjemmel', watch().rettsligGrunnlag, { shouldDirty: false })
+    }
+  }, [watch().vilkaarsresultat, watch().rettsligGrunnlag])
 
   return (
     <InnholdPadding>

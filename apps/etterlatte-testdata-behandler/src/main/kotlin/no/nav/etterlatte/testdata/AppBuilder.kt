@@ -56,7 +56,7 @@ class AppBuilder {
             )
         val brevService =
             BrevService(
-                settOppHttpClient("brev-api"),
+                settOppHttpClient("brev"),
                 "http://etterlatte-brev-api",
             )
 

@@ -26,9 +26,9 @@ import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import { throttle } from 'lodash'
+import debounce from 'lodash/debounce'
 
-const initialVurdering = {
+const initialVurdering: TilbakekrevingVurdering = {
   aarsak: null,
   beskrivelse: null,
   forhaandsvarsel: null,
@@ -38,7 +38,6 @@ const initialVurdering = {
   tilsvar: null,
   rettsligGrunnlag: null,
   objektivtVilkaarOppfylt: null,
-  subjektivtVilkaarOppfylt: null,
   uaktsomtForaarsaketFeilutbetaling: null,
   burdeBrukerForstaatt: null,
   burdeBrukerForstaattEllerUaktsomtForaarsaket: null,
@@ -90,9 +89,9 @@ export function TilbakekrevingVurderingSkjema({
   const beloepIBehold = () =>
     watch().beloepBehold && watch().beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD
 
-  const throttledAutosave = useMemo(
+  const autosave = useMemo(
     () =>
-      throttle((data, dirtyFields) => {
+      debounce((data, dirtyFields) => {
         if (Object.keys(dirtyFields).length > 0) {
           lagreVurdering(data)
         }
@@ -100,7 +99,7 @@ export function TilbakekrevingVurderingSkjema({
     []
   )
   watch((data) => {
-    throttledAutosave(data as TilbakekrevingVurdering, dirtyFields)
+    autosave(data as TilbakekrevingVurdering, dirtyFields)
   })
 
   useEffect(() => {

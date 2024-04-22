@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning.grunnlag
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.LocalDate
 import java.util.UUID
@@ -17,6 +18,8 @@ data class OverstyrBeregningGrunnlagDao(
     val sakId: Long,
     val beskrivelse: String,
     val kilde: Grunnlagsopplysning.Saksbehandler,
+    val reguleringRegelresultat: JsonNode? = null,
+    val reguleringRegelVersjon: String? = null,
 )
 
 data class OverstyrBeregningGrunnlagData(

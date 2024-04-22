@@ -78,6 +78,7 @@ internal class OmregningHendelserRiver(
     ): Pair<BeregningDTO, AvkortingDto?> {
         trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
+        beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(behandlingId)
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
         val forrigeBeregning = beregningService.hentBeregning(behandlingViOmregnerFra).body<BeregningDTO>()
         verifiserToleransegrenser(dato, ny = beregning, gammel = forrigeBeregning)

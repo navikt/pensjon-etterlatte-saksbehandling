@@ -36,7 +36,7 @@ internal class FordelerRiverTest {
     @Test
     fun `skal fordele gyldig soknad til behandling`() {
         every { fordelerService.sjekkGyldighetForBehandling(any()) } returns FordelerResultat.GyldigForBehandling()
-        every { fordelerService.hentSakId(any(), any(), null) } returns 1337L
+        every { fordelerService.hentSakId(any(), any()) } returns 1337L
         every { fordelerMetricLogger.logMetricFordelt() } just runs
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
@@ -66,7 +66,7 @@ internal class FordelerRiverTest {
 
         val responseException = mockk<ResponseException>()
         every { responseException.message } returns "Oops"
-        every { fordelerService.hentSakId(any(), any(), null) } throws responseException
+        every { fordelerService.hentSakId(any(), any()) } throws responseException
 
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 

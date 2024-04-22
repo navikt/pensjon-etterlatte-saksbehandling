@@ -16,11 +16,9 @@ import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.CallParamAuthId
-import no.nav.etterlatte.libs.ktor.route.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -149,30 +147,6 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
         }
 
         else -> onSuccess(foedselsnummer)
-    }
-}
-
-suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGradering(
-    tilgangService: TilgangService,
-    onSuccess: (fnr: Folkeregisteridentifikator, gradering: AdressebeskyttelseGradering?) -> Unit,
-) {
-    val foedselsnummerDTOmedGradering = call.receive<FoedselsNummerMedGraderingDTO>()
-    val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTOmedGradering.foedselsnummer)
-    when (brukerTokenInfo) {
-        is Saksbehandler -> {
-            val harTilgangTilPerson =
-                tilgangService.harTilgangTilPerson(
-                    foedselsnummer.value,
-                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
-                )
-            if (harTilgangTilPerson) {
-                onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
-            } else {
-                call.respond(HttpStatusCode.NotFound)
-            }
-        }
-
-        else -> onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
     }
 }
 

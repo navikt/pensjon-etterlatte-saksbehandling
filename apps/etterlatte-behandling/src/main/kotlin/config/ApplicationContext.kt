@@ -65,6 +65,7 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingDao
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
 import no.nav.etterlatte.common.ConnectionAutoclosingImpl
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.PesysKlientImpl
@@ -225,7 +226,6 @@ internal class ApplicationContext(
             properties = featureToggleProperties(config),
             brukerIdent = { finnBrukerIdent() },
         ),
-    val pdlHttpClient: HttpClient = pdlHttpClient(config),
     val skjermingHttpKlient: HttpClient = skjermingHttpClient(config),
     val grunnlagHttpClient: HttpClient = grunnlagHttpClient(config),
     val navAnsattKlient: NavAnsattKlient =
@@ -248,6 +248,7 @@ internal class ApplicationContext(
     val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
     val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
     val axsysKlient: AxsysKlient = AxsysKlientImpl(axsysKlient(config), url = config.getString("axsys.url")),
+    val pdlTjenesterKlient: PdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient(config)),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
@@ -286,7 +287,6 @@ internal class ApplicationContext(
     val sakTilgangDao = SakTilgangDao(dataSource)
 
     // Klient
-    val pdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
     val leaderElectionKlient = LeaderElection(env.maybeEnvValue("ELECTOR_PATH"), leaderElectionHttpClient)
@@ -478,7 +478,6 @@ internal class ApplicationContext(
             hendelseDao = hendelseDao,
             behandlingHendelser = behandlingsHendelser,
             migreringKlient = migreringKlient,
-            pdltjenesterKlient = pdlTjenesterKlient,
         )
 
     val migreringService =

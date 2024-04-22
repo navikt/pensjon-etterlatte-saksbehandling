@@ -11,12 +11,10 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.person.finnHoyestGradering
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.etterlatte.pdltjenester.PersonFinnesIkkeException
@@ -29,11 +27,10 @@ data class Fordeling(
     val soeknadId: Long,
     val fordeltTil: Vedtaksloesning,
     val kriterier: List<FordelerKriterie>,
-    val gradering: AdressebeskyttelseGradering? = null,
 )
 
 sealed class FordelerResultat {
-    class GyldigForBehandling(val gradering: AdressebeskyttelseGradering? = null) : FordelerResultat()
+    class GyldigForBehandling : FordelerResultat()
 
     class UgyldigHendelse(val message: String) : FordelerResultat()
 
@@ -62,7 +59,7 @@ class FordelerService(
         return try {
             fordelSoeknad(event, alleScenarierTillates).let {
                 when (it.fordeltTil) {
-                    Vedtaksloesning.GJENNY -> GyldigForBehandling(it.gradering)
+                    Vedtaksloesning.GJENNY -> GyldigForBehandling()
                     Vedtaksloesning.PESYS -> IkkeGyldigForBehandling(it.kriterier)
                     Vedtaksloesning.GJENOPPRETTA -> throw RuntimeException("Gjenoppretta er ikke relevant for fordeling")
                 }
@@ -131,15 +128,10 @@ class FordelerService(
                 if ((it.kandidat || tillatAlleScenarier) &&
                     fordelerRepository.antallFordeltTil(Vedtaksloesning.GJENNY.name) < maxFordelingTilGjenny
                 ) {
-                    val hoyesteGradering =
-                        finnHoyestGradering(
-                            listOfNotNull(barn.adressebeskyttelse, avdoed.adressebeskyttelse, gjenlevende?.adressebeskyttelse),
-                        )
                     Fordeling(
                         event.soeknadId,
                         Vedtaksloesning.GJENNY,
                         emptyList(),
-                        hoyesteGradering,
                     )
                 } else {
                     Fordeling(event.soeknadId, Vedtaksloesning.PESYS, it.forklaring)
@@ -189,10 +181,9 @@ class FordelerService(
     fun hentSakId(
         fnr: String,
         barnepensjon: SakType,
-        gradering: AdressebeskyttelseGradering?,
     ): Long {
         return runBlocking {
-            behandlingKlient.hentSak(fnr, barnepensjon, gradering)
+            behandlingKlient.hentSak(fnr, barnepensjon)
         }
     }
 }

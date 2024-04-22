@@ -183,9 +183,10 @@ class OppgaveService(
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
 
-        sikreAktivOppgaveOgTildeltSaksbehandler(hentetOppgave) {
-            oppgaveDao.oppdaterReferanseOgMerknad(oppgaveId, referanse, merknad)
-        }
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+
+        // Krever ikke at saksbehandler er tildelt for dette
+        oppgaveDao.oppdaterReferanseOgMerknad(oppgaveId, referanse, merknad)
     }
 
     fun endrePaaVent(

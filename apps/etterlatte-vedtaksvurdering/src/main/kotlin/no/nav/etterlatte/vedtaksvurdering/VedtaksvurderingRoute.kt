@@ -349,6 +349,11 @@ private fun Vedtak.toVedtakSammendragDto() =
         datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
         attesterendeSaksbehandler = attestasjon?.attestant,
         datoAttestert = attestasjon?.tidspunkt?.toNorskTid(),
+        virkningstidspunkt =
+            when (innhold) {
+                is VedtakInnhold.Behandling -> innhold.virkningstidspunkt
+                else -> null
+            },
     )
 
 private fun LoependeYtelse.toDto() =

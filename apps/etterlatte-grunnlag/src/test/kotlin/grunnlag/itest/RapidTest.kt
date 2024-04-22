@@ -11,14 +11,14 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.FNR_KEY
-import no.nav.etterlatte.rapidsandrivers.NY_OPPLYSNING_KEY
 import no.nav.etterlatte.rapidsandrivers.OPPLYSNING_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -69,7 +69,7 @@ internal class RapidTest(private val dataSource: DataSource) {
         private val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to NY_OPPLYSNING_KEY,
+                    EventNames.NY_OPPLYSNING.lagParMedEventNameKey(),
                     OPPLYSNING_KEY to listOf(nyOpplysning),
                     FNR_KEY to fnr,
                     SAK_ID_KEY to 1,

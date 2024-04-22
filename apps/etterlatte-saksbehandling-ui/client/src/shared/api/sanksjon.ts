@@ -9,3 +9,6 @@ export const lagreSanksjon = async (args: {
   behandlingId: string
   sanksjon: ISanksjonLagre
 }): Promise<ApiResponse<void>> => apiClient.post(`/beregning/sanksjon/${args.behandlingId}`, { ...args.sanksjon })
+
+export const slettSanksjon = async (args: { behandlingId: string; sanksjonId: string }): Promise<ApiResponse<void>> =>
+  apiClient.delete(`/beregning/sanksjon/${args.behandlingId}/${args.sanksjonId}`)

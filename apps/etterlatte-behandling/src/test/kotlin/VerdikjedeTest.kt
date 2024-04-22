@@ -84,7 +84,7 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VerdikjedeTest : BehandlingIntegrationTest() {
     @BeforeAll
-    fun start() =
+    fun start() {
         startServer(
             // En enkel mock som skrur på alle toggles for verdikjedetesten
             // overstyr egne ønskede toggles her om behovet oppstår
@@ -93,6 +93,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                     every { isEnabled(any(), any()) } returns true
                 },
         )
+    }
 
     @AfterAll
     fun shutdown() = afterAll()

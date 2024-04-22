@@ -35,7 +35,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -115,13 +114,10 @@ class RevurderingService(
 
     fun maksEnOppgaveUnderbehandlingForKildeBehandling(sakId: Long) {
         val oppgaverForSak = oppgaveService.hentOppgaverForSak(sakId)
-        val ingenBehandlingerUnderarbeid =
-            oppgaverForSak.filter {
+        if (oppgaverForSak.filter {
                 it.kilde == OppgaveKilde.BEHANDLING
-            }.none { it.status === Status.UNDER_BEHANDLING }
-        if (ingenBehandlingerUnderarbeid) {
-            return
-        } else {
+            }.any { !it.erAvsluttet() }
+        ) {
             throw MaksEnAktivOppgavePaaBehandling(sakId)
         }
     }

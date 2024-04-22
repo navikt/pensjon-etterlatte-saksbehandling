@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
@@ -30,39 +29,6 @@ fun skjermingHttpClient(): HttpClient =
                 if (request.url.fullPath.contains("skjermet")) {
                     val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                     respond(false.toJson(), headers = headers)
-                } else {
-                    error(request.url.fullPath)
-                }
-            }
-        }
-        install(ContentNegotiation) {
-            register(
-                ContentType.Application.Json,
-                JacksonConverter(objectMapper),
-            )
-        }
-    }
-
-fun pdlHttpClient(): HttpClient =
-    HttpClient(MockEngine) {
-        engine {
-            addHandler { request ->
-                if (request.url.fullPath.contains("geografisktilknytning")) {
-                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    val json = GeografiskTilknytning(kommune = "0301").toJson()
-                    respond(json, headers = headers)
-                } else if (request.url.fullPath.contains("folkeregisteridenter")) {
-                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    val json = emptyMap<String, String>().toJson()
-                    respond(json, headers = headers)
-                } else if (request.url.fullPath.contains("person/v2")) {
-                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    val json = mockPerson().toJson()
-                    respond(json, headers = headers)
-                } else if (request.url.fullPath.startsWith("/")) {
-                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    val json = javaClass.getResource("")!!.readText() // TODO: endre name
-                    respond(json, headers = headers)
                 } else {
                     error(request.url.fullPath)
                 }

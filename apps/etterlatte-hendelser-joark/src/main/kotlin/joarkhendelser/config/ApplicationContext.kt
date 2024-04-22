@@ -41,7 +41,7 @@ class ApplicationContext(env: Map<String, String> = System.getenv()) {
 
     private val joarkHendelseHandler =
         JoarkHendelseHandler(
-            BehandlingService(behandlingKlient, pdlTjenesterKlient),
+            BehandlingService(behandlingKlient),
             safKlient,
             oppgaveKlient,
             pdlTjenesterKlient,

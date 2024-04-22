@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_KRITERIER_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.GYLDIG_FOR_BEHANDLING_KEY
@@ -70,11 +69,10 @@ internal class FordelerRiver(
             logger.info("Sjekker om soknad (${packet.soeknadId()}) er gyldig for fordeling")
 
             val soeknadType = SoeknadType.valueOf(packet[GyldigSoeknadVurdert.skjemaInfoTypeKey].textValue())
-            val gradering = AdressebeskyttelseGradering.valueOf(packet[GyldigSoeknadVurdert.adressebeskyttelseKey].textValue())
 
             if (soeknadType == SoeknadType.OMSTILLINGSSTOENAD) {
                 logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling, henter sakId for Gjenny")
-                hentSakId(packet, gradering)?.let { sakId ->
+                hentSakId(packet)?.let { sakId ->
                     packet.leggPaaSakId(sakId)
                     context.publish(packet.leggPaaFordeltStatus(true).toJson())
                 }
@@ -104,7 +102,7 @@ internal class FordelerRiver(
         when (val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent)) {
             is FordelerResultat.GyldigForBehandling -> {
                 logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling, henter sakId for Gjenny")
-                hentSakId(packet, resultat.gradering)?.let { sakIdForSoeknad ->
+                hentSakId(packet)?.let { sakIdForSoeknad ->
                     packet.leggPaaSakId(sakIdForSoeknad)
                     context.publish(packet.leggPaaFordeltStatus(true).toJson())
 
@@ -128,23 +126,20 @@ internal class FordelerRiver(
         }
     }
 
-    private fun hentSakId(
-        packet: JsonMessage,
-        gradering: AdressebeskyttelseGradering?,
-    ): Long? =
-        try {
+    private fun hentSakId(packet: JsonMessage): Long? {
+        return try {
             // Denne har ansvaret for å sette gradering
             fordelerService.hentSakId(
                 packet[SoeknadInnsendt.fnrSoekerKey].textValue(),
                 SakType.BARNEPENSJON,
-                gradering,
             )
         } catch (e: ResponseException) {
             logger.error("Avbrutt fordeling - kunne ikke hente sakId: ${e.message}")
 
-            // Svelg slik at Innsendt søknad vil retry
+            // Svelg slik at Innsendt søknad vil retrye
             null
         }
+    }
 
     private fun JsonMessage.toFordelerEvent() =
         FordelerEvent(

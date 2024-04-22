@@ -6,7 +6,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
-import no.nav.etterlatte.libs.ktor.route.FoedselsNummerMedGraderingDTO
+import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
@@ -49,7 +49,7 @@ internal class OpprettBrevRiver(
         val sak =
             if (!fnr.isNullOrEmpty()) {
                 logger.info("Finner eller oppretter sak av type $sakType")
-                behandlingService.finnEllerOpprettSak(sakType, FoedselsNummerMedGraderingDTO(foedselsnummer = fnr)).id
+                behandlingService.finnEllerOpprettSak(sakType, FoedselsnummerDTO(foedselsnummer = fnr)).id
             } else if (!behandlingId.isNullOrEmpty()) {
                 behandlingService.hentBehandling(UUID.fromString(behandlingId)).sak
             } else {

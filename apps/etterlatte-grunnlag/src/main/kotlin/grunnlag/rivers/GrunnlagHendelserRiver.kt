@@ -16,7 +16,6 @@ import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.GRUNNLAG_OPPDATERT
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
-import no.nav.etterlatte.rapidsandrivers.NY_OPPLYSNING_KEY
 import no.nav.etterlatte.rapidsandrivers.OPPLYSNING_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
@@ -50,7 +49,7 @@ class GrunnlagHendelserRiver(
         val eventName = packet[EVENT_NAME_KEY].asText()
         val opplysningType = packet[BEHOV_NAME_KEY].asText()
 
-        if (eventName == NY_OPPLYSNING_KEY || opplysningType in OPPLYSNING_TYPER) {
+        if (eventName == EventNames.NY_OPPLYSNING.eventname || opplysningType in OPPLYSNING_TYPER) {
             val sakId = packet[SAK_ID_KEY].asLong()
             val behandlingId = packet[BEHANDLING_ID_KEY].let { UUID.fromString(it.asText()) }
 

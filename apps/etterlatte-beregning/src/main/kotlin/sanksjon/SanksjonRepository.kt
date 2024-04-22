@@ -83,6 +83,15 @@ class SanksjonRepository(private val dataSource: DataSource) {
         }
     }
 
+    fun slettSanksjon(sanksjonId: UUID): Int =
+        dataSource.transaction { tx ->
+            queryOf(
+                statement =
+                    "DELETE FROM sanksjon WHERE id = ?",
+                sanksjonId,
+            ).let { query -> tx.run(query.asUpdate) }
+        }
+
     private fun Row.toSanksjon() =
         Sanksjon(
             id = uuid("id"),

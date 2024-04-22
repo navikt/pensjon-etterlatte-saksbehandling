@@ -17,7 +17,7 @@ import React, { useState } from 'react'
 import { IAvkorting, IAvkortingGrunnlagLagre } from '~shared/types/IAvkorting'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
-import { formaterStringDato, NOK } from '~utils/formattering'
+import { formaterDato, formaterStringDato, NOK } from '~utils/formattering'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
@@ -32,6 +32,7 @@ import { useForm } from 'react-hook-form'
 import { IBehandlingStatus, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { useAppDispatch } from '~store/Store'
+import { lastDayOfMonth } from 'date-fns'
 
 export const AvkortingInntekt = ({
   behandling,
@@ -179,8 +180,8 @@ export const AvkortingInntekt = ({
                     </Table.DataCell>
                     <Table.DataCell>{inntektsgrunnlag.relevanteMaanederInnAar}</Table.DataCell>
                     <Table.DataCell key="Periode">
-                      {inntektsgrunnlag.fom && formaterStringDato(inntektsgrunnlag.fom)} -
-                      {inntektsgrunnlag.tom && formaterStringDato(inntektsgrunnlag.tom)}
+                      {inntektsgrunnlag.fom && formaterStringDato(inntektsgrunnlag.fom)} -{' '}
+                      {inntektsgrunnlag.tom && formaterDato(lastDayOfMonth(new Date(inntektsgrunnlag.tom)))}
                     </Table.DataCell>
                     <Table.DataCell key="InntektSpesifikasjon">{inntektsgrunnlag.spesifikasjon}</Table.DataCell>
                     <Table.DataCell key="InntektKilde">

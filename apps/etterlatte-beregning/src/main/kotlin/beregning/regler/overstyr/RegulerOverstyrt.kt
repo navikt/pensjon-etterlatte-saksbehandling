@@ -56,7 +56,7 @@ val forrigeGrunnbeloep =
 val nyttGrunnbeloep =
     finnFaktumIGrunnlag(
         gjelderFra = BP_1967_DATO,
-        beskrivelse = "Nytt grunbeløp beregnins skal reguleres etter",
+        beskrivelse = "Nytt grunnbeløp beregnins skal reguleres etter",
         finnFaktum = RegulerManuellBeregningGrunnlag::nyttGrunnbeloep,
     ) { it }
 

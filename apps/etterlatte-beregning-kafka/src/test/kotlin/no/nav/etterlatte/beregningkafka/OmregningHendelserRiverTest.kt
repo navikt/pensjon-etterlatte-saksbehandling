@@ -32,6 +32,7 @@ class OmregningHendelserRiverTest {
         val gammelBehandling = UUID.randomUUID()
 
         every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
+        every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
         every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 500)
         every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 600)
 
@@ -53,6 +54,7 @@ class OmregningHendelserRiverTest {
         val gammelBehandling = UUID.randomUUID()
 
         every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
+        every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
         every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 1000)
         every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 500)
 
@@ -76,6 +78,7 @@ class OmregningHendelserRiverTest {
         val gammelBehandling = UUID.randomUUID()
 
         every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
+        every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
         every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 1000)
         every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 1500)
 

@@ -44,7 +44,7 @@ fun tilpassOverstyrtBeregningsgrunnlagForRegulering(
                             FaktumNode(
                                 verdi = Beregningstall(nyttGrunnbeloep.grunnbeloepPerMaaned),
                                 Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now()),
-                                beskrivelse = "Nytt grunbeløp beregnins skal reguleres etter",
+                                beskrivelse = "Nytt grunnbeløp beregnins skal reguleres etter",
                             ),
                     ),
                 ),

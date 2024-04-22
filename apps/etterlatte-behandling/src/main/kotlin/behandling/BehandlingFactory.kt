@@ -9,7 +9,6 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -54,7 +53,6 @@ class BehandlingFactory(
     private val hendelseDao: HendelseDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val migreringKlient: MigreringKlient,
-    private val pdltjenesterKlient: PdlTjenesterKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 

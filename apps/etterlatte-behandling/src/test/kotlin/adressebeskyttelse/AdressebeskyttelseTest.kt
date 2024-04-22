@@ -10,7 +10,9 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
+import io.mockk.spyk
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.PdltjenesterKlientTest
 import no.nav.etterlatte.behandling.tilgang.SKRIVETILGANG_CALL_QUERYPARAMETER
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
@@ -36,9 +38,11 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AdressebeskyttelseTest : BehandlingIntegrationTest() {
+    private val pdltjenesterKlient = spyk<PdltjenesterKlientTest>()
+
     @BeforeAll
     fun start() {
-        startServer()
+        startServer(pdlTjenesterKlient = pdltjenesterKlient)
     }
 
     @AfterEach

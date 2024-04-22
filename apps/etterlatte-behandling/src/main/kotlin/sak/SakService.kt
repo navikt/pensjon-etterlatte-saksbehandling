@@ -41,14 +41,12 @@ interface SakService {
         fnr: String,
         type: SakType,
         overstyrendeEnhet: String? = null,
-        gradering: AdressebeskyttelseGradering? = null,
     ): Sak
 
     fun finnEllerOpprettSak(
         fnr: String,
         type: SakType,
         overstyrendeEnhet: String? = null,
-        gradering: AdressebeskyttelseGradering? = null,
     ): Sak
 
     fun finnGjeldendeEnhet(
@@ -157,19 +155,8 @@ class SakServiceImpl(
         fnr: String,
         type: SakType,
         overstyrendeEnhet: String?,
-        gradering: AdressebeskyttelseGradering?,
     ): Sak {
-        val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet, gradering)
-        val hentetGradering =
-            runBlocking {
-                pdltjenesterKlient.hentAdressebeskyttelseForPerson(
-                    HentAdressebeskyttelseRequest(
-                        PersonIdent(sak.ident),
-                        sak.sakType,
-                    ),
-                )
-            }
-        oppdaterAdressebeskyttelse(sak.id, hentetGradering)
+        val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet)
 
         grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident))
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
@@ -204,7 +191,6 @@ class SakServiceImpl(
         fnr: String,
         type: SakType,
         overstyrendeEnhet: String?,
-        gradering: AdressebeskyttelseGradering?,
     ): Sak {
         var sak = finnSakerForPersonOgType(fnr, type)
         if (sak == null) {
@@ -213,12 +199,43 @@ class SakServiceImpl(
         }
 
         sjekkSkjerming(fnr = fnr, sakId = sak.id)
-        gradering?.let {
-            oppdaterAdressebeskyttelse(sak.id, it)
-        }
-
+        val hentetGradering =
+            runBlocking {
+                pdltjenesterKlient.hentAdressebeskyttelseForPerson(
+                    HentAdressebeskyttelseRequest(
+                        PersonIdent(sak.ident),
+                        sak.sakType,
+                    ),
+                )
+            }
+        oppdaterAdressebeskyttelse(sak.id, hentetGradering)
+        settEnhetOmAdresebeskyttet(sak, hentetGradering)
         sjekkGraderingOgEnhetStemmer(dao.finnSakMedGraderingOgSkjerming(sak.id))
         return sak
+    }
+
+    private fun settEnhetOmAdresebeskyttet(
+        sak: Sak,
+        gradering: AdressebeskyttelseGradering,
+    ) {
+        when (gradering) {
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> {
+                if (sak.enhet != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr) {
+                    dao.oppdaterEnheterPaaSaker(
+                        listOf(GrunnlagsendringshendelseService.SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)),
+                    )
+                }
+            }
+            AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
+                if (sak.enhet != Enheter.STRENGT_FORTROLIG.enhetNr) {
+                    dao.oppdaterEnheterPaaSaker(
+                        listOf(GrunnlagsendringshendelseService.SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG.enhetNr)),
+                    )
+                }
+            }
+            AdressebeskyttelseGradering.FORTROLIG -> return
+            AdressebeskyttelseGradering.UGRADERT -> return
+        }
     }
 
     private fun sjekkGraderingOgEnhetStemmer(sak: SakMedGraderingOgSkjermet) {

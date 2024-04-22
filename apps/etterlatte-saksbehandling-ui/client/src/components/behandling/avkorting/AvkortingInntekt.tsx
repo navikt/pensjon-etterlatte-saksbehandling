@@ -20,7 +20,7 @@ import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
 import { formaterStringDato, NOK } from '~utils/formattering'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import { ToolTip } from '~components/behandling/felles/ToolTip'
@@ -29,8 +29,9 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 import { useForm } from 'react-hook-form'
-import { virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { useAppDispatch } from '~store/Store'
 
 export const AvkortingInntekt = ({
   behandling,
@@ -49,7 +50,7 @@ export const AvkortingInntekt = ({
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
-
+  const dispatch = useAppDispatch()
   const avkortingGrunnlag = avkorting == null ? [] : [...avkorting.avkortingGrunnlag]
   avkortingGrunnlag?.sort((a, b) => new Date(b.fom!).getTime() - new Date(a.fom!).getTime())
 
@@ -98,6 +99,7 @@ export const AvkortingInntekt = ({
         avkortingGrunnlag: data,
       },
       (respons) => {
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
         const nyttAvkortingGrunnlag = respons.avkortingGrunnlag[respons.avkortingGrunnlag.length - 1]
         nyttAvkortingGrunnlag && reset(nyttAvkortingGrunnlag)
         setAvkorting(respons)

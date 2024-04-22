@@ -13,11 +13,12 @@ import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.PdltjenesterKlientTest
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.attachMockContext
-import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
@@ -39,7 +40,7 @@ import javax.sql.DataSource
 @ExtendWith(DatabaseExtension::class)
 internal class DoedshendelseRouteTest(val dataSource: DataSource) {
     private val mockOAuth2Server = MockOAuth2Server()
-    private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
+    private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
     private val doedshendelseDao: DoedshendelseDao = DoedshendelseDao(ConnectionAutoclosingTest(dataSource))
     private val toggle =
         mockk<FeatureToggleService> {

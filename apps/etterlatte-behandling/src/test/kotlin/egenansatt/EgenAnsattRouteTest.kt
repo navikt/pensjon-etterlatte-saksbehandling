@@ -12,7 +12,9 @@ import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.mockk
+import io.mockk.spyk
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.PdltjenesterKlientTest
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
@@ -23,6 +25,9 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
+import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
+import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -40,10 +45,11 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class EgenAnsattRouteTest : BehandlingIntegrationTest() {
     private val norg2Klient = mockk<Norg2Klient>()
+    private val pdltjenesterKlient = spyk<PdltjenesterKlientTest>()
 
     @BeforeEach
     fun start() =
-        startServer(norg2Klient = norg2Klient)
+        startServer(norg2Klient = norg2Klient, pdlTjenesterKlient = pdltjenesterKlient)
             .also { resetDatabase() }
 
     @AfterEach
@@ -63,6 +69,17 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             coEvery {
                 norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any())
             } returns listOf(ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr))
+
+            coEvery {
+                pdltjenesterKlient.hentAdressebeskyttelseForPerson(HentAdressebeskyttelseRequest(PersonIdent(fnr), SakType.BARNEPENSJON))
+            } returns AdressebeskyttelseGradering.UGRADERT
+            coEvery {
+                pdltjenesterKlient.hentGeografiskTilknytning(
+                    fnr,
+                    SakType.BARNEPENSJON,
+                )
+            } returns GeografiskTilknytning(kommune = "0301")
+
             val sak: Sak =
                 client.post("personer/saker/${SakType.BARNEPENSJON}") {
                     addAuthToken(tokenSaksbehandler)
@@ -150,6 +167,16 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             coEvery {
                 norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any())
             } returns listOf(ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr))
+
+            coEvery {
+                pdltjenesterKlient.hentAdressebeskyttelseForPerson(HentAdressebeskyttelseRequest(PersonIdent(fnr), SakType.BARNEPENSJON))
+            } returns AdressebeskyttelseGradering.UGRADERT
+            coEvery {
+                pdltjenesterKlient.hentGeografiskTilknytning(
+                    fnr,
+                    SakType.BARNEPENSJON,
+                )
+            } returns GeografiskTilknytning(kommune = "0301")
 
             val sak: Sak =
                 client.post("personer/saker/${SakType.BARNEPENSJON}") {

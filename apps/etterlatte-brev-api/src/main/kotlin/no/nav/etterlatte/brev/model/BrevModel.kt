@@ -1,30 +1,11 @@
 package no.nav.etterlatte.brev.model
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.UUID
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Mottaker(
-    val navn: String,
-    val foedselsnummer: Folkeregisteridentifikator? = null,
-    val orgnummer: String? = null,
-    val adresse: Adresse,
-) {
-    fun erGyldig(): Boolean {
-        return if (navn.isBlank()) {
-            false
-        } else if (foedselsnummer == null && orgnummer.isNullOrBlank()) {
-            false
-        } else {
-            adresse.erGyldig()
-        }
-    }
-}
 
 fun mottakerFraAdresse(
     fnr: Folkeregisteridentifikator,

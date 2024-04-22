@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 
 typealias BrevID = Long
 
@@ -33,6 +34,24 @@ data class Adresse(
             !adresselinje1.isNullOrBlank()
         } else {
             true
+        }
+    }
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class Mottaker(
+    val navn: String,
+    val foedselsnummer: Folkeregisteridentifikator? = null,
+    val orgnummer: String? = null,
+    val adresse: Adresse,
+) {
+    fun erGyldig(): Boolean {
+        return if (navn.isBlank()) {
+            false
+        } else if (foedselsnummer == null && orgnummer.isNullOrBlank()) {
+            false
+        } else {
+            adresse.erGyldig()
         }
     }
 }

@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.model
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.UUID
@@ -12,7 +13,7 @@ fun mottakerFraAdresse(
     regoppslag: RegoppslagResponseDTO,
 ) = Mottaker(
     navn = regoppslag.navn,
-    foedselsnummer = fnr,
+    foedselsnummer = MottakerFoedselsnummer(fnr.value),
     adresse =
         Adresse(
             adresseType = regoppslag.adresse.type.name,
@@ -29,7 +30,7 @@ fun mottakerFraAdresse(
 fun tomMottaker(fnr: Folkeregisteridentifikator) =
     Mottaker(
         navn = "N/A",
-        foedselsnummer = fnr,
+        foedselsnummer = MottakerFoedselsnummer(fnr.value),
         adresse =
             Adresse(
                 adresseType = "",

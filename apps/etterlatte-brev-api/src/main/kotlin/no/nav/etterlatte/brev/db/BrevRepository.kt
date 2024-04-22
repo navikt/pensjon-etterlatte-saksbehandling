@@ -37,7 +37,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.opprettBrevFra
 import no.nav.etterlatte.libs.common.deserialize
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -382,7 +382,7 @@ class BrevRepository(private val ds: DataSource) {
             mottaker =
                 Mottaker(
                     navn = row.string("navn"),
-                    foedselsnummer = row.stringOrNull("foedselsnummer")?.let { Folkeregisteridentifikator.ofNullable(it) },
+                    foedselsnummer = row.stringOrNull("foedselsnummer")?.let { MottakerFoedselsnummer(it) },
                     orgnummer = row.stringOrNull("orgnummer"),
                     adresse =
                         Adresse(

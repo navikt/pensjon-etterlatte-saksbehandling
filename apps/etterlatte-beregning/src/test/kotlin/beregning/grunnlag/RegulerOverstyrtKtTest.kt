@@ -31,13 +31,13 @@ class RegulerOverstyrtKtTest {
         val virkRegulering = YearMonth.of(2023, 5)
         val reguleringsbehandlingId = UUID.randomUUID()
 
-        val resulat =
+        val resultat =
             regulerOverstyrtBeregningsgrunnlag(
                 virkRegulering,
                 overstyrtBeregningsgrunnlag,
                 reguleringsbehandlingId,
             )
-        with(resulat) {
+        with(resultat) {
             utbetaltBeloep shouldBe 6043
             id shouldNotBe overstyrtBeregningsgrunnlag.id
             behandlingId shouldBe reguleringsbehandlingId

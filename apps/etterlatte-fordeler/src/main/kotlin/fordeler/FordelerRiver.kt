@@ -72,7 +72,7 @@ internal class FordelerRiver(
 
             if (soeknadType == SoeknadType.OMSTILLINGSSTOENAD) {
                 logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling, henter sakId for Gjenny")
-                hentSakId(packet)?.let { sakId ->
+                hentSakId(packet, SakType.OMSTILLINGSSTOENAD)?.let { sakId ->
                     packet.leggPaaSakId(sakId)
                     context.publish(packet.leggPaaFordeltStatus(true).toJson())
                 }
@@ -102,7 +102,7 @@ internal class FordelerRiver(
         when (val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent)) {
             is FordelerResultat.GyldigForBehandling -> {
                 logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling, henter sakId for Gjenny")
-                hentSakId(packet)?.let { sakIdForSoeknad ->
+                hentSakId(packet, SakType.BARNEPENSJON)?.let { sakIdForSoeknad ->
                     packet.leggPaaSakId(sakIdForSoeknad)
                     context.publish(packet.leggPaaFordeltStatus(true).toJson())
 
@@ -126,12 +126,15 @@ internal class FordelerRiver(
         }
     }
 
-    private fun hentSakId(packet: JsonMessage): Long? {
+    private fun hentSakId(
+        packet: JsonMessage,
+        sakType: SakType,
+    ): Long? {
         return try {
             // Denne har ansvaret for å sette gradering
             fordelerService.hentSakId(
                 packet[SoeknadInnsendt.fnrSoekerKey].textValue(),
-                SakType.BARNEPENSJON,
+                sakType,
             )
         } catch (e: ResponseException) {
             logger.error("Avbrutt fordeling - kunne ikke hente sakId: ${e.message}")

@@ -14,7 +14,7 @@ import {
   TilbakekrevingVurdering,
 } from '~shared/types/Tilbakekreving'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { lagreTilbakekrevingsvurdering } from '~shared/api/tilbakekreving'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
@@ -26,6 +26,7 @@ import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { throttle } from 'lodash'
 
 const initialVurdering = {
   aarsak: null,
@@ -85,6 +86,17 @@ export function TilbakekrevingVurderingSkjema({
 
   const beloepIBehold = () =>
     watch().beloepBehold && watch().beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD
+
+  const throttledAutosave = useMemo(
+    () =>
+      throttle((data) => {
+        lagreVurdering(data)
+      }, 3000),
+    []
+  )
+  watch((data) => {
+    throttledAutosave(data as TilbakekrevingVurdering)
+  })
 
   return (
     <InnholdPadding>

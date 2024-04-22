@@ -1,18 +1,18 @@
-import { useApiCall } from '~shared/hooks/useApiCall'
-import React, { useEffect } from 'react'
+import {useApiCall} from '~shared/hooks/useApiCall'
+import React, {useEffect} from 'react'
 import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
-import { Alert, Link, Table } from '@navikt/ds-react'
-import { formaterDato, formaterStringDato } from '~utils/formattering'
+import {ApiErrorAlert} from '~ErrorBoundary'
+import {Alert, Link, Table} from '@navikt/ds-react'
+import {formaterDato, formaterStringDato} from '~utils/formattering'
 
 import {
   teksterTilbakekrevingStatus,
   TilbakekrevingBehandling,
   TilbakekrevingPeriode,
 } from '~shared/types/Tilbakekreving'
-import { hentTilbakekrevingerISak } from '~shared/api/tilbakekreving'
-import { VedtakKolonner } from '~components/person/VedtakKoloner'
-import { MapApiResult } from '~shared/components/MapApiResult'
+import {hentTilbakekrevingerISak} from '~shared/api/tilbakekreving'
+import {VedtakKolonner} from '~components/person/VedtakKoloner'
+import {MapApiResult} from '~shared/components/MapApiResult'
 
 export function lenkeTilTilbakekrevingMedId(id: string): string {
   return `/tilbakekreving/${id}/`
@@ -28,7 +28,7 @@ function formaterPeriode(perioder: TilbakekrevingPeriode[]): string {
 function TilbakekrevingTabell(props: { tilbakekrevinger: Array<TilbakekrevingBehandling> }) {
   const { tilbakekrevinger } = props
 
-  if (!!tilbakekrevinger?.length) {
+  if (tilbakekrevinger.length == 0) {
     return (
       <Alert variant="info" inline>
         Ingen tilbakekrevinger på sak

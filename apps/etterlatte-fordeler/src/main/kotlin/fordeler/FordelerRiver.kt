@@ -73,9 +73,11 @@ internal class FordelerRiver(
             val gradering = AdressebeskyttelseGradering.valueOf(packet[GyldigSoeknadVurdert.adressebeskyttelseKey].textValue())
 
             if (soeknadType == SoeknadType.OMSTILLINGSSTOENAD) {
-                val sakId = hentSakId(packet, gradering)
-                sakId?.let { packet.leggPaaSakId(sakId) }
-                context.publish(packet.leggPaaFordeltStatus(true).toJson())
+                logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling, henter sakId for Gjenny")
+                hentSakId(packet, gradering)?.let { sakId ->
+                    packet.leggPaaSakId(sakId)
+                    context.publish(packet.leggPaaFordeltStatus(true).toJson())
+                }
             } else if (soeknadType == SoeknadType.BARNEPENSJON) {
                 startFordelingBarnepensjon(packet, context)
             } else {

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    /* Visit https://aka.ms/tsconfig.json to read more about this file test */
+    /* Visit https://aka.ms/tsconfig.json to read more about this file */
 
     "target": "es2016",
     "module": "commonjs",

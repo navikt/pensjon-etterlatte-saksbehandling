@@ -67,6 +67,9 @@ jobs:
           node-version: '20.x'
       - name: Inject slug/short variables
         uses: rlespinasse/github-slug-action@v4
+      - name: License check top level
+        working-directory: apps/${{ env.APP_NAME }}
+        run: yarn install --frozen-lockfile && yarn lisenssjekk
       - name: Install and build client
         working-directory: apps/${{ env.APP_NAME }}
         run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build

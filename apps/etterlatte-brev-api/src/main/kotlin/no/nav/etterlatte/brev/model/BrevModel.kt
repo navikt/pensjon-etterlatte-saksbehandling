@@ -49,40 +49,38 @@ data class Mottaker(
             adresse.erGyldig()
         }
     }
-
-    companion object {
-        fun fra(
-            fnr: Folkeregisteridentifikator,
-            regoppslag: RegoppslagResponseDTO,
-        ) = Mottaker(
-            navn = regoppslag.navn,
-            foedselsnummer = Foedselsnummer(fnr.value),
-            adresse =
-                Adresse(
-                    adresseType = regoppslag.adresse.type.name,
-                    adresselinje1 = regoppslag.adresse.adresselinje1,
-                    adresselinje2 = regoppslag.adresse.adresselinje2,
-                    adresselinje3 = regoppslag.adresse.adresselinje3,
-                    postnummer = regoppslag.adresse.postnummer,
-                    poststed = regoppslag.adresse.poststed,
-                    landkode = regoppslag.adresse.landkode,
-                    land = regoppslag.adresse.land,
-                ),
-        )
-
-        fun tom(fnr: Folkeregisteridentifikator) =
-            Mottaker(
-                navn = "N/A",
-                foedselsnummer = Foedselsnummer(fnr.value),
-                adresse =
-                    Adresse(
-                        adresseType = "",
-                        landkode = "",
-                        land = "",
-                    ),
-            )
-    }
 }
+
+fun mottakerFraAdresse(
+    fnr: Folkeregisteridentifikator,
+    regoppslag: RegoppslagResponseDTO,
+) = Mottaker(
+    navn = regoppslag.navn,
+    foedselsnummer = Foedselsnummer(fnr.value),
+    adresse =
+        Adresse(
+            adresseType = regoppslag.adresse.type.name,
+            adresselinje1 = regoppslag.adresse.adresselinje1,
+            adresselinje2 = regoppslag.adresse.adresselinje2,
+            adresselinje3 = regoppslag.adresse.adresselinje3,
+            postnummer = regoppslag.adresse.postnummer,
+            poststed = regoppslag.adresse.poststed,
+            landkode = regoppslag.adresse.landkode,
+            land = regoppslag.adresse.land,
+        ),
+)
+
+fun tomMottaker(fnr: Folkeregisteridentifikator) =
+    Mottaker(
+        navn = "N/A",
+        foedselsnummer = Foedselsnummer(fnr.value),
+        adresse =
+            Adresse(
+                adresseType = "",
+                landkode = "",
+                land = "",
+            ),
+    )
 
 data class Brev(
     val id: BrevID,

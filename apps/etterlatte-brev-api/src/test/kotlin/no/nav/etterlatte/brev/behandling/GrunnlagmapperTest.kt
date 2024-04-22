@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
-import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.brev.toMottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -115,7 +115,7 @@ class GrunnlagmapperTest {
 
         verge.navn() shouldBe "Vera Verge"
         verge.toMottaker() shouldBeEqual
-            Mottaker.tom(Folkeregisteridentifikator.of(pdlVergeOekonomiskFnr))
+            tomMottaker(Folkeregisteridentifikator.of(pdlVergeOekonomiskFnr))
                 .copy(navn = "Vera Verge")
     }
 

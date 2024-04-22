@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -223,7 +224,7 @@ fun Vergemaal.toMottaker(): Mottaker {
         )
     }
 
-    return Mottaker.tom(Folkeregisteridentifikator.of(mottaker.foedselsnummer!!.value))
+    return tomMottaker(Folkeregisteridentifikator.of(mottaker.foedselsnummer!!.value))
         .copy(navn = if (mottaker.navn.isNullOrBlank()) "N/A" else mottaker.navn!!)
 }
 

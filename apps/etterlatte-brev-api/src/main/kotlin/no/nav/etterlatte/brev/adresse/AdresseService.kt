@@ -4,6 +4,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.mottakerFraAdresse
+import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
@@ -23,9 +25,9 @@ class AdresseService(
         val fnr = Folkeregisteridentifikator.of(ident)
 
         return if (regoppslag == null) {
-            Mottaker.tom(fnr)
+            tomMottaker(fnr)
         } else {
-            Mottaker.fra(fnr, regoppslag)
+            mottakerFraAdresse(fnr, regoppslag)
         }
     }
 

@@ -6,13 +6,16 @@ import io.ktor.client.plugins.ResponseException
 import io.mockk.Called
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.KONTANT_FOT
+import no.nav.etterlatte.PdltjenesterKlientTest
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BrukerServiceImpl
@@ -22,11 +25,11 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingRequest
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
+import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
+import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
@@ -45,15 +48,14 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.random.Random
 
 internal class SakServiceTest {
+    private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
     private val sakDao = mockk<SakDao>()
-    private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
     private val norg2Klient = mockk<Norg2Klient>()
-    private val brukerService = BrukerServiceImpl(pdltjenesterKlient, norg2Klient)
+    private val brukerService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
     private val saksbehandlerService = mockk<SaksbehandlerService>()
     private val skjermingKlient = mockk<SkjermingKlient>()
     private val grunnlagservice = mockk<GrunnlagService>()
     private val krrKlient = mockk<KrrKlient>()
-    private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
 
     private val service = SakServiceImpl(sakDao, skjermingKlient, brukerService, grunnlagservice, krrKlient, pdlTjenesterKlient)
 
@@ -69,7 +71,7 @@ internal class SakServiceTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(sakDao, pdltjenesterKlient, norg2Klient)
+        confirmVerified(sakDao, pdlTjenesterKlient, norg2Klient)
     }
 
     private fun saksbehandlerKontekst(
@@ -215,7 +217,7 @@ internal class SakServiceTest {
         val responseException = ResponseException(mockk(), "Oops")
         every { sakDao.finnSaker(KONTANT_FOT.value) } returns emptyList()
         every {
-            pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
+            pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
         } throws responseException
 
         val thrown =
@@ -229,7 +231,7 @@ internal class SakServiceTest {
         thrown.message shouldContain "Oops"
 
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
-        verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
+        verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify {
             listOf(norg2Klient) wasNot Called
         }
@@ -237,9 +239,6 @@ internal class SakServiceTest {
 
     @Test
     fun `finnEllerOpprettSak feiler hvis NORG2 ikke finner geografisk tilknytning`() {
-        every {
-            pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
-        } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
         every {
             norg2Klient.hentArbeidsfordelingForOmraadeOgTema(
                 ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301"),
@@ -256,7 +255,7 @@ internal class SakServiceTest {
         thrown.arbeidsFordelingRequest.geografiskOmraade shouldBe "0301"
 
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
-        verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
+        verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) }
     }
 
@@ -274,9 +273,8 @@ internal class SakServiceTest {
             )
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
         every { sakDao.markerSakerMedSkjerming(any(), any()) } returns 0
-        every {
-            pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
-        } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
+        every { sakDao.oppdaterAdresseBeskyttelse(1, AdressebeskyttelseGradering.UGRADERT) } returns 1
+
         every { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) } returns
             listOf(
                 ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr),
@@ -295,13 +293,23 @@ internal class SakServiceTest {
         verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
-        verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
+        verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
+        coVerify(exactly = 1) {
+            pdlTjenesterKlient.hentAdressebeskyttelseForPerson(
+                HentAdressebeskyttelseRequest(
+                    PersonIdent(KONTANT_FOT.value),
+                    SakType.BARNEPENSJON,
+                ),
+            )
+        }
         verify(exactly = 1) { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) }
         verify(exactly = 1) {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         }
+        verify(exactly = 1) { sakDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT) }
     }
 
+    // TODO: skriv om til at pdltjenester returnerer  strengt fortrolgi for denne
     @Test
     fun `finnEllerOpprettSak lagre enhet og setter gradering`() {
         systemBrukerKontekst()
@@ -317,20 +325,24 @@ internal class SakServiceTest {
                 sakType = SakType.BARNEPENSJON,
                 enhet = Enheter.PORSGRUNN.enhetNr,
             )
-        every {
-            pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
-        } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
+
+        coEvery {
+            pdlTjenesterKlient.hentAdressebeskyttelseForPerson(
+                HentAdressebeskyttelseRequest(PersonIdent(KONTANT_FOT.value), SakType.BARNEPENSJON),
+            )
+        } returns AdressebeskyttelseGradering.STRENGT_FORTROLIG
+
         every { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) } returns
             listOf(
                 ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr),
             )
         every { sakDao.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
+        every { sakDao.oppdaterEnheterPaaSaker(any()) } just runs
 
         val sak =
             service.finnEllerOpprettSak(
                 KONTANT_FOT.value,
                 SakType.BARNEPENSJON,
-                gradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
             )
 
         sak shouldBe
@@ -350,11 +362,20 @@ internal class SakServiceTest {
         verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
-        verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
+        verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
+        coVerify(exactly = 1) {
+            pdlTjenesterKlient.hentAdressebeskyttelseForPerson(
+                HentAdressebeskyttelseRequest(
+                    PersonIdent(KONTANT_FOT.value),
+                    SakType.BARNEPENSJON,
+                ),
+            )
+        }
         verify(exactly = 1) { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) }
         verify(exactly = 1) {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         }
+        verify(exactly = 1) { sakDao.oppdaterEnheterPaaSaker(any()) }
     }
 
     @Test
@@ -372,10 +393,9 @@ internal class SakServiceTest {
             )
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns true
         every { sakDao.oppdaterEnheterPaaSaker(any()) } just runs
+        every { sakDao.oppdaterAdresseBeskyttelse(1, AdressebeskyttelseGradering.UGRADERT) } returns 1
         every { sakDao.markerSakerMedSkjerming(any(), any()) } returns 1
-        every {
-            pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
-        } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
+
         every { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) } returns
             listOf(
                 ArbeidsFordelingEnhet(Enheter.EGNE_ANSATTE.navn, Enheter.EGNE_ANSATTE.enhetNr),
@@ -394,12 +414,21 @@ internal class SakServiceTest {
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
         verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
-        verify(exactly = 1) { pdltjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
+        verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
+        coVerify(exactly = 1) {
+            pdlTjenesterKlient.hentAdressebeskyttelseForPerson(
+                HentAdressebeskyttelseRequest(
+                    PersonIdent(KONTANT_FOT.value),
+                    SakType.BARNEPENSJON,
+                ),
+            )
+        }
         verify(exactly = 1) { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) }
         verify(exactly = 1) {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         }
         verify(exactly = 1) { sakDao.oppdaterEnheterPaaSaker(any()) }
+        verify(exactly = 1) { sakDao.oppdaterAdresseBeskyttelse(sak.id, AdressebeskyttelseGradering.UGRADERT) }
     }
 
     @Test

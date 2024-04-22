@@ -17,17 +17,24 @@ import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
+import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toObjectNode
@@ -400,6 +407,52 @@ class AxsysKlientTest : AxsysKlient {
         get() = "Axsys"
     override val beskrivelse: String
         get() = "Henter enheter for saksbehandlerident"
+    override val endpoint: String
+        get() = "endpoint"
+
+    override suspend fun ping(konsument: String?): PingResult {
+        return PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
+    }
+}
+
+class PdltjenesterKlientTest : PdlTjenesterKlient {
+    override fun hentPdlModellFlereSaktyper(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        saktype: SakType,
+    ): PersonDTO {
+        return mockPerson()
+    }
+
+    override fun hentPdlModellFlereSaktyper(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        saktyper: List<SakType>,
+    ): PersonDTO {
+        return mockPerson()
+    }
+
+    override fun hentGeografiskTilknytning(
+        foedselsnummer: String,
+        saktype: SakType,
+    ): GeografiskTilknytning {
+        return GeografiskTilknytning(kommune = "0301")
+    }
+
+    override fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?> {
+        return emptyMap<String, String>()
+    }
+
+    override suspend fun hentAdressebeskyttelseForPerson(
+        hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest,
+    ): AdressebeskyttelseGradering {
+        return AdressebeskyttelseGradering.UGRADERT
+    }
+
+    override val serviceName: String
+        get() = "Pdl tjenester"
+    override val beskrivelse: String
+        get() = "Henter enheter pdl data"
     override val endpoint: String
         get() = "endpoint"
 

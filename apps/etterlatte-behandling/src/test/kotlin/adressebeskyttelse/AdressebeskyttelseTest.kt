@@ -10,7 +10,10 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
+import io.mockk.coEvery
+import io.mockk.spyk
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.PdltjenesterKlientTest
 import no.nav.etterlatte.behandling.tilgang.SKRIVETILGANG_CALL_QUERYPARAMETER
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
@@ -19,6 +22,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
+import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -37,9 +42,11 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AdressebeskyttelseTest : BehandlingIntegrationTest() {
+    private val pdltjenesterKlient = spyk<PdltjenesterKlientTest>()
+
     @BeforeAll
     fun start() {
-        startServer()
+        startServer(pdlTjenesterKlient = pdltjenesterKlient)
     }
 
     @AfterEach
@@ -318,10 +325,13 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     module(applicationContext)
                 }
 
+            coEvery {
+                pdltjenesterKlient.hentAdressebeskyttelseForPerson(HentAdressebeskyttelseRequest(PersonIdent(fnr), SakType.BARNEPENSJON))
+            } returns AdressebeskyttelseGradering.STRENGT_FORTROLIG
             httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
                 contentType(ContentType.Application.Json)
-                setBody(FoedselsNummerMedGraderingDTO(fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG))
+                setBody(FoedselsNummerMedGraderingDTO(fnr))
             }.apply {
                 Assertions.assertEquals(HttpStatusCode.OK, status)
             }.body<Sak>()

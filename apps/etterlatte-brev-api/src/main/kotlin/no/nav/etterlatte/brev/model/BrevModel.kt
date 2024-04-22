@@ -38,23 +38,6 @@ fun tomMottaker(fnr: Folkeregisteridentifikator) =
             ),
     )
 
-data class Brev(
-    val id: BrevID,
-    val sakId: Long,
-    val behandlingId: UUID?,
-    val tittel: String?,
-    val spraak: Spraak,
-    val prosessType: BrevProsessType,
-    val soekerFnr: String,
-    val status: Status,
-    val statusEndret: Tidspunkt,
-    val opprettet: Tidspunkt,
-    val mottaker: Mottaker,
-    val brevtype: Brevtype,
-) {
-    fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
-}
-
 fun opprettBrevFra(
     id: BrevID,
     opprettNyttBrev: OpprettNyttBrev,

@@ -1,7 +1,10 @@
 package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import java.util.UUID
 
 typealias BrevID = Long
 
@@ -54,6 +57,23 @@ data class Mottaker(
             adresse.erGyldig()
         }
     }
+}
+
+data class Brev(
+    val id: BrevID,
+    val sakId: Long,
+    val behandlingId: UUID?,
+    val tittel: String?,
+    val spraak: Spraak,
+    val prosessType: BrevProsessType,
+    val soekerFnr: String,
+    val status: Status,
+    val statusEndret: Tidspunkt,
+    val opprettet: Tidspunkt,
+    val mottaker: Mottaker,
+    val brevtype: Brevtype,
+) {
+    fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
 }
 
 enum class BrevProsessType {

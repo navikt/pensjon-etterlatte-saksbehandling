@@ -1,34 +1,45 @@
 import express from 'express'
-import { createProxyMiddleware } from 'http-proxy-middleware'
 import { ApiConfig } from '../config/config'
+import fetch from 'node-fetch'
 import { logger } from '../monitoring/logger'
 
 export const selftestRouter = express.Router()
 
-selftestRouter.get('/', express.json(), (req, res) => {
-  Object.entries(ApiConfig).forEach((e) => {
-    createUnauthProxySelftestFor(e[1].url, e[0])
+selftestRouter.get('/', express.json(), async (req, res) => {
+  const results: Promise<IPingResult>[] = Object.entries(ApiConfig).map(async ([serviceName, urlscope]) => {
+    const statuscode = await fetch(`${urlscope.url}/health/isready`)
+      .then((res) => res.status)
+      .catch((err) => {
+        logger.warn(`${serviceName} is down.`, err)
+        return 500
+      })
+    return {
+      serviceName: serviceName,
+      result: statuscode === 200 ? ServiceStatus.UP : ServiceStatus.DOWN,
+      endpoint: urlscope.url,
+      description: serviceName,
+    }
   })
-  return res.sendStatus(200)
+  Promise.all(results)
+    .then((e) =>
+      e.flatMap((pingres) => {
+        return pingres
+      })
+    )
+    .then((all) => {
+      res.json(all)
+    })
+    .catch((err) => res.status(500).send(err))
 })
 
-function createUnauthProxySelftestFor(targetUrl: string, servicename: string) {
-  createProxyMiddleware({
-    target: targetUrl,
-    pathRewrite: {
-      '^/internal/selftest': '/health/isready',
-    },
-    changeOrigin: false,
-    on: {
-      proxyReq: (proxyReq, req) => {
-        logger.info(`proxying isready for service ${servicename} ${req.url}`)
-      },
-      proxyRes: (proxyRes, req, res) => {
-        logger.info(`res from ${servicename} isready: ${res.req.statusCode}`)
-      },
-      error: (err) => {
-        logger.error(`Error from ${servicename} - isready`, err)
-      },
-    },
-  })
+interface IPingResult {
+  serviceName: string
+  result: ServiceStatus
+  endpoint: string
+  description: string
+}
+
+enum ServiceStatus {
+  UP = 0,
+  DOWN = 1,
 }

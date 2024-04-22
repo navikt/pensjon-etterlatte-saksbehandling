@@ -137,7 +137,7 @@ class OversendelseBrevServiceImpl(
             )
         }
 
-        val klage = brevdataFacade.hentKlage(brev.behandlingId, brukerTokenInfo)
+        val klage = brevdataFacade.hentKlage(requireNotNull(brev.behandlingId), brukerTokenInfo)
         return pdfGenerator.genererPdf(
             id = brev.id,
             bruker = brukerTokenInfo,

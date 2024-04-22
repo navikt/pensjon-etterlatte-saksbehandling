@@ -1,4 +1,4 @@
-package no.nav.etterlatte.no.nav.etterlatte.testdata.automatisk
+package no.nav.etterlatte.testdata.automatisk
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get

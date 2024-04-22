@@ -1,16 +1,9 @@
-package no.nav.etterlatte.no.nav.etterlatte.testdata.features
+package no.nav.etterlatte.testdata
 
 import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.no.nav.etterlatte.testdata.automatisk.AvkortingService
-import no.nav.etterlatte.no.nav.etterlatte.testdata.automatisk.BeregningService
-import no.nav.etterlatte.no.nav.etterlatte.testdata.automatisk.BrevService
-import no.nav.etterlatte.no.nav.etterlatte.testdata.automatisk.SakService
-import no.nav.etterlatte.no.nav.etterlatte.testdata.automatisk.TrygdetidService
-import no.nav.etterlatte.no.nav.etterlatte.testdata.automatisk.VedtaksvurderingService
-import no.nav.etterlatte.no.nav.etterlatte.testdata.automatisk.VilkaarsvurderingService
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -19,6 +12,13 @@ import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.sakId
+import no.nav.etterlatte.testdata.automatisk.AvkortingService
+import no.nav.etterlatte.testdata.automatisk.BeregningService
+import no.nav.etterlatte.testdata.automatisk.BrevService
+import no.nav.etterlatte.testdata.automatisk.SakService
+import no.nav.etterlatte.testdata.automatisk.TrygdetidService
+import no.nav.etterlatte.testdata.automatisk.VedtaksvurderingService
+import no.nav.etterlatte.testdata.automatisk.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection

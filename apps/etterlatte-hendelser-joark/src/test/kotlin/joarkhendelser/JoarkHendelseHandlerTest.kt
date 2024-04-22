@@ -52,7 +52,7 @@ internal class JoarkHendelseHandlerTest {
 
     private val sut =
         JoarkHendelseHandler(
-            BehandlingService(behandlingKlientMock, pdlTjenesterKlientMock),
+            BehandlingService(behandlingKlientMock),
             safKlientMock,
             oppgaveKlient,
             pdlTjenesterKlientMock,
@@ -101,7 +101,7 @@ internal class JoarkHendelseHandlerTest {
                 safKlientMock.hentJournalpost(journalpostId)
                 pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
                 pdlTjenesterKlientMock.hentAdressebeskyttelse(ident, sakType)
-                behandlingKlientMock.hentEllerOpprettSak(ident, sakType, AdressebeskyttelseGradering.UGRADERT)
+                behandlingKlientMock.hentEllerOpprettSak(ident, sakType)
                 behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
             }
         }
@@ -136,7 +136,7 @@ internal class JoarkHendelseHandlerTest {
                 safKlientMock.hentJournalpost(journalpostId)
                 pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
                 pdlTjenesterKlientMock.hentAdressebeskyttelse(ident, sakType)
-                behandlingKlientMock.hentEllerOpprettSak(ident, sakType, AdressebeskyttelseGradering.UGRADERT)
+                behandlingKlientMock.hentEllerOpprettSak(ident, sakType)
                 behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
             }
         }
@@ -173,7 +173,7 @@ internal class JoarkHendelseHandlerTest {
                 pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
                 behandlingKlientMock.hentSak(ident, sakType)
                 pdlTjenesterKlientMock.hentAdressebeskyttelse(ident, sakType)
-                behandlingKlientMock.hentEllerOpprettSak(ident, sakType, AdressebeskyttelseGradering.UGRADERT)
+                behandlingKlientMock.hentEllerOpprettSak(ident, sakType)
                 behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
             }
         }

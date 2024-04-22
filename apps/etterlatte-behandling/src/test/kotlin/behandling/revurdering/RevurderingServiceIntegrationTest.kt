@@ -130,11 +130,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         assertNotNull(behandling)
 
         inTransaction {
-            applicationContext.behandlingDao.lagreStatus(
-                behandling!!.id,
-                BehandlingStatus.IVERKSATT,
-                Tidspunkt.now().toLocalDatetimeUTC(),
-            )
+            iverksett(behandling!!)
         }
 
         val revurdering =
@@ -185,11 +181,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         assertNotNull(behandling)
 
         inTransaction {
-            applicationContext.behandlingDao.lagreStatus(
-                behandling!!.id,
-                BehandlingStatus.IVERKSATT,
-                Tidspunkt.now().toLocalDatetimeUTC(),
-            )
+            iverksett(behandling!!)
         }
         val revurderingService =
             revurderingService(
@@ -310,11 +302,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         assertNotNull(behandling)
 
         inTransaction {
-            applicationContext.behandlingDao.lagreStatus(
-                behandling!!.id,
-                BehandlingStatus.IVERKSATT,
-                Tidspunkt.now().toLocalDatetimeUTC(),
-            )
+            iverksett(behandling!!)
         }
         val hendelse =
             inTransaction {
@@ -422,11 +410,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         assertNotNull(behandling)
 
         inTransaction {
-            applicationContext.behandlingDao.lagreStatus(
-                behandling!!.id,
-                BehandlingStatus.IVERKSATT,
-                Tidspunkt.now().toLocalDatetimeUTC(),
-            )
+            iverksett(behandling!!)
         }
 
         inTransaction {
@@ -493,11 +477,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         assertNotNull(behandling)
 
         inTransaction {
-            applicationContext.behandlingDao.lagreStatus(
-                behandling!!.id,
-                BehandlingStatus.IVERKSATT,
-                Tidspunkt.now().toLocalDatetimeUTC(),
-            )
+            iverksett(behandling!!)
         }
         assertThrows<RevurderingSluttbehandlingUtlandMaaHaEnBehandlingMedSkalSendeKravpakke> {
             inTransaction {
@@ -554,6 +534,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 BehandlingStatus.IVERKSATT,
                 Tidspunkt.now().toLocalDatetimeUTC(),
             )
+            ferdigstillOppgaver(behandling, saksbehandler)
         }
         val revurderingen =
             inTransaction {
@@ -628,7 +609,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `Skal få bad request hvis man mangler hendelsesid`() {
+    fun `Skal faa bad request hvis man mangler hendelsesid`() {
         val revurderingService = revurderingService()
         val behandlingFactory = behandlingFactory()
 
@@ -652,9 +633,11 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
     @Test
     fun `Skal faa bad request hvis man mangler forrige iverksattebehandling`() {
         val revurderingService = revurderingService()
-        val behandlingFactory = behandlingFactory()
 
-        val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
+        val sak =
+            inTransaction {
+                applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+            }
 
         assertThrows<RevurderingManglerIverksattBehandling> {
             inTransaction {
@@ -716,7 +699,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `Kan opprette revurdering for omgjøring av klage`() {
+    fun `Kan opprette revurdering for omgjoering av klage`() {
         val revurderingService = revurderingService()
         val behandlingFactory = behandlingFactory()
 
@@ -880,6 +863,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 BehandlingStatus.IVERKSATT,
                 Tidspunkt.now().toLocalDatetimeUTC(),
             )
+            ferdigstillOppgaver(behandling, saksbehandler)
         }
 
         val utlandsoppgaveref =
@@ -919,11 +903,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         // Forutsetninger - sak med iverksatt behandling
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
         inTransaction {
-            applicationContext.behandlingDao.lagreStatus(
-                behandling!!.id,
-                BehandlingStatus.IVERKSATT,
-                Tidspunkt.now().toLocalDatetimeUTC(),
-            )
+            iverksett(behandling!!)
         }
 
         // Opprett en revurderingsoppgave som gjelder en hendelse
@@ -959,11 +939,37 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
 
         with(
             inTransaction {
-                oppgaveService.hentOppgave(oppgaveHendelse.id)!!
+                oppgaveService.hentOppgave(oppgaveHendelse.id)
             },
         ) {
             status shouldBe Status.UNDER_BEHANDLING
             referanse shouldBe revurdering.id.toString()
+        }
+    }
+
+    private fun iverksett(behandling: Behandling) {
+        applicationContext.behandlingDao.lagreStatus(
+            behandling.id,
+            BehandlingStatus.IVERKSATT,
+            Tidspunkt.now().toLocalDatetimeUTC(),
+        )
+        ferdigstillOppgaver(behandling)
+    }
+
+    private fun ferdigstillOppgaver(
+        behandling: Behandling,
+        saksbehandlerId: String = "sbh",
+    ) {
+        with(applicationContext.oppgaveService) {
+            this.hentOppgaverForReferanse(behandling.id.toString()).forEach {
+                if (it.manglerSaksbehandler()) {
+                    this.byttSaksbehandler(it.id, saksbehandlerId) // for aa kunne ferdgistille oppgaven
+                }
+                this.ferdigstillOppgave(
+                    id = it.id,
+                    saksbehandler = BrukerTokenInfo.of("acc", saksbehandlerId, oid = null, sub = "sub", claims = null),
+                )
+            }
         }
     }
 

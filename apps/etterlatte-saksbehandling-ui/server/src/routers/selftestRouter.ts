@@ -5,7 +5,7 @@ import { logger } from '../monitoring/logger'
 
 export const selftestRouter = express.Router()
 
-selftestRouter.get('internal/selftest', express.json(), () => {
+selftestRouter.get('/', express.json(), () => {
   Object.entries(ApiConfig).forEach((e) => {
     createUnauthProxySelftestFor(e[1].url, e[0])
   })

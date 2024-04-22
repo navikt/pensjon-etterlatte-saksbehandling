@@ -20,6 +20,7 @@ import no.nav.etterlatte.testdata.dolly.ForenkletFamilieModell
 import no.nav.etterlatte.testdata.features.dolly.NySoeknadRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import kotlin.concurrent.thread
 
 class OpprettOgBehandle(private val dollyService: DollyService, private val familieoppretter: Familieoppretter) :
     TestDataFeature {
@@ -53,23 +54,32 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
                 val soeknadType = SoeknadType.BARNEPENSJON
                 val behandlingssteg = Behandlingssteg.IVERKSATT
                 val navIdent = navIdentFraToken()
-
-                var opprettaFamilier = 0
                 val oenskaAntall = 3
 
-                // TODO: få while-løkka her ut i ein tråd på eit vis, så vi kan returnere vanleg til frontend
-
-                logger.info("Oppretter $oenskaAntall familier og sender inn søknad for hver")
-                while (opprettaFamilier < oenskaAntall) {
-                    val familie = familieoppretter.opprettFamilie(getDollyAccessToken(), gruppeid)
-                    familie.forEach {
-                        opprettaFamilier++
-                        sendSoeknad(it, soeknadType, navIdent, behandlingssteg)
-                    }
-                }
+                opprettOgSendInn(oenskaAntall, gruppeid, soeknadType, navIdent, behandlingssteg)
                 call.respond(HttpStatusCode.Created)
             }
         }
+
+    private fun opprettOgSendInn(
+        oenskaAntall: Int,
+        gruppeid: Long,
+        soeknadType: SoeknadType,
+        navIdent: String?,
+        behandlingssteg: Behandlingssteg,
+    ) {
+        thread {
+            var opprettaFamilier = 0
+            logger.info("Oppretter $oenskaAntall familier og sender inn søknad for hver")
+            while (opprettaFamilier < oenskaAntall) {
+                val familie = familieoppretter.opprettFamilie(getDollyAccessToken(), gruppeid)
+                familie.forEach {
+                    opprettaFamilier++
+                    sendSoeknad(it, soeknadType, navIdent, behandlingssteg)
+                }
+            }
+        }
+    }
 
     private fun sendSoeknad(
         it: ForenkletFamilieModell,

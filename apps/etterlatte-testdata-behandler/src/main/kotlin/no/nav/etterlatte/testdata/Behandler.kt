@@ -4,14 +4,6 @@ import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
-import no.nav.etterlatte.rapidsandrivers.EventNames
-import no.nav.etterlatte.rapidsandrivers.Kontekst
-import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.behandlingId
-import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.testdata.automatisk.AvkortingService
 import no.nav.etterlatte.testdata.automatisk.BeregningService
 import no.nav.etterlatte.testdata.automatisk.BrevService
@@ -19,13 +11,10 @@ import no.nav.etterlatte.testdata.automatisk.SakService
 import no.nav.etterlatte.testdata.automatisk.TrygdetidService
 import no.nav.etterlatte.testdata.automatisk.VedtaksvurderingService
 import no.nav.etterlatte.testdata.automatisk.VilkaarsvurderingService
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class Behandler(
-    rapidsConnection: RapidsConnection,
     private val sakService: SakService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val trygdetidService: TrygdetidService,
@@ -33,24 +22,13 @@ class Behandler(
     private val avkortingService: AvkortingService,
     private val brevService: BrevService,
     private val vedtaksvurderingService: VedtaksvurderingService,
-) : ListenerMedLoggingOgFeilhaandtering() {
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    init {
-        initialiserRiver(rapidsConnection, EventNames.NY_OPPLYSNING) {
-            validate { it.requireKey(Behandlingssteg.KEY) }
-            validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.requireKey(BEHANDLING_ID_KEY) }
-        }
-    }
-
-    override fun haandterPakke(
-        packet: JsonMessage,
-        context: MessageContext,
+    fun behandle(
+        sakId: Long,
+        behandling: UUID,
     ) {
-        val sakId = packet.sakId
-        val behandling = packet.behandlingId
-
         runBlocking {
             logger.info("Starter automatisk behandling av sak $sakId")
             val sak = sakService.hentSak(sakId).body<Sak>()
@@ -71,6 +49,4 @@ class Behandler(
             logger.info("Ferdig iverksatt behandling $behandling i sak $sakId")
         }
     }
-
-    override fun kontekst() = Kontekst.TEST
 }

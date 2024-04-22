@@ -28,7 +28,7 @@ function formaterPeriode(perioder: TilbakekrevingPeriode[]): string {
 function TilbakekrevingTabell(props: { tilbakekrevinger: Array<TilbakekrevingBehandling> }) {
   const { tilbakekrevinger } = props
 
-  if (!!tilbakekrevinger?.length) {
+  if (tilbakekrevinger?.length == 0) {
     return (
       <Alert variant="info" inline>
         Ingen tilbakekrevinger på sak

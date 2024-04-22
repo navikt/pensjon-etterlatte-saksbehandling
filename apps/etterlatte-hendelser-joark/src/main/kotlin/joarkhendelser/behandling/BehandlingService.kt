@@ -1,6 +1,5 @@
 package no.nav.etterlatte.joarkhendelser.behandling
 
-import no.nav.etterlatte.joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.slf4j.LoggerFactory
@@ -8,7 +7,6 @@ import java.util.UUID
 
 class BehandlingService(
     private val behandlingKlient: BehandlingKlient,
-    private val pdlTjenesterKlient: PdlTjenesterKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -46,10 +44,9 @@ class BehandlingService(
         ident: String,
         sakType: SakType,
     ): Long {
-        val gradering = pdlTjenesterKlient.hentAdressebeskyttelse(ident, sakType)
-        logger.info("Bruker=${ident.maskerFnr()} har gradering $gradering")
+        logger.info("Bruker=${ident.maskerFnr()}")
 
-        logger.info("Henter/oppretter sak av type=${sakType.name.lowercase()} for bruker=${ident.maskerFnr()} med gradering=$gradering")
-        return behandlingKlient.hentEllerOpprettSak(ident, sakType, gradering)
+        logger.info("Henter/oppretter sak av type=${sakType.name.lowercase()} for bruker=${ident.maskerFnr()}")
+        return behandlingKlient.hentEllerOpprettSak(ident, sakType)
     }
 }

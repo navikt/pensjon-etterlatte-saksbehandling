@@ -1,0 +1,67 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-testdata-behandler
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: "{{image}}"
+  port: 8080
+  ingresses:
+    - https://etterlatte-testdata-behandler.intern.dev.nav.no
+  liveness:
+    initialDelay: 20
+    path: /isalive
+  readiness:
+    initialDelay: 5
+    path: /isready
+  prometheus:
+    enabled: true
+    path: /metrics
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+  resources:
+    requests:
+      cpu: 10m
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+      allowAllUsers: false
+      claims:
+        groups:
+          - id: 63f46f74-84a8-4d1c-87a8-78532ab3ae60 # 0000-GA-PENSJON_ATTESTERING
+          - id: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf # 0000-GA-PENSJON_SAKSBEHANDLER
+          - id: 5b6745de-b65d-40eb-a6f5-860c8b61c27f # 0000-GA-GJENNY_SAKSBEHANDLER
+          - id: 5ef775f2-61f8-4283-bf3d-8d03f428aa14 # 0000-GA-Strengt_Fortrolig_Adresse
+          - id: ea930b6b-9397-44d9-b9e6-f4cf527a632a #0000-GA-Fortrolig_Adresse
+          - id: dbe4ad45-320b-4e9a-aaa1-73cca4ee124d # 0000-GA-Egne_ansatte
+          - id: 753805ea-65a7-4855-bdc3-e6130348df9f # 0000-GA-PENSJON_NASJONAL_M_LOGG
+          - id: ea7411eb-8b48-41a0-bc56-7b521fbf0c25 # 0000-GA-PENSJON_NASJONAL_U_LOGG
+        extra:
+          - NAVident
+    sidecar:
+      enabled: true
+      autoLogin: true
+      autoLoginIgnorePaths:
+        - /internal/**
+  kafka:
+    pool: nav-dev
+  env:
+    - name: KAFKA_TARGET_TOPIC
+      value: etterlatte.dodsmelding
+    - name: KAFKA_RESET_POLICY
+      value: earliest
+  accessPolicy:
+    inbound:
+      rules:
+        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
+          namespace: aura
+          cluster: dev-gcp

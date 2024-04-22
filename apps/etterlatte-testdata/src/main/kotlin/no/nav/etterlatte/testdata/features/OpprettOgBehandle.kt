@@ -13,18 +13,16 @@ import no.nav.etterlatte.brukerIdFraToken
 import no.nav.etterlatte.getDollyAccessToken
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.navIdentFraToken
+import no.nav.etterlatte.no.nav.etterlatte.testdata.features.automatisk.Familieoppretter
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
-import no.nav.etterlatte.testdata.dolly.BestillingRequest
-import no.nav.etterlatte.testdata.dolly.BestillingStatus
 import no.nav.etterlatte.testdata.dolly.DollyService
 import no.nav.etterlatte.testdata.dolly.ForenkletFamilieModell
 import no.nav.etterlatte.testdata.features.dolly.NySoeknadRequest
-import no.nav.etterlatte.testdata.features.dolly.generererBestilling
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.Duration
 
-class OpprettOgBehandle(private val dollyService: DollyService) : TestDataFeature {
+class OpprettOgBehandle(private val dollyService: DollyService, private val familieoppretter: Familieoppretter) :
+    TestDataFeature {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
     override val beskrivelse: String
         get() = "Opprett og behandle søknad(er)"
@@ -51,60 +49,45 @@ class OpprettOgBehandle(private val dollyService: DollyService) : TestDataFeatur
             }
 
             post {
-                val familier =
-                    opprettFamilierIDolly(
-                        100,
-                        call.receiveParameters()["gruppeId"]!!.toLong(),
-                    ).also { logger.info("Oppretta ${it.size} familier") }
+                val gruppeid = call.receiveParameters()["gruppeId"]!!.toLong()
                 val soeknadType = SoeknadType.BARNEPENSJON
-                val navIdent = navIdentFraToken()
                 val behandlingssteg = Behandlingssteg.IVERKSATT
-                familier.map {
-                    NySoeknadRequest(
-                        type = soeknadType,
-                        avdoed = it.avdoed,
-                        gjenlevende = it.gjenlevende,
-                        barn = it.barn,
-                    )
-                }.forEach {
-                    dollyService.sendSoeknad(
-                        request = it,
-                        navIdent = navIdent,
-                        behandlingssteg = behandlingssteg,
-                    )
+                val navIdent = navIdentFraToken()
+
+                var opprettaFamilier = 0
+                val oenskaAntall = 3
+
+                // TODO: få while-løkka her ut i ein tråd på eit vis, så vi kan returnere vanleg til frontend
+
+                logger.info("Oppretter $oenskaAntall familier og sender inn søknad for hver")
+                while (opprettaFamilier < oenskaAntall) {
+                    val familie = familieoppretter.opprettFamilie(getDollyAccessToken(), gruppeid)
+                    familie.forEach {
+                        opprettaFamilier++
+                        sendSoeknad(it, soeknadType, navIdent, behandlingssteg)
+                    }
                 }
                 call.respond(HttpStatusCode.Created)
             }
         }
 
-    private fun opprettFamilierIDolly(
-        antall: Int,
-        gruppeid: Long,
-    ): List<ForenkletFamilieModell> {
-        val accessToken = getDollyAccessToken()
-        val baselineFamilier = dollyService.hentFamilier(gruppeid, accessToken)
-        val req =
-            BestillingRequest(
-                erOver18 = false,
-                helsoesken = 0,
-                halvsoeskenAvdoed = 0,
-                halvsoeskenGjenlevende = 0,
-                gruppeId = gruppeid,
+    private fun sendSoeknad(
+        it: ForenkletFamilieModell,
+        soeknadType: SoeknadType,
+        navIdent: String?,
+        behandlingssteg: Behandlingssteg,
+    ) {
+        val request =
+            NySoeknadRequest(
+                type = soeknadType,
+                avdoed = it.avdoed,
+                gjenlevende = it.gjenlevende,
+                barn = it.barn,
             )
-        val bestillinger = mutableListOf<BestillingStatus>()
-        logger.info("Sender ${antall + 1} bestillinger")
-        for (i in 0..antall) {
-            bestillinger.add(
-                dollyService.opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
-                    .also { bestilling ->
-                        logger.info("Bestilling med id ${bestilling.id} har status ${bestilling.ferdig}")
-                    },
-            )
-        }
-        val ventetid = Duration.ofSeconds(antall * 2L)
-        logger.info("Venter $ventetid så Dolly rekk å komme ajour")
-        Thread.sleep(ventetid)
-        logger.info("Ferdig med $ventetid-venting")
-        return dollyService.hentFamilier(gruppeid, accessToken) - baselineFamilier.toSet()
+        dollyService.sendSoeknad(
+            request = request,
+            navIdent = navIdent,
+            behandlingssteg = behandlingssteg,
+        )
     }
 }

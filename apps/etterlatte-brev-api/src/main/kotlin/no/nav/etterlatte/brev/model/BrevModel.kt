@@ -97,27 +97,25 @@ data class Brev(
     val brevtype: Brevtype,
 ) {
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
-
-    companion object {
-        fun fra(
-            id: BrevID,
-            opprettNyttBrev: OpprettNyttBrev,
-        ) = Brev(
-            id = id,
-            sakId = opprettNyttBrev.sakId,
-            behandlingId = opprettNyttBrev.behandlingId,
-            tittel = opprettNyttBrev.innhold.tittel,
-            spraak = opprettNyttBrev.innhold.spraak,
-            prosessType = opprettNyttBrev.prosessType,
-            soekerFnr = opprettNyttBrev.soekerFnr,
-            status = opprettNyttBrev.status,
-            statusEndret = opprettNyttBrev.opprettet,
-            mottaker = opprettNyttBrev.mottaker,
-            opprettet = opprettNyttBrev.opprettet,
-            brevtype = opprettNyttBrev.brevtype,
-        )
-    }
 }
+
+fun opprettBrevFra(
+    id: BrevID,
+    opprettNyttBrev: OpprettNyttBrev,
+) = Brev(
+    id = id,
+    sakId = opprettNyttBrev.sakId,
+    behandlingId = opprettNyttBrev.behandlingId,
+    tittel = opprettNyttBrev.innhold.tittel,
+    spraak = opprettNyttBrev.innhold.spraak,
+    prosessType = opprettNyttBrev.prosessType,
+    soekerFnr = opprettNyttBrev.soekerFnr,
+    status = opprettNyttBrev.status,
+    statusEndret = opprettNyttBrev.opprettet,
+    mottaker = opprettNyttBrev.mottaker,
+    opprettet = opprettNyttBrev.opprettet,
+    brevtype = opprettNyttBrev.brevtype,
+)
 
 class Pdf(val bytes: ByteArray)
 

@@ -35,6 +35,7 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.model.opprettBrevFra
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
@@ -292,7 +293,7 @@ class BrevRepository(private val ds: DataSource) {
             tx.lagreHendelse(id, Status.OPPRETTET, ulagretBrev.opprettet)
                 .also { oppdatert -> require(oppdatert == 1) }
 
-            Brev.fra(id, ulagretBrev)
+            opprettBrevFra(id, ulagretBrev)
         }
 
     fun settBrevJournalfoert(

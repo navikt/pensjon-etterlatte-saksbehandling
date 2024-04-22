@@ -9,17 +9,6 @@ import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.time.LocalDate
 import java.util.UUID
 
-typealias BrevID = Long
-
-enum class Status {
-    OPPRETTET,
-    OPPDATERT,
-    FERDIGSTILT,
-    JOURNALFOERT,
-    DISTRIBUERT,
-    SLETTET,
-}
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Adresse(
     val adresseType: String,
@@ -165,13 +154,6 @@ data class OpprettNyttBrev(
     val brevtype: Brevtype,
 ) {
     val status: Status = Status.OPPRETTET
-}
-
-enum class BrevProsessType {
-    MANUELL,
-    REDIGERBAR,
-    AUTOMATISK,
-    OPPLASTET_PDF,
 }
 
 data class EtterbetalingDTO(

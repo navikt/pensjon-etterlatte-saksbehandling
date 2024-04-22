@@ -42,6 +42,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
+          cache: 'yarn'
+          cache-dependency-path: apps/${{ env.APP_NAME }}/client/yarn.lock
       - name: Install client
         working-directory: apps/${{ env.APP_NAME }}
         run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build
@@ -65,6 +67,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
+          cache: 'yarn'
+          cache-dependency-path: apps/${{ env.APP_NAME }}/client/yarn.lock
       - name: Inject slug/short variables
         uses: rlespinasse/github-slug-action@v4
       - name: License check top level

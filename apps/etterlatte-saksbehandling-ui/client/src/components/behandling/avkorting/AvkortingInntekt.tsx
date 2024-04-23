@@ -261,6 +261,7 @@ export const AvkortingInntekt = ({
                 <TextAreaWrapper>
                   <Textarea
                     {...register('spesifikasjon')}
+                    resize="vertical"
                     label={
                       <SpesifikasjonLabel>
                         <Label>Spesifikasjon av inntekt</Label>

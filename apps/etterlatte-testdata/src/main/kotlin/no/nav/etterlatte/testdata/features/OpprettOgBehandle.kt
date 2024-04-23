@@ -75,7 +75,9 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
                 val familie = familieoppretter.opprettFamilie(getDollyAccessToken(), gruppeid)
                 familie.forEach {
                     opprettaFamilier++
+                    logger.info("Sender inn søknad for familie med avdød ${it.avdoed}")
                     sendSoeknad(it, soeknadType, navIdent, behandlingssteg)
+                    logger.info("Søknad sendt for familie med avdød ${it.avdoed}")
                 }
             }
         }

@@ -22,7 +22,9 @@ class Familieoppretter(
         accessToken: String,
         gruppeid: Long,
     ): List<ForenkletFamilieModell> {
+        logger.info("Oppretter familie")
         val baselineFamilier = dollyService.hentFamilier(gruppeid, accessToken)
+        logger.debug("Baseline er ${baselineFamilier.size} saker")
         val req =
             BestillingRequest(
                 erOver18 = false,
@@ -32,6 +34,7 @@ class Familieoppretter(
                 gruppeId = gruppeid,
             )
 
+        logger.info("Oppretter bestilling for gruppeid $gruppeid")
         dollyService.opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
             .also { bestilling ->
                 logger.info("Bestilling med id ${bestilling.id} har status ${bestilling.ferdig}")
@@ -42,9 +45,11 @@ class Familieoppretter(
         iTraad {
             while (dollyService.hentFamilier(gruppeid, accessToken) == baselineFamilier && venta <= maksVentetid) {
                 venta += ventetid
+                logger.info("Ingen ny familie oppretta, venter $ventetid")
                 sleep(ventetid)
             }
         }
+        logger.info("Ferdig med å vente etter $venta, returnerer")
         return (dollyService.hentFamilier(gruppeid, accessToken) - baselineFamilier).also {
             logger.info("${it.size} endra familier")
         }

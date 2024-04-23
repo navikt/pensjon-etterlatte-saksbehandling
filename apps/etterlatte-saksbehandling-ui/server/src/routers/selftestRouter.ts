@@ -22,14 +22,17 @@ selftestRouter.get('/', express.json(), async (req, res) => {
   })
   Promise.all(results)
     .then((e) =>
-      e.flatMap((pingres) => {
-        return pingres
+      e.map((pingresult) => {
+        return pingresult
       })
     )
     .then((all) => {
       res.json(all)
     })
     .catch((err) => res.status(500).send(err))
+    .finally(() => {
+      return
+    })
 })
 
 interface IPingResult {

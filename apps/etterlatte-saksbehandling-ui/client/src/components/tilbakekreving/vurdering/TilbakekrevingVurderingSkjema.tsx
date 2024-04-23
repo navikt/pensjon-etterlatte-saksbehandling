@@ -111,9 +111,11 @@ export function TilbakekrevingVurderingSkjema({
     lagreVurdering({ vurdering: vurdering, automatisk: false })
   }
 
-  watch((data) => {
-    if (isDirty) autosave(data as TilbakekrevingVurdering)
-  })
+  const formData: TilbakekrevingVurdering = watch()
+
+  useEffect(() => {
+    if (isDirty) autosave(formData)
+  }, [formData])
 
   useEffect(() => {
     return () => {

@@ -15,9 +15,7 @@ export interface IBrev {
 
 export interface Mottaker {
   navn: string
-  foedselsnummer?: {
-    value: string
-  }
+  foedselsnummer?: string
   orgnummer?: string
   adresse: Adresse
 }

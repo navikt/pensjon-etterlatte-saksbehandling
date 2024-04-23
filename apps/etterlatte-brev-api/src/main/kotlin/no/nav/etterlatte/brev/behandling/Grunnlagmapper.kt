@@ -21,8 +21,8 @@ import no.nav.etterlatte.libs.common.grunnlag.hentVergemaalellerfremtidsfullmakt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.BrevMottaker
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.ForelderVerge
-import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -176,7 +176,7 @@ private fun vergemaalUtenAdresse(
     mottaker =
         BrevMottaker(
             vergesNavn,
-            foedselsnummer = MottakerFoedselsnummer(vergesFoedselsnummer),
+            foedselsnummer = Folkeregisteridentifikator.ofNullable(vergesFoedselsnummer),
             adresse = null,
         ),
 )

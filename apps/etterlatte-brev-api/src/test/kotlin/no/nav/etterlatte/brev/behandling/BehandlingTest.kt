@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerAdresse
-import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -185,7 +184,7 @@ internal class BehandlingTest {
                             opprettOpplysning(
                                 BrevMottaker(
                                     forventetVergeNavn,
-                                    MottakerFoedselsnummer(""),
+                                    SOEKER_FOEDSELSNUMMER,
                                     MottakerAdresse("", "", "", "", "", "", "", ""),
                                     "",
                                 ).toJsonNode(),

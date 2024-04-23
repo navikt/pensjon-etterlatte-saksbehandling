@@ -24,7 +24,7 @@ export const VergeadressePanel = ({ vergeadresseResult }: Props) =>
             <>
               {!vergeadresse.foedselsnummer && !vergeadresse.orgnummer && `Fødselsnummer/orgnummer: Ikke registrert.`}
               {!vergeadresse.foedselsnummer && !vergeadresse.orgnummer && <br />}
-              {vergeadresse.foedselsnummer && `Fødselsnummer: ${formaterFnr(vergeadresse.foedselsnummer.value)}`}
+              {vergeadresse.foedselsnummer && `Fødselsnummer: ${formaterFnr(vergeadresse.foedselsnummer)}`}
               {vergeadresse.foedselsnummer && <br />}
               {vergeadresse.navn}
               {vergeadresse.navn && <br />}

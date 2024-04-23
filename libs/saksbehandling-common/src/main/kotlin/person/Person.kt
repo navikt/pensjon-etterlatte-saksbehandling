@@ -208,23 +208,10 @@ data class ForelderVerge(val foedselsnummer: Folkeregisteridentifikator, val nav
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class BrevMottaker(
     val navn: String?,
-    val foedselsnummer: MottakerFoedselsnummer?,
+    val foedselsnummer: Folkeregisteridentifikator?,
     val adresse: MottakerAdresse?,
     val adresseTypeIKilde: String? = null,
 )
-
-/**
- * Denne pakker inn fødselsnummer i {value: "<fnr>"}, fordi det skal matche responsen fra brev-api...
- */
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class MottakerFoedselsnummer(val value: String) {
-    /**
-     * Skal ALLTID returnere anonymisert fødselsnummer.
-     *
-     * Bruk [value] ved behov for komplett fødselsnummer.
-     */
-    override fun toString(): String = this.value.replaceRange(6 until 11, "*****")
-}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class MottakerAdresse(

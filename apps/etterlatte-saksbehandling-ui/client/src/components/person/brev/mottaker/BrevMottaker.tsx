@@ -57,7 +57,7 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
             )
           }
         />
-        {mottaker.foedselsnummer && <Info label="Fødselsnummer" tekst={mottaker.foedselsnummer.value} wide />}
+        {mottaker.foedselsnummer && <Info label="Fødselsnummer" tekst={mottaker.foedselsnummer} wide />}
         {mottaker.orgnummer && <Info label="Org.nr." tekst={mottaker.orgnummer} wide />}
 
         <Info

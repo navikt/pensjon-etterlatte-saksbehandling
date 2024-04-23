@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerAdresse
-import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -64,7 +63,7 @@ class GrunnlagmapperTest {
 
         verge.navn() shouldBe "ADVOKAT VERA V VERGE"
         with(verge.mottaker) {
-            foedselsnummer shouldBe MottakerFoedselsnummer(vergesAdresseFnr)
+            foedselsnummer shouldBe Folkeregisteridentifikator.of(vergesAdresseFnr)
             navn shouldBe "ADVOKAT VERA V VERGE"
             adresse shouldBe
                 MottakerAdresse(
@@ -108,7 +107,7 @@ class GrunnlagmapperTest {
 
         verge.navn() shouldBe "Vera Verge"
         with(verge.mottaker) {
-            foedselsnummer shouldBe MottakerFoedselsnummer(pdlVergeOekonomiskFnr)
+            foedselsnummer shouldBe Folkeregisteridentifikator.of(pdlVergeOekonomiskFnr)
             navn shouldBe "Vera Verge"
             adresse shouldBe null
         }

@@ -111,7 +111,7 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
               )}
               {mottakerType == MottakerType.PRIVATPERSON && (
                 <TextField
-                  {...register('foedselsnummer.value', {
+                  {...register('foedselsnummer', {
                     required: {
                       value: true,
                       message: 'Fødselsnummer må være satt',
@@ -122,7 +122,7 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
                     },
                   })}
                   label="Fødselsnummer"
-                  error={errors?.foedselsnummer?.value?.message}
+                  error={errors?.foedselsnummer?.message}
                 />
               )}
             </SkjemaGruppe>

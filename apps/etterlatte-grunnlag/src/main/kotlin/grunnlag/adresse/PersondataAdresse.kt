@@ -3,8 +3,8 @@ package no.nav.etterlatte.grunnlag.adresse
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.etterlatte.libs.common.person.BrevMottaker
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerAdresse
-import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import org.slf4j.LoggerFactory
 
 const val REGOPPSLAG_ADRESSE = "REGOPPSLAG_ADRESSE"
@@ -74,7 +74,7 @@ data class VergePersonFormat(
     override fun tilFrittstaendeBrevMottaker(foedselsnummer: String): BrevMottaker {
         return BrevMottaker(
             navn = navn ?: "Ukjent",
-            foedselsnummer = MottakerFoedselsnummer(foedselsnummer),
+            foedselsnummer = Folkeregisteridentifikator.ofNullable(foedselsnummer),
             adresse =
                 MottakerAdresse(
                     adresseType = adressetypeFromLand(adresse.landkode, adresse.land),
@@ -101,7 +101,7 @@ data class RegoppslagFormat(
     override fun tilFrittstaendeBrevMottaker(foedselsnummer: String): BrevMottaker =
         BrevMottaker(
             navn = navn ?: "Ukjent",
-            foedselsnummer = MottakerFoedselsnummer(foedselsnummer),
+            foedselsnummer = Folkeregisteridentifikator.ofNullable(foedselsnummer),
             adresse =
                 MottakerAdresse(
                     adresseType = adressetypeFromLand(adresse.landkode, adresse.land),

@@ -14,7 +14,7 @@ import {
   TilbakekrevingVurdering,
 } from '~shared/types/Tilbakekreving'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 import { lagreTilbakekrevingsvurdering } from '~shared/api/tilbakekreving'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
@@ -26,9 +26,8 @@ import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import debounce from 'lodash/debounce'
 
-const initialVurdering: TilbakekrevingVurdering = {
+const initialVurdering = {
   aarsak: null,
   beskrivelse: null,
   forhaandsvarsel: null,
@@ -38,6 +37,7 @@ const initialVurdering: TilbakekrevingVurdering = {
   tilsvar: null,
   rettsligGrunnlag: null,
   objektivtVilkaarOppfylt: null,
+  subjektivtVilkaarOppfylt: null,
   uaktsomtForaarsaketFeilutbetaling: null,
   burdeBrukerForstaatt: null,
   burdeBrukerForstaattEllerUaktsomtForaarsaket: null,
@@ -58,23 +58,10 @@ export function TilbakekrevingVurderingSkjema({
   behandling: TilbakekrevingBehandling
   redigerbar: boolean
 }) {
-  if (!behandling) {
-    return
-  }
   const dispatch = useAppDispatch()
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
-  const [autolagreVurderingStatus, autolagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
-  const {
-    register,
-    handleSubmit,
-    trigger,
-    watch,
-    control,
-    getValues,
-    setValue,
-    formState: { isDirty },
-  } = useForm<TilbakekrevingVurdering>({
-    defaultValues: behandling.tilbakekreving.vurdering || initialVurdering,
+  const { register, handleSubmit, watch, control, getValues, setValue } = useForm<TilbakekrevingVurdering>({
+    defaultValues: behandling.tilbakekreving.vurdering ? behandling.tilbakekreving.vurdering : initialVurdering,
     shouldUnregister: true,
   })
 
@@ -86,42 +73,11 @@ export function TilbakekrevingVurderingSkjema({
     }
   }, [watch().vilkaarsresultat, watch().rettsligGrunnlag])
 
-  const lagreVurdering = ({ vurdering, automatisk }: { vurdering: TilbakekrevingVurdering; automatisk: boolean }) => {
-    const apiCall = automatisk ? autolagreVurderingRequest : lagreVurderingRequest
-
-    apiCall(
-      {
-        behandlingsId: behandling.id,
-        vurdering: vurdering,
-      },
-      (lagretTilbakekreving: TilbakekrevingBehandling) => {
-        dispatch(addTilbakekreving(lagretTilbakekreving))
-      }
-    )
+  const lagreVurdering = (vurdering: TilbakekrevingVurdering) => {
+    lagreVurderingRequest({ behandlingsId: behandling.id, vurdering }, (lagretTilbakekreving) => {
+      dispatch(addTilbakekreving(lagretTilbakekreving))
+    })
   }
-
-  const autosave = useRef(
-    debounce((vurdering) => {
-      trigger().then((isValid) => isValid && lagreVurdering({ vurdering: vurdering, automatisk: true }))
-    }, 3000)
-  ).current
-
-  const submitVurdering = (vurdering: TilbakekrevingVurdering) => {
-    autosave.cancel()
-    lagreVurdering({ vurdering: vurdering, automatisk: false })
-  }
-
-  const formData: TilbakekrevingVurdering = watch()
-
-  useEffect(() => {
-    if (isDirty) autosave(formData)
-  }, [formData])
-
-  useEffect(() => {
-    return () => {
-      autosave.cancel()
-    }
-  }, [autosave])
 
   const vilkaarOppfylt = () =>
     watch().vilkaarsresultat &&
@@ -384,7 +340,7 @@ export function TilbakekrevingVurderingSkjema({
             <Button
               variant="primary"
               size="small"
-              onClick={handleSubmit(submitVurdering)}
+              onClick={handleSubmit(lagreVurdering)}
               loading={isPending(lagreVurderingStatus)}
               style={{ maxWidth: '7.5em' }}
             >
@@ -393,10 +349,6 @@ export function TilbakekrevingVurderingSkjema({
             {mapResult(lagreVurderingStatus, {
               success: () => <Toast melding="Vurdering lagret" />,
               error: (error) => <Alert variant="error">Kunne ikke lagre vurdering: {error.detail}</Alert>,
-            })}
-            {mapResult(autolagreVurderingStatus, {
-              success: () => <Toast melding="Vurdering auto-lagret" />,
-              error: (error) => <Alert variant="error">Kunne ikke auto-lagre vurdering: {error.detail}</Alert>,
             })}
           </VStack>
         )}

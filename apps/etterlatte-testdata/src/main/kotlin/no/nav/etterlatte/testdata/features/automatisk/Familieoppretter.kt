@@ -23,7 +23,7 @@ class Familieoppretter(
         gruppeid: Long,
     ): List<ForenkletFamilieModell> {
         logger.info("Oppretter familie")
-        val baselineFamilier = dollyService.hentFamilier(gruppeid, accessToken)
+        val baselineFamilier = hentFamilier(gruppeid, accessToken)
         logger.debug("Baseline er ${baselineFamilier.size} saker")
         val req =
             BestillingRequest(
@@ -43,15 +43,25 @@ class Familieoppretter(
         var venta = Duration.ZERO
         val ventetid = Duration.ofSeconds(5)
         iTraad {
-            while (dollyService.hentFamilier(gruppeid, accessToken) == baselineFamilier && venta <= maksVentetid) {
+            while (hentFamilier(gruppeid, accessToken) == baselineFamilier && venta <= maksVentetid) {
                 venta += ventetid
                 logger.info("Ingen ny familie oppretta, venter $ventetid")
                 sleep(ventetid)
             }
         }
         logger.info("Ferdig med å vente etter $venta, returnerer")
-        return (dollyService.hentFamilier(gruppeid, accessToken) - baselineFamilier).also {
+        return (hentFamilier(gruppeid, accessToken) - baselineFamilier).also {
             logger.info("${it.size} endra familier")
         }
+    }
+
+    private fun hentFamilier(
+        gruppeid: Long,
+        accessToken: String,
+    ) = try {
+        dollyService.hentFamilier(gruppeid, accessToken)
+    } catch (e: Exception) {
+        logger.warn("Kunne ikke hente familie, prøver igjen snart", e)
+        listOf()
     }
 }

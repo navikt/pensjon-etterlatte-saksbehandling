@@ -38,7 +38,7 @@ data class OppgaveIntern(
 
     fun erAttestering(): Boolean = status == Status.ATTESTERING
 
-    fun kanSendesTilAttestering() =
+    fun typeKanAttesteres() =
         type in
             listOf(
                 OppgaveType.FOERSTEGANGSBEHANDLING,

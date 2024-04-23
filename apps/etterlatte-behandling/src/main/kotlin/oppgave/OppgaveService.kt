@@ -362,7 +362,7 @@ class OppgaveService(
         }
         logger.info("Oppgave med id=${oppgave.id} ferdigstilt av ${saksbehandler.ident()}")
 
-        if (oppgave.kanSendesTilAttestering()) {
+        if (oppgave.typeKanAttesteres()) {
             tildelOpprinneligSaksbehandler(oppgave.id)
         }
     }

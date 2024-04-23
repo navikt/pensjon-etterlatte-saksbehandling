@@ -52,16 +52,16 @@ internal class StartUthentingFraSoeknadRiver(
                 SoeknadType.valueOf(packet[GyldigSoeknadVurdert.skjemaInfoTypeKey].textValue()),
             )
 
-        JsonMessage.newMessage(
-            mapOf(
+        val verdier =
+            mutableMapOf(
                 EventNames.NY_OPPLYSNING.lagParMedEventNameKey(),
                 SAK_ID_KEY to packet[GyldigSoeknadVurdert.sakIdKey],
                 BEHANDLING_ID_KEY to packet[GyldigSoeknadVurdert.behandlingIdKey],
                 CORRELATION_ID_KEY to packet[CORRELATION_ID_KEY],
                 OPPLYSNING_KEY to opplysninger,
-                Behandlingssteg.KEY to packet[Behandlingssteg.KEY],
-            ),
-        ).apply {
+            )
+        packet[Behandlingssteg.KEY].takeUnless { it.isMissingNode }?.also { verdier[Behandlingssteg.KEY] = it }
+        JsonMessage.newMessage(verdier).apply {
             try {
                 rapid.publish(packet[BEHANDLING_ID_KEY].toString(), toJson())
             } catch (err: Exception) {

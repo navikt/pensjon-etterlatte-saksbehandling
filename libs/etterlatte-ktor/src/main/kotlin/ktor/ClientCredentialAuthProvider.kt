@@ -28,6 +28,7 @@ class ClientCredentialAuthConfig {
 }
 
 class ClientCredentialAuthProvider(config: Map<String, String>) : AuthProvider {
+    @Deprecated("Please use sendWithoutRequest function instead")
     override val sendWithoutRequest: Boolean = true
 
     private val clientPropertiesConfig =
@@ -64,7 +65,7 @@ class ClientCredentialAuthProvider(config: Map<String, String>) : AuthProvider {
         request: HttpRequestBuilder,
         authHeader: HttpAuthHeader?,
     ) {
-        accessTokenService.getAccessToken(clientPropertiesConfig)?.accessToken.also {
+        accessTokenService.getAccessToken(clientPropertiesConfig).accessToken.also {
             request.headers[HttpHeaders.Authorization] = "Bearer $it"
         }
     }

@@ -3,6 +3,7 @@ package no.nav.etterlatte.testdata
 import io.ktor.client.call.body
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.automatisk.AvkortingService
 import no.nav.etterlatte.testdata.automatisk.BeregningService
@@ -36,6 +37,12 @@ class Behandler(
         }
         val sak = sakService.hentSak(sakId).body<Sak>()
         logger.info("Henta sak $sakId")
+
+        sakService.settKommerBarnetTilGode(behandling)
+        sakService.lagreGyldighetsproeving(behandling)
+        sakService.lagreVirkningstidspunkt(behandling)
+        sakService.tildelSaksbehandler(Fagsaksystem.EY.navn, sakId)
+
         vilkaarsvurderingService.vilkaarsvurder(behandling)
         logger.info("Vilkårsvurderte behandling $behandling i sak $sakId")
         if (behandlingssteg == Behandlingssteg.VILKAARSVURDERT) {

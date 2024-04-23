@@ -80,8 +80,15 @@ export interface Filter {
   oppgavetypeFilter: Array<string>
 }
 
+export enum GosysOppgaveValg {
+  ALLE_OPPGAVER = 'ALLE_OPPGAVER',
+  MINE_OPPGAVER = 'MINE_OPPGAVER',
+  IKKE_TILDELTE = 'IKKE_TILDELTE',
+}
+
 export interface GosysFilter {
   enhetFilter?: EnhetFilterKeys
   saksbehandlerFilter?: string
   temaFilter?: TemaFilterKeys
+  harTildelingFilter?: boolean
 }

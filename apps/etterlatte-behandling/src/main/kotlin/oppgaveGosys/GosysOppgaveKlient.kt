@@ -122,7 +122,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                     .plus("&limit=1000")
                     .plus(enhetsnr?.let { "&tildeltEnhetsnr=$it" } ?: "")
                     .plus(saksbehandler?.let { "&tilordnetRessurs=$it" } ?: "")
-//                    .plus("&tildeltRessurs=false")
+                    .plus(harTildeling?.let { "&tildeltRessurs=$it" } ?: "")
 
             return downstreamResourceClient
                 .get(

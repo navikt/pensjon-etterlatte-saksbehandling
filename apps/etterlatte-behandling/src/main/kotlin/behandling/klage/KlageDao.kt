@@ -70,7 +70,7 @@ class KlageDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) : K
                 val statement =
                     prepareStatement(
                         """
-                        SELECT k.id, k.sak_id, saktype, fnr, enhet, k.opprettet, status, 
+                        SELECT k.id, k.sak_id, s.saktype, s.fnr, s.enhet, k.opprettet, k.status, 
                             kabalstatus, formkrav, utfall, resultat, kabalresultat, innkommende_klage, aarsak_til_avbrytelse, initielt_utfall
                         FROM klage k INNER JOIN sak s on k.sak_id = s.id
                         WHERE k.id = ?
@@ -90,7 +90,7 @@ class KlageDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) : K
                 val statement =
                     prepareStatement(
                         """
-                        SELECT k.id, k.sak_id, saktype, fnr, enhet, k.opprettet, status, 
+                        SELECT k.id, k.sak_id, s.saktype, s.fnr, s.enhet, k.opprettet, k.status, 
                             kabalstatus, formkrav, utfall, resultat, kabalresultat, innkommende_klage, aarsak_til_avbrytelse, initielt_utfall
                         FROM klage k INNER JOIN sak s on k.sak_id = s.id
                         WHERE s.id = ?

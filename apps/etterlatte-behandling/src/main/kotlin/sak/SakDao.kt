@@ -9,6 +9,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -144,11 +146,12 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
             with(connection) {
                 val statement =
                     prepareStatement(
-                        "INSERT INTO sak(sakType, fnr, enhet) VALUES(?, ?, ?) RETURNING id, sakType, fnr, enhet",
+                        "INSERT INTO sak(sakType, fnr, enhet, opprettet) VALUES(?, ?, ?, ?) RETURNING id, sakType, fnr, enhet",
                     )
                 statement.setString(1, type.name)
                 statement.setString(2, fnr)
                 statement.setString(3, enhet)
+                statement.setTidspunkt(4, Tidspunkt.now())
                 requireNotNull(
                     statement.executeQuery().singleOrNull { this.toSak() },
                 ) { "Kunne ikke opprette sak for fnr: $fnr" }

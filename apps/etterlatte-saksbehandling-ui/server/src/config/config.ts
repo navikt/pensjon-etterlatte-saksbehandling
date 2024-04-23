@@ -75,7 +75,16 @@ export function requireEnvValue(key: string): string {
   throw new Error(`Env is missing required key ${key}`)
 }
 
-const API_CONFIG_FROM_ENV = () => {
+export interface ApiUrlScope {
+  url: string
+  scope: string
+}
+
+export interface ApiConfig {
+  [key: string]: ApiUrlScope
+}
+
+const API_CONFIG_FROM_ENV = (): ApiConfig => {
   return {
     vilkaarsvurdering: {
       url: requireEnvValue('VILKAARSVURDERING_API_URL'),

@@ -55,7 +55,6 @@ import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
-import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -65,10 +64,7 @@ import no.nav.etterlatte.libs.ktor.ktor.clientCredential
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.setReady
-import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
-import no.nav.etterlatte.rapidsandrivers.migrering.FIKS_BREV_MIGRERING
-import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.FerdigstillJournalfoerOgDistribuerBrev
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
@@ -76,7 +72,6 @@ import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
 import no.nav.etterlatte.rivers.StartBrevgenereringRepository
 import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
-import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
@@ -263,15 +258,6 @@ class ApplicationBuilder {
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
                 DistribuerBrevRiver(this, brevdistribuerer)
             }
-
-    private fun lagMelding(behandlingId: String) =
-        JsonMessage.newMessage(
-            mapOf(
-                Migreringshendelser.FIKS_ENKELTBREV.lagParMedEventNameKey(),
-                BEHANDLING_ID_KEY to behandlingId,
-                FIKS_BREV_MIGRERING to true,
-            ),
-        ).toJson()
 
     fun start() = setReady().also { rapidsConnection.start() }
 

@@ -268,6 +268,7 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         saksbehandler: String?,
         tema: List<String>,
         enhetsnr: String?,
+        harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver {
         return GosysOppgaver(0, emptyList())

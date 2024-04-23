@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -127,7 +126,7 @@ class OversendelseBrevServiceImplTest(dataSource: DataSource) {
     private fun opprettMottaker() =
         Mottaker(
             "Rød Blanding",
-            foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+            foedselsnummer = SOEKER_FOEDSELSNUMMER,
             orgnummer = null,
             adresse =
                 Adresse(

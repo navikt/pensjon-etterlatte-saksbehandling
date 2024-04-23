@@ -2,7 +2,7 @@ package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.Brevtype
-import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
 
@@ -44,14 +44,14 @@ data class Adresse(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Mottaker(
     val navn: String,
-    val foedselsnummer: MottakerFoedselsnummer? = null,
+    val foedselsnummer: Folkeregisteridentifikator? = null,
     val orgnummer: String? = null,
     val adresse: Adresse,
 ) {
     fun erGyldig(): Boolean {
         return if (navn.isBlank()) {
             false
-        } else if ((foedselsnummer == null || foedselsnummer.value.isBlank()) && orgnummer.isNullOrBlank()) {
+        } else if (foedselsnummer == null && orgnummer.isNullOrBlank()) {
             false
         } else {
             adresse.erGyldig()

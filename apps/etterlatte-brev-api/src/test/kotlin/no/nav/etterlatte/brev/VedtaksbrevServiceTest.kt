@@ -53,7 +53,6 @@ import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
-import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -716,7 +715,7 @@ internal class VedtaksbrevServiceTest {
     private fun opprettMottaker() =
         Mottaker(
             "Rød Blanding",
-            foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+            foedselsnummer = SOEKER_FOEDSELSNUMMER,
             orgnummer = null,
             adresse =
                 Adresse(

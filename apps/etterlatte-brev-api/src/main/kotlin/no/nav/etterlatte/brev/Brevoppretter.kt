@@ -23,7 +23,6 @@ import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -206,7 +205,7 @@ fun Vergemaal.toMottaker(): Mottaker {
     if (mottaker.adresse != null) {
         return Mottaker(
             navn = if (mottaker.navn.isNullOrBlank()) "N/A" else mottaker.navn!!,
-            foedselsnummer = mottaker.foedselsnummer?.let { MottakerFoedselsnummer(it.value) },
+            foedselsnummer = mottaker.foedselsnummer?.let { Folkeregisteridentifikator.ofNullable(it.value) },
             orgnummer = null,
             adresse =
                 with(mottaker.adresse!!) {

@@ -45,6 +45,7 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { validateFnrObligatorisk } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 
 const stripWhitespace = (s: string | number): string => {
   if (typeof s === 'string') return s.replace(/\s+/g, '')
@@ -299,7 +300,7 @@ function feilIOverstyrBeregningperiode(
     feil.push('TRYGDETID_MANGLER')
   }
 
-  if (!grunnlag.data.trygdetidForIdent) {
+  if (validateFnrObligatorisk(grunnlag.data.trygdetidForIdent)) {
     feil.push('TRYGDETID_MANGLER_FNR')
   }
 

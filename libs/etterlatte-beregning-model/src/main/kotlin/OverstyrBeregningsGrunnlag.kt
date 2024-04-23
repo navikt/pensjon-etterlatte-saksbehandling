@@ -19,7 +19,6 @@ data class OverstyrBeregningGrunnlagDao(
     val beskrivelse: String,
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val reguleringRegelresultat: JsonNode? = null,
-    val reguleringRegelVersjon: String? = null,
 )
 
 data class OverstyrBeregningGrunnlagData(

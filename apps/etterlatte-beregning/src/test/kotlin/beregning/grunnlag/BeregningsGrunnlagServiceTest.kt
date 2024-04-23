@@ -813,7 +813,6 @@ internal class BeregningsGrunnlagServiceTest {
                         OverstyrBeregningGrunnlagDao::id,
                         OverstyrBeregningGrunnlagDao::kilde,
                         OverstyrBeregningGrunnlagDao::reguleringRegelresultat,
-                        OverstyrBeregningGrunnlagDao::reguleringRegelVersjon,
                         OverstyrBeregningGrunnlagDao::beskrivelse,
                     )
                 },

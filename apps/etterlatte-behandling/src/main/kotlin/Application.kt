@@ -10,6 +10,7 @@ import io.ktor.server.routing.Route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
+import no.nav.etterlatte.behandling.aktivitetsplikt.aktivitetspliktRoutes
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingVedtakRoute
 import no.nav.etterlatte.behandling.behandlinginfo.behandlingInfoRoutes
@@ -160,9 +161,9 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         behandlingService = applicationContext.behandlingService,
         gyldighetsproevingService = applicationContext.gyldighetsproevingService,
         kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
-        aktivitetspliktService = applicationContext.aktivtetspliktService,
         behandlingFactory = applicationContext.behandlingFactory,
     )
+    aktivitetspliktRoutes(aktivitetspliktService = applicationContext.aktivtetspliktService)
     sjekklisteRoute(sjekklisteService = applicationContext.sjekklisteService)
     statistikkRoutes(behandlingService = applicationContext.behandlingService)
     generellbehandlingRoutes(

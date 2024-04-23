@@ -28,7 +28,7 @@ export const validerFnrValgfri = (fnr: string): string | undefined => {
   return undefined
 }
 
-export const validateFnrObligatorisk = (fnr: string): string | undefined => {
+export const validateFnrObligatorisk = (fnr: string | undefined): string | undefined => {
   if (!fnr) {
     return 'Fødselsnummer må være satt'
   } else if (!fnrErGyldig(fnr)) {

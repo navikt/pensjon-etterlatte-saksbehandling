@@ -1,5 +1,6 @@
 package no.nav.etterlatte.oppgaveGosys
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
@@ -24,6 +25,7 @@ import java.time.LocalDate
 
 data class GosysOppgaver(val antallTreffTotalt: Int, val oppgaver: List<GosysApiOppgave>)
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class GosysApiOppgave(
     val id: Long,
     val versjon: Long,
@@ -273,7 +275,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                     patchBody = objectMapper.writeValueAsString(body),
                 )
                 .mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue<GosysApiOppgave>(it.toString()) } },
+                    success = { resource -> deserialize(resource.response.toString()) },
                     failure = { errorResponse -> throw errorResponse },
                 )
         } catch (re: ResponseException) {

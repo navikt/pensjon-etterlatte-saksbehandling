@@ -9,6 +9,7 @@ export const hentGosysOppgaver = async (filter: GosysFilter): Promise<ApiRespons
     saksbehandler: filter.saksbehandlerFilter || '',
     tema: filter.temaFilter || '',
     enhet: filter.enhetFilter ? filter.enhetFilter.replace('E', '') : '',
+    harTildeling: filter.harTildelingFilter === false ? filter.harTildelingFilter.toString() : '',
   })
 
   return apiClient.get(`/oppgaver/gosys?${queryParams}`)

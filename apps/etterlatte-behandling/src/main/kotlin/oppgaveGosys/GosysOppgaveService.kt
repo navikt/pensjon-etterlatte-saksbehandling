@@ -24,6 +24,7 @@ interface GosysOppgaveService {
         saksbehandler: String?,
         tema: String?,
         enhet: String?,
+        harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<GosysOppgave>
 
@@ -86,6 +87,7 @@ class GosysOppgaveServiceImpl(
         saksbehandler: String?,
         tema: String?,
         enhet: String?,
+        harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<GosysOppgave> {
         val saksbehandlerMedRoller = Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
@@ -95,6 +97,7 @@ class GosysOppgaveServiceImpl(
                 saksbehandler = saksbehandler,
                 tema = if (tema.isNullOrBlank()) listOf("EYO", "EYB") else listOf(tema),
                 enhetsnr = if (saksbehandlerMedRoller.harRolleStrengtFortrolig()) Enheter.STRENGT_FORTROLIG.enhetNr else enhet,
+                harTildeling = harTildeling,
                 brukerTokenInfo = brukerTokenInfo,
             )
 

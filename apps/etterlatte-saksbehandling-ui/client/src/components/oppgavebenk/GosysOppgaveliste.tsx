@@ -3,8 +3,8 @@ import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { GosysFilter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
-import { Switch } from '@navikt/ds-react'
+import { GosysFilter, GosysOppgaveValg } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import { ToggleGroup } from '@navikt/ds-react'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import styled from 'styled-components'
 import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
@@ -14,6 +14,7 @@ import { GosysOppgaver } from '~components/oppgavebenk/gosys/GosysOppgaver'
 import { hentGosysOppgaver } from '~shared/api/gosys'
 import { GosysFilterRad } from './filtreringAvOppgaver/GosysFilterRad'
 import { GosysOppgave } from '~shared/types/Gosys'
+import { formaterEnumTilLesbarString } from '~utils/formattering'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -37,6 +38,16 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   const dispatcher = useOppgavebenkStateDispatcher()
 
   const [gosysOppgaverResult, hentGosysOppgaverFetch] = useApiCall(hentGosysOppgaver)
+  const lagGosysFilterBasertPaaOppgaveValg = (oppgaveValg: GosysOppgaveValg): GosysFilter => {
+    switch (oppgaveValg) {
+      case GosysOppgaveValg.ALLE_OPPGAVER:
+        return { ...filter, saksbehandlerFilter: undefined, harTildelingFilter: undefined }
+      case GosysOppgaveValg.MINE_OPPGAVER:
+        return { ...filter, saksbehandlerFilter: innloggetSaksbehandler.ident, harTildelingFilter: undefined }
+      case GosysOppgaveValg.IKKE_TILDELTE:
+        return { ...filter, saksbehandlerFilter: undefined, harTildelingFilter: false }
+    }
+  }
 
   const hentOppgaver = (filter: GosysFilter) => {
     hentGosysOppgaverFetch(filter, (oppgaver) => {
@@ -50,17 +61,21 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
 
   return (
     <>
-      <VisKunMineGosysOppgaverSwitch
-        checked={filter.saksbehandlerFilter === innloggetSaksbehandler.ident}
-        onChange={(e) =>
-          setFilter({
-            ...filter,
-            saksbehandlerFilter: e.target.checked ? innloggetSaksbehandler.ident : undefined,
-          })
-        }
+      <GosysOppgaveValgToggleGroup
+        defaultValue={GosysOppgaveValg.ALLE_OPPGAVER}
+        onChange={(e) => setFilter(lagGosysFilterBasertPaaOppgaveValg(e as GosysOppgaveValg))}
+        size="small"
       >
-        Vis mine Gosys-oppgaver
-      </VisKunMineGosysOppgaverSwitch>
+        <ToggleGroup.Item value={GosysOppgaveValg.ALLE_OPPGAVER}>
+          {formaterEnumTilLesbarString(GosysOppgaveValg.ALLE_OPPGAVER)}
+        </ToggleGroup.Item>
+        <ToggleGroup.Item value={GosysOppgaveValg.MINE_OPPGAVER}>
+          {formaterEnumTilLesbarString(GosysOppgaveValg.MINE_OPPGAVER)}
+        </ToggleGroup.Item>
+        <ToggleGroup.Item value={GosysOppgaveValg.IKKE_TILDELTE}>
+          {formaterEnumTilLesbarString(GosysOppgaveValg.IKKE_TILDELTE)}
+        </ToggleGroup.Item>
+      </GosysOppgaveValgToggleGroup>
 
       <GosysFilterRad
         hentAlleOppgaver={() => hentOppgaver(filter)}
@@ -84,6 +99,6 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   )
 }
 
-const VisKunMineGosysOppgaverSwitch = styled(Switch)`
-  margin-bottom: 0.5rem;
+const GosysOppgaveValgToggleGroup = styled(ToggleGroup)`
+  margin-bottom: 2rem;
 `

@@ -25,8 +25,9 @@ internal fun Route.gosysOppgaveRoute(gosysService: GosysOppgaveService) {
                 val saksbehandler = call.request.queryParameters["saksbehandler"].takeUnless { it.isNullOrBlank() }
                 val tema = call.request.queryParameters["tema"].takeUnless { it.isNullOrBlank() }
                 val enhet = call.request.queryParameters["enhet"].takeUnless { it.isNullOrBlank() }
+                val harTildeling = call.request.queryParameters["harTildeling"].takeUnless { it.isNullOrBlank() }?.toBooleanStrictOrNull()
 
-                call.respond(gosysService.hentOppgaver(saksbehandler, tema, enhet, brukerTokenInfo))
+                call.respond(gosysService.hentOppgaver(saksbehandler, tema, enhet, harTildeling, brukerTokenInfo))
             }
         }
 

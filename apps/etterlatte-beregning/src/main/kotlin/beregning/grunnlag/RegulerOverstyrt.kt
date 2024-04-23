@@ -68,7 +68,7 @@ fun tilpassOverstyrtBeregningsgrunnlagForRegulering(
         datoTOM = null,
         utbetaltBeloep = resultat.resultat.verdi.toLong(),
         kilde = Grunnlagsopplysning.automatiskSaksbehandler,
-        reguleringRegelresultat = objectMapper.valueToTree(resultat.resultat),
+        reguleringRegelresultat = objectMapper.valueToTree(resultat),
         beskrivelse =
             "${resultat.resultat.opprettet}: Automatisk regulert fra grunnbeløp " +
                 "${forrigeGrunnbeloep.grunnbeloep} til ${nyttGrunnbeloep.grunnbeloep}",

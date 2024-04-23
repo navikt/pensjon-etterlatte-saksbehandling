@@ -14,7 +14,7 @@ import {
   TilbakekrevingVurdering,
 } from '~shared/types/Tilbakekreving'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { lagreTilbakekrevingsvurdering } from '~shared/api/tilbakekreving'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
@@ -63,24 +63,63 @@ export function TilbakekrevingVurderingSkjema({
   }
   const dispatch = useAppDispatch()
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
+  const [autolagreVurderingStatus, autolagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
   const {
     register,
     handleSubmit,
+    trigger,
     watch,
     control,
     getValues,
     setValue,
-    formState: { dirtyFields },
+    formState: { isDirty },
   } = useForm<TilbakekrevingVurdering>({
     defaultValues: behandling.tilbakekreving.vurdering || initialVurdering,
     shouldUnregister: true,
   })
 
-  const lagreVurdering = (vurdering: TilbakekrevingVurdering) => {
-    lagreVurderingRequest({ behandlingsId: behandling.id, vurdering }, (lagretTilbakekreving) => {
-      dispatch(addTilbakekreving(lagretTilbakekreving))
-    })
+  useEffect(() => {
+    if (watch().vilkaarsresultat === TilbakekrevingVilkaar.IKKE_OPPFYLT) {
+      setValue('hjemmel', TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD)
+    } else {
+      setValue('hjemmel', watch().rettsligGrunnlag)
+    }
+  }, [watch().vilkaarsresultat, watch().rettsligGrunnlag])
+
+  const lagreVurdering = ({ vurdering, automatisk }: { vurdering: TilbakekrevingVurdering; automatisk: boolean }) => {
+    const apiCall = automatisk ? autolagreVurderingRequest : lagreVurderingRequest
+
+    apiCall(
+      {
+        behandlingsId: behandling.id,
+        vurdering: vurdering,
+      },
+      (lagretTilbakekreving: TilbakekrevingBehandling) => {
+        dispatch(addTilbakekreving(lagretTilbakekreving))
+      }
+    )
   }
+
+  const autosave = useRef(
+    debounce((vurdering) => {
+      trigger().then((isValid) => isValid && lagreVurdering({ vurdering: vurdering, automatisk: true }))
+    }, 3000)
+  ).current
+
+  const submitVurdering = (vurdering: TilbakekrevingVurdering) => {
+    autosave.cancel()
+    lagreVurdering({ vurdering: vurdering, automatisk: false })
+  }
+
+  watch((data) => {
+    if (isDirty) autosave(data as TilbakekrevingVurdering)
+  })
+
+  useEffect(() => {
+    return () => {
+      autosave.cancel()
+    }
+  }, [autosave])
 
   const vilkaarOppfylt = () =>
     watch().vilkaarsresultat &&
@@ -88,27 +127,6 @@ export function TilbakekrevingVurderingSkjema({
 
   const beloepIBehold = () =>
     watch().beloepBehold && watch().beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD
-
-  const autosave = useMemo(
-    () =>
-      debounce((data, dirtyFields) => {
-        if (Object.keys(dirtyFields).length > 0) {
-          lagreVurdering(data)
-        }
-      }, 3000),
-    []
-  )
-  watch((data) => {
-    autosave(data as TilbakekrevingVurdering, dirtyFields)
-  })
-
-  useEffect(() => {
-    if (watch().vilkaarsresultat === TilbakekrevingVilkaar.IKKE_OPPFYLT) {
-      setValue('hjemmel', TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD, { shouldDirty: false })
-    } else {
-      setValue('hjemmel', watch().rettsligGrunnlag, { shouldDirty: false })
-    }
-  }, [watch().vilkaarsresultat, watch().rettsligGrunnlag])
 
   return (
     <InnholdPadding>
@@ -364,7 +382,7 @@ export function TilbakekrevingVurderingSkjema({
             <Button
               variant="primary"
               size="small"
-              onClick={handleSubmit(lagreVurdering)}
+              onClick={handleSubmit(submitVurdering)}
               loading={isPending(lagreVurderingStatus)}
               style={{ maxWidth: '7.5em' }}
             >
@@ -373,6 +391,10 @@ export function TilbakekrevingVurderingSkjema({
             {mapResult(lagreVurderingStatus, {
               success: () => <Toast melding="Vurdering lagret" />,
               error: (error) => <Alert variant="error">Kunne ikke lagre vurdering: {error.detail}</Alert>,
+            })}
+            {mapResult(autolagreVurderingStatus, {
+              success: () => <Toast melding="Vurdering auto-lagret" />,
+              error: (error) => <Alert variant="error">Kunne ikke auto-lagre vurdering: {error.detail}</Alert>,
             })}
           </VStack>
         )}

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.testdata
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -28,7 +29,10 @@ class AutomatiskBehandlingRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        behandler.behandle(packet.sakId, packet.behandlingId)
+        val behandlingssteg = Behandlingssteg.valueOf(packet[Behandlingssteg.KEY].asText())
+        runBlocking {
+            behandler.behandle(packet.sakId, packet.behandlingId, behandlingssteg)
+        }
     }
 
     override fun kontekst() = Kontekst.TEST

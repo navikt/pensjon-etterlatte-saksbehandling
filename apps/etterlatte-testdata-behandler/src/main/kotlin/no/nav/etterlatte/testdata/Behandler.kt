@@ -1,9 +1,9 @@
 package no.nav.etterlatte.testdata
 
 import io.ktor.client.call.body
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.automatisk.AvkortingService
 import no.nav.etterlatte.testdata.automatisk.BeregningService
 import no.nav.etterlatte.testdata.automatisk.BrevService
@@ -25,28 +25,47 @@ class Behandler(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun behandle(
+    suspend fun behandle(
         sakId: Long,
         behandling: UUID,
+        behandlingssteg: Behandlingssteg,
     ) {
-        runBlocking {
-            logger.info("Starter automatisk behandling av sak $sakId")
-            val sak = sakService.hentSak(sakId).body<Sak>()
-            logger.info("Henta sak $sakId")
-            vilkaarsvurderingService.vilkaarsvurder(behandling)
-            logger.info("Vilkårsvurderte behandling $behandling i sak $sakId")
-            trygdetidService.beregnTrygdetid(behandling)
-            logger.info("Beregna trygdetid for $behandling i sak $sakId")
-            beregningService.beregn(behandling)
-            logger.info("Beregna behandling $behandling i sak $sakId")
-            if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
-                avkortingService.avkort(behandling)
-                logger.info("Avkorta behandling $behandling i sak $sakId")
-            }
-            vedtaksvurderingService.fattVedtak(sakId, behandling)
-            brevService.opprettOgDistribuerVedtaksbrev(sakId, behandling)
-            vedtaksvurderingService.attesterOgIverksettVedtak(sakId, behandling)
-            logger.info("Ferdig iverksatt behandling $behandling i sak $sakId")
+        logger.info("Starter automatisk behandling av sak $sakId og behandling $behandling til steg $behandlingssteg")
+        if (behandlingssteg in listOf(Behandlingssteg.KLAR, Behandlingssteg.BEHANDLING_OPPRETTA)) {
+            return
         }
+        val sak = sakService.hentSak(sakId).body<Sak>()
+        logger.info("Henta sak $sakId")
+        vilkaarsvurderingService.vilkaarsvurder(behandling)
+        logger.info("Vilkårsvurderte behandling $behandling i sak $sakId")
+        if (behandlingssteg == Behandlingssteg.VILKAARSVURDERT) {
+            return
+        }
+        trygdetidService.beregnTrygdetid(behandling)
+        logger.info("Beregna trygdetid for $behandling i sak $sakId")
+        if (behandlingssteg == Behandlingssteg.TRYGDETID_OPPRETTA) {
+            return
+        }
+        beregningService.beregn(behandling)
+        logger.info("Beregna behandling $behandling i sak $sakId")
+        if (behandlingssteg == Behandlingssteg.BEREGNA) {
+            return
+        }
+
+        if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+            avkortingService.avkort(behandling)
+            logger.info("Avkorta behandling $behandling i sak $sakId")
+        }
+        if (behandlingssteg == Behandlingssteg.AVKORTA) {
+            return
+        }
+        vedtaksvurderingService.fattVedtak(sakId, behandling)
+        if (behandlingssteg == Behandlingssteg.VEDTAK_FATTA) {
+            return
+        }
+
+        brevService.opprettOgDistribuerVedtaksbrev(sakId, behandling)
+        vedtaksvurderingService.attesterOgIverksettVedtak(sakId, behandling)
+        logger.info("Ferdig iverksatt behandling $behandling i sak $sakId")
     }
 }

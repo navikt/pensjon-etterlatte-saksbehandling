@@ -7,8 +7,11 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktAktivitetType
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.OpprettAktivitetspliktAktivitet
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
@@ -18,11 +21,12 @@ import javax.sql.DataSource
 @ExtendWith(DatabaseExtension::class)
 class AktivitetspliktDaoTest(ds: DataSource) {
     private val dao = AktivitetspliktDao(ConnectionAutoclosingTest(ds))
+    private val sakDao = SakDao(ConnectionAutoclosingTest(ds))
 
     @Test
     fun `skal hente aktiviteter for behandling`() {
         val behandlingId = UUID.randomUUID()
-        val nyAktivtet = opprettAktivitet()
+        val nyAktivtet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
         dao.opprettAktivitet(behandlingId, nyAktivtet, kilde)
         dao.opprettAktivitet(UUID.randomUUID(), nyAktivtet, kilde)
 
@@ -34,7 +38,7 @@ class AktivitetspliktDaoTest(ds: DataSource) {
     @Test
     fun `skal opprette ny aktivetet`() {
         val behandlingId = UUID.randomUUID()
-        val nyAktivitet = opprettAktivitet()
+        val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
 
         dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
 
@@ -52,9 +56,9 @@ class AktivitetspliktDaoTest(ds: DataSource) {
     }
 
     companion object {
-        fun opprettAktivitet() =
+        fun opprettAktivitet(sak: Sak) =
             OpprettAktivitetspliktAktivitet(
-                sakId = 1L,
+                sakId = sak.id,
                 type = AktivitetspliktAktivitetType.ARBEIDSTAKER,
                 fom = LocalDate.now(),
                 beskrivelse = "Beskrivelse",

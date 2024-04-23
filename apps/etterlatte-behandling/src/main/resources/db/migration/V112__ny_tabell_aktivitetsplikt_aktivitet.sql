@@ -8,5 +8,6 @@ CREATE TABLE aktivitetsplikt_aktivitet
     tom            Date,
     opprettet      TEXT,
     endret         TEXT,
-    beskrivelse    TEXT
+    beskrivelse    TEXT,
+    CONSTRAINT fk_sak_id FOREIGN KEY (sak_id) REFERENCES sak(id)
 );

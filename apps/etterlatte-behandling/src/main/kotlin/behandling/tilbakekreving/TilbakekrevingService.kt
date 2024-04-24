@@ -21,7 +21,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
 import org.slf4j.Logger
@@ -104,14 +104,14 @@ class TilbakekrevingService(
     fun lagreVurdering(
         tilbakekrevingId: UUID,
         vurdering: TilbakekrevingVurdering,
-        brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Lagrer vurdering for tilbakekreving=$tilbakekrevingId")
             val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
 
             sjekkAtTilbakekrevingErUnderBehandling(tilbakekreving)
-            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, brukerTokenInfo)
+            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
 
             tilbakekrevingDao.lagreTilbakekreving(
                 tilbakekreving.copy(
@@ -127,14 +127,14 @@ class TilbakekrevingService(
     fun lagrePerioder(
         tilbakekrevingId: UUID,
         perioder: List<TilbakekrevingPeriode>,
-        brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Lagrer perioder for tilbakekreving=$tilbakekrevingId")
             val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
 
             sjekkAtTilbakekrevingErUnderBehandling(tilbakekreving)
-            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, brukerTokenInfo)
+            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
 
             tilbakekrevingDao.lagreTilbakekreving(
                 tilbakekreving.copy(
@@ -150,14 +150,14 @@ class TilbakekrevingService(
     fun lagreSkalSendeBrev(
         tilbakekrevingId: UUID,
         sendeBrev: Boolean,
-        brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Lagrer om brev skal sendes for tilbakekreving=$tilbakekrevingId")
             val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
 
             sjekkAtTilbakekrevingErUnderBehandling(tilbakekreving)
-            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, brukerTokenInfo)
+            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
 
             tilbakekrevingDao.lagreTilbakekreving(
                 tilbakekreving.copy(
@@ -168,14 +168,14 @@ class TilbakekrevingService(
 
     fun validerVurderingOgPerioder(
         tilbakekrevingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Sjekker at vurdering og perioder er gyldig for tilbakekreving=$tilbakekrevingId")
             val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
 
             sjekkAtTilbakekrevingErUnderBehandling(tilbakekreving)
-            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, brukerTokenInfo)
+            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
             sjekkAtTilbakekrevingErGyldig(tilbakekreving)
 
             val lagretTilbakekreving =
@@ -190,7 +190,7 @@ class TilbakekrevingService(
                 val vedtakId =
                     vedtakKlient.lagreVedtakTilbakekreving(
                         tilbakekrevingBehandling = lagretTilbakekreving,
-                        brukerTokenInfo = brukerTokenInfo,
+                        brukerTokenInfo = saksbehandler,
                         enhet = lagretTilbakekreving.sak.enhet,
                     )
 
@@ -202,16 +202,16 @@ class TilbakekrevingService(
 
     suspend fun fattVedtak(
         tilbakekrevingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ) = inTransaction {
         logger.info("Fatter vedtak for tilbakekreving=$tilbakekrevingId")
         val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
 
         sjekkAtTilbakekrevingErGyldigForVedtak(tilbakekreving)
-        sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, brukerTokenInfo)
+        sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
 
         runBlocking {
-            val vedtaksbrev = brevApiKlient.hentVedtaksbrev(tilbakekrevingId, brukerTokenInfo)
+            val vedtaksbrev = brevApiKlient.hentVedtaksbrev(tilbakekrevingId, saksbehandler)
             if (tilbakekreving.sendeBrev && vedtaksbrev == null) {
                 throw TilbakekrevingManglerBrevException(
                     "Kan ikke fatte tilbakekrevingsvedtak uten vedtaksbrev når dette er spesifisert",
@@ -219,7 +219,7 @@ class TilbakekrevingService(
             }
             if (!tilbakekreving.sendeBrev && vedtaksbrev != null) {
                 logger.info("Sletter ubrukt vedtaksbrev med id ${vedtaksbrev.id}")
-                brevApiKlient.slettVedtaksbrev(tilbakekrevingId, brukerTokenInfo)
+                brevApiKlient.slettVedtaksbrev(tilbakekrevingId, saksbehandler)
             }
         }
 
@@ -227,7 +227,7 @@ class TilbakekrevingService(
             runBlocking {
                 vedtakKlient.fattVedtakTilbakekreving(
                     tilbakekrevingId = tilbakekreving.id,
-                    brukerTokenInfo = brukerTokenInfo,
+                    brukerTokenInfo = saksbehandler,
                     enhet = tilbakekreving.sak.enhet,
                 )
             }
@@ -243,7 +243,7 @@ class TilbakekrevingService(
             vedtakId = vedtakId,
             hendelse = HendelseType.FATTET,
             inntruffet = Tidspunkt.now(),
-            saksbehandler = brukerTokenInfo.ident(),
+            saksbehandler = saksbehandler.ident(),
         )
 
         tilbakekrevinghendelser.sendTilbakekreving(
@@ -263,18 +263,18 @@ class TilbakekrevingService(
     suspend fun attesterVedtak(
         tilbakekrevingId: UUID,
         kommentar: String,
-        brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Attesterer vedtak for tilbakekreving=$tilbakekrevingId")
             val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
 
             sjekkForventetStatus(tilbakekreving, TilbakekrevingStatus.FATTET_VEDTAK)
-            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, brukerTokenInfo)
+            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
 
             if (tilbakekreving.sendeBrev) {
                 logger.info("Sender vedtaksbrev for tilbakekreving=$tilbakekrevingId")
-                runBlocking { brevApiKlient.ferdigstillVedtaksbrev(tilbakekrevingId, tilbakekreving.sak.id, brukerTokenInfo) }
+                runBlocking { brevApiKlient.ferdigstillVedtaksbrev(tilbakekrevingId, tilbakekreving.sak.id, saksbehandler) }
             } else {
                 logger.info("Skal ikke sende vedtaksbrev for tilbakekreving=$tilbakekrevingId")
             }
@@ -283,7 +283,7 @@ class TilbakekrevingService(
                 runBlocking {
                     vedtakKlient.attesterVedtakTilbakekreving(
                         tilbakekrevingId = tilbakekreving.id,
-                        brukerTokenInfo = brukerTokenInfo,
+                        brukerTokenInfo = saksbehandler,
                         enhet = tilbakekreving.sak.enhet,
                     )
                 }
@@ -299,7 +299,7 @@ class TilbakekrevingService(
                 vedtakId = vedtak.id,
                 hendelse = HendelseType.ATTESTERT,
                 inntruffet = Tidspunkt.now(),
-                saksbehandler = brukerTokenInfo.ident(),
+                saksbehandler = saksbehandler.ident(),
                 kommentar = kommentar,
                 begrunnelse = null,
             )
@@ -307,7 +307,7 @@ class TilbakekrevingService(
             oppgaveService.ferdigStillOppgaveUnderBehandling(
                 referanse = tilbakekreving.id.toString(),
                 type = OppgaveType.TILBAKEKREVING,
-                saksbehandler = brukerTokenInfo,
+                saksbehandler = saksbehandler,
             )
 
             tilbakekrevinghendelser.sendTilbakekreving(
@@ -317,7 +317,7 @@ class TilbakekrevingService(
 
             runBlocking {
                 tilbakekrevingKlient.sendTilbakekrevingsvedtak(
-                    brukerTokenInfo,
+                    saksbehandler,
                     tilbakekrevingVedtak(tilbakekreving, vedtak),
                 )
             }
@@ -329,20 +329,20 @@ class TilbakekrevingService(
         tilbakekrevingId: UUID,
         kommentar: String,
         valgtBegrunnelse: String,
-        brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Underkjenner vedtak for tilbakekreving=$tilbakekrevingId")
             val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
 
             sjekkForventetStatus(tilbakekreving, TilbakekrevingStatus.FATTET_VEDTAK)
-            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, brukerTokenInfo)
+            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
 
             val vedtakId =
                 runBlocking {
                     vedtakKlient.underkjennVedtakTilbakekreving(
                         tilbakekrevingId = tilbakekreving.id,
-                        brukerTokenInfo = brukerTokenInfo,
+                        brukerTokenInfo = saksbehandler,
                     )
                 }
 
@@ -355,7 +355,7 @@ class TilbakekrevingService(
                 vedtakId = vedtakId,
                 hendelse = HendelseType.UNDERKJENT,
                 inntruffet = Tidspunkt.now(),
-                saksbehandler = brukerTokenInfo.ident(),
+                saksbehandler = saksbehandler.ident(),
                 kommentar = kommentar,
                 begrunnelse = valgtBegrunnelse,
             )
@@ -439,7 +439,7 @@ class TilbakekrevingService(
 
     private fun sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(
         tilbakekrevingId: UUID,
-        saksbehandler: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ) {
         val oppgaveUnderBehandling =
             oppgaveService.hentOppgaveUnderBehandling(tilbakekrevingId.toString())

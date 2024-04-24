@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.sak.TilgangService
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class PluginConfiguration {
@@ -150,7 +151,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
     }
 }
 
-private val logger = LoggerFactory.getLogger("Skrivetilgang")
+val logger: Logger = LoggerFactory.getLogger("Skrivetilgang")
 
 fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
     sakId: Long? = null,
@@ -204,8 +205,14 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
     onSuccess: () -> Unit,
 ) {
     when (sjekkSkrivetilgang(sakId, enhetNr)) {
-        true -> onSuccess()
-        false -> call.respond(HttpStatusCode.Forbidden)
+        true -> {
+            logger.debug("Har skrivetilgang, fortsetter")
+            onSuccess()
+        }
+        false -> {
+            logger.debug("Mangler skrivetilgang, avviser forespørselen")
+            call.respond(HttpStatusCode.Forbidden)
+        }
     }
 }
 
@@ -217,12 +224,21 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrive
     when (val token = brukerTokenInfo) {
         is Saksbehandler -> {
             when (sjekkSkrivetilgang(sakId, enhetNr)) {
-                true -> onSuccess(token)
-                false -> call.respond(HttpStatusCode.Forbidden)
+                true -> {
+                    logger.debug("Har skrivetilgang, fortsetter")
+                    onSuccess(token)
+                }
+                false -> {
+                    logger.debug("Mangler skrivetilgang, avviser forespørselen")
+                    call.respond(HttpStatusCode.Forbidden)
+                }
             }
         }
 
-        else -> call.respond(HttpStatusCode.Forbidden)
+        else -> {
+            logger.debug("Endepunktet er ikke tilgjengeliggjort for systembruker, avviser forespørselen")
+            call.respond(HttpStatusCode.Forbidden)
+        }
     }
 }
 

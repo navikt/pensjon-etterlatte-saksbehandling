@@ -158,7 +158,10 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSystembruker(onSuccess
             onSuccess()
         }
 
-        else -> call.respond(HttpStatusCode.NotFound)
+        else -> {
+            logger.debug("Endepunktet er ikke tilgjengeliggjort for saksbehandler, avviser forespørselen")
+            call.respond(HttpStatusCode.NotFound)
+        }
     }
 }
 
@@ -168,7 +171,10 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandler(onSucces
             onSuccess(token)
         }
 
-        else -> call.respond(HttpStatusCode.Forbidden)
+        else -> {
+            logger.debug("Endepunktet er ikke tilgjengeliggjort for systembruker, avviser forespørselen")
+            call.respond(HttpStatusCode.Forbidden)
+        }
     }
 }
 
@@ -194,6 +200,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
 suspend inline fun PipelineContext<*, ApplicationCall>.hentNavidentFraToken(onSuccess: (navident: String) -> Unit) {
     val navident = call.firstValidTokenClaims()?.get("NAVident")?.toString()
     if (navident.isNullOrEmpty()) {
+        logger.warn("Kunne ikke hente ut navident fra token, avviser forespørselen")
         call.respond(
             HttpStatusCode.Unauthorized,
             "Kunne ikke hente ut navident ",

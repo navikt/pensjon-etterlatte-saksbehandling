@@ -1,7 +1,8 @@
 {
   "@event_name": "soeknad_innsendt",
   "@skjema_info": {
-    "type": "OMSTILLINGSSTOENAD"
+    "type": "OMSTILLINGSSTOENAD",
+    "-----": "---- resterende felter brukes ikke ved fordeling ----"
   },
   "@lagret_soeknad_id": "TEST-157fb687-3dfe-40bf-b099-45d531c0d12d",
   "@template": "soeknad",

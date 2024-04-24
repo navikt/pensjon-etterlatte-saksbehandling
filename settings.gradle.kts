@@ -3,7 +3,6 @@ plugins {
     kotlin("jvm") version "1.9.23" apply false
 }
 include(
-    "apps:etterlatte-fordeler",
     "apps:etterlatte-pdltjenester",
     "apps:etterlatte-behandling",
     "apps:etterlatte-gyldig-soeknad",

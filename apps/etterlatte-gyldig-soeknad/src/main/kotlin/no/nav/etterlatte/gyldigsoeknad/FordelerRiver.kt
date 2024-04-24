@@ -1,15 +1,14 @@
-package no.nav.etterlatte.fordeler
+package no.nav.etterlatte.gyldigsoeknad
 
 import com.fasterxml.jackson.databind.JsonMappingException
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.BehandlingKlient
+import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
-import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -19,17 +18,10 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import java.time.OffsetDateTime
-
-data class FordelerEvent(
-    val soeknadId: Long,
-    val soeknad: Barnepensjon,
-    val hendelseGyldigTil: OffsetDateTime,
-)
 
 internal class FordelerRiver(
     rapidsConnection: RapidsConnection,
-    private val behandlingKlient: BehandlingKlient,
+    private val behandlingKlient: BehandlingClient,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(FordelerRiver::class.java)
 
@@ -93,7 +85,7 @@ internal class FordelerRiver(
         return try {
             // Denne har ansvaret for å sette gradering
             runBlocking {
-                behandlingKlient.hentSak(fnr, sakType)
+                behandlingKlient.finnEllerOpprettSak(fnr, sakType).id
             }
         } catch (e: ResponseException) {
             logger.error("Avbrutt fordeling - kunne ikke hente sakId: ${e.message}")

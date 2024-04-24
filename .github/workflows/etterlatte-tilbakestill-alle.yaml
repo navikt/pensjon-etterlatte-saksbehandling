@@ -12,7 +12,6 @@ jobs:
           - behandling
           - beregning
           - brev-api
-          - fordeler
           - grunnlag
           - gyldig-soeknad
           - hendelser-pdl

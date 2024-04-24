@@ -194,7 +194,6 @@ spec:
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-opplysninger-fra-soeknad
         - application: etterlatte-grunnlag
-        - application: etterlatte-fordeler
         - application: etterlatte-trygdetid
         - application: etterlatte-institusjonsopphold
         - application: etterlatte-klage

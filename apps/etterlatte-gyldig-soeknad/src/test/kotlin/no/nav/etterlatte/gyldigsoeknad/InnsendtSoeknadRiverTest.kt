@@ -46,7 +46,7 @@ internal class InnsendtSoeknadRiverTest {
         every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns behandlingId
         every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } just runs
 
-        val inspector = testRapid().apply { sendTestMessage(getJson("/omstillingsstoenad.json")) }.inspektør
+        val inspector = testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/omstillingsstoenad.json")) }.inspektør
         val message = inspector.message(0)
 
         assertEquals(1, inspector.size)
@@ -73,7 +73,7 @@ internal class InnsendtSoeknadRiverTest {
         every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns behandlingId
         every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } just runs
 
-        val inspector = testRapid().apply { sendTestMessage(getJson("/barnepensjon.json")) }.inspektør
+        val inspector = testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/barnepensjon.json")) }.inspektør
         val message = inspector.message(0)
 
         assertEquals(

@@ -33,13 +33,19 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
                 Grunnlagsopplysning.Pesys.create(),
                 behandlingId = behandling,
             )
-        }
+        }.mapBoth(
+            success = {},
+            failure = { throw it },
+        )
     }
 
     suspend fun lagreGyldighetsproeving(behandling: UUID) {
         klient.post(Resource(clientId, "$url/api/behandling/$behandling/gyldigfremsatt"), Systembruker.testdata) {
             JaNeiMedBegrunnelse(JaNei.JA, "Automatisk behandla testsak")
-        }
+        }.mapBoth(
+            success = {},
+            failure = { throw it },
+        )
     }
 
     suspend fun lagreVirkningstidspunkt(behandling: UUID) {
@@ -57,7 +63,7 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
         sakId: Long,
     ) {
         val oppgaver: List<OppgaveIntern> =
-            klient.get(Resource(clientId, "$url/api/oppgaver/sak/$sakId"), Systembruker.testdata)
+            klient.get(Resource(clientId, "$url/api/oppgaver/sak/$sakId/oppgaver"), Systembruker.testdata)
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throw it },

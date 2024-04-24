@@ -178,7 +178,6 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     behandlingsstatusRoutes(behandlingsstatusService = applicationContext.behandlingsStatusService)
     behandlingVedtakRoute(
         behandlingsstatusService = applicationContext.behandlingsStatusService,
-        oppgaveService = applicationContext.oppgaveService,
         behandlingService = applicationContext.behandlingService,
     )
     behandlingInfoRoutes(applicationContext.behandlingInfoService)

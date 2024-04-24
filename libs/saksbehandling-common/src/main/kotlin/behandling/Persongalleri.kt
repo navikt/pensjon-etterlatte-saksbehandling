@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import no.nav.etterlatte.libs.common.person.FolkeregisteridentifikatorValidator
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import java.time.LocalDate
 
@@ -33,9 +34,7 @@ fun validateFnrSimple(fnr: String?): Boolean {
     if (fnr == null) {
         return true
     }
-    return !Regex("0{11}").matches(fnr) &&
-        fnr.length == 11 &&
-        fnr.toBigIntegerOrNull() != null
+    return FolkeregisteridentifikatorValidator.isValid(fnr)
 }
 
 enum class RelativPersonrolle {

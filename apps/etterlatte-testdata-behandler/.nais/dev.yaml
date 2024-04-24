@@ -61,9 +61,9 @@ spec:
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-trygdetid
     - name: ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID
-      value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
-    - name: ETTERLATTE_VEDTAKSVURDERING_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-vedtaksvurdering
+    - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-vilkaarsvurdering
   accessPolicy:
     outbound:
       rules:

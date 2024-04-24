@@ -9,7 +9,7 @@ import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Alert, Button, Heading, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
-import { AktivitetspliktType, IOpprettAktivitet } from '~shared/types/Aktivitetsplikt'
+import { AktivitetspliktType, IAktivitet, IOpprettAktivitet } from '~shared/types/Aktivitetsplikt'
 import { opprettAktivitet } from '~shared/api/aktivitetsplikt'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { typeTilTekst } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
@@ -28,7 +28,13 @@ const aktivitetDefaultValue: AktivitetDefaultValue = {
   beskrivelse: '',
 }
 
-export const NyAktivitet = ({ behandling }: { behandling: IBehandlingReducer }) => {
+export const NyAktivitet = ({
+  behandling,
+  oppdaterAktiviteter,
+}: {
+  behandling: IBehandlingReducer
+  oppdaterAktiviteter: (aktiviteter: IAktivitet[]) => void
+}) => {
   const [opprettAktivitetResponse, opprettAktivitetRequest] = useApiCall(opprettAktivitet)
   const [visForm, setVisForm] = useState(false)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -65,9 +71,10 @@ export const NyAktivitet = ({ behandling }: { behandling: IBehandlingReducer }) 
         behandlingId: behandling.id,
         request: opprettAktivitet,
       },
-      () => {
+      (aktiviteter) => {
         reset(aktivitetDefaultValue)
         setVisForm(false)
+        oppdaterAktiviteter(aktiviteter)
       }
     )
   }

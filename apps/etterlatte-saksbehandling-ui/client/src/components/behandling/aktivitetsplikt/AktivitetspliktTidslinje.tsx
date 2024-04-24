@@ -8,6 +8,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect, useState } from 'react'
 import { AktivitetspliktType, IAktivitet } from '~shared/types/Aktivitetsplikt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { NyAktivitet } from '~components/behandling/aktivitetsplikt/NyAktivitet'
 
 export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandling; doedsdato: Date }) => {
   const { behandling, doedsdato } = props
@@ -74,6 +75,8 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
           </Timeline.Row>
         ))}
       </Timeline>
+
+      <NyAktivitet behandling={behandling} oppdaterAktiviteter={setAktiviteter} />
 
       {isFailureHandler({
         errorMessage: 'En feil oppsto ved henting av aktiviteter',

@@ -20,7 +20,6 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
-import { NyAktivitet } from '~components/behandling/aktivitetsplikt/NyAktivitet'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -88,7 +87,6 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         </BodyLong>
 
         <AktivitetspliktTidslinje behandling={behandling} doedsdato={new Date(avdoedesDoedsdato!!)} />
-        <NyAktivitet behandling={behandling} />
 
         <Heading size="small" spacing>
           Beskriv etterlatte sin aktivitet idag

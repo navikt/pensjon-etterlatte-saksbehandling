@@ -38,6 +38,7 @@ abstract class BehandlingIntegrationTest {
         brevApiKlient: BrevApiKlient? = null,
         pdlTjenesterKlient: PdlTjenesterKlient? = null,
         tilbakekrevingKlient: TilbakekrevingKlient? = null,
+        testProdusent: TestProdusent<String, String>? = null,
     ) {
         server.start()
         val props = dbExtension.properties()
@@ -80,7 +81,7 @@ abstract class BehandlingIntegrationTest {
                             "krr.url" to "http://localhost",
                         ),
                     ),
-                rapid = TestProdusent(),
+                rapid = testProdusent ?: TestProdusent(),
                 featureToggleService = featureToggleService,
                 skjermingHttpKlient = skjermingHttpClient(),
                 grunnlagHttpClient = grunnlagHttpClient(),

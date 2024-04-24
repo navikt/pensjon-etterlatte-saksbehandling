@@ -9,9 +9,9 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
@@ -24,13 +24,18 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.tilbakekreving.TILBAKEKREVING_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
@@ -49,7 +54,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.random.Random
@@ -65,16 +69,12 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     private val brevApiKlient: BrevApiKlient = mockk()
     private val tilbakekrevingKlient: TilbakekrevingKlient = mockk()
+    private val rapid: TestProdusent<String, String> = spyk(TestProdusent())
 
     private val saksbehandler = Saksbehandler("tokenSaksbehandler", "saksbehandlerIdent", null)
     private val attestant = Saksbehandler("tokenAttestant", "attestantIdent", null)
     private val bruker = GrunnlagTestData().gjenlevende.foedselsnummer.value
     private val enhet = "123456"
-
-    companion object {
-        @RegisterExtension
-        private val dbExtension = DatabaseExtension()
-    }
 
     @BeforeEach
     fun setUp() {
@@ -102,6 +102,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
             featureToggleService = DummyFeatureToggleService(),
             brevApiKlient = brevApiKlient,
             tilbakekrevingKlient = tilbakekrevingKlient,
+            testProdusent = rapid,
         )
 
         nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)
@@ -114,7 +115,8 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
     @AfterEach
     fun afterEachTest() {
-        dbExtension.resetDb()
+        resetDatabase()
+        rapid.publiserteMeldinger.clear()
     }
 
     @Test
@@ -144,6 +146,14 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         oppgave.referanse shouldBe tilbakekreving.id.toString()
         oppgave.status shouldBe Status.NY
         oppgave.merknad shouldBe "Kravgrunnlag mottatt"
+
+        rapid.publiserteMeldinger.size shouldBe 1
+        rapid.publiserteMeldinger.last().let { melding ->
+            objectMapper.readTree(melding.verdi).let {
+                it[EVENT_NAME_KEY].textValue() shouldBe TilbakekrevingHendelseType.OPPRETTET.lagEventnameForType()
+                it[TILBAKEKREVING_STATISTIKK_RIVER_KEY] shouldNotBe null
+            }
+        }
     }
 
     @Test
@@ -164,6 +174,14 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         oppgave.referanse shouldBe tilbakekreving.id.toString()
         oppgave.status shouldBe Status.NY
         oppgave.merknad shouldBe "Kravgrunnlag mottatt"
+
+        rapid.publiserteMeldinger.size shouldBe 1
+        rapid.publiserteMeldinger.last().let { melding ->
+            objectMapper.readTree(melding.verdi).let {
+                it[EVENT_NAME_KEY].textValue() shouldBe TilbakekrevingHendelseType.OPPRETTET.lagEventnameForType()
+                it[TILBAKEKREVING_STATISTIKK_RIVER_KEY] shouldNotBe null
+            }
+        }
     }
 
     @Test
@@ -209,6 +227,14 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
             opprettet shouldNotBe null
             kommentar shouldBe null
             valgtBegrunnelse shouldBe null
+        }
+
+        rapid.publiserteMeldinger.size shouldBe 2
+        rapid.publiserteMeldinger.last().let { melding ->
+            objectMapper.readTree(melding.verdi).let {
+                it[EVENT_NAME_KEY].textValue() shouldBe TilbakekrevingHendelseType.FATTET_VEDTAK.lagEventnameForType()
+                it[TILBAKEKREVING_STATISTIKK_RIVER_KEY] shouldNotBe null
+            }
         }
 
         confirmVerified(vedtakKlient, brevApiKlient)
@@ -271,6 +297,14 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
             valgtBegrunnelse shouldBe null
         }
 
+        rapid.publiserteMeldinger.size shouldBe 3
+        rapid.publiserteMeldinger.last().let { melding ->
+            objectMapper.readTree(melding.verdi).let {
+                it[EVENT_NAME_KEY].textValue() shouldBe TilbakekrevingHendelseType.ATTESTERT.lagEventnameForType()
+                it[TILBAKEKREVING_STATISTIKK_RIVER_KEY] shouldNotBe null
+            }
+        }
+
         confirmVerified(vedtakKlient, brevApiKlient, tilbakekrevingKlient)
     }
 
@@ -328,6 +362,14 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
             valgtBegrunnelse shouldBe "feil beregning"
         }
 
+        rapid.publiserteMeldinger.size shouldBe 3
+        rapid.publiserteMeldinger.last().let { melding ->
+            objectMapper.readTree(melding.verdi).let {
+                it[EVENT_NAME_KEY].textValue() shouldBe TilbakekrevingHendelseType.UNDERKJENT.lagEventnameForType()
+                it[TILBAKEKREVING_STATISTIKK_RIVER_KEY] shouldNotBe null
+            }
+        }
+
         confirmVerified(vedtakKlient, brevApiKlient)
     }
 
@@ -370,7 +412,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
             mottaker =
                 Mottaker(
                     navn = "Mottaker mottakersen",
-                    foedselsnummer = Mottakerident("19448310410"),
+                    foedselsnummer = Mottakerident(bruker),
                     orgnummer = null,
                 ),
             journalpostId = null,

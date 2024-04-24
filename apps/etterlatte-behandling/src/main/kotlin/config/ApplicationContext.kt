@@ -301,7 +301,7 @@ internal class ApplicationContext(
 
     // Service
     val klageHendelser = KlageHendelserServiceImpl(rapid)
-    val tilbakekreving = TilbakekrevingHendelserServiceImpl(rapid)
+    val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, behandlingsHendelser)
 
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlTjenesterKlient, oppgaveService)
@@ -461,7 +461,7 @@ internal class ApplicationContext(
             vedtakKlient = vedtakKlient,
             brevApiKlient = brevApiKlient,
             tilbakekrevingKlient = tilbakekrevingKlient,
-            tilbakekrevinghendelser = tilbakekreving,
+            tilbakekrevinghendelser = tilbakekrevingHendelserService,
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)

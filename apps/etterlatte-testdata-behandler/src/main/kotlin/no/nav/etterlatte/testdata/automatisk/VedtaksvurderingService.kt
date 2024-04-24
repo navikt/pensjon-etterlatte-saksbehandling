@@ -1,27 +1,23 @@
 package no.nav.etterlatte.testdata.automatisk
 
-import io.ktor.client.HttpClient
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import java.util.UUID
 
-class VedtaksvurderingService(private val klient: HttpClient, private val url: String) {
+class VedtaksvurderingService(private val klient: DownstreamResourceClient, private val url: String, private val clientId: String) {
     suspend fun fattVedtak(
         sakId: Long,
         behandlingId: UUID,
-    ) = klient.post("$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis") {
-        contentType(ContentType.Application.Json)
-        setBody(MigreringKjoringVariant.MED_PAUSE)
+    ) = klient.post(Resource(clientId, "$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis"), Systembruker.testdata) {
+        MigreringKjoringVariant.MED_PAUSE
     }
 
     suspend fun attesterOgIverksettVedtak(
         sakId: Long,
         behandlingId: UUID,
-    ) = klient.post("$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis") {
-        contentType(ContentType.Application.Json)
-        setBody(MigreringKjoringVariant.FORTSETT_ETTER_PAUSE)
+    ) = klient.post(Resource(clientId, "$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis"), Systembruker.testdata) {
+        MigreringKjoringVariant.FORTSETT_ETTER_PAUSE
     }
 }

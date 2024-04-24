@@ -1,17 +1,18 @@
 package no.nav.etterlatte.testdata.automatisk
 
-import io.ktor.client.HttpClient
-import io.ktor.client.request.post
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import java.util.UUID
 
-class TrygdetidService(private val klient: HttpClient, private val url: String) {
+class TrygdetidService(
+    private val klient: DownstreamResourceClient,
+    private val url: String,
+    private val clientId: String,
+) {
     suspend fun beregnTrygdetid(behandlingId: UUID) =
         retryOgPakkUt {
-            klient.post("$url/api/trygdetid/$behandlingId") {
-                contentType(ContentType.Application.Json)
-            }
+            klient.post(Resource(clientId, "$url/api/trygdetid/$behandlingId"), Systembruker.testdata) {}
         }
 }

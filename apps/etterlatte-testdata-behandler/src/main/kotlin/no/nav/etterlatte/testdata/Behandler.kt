@@ -1,8 +1,6 @@
 package no.nav.etterlatte.testdata
 
-import io.ktor.client.call.body
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.automatisk.AvkortingService
@@ -35,7 +33,7 @@ class Behandler(
         if (behandlingssteg in listOf(Behandlingssteg.KLAR, Behandlingssteg.BEHANDLING_OPPRETTA)) {
             return
         }
-        val sak = sakService.hentSak(sakId).body<Sak>()
+        val sak = sakService.hentSak(sakId)
         logger.info("Henta sak $sakId")
 
         sakService.settKommerBarnetTilGode(behandling)

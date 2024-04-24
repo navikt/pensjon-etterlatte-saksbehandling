@@ -1,15 +1,14 @@
 package no.nav.etterlatte.testdata.automatisk
 
-import io.ktor.client.HttpClient
-import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
+import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class VilkaarsvurderingService(private val klient: HttpClient, private val url: String) {
+class VilkaarsvurderingService(private val klient: DownstreamResourceClient, private val url: String, private val clientId: String) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun vilkaarsvurder(behandlingId: UUID) {
@@ -17,21 +16,31 @@ class VilkaarsvurderingService(private val klient: HttpClient, private val url: 
         val vilkaarsvurdering = retryOgPakkUt { opprettVilkaarsvurdering(behandlingId) }
 
         logger.info("Oppdaterer vilkårene med korrekt utfall for gjenoppretting $behandlingId")
-        settUtfallForAlleVilkaar(vilkaarsvurdering) // Usikker på om vi må dette, hoppar over i første omgang
+//        settUtfallForAlleVilkaar(vilkaarsvurdering) // Usikker på om vi må dette, hoppar over i første omgang
 
         retryOgPakkUt { settVilkaarsvurderingaSomHelhetSomOppfylt(behandlingId) }
     }
 
     private suspend fun opprettVilkaarsvurdering(behandlingId: UUID) =
-        klient.post("$url/api/vilkaarsvurdering/$behandlingId/opprett") {
-            contentType(ContentType.Application.Json)
-        }
+        klient.post(
+            Resource(
+                clientId = clientId,
+                url = "$url/api/vilkaarsvurdering/$behandlingId/opprett",
+            ),
+            Systembruker.testdata,
+            {},
+        )
 
     private suspend fun settUtfallForAlleVilkaar(vilkaarsvurdering: HttpResponse) {
     }
 
     private suspend fun settVilkaarsvurderingaSomHelhetSomOppfylt(behandlingId: UUID) =
-        klient.post("$url/api/vilkaarsvurdering/resultat/$behandlingId") {
-            contentType(ContentType.Application.Json)
-        }
+        klient.post(
+            Resource(
+                clientId = clientId,
+                url = "$url/api/vilkaarsvurdering/resultat/$behandlingId",
+            ),
+            Systembruker.testdata,
+            {},
+        )
 }

@@ -200,6 +200,12 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
 suspend inline fun PipelineContext<*, ApplicationCall>.hentNavidentFraToken(onSuccess: (navident: String) -> Unit) {
     val navident = call.firstValidTokenClaims()?.get("NAVident")?.toString()
     if (navident.isNullOrEmpty()) {
+        val bruker = call.brukerTokenInfo
+        if (bruker is Systembruker && bruker.ident != null) {
+            logger.debug("Er systembruker, så fortsetter med ident fra brukerTokenInfo")
+            onSuccess(bruker.ident)
+        }
+
         logger.warn("Kunne ikke hente ut navident fra token, avviser forespørselen")
         call.respond(
             HttpStatusCode.Unauthorized,

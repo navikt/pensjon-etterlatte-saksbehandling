@@ -83,8 +83,6 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
     private lateinit var klageDao: KlageDao
     private val brevApiKlientMock = mockk<BrevApiKlient>()
 
-    private val saksbehandlerIdent = "SaraSak"
-    private val attestantIdent = "AtleAttestant"
     private val saksbehandler = Saksbehandler("token", saksbehandlerIdent, null)
     private val attestant = Saksbehandler("tokenAttestant", attestantIdent, null)
     private val klagerFnr = GrunnlagTestData().gjenlevende.foedselsnummer.value

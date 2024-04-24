@@ -32,6 +32,11 @@ abstract class BehandlingIntegrationTest {
     protected val server: MockOAuth2Server = MockOAuth2Server()
     internal lateinit var applicationContext: ApplicationContext
 
+    protected val saksbehandlerIdent = "Saksbehandler01"
+    protected val attestantIdent = "Saksbehandler02"
+    protected val saksbehandlerStrengtFortroligIdent = "saksebehandlerstrengtfortrolig"
+    protected val saksbehandlerSkjermetIdent = "saksbehandlerskjermet"
+
     protected fun startServer(
         norg2Klient: Norg2Klient? = null,
         featureToggleService: FeatureToggleService = DummyFeatureToggleService(),
@@ -130,19 +135,13 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val tokenSaksbehandler: String by lazy {
-        server.issueSaksbehandlerToken(navn = "John Doe", navIdent = "Saksbehandler01", groups = listOf(azureAdAttestantClaim))
+        server.issueSaksbehandlerToken(navn = "John Doe", navIdent = saksbehandlerIdent, groups = listOf(azureAdAttestantClaim))
     }
-
-    protected val tokenSaksbehandler2: String by lazy {
-        server.issueSaksbehandlerToken(navn = "Jane Doe", navIdent = "Saksbehandler02", groups = listOf(azureAdAttestantClaim))
-    }
-
-    protected val fagsystemTokenEY: String by lazy { server.issueSystembrukerToken() }
 
     protected val tokenAttestant: String by lazy {
         server.issueSaksbehandlerToken(
             navn = "John Doe",
-            navIdent = "Saksbehandler02",
+            navIdent = attestantIdent,
             groups = listOf(azureAdSaksbehandlerClaim, azureAdAttestantClaim),
         )
     }
@@ -150,7 +149,7 @@ abstract class BehandlingIntegrationTest {
     protected val tokenSaksbehandlerMedStrengtFortrolig: String by lazy {
         server.issueSaksbehandlerToken(
             navn = "John Doe",
-            navIdent = "saksebehandlerstrengtfortrolig",
+            navIdent = saksbehandlerStrengtFortroligIdent,
             groups =
                 listOf(
                     azureAdSaksbehandlerClaim,
@@ -163,7 +162,7 @@ abstract class BehandlingIntegrationTest {
     protected val tokenSaksbehandlerMedEgenAnsattTilgang: String by lazy {
         server.issueSaksbehandlerToken(
             navn = "John Doe",
-            navIdent = "saksbehandlerskjermet",
+            navIdent = saksbehandlerSkjermetIdent,
             groups =
                 listOf(
                     azureAdAttestantClaim,

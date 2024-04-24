@@ -94,7 +94,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
             val response =
                 client.get("/vedtaksbehandling/${klage.id}/redigerbar") {
-                    addAuthToken(fagsystemTokenEY)
+                    addAuthToken(systemBruker)
                     contentType(ContentType.Application.Json)
                 }
             assertEquals(HttpStatusCode.OK, response.status)
@@ -117,7 +117,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
             val response =
                 client.get("/vedtaksbehandling/${behandling!!.id}/redigerbar") {
-                    addAuthToken(fagsystemTokenEY)
+                    addAuthToken(systemBruker)
                     contentType(ContentType.Application.Json)
                 }
             assertEquals(HttpStatusCode.OK, response.status)
@@ -144,7 +144,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
         withTestApplication { client ->
             val response =
                 client.get("/vedtaksbehandling/${tilbakekreving.id}/redigerbar") {
-                    addAuthToken(fagsystemTokenEY)
+                    addAuthToken(systemBruker)
                     contentType(ContentType.Application.Json)
                 }
             assertEquals(HttpStatusCode.OK, response.status)

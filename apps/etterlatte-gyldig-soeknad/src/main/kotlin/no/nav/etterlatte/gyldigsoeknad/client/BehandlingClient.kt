@@ -9,6 +9,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
@@ -48,7 +49,7 @@ class BehandlingClient(
 
     fun finnEllerOpprettSak(
         fnr: String,
-        saktype: String,
+        saktype: SakType,
     ): Sak {
         return runBlocking {
             sakOgBehandlingApp.post("$url/personer/saker/$saktype") {

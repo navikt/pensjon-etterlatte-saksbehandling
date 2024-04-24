@@ -180,10 +180,10 @@ class FordelerService(
 
     fun hentSakId(
         fnr: String,
-        barnepensjon: SakType,
+        sakType: SakType,
     ): Long {
         return runBlocking {
-            behandlingKlient.hentSak(fnr, barnepensjon)
+            behandlingKlient.hentSak(fnr, sakType)
         }
     }
 }

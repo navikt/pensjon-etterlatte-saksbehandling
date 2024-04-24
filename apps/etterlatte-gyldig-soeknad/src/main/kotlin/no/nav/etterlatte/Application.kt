@@ -1,7 +1,7 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.gyldigsoeknad.FordelerRiver
-import no.nav.etterlatte.gyldigsoeknad.InnsendtSoeknadRiver
+import no.nav.etterlatte.gyldigsoeknad.NySoeknadRiver
+import no.nav.etterlatte.gyldigsoeknad.OpprettBehandlingRiver
 import no.nav.etterlatte.gyldigsoeknad.config.AppBuilder
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -15,12 +15,12 @@ fun main() {
     RapidApplication.create(rapidEnv).also { rapidsConnection ->
         val ab = AppBuilder(Miljoevariabler(rapidEnv))
 
-        FordelerRiver(
+        NySoeknadRiver(
             rapidsConnection = rapidsConnection,
             behandlingKlient = ab.createBehandlingClient(),
         )
 
-        InnsendtSoeknadRiver(
+        OpprettBehandlingRiver(
             rapidsConnection,
             ab.createBehandlingClient(),
         )

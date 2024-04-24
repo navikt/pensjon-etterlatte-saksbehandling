@@ -26,7 +26,7 @@ import java.util.UUID
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class InnsendtSoeknadRiverTest {
+internal class OpprettBehandlingRiverTest {
     private val behandlingClientMock = mockk<BehandlingClient>()
 
     @AfterEach
@@ -95,7 +95,7 @@ internal class InnsendtSoeknadRiverTest {
 
     private fun testRapid() =
         TestRapid().apply {
-            InnsendtSoeknadRiver(this, behandlingClientMock)
+            OpprettBehandlingRiver(this, behandlingClientMock)
         }
 
     private fun getJson(file: String) = javaClass.getResource(file)!!.readText()

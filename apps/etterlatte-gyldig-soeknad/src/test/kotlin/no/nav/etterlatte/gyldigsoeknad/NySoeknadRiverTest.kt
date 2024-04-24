@@ -6,7 +6,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
-import no.nav.etterlatte.gyldigsoeknad.FordelerRiver
+import no.nav.etterlatte.gyldigsoeknad.NySoeknadRiver
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
@@ -22,7 +22,7 @@ import org.junit.jupiter.api.TestInstance
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class FordelerRiverTest {
+internal class NySoeknadRiverTest {
     private val behandlingKlientMock = mockk<BehandlingClient>()
 
     @AfterEach
@@ -114,14 +114,14 @@ internal class FordelerRiverTest {
 
     private fun testRapid(block: TestRapid.() -> Unit) =
         TestRapid().apply {
-            FordelerRiver(this, behandlingKlientMock)
+            NySoeknadRiver(this, behandlingKlientMock)
             block()
         }.inspektør
 
     companion object {
-        val BARNEPENSJON_SOEKNAD = readFile("/fordeler/barnepensjon.json")
-        val OMSTILLINGSSTOENAD_SOEKNAD = readFile("/fordeler/omstillingsstoenad.json")
+        val BARNEPENSJON_SOEKNAD = readFile("/innsendtsoeknad/barnepensjon.json")
+        val OMSTILLINGSSTOENAD_SOEKNAD = readFile("/innsendtsoeknad/omstillingsstoenad.json")
 
-        private fun readFile(file: String) = FordelerRiverTest::class.java.getResource(file)!!.readText()
+        private fun readFile(file: String) = NySoeknadRiverTest::class.java.getResource(file)!!.readText()
     }
 }

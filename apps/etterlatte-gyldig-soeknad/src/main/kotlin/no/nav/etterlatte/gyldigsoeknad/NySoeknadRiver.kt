@@ -19,11 +19,11 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
-internal class FordelerRiver(
+internal class NySoeknadRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingKlient: BehandlingClient,
 ) : ListenerMedLogging() {
-    private val logger = LoggerFactory.getLogger(FordelerRiver::class.java)
+    private val logger = LoggerFactory.getLogger(NySoeknadRiver::class.java)
 
     init {
         initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT) {
@@ -40,16 +40,12 @@ internal class FordelerRiver(
         }
     }
 
-    /**
-     * Fordeleren eksisterer kun for etterlatte-statistikk
-     * Burde på sikt flyttes helt over til statistikk slik at det ikke skaper støy i søknadsflyten.
-     **/
     override fun haandterPakke(
         packet: JsonMessage,
         context: MessageContext,
     ) {
         try {
-            logger.info("Sjekker om soknad (${packet.soeknadId()}) er gyldig for fordeling")
+            logger.info("Ny søknad mottatt (id=${packet.soeknadId()})")
 
             val soekerFnr = packet[SoeknadInnsendt.fnrSoekerKey].textValue()
             val soeknadType = SoeknadType.valueOf(packet[GyldigSoeknadVurdert.skjemaInfoTypeKey].textValue())

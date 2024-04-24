@@ -1,183 +1,113 @@
 package no.nav.etterlatte.fordeler
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.plugins.ResponseException
-import io.mockk.every
-import io.mockk.just
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.confirmVerified
 import io.mockk.mockk
-import io.mockk.runs
-import io.mockk.verify
-import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_YRKESSKADE
-import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_FOR_GAMMELT
+import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
-import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_KRITERIER_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.GYLDIG_FOR_BEHANDLING_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.SOEKNAD_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.EventNames
-import no.nav.etterlatte.readFile
-import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import kotlin.random.Random
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class FordelerRiverTest {
-    private val fordelerService = mockk<FordelerService>()
-    private val fordelerMetricLogger = mockk<FordelerMetricLogger>()
-    private val inspector = TestRapid().apply { FordelerRiver(this, fordelerService, fordelerMetricLogger) }
+    private val behandlingKlientMock = mockk<BehandlingKlient>()
+
+    @AfterEach
+    fun afterEach() {
+        confirmVerified(behandlingKlientMock)
+        clearAllMocks()
+    }
 
     @Test
-    fun `skal fordele gyldig soknad til behandling`() {
-        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns FordelerResultat.GyldigForBehandling()
-        every { fordelerService.hentSakId(any(), any()) } returns 1337L
-        every { fordelerMetricLogger.logMetricFordelt() } just runs
-        val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
+    fun `BP - skal fordele gyldig soknad til behandling`() {
+        val sakId = Random.nextLong()
+
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns sakId
+
+        val inspector =
+            testRapid {
+                sendTestMessage(BARNEPENSJON_SOEKNAD)
+            }
 
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
             inspector.message(0).get(EVENT_NAME_KEY).asText(),
         )
-        assertEquals(1337L, inspector.message(0).get(GyldigSoeknadVurdert.sakIdKey).longValue())
+        assertEquals(sakId, inspector.message(0).get(GyldigSoeknadVurdert.sakIdKey).longValue())
         assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadFordeltKey).asText())
 
-        verify { fordelerMetricLogger.logMetricFordelt() }
+        coVerify { behandlingKlientMock.hentSak("25478323363", SakType.BARNEPENSJON) }
     }
 
     @Test
-    fun `skal ikke fordele ugyldig soknad til behandling`() {
-        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns
-            FordelerResultat.UgyldigHendelse("Ikke gyldig for behandling")
+    fun `BP - skal ikke fordele soknad uten sakId til behandling`() {
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } throws ResponseException(mockk(), "Ukjent feil")
 
-        val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
-
-        assertEquals(0, inspector.size)
-    }
-
-    @Test
-    fun `skal ikke fordele soknad uten sakId til behandling`() {
-        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns FordelerResultat.GyldigForBehandling()
-
-        val responseException = mockk<ResponseException>()
-        every { responseException.message } returns "Oops"
-        every { fordelerService.hentSakId(any(), any()) } throws responseException
-
-        val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
-
-        assertEquals(0, inspector.size)
-    }
-
-    @Test
-    fun `skal ikke fordele soknad som ikke oppfyller alle kriterier til behandling`() {
-        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns
-            FordelerResultat.IkkeGyldigForBehandling(listOf(BARN_ER_FOR_GAMMELT, AVDOED_HAR_YRKESSKADE))
-        every { fordelerMetricLogger.logMetricIkkeFordelt(any()) } just runs
-        val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
-
-        assertEquals(false, inspector.message(0).get(FordelerFordelt.soeknadFordeltKey).asBoolean())
-        val allMessages = (0 until inspector.size).map { inspector.message(it) }
-        assertTrue {
-            allMessages.all {
-                it.get(FordelerFordelt.soeknadFordeltKey) == null ||
-                    !it.get(FordelerFordelt.soeknadFordeltKey)
-                        .asBoolean()
+        val inspector =
+            testRapid {
+                sendTestMessage(BARNEPENSJON_SOEKNAD)
             }
-        }
 
-        verify(exactly = 1) {
-            fordelerMetricLogger.logMetricIkkeFordelt(
-                match {
-                    it.ikkeOppfylteKriterier.containsAll(listOf(BARN_ER_FOR_GAMMELT, AVDOED_HAR_YRKESSKADE))
-                },
-            )
-        }
+        assertEquals(0, inspector.size)
+
+        coVerify { behandlingKlientMock.hentSak("25478323363", SakType.BARNEPENSJON) }
     }
 
     @Test
-    fun `lagStatistikkMelding lager riktig statistikkmelding`() {
-        val soeknadId = 1337L
-        val fordelerRiver =
-            FordelerRiver(
-                rapidsConnection = mockk(relaxed = true),
-                fordelerService = fordelerService,
-                fordelerMetricLogger = fordelerMetricLogger,
-            )
-        val packet: JsonMessage = mockk()
+    fun `OMS - skal fordele gyldig soknad til behandling`() {
+        val sakId = Random.nextLong()
 
-        every {
-            packet["@lagret_soeknad_id"].longValue()
-        } returns soeknadId
-        every {
-            packet[CORRELATION_ID_KEY].textValue()
-        } returns "korrelasjonsid"
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns sakId
 
-        val statistikkMeldingGyldig =
-            fordelerRiver.lagStatistikkMelding(
-                packet,
-                FordelerResultat.GyldigForBehandling(),
-                SakType.BARNEPENSJON,
-            )
-        assertJsonEquals(
-            """
-               {
-                    "$CORRELATION_ID_KEY": "korrelasjonsid",
-                    "$EVENT_NAME_KEY": "${EventNames.FORDELER_STATISTIKK.lagEventnameForType()}",
-                    "$SAK_TYPE_KEY": "BARNEPENSJON",
-                    "$SOEKNAD_ID_KEY": 1337,
-                    "$GYLDIG_FOR_BEHANDLING_KEY": true
-               } 
-            """,
-            statistikkMeldingGyldig,
+        val inspector =
+            testRapid {
+                sendTestMessage(OMSTILLINGSSTOENAD_SOEKNAD)
+            }
+
+        assertEquals(
+            SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
+            inspector.message(0).get(EVENT_NAME_KEY).asText(),
         )
+        assertEquals(sakId, inspector.message(0).get(GyldigSoeknadVurdert.sakIdKey).longValue())
+        assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadFordeltKey).asText())
 
-        val kriterier =
-            listOf(
-                FordelerKriterie.BARN_ER_IKKE_BOSATT_I_NORGE,
-            )
-
-        val statistikkmeldingIkkeGyldig =
-            fordelerRiver.lagStatistikkMelding(
-                packet,
-                FordelerResultat.IkkeGyldigForBehandling(kriterier),
-                SakType.BARNEPENSJON,
-            )
-
-        assertJsonEquals(
-            """
-                {
-                    "$CORRELATION_ID_KEY": "korrelasjonsid",
-                    "$EVENT_NAME_KEY": "${EventNames.FORDELER_STATISTIKK.lagEventnameForType()}",
-                    "$SOEKNAD_ID_KEY": 1337,
-                    "$SAK_TYPE_KEY": "BARNEPENSJON",
-                    "$GYLDIG_FOR_BEHANDLING_KEY": false,
-                    "$FEILENDE_KRITERIER_KEY": [
-                        "BARN_ER_IKKE_BOSATT_I_NORGE"
-                    ]
-                }
-            """,
-            statistikkmeldingIkkeGyldig,
-        )
+        coVerify { behandlingKlientMock.hentSak("13848599411", SakType.OMSTILLINGSSTOENAD) }
     }
+
+    @Test
+    fun `OMS - skal ikke fordele soknad uten sakId til behandling`() {
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } throws ResponseException(mockk(), "Ukjent feil")
+
+        val inspector =
+            testRapid {
+                sendTestMessage(OMSTILLINGSSTOENAD_SOEKNAD)
+            }
+
+        assertEquals(0, inspector.size)
+        coVerify { behandlingKlientMock.hentSak("13848599411", SakType.OMSTILLINGSSTOENAD) }
+    }
+
+    private fun testRapid(block: TestRapid.() -> Unit) =
+        TestRapid().apply {
+            FordelerRiver(this, behandlingKlientMock)
+            block()
+        }.inspektør
 
     companion object {
-        val BARNEPENSJON_SOKNAD = readFile("/fordeler/soknad_barnepensjon.json")
-        val GJENLEVENDE_SOKNAD = readFile("/fordeler/soknad_ikke_barnepensjon.json")
-        val UGYLDIG_VERSJON = readFile("/fordeler/soknad_ugyldig_versjon.json")
+        val BARNEPENSJON_SOEKNAD = readFile("/fordeler/soknad_barnepensjon.json")
+        val OMSTILLINGSSTOENAD_SOEKNAD = readFile("/fordeler/soknad_omstillingsstoenad.json")
+
+        private fun readFile(file: String) = FordelerRiverTest::class.java.getResource(file)!!.readText()
     }
-}
-
-private fun String.asJsonNode(): JsonNode = objectMapper.readTree(this)
-
-// Sammenligning som ignorerer linjeskift og medlemsrekkefølge i råe JSON-strenger
-private fun assertJsonEquals(
-    expected: String?,
-    actual: String?,
-) {
-    assertEquals(expected?.asJsonNode(), actual?.asJsonNode())
 }

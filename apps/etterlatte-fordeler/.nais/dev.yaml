@@ -49,25 +49,14 @@ spec:
     - name: KAFKA_RESET_POLICY
       #sette tilbake til none senere
       value: earliest
-    - name: PDL_URL
-      value: http://etterlatte-pdltjenester/person
-    - name: PDL_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: BEHANDLING_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: BEHANDLING_URL
       value: http://etterlatte-behandling
-    - name: FEATURE_MAX_FORDELING_TIL_GJENNY
-      value: "-1"
-  envFrom:
-    - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
-        - application: etterlatte-pdltjenester
         - application: etterlatte-behandling
-      external:
-        - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:
       rules:
         - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator

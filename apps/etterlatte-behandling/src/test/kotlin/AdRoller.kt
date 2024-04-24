@@ -16,6 +16,10 @@ val azureAdAttestantClaim: String by lazy {
     "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
 }
 
+val azureAdAttestantGjennyClaim: String by lazy {
+    "70cfce24-7865-4676-9fdc-b676e90bfc92"
+}
+
 val azureAdEgenAnsattClaim: String by lazy {
     "dbe4ad45-320b-4e9a-aaa1-73cca4ee124d"
 }

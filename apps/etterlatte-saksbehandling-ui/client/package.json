@@ -60,7 +60,8 @@
     "typescript": "~5.4.5",
     "vite": "5.2.8",
     "vite-tsconfig-paths": "4.3.2",
-    "vitest": "1.4.0"
+    "vitest": "1.4.0",
+    "use-deep-compare-effect": "^1.8.1"
   },
   "browserslist": {
     "production": [

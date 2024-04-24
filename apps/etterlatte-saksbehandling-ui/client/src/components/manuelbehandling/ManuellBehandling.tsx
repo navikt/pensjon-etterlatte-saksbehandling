@@ -21,7 +21,6 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { formaterDatoStrengTilLocaleDateTime, formaterSpraak, mapRHFArrayToStringArray } from '~utils/formattering'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
-import { GRADERING, GraderingFilterKeys } from '~shared/types/Gradering'
 import GjenopprettingModal from '~components/manuelbehandling/GjenopprettingModal'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Oppgavestatus, Oppgavetype } from '~shared/types/oppgave'
@@ -30,7 +29,6 @@ interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   kilde: string
   pesysId: number | undefined
   enhet: EnhetFilterKeys
-  gradering: GraderingFilterKeys
   foreldreloes: boolean
   ufoere: boolean
   overstyrBeregning: boolean
@@ -90,7 +88,6 @@ export default function ManuellBehandling() {
         enhet: data.enhet === 'VELGENHET' ? undefined : filtrerEnhet(data.enhet),
         foreldreloes: data.foreldreloes,
         ufoere: data.ufoere,
-        gradering: data.gradering,
       },
       (nyBehandlingRespons) => {
         if (data.overstyrBeregning) {
@@ -151,21 +148,6 @@ export default function ManuellBehandling() {
             maxLength={11}
           />
         </InputRow>
-
-        <Select
-          {...register('gradering', {
-            required: { value: true, message: 'Du må spesifisere gradering' },
-          })}
-          label="Gradering - Adressebeskyttelse (påkrevd)"
-          error={errors.gradering?.message}
-        >
-          <option value="">Velg ...</option>
-          {Object.entries(GRADERING).map(([key, beskrivelse]) => (
-            <option key={key} value={key}>
-              {beskrivelse}
-            </option>
-          ))}
-        </Select>
 
         <Select {...register('enhet')} label="Overstyre enhet (valgfritt)">
           {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (

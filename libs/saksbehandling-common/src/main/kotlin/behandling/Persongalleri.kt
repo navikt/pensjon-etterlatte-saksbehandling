@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import no.nav.etterlatte.libs.common.person.FolkeregisteridentifikatorValidator
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import java.time.LocalDate
 
@@ -19,6 +20,21 @@ data class Persongalleri(
             "gjenlevende=${gjenlevende.map { it.maskerFnr() }}," +
             "personerUtenIdent=${personerUtenIdent?.map { it.person.foedselsdato.toString() }})"
     }
+
+    fun validerFoedselesnummere(): Boolean {
+        return validateFnrSimple(soeker) &&
+            validateFnrSimple(innsender) &&
+            soesken.all { validateFnrSimple(it) } &&
+            avdoed.all { validateFnrSimple(it) } &&
+            gjenlevende.all { validateFnrSimple(it) }
+    }
+}
+
+fun validateFnrSimple(fnr: String?): Boolean {
+    if (fnr == null) {
+        return true
+    }
+    return FolkeregisteridentifikatorValidator.isValid(fnr)
 }
 
 enum class RelativPersonrolle {

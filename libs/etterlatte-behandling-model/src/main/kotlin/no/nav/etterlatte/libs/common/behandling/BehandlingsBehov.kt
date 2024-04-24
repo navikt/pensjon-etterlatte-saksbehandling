@@ -1,13 +1,16 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 
 data class BehandlingsBehov(
     val sakId: Long,
     val persongalleri: Persongalleri,
     val mottattDato: String,
 )
+
+class PersongalleriFeilException(message: String) :
+    UgyldigForespoerselException(code = "PERSONGALLERI_MAA_VAERE_GYLDIG", detail = message)
 
 data class NyBehandlingRequest(
     val sakType: SakType,
@@ -19,5 +22,10 @@ data class NyBehandlingRequest(
     val enhet: String?,
     val foreldreloes: Boolean = false,
     val ufoere: Boolean = false,
-    val gradering: AdressebeskyttelseGradering? = AdressebeskyttelseGradering.UGRADERT,
-)
+) {
+    fun validerPersongalleri() {
+        if (!persongalleri.validerFoedselesnummere()) {
+            throw PersongalleriFeilException("Persongalleriet har feil eller mangler i sine fødselsnummere")
+        }
+    }
+}

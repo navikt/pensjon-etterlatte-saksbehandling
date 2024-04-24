@@ -23,7 +23,6 @@ import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
@@ -50,8 +49,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -215,8 +214,8 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
                 addAuthToken(tokenSaksbehandler)
                 contentType(ContentType.Application.Json)
                 setBody(
-                    InnkommendeKlage(
-                        mottattDato = LocalDate.now(),
+                    InnkommendeKlageDto(
+                        mottattDato = ZonedDateTime.now().toOffsetDateTime().toString(),
                         journalpostId = "",
                         innsender = "En klager",
                     ),

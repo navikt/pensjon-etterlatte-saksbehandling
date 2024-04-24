@@ -16,6 +16,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klage.InnkommendeKlageDto
 import no.nav.etterlatte.behandling.klage.VurdereFormkravDto
 import no.nav.etterlatte.behandling.klage.VurdertUtfallDto
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -31,7 +32,6 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
 import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
-import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabalUtenBrev
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
@@ -79,6 +79,7 @@ import org.junit.jupiter.api.TestInstance
 import java.lang.Thread.sleep
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.ZonedDateTime
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -404,7 +405,13 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 client.post("/api/klage/opprett/${sak.id}") {
                     addAuthToken(tokenSaksbehandler)
                     contentType(ContentType.Application.Json)
-                    setBody(InnkommendeKlage(mottattDato = LocalDate.now(), journalpostId = "123546", innsender = "en innsender"))
+                    setBody(
+                        InnkommendeKlageDto(
+                            mottattDato = ZonedDateTime.now().toOffsetDateTime().toString(),
+                            journalpostId = "123546",
+                            innsender = "en innsender",
+                        ),
+                    )
                 }.body()
             val medOppdatertFormkrav: Klage =
                 client.put("/api/klage/${klage.id}/formkrav") {

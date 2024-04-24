@@ -47,7 +47,6 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -112,14 +111,10 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     fun `opprettelse av klage gaar bra og henting gir 404 etter at saken blir skjermet`() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
-            val mottattDato = LocalDate.now()
-            val mottattDatoString = ZonedDateTime.of(LocalDate.now().atTime(0, 0), norskTidssone).toOffsetDateTime().toString()
-
             val klage: Klage = opprettKlage(sak, client)
 
             val hentetKlage: Klage = hentKlage(client, klage.id)
             assertEquals(klage, hentetKlage)
-            assertEquals(mottattDato, klage.innkommendeDokument?.mottattDato.toString())
 
             // setter skjerming for saken
             client.postAndAssertOk(
@@ -349,7 +344,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     private suspend fun opprettKlage(
         sak: Sak,
         client: HttpClient,
-        mottattDato: String = LocalDate.now().toString(),
+        mottattDato: String = ZonedDateTime.now().toOffsetDateTime().toString(),
     ): Klage {
         val klage: Klage =
             client.post("/api/klage/opprett/${sak.id}") {

@@ -58,6 +58,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.Month
+import java.time.OffsetDateTime
 import java.time.ZonedDateTime
 import java.util.UUID
 
@@ -344,7 +345,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     private suspend fun opprettKlage(
         sak: Sak,
         client: HttpClient,
-        mottattDato: String = ZonedDateTime.now().toOffsetDateTime().toString(),
+        mottattDato: String = OffsetDateTime.now().toString(),
     ): Klage {
         val klage: Klage =
             client.post("/api/klage/opprett/${sak.id}") {

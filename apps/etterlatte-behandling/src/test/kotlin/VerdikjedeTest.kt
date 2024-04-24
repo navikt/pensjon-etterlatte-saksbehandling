@@ -78,8 +78,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.lang.Thread.sleep
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.time.YearMonth
-import java.time.ZonedDateTime
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -407,7 +407,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                     contentType(ContentType.Application.Json)
                     setBody(
                         InnkommendeKlageDto(
-                            mottattDato = ZonedDateTime.now().toOffsetDateTime().toString(),
+                            mottattDato = OffsetDateTime.now().toString(),
                             journalpostId = "123546",
                             innsender = "en innsender",
                         ),

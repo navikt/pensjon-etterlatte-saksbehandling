@@ -50,7 +50,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDateTime
-import java.time.ZonedDateTime
+import java.time.OffsetDateTime
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -215,7 +215,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
                 contentType(ContentType.Application.Json)
                 setBody(
                     InnkommendeKlageDto(
-                        mottattDato = ZonedDateTime.now().toOffsetDateTime().toString(),
+                        mottattDato = OffsetDateTime.now().toString(),
                         journalpostId = "",
                         innsender = "En klager",
                     ),

@@ -19,6 +19,7 @@ import { usePersonopplysninger, usePersonopplysningerOmsAvdoede } from '~compone
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -84,6 +85,8 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           aktivitet etter 12 måneder. I visse tilfeller kan man ha rett på omstillingsstønad selv om aktivitetskravet
           ikke er oppfylt.
         </BodyLong>
+
+        <AktivitetspliktTidslinje behandling={behandling} doedsdato={new Date(avdoedesDoedsdato!!)} />
 
         <Heading size="small" spacing>
           Beskriv etterlatte sin aktivitet idag
@@ -183,7 +186,6 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
 
 const AktivitetspliktWrapper = styled.div`
   padding: 0 4em;
-  max-width: 40em;
 `
 const SpacingWrapper = styled.div`
   margin-top: 1rem;

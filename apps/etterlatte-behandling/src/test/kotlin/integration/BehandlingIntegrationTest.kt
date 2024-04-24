@@ -51,6 +51,7 @@ abstract class BehandlingIntegrationTest {
                         put("DB_PORT", props.firstMappedPort.toString())
                         put("DB_DATABASE", props.databaseName)
                         put("AZUREAD_ATTESTANT_GROUPID", azureAdAttestantClaim)
+                        put("AZUREAD_ATTESTANT_GJENNY_GROUPID", azureAdAttestantGjennyClaim)
                         put("AZUREAD_SAKSBEHANDLER_GROUPID", azureAdSaksbehandlerClaim)
                         put("AZUREAD_STRENGT_FORTROLIG_GROUPID", azureAdStrengtFortroligClaim)
                         put("AZUREAD_EGEN_ANSATT_GROUPID", azureAdEgenAnsattClaim)

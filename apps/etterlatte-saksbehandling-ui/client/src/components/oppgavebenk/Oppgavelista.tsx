@@ -13,7 +13,6 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { FilterRad } from '~components/oppgavebenk/filtreringAvOppgaver/FilterRad'
 import {
-  FILTER_KEY,
   hentFilterFraLocalStorage,
   leggFilterILocalStorage,
 } from '~components/oppgavebenk/filtreringAvOppgaver/filterLocalStorage'
@@ -78,7 +77,7 @@ export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Pro
     )
 
   useEffect(() => {
-    leggFilterILocalStorage({ ...filter, sakEllerFnrFilter: '' }, FILTER_KEY)
+    leggFilterILocalStorage({ ...filter, sakEllerFnrFilter: '' })
   }, [filter])
 
   useEffect(() => {

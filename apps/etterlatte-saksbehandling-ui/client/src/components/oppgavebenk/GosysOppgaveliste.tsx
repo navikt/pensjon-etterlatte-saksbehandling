@@ -16,9 +16,8 @@ import { GosysFilterRad } from './filtreringAvOppgaver/GosysFilterRad'
 import { GosysOppgave } from '~shared/types/Gosys'
 import { formaterEnumTilLesbarString } from '~utils/formattering'
 import {
-  GOSYS_FILTER_KEY,
   hentGosysFilterFraLocalStorage,
-  leggFilterILocalStorage,
+  leggGosysFilterILocalStorage,
 } from '~components/oppgavebenk/filtreringAvOppgaver/filterLocalStorage'
 
 interface Props {
@@ -61,7 +60,7 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   }
 
   useEffect(() => {
-    leggFilterILocalStorage({ ...filter, sakEllerFnrFilter: '' }, GOSYS_FILTER_KEY)
+    leggGosysFilterILocalStorage(filter)
     hentOppgaver(filter)
   }, [filter])
 

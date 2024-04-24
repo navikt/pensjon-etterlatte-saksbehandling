@@ -2,11 +2,14 @@ import { initialFilter } from '~components/oppgavebenk/filtreringAvOppgaver/filt
 import { logger } from '~utils/logger'
 import { Filter, GosysFilter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 
-export const FILTER_KEY = 'filter'
-export const GOSYS_FILTER_KEY = 'gosysFilter'
+const FILTER_KEY = 'filter'
+const GOSYS_FILTER_KEY = 'gosysFilter'
 
-export const leggFilterILocalStorage = (filter: Filter | GosysFilter, filterKey: string) =>
-  localStorage.setItem(filterKey, JSON.stringify(filter))
+export const leggFilterILocalStorage = (filter: Filter) => localStorage.setItem(FILTER_KEY, JSON.stringify(filter))
+
+export const leggGosysFilterILocalStorage = (filter: GosysFilter) => {
+  localStorage.setItem(GOSYS_FILTER_KEY, JSON.stringify(filter))
+}
 
 export const hentFilterFraLocalStorage = (): Filter => {
   try {

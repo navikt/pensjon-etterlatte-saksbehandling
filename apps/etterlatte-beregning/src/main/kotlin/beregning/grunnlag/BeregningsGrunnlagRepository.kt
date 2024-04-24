@@ -6,6 +6,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.transaction
 import org.postgresql.util.PGobject
 import java.util.UUID
@@ -96,6 +97,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                                 "sak_id" to grunnlag.sakId,
                                 "beskrivelse" to grunnlag.beskrivelse,
                                 "kilde" to grunnlag.kilde.toJson(),
+                                "regulering_regelresultat" to grunnlag.reguleringRegelresultat?.toJson(),
                             ),
                     ).asUpdate,
                 )
@@ -156,7 +158,8 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                 prorata_broek_nevner,
                 sak_id,
                 beskrivelse,
-                kilde
+                kilde,
+                regulering_regelresultat 
             FROM overstyr_beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id
             """.trimIndent()
@@ -181,7 +184,8 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                 prorata_broek_nevner,
                 sak_id,
                 beskrivelse,
-                kilde
+                kilde,
+                regulering_regelresultat 
             )                
             VALUES (
                 :id,
@@ -195,7 +199,8 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                 :prorata_broek_nevner,
                 :sak_id,
                 :beskrivelse,
-                :kilde
+                :kilde,
+                :regulering_regelresultat 
             )
             """.trimMargin()
     }
@@ -248,5 +253,6 @@ private fun Row.asOverstyrBeregningGrunnlag(): OverstyrBeregningGrunnlagDao {
         sakId = this.long("sak_id"),
         beskrivelse = this.string("beskrivelse"),
         kilde = objectMapper.readValue(this.string("kilde")),
+        reguleringRegelresultat = this.stringOrNull("regulering_regelresultat")?.let { objectMapper.readValue(it) },
     )
 }

@@ -106,6 +106,7 @@ spec:
         - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
         - application: etterlatte-behandling
         - application: etterlatte-beregning
+        - application: etterlatte-testdata-behandler
         - application: etterlatte-samordning-vedtak
           permissions:
             roles:

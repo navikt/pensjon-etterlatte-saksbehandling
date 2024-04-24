@@ -11,15 +11,11 @@ spec:
   ingresses:
     - https://etterlatte-pdltjenester.intern.dev.nav.no
   liveness:
-    path: "health/isalive"
-    initialDelay: 60
-    timeout: 1
-    periodSeconds: 5
-    failureThreshold: 10
+    initialDelay: 5
+    path: /health/isalive
   readiness:
-    path: "health/isready"
-    initialDelay: 60
-    timeout: 1
+    initialDelay: 5
+    path: /health/isready
   prometheus:
     enabled: true
     path: /metrics

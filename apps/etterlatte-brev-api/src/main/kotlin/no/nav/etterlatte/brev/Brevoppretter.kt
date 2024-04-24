@@ -19,15 +19,16 @@ import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.UUID
 
 class Brevoppretter(
@@ -205,7 +206,7 @@ fun Vergemaal.toMottaker(): Mottaker {
     if (mottaker.adresse != null) {
         return Mottaker(
             navn = if (mottaker.navn.isNullOrBlank()) "N/A" else mottaker.navn!!,
-            foedselsnummer = mottaker.foedselsnummer?.let { Foedselsnummer(it.value) },
+            foedselsnummer = mottaker.foedselsnummer?.let { MottakerFoedselsnummer(it.value) },
             orgnummer = null,
             adresse =
                 with(mottaker.adresse!!) {
@@ -223,7 +224,7 @@ fun Vergemaal.toMottaker(): Mottaker {
         )
     }
 
-    return Mottaker.tom(Folkeregisteridentifikator.of(mottaker.foedselsnummer!!.value))
+    return tomMottaker(Folkeregisteridentifikator.of(mottaker.foedselsnummer!!.value))
         .copy(navn = if (mottaker.navn.isNullOrBlank()) "N/A" else mottaker.navn!!)
 }
 

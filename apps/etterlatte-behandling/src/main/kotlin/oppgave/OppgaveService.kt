@@ -362,6 +362,27 @@ class OppgaveService(
             else -> oppgaveDao.oppdaterStatusOgMerknad(oppgave.id, merknad, Status.FERDIGSTILT)
         }
         logger.info("Oppgave med id=${oppgave.id} ferdigstilt av ${saksbehandler.ident()}")
+
+        if (oppgave.typeKanAttesteres()) {
+            tildelOpprinneligSaksbehandler(oppgave.id)
+        }
+    }
+
+    private fun tildelOpprinneligSaksbehandler(oppgaveId: UUID) {
+        val forrigeSaksbehandler =
+            oppgaveDao.hentEndringerForOppgave(oppgaveId)
+                .sortedByDescending { it.tidspunkt }
+                .firstOrNull(OppgaveEndring::sendtTilAttestering)
+                ?.oppgaveFoer
+                ?.saksbehandler
+                ?.ident
+
+        if (forrigeSaksbehandler.isNullOrBlank()) {
+            logger.warn("Fant ikke saksbehandleren som sendte oppgave $oppgaveId til attestering")
+        } else {
+            logger.info("Tildeler oppgave $oppgaveId til $forrigeSaksbehandler som sendte oppgaven til attestering")
+            oppgaveDao.settNySaksbehandler(oppgaveId, forrigeSaksbehandler)
+        }
     }
 
     private fun sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(

@@ -17,7 +17,6 @@ import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.attachMockContext
-import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
@@ -44,7 +43,6 @@ internal class BehandlingRoutesTest {
     private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>()
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
-    private val aktivitetspliktService = mockk<AktivitetspliktService>()
     private val behandlingFactory = mockk<BehandlingFactory>()
 
     @BeforeAll
@@ -185,7 +183,6 @@ internal class BehandlingRoutesTest {
                         behandlingService,
                         gyldighetsproevingService,
                         kommerBarnetTilGodeService,
-                        aktivitetspliktService,
                         behandlingFactory,
                     )
                 }

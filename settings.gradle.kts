@@ -11,6 +11,7 @@ include(
     "apps:etterlatte-egne-ansatte-lytter",
     "apps:etterlatte-institusjonsopphold",
     "apps:etterlatte-testdata",
+    "apps:etterlatte-testdata-behandler",
     "apps:etterlatte-utbetaling",
     "apps:etterlatte-oppdater-behandling",
     "apps:etterlatte-beregning",

@@ -12,6 +12,7 @@ import { githubRouter } from './routers/githubRouter'
 import { unleashRouter } from './routers/unleashRouter'
 import { requestLoggerMiddleware } from './middleware/logging'
 import { createProxyMiddleware } from 'http-proxy-middleware'
+import { selftestRouter } from './routers/selftestRouter'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -34,6 +35,7 @@ app.get('/metrics', async (_: Request, res: Response) => {
 
 app.use('/api/logg', loggerRouter)
 app.use('/api/feature', unleashRouter)
+app.use('/internal/selftest', selftestRouter)
 
 app.get(
   '/internal/selftest/behandling',

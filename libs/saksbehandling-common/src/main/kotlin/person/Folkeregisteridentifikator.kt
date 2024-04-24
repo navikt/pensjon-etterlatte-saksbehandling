@@ -25,13 +25,20 @@ class Folkeregisteridentifikator private constructor(
             if (fnr.isNullOrEmpty()) {
                 throw InvalidFoedselsnummerException("Fødselsnummer er tomt")
             } else {
-                val fnrMedGyldigeTall = fnr.replace(Regex("[^0-9]"), "")
-                if (FolkeregisteridentifikatorValidator.isValid(fnrMedGyldigeTall)) {
-                    return Folkeregisteridentifikator(fnrMedGyldigeTall)
-                } else {
-                    sikkerlogger().error("Ugyldig fødselsnummer: $fnr")
-                    throw InvalidFoedselsnummerException("Fødselsnummeret er ugyldig")
-                }
+                return requireNotNull(ofNullable(fnr))
+            }
+        }
+
+        fun ofNullable(fnr: String?): Folkeregisteridentifikator? {
+            if (fnr.isNullOrEmpty()) {
+                return null
+            }
+            val fnrMedGyldigeTall = fnr.replace(Regex("[^0-9]"), "")
+            if (FolkeregisteridentifikatorValidator.isValid(fnrMedGyldigeTall)) {
+                return Folkeregisteridentifikator(fnrMedGyldigeTall)
+            } else {
+                sikkerlogger().error("Ugyldig fødselsnummer: $fnr")
+                throw InvalidFoedselsnummerException("Fødselsnummeret er ugyldig")
             }
         }
 

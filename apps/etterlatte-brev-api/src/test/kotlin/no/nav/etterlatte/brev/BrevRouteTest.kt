@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -32,9 +33,10 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -117,6 +119,25 @@ internal class BrevRouteTest {
             brevService.genererPdf(brevId, any())
             tilgangssjekker.harTilgangTilSak(any(), any(), any())
         }
+    }
+
+    @Test
+    fun deserialiser() {
+        val mottaker =
+            """{
+            "navn": "Peder Ås",
+            "foedselsnummer": {
+                "value": "25478323363"
+            },
+            "orgnummer": null,
+            "adresse": {
+                "adresseType": "123",
+                "landkode": "NO",
+                "land": "Norge"
+            }
+        }
+            """.trimMargin()
+        objectMapper.readValue<Mottaker>(mottaker)
     }
 
     @Test
@@ -251,7 +272,7 @@ internal class BrevRouteTest {
         }
 
     companion object {
-        private val STOR_SNERK = Foedselsnummer("11057523044")
+        private val STOR_SNERK = MottakerFoedselsnummer("11057523044")
         private val SAK_ID = Random.nextLong(1000)
     }
 }

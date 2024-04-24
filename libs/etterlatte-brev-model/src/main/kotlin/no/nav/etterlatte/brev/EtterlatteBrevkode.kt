@@ -58,6 +58,7 @@ enum class Brevtype {
     VEDLEGG,
     NOTAT,
     OVERSENDELSE_KLAGE,
+    SLETTET_VARSEL,
     ;
 
     fun erKobletTilEnBehandling(): Boolean {

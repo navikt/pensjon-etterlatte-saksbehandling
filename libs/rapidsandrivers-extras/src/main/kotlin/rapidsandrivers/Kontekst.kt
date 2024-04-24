@@ -6,4 +6,5 @@ enum class Kontekst {
     MIGRERING,
     REGULERING,
     VENT,
+    TEST,
 }

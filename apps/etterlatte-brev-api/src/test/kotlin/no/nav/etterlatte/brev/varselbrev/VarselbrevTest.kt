@@ -17,9 +17,9 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -47,7 +47,7 @@ class VarselbrevTest(datasource: DataSource) {
     fun start() {
         val adresseService =
             mockk<AdresseService>().also {
-                coEvery { it.hentMottakerAdresse(any(), any()) } returns Mottaker.tom(SOEKER_FOEDSELSNUMMER)
+                coEvery { it.hentMottakerAdresse(any(), any()) } returns tomMottaker(SOEKER_FOEDSELSNUMMER)
             }
         val brevdataFacade =
             mockk<BrevdataFacade>().also {

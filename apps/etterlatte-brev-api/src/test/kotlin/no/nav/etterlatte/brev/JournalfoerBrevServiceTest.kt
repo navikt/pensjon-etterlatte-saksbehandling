@@ -21,12 +21,13 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -150,7 +151,7 @@ class JournalfoerBrevServiceTest {
     @ParameterizedTest
     @EnumSource(SakType::class)
     fun `Journalfoeringsrequest for vedtaksbrev mappes korrekt`(type: SakType) {
-        val forventetBrevMottakerFnr = "01018012345"
+        val forventetBrevMottakerFnr = SOEKER_FOEDSELSNUMMER.value
         val forventetBrev =
             Brev(
                 id = 123,
@@ -166,7 +167,7 @@ class JournalfoerBrevServiceTest {
                 mottaker =
                     Mottaker(
                         "Stor Snerk",
-                        Foedselsnummer(forventetBrevMottakerFnr),
+                        MottakerFoedselsnummer(forventetBrevMottakerFnr),
                         null,
                         Adresse(
                             adresseType = "NORSKPOSTADRESSE",
@@ -221,7 +222,7 @@ class JournalfoerBrevServiceTest {
     @ParameterizedTest
     @EnumSource(SakType::class)
     fun `Journalfoeringsrequest for informasjonsbrev mappes korrekt`(type: SakType) {
-        val forventetBrevMottakerFnr = "01018012345"
+        val forventetBrevMottakerFnr = SOEKER_FOEDSELSNUMMER.value
         val forventetBrev =
             Brev(
                 id = 123,
@@ -237,7 +238,7 @@ class JournalfoerBrevServiceTest {
                 mottaker =
                     Mottaker(
                         "Stor Snerk",
-                        Foedselsnummer(forventetBrevMottakerFnr),
+                        MottakerFoedselsnummer(forventetBrevMottakerFnr),
                         null,
                         Adresse(
                             adresseType = "NORSKPOSTADRESSE",
@@ -306,7 +307,7 @@ class JournalfoerBrevServiceTest {
     private fun opprettMottaker() =
         Mottaker(
             "Stor Snerk",
-            foedselsnummer = Foedselsnummer("1234567890"),
+            foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
             orgnummer = null,
             adresse =
                 Adresse(

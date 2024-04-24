@@ -23,9 +23,9 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class OmregningsHendelserTest {
-    private val behandlingService = mockk<BeregningService>()
+    private val beregningService = mockk<BeregningService>()
     private val trygdetidService = mockk<TrygdetidService>()
-    private val inspector = TestRapid().apply { OmregningHendelserRiver(this, behandlingService, trygdetidService) }
+    private val inspector = TestRapid().apply { OmregningHendelserRiver(this, beregningService, trygdetidService) }
 
     @Test
     fun `skal opprette omregning`() {
@@ -73,13 +73,14 @@ internal class OmregningsHendelserTest {
             )
         }.returns(noContentValue)
         every {
-            behandlingService.opprettBeregningsgrunnlagFraForrigeBehandling(
+            beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(
                 capture(behandlingsId),
                 capture(forrigeBehandlingId),
             )
         }.returns(noContentValue)
-        every { behandlingService.beregn(capture(omregningsid)) }.returns(returnValue)
-        every { behandlingService.hentBeregning(any()) }.returns(returnValue)
+        every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(capture(omregningsid)) } returns mockk()
+        every { beregningService.beregn(capture(omregningsid)) }.returns(returnValue)
+        every { beregningService.hentBeregning(any()) }.returns(returnValue)
 
         val inspector = inspector.apply { sendTestMessage(fullMelding) }
 

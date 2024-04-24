@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
@@ -336,9 +337,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
                 merknad = null,
             )
 
-        val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
-        nyKontekstMedBruker(attestantmock)
-        mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
+        opprettAttestantKontekst()
         oppgaveService.tildelSaksbehandler(oppgaveUnderBehandlingAnnenBehandling.id, saksbehandler.ident)
         oppgaveService.avbrytAapneOppgaverMedReferanse(behandlingId)
 
@@ -1019,9 +1018,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
         oppgaveService.tildelSaksbehandler(foerstegangsbehandling.id, saksbehandler.ident)
 
-        val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
-        nyKontekstMedBruker(attestantmock)
-        mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
+        opprettAttestantKontekst()
 
         oppgaveService.tilAttestering(behandlingId, OppgaveType.FOERSTEGANGSBEHANDLING, null)
         oppgaveService.tildelSaksbehandler(foerstegangsbehandling.id, "attestant")
@@ -1069,5 +1066,47 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             kilde shouldBe OppgaveKilde.BEHANDLING
             referanse shouldBe nyReferanse
         }
+    }
+
+    @Test
+    fun `Oppgaven skal tildeles opprinnelig saksbehandler etter attestering`() {
+        val saksbehandler = BrukerTokenInfo.of("", "saksbehandler", null, null, null)
+        val attestant = BrukerTokenInfo.of("", "attestant", null, null, null)
+
+        val behandlingId = UUID.randomUUID().toString()
+        val opprettetSak = sakDao.opprettSak("123", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val oppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse = behandlingId,
+                sakId = opprettetSak.id,
+                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+                merknad = null,
+            )
+
+        oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident())
+
+        val attestertOppgave = oppgaveService.tilAttestering(behandlingId, OppgaveType.FOERSTEGANGSBEHANDLING, "innvilget")
+        assertNull(attestertOppgave.saksbehandler)
+
+        opprettAttestantKontekst(attestant.ident())
+        oppgaveService.tildelSaksbehandler(oppgave.id, attestant.ident())
+        val oppgaveTilAttestering = oppgaveService.hentOppgave(oppgave.id)
+        assertEquals(attestant.ident(), oppgaveTilAttestering.saksbehandler?.ident)
+
+        val ferdigstiltOppgave =
+            oppgaveService.ferdigStillOppgaveUnderBehandling(
+                behandlingId,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                attestant,
+            )
+        assertEquals(saksbehandler.ident(), ferdigstiltOppgave.saksbehandler?.ident)
+    }
+
+    private fun opprettAttestantKontekst(ident: String = "ident"): SaksbehandlerMedEnheterOgRoller {
+        val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns ident }
+        nyKontekstMedBruker(attestantmock)
+        mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
+        return attestantmock
     }
 }

@@ -1,7 +1,8 @@
 package no.nav.etterlatte.brev.model
 
 import io.kotest.matchers.shouldBe
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.Test
 
 internal class BrevModelTest {
@@ -10,7 +11,7 @@ internal class BrevModelTest {
         opprettMottaker(navn = "").erGyldig() shouldBe false
 
         opprettMottaker(foedselsnummer = null).erGyldig() shouldBe false
-        opprettMottaker(foedselsnummer = Foedselsnummer("")).erGyldig() shouldBe false
+        opprettMottaker(foedselsnummer = MottakerFoedselsnummer("")).erGyldig() shouldBe false
 
         opprettMottaker(orgnummer = null).erGyldig() shouldBe false
         opprettMottaker(orgnummer = "").erGyldig() shouldBe false
@@ -41,7 +42,7 @@ internal class BrevModelTest {
 
     private fun opprettMottaker(
         navn: String = "Test Testesen",
-        foedselsnummer: Foedselsnummer? = Foedselsnummer("12345"),
+        foedselsnummer: MottakerFoedselsnummer? = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
         orgnummer: String? = "999888777",
         adresseType: String = "NORSKPOSTADRESSE",
         adresselinje1: String? = null,

@@ -202,7 +202,6 @@ class BeregningsGrunnlagService(
 
         val forrigeGrunnlag =
             beregningsGrunnlagRepository.finnBeregningsGrunnlag(forrigeBehandlingId)
-
         if (forrigeGrunnlag == null) {
             val behandling =
                 runBlocking {
@@ -234,7 +233,10 @@ class BeregningsGrunnlagService(
                 beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
                     behandlingId,
                     grunnlag.map {
-                        it.copy(id = behandlingId)
+                        it.copy(
+                            id = UUID.randomUUID(),
+                            behandlingId = behandlingId,
+                        )
                     },
                 )
             }
@@ -299,6 +301,42 @@ class BeregningsGrunnlagService(
         )
 
         return hentOverstyrBeregningGrunnlag(behandlingId)
+    }
+
+    fun tilpassOverstyrtBeregningsgrunnlagForRegulering(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId).let { grunnlag ->
+            if (grunnlag.isNotEmpty()) {
+                val behandling =
+                    runBlocking {
+                        behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+                    }
+                val reguleringsmaaned = behandling.virkningstidspunkt().dato
+                beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
+                    behandlingId,
+                    grunnlag.map {
+                        it.copy(
+                            // lukker siste periode
+                            datoTOM =
+                                if (it.datoTOM == null) {
+                                    reguleringsmaaned.minusMonths(1).atEndOfMonth()
+                                } else {
+                                    it.datoTOM
+                                },
+                        )
+                    } +
+                        listOf(
+                            tilpassOverstyrtBeregningsgrunnlagForRegulering(
+                                reguleringsmaaned,
+                                grunnlag.last(),
+                                behandlingId,
+                            ),
+                        ),
+                )
+            }
+        }
     }
 }
 

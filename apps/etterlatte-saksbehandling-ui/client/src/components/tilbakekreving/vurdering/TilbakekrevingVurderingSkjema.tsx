@@ -14,7 +14,7 @@ import {
   TilbakekrevingVurdering,
 } from '~shared/types/Tilbakekreving'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { lagreTilbakekrevingsvurdering } from '~shared/api/tilbakekreving'
 
 import { isPending, mapResult } from '~shared/api/apiUtils'
@@ -24,7 +24,6 @@ import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import { useAutolagring } from '~components/autolagring/autolagring'
 
 const initialVurdering: TilbakekrevingVurdering = {
   aarsak: null,
@@ -49,8 +48,6 @@ const initialVurdering: TilbakekrevingVurdering = {
   hjemmel: null,
 }
 
-let renderCount = 0
-
 export function TilbakekrevingVurderingSkjema({
   behandling,
   redigerbar,
@@ -58,78 +55,52 @@ export function TilbakekrevingVurderingSkjema({
   behandling: TilbakekrevingBehandling
   redigerbar: boolean
 }) {
-  renderCount++
   if (!behandling) {
     return
   }
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
-  const [autolagreVurderingStatus, autolagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
 
   const methods = useForm<TilbakekrevingVurdering>({
     defaultValues: behandling.tilbakekreving.vurdering || initialVurdering,
     shouldUnregister: true,
   })
-  const {
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    control,
-    getValues,
-    setValue,
-    formState: { isSubmitSuccessful },
-  } = methods
+  const { register, handleSubmit, watch, control, getValues, setValue, formState, reset } = methods
 
-  const [submittedData, setSubmittedData] = useState(behandling.tilbakekreving.vurdering || initialVurdering)
+  useEffect(() => {
+    if (formState.isDirty && Object.keys(formState.dirtyFields).length) {
+      const delay = setTimeout(() => {
+        lagreVurdering({ vurdering: getValues(), automatisk: true })
+        reset(undefined, { keepValues: true, keepDirtyValues: true })
+      }, 3000)
+
+      return () => clearTimeout(delay)
+    }
+  }, [formState])
 
   useEffect(() => {
     if (watch().vilkaarsresultat === TilbakekrevingVilkaar.IKKE_OPPFYLT) {
       setValue('hjemmel', TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD)
     } else {
-      setValue('hjemmel', watch().rettsligGrunnlag)
+      setValue('hjemmel', getValues().rettsligGrunnlag)
     }
-  }, [watch().vilkaarsresultat, watch().rettsligGrunnlag])
+  }, [watch().vilkaarsresultat])
 
-  const lagreVurdering = ({ vurdering, automatisk }: { vurdering: TilbakekrevingVurdering; automatisk: boolean }) => {
-    console.log('Lagrer vurdering', renderCount)
-    const apiCall = automatisk ? autolagreVurderingRequest : lagreVurderingRequest
-
-    apiCall(
+  const lagreVurdering = ({ vurdering }: { vurdering: TilbakekrevingVurdering; automatisk: boolean }) => {
+    lagreVurderingRequest(
       {
         behandlingsId: behandling.id,
         vurdering: vurdering,
+      },
+      (behandling) => {
+        if (behandling.tilbakekreving.vurdering) {
+          reset(behandling.tilbakekreving.vurdering)
+        }
       }
-      // ,
-      // (lagretTilbakekreving: TilbakekrevingBehandling) => {
-      //   dispatch(addTilbakekreving(lagretTilbakekreving))
-      // }
     )
   }
 
-  const onAutoSubmit = (data: TilbakekrevingVurdering) => {
-    lagreVurdering({ vurdering: data, automatisk: true })
-    setSubmittedData(data)
-    settLagret(true)
-  }
-
-  const { lagret, settLagret } = useAutolagring({
-    defaultValues: submittedData,
-    methods: methods,
-    onSubmit: onAutoSubmit,
-  })
-
-  useEffect(() => {
-    if (isSubmitSuccessful) {
-      const foo = { ...submittedData }
-      console.log('Resetting form', foo)
-      reset(foo)
-    }
-  }, [isSubmitSuccessful, submittedData, reset])
-
   const onManualSubmit = (vurdering: TilbakekrevingVurdering) => {
     lagreVurdering({ vurdering: vurdering, automatisk: false })
-    setSubmittedData(vurdering)
-    settLagret(true)
   }
 
   const vilkaarOppfylt = () =>
@@ -141,7 +112,6 @@ export function TilbakekrevingVurderingSkjema({
 
   return (
     <InnholdPadding>
-      {'Lagret: ' + lagret}
       <VStack gap="8" style={{ width: '50em' }}>
         <Select {...register('aarsak')} label="Årsak til sak om feilutbetaling" readOnly={!redigerbar}>
           <option value="">Velg..</option>
@@ -177,7 +147,7 @@ export function TilbakekrevingVurderingSkjema({
               name="forhaandsvarselDato"
               label="Forhåndsvarsel dato"
               control={control}
-              defaultValue={getValues().forhaandsvarselDato ?? undefined}
+              // defaultValue={getValues().forhaandsvarselDato ?? undefined}
               readOnly={!redigerbar}
             />
           )}
@@ -403,10 +373,6 @@ export function TilbakekrevingVurderingSkjema({
             {mapResult(lagreVurderingStatus, {
               success: () => <Toast melding="Vurdering lagret" />,
               error: (error) => <Alert variant="error">Kunne ikke lagre vurdering: {error.detail}</Alert>,
-            })}
-            {mapResult(autolagreVurderingStatus, {
-              success: () => <Toast melding="Vurdering auto-lagret" />,
-              error: (error) => <Alert variant="error">Kunne ikke auto-lagre vurdering: {error.detail}</Alert>,
             })}
           </VStack>
         )}

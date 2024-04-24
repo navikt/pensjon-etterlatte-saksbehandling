@@ -29,19 +29,19 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
             put("/vurdering") {
                 kunSkrivetilgang {
                     val vurdering = call.receive<TilbakekrevingVurdering>()
-                    call.respond(service.lagreVurdering(behandlingId, vurdering))
+                    call.respond(service.lagreVurdering(behandlingId, vurdering, brukerTokenInfo))
                 }
             }
             put("/perioder") {
                 kunSkrivetilgang {
                     val request = call.receive<TilbakekrevingPerioderRequest>()
-                    call.respond(service.lagrePerioder(behandlingId, request.perioder))
+                    call.respond(service.lagrePerioder(behandlingId, request.perioder, brukerTokenInfo))
                 }
             }
             put("/skal-sende-brev") {
                 kunSkrivetilgang {
                     val request = call.receive<TilbakekrevingSendeBrevRequest>()
-                    call.respond(service.lagreSkalSendeBrev(behandlingId, request.skalSendeBrev))
+                    call.respond(service.lagreSkalSendeBrev(behandlingId, request.skalSendeBrev, brukerTokenInfo))
                 }
             }
             post("/valider") {

@@ -1,11 +1,12 @@
-package no.nav.etterlatte.behandling.klage
+package no.nav.etterlatte.behandling.tilbakekreving
 
+import behandling.tilbakekreving.kravgrunnlag
+import behandling.tilbakekreving.tilbakekrevingVurdering
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -16,40 +17,14 @@ import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingPerioderRequest
-import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingSendeBrevRequest
-import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.ktor.runServerWithModule
-import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
-import no.nav.etterlatte.libs.common.tilbakekreving.JaNei
-import no.nav.etterlatte.libs.common.tilbakekreving.KlasseKode
-import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
-import no.nav.etterlatte.libs.common.tilbakekreving.Kontrollfelt
-import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
-import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagId
-import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagPeriode
-import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagStatus
-import no.nav.etterlatte.libs.common.tilbakekreving.NavIdent
-import no.nav.etterlatte.libs.common.tilbakekreving.Periode
-import no.nav.etterlatte.libs.common.tilbakekreving.SakId
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBeloepBehold
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBeloepBeholdSvar
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingTilsvar
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVarsel
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVilkaar
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
-import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
-import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
@@ -58,9 +33,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
@@ -281,90 +253,6 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
         return sak
     }
 
-    private fun kravgrunnlag(sak: Sak) =
-        Kravgrunnlag(
-            kravgrunnlagId = KravgrunnlagId(123L),
-            sakId = SakId(sak.id),
-            vedtakId = VedtakId(2L),
-            kontrollFelt = Kontrollfelt(""),
-            status = KravgrunnlagStatus.ANNU,
-            saksbehandler = NavIdent(""),
-            sisteUtbetalingslinjeId = UUID30(""),
-            perioder =
-                listOf(
-                    KravgrunnlagPeriode(
-                        periode =
-                            Periode(
-                                fraOgMed = YearMonth.of(2023, 1),
-                                tilOgMed = YearMonth.of(2023, 2),
-                            ),
-                        skatt = BigDecimal(200),
-                        grunnlagsbeloep =
-                            listOf(
-                                Grunnlagsbeloep(
-                                    klasseKode = KlasseKode(""),
-                                    klasseType = KlasseType.YTEL,
-                                    bruttoUtbetaling = BigDecimal(1000),
-                                    nyBruttoUtbetaling = BigDecimal(1200),
-                                    bruttoTilbakekreving = BigDecimal(200),
-                                    beloepSkalIkkeTilbakekreves = BigDecimal(200),
-                                    skatteProsent = BigDecimal(20),
-                                    resultat = null,
-                                    skyld = null,
-                                    aarsak = null,
-                                ),
-                                Grunnlagsbeloep(
-                                    klasseKode = KlasseKode(""),
-                                    klasseType = KlasseType.FEIL,
-                                    bruttoUtbetaling = BigDecimal(0),
-                                    nyBruttoUtbetaling = BigDecimal(0),
-                                    bruttoTilbakekreving = BigDecimal(0),
-                                    beloepSkalIkkeTilbakekreves = BigDecimal(0),
-                                    skatteProsent = BigDecimal(0),
-                                    resultat = null,
-                                    skyld = null,
-                                    aarsak = null,
-                                ),
-                            ),
-                    ),
-                ),
-        )
-
-    private fun tilbakekrevingVurdering(
-        beskrivelse: String? = "en beskrivelse",
-        rettsligGrunnlag: TilbakekrevingHjemmel? = TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
-    ) = TilbakekrevingVurdering(
-        aarsak = TilbakekrevingAarsak.REVURDERING,
-        beskrivelse = beskrivelse,
-        forhaandsvarsel = TilbakekrevingVarsel.EGET_BREV,
-        forhaandsvarselDato = LocalDate.of(2024, 1, 1),
-        doedsbosak = JaNei.NEI,
-        foraarsaketAv = "Denne ble forårsaket av bruker.",
-        tilsvar =
-            TilbakekrevingTilsvar(
-                tilsvar = JaNei.JA,
-                beskrivelse = "Tilsvar på varsel.",
-                dato = LocalDate.of(2024, 1, 15),
-            ),
-        rettsligGrunnlag = rettsligGrunnlag,
-        objektivtVilkaarOppfylt = "Ja.",
-        uaktsomtForaarsaketFeilutbetaling = null,
-        burdeBrukerForstaatt = "Ja",
-        burdeBrukerForstaattEllerUaktsomtForaarsaket = null,
-        vilkaarsresultat = TilbakekrevingVilkaar.IKKE_OPPFYLT,
-        beloepBehold =
-            TilbakekrevingBeloepBehold(
-                behold = TilbakekrevingBeloepBeholdSvar.BELOEP_IKKE_I_BEHOLD,
-                beskrivelse = "Beløpet er ikke i behold.",
-            ),
-        reduseringAvKravet = null,
-        foreldet = null,
-        rentevurdering = null,
-        vedtak = "Bruker må betale tilbake.",
-        vurderesForPaatale = null,
-        hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD,
-    )
-
     private fun HttpClient.getAndAssertOk(
         url: String,
         token: String,
@@ -387,20 +275,6 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
             block?.invoke(response)
             response
         }
-    }
-
-    private suspend fun HttpClient.patchAndAssertOk(
-        url: String,
-        token: String,
-        body: Kabalrespons,
-    ) {
-        val response =
-            patch(url) {
-                addAuthToken(token)
-                contentType(ContentType.Application.Json)
-                setBody(body)
-            }
-        assertEquals(HttpStatusCode.OK, response.status)
     }
 
     private suspend fun HttpClient.postAndAssertOk(

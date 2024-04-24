@@ -1,0 +1,381 @@
+package behandling.tilbakekreving
+
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.runs
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klienter.BrevApiKlient
+import no.nav.etterlatte.behandling.klienter.BrevStatus
+import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
+import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
+import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
+import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.Mottaker
+import no.nav.etterlatte.libs.common.behandling.Mottakerident
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
+import no.nav.etterlatte.libs.common.toUUID30
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
+import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.RegisterExtension
+import java.time.LocalDate
+import java.util.UUID
+import kotlin.random.Random
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest() {
+    private lateinit var tilbakekrevingDao: TilbakekrevingDao
+    private lateinit var sakDao: SakDao
+    private lateinit var hendelseDao: HendelseDao
+    private lateinit var service: TilbakekrevingService
+    private lateinit var oppgaveService: OppgaveService
+    private lateinit var vedtakKlient: VedtakKlient
+
+    private val brevApiKlient: BrevApiKlient = mockk()
+    private val tilbakekrevingKlient: TilbakekrevingKlient = mockk()
+
+    private val saksbehandler = Saksbehandler("tokenSaksbehandler", "saksbehandlerIdent", null)
+    private val attestant = Saksbehandler("tokenAttestant", "attestantIdent", null)
+    private val bruker = GrunnlagTestData().gjenlevende.foedselsnummer.value
+    private val enhet = "123456"
+
+    companion object {
+        @RegisterExtension
+        private val dbExtension = DatabaseExtension()
+    }
+
+    @BeforeEach
+    fun setUp() {
+        service = applicationContext.tilbakekrevingService
+        sakDao = applicationContext.sakDao
+        tilbakekrevingDao = applicationContext.tilbakekrevingDao
+        hendelseDao = applicationContext.hendelseDao
+        oppgaveService = applicationContext.oppgaveService
+        vedtakKlient = applicationContext.vedtakKlient
+    }
+
+    @BeforeAll
+    fun start() {
+        val user =
+            mockk<SaksbehandlerMedEnheterOgRoller> {
+                every { name() } returns "User"
+                every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+                every { saksbehandlerMedRoller } returns
+                    mockk<SaksbehandlerMedRoller> {
+                        every { harRolleAttestant() } returns true
+                    }
+            }
+
+        startServer(
+            featureToggleService = DummyFeatureToggleService(),
+            brevApiKlient = brevApiKlient,
+            tilbakekrevingKlient = tilbakekrevingKlient,
+        )
+
+        nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)
+    }
+
+    @AfterAll
+    fun afterAllTests() {
+        afterAll()
+    }
+
+    @AfterEach
+    fun afterEachTest() {
+        dbExtension.resetDb()
+    }
+
+    @Test
+    fun `skal opprette tilbakekrevingsbehandling fra kravgrunnlag og koble mot eksisterende oppgave`() {
+        val sak = inTransaction { sakDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val behandlingId = UUID.randomUUID()
+
+        val oppgaveFraBehandlingMedFeilutbetaling =
+            inTransaction {
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    referanse = behandlingId.toUUID30().value,
+                    sakId = sak.id,
+                    oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
+                    oppgaveType = OppgaveType.TILBAKEKREVING,
+                    merknad = "Venter på kravgrunnlag",
+                )
+            }
+
+        oppgaveFraBehandlingMedFeilutbetaling.referanse shouldBe behandlingId.toUUID30().value
+        oppgaveFraBehandlingMedFeilutbetaling.status shouldBe Status.NY
+        oppgaveFraBehandlingMedFeilutbetaling.merknad shouldBe "Venter på kravgrunnlag"
+
+        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak, behandlingId.toUUID30()))
+        val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
+
+        oppgave.id shouldBe oppgaveFraBehandlingMedFeilutbetaling.id
+        oppgave.referanse shouldBe tilbakekreving.id.toString()
+        oppgave.status shouldBe Status.NY
+        oppgave.merknad shouldBe "Kravgrunnlag mottatt"
+    }
+
+    @Test
+    fun `skal opprette tilbakekrevingsbehandling fra kravgrunnlag og lage ny oppgave hvis eksisterende ikke finnes`() {
+        val sak = inTransaction { sakDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val behandlingId = UUID.randomUUID()
+
+        val oppgaverFraReferanse =
+            inTransaction {
+                oppgaveService.hentOppgaverForReferanse(behandlingId.toUUID30().value)
+            }
+
+        oppgaverFraReferanse.size shouldBe 0
+
+        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak, behandlingId.toUUID30()))
+        val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
+
+        oppgave.referanse shouldBe tilbakekreving.id.toString()
+        oppgave.status shouldBe Status.NY
+        oppgave.merknad shouldBe "Kravgrunnlag mottatt"
+    }
+
+    @Test
+    fun `skal fatte vedtak for tilbakekrevingsbehandling`() {
+        coEvery { vedtakKlient.fattVedtakTilbakekreving(any(), any(), any()) } returns 1L
+        coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
+
+        // Oppretter sak og tilbakekreving basert på kravgrunnlag
+        val sak = inTransaction { sakDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
+        val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
+
+        // Tildeler oppgaven til saksbehandler
+        inTransaction { oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident) }
+
+        // Lagrer vurdering og perioder
+        service.lagreVurdering(tilbakekreving.id, tilbakekrevingVurdering(), saksbehandler)
+        service.lagrePerioder(tilbakekreving.id, tilbakekrevingPerioder(tilbakekreving), saksbehandler)
+        service.validerVurderingOgPerioder(tilbakekreving.id, saksbehandler)
+
+        // Fatter vedtak
+        val tilbakekrevingMedFattetVedtak = runBlocking { service.fattVedtak(tilbakekreving.id, saksbehandler) }
+        val sisteLagretHendelse = inTransaction { hendelseDao.hentHendelserISak(sak.id).maxBy { it.opprettet } }
+        val oppgaveTilAttestering = inTransaction { oppgaveService.hentOppgave(oppgave.id) }
+
+        tilbakekrevingMedFattetVedtak.status shouldBe TilbakekrevingStatus.FATTET_VEDTAK
+        oppgaveTilAttestering.status shouldBe Status.ATTESTERING
+
+        coVerify {
+            vedtakKlient.lagreVedtakTilbakekreving(any(), saksbehandler, enhet)
+            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet)
+            brevApiKlient.hentVedtaksbrev(tilbakekreving.id, saksbehandler)
+        }
+
+        with(sisteLagretHendelse) {
+            sakId shouldBe sak.id
+            vedtakId shouldBe 1L
+            behandlingId shouldBe tilbakekreving.id
+            hendelse shouldBe "VEDTAK:FATTET"
+            ident shouldBe saksbehandler.ident
+            identType shouldBe "SAKSBEHANDLER"
+            inntruffet shouldNotBe null
+            opprettet shouldNotBe null
+            kommentar shouldBe null
+            valgtBegrunnelse shouldBe null
+        }
+
+        confirmVerified(vedtakKlient, brevApiKlient)
+    }
+
+    @Test
+    fun `skal fatte og attestere vedtak for tilbakekrevingsbehandling`() {
+        coEvery { vedtakKlient.attesterVedtakTilbakekreving(any(), any(), any()) } returns tilbakekrevingsvedtak(saksbehandler, enhet)
+        coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
+        coEvery { brevApiKlient.ferdigstillVedtaksbrev(any(), any(), any()) } just runs
+        coEvery { tilbakekrevingKlient.sendTilbakekrevingsvedtak(any(), any()) } just runs
+
+        // Oppretter sak og tilbakekreving basert på kravgrunnlag
+        val sak = inTransaction { sakDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
+        val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
+
+        // Tildeler oppgaven til saksbehandler
+        inTransaction { oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident) }
+
+        // Lagrer vurdering og perioder
+        service.lagreVurdering(tilbakekreving.id, tilbakekrevingVurdering(), saksbehandler)
+        service.lagrePerioder(tilbakekreving.id, tilbakekrevingPerioder(tilbakekreving), saksbehandler)
+        service.validerVurderingOgPerioder(tilbakekreving.id, saksbehandler)
+
+        // Fatter vedtak
+        runBlocking { service.fattVedtak(tilbakekreving.id, saksbehandler) }
+
+        // Tildeler oppgaven til attestant
+        inTransaction { oppgaveService.tildelSaksbehandler(oppgave.id, attestant.ident) }
+
+        // Attesterer vedtaket
+        val tilbakekrevingMedAttestertVedtak = runBlocking { service.attesterVedtak(tilbakekreving.id, "kommentar", attestant) }
+        val sisteLagretHendelse = inTransaction { hendelseDao.hentHendelserISak(sak.id).maxBy { it.opprettet } }
+        val oppgaveFerdigstilt = inTransaction { oppgaveService.hentOppgave(oppgave.id) }
+
+        tilbakekrevingMedAttestertVedtak.status shouldBe TilbakekrevingStatus.ATTESTERT
+        oppgaveFerdigstilt.status shouldBe Status.FERDIGSTILT
+
+        coVerify {
+            vedtakKlient.lagreVedtakTilbakekreving(any(), saksbehandler, enhet)
+            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet)
+            brevApiKlient.hentVedtaksbrev(tilbakekreving.id, saksbehandler)
+
+            vedtakKlient.attesterVedtakTilbakekreving(tilbakekreving.id, attestant, enhet)
+            brevApiKlient.ferdigstillVedtaksbrev(tilbakekreving.id, sak.id, attestant)
+            tilbakekrevingKlient.sendTilbakekrevingsvedtak(attestant, any())
+        }
+
+        with(sisteLagretHendelse) {
+            sakId shouldBe sak.id
+            vedtakId shouldBe 1L
+            behandlingId shouldBe tilbakekreving.id
+            hendelse shouldBe "VEDTAK:ATTESTERT"
+            ident shouldBe attestant.ident
+            identType shouldBe "SAKSBEHANDLER"
+            inntruffet shouldNotBe null
+            opprettet shouldNotBe null
+            kommentar shouldBe "kommentar"
+            valgtBegrunnelse shouldBe null
+        }
+
+        confirmVerified(vedtakKlient, brevApiKlient, tilbakekrevingKlient)
+    }
+
+    @Test
+    fun `skal fatte og underkjenne vedtak for tilbakekrevingsbehandling`() {
+        coEvery { vedtakKlient.underkjennVedtakTilbakekreving(any(), any()) } returns 1L
+        coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
+
+        // Oppretter sak og tilbakekreving basert på kravgrunnlag
+        val sak = inTransaction { sakDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
+        val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
+
+        // Tildeler oppgaven til saksbehandler
+        inTransaction { oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident) }
+
+        // Lagrer vurdering og perioder
+        service.lagreVurdering(tilbakekreving.id, tilbakekrevingVurdering(), saksbehandler)
+        service.lagrePerioder(tilbakekreving.id, tilbakekrevingPerioder(tilbakekreving), saksbehandler)
+        service.validerVurderingOgPerioder(tilbakekreving.id, saksbehandler)
+
+        // Fatter vedtak
+        runBlocking { service.fattVedtak(tilbakekreving.id, saksbehandler) }
+
+        // Tildeler oppgaven til attestant
+        inTransaction { oppgaveService.tildelSaksbehandler(oppgave.id, attestant.ident) }
+
+        // Underkjenner vedtaket
+        val tilbakekrevingMedUnderkjentVedtak =
+            runBlocking { service.underkjennVedtak(tilbakekreving.id, "kommentar", "feil beregning", attestant) }
+        val sisteLagretHendelse = inTransaction { hendelseDao.hentHendelserISak(sak.id).maxBy { it.opprettet } }
+        val oppgaveUnderkjent = inTransaction { oppgaveService.hentOppgave(oppgave.id) }
+
+        tilbakekrevingMedUnderkjentVedtak.status shouldBe TilbakekrevingStatus.UNDERKJENT
+        oppgaveUnderkjent.status shouldBe Status.UNDERKJENT
+
+        coVerify {
+            vedtakKlient.lagreVedtakTilbakekreving(any(), saksbehandler, enhet)
+            vedtakKlient.fattVedtakTilbakekreving(tilbakekreving.id, saksbehandler, enhet)
+            brevApiKlient.hentVedtaksbrev(tilbakekreving.id, saksbehandler)
+
+            vedtakKlient.underkjennVedtakTilbakekreving(tilbakekreving.id, attestant)
+        }
+
+        with(sisteLagretHendelse) {
+            sakId shouldBe sak.id
+            vedtakId shouldBe 1L
+            behandlingId shouldBe tilbakekreving.id
+            hendelse shouldBe "VEDTAK:UNDERKJENT"
+            ident shouldBe attestant.ident
+            identType shouldBe "SAKSBEHANDLER"
+            inntruffet shouldNotBe null
+            opprettet shouldNotBe null
+            kommentar shouldBe "kommentar"
+            valgtBegrunnelse shouldBe "feil beregning"
+        }
+
+        confirmVerified(vedtakKlient, brevApiKlient)
+    }
+
+    private fun tilbakekrevingsvedtak(
+        saksbehandler: Saksbehandler,
+        enhet: String,
+    ): TilbakekrevingVedtakLagretDto {
+        return TilbakekrevingVedtakLagretDto(
+            id = 1L,
+            fattetAv = saksbehandler.ident,
+            enhet = enhet,
+            dato = LocalDate.now(),
+        )
+    }
+
+    private fun tilbakekrevingPerioder(tilbakekreving: TilbakekrevingBehandling) = listOf(oppdatertPeriode(tilbakekreving))
+
+    private fun oppdatertPeriode(tilbakekreving: TilbakekrevingBehandling): TilbakekrevingPeriode {
+        return tilbakekreving.tilbakekreving.perioder.first().let {
+            it.copy(
+                ytelse =
+                    it.ytelse.copy(
+                        beregnetFeilutbetaling = 100,
+                        bruttoTilbakekreving = 100,
+                        nettoTilbakekreving = 100,
+                        skatt = 10,
+                        skyld = TilbakekrevingSkyld.BRUKER,
+                        resultat = TilbakekrevingResultat.FULL_TILBAKEKREV,
+                        tilbakekrevingsprosent = 100,
+                        rentetillegg = 10,
+                    ),
+            )
+        }
+    }
+
+    private fun opprettetBrevDto(brevId: Long) =
+        OpprettetBrevDto(
+            id = brevId,
+            status = BrevStatus.OPPRETTET,
+            mottaker =
+                Mottaker(
+                    navn = "Mottaker mottakersen",
+                    foedselsnummer = Mottakerident("19448310410"),
+                    orgnummer = null,
+                ),
+            journalpostId = null,
+            bestillingsID = null,
+        )
+
+    private fun vedtaksbrev() = opprettetBrevDto(Random.nextLong())
+}

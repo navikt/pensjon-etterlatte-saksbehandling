@@ -22,6 +22,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServerWithModule
+import no.nav.etterlatte.libs.common.UUID30
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -33,7 +34,6 @@ import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagId
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.NavIdent
 import no.nav.etterlatte.libs.common.tilbakekreving.SakId
-import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
 import no.nav.etterlatte.libs.testdata.grunnlag.BARN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HALVSOESKEN_ANNEN_FORELDER

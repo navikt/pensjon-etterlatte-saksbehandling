@@ -1,4 +1,4 @@
-import { Kilde } from '~shared/types/kilde'
+import { KildeSaksbehandler } from '~shared/types/kilde'
 
 export interface AktivitetspliktOppfolging {
   behandlingId: string
@@ -12,17 +12,25 @@ export interface IAktivitet {
   sakId: number
   behandlingId: string
   type: AktivitetspliktType
-  fom: Date
-  tom?: Date
-  opprettet: Kilde
-  endret: Kilde
+  fom: string
+  tom?: string
+  opprettet: KildeSaksbehandler
+  endret: KildeSaksbehandler
+  beskrivelse: string
+}
+
+export interface IOpprettAktivitet {
+  sakId: number
+  type: AktivitetspliktType
+  fom: string
+  tom?: string
   beskrivelse: string
 }
 
 export enum AktivitetspliktType {
-  ARBEIDSTAKER = 'Arbeidstaker',
-  SELVSTENDIG_NAERINGSDRIVENDE = 'Selvstendig Næringsdrivende',
-  ETABLERER_VIRKSOMHET = 'Etablerer virksomhet',
-  ARBEIDSSOEKER = 'Arbeidssøker',
-  UTDANNING = 'Utdanning',
+  ARBEIDSTAKER = 'ARBEIDSTAKER',
+  SELVSTENDIG_NAERINGSDRIVENDE = 'SELVSTENDIG_NAERINGSDRIVENDE',
+  ETABLERER_VIRKSOMHET = 'ETABLERER_VIRKSOMHET',
+  ARBEIDSSOEKER = 'ARBEIDSSOEKER',
+  UTDANNING = 'UTDANNING',
 }

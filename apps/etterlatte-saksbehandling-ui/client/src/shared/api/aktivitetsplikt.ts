@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { AktivitetspliktOppfolging, IAktivitet } from '~shared/types/Aktivitetsplikt'
+import { AktivitetspliktOppfolging, IAktivitet, IOpprettAktivitet } from '~shared/types/Aktivitetsplikt'
 
 export const hentAktivitetspliktOppfolging = async (args: {
   behandlingId: string
@@ -17,3 +17,9 @@ export const opprettAktivitetspliktOppfolging = async (args: {
 
 export const hentAktiviteter = async (args: { behandlingId: string }): Promise<ApiResponse<IAktivitet[]>> =>
   apiClient.get(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet`)
+
+export const opprettAktivitet = async (args: {
+  behandlingId: string
+  request: IOpprettAktivitet
+}): Promise<ApiResponse<IAktivitet[]>> =>
+  apiClient.post(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet`, { ...args.request })

@@ -1,7 +1,7 @@
 import { PiggybankIcon } from '@navikt/aksel-icons'
 import { Timeline } from '@navikt/ds-react'
 import { hentAktiviteter } from '~shared/api/aktivitetsplikt'
-import { formaterDato } from '~utils/formattering'
+import { formaterDato, formaterDatoMedTidspunkt } from '~utils/formattering'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears } from 'date-fns'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -41,19 +41,34 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
           <p>12 måneder etter dødsfall: {formaterDato(tolvMndEtterDoedsfall)}</p>
         </Timeline.Pin>
         {aktivitetsTyper.map((aktivitetType) => (
-          <Timeline.Row key={`row-${aktivitetType}`} label={aktivitetType.toString()}>
+          <Timeline.Row key={`row-${aktivitetType}`} label={typeTilTekst(aktivitetType)}>
             {aktiviteter
               .filter((aktivitet) => aktivitet.type === aktivitetType)
               .map((aktivitet, i) => (
                 <Timeline.Period
                   key={aktivitetType + i}
-                  start={aktivitet.fom}
-                  end={aktivitet.tom || addYears(doedsdato, 3)}
+                  start={new Date(aktivitet.fom)}
+                  end={(aktivitet.tom && new Date(aktivitet.tom)) || addYears(doedsdato, 3)}
                   status="success"
                   icon={<PiggybankIcon aria-hidden />}
-                  statusLabel={aktivitet.type.toString()}
+                  statusLabel={typeTilTekst(aktivitet.type)}
                 >
+                  <p>
+                    <b>
+                      Fra {formaterDato(new Date(aktivitet.fom))}{' '}
+                      {aktivitet.tom && `til ${formaterDato(new Date(aktivitet.tom))}`}
+                    </b>
+                  </p>
                   <p>{aktivitet.beskrivelse}</p>
+                  <i>
+                    Lagt til {formaterDatoMedTidspunkt(new Date(aktivitet.opprettet.tidspunkt))} av{' '}
+                    {aktivitet.opprettet.ident}
+                  </i>
+                  <br />
+                  <i>
+                    Sist endret {formaterDatoMedTidspunkt(new Date(aktivitet.endret.tidspunkt))} av{' '}
+                    {aktivitet.endret.ident}
+                  </i>
                 </Timeline.Period>
               ))}
           </Timeline.Row>
@@ -66,4 +81,19 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
       })}
     </div>
   )
+}
+
+export const typeTilTekst = (type: AktivitetspliktType) => {
+  switch (type) {
+    case AktivitetspliktType.ARBEIDSTAKER:
+      return 'Arbeidstaker'
+    case AktivitetspliktType.SELVSTENDIG_NAERINGSDRIVENDE:
+      return 'Selvstendig næringsdrivende'
+    case AktivitetspliktType.ETABLERER_VIRKSOMHET:
+      return 'Etablerer virksomhet'
+    case AktivitetspliktType.ARBEIDSSOEKER:
+      return 'Arbeidssøker'
+    case AktivitetspliktType.UTDANNING:
+      return 'Utdanning'
+  }
 }

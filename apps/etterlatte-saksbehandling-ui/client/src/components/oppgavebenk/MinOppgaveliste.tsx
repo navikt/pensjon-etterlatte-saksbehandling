@@ -4,7 +4,6 @@ import { hentOppgaverMedStatus } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
-import { minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
   leggTilOppgavenIMinliste,
@@ -20,6 +19,10 @@ import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import {
+  hentMinOppgavelisteFilterFraLocalstorage,
+  leggMinOppgavelisteFilterILocalStorage,
+} from '~components/oppgavebenk/filtreringAvOppgaver/filterLocalStorage'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -29,7 +32,7 @@ interface Props {
 export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const [filter, setFilter] = useState<Filter>(minOppgavelisteFiltre())
+  const [filter, setFilter] = useState<Filter>(hentMinOppgavelisteFilterFraLocalstorage())
 
   const oppgavebenkState = useOppgaveBenkState()
   const dispatcher = useOppgavebenkStateDispatcher()
@@ -71,6 +74,10 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
       },
       (oppgaver) => dispatcher.setMinOppgavelisteOppgaver(sorterOppgaverEtterOpprettet(oppgaver))
     )
+
+  useEffect(() => {
+    leggMinOppgavelisteFilterILocalStorage(filter)
+  }, [filter])
 
   useEffect(() => {
     if (!oppgavebenkState.minOppgavelisteOppgaver?.length) hentMinOppgavelisteOppgaver()

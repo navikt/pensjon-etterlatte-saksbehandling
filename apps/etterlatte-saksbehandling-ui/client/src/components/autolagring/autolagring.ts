@@ -31,7 +31,7 @@ export const useAutolagring = <T>({ defaultValues, methods, onSubmit }: Props<T>
    * hele objekttreet trigger en lagring
    */
   useDeepCompareEffect(() => {
-    console.log('useDeep: ', methods.formState.isDirty)
+    console.log('useDeep** ', methods.formState.isDirty)
     if (methods.formState.isDirty) {
       settLagret(false)
       debouncedSave()

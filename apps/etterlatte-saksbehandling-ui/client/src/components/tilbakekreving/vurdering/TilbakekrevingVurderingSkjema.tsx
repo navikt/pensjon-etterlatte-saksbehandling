@@ -16,8 +16,6 @@ import {
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect, useState } from 'react'
 import { lagreTilbakekrevingsvurdering } from '~shared/api/tilbakekreving'
-import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
-import { useAppDispatch } from '~store/Store'
 
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
@@ -64,7 +62,6 @@ export function TilbakekrevingVurderingSkjema({
   if (!behandling) {
     return
   }
-  const dispatch = useAppDispatch()
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
   const [autolagreVurderingStatus, autolagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
 
@@ -101,10 +98,11 @@ export function TilbakekrevingVurderingSkjema({
       {
         behandlingsId: behandling.id,
         vurdering: vurdering,
-      },
-      (lagretTilbakekreving: TilbakekrevingBehandling) => {
-        dispatch(addTilbakekreving(lagretTilbakekreving))
       }
+      // ,
+      // (lagretTilbakekreving: TilbakekrevingBehandling) => {
+      //   dispatch(addTilbakekreving(lagretTilbakekreving))
+      // }
     )
   }
 
@@ -122,8 +120,9 @@ export function TilbakekrevingVurderingSkjema({
 
   useEffect(() => {
     if (isSubmitSuccessful) {
-      console.log('Resetting form')
-      reset({ ...submittedData })
+      const foo = { ...submittedData }
+      console.log('Resetting form', foo)
+      reset(foo)
     }
   }, [isSubmitSuccessful, submittedData, reset])
 

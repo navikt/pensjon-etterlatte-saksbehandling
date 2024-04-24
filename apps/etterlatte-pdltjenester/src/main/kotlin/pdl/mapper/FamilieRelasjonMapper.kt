@@ -80,9 +80,9 @@ object FamilieRelasjonMapper {
     ): List<PersonUtenIdent> {
         return forelderBarnRelasjon
             ?.filter { it.relatertPersonsIdent == null && erRelevantForPersonrolle(it, personRolle) }
-            ?.mapNotNull { forelderBarnRelasjon ->
-                forelderBarnRelasjon.relatertPersonUtenFolkeregisteridentifikator?.tilRelatertPerson()
-                    ?.let { forelderBarnRelasjon.relatertPersonsRolle to it }
+            ?.mapNotNull { forelderBarnRelasjoninner ->
+                forelderBarnRelasjoninner.relatertPersonUtenFolkeregisteridentifikator?.tilRelatertPerson()
+                    ?.let { forelderBarnRelasjoninner.relatertPersonsRolle to it }
             }
             ?.map { (rolle, person) -> PersonUtenIdent(rolle = rolle.tilRelativPersonrolle(), person = person) }
             ?: emptyList()

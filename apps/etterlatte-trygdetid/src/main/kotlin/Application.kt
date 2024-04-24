@@ -8,7 +8,6 @@ import no.nav.etterlatte.trygdetid.avtale.avtale
 import no.nav.etterlatte.trygdetid.config.ApplicationContext
 import no.nav.etterlatte.trygdetid.kodeverk
 import no.nav.etterlatte.trygdetid.trygdetid
-import no.nav.etterlatte.trygdetid.trygdetidV2
 
 fun main() {
     ApplicationContext().let { Server(it).run() }
@@ -26,7 +25,6 @@ class Server(private val context: ApplicationContext) {
                 applicationConfig = context.config,
             ) {
                 trygdetid(trygdetidService, behandlingKlient)
-                trygdetidV2(trygdetidService, behandlingKlient)
                 avtale(avtaleService, behandlingKlient)
                 kodeverk(kodeverkService)
             }

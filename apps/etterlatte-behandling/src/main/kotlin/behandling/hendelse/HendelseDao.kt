@@ -78,7 +78,7 @@ class HendelseDao(private val connectionAutoclosing: ConnectionAutoclosing) {
             behandlingId = behandlingId,
             sakId = sakId,
             ident = saksbehandler,
-            identType = "SAKSBEHANDLER".takeIf { saksbehandler != null },
+            identType = "SAKSBEHANDLER",
             kommentar = null,
             valgtBegrunnelse = null,
         ),

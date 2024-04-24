@@ -44,7 +44,7 @@ class AktivitetspliktService(
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
-            requireNotNull(behandlingService.hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
+            requireNotNull(inTransaction { behandlingService.hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
 
         if (!behandling.status.kanEndres()) {
             throw BehandlingKanIkkeEndres()

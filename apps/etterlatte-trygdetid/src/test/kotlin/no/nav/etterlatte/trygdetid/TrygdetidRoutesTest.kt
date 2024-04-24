@@ -43,11 +43,11 @@ internal class TrygdetidRoutesTest {
 
     @Test
     fun `skal returnere 204 naar trygdetid ikke finnes`() {
-        coEvery { trygdetidService.hentTrygdetid(any(), any()) } returns null
+        coEvery { trygdetidService.hentTrygdetiderIBehandling(any(), any()) } returns emptyList()
 
         testApplication {
             val response =
-                client.get("/api/trygdetid/${randomUUID()}") {
+                client.get("/api/trygdetid_v2/${randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
@@ -57,7 +57,7 @@ internal class TrygdetidRoutesTest {
 
         coVerify {
             behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-            trygdetidService.hentTrygdetid(any(), any())
+            trygdetidService.hentTrygdetiderIBehandling(any(), any())
         }
     }
 
@@ -67,7 +67,7 @@ internal class TrygdetidRoutesTest {
 
         testApplication {
             val response =
-                client.post("/api/trygdetid/${randomUUID()}/oppdater-status") {
+                client.post("/api/trygdetid_v2/${randomUUID()}/oppdater-status") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }

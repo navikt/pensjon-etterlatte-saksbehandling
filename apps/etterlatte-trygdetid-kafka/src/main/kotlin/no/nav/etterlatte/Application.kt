@@ -5,6 +5,5 @@ import no.nav.helse.rapids_rivers.RapidApplication
 
 fun main() {
     val rapidEnv = getRapidEnv()
-    RapidApplication.create(rapidEnv).also { rapidsConnection ->
-    }.start()
+    RapidApplication.create(rapidEnv).start()
 }

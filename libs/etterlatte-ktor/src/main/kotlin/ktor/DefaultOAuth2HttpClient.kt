@@ -29,13 +29,13 @@ class DefaultOAuth2HttpClient : OAuth2HttpClient {
         }
 
     // Override default POST with other form parameters specified for Idp request
-    override fun post(request: OAuth2HttpRequest): OAuth2AccessTokenResponse {
+    override fun post(req: OAuth2HttpRequest): OAuth2AccessTokenResponse {
         return runBlocking {
             defaultHttpClient.submitForm(
-                url = request.tokenEndpointUrl.toString(),
+                url = req.tokenEndpointUrl.toString(),
                 formParameters =
                     Parameters.build {
-                        request.formParameters.forEach {
+                        req.formParameters.forEach {
                             append(it.key, it.value)
                         }
                     },

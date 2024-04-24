@@ -12,15 +12,11 @@ spec:
     - "https://etterlatte-samordning-vedtak.ekstern.dev.nav.no"  # Skru av etterhvert, skal nås via etterlatte-gw
     - "https://etterlatte-samordning-vedtak.intern.dev.nav.no"
   liveness:
-    path: "health/isalive"
-    initialDelay: 10
-    timeout: 1
-    periodSeconds: 5
-    failureThreshold: 10
+    path: /health/isalive
+    initialDelay: 5
   readiness:
-    path: "health/isready"
-    initialDelay: 10
-    timeout: 1
+    path: /health/isready
+    initialDelay: 5
   prometheus:
     enabled: true
     path: /metrics

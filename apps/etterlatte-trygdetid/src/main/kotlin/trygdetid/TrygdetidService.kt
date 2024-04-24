@@ -2,7 +2,6 @@ package no.nav.etterlatte.trygdetid
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -32,152 +31,6 @@ import java.time.temporal.TemporalAdjusters
 import java.util.UUID
 
 interface TrygdetidService {
-    suspend fun hentTrygdetid(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid?
-
-    suspend fun opprettTrygdetid(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid
-
-    suspend fun lagreTrygdetidGrunnlag(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        trygdetidGrunnlag: TrygdetidGrunnlag,
-    ): Trygdetid
-
-    suspend fun slettTrygdetidGrunnlag(
-        behandlingId: UUID,
-        trygdetidGrunnlagId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid
-
-    suspend fun kopierSisteTrygdetidberegning(
-        behandlingId: UUID,
-        forrigeBehandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid
-
-    fun overstyrBeregnetTrygdetid(
-        behandlingId: UUID,
-        beregnetTrygdetid: DetaljertBeregnetTrygdetidResultat,
-    ): Trygdetid
-
-    suspend fun setYrkesskade(
-        trygdetidId: UUID,
-        behandlingId: UUID,
-        yrkesskade: Boolean,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid
-
-    suspend fun overstyrNorskPoengaar(
-        trygdetidId: UUID,
-        behandlingId: UUID,
-        overstyrtNorskPoengaar: Int?,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid
-
-    suspend fun sjekkGyldighetOgOppdaterBehandlingStatus(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Boolean
-
-    suspend fun reberegnUtenFremtidigTrygdetid(
-        behandlingId: UUID,
-        trygdetidId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid
-
-    suspend fun opprettOverstyrtBeregnetTrygdetid(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    )
-
-    suspend fun sjekkTrygdetidMotGrunnlag(
-        trygdetid: Trygdetid,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid?
-}
-
-interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
-    override suspend fun hentTrygdetid(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid? {
-        return hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo).minByOrNull { it.ident }
-    }
-
-    override suspend fun opprettTrygdetid(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid {
-        val trygdetid = opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo).minByOrNull { it.ident }
-
-        return checkNotNull(trygdetid) {
-            "Kunne ikke opprette trygdetid for behandling=$behandlingId"
-        }
-    }
-
-    override suspend fun lagreTrygdetidGrunnlag(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        trygdetidGrunnlag: TrygdetidGrunnlag,
-    ): Trygdetid {
-        val trygdetid = hentTrygdetidOld(behandlingId) ?: throw GenerellIkkeFunnetException()
-        return lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
-            behandlingId,
-            trygdetid.id,
-            trygdetidGrunnlag,
-            brukerTokenInfo,
-        )
-    }
-
-    override suspend fun overstyrNorskPoengaar(
-        trygdetidId: UUID,
-        behandlingId: UUID,
-        overstyrtNorskPoengaar: Int?,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid {
-        return overstyrNorskPoengaaarForTrygdetid(trygdetidId, behandlingId, overstyrtNorskPoengaar, brukerTokenInfo)
-    }
-
-    override suspend fun slettTrygdetidGrunnlag(
-        behandlingId: UUID,
-        trygdetidGrunnlagId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid {
-        val trygdetid = hentTrygdetidOld(behandlingId) ?: throw GenerellIkkeFunnetException()
-        return slettTrygdetidGrunnlagForTrygdetid(behandlingId, trygdetid.id, trygdetidGrunnlagId, brukerTokenInfo)
-    }
-
-    override suspend fun kopierSisteTrygdetidberegning(
-        behandlingId: UUID,
-        forrigeBehandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid {
-        return kopierSisteTrygdetidberegninger(behandlingId, forrigeBehandlingId, brukerTokenInfo).minBy { it.ident }
-    }
-
-    override fun overstyrBeregnetTrygdetid(
-        behandlingId: UUID,
-        beregnetTrygdetid: DetaljertBeregnetTrygdetidResultat,
-    ): Trygdetid {
-        val trygdetid =
-            runBlocking { hentTrygdetidOld(behandlingId) }
-                ?: throw GenerellIkkeFunnetException()
-        return overstyrBeregnetTrygdetidForAvdoed(behandlingId, trygdetid.ident, beregnetTrygdetid)
-    }
-}
-
-interface NyTrygdetidService {
-    @Deprecated(
-        replaceWith = ReplaceWith("hentTrygdetiderIBehandling"),
-        message = "Håndterer ikke flere trygdetider i behandling riktig, kun for bruk i overgangsfase",
-    )
-    suspend fun hentTrygdetidOld(behandlingId: UUID): Trygdetid?
-
     suspend fun hentTrygdetiderIBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -250,19 +103,6 @@ interface NyTrygdetidService {
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid
 
-    suspend fun kopierSisteTrygdetidberegning(
-        behandlingId: UUID,
-        forrigeBehandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid
-
-    suspend fun overstyrNorskPoengaar(
-        trygdetidId: UUID,
-        behandlingId: UUID,
-        overstyrtNorskPoengaar: Int?,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid
-
     suspend fun opprettOverstyrtBeregnetTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -274,19 +114,11 @@ class TrygdetidServiceImpl(
     private val behandlingKlient: BehandlingKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val beregnTrygdetidService: TrygdetidBeregningService,
-) : GammelTrygdetidServiceMedNy {
+) : TrygdetidService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     companion object {
         private const val SIST_FREMTIDIG_TRYGDETID_ALDER = 66L
-    }
-
-    @Deprecated(
-        replaceWith = ReplaceWith("hentTrygdetiderIBehandling"),
-        message = "Håndterer ikke flere trygdetider i behandling riktig, kun for bruk i overgangsfase",
-    )
-    override suspend fun hentTrygdetidOld(behandlingId: UUID): Trygdetid? {
-        return trygdetidRepository.hentTrygdetid(behandlingId)
     }
 
     override suspend fun hentTrygdetiderIBehandling(
@@ -774,7 +606,7 @@ class TrygdetidServiceImpl(
             }
         }
 
-    override suspend fun sjekkTrygdetidMotGrunnlag(
+    private suspend fun sjekkTrygdetidMotGrunnlag(
         trygdetid: Trygdetid,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid? {

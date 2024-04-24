@@ -33,7 +33,7 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class TrygdetidServiceImplIntegrationTest(dataSource: DataSource) {
+internal class TrygdetidServiceIntegrationTest(dataSource: DataSource) {
     companion object {
         @RegisterExtension
         val dbExtension = DatabaseExtension()
@@ -42,7 +42,7 @@ internal class TrygdetidServiceImplIntegrationTest(dataSource: DataSource) {
     private val saksbehandler = Saksbehandler("token", "ident", null)
 
     private val repository = TrygdetidRepository(dataSource)
-    private lateinit var trygdetidService: TrygdetidServiceImpl
+    private lateinit var trygdetidService: TrygdetidService
 
     private val pdlKilde: Grunnlagsopplysning.Pdl = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
     private val regelKilde: Grunnlagsopplysning.RegelKilde = Grunnlagsopplysning.RegelKilde("regel", Tidspunkt.now(), "1")
@@ -83,12 +83,13 @@ internal class TrygdetidServiceImplIntegrationTest(dataSource: DataSource) {
             ),
         )
 
-        val trygdetid = runBlocking { trygdetidService.hentTrygdetid(behandlingId, saksbehandler) }
+        val trygdetider = runBlocking { trygdetidService.hentTrygdetiderIBehandling(behandlingId, saksbehandler) }
 
         val toLocalDate: (OpplysningsgrunnlagDto?) -> LocalDate? = { dto ->
             dto?.let { deserialize<LocalDate>(it.opplysning.toJson()) }
         }
-        with(trygdetid?.opplysningerDifferanse!!) {
+
+        with(trygdetider.firstOrNull()?.opplysningerDifferanse!!) {
             differanse shouldBe true
             with(oppdaterteGrunnlagsopplysninger) {
                 toLocalDate(avdoedFoedselsdato) shouldBe grunnlagTestData.avdoede.first().foedselsdato
@@ -116,12 +117,12 @@ internal class TrygdetidServiceImplIntegrationTest(dataSource: DataSource) {
             ),
         )
 
-        val trygdetid = runBlocking { trygdetidService.hentTrygdetid(behandlingId, saksbehandler) }
+        val trygdetider = runBlocking { trygdetidService.hentTrygdetiderIBehandling(behandlingId, saksbehandler) }
 
         val toLocalDate: (OpplysningsgrunnlagDto?) -> LocalDate? = { dto ->
             dto?.let { deserialize<LocalDate>(it.opplysning.toJson()) }
         }
-        with(trygdetid?.opplysningerDifferanse!!) {
+        with(trygdetider.firstOrNull()?.opplysningerDifferanse!!) {
             differanse shouldBe false
             with(oppdaterteGrunnlagsopplysninger) {
                 toLocalDate(avdoedFoedselsdato) shouldBe grunnlagTestData.avdoede.first().foedselsdato
@@ -156,10 +157,10 @@ internal class TrygdetidServiceImplIntegrationTest(dataSource: DataSource) {
             ),
         )
 
-        val trygdetid = runBlocking { trygdetidService.hentTrygdetid(behandlingId, saksbehandler) }
+        val trygdetider = runBlocking { trygdetidService.hentTrygdetiderIBehandling(behandlingId, saksbehandler) }
 
-        with(trygdetid!!) {
-            trygdetid.ident shouldBe UKJENT_AVDOED
+        with(trygdetider.first()) {
+            ident shouldBe UKJENT_AVDOED
             opplysningerDifferanse!! shouldBeEqual OpplysningerDifferanse(false, GrunnlagOpplysningerDto.tomt())
         }
     }
@@ -182,9 +183,9 @@ internal class TrygdetidServiceImplIntegrationTest(dataSource: DataSource) {
             ),
         )
 
-        val trygdetid = runBlocking { trygdetidService.hentTrygdetid(behandlingId, saksbehandler) }
+        val trygdetider = runBlocking { trygdetidService.hentTrygdetiderIBehandling(behandlingId, saksbehandler) }
 
-        trygdetid shouldBe null
+        trygdetider shouldBe emptyList()
     }
 
     private fun opplysningsgrunnlag(grunnlagTestData: GrunnlagTestData): List<Opplysningsgrunnlag> {

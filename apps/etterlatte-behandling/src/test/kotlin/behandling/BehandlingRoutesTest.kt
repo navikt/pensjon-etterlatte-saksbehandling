@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -16,16 +17,28 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.SystemUser
+import no.nav.etterlatte.User
 import no.nav.etterlatte.attachMockContext
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -34,6 +47,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -61,6 +75,94 @@ internal class BehandlingRoutesTest {
     }
 
     @Test
+    fun `Kan opprette ny behandling`() {
+        val persongalleri =
+            Persongalleri(
+                "11057523044",
+                INNSENDER_FOEDSELSNUMMER.value,
+                emptyList(),
+                listOf(AVDOED_FOEDSELSNUMMER.value),
+                listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+            )
+
+        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enheter.defaultEnhet.enhetNr)
+
+        every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enheter.AALESUND.enhetNr
+        val behandlingId = UUID.randomUUID()
+        coEvery { behandlingFactory.opprettSakOgBehandlingForOppgave(any(), any()) } returns
+            mockk<Behandling> {
+                every { id } returns behandlingId
+            }
+        val systembruker = mockk<SystemUser>()
+        withTestApplication(systembruker) { client ->
+            val response =
+                client.post("/api/behandling") {
+                    header(HttpHeaders.Authorization, "Bearer $systembrukertoken")
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        NyBehandlingRequest(
+                            sak.sakType,
+                            persongalleri,
+                            LocalDateTime.now().toString(),
+                            "nb",
+                            Vedtaksloesning.GJENNY,
+                            null,
+                            null,
+                        ),
+                    )
+                }
+
+            assertEquals(200, response.status.value)
+            assertEquals(behandlingId.toString(), response.body<String>())
+        }
+    }
+
+    @Test
+    fun `Får feil ved rart fnr ved opprett ny behandling`() {
+        val behandlingId = UUID.randomUUID()
+        val persongalleri =
+            Persongalleri(
+                "1105752304,", // feil i fnr her
+                INNSENDER_FOEDSELSNUMMER.value,
+                emptyList(),
+                listOf(AVDOED_FOEDSELSNUMMER.value),
+                listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+            )
+
+        val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enheter.defaultEnhet.enhetNr)
+
+        every { behandlingFactory.finnGjeldendeEnhet(any(), any()) } returns Enheter.AALESUND.enhetNr
+        coEvery { behandlingFactory.opprettSakOgBehandlingForOppgave(any(), any()) } returns
+            mockk<Behandling> {
+                every { id } returns behandlingId
+            }
+        val systembruker = mockk<SystemUser>()
+        withTestApplication(systembruker) { client ->
+            val response =
+                client.post("/api/behandling") {
+                    header(HttpHeaders.Authorization, "Bearer $systembrukertoken")
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        NyBehandlingRequest(
+                            sak.sakType,
+                            persongalleri,
+                            LocalDateTime.now().toString(),
+                            "nb",
+                            Vedtaksloesning.GJENNY,
+                            null,
+                            null,
+                        ),
+                    )
+                }
+
+            assertEquals(400, response.status.value)
+
+            val errormeldingtilfrontend = response.body<String>()
+            assert(errormeldingtilfrontend.contains("PERSONGALLERI_MAA_VAERE_GYLDIG"))
+        }
+    }
+
+    @Test
     fun `kan oppdater bodd eller arbeidet i utlandet`() {
         coEvery {
             behandlingService.oppdaterBoddEllerArbeidetUtlandet(any(), any())
@@ -69,7 +171,7 @@ internal class BehandlingRoutesTest {
         withTestApplication { client ->
             val response =
                 client.post("/api/behandling/$behandlingId/boddellerarbeidetutlandet") {
-                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
                     contentType(ContentType.Application.Json)
                     setBody(BoddEllerArbeidetUtlandetRequest(true, "Test"))
                 }
@@ -92,7 +194,7 @@ internal class BehandlingRoutesTest {
         withTestApplication { client ->
             val response =
                 client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
-                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
                     contentType(ContentType.Application.Json)
                     setBody(
                         """
@@ -113,7 +215,7 @@ internal class BehandlingRoutesTest {
         withTestApplication { client ->
             val response =
                 client.post("/api/behandling/$behandlingId/avbryt") {
-                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
                 }
 
             assertEquals(200, response.status.value)
@@ -135,7 +237,7 @@ internal class BehandlingRoutesTest {
         withTestApplication { client ->
             val response =
                 client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
-                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
                     contentType(ContentType.Application.Json)
                     setBody(
                         """
@@ -160,7 +262,7 @@ internal class BehandlingRoutesTest {
         withTestApplication { client ->
             val response =
                 client.post("/api/behandling/${UUID.randomUUID()}/utlandstilknytning") {
-                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlertoken")
                     contentType(ContentType.Application.Json)
                     setBody(UtlandstilknytningRequest(UtlandstilknytningType.BOSATT_UTLAND, "Test"))
                 }
@@ -169,7 +271,10 @@ internal class BehandlingRoutesTest {
         }
     }
 
-    private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
+    private fun withTestApplication(
+        testUser: User? = null,
+        block: suspend (client: HttpClient) -> Unit,
+    ) {
         val user =
             mockk<SaksbehandlerMedEnheterOgRoller> {
                 every { enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
@@ -178,7 +283,7 @@ internal class BehandlingRoutesTest {
         testApplication {
             val client =
                 runServer(mockOAuth2Server) {
-                    attachMockContext(user)
+                    attachMockContext(testUser ?: user)
                     behandlingRoutes(
                         behandlingService,
                         gyldighetsproevingService,
@@ -217,7 +322,8 @@ internal class BehandlingRoutesTest {
         } returns virkningstidspunkt
     }
 
-    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(navIdent = NAV_IDENT) }
+    private val saksbehandlertoken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(navIdent = NAV_IDENT) }
+    private val systembrukertoken: String by lazy { mockOAuth2Server.issueSystembrukerToken() }
 
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()

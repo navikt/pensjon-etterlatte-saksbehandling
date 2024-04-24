@@ -19,6 +19,23 @@ data class Persongalleri(
             "gjenlevende=${gjenlevende.map { it.maskerFnr() }}," +
             "personerUtenIdent=${personerUtenIdent?.map { it.person.foedselsdato.toString() }})"
     }
+
+    fun validerFoedselesnummere(): Boolean {
+        return validateFnrSimple(soeker) &&
+            validateFnrSimple(innsender) &&
+            soesken.all { validateFnrSimple(it) } &&
+            avdoed.all { validateFnrSimple(it) } &&
+            gjenlevende.all { validateFnrSimple(it) }
+    }
+}
+
+fun validateFnrSimple(fnr: String?): Boolean {
+    if (fnr == null) {
+        return true
+    }
+    return !Regex("0{11}").matches(fnr) &&
+        fnr.length == 11 &&
+        fnr.toBigIntegerOrNull() != null
 }
 
 enum class RelativPersonrolle {

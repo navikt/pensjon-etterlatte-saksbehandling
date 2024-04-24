@@ -44,7 +44,6 @@ export interface NyBehandlingRequest {
   enhet?: String
   foreldreloes?: boolean
   ufoere?: boolean
-  gradering?: string
 }
 
 export enum IBehandlingsType {

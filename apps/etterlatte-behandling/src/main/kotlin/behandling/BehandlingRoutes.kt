@@ -47,6 +47,7 @@ internal fun Route.behandlingRoutes(
 
     post("/api/behandling") {
         val request = call.receive<NyBehandlingRequest>()
+        request.validerPersongalleri()
 
         val gjeldendeEnhet = inTransaction { behandlingFactory.finnGjeldendeEnhet(request.persongalleri, request.sakType) }
 

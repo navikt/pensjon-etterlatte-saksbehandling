@@ -75,7 +75,7 @@ class DoedshendelseService(
         val alleBeroerte = barn + ektefeller + samboere
 
         if (gyldigeDoedshendelserForAvdoed.isEmpty()) {
-            sikkerLogg.info("Fant ${alleBeroerte.size} berørte personer for avdød (${avdoed.foedselsnummer})")
+            sikkerLogg.info("Fant ${alleBeroerte.size} berørte personer for avdød (${avdoed.foedselsnummer.verdi.value})")
             inTransaction {
                 lagreDoedshendelser(alleBeroerte, avdoed, doedshendelse.endringstype)
             }

@@ -5,16 +5,12 @@ import behandling.tilbakekreving.tilbakekrevingVurdering
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
-import no.nav.etterlatte.mockedSakTilgangDao
+import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -35,14 +31,8 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
     fun setup() {
         sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
         tilbakekrevingDao = TilbakekrevingDao(ConnectionAutoclosingTest(dataSource))
-        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-        Kontekst.set(
-            Context(
-                user,
-                DatabaseContextTest(dataSource),
-                mockedSakTilgangDao(),
-            ),
-        )
+
+        nyKontekstMedBrukerOgDatabase(mockk(), dataSource)
     }
 
     @BeforeEach

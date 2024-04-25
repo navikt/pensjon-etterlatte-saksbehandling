@@ -43,10 +43,10 @@ internal class KlageDaoImplTest(val dataSource: DataSource) {
 
     @BeforeEach
     fun resetTabell() {
-        dataSource.connection.prepareStatement("""TRUNCATE TABLE klage""")
-            .executeUpdate()
-        dataSource.connection.prepareStatement("""TRUNCATE TABLE sak CASCADE """)
-            .executeUpdate()
+        dataSource.connection.use {
+            it.prepareStatement("""TRUNCATE TABLE klage""")
+            it.prepareStatement("""TRUNCATE TABLE sak CASCADE """).executeUpdate()
+        }
     }
 
     @Test

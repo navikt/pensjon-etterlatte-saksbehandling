@@ -15,8 +15,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
@@ -28,26 +30,36 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
+import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
     private lateinit var tilbakekrevingService: TilbakekrevingService
     private lateinit var oppgaveService: OppgaveService
 
-    @BeforeEach
-    fun start() =
-        startServer().also {
-            tilbakekrevingService = applicationContext.tilbakekrevingService
-            oppgaveService = applicationContext.oppgaveService
-            resetDatabase()
-        }
+    @BeforeAll
+    fun start() {
+        startServer()
+        tilbakekrevingService = applicationContext.tilbakekrevingService
+        oppgaveService = applicationContext.oppgaveService
 
-    @AfterEach
-    fun afterEach() {
+        nyKontekstMedBrukerOgDatabase(mockk(), applicationContext.dataSource)
+    }
+
+    @BeforeEach
+    fun beforeEach() {
+        resetDatabase()
+    }
+
+    @AfterAll
+    fun afterAllTests() {
         afterAll()
     }
 
@@ -221,7 +233,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
     private suspend fun opprettTilbakekrevingOgTildelOppgave(client: HttpClient): TilbakekrevingBehandling {
         val sak: Sak = opprettSak(client)
         val tilbakekreving = opprettTilbakekreving(sak, client)
-        tildelOppgaveTilSaksbehandler(tilbakekreving, saksbehandlerIdent)
+        inTransaction { tildelOppgaveTilSaksbehandler(tilbakekreving, saksbehandlerIdent) }
         return tilbakekreving
     }
 

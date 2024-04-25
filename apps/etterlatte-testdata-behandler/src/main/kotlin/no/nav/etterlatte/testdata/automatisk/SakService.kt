@@ -12,8 +12,8 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.Systembruker
+import java.time.Instant
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 
 class SakService(private val klient: DownstreamResourceClient, private val url: String, private val clientId: String) {
@@ -55,7 +55,7 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
             Resource(clientId, "$url/api/behandling/$behandling/virkningstidspunkt"),
             Systembruker.testdata,
             VirkningstidspunktRequest(
-                _dato = YearMonth.now().toString(),
+                _dato = Instant.now().toString(),
                 begrunnelse = "Automatisk behandla testsak",
                 kravdato = LocalDate.now(),
             ),

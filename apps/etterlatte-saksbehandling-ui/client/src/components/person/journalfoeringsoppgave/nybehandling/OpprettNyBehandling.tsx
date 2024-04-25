@@ -64,9 +64,7 @@ export default function OpprettNyBehandling() {
     defaultValues: {
       ...nyBehandlingRequest,
       persongalleri: {
-        innsender: !!nyBehandlingRequest?.persongalleri?.innsender
-          ? nyBehandlingRequest?.persongalleri?.innsender
-          : null,
+        innsender: nyBehandlingRequest?.persongalleri?.innsender || null,
         soeker: nyBehandlingRequest?.persongalleri?.soeker,
         gjenlevende: mapStringArrayToRHFArray(nyBehandlingRequest?.persongalleri?.gjenlevende),
         soesken: mapStringArrayToRHFArray(nyBehandlingRequest?.persongalleri?.soesken),

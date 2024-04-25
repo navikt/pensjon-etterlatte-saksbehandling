@@ -77,7 +77,7 @@ export default function ManuellBehandling() {
         sakType: SakType.BARNEPENSJON,
         persongalleri: {
           soeker: data.persongalleri.soeker,
-          innsender: !!data.persongalleri.innsender ? data.persongalleri.innsender : null,
+          innsender: data.persongalleri.innsender || null,
           gjenlevende: mapRHFArrayToStringArray(data.persongalleri.gjenlevende),
           avdoed: mapRHFArrayToStringArray(data.persongalleri.avdoed).filter((val) => val !== ''),
           soesken: mapRHFArrayToStringArray(data.persongalleri.soesken),

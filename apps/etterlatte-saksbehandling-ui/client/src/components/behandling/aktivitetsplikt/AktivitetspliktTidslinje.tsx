@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import { AktivitetspliktType, IAktivitet } from '~shared/types/Aktivitetsplikt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { NyAktivitet } from '~components/behandling/aktivitetsplikt/NyAktivitet'
+import styled from 'styled-components'
 
 export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandling; doedsdato: Date }) => {
   const { behandling, doedsdato } = props
@@ -27,7 +28,7 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
   }, [])
 
   return (
-    <div className="min-w-[800px]" style={{ marginBottom: '50px' }}>
+    <TidslinjeWrapper className="min-w-[800px]">
       <Timeline startDate={doedsdato} endDate={addYears(doedsdato, 3)}>
         <Timeline.Pin date={doedsdato}>
           <p>Dødsdato: {formaterDato(doedsdato)}</p>
@@ -86,7 +87,7 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
         errorMessage: 'En feil oppsto ved henting av aktiviteter',
         apiResult: hentet,
       })}
-    </div>
+    </TidslinjeWrapper>
   )
 }
 
@@ -130,3 +131,10 @@ export const mapAktivitetstypeProps = (type: AktivitetspliktType): Aktivitetstyp
       }
   }
 }
+
+const TidslinjeWrapper = styled.div`
+  margin-bottom: 50px;
+  .navds-timeline__pin-button {
+    margin-bottom: 15px;
+  }
+`

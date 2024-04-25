@@ -34,6 +34,7 @@ import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.hentNavidentFraToken
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
@@ -87,22 +88,24 @@ internal fun Route.behandlingRoutes(
 
         post("/kommerbarnettilgode") {
             kunSkrivetilgang {
-                hentNavidentFraToken { navIdent ->
-                    val body = call.receive<JaNeiMedBegrunnelse>()
-                    val kommerBarnetTilgode =
-                        KommerBarnetTilgode(
-                            body.svar,
-                            body.begrunnelse,
-                            Grunnlagsopplysning.Saksbehandler.create(navIdent),
-                            behandlingId,
-                        )
+                val body = call.receive<JaNeiMedBegrunnelse>()
+                val kommerBarnetTilgode =
+                    KommerBarnetTilgode(
+                        body.svar,
+                        body.begrunnelse,
+                        if (brukerTokenInfo is Saksbehandler) {
+                            Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
+                        } else {
+                            Grunnlagsopplysning.Gjenny.create(brukerTokenInfo.ident())
+                        },
+                        behandlingId,
+                    )
 
-                    try {
-                        inTransaction { kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kommerBarnetTilgode) }
-                        call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
-                    } catch (e: TilstandException.UgyldigTilstand) {
-                        call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
-                    }
+                try {
+                    inTransaction { kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kommerBarnetTilgode) }
+                    call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
+                } catch (e: TilstandException.UgyldigTilstand) {
+                    call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
                 }
             }
         }

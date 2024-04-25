@@ -1,4 +1,4 @@
--- Flytter mottatt dato en dag frem for klager som er "redigerbare" og opprettet fˆ
+-- Flytter mottatt dato en dag frem for klager som er "redigerbare" og opprettet før feilen ble patchet
 -- på grunn av feil parsing av innsendt mottatt dato
 update klage
 set innkommende_klage = jsonb_set(innkommende_klage, '{mottattDato}',

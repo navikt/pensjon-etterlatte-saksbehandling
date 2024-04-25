@@ -5,14 +5,15 @@ import com.github.michaelbull.result.mapBoth
 import no.nav.etterlatte.behandling.VirkningstidspunktRequest
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
-import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import java.time.LocalDate
 import java.util.UUID
 
@@ -50,6 +51,20 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
         )
     }
 
+    suspend fun lagreUtlandstilknytning(behandling: UUID) {
+        klient.post(
+            Resource(clientId, "$url/api/behandling/$behandling/utlandstilknytning"),
+            Systembruker.testdata,
+            UtlandstilknytningRequest(
+                utlandstilknytningType = UtlandstilknytningType.NASJONAL,
+                begrunnelse = "Automatisk behandla testsak",
+            ),
+        ).mapBoth(
+            success = {},
+            failure = { throw it },
+        )
+    }
+
     suspend fun lagreVirkningstidspunkt(behandling: UUID) {
         val tidspunkt =
             with(LocalDate.now()) {
@@ -61,7 +76,6 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
                     }
                 "$year-$maaned-${dayOfMonth}T12:00:00Z"
             }
-        logger.warn("Sender tidspunkt $tidspunkt til virkningstidspunkt")
         klient.post(
             Resource(clientId, "$url/api/behandling/$behandling/virkningstidspunkt"),
             Systembruker.testdata,

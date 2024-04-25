@@ -38,6 +38,7 @@ class Behandler(
 
         sakService.settKommerBarnetTilGode(behandling)
         sakService.lagreGyldighetsproeving(behandling)
+        sakService.lagreUtlandstilknytning(behandling)
         sakService.lagreVirkningstidspunkt(behandling)
         sakService.tildelSaksbehandler(Fagsaksystem.EY.navn, sakId)
 

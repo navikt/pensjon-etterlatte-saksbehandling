@@ -158,8 +158,11 @@ internal class GyldighetsproevingServiceImplTest {
         val resultat =
             behandlingsService.lagreGyldighetsproeving(
                 id,
-                "saksbehandler",
                 JaNeiMedBegrunnelse(JaNei.JA, "begrunnelse"),
+                Grunnlagsopplysning.Saksbehandler(
+                    "saksbehandler",
+                    naaTid,
+                ),
             )
 
         assertEquals(forventetResultat, resultat)

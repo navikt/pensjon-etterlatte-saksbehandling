@@ -946,8 +946,8 @@ class BehandlingServiceImplTest {
                                 virkningstidspunkt =
                                     Virkningstidspunkt.create(
                                         dato = foersteVirk!!,
-                                        ident = "Z123456",
                                         begrunnelse = "begrunnelse",
+                                        saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
                                     ),
                                 soeknadMottattDato = soeknadMottatt,
                                 utlandstilknytning = utlandstilknytning,

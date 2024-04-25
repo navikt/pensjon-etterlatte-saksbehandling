@@ -13,10 +13,10 @@ data class Virkningstidspunkt(
     companion object {
         fun create(
             dato: YearMonth,
-            ident: String,
             begrunnelse: String,
             kravdato: LocalDate? = null,
-        ) = Virkningstidspunkt(dato, Grunnlagsopplysning.Saksbehandler.create(ident), begrunnelse, kravdato)
+            saksbehandler: Grunnlagsopplysning.Saksbehandler,
+        ) = Virkningstidspunkt(dato, saksbehandler, begrunnelse, kravdato)
     }
 }
 

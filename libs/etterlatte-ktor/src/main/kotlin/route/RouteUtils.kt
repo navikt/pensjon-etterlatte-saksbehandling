@@ -9,10 +9,12 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import org.slf4j.LoggerFactory
@@ -200,6 +202,12 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
 suspend inline fun PipelineContext<*, ApplicationCall>.hentNavidentFraToken(onSuccess: (navident: String) -> Unit) {
     val navident = call.firstValidTokenClaims()?.get("NAVident")?.toString()
     if (navident.isNullOrEmpty()) {
+        val bruker = call.brukerTokenInfo
+        if (bruker is Systembruker && bruker.ident != null) {
+            logger.debug("Er systembruker, så fortsetter med ident fra brukerTokenInfo")
+            onSuccess(bruker.ident)
+        }
+
         logger.warn("Kunne ikke hente ut navident fra token, avviser forespørselen")
         call.respond(
             HttpStatusCode.Unauthorized,
@@ -234,3 +242,10 @@ class FeatureIkkeStoettetException : ForespoerselException(
     status = HttpStatusCode.NotImplemented.value,
     detail = "Funksjonaliteten er ikke tilgjengelig enda.",
 )
+
+fun BrukerTokenInfo.lagGrunnlagsopplysning() =
+    if (this is Saksbehandler) {
+        Grunnlagsopplysning.Saksbehandler.create(ident())
+    } else {
+        Grunnlagsopplysning.Gjenny.create(ident())
+    }

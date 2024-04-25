@@ -27,7 +27,7 @@ selftestRouter.get('/', express.json(), async (req, res) => {
       })
     )
     .then((allchecks) => {
-      const aggregateResult = allchecks.filter((res) => res.result == ServiceStatus.DOWN)
+      const aggregateResult = allchecks.some((res) => res.result == ServiceStatus.DOWN) ? 1 : 0
       const selfTestReport = {
         application: 'etterlatte-saksbehandling',
         timestamp: new Date().toISOString(),

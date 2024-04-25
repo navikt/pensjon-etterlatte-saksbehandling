@@ -28,7 +28,6 @@ import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
-import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
@@ -48,6 +47,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
@@ -57,6 +57,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
+import java.time.Month
+import java.time.OffsetDateTime
 import java.time.ZonedDateTime
 import java.util.UUID
 
@@ -83,10 +85,35 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
+    fun `dato sendt inn med norsk offset parses til riktig norsk localdate`() {
+        val innkommendeKlageSommertid =
+            InnkommendeKlageDto(
+                // 17. april ved midnatt norsk sommertid
+                mottattDato = "2024-04-16T22:00:00.000Z",
+                journalpostId = "",
+                innsender = "",
+            )
+        val forventetParsetDatoSommertid = LocalDate.of(2024, Month.APRIL, 17)
+        assertEquals(forventetParsetDatoSommertid, innkommendeKlageSommertid.parseMottattDato())
+
+        val innkommendeKlageVintertid =
+            InnkommendeKlageDto(
+                // 3. februar ved midnatt norsk vintertid
+                mottattDato = "2024-02-02T23:00:00.000Z",
+                journalpostId = "",
+                innsender = "",
+            )
+
+        val forventetParsetDatoVintertid = LocalDate.of(2024, Month.FEBRUARY, 3)
+        assertEquals(forventetParsetDatoVintertid, innkommendeKlageVintertid.parseMottattDato())
+    }
+
+    @Test
     fun `opprettelse av klage gaar bra og henting gir 404 etter at saken blir skjermet`() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
             val klage: Klage = opprettKlage(sak, client)
+
             val hentetKlage: Klage = hentKlage(client, klage.id)
             assertEquals(klage, hentetKlage)
 
@@ -318,17 +345,18 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     private suspend fun opprettKlage(
         sak: Sak,
         client: HttpClient,
+        mottattDato: String = OffsetDateTime.now().toString(),
     ): Klage {
         val klage: Klage =
             client.post("/api/klage/opprett/${sak.id}") {
                 addAuthToken(tokenSaksbehandler)
                 contentType(ContentType.Application.Json)
                 setBody(
-                    InnkommendeKlage(
-                        mottattDato = LocalDate.now(),
-                        journalpostId = "",
-                        innsender = "En klager",
-                    ),
+                    mapOf(
+                        "mottattDato" to mottattDato,
+                        "journalpostId" to "",
+                        "innsender" to "En klager",
+                    ).toJson(),
                 )
             }.body()
         return klage

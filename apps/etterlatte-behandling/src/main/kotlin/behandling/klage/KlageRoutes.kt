@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.hvisEnabled
@@ -28,6 +29,8 @@ import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
+import java.time.LocalDate
+import java.time.OffsetDateTime
 
 enum class KlageFeatureToggle(private val key: String) : FeatureToggle {
     KanFerdigstilleKlageToggle("pensjon-etterlatte.kan-ferdigstille-klage"),
@@ -45,11 +48,19 @@ internal fun Route.klageRoutes(
     route("/api/klage") {
         post("opprett/{$SAKID_CALL_PARAMETER}") {
             kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
-                medBody<InnkommendeKlage> { innkommendeKlage ->
+                medBody<InnkommendeKlageDto> { dto ->
                     val sakId = sakId
                     val klage =
                         inTransaction {
-                            klageService.opprettKlage(sakId, innkommendeKlage, saksbehandler)
+                            klageService.opprettKlage(
+                                sakId,
+                                InnkommendeKlage(
+                                    mottattDato = dto.parseMottattDato(),
+                                    journalpostId = dto.journalpostId,
+                                    innsender = dto.innsender,
+                                ),
+                                saksbehandler,
+                            )
                         }
                     call.respond(klage)
                 }
@@ -205,6 +216,16 @@ private fun sjekkStoetterUtfallHvisAvvist(
             "KLAGE_KAN_IKKE_AVVISES_MED_VEDTAK",
             "Avvisning med vedtak er ikke aktivert ennå",
         )
+    }
+}
+
+data class InnkommendeKlageDto(
+    val mottattDato: String,
+    val journalpostId: String,
+    val innsender: String?,
+) {
+    fun parseMottattDato(): LocalDate {
+        return Tidspunkt(OffsetDateTime.parse(mottattDato).toInstant()).toNorskLocalDate()
     }
 }
 

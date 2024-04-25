@@ -18,11 +18,11 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
   const tolvMndEtterDoedsfall = addMonths(doedsdato, 12)
 
   const [aktiviteter, setAktiviteter] = useState<IAktivitet[]>([])
-  const [aktivitetsTyper, setAktivitetsTyper] = useState<AktivitetspliktType[]>([])
+  const [aktivitetsTypeProps, setAktivitetsTypeProps] = useState<AktivitetstypeProps[]>([])
 
   useEffect(() => {
     hent({ behandlingId: behandling.id }, (aktiviteter) => {
-      setAktivitetsTyper([...new Set(aktiviteter.map((a) => a.type))])
+      setAktivitetsTypeProps([...new Set(aktiviteter.map((a) => a.type))].map(mapAktivitetstypeProps))
       setAktiviteter(aktiviteter)
     })
   }, [])
@@ -42,43 +42,40 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
         <Timeline.Pin date={tolvMndEtterDoedsfall}>
           <p>12 måneder etter dødsfall: {formaterDato(tolvMndEtterDoedsfall)}</p>
         </Timeline.Pin>
-        {aktivitetsTyper.map((aktivitetType) => {
-          const aktivitetstypeProps = mapAktivitetstypeProps(aktivitetType)
 
-          return (
-            <Timeline.Row key={`row-${aktivitetType}`} label={aktivitetstypeProps.beskrivelse}>
-              {aktiviteter
-                .filter((aktivitet) => aktivitet.type === aktivitetType)
-                .map((aktivitet, i) => (
-                  <Timeline.Period
-                    key={aktivitetType + i}
-                    start={new Date(aktivitet.fom)}
-                    end={(aktivitet.tom && new Date(aktivitet.tom)) || addYears(doedsdato, 3)}
-                    status={aktivitetstypeProps.status}
-                    icon={aktivitetstypeProps.ikon}
-                    statusLabel={aktivitetstypeProps.beskrivelse}
-                  >
-                    <p>
-                      <b>
-                        Fra {formaterDato(new Date(aktivitet.fom))}{' '}
-                        {aktivitet.tom && `til ${formaterDato(new Date(aktivitet.tom))}`}
-                      </b>
-                    </p>
-                    <p>{aktivitet.beskrivelse}</p>
-                    <i>
-                      Lagt til {formaterDatoMedTidspunkt(new Date(aktivitet.opprettet.tidspunkt))} av{' '}
-                      {aktivitet.opprettet.ident}
-                    </i>
-                    <br />
-                    <i>
-                      Sist endret {formaterDatoMedTidspunkt(new Date(aktivitet.endret.tidspunkt))} av{' '}
-                      {aktivitet.endret.ident}
-                    </i>
-                  </Timeline.Period>
-                ))}
-            </Timeline.Row>
-          )
-        })}
+        {aktivitetsTypeProps.map((props) => (
+          <Timeline.Row key={props.type} label={props.beskrivelse}>
+            {aktiviteter
+              .filter((aktivitet) => aktivitet.type === props.type)
+              .map((aktivitet, i) => (
+                <Timeline.Period
+                  key={props.type + i}
+                  start={new Date(aktivitet.fom)}
+                  end={(aktivitet.tom && new Date(aktivitet.tom)) || addYears(doedsdato, 3)}
+                  status={props.status}
+                  icon={props.ikon}
+                  statusLabel={props.beskrivelse}
+                >
+                  <p>
+                    <b>
+                      Fra {formaterDato(new Date(aktivitet.fom))}{' '}
+                      {aktivitet.tom && `til ${formaterDato(new Date(aktivitet.tom))}`}
+                    </b>
+                  </p>
+                  <p>{aktivitet.beskrivelse}</p>
+                  <i>
+                    Lagt til {formaterDatoMedTidspunkt(new Date(aktivitet.opprettet.tidspunkt))} av{' '}
+                    {aktivitet.opprettet.ident}
+                  </i>
+                  <br />
+                  <i>
+                    Sist endret {formaterDatoMedTidspunkt(new Date(aktivitet.endret.tidspunkt))} av{' '}
+                    {aktivitet.endret.ident}
+                  </i>
+                </Timeline.Period>
+              ))}
+          </Timeline.Row>
+        ))}
       </Timeline>
 
       <NyAktivitet behandling={behandling} oppdaterAktiviteter={setAktiviteter} />
@@ -92,6 +89,7 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
 }
 
 interface AktivitetstypeProps {
+  type: AktivitetspliktType
   beskrivelse: string
   ikon: JSX.Element
   status: 'success' | 'warning' | 'danger' | 'info' | 'neutral'
@@ -101,30 +99,35 @@ export const mapAktivitetstypeProps = (type: AktivitetspliktType): Aktivitetstyp
   switch (type) {
     case AktivitetspliktType.ARBEIDSTAKER:
       return {
+        type: AktivitetspliktType.ARBEIDSTAKER,
         beskrivelse: 'Arbeidstaker',
         ikon: <PersonIcon aria-hidden />,
         status: 'success',
       }
     case AktivitetspliktType.SELVSTENDIG_NAERINGSDRIVENDE:
       return {
+        type: AktivitetspliktType.SELVSTENDIG_NAERINGSDRIVENDE,
         beskrivelse: 'Selvstendig næringsdrivende',
         ikon: <RulerIcon aria-hidden />,
         status: 'info',
       }
     case AktivitetspliktType.ETABLERER_VIRKSOMHET:
       return {
+        type: AktivitetspliktType.ETABLERER_VIRKSOMHET,
         beskrivelse: 'Etablerer virksomhet',
         ikon: <Buildings2Icon aria-hidden />,
         status: 'danger',
       }
     case AktivitetspliktType.ARBEIDSSOEKER:
       return {
+        type: AktivitetspliktType.ARBEIDSSOEKER,
         beskrivelse: 'Arbeidssøker',
         ikon: <PencilIcon aria-hidden />,
         status: 'warning',
       }
     case AktivitetspliktType.UTDANNING:
       return {
+        type: AktivitetspliktType.UTDANNING,
         beskrivelse: 'Utdanning',
         ikon: <HatSchoolIcon aria-hidden />,
         status: 'neutral',

@@ -157,6 +157,7 @@ fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
     sakId: Long? = null,
     enhetNr: String? = null,
 ): Boolean {
+    logger.debug("Sjekker skrivetilgang")
     return when (val user = Kontekst.get().AppUser) {
         is SaksbehandlerMedEnheterOgRoller -> {
             val enhetNrSomSkalTestes =
@@ -204,6 +205,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
     enhetNr: String? = null,
     onSuccess: () -> Unit,
 ) {
+    logger.debug("Sjekker skrivetilgang")
     when (sjekkSkrivetilgang(sakId, enhetNr)) {
         true -> {
             logger.debug("Har skrivetilgang, fortsetter")
@@ -221,6 +223,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrive
     enhetNr: String? = null,
     onSuccess: (Saksbehandler) -> Unit,
 ) {
+    logger.debug("Sjekker skrivetilgang")
     when (val token = brukerTokenInfo) {
         is Saksbehandler -> {
             when (sjekkSkrivetilgang(sakId, enhetNr)) {

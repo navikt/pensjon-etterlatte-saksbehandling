@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling
 
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.log
 import io.ktor.server.request.receive
@@ -14,7 +13,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
-import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
@@ -37,6 +35,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.lagGrunnlagsopplysning
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
@@ -101,7 +100,7 @@ internal fun Route.behandlingRoutes(
                     KommerBarnetTilgode(
                         body.svar,
                         body.begrunnelse,
-                        lagGrunnlagsopplysningSaksbehandler(),
+                        brukerTokenInfo.lagGrunnlagsopplysning(),
                         behandlingId,
                     )
 
@@ -174,7 +173,7 @@ internal fun Route.behandlingRoutes(
                     val utlandstilknytning =
                         Utlandstilknytning(
                             type = body.utlandstilknytningType,
-                            kilde = lagGrunnlagsopplysningSaksbehandler(),
+                            kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
                             begrunnelse = body.begrunnelse,
                         )
 
@@ -202,7 +201,7 @@ internal fun Route.behandlingRoutes(
                     val boddEllerArbeidetUtlandet =
                         BoddEllerArbeidetUtlandet(
                             boddEllerArbeidetUtlandet = body.boddEllerArbeidetUtlandet,
-                            kilde = lagGrunnlagsopplysningSaksbehandler(),
+                            kilde = brukerTokenInfo.lagGrunnlagsopplysning(),
                             begrunnelse = body.begrunnelse,
                             boddArbeidetIkkeEosEllerAvtaleland = body.boddArbeidetIkkeEosEllerAvtaleland,
                             boddArbeidetEosNordiskKonvensjon = body.boddArbeidetEosNordiskKonvensjon,
@@ -298,10 +297,3 @@ internal fun Route.behandlingRoutes(
         }
     }
 }
-
-private fun PipelineContext<Unit, ApplicationCall>.lagGrunnlagsopplysningSaksbehandler() =
-    if (brukerTokenInfo is Saksbehandler) {
-        Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
-    } else {
-        Grunnlagsopplysning.Gjenny.create(brukerTokenInfo.ident())
-    }

@@ -134,7 +134,13 @@ export const initialFilter = (): Filter => {
 export const minOppgavelisteFiltre = (): Filter => {
   return {
     ...defaultFiltre,
-    oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
+    oppgavestatusFilter: [
+      OPPGAVESTATUSFILTER.NY,
+      OPPGAVESTATUSFILTER.UNDER_BEHANDLING,
+      OPPGAVESTATUSFILTER.ATTESTERING,
+      OPPGAVESTATUSFILTER.UNDERKJENT,
+      OPPGAVESTATUSFILTER.PAA_VENT,
+    ],
   }
 }
 

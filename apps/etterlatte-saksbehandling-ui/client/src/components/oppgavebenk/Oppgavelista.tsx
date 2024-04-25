@@ -13,8 +13,8 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { FilterRad } from '~components/oppgavebenk/filtreringAvOppgaver/FilterRad'
 import {
-  hentFilterFraLocalStorage,
-  leggFilterILocalStorage,
+  hentOppgavelistenFilterFraLocalStorage,
+  leggOppgavelistenFilterILocalStorage,
 } from '~components/oppgavebenk/filtreringAvOppgaver/filterLocalStorage'
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
@@ -31,7 +31,7 @@ interface Props {
 export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const [filter, setFilter] = useState<Filter>(hentFilterFraLocalStorage())
+  const [filter, setFilter] = useState<Filter>(hentOppgavelistenFilterFraLocalStorage())
 
   const oppgavebenkState = useOppgaveBenkState()
   const dispatcher = useOppgavebenkStateDispatcher()
@@ -77,7 +77,7 @@ export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Pro
     )
 
   useEffect(() => {
-    leggFilterILocalStorage({ ...filter, sakEllerFnrFilter: '' })
+    leggOppgavelistenFilterILocalStorage({ ...filter, sakEllerFnrFilter: '' })
   }, [filter])
 
   useEffect(() => {

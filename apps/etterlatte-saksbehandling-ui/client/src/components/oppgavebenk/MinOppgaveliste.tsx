@@ -4,7 +4,6 @@ import { hentOppgaverMedStatus } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
-import { minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
   leggTilOppgavenIMinliste,
@@ -20,6 +19,7 @@ import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>

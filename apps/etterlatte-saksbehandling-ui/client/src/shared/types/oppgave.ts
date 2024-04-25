@@ -62,15 +62,14 @@ export enum Oppgavetype {
   AKTIVITETSPLIKT = 'AKTIVITETSPLIKT',
 }
 
+export const oppgavestatuserForRedigerbarOppgave: Array<Oppgavestatus> = [
+  Oppgavestatus.NY,
+  Oppgavestatus.UNDER_BEHANDLING,
+  Oppgavestatus.ATTESTERING,
+  Oppgavestatus.UNDERKJENT,
+  Oppgavestatus.PAA_VENT,
+]
+
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => {
-  switch (status) {
-    case Oppgavestatus.NY:
-    case Oppgavestatus.UNDER_BEHANDLING:
-    case Oppgavestatus.ATTESTERING:
-    case Oppgavestatus.UNDERKJENT:
-    case Oppgavestatus.PAA_VENT:
-      return true
-    default:
-      return false
-  }
+  return oppgavestatuserForRedigerbarOppgave.includes(status)
 }

@@ -316,8 +316,8 @@ internal class BehandlingRoutesTest {
                 behandlingId,
                 parsetVirkningstidspunkt,
                 any(),
-                any(),
                 bodyBegrunnelse,
+                any(),
             )
         } returns virkningstidspunkt
     }

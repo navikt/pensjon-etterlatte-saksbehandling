@@ -26,7 +26,7 @@ import java.util.UUID
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class InnsendtSoeknadRiverTest {
+internal class OpprettBehandlingRiverTest {
     private val behandlingClientMock = mockk<BehandlingClient>()
 
     @AfterEach
@@ -46,7 +46,7 @@ internal class InnsendtSoeknadRiverTest {
         every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns behandlingId
         every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } just runs
 
-        val inspector = testRapid().apply { sendTestMessage(getJson("/omstillingsstoenad.json")) }.inspektør
+        val inspector = testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/omstillingsstoenad.json")) }.inspektør
         val message = inspector.message(0)
 
         assertEquals(1, inspector.size)
@@ -73,7 +73,7 @@ internal class InnsendtSoeknadRiverTest {
         every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns behandlingId
         every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } just runs
 
-        val inspector = testRapid().apply { sendTestMessage(getJson("/barnepensjon.json")) }.inspektør
+        val inspector = testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/barnepensjon.json")) }.inspektør
         val message = inspector.message(0)
 
         assertEquals(
@@ -95,7 +95,7 @@ internal class InnsendtSoeknadRiverTest {
 
     private fun testRapid() =
         TestRapid().apply {
-            InnsendtSoeknadRiver(this, behandlingClientMock)
+            OpprettBehandlingRiver(this, behandlingClientMock)
         }
 
     private fun getJson(file: String) = javaClass.getResource(file)!!.readText()

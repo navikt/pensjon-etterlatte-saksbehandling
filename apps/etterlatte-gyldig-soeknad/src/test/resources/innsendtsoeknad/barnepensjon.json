@@ -1,0 +1,30 @@
+{
+  "@event_name": "soeknad_innsendt",
+  "@skjema_info": {
+    "type": "BARNEPENSJON",
+    "-----": "---- resterende felter brukes ikke ved fordeling ----"
+  },
+  "@lagret_soeknad_id": 621,
+  "@template": "soeknad",
+  "@fnr_soeker": "25478323363",
+  "@hendelse_gyldig_til": "2023-02-10T10:23:30.808950460Z",
+  "system_read_count": 2,
+  "system_participating_services": [
+    {
+      "service": "innsendt-soeknad",
+      "instance": "innsendt-soeknad-9c8466574-k8rsg",
+      "time": "2022-02-10T10:53:30.809646217"
+    },
+    {
+      "service": "sjekk-adressebeskyttelse",
+      "instance": "sjekk-adressebeskyttelse-696bcbb647-g59xj",
+      "time": "2022-02-10T10:53:30.817628111"
+    },
+    {
+      "service": "journalfoer-soeknad",
+      "instance": "journalfoer-soeknad-86c4676f6f-twptd",
+      "time": "2022-02-10T10:53:31.194624485"
+    }
+  ],
+  "@adressebeskyttelse": "UGRADERT"
+}

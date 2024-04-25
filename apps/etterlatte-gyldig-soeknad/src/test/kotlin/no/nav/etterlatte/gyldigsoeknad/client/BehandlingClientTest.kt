@@ -34,7 +34,7 @@ internal class BehandlingClientTest {
         val requestList = mutableListOf<HttpRequestData>()
 
         val behandlingClient = createBehandlingClient(requestList, behandlingId)
-        val hendelseJson = objectMapper.readTree(javaClass.getResource("/barnepensjon.json")!!.readText())
+        val hendelseJson = objectMapper.readTree(javaClass.getResource("/behandlingsbehov/barnepensjon.json")!!.readText())
         val soeknad = objectMapper.treeToValue<Barnepensjon>(hendelseJson[FordelerFordelt.skjemaInfoKey])
         val hentetSaksid =
             behandlingClient.opprettBehandling(

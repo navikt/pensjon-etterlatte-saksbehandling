@@ -202,7 +202,6 @@ spec:
         - application: etterlatte-opplysninger-fra-soeknad
         - application: etterlatte-grunnlag
         - application: etterlatte-trygdetid
-        - application: etterlatte-fordeler
         - application: etterlatte-institusjonsopphold
         - application: etterlatte-tilbakekreving
         - application: etterlatte-klage

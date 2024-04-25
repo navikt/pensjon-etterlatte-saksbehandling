@@ -1,1 +1,0 @@
-UPDATE fordelinger set fordeling = 'GJENNY' WHERE fordeling = 'DOFFEN'

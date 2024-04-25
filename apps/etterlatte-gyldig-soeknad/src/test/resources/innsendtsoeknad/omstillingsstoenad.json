@@ -1,0 +1,26 @@
+{
+  "@event_name": "soeknad_innsendt",
+  "@skjema_info": {
+    "type": "OMSTILLINGSSTOENAD",
+    "-----": "---- resterende felter brukes ikke ved fordeling ----"
+  },
+  "@lagret_soeknad_id": "TEST-157fb687-3dfe-40bf-b099-45d531c0d12d",
+  "@template": "soeknad",
+  "@fnr_soeker": "13848599411",
+  "@hendelse_gyldig_til": "2022-05-12T10:17:34.833603804+02:00",
+  "system_read_count": 2,
+  "system_participating_services": [
+    {
+      "service": "etterlatte-testdata",
+      "instance": "etterlatte-testdata-5b9947f9cb-bfv7k",
+      "time": "2022-05-12T09:17:34.83685562"
+    },
+    {
+      "service": "sjekk-adressebeskyttelse",
+      "instance": "sjekk-adressebeskyttelse-868f49b8c9-lr8d2",
+      "time": "2022-05-12T09:17:34.899362407"
+    }
+  ],
+  "@adressebeskyttelse": "UGRADERT",
+  "@correlation_id": "f7542492-0ee4-477d-9cf7-01262c3f263e"
+}

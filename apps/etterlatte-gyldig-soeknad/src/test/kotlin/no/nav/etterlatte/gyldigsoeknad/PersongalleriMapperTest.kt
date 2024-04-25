@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 internal class PersongalleriMapperTest {
     @Test
     fun `Barnepensjon - skal hente persongalleri fra søknad`() {
-        val soeknad = getSoeknad("/barnepensjon.json") as Barnepensjon
+        val soeknad = getSoeknad("/behandlingsbehov/barnepensjon.json") as Barnepensjon
 
         val persongalleri = PersongalleriMapper.hentPersongalleriFraSoeknad(soeknad)
 
@@ -25,7 +25,7 @@ internal class PersongalleriMapperTest {
 
     @Test
     fun `Omstillingsstoenad - skal hente persongalleri fra søknad`() {
-        val soeknad = getSoeknad("/omstillingsstoenad.json") as Omstillingsstoenad
+        val soeknad = getSoeknad("/behandlingsbehov/omstillingsstoenad.json") as Omstillingsstoenad
 
         val persongalleri = PersongalleriMapper.hentPersongalleriFraSoeknad(soeknad)
 

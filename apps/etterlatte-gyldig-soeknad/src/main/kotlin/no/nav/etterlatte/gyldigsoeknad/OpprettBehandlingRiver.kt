@@ -20,11 +20,11 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
-internal class InnsendtSoeknadRiver(
+internal class OpprettBehandlingRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingClient: BehandlingClient,
 ) : ListenerMedLogging() {
-    private val logger = LoggerFactory.getLogger(InnsendtSoeknadRiver::class.java)
+    private val logger = LoggerFactory.getLogger(OpprettBehandlingRiver::class.java)
 
     init {
         initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV) {

@@ -26,8 +26,6 @@ interface RHFRedigerbarFamilie {
 
 export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [feilmelding, setFeilmelding] = useState<string | null>(null)
-
   const [status, redigerFamilieforholdRequest] = useApiCall(redigerFamilieforhold)
 
   const {
@@ -49,25 +47,19 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
   const avdoedListe = useFieldArray({ name: 'avdoede', control })
 
   const lagre = () => {
-    setFeilmelding(null)
     const familieforhold = getValues()
-
-    if (familieforhold.avdoede.length === 0) {
-      setFeilmelding(`Det er ikke angitt noen avdød, men det skal være minst 1.`)
-    } else {
-      redigerFamilieforholdRequest(
-        {
-          behandlingId: behandling.id,
-          redigert: {
-            gjenlevende: familieforhold.gjenlevende.map((v) => v.fnr),
-            avdoede: familieforhold.avdoede.map((v) => v.fnr),
-          },
+    redigerFamilieforholdRequest(
+      {
+        behandlingId: behandling.id,
+        redigert: {
+          gjenlevende: familieforhold.gjenlevende.map((v) => v.fnr),
+          avdoede: familieforhold.avdoede.map((v) => v.fnr),
         },
-        () => {
-          setTimeout(() => window.location.reload(), 2000)
-        }
-      )
-    }
+      },
+      () => {
+        setTimeout(() => window.location.reload(), 2000)
+      }
+    )
   }
 
   const avbryt = () => {
@@ -162,7 +154,6 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
           {mapFailure(status, (error) => (
             <Alert variant="error">{error.detail}</Alert>
           ))}
-          {feilmelding && <Alert variant="error">{feilmelding}</Alert>}
         </Modal.Body>
 
         <Modal.Footer>

@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.behandling.ForenkletBehandling
 import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
-import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -295,11 +294,6 @@ internal fun Route.sakWebRoutes(
         }
     }
 }
-
-data class UtlandstilknytningRequest(
-    val utlandstilknytningType: UtlandstilknytningType,
-    val begrunnelse: String,
-)
 
 data class EnhetRequest(
     val enhet: String,

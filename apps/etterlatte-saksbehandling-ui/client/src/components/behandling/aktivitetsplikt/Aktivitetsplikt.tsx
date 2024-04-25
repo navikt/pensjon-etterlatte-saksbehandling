@@ -20,6 +20,7 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -36,6 +37,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
     innloggetSaksbehandler.skriveEnheter
   )
   const configContext = useContext(ConfigContext)
+  const visTidslinje = useFeatureEnabledMedDefault('aktivitetsplikt-tidslinje', false)
 
   const [beskrivelse, setBeskrivelse] = useState<string>('')
   const [aktivitetOppfolging, setAktivitetOppfolging] = useState<AktivitetspliktOppfolging>()
@@ -86,7 +88,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           ikke er oppfylt.
         </BodyLong>
 
-        <AktivitetspliktTidslinje behandling={behandling} doedsdato={new Date(avdoedesDoedsdato!!)} />
+        {visTidslinje && <AktivitetspliktTidslinje behandling={behandling} doedsdato={new Date(avdoedesDoedsdato!!)} />}
 
         <Heading size="small" spacing>
           Beskriv etterlatte sin aktivitet idag

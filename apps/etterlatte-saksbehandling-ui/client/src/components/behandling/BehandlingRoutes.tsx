@@ -21,6 +21,8 @@ import { SakType } from '~shared/types/sak'
 import TrygdetidVisning from '~components/behandling/trygdetid/TrygdetidVisning'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { Varselbrev } from '~components/behandling/brev/Varselbrev'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { Personopplysninger } from '~shared/types/grunnlag'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -133,8 +135,9 @@ function useRouteNavigation() {
 export const useBehandlingRoutes = () => {
   const { currentRoute, goto } = useRouteNavigation()
   const behandling = useBehandling()
+  const personopplysninger = usePersonopplysninger()
 
-  const aktuelleRoutes = hentAktuelleRoutes(behandling)
+  const aktuelleRoutes = hentAktuelleRoutes(behandling, personopplysninger)
 
   const firstPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === 0
   const lastPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === aktuelleRoutes.length - 1
@@ -155,7 +158,7 @@ export const useBehandlingRoutes = () => {
   return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, goto }
 }
 
-const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
+const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, personopplysninger: Personopplysninger | null) => {
   if (!behandling) return []
 
   const lagVarselbrev = behandling?.kilde === Vedtaksloesning.GJENOPPRETTA
@@ -163,7 +166,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
   switch (behandling.behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return behandlingRoutes(behandling).filter((route) =>
-        soeknadRoutes(behandling, lagVarselbrev)
+        soeknadRoutes(behandling, personopplysninger, lagVarselbrev)
           .map((pathinfo) => pathinfo.path)
           .includes(route.path)
       )
@@ -176,8 +179,13 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
   }
 }
 
-export function soeknadRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteTypes> {
+export function soeknadRoutes(
+  behandling: IBehandlingReducer,
+  personopplysninger: Personopplysninger | null,
+  lagVarselbrev: boolean
+): Array<BehandlingRouteTypes> {
   const avslag = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
+  const ukjentAvdoed = personopplysninger?.avdoede.length === 0
 
   const defaultRoutes: Array<BehandlingRouteTypes> = avslag
     ? [routeTypes.soeknadsoversikt, routeTypes.vilkaarsvurdering]
@@ -192,7 +200,7 @@ export function soeknadRoutes(behandling: IBehandlingReducer, lagVarselbrev: boo
 
   const boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet?.boddEllerArbeidetUtlandet ?? false
 
-  if (avslag && boddEllerArbeidetUtlandet) {
+  if (avslag && boddEllerArbeidetUtlandet && !ukjentAvdoed) {
     defaultRoutes.push(routeTypes.trygdetid)
   }
 

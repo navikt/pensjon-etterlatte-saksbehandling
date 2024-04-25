@@ -5,8 +5,6 @@ import com.github.michaelbull.result.mapBoth
 import no.nav.etterlatte.behandling.VirkningstidspunktRequest
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
-import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -27,11 +25,9 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
 
     suspend fun settKommerBarnetTilGode(behandling: UUID) {
         klient.post(Resource(clientId, "$url/api/behandling/$behandling/kommerbarnettilgode"), Systembruker.testdata) {
-            KommerBarnetTilgode(
+            JaNeiMedBegrunnelse(
                 JaNei.JA,
                 "Automatisk behandla testsak",
-                Grunnlagsopplysning.Pesys.create(),
-                behandlingId = behandling,
             )
         }.mapBoth(
             success = {},

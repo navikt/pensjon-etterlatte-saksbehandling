@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
-import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class SakService(private val klient: DownstreamResourceClient, private val url: String, private val clientId: String) {
@@ -66,21 +66,11 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
     }
 
     suspend fun lagreVirkningstidspunkt(behandling: UUID) {
-        val tidspunkt =
-            with(LocalDate.now()) {
-                val maaned =
-                    if (monthValue < 10) {
-                        "0$monthValue"
-                    } else {
-                        monthValue
-                    }
-                "$year-$maaned-${dayOfMonth}T12:00:00Z"
-            }
         klient.post(
             Resource(clientId, "$url/api/behandling/$behandling/virkningstidspunkt"),
             Systembruker.testdata,
             VirkningstidspunktRequest(
-                _dato = tidspunkt,
+                _dato = YearMonth.now().toString(),
                 begrunnelse = "Automatisk behandla testsak",
                 kravdato = null,
             ),

@@ -50,7 +50,7 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag, vurdering, sende_brev 
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev 
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.sak_id = ?
                     """.trimIndent(),
@@ -81,7 +81,7 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag, vurdering, sende_brev 
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev 
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.id = ?
                     """.trimIndent(),

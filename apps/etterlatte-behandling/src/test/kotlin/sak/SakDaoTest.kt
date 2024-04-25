@@ -1,12 +1,23 @@
 package no.nav.etterlatte.sak
 
+import io.kotest.matchers.date.shouldBeBetween
+import io.kotest.matchers.date.shouldBeToday
+import io.kotest.matchers.date.shouldNotBeToday
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Flyktning
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
+import no.nav.etterlatte.libs.database.toList
+import no.nav.etterlatte.opprettBehandling
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -20,15 +31,83 @@ import javax.sql.DataSource
 internal class SakDaoTest(val dataSource: DataSource) {
     private lateinit var sakRepo: SakDao
     private lateinit var tilgangService: TilgangService
+    private lateinit var behandlingRepo: BehandlingDao
+    private lateinit var kommerBarnetTilGodeDao: KommerBarnetTilGodeDao
 
     @BeforeAll
     fun beforeAll() {
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
+        kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
+        behandlingRepo =
+            BehandlingDao(
+                kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                ConnectionAutoclosingTest(dataSource),
+            )
     }
 
     @Test
-    fun `kan opprett sak`() {
+    fun `klarer å sette opprett for saker der de har det på behandlingen`() {
+        val fnrMedBehandling = "1231234"
+        val opprettSak = sakRepo.opprettSak(fnrMedBehandling, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val fnrUtenbehandling = "123124124"
+        val sakutenopprettet = sakRepo.opprettSak(fnrUtenbehandling, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = opprettSak.id,
+                prosesstype = Prosesstype.MANUELL,
+            )
+
+        behandlingRepo.opprettBehandling(opprettBehandling)
+
+        // setter opprettet dato fra behandling
+        dataSource.connection.prepareStatement(
+            """
+            UPDATE sak as s
+            SET opprettet = (select behandling_opprettet from behandling as b where b.sak_id = s.id);
+            """.trimIndent(),
+        ).executeUpdate()
+
+        val saker =
+            dataSource.connection.prepareStatement(
+                """
+                select * from sak;    
+                """.trimIndent(),
+            ).executeQuery().toList {
+                Pair(getString("fnr"), getTidspunktOrNull("opprettet"))
+            }
+        val sakmedTidligereDato = saker.find { it.first === fnrMedBehandling }
+
+        sakmedTidligereDato?.second?.toLocalDate()?.shouldBeToday()
+
+        dataSource.connection.prepareStatement(
+            """
+            UPDATE sak
+            SET opprettet = 'yesterday'::TIMESTAMP
+            WHERE sak.opprettet IS NULL;
+            """.trimIndent(),
+        ).executeUpdate()
+
+        val beggesakerMedDato =
+            dataSource.connection.prepareStatement(
+                """
+                select * from sak;    
+                """.trimIndent(),
+            ).executeQuery().toList {
+                Pair(getString("fnr"), getTidspunktOrNull("opprettet"))
+            }
+
+        val sakmedBehandlingsdato = beggesakerMedDato.find { it.first === fnrMedBehandling }
+        sakmedBehandlingsdato?.second?.toLocalDate()?.shouldBeToday()
+        val sakUtenbehandlingsdato = beggesakerMedDato.find { it.first === fnrUtenbehandling }
+        sakUtenbehandlingsdato?.second?.toLocalDate()?.shouldNotBeToday()
+        sakUtenbehandlingsdato?.second?.toLocalDate()?.shouldBeBetween(LocalDate.now().minusDays(2), LocalDate.now())
+    }
+
+    @Test
+    fun `kan opprette sak`() {
         val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
         Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, opprettSak.enhet)

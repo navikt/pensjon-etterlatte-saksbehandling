@@ -70,7 +70,7 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
         sakId: Long,
     ) {
         val oppgaver: List<OppgaveIntern> =
-            klient.get(Resource(clientId, "$url/api/oppgaver/sak/$sakId/oppgaver"), Systembruker.testdata)
+            klient.get(Resource(clientId, "$url/oppgaver/sak/$sakId/oppgaver"), Systembruker.testdata)
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throw it },

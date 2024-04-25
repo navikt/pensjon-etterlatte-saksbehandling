@@ -123,3 +123,13 @@ data class LagreSanksjon(
     val tom: LocalDate?,
     val beskrivelse: String,
 )
+
+fun Sanksjon.toLagreSanksjon(): LagreSanksjon {
+    return LagreSanksjon(
+        id = this.id,
+        sakId = this.sakId,
+        fom = LocalDate.of(this.fom.year, this.fom.month, 1),
+        tom = this.tom?.let { LocalDate.of(it.year, it.month, 1) },
+        beskrivelse = this.beskrivelse,
+    )
+}

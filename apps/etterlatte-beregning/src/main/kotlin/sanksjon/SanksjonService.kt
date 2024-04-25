@@ -1,6 +1,7 @@
 package no.nav.etterlatte.sanksjon
 
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -17,6 +18,24 @@ class SanksjonService(
     fun hentSanksjon(behandlingId: UUID): List<Sanksjon>? {
         logger.info("Henter sanksjoner med behandlingID=$behandlingId")
         return sanksjonRepository.hentSanksjon(behandlingId)?.sortedBy { it.fom }
+    }
+
+    suspend fun kopierSanksjon(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo) {
+        logger.info("Kopierer sanksjoner fra forrige behandling med behandlingID=$behandlingId")
+        val behandling =  behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo).id
+
+        val sanksjoner = sanksjonRepository.hentSanksjon(forrigeBehandlingId)
+        if (sanksjoner != null) {
+            sanksjoner.forEach {
+                sanksjonRepository.opprettSanksjon(
+                    behandlingId,
+                    it.sakId,
+                    brukerTokenInfo.ident(),
+                    it.toLagreSanksjon()
+                )
+            }
+        }
     }
 
     suspend fun opprettEllerOppdaterSanksjon(

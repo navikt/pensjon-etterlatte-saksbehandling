@@ -22,7 +22,7 @@ export interface NyBehandlingSkjema {
   mottattDato: string
   persongalleri: {
     soeker: string
-    innsender: string
+    innsender: string | null
     gjenlevende?: Array<{ value: string }>
     avdoed?: Array<{ value: string }>
     soesken?: Array<{ value: string }>
@@ -64,7 +64,7 @@ export default function OpprettNyBehandling() {
     defaultValues: {
       ...nyBehandlingRequest,
       persongalleri: {
-        innsender: nyBehandlingRequest?.persongalleri?.innsender,
+        innsender: nyBehandlingRequest?.persongalleri?.innsender || null,
         soeker: nyBehandlingRequest?.persongalleri?.soeker,
         gjenlevende: mapStringArrayToRHFArray(nyBehandlingRequest?.persongalleri?.gjenlevende),
         soesken: mapStringArrayToRHFArray(nyBehandlingRequest?.persongalleri?.soesken),

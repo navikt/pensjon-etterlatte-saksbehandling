@@ -56,6 +56,7 @@ class SimuleringOsKlient(config: Config, private val client: HttpClient, private
         } else {
             return response.body<String>().let {
                 objectMapper.readValue<ResponseWrapper>(it).response
+                    ?: SimulerBeregningResponse()
             }
         }
     }

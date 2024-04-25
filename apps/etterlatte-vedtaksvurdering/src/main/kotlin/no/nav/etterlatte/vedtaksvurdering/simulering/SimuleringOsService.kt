@@ -12,6 +12,7 @@ import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
+import no.nav.system.os.entiteter.oppdragskjema.Enhet
 import no.nav.system.os.entiteter.typer.simpletypes.FradragTillegg
 import no.nav.system.os.entiteter.typer.simpletypes.KodeStatusLinje
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.Oppdrag
@@ -43,7 +44,7 @@ class SimuleringOsService(
             val request = mapTilSimuleringRequest(vedtak, brukerTokenInfo)
 
             return simuleringOsKlient.simuler(request).also {
-                logger.info(it.infomelding.beskrMelding.trim())
+                it.infomelding?.beskrMelding?.trim().let { logger.info(it) }
             }
         } else {
             throw IkkeStoettetSimulering(vedtak.type, behandlingId)
@@ -89,6 +90,13 @@ class SimuleringOsService(
                             vedtak,
                             brukerTokenInfo,
                         )
+                    },
+                )
+                enhet.add(
+                    Enhet().apply {
+                        typeEnhet = "BOS"
+                        enhet = "4819"
+                        datoEnhetFom = LocalDate.parse("1900-01-01").toOppdragDate()
                     },
                 )
             }

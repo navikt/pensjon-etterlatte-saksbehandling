@@ -9,16 +9,18 @@ import { useEffect } from 'react'
 import { useAppDispatch } from '~store/Store'
 
 import { isSuccess } from '~shared/api/apiUtils'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const dispatch = useAppDispatch()
   const behandling = props.behandling
   const { id, behandlingType } = behandling
+  const personopplysninger = usePersonopplysninger()
 
   const [fetchVilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
 
   const lagVarselbrev = behandling.kilde === Vedtaksloesning.GJENOPPRETTA
-  const soeknadRoutes_ = soeknadRoutes(behandling, lagVarselbrev)
+  const soeknadRoutes_ = soeknadRoutes(behandling, personopplysninger, lagVarselbrev)
   const revurderingRoutes_ = revurderingRoutes(behandling, lagVarselbrev)
 
   const erSisteRoute = (index: number, list: BehandlingRouteTypes[]) => index != list.length - 1

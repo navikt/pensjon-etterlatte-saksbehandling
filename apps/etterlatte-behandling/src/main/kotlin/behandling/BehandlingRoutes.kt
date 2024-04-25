@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.log
 import io.ktor.server.request.receive
@@ -13,6 +14,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
@@ -35,7 +37,6 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
-import no.nav.etterlatte.libs.ktor.route.hentNavidentFraToken
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
@@ -100,11 +101,7 @@ internal fun Route.behandlingRoutes(
                     KommerBarnetTilgode(
                         body.svar,
                         body.begrunnelse,
-                        if (brukerTokenInfo is Saksbehandler) {
-                            Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
-                        } else {
-                            Grunnlagsopplysning.Gjenny.create(brukerTokenInfo.ident())
-                        },
+                        lagGrunnlagsopplysningSaksbehandler(),
                         behandlingId,
                     )
 
@@ -170,68 +167,64 @@ internal fun Route.behandlingRoutes(
 
         post("/utlandstilknytning") {
             kunSkrivetilgang {
-                hentNavidentFraToken { navIdent ->
-                    logger.debug("Prøver å fastsette utlandstilknytning")
-                    val body = call.receive<UtlandstilknytningRequest>()
+                logger.debug("Prøver å fastsette utlandstilknytning")
+                val body = call.receive<UtlandstilknytningRequest>()
 
-                    try {
-                        val utlandstilknytning =
-                            Utlandstilknytning(
-                                type = body.utlandstilknytningType,
-                                kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
-                                begrunnelse = body.begrunnelse,
-                            )
-
-                        inTransaction {
-                            behandlingService.oppdaterUtlandstilknytning(behandlingId, utlandstilknytning)
-                        }
-
-                        call.respondText(
-                            contentType = ContentType.Application.Json,
-                            status = HttpStatusCode.OK,
-                            text = utlandstilknytning.toJson(),
+                try {
+                    val utlandstilknytning =
+                        Utlandstilknytning(
+                            type = body.utlandstilknytningType,
+                            kilde = lagGrunnlagsopplysningSaksbehandler(),
+                            begrunnelse = body.begrunnelse,
                         )
-                    } catch (e: TilstandException.UgyldigTilstand) {
-                        call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
+
+                    inTransaction {
+                        behandlingService.oppdaterUtlandstilknytning(behandlingId, utlandstilknytning)
                     }
+
+                    call.respondText(
+                        contentType = ContentType.Application.Json,
+                        status = HttpStatusCode.OK,
+                        text = utlandstilknytning.toJson(),
+                    )
+                } catch (e: TilstandException.UgyldigTilstand) {
+                    call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                 }
             }
         }
 
         post("/boddellerarbeidetutlandet") {
             kunSkrivetilgang {
-                hentNavidentFraToken { navIdent ->
-                    logger.debug("Prøver å fastsette boddEllerArbeidetUtlandet")
-                    val body = call.receive<BoddEllerArbeidetUtlandetRequest>()
+                logger.debug("Prøver å fastsette boddEllerArbeidetUtlandet")
+                val body = call.receive<BoddEllerArbeidetUtlandetRequest>()
 
-                    try {
-                        val boddEllerArbeidetUtlandet =
-                            BoddEllerArbeidetUtlandet(
-                                boddEllerArbeidetUtlandet = body.boddEllerArbeidetUtlandet,
-                                kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
-                                begrunnelse = body.begrunnelse,
-                                boddArbeidetIkkeEosEllerAvtaleland = body.boddArbeidetIkkeEosEllerAvtaleland,
-                                boddArbeidetEosNordiskKonvensjon = body.boddArbeidetEosNordiskKonvensjon,
-                                boddArbeidetAvtaleland = body.boddArbeidetAvtaleland,
-                                vurdereAvoededsTrygdeavtale = body.vurdereAvoededsTrygdeavtale,
-                                skalSendeKravpakke = body.skalSendeKravpakke,
-                            )
-
-                        inTransaction {
-                            behandlingService.oppdaterBoddEllerArbeidetUtlandet(
-                                behandlingId,
-                                boddEllerArbeidetUtlandet,
-                            )
-                        }
-
-                        call.respondText(
-                            contentType = ContentType.Application.Json,
-                            status = HttpStatusCode.OK,
-                            text = boddEllerArbeidetUtlandet.toJson(),
+                try {
+                    val boddEllerArbeidetUtlandet =
+                        BoddEllerArbeidetUtlandet(
+                            boddEllerArbeidetUtlandet = body.boddEllerArbeidetUtlandet,
+                            kilde = lagGrunnlagsopplysningSaksbehandler(),
+                            begrunnelse = body.begrunnelse,
+                            boddArbeidetIkkeEosEllerAvtaleland = body.boddArbeidetIkkeEosEllerAvtaleland,
+                            boddArbeidetEosNordiskKonvensjon = body.boddArbeidetEosNordiskKonvensjon,
+                            boddArbeidetAvtaleland = body.boddArbeidetAvtaleland,
+                            vurdereAvoededsTrygdeavtale = body.vurdereAvoededsTrygdeavtale,
+                            skalSendeKravpakke = body.skalSendeKravpakke,
                         )
-                    } catch (e: TilstandException.UgyldigTilstand) {
-                        call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
+
+                    inTransaction {
+                        behandlingService.oppdaterBoddEllerArbeidetUtlandet(
+                            behandlingId,
+                            boddEllerArbeidetUtlandet,
+                        )
                     }
+
+                    call.respondText(
+                        contentType = ContentType.Application.Json,
+                        status = HttpStatusCode.OK,
+                        text = boddEllerArbeidetUtlandet.toJson(),
+                    )
+                } catch (e: TilstandException.UgyldigTilstand) {
+                    call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                 }
             }
         }
@@ -305,3 +298,10 @@ internal fun Route.behandlingRoutes(
         }
     }
 }
+
+private fun PipelineContext<Unit, ApplicationCall>.lagGrunnlagsopplysningSaksbehandler() =
+    if (brukerTokenInfo is Saksbehandler) {
+        Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
+    } else {
+        Grunnlagsopplysning.Gjenny.create(brukerTokenInfo.ident())
+    }

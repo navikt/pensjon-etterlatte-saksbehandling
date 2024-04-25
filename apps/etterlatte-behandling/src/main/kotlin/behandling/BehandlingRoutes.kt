@@ -108,6 +108,7 @@ internal fun Route.behandlingRoutes(
                     inTransaction { kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kommerBarnetTilgode) }
                     call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
                 } catch (e: TilstandException.UgyldigTilstand) {
+                    logger.warn("Ugyldig tilstand for lagre kommer barnet til gode", e)
                     call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
                 }
             }
@@ -159,6 +160,7 @@ internal fun Route.behandlingRoutes(
                         text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson(),
                     )
                 } catch (e: TilstandException.UgyldigTilstand) {
+                    logger.warn("Ugyldig tilstand for lagre virkningstidspunkt", e)
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                 }
             }
@@ -187,6 +189,7 @@ internal fun Route.behandlingRoutes(
                         text = utlandstilknytning.toJson(),
                     )
                 } catch (e: TilstandException.UgyldigTilstand) {
+                    logger.warn("Ugyldig tilstand for lagre utlandstilknytning", e)
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                 }
             }
@@ -223,6 +226,7 @@ internal fun Route.behandlingRoutes(
                         text = boddEllerArbeidetUtlandet.toJson(),
                     )
                 } catch (e: TilstandException.UgyldigTilstand) {
+                    logger.warn("Ugyldig tilstand for lagre boddellerarbeidetutlandet", e)
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                 }
             }

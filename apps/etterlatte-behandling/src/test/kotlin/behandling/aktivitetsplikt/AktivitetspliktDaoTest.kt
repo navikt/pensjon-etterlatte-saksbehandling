@@ -120,7 +120,7 @@ class AktivitetspliktDaoTest(ds: DataSource) {
     @Nested
     inner class SlettAktivitet {
         @Test
-        fun `skal slette aktivetet`() {
+        fun `skal slette aktivitet`() {
             val behandlingId = UUID.randomUUID()
             val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
@@ -132,7 +132,7 @@ class AktivitetspliktDaoTest(ds: DataSource) {
         }
 
         @Test
-        fun `skal ikke slette aktivetet hvis behandling id ikke stemmer`() {
+        fun `skal ikke slette aktivitet hvis behandling id ikke stemmer`() {
             val behandlingId = UUID.randomUUID()
             val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
             dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)

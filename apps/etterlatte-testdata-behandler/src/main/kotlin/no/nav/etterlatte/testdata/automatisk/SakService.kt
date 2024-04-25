@@ -9,11 +9,11 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class SakService(private val klient: DownstreamResourceClient, private val url: String, private val clientId: String) {
@@ -55,10 +55,13 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
             Resource(clientId, "$url/api/behandling/$behandling/virkningstidspunkt"),
             Systembruker.testdata,
             VirkningstidspunktRequest(
-                _dato = Tidspunkt.now().toString(),
+                _dato = YearMonth.now().toString(),
                 begrunnelse = "Automatisk behandla testsak",
                 kravdato = LocalDate.now(),
             ),
+        ).mapBoth(
+            success = {},
+            failure = { throw it },
         )
     }
 
@@ -74,9 +77,11 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
                 )
 
         oppgaver.forEach {
-            klient.post(Resource(clientId, "$url/api/oppgaver/${it.id}/tildel-saksbehandler"), Systembruker.testdata) {
-                SaksbehandlerEndringDto(navn)
-            }
+            klient.post(
+                Resource(clientId, "$url/api/oppgaver/${it.id}/tildel-saksbehandler"),
+                Systembruker.testdata,
+                SaksbehandlerEndringDto(navn),
+            )
         }
     }
 }

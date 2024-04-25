@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
+import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import java.time.LocalDate
 import java.util.UUID
@@ -60,13 +61,14 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
                     }
                 "$year-$maaned-${dayOfMonth}T12:00:00Z"
             }
+        logger.warn("Sender tidspunkt $tidspunkt til virkningstidspunkt")
         klient.post(
             Resource(clientId, "$url/api/behandling/$behandling/virkningstidspunkt"),
             Systembruker.testdata,
             VirkningstidspunktRequest(
                 _dato = tidspunkt,
                 begrunnelse = "Automatisk behandla testsak",
-                kravdato = LocalDate.now(),
+                kravdato = null,
             ),
         ).mapBoth(
             success = {},

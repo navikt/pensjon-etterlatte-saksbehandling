@@ -63,6 +63,22 @@ class AktivitetspliktService(
             aktivitetspliktDao.opprettAktivitet(behandlingId, aktivitet, kilde)
         }
     }
+
+    fun slettAktivitet(
+        behandlingId: UUID,
+        aktivitetId: UUID,
+    ) {
+        val behandling =
+            requireNotNull(inTransaction { behandlingService.hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
+
+        if (!behandling.status.kanEndres()) {
+            throw BehandlingKanIkkeEndres()
+        }
+
+        inTransaction {
+            aktivitetspliktDao.slettAktivitet(aktivitetId, behandlingId)
+        }
+    }
 }
 
 class SakidTilhoererIkkeBehandlingException :

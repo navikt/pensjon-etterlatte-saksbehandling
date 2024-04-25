@@ -1,6 +1,7 @@
 package behandling.aktivitetsplikt
 
 import io.kotest.assertions.asClue
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
@@ -12,6 +13,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.sak.SakDao
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
@@ -52,6 +54,33 @@ class AktivitetspliktDaoTest(ds: DataSource) {
             aktivitet.opprettet shouldBe kilde
             aktivitet.endret shouldBe kilde
             aktivitet.beskrivelse shouldBe nyAktivitet.beskrivelse
+        }
+    }
+
+    @Nested
+    inner class SlettAktivitet {
+        @Test
+        fun `skal slette aktivetet`() {
+            val behandlingId = UUID.randomUUID()
+            val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+            dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
+            val aktivitet = dao.hentAktiviteter(behandlingId).first()
+
+            dao.slettAktivitet(aktivitet.id, behandlingId)
+
+            dao.hentAktiviteter(behandlingId) shouldHaveSize 0
+        }
+
+        @Test
+        fun `skal ikke slette aktivetet hvis behandlingId ikke stemmer`() {
+            val behandlingId = UUID.randomUUID()
+            val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+            dao.opprettAktivitet(behandlingId, nyAktivitet, kilde)
+            val aktivitet = dao.hentAktiviteter(behandlingId).first()
+
+            dao.slettAktivitet(aktivitet.id, UUID.randomUUID())
+
+            dao.hentAktiviteter(behandlingId) shouldHaveSize 1
         }
     }
 

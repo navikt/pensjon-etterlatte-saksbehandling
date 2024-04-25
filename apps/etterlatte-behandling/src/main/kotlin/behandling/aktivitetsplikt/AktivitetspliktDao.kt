@@ -115,6 +115,27 @@ class AktivitetspliktDao(private val connectionAutoclosing: ConnectionAutoclosin
         }
     }
 
+    fun slettAktivitet(
+        aktivitetId: UUID,
+        behandlingId: UUID,
+    ) {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        DELETE FROM aktivitetsplikt_aktivitet
+                        WHERE id = ? AND behandling_id = ?
+                        """.trimMargin(),
+                    )
+                stmt.setObject(1, aktivitetId)
+                stmt.setObject(2, behandlingId)
+
+                stmt.executeUpdate()
+            }
+        }
+    }
+
     private fun ResultSet.toAktivitet() =
         AktivitetspliktAktivitet(
             id = getUUID("id"),

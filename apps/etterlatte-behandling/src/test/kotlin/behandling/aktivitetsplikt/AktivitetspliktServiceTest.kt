@@ -1,5 +1,6 @@
 package behandling.aktivitetsplikt
 
+import io.kotest.assertions.any
 import io.kotest.matchers.shouldBe
 import io.mockk.coVerify
 import io.mockk.every
@@ -98,6 +99,34 @@ class AktivitetspliktServiceTest {
             assertThrows<BehandlingKanIkkeEndres> {
                 service.opprettAktivitet(behandling.id, aktivitet, brukerTokenInfo)
             }
+        }
+    }
+
+    @Nested
+    inner class SlettAktivitet {
+        private val aktivitetId = UUID.randomUUID()
+
+        @Test
+        fun `Skal slette en aktivitet`() {
+            every { aktivitetspliktDao.slettAktivitet(aktivitetId, behandling.id) } just runs
+
+            every { behandlingService.hentBehandling(behandling.id) } returns
+                behandling.apply {
+                    every { status } returns BehandlingStatus.ATTESTERT
+                }
+
+            assertThrows<BehandlingKanIkkeEndres> {
+                service.slettAktivitet(behandling.id, aktivitetId)
+            }
+        }
+
+        @Test
+        fun `Skal kaste feil hvis behandling ikke kan endres`() {
+            every { aktivitetspliktDao.slettAktivitet(aktivitetId, behandling.id) } just runs
+
+            service.slettAktivitet(behandling.id, aktivitetId)
+
+            coVerify { aktivitetspliktDao.slettAktivitet(aktivitetId, behandling.id) }
         }
     }
 

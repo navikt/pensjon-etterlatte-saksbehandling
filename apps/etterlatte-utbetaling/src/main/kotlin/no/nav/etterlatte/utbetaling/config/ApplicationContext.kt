@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.config
 
+import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.jobs.next
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
@@ -7,10 +8,14 @@ import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.jdbcUrl
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.mq.JmsConnectionFactory
 import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
+import no.nav.etterlatte.utbetaling.BehandlingKlient
+import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
 import no.nav.etterlatte.utbetaling.avstemming.AvstemmingDao
 import no.nav.etterlatte.utbetaling.avstemming.GrensesnittsavstemmingJob
 import no.nav.etterlatte.utbetaling.avstemming.GrensesnittsavstemmingService
@@ -36,6 +41,9 @@ import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
+import no.nav.etterlatte.utbetaling.simulering.SimuleringOsKlient
+import no.nav.etterlatte.utbetaling.simulering.SimuleringOsService
+import no.nav.etterlatte.utbetaling.simulering.simuleringObjectMapper
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.Duration
@@ -59,7 +67,8 @@ class ApplicationContext(
             password = properties.serviceUserPassword,
         ),
 ) {
-    val clock = utcKlokke()
+    private val clock = utcKlokke()
+    private val config = ConfigFactory.load()
 
     val dataSource =
         DataSourceBuilder.createDataSource(
@@ -107,6 +116,22 @@ class ApplicationContext(
             clock = clock,
         )
     }
+
+    private val behandlingKlient = BehandlingKlient(config, httpClient())
+    private val vedtaksvurderingKlient = VedtaksvurderingKlient(config, httpClient())
+
+    private val simuleringOsKlient =
+        SimuleringOsKlient(
+            config,
+            httpClientClientCredentials(
+                azureAppClientId = config.getString("azure.app.client.id"),
+                azureAppJwk = config.getString("azure.app.jwk"),
+                azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+                azureAppScope = config.getString("etterlatteproxy.scope"),
+            ),
+            objectMapper = simuleringObjectMapper(),
+        )
+    val simuleringOsService = SimuleringOsService(vedtaksvurderingKlient, simuleringOsKlient)
 
     val leaderElection = LeaderElection(properties.leaderElectorPath)
 

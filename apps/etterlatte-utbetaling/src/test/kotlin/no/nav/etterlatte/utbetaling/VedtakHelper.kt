@@ -41,6 +41,7 @@ fun vedtak(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
         ),
     saktype: SakType = SakType.BARNEPENSJON,
+    virkningstidspunkt: YearMonth? = null,
 ) = VedtakDto(
     id = vedtakId,
     behandlingId = behandling.id,
@@ -67,7 +68,7 @@ fun vedtak(
     innhold =
         VedtakInnholdDto.VedtakBehandlingDto(
             behandling = behandling,
-            virkningstidspunkt = YearMonth.of(2022, 1),
+            virkningstidspunkt = virkningstidspunkt ?: YearMonth.of(2022, 1),
             utbetalingsperioder = utbetalingsperioder,
         ),
 )

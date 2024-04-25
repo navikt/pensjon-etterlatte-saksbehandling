@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering.simulering
+package no.nav.etterlatte.utbetaling.simulering
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -11,7 +11,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
-import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
+import no.nav.etterlatte.utbetaling.BehandlingKlient
 
 internal fun Route.simuleringOsRoutes(
     service: SimuleringOsService,
@@ -19,9 +19,9 @@ internal fun Route.simuleringOsRoutes(
 ) {
     val logger = application.log
 
-    route("/api/vedtak/simulering/os") {
+    route("/api/utbetaling") {
         route("{$BEHANDLINGID_CALL_PARAMETER}") {
-            post {
+            post("/simulering") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                     logger.info("Foretar simulering mot Oppdrag for behandling=$behandlingId")
                     val beregning = service.simuler(behandlingId, brukerTokenInfo).simulering

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering.simulering
+package no.nav.etterlatte.utbetaling.simulering
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -34,7 +34,7 @@ fun simuleringObjectMapper(): ObjectMapper =
 class SimuleringOsKlient(config: Config, private val client: HttpClient, private val objectMapper: ObjectMapper) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    private val url = config.getString("etterlatteproxy.resource.url")
+    private val url = config.getString("etterlatteproxy.url")
 
     suspend fun simuler(request: SimulerBeregningRequest): SimulerBeregningResponse {
         logger.info("Kaller simuleringstjeneste i Oppdrag (via proxy)")
@@ -43,7 +43,7 @@ class SimuleringOsKlient(config: Config, private val client: HttpClient, private
             client.post("$url/simuleringoppdrag/simulerberegning") {
                 contentType(ContentType.Application.Json)
                 setBody(
-                    RequestWrapper().apply {
+                    no.nav.etterlatte.utbetaling.simulering.RequestWrapper().apply {
                         this.request = request
                     },
                 )

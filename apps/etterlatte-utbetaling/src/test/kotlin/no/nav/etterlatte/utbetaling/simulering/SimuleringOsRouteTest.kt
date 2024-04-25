@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering.simulering
+package no.nav.etterlatte.utbetaling.simulering
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -14,18 +14,17 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.toUUID30
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
-import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
-import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
-import no.nav.etterlatte.vedtaksvurdering.vedtak
+import no.nav.etterlatte.utbetaling.BehandlingKlient
+import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
+import no.nav.etterlatte.utbetaling.vedtak
 import no.nav.security.mock.oauth2.MockOAuth2Server
+import no.nav.system.os.entiteter.beregningskjema.Beregning
 import no.nav.system.os.entiteter.infomelding.Infomelding
 import no.nav.system.os.entiteter.typer.simpletypes.FradragTillegg
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningRequest
@@ -45,14 +44,12 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SimuleringOsRouteTest {
     private val server = MockOAuth2Server()
-    private val vedtaksvurderingService: VedtaksvurderingService = mockk()
-    private val vedtaksbehandlingService: VedtakBehandlingService = mockk()
+    private val vedtaksvurderingKlient: VedtaksvurderingKlient = mockk()
     private val simuleringOsKlient: SimuleringOsKlient = mockk()
     private val behandlingKlient: BehandlingKlient = mockk()
     private val simuleringOsService: SimuleringOsService =
         SimuleringOsService(
-            vedtaksvurderingService,
-            vedtaksbehandlingService,
+            vedtaksvurderingKlient,
             simuleringOsKlient,
         )
 
@@ -90,19 +87,21 @@ class SimuleringOsRouteTest {
             )
         val vedtak =
             vedtak(
-                virkningstidspunkt = of(2024, FEBRUARY),
+                vedtakId = 1,
+                saktype = SakType.BARNEPENSJON,
                 sakId = 1000223L,
-                status = VedtakStatus.OPPRETTET,
-                revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
+                ident = SOEKER_FOEDSELSNUMMER.value,
+                virkningstidspunkt = of(2024, FEBRUARY),
                 utbetalingsperioder = listOf(utbetalingsperiodeFeb2024, utbetalingsperiodeMai2024),
             )
 
-        coEvery { vedtaksvurderingService.hentVedtakMedBehandlingId(behandlingId) } returns vedtak
+        coEvery { vedtaksvurderingKlient.hentVedtak(behandlingId, any()) } returns vedtak
         coEvery {
             behandlingKlient.harTilgangTilBehandling(behandlingId, true, bruker = any())
         } returns true
         coEvery { simuleringOsKlient.simuler(any()) } returns
             SimulerBeregningResponse().apply {
+                simulering = Beregning()
                 infomelding =
                     Infomelding().apply {
                         beskrMelding = "Simulering OK"
@@ -115,7 +114,7 @@ class SimuleringOsRouteTest {
             }
 
             val response =
-                client.post("/api/vedtak/simulering/os/$behandlingId") {
+                client.post("/api/utbetaling/$behandlingId/simulering") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
             response.status shouldBe HttpStatusCode.OK
@@ -137,7 +136,7 @@ class SimuleringOsRouteTest {
                 oppdragslinje.forEach {
                     it.vedtakId shouldBe vedtak.id.toString()
                     it.henvisning shouldBe vedtak.behandlingId.toUUID30().value
-                    it.utbetalesTilId shouldBe vedtak.soeker.value
+                    it.utbetalesTilId shouldBe vedtak.sak.ident
                     it.saksbehId shouldBe "Z991122"
                     it.kodeEndringLinje shouldBe "NY"
                     it.kodeKlassifik shouldBe "BARNEPENSJON-OPTP"

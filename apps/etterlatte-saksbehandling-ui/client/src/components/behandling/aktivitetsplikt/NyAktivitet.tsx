@@ -12,7 +12,7 @@ import styled from 'styled-components'
 import { AktivitetspliktType, IAktivitet, IOpprettAktivitet } from '~shared/types/Aktivitetsplikt'
 import { opprettAktivitet } from '~shared/api/aktivitetsplikt'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
-import { typeTilTekst } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
+import { mapAktivitetstypeProps } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 
 interface AktivitetDefaultValue {
   type: AktivitetspliktType | ''
@@ -100,7 +100,7 @@ export const NyAktivitet = ({
                 <option value="">Velg aktivitet</option>
                 {Object.keys(AktivitetspliktType).map((type, index) => (
                   <option key={index} value={type}>
-                    {typeTilTekst(type as AktivitetspliktType)}
+                    {mapAktivitetstypeProps(type as AktivitetspliktType).beskrivelse}
                   </option>
                 ))}
               </Select>

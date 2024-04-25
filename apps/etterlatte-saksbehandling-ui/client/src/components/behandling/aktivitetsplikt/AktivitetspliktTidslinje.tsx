@@ -1,4 +1,4 @@
-import { PiggybankIcon } from '@navikt/aksel-icons'
+import { Buildings2Icon, HatSchoolIcon, PencilIcon, PersonIcon, RulerIcon } from '@navikt/aksel-icons'
 import { Timeline } from '@navikt/ds-react'
 import { hentAktiviteter } from '~shared/api/aktivitetsplikt'
 import { formaterDato, formaterDatoMedTidspunkt } from '~utils/formattering'
@@ -41,39 +41,43 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
         <Timeline.Pin date={tolvMndEtterDoedsfall}>
           <p>12 måneder etter dødsfall: {formaterDato(tolvMndEtterDoedsfall)}</p>
         </Timeline.Pin>
-        {aktivitetsTyper.map((aktivitetType) => (
-          <Timeline.Row key={`row-${aktivitetType}`} label={typeTilTekst(aktivitetType)}>
-            {aktiviteter
-              .filter((aktivitet) => aktivitet.type === aktivitetType)
-              .map((aktivitet, i) => (
-                <Timeline.Period
-                  key={aktivitetType + i}
-                  start={new Date(aktivitet.fom)}
-                  end={(aktivitet.tom && new Date(aktivitet.tom)) || addYears(doedsdato, 3)}
-                  status="success"
-                  icon={<PiggybankIcon aria-hidden />}
-                  statusLabel={typeTilTekst(aktivitet.type)}
-                >
-                  <p>
-                    <b>
-                      Fra {formaterDato(new Date(aktivitet.fom))}{' '}
-                      {aktivitet.tom && `til ${formaterDato(new Date(aktivitet.tom))}`}
-                    </b>
-                  </p>
-                  <p>{aktivitet.beskrivelse}</p>
-                  <i>
-                    Lagt til {formaterDatoMedTidspunkt(new Date(aktivitet.opprettet.tidspunkt))} av{' '}
-                    {aktivitet.opprettet.ident}
-                  </i>
-                  <br />
-                  <i>
-                    Sist endret {formaterDatoMedTidspunkt(new Date(aktivitet.endret.tidspunkt))} av{' '}
-                    {aktivitet.endret.ident}
-                  </i>
-                </Timeline.Period>
-              ))}
-          </Timeline.Row>
-        ))}
+        {aktivitetsTyper.map((aktivitetType) => {
+          const aktivitetstypeProps = mapAktivitetstypeProps(aktivitetType)
+
+          return (
+            <Timeline.Row key={`row-${aktivitetType}`} label={aktivitetstypeProps.beskrivelse}>
+              {aktiviteter
+                .filter((aktivitet) => aktivitet.type === aktivitetType)
+                .map((aktivitet, i) => (
+                  <Timeline.Period
+                    key={aktivitetType + i}
+                    start={new Date(aktivitet.fom)}
+                    end={(aktivitet.tom && new Date(aktivitet.tom)) || addYears(doedsdato, 3)}
+                    status={aktivitetstypeProps.status}
+                    icon={aktivitetstypeProps.ikon}
+                    statusLabel={aktivitetstypeProps.beskrivelse}
+                  >
+                    <p>
+                      <b>
+                        Fra {formaterDato(new Date(aktivitet.fom))}{' '}
+                        {aktivitet.tom && `til ${formaterDato(new Date(aktivitet.tom))}`}
+                      </b>
+                    </p>
+                    <p>{aktivitet.beskrivelse}</p>
+                    <i>
+                      Lagt til {formaterDatoMedTidspunkt(new Date(aktivitet.opprettet.tidspunkt))} av{' '}
+                      {aktivitet.opprettet.ident}
+                    </i>
+                    <br />
+                    <i>
+                      Sist endret {formaterDatoMedTidspunkt(new Date(aktivitet.endret.tidspunkt))} av{' '}
+                      {aktivitet.endret.ident}
+                    </i>
+                  </Timeline.Period>
+                ))}
+            </Timeline.Row>
+          )
+        })}
       </Timeline>
 
       <NyAktivitet behandling={behandling} oppdaterAktiviteter={setAktiviteter} />
@@ -86,17 +90,43 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
   )
 }
 
-export const typeTilTekst = (type: AktivitetspliktType) => {
+interface AktivitetstypeProps {
+  beskrivelse: string
+  ikon: JSX.Element
+  status: 'success' | 'warning' | 'danger' | 'info' | 'neutral'
+}
+
+export const mapAktivitetstypeProps = (type: AktivitetspliktType): AktivitetstypeProps => {
   switch (type) {
     case AktivitetspliktType.ARBEIDSTAKER:
-      return 'Arbeidstaker'
+      return {
+        beskrivelse: 'Arbeidstaker',
+        ikon: <PersonIcon aria-hidden />,
+        status: 'success',
+      }
     case AktivitetspliktType.SELVSTENDIG_NAERINGSDRIVENDE:
-      return 'Selvstendig næringsdrivende'
+      return {
+        beskrivelse: 'Selvstendig næringsdrivende',
+        ikon: <RulerIcon aria-hidden />,
+        status: 'info',
+      }
     case AktivitetspliktType.ETABLERER_VIRKSOMHET:
-      return 'Etablerer virksomhet'
+      return {
+        beskrivelse: 'Etablerer virksomhet',
+        ikon: <Buildings2Icon aria-hidden />,
+        status: 'danger',
+      }
     case AktivitetspliktType.ARBEIDSSOEKER:
-      return 'Arbeidssøker'
+      return {
+        beskrivelse: 'Arbeidssøker',
+        ikon: <PencilIcon aria-hidden />,
+        status: 'warning',
+      }
     case AktivitetspliktType.UTDANNING:
-      return 'Utdanning'
+      return {
+        beskrivelse: 'Utdanning',
+        ikon: <HatSchoolIcon aria-hidden />,
+        status: 'neutral',
+      }
   }
 }

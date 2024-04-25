@@ -10,14 +10,18 @@ class VedtaksvurderingService(private val klient: DownstreamResourceClient, priv
     suspend fun fattVedtak(
         sakId: Long,
         behandlingId: UUID,
-    ) = klient.post(Resource(clientId, "$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis"), Systembruker.testdata) {
-        MigreringKjoringVariant.MED_PAUSE
-    }
+    ) = klient.post(
+        Resource(clientId, "$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis"),
+        Systembruker.testdata,
+        MigreringKjoringVariant.MED_PAUSE,
+    )
 
     suspend fun attesterOgIverksettVedtak(
         sakId: Long,
         behandlingId: UUID,
-    ) = klient.post(Resource(clientId, "$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis"), Systembruker.testdata) {
-        MigreringKjoringVariant.FORTSETT_ETTER_PAUSE
-    }
+    ) = klient.post(
+        Resource(clientId, "$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis"),
+        Systembruker.testdata,
+        MigreringKjoringVariant.FORTSETT_ETTER_PAUSE,
+    )
 }

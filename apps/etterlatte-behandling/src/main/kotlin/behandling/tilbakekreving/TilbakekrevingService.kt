@@ -273,7 +273,7 @@ class TilbakekrevingService(
             sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
 
             if (tilbakekreving.sendeBrev) {
-                logger.info("Sender vedtaksbrev for tilbakekreving=$tilbakekrevingId")
+                logger.info("Ferdigstiller vedtaksbrev for tilbakekreving=$tilbakekrevingId")
                 runBlocking { brevApiKlient.ferdigstillVedtaksbrev(tilbakekrevingId, tilbakekreving.sak.id, saksbehandler) }
             } else {
                 logger.info("Skal ikke sende vedtaksbrev for tilbakekreving=$tilbakekrevingId")

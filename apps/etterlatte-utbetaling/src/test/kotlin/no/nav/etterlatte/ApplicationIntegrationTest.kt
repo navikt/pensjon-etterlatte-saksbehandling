@@ -64,7 +64,7 @@ class ApplicationIntegrationTest {
                 konsistensavstemmingOMSEnabled = false,
             )
 
-        ApplicationContext(applicationProperties, rapidsConnection, jmsConnectionFactory = connectionFactory).also {
+        ApplicationContext(System.getenv(), applicationProperties, rapidsConnection, jmsConnectionFactory = connectionFactory).also {
             rapidApplication(it).start()
         }
     }

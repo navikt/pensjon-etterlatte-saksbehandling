@@ -64,6 +64,7 @@ import no.nav.etterlatte.libs.ktor.ktor.clientCredential
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.FerdigstillJournalfoerOgDistribuerBrev
@@ -215,7 +216,9 @@ class ApplicationBuilder {
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 
     private val rapidsConnection: RapidsConnection =
-        RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
+        RapidApplication.Builder(
+            RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
+        )
             .withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker)

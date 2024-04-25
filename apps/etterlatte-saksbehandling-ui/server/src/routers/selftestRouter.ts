@@ -26,8 +26,16 @@ selftestRouter.get('/', express.json(), async (req, res) => {
         return pingresult
       })
     )
-    .then((all) => {
-      res.json(all)
+    .then((allchecks) => {
+      const aggregateResult = allchecks.filter((res) => res.result == ServiceStatus.DOWN)
+      const selfTestReport = {
+        application: 'etterlatte-saksbehandling',
+        timestamp: new Date().toISOString(),
+        aggregateResult: aggregateResult,
+        checks: allchecks,
+      }
+
+      res.json(selfTestReport)
     })
     .catch((err) => res.status(500).send(err))
     .finally(() => {

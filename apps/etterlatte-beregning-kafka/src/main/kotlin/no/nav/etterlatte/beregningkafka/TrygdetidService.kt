@@ -15,7 +15,7 @@ class TrygdetidService(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
     ) = runBlocking {
-        trygdetidApp.post("$url/api/trygdetid/$behandlingId/kopier/$forrigeBehandlingId") {
+        trygdetidApp.post("$url/api/trygdetid_v2/$behandlingId/kopier/$forrigeBehandlingId") {
             contentType(ContentType.Application.Json)
         }
     }

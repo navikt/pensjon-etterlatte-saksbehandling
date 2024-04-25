@@ -126,47 +126,44 @@ internal fun Route.behandlingRoutes(
 
         post("/virkningstidspunkt") {
             kunSkrivetilgang {
-                hentNavidentFraToken { navIdent ->
-                    logger.debug("Prøver å fastsette virkningstidspunkt")
-                    val body = call.receive<VirkningstidspunktRequest>()
+                logger.debug("Prøver å fastsette virkningstidspunkt")
+                val body = call.receive<VirkningstidspunktRequest>()
 
-                    val erGyldigVirkningstidspunkt =
+                val erGyldigVirkningstidspunkt =
+                    inTransaction {
+                        runBlocking {
+                            behandlingService.erGyldigVirkningstidspunkt(
+                                behandlingId,
+                                brukerTokenInfo,
+                                body,
+                            )
+                        }
+                    }
+
+                if (!erGyldigVirkningstidspunkt) {
+                    return@post call.respond(HttpStatusCode.BadRequest, "Ugyldig virkningstidspunkt")
+                }
+                try {
+                    val virkningstidspunkt =
                         inTransaction {
                             runBlocking {
-                                behandlingService.erGyldigVirkningstidspunkt(
+                                behandlingService.oppdaterVirkningstidspunkt(
                                     behandlingId,
+                                    body.dato,
                                     brukerTokenInfo,
-                                    body,
+                                    body.begrunnelse!!,
+                                    kravdato = body.kravdato,
                                 )
                             }
                         }
 
-                    if (!erGyldigVirkningstidspunkt) {
-                        return@post call.respond(HttpStatusCode.BadRequest, "Ugyldig virkningstidspunkt")
-                    }
-                    try {
-                        val virkningstidspunkt =
-                            inTransaction {
-                                runBlocking {
-                                    behandlingService.oppdaterVirkningstidspunkt(
-                                        behandlingId,
-                                        body.dato,
-                                        navIdent,
-                                        brukerTokenInfo,
-                                        body.begrunnelse!!,
-                                        kravdato = body.kravdato,
-                                    )
-                                }
-                            }
-
-                        call.respondText(
-                            contentType = ContentType.Application.Json,
-                            status = HttpStatusCode.OK,
-                            text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson(),
-                        )
-                    } catch (e: TilstandException.UgyldigTilstand) {
-                        call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
-                    }
+                    call.respondText(
+                        contentType = ContentType.Application.Json,
+                        status = HttpStatusCode.OK,
+                        text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson(),
+                    )
+                } catch (e: TilstandException.UgyldigTilstand) {
+                    call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                 }
             }
         }

@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -358,7 +359,12 @@ fun behandling(
     innsender = "Sss",
     soeker = "soeker",
     soesken = null,
-    virkningstidspunkt = Virkningstidspunkt.create(YearMonth.now(), "ident", "begrunnelse"),
+    virkningstidspunkt =
+        Virkningstidspunkt.create(
+            YearMonth.now(),
+            "begrunnelse",
+            saksbehandler = Grunnlagsopplysning.Saksbehandler.create("ident"),
+        ),
     enhet = Enheter.defaultEnhet.enhetNr,
     revurderingsaarsak = null,
     revurderingInfo = null,

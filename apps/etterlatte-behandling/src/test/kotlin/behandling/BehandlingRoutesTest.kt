@@ -315,7 +315,7 @@ internal class BehandlingRoutesTest {
             behandlingService.oppdaterVirkningstidspunkt(
                 behandlingId,
                 parsetVirkningstidspunkt,
-                NAV_IDENT,
+                any(),
                 any(),
                 bodyBegrunnelse,
             )

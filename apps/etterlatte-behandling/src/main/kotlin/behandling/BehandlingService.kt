@@ -43,6 +43,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
@@ -100,7 +101,6 @@ interface BehandlingService {
     suspend fun oppdaterVirkningstidspunkt(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
-        ident: String,
         brukerTokenInfo: BrukerTokenInfo,
         begrunnelse: String,
         kravdato: LocalDate? = null,
@@ -516,7 +516,6 @@ internal class BehandlingServiceImpl(
     override suspend fun oppdaterVirkningstidspunkt(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
-        ident: String,
         brukerTokenInfo: BrukerTokenInfo,
         begrunnelse: String,
         kravdato: LocalDate?,
@@ -527,7 +526,17 @@ internal class BehandlingServiceImpl(
                 throw RuntimeException("Fant ikke behandling")
             }
 
-        val virkningstidspunktData = Virkningstidspunkt.create(virkningstidspunkt, ident, begrunnelse, kravdato)
+        val virkningstidspunktData =
+            Virkningstidspunkt.create(
+                virkningstidspunkt,
+                begrunnelse,
+                kravdato,
+                if (brukerTokenInfo is Saksbehandler) {
+                    Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident)
+                } else {
+                    Grunnlagsopplysning.Gjenny.create(brukerTokenInfo.ident())
+                },
+            )
         try {
             behandling.oppdaterVirkningstidspunkt(virkningstidspunktData)
                 .also {

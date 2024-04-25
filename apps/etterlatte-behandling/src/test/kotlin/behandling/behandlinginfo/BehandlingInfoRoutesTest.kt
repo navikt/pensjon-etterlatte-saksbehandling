@@ -188,7 +188,11 @@ internal class BehandlingInfoRoutesTest {
             every { status } returns BehandlingStatus.BEREGNET
             every { revurderingsaarsak() } returns null
             every { virkningstidspunkt } returns
-                Virkningstidspunkt.create(YearMonth.of(2023, 1), "ident", "begrunnelse")
+                Virkningstidspunkt.create(
+                    YearMonth.of(2023, 1),
+                    "begrunnelse",
+                    saksbehandler = Grunnlagsopplysning.Saksbehandler.create("ident"),
+                )
         }
 
     private fun brevutfall(behandlingId: UUID) =

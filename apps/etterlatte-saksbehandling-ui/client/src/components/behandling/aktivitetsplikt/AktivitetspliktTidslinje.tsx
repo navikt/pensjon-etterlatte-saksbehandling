@@ -1,11 +1,11 @@
 import { Buildings2Icon, HatSchoolIcon, PencilIcon, PersonIcon, RulerIcon } from '@navikt/aksel-icons'
-import { Timeline } from '@navikt/ds-react'
+import { Alert, Timeline } from '@navikt/ds-react'
 import { hentAktiviteter } from '~shared/api/aktivitetsplikt'
 import { formaterDato, formaterDatoMedTidspunkt } from '~utils/formattering'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears } from 'date-fns'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { AktivitetspliktType, IAktivitet } from '~shared/types/Aktivitetsplikt'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { NyAktivitet } from '~components/behandling/aktivitetsplikt/NyAktivitet'
@@ -22,63 +22,73 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
 
   useEffect(() => {
     hent({ behandlingId: behandling.id }, (aktiviteter) => {
-      setAktivitetsTypeProps([...new Set(aktiviteter.map((a) => a.type))].map(mapAktivitetstypeProps))
-      setAktiviteter(aktiviteter)
+      oppdaterAktiviteter(aktiviteter)
     })
   }, [])
 
+  const oppdaterAktiviteter = (aktiviteter: IAktivitet[]) => {
+    setAktivitetsTypeProps([...new Set(aktiviteter.map((a) => a.type))].map(mapAktivitetstypeProps))
+    setAktiviteter(aktiviteter)
+  }
+
   return (
     <TidslinjeWrapper className="min-w-[800px]">
-      <Timeline startDate={doedsdato} endDate={addYears(doedsdato, 3)}>
-        <Timeline.Pin date={doedsdato}>
-          <p>Dødsdato: {formaterDato(doedsdato)}</p>
-        </Timeline.Pin>
-        <Timeline.Pin date={new Date()}>
-          <p>Dagens dato: {formaterDato(new Date())}</p>
-        </Timeline.Pin>
-        <Timeline.Pin date={seksMndEtterDoedsfall}>
-          <p>6 måneder etter dødsfall: {formaterDato(seksMndEtterDoedsfall)}</p>
-        </Timeline.Pin>
-        <Timeline.Pin date={tolvMndEtterDoedsfall}>
-          <p>12 måneder etter dødsfall: {formaterDato(tolvMndEtterDoedsfall)}</p>
-        </Timeline.Pin>
+      {aktiviteter.length === 0 ? (
+        <Alert variant="info" inline>
+          Ingen aktiviteter er registrert.
+        </Alert>
+      ) : (
+        <Timeline startDate={doedsdato} endDate={addYears(doedsdato, 3)}>
+          <Timeline.Pin date={doedsdato}>
+            <p>Dødsdato: {formaterDato(doedsdato)}</p>
+          </Timeline.Pin>
+          <Timeline.Pin date={new Date()}>
+            <p>Dagens dato: {formaterDato(new Date())}</p>
+          </Timeline.Pin>
+          <Timeline.Pin date={seksMndEtterDoedsfall}>
+            <p>6 måneder etter dødsfall: {formaterDato(seksMndEtterDoedsfall)}</p>
+          </Timeline.Pin>
+          <Timeline.Pin date={tolvMndEtterDoedsfall}>
+            <p>12 måneder etter dødsfall: {formaterDato(tolvMndEtterDoedsfall)}</p>
+          </Timeline.Pin>
 
-        {aktivitetsTypeProps.map((props) => (
-          <Timeline.Row key={props.type} label={props.beskrivelse}>
-            {aktiviteter
-              .filter((aktivitet) => aktivitet.type === props.type)
-              .map((aktivitet, i) => (
-                <Timeline.Period
-                  key={props.type + i}
-                  start={new Date(aktivitet.fom)}
-                  end={(aktivitet.tom && new Date(aktivitet.tom)) || addYears(doedsdato, 3)}
-                  status={props.status}
-                  icon={props.ikon}
-                  statusLabel={props.beskrivelse}
-                >
-                  <p>
-                    <b>
-                      Fra {formaterDato(new Date(aktivitet.fom))}{' '}
-                      {aktivitet.tom && `til ${formaterDato(new Date(aktivitet.tom))}`}
-                    </b>
-                  </p>
-                  <p>{aktivitet.beskrivelse}</p>
-                  <i>
-                    Lagt til {formaterDatoMedTidspunkt(new Date(aktivitet.opprettet.tidspunkt))} av{' '}
-                    {aktivitet.opprettet.ident}
-                  </i>
-                  <br />
-                  <i>
-                    Sist endret {formaterDatoMedTidspunkt(new Date(aktivitet.endret.tidspunkt))} av{' '}
-                    {aktivitet.endret.ident}
-                  </i>
-                </Timeline.Period>
-              ))}
-          </Timeline.Row>
-        ))}
-      </Timeline>
+          {aktivitetsTypeProps.map((props) => (
+            <Timeline.Row key={props.type} label={props.beskrivelse}>
+              {aktiviteter
+                .filter((aktivitet) => aktivitet.type === props.type)
+                .map((aktivitet, i) => (
+                  <Timeline.Period
+                    key={props.type + i}
+                    start={new Date(aktivitet.fom)}
+                    end={(aktivitet.tom && new Date(aktivitet.tom)) || addYears(doedsdato, 3)}
+                    status={props.status}
+                    icon={props.ikon}
+                    statusLabel={props.beskrivelse}
+                  >
+                    <p>
+                      <b>
+                        Fra {formaterDato(new Date(aktivitet.fom))}{' '}
+                        {aktivitet.tom && `til ${formaterDato(new Date(aktivitet.tom))}`}
+                      </b>
+                    </p>
+                    <p>{aktivitet.beskrivelse}</p>
+                    <i>
+                      Lagt til {formaterDatoMedTidspunkt(new Date(aktivitet.opprettet.tidspunkt))} av{' '}
+                      {aktivitet.opprettet.ident}
+                    </i>
+                    <br />
+                    <i>
+                      Sist endret {formaterDatoMedTidspunkt(new Date(aktivitet.endret.tidspunkt))} av{' '}
+                      {aktivitet.endret.ident}
+                    </i>
+                  </Timeline.Period>
+                ))}
+            </Timeline.Row>
+          ))}
+        </Timeline>
+      )}
 
-      <NyAktivitet behandling={behandling} oppdaterAktiviteter={setAktiviteter} />
+      <NyAktivitet behandling={behandling} oppdaterAktiviteter={oppdaterAktiviteter} />
 
       {isFailureHandler({
         errorMessage: 'En feil oppsto ved henting av aktiviteter',
@@ -137,7 +147,4 @@ export const mapAktivitetstypeProps = (type: AktivitetspliktType): Aktivitetstyp
 
 const TidslinjeWrapper = styled.div`
   margin-bottom: 50px;
-  .navds-timeline__pin-button {
-    margin-bottom: 15px;
-  }
 `

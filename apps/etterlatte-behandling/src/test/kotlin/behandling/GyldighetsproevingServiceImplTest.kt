@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.fixedNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.nyKontekstMedBruker
@@ -158,8 +159,11 @@ internal class GyldighetsproevingServiceImplTest {
         val resultat =
             behandlingsService.lagreGyldighetsproeving(
                 id,
-                "saksbehandler",
                 JaNeiMedBegrunnelse(JaNei.JA, "begrunnelse"),
+                Grunnlagsopplysning.Saksbehandler(
+                    "saksbehandler",
+                    Tidspunkt.from(norskKlokke()),
+                ),
             )
 
         assertEquals(forventetResultat, resultat)

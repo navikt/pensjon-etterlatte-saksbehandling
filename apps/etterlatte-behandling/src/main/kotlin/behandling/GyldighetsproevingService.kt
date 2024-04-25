@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.ManuellVurdering
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import org.slf4j.LoggerFactory
@@ -20,8 +19,8 @@ import java.util.UUID
 interface GyldighetsproevingService {
     fun lagreGyldighetsproeving(
         behandlingId: UUID,
-        navIdent: String,
         svar: JaNeiMedBegrunnelse,
+        kilde: Grunnlagsopplysning.Saksbehandler,
     ): GyldighetsResultat?
 
     fun lagreGyldighetsproeving(
@@ -41,8 +40,8 @@ class GyldighetsproevingServiceImpl(
 
     override fun lagreGyldighetsproeving(
         behandlingId: UUID,
-        navIdent: String,
         svar: JaNeiMedBegrunnelse,
+        kilde: Grunnlagsopplysning.Saksbehandler,
     ): GyldighetsResultat? {
         return hentFoerstegangsbehandling(behandlingId)?.let { behandling ->
             val resultat =
@@ -58,11 +57,7 @@ class GyldighetsproevingServiceImpl(
                                 basertPaaOpplysninger =
                                     ManuellVurdering(
                                         begrunnelse = svar.begrunnelse,
-                                        kilde =
-                                            Grunnlagsopplysning.Saksbehandler(
-                                                navIdent,
-                                                Tidspunkt.from(klokke.norskKlokke()),
-                                            ),
+                                        kilde = kilde,
                                     ),
                             ),
                         ),

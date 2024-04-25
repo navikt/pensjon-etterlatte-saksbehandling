@@ -29,6 +29,8 @@ import no.nav.etterlatte.libs.common.behandling.SendBrev
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
@@ -67,21 +69,26 @@ internal fun Route.behandlingRoutes(
 
         post("/gyldigfremsatt") {
             kunSkrivetilgang {
-                hentNavidentFraToken { navIdent ->
-                    val body = call.receive<JaNeiMedBegrunnelse>()
-                    when (
-                        val lagretGyldighetsResultat =
-                            inTransaction {
-                                gyldighetsproevingService.lagreGyldighetsproeving(
-                                    behandlingId,
-                                    navIdent,
-                                    body,
-                                )
-                            }
-                    ) {
-                        null -> call.respond(HttpStatusCode.NotFound)
-                        else -> call.respond(HttpStatusCode.OK, lagretGyldighetsResultat)
-                    }
+                val body = call.receive<JaNeiMedBegrunnelse>()
+                when (
+                    val lagretGyldighetsResultat =
+                        inTransaction {
+                            gyldighetsproevingService.lagreGyldighetsproeving(
+                                behandlingId,
+                                body,
+                                if (brukerTokenInfo is Saksbehandler) {
+                                    Grunnlagsopplysning.Saksbehandler(
+                                        brukerTokenInfo.ident(),
+                                        Tidspunkt.from(norskKlokke()),
+                                    )
+                                } else {
+                                    Grunnlagsopplysning.Gjenny.create(brukerTokenInfo.ident())
+                                },
+                            )
+                        }
+                ) {
+                    null -> call.respond(HttpStatusCode.NotFound)
+                    else -> call.respond(HttpStatusCode.OK, lagretGyldighetsResultat)
                 }
             }
         }

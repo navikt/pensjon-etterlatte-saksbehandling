@@ -38,9 +38,9 @@ class AktivitetspliktService(
             aktivitetspliktDao.hentAktiviteter(behandlingId)
         }
 
-    fun opprettAktivitet(
+    fun upsertAktivitet(
         behandlingId: UUID,
-        aktivitet: OpprettAktivitetspliktAktivitet,
+        aktivitet: LagreAktivitetspliktAktivitet,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
@@ -60,7 +60,11 @@ class AktivitetspliktService(
 
         val kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
         inTransaction {
-            aktivitetspliktDao.opprettAktivitet(behandlingId, aktivitet, kilde)
+            if (aktivitet.id != null) {
+                aktivitetspliktDao.oppdaterAktivitet(behandlingId, aktivitet, kilde)
+            } else {
+                aktivitetspliktDao.opprettAktivitet(behandlingId, aktivitet, kilde)
+            }
         }
     }
 

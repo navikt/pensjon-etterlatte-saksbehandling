@@ -66,10 +66,10 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
 
             post {
                 kunSkrivetilgang {
-                    logger.info("Oppretter aktivitet for behandlingId=$behandlingId")
-                    val aktivitet = call.receive<OpprettAktivitetspliktAktivitet>()
+                    logger.info("Oppretter eller oppdaterer aktivitet for behandlingId=$behandlingId")
+                    val aktivitet = call.receive<LagreAktivitetspliktAktivitet>()
 
-                    aktivitetspliktService.opprettAktivitet(behandlingId, aktivitet, brukerTokenInfo)
+                    aktivitetspliktService.upsertAktivitet(behandlingId, aktivitet, brukerTokenInfo)
 
                     call.respond(aktivitetspliktService.hentAktiviteter(behandlingId))
                 }

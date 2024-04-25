@@ -24,34 +24,42 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
         )
 
     suspend fun settKommerBarnetTilGode(behandling: UUID) {
-        klient.post(Resource(clientId, "$url/api/behandling/$behandling/kommerbarnettilgode"), Systembruker.testdata) {
-            JaNeiMedBegrunnelse(
-                JaNei.JA,
-                "Automatisk behandla testsak",
-            )
-        }.mapBoth(
-            success = {},
-            failure = { throw it },
+        klient.post(
+            Resource(clientId, "$url/api/behandling/$behandling/kommerbarnettilgode"),
+            Systembruker.testdata,
+            postBody =
+                JaNeiMedBegrunnelse(
+                    JaNei.JA,
+                    "Automatisk behandla testsak",
+                ),
         )
+            .mapBoth(
+                success = {},
+                failure = { throw it },
+            )
     }
 
     suspend fun lagreGyldighetsproeving(behandling: UUID) {
-        klient.post(Resource(clientId, "$url/api/behandling/$behandling/gyldigfremsatt"), Systembruker.testdata) {
-            JaNeiMedBegrunnelse(JaNei.JA, "Automatisk behandla testsak")
-        }.mapBoth(
+        klient.post(
+            Resource(clientId, "$url/api/behandling/$behandling/gyldigfremsatt"),
+            Systembruker.testdata,
+            JaNeiMedBegrunnelse(JaNei.JA, "Automatisk behandla testsak"),
+        ).mapBoth(
             success = {},
             failure = { throw it },
         )
     }
 
     suspend fun lagreVirkningstidspunkt(behandling: UUID) {
-        klient.post(Resource(clientId, "$url/api/behandling/$behandling/virkningstidspunkt"), Systembruker.testdata) {
+        klient.post(
+            Resource(clientId, "$url/api/behandling/$behandling/virkningstidspunkt"),
+            Systembruker.testdata,
             VirkningstidspunktRequest(
                 _dato = Tidspunkt.now().toString(),
                 begrunnelse = "Automatisk behandla testsak",
                 kravdato = LocalDate.now(),
-            )
-        }
+            ),
+        )
     }
 
     suspend fun tildelSaksbehandler(

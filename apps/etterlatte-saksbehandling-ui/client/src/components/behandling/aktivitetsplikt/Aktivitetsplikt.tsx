@@ -19,6 +19,9 @@ import { usePersonopplysninger, usePersonopplysningerOmsAvdoede } from '~compone
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { formaterDato } from '~utils/formattering'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -35,6 +38,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
     innloggetSaksbehandler.skriveEnheter
   )
   const configContext = useContext(ConfigContext)
+  const visTidslinje = useFeatureEnabledMedDefault('aktivitetsplikt-tidslinje', false)
 
   const [beskrivelse, setBeskrivelse] = useState<string>('')
   const [aktivitetOppfolging, setAktivitetOppfolging] = useState<AktivitetspliktOppfolging>()
@@ -69,7 +73,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             Oppfølging av aktivitet
           </Heading>
           <BodyShort spacing>
-            <strong>Dødsdato: </strong> {avdoedesDoedsdato}
+            <strong>Dødsdato: </strong> {avdoedesDoedsdato && formaterDato(new Date(avdoedesDoedsdato))}
           </BodyShort>
         </HeadingWrapper>
       </ContentHeader>
@@ -84,6 +88,8 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           aktivitet etter 12 måneder. I visse tilfeller kan man ha rett på omstillingsstønad selv om aktivitetskravet
           ikke er oppfylt.
         </BodyLong>
+
+        {visTidslinje && <AktivitetspliktTidslinje behandling={behandling} doedsdato={new Date(avdoedesDoedsdato!!)} />}
 
         <Heading size="small" spacing>
           Beskriv etterlatte sin aktivitet idag
@@ -183,7 +189,6 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
 
 const AktivitetspliktWrapper = styled.div`
   padding: 0 4em;
-  max-width: 40em;
 `
 const SpacingWrapper = styled.div`
   margin-top: 1rem;

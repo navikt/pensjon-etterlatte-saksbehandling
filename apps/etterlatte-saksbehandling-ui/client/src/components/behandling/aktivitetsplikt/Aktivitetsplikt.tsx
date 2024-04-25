@@ -21,6 +21,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { formaterDato } from '~utils/formattering'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -72,7 +73,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             Oppfølging av aktivitet
           </Heading>
           <BodyShort spacing>
-            <strong>Dødsdato: </strong> {avdoedesDoedsdato}
+            <strong>Dødsdato: </strong> {avdoedesDoedsdato && formaterDato(new Date(avdoedesDoedsdato))}
           </BodyShort>
         </HeadingWrapper>
       </ContentHeader>

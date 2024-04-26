@@ -47,7 +47,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
     locale: 'nb',
     inputFormat: 'dd.MM.yyyy',
     onValidate: setDateError,
-    defaultSelected: defaultValue ? new Date(defaultValue) : undefined,
+    defaultSelected: defaultSelected(),
   } as UseDatepickerOptions)
 
   useEffect(() => {

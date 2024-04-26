@@ -24,7 +24,8 @@ import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import { UseFormSetValue } from 'react-hook-form/dist/types/form'
+import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
+import { useAppDispatch } from '~store/Store'
 
 const initialVurdering: TilbakekrevingVurdering = {
   aarsak: null,
@@ -59,11 +60,13 @@ export function TilbakekrevingVurderingSkjema({
   if (!behandling) {
     return
   }
+  const dispatch = useAppDispatch()
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
 
   const { register, handleSubmit, watch, control, getValues, setValue, formState, reset } =
     useForm<TilbakekrevingVurdering>({
       defaultValues: behandling.tilbakekreving.vurdering || initialVurdering,
+      shouldUnregister: true,
     })
 
   useEffect(() => {
@@ -76,40 +79,26 @@ export function TilbakekrevingVurderingSkjema({
       setValue('hjemmel', utledetHjemmel, { shouldDirty: false })
     }
 
-    setIkkeRelevanteFelterTilNull(
-      values,
-      setValue,
-      skalHaForhaandsvarsel(),
-      rettsligGrunnlagForVilkaarOppfyltEllerDelvisOppfylt(),
-      vilkaarOppfylt(),
-      beloepIBehold()
-    )
-
     if (formState.isDirty && Object.keys(formState.dirtyFields).length) {
       const delay = setTimeout(() => {
-        lagreVurdering({ vurdering: values, automatisk: true })
-      }, 3000)
+        lagreVurdering(values)
+      }, 2000)
 
       return () => clearTimeout(delay)
     }
-  }, [watch()])
+  }, [formState])
 
-  const lagreVurdering = ({ vurdering }: { vurdering: TilbakekrevingVurdering; automatisk: boolean }) => {
+  const lagreVurdering = (vurdering: TilbakekrevingVurdering) => {
     lagreVurderingRequest(
       {
         behandlingsId: behandling.id,
         vurdering: vurdering,
       },
       (lagretBehandling) => {
-        if (lagretBehandling.tilbakekreving.vurdering) {
-          reset(lagretBehandling.tilbakekreving.vurdering)
-        }
+        dispatch(addTilbakekreving(lagretBehandling))
+        reset(lagretBehandling.tilbakekreving.vurdering || initialVurdering)
       }
     )
-  }
-
-  const onManualSubmit = (vurdering: TilbakekrevingVurdering) => {
-    lagreVurdering({ vurdering: vurdering, automatisk: false })
   }
 
   const vilkaarOppfylt = () =>
@@ -168,7 +157,6 @@ export function TilbakekrevingVurderingSkjema({
             name="forhaandsvarselDato"
             label="Forhåndsvarsel dato"
             control={control}
-            defaultValue={getValues().forhaandsvarselDato ?? undefined}
             readOnly={!redigerbar}
           />
         )}
@@ -217,13 +205,7 @@ export function TilbakekrevingVurderingSkjema({
         />
         {watch().tilsvar?.tilsvar == JaNei.JA && (
           <>
-            <ControlledDatoVelger
-              name="tilsvar.dato"
-              label="Tilsvar dato"
-              control={control}
-              defaultValue={getValues().tilsvar?.dato ?? undefined}
-              readOnly={!redigerbar}
-            />
+            <ControlledDatoVelger name="tilsvar.dato" label="Tilsvar dato" control={control} readOnly={!redigerbar} />
 
             <Textarea {...register('tilsvar.beskrivelse')} label="Beskriv tilsvar" readOnly={!redigerbar} />
           </>
@@ -377,7 +359,7 @@ export function TilbakekrevingVurderingSkjema({
             <Button
               variant="primary"
               size="small"
-              onClick={handleSubmit(onManualSubmit)}
+              onClick={handleSubmit(lagreVurdering)}
               loading={isPending(lagreVurderingStatus)}
               style={{ maxWidth: '7.5em' }}
             >
@@ -392,66 +374,6 @@ export function TilbakekrevingVurderingSkjema({
       </VStack>
     </InnholdPadding>
   )
-}
-
-function setIkkeRelevanteFelterTilNull(
-  values: TilbakekrevingVurdering,
-  setValue: UseFormSetValue<TilbakekrevingVurdering>,
-  skalHaForhaandsvarsel: boolean,
-  rettsligGrunnlagForVilkaarOppfyltEllerDelvisOppfylt: boolean,
-  vilkaarOppfylt: boolean,
-  beloepIBehold: boolean
-) {
-  if (values.tilsvar?.tilsvar !== JaNei.JA) {
-    if (values.tilsvar?.dato !== null) setValue('tilsvar.dato', null, { shouldDirty: false })
-    if (values.tilsvar?.beskrivelse !== null) setValue('tilsvar.beskrivelse', null, { shouldDirty: false })
-  }
-  if (!skalHaForhaandsvarsel) {
-    if (values.forhaandsvarselDato !== null) setValue('forhaandsvarselDato', null, { shouldDirty: false })
-  }
-  if (!rettsligGrunnlagForVilkaarOppfyltEllerDelvisOppfylt) {
-    if (values.vurderesForPaatale != null) setValue('vurderesForPaatale', null, { shouldDirty: false })
-    if (values.vedtak != null) setValue('vedtak', null, { shouldDirty: false })
-    if (values.rentevurdering != null) setValue('rentevurdering', null, { shouldDirty: false })
-    if (values.foreldet != null) setValue('foreldet', null, { shouldDirty: false })
-    if (values.reduseringAvKravet != null) setValue('reduseringAvKravet', null, { shouldDirty: false })
-    if (values.beloepBehold?.behold != null) setValue('beloepBehold.behold', null, { shouldDirty: false })
-    if (values.beloepBehold?.beskrivelse != null) setValue('beloepBehold.beskrivelse', null, { shouldDirty: false })
-    if (values.vilkaarsresultat != null) setValue('vilkaarsresultat', null, { shouldDirty: false })
-    if (values.burdeBrukerForstaattEllerUaktsomtForaarsaket != null)
-      setValue('burdeBrukerForstaattEllerUaktsomtForaarsaket', null, { shouldDirty: false })
-    if (values.uaktsomtForaarsaketFeilutbetaling != null)
-      setValue('uaktsomtForaarsaketFeilutbetaling', null, { shouldDirty: false })
-    if (values.burdeBrukerForstaatt != null) setValue('burdeBrukerForstaatt', null, { shouldDirty: false })
-    if (values.objektivtVilkaarOppfylt != null) setValue('objektivtVilkaarOppfylt', null, { shouldDirty: false })
-  }
-  if (values.rettsligGrunnlag !== TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM) {
-    if (values.uaktsomtForaarsaketFeilutbetaling != null)
-      setValue('uaktsomtForaarsaketFeilutbetaling', null, { shouldDirty: false })
-    if (values.burdeBrukerForstaattEllerUaktsomtForaarsaket != null)
-      setValue('burdeBrukerForstaattEllerUaktsomtForaarsaket', null, { shouldDirty: false })
-  }
-  if (values.rettsligGrunnlag !== TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM) {
-    if (values.burdeBrukerForstaatt != null) setValue('burdeBrukerForstaatt', null, { shouldDirty: false })
-    if (values.burdeBrukerForstaattEllerUaktsomtForaarsaket != null)
-      setValue('burdeBrukerForstaattEllerUaktsomtForaarsaket', null, { shouldDirty: false })
-  }
-  if (values.rettsligGrunnlag !== TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM) {
-    if (values.burdeBrukerForstaatt != null) setValue('burdeBrukerForstaatt', null, { shouldDirty: false })
-    if (values.uaktsomtForaarsaketFeilutbetaling != null)
-      setValue('uaktsomtForaarsaketFeilutbetaling', null, { shouldDirty: false })
-  }
-  if (vilkaarOppfylt) {
-    if (values.beloepBehold?.behold != null) setValue('beloepBehold.behold', null, { shouldDirty: false })
-    if (values.beloepBehold?.beskrivelse != null) setValue('beloepBehold.beskrivelse', null, { shouldDirty: false })
-  }
-
-  if (!vilkaarOppfylt && !beloepIBehold) {
-    if (values.vurderesForPaatale != null) setValue('vurderesForPaatale', null, { shouldDirty: false })
-    if (values.rentevurdering != null) setValue('rentevurdering', null, { shouldDirty: false })
-    if (values.foreldet != null) setValue('foreldet', null, { shouldDirty: false })
-    if (values.reduseringAvKravet != null) setValue('reduseringAvKravet', null, { shouldDirty: false })
-  }
 }
 
 export function RadioGroupLegend({ label }: { label: string }) {

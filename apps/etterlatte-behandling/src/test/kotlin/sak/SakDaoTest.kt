@@ -76,7 +76,7 @@ internal class SakDaoTest(val dataSource: DataSource) {
             dataSource.connection.use {
                 it.prepareStatement(
                     """
-                    select * from sak;    
+                    select fnr, opprettet from sak;    
                     """.trimIndent(),
                 ).executeQuery().toList {
                     Pair(getString("fnr"), getTidspunktOrNull("opprettet"))
@@ -100,7 +100,7 @@ internal class SakDaoTest(val dataSource: DataSource) {
             dataSource.connection.use {
                 it.prepareStatement(
                     """
-                    select * from sak;    
+                    select fnr, opprettet from sak;    
                     """.trimIndent(),
                 ).executeQuery().toList {
                     Pair(getString("fnr"), getTidspunktOrNull("opprettet"))

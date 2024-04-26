@@ -28,11 +28,10 @@ class SanksjonService(
         val sanksjoner = sanksjonRepository.hentSanksjon(forrigeBehandlingId)
         if (sanksjoner != null) {
             sanksjoner.forEach {
-                sanksjonRepository.opprettSanksjon(
+                sanksjonRepository.opprettSanksjonFraKopi(
                     behandlingId,
                     it.sakId,
-                    brukerTokenInfo.ident(),
-                    it.toLagreSanksjon()
+                    it
                 )
             }
         }

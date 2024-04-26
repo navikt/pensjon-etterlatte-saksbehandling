@@ -56,6 +56,36 @@ class SanksjonRepository(private val dataSource: DataSource) {
         }
     }
 
+    fun opprettSanksjonFraKopi(
+        behandlingId: UUID,
+        sakId: Long,
+        sanksjon: Sanksjon,
+    ) {
+        dataSource.transaction { tx ->
+            queryOf(
+                statement =
+                    """
+                    INSERT INTO sanksjon(
+                        id, behandling_id, sak_id, fom, tom, opprettet, endret, beskrivelse
+                    ) VALUES (
+                        :id, :behandlingId, :sak_id, :fom, :tom, :opprettet, :endret, :beskrivelse
+                    )
+                    """.trimIndent(),
+                paramMap =
+                    mapOf(
+                        "id" to UUID.randomUUID(),
+                        "behandlingId" to behandlingId,
+                        "sak_id" to sakId,
+                        "fom" to sanksjon.fom,
+                        "tom" to sanksjon.tom,
+                        "opprettet" to sanksjon.opprettet.toJson(),
+                        "endret" to sanksjon.endret?.toJson(),
+                        "beskrivelse" to sanksjon.beskrivelse,
+                    ),
+            ).let { query -> tx.run(query.asUpdate) }
+        }
+    }
+
     fun oppdaterSanksjon(
         sanksjon: LagreSanksjon,
         saksbehandlerIdent: String,
@@ -123,13 +153,3 @@ data class LagreSanksjon(
     val tom: LocalDate?,
     val beskrivelse: String,
 )
-
-fun Sanksjon.toLagreSanksjon(): LagreSanksjon {
-    return LagreSanksjon(
-        id = this.id,
-        sakId = this.sakId,
-        fom = LocalDate.of(this.fom.year, this.fom.month, 1),
-        tom = this.tom?.let { LocalDate.of(it.year, it.month, 1) },
-        beskrivelse = this.beskrivelse,
-    )
-}

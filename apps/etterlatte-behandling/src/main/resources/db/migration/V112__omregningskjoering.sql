@@ -1,4 +1,4 @@
-CREATE TABLE kjoering
+CREATE TABLE omregningskjoering
 (
     id        UUID UNIQUE              NOT NULL DEFAULT gen_random_uuid(),
     tidspunkt TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,

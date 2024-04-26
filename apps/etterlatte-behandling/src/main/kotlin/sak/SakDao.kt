@@ -95,7 +95,7 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                 val statement =
                     prepareStatement(
                         """SELECT id, sakType, fnr, enhet from sak s 
-                    where not exists(select 1 from kjoering k where k.sak_id=s.id and k.kjoering='$kjoering')
+                    where not exists(select 1 from omregningskjoering k where k.sak_id=s.id and k.kjoering='$kjoering')
                     LIMIT $antall"""
                             .trimMargin(),
                     )

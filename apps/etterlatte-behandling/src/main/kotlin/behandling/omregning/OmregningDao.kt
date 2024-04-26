@@ -10,7 +10,7 @@ class OmregningDao(private val connection: ConnectionAutoclosing) {
                 val statement =
                     prepareStatement(
                         """
-                        INSERT INTO kjoering (kjoering, status, sak_id)
+                        INSERT INTO omregningskjoering (kjoering, status, sak_id)
                         VALUES (?, ?, ?)
                         """.trimIndent(),
                     )

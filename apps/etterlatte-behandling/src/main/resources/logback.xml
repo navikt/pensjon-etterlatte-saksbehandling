@@ -10,10 +10,11 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
     </appender>
 
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="${LOGBACK_APPENDER:-STDOUT_JSON}"/>
     </root>
 
+    <logger name="Route" level="DEBUG"/>
     <logger name="org.eclipse.jetty" level="INFO"/>
     <logger name="io.netty" level="INFO"/>
     <logger name="no.nav.etterlatte" level="DEBUG"/>

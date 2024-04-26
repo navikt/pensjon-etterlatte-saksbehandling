@@ -54,18 +54,17 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
   }, [fnr, sakResult])
 
   return (
-    <SakOversiktWrapper>
+    <>
       {mapResult(sakResult, {
         pending: <Spinner visible label="Henter sak og behandlinger" />,
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
         success: ({ sak, behandlinger }) => (
-          <>
+          <SpaceChildren direction="row">
+            <SakHeaderWrapper>
+              <SakOversiktHeader fnr={fnr} sak={sak} />
+            </SakHeaderWrapper>
             <Container>
               <SpaceChildren gap="2rem">
-                <SakOversiktHeader fnr={fnr} sak={sak} />
-
-                <HorisontaltSkille />
-
                 {mapResult(flyktningResult, {
                   success: (data) =>
                     !!data?.erFlyktning && (
@@ -130,18 +129,12 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 </SpaceChildren>
               </SpaceChildren>
             </Container>
-          </>
+          </SpaceChildren>
         ),
       })}
-    </SakOversiktWrapper>
+    </>
   )
 }
-
-const HendelseSidebar = styled.div`
-  width: 100%;
-  border-left: 1px solid var(--a-surface-active);
-  padding: 3em 2rem;
-`
 
 const HorisontaltSkille = styled.hr`
   border-color: var(--a-surface-active);
@@ -157,9 +150,10 @@ export const HeadingWrapper = styled.div`
   }
 `
 
-const SakOversiktWrapper = styled.div`
-  height: 100%;
-  width: 100%;
-  display: grid;
-  grid-template-columns: 67% 33%;
+const SakHeaderWrapper = styled.div`
+  padding: 2rem;
+  border-right: 1px solid var(--a-surface-active);
+  width: 25rem;
+  min-width: 20rem;
+  max-width: 30rem;
 `

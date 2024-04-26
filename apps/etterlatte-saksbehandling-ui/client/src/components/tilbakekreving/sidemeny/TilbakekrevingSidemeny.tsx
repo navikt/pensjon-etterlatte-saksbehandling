@@ -22,7 +22,7 @@ import { Info, Tekst } from '~components/behandling/attestering/styled'
 import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
-import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
+import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
 
@@ -70,7 +70,8 @@ export function TilbakekrevingSidemeny() {
       </Sidebar>
     )
   }
-  useSaksbehandlerPaaOppgaveUnderArbeidForReferanse({ referanse: tilbakekreving.id, sakId: tilbakekreving.sak.id })
+
+  useOppgaveUnderBehandling({ referanse: tilbakekreving.id })
 
   return (
     <CollapsibleSidebar collapsed={collapsed}>

@@ -11,13 +11,13 @@ import { tilbakekrevingReducer } from '~store/reducers/TilbakekrevingReducer'
 import { vedtakReducer } from '~store/reducers/VedtakReducer'
 import { sjekklisteReducer } from '~store/reducers/SjekklisteReducer'
 import { behandlingsidemenyReducer } from '~store/reducers/BehandlingSidemenyReducer'
-import { saksbehandlerGjeldendeOppgaveForBehandlingReducer } from '~store/reducers/SaksbehandlerGjeldendeOppgaveForBehandlingReducer'
+import { oppgaveReducer } from '~store/reducers/OppgaveReducer'
 import { personopplysningerReducer } from '~store/reducers/PersonopplysningerReducer'
 
 const reducer = {
   menuReducer: menuReducer,
   saksbehandlerReducer: saksbehandlerReducer,
-  saksbehandlerGjeldendeOppgaveReducer: saksbehandlerGjeldendeOppgaveForBehandlingReducer,
+  oppgaveReducer: oppgaveReducer,
   behandlingReducer: behandlingReducer,
   behandlingSidemenyReducer: behandlingsidemenyReducer,
   vedtakReducer: vedtakReducer,

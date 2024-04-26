@@ -27,7 +27,7 @@ import { updateSjekkliste, updateSjekklisteItem } from '~store/reducers/Sjekklis
 import { PencilIcon } from '@navikt/aksel-icons'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
-import { useSelectorSaksbehandlerGjeldendeOppgaveBehandling } from '~store/selectors/useSelectorSaksbehandlerGjeldendeOppgaveBehandling'
+import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -37,7 +37,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [redigerbar, setRedigerbar] = useState<boolean>(false)
   const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)
-  const saksbehandlerGjeldendeOppgave = useSelectorSaksbehandlerGjeldendeOppgaveBehandling()
+  const oppgave = useSelectorOppgaveUnderBehandling()
   const soeker = usePersonopplysninger()?.soeker?.opplysning
 
   const dispatch = useAppDispatch()
@@ -61,7 +61,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
   const fireOpppdater = useMemo(() => debounce(oppdaterSjekklisteApi, 1500), [])
 
   useEffect(() => {
-    const erSammeIdent = saksbehandlerGjeldendeOppgave === innloggetSaksbehandler.ident
+    const erSammeIdent = oppgave?.saksbehandler?.ident === innloggetSaksbehandler.ident
     setOppgaveErTildeltInnloggetBruker(erSammeIdent)
     setRedigerbar(
       behandlingErRedigerbar(behandling.status, behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter) &&

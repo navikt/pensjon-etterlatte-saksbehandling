@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.utbetaling.BehandlingKlient
 import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
+import no.nav.etterlatte.utbetaling.utbetalingRoutes
 import no.nav.etterlatte.utbetaling.vedtak
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.system.os.entiteter.beregningskjema.Beregning
@@ -110,7 +111,7 @@ class SimuleringOsRouteTest {
 
         testApplication {
             runServer(server) {
-                simuleringOsRoutes(simuleringOsService, behandlingKlient)
+                utbetalingRoutes(simuleringOsService, behandlingKlient)
             }
 
             val response =

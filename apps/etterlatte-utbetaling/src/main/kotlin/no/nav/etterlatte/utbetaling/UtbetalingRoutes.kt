@@ -1,4 +1,4 @@
-package no.nav.etterlatte.utbetaling.simulering
+package no.nav.etterlatte.utbetaling
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -11,9 +11,9 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
-import no.nav.etterlatte.utbetaling.BehandlingKlient
+import no.nav.etterlatte.utbetaling.simulering.SimuleringOsService
 
-internal fun Route.simuleringOsRoutes(
+internal fun Route.utbetalingRoutes(
     service: SimuleringOsService,
     behandlingKlient: BehandlingKlient,
 ) {

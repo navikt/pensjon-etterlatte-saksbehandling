@@ -26,11 +26,15 @@ export const SakOversiktHeader = ({ sak, fnr }: { sak: ISakMedUtlandstilknytning
     <SpaceChildren>
       <Heading size="medium">Saksnummer {sak.id}</Heading>
       <SpaceChildren>
-        <Tag variant={tagColors[sak.sakType]}>{formaterEnumTilLesbarString(sak.sakType)}</Tag>
+        <div>
+          <Tag variant={tagColors[sak.sakType]}>{formaterEnumTilLesbarString(sak.sakType)}</Tag>
+        </div>
         {!!sak.utlandstilknytning?.type && (
-          <Tag variant={tagColors[sak.utlandstilknytning?.type]}>
-            {formaterEnumTilLesbarString(sak.utlandstilknytning?.type)}
-          </Tag>
+          <div>
+            <Tag variant={tagColors[sak.utlandstilknytning?.type]}>
+              {formaterEnumTilLesbarString(sak.utlandstilknytning?.type)}
+            </Tag>
+          </div>
         )}
         <SakStatus sakId={sak.id} />
       </SpaceChildren>

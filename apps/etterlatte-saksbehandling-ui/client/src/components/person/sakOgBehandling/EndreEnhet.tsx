@@ -30,7 +30,7 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
   }
 
   return (
-    <>
+    <div>
       <Button
         size="small"
         variant="tertiary"
@@ -76,7 +76,7 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
           </ButtonGroup>
         </Modal.Body>
       </Modal>
-    </>
+    </div>
   )
 }
 

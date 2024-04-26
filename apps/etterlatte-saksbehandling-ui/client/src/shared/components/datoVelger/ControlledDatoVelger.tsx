@@ -1,8 +1,9 @@
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { DatePicker, DateValidationT, useDatepicker } from '@navikt/ds-react'
 import { UseDatepickerOptions } from '@navikt/ds-react/esm/date/hooks/useDatepicker'
 import { Control, FieldValues, Path, useController } from 'react-hook-form'
 import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
+import { isEqual } from 'date-fns'
 
 export const ControlledDatoVelger = <T extends FieldValues>({
   name,
@@ -39,7 +40,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
     },
   })
 
-  const { datepickerProps, inputProps } = useDatepicker({
+  const { datepickerProps, inputProps, setSelected, selectedDay } = useDatepicker({
     onDateChange: (date: Date) => {
       date && field.onChange(formatDateToLocaleDateOrEmptyString(date))
     },
@@ -48,6 +49,17 @@ export const ControlledDatoVelger = <T extends FieldValues>({
     onValidate: setDateError,
     defaultSelected: defaultValue ? new Date(defaultValue) : undefined,
   } as UseDatepickerOptions)
+
+  useEffect(() => {
+    // Dette tillater å sette value for feltet via setValue utenfor komponenten
+    if (selectedDay && !field.value) {
+      setSelected(undefined)
+    } else if (selectedDay && !isEqual(new Date(field.value), selectedDay)) {
+      setSelected(new Date(field.value))
+    } else if (field.value && !selectedDay && inputProps.value?.toString().length === 0) {
+      setSelected(new Date(field.value))
+    }
+  }, [field, selectedDay])
 
   return (
     <DatePicker {...datepickerProps}>

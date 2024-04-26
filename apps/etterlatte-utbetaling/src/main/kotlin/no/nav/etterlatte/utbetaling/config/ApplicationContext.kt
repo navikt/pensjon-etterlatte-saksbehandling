@@ -55,10 +55,7 @@ import java.time.temporal.ChronoUnit
 class ApplicationContext(
     val env: Map<String, String> = getRapidEnv(),
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(env),
-    val rapidsConnection: RapidsConnection =
-        RapidApplication.Builder(
-            RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
-        ).build(),
+    rapidConnection: RapidsConnection? = null,
     val jmsConnectionFactory: EtterlatteJmsConnectionFactory =
         JmsConnectionFactory(
             hostname = properties.mqHost,
@@ -69,7 +66,7 @@ class ApplicationContext(
             password = properties.serviceUserPassword,
         ),
     // Overridable clients
-    config: Config = ConfigFactory.parseMap(env),
+    config: Config = ConfigFactory.load(),
     httpClient: HttpClient = httpClient(),
     val behandlingKlient: BehandlingKlient = BehandlingKlient(config, httpClient),
     val vedtaksvurderingKlient: VedtaksvurderingKlient = VedtaksvurderingKlient(config, httpClient),
@@ -183,6 +180,11 @@ class ApplicationContext(
             clock = clock,
             saktype = Saktype.OMSTILLINGSSTOENAD,
         )
+
+    val rapidsConnection =
+        rapidConnection ?: RapidApplication.Builder(
+            RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
+        ).build()
 
     val oppgavetriggerRiver by lazy {
         OppgavetriggerRiver(

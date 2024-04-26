@@ -68,7 +68,7 @@ class ApplicationIntegrationTest {
         ApplicationContext(
             env = System.getenv(),
             properties = applicationProperties,
-            rapidsConnection = rapidsConnection,
+            rapidConnection = rapidsConnection,
             jmsConnectionFactory = connectionFactory,
             behandlingKlient = mockk(),
             vedtaksvurderingKlient = mockk(),

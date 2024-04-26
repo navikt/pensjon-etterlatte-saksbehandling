@@ -7,6 +7,8 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.ANTALL
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.sakId
@@ -26,6 +28,8 @@ internal class ReguleringsforespoerselRiver(
     init {
         initialiserRiver(rapidsConnection, ReguleringHendelseType.REGULERING_STARTA) {
             validate { it.requireKey(DATO_KEY) }
+            validate { it.requireKey(KJOERING) }
+            validate { it.requireKey(ANTALL) }
         }
     }
 
@@ -42,7 +46,9 @@ internal class ReguleringsforespoerselRiver(
             return
         }
 
-        val sakerTilOmregning = behandlingService.hentAlleSaker()
+        val kjoering = packet[KJOERING].asText()
+        val antall = packet[ANTALL].asInt()
+        val sakerTilOmregning = behandlingService.hentAlleSaker(kjoering, antall)
 
         val tilbakemigrerte =
             behandlingService.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)

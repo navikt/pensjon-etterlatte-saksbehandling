@@ -30,6 +30,9 @@ import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.sak.KjoeringRequest
+import no.nav.etterlatte.libs.common.sak.KjoeringStatus
+import no.nav.etterlatte.libs.common.sak.ReguleringFeiletHendelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
@@ -56,7 +59,10 @@ interface BehandlingService {
 
     fun sendReguleringFeiletHendelse(reguleringFeilethendelse: ReguleringFeiletHendelse)
 
-    fun hentAlleSaker(): Saker
+    fun hentAlleSaker(
+        kjoering: String,
+        antall: Int,
+    ): Saker
 
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
 
@@ -87,9 +93,13 @@ interface BehandlingService {
     )
 
     fun leggInnBrevutfall(request: BrevutfallOgEtterbetalingDto)
-}
 
-data class ReguleringFeiletHendelse(val sakId: Long)
+    fun lagreKjoering(
+        sakId: Long,
+        status: KjoeringStatus,
+        kjoering: String,
+    )
+}
 
 class BehandlingServiceImpl(
     private val behandlingKlient: HttpClient,
@@ -194,9 +204,12 @@ class BehandlingServiceImpl(
         }
     }
 
-    override fun hentAlleSaker(): Saker =
+    override fun hentAlleSaker(
+        kjoering: String,
+        antall: Int,
+    ): Saker =
         runBlocking {
-            behandlingKlient.get("$url/saker").body()
+            behandlingKlient.get("$url/saker/$kjoering/$antall").body()
         }
 
     override fun avbryt(behandlingId: UUID) =
@@ -271,6 +284,25 @@ class BehandlingServiceImpl(
             behandlingKlient.post("$url/api/behandling/${request.behandlingId}/info/brevutfall") {
                 contentType(ContentType.Application.Json)
                 setBody(request)
+            }
+        }
+    }
+
+    override fun lagreKjoering(
+        sakId: Long,
+        status: KjoeringStatus,
+        kjoering: String,
+    ) {
+        runBlocking {
+            behandlingKlient.put("$url/omregning/kjoering") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    KjoeringRequest(
+                        kjoering = kjoering,
+                        status = status,
+                        sakId = sakId,
+                    ),
+                )
             }
         }
     }

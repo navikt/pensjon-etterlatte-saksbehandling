@@ -1,11 +1,12 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.BehandlingService
-import no.nav.etterlatte.ReguleringFeiletHendelse
+import no.nav.etterlatte.libs.common.sak.ReguleringFeiletHendelse
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.etterlatte.rapidsandrivers.KONTEKST_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -23,6 +24,7 @@ internal class ReguleringFeiletRiver(
         initialiserRiver(rapidsConnection, FEILA) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireValue(KONTEKST_KEY, Kontekst.REGULERING.name) }
+            validate { it.requireKey(KJOERING) }
         }
     }
 
@@ -31,6 +33,6 @@ internal class ReguleringFeiletRiver(
         context: MessageContext,
     ) {
         logger.info("Regulering har feilet for sak ${packet.sakId}")
-        behandlingService.sendReguleringFeiletHendelse(ReguleringFeiletHendelse(packet.sakId))
+        behandlingService.sendReguleringFeiletHendelse(ReguleringFeiletHendelse(packet.sakId, packet[KJOERING].asText()))
     }
 }

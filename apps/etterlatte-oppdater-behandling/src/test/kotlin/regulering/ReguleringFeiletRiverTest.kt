@@ -4,12 +4,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.BehandlingService
-import no.nav.etterlatte.ReguleringFeiletHendelse
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
+import no.nav.etterlatte.libs.common.sak.ReguleringFeiletHendelse
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.etterlatte.rapidsandrivers.KONTEKST_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -27,6 +28,8 @@ internal class ReguleringFeiletRiverTest {
                 DATO_KEY to foersteMai2023,
                 KONTEKST_KEY to Kontekst.REGULERING,
                 SAK_ID_KEY to 83L,
+                ReguleringEvents.KJOERING to "Regulering2023",
+                ReguleringEvents.ANTALL to Int.MAX_VALUE,
             ),
         )
 

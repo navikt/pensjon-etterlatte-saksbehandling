@@ -52,6 +52,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.omregning.MigreringService
+import no.nav.etterlatte.behandling.omregning.OmregningDao
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
@@ -284,6 +285,7 @@ internal class ApplicationContext(
     val bosattUtlandDao = BosattUtlandDao(autoClosingDatabase)
     val saksbehandlerInfoDao = SaksbehandlerInfoDao(autoClosingDatabase)
     val doedshendelseDao = DoedshendelseDao(autoClosingDatabase)
+    val omregningDao = OmregningDao(autoClosingDatabase)
     val sakTilgangDao = SakTilgangDao(dataSource)
 
     // Klient
@@ -376,6 +378,7 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             grunnlagService = grunnlagsService,
             revurderingService = automatiskRevurderingService,
+            omregningDao = omregningDao,
         )
 
     val tilgangService = TilgangServiceImpl(sakTilgangDao)

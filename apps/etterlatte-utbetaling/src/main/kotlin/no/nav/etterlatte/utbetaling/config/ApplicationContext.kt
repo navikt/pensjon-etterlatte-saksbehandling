@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.database.jdbcUrl
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.mq.JmsConnectionFactory
+import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.utbetaling.avstemming.AvstemmingDao
 import no.nav.etterlatte.utbetaling.avstemming.GrensesnittsavstemmingJob
@@ -42,8 +43,12 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 class ApplicationContext(
-    val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
-    val rapidsConnection: RapidsConnection = RapidApplication.create(getRapidEnv()),
+    val env: Map<String, String> = getRapidEnv(),
+    val properties: ApplicationProperties = ApplicationProperties.fromEnv(env),
+    val rapidsConnection: RapidsConnection =
+        RapidApplication.Builder(
+            RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
+        ).build(),
     val jmsConnectionFactory: EtterlatteJmsConnectionFactory =
         JmsConnectionFactory(
             hostname = properties.mqHost,

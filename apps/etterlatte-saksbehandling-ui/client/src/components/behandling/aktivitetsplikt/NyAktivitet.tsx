@@ -1,6 +1,6 @@
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useForm } from 'react-hook-form'
@@ -15,6 +15,7 @@ import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDa
 import { mapAktivitetstypeProps } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 
 interface AktivitetDefaultValue {
+  id: string | undefined
   type: AktivitetspliktType | ''
   datoFom?: Date
   datoTom?: Date | null
@@ -22,6 +23,7 @@ interface AktivitetDefaultValue {
 }
 
 const aktivitetDefaultValue: AktivitetDefaultValue = {
+  id: undefined,
   type: '',
   datoFom: undefined,
   datoTom: undefined,
@@ -31,9 +33,11 @@ const aktivitetDefaultValue: AktivitetDefaultValue = {
 export const NyAktivitet = ({
   behandling,
   oppdaterAktiviteter,
+  redigerAktivitet,
 }: {
   behandling: IBehandlingReducer
   oppdaterAktiviteter: (aktiviteter: IAktivitet[]) => void
+  redigerAktivitet: IAktivitet | undefined
 }) => {
   const [opprettAktivitetResponse, opprettAktivitetRequest] = useApiCall(opprettAktivitet)
   const [visForm, setVisForm] = useState(false)
@@ -46,6 +50,7 @@ export const NyAktivitet = ({
   )
 
   const {
+    getValues,
     register,
     handleSubmit,
     control,
@@ -55,10 +60,24 @@ export const NyAktivitet = ({
     defaultValues: aktivitetDefaultValue,
   })
 
+  useEffect(() => {
+    if (redigerAktivitet) {
+      reset({
+        id: redigerAktivitet.id,
+        type: redigerAktivitet.type,
+        datoFom: new Date(redigerAktivitet.fom),
+        datoTom: redigerAktivitet.tom ? new Date(redigerAktivitet.tom) : null,
+        beskrivelse: redigerAktivitet.beskrivelse,
+      })
+      setVisForm(true)
+    }
+  }, [redigerAktivitet])
+
   const submitAktivitet = (data: AktivitetDefaultValue) => {
-    const { type, datoFom, datoTom, beskrivelse } = data
+    const { id, type, datoFom, datoTom, beskrivelse } = data
 
     const opprettAktivitet: IOpprettAktivitet = {
+      id: id,
       sakId: behandling.sakId,
       type: type as AktivitetspliktType,
       fom: formatISO(datoFom!, { representation: 'date' }),
@@ -84,7 +103,7 @@ export const NyAktivitet = ({
       {visForm && (
         <form onSubmit={handleSubmit(submitAktivitet)}>
           <Heading size="small" level="3" spacing>
-            Ny aktivitet
+            {getValues('id') ? 'Endre' : 'Ny'} aktivitet
           </Heading>
           <VStack gap="4">
             <HStack gap="4">

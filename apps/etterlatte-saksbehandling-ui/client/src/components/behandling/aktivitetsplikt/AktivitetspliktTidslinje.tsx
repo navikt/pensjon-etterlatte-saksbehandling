@@ -21,6 +21,7 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
   const tolvMndEtterDoedsfall = addMonths(doedsdato, 12)
 
   const [aktiviteter, setAktiviteter] = useState<IAktivitet[]>([])
+  const [rediger, setRediger] = useState<IAktivitet | undefined>(undefined)
   const [aktivitetsTypeProps, setAktivitetsTypeProps] = useState<AktivitetstypeProps[]>([])
 
   useEffect(() => {
@@ -95,7 +96,10 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
                     {isPending(slettet) ? (
                       <Spinner visible={true} variant="neutral" label="Sletter" margin="1em" />
                     ) : (
-                      <SlettWrapper onClick={() => fjernAktivitet(aktivitet.id)}>Slett</SlettWrapper>
+                      <>
+                        <SlettEndreWrapper onClick={() => fjernAktivitet(aktivitet.id)}>Slett</SlettEndreWrapper>
+                        <SlettEndreWrapper onClick={() => setRediger(aktivitet)}>Endre</SlettEndreWrapper>
+                      </>
                     )}
                     {isFailureHandler({
                       apiResult: slettet,
@@ -108,7 +112,7 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
         </Timeline>
       )}
 
-      <NyAktivitet behandling={behandling} oppdaterAktiviteter={oppdaterAktiviteter} />
+      <NyAktivitet behandling={behandling} oppdaterAktiviteter={oppdaterAktiviteter} redigerAktivitet={rediger} />
 
       {isFailureHandler({
         errorMessage: 'En feil oppsto ved henting av aktiviteter',
@@ -169,7 +173,8 @@ const TidslinjeWrapper = styled.div`
   margin-bottom: 50px;
 `
 
-const SlettWrapper = styled.div`
+const SlettEndreWrapper = styled.div`
+  padding-right: 1em;
   display: inline-flex;
   float: left;
   cursor: pointer;

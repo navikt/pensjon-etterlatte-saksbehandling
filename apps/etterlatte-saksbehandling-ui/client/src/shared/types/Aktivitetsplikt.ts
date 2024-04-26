@@ -20,6 +20,7 @@ export interface IAktivitet {
 }
 
 export interface IOpprettAktivitet {
+  id: string | undefined
   sakId: number
   type: AktivitetspliktType
   fom: string

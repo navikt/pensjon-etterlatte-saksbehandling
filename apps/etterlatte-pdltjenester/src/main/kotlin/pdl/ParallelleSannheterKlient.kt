@@ -68,8 +68,11 @@ class ParallelleSannheterKlient(
                 logger.warn("Fant flere aktive sivilstander av samme type")
                 return aktiveSivilstander.sortedByDescending { it.gyldigFraOgMed }.first()
             } else {
-                logger.error("Fant flere aktive sivilstander av ulik type for $foedselsnummer. Se sikkerlogg for detaljer.")
-                sikkerLogg.info("Fant flere aktive sivilstander for ${foedselsnummer.value}: ${aktiveSivilstander.toJson()}")
+                val toSiste = aktiveSivilstander.sortedByDescending { it.gyldigFraOgMed }.takeLast(2)
+                if (toSiste.first().gyldigFraOgMed == toSiste.last().gyldigFraOgMed) {
+                    logger.warn("Fant flere aktive sivilstander av ulik type for $foedselsnummer. Se sikkerlogg for detaljer.")
+                    sikkerLogg.info("Fant flere aktive sivilstander for ${foedselsnummer.value}: ${aktiveSivilstander.toJson()}")
+                }
             }
         }
 

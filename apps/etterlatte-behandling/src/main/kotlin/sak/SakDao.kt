@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.single
@@ -95,7 +96,7 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                 val statement =
                     prepareStatement(
                         """SELECT id, sakType, fnr, enhet from sak s 
-                    where not exists(select 1 from omregningskjoering k where k.sak_id=s.id and k.kjoering='$kjoering')
+                    where not exists(select 1 from omregningskjoering k where k.sak_id=s.id and k.kjoering='$kjoering' and k.status != '${KjoeringStatus.FEILA.name}')
                     LIMIT $antall"""
                             .trimMargin(),
                     )

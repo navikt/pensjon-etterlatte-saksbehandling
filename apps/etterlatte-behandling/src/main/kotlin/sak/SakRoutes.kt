@@ -27,11 +27,13 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
@@ -51,6 +53,15 @@ internal fun Route.sakSystemRoutes(
         get {
             kunSystembruker {
                 call.respond(Saker(inTransaction { sakService.hentSaker() }))
+            }
+        }
+
+        post("hent") {
+            kunSystembruker {
+                medBody<SakIderDto> { dto ->
+                    val saker = inTransaction { sakService.hentSakerMedIder(dto.sakIder) }
+                    call.respond(SakerDto(saker))
+                }
             }
         }
 
@@ -300,3 +311,11 @@ data class EnhetRequest(
 )
 
 data class FoersteVirkDto(val foersteIverksatteVirkISak: LocalDate, val sakId: Long)
+
+data class SakIderDto(
+    val sakIder: List<Long>,
+)
+
+data class SakerDto(
+    val saker: Map<Long, Sak>,
+)

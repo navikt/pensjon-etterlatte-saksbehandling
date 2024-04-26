@@ -199,6 +199,7 @@ spec:
         - application: etterlatte-statistikk
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-tidshendelser
         - application: etterlatte-opplysninger-fra-soeknad
         - application: etterlatte-grunnlag
         - application: etterlatte-trygdetid

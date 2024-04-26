@@ -63,11 +63,10 @@ export function TilbakekrevingVurderingSkjema({
   const dispatch = useAppDispatch()
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
 
-  const { register, handleSubmit, watch, control, getValues, setValue, formState, reset } =
-    useForm<TilbakekrevingVurdering>({
-      defaultValues: behandling.tilbakekreving.vurdering || initialVurdering,
-      shouldUnregister: true,
-    })
+  const { register, handleSubmit, control, getValues, setValue, formState, reset } = useForm<TilbakekrevingVurdering>({
+    defaultValues: behandling.tilbakekreving.vurdering || initialVurdering,
+    shouldUnregister: true,
+  })
 
   useEffect(() => {
     const values = getValues()
@@ -102,25 +101,27 @@ export function TilbakekrevingVurderingSkjema({
   }
 
   const vilkaarOppfylt = () =>
-    watch().vilkaarsresultat
-      ? [TilbakekrevingVilkaar.OPPFYLT, TilbakekrevingVilkaar.DELVIS_OPPFYLT].includes(watch().vilkaarsresultat!)
+    getValues().vilkaarsresultat
+      ? [TilbakekrevingVilkaar.OPPFYLT, TilbakekrevingVilkaar.DELVIS_OPPFYLT].includes(getValues().vilkaarsresultat!)
       : false
 
   const beloepIBehold = () =>
-    watch().beloepBehold ? watch().beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD : false
+    getValues().beloepBehold
+      ? getValues().beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD
+      : false
 
   const skalHaForhaandsvarsel = () =>
-    watch().forhaandsvarsel
-      ? [TilbakekrevingVarsel.MED_I_ENDRINGSBREV, TilbakekrevingVarsel.EGET_BREV].includes(watch().forhaandsvarsel!)
+    getValues().forhaandsvarsel
+      ? [TilbakekrevingVarsel.MED_I_ENDRINGSBREV, TilbakekrevingVarsel.EGET_BREV].includes(getValues().forhaandsvarsel!)
       : false
 
   const rettsligGrunnlagForVilkaarOppfyltEllerDelvisOppfylt = () =>
-    watch().rettsligGrunnlag
+    getValues().rettsligGrunnlag
       ? [
           TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
           TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM,
           TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM,
-        ].includes(watch().rettsligGrunnlag!)
+        ].includes(getValues().rettsligGrunnlag!)
       : false
 
   return (
@@ -203,7 +204,7 @@ export function TilbakekrevingVurderingSkjema({
             </>
           }
         />
-        {watch().tilsvar?.tilsvar == JaNei.JA && (
+        {getValues().tilsvar?.tilsvar == JaNei.JA && (
           <>
             <ControlledDatoVelger name="tilsvar.dato" label="Tilsvar dato" control={control} readOnly={!redigerbar} />
 
@@ -239,7 +240,9 @@ export function TilbakekrevingVurderingSkjema({
               readOnly={!redigerbar}
             />
 
-            {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM].includes(watch().rettsligGrunnlag!) && (
+            {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM].includes(
+              getValues().rettsligGrunnlag!
+            ) && (
               <Textarea
                 {...register('burdeBrukerForstaatt')}
                 label="Er de subjektive vilkårene oppfylt?"
@@ -248,7 +251,9 @@ export function TilbakekrevingVurderingSkjema({
               />
             )}
 
-            {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM].includes(watch().rettsligGrunnlag!) && (
+            {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM].includes(
+              getValues().rettsligGrunnlag!
+            ) && (
               <Textarea
                 {...register('uaktsomtForaarsaketFeilutbetaling')}
                 label="Er de subjektive vilkårene oppfylt?"
@@ -258,7 +263,7 @@ export function TilbakekrevingVurderingSkjema({
             )}
 
             {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM].includes(
-              watch().rettsligGrunnlag!
+              getValues().rettsligGrunnlag!
             ) && (
               <Textarea
                 {...register('burdeBrukerForstaattEllerUaktsomtForaarsaket')}
@@ -351,7 +356,7 @@ export function TilbakekrevingVurderingSkjema({
 
         <div>
           <Label>Hjemmel</Label>
-          <BodyLong>{watch().hjemmel ? teksterTilbakekrevingHjemmel[watch().hjemmel!] : 'Ikke satt'}</BodyLong>
+          <BodyLong>{getValues().hjemmel ? teksterTilbakekrevingHjemmel[getValues().hjemmel!] : 'Ikke satt'}</BodyLong>
         </div>
 
         {redigerbar && (

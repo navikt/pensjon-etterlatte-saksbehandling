@@ -1,6 +1,8 @@
 package no.nav.etterlatte.utbetaling.config
 
+import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import io.ktor.client.HttpClient
 import no.nav.etterlatte.jobs.next
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
@@ -66,9 +68,24 @@ class ApplicationContext(
             username = properties.serviceUserUsername,
             password = properties.serviceUserPassword,
         ),
+    // Overridable clients
+    config: Config = ConfigFactory.parseMap(env),
+    httpClient: HttpClient = httpClient(),
+    val behandlingKlient: BehandlingKlient = BehandlingKlient(config, httpClient),
+    val vedtaksvurderingKlient: VedtaksvurderingKlient = VedtaksvurderingKlient(config, httpClient),
+    val simuleringOsKlient: SimuleringOsKlient =
+        SimuleringOsKlient(
+            config,
+            httpClientClientCredentials(
+                azureAppClientId = config.getString("azure.app.client.id"),
+                azureAppJwk = config.getString("azure.app.jwk"),
+                azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+                azureAppScope = config.getString("etterlatteproxy.scope"),
+            ),
+            objectMapper = simuleringObjectMapper(),
+        ),
 ) {
     private val clock = utcKlokke()
-    private val config = ConfigFactory.load()
 
     val dataSource =
         DataSourceBuilder.createDataSource(
@@ -96,7 +113,6 @@ class ApplicationContext(
             oppdragMapper = OppdragMapper,
             oppdragSender = oppdragSender,
             utbetalingDao = utbetalingDao,
-            rapidsConnection = rapidsConnection,
             clock = clock,
         )
 
@@ -117,20 +133,6 @@ class ApplicationContext(
         )
     }
 
-    private val behandlingKlient = BehandlingKlient(config, httpClient())
-    private val vedtaksvurderingKlient = VedtaksvurderingKlient(config, httpClient())
-
-    private val simuleringOsKlient =
-        SimuleringOsKlient(
-            config,
-            httpClientClientCredentials(
-                azureAppClientId = config.getString("azure.app.client.id"),
-                azureAppJwk = config.getString("azure.app.jwk"),
-                azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-                azureAppScope = config.getString("etterlatteproxy.scope"),
-            ),
-            objectMapper = simuleringObjectMapper(),
-        )
     val simuleringOsService = SimuleringOsService(vedtaksvurderingKlient, simuleringOsKlient)
 
     val leaderElection = LeaderElection(properties.leaderElectorPath)

@@ -110,7 +110,6 @@ export default function ManuellBehandling() {
     handleSubmit,
     control,
     formState: { errors },
-    getValues,
   } = methods
 
   if (isPending(hentOppgaveStatus)) {
@@ -181,7 +180,6 @@ export default function ManuellBehandling() {
           description="Datoen søknaden ble mottatt"
           control={control}
           errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
-          defaultValue={getValues().mottattDato}
         />
 
         <Checkbox {...register('foreldreloes')}>Er foreldreløs</Checkbox>

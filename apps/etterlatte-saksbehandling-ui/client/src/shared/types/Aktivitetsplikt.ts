@@ -8,7 +8,7 @@ export interface AktivitetspliktOppfolging {
 }
 
 export interface IAktivitet {
-  id?: string
+  id: string
   sakId: number
   behandlingId: string
   type: AktivitetspliktType

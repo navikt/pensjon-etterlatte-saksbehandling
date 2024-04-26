@@ -23,3 +23,9 @@ export const opprettAktivitet = async (args: {
   request: IOpprettAktivitet
 }): Promise<ApiResponse<IAktivitet[]>> =>
   apiClient.post(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet`, { ...args.request })
+
+export const slettAktivitet = async (args: {
+  behandlingId: string
+  aktivitetId: string
+}): Promise<ApiResponse<IAktivitet[]>> =>
+  apiClient.delete(`/behandling/${args.behandlingId}/aktivitetsplikt/aktivitet/${args.aktivitetId}`)

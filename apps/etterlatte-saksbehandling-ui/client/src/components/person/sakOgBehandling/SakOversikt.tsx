@@ -144,16 +144,10 @@ const HorisontaltSkille = styled.hr`
 export const HeadingWrapper = styled.div`
   display: inline-flex;
   margin-top: 3em;
-
-  .details {
-    padding: 0.6em;
-  }
 `
 
 const SakHeaderWrapper = styled.div`
   padding: 2rem;
   border-right: 1px solid var(--a-surface-active);
-  width: 25rem;
-  min-width: 20rem;
-  max-width: 30rem;
+  width: fit-content;
 `

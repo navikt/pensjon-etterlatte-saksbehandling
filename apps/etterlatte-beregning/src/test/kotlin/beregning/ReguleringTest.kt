@@ -12,6 +12,7 @@ import no.nav.etterlatte.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceTest
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.beregning.grunnlag.BeregningsmetodeForAvdoed
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
@@ -29,6 +30,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -199,6 +201,21 @@ class ReguleringTest {
                 ),
             ),
         beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
+        avdoedeBeregningmetode =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 1, 1),
+                    tom = null,
+                    data =
+                        BeregningsmetodeForAvdoed(
+                            AVDOED_FOEDSELSNUMMER.value,
+                            BeregningsMetodeBeregningsgrunnlag(
+                                beregningsMetode = BeregningsMetode.NASJONAL,
+                                begrunnelse = "Beskrivelse",
+                            ),
+                        ),
+                ),
+            ),
     )
 
     private fun mockBehandling(

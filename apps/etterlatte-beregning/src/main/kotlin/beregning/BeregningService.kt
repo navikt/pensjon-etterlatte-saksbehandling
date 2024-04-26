@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.UUID
 
 class BeregningService(
@@ -124,7 +125,12 @@ class AnvendtGrunnbeloepIkkeFunnet : UgyldigForespoerselException(
     detail = "Anvendt grunnbeløp ikke funnet for perioden",
 )
 
-class AnvendtTrygdetidIkkeFunnet : UgyldigForespoerselException(
+class AnvendtTrygdetidIkkeFunnet(fom: LocalDate, tom: LocalDate?) : UgyldigForespoerselException(
     code = "ANVENDT_TRYGDETID_IKKE_FUNNET",
-    detail = "Anvendt trygdetid ikke funnet for perioden",
+    detail = "Anvendt trygdetid ikke funnet for perioden $fom - $tom",
+)
+
+class AnvendtTrygdetidIdentIkkeFunnet() : UgyldigForespoerselException(
+    code = "ANVENDT_TRYGDETID_IDENT_IKKE_FUNNET",
+    detail = "Anvendt trygdetid ikke funnet for avdøde",
 )

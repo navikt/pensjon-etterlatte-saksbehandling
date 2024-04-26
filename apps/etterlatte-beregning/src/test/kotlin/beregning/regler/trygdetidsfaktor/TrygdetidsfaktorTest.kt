@@ -3,8 +3,9 @@ package no.nav.etterlatte.beregning.regler.trygdetidsfaktor
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.REGEL_PERIODE
+import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.TrygdetidGrunnlag
+import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.anvendtTrygdetidRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.maksTrygdetid
-import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidBruktRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidsFaktor
 import no.nav.etterlatte.beregning.regler.barnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.samletTrygdetid
@@ -25,13 +26,7 @@ internal class TrygdetidsfaktorTest {
 
     @Test
     fun `trygdetidRegel skal returnere 40 aars trygdetid for nasjonal`() {
-        val resultat =
-            trygdetidBruktRegel.anvend(
-                barnepensjonGrunnlag().copy(
-                    avdoedesTrygdetid = trygdetid,
-                ),
-                REGEL_PERIODE,
-            )
+        val resultat = anvendtTrygdetidRegel.anvend(TrygdetidGrunnlag(trygdetid), REGEL_PERIODE)
 
         resultat.verdi shouldBe AnvendtTrygdetid(BeregningsMetode.NASJONAL, Beregningstall(40.0))
     }
@@ -39,10 +34,8 @@ internal class TrygdetidsfaktorTest {
     @Test
     fun `trygdetidRegel skal returnere 15 aars trygdetid for prorata`() {
         val resultat =
-            trygdetidBruktRegel.anvend(
-                barnepensjonGrunnlag().copy(
-                    avdoedesTrygdetid = trygdetid.copy(verdi = trygdetid.verdi.copy(beregningsMetode = BeregningsMetode.PRORATA)),
-                ),
+            anvendtTrygdetidRegel.anvend(
+                TrygdetidGrunnlag(trygdetid.copy(verdi = trygdetid.verdi.copy(beregningsMetode = BeregningsMetode.PRORATA))),
                 REGEL_PERIODE,
             )
 
@@ -52,10 +45,8 @@ internal class TrygdetidsfaktorTest {
     @Test
     fun `trygdetidRegel skal returnere 40 aars trygdetid for best`() {
         val resultat =
-            trygdetidBruktRegel.anvend(
-                barnepensjonGrunnlag().copy(
-                    avdoedesTrygdetid = trygdetid.copy(verdi = trygdetid.verdi.copy(beregningsMetode = BeregningsMetode.BEST)),
-                ),
+            anvendtTrygdetidRegel.anvend(
+                TrygdetidGrunnlag(trygdetid.copy(verdi = trygdetid.verdi.copy(beregningsMetode = BeregningsMetode.BEST))),
                 REGEL_PERIODE,
             )
 

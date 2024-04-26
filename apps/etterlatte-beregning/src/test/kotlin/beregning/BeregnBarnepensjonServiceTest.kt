@@ -10,6 +10,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.beregning.grunnlag.BeregningsmetodeForAvdoed
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
@@ -27,6 +28,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
@@ -447,12 +449,40 @@ internal class BeregnBarnepensjonServiceTest {
                 behandling.id,
                 emptyList(),
                 institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                avdoedeBeregningmetode =
+                    listOf(
+                        GrunnlagMedPeriode(
+                            fom = LocalDate.of(2023, 1, 1),
+                            tom = null,
+                            data =
+                                BeregningsmetodeForAvdoed(
+                                    AVDOED_FOEDSELSNUMMER.value,
+                                    BeregningsMetodeBeregningsgrunnlag(
+                                        beregningsMetode = BeregningsMetode.BEST,
+                                        begrunnelse = "Beskrivelse",
+                                    ),
+                                ),
+                        ),
+                        GrunnlagMedPeriode(
+                            fom = LocalDate.of(2023, 1, 1),
+                            tom = null,
+                            data =
+                                BeregningsmetodeForAvdoed(
+                                    AVDOED2_FOEDSELSNUMMER.value,
+                                    BeregningsMetodeBeregningsgrunnlag(
+                                        beregningsMetode = BeregningsMetode.BEST,
+                                        begrunnelse = "Beskrivelse",
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns emptyList()
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(mockTrygdetid(behandling.id))
+        coEvery {
+            trygdetidKlient.hentTrygdetid(any(), any())
+        } returns listOf(mockTrygdetid(behandling.id), mockTrygdetid(behandling.id, fnr = AVDOED2_FOEDSELSNUMMER.value))
 
         runBlocking {
-            val beregning = beregnBarnepensjonService().beregn(behandling, bruker, periodensSisteDato)
+            val beregning = beregnBarnepensjonService(true).beregn(behandling, bruker, periodensSisteDato)
             beregning.beregningsperioder.size shouldBeGreaterThanOrEqual 3
 
             with(beregning.beregningsperioder[0]) {
@@ -487,6 +517,21 @@ internal class BeregnBarnepensjonServiceTest {
                 emptyList(),
                 beregningsMetode = BeregningsMetode.BEST,
                 virk = YearMonth.of(2024, Month.JANUARY).atDay(1),
+                avdoedeBeregningmetode =
+                    listOf(
+                        GrunnlagMedPeriode(
+                            fom = LocalDate.of(2023, 1, 1),
+                            tom = null,
+                            data =
+                                BeregningsmetodeForAvdoed(
+                                    UKJENT_AVDOED,
+                                    BeregningsMetodeBeregningsgrunnlag(
+                                        beregningsMetode = BeregningsMetode.BEST,
+                                        begrunnelse = "Beskrivelse",
+                                    ),
+                                ),
+                        ),
+                    ),
             )
 
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns
@@ -589,6 +634,7 @@ internal class BeregnBarnepensjonServiceTest {
         institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
             defaultInstitusjonsopphold(),
         virk: LocalDate = VIRKNINGSTIDSPUNKT_JAN_23.minusMonths(1).atDay(1),
+        avdoedeBeregningmetode: List<GrunnlagMedPeriode<BeregningsmetodeForAvdoed>> = defaultAvdoedeBeregningmetode(beregningsMetode),
     ) = BeregningsGrunnlag(
         behandlingId,
         defaultKilde(),
@@ -608,6 +654,7 @@ internal class BeregnBarnepensjonServiceTest {
             ),
         institusjonsoppholdBeregningsgrunnlag = institusjonsoppholdBeregningsgrunnlag,
         beregningsMetode = beregningsMetode.toGrunnlag(),
+        avdoedeBeregningmetode = avdoedeBeregningmetode,
     )
 
     private fun beregningsGrunnlagMedSoesken(
@@ -632,6 +679,7 @@ internal class BeregnBarnepensjonServiceTest {
             },
         institusjonsoppholdBeregningsgrunnlag = defaultInstitusjonsopphold(),
         beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
+        avdoedeBeregningmetode = defaultAvdoedeBeregningmetode(),
     )
 
     private fun defaultKilde(): Grunnlagsopplysning.Saksbehandler =
@@ -647,6 +695,22 @@ internal class BeregnBarnepensjonServiceTest {
                 fom = LocalDate.of(2022, 8, 1),
                 tom = null,
                 data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
+            ),
+        )
+
+    private fun defaultAvdoedeBeregningmetode(beregningsMetode: BeregningsMetode = BeregningsMetode.BEST) =
+        listOf(
+            GrunnlagMedPeriode(
+                fom = LocalDate.of(2023, 1, 1),
+                tom = null,
+                data =
+                    BeregningsmetodeForAvdoed(
+                        AVDOED_FOEDSELSNUMMER.value,
+                        BeregningsMetodeBeregningsgrunnlag(
+                            beregningsMetode = beregningsMetode,
+                            begrunnelse = "Beskrivelse",
+                        ),
+                    ),
             ),
         )
 
@@ -667,11 +731,12 @@ internal class BeregnBarnepensjonServiceTest {
     private fun mockTrygdetid(
         behandlingId_: UUID,
         anvendtTrygdetid: Int = TRYGDETID_40_AAR,
+        fnr: String = AVDOED_FOEDSELSNUMMER.value,
     ): TrygdetidDto =
         mockk<TrygdetidDto>().apply {
             every { id } returns randomUUID()
             every { behandlingId } returns behandlingId_
-            every { ident } returns AVDOED_FOEDSELSNUMMER.value
+            every { ident } returns fnr
             every { beregnetTrygdetid } returns
                 mockk {
                     every { resultat } returns

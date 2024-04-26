@@ -61,17 +61,16 @@ fun barnepensjonGrunnlag(
     soeskenKull: List<Folkeregisteridentifikator> = emptyList(),
     trygdeTid: Beregningstall = Beregningstall(MAKS_TRYGDETID),
     institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag? = null,
-    avdoedeForeldre: List<Folkeregisteridentifikator> = listOf(AVDOED_FOEDSELSNUMMER),
+    avdoede: List<Folkeregisteridentifikator> = listOf(AVDOED_FOEDSELSNUMMER),
 ) = BarnepensjonGrunnlag(
     soeskenKull = FaktumNode(soeskenKull, kilde, "søskenkull"),
     avdoedesTrygdetid =
         FaktumNode(
-            SamletTrygdetidMedBeregningsMetode(BeregningsMetode.NASJONAL, trygdeTid, null, null, null),
+            avdoede.map { AnvendtTrygdetid(BeregningsMetode.NASJONAL, trygdeTid, it.value) },
             kilde,
             "trygdetid",
         ),
     institusjonsopphold = FaktumNode(institusjonsopphold, kilde, "institusjonsopphold"),
-    avdoedeForeldre = FaktumNode(avdoedeForeldre, kilde, "avdøde"),
 )
 
 fun samletTrygdetid(
@@ -79,13 +78,14 @@ fun samletTrygdetid(
     samletTrygdetidNorge: Beregningstall? = null,
     samletTrygdetidTeoretisk: Beregningstall? = null,
     broek: IntBroek? = null,
+    ident: String? = null,
 ) = FaktumNode(
     SamletTrygdetidMedBeregningsMetode(
         beregningsMetode = beregningsMetode,
         samletTrygdetidNorge = samletTrygdetidNorge,
         samletTrygdetidTeoretisk = samletTrygdetidTeoretisk,
         prorataBroek = broek,
-        ident = null,
+        ident = ident,
     ),
     kilde,
     "trygdetid",

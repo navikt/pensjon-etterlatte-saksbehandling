@@ -148,8 +148,8 @@ class HendelseDao(private val connectionAutoclosing: ConnectionAutoclosing) {
         hendelse: HendelseType,
         inntruffet: Tidspunkt,
         saksbehandler: String?,
-        kommentar: String?,
-        begrunnelse: String?,
+        kommentar: String? = null,
+        begrunnelse: String? = null,
     ) = lagreHendelse(
         UlagretHendelse(
             "VEDTAK:${hendelse.name}",

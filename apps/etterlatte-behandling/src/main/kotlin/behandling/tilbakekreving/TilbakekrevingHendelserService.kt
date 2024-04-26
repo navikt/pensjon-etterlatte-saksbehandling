@@ -12,7 +12,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
-interface ITilbakekrevingHendelserService {
+interface TilbakekrevingHendelserService {
     fun sendTilbakekreving(
         statistikkTilbakekreving: StatistikkTilbakekrevingDto,
         type: TilbakekrevingHendelseType,
@@ -21,7 +21,7 @@ interface ITilbakekrevingHendelserService {
 
 class TilbakekrevingHendelserServiceImpl(
     private val rapid: KafkaProdusent<String, String>,
-) : ITilbakekrevingHendelserService {
+) : TilbakekrevingHendelserService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun sendTilbakekreving(

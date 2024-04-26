@@ -80,13 +80,13 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                 }
 
             client.get("/behandlinger/$behandlingId") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@GrunnlagsendringshendelseRouteTest.systemBruker)
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
 
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@GrunnlagsendringshendelseRouteTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
@@ -101,7 +101,7 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
             }
 
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@GrunnlagsendringshendelseRouteTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
@@ -116,7 +116,7 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
             }
 
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@GrunnlagsendringshendelseRouteTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(

@@ -26,7 +26,7 @@ export function TilbakekrevingOppsummering({
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const [validerTilbakekrevingStatus, validerTilbakekrevingRequest] = useApiCall(validerTilbakekreving)
-  const [gyldigTilbakekreving, setGyldigTilbakekreving] = useState(false)
+  const [gyldigTilbakekreving, setGyldigTilbakekreving] = useState(!redigerbar)
 
   const gaaTilBrev = () => {
     navigate(`/tilbakekreving/${behandling?.id}/brev`)

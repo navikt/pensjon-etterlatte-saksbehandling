@@ -63,40 +63,48 @@ internal class SakDaoTest(val dataSource: DataSource) {
         behandlingRepo.opprettBehandling(opprettBehandling)
 
         // setter opprettet dato fra behandling
-        dataSource.connection.prepareStatement(
-            """
-            UPDATE sak as s
-            SET opprettet = (select behandling_opprettet from behandling as b where b.sak_id = s.id);
-            """.trimIndent(),
-        ).executeUpdate()
+        dataSource.connection.use {
+            it.prepareStatement(
+                """
+                UPDATE sak as s
+                SET opprettet = (select behandling_opprettet from behandling as b where b.sak_id = s.id);
+                """.trimIndent(),
+            ).executeUpdate()
+        }
 
         val saker =
-            dataSource.connection.prepareStatement(
-                """
-                select * from sak;    
-                """.trimIndent(),
-            ).executeQuery().toList {
-                Pair(getString("fnr"), getTidspunktOrNull("opprettet"))
+            dataSource.connection.use {
+                it.prepareStatement(
+                    """
+                    select fnr, opprettet from sak;    
+                    """.trimIndent(),
+                ).executeQuery().toList {
+                    Pair(getString("fnr"), getTidspunktOrNull("opprettet"))
+                }
             }
         val sakmedTidligereDato = saker.find { it.first === fnrMedBehandling }
 
         sakmedTidligereDato?.second?.toLocalDate()?.shouldBeToday()
 
-        dataSource.connection.prepareStatement(
-            """
-            UPDATE sak
-            SET opprettet = 'yesterday'::TIMESTAMP
-            WHERE sak.opprettet IS NULL;
-            """.trimIndent(),
-        ).executeUpdate()
+        dataSource.connection.use {
+            it.prepareStatement(
+                """
+                UPDATE sak
+                SET opprettet = 'yesterday'::TIMESTAMP
+                WHERE sak.opprettet IS NULL;
+                """.trimIndent(),
+            ).executeUpdate()
+        }
 
         val beggesakerMedDato =
-            dataSource.connection.prepareStatement(
-                """
-                select * from sak;    
-                """.trimIndent(),
-            ).executeQuery().toList {
-                Pair(getString("fnr"), getTidspunktOrNull("opprettet"))
+            dataSource.connection.use {
+                it.prepareStatement(
+                    """
+                    select fnr, opprettet from sak;    
+                    """.trimIndent(),
+                ).executeQuery().toList {
+                    Pair(getString("fnr"), getTidspunktOrNull("opprettet"))
+                }
             }
 
         val sakmedBehandlingsdato = beggesakerMedDato.find { it.first === fnrMedBehandling }

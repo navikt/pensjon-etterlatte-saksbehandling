@@ -11,6 +11,7 @@ import io.ktor.http.fullPath
 import io.mockk.spyk
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
+import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -31,11 +32,18 @@ abstract class BehandlingIntegrationTest {
     protected val server: MockOAuth2Server = MockOAuth2Server()
     internal lateinit var applicationContext: ApplicationContext
 
+    protected val saksbehandlerIdent = "Saksbehandler01"
+    protected val attestantIdent = "Saksbehandler02"
+    protected val saksbehandlerStrengtFortroligIdent = "saksebehandlerstrengtfortrolig"
+    protected val saksbehandlerSkjermetIdent = "saksbehandlerskjermet"
+
     protected fun startServer(
         norg2Klient: Norg2Klient? = null,
         featureToggleService: FeatureToggleService = DummyFeatureToggleService(),
         brevApiKlient: BrevApiKlient? = null,
         pdlTjenesterKlient: PdlTjenesterKlient? = null,
+        tilbakekrevingKlient: TilbakekrevingKlient? = null,
+        testProdusent: TestProdusent<String, String>? = null,
     ) {
         server.start()
         val props = dbExtension.properties()
@@ -78,7 +86,7 @@ abstract class BehandlingIntegrationTest {
                             "krr.url" to "http://localhost",
                         ),
                     ),
-                rapid = TestProdusent(),
+                rapid = testProdusent ?: TestProdusent(),
                 featureToggleService = featureToggleService,
                 skjermingHttpKlient = skjermingHttpClient(),
                 grunnlagHttpClient = grunnlagHttpClient(),
@@ -91,7 +99,7 @@ abstract class BehandlingIntegrationTest {
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiKlient = brevApiKlient ?: BrevApiKlientTest(),
                 klageHttpClient = klageHttpClientTest(),
-                tilbakekrevingHttpClient = tilbakekrevingHttpClientTest(),
+                tilbakekrevingKlient = tilbakekrevingKlient ?: TilbakekrevingKlientTest(),
                 migreringHttpClient = migreringHttpClientTest(),
                 pesysKlient = PesysKlientTest(),
                 krrKlient = KrrklientTest(),
@@ -127,19 +135,13 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val tokenSaksbehandler: String by lazy {
-        server.issueSaksbehandlerToken(navn = "John Doe", navIdent = "Saksbehandler01", groups = listOf(azureAdAttestantClaim))
+        server.issueSaksbehandlerToken(navn = "John Doe", navIdent = saksbehandlerIdent, groups = listOf(azureAdAttestantClaim))
     }
-
-    protected val tokenSaksbehandler2: String by lazy {
-        server.issueSaksbehandlerToken(navn = "Jane Doe", navIdent = "Saksbehandler02", groups = listOf(azureAdAttestantClaim))
-    }
-
-    protected val fagsystemTokenEY: String by lazy { server.issueSystembrukerToken() }
 
     protected val tokenAttestant: String by lazy {
         server.issueSaksbehandlerToken(
             navn = "John Doe",
-            navIdent = "Saksbehandler02",
+            navIdent = attestantIdent,
             groups = listOf(azureAdSaksbehandlerClaim, azureAdAttestantClaim),
         )
     }
@@ -147,7 +149,7 @@ abstract class BehandlingIntegrationTest {
     protected val tokenSaksbehandlerMedStrengtFortrolig: String by lazy {
         server.issueSaksbehandlerToken(
             navn = "John Doe",
-            navIdent = "saksebehandlerstrengtfortrolig",
+            navIdent = saksbehandlerStrengtFortroligIdent,
             groups =
                 listOf(
                     azureAdSaksbehandlerClaim,
@@ -160,7 +162,7 @@ abstract class BehandlingIntegrationTest {
     protected val tokenSaksbehandlerMedEgenAnsattTilgang: String by lazy {
         server.issueSaksbehandlerToken(
             navn = "John Doe",
-            navIdent = "saksbehandlerskjermet",
+            navIdent = saksbehandlerSkjermetIdent,
             groups =
                 listOf(
                     azureAdAttestantClaim,

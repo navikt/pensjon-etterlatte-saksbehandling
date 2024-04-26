@@ -9,27 +9,24 @@ import { ReturnertVisning } from '~components/generellbehandling/ReturnertVisnin
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useSelectorSaksbehandlerGjeldendeOppgaveBehandling } from '~store/selectors/useSelectorSaksbehandlerGjeldendeOppgaveBehandling'
-import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
+import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
+import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const GenerellbehandlingSidemeny = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
 }) => {
   const { utlandsBehandling } = props
-  const [saksbehandlerForOppgaveStatus] = useSaksbehandlerPaaOppgaveUnderArbeidForReferanse({
-    referanse: utlandsBehandling.id,
-    sakId: utlandsBehandling.sakId,
-  })
+  const [oppgaveResult] = useOppgaveUnderBehandling({ referanse: utlandsBehandling.id })
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)
 
-  const saksbehandlerForGjeldendeOppgave = useSelectorSaksbehandlerGjeldendeOppgaveBehandling()
+  const oppgave = useSelectorOppgaveUnderBehandling()
 
   useEffect(() => {
-    setOppgaveErTildeltInnloggetBruker(innloggetSaksbehandler.ident === saksbehandlerForGjeldendeOppgave)
-  }, [saksbehandlerForGjeldendeOppgave, innloggetSaksbehandler])
+    setOppgaveErTildeltInnloggetBruker(innloggetSaksbehandler.ident === oppgave?.saksbehandler?.ident)
+  }, [oppgave?.saksbehandler, innloggetSaksbehandler])
 
   const genererSidemeny = () => {
     switch (utlandsBehandling.status) {
@@ -54,14 +51,14 @@ export const GenerellbehandlingSidemeny = (props: {
     <Sidebar>
       <SidebarPanel>
         {isFailureHandler({
-          apiResult: saksbehandlerForOppgaveStatus,
+          apiResult: oppgaveResult,
           errorMessage: 'Vi fant ingen saksbehandler for den tilknyttede oppgaven. Husk å tildele oppgaven.',
         })}
-        {isPending(saksbehandlerForOppgaveStatus) && <Spinner visible={true} label="Henter saksbehandler or oppgave" />}
-        {saksbehandlerForGjeldendeOppgave ? (
+        {isPending(oppgaveResult) && <Spinner visible={true} label="Henter saksbehandler or oppgave" />}
+        {oppgave?.saksbehandler ? (
           <Alert variant={oppgaveErTildeltInnloggetBruker ? 'success' : 'info'} style={{ marginBottom: '2rem' }}>
             <BodyShort>{`Oppgaven for kravpakken er tildelt ${
-              oppgaveErTildeltInnloggetBruker ? 'deg' : saksbehandlerForGjeldendeOppgave
+              oppgaveErTildeltInnloggetBruker ? 'deg' : oppgave?.saksbehandler?.navn
             }`}</BodyShort>
           </Alert>
         ) : (

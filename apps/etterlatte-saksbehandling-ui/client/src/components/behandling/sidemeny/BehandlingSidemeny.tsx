@@ -29,8 +29,8 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
-import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtlandstilknytningType | null => {
   if (behandling.utlandstilknytning?.type) {
@@ -67,10 +67,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   const [beslutning, setBeslutning] = useState<IBeslutning>()
   const fane = useSelectorBehandlingSidemenyFane()
 
-  const [saksbehandlerForOppgaveResult] = useSaksbehandlerPaaOppgaveUnderArbeidForReferanse({
-    referanse: behandling.id,
-    sakId: behandling.sakId,
-  })
+  const [oppgaveResult] = useOppgaveUnderBehandling({ referanse: behandling.id })
 
   const behandlingsinfo = mapTilBehandlingInfo(behandling, vedtak)
 
@@ -140,10 +137,10 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
       })}
 
       {isFailureHandler({
-        apiResult: saksbehandlerForOppgaveResult,
+        apiResult: oppgaveResult,
         errorMessage: 'Kunne ikke hente saksbehandler gjeldende oppgave. Husk å tildele oppgaven.',
       })}
-      {isPending(saksbehandlerForOppgaveResult) && <Spinner visible={true} label="Henter saksbehandler for oppgave" />}
+      {isPending(oppgaveResult) && <Spinner visible={true} label="Henter saksbehandler for oppgave" />}
       {erFoerstegangsbehandling && (
         <Tabs value={fane} iconPosition="top" onChange={(val) => dispatch(visFane(val as BehandlingFane))}>
           <Tabs.List>

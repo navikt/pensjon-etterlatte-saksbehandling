@@ -58,21 +58,13 @@ class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
             when (code) {
                 HttpStatusCode.NotFound -> call.respond(GenerellIkkeFunnetException())
 
-                HttpStatusCode.BadRequest -> {
-                    call.application.log.warn("Bad request")
-                    call.application.log.warn("Bad request med parametre ${call.parameters.entries()}")
-                    call.application.log.warn("Bad request med query params ${call.request.queryParameters.entries()}")
-                    call.application.log.warn("Bad request med uri ${call.request.uri}")
-                    call.application.log.warn("Bad request med headers ${call.request.headers.entries()}")
-                    call.application.log.warn("Bad request med attributes ${call.attributes.allKeys}")
-                    call.application.log.warn("Bad request med attributevalues ${call.attributes.allKeys.map { call.attributes[it] }}")
+                HttpStatusCode.BadRequest ->
                     call.respond(
                         UgyldigForespoerselException(
                             code = "BAD_REQUEST",
                             detail = "Forespørselen er ugyldig",
                         ),
                     )
-                }
 
                 HttpStatusCode.Unauthorized ->
                     call.respond(

@@ -2,11 +2,9 @@ package no.nav.etterlatte.behandling.generellbehandling
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
-import io.ktor.server.application.log
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
@@ -17,6 +15,7 @@ import no.nav.etterlatte.libs.ktor.route.GENERELLBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.generellBehandlingId
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
+import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
@@ -25,7 +24,7 @@ internal fun Route.generellbehandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
     sakService: SakService,
 ) {
-    val logger = application.log
+    val logger = routeLogger
 
     post("/api/generellbehandling/{$SAKID_CALL_PARAMETER}") {
         kunSaksbehandlerMedSkrivetilgang { saksbehandler ->

@@ -2,11 +2,9 @@ package no.nav.etterlatte.grunnlagsendring
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
-import io.ktor.server.application.log
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -28,13 +26,14 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.ReguleringFeiletHendelse
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 
 internal fun Route.grunnlagsendringshendelseRoute(
     grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     omregningService: OmregningService,
 ) {
-    val logger = application.log
+    val logger = routeLogger
 
     route("/grunnlagsendringshendelse") {
         post("/doedshendelse") {

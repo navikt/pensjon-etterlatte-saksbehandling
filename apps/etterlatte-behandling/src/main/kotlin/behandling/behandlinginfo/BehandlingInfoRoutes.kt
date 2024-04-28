@@ -2,10 +2,8 @@ package no.nav.etterlatte.behandling.behandlinginfo
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
-import io.ktor.server.application.log
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -20,12 +18,13 @@ import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.medBody
+import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import java.util.UUID
 
 internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
-    val logger = application.log
+    val logger = routeLogger
 
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/info") {
         route("/brevutfall") {

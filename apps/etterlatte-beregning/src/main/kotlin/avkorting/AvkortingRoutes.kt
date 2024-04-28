@@ -2,11 +2,9 @@ package no.nav.etterlatte.avkorting
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
-import io.ktor.server.application.log
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.application
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -19,6 +17,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.uuid
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 
@@ -27,7 +26,7 @@ fun Route.avkorting(
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/beregning/avkorting/{$BEHANDLINGID_CALL_PARAMETER}") {
-        val logger = application.log
+        val logger = routeLogger
 
         get {
             withBehandlingId(behandlingKlient) {

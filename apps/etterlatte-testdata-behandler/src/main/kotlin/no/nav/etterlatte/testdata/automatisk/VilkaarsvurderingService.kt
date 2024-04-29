@@ -1,10 +1,13 @@
 package no.nav.etterlatte.testdata.automatisk
 
+import com.github.michaelbull.result.mapBoth
 import io.ktor.client.statement.HttpResponse
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -29,6 +32,9 @@ class VilkaarsvurderingService(private val klient: DownstreamResourceClient, pri
             ),
             Systembruker.testdata,
             {},
+        ).mapBoth(
+            success = {},
+            failure = { throw it },
         )
 
     private suspend fun settUtfallForAlleVilkaar(vilkaarsvurdering: HttpResponse) {
@@ -41,6 +47,12 @@ class VilkaarsvurderingService(private val klient: DownstreamResourceClient, pri
                 url = "$url/api/vilkaarsvurdering/resultat/$behandlingId",
             ),
             Systembruker.testdata,
-            {},
+            VurdertVilkaarsvurderingResultatDto(
+                resultat = VilkaarsvurderingUtfall.OPPFYLT,
+                kommentar = "Automatisk behandla testsak",
+            ),
+        ).mapBoth(
+            success = {},
+            failure = { throw it },
         )
 }

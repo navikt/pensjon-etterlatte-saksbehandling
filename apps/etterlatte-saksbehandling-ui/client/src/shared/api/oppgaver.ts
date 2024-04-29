@@ -59,13 +59,6 @@ export interface SaksbehandlerEndringDto {
   versjon: number | null
 }
 
-export const tildelSaksbehandlerApi = async (args: {
-  oppgaveId: string
-  nysaksbehandler: SaksbehandlerEndringDto
-}): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
-  return apiClient.post(`/oppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
-}
-
 export const saksbehandlereIEnhetApi = async (args: {
   enheter: string[]
 }): Promise<ApiResponse<Array<Saksbehandler>>> => {

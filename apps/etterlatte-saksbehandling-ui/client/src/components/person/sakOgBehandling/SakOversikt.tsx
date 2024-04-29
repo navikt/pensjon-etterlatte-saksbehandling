@@ -92,5 +92,5 @@ const SakHeaderWrapper = styled.div`
   padding: 2rem;
   border-right: 1px solid var(--a-surface-active);
   height: 100vh;
-  width: 25rem;
+  min-width: 25rem;
 `

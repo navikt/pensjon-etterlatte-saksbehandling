@@ -124,6 +124,8 @@ internal fun Route.behandlingRoutes(
             kunSkrivetilgang {
                 logger.debug("Prøver å fastsette virkningstidspunkt")
                 val body = call.receive<VirkningstidspunktRequest>()
+                logger.debug("Tok imot virkningstidspunktrequest")
+                logger.debug("Virkningstidspunktrequest hadde dato {}", body.dato)
 
                 val erGyldigVirkningstidspunkt =
                     inTransaction {
@@ -137,9 +139,11 @@ internal fun Route.behandlingRoutes(
                     }
 
                 if (!erGyldigVirkningstidspunkt) {
+                    logger.warn("Ugyldig virkningstidspunkt")
                     return@post call.respond(HttpStatusCode.BadRequest, "Ugyldig virkningstidspunkt")
                 }
                 try {
+                    logger.debug("Gyldig virkningstidspunkt")
                     val virkningstidspunkt =
                         inTransaction {
                             runBlocking {

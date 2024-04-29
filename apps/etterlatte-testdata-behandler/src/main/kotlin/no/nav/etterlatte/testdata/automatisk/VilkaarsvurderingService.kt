@@ -1,7 +1,6 @@
 package no.nav.etterlatte.testdata.automatisk
 
 import com.github.michaelbull.result.mapBoth
-import io.ktor.client.statement.HttpResponse
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
@@ -17,10 +16,9 @@ class VilkaarsvurderingService(private val klient: DownstreamResourceClient, pri
 
     suspend fun vilkaarsvurder(behandlingId: UUID) {
         logger.info("Oppretter vilkårsvurdering for gjenoppretting for $behandlingId")
-        val vilkaarsvurdering = retryOgPakkUt { opprettVilkaarsvurdering(behandlingId) }
+        retryOgPakkUt { opprettVilkaarsvurdering(behandlingId) }
 
         logger.info("Oppdaterer vilkårene med korrekt utfall for gjenoppretting $behandlingId")
-//        settUtfallForAlleVilkaar(vilkaarsvurdering) // Usikker på om vi må dette, hoppar over i første omgang
 
         retryOgPakkUt { settVilkaarsvurderingaSomHelhetSomOppfylt(behandlingId) }
     }
@@ -37,9 +35,6 @@ class VilkaarsvurderingService(private val klient: DownstreamResourceClient, pri
             success = {},
             failure = { throw it },
         )
-
-    private suspend fun settUtfallForAlleVilkaar(vilkaarsvurdering: HttpResponse) {
-    }
 
     private suspend fun settVilkaarsvurderingaSomHelhetSomOppfylt(behandlingId: UUID) =
         klient.post(

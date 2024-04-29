@@ -14,7 +14,7 @@ class TrygdetidService(
 ) {
     suspend fun beregnTrygdetid(behandlingId: UUID) =
         retryOgPakkUt {
-            klient.post(Resource(clientId, "$url/api/trygdetid/$behandlingId"), Systembruker.testdata) {}
+            klient.post(Resource(clientId, "$url/api/trygdetid_v2/$behandlingId"), Systembruker.testdata) {}
         }.mapBoth(
             success = {},
             failure = { throw it },

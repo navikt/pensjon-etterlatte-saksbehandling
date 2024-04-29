@@ -8,7 +8,6 @@ import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
 import no.nav.etterlatte.vedtaksvurdering.config.ApplicationContext
 import no.nav.etterlatte.vedtaksvurdering.klagevedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.samordningsvedtakRoute
-import no.nav.etterlatte.vedtaksvurdering.simulering.simuleringOsRoutes
 import no.nav.etterlatte.vedtaksvurdering.tilbakekrevingvedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
 
@@ -42,7 +41,6 @@ class Server(private val context: ApplicationContext) {
                 samordningsvedtakRoute(vedtakSamordningService)
                 tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
                 klagevedtakRoute(vedtakKlageService, behandlingKlient)
-                simuleringOsRoutes(simuleringOsService, behandlingKlient)
             }
         }
 

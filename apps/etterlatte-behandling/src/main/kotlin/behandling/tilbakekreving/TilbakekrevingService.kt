@@ -20,7 +20,8 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriodeVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
-import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
 import org.slf4j.Logger
@@ -35,7 +36,7 @@ class TilbakekrevingService(
     private val vedtakKlient: VedtakKlient,
     private val brevApiKlient: BrevApiKlient,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
-    private val tilbakekrevinghendelser: ITilbakekrevingHendelserService,
+    private val tilbakekrevinghendelser: TilbakekrevingHendelserService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -53,7 +54,7 @@ class TilbakekrevingService(
                 sakDao.hentSak(kravgrunnlag.sakId.value)
                     ?: throw TilbakekrevingHarMangelException("Tilbakekreving mangler sak")
 
-            val tilbakekrevingBehandling =
+            val tilbakekreving =
                 tilbakekrevingDao.lagreTilbakekreving(
                     TilbakekrevingBehandling.ny(kravgrunnlag, sak),
                 )
@@ -63,8 +64,8 @@ class TilbakekrevingService(
                     if (it.isEmpty()) {
                         logger.info("Fant ingen tilbakekrevingsoppgave, oppretter ny")
                         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                            referanse = tilbakekrevingBehandling.id.toString(),
-                            sakId = tilbakekrevingBehandling.sak.id,
+                            referanse = tilbakekreving.id.toString(),
+                            sakId = tilbakekreving.sak.id,
                             oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
                             oppgaveType = OppgaveType.TILBAKEKREVING,
                             merknad = "Kravgrunnlag mottatt",
@@ -75,29 +76,23 @@ class TilbakekrevingService(
                         logger.info("Kobler nytt kravgrunnlag med eksisterende oppgave ${eksisterendeOppgave.id}")
                         oppgaveService.oppdaterReferanseOgMerknad(
                             oppgaveId = eksisterendeOppgave.id,
-                            referanse = tilbakekrevingBehandling.id.toString(),
+                            referanse = tilbakekreving.id.toString(),
                             merknad = "Kravgrunnlag mottatt",
                         )
                     }
                 }
 
             hendelseDao.tilbakekrevingOpprettet(
-                tilbakekrevingId = tilbakekrevingBehandling.id,
-                sakId = tilbakekrevingBehandling.sak.id,
+                tilbakekrevingId = tilbakekreving.id,
+                sakId = tilbakekreving.sak.id,
             )
 
-            val statistikkTilbakekrevingDto =
-                StatistikkTilbakekrevingDto(
-                    tilbakekrevingBehandling.id,
-                    tilbakekrevingBehandling,
-                    Tidspunkt.now(),
-                )
             tilbakekrevinghendelser.sendTilbakekreving(
-                statistikkTilbakekrevingDto,
-                TilbakekrevingHendelseType.OPPRETTET,
+                statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
+                type = TilbakekrevingHendelseType.OPPRETTET,
             )
 
-            tilbakekrevingBehandling
+            tilbakekreving
         }
 
     fun hentTilbakekreving(tilbakekrevingId: UUID): TilbakekrevingBehandling =
@@ -109,18 +104,20 @@ class TilbakekrevingService(
     fun lagreVurdering(
         tilbakekrevingId: UUID,
         vurdering: TilbakekrevingVurdering,
+        saksbehandler: Saksbehandler,
     ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Lagrer vurdering for tilbakekreving=$tilbakekrevingId")
-            val eksisterende = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
-            if (!eksisterende.underBehandling()) {
-                throw TilbakekrevingFeilTilstandException("Tilbakekreving er ikke under behandling")
-            }
+            val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+
+            sjekkAtTilbakekrevingErUnderBehandling(tilbakekreving)
+            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
+
             tilbakekrevingDao.lagreTilbakekreving(
-                eksisterende.copy(
+                tilbakekreving.copy(
                     status = TilbakekrevingStatus.UNDER_ARBEID,
                     tilbakekreving =
-                        eksisterende.tilbakekreving.copy(
+                        tilbakekreving.tilbakekreving.copy(
                             vurdering = vurdering,
                         ),
                 ),
@@ -130,18 +127,20 @@ class TilbakekrevingService(
     fun lagrePerioder(
         tilbakekrevingId: UUID,
         perioder: List<TilbakekrevingPeriode>,
+        saksbehandler: Saksbehandler,
     ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Lagrer perioder for tilbakekreving=$tilbakekrevingId")
-            val eksisterende = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
-            if (!eksisterende.underBehandling()) {
-                throw TilbakekrevingFeilTilstandException("Tilbakekreving er ikke under behandling")
-            }
+            val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+
+            sjekkAtTilbakekrevingErUnderBehandling(tilbakekreving)
+            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
+
             tilbakekrevingDao.lagreTilbakekreving(
-                eksisterende.copy(
+                tilbakekreving.copy(
                     status = TilbakekrevingStatus.UNDER_ARBEID,
                     tilbakekreving =
-                        eksisterende.tilbakekreving.copy(
+                        tilbakekreving.tilbakekreving.copy(
                             perioder = perioder,
                         ),
                 ),
@@ -151,15 +150,17 @@ class TilbakekrevingService(
     fun lagreSkalSendeBrev(
         tilbakekrevingId: UUID,
         sendeBrev: Boolean,
+        saksbehandler: Saksbehandler,
     ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Lagrer om brev skal sendes for tilbakekreving=$tilbakekrevingId")
-            val eksisterende = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
-            if (!eksisterende.underBehandling()) {
-                throw TilbakekrevingFeilTilstandException("Tilbakekreving er ikke under behandling")
-            }
+            val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+
+            sjekkAtTilbakekrevingErUnderBehandling(tilbakekreving)
+            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
+
             tilbakekrevingDao.lagreTilbakekreving(
-                eksisterende.copy(
+                tilbakekreving.copy(
                     sendeBrev = sendeBrev,
                 ),
             )
@@ -167,16 +168,15 @@ class TilbakekrevingService(
 
     fun validerVurderingOgPerioder(
         tilbakekrevingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Sjekker at vurdering og perioder er gyldig for tilbakekreving=$tilbakekrevingId")
             val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
-            if (!tilbakekreving.underBehandling()) {
-                throw TilbakekrevingFeilTilstandException("Tilbakekreving er ikke under behandling")
-            }
 
-            tilbakekreving.validerVurderingOgPerioder()
+            sjekkAtTilbakekrevingErUnderBehandling(tilbakekreving)
+            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
+            sjekkAtTilbakekrevingErGyldig(tilbakekreving)
 
             val lagretTilbakekreving =
                 tilbakekrevingDao.lagreTilbakekreving(
@@ -185,13 +185,16 @@ class TilbakekrevingService(
                     ),
                 )
 
-            logger.info("Oppretter eller oppdaterer vedtak for tilbakekreving=$tilbakekrevingId")
             runBlocking {
-                vedtakKlient.lagreVedtakTilbakekreving(
-                    tilbakekrevingBehandling = lagretTilbakekreving,
-                    brukerTokenInfo = brukerTokenInfo,
-                    enhet = lagretTilbakekreving.sak.enhet,
-                )
+                logger.info("Oppretter eller oppdaterer vedtak for tilbakekreving=$tilbakekrevingId")
+                val vedtakId =
+                    vedtakKlient.lagreVedtakTilbakekreving(
+                        tilbakekrevingBehandling = lagretTilbakekreving,
+                        brukerTokenInfo = saksbehandler,
+                        enhet = lagretTilbakekreving.sak.enhet,
+                    )
+
+                logger.info("Lagret vedtak med vedtakId $vedtakId for tilbakekreving $tilbakekrevingId")
             }
 
             lagretTilbakekreving
@@ -199,18 +202,16 @@ class TilbakekrevingService(
 
     suspend fun fattVedtak(
         tilbakekrevingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ) = inTransaction {
         logger.info("Fatter vedtak for tilbakekreving=$tilbakekrevingId")
         val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
-        if (!tilbakekreving.gyldigForVedtak()) {
-            throw TilbakekrevingFeilTilstandException(
-                "Tilbakekreving har ikke gyldig status for vedtak (${tilbakekreving.status}",
-            )
-        }
+
+        sjekkAtTilbakekrevingErGyldigForVedtak(tilbakekreving)
+        sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
 
         runBlocking {
-            val vedtaksbrev = brevApiKlient.hentVedtaksbrev(tilbakekrevingId, brukerTokenInfo)
+            val vedtaksbrev = brevApiKlient.hentVedtaksbrev(tilbakekrevingId, saksbehandler)
             if (tilbakekreving.sendeBrev && vedtaksbrev == null) {
                 throw TilbakekrevingManglerBrevException(
                     "Kan ikke fatte tilbakekrevingsvedtak uten vedtaksbrev når dette er spesifisert",
@@ -218,7 +219,7 @@ class TilbakekrevingService(
             }
             if (!tilbakekreving.sendeBrev && vedtaksbrev != null) {
                 logger.info("Sletter ubrukt vedtaksbrev med id ${vedtaksbrev.id}")
-                brevApiKlient.slettVedtaksbrev(tilbakekrevingId, brukerTokenInfo)
+                brevApiKlient.slettVedtaksbrev(tilbakekrevingId, saksbehandler)
             }
         }
 
@@ -226,12 +227,15 @@ class TilbakekrevingService(
             runBlocking {
                 vedtakKlient.fattVedtakTilbakekreving(
                     tilbakekrevingId = tilbakekreving.id,
-                    brukerTokenInfo = brukerTokenInfo,
+                    brukerTokenInfo = saksbehandler,
                     enhet = tilbakekreving.sak.enhet,
                 )
             }
 
-        tilbakekrevingDao.lagreTilbakekreving(tilbakekreving.copy(status = TilbakekrevingStatus.FATTET_VEDTAK))
+        val oppdatertTilbakekreving =
+            tilbakekrevingDao.lagreTilbakekreving(
+                tilbakekreving.copy(status = TilbakekrevingStatus.FATTET_VEDTAK),
+            )
 
         hendelseDao.vedtakHendelse(
             behandlingId = tilbakekreving.id,
@@ -239,20 +243,12 @@ class TilbakekrevingService(
             vedtakId = vedtakId,
             hendelse = HendelseType.FATTET,
             inntruffet = Tidspunkt.now(),
-            saksbehandler = brukerTokenInfo.ident(),
-            kommentar = null,
-            begrunnelse = null,
+            saksbehandler = saksbehandler.ident(),
         )
 
-        val statistikkTilbakekrevingDto =
-            StatistikkTilbakekrevingDto(
-                tilbakekreving.id,
-                tilbakekreving,
-                Tidspunkt.now(),
-            )
         tilbakekrevinghendelser.sendTilbakekreving(
-            statistikkTilbakekrevingDto,
-            TilbakekrevingHendelseType.FATTET_VEDTAK,
+            statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
+            type = TilbakekrevingHendelseType.FATTET_VEDTAK,
         )
 
         oppgaveService.tilAttestering(
@@ -260,128 +256,201 @@ class TilbakekrevingService(
             type = OppgaveType.TILBAKEKREVING,
             merknad = "Tilbakekreving kan attesteres",
         )
+
+        oppdatertTilbakekreving
     }
 
     suspend fun attesterVedtak(
         tilbakekrevingId: UUID,
         kommentar: String,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = inTransaction {
-        logger.info("Attesterer vedtak for tilbakekreving=$tilbakekrevingId")
-        val behandling = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
-        if (behandling.status != TilbakekrevingStatus.FATTET_VEDTAK) {
-            throw TilbakekrevingFeilTilstandException("Tilbakekreving kan ikke attesteres fordi vedtak ikke er fattet")
-        }
+        saksbehandler: Saksbehandler,
+    ): TilbakekrevingBehandling =
+        inTransaction {
+            logger.info("Attesterer vedtak for tilbakekreving=$tilbakekrevingId")
+            val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
 
-        if (behandling.sendeBrev) {
-            logger.info("Sender vedtaksbrev for tilbakekreving=$tilbakekrevingId")
-            runBlocking { brevApiKlient.ferdigstillVedtaksbrev(tilbakekrevingId, behandling.sak.id, brukerTokenInfo) }
-        } else {
-            logger.info("Skal ikke sende vedtaksbrev for tilbakekreving=$tilbakekrevingId")
-        }
+            sjekkForventetStatus(tilbakekreving, TilbakekrevingStatus.FATTET_VEDTAK)
+            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
 
-        val vedtak =
+            if (tilbakekreving.sendeBrev) {
+                logger.info("Ferdigstiller vedtaksbrev for tilbakekreving=$tilbakekrevingId")
+                runBlocking { brevApiKlient.ferdigstillVedtaksbrev(tilbakekrevingId, tilbakekreving.sak.id, saksbehandler) }
+            } else {
+                logger.info("Skal ikke sende vedtaksbrev for tilbakekreving=$tilbakekrevingId")
+            }
+
+            val vedtak =
+                runBlocking {
+                    vedtakKlient.attesterVedtakTilbakekreving(
+                        tilbakekrevingId = tilbakekreving.id,
+                        brukerTokenInfo = saksbehandler,
+                        enhet = tilbakekreving.sak.enhet,
+                    )
+                }
+
+            val oppdatertTilbakekreving =
+                tilbakekrevingDao.lagreTilbakekreving(
+                    tilbakekreving.copy(status = TilbakekrevingStatus.ATTESTERT),
+                )
+
+            hendelseDao.vedtakHendelse(
+                behandlingId = tilbakekreving.id,
+                sakId = tilbakekreving.sak.id,
+                vedtakId = vedtak.id,
+                hendelse = HendelseType.ATTESTERT,
+                inntruffet = Tidspunkt.now(),
+                saksbehandler = saksbehandler.ident(),
+                kommentar = kommentar,
+                begrunnelse = null,
+            )
+
+            oppgaveService.ferdigStillOppgaveUnderBehandling(
+                referanse = tilbakekreving.id.toString(),
+                type = OppgaveType.TILBAKEKREVING,
+                saksbehandler = saksbehandler,
+            )
+
+            tilbakekrevinghendelser.sendTilbakekreving(
+                statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
+                type = TilbakekrevingHendelseType.ATTESTERT,
+            )
+
             runBlocking {
-                vedtakKlient.attesterVedtakTilbakekreving(
-                    tilbakekrevingId = behandling.id,
-                    brukerTokenInfo = brukerTokenInfo,
-                    enhet = behandling.sak.enhet,
+                tilbakekrevingKlient.sendTilbakekrevingsvedtak(
+                    saksbehandler,
+                    tilbakekrevingVedtak(tilbakekreving, vedtak),
                 )
             }
 
-        tilbakekrevingDao.lagreTilbakekreving(behandling.copy(status = TilbakekrevingStatus.ATTESTERT))
-
-        hendelseDao.vedtakHendelse(
-            behandlingId = behandling.id,
-            sakId = behandling.sak.id,
-            vedtakId = vedtak.id,
-            hendelse = HendelseType.ATTESTERT,
-            inntruffet = Tidspunkt.now(),
-            saksbehandler = brukerTokenInfo.ident(),
-            kommentar = kommentar,
-            begrunnelse = null,
-        )
-
-        oppgaveService.ferdigStillOppgaveUnderBehandling(
-            referanse = behandling.id.toString(),
-            type = OppgaveType.TILBAKEKREVING,
-            saksbehandler = brukerTokenInfo,
-        )
-
-        val statistikkTilbakekrevingDto =
-            StatistikkTilbakekrevingDto(
-                behandling.id,
-                behandling,
-                Tidspunkt.now(),
-            )
-
-        tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.ATTESTERT)
-
-        runBlocking {
-            tilbakekrevingKlient.sendTilbakekrevingsvedtak(
-                brukerTokenInfo,
-                TilbakekrevingVedtak(
-                    vedtakId = behandling.tilbakekreving.kravgrunnlag.vedtakId.value,
-                    fattetVedtak =
-                        FattetVedtak(
-                            saksbehandler = vedtak.fattetAv,
-                            enhet = vedtak.enhet,
-                            dato = vedtak.dato,
-                        ),
-                    aarsak = requireNotNull(behandling.tilbakekreving.vurdering?.aarsak),
-                    hjemmel = requireNotNull(behandling.tilbakekreving.vurdering?.hjemmel),
-                    kravgrunnlagId = behandling.tilbakekreving.kravgrunnlag.kravgrunnlagId.value.toString(),
-                    kontrollfelt = behandling.tilbakekreving.kravgrunnlag.kontrollFelt.value,
-                    perioder =
-                        behandling.tilbakekreving.perioder.map {
-                            TilbakekrevingPeriodeVedtak(
-                                maaned = it.maaned,
-                                ytelse = it.ytelse.toYtelseVedtak(),
-                                feilkonto = it.feilkonto.toFeilkontoVedtak(),
-                            )
-                        },
-                ),
-            )
+            oppdatertTilbakekreving
         }
-    }
 
     suspend fun underkjennVedtak(
         tilbakekrevingId: UUID,
         kommentar: String,
         valgtBegrunnelse: String,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = inTransaction {
-        logger.info("Underkjenner vedtak for tilbakekreving=$tilbakekrevingId")
-        val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
-        if (tilbakekreving.status != TilbakekrevingStatus.FATTET_VEDTAK) {
-            throw TilbakekrevingFeilTilstandException("Tilbakekreving kan ikke underkjennes fordi vedtak ikke er fattet")
+        saksbehandler: Saksbehandler,
+    ): TilbakekrevingBehandling =
+        inTransaction {
+            logger.info("Underkjenner vedtak for tilbakekreving=$tilbakekrevingId")
+            val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+
+            sjekkForventetStatus(tilbakekreving, TilbakekrevingStatus.FATTET_VEDTAK)
+            sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(tilbakekreving.id, saksbehandler)
+
+            val vedtakId =
+                runBlocking {
+                    vedtakKlient.underkjennVedtakTilbakekreving(
+                        tilbakekrevingId = tilbakekreving.id,
+                        brukerTokenInfo = saksbehandler,
+                    )
+                }
+
+            val oppdatertTilbakekreving =
+                tilbakekrevingDao.lagreTilbakekreving(tilbakekreving.copy(status = TilbakekrevingStatus.UNDERKJENT))
+
+            hendelseDao.vedtakHendelse(
+                behandlingId = tilbakekreving.id,
+                sakId = tilbakekreving.sak.id,
+                vedtakId = vedtakId,
+                hendelse = HendelseType.UNDERKJENT,
+                inntruffet = Tidspunkt.now(),
+                saksbehandler = saksbehandler.ident(),
+                kommentar = kommentar,
+                begrunnelse = valgtBegrunnelse,
+            )
+
+            oppgaveService.tilUnderkjent(
+                referanse = tilbakekreving.id.toString(),
+                type = OppgaveType.TILBAKEKREVING,
+                merknad = listOfNotNull(valgtBegrunnelse, kommentar).joinToString(separator = ": "),
+            )
+
+            tilbakekrevinghendelser.sendTilbakekreving(
+                statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
+                type = TilbakekrevingHendelseType.UNDERKJENT,
+            )
+
+            oppdatertTilbakekreving
         }
 
-        val vedtakId =
-            runBlocking {
-                vedtakKlient.underkjennVedtakTilbakekreving(
-                    tilbakekrevingId = tilbakekreving.id,
-                    brukerTokenInfo = brukerTokenInfo,
+    private fun sjekkAtTilbakekrevingErGyldig(tilbakekreving: TilbakekrevingBehandling) {
+        tilbakekreving.validerVurderingOgPerioder()
+    }
+
+    private fun tilbakekrevingVedtak(
+        tilbakekreving: TilbakekrevingBehandling,
+        vedtak: TilbakekrevingVedtakLagretDto,
+    ) = TilbakekrevingVedtak(
+        vedtakId = tilbakekreving.tilbakekreving.kravgrunnlag.vedtakId.value,
+        fattetVedtak =
+            FattetVedtak(
+                saksbehandler = vedtak.fattetAv,
+                enhet = vedtak.enhet,
+                dato = vedtak.dato,
+            ),
+        aarsak = requireNotNull(tilbakekreving.tilbakekreving.vurdering?.aarsak),
+        hjemmel = requireNotNull(tilbakekreving.tilbakekreving.vurdering?.hjemmel),
+        kravgrunnlagId = tilbakekreving.tilbakekreving.kravgrunnlag.kravgrunnlagId.value.toString(),
+        kontrollfelt = tilbakekreving.tilbakekreving.kravgrunnlag.kontrollFelt.value,
+        perioder =
+            tilbakekreving.tilbakekreving.perioder.map {
+                TilbakekrevingPeriodeVedtak(
+                    maaned = it.maaned,
+                    ytelse = it.ytelse.toYtelseVedtak(),
+                    feilkonto = it.feilkonto.toFeilkontoVedtak(),
                 )
-            }
+            },
+    )
 
-        tilbakekrevingDao.lagreTilbakekreving(tilbakekreving.copy(status = TilbakekrevingStatus.UNDERKJENT))
-
-        hendelseDao.vedtakHendelse(
-            behandlingId = tilbakekreving.id,
-            sakId = tilbakekreving.sak.id,
-            vedtakId = vedtakId,
-            hendelse = HendelseType.UNDERKJENT,
-            inntruffet = Tidspunkt.now(),
-            saksbehandler = brukerTokenInfo.ident(),
-            kommentar = kommentar,
-            begrunnelse = valgtBegrunnelse,
+    private fun tilbakekrevingForStatistikk(tilbakekreving: TilbakekrevingBehandling) =
+        StatistikkTilbakekrevingDto(
+            tilbakekreving.id,
+            tilbakekreving,
+            Tidspunkt.now(),
         )
 
-        oppgaveService.tilUnderkjent(
-            referanse = tilbakekreving.id.toString(),
-            type = OppgaveType.TILBAKEKREVING,
-            merknad = listOfNotNull(valgtBegrunnelse, kommentar).joinToString(separator = ": "),
-        )
+    private fun sjekkForventetStatus(
+        tilbakekreving: TilbakekrevingBehandling,
+        forventetStatus: TilbakekrevingStatus,
+    ) {
+        if (tilbakekreving.status != forventetStatus) {
+            throw TilbakekrevingFeilTilstandException(
+                "Tilbakekreving har status ${tilbakekreving.status} men forventet $forventetStatus",
+            )
+        }
+    }
+
+    private fun sjekkAtTilbakekrevingErUnderBehandling(tilbakekreving: TilbakekrevingBehandling) {
+        if (!tilbakekreving.underBehandling()) {
+            throw TilbakekrevingFeilTilstandException(
+                "Tilbakekreving har status ${tilbakekreving.status} og er ikke under behandling",
+            )
+        }
+    }
+
+    private fun sjekkAtTilbakekrevingErGyldigForVedtak(tilbakekreving: TilbakekrevingBehandling) {
+        if (!tilbakekreving.gyldigForVedtak()) {
+            throw TilbakekrevingFeilTilstandException(
+                "Tilbakekreving har status ${tilbakekreving.status} og er ikke gyldig for vedtak",
+            )
+        }
+    }
+
+    private fun sjekkAtOppgavenErTildeltSaksbehandlerOgErUnderBehandling(
+        tilbakekrevingId: UUID,
+        saksbehandler: Saksbehandler,
+    ) {
+        val oppgaveUnderBehandling =
+            oppgaveService.hentOppgaveUnderBehandling(tilbakekrevingId.toString())
+                ?: throw TilbakekrevingFeilTilstandException(
+                    "Oppgaven tilknyttet tilbakekreving $tilbakekrevingId er ikke under behandling",
+                )
+
+        if (oppgaveUnderBehandling.saksbehandler?.ident != saksbehandler.ident()) {
+            throw TilbakekrevingFeilTilstandException(
+                "Saksbehandler ${saksbehandler.ident()} er ikke tilknyttet oppgave ${oppgaveUnderBehandling.id}",
+            )
+        }
     }
 }

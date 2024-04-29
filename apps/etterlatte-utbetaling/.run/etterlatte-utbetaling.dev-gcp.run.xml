@@ -24,18 +24,26 @@
       <env name="GRENSESNITTAVSTEMMING_OMS_ENABLED" value="true" />
       <env name="KONSISTENSAVSTEMMING_ENABLED" value="true" />
       <env name="KONSISTENSAVSTEMMING_OMS_ENABLED" value="true" />
+      <env name="ETTERLATTE_VEDTAK_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-vedtaksvurdering" />
+      <env name="ETTERLATTE_VEDTAK_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
+      <env name="ETTERLATTE_BEHANDLING_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-behandling" />
+      <env name="ETTERLATTE_BEHANDLING_URL" value="https://etterlatte-behandling.intern.dev.nav.no" />
+      <env name="ETTERLATTE_PROXY_SCOPE" value="api://dev-fss.etterlatte.etterlatte-proxy/.default" />
+      <env name="ETTERLATTE_PROXY_URL" value="https://etterlatte-proxy.dev-fss-pub.nais.io/aad" />
+      <env name="ELECTOR_PATH" value="http://localhost:8096" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-utbetaling.main" />
     <shortenClasspath name="NONE" />
     <extension name="net.ashald.envfile">
-      <option name="IS_ENABLED" value="false" />
+      <option name="IS_ENABLED" value="true" />
       <option name="IS_SUBST" value="false" />
       <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
       <option name="IS_IGNORE_MISSING_FILES" value="false" />
       <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
       <ENTRIES>
         <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="apps/etterlatte-utbetaling/.env.dev-gcp" />
       </ENTRIES>
     </extension>
     <method v="2">

@@ -89,6 +89,11 @@ interface OppgaveDao {
         oppgaver: List<UUID>,
         grense: Int,
     ): List<VentefristGaarUt>
+
+    fun hentOppgaverTilSaker(
+        saker: List<Long>,
+        oppgaveStatuser: List<String>,
+    ): List<OppgaveIntern>
 }
 
 class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) : OppgaveDao {
@@ -213,6 +218,35 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setString(5, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
                 statement.setBoolean(6, minOppgavelisteIdentFilter == null)
                 statement.setString(7, minOppgavelisteIdentFilter)
+
+                statement.executeQuery().toList {
+                    asOppgave()
+                }.also { oppgaveliste ->
+                    logger.info("Hentet antall nye oppgaver: ${oppgaveliste.size}")
+                }
+            }
+        }
+    }
+
+    override fun hentOppgaverTilSaker(
+        saker: List<Long>,
+        oppgaveStatuser: List<String>,
+    ): List<OppgaveIntern> {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde
+                        FROM oppgave o 
+                        WHERE (? OR o.status = ANY(?))
+                        AND o.sak_id = ANY(?)
+                        """.trimIndent(),
+                    )
+
+                statement.setBoolean(1, oppgaveStatuser.isEmpty() || oppgaveStatuser.contains(VISALLE))
+                statement.setArray(2, createArrayOf("text", oppgaveStatuser.toTypedArray()))
+                statement.setArray(3, createArrayOf("bigint", saker.toTypedArray()))
 
                 statement.executeQuery().toList {
                     asOppgave()

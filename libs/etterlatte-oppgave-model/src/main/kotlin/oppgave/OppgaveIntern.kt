@@ -82,6 +82,13 @@ enum class Status {
     fun erUnderBehandling(): Boolean = this in listOf(UNDER_BEHANDLING, PAA_VENT, ATTESTERING, UNDERKJENT)
 
     fun erFerdigstilt(): Boolean = this == FERDIGSTILT
+
+    companion object {
+        fun skalOmregnesVedGRegulering() =
+            listOf(
+                ATTESTERING,
+            )
+    }
 }
 
 enum class OppgaveKilde {

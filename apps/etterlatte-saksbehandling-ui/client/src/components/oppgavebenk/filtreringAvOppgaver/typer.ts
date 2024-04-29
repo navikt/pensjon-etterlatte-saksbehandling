@@ -42,7 +42,7 @@ export const OPPGAVESTATUSFILTER: Record<OppgavestatusFilterKeys, string> = {
   UNDER_BEHANDLING: 'Under behandling',
   ATTESTERING: 'Attestering',
   UNDERKJENT: 'Underkjent',
-  PAA_VENT: 'På Vent',
+  PAA_VENT: 'På vent',
   FERDIGSTILT: 'Ferdigstilt',
   FEILREGISTRERT: 'Feilregistrert',
   AVBRUTT: 'Avbrutt',

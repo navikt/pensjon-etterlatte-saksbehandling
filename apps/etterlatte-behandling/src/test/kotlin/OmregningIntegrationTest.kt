@@ -122,7 +122,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 iverksettFoerstegangsbehandling(sak, behandling)
                 val (omregning) =
                     client.post("/omregning") {
-                        addAuthToken(systemBruker)
+                        addAuthToken(this@OmregningIntegrationTest.systemBruker)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         setBody(
                             Omregningshendelse(
@@ -161,7 +161,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 }
 
             client.post("/omregning") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@OmregningIntegrationTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(Omregningshendelse(sak.id, LocalDate.now(), null, Prosesstype.AUTOMATISK))
             }.also {

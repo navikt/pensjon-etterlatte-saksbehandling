@@ -3,6 +3,9 @@ package no.nav.etterlatte.testdata.automatisk
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import no.nav.etterlatte.behandling.VirkningstidspunktRequest
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
+import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -102,5 +105,28 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
                 failure = { err -> throw err },
             )
         }
+    }
+
+    suspend fun lagreBrevutfall(behandling: UUID) {
+        klient.post(
+            Resource(clientId, "$url/api/behandling/$behandling/info/brevutfall"),
+            Systembruker.testdata,
+            BrevutfallOgEtterbetalingDto(
+                behandlingId = behandling,
+                opphoer = null,
+                etterbetaling = null,
+                brevutfall =
+                    BrevutfallDto(
+                        behandlingId = behandling,
+                        aldersgruppe = Aldersgruppe.UNDER_18,
+                        lavEllerIngenInntekt = null,
+                        feilutbetaling = null,
+                        kilde = null,
+                    ),
+            ),
+        ).mapBoth(
+            success = {},
+            failure = { throw it },
+        )
     }
 }

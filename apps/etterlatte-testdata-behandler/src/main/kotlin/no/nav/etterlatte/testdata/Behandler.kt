@@ -74,7 +74,9 @@ class Behandler(
             return
         }
 
-        logger.info("Fatta vedtak for behandling $behandling. Klar til å lage og distribuere varselbrev")
+        logger.info("Fatta vedtak for behandling $behandling. Klar til å lagre brevutfall")
+        sakService.lagreBrevutfall(behandling)
+        logger.info("Ferdig med å lagre brevutfall for behandling $behandling. Klar til å lage og distribuere varselbrev")
         brevService.opprettOgDistribuerVedtaksbrev(sakId, behandling)
         vedtaksvurderingService.attesterOgIverksettVedtak(sakId, behandling)
         logger.info("Ferdig iverksatt behandling $behandling i sak $sakId")

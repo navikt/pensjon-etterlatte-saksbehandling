@@ -8,7 +8,7 @@ export const hentGosysOppgaver = async (filter: GosysFilter): Promise<ApiRespons
   const queryParams = new URLSearchParams({
     saksbehandler: filter.saksbehandlerFilter || '',
     tema: filter.temaFilter || '',
-    enhet: filter.enhetFilter ? filter.enhetFilter.replace('E', '') : '',
+    enhet: !!filter.enhetFilter && filter.enhetFilter !== 'visAlle' ? filter.enhetFilter.replace('E', '') : '',
     harTildeling: filter.harTildelingFilter === false ? filter.harTildelingFilter.toString() : '',
   })
 

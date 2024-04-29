@@ -23,7 +23,7 @@ class BrevService(private val klient: DownstreamResourceClient, private val url:
         behandlingId: UUID,
         sakId: Long,
     ): Brev =
-        klient.post(Resource(clientId, "$url/brev/behandling/$behandlingId/vedtak?sakId=$sakId"), Systembruker.testdata) {}
+        klient.post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak?sakId=$sakId"), Systembruker.testdata) {}
             .mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                 failure = { throw it },
@@ -32,9 +32,9 @@ class BrevService(private val klient: DownstreamResourceClient, private val url:
     private suspend fun genererPDF(
         behandlingId: UUID,
         brev: Brev,
-    ) = klient.post(Resource(clientId, "$url/brev/behandling/$behandlingId/vedtak/pdf?brevId=${brev.id}"), Systembruker.testdata) {}
+    ) = klient.post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak/pdf?brevId=${brev.id}"), Systembruker.testdata) {}
 
     private suspend fun ferdigstillBrev(behandlingId: UUID) =
-        klient.post(Resource(clientId, "$url/brev/behandling/$behandlingId/vedtak/ferdigstill"), Systembruker.testdata) {
+        klient.post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak/ferdigstill"), Systembruker.testdata) {
         }
 }

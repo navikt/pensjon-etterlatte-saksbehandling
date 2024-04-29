@@ -183,7 +183,10 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
     behandlingInfoRoutes(applicationContext.behandlingInfoService)
     gosysOppgaveRoute(applicationContext.gosysOppgaveService)
     oppgaveRoutes(applicationContext.oppgaveService)
-    grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = applicationContext.grunnlagsendringshendelseService)
+    grunnlagsendringshendelseRoute(
+        grunnlagsendringshendelseService = applicationContext.grunnlagsendringshendelseService,
+        omregningService = applicationContext.omregningService,
+    )
     doedshendelseRoute(doedshendelseService = applicationContext.doedshendelseService)
     egenAnsattRoute(
         egenAnsattService =

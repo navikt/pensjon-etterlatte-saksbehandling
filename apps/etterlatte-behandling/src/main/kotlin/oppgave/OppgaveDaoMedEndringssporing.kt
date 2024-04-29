@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
@@ -19,6 +20,8 @@ import java.util.UUID
 
 interface OppgaveDaoMedEndringssporing : OppgaveDao {
     fun hentEndringerForOppgave(oppgaveId: UUID): List<OppgaveEndring>
+
+    fun tilbakestillOppgaveUnderAttestering(saker: Saker)
 }
 
 class OppgaveDaoMedEndringssporingImpl(
@@ -205,4 +208,26 @@ class OppgaveDaoMedEndringssporingImpl(
         oppgaver: List<UUID>,
         grense: Int,
     ) = oppgaveDao.hentFristGaarUt(dato, type, kilde, oppgaver, grense)
+
+    override fun hentOppgaverTilSaker(
+        saker: List<Long>,
+        oppgaveStatuser: List<String>,
+    ) = oppgaveDao.hentOppgaverTilSaker(saker, oppgaveStatuser)
+
+    override fun tilbakestillOppgaveUnderAttestering(saker: Saker) {
+        val oppgaverTilAttestering =
+            hentOppgaverTilSaker(
+                saker.saker.map { it.id },
+                listOf(Status.ATTESTERING.name),
+            )
+        oppgaverTilAttestering.forEach {
+            lagreEndringerPaaOppgave(it.id) {
+                oppgaveDao.oppdaterStatusOgMerknad(
+                    oppgaveId = it.id,
+                    merknad = it.merknad ?: "",
+                    oppgaveStatus = Status.UNDER_BEHANDLING,
+                )
+            }
+        }
+    }
 }

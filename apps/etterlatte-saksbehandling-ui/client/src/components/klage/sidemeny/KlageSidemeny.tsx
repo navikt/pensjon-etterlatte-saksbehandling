@@ -19,7 +19,7 @@ import { AttesteringEllerUnderkjenning } from '~components/behandling/attesterin
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { FlexRow } from '~shared/styled'
-import { useSaksbehandlerPaaOppgaveUnderArbeidForReferanse } from '~shared/hooks/useSaksbehandlerPaaOppgaveUnderArbeidForReferanse'
+import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export function KlageSidemeny() {
@@ -46,10 +46,7 @@ export function KlageSidemeny() {
       </Sidebar>
     )
   }
-  const [saksbehandlerForOppgaveResult] = useSaksbehandlerPaaOppgaveUnderArbeidForReferanse({
-    referanse: klage.id,
-    sakId: klage.sak.id,
-  })
+  const [oppgaveResult] = useOppgaveUnderBehandling({ referanse: klage.id })
 
   return (
     <Sidebar>
@@ -109,7 +106,7 @@ export function KlageSidemeny() {
         </>
       )}
       {isFailureHandler({
-        apiResult: saksbehandlerForOppgaveResult,
+        apiResult: oppgaveResult,
         errorMessage: 'Kunne ikke hente saksbehandler gjeldende oppgave. Husk å tildele oppgaven.',
       })}
       <DokumentlisteLiten fnr={klage.sak.ident} />

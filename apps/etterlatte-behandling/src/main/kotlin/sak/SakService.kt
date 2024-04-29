@@ -33,7 +33,10 @@ import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
 interface SakService {
-    fun hentSaker(): List<Sak>
+    fun hentSaker(
+        kjoering: String,
+        antall: Int,
+    ): List<Sak>
 
     fun finnSaker(person: String): List<Sak>
 
@@ -127,8 +130,11 @@ class SakServiceImpl(
         return brukerService.finnNavkontorForPerson(fnr, sak.sakType)
     }
 
-    override fun hentSaker(): List<Sak> {
-        return dao.hentSaker().filterForEnheter()
+    override fun hentSaker(
+        kjoering: String,
+        antall: Int,
+    ): List<Sak> {
+        return dao.hentSaker(kjoering, antall).filterForEnheter()
     }
 
     private fun finnSakerForPerson(person: String) = dao.finnSaker(person)

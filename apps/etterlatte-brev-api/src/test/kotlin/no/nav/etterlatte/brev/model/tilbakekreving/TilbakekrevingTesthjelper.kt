@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model.tilbakekreving
 
+import no.nav.etterlatte.libs.common.UUID30
 import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseKode
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
@@ -19,7 +20,6 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVarsel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
-import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
 import java.math.BigDecimal
 import java.time.LocalDate

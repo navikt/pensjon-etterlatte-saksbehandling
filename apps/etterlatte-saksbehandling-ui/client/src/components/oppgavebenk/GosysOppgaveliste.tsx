@@ -53,7 +53,7 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
     }
   }
 
-  const hentOppgaver = (filter: GosysFilter) => {
+  const hentOppgaver = () => {
     hentGosysOppgaverFetch(filter, (oppgaver) => {
       dispatcher.setGosysOppgavelisteOppgaver(sorterOppgaverEtterOpprettet(oppgaver))
     })
@@ -61,7 +61,7 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
 
   useEffect(() => {
     leggGosysOppgaverFilterILocalStorage(filter)
-    hentOppgaver(filter)
+    hentOppgaver()
   }, [filter])
 
   return (
@@ -83,7 +83,7 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
       </GosysOppgaveValgToggleGroup>
 
       <GosysFilterRad
-        hentAlleOppgaver={() => hentOppgaver(filter)}
+        hentAlleOppgaver={hentOppgaver}
         filter={filter}
         setFilter={setFilter}
         filterFoedselsnummer={setFnrFilter}

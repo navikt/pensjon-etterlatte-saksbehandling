@@ -94,7 +94,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 }
 
             client.get("/behandlinger/$behandlingId") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@AdressebeskyttelseTest.systemBruker)
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -106,7 +106,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }
 
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@AdressebeskyttelseTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
@@ -131,7 +131,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }
             // systemBruker skal alltid ha tilgang
             client.get("/behandlinger/$behandlingId") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@AdressebeskyttelseTest.systemBruker)
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -182,7 +182,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }
 
             httpClient.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@AdressebeskyttelseTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
@@ -234,7 +234,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 }
 
             client.get("/behandlinger/$behandlingId") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@AdressebeskyttelseTest.systemBruker)
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -249,7 +249,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             Assertions.assertTrue(harTilgang)
 
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@AdressebeskyttelseTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(
@@ -290,7 +290,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }.body<Sak>()
 
             httpClient.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@AdressebeskyttelseTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(

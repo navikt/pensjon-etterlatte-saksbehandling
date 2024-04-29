@@ -71,8 +71,7 @@ export const GosysFilterRad = ({ hentAlleOppgaver, filter, setFilter, filterFoed
         <Button
           variant="secondary"
           onClick={() => {
-            setFilter({})
-            hentAlleOppgaver()
+            setFilter({ enhetFilter: 'visAlle' })
           }}
           size="small"
           icon={<ArrowUndoIcon />}

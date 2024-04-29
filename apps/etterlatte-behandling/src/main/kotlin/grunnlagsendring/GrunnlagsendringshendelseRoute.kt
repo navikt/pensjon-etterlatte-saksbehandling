@@ -2,16 +2,15 @@ package no.nav.etterlatte.grunnlagsendring
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
-import io.ktor.server.application.log
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
+import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -22,12 +21,19 @@ import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.common.sak.KjoeringRequest
+import no.nav.etterlatte.libs.common.sak.KjoeringStatus
+import no.nav.etterlatte.libs.common.sak.ReguleringFeiletHendelse
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 
-internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseService: GrunnlagsendringshendelseService) {
-    val logger = application.log
+internal fun Route.grunnlagsendringshendelseRoute(
+    grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
+    omregningService: OmregningService,
+) {
+    val logger = routeLogger
 
     route("/grunnlagsendringshendelse") {
         post("/doedshendelse") {
@@ -109,6 +115,13 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
                 val hendelse = call.receive<ReguleringFeiletHendelse>()
                 logger.info("Motter hendelse om at regulering har feilet i sak ${hendelse.sakId}")
                 grunnlagsendringshendelseService.opprettEndretGrunnbeloepHendelse(hendelse.sakId)
+                omregningService.oppdaterKjoering(
+                    KjoeringRequest(
+                        hendelse.kjoering,
+                        KjoeringStatus.FEILA,
+                        hendelse.sakId,
+                    ),
+                )
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -134,5 +147,3 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
 }
 
 data class GrunnlagsendringsListe(val hendelser: List<Grunnlagsendringshendelse>)
-
-data class ReguleringFeiletHendelse(val sakId: Long)

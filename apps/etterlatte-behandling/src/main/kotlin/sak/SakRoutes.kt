@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.behandling.ForenkletBehandling
 import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
-import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -40,6 +39,9 @@ import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
+const val KJOERING = "kjoering"
+const val ANTALL = "antall"
+
 internal fun Route.sakSystemRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
@@ -49,9 +51,11 @@ internal fun Route.sakSystemRoutes(
     val logger = LoggerFactory.getLogger(this::class.java)
 
     route("/saker") {
-        get {
+        get("/$KJOERING/$ANTALL") {
             kunSystembruker {
-                call.respond(Saker(inTransaction { sakService.hentSaker() }))
+                val kjoering = call.parameters[KJOERING]!!
+                val antall = call.parameters[ANTALL]!!.toInt()
+                call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall) }))
             }
         }
 
@@ -295,11 +299,6 @@ internal fun Route.sakWebRoutes(
         }
     }
 }
-
-data class UtlandstilknytningRequest(
-    val utlandstilknytningType: UtlandstilknytningType,
-    val begrunnelse: String,
-)
 
 data class EnhetRequest(
     val enhet: String,

@@ -5,8 +5,10 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.Hook
 import io.ktor.server.application.RouteScopedPlugin
+import io.ktor.server.application.application
 import io.ktor.server.application.call
 import io.ktor.server.application.createRouteScopedPlugin
+import io.ktor.server.application.log
 import io.ktor.server.request.path
 import io.ktor.server.request.receive
 import io.ktor.server.request.uri
@@ -23,8 +25,6 @@ import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.sak.TilgangService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 class PluginConfiguration {
     var harTilgangBehandling: (behandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
@@ -151,12 +151,11 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
     }
 }
 
-val logger: Logger = LoggerFactory.getLogger("Skrivetilgang")
-
 fun PipelineContext<*, ApplicationCall>.sjekkSkrivetilgang(
     sakId: Long? = null,
     enhetNr: String? = null,
 ): Boolean {
+    application.log.debug("Sjekker skrivetilgang")
     return when (val user = Kontekst.get().AppUser) {
         is SaksbehandlerMedEnheterOgRoller -> {
             val enhetNrSomSkalTestes =
@@ -182,7 +181,7 @@ private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: Lo
     }
     val funnetCallIdParametersType = CallParamAuthId.entries.firstOrNull { call.parameters.contains(it.value) }
     return if (funnetCallIdParametersType == null) {
-        logger.warn("Fant ingen pathparam i url: ${call.request.path()} params: ${call.parameters}")
+        application.log.warn("Fant ingen pathparam i url: ${call.request.path()} params: ${call.parameters}")
         null
     } else {
         val idForRequest = call.parameters[funnetCallIdParametersType.value]!!
@@ -204,13 +203,14 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(
     enhetNr: String? = null,
     onSuccess: () -> Unit,
 ) {
+    application.log.debug("Sjekker skrivetilgang")
     when (sjekkSkrivetilgang(sakId, enhetNr)) {
         true -> {
-            logger.debug("Har skrivetilgang, fortsetter")
+            application.log.debug("Har skrivetilgang, fortsetter")
             onSuccess()
         }
         false -> {
-            logger.debug("Mangler skrivetilgang, avviser forespørselen")
+            application.log.debug("Mangler skrivetilgang, avviser forespørselen")
             call.respond(HttpStatusCode.Forbidden)
         }
     }
@@ -221,22 +221,23 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrive
     enhetNr: String? = null,
     onSuccess: (Saksbehandler) -> Unit,
 ) {
+    application.log.debug("Sjekker skrivetilgang")
     when (val token = brukerTokenInfo) {
         is Saksbehandler -> {
             when (sjekkSkrivetilgang(sakId, enhetNr)) {
                 true -> {
-                    logger.debug("Har skrivetilgang, fortsetter")
+                    application.log.debug("Har skrivetilgang, fortsetter")
                     onSuccess(token)
                 }
                 false -> {
-                    logger.debug("Mangler skrivetilgang, avviser forespørselen")
+                    application.log.debug("Mangler skrivetilgang, avviser forespørselen")
                     call.respond(HttpStatusCode.Forbidden)
                 }
             }
         }
 
         else -> {
-            logger.debug("Endepunktet er ikke tilgjengeliggjort for systembruker, avviser forespørselen")
+            application.log.debug("Endepunktet er ikke tilgjengeliggjort for systembruker, avviser forespørselen")
             call.respond(HttpStatusCode.Forbidden)
         }
     }

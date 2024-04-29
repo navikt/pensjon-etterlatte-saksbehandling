@@ -137,7 +137,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
 
             val behandlingId =
                 client.post("/behandlinger/opprettbehandling") {
-                    addAuthToken(systemBruker)
+                    addAuthToken(this@VerdikjedeTest.systemBruker)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(
                         BehandlingsBehov(
@@ -349,7 +349,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             }
 
             client.post("/attestervedtak") {
-                addAuthToken(tokenSaksbehandler2)
+                addAuthToken(tokenAttestant)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     VedtakEndringDTO(
@@ -491,7 +491,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             assertNotNull(ferdigstiltKlage.resultat?.sendtInnstillingsbrev)
 
             client.post("/grunnlagsendringshendelse/doedshendelse") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@VerdikjedeTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(DoedshendelsePdl("1", Endringstype.OPPRETTET, fnr, LocalDate.now()))
             }.also {
@@ -499,7 +499,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             }
 
             client.post("/grunnlagsendringshendelse/doedshendelse") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@VerdikjedeTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(DoedshendelsePdl("1", Endringstype.OPPRETTET, fnr, LocalDate.now()))
             }.also {
@@ -507,7 +507,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             }
 
             client.post("/grunnlagsendringshendelse/utflyttingshendelse") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@VerdikjedeTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     UtflyttingsHendelse(
@@ -524,7 +524,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             }
 
             client.post("/grunnlagsendringshendelse/forelderbarnrelasjonhendelse") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@VerdikjedeTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     ForelderBarnRelasjonHendelse(
@@ -543,7 +543,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
 
             val behandlingIdNyFoerstegangsbehandling =
                 client.post("/behandlinger/opprettbehandling") {
-                    addAuthToken(systemBruker)
+                    addAuthToken(this@VerdikjedeTest.systemBruker)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(
                         BehandlingsBehov(
@@ -558,13 +558,13 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 }
 
             client.post("/api/behandling/$behandlingIdNyFoerstegangsbehandling/avbryt") {
-                addAuthToken(fagsystemTokenEY)
+                addAuthToken(systemBruker)
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(systemBruker)
+                addAuthToken(this@VerdikjedeTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     Adressebeskyttelse(

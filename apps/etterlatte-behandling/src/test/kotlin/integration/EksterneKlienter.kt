@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
 import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
+import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
@@ -37,6 +38,7 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
@@ -163,6 +165,26 @@ class VedtakKlientTest : VedtakKlient {
         return mockk<VedtakDto> {
             every { id } returns 123L
         }
+    }
+}
+
+class TilbakekrevingKlientTest : TilbakekrevingKlient {
+    override suspend fun sendTilbakekrevingsvedtak(
+        brukerTokenInfo: BrukerTokenInfo,
+        tilbakekrevingVedtak: TilbakekrevingVedtak,
+    ) {
+        return
+    }
+
+    override val serviceName: String
+        get() = this.javaClass.simpleName
+    override val beskrivelse: String
+        get() = "Sender tilbakekrevingsvedtak til tilbakekreving"
+    override val endpoint: String
+        get() = "endpoint"
+
+    override suspend fun ping(konsument: String?): PingResult {
+        return PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
     }
 }
 

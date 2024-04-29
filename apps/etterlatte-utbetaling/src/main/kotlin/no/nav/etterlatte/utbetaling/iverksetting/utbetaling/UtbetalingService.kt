@@ -10,7 +10,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.Ut
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringResultat.KvitteringOppdatert
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringResultat.UgyldigStatus
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringResultat.UtbetalingFinnesIkke
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
@@ -20,7 +19,6 @@ class UtbetalingService(
     val oppdragMapper: OppdragMapper,
     val oppdragSender: OppdragSender,
     val utbetalingDao: UtbetalingDao,
-    val rapidsConnection: RapidsConnection,
     val clock: Clock,
 ) {
     fun iverksettUtbetaling(vedtak: Utbetalingsvedtak): IverksettResultat {

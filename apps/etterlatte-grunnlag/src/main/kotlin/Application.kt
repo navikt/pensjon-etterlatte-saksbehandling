@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
+import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.Logger
@@ -93,7 +94,7 @@ class ApplicationBuilder {
     private val aldersovergangService = AldersovergangService(aldersovergangDao)
 
     private val rapidsConnection =
-        RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
+        RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)))
             .withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     route("grunnlag") {

@@ -38,9 +38,9 @@ class AktivitetspliktService(
             aktivitetspliktDao.hentAktiviteter(behandlingId)
         }
 
-    fun opprettAktivitet(
+    fun upsertAktivitet(
         behandlingId: UUID,
-        aktivitet: OpprettAktivitetspliktAktivitet,
+        aktivitet: LagreAktivitetspliktAktivitet,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val behandling =
@@ -60,7 +60,27 @@ class AktivitetspliktService(
 
         val kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
         inTransaction {
-            aktivitetspliktDao.opprettAktivitet(behandlingId, aktivitet, kilde)
+            if (aktivitet.id != null) {
+                aktivitetspliktDao.oppdaterAktivitet(behandlingId, aktivitet, kilde)
+            } else {
+                aktivitetspliktDao.opprettAktivitet(behandlingId, aktivitet, kilde)
+            }
+        }
+    }
+
+    fun slettAktivitet(
+        behandlingId: UUID,
+        aktivitetId: UUID,
+    ) {
+        val behandling =
+            requireNotNull(inTransaction { behandlingService.hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
+
+        if (!behandling.status.kanEndres()) {
+            throw BehandlingKanIkkeEndres()
+        }
+
+        inTransaction {
+            aktivitetspliktDao.slettAktivitet(aktivitetId, behandlingId)
         }
     }
 }

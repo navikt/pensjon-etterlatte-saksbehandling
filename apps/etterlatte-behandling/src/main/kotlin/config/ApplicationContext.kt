@@ -46,12 +46,14 @@ import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
+import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.omregning.MigreringService
+import no.nav.etterlatte.behandling.omregning.OmregningDao
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
@@ -243,7 +245,8 @@ internal class ApplicationContext(
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val brevApiKlient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
-    val tilbakekrevingHttpClient: HttpClient = tilbakekrevingHttpClient(config),
+    val tilbakekrevingKlient: TilbakekrevingKlient =
+        TilbakekrevingKlientImpl(tilbakekrevingHttpClient(config), url = env.getValue("ETTERLATTE_TILBAKEKREVING_URL")),
     val migreringHttpClient: HttpClient = migreringHttpClient(config),
     val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
     val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
@@ -284,6 +287,7 @@ internal class ApplicationContext(
     val bosattUtlandDao = BosattUtlandDao(autoClosingDatabase)
     val saksbehandlerInfoDao = SaksbehandlerInfoDao(autoClosingDatabase)
     val doedshendelseDao = DoedshendelseDao(autoClosingDatabase)
+    val omregningDao = OmregningDao(autoClosingDatabase)
     val sakTilgangDao = SakTilgangDao(dataSource)
 
     // Klient
@@ -292,8 +296,6 @@ internal class ApplicationContext(
     val leaderElectionKlient = LeaderElection(env.maybeEnvValue("ELECTOR_PATH"), leaderElectionHttpClient)
 
     val klageKlient = KlageKlientImpl(klageHttpClient, url = env.getValue("ETTERLATTE_KLAGE_API_URL"))
-    val tilbakekrevingKlient =
-        TilbakekrevingKlientImpl(tilbakekrevingHttpClient, url = env.getValue("ETTERLATTE_TILBAKEKREVING_URL"))
     val migreringKlient = MigreringKlient(migreringHttpClient, env.getValue("ETTERLATTE_MIGRERING_URL"))
     val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
 
@@ -301,7 +303,7 @@ internal class ApplicationContext(
 
     // Service
     val klageHendelser = KlageHendelserServiceImpl(rapid)
-    val tilbakekreving = TilbakekrevingHendelserServiceImpl(rapid)
+    val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, behandlingsHendelser)
 
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlTjenesterKlient, oppgaveService)
@@ -376,6 +378,7 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             grunnlagService = grunnlagsService,
             revurderingService = automatiskRevurderingService,
+            omregningDao = omregningDao,
         )
 
     val tilgangService = TilgangServiceImpl(sakTilgangDao)
@@ -461,7 +464,7 @@ internal class ApplicationContext(
             vedtakKlient = vedtakKlient,
             brevApiKlient = brevApiKlient,
             tilbakekrevingKlient = tilbakekrevingKlient,
-            tilbakekrevinghendelser = tilbakekreving,
+            tilbakekrevinghendelser = tilbakekrevingHendelserService,
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)

@@ -96,6 +96,9 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
                 Resource(clientId, "$url/api/oppgaver/${it.id}/tildel-saksbehandler"),
                 Systembruker.testdata,
                 SaksbehandlerEndringDto(navn),
+            ).mapBoth(
+                success = {},
+                failure = { err -> throw err },
             )
         }
     }

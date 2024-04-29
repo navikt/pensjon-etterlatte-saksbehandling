@@ -42,6 +42,7 @@ class Behandler(
         sakService.lagreVirkningstidspunkt(behandling)
         sakService.tildelSaksbehandler(Fagsaksystem.EY.navn, sakId)
 
+        logger.info("Tildelt til saksbehandler, klar til vilkårsvurdering")
         vilkaarsvurderingService.vilkaarsvurder(behandling)
         logger.info("Vilkårsvurderte behandling $behandling i sak $sakId")
         if (behandlingssteg == Behandlingssteg.VILKAARSVURDERT) {

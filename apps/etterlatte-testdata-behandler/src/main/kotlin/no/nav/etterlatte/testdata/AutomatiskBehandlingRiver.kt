@@ -31,7 +31,7 @@ class AutomatiskBehandlingRiver(
     ) {
         val behandlingssteg = Behandlingssteg.valueOf(packet[Behandlingssteg.KEY].asText())
         runBlocking {
-            behandler.behandle(packet.sakId, packet.behandlingId, behandlingssteg)
+            behandler.behandle(packet.sakId, packet.behandlingId, behandlingssteg, packet, context)
         }
     }
 

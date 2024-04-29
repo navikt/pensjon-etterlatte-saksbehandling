@@ -10,6 +10,8 @@ import no.nav.etterlatte.testdata.automatisk.SakService
 import no.nav.etterlatte.testdata.automatisk.TrygdetidService
 import no.nav.etterlatte.testdata.automatisk.VedtaksvurderingService
 import no.nav.etterlatte.testdata.automatisk.VilkaarsvurderingService
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -28,6 +30,8 @@ class Behandler(
         sakId: Long,
         behandling: UUID,
         behandlingssteg: Behandlingssteg,
+        packet: JsonMessage,
+        context: MessageContext,
     ) {
         logger.info("Starter automatisk behandling av sak $sakId og behandling $behandling til steg $behandlingssteg")
         if (behandlingssteg in listOf(Behandlingssteg.KLAR, Behandlingssteg.BEHANDLING_OPPRETTA)) {
@@ -74,14 +78,16 @@ class Behandler(
         logger.info("Klar til å lagre brevutfall for $behandling")
         sakService.lagreBrevutfall(behandling)
         logger.info("Ferdig med å lagre brevutfall for behandling $behandling. Klar til å fatte vedtak")
-        vedtaksvurderingService.fattVedtak(sakId, behandling)
+        val fattaVedtak = vedtaksvurderingService.fattVedtak(sakId, behandling)
+        RapidUtsender.sendUt(fattaVedtak, packet, context)
         if (behandlingssteg == Behandlingssteg.VEDTAK_FATTA) {
             return
         }
 
         logger.info("Fatta vedtak for behandling $behandling. Klar til å lage og distribuere varselbrev")
         brevService.opprettOgDistribuerVedtaksbrev(sakId, behandling)
-        vedtaksvurderingService.attesterOgIverksettVedtak(sakId, behandling)
-        logger.info("Ferdig iverksatt behandling $behandling i sak $sakId")
+        val attestertVedtak = vedtaksvurderingService.attesterOgIverksettVedtak(sakId, behandling)
+        logger.info("Ferdig attestert behandling $behandling i sak $sakId")
+        RapidUtsender.sendUt(attestertVedtak, packet, context)
     }
 }

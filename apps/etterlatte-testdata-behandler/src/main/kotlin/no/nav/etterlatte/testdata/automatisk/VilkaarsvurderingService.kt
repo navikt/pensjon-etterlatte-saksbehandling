@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
+import no.nav.etterlatte.testdata.BEGRUNNELSE
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -49,7 +50,7 @@ class VilkaarsvurderingService(private val klient: DownstreamResourceClient, pri
             Systembruker.testdata,
             VurdertVilkaarsvurderingResultatDto(
                 resultat = VilkaarsvurderingUtfall.OPPFYLT,
-                kommentar = "Automatisk behandla testsak",
+                kommentar = BEGRUNNELSE,
             ),
         ).mapBoth(
             success = {},

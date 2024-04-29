@@ -53,6 +53,9 @@ class Behandler(
         if (behandlingssteg == Behandlingssteg.TRYGDETID_OPPRETTA) {
             return
         }
+        logger.info("Lagrer beregningsgrunnlag")
+        beregningService.lagreBeregningsgrunnlag(behandling)
+        logger.info("Lagra beregningsgrunnlag, klar til beregning")
         beregningService.beregn(behandling)
         logger.info("Beregna behandling $behandling i sak $sakId")
         if (behandlingssteg == Behandlingssteg.BEREGNA) {

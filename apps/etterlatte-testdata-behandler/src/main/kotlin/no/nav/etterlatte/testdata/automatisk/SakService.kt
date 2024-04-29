@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
+import no.nav.etterlatte.testdata.BEGRUNNELSE
 import java.time.YearMonth
 import java.util.UUID
 
@@ -31,7 +32,7 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
             postBody =
                 JaNeiMedBegrunnelse(
                     JaNei.JA,
-                    "Automatisk behandla testsak",
+                    BEGRUNNELSE,
                 ),
         )
             .mapBoth(
@@ -44,7 +45,7 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
         klient.post(
             Resource(clientId, "$url/api/behandling/$behandling/gyldigfremsatt"),
             Systembruker.testdata,
-            JaNeiMedBegrunnelse(JaNei.JA, "Automatisk behandla testsak"),
+            JaNeiMedBegrunnelse(JaNei.JA, BEGRUNNELSE),
         ).mapBoth(
             success = {},
             failure = { throw it },
@@ -57,7 +58,7 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
             Systembruker.testdata,
             UtlandstilknytningRequest(
                 utlandstilknytningType = UtlandstilknytningType.NASJONAL,
-                begrunnelse = "Automatisk behandla testsak",
+                begrunnelse = BEGRUNNELSE,
             ),
         ).mapBoth(
             success = {},
@@ -71,7 +72,7 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
             Systembruker.testdata,
             VirkningstidspunktRequest(
                 _dato = YearMonth.now().plusMonths(1).toString(),
-                begrunnelse = "Automatisk behandla testsak",
+                begrunnelse = BEGRUNNELSE,
                 kravdato = null,
             ),
         ).mapBoth(

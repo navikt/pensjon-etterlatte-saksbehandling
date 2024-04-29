@@ -84,3 +84,5 @@ class AppBuilder {
         )
     }
 }
+
+const val BEGRUNNELSE = "Automatisk behandla testsak"

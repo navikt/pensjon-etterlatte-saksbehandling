@@ -147,13 +147,18 @@ internal fun Route.behandlingRoutes(
                     val virkningstidspunkt =
                         inTransaction {
                             runBlocking {
-                                behandlingService.oppdaterVirkningstidspunkt(
-                                    behandlingId,
-                                    body.dato,
-                                    brukerTokenInfo,
-                                    body.begrunnelse!!,
-                                    kravdato = body.kravdato,
-                                )
+                                try {
+                                    behandlingService.oppdaterVirkningstidspunkt(
+                                        behandlingId,
+                                        body.dato,
+                                        brukerTokenInfo,
+                                        body.begrunnelse!!,
+                                        kravdato = body.kravdato,
+                                    )
+                                } catch (e: Exception) {
+                                    logger.warn("Kunne ikke oppdatere virkningstidspunktet", e)
+                                    throw e
+                                }
                             }
                         }
 

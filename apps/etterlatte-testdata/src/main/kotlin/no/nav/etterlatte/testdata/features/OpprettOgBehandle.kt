@@ -54,7 +54,7 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
                 val soeknadType = SoeknadType.BARNEPENSJON
                 val behandlingssteg = Behandlingssteg.IVERKSATT
                 val navIdent = navIdentFraToken()
-                val oenskaAntall = 10
+                val oenskaAntall = 3
 
                 opprettOgSendInn(oenskaAntall, gruppeid, soeknadType, navIdent, behandlingssteg)
                 call.respond(HttpStatusCode.Created)
@@ -72,7 +72,7 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
             var opprettaFamilier = 0
             logger.info("Oppretter $oenskaAntall familier og sender inn søknad for hver")
             while (opprettaFamilier < oenskaAntall) {
-                val familie = familieoppretter.opprettFamilie(getDollyAccessToken(), gruppeid)
+                val familie = familieoppretter.opprettFamilie(getDollyAccessToken(), gruppeid).filterNot { it.ibruk }
                 familie.forEach {
                     opprettaFamilier++
                     logger.info("Sender inn søknad for familie med avdød ${it.avdoed}")

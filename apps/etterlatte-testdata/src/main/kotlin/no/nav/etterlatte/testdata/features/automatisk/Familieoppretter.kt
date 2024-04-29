@@ -50,7 +50,7 @@ class Familieoppretter(
             }
         }
         logger.info("Ferdig med å vente etter $venta, returnerer")
-        return (hentFamilier(gruppeid, accessToken) - baselineFamilier).also {
+        return (hentFamilier(gruppeid, accessToken) - baselineFamilier).filterNot { it.ibruk }.also {
             logger.info("${it.size} endra familier")
         }
     }

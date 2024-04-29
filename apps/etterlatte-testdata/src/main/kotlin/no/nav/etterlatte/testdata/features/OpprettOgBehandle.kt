@@ -54,7 +54,7 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
                 val soeknadType = SoeknadType.BARNEPENSJON
                 val behandlingssteg = Behandlingssteg.IVERKSATT
                 val navIdent = navIdentFraToken()
-                val oenskaAntall = 3
+                val oenskaAntall = 1
 
                 opprettOgSendInn(oenskaAntall, gruppeid, soeknadType, navIdent, behandlingssteg)
                 call.respond(HttpStatusCode.Created)

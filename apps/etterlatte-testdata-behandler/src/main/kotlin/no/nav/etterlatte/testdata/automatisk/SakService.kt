@@ -70,7 +70,7 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
             Resource(clientId, "$url/api/behandling/$behandling/virkningstidspunkt"),
             Systembruker.testdata,
             VirkningstidspunktRequest(
-                _dato = YearMonth.now().toString(),
+                _dato = YearMonth.now().plusMonths(1).toString(),
                 begrunnelse = "Automatisk behandla testsak",
                 kravdato = null,
             ),

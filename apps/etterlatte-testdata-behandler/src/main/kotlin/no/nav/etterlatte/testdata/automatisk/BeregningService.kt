@@ -1,5 +1,6 @@
 package no.nav.etterlatte.testdata.automatisk
 
+import com.github.michaelbull.result.mapBoth
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -10,5 +11,9 @@ class BeregningService(
     private val url: String,
     private val clientId: String,
 ) {
-    suspend fun beregn(behandlingId: UUID) = klient.post(Resource(clientId, "$url/api/beregning/$behandlingId"), Systembruker.testdata) {}
+    suspend fun beregn(behandlingId: UUID) =
+        klient.post(Resource(clientId, "$url/api/beregning/$behandlingId"), Systembruker.testdata) {}.mapBoth(
+            success = {},
+            failure = { throw it },
+        )
 }

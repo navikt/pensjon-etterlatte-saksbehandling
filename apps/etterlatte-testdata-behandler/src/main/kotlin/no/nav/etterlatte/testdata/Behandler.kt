@@ -61,22 +61,25 @@ class Behandler(
         if (behandlingssteg == Behandlingssteg.BEREGNA) {
             return
         }
+        logger.info("Ferdig beregna i $behandling")
 
         if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+            logger.info("Avkorter $behandling")
             avkortingService.avkort(behandling)
             logger.info("Avkorta behandling $behandling i sak $sakId")
         }
         if (behandlingssteg == Behandlingssteg.AVKORTA) {
             return
         }
+        logger.info("Klar til å lagre brevutfall for $behandling")
+        sakService.lagreBrevutfall(behandling)
+        logger.info("Ferdig med å lagre brevutfall for behandling $behandling. Klar til å fatte vedtak")
         vedtaksvurderingService.fattVedtak(sakId, behandling)
         if (behandlingssteg == Behandlingssteg.VEDTAK_FATTA) {
             return
         }
 
-        logger.info("Fatta vedtak for behandling $behandling. Klar til å lagre brevutfall")
-        sakService.lagreBrevutfall(behandling)
-        logger.info("Ferdig med å lagre brevutfall for behandling $behandling. Klar til å lage og distribuere varselbrev")
+        logger.info("Fatta vedtak for behandling $behandling. Klar til å lage og distribuere varselbrev")
         brevService.opprettOgDistribuerVedtaksbrev(sakId, behandling)
         vedtaksvurderingService.attesterOgIverksettVedtak(sakId, behandling)
         logger.info("Ferdig iverksatt behandling $behandling i sak $sakId")

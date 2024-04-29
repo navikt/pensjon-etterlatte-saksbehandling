@@ -113,7 +113,7 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
             Systembruker.testdata,
             BrevutfallOgEtterbetalingDto(
                 behandlingId = behandling,
-                opphoer = null,
+                opphoer = false,
                 etterbetaling = null,
                 brevutfall =
                     BrevutfallDto(

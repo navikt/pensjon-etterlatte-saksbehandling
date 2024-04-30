@@ -185,7 +185,7 @@ internal fun Route.sakWebRoutes(
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                             for (oppgaveIntern in oppgaveService.hentOppgaverForSak(sakId)) {
                                 if (oppgaveIntern.saksbehandler != null &&
-                                    oppgaveIntern.status == Status.UNDER_BEHANDLING
+                                    oppgaveIntern.status in listOf(Status.UNDER_BEHANDLING, Status.ATTESTERING, Status.PAA_VENT)
                                 ) {
                                     oppgaveService.fjernSaksbehandler(
                                         oppgaveIntern.id,

@@ -8,12 +8,10 @@ import no.nav.etterlatte.testdata.features.dolly.generererBestilling
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import kotlin.concurrent.thread
 
 class Familieoppretter(
     private val dollyService: DollyService,
     private val sleep: (millis: Duration) -> Unit = { Thread.sleep(it) },
-    private val iTraad: (handling: () -> Unit) -> Unit = { thread { it() } },
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -49,12 +47,10 @@ class Familieoppretter(
         var venta = Duration.ZERO
         val ventetid = Duration.ofSeconds(10)
         val maksVentetid = Duration.ofSeconds(20).multipliedBy(oenskaAntall.toLong())
-        iTraad {
-            while (!hentStatusBestilling(bestilling = bestilling.id, accessToken).ferdig && venta <= maksVentetid) {
-                venta += ventetid
-                logger.info("Ingen ny familie oppretta, venter $ventetid")
-                sleep(ventetid)
-            }
+        while (!hentStatusBestilling(bestilling = bestilling.id, accessToken).ferdig && venta <= maksVentetid) {
+            venta += ventetid
+            logger.info("Ingen ny familie oppretta, venter $ventetid")
+            sleep(ventetid)
         }
         logger.info("Ferdig med å vente etter $venta, returnerer")
         return (hentFamilier(gruppeid, accessToken) - baselineFamilier).filterNot { it.ibruk }.also {

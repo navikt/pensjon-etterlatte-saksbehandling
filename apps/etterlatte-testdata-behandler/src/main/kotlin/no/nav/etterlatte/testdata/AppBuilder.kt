@@ -35,10 +35,9 @@ class AppBuilder {
                 "http://etterlatte-vilkaarsvurdering",
                 config.getString("vilkaarsvurdering.client.id"),
             )
-        val httpClientBehandling = settOppHttpClient("behandling")
         val behandlingService =
             BehandlingService(
-                httpClientBehandling,
+                settOppHttpClient("behandling"),
                 "http://etterlatte-behandling",
                 config.getString("behandling.client.id"),
             )
@@ -48,15 +47,16 @@ class AppBuilder {
                 "http://etterlatte-trygdetid",
                 config.getString("trygdetid.client.id"),
             )
+        val httpClientBeregning = settOppHttpClient("beregning")
         val avkortingService =
             AvkortingService(
-                httpClientBehandling,
-                "http://etterlatte-behandling",
-                config.getString("behandling.client.id"),
+                httpClientBeregning,
+                "http://etterlatte-beregning",
+                config.getString("beregning.client.id"),
             )
         val beregningService =
             BeregningService(
-                settOppHttpClient("beregning"),
+                httpClientBeregning,
                 "http://etterlatte-beregning",
                 config.getString("beregning.client.id"),
             )

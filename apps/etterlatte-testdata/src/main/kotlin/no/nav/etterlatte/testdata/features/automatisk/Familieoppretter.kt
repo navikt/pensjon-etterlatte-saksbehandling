@@ -49,7 +49,7 @@ class Familieoppretter(
         val maksVentetid = Duration.ofSeconds(20).multipliedBy(oenskaAntall.toLong())
         while (!hentStatusBestilling(bestilling = bestilling.id, accessToken).ferdig && venta <= maksVentetid) {
             venta += ventetid
-            logger.info("Ingen ny familie oppretta, venter $ventetid")
+            logger.info("Ikke ferdig med å opprette bestilling, venter $ventetid")
             sleep(ventetid)
         }
         logger.info("Ferdig med å vente etter $venta, returnerer")

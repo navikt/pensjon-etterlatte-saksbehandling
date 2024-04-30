@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.omstillingsstoenad.Omstilli
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.toObjectNode
+import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.JsonMessage
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -39,6 +40,7 @@ object SoeknadMapper {
         gjenlevendeFnr: String,
         avdoedFnr: String,
         barn: List<String> = emptyList(),
+        behandlingssteg: Behandlingssteg,
     ): JsonMessage {
         return when (type) {
             SoeknadType.OMSTILLINGSSTOENAD ->
@@ -55,6 +57,7 @@ object SoeknadMapper {
                         "@template" to "soeknad",
                         "@fnr_soeker" to gjenlevendeFnr,
                         "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
+                        Behandlingssteg.KEY to behandlingssteg.name,
                     ),
                 )
 
@@ -73,6 +76,7 @@ object SoeknadMapper {
                         "@template" to "soeknad",
                         "@fnr_soeker" to barn.first(),
                         "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
+                        Behandlingssteg.KEY to behandlingssteg.name,
                     ),
                 )
 

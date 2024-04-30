@@ -21,6 +21,7 @@ class Familieoppretter(
     fun opprettFamilie(
         accessToken: String,
         gruppeid: Long,
+        antall: Int,
     ): List<ForenkletFamilieModell> {
         logger.info("Oppretter familie")
         val baselineFamilier = hentFamilier(gruppeid, accessToken)
@@ -32,6 +33,7 @@ class Familieoppretter(
                 halvsoeskenAvdoed = 0,
                 halvsoeskenGjenlevende = 0,
                 gruppeId = gruppeid,
+                antall = antall,
             )
 
         logger.info("Oppretter bestilling for gruppeid $gruppeid")

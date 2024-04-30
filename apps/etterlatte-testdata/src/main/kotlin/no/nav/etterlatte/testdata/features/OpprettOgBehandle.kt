@@ -72,7 +72,7 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
             var opprettaFamilier = 0
             logger.info("Oppretter $oenskaAntall familier og sender inn søknad for hver")
             while (opprettaFamilier < oenskaAntall) {
-                val familie = familieoppretter.opprettFamilie(getDollyAccessToken(), gruppeid).filterNot { it.ibruk }
+                val familie = familieoppretter.opprettFamilie(getDollyAccessToken(), gruppeid, 1).filterNot { it.ibruk }
                 familie.forEach {
                     opprettaFamilier++
                     logger.info("Sender inn søknad for familie med avdød ${it.avdoed}")

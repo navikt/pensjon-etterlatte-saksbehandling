@@ -71,4 +71,5 @@ data class BestillingRequest(
     val halvsoeskenAvdoed: Int,
     val halvsoeskenGjenlevende: Int,
     val gruppeId: Long,
+    val antall: Int,
 )

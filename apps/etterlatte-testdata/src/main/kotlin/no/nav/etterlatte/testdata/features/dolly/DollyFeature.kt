@@ -83,6 +83,7 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                                 it["halvsoeskenAvdoed"]!!.toInt(),
                                 it["halvsoeskenGjenlevende"]!!.toInt(),
                                 it["gruppeId"]!!.toLong(),
+                                1,
                             )
 
                         dollyService.opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)

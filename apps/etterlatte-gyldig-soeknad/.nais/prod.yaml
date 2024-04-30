@@ -61,4 +61,4 @@ spec:
         - application: ey-pdfgen
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
-        - host: dokarkiv-q2.dev-fss-pub.nais.io
+        - host: dokarkiv.prod-fss-pub.nais.io

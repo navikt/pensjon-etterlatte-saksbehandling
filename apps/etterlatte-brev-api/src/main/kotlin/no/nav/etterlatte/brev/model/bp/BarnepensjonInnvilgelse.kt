@@ -75,6 +75,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
     val erEtterbetaling: Boolean,
     val harFlereUtbetalingsperioder: Boolean,
     val erGjenoppretting: Boolean,
+    val harUtbetaling: Boolean,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -116,6 +117,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
                 erEtterbetaling = etterbetaling != null,
                 harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
                 erGjenoppretting = generellBrevData.systemkilde == Vedtaksloesning.GJENOPPRETTA,
+                harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
             )
         }
     }

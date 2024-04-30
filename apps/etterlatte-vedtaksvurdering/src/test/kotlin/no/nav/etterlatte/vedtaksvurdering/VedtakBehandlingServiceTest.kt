@@ -92,7 +92,6 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
                 behandlingKlient = behandlingKlientMock,
                 samKlient = samKlientMock,
                 trygdetidKlient = trygdetidKlientMock,
-                featureToggleService = featureToggleService,
             )
     }
 

@@ -2,7 +2,6 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -48,7 +47,6 @@ class VedtakBehandlingService(
     private val behandlingKlient: BehandlingKlient,
     private val samKlient: SamKlient,
     private val trygdetidKlient: TrygdetidKlient,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(VedtakBehandlingService::class.java)
 

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.testdata.automatisk
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import no.nav.etterlatte.behandling.VirkningstidspunktRequest
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
@@ -9,7 +8,6 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.retryOgPakkUt
@@ -17,6 +15,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.readValue
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.testdata.BEGRUNNELSE
 import java.time.YearMonth
@@ -26,7 +25,7 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
     suspend fun hentSak(sakId: Long): Sak =
         retryOgPakkUt {
             klient.get(Resource(clientId, "$url/saker/$sakId"), Systembruker.testdata).mapBoth(
-                success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                success = { readValue(it) },
                 failure = { throw it },
             )
         }
@@ -103,7 +102,7 @@ class SakService(private val klient: DownstreamResourceClient, private val url: 
             retryOgPakkUt {
                 klient.get(Resource(clientId, "$url/oppgaver/sak/$sakId/oppgaver"), Systembruker.testdata)
                     .mapBoth(
-                        success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                        success = { readValue(it) },
                         failure = { throw it },
                     )
             }

@@ -1,13 +1,22 @@
 package no.nav.etterlatte.fordeler
 
 import io.ktor.client.plugins.ResponseException
+import io.mockk.Called
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.etterlatte.gyldigsoeknad.NySoeknadRiver
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
+import no.nav.etterlatte.gyldigsoeknad.journalfoering.AvsenderMottaker
+import no.nav.etterlatte.gyldigsoeknad.journalfoering.Bruker
+import no.nav.etterlatte.gyldigsoeknad.journalfoering.DokarkivKlient
+import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalfoerSoeknadService
+import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalpostSak
+import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostRequest
+import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostResponse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
@@ -19,48 +28,100 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import pdf.PdfGeneratorKlient
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class NySoeknadRiverTest {
     private val behandlingKlientMock = mockk<BehandlingClient>()
+    private val dokarkivKlientMock = mockk<DokarkivKlient>()
+    private val pdfgenKlient = mockk<PdfGeneratorKlient>()
+
+    private val journalfoerSoeknadService = JournalfoerSoeknadService(dokarkivKlientMock, pdfgenKlient)
 
     @AfterEach
     fun afterEach() {
-        confirmVerified(behandlingKlientMock)
+        confirmVerified(behandlingKlientMock, dokarkivKlientMock, pdfgenKlient)
         clearAllMocks()
     }
 
     @Test
-    fun `BP - skal fordele gyldig soknad til behandling`() {
-        val sakId = Random.nextLong()
+    fun `BARNEPENSJON - Skal opprette sak og journalføre søknad`() {
+        val sak = Sak("25478323363", SakType.BARNEPENSJON, Random.nextLong(), "4808")
 
-        coEvery {
-            behandlingKlientMock.finnEllerOpprettSak(any(), any())
-        } returns Sak("-", SakType.BARNEPENSJON, sakId, "-")
+        coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
+        coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
+        coEvery { dokarkivKlientMock.opprettJournalpost(any()) } returns OpprettJournalpostResponse("123", true)
 
         val inspector =
             testRapid {
                 sendTestMessage(BARNEPENSJON_SOEKNAD)
             }
 
+        val melding = inspector.message(0)
         assertEquals(
             SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
-            inspector.message(0).get(EVENT_NAME_KEY).asText(),
+            melding.get(EVENT_NAME_KEY).asText(),
         )
-        assertEquals(sakId, inspector.message(0).get(GyldigSoeknadVurdert.sakIdKey).longValue())
-        assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadFordeltKey).asText())
+        assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).longValue())
+        assertEquals("true", melding.get(FordelerFordelt.soeknadFordeltKey).asText())
 
-        coVerify { behandlingKlientMock.finnEllerOpprettSak("25478323363", SakType.BARNEPENSJON) }
+        coVerify(exactly = 1) { behandlingKlientMock.finnEllerOpprettSak("25478323363", SakType.BARNEPENSJON) }
+        coVerify(exactly = 1) { pdfgenKlient.genererPdf(any(), "barnepensjon_v2") }
+
+        val request = slot<OpprettJournalpostRequest>()
+        coVerify(exactly = 1) { dokarkivKlientMock.opprettJournalpost(capture(request)) }
+        with(request.captured) {
+            assertEquals("Søknad om barnepensjon", this.tittel)
+            assertEquals(sak.sakType.tema, this.tema)
+            assertEquals(sak.enhet, this.journalfoerendeEnhet)
+            assertEquals(AvsenderMottaker("25478323363"), this.avsenderMottaker)
+            assertEquals(Bruker("25478323363"), this.bruker)
+            assertEquals("etterlatte:barnepensjon:621", this.eksternReferanseId)
+            assertEquals(JournalpostSak(sak.id.toString()), this.sak)
+        }
     }
 
     @Test
-    fun `BP - skal ikke fordele soknad uten sakId til behandling`() {
-        coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } throws
-            ResponseException(
-                mockk(),
-                "Ukjent feil",
-            )
+    fun `OMSTILLINGSSTOENAD - Skal opprette sak og journalføre søknad`() {
+        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, Random.nextLong(), "4808")
+
+        coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
+        coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
+        coEvery { dokarkivKlientMock.opprettJournalpost(any()) } returns OpprettJournalpostResponse("123", true)
+
+        val inspector =
+            testRapid {
+                sendTestMessage(OMSTILLINGSSTOENAD_SOEKNAD)
+            }
+
+        val melding = inspector.message(0)
+        assertEquals(
+            SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
+            melding.get(EVENT_NAME_KEY).asText(),
+        )
+        assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).longValue())
+        assertEquals("true", melding.get(FordelerFordelt.soeknadFordeltKey).asText())
+
+        coVerify(exactly = 1) { behandlingKlientMock.finnEllerOpprettSak("13848599411", SakType.OMSTILLINGSSTOENAD) }
+        coVerify(exactly = 1) { pdfgenKlient.genererPdf(any(), "omstillingsstoenad_v1") }
+
+        val request = slot<OpprettJournalpostRequest>()
+        coVerify(exactly = 1) { dokarkivKlientMock.opprettJournalpost(capture(request)) }
+        with(request.captured) {
+            assertEquals("Søknad om omstillingsstønad", this.tittel)
+            assertEquals(sak.sakType.tema, this.tema)
+            assertEquals(sak.enhet, this.journalfoerendeEnhet)
+            assertEquals(AvsenderMottaker("13848599411"), this.avsenderMottaker)
+            assertEquals(Bruker("13848599411"), this.bruker)
+            assertEquals("etterlatte:omstillingsstoenad:42", this.eksternReferanseId)
+            assertEquals(JournalpostSak(sak.id.toString()), this.sak)
+        }
+    }
+
+    @Test
+    fun `BARNEPENSJON - Ingen sak funnet eller opprettet`() {
+        coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } throws ResponseException(mockk(), "error")
 
         val inspector =
             testRapid {
@@ -68,40 +129,16 @@ internal class NySoeknadRiverTest {
             }
 
         assertEquals(0, inspector.size)
-
-        coVerify { behandlingKlientMock.finnEllerOpprettSak("25478323363", SakType.BARNEPENSJON) }
+        coVerify(exactly = 1) { behandlingKlientMock.finnEllerOpprettSak("25478323363", SakType.BARNEPENSJON) }
+        coVerify {
+            dokarkivKlientMock wasNot Called
+            pdfgenKlient wasNot Called
+        }
     }
 
     @Test
-    fun `OMS - skal fordele gyldig soknad til behandling`() {
-        val sakId = Random.nextLong()
-
-        coEvery {
-            behandlingKlientMock.finnEllerOpprettSak(any(), any())
-        } returns Sak("-", SakType.BARNEPENSJON, sakId, "-")
-
-        val inspector =
-            testRapid {
-                sendTestMessage(OMSTILLINGSSTOENAD_SOEKNAD)
-            }
-
-        assertEquals(
-            SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
-            inspector.message(0).get(EVENT_NAME_KEY).asText(),
-        )
-        assertEquals(sakId, inspector.message(0).get(GyldigSoeknadVurdert.sakIdKey).longValue())
-        assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadFordeltKey).asText())
-
-        coVerify { behandlingKlientMock.finnEllerOpprettSak("13848599411", SakType.OMSTILLINGSSTOENAD) }
-    }
-
-    @Test
-    fun `OMS - skal ikke fordele soknad uten sakId til behandling`() {
-        coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } throws
-            ResponseException(
-                mockk(),
-                "Ukjent feil",
-            )
+    fun `OMSTILLINGSSTOENAD - Ingen sak funnet eller opprettet`() {
+        coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } throws ResponseException(mockk(), "error")
 
         val inspector =
             testRapid {
@@ -109,12 +146,16 @@ internal class NySoeknadRiverTest {
             }
 
         assertEquals(0, inspector.size)
-        coVerify { behandlingKlientMock.finnEllerOpprettSak("13848599411", SakType.OMSTILLINGSSTOENAD) }
+        coVerify(exactly = 1) { behandlingKlientMock.finnEllerOpprettSak("13848599411", SakType.OMSTILLINGSSTOENAD) }
+        coVerify {
+            dokarkivKlientMock wasNot Called
+            pdfgenKlient wasNot Called
+        }
     }
 
     private fun testRapid(block: TestRapid.() -> Unit) =
         TestRapid().apply {
-            NySoeknadRiver(this, behandlingKlientMock)
+            NySoeknadRiver(this, behandlingKlientMock, journalfoerSoeknadService)
             block()
         }.inspektør
 

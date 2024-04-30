@@ -13,16 +13,12 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import io.ktor.utils.io.ByteReadChannel
-import io.mockk.every
-import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.gyldigsoeknad.PersongalleriMapper
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.sak.Sak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -50,19 +46,6 @@ internal class BehandlingClientTest {
                 (runBlocking { String(requestList[0].body.toByteArray()) }),
             ).sakId,
         )
-    }
-
-    @Test
-    fun testSkaffSak() {
-        val behandlingKlient = mockk<BehandlingClient>()
-        val fnr = "123"
-        every {
-            behandlingKlient.hentSak(fnr, SakType.BARNEPENSJON.toString())
-        } returns Sak(fnr, SakType.BARNEPENSJON, 1L, "4808")
-
-        val sak = behandlingKlient.hentSak(fnr, SakType.BARNEPENSJON.toString())
-
-        assertEquals(1L, sak.id)
     }
 
     private fun createBehandlingClient(

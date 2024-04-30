@@ -3,7 +3,6 @@ package no.nav.etterlatte.gyldigsoeknad
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
@@ -76,5 +75,5 @@ internal class OpprettBehandlingRiver(
         }
     }
 
-    private fun JsonMessage.soeknad() = this[FordelerFordelt.skjemaInfoKey].let { objectMapper.treeToValue<InnsendtSoeknad>(it) }
+    private fun JsonMessage.soeknad() = this[SoeknadInnsendt.skjemaInfoKey].let { objectMapper.treeToValue<InnsendtSoeknad>(it) }
 }

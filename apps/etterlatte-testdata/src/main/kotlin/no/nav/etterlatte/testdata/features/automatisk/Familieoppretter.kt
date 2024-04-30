@@ -72,7 +72,7 @@ class Familieoppretter(
         listOf()
     }
 
-    fun hentStatusBestilling(
+    private fun hentStatusBestilling(
         bestilling: Long,
         accessToken: String,
     ) = try {

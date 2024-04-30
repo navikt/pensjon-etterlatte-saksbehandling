@@ -69,22 +69,16 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
         behandlingssteg: Behandlingssteg,
     ) {
         thread {
-            var opprettaFamilier = 0
             logger.info("Oppretter $oenskaAntall familier og sender inn søknad for hver")
-            while (opprettaFamilier < oenskaAntall) {
-                logger.info("Oppretter familier")
-                val baselineFamilier =
-                    familieoppretter.hentFamilier(gruppeid, getDollyAccessToken()).also {
-                        logger.debug("Baseline er ${it.size} saker")
-                    }
-                val bestilling = familieoppretter.opprettFamilie(getDollyAccessToken(), gruppeid, 1)
-                val familie = familieoppretter.hentFamilier(gruppeid, getDollyAccessToken(), bestilling, baselineFamilier)
-                familie.forEach {
-                    opprettaFamilier++
-                    logger.info("Sender inn søknad for familie med avdød ${it.avdoed}")
-                    sendSoeknad(it, soeknadType, navIdent, behandlingssteg)
-                    logger.info("Søknad sendt for familie med avdød ${it.avdoed}")
+            val baselineFamilier =
+                familieoppretter.hentFamilier(gruppeid, getDollyAccessToken()).also {
+                    logger.debug("Baseline er ${it.size} saker")
                 }
+            val bestilling = familieoppretter.opprettFamilie(getDollyAccessToken(), gruppeid, oenskaAntall)
+            familieoppretter.hentFamilier(gruppeid, getDollyAccessToken(), bestilling, baselineFamilier).forEach {
+                logger.info("Sender inn søknad for familie med avdød ${it.avdoed}")
+                sendSoeknad(it, soeknadType, navIdent, behandlingssteg)
+                logger.info("Søknad sendt for familie med avdød ${it.avdoed}")
             }
         }
     }

@@ -12,7 +12,7 @@ import pdf.PdfGeneratorKlient
 class AppBuilder(private val env: Miljoevariabler) {
     val behandlingKlient: BehandlingClient by lazy {
         BehandlingClient(
-            httpClient(env.requireEnvValue("BEHANDLING_AZURE_SCOPE")),
+            httpClient("BEHANDLING_AZURE_SCOPE"),
             env.requireEnvValue("BEHANDLING_URL"),
         )
     }
@@ -20,8 +20,8 @@ class AppBuilder(private val env: Miljoevariabler) {
     val journalfoerSoeknadService: JournalfoerSoeknadService by lazy {
         JournalfoerSoeknadService(
             DokarkivKlient(
-                httpClient(env.requireEnvValue("DOKARKIV_URL")),
-                env.requireEnvValue("DOKARKIV_SCOPE"),
+                httpClient("DOKARKIV_SCOPE"),
+                env.requireEnvValue("DOKARKIV_URL"),
             ),
             PdfGeneratorKlient(httpClient(), env.requireEnvValue("PDFGEN_URL")),
         )

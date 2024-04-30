@@ -17,8 +17,6 @@ class Familieoppretter(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    private val maksVentetid = Duration.ofMinutes(1)
-
     fun opprettFamilie(
         accessToken: String,
         gruppeid: Long,
@@ -45,10 +43,12 @@ class Familieoppretter(
         gruppeid: Long,
         accessToken: String,
         bestilling: BestillingStatus,
+        oenskaAntall: Int,
         baselineFamilier: List<ForenkletFamilieModell>,
     ): List<ForenkletFamilieModell> {
         var venta = Duration.ZERO
-        val ventetid = Duration.ofMinutes(5)
+        val ventetid = Duration.ofSeconds(10)
+        val maksVentetid = Duration.ofSeconds(20).multipliedBy(oenskaAntall.toLong())
         iTraad {
             while (!hentStatusBestilling(bestilling = bestilling.id, accessToken).ferdig && venta <= maksVentetid) {
                 venta += ventetid

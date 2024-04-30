@@ -75,7 +75,7 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
                     logger.debug("Baseline er ${it.size} saker")
                 }
             val bestilling = familieoppretter.opprettFamilie(getDollyAccessToken(), gruppeid, oenskaAntall)
-            familieoppretter.hentFamilier(gruppeid, getDollyAccessToken(), bestilling, baselineFamilier).forEach {
+            familieoppretter.hentFamilier(gruppeid, getDollyAccessToken(), bestilling, oenskaAntall, baselineFamilier).forEach {
                 logger.info("Sender inn søknad for familie med avdød ${it.avdoed}")
                 sendSoeknad(it, soeknadType, navIdent, behandlingssteg)
                 logger.info("Søknad sendt for familie med avdød ${it.avdoed}")

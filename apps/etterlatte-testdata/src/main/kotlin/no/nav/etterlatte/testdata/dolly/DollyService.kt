@@ -109,7 +109,7 @@ class DollyService(
         return noekkel
     }
 
-    fun markerSomIBruk(
+    private fun markerSomIBruk(
         ident: String,
         accessToken: String,
     ) = runBlocking {
@@ -119,7 +119,7 @@ class DollyService(
             dollyClient.markerIdentIBruk(ident, accessToken)
                 .also { logger.info("Test ident $ident markert med 'iBruk=${it.ibruk}'") }
         } catch (e: Exception) {
-            logger.warn("Klart ikke markere testident $ident som 'i bruk'")
+            logger.warn("Klart ikke markere testident $ident som 'i bruk'", e)
         }
     }
 

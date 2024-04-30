@@ -5,8 +5,9 @@ import { Alert, BodyShort } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { VedtakSammendrag } from '~components/vedtak/typer'
-import { useSelectorSaksbehandlerGjeldendeOppgaveBehandling } from '~store/selectors/useSelectorSaksbehandlerGjeldendeOppgaveBehandling'
+import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { Oppgavestatus } from '~shared/types/oppgave'
 
 type Props = {
   setBeslutning: (value: IBeslutning) => void
@@ -17,29 +18,37 @@ type Props = {
 
 export const AttesteringEllerUnderkjenning = ({ setBeslutning, beslutning, vedtak, erFattet }: Props) => {
   const { lastPage } = useBehandlingRoutes()
+
+  const oppgave = useSelectorOppgaveUnderBehandling()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const saksbehandlerForGjeldendeOppgave = useSelectorSaksbehandlerGjeldendeOppgaveBehandling()
+
   const attestantOgSaksbehandlerErSammePerson = vedtak?.behandlendeSaksbehandler === innloggetSaksbehandler.ident
   const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)
 
   useEffect(() => {
-    setOppgaveErTildeltInnloggetBruker(saksbehandlerForGjeldendeOppgave === innloggetSaksbehandler.ident)
-  }, [saksbehandlerForGjeldendeOppgave, innloggetSaksbehandler.ident, beslutning])
+    setOppgaveErTildeltInnloggetBruker(oppgave?.saksbehandler?.ident === innloggetSaksbehandler.ident)
+  }, [oppgave?.saksbehandler, innloggetSaksbehandler.ident, beslutning])
 
   return (
     <SidebarPanel>
       {oppgaveErTildeltInnloggetBruker ? (
         <>
-          <Alert variant="info" size="small">
-            Kontroller opplysninger og faglige vurderinger gjort under behandling.
-          </Alert>
+          {oppgave?.status === Oppgavestatus.PAA_VENT ? (
+            <Alert variant="warning" size="small" inline>
+              Kan ikke attestere en oppgave som står på vent
+            </Alert>
+          ) : (
+            <Alert variant="info" size="small">
+              Kontroller opplysninger og faglige vurderinger gjort under behandling.
+            </Alert>
+          )}
           <br />
 
           {lastPage ? (
             <Beslutningsvalg
               beslutning={beslutning}
               setBeslutning={setBeslutning}
-              disabled={attestantOgSaksbehandlerErSammePerson}
+              disabled={attestantOgSaksbehandlerErSammePerson || oppgave?.status === Oppgavestatus.PAA_VENT}
             />
           ) : (
             <BodyShort size="small" spacing>
@@ -53,8 +62,10 @@ export const AttesteringEllerUnderkjenning = ({ setBeslutning, beslutning, vedta
         </>
       ) : (
         <Alert variant="warning">
-          {saksbehandlerForGjeldendeOppgave ? (
-            <BodyShort>Oppgaven er tildelt {saksbehandlerForGjeldendeOppgave}.&nbsp;</BodyShort>
+          {oppgave?.saksbehandler ? (
+            <BodyShort>
+              Oppgaven er tildelt {oppgave?.saksbehandler?.navn || oppgave?.saksbehandler?.ident}.&nbsp;
+            </BodyShort>
           ) : (
             <BodyShort>Oppgaven er ikke tildelt noen.&nbsp;</BodyShort>
           )}

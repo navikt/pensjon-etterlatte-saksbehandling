@@ -3,12 +3,10 @@ package no.nav.etterlatte.behandling
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
-import io.ktor.server.application.log
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
@@ -36,6 +34,7 @@ import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.lagGrunnlagsopplysning
+import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
@@ -46,7 +45,7 @@ internal fun Route.behandlingRoutes(
     kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     behandlingFactory: BehandlingFactory,
 ) {
-    val logger = application.log
+    val logger = routeLogger
 
     post("/api/behandling") {
         val request = call.receive<NyBehandlingRequest>()
@@ -125,6 +124,8 @@ internal fun Route.behandlingRoutes(
             kunSkrivetilgang {
                 logger.debug("Prøver å fastsette virkningstidspunkt")
                 val body = call.receive<VirkningstidspunktRequest>()
+                logger.debug("Tok imot virkningstidspunktrequest")
+                logger.debug("Virkningstidspunktrequest hadde dato {}", body.dato)
 
                 val erGyldigVirkningstidspunkt =
                     inTransaction {
@@ -138,19 +139,26 @@ internal fun Route.behandlingRoutes(
                     }
 
                 if (!erGyldigVirkningstidspunkt) {
+                    logger.warn("Ugyldig virkningstidspunkt")
                     return@post call.respond(HttpStatusCode.BadRequest, "Ugyldig virkningstidspunkt")
                 }
                 try {
+                    logger.debug("Gyldig virkningstidspunkt")
                     val virkningstidspunkt =
                         inTransaction {
                             runBlocking {
-                                behandlingService.oppdaterVirkningstidspunkt(
-                                    behandlingId,
-                                    body.dato,
-                                    brukerTokenInfo,
-                                    body.begrunnelse!!,
-                                    kravdato = body.kravdato,
-                                )
+                                try {
+                                    behandlingService.oppdaterVirkningstidspunkt(
+                                        behandlingId,
+                                        body.dato,
+                                        brukerTokenInfo,
+                                        body.begrunnelse!!,
+                                        kravdato = body.kravdato,
+                                    )
+                                } catch (e: Exception) {
+                                    logger.warn("Kunne ikke oppdatere virkningstidspunktet", e)
+                                    throw e
+                                }
                             }
                         }
 

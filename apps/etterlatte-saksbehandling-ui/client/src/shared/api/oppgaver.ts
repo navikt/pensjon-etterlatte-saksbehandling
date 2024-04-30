@@ -32,11 +32,6 @@ export const hentOppgaverMedReferanse = async (referanse: string): Promise<ApiRe
 export const hentOppgaveForReferanseUnderBehandling = async (referanse: string): Promise<ApiResponse<OppgaveDTO>> =>
   apiClient.get(`/oppgaver/referanse/${referanse}/underbehandling`)
 
-export const hentSaksbehandlerForOppgaveUnderBehandling = async (
-  referanse: string
-): Promise<ApiResponse<Saksbehandler>> =>
-  apiClient.get(`/oppgaver/referanse/${referanse}/saksbehandler-underbehandling`)
-
 export const hentOppgavebenkStats = async (): Promise<ApiResponse<OppgavebenkStats>> => apiClient.get('/oppgaver/stats')
 
 export const hentOppgaverTilknyttetSak = async (sakId: number): Promise<ApiResponse<Array<OppgaveDTO>>> => {
@@ -62,13 +57,6 @@ export interface OppdatertOppgaveversjonResponseDto {
 export interface SaksbehandlerEndringDto {
   saksbehandler: string
   versjon: number | null
-}
-
-export const tildelSaksbehandlerApi = async (args: {
-  oppgaveId: string
-  nysaksbehandler: SaksbehandlerEndringDto
-}): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
-  return apiClient.post(`/oppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
 }
 
 export const saksbehandlereIEnhetApi = async (args: {

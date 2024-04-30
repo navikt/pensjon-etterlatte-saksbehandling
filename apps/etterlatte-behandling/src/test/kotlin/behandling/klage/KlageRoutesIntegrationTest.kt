@@ -64,9 +64,6 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
-    private val saksbehandlerIdent = "Saksbehandler01"
-    private val attestantIdent = "Saksbehandler02"
-
     @BeforeEach
     fun start() =
         startServer(
@@ -120,7 +117,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             // setter skjerming for saken
             client.postAndAssertOk(
                 "/egenansatt",
-                fagsystemTokenEY,
+                systemBruker,
                 EgenAnsattSkjermet(fnr = sak.ident, inntruffet = Tidspunkt.now(), skjermet = true),
             )
 
@@ -144,7 +141,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             // Setter strengt fortrolig på saken klagen hører til
             client.postAndAssertOk(
                 "/grunnlagsendringshendelse/adressebeskyttelse",
-                fagsystemTokenEY,
+                systemBruker,
                 Adressebeskyttelse(
                     hendelseId = "1",
                     endringstype = Endringstype.OPPRETTET,
@@ -196,7 +193,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
 
             client.patchAndAssertOk(
                 "/api/klage/${klage.id}/kabalstatus",
-                fagsystemTokenEY,
+                systemBruker,
                 Kabalrespons(KabalStatus.FERDIGSTILT, BehandlingResultat.IKKE_MEDHOLD),
             )
 

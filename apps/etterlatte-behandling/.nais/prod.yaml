@@ -207,3 +207,4 @@ spec:
         - application: etterlatte-tilbakekreving
         - application: etterlatte-klage
         - application: etterlatte-brev-api
+        - application: etterlatte-utbetaling

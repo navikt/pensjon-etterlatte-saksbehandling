@@ -3,16 +3,14 @@ package behandling.aktivitetsplikt
 import io.kotest.matchers.shouldBe
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktAktivitet
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktAktivitetType
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
-import no.nav.etterlatte.behandling.aktivitetsplikt.OpprettAktivitetspliktAktivitet
+import no.nav.etterlatte.behandling.aktivitetsplikt.LagreAktivitetspliktAktivitet
 import no.nav.etterlatte.behandling.aktivitetsplikt.SakidTilhoererIkkeBehandlingException
 import no.nav.etterlatte.behandling.aktivitetsplikt.TomErFoerFomException
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -58,14 +56,26 @@ class AktivitetspliktServiceTest {
     }
 
     @Nested
-    inner class OpprettAktivitet {
+    inner class OpprettEllerOppdaterAktivitet {
         @Test
         fun `Skal opprette en aktivitet`() {
-            every { aktivitetspliktDao.opprettAktivitet(behandling.id, aktivitet, any()) } just runs
+            every { aktivitetspliktDao.opprettAktivitet(behandling.id, aktivitet, any()) } returns 1
 
-            service.opprettAktivitet(behandling.id, aktivitet, brukerTokenInfo)
+            service.upsertAktivitet(behandling.id, aktivitet, brukerTokenInfo)
 
             coVerify { aktivitetspliktDao.opprettAktivitet(behandling.id, aktivitet, any()) }
+            coVerify(exactly = 0) { aktivitetspliktDao.oppdaterAktivitet(any(), any(), any()) }
+        }
+
+        @Test
+        fun `Skal oppdatere en aktivitet`() {
+            val aktivitet = aktivitet.copy(id = UUID.randomUUID())
+            every { aktivitetspliktDao.oppdaterAktivitet(behandling.id, aktivitet, any()) } returns 1
+
+            service.upsertAktivitet(behandling.id, aktivitet, brukerTokenInfo)
+
+            coVerify { aktivitetspliktDao.oppdaterAktivitet(behandling.id, aktivitet, any()) }
+            coVerify(exactly = 0) { aktivitetspliktDao.opprettAktivitet(any(), any(), any()) }
         }
 
         @Test
@@ -73,17 +83,16 @@ class AktivitetspliktServiceTest {
             val aktivitet = aktivitet.copy(sakId = 2)
 
             assertThrows<SakidTilhoererIkkeBehandlingException> {
-                service.opprettAktivitet(behandling.id, aktivitet, brukerTokenInfo)
+                service.upsertAktivitet(behandling.id, aktivitet, brukerTokenInfo)
             }
         }
 
         @Test
         fun `Skal kaste feil hvis tom er foer fom`() {
             val aktivitet = aktivitet.copy(tom = LocalDate.now().minusYears(1))
-            every { behandlingService.hentBehandling(behandling.id) } returns behandling
 
             assertThrows<TomErFoerFomException> {
-                service.opprettAktivitet(behandling.id, aktivitet, brukerTokenInfo)
+                service.upsertAktivitet(behandling.id, aktivitet, brukerTokenInfo)
             }
         }
 
@@ -96,7 +105,37 @@ class AktivitetspliktServiceTest {
             every { behandlingService.hentBehandling(behandling.id) } returns behandling
 
             assertThrows<BehandlingKanIkkeEndres> {
-                service.opprettAktivitet(behandling.id, aktivitet, brukerTokenInfo)
+                service.upsertAktivitet(behandling.id, aktivitet, brukerTokenInfo)
+            }
+        }
+    }
+
+    @Nested
+    inner class SlettAktivitet {
+        private val aktivitetId = UUID.randomUUID()
+
+        @Test
+        fun `Skal slette en aktivitet`() {
+            every { aktivitetspliktDao.slettAktivitet(aktivitetId, behandling.id) } returns 1
+            every { behandlingService.hentBehandling(behandling.id) } returns
+                behandling.apply {
+                    every { status } returns BehandlingStatus.VILKAARSVURDERT
+                }
+
+            service.slettAktivitet(behandling.id, aktivitetId)
+
+            coVerify { aktivitetspliktDao.slettAktivitet(aktivitetId, behandling.id) }
+        }
+
+        @Test
+        fun `Skal kaste feil hvis behandling ikke kan endres`() {
+            every { behandlingService.hentBehandling(behandling.id) } returns
+                behandling.apply {
+                    every { status } returns BehandlingStatus.FATTET_VEDTAK
+                }
+
+            assertThrows<BehandlingKanIkkeEndres> {
+                service.slettAktivitet(behandling.id, aktivitetId)
             }
         }
     }
@@ -111,7 +150,7 @@ class AktivitetspliktServiceTest {
                     }
             }
         val aktivitet =
-            OpprettAktivitetspliktAktivitet(
+            LagreAktivitetspliktAktivitet(
                 sakId = 1L,
                 type = AktivitetspliktAktivitetType.ARBEIDSTAKER,
                 fom = LocalDate.now(),

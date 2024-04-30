@@ -1,9 +1,7 @@
 package no.nav.etterlatte.grunnlag
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.application
 import io.ktor.server.application.call
-import io.ktor.server.application.log
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
@@ -12,6 +10,7 @@ import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummerException
 import no.nav.etterlatte.libs.ktor.route.hentNavidentFraToken
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.withFoedselsnummer
 
 fun Route.personRoute(
@@ -60,7 +59,7 @@ fun Route.personRoute(
                         "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt",
                     )
                 } catch (ex: Exception) {
-                    application.log.error("Fikk feilmelding under henting av navn fra grunnlag", ex)
+                    routeLogger.error("Fikk feilmelding under henting av navn fra grunnlag", ex)
                     call.respond(
                         HttpStatusCode.NotFound,
                         "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt",

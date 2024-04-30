@@ -249,3 +249,5 @@ fun BrukerTokenInfo.lagGrunnlagsopplysning() =
     } else {
         Grunnlagsopplysning.Gjenny.create(ident())
     }
+
+val routeLogger = LoggerFactory.getLogger("Route")

@@ -13,6 +13,7 @@ services:
     environment:
       - LICENSE=accept
       - MQ_QMGR_NAME=QM1
+      - MQ_ADMIN_PASSWORD=passw0rd
   kafka:
     image: 'bitnami/kafka:latest'
     ports:

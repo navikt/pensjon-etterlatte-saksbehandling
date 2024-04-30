@@ -236,7 +236,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                     </>
                   ) : (
                     <Table.Row>
-                      <Table.DataCell align="center" colSpan={5}>
+                      <Table.DataCell align="center" colSpan={6}>
                         Bruker har ingen sanksjoner
                       </Table.DataCell>
                     </Table.Row>

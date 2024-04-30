@@ -103,18 +103,6 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             }
         }
 
-        // TODO: Slå sammen med den over
-        get("/referanse/{referanse}/saksbehandler-underbehandling") {
-            kunSaksbehandler {
-                val oppgave =
-                    inTransaction {
-                        service.hentOppgaveUnderBehandling(referanse)?.saksbehandler
-                    }
-
-                call.respond(oppgave ?: HttpStatusCode.NoContent)
-            }
-        }
-
         route("/stats") {
             get {
                 kunSaksbehandler {

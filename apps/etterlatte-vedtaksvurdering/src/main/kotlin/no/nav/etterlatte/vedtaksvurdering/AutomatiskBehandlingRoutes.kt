@@ -1,16 +1,15 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.server.application.call
-import io.ktor.server.application.log
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.application
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
@@ -21,7 +20,7 @@ fun Route.automatiskBehandlingRoutes(
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/vedtak") {
-        val logger = application.log
+        val logger = routeLogger
 
         post("/{$SAKID_CALL_PARAMETER}/{$BEHANDLINGID_CALL_PARAMETER}/automatisk") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->

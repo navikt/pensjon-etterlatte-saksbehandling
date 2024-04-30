@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.UUID
@@ -19,6 +20,7 @@ class OmregningService(
     private val behandlingService: BehandlingService,
     private val grunnlagService: GrunnlagServiceImpl,
     private val revurderingService: AutomatiskRevurderingService,
+    private val omregningDao: OmregningDao,
 ) {
     fun hentForrigeBehandling(sakId: Long) =
         behandlingService.hentSisteIverksatte(sakId)
@@ -53,6 +55,8 @@ class OmregningService(
             ),
         ) { "Opprettelse av revurdering feilet for $sakId" }
     }
+
+    fun oppdaterKjoering(request: KjoeringRequest) = omregningDao.oppdaterKjoering(request)
 }
 
 class StoetterIkkeProsesstypeManuell : UgyldigForespoerselException(

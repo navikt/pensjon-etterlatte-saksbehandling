@@ -80,7 +80,6 @@ export default function OpprettNyBehandling() {
     handleSubmit,
     control,
     formState: { errors },
-    getValues,
   } = methods
 
   const onSubmit = (data: NyBehandlingSkjema) => {
@@ -131,7 +130,6 @@ export default function OpprettNyBehandling() {
             description="Datoen søknaden ble mottatt"
             control={control}
             errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
-            defaultValue={getValues().mottattDato}
           />
 
           <PersongalleriHeading size="medium" spacing>

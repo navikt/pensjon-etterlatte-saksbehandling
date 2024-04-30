@@ -30,7 +30,6 @@ internal class UtbetalingServiceTest {
             oppdragMapper = OppdragMapper,
             oppdragSender = oppdragSender,
             utbetalingDao = utbetalingDao,
-            rapidsConnection = mockk(),
             clock = utcKlokke(),
         )
 

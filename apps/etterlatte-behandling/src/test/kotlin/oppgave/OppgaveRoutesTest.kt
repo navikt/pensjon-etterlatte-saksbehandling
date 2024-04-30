@@ -72,7 +72,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                     val dto =
                         NyOppgaveDto(OppgaveKilde.EKSTERN, OppgaveType.JOURNALFOERING, "Mottatt journalpost", referanse)
 
-                    addAuthToken(systemBruker)
+                    addAuthToken(this@OppgaveRoutesTest.systemBruker)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     setBody(dto)
                 }.let {
@@ -87,8 +87,8 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
             hentOppgave(client, oppgave.id)
 
             client.post("/api/oppgaver/${oppgave.id}/tildel-saksbehandler") {
-                val dto = SaksbehandlerEndringDto(systemBruker)
-                addAuthToken(systemBruker)
+                val dto = SaksbehandlerEndringDto(this@OppgaveRoutesTest.systemBruker)
+                addAuthToken(this@OppgaveRoutesTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(dto)
             }.also {
@@ -97,7 +97,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
 
             client.put("/api/oppgaver/${oppgave.id}/frist") {
                 val dto = RedigerFristRequest(Tidspunkt.now().plus(28, ChronoUnit.DAYS))
-                addAuthToken(systemBruker)
+                addAuthToken(this@OppgaveRoutesTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(dto)
             }.also {
@@ -106,7 +106,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
 
             client.post("/api/oppgaver/${oppgave.id}/sett-paa-vent") {
                 val dto = EndrePaaVentRequest("", true)
-                addAuthToken(systemBruker)
+                addAuthToken(this@OppgaveRoutesTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(dto)
             }.also {
@@ -122,7 +122,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                         oppgaveKilde = setOf(OppgaveKilde.EKSTERN),
                         oppgaver = listOf(),
                     )
-                addAuthToken(systemBruker)
+                addAuthToken(this@OppgaveRoutesTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(dto)
             }.also {
@@ -137,7 +137,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
         oppgaveId: UUID,
     ): OppgaveIntern =
         client.get("/api/oppgaver/$oppgaveId") {
-            addAuthToken(systemBruker)
+            addAuthToken(this@OppgaveRoutesTest.systemBruker)
         }.let {
             assertEquals(HttpStatusCode.OK, it.status)
             it.body()

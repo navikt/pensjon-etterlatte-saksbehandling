@@ -16,6 +16,8 @@ import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.ANTALL
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
@@ -34,6 +36,8 @@ internal class ReguleringsforespoerselRiverTest {
             mapOf(
                 ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
                 DATO_KEY to dato,
+                KJOERING to "Regulering2023",
+                ANTALL to Int.MAX_VALUE,
             ),
         )
 
@@ -47,7 +51,7 @@ internal class ReguleringsforespoerselRiverTest {
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) {
             vedtakServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(any())
-            vedtakServiceMock.hentAlleSaker()
+            vedtakServiceMock.hentAlleSaker("Regulering2023", Int.MAX_VALUE)
         }
     }
 
@@ -55,7 +59,7 @@ internal class ReguleringsforespoerselRiverTest {
     fun `skal lage ny melding for hver sak den faar tilbake`() {
         val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
-        every { vedtakServiceMock.hentAlleSaker() } returns
+        every { vedtakServiceMock.hentAlleSaker("Regulering2023", Int.MAX_VALUE) } returns
             Saker(
                 listOf(
                     Sak("saksbehandler1", SakType.BARNEPENSJON, 1L, "4808"),
@@ -83,7 +87,7 @@ internal class ReguleringsforespoerselRiverTest {
     fun `skal sende med sakId for alle saker i basen`() {
         val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
-        every { behandlingServiceMock.hentAlleSaker() } returns
+        every { behandlingServiceMock.hentAlleSaker("Regulering2023", Int.MAX_VALUE) } returns
             Saker(
                 listOf(
                     Sak("saksbehandler1", SakType.BARNEPENSJON, 1000L, "4808"),
@@ -109,7 +113,7 @@ internal class ReguleringsforespoerselRiverTest {
         val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
         val sakId = 1000L
-        every { behandlingServiceMock.hentAlleSaker() } returns
+        every { behandlingServiceMock.hentAlleSaker("Regulering2023", Int.MAX_VALUE) } returns
             Saker(
                 listOf(
                     Sak("saksbehandler1", SakType.BARNEPENSJON, sakId, "4808"),

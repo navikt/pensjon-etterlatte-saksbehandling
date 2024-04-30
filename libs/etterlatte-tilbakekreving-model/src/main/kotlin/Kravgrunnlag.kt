@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.tilbakekreving
 
+import no.nav.etterlatte.libs.common.UUID30
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -12,8 +13,6 @@ data class VedtakId(val value: Long)
 data class Kontrollfelt(val value: String)
 
 data class NavIdent(val value: String)
-
-data class UUID30(val value: String)
 
 data class KlasseKode(val value: String)
 

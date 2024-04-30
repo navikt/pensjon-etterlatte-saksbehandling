@@ -38,9 +38,6 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxJob
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxRepository
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxService
-import no.nav.etterlatte.vedtaksvurdering.simulering.SimuleringOsKlient
-import no.nav.etterlatte.vedtaksvurdering.simulering.SimuleringOsService
-import no.nav.etterlatte.vedtaksvurdering.simulering.simuleringObjectMapper
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -121,23 +118,6 @@ class ApplicationContext {
         AutomatiskBehandlingService(
             vedtakBehandlingService,
             behandlingKlient,
-        )
-
-    val simuleringOsService =
-        SimuleringOsService(
-            vedtaksvurderingService = vedtaksvurderingService,
-            vedtakBehandlingService = vedtakBehandlingService,
-            simuleringOsKlient =
-                SimuleringOsKlient(
-                    config,
-                    httpClientClientCredentials(
-                        azureAppClientId = config.getString("azure.app.client.id"),
-                        azureAppJwk = config.getString("azure.app.jwk"),
-                        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-                        azureAppScope = config.getString("etterlatteproxy.azure.scope"),
-                    ),
-                    objectMapper = simuleringObjectMapper(),
-                ),
         )
 
     val metrikkerJob: MetrikkerJob by lazy {

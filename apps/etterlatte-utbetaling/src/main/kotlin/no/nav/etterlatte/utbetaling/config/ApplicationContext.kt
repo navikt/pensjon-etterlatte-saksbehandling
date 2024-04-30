@@ -1,5 +1,9 @@
 package no.nav.etterlatte.utbetaling.config
 
+import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
+import io.ktor.client.HttpClient
+import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.jobs.next
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
@@ -7,9 +11,16 @@ import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.jdbcUrl
 import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.mq.JmsConnectionFactory
+import no.nav.etterlatte.rapidsandrivers.configFromEnvironment
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
+import no.nav.etterlatte.sikkerLogg
+import no.nav.etterlatte.utbetaling.BehandlingKlient
+import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
 import no.nav.etterlatte.utbetaling.avstemming.AvstemmingDao
 import no.nav.etterlatte.utbetaling.avstemming.GrensesnittsavstemmingJob
 import no.nav.etterlatte.utbetaling.avstemming.GrensesnittsavstemmingService
@@ -35,6 +46,10 @@ import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
+import no.nav.etterlatte.utbetaling.simulering.SimuleringOsKlient
+import no.nav.etterlatte.utbetaling.simulering.SimuleringOsService
+import no.nav.etterlatte.utbetaling.simulering.simuleringObjectMapper
+import no.nav.etterlatte.utbetaling.utbetalingRoutes
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.Duration
@@ -42,8 +57,9 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 class ApplicationContext(
-    val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
-    val rapidsConnection: RapidsConnection = RapidApplication.create(getRapidEnv()),
+    val env: Map<String, String> = getRapidEnv(),
+    val properties: ApplicationProperties = ApplicationProperties.fromEnv(env),
+    rapidConnection: RapidsConnection? = null,
     val jmsConnectionFactory: EtterlatteJmsConnectionFactory =
         JmsConnectionFactory(
             hostname = properties.mqHost,
@@ -53,8 +69,24 @@ class ApplicationContext(
             username = properties.serviceUserUsername,
             password = properties.serviceUserPassword,
         ),
+    // Overridable clients
+    config: Config = ConfigFactory.load(),
+    httpClient: HttpClient = httpClient(),
+    val behandlingKlient: BehandlingKlient = BehandlingKlient(config, httpClient),
+    val vedtaksvurderingKlient: VedtaksvurderingKlient = VedtaksvurderingKlient(config, httpClient),
+    val simuleringOsKlient: SimuleringOsKlient =
+        SimuleringOsKlient(
+            config,
+            httpClientClientCredentials(
+                azureAppClientId = config.getString("azure.app.client.id"),
+                azureAppJwk = config.getString("azure.app.jwk"),
+                azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+                azureAppScope = config.getString("etterlatteproxy.scope"),
+            ),
+            objectMapper = simuleringObjectMapper(),
+        ),
 ) {
-    val clock = utcKlokke()
+    private val clock = utcKlokke()
 
     val dataSource =
         DataSourceBuilder.createDataSource(
@@ -82,7 +114,6 @@ class ApplicationContext(
             oppdragMapper = OppdragMapper,
             oppdragSender = oppdragSender,
             utbetalingDao = utbetalingDao,
-            rapidsConnection = rapidsConnection,
             clock = clock,
         )
 
@@ -102,6 +133,8 @@ class ApplicationContext(
             clock = clock,
         )
     }
+
+    val simuleringOsService = SimuleringOsService(vedtaksvurderingKlient, simuleringOsKlient)
 
     val leaderElection = LeaderElection(properties.leaderElectorPath)
 
@@ -151,6 +184,17 @@ class ApplicationContext(
             clock = clock,
             saktype = Saktype.OMSTILLINGSSTOENAD,
         )
+
+    val rapidsConnection =
+        rapidConnection ?: RapidApplication.Builder(
+            RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
+        )
+            .withKtorModule {
+                restModule(sikkerLogg, config = HoconApplicationConfig(config)) {
+                    utbetalingRoutes(simuleringOsService, behandlingKlient)
+                }
+            }
+            .build()
 
     val oppgavetriggerRiver by lazy {
         OppgavetriggerRiver(

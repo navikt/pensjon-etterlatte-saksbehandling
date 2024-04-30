@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -64,7 +65,15 @@ class ApplicationIntegrationTest {
                 konsistensavstemmingOMSEnabled = false,
             )
 
-        ApplicationContext(applicationProperties, rapidsConnection, jmsConnectionFactory = connectionFactory).also {
+        ApplicationContext(
+            env = System.getenv(),
+            properties = applicationProperties,
+            rapidConnection = rapidsConnection,
+            jmsConnectionFactory = connectionFactory,
+            behandlingKlient = mockk(),
+            vedtaksvurderingKlient = mockk(),
+            simuleringOsKlient = mockk(),
+        ).also {
             rapidApplication(it).start()
         }
     }

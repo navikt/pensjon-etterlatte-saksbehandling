@@ -13,6 +13,7 @@ import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/Beh
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useBehandling } from '~components/behandling/useBehandling'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
   const { next, goto } = useBehandlingRoutes()
@@ -20,10 +21,13 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
   const { behandlingId } = props
   const vedtaksresultat = useVedtaksResultat()
   const behandling = useBehandling()
+  const personopplysninger = usePersonopplysninger()
   const [vedtakResult, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [oppdaterStatusResult, oppdaterStatusRequest] = useApiCall(oppdaterStatus)
 
   const boddEllerArbeidetUtlandet = behandling?.boddEllerArbeidetUtlandet?.boddEllerArbeidetUtlandet ?? false
+  const ukjentAvdoed = personopplysninger?.avdoede.length === 0
+  const skalBrukeTrygdetid = boddEllerArbeidetUtlandet && !ukjentAvdoed
 
   const oppdaterVedtakAvslag = () => {
     oppdaterStatusRequest(behandlingId, (result) => {
@@ -31,7 +35,7 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
       }
       oppdaterVedtakRequest(behandlingId, () => {
-        if (boddEllerArbeidetUtlandet) {
+        if (skalBrukeTrygdetid) {
           goto('trygdetid')
         } else {
           goto('brev')
@@ -77,7 +81,7 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
             case 'avslag':
               return (
                 <Button variant="primary" loading={isPending(vedtakResult)} onClick={() => oppdaterVedtakAvslag()}>
-                  {boddEllerArbeidetUtlandet ? handlinger.AVSLAG_UTLAND.navn : handlinger.AVSLAG.navn}
+                  {skalBrukeTrygdetid ? handlinger.AVSLAG_UTLAND.navn : handlinger.AVSLAG.navn}
                 </Button>
               )
           }

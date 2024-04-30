@@ -1,5 +1,6 @@
 package no.nav.etterlatte.gyldigsoeknad.journalfoering
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.RetryResult
@@ -7,7 +8,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import org.slf4j.LoggerFactory
 import pdf.PdfGenerator
@@ -60,8 +60,8 @@ class JournalfoerSoeknadService(
         try {
             val arkivPdf = opprettArkivPdf(soeknadId, soeknad, template)
 
-            logger.info("Oppretter original JSON for søknad med id $soeknadId")
-            val originalJson = DokumentVariant.OriginalJson(soeknad.toJson())
+            logger.info("Oppretter original JSON for søknad (id=$soeknadId)")
+            val originalJson = opprettOriginalJson(soeknadId, soeknad)
 
             return JournalpostDokument(
                 tittel = tittel,
@@ -70,6 +70,17 @@ class JournalfoerSoeknadService(
         } catch (e: ResponseException) {
             throw Exception("Klarte ikke å generere PDF for søknad med id=$soeknadId", e)
         }
+    }
+
+    private fun opprettOriginalJson(
+        soeknadId: Long,
+        soeknad: InnsendtSoeknad,
+    ): DokumentVariant.OriginalJson {
+        logger.info("Oppretter original JSON for søknad (id=$soeknadId)")
+
+        val skjemaInfoBytes = jacksonObjectMapper().writeValueAsBytes(soeknad)
+
+        return DokumentVariant.OriginalJson(encoder.encodeToString(skjemaInfoBytes))
     }
 
     private fun opprettArkivPdf(

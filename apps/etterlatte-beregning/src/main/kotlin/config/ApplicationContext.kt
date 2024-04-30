@@ -59,6 +59,11 @@ class ApplicationContext {
     val trygdetidKlient = TrygdetidKlient(config, httpClient())
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
 
+    val sanksjonService =
+        SanksjonService(
+            sanksjonRepository = SanksjonRepository(dataSource),
+            behandlingKlient = behandlingKlient,
+        )
     private val beregningsGrunnlagRepository = BeregningsGrunnlagRepository(dataSource)
     val beregningRepository = BeregningRepository(dataSource)
     val beregningsGrunnlagService =
@@ -98,6 +103,7 @@ class ApplicationContext {
             beregnBarnepensjonService = beregnBarnepensjonService,
             beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
             beregnOverstyrBeregningService = beregnOverstyrBeregningService,
+            sanksjonService = sanksjonService,
         )
     val avkortingRepository = AvkortingRepository(dataSource)
     val avkortingService =
@@ -113,9 +119,5 @@ class ApplicationContext {
             behandlingKlient = behandlingKlient,
         )
     val grunnbeloepService = GrunnbeloepService(repository = GrunnbeloepRepository)
-    val sanksjonService =
-        SanksjonService(
-            sanksjonRepository = SanksjonRepository(dataSource),
-            behandlingKlient = behandlingKlient,
-        )
+
 }

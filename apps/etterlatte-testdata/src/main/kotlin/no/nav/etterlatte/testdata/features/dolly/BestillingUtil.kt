@@ -167,13 +167,13 @@ private fun soeskenTemplate(
   "borIkkeSammen": null,
   "nyRelatertPerson": {
     "identtype": "FNR",
-    "kjoenn": $kjoenn,
+    "kjoenn": "$kjoenn",
     "foedtEtter": null,
     "foedtFoer": null,
     "alder": ${
     when (erOver18) {
-        true -> alderSoeskenOver18
-        false -> alderSoeskenUnder18
+        true -> "$alderSoeskenOver18"
+        false -> "$alderSoeskenUnder18"
     }
 },
     "syntetisk": false,

@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.utbetaling.BehandlingKlient
 import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.utbetalingRoutes
 import no.nav.etterlatte.utbetaling.vedtak
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -45,11 +46,13 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SimuleringOsRouteTest {
     private val server = MockOAuth2Server()
+    private val utbetalingDao: UtbetalingDao = mockk()
     private val vedtaksvurderingKlient: VedtaksvurderingKlient = mockk()
     private val simuleringOsKlient: SimuleringOsKlient = mockk()
     private val behandlingKlient: BehandlingKlient = mockk()
     private val simuleringOsService: SimuleringOsService =
         SimuleringOsService(
+            utbetalingDao,
             vedtaksvurderingKlient,
             simuleringOsKlient,
         )
@@ -71,7 +74,9 @@ class SimuleringOsRouteTest {
 
     @Test
     fun `mappe informasjon fra revurderingsvedtak til simuleringsinput`() {
+        val sakId = 1000223L
         val behandlingId = UUID.randomUUID()
+
         val utbetalingsperiodeFeb2024 =
             Utbetalingsperiode(
                 id = 444L,
@@ -90,12 +95,13 @@ class SimuleringOsRouteTest {
             vedtak(
                 vedtakId = 1,
                 saktype = SakType.BARNEPENSJON,
-                sakId = 1000223L,
+                sakId = sakId,
                 ident = SOEKER_FOEDSELSNUMMER.value,
                 virkningstidspunkt = of(2024, FEBRUARY),
                 utbetalingsperioder = listOf(utbetalingsperiodeFeb2024, utbetalingsperiodeMai2024),
             )
 
+        coEvery { utbetalingDao.hentUtbetalinger(sakId) } returns emptyList()
         coEvery { vedtaksvurderingKlient.hentVedtak(behandlingId, any()) } returns vedtak
         coEvery {
             behandlingKlient.harTilgangTilBehandling(behandlingId, true, bruker = any())
@@ -115,7 +121,7 @@ class SimuleringOsRouteTest {
             }
 
             val response =
-                client.post("/api/utbetaling/$behandlingId/simulering") {
+                client.post("/api/utbetaling/behandling/$behandlingId/simulering") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
             response.status shouldBe HttpStatusCode.OK

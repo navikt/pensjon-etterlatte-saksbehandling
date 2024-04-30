@@ -134,7 +134,12 @@ class ApplicationContext(
         )
     }
 
-    val simuleringOsService = SimuleringOsService(vedtaksvurderingKlient, simuleringOsKlient)
+    private val simuleringOsService =
+        SimuleringOsService(
+            utbetalingDao,
+            vedtaksvurderingKlient,
+            simuleringOsKlient,
+        )
 
     val leaderElection = LeaderElection(properties.leaderElectorPath)
 

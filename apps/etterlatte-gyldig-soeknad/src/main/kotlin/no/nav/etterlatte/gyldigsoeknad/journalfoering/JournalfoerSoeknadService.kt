@@ -78,7 +78,7 @@ class JournalfoerSoeknadService(
     ): DokumentVariant.OriginalJson {
         logger.info("Oppretter original JSON for søknad (id=$soeknadId)")
 
-        val skjemaInfoBytes = jacksonObjectMapper().writeValueAsBytes(soeknad)
+        val skjemaInfoBytes = jacksonObjectMapper().writeValueAsBytes(soeknad.toJsonNode())
 
         return DokumentVariant.OriginalJson(encoder.encodeToString(skjemaInfoBytes))
     }

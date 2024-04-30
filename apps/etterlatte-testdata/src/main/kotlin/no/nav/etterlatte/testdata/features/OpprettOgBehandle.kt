@@ -72,7 +72,7 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
             logger.info("Oppretter $oenskaAntall familier og sender inn søknad for hver")
             val baselineFamilier =
                 familieoppretter.hentFamilier(gruppeid, getDollyAccessToken()).also {
-                    logger.debug("Baseline er ${it.size} saker")
+                    logger.debug("Baseline for gruppeid $gruppeid er ${it.size} saker")
                 }
             val bestilling = familieoppretter.opprettFamilie(getDollyAccessToken(), gruppeid, oenskaAntall)
             familieoppretter.hentFamilier(gruppeid, getDollyAccessToken(), bestilling, oenskaAntall, baselineFamilier).forEach {

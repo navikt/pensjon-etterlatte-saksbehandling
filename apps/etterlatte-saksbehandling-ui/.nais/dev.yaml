@@ -133,7 +133,7 @@ spec:
         - application: etterlatte-pdltjenester
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
-        - applicaiton: etterlatte-utbetaling
+        - application: etterlatte-utbetaling
     inbound:
       rules:
         - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator

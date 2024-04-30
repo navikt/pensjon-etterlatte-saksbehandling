@@ -6,9 +6,9 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.testdata.automatisk.AvkortingService
+import no.nav.etterlatte.testdata.automatisk.BehandlingService
 import no.nav.etterlatte.testdata.automatisk.BeregningService
 import no.nav.etterlatte.testdata.automatisk.BrevService
-import no.nav.etterlatte.testdata.automatisk.SakService
 import no.nav.etterlatte.testdata.automatisk.TrygdetidService
 import no.nav.etterlatte.testdata.automatisk.VedtaksvurderingService
 import no.nav.etterlatte.testdata.automatisk.VilkaarsvurderingService
@@ -36,8 +36,8 @@ class AppBuilder {
                 config.getString("vilkaarsvurdering.client.id"),
             )
         val httpClientBehandling = settOppHttpClient("behandling")
-        val sakService =
-            SakService(
+        val behandlingService =
+            BehandlingService(
                 httpClientBehandling,
                 "http://etterlatte-behandling",
                 config.getString("behandling.client.id"),
@@ -77,7 +77,7 @@ class AppBuilder {
             avkortingService = avkortingService,
             beregningService = beregningService,
             brevService = brevService,
-            sakService = sakService,
+            behandlingService = behandlingService,
             trygdetidService = trygdetidService,
             vedtaksvurderingService = vedtaksvurderingService,
             vilkaarsvurderingService = vilkaarsvurderingService,

@@ -21,7 +21,7 @@ import no.nav.etterlatte.testdata.BEGRUNNELSE
 import java.time.YearMonth
 import java.util.UUID
 
-class SakService(private val klient: DownstreamResourceClient, private val url: String, private val clientId: String) {
+class BehandlingService(private val klient: DownstreamResourceClient, private val url: String, private val clientId: String) {
     suspend fun hentSak(sakId: Long): Sak =
         retryOgPakkUt {
             klient.get(Resource(clientId, "$url/saker/$sakId"), Systembruker.testdata).mapBoth(

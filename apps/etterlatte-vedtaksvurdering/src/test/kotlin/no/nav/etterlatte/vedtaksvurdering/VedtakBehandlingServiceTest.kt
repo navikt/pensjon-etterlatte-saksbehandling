@@ -45,7 +45,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.vedtaksvurdering.config.VedtaksvurderingFeatureToggle
 import no.nav.etterlatte.vedtaksvurdering.database.DatabaseExtension
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
@@ -79,10 +78,6 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
     private val trygdetidKlientMock = mockk<TrygdetidKlient>()
     private val featureToggleService = DummyFeatureToggleService()
     private lateinit var service: VedtakBehandlingService
-
-    init {
-        featureToggleService.settBryter(VedtaksvurderingFeatureToggle.Foreldreloes, false)
-    }
 
     @BeforeAll
     fun beforeAll() {

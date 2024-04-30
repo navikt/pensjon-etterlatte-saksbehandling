@@ -3,7 +3,6 @@ package no.nav.etterlatte.vedtaksvurdering.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.MetrikkerJob
@@ -48,13 +47,6 @@ private fun featureToggleProperties(config: Config) =
         host = config.getString("funksjonsbrytere.unleash.host"),
         apiKey = config.getString("funksjonsbrytere.unleash.token"),
     )
-
-enum class VedtaksvurderingFeatureToggle(private val key: String) : FeatureToggle {
-    Foreldreloes("foreldreloes"),
-    ;
-
-    override fun key(): String = key
-}
 
 class ApplicationContext {
     init {

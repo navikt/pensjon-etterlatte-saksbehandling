@@ -30,7 +30,6 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.SamordningsvedtakWrapper
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
-import no.nav.etterlatte.vedtaksvurdering.config.VedtaksvurderingFeatureToggle
 import no.nav.etterlatte.vedtaksvurdering.grunnlag.GrunnlagVersjonValidering.validerVersjon
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
@@ -589,28 +588,11 @@ class VedtakBehandlingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakData {
-        val foreldreloesFlag = featureToggleService.isEnabled(VedtaksvurderingFeatureToggle.Foreldreloes, false)
-
         return coroutineScope {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
             val sak = behandlingKlient.hentSak(behandling.sak, brukerTokenInfo)
 
-            val trygdetidListe = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
-
-            val trygdetider =
-                when (foreldreloesFlag) {
-                    true -> {
-                        trygdetidListe
-                    }
-
-                    false -> {
-                        if (trygdetidListe.size > 1) {
-                            throw ForeldreloesTrygdetid(behandling.id)
-                        }
-
-                        listOfNotNull(trygdetidListe.firstOrNull())
-                    }
-                }
+            val trygdetider = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
 
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {

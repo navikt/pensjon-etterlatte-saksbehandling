@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.producer
+import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 
 object OpprettSoeknadFeature : TestDataFeature {
     override val beskrivelse: String
@@ -46,6 +47,7 @@ object OpprettSoeknadFeature : TestDataFeature {
                                     gjenlevendeFnr = it["fnrGjenlevende"]!!,
                                     avdoedFnr = it["fnrAvdoed"]!!,
                                     barnFnr = it["fnrBarn"]!!,
+                                    behandlingssteg = Behandlingssteg.BEHANDLING_OPPRETTA,
                                 ),
                                 mapOf("NavIdent" to (navIdentFraToken()!!.toByteArray())),
                             )
@@ -89,6 +91,7 @@ private fun opprettSoeknadJson(
     gjenlevendeFnr: String,
     avdoedFnr: String,
     barnFnr: String,
+    behandlingssteg: Behandlingssteg,
 ): String {
     val soeknadType =
         if ("Omstillingsstoenad" == ytelse) {
@@ -102,5 +105,6 @@ private fun opprettSoeknadJson(
         gjenlevendeFnr,
         avdoedFnr,
         listOf(barnFnr),
+        behandlingssteg,
     ).toJson()
 }

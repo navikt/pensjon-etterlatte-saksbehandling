@@ -1,0 +1,93 @@
+package no.nav.etterlatte.testdata
+
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
+import no.nav.etterlatte.testdata.automatisk.AvkortingService
+import no.nav.etterlatte.testdata.automatisk.BehandlingService
+import no.nav.etterlatte.testdata.automatisk.BeregningService
+import no.nav.etterlatte.testdata.automatisk.BrevService
+import no.nav.etterlatte.testdata.automatisk.TrygdetidService
+import no.nav.etterlatte.testdata.automatisk.VedtaksvurderingService
+import no.nav.etterlatte.testdata.automatisk.VilkaarsvurderingService
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import org.slf4j.LoggerFactory
+import java.util.UUID
+
+class Behandler(
+    private val behandlingService: BehandlingService,
+    private val vilkaarsvurderingService: VilkaarsvurderingService,
+    private val trygdetidService: TrygdetidService,
+    private val beregningService: BeregningService,
+    private val avkortingService: AvkortingService,
+    private val brevService: BrevService,
+    private val vedtaksvurderingService: VedtaksvurderingService,
+) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
+    suspend fun behandle(
+        sakId: Long,
+        behandling: UUID,
+        behandlingssteg: Behandlingssteg,
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
+        logger.info("Starter automatisk behandling av sak $sakId og behandling $behandling til steg $behandlingssteg")
+        if (behandlingssteg in listOf(Behandlingssteg.KLAR, Behandlingssteg.BEHANDLING_OPPRETTA)) {
+            return
+        }
+        val sak = behandlingService.hentSak(sakId)
+        logger.info("Henta sak $sakId")
+
+        behandlingService.settKommerBarnetTilGode(behandling)
+        behandlingService.lagreGyldighetsproeving(behandling)
+        behandlingService.lagreUtlandstilknytning(behandling)
+        behandlingService.lagreVirkningstidspunkt(behandling)
+        behandlingService.tildelSaksbehandler(Fagsaksystem.EY.navn, sakId)
+
+        logger.info("Tildelt til saksbehandler, klar til vilkårsvurdering")
+        vilkaarsvurderingService.vilkaarsvurder(behandling)
+        logger.info("Vilkårsvurderte behandling $behandling i sak $sakId")
+        if (behandlingssteg == Behandlingssteg.VILKAARSVURDERT) {
+            return
+        }
+        trygdetidService.beregnTrygdetid(behandling)
+        logger.info("Beregna trygdetid for $behandling i sak $sakId")
+        if (behandlingssteg == Behandlingssteg.TRYGDETID_OPPRETTA) {
+            return
+        }
+        logger.info("Lagrer beregningsgrunnlag")
+        beregningService.lagreBeregningsgrunnlag(behandling, sak.sakType)
+        logger.info("Lagra beregningsgrunnlag, klar til beregning")
+        beregningService.beregn(behandling)
+        logger.info("Beregna behandling $behandling i sak $sakId")
+        if (behandlingssteg == Behandlingssteg.BEREGNA) {
+            return
+        }
+        logger.info("Ferdig beregna i $behandling")
+
+        if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+            logger.info("Avkorter $behandling")
+            avkortingService.avkort(behandling)
+            logger.info("Avkorta behandling $behandling i sak $sakId")
+        }
+        if (behandlingssteg == Behandlingssteg.AVKORTA) {
+            return
+        }
+        logger.info("Klar til å lagre brevutfall for $behandling")
+        behandlingService.lagreBrevutfall(behandling)
+        logger.info("Ferdig med å lagre brevutfall for behandling $behandling. Klar til å fatte vedtak")
+        val fattaVedtak = vedtaksvurderingService.fattVedtak(sakId, behandling)
+        RapidUtsender.sendUt(fattaVedtak, packet, context)
+        if (behandlingssteg == Behandlingssteg.VEDTAK_FATTA) {
+            return
+        }
+
+        logger.info("Fatta vedtak for behandling $behandling. Klar til å lage og distribuere vedtaksbrev")
+        brevService.opprettOgDistribuerVedtaksbrev(sakId, behandling)
+        val attestertVedtak = vedtaksvurderingService.attesterOgIverksettVedtak(sakId, behandling)
+        logger.info("Ferdig attestert behandling $behandling i sak $sakId")
+        RapidUtsender.sendUt(attestertVedtak, packet, context)
+    }
+}

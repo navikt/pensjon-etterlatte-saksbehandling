@@ -1,8 +1,14 @@
 package no.nav.etterlatte.testdata.dolly
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.getDollyAccessToken
+import no.nav.etterlatte.producer
+import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
+import no.nav.etterlatte.testdata.features.dolly.NySoeknadRequest
+import no.nav.etterlatte.testdata.features.soeknad.SoeknadMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class DollyService(
     private val dollyClient: DollyClient,
@@ -38,6 +44,13 @@ class DollyService(
             dollyClient.opprettBestilling(bestilling, gruppeId, accessToken)
         }
 
+    fun statusBestilling(
+        bestilling: Long,
+        accessToken: String,
+    ) = runBlocking {
+        dollyClient.hentStatus(bestilling, accessToken)
+    }
+
     /**
      * Hent testfamilier som kan benyttes for å sende inn søknad.
      */
@@ -72,7 +85,31 @@ class DollyService(
             }
         }
 
-    fun markerSomIBruk(
+    fun sendSoeknad(
+        request: NySoeknadRequest,
+        navIdent: String?,
+        behandlingssteg: Behandlingssteg,
+    ): String {
+        val noekkel = UUID.randomUUID().toString()
+        val (partisjon, offset) =
+            producer.publiser(
+                noekkel,
+                SoeknadMapper.opprettJsonMessage(
+                    type = request.type,
+                    gjenlevendeFnr = request.gjenlevende,
+                    avdoedFnr = request.avdoed,
+                    barn = request.barn,
+                    behandlingssteg = behandlingssteg,
+                ).toJson(),
+                mapOf("NavIdent" to (navIdent!!.toByteArray())),
+            )
+        logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
+
+        markerSomIBruk(request.avdoed, getDollyAccessToken())
+        return noekkel
+    }
+
+    private fun markerSomIBruk(
         ident: String,
         accessToken: String,
     ) = runBlocking {
@@ -82,7 +119,7 @@ class DollyService(
             dollyClient.markerIdentIBruk(ident, accessToken)
                 .also { logger.info("Test ident $ident markert med 'iBruk=${it.ibruk}'") }
         } catch (e: Exception) {
-            logger.warn("Klart ikke markere testident $ident som 'i bruk'")
+            logger.warn("Klart ikke markere testident $ident som 'i bruk'", e)
         }
     }
 

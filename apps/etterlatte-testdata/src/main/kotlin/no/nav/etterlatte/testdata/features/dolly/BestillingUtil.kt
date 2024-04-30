@@ -2,27 +2,60 @@ package no.nav.etterlatte.testdata.features.dolly
 
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import java.time.LocalDateTime
+import kotlin.random.Random
 
 fun generererBestilling(bestilling: BestillingRequest): String {
-    val soeker = soeskenTemplate(helsoesken = true, erOver18 = bestilling.erOver18)
-    val helsoesken = List(bestilling.helsoesken) { soeskenTemplate(true) }
-    val halvsoeskenAvdoed = List(bestilling.halvsoeskenAvdoed) { soeskenTemplate(false) }
+    val soeker =
+        soeskenTemplate(
+            helsoesken = true,
+            erOver18 = bestilling.erOver18,
+            kjoenn = vilkaarligKjoenn(),
+            alderSoeskenUnder18 = alderUnder18(),
+            alderSoeskenOver18 = alder18Til20(),
+        )
+    val helsoesken =
+        List(bestilling.helsoesken) {
+            soeskenTemplate(
+                true,
+                kjoenn = vilkaarligKjoenn(),
+                alderSoeskenUnder18 = alderUnder18(),
+                alderSoeskenOver18 = alder18Til20(),
+            )
+        }
+    val halvsoeskenAvdoed =
+        List(bestilling.halvsoeskenAvdoed) {
+            soeskenTemplate(
+                false,
+                kjoenn = vilkaarligKjoenn(),
+                alderSoeskenUnder18 = alderUnder18(),
+                alderSoeskenOver18 = alder18Til20(),
+            )
+        }
 
     val barnListe = listOf(listOf(soeker), helsoesken, halvsoeskenAvdoed).flatten()
 
-    return BESTLLING_TEMPLATE_START + barnListe + BESTLLING_TEMPLATE_END
+    return bestillingTemplateStart(Random.nextInt(20, 60), bestilling.antall) + barnListe + BESTLLING_TEMPLATE_END
 }
 
-const val BESTLLING_TEMPLATE_START = """
+private fun alder18Til20() = Random.nextInt(18, 20)
+
+private fun alderUnder18() = Random.nextInt(1, 18)
+
+private fun vilkaarligKjoenn() = if (Random.nextBoolean()) "KVINNE" else "MANN"
+
+fun bestillingTemplateStart(
+    alder: Int,
+    antall: Int,
+) = """
 {
-  "antall": 1,
+  "antall": $antall,
   "beskrivelse": null,
   "pdldata": {
     "opprettNyPerson": {
       "identtype": "FNR",
       "foedtEtter": null,
       "foedtFoer": null,
-      "alder": 40,
+      "alder": $alder,
       "syntetisk": true
     },
     "person": {
@@ -118,6 +151,9 @@ val BESTLLING_TEMPLATE_END = """,
 private fun soeskenTemplate(
     helsoesken: Boolean,
     erOver18: Boolean = false,
+    kjoenn: String,
+    alderSoeskenUnder18: Int,
+    alderSoeskenOver18: Int,
 ) = """
 {
   "id": null,
@@ -131,13 +167,13 @@ private fun soeskenTemplate(
   "borIkkeSammen": null,
   "nyRelatertPerson": {
     "identtype": "FNR",
-    "kjoenn": "MANN",
+    "kjoenn": "$kjoenn",
     "foedtEtter": null,
     "foedtFoer": null,
     "alder": ${
     when (erOver18) {
-        true -> "18"
-        false -> "10"
+        true -> "$alderSoeskenOver18"
+        false -> "$alderSoeskenUnder18"
     }
 },
     "syntetisk": false,

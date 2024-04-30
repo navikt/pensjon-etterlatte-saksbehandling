@@ -19,7 +19,7 @@ data class HentGruppeResponse(
 data class OpprettGruppeRequest(val navn: String, val hensikt: String)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class DollyIBrukResponse(val ident: String, val ibruk: Boolean, val beskrivelse: String, val gruppeId: Long)
+data class DollyIBrukResponse(val ident: String, val ibruk: Boolean, val gruppeId: Long)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class BestillingStatus(val id: Long, val ferdig: Boolean)

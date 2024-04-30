@@ -65,9 +65,19 @@ internal class NySoeknadRiver(
                     SoeknadType.OMSTILLINGSSTOENAD -> SakType.OMSTILLINGSSTOENAD
                 }
 
-            finnEllerOpprettSak(soekerFnr, sakType)?.let { sak ->
-                val journalpostResponse = journalfoerSoeknadService.opprettJournalpost(soeknadId, sak, soeknad)
+            val sak = finnEllerOpprettSak(soekerFnr, sakType)
 
+            if (sak == null) {
+                logger.warn("Kan ikke journalføre søknad (id=$soeknadId) uten sak. Retry kjøres automatisk...")
+                return
+            }
+
+            val journalpostResponse = journalfoerSoeknadService.opprettJournalpost(soeknadId, sak, soeknad)
+
+            if (journalpostResponse == null) {
+                logger.warn("Kan ikke fortsette uten respons fra dokarkiv. Retry kjøres automatisk...")
+                return
+            } else {
                 context.publish(packet.oppdaterMed(sak.id, journalpostResponse).toJson())
             }
         } catch (e: JsonMappingException) {

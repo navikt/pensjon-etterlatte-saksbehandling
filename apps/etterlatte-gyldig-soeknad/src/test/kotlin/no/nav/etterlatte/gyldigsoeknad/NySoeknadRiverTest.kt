@@ -66,11 +66,14 @@ internal class NySoeknadRiverTest {
         assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).longValue())
         assertEquals("true", melding.get(FordelerFordelt.soeknadFordeltKey).asText())
 
-        coVerify(exactly = 1) { behandlingKlientMock.finnEllerOpprettSak("25478323363", SakType.BARNEPENSJON) }
-        coVerify(exactly = 1) { pdfgenKlient.genererPdf(any(), "barnepensjon_v2") }
-
         val request = slot<OpprettJournalpostRequest>()
-        coVerify(exactly = 1) { dokarkivKlientMock.opprettJournalpost(capture(request)) }
+
+        coVerify(exactly = 1) {
+            behandlingKlientMock.finnEllerOpprettSak("25478323363", SakType.BARNEPENSJON)
+            pdfgenKlient.genererPdf(any(), "barnepensjon_v2")
+            dokarkivKlientMock.opprettJournalpost(capture(request))
+        }
+
         with(request.captured) {
             assertEquals("Søknad om barnepensjon", this.tittel)
             assertEquals(sak.sakType.tema, this.tema)
@@ -103,11 +106,14 @@ internal class NySoeknadRiverTest {
         assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).longValue())
         assertEquals("true", melding.get(FordelerFordelt.soeknadFordeltKey).asText())
 
-        coVerify(exactly = 1) { behandlingKlientMock.finnEllerOpprettSak("13848599411", SakType.OMSTILLINGSSTOENAD) }
-        coVerify(exactly = 1) { pdfgenKlient.genererPdf(any(), "omstillingsstoenad_v1") }
-
         val request = slot<OpprettJournalpostRequest>()
-        coVerify(exactly = 1) { dokarkivKlientMock.opprettJournalpost(capture(request)) }
+
+        coVerify(exactly = 1) {
+            behandlingKlientMock.finnEllerOpprettSak("13848599411", SakType.OMSTILLINGSSTOENAD)
+            pdfgenKlient.genererPdf(any(), "omstillingsstoenad_v1")
+            dokarkivKlientMock.opprettJournalpost(capture(request))
+        }
+
         with(request.captured) {
             assertEquals("Søknad om omstillingsstønad", this.tittel)
             assertEquals(sak.sakType.tema, this.tema)
@@ -120,7 +126,51 @@ internal class NySoeknadRiverTest {
     }
 
     @Test
-    fun `BARNEPENSJON - Ingen sak funnet eller opprettet`() {
+    fun `BARNEPENSJON - Feil ved journalføring, skal ikke sende melding`() {
+        val sak = Sak("25478323363", SakType.BARNEPENSJON, Random.nextLong(), "4808")
+
+        coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
+        coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
+        coEvery { dokarkivKlientMock.opprettJournalpost(any()) } throws ResponseException(mockk(), "feil")
+
+        val inspector =
+            testRapid {
+                sendTestMessage(BARNEPENSJON_SOEKNAD)
+            }
+
+        assertEquals(0, inspector.size)
+
+        coVerify(exactly = 1) {
+            behandlingKlientMock.finnEllerOpprettSak("25478323363", SakType.BARNEPENSJON)
+            pdfgenKlient.genererPdf(any(), any())
+            dokarkivKlientMock.opprettJournalpost(any())
+        }
+    }
+
+    @Test
+    fun `OMSTILLINGSSTOENAD - Feil ved journalføring, skal ikke sende melding`() {
+        val sak = Sak("13848599411", SakType.OMSTILLINGSSTOENAD, Random.nextLong(), "4808")
+
+        coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } returns sak
+        coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
+        coEvery { dokarkivKlientMock.opprettJournalpost(any()) } throws ResponseException(mockk(), "feil")
+
+        val inspector =
+            testRapid {
+                sendTestMessage(OMSTILLINGSSTOENAD_SOEKNAD)
+            }
+
+        assertEquals(0, inspector.size)
+
+        coVerify(exactly = 1) {
+            behandlingKlientMock.finnEllerOpprettSak("13848599411", SakType.OMSTILLINGSSTOENAD)
+            pdfgenKlient.genererPdf(any(), any())
+            dokarkivKlientMock.opprettJournalpost(any())
+        }
+    }
+
+    @Test
+    fun `BARNEPENSJON - Ingen sak funnet eller opprettet, skal ikke sende melding`() {
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } throws ResponseException(mockk(), "error")
 
         val inspector =
@@ -137,7 +187,7 @@ internal class NySoeknadRiverTest {
     }
 
     @Test
-    fun `OMSTILLINGSSTOENAD - Ingen sak funnet eller opprettet`() {
+    fun `OMSTILLINGSSTOENAD - Ingen sak funnet eller opprettet, skal ikke sende melding`() {
         coEvery { behandlingKlientMock.finnEllerOpprettSak(any(), any()) } throws ResponseException(mockk(), "error")
 
         val inspector =

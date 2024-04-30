@@ -25,29 +25,32 @@ class JournalfoerSoeknadService(
         soeknadId: Long,
         sak: Sak,
         soeknad: InnsendtSoeknad,
-    ): OpprettJournalpostResponse {
-        val tittel =
-            when (sak.sakType) {
-                SakType.BARNEPENSJON -> "Søknad om barnepensjon"
-                SakType.OMSTILLINGSSTOENAD -> "Søknad om omstillingsstønad"
-            }
+    ): OpprettJournalpostResponse? {
+        return try {
+            val tittel =
+                when (sak.sakType) {
+                    SakType.BARNEPENSJON -> "Søknad om barnepensjon"
+                    SakType.OMSTILLINGSSTOENAD -> "Søknad om omstillingsstønad"
+                }
 
-        val dokument = opprettDokument(soeknadId, tittel, soeknad, soeknad.template())
+            val dokument = opprettDokument(soeknadId, tittel, soeknad, soeknad.template())
 
-        val request =
-            OpprettJournalpostRequest(
-                tittel = tittel,
-                tema = sak.sakType.tema,
-                journalfoerendeEnhet = sak.enhet,
-                avsenderMottaker = AvsenderMottaker(sak.ident),
-                bruker = Bruker(sak.ident),
-                eksternReferanseId = "etterlatte:${sak.sakType.toString().lowercase()}:$soeknadId",
-                sak = JournalpostSak(sak.id.toString()),
-                dokumenter = listOf(dokument),
-            )
+            val request =
+                OpprettJournalpostRequest(
+                    tittel = tittel,
+                    tema = sak.sakType.tema,
+                    journalfoerendeEnhet = sak.enhet,
+                    avsenderMottaker = AvsenderMottaker(sak.ident),
+                    bruker = Bruker(sak.ident),
+                    eksternReferanseId = "etterlatte:${sak.sakType.toString().lowercase()}:$soeknadId",
+                    sak = JournalpostSak(sak.id.toString()),
+                    dokumenter = listOf(dokument),
+                )
 
-        return runBlocking {
-            dokarkivKlient.opprettJournalpost(request)
+            runBlocking { dokarkivKlient.opprettJournalpost(request) }
+        } catch (e: Exception) {
+            logger.error("Feil oppsto ved journalføring av søknad (id=$soeknadId)", e)
+            return null
         }
     }
 

@@ -6,6 +6,7 @@ enum class ReguleringHendelseType : EventnameHendelseType {
     REGULERING_STARTA,
     SAK_FUNNET,
     LOEPENDE_YTELSE_FUNNET,
+    UTFORT_SJEKK_AAPEN_OVERSTYRT,
     BEHANDLING_OPPRETTA,
     VILKAARSVURDERT,
     BEREGNA,

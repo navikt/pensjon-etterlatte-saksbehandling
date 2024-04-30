@@ -122,7 +122,7 @@ class DollyClientImpl(config: Config, private val httpClient: HttpClient) : Doll
         bestilling: Long,
         accessToken: String,
     ): BestillingStatus =
-        httpClient.get("$dollyUrl/bestiling/$bestilling") {
+        httpClient.get("$dollyUrl/bestilling/$bestilling") {
             header(HttpHeaders.Authorization, "Bearer $accessToken")
         }.body()
 }

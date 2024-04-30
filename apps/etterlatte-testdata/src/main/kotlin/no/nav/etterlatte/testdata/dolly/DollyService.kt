@@ -44,6 +44,13 @@ class DollyService(
             dollyClient.opprettBestilling(bestilling, gruppeId, accessToken)
         }
 
+    fun statusBestilling(
+        bestilling: Long,
+        accessToken: String,
+    ) = runBlocking {
+        dollyClient.hentStatus(bestilling, accessToken)
+    }
+
     /**
      * Hent testfamilier som kan benyttes for å sende inn søknad.
      */

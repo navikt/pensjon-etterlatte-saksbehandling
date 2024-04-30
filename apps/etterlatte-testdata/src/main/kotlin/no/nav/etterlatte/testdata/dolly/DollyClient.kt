@@ -48,6 +48,11 @@ interface DollyClient {
         ident: String,
         accessToken: String,
     ): DollyIBrukResponse
+
+    suspend fun hentStatus(
+        bestilling: Long,
+        accessToken: String,
+    ): BestillingStatus
 }
 
 class DollyClientImpl(config: Config, private val httpClient: HttpClient) : DollyClient {
@@ -110,6 +115,14 @@ class DollyClientImpl(config: Config, private val httpClient: HttpClient) : Doll
         accessToken: String,
     ): DollyIBrukResponse =
         httpClient.put("$dollyUrl/ident/$ident/ibruk?iBruk=true") {
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
+        }.body()
+
+    override suspend fun hentStatus(
+        bestilling: Long,
+        accessToken: String,
+    ): BestillingStatus =
+        httpClient.get("$dollyUrl/bestiling/$bestilling") {
             header(HttpHeaders.Authorization, "Bearer $accessToken")
         }.body()
 }

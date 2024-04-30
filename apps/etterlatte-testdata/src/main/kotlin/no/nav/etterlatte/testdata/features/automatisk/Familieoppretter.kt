@@ -1,6 +1,7 @@
 package no.nav.etterlatte.no.nav.etterlatte.testdata.features.automatisk
 
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
+import no.nav.etterlatte.testdata.dolly.BestillingStatus
 import no.nav.etterlatte.testdata.dolly.DollyService
 import no.nav.etterlatte.testdata.dolly.ForenkletFamilieModell
 import no.nav.etterlatte.testdata.features.dolly.generererBestilling
@@ -22,7 +23,7 @@ class Familieoppretter(
         accessToken: String,
         gruppeid: Long,
         antall: Int,
-    ) {
+    ): BestillingStatus {
         val req =
             BestillingRequest(
                 erOver18 = false,
@@ -34,7 +35,7 @@ class Familieoppretter(
             )
 
         logger.info("Oppretter bestilling for gruppeid $gruppeid")
-        dollyService.opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
+        return dollyService.opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
             .also { bestilling ->
                 logger.info("Bestilling med id ${bestilling.id} har status ${bestilling.ferdig}")
             }
@@ -43,12 +44,13 @@ class Familieoppretter(
     fun hentFamilier(
         gruppeid: Long,
         accessToken: String,
+        bestilling: BestillingStatus,
         baselineFamilier: List<ForenkletFamilieModell>,
     ): List<ForenkletFamilieModell> {
         var venta = Duration.ZERO
-        val ventetid = Duration.ofSeconds(5)
+        val ventetid = Duration.ofMinutes(5)
         iTraad {
-            while (hentFamilier(gruppeid, accessToken) == baselineFamilier && venta <= maksVentetid) {
+            while (!hentStatusBestilling(bestilling = bestilling.id, accessToken).ferdig && venta <= maksVentetid) {
                 venta += ventetid
                 logger.info("Ingen ny familie oppretta, venter $ventetid")
                 sleep(ventetid)
@@ -68,5 +70,15 @@ class Familieoppretter(
     } catch (e: Exception) {
         logger.warn("Kunne ikke hente familie, prøver igjen snart", e)
         listOf()
+    }
+
+    fun hentStatusBestilling(
+        bestilling: Long,
+        accessToken: String,
+    ) = try {
+        dollyService.statusBestilling(bestilling, accessToken)
+    } catch (e: Exception) {
+        logger.warn("Kunne ikke hente status bestilling, prøver igjen snart", e)
+        BestillingStatus(bestilling, false)
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.ktor
 
+import com.fasterxml.jackson.annotation.JsonValue
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
@@ -74,7 +75,9 @@ class PingResultDown(
     }
 }
 
-enum class ServiceStatus(private val code: Int) {
+enum class ServiceStatus(
+    @JsonValue private val code: Int,
+) {
     DOWN(1), // red
     UP(0), // green
     ;

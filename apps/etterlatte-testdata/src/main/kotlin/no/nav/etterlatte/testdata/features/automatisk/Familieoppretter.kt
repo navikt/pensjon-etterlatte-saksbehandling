@@ -22,10 +22,7 @@ class Familieoppretter(
         accessToken: String,
         gruppeid: Long,
         antall: Int,
-    ): List<ForenkletFamilieModell> {
-        logger.info("Oppretter familie")
-        val baselineFamilier = hentFamilier(gruppeid, accessToken)
-        logger.debug("Baseline er ${baselineFamilier.size} saker")
+    ) {
         val req =
             BestillingRequest(
                 erOver18 = false,
@@ -41,7 +38,13 @@ class Familieoppretter(
             .also { bestilling ->
                 logger.info("Bestilling med id ${bestilling.id} har status ${bestilling.ferdig}")
             }
+    }
 
+    fun hentFamilier(
+        gruppeid: Long,
+        accessToken: String,
+        baselineFamilier: List<ForenkletFamilieModell>,
+    ): List<ForenkletFamilieModell> {
         var venta = Duration.ZERO
         val ventetid = Duration.ofSeconds(5)
         iTraad {
@@ -57,7 +60,7 @@ class Familieoppretter(
         }
     }
 
-    private fun hentFamilier(
+    fun hentFamilier(
         gruppeid: Long,
         accessToken: String,
     ) = try {

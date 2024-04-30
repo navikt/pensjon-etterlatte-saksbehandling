@@ -80,9 +80,7 @@ export function TilbakekrevingVurderingSkjema({
     }
 
     if (formState.isDirty && Object.keys(formState.dirtyFields).length) {
-      const delay = setTimeout(() => {
-        lagreVurdering(values)
-      }, 2000)
+      const delay = setTimeout(handleSubmit(lagreVurdering), 2000)
 
       return () => clearTimeout(delay)
     }

@@ -8,7 +8,7 @@ import {
 } from '~shared/types/Tilbakekreving'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreTilbakekrevingsperioder } from '~shared/api/tilbakekreving'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
 import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
@@ -33,13 +33,26 @@ export function TilbakekrevingVurderingPerioderSkjema({
     handleSubmit,
     formState: { errors },
     watch,
+    formState,
+    reset,
   } = useForm<{ values: TilbakekrevingPeriode[] }>({
     defaultValues: { values: behandling.tilbakekreving.perioder },
   })
 
+  useEffect(() => {
+    if (formState.isDirty && Object.keys(formState.dirtyFields).length) {
+      const delay = setTimeout(handleSubmit(lagrePerioder), 2000)
+
+      return () => {
+        clearTimeout(delay)
+      }
+    }
+  }, [formState])
+
   const lagrePerioder = (data: { values: TilbakekrevingPeriode[] }) => {
     lagrePerioderRequest({ behandlingsId: behandling.id, perioder: data.values }, (lagretTilbakekreving) => {
       dispatch(addTilbakekreving(lagretTilbakekreving))
+      reset({ values: lagretTilbakekreving.tilbakekreving.perioder })
     })
   }
 

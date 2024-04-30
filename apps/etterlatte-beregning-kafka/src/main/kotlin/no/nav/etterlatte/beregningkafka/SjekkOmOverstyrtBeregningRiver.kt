@@ -38,8 +38,10 @@ class SjekkOmOverstyrtBeregningRiver(
 
         packet.tilbakestilteBehandlinger.forEach {
             val overstyrt = beregningService.hentOverstyrt(it)
-            if (overstyrt.status != HttpStatusCode.NoContent) {
-                throw KanIkkeRegulereSakMedAapenBehandlingOverstyrtBeregning()
+            when (overstyrt.status) {
+                HttpStatusCode.NoContent -> return@forEach
+                HttpStatusCode.OK -> throw KanIkkeRegulereSakMedAapenBehandlingOverstyrtBeregning()
+                else -> throw KanIkkeBekrefteAtSakIkkeHarOverstyrtBeregning()
             }
         }
 
@@ -51,3 +53,6 @@ class SjekkOmOverstyrtBeregningRiver(
 
 class KanIkkeRegulereSakMedAapenBehandlingOverstyrtBeregning :
     Exception("Kan ikke regulere sak med åpen behandling som er overstyrt beregning")
+
+class KanIkkeBekrefteAtSakIkkeHarOverstyrtBeregning :
+    Exception("Fikk ikke bekreftet at sak ikke har åpen behandling som er overstyrt beregning")

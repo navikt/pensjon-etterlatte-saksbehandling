@@ -34,6 +34,21 @@ internal class SjekkOmOverstyrtBeregningRiverTest {
     }
 
     @Test
+    fun `skal feile om ikke faar bekreftet at aapen behandling ikke har overstyrt beregning`() {
+        val tilbakestilgBehandling = UUID.fromString("63ba95c8-119b-465f-81fa-0a5316451db4")
+        every { beregningService.hentOverstyrt(tilbakestilgBehandling) } returns
+            mockk<HttpResponse>().also {
+                every { it.status } returns HttpStatusCode.BadRequest
+            }
+        val inspector = inspector.apply { sendTestMessage(fullMelding) }
+        inspector.sendTestMessage(fullMelding)
+
+        val melding = inspector.inspektør.message(0)
+        assertEquals(EventNames.FEILA.lagEventnameForType(), melding.get(EVENT_NAME_KEY).textValue())
+        assertTrue("KanIkkeBekrefteAtSakIkkeHarOverstyrtBeregning" in melding.get(FEILMELDING_KEY).textValue())
+    }
+
+    @Test
     fun `skal fortsette om sak ikke har aapen behandling med overstyrt beregning`() {
         val tilbakestilgBehandling = UUID.fromString("63ba95c8-119b-465f-81fa-0a5316451db4")
         every { beregningService.hentOverstyrt(tilbakestilgBehandling) } returns

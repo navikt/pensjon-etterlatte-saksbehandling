@@ -23,6 +23,9 @@ sealed class RevurderingInfo {
         val aarsak: String,
     ) : RevurderingInfo()
 
+    @JsonTypeName("ADOPSJON")
+    data object Adopsjon : RevurderingInfo()
+
     @JsonTypeName("ANNEN_UTEN_BREV")
     data class RevurderingAarsakAnnenUtenBrev(
         val aarsak: String,

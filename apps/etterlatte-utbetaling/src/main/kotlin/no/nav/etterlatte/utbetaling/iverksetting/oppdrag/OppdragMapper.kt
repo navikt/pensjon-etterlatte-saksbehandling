@@ -10,10 +10,12 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
 import no.trygdeetaten.skjema.oppdrag.Attestant180
 import no.trygdeetaten.skjema.oppdrag.Avstemming115
+import no.trygdeetaten.skjema.oppdrag.LinjeTekst158
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import no.trygdeetaten.skjema.oppdrag.Oppdrag110
 import no.trygdeetaten.skjema.oppdrag.OppdragsEnhet120
 import no.trygdeetaten.skjema.oppdrag.OppdragsLinje150
+import no.trygdeetaten.skjema.oppdrag.Tekst140
 import no.trygdeetaten.skjema.oppdrag.TkodeStatusLinje
 import java.time.format.DateTimeFormatter
 
@@ -50,6 +52,16 @@ object OppdragMapper {
                     },
                 )
 
+                // TODO Denne eller LinjeTekst158?
+                tekst140.add(
+                    Tekst140().apply {
+                        // TODO Finne nødvendige felter og riktige verdier
+                        tekst = "Hva skal teksten være her?"
+                        datoTekstFom = utbetaling.utbetalingslinjer.first().periode.fra.toXMLDate()
+                        datoTekstTom = utbetaling.utbetalingslinjer.first().periode.fra.plusDays(7).toXMLDate()
+                    },
+                )
+
                 oppdragsLinje150.addAll(
                     utbetaling.utbetalingslinjer.map {
                         OppdragsLinje150().apply {
@@ -78,6 +90,17 @@ object OppdragMapper {
                             saksbehId = utbetaling.saksbehandler.value
                             utbetalesTilId = utbetaling.stoenadsmottaker.value
                             henvisning = utbetaling.behandlingId.shortValue.value
+
+                            // TODO Denne eller Tekst140?
+                            linjeTekst158.add(
+                                LinjeTekst158().apply {
+                                    // TODO Finne nødvendige felter og riktige verdier
+                                    tekst = "Hva skal teksten være her?"
+                                    tekstKode = ""
+                                    datoTekstFom = it.periode.fra.toXMLDate()
+                                    datoTekstTom = it.periode.fra.plusDays(7).toXMLDate()
+                                },
+                            )
 
                             attestant180.add(
                                 Attestant180().apply {

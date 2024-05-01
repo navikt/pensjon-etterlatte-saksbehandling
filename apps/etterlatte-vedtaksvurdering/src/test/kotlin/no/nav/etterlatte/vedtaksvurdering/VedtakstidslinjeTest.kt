@@ -271,6 +271,8 @@ internal class VedtakstidslinjeTest {
         assertEquals(LocalDate.of(2023, 6, 1), actual.dato)
     }
 
+    // TODO
+
     @Nested
     inner class Sammenstill {
         private val januar2024 = YearMonth.of(2024, Month.JANUARY)

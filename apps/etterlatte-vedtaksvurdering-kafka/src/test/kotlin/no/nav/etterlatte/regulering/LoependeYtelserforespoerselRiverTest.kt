@@ -56,7 +56,12 @@ internal class LoependeYtelserforespoerselRiverTest {
         val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         every { vedtakServiceMock.tilbakestillVedtak(any()) } just runs
-        every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023) } returns LoependeYtelseDTO(true, fraDato)
+        every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023) } returns
+            LoependeYtelseDTO(
+                erLoepende = true,
+                underSamordning = false,
+                dato = fraDato,
+            )
         val inspector = TestRapid().apply { LoependeYtelserforespoerselRiver(this, vedtakServiceMock) }
 
         inspector.sendTestMessage(melding.toJson())
@@ -81,8 +86,9 @@ internal class LoependeYtelserforespoerselRiverTest {
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023) } returns
             LoependeYtelseDTO(
-                false,
-                foersteMai2023,
+                erLoepende = false,
+                underSamordning = false,
+                dato = foersteMai2023,
             )
         val inspector = TestRapid().apply { LoependeYtelserforespoerselRiver(this, vedtakServiceMock) }
 
@@ -104,8 +110,9 @@ internal class LoependeYtelserforespoerselRiverTest {
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023) } returns
             LoependeYtelseDTO(
-                true,
-                foersteMai2023,
+                erLoepende = true,
+                underSamordning = false,
+                dato = foersteMai2023,
             )
         val inspector = TestRapid().apply { LoependeYtelserforespoerselRiver(this, vedtakServiceMock) }
 

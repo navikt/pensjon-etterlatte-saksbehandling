@@ -23,7 +23,7 @@ internal class OmregningsHendelserRiver(rapidsConnection: RapidsConnection, priv
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET) {
+        initialiserRiver(rapidsConnection, ReguleringHendelseType.UTFORT_SJEKK_AAPEN_OVERSTYRT) {
             validate { it.rejectKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }

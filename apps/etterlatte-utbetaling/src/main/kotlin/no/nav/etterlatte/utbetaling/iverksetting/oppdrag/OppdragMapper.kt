@@ -7,6 +7,7 @@ import no.nav.etterlatte.utbetaling.common.toXMLDate
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjonskode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
 import no.trygdeetaten.skjema.oppdrag.Attestant180
 import no.trygdeetaten.skjema.oppdrag.Avstemming115
@@ -66,53 +67,14 @@ object OppdragMapper {
                 }
 
                 oppdragsLinje150.addAll(
-                    utbetaling.utbetalingslinjer.map {
-                        OppdragsLinje150().apply {
-                            kodeEndringLinje = "NY"
-                            if (it.erstatterId != null) {
-                                refFagsystemId = utbetaling.sakId.value.toString()
-                                refDelytelseId = it.erstatterId.value.toString()
+                    if (erGRegulering) {
+                        val first =
+                            utbetaling.utbetalingslinjer.removeFirst().let {
+                                oppdragslinje(it, utbetaling, true)
                             }
-                            when (it.type) {
-                                Utbetalingslinjetype.OPPHOER -> {
-                                    kodeStatusLinje = TkodeStatusLinje.OPPH
-                                    datoStatusFom = it.periode.fra.toXMLDate()
-                                }
-                                else -> {}
-                            }
-
-                            vedtakId = utbetaling.vedtakId.value.toString()
-                            delytelseId = it.id.value.toString()
-                            kodeKlassifik = utbetaling.sakType.tilKodeklassifikasjon()
-                            datoVedtakFom = it.periode.fra.toXMLDate()
-                            datoVedtakTom = it.periode.til?.toXMLDate()
-                            sats = it.beloep
-                            fradragTillegg = OppdragslinjeDefaults.FRADRAG_ELLER_TILLEGG
-                            typeSats = OppdragslinjeDefaults.UTBETALINGSFREKVENS
-                            brukKjoreplan = it.kjoereplan.toString()
-                            saksbehId = utbetaling.saksbehandler.value
-                            utbetalesTilId = utbetaling.stoenadsmottaker.value
-                            henvisning = utbetaling.behandlingId.shortValue.value
-
-                            if (erGRegulering) {
-                                // TODO Denne eller Tekst140?
-                                linjeTekst158.add(
-                                    LinjeTekst158().apply {
-                                        // TODO Finne nødvendige felter og riktige verdier
-                                        tekst = "Hva skal teksten være her?"
-                                        tekstKode = ""
-                                        datoTekstFom = it.periode.fra.toXMLDate()
-                                        datoTekstTom = it.periode.fra.plusDays(7).toXMLDate()
-                                    },
-                                )
-                            }
-
-                            attestant180.add(
-                                Attestant180().apply {
-                                    attestantId = utbetaling.attestant.value
-                                },
-                            )
-                        }
+                        listOf(first) + utbetaling.utbetalingslinjer.map { oppdragslinje(it, utbetaling, false) }
+                    } else {
+                        utbetaling.utbetalingslinjer.map { oppdragslinje(it, utbetaling, false) }
                     },
                 )
             }
@@ -121,6 +83,57 @@ object OppdragMapper {
             this.oppdrag110 = oppdrag110
         }
     }
+}
+
+fun oppdragslinje(
+    utbetalingslinje: Utbetalingslinje,
+    utbetaling: Utbetaling,
+    erGRegulering: Boolean,
+) = OppdragsLinje150().apply {
+    kodeEndringLinje = "NY"
+    if (utbetalingslinje.erstatterId != null) {
+        refFagsystemId = utbetaling.sakId.value.toString()
+        refDelytelseId = utbetalingslinje.erstatterId.value.toString()
+    }
+    when (utbetalingslinje.type) {
+        Utbetalingslinjetype.OPPHOER -> {
+            kodeStatusLinje = TkodeStatusLinje.OPPH
+            datoStatusFom = utbetalingslinje.periode.fra.toXMLDate()
+        }
+        else -> {}
+    }
+
+    vedtakId = utbetaling.vedtakId.value.toString()
+    delytelseId = utbetalingslinje.id.value.toString()
+    kodeKlassifik = utbetaling.sakType.tilKodeklassifikasjon()
+    datoVedtakFom = utbetalingslinje.periode.fra.toXMLDate()
+    datoVedtakTom = utbetalingslinje.periode.til?.toXMLDate()
+    sats = utbetalingslinje.beloep
+    fradragTillegg = OppdragslinjeDefaults.FRADRAG_ELLER_TILLEGG
+    typeSats = OppdragslinjeDefaults.UTBETALINGSFREKVENS
+    brukKjoreplan = utbetalingslinje.kjoereplan.toString()
+    saksbehId = utbetaling.saksbehandler.value
+    utbetalesTilId = utbetaling.stoenadsmottaker.value
+    henvisning = utbetaling.behandlingId.shortValue.value
+
+    if (erGRegulering) {
+        // TODO Denne eller Tekst140?
+        linjeTekst158.add(
+            LinjeTekst158().apply {
+                // TODO Finne nødvendige felter og riktige verdier
+                tekst = "Hva skal teksten være her?"
+                tekstKode = ""
+                datoTekstFom = utbetalingslinje.periode.fra.toXMLDate()
+                datoTekstTom = utbetalingslinje.periode.fra.plusDays(7).toXMLDate()
+            },
+        )
+    }
+
+    attestant180.add(
+        Attestant180().apply {
+            attestantId = utbetaling.attestant.value
+        },
+    )
 }
 
 fun Saktype.tilKodeFagomraade(): String =

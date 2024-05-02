@@ -103,7 +103,12 @@ sealed interface VedtakInnhold {
     ) : VedtakInnhold
 }
 
-data class LoependeYtelse(val erLoepende: Boolean, val dato: LocalDate, val behandlingId: UUID? = null)
+data class LoependeYtelse(
+    val erLoepende: Boolean,
+    val underSamordning: Boolean,
+    val dato: LocalDate,
+    val behandlingId: UUID? = null,
+)
 
 class UgyldigAttestantException(ident: String) :
     IkkeTillattException(

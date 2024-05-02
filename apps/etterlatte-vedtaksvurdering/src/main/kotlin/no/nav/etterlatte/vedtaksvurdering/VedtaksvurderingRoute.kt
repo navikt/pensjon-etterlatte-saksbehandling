@@ -358,6 +358,7 @@ private fun Vedtak.toVedtakSammendragDto() =
 private fun LoependeYtelse.toDto() =
     LoependeYtelseDTO(
         erLoepende = erLoepende,
+        underSamordning = underSamordning,
         dato = dato,
         behandlingId = behandlingId,
     )

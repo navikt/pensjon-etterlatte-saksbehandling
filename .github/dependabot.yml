@@ -50,6 +50,7 @@ updates:
           - "io.mockk:mockk"
           - "no.nav.security:mock-oauth2-server"
           - "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner*"
+          - "com.github.jk1.dependency-license-report"
       jms-mq:
         patterns:
           - "org.messaginghub:pooled-jms"

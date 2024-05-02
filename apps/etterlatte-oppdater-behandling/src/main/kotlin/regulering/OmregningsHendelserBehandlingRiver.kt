@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
@@ -38,9 +37,8 @@ internal class OmregningsHendelserBehandlingRiver(rapidsConnection: RapidsConnec
         logger.info("Mottatt omregningshendelse")
 
         val hendelse: Omregningshendelse = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
-        val (behandlingId, behandlingViOmregnerFra, sakType) = behandlinger.opprettOmregning(hendelse)
+        val (behandlingId, _, sakType) = behandlinger.opprettOmregning(hendelse)
         packet.behandlingId = behandlingId
-        packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = behandlingViOmregnerFra
         packet[SAK_TYPE] = sakType
         packet.setEventNameForHendelseType(ReguleringHendelseType.BEHANDLING_OPPRETTA)
         context.publish(packet.toJson())

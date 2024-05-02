@@ -77,7 +77,12 @@ class DoedshendelseJobService(
             doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
                 inTransaction {
                     logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
-                    haandterDoedshendelse(doedshendelse)
+                    try {
+                        haandterDoedshendelse(doedshendelse)
+                    } catch (e: Exception) {
+                        logger.error("Kunne ikke håndtere dødshendelse for sak ${doedshendelse.sakId}", e)
+                        throw e
+                    }
                 }
             }
         }

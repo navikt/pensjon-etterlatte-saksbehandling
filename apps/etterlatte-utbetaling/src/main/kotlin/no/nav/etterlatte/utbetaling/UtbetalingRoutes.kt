@@ -19,7 +19,7 @@ internal fun Route.utbetalingRoutes(
     val logger = routeLogger
 
     route("/api/utbetaling") {
-        route("{$BEHANDLINGID_CALL_PARAMETER}") {
+        route("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
             post("/simulering") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                     logger.info("Foretar simulering mot Oppdrag for behandling=$behandlingId")

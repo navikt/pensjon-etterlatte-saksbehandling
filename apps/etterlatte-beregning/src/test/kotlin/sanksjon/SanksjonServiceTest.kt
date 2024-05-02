@@ -202,12 +202,10 @@ internal class SanksjonServiceTest {
                 }
             }
         }
-
     }
 
-
     @Nested
-    inner class SlettSanksjon{
+    inner class SlettSanksjon {
         @Test
         fun `Skal returnere 1 hvis en sanksjon slettes`() {
             val behandlingId = UUID.randomUUID()
@@ -234,10 +232,10 @@ internal class SanksjonServiceTest {
     }
 
     @Nested
-    inner class KopierSanksjon{
+    inner class KopierSanksjon {
 
         @Test
-        fun `Skal kopiere sanksjoner fra forrige behandling`(){
+        fun `Skal kopiere sanksjoner fra forrige behandling`()  {
             val behandlingId = UUID.randomUUID()
             val forrigeBehandlingId = UUID.randomUUID()
             val sanksjon = lagreSanksjon()
@@ -262,8 +260,12 @@ internal class SanksjonServiceTest {
             every { sanksjonRepository.opprettSanksjon(forrigeBehandlingId, sakId, bruker.ident, sanksjon) } returns Unit
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
             coEvery { behandlingKlient.hentBehandling(forrigeBehandlingId, bruker) } returns forrigeBehandling
-            coEvery { behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker) } returns SisteIverksatteBehandling(forrigeBehandlingId)
-
+            coEvery {
+                behandlingKlient.hentSisteIverksatteBehandling(
+                    behandling.sak,
+                    bruker,
+                )
+            } returns SisteIverksatteBehandling(forrigeBehandlingId)
 
             runBlocking {
                 service.opprettEllerOppdaterSanksjon(forrigeBehandlingId, sanksjon, bruker)

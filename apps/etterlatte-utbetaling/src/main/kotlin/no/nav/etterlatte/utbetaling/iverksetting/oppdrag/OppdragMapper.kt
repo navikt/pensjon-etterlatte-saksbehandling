@@ -25,6 +25,7 @@ object OppdragMapper {
     fun oppdragFraUtbetaling(
         utbetaling: Utbetaling,
         erFoersteUtbetalingPaaSak: Boolean,
+        erGRegulering: Boolean,
     ): Oppdrag {
         val oppdrag110 =
             Oppdrag110().apply {
@@ -52,15 +53,17 @@ object OppdragMapper {
                     },
                 )
 
-                // TODO Denne eller LinjeTekst158?
-                tekst140.add(
-                    Tekst140().apply {
-                        // TODO Finne nødvendige felter og riktige verdier
-                        tekst = "Hva skal teksten være her?"
-                        datoTekstFom = utbetaling.utbetalingslinjer.first().periode.fra.toXMLDate()
-                        datoTekstTom = utbetaling.utbetalingslinjer.first().periode.fra.plusDays(7).toXMLDate()
-                    },
-                )
+                if (erGRegulering) {
+                    // TODO Denne eller LinjeTekst158?
+                    tekst140.add(
+                        Tekst140().apply {
+                            // TODO Finne nødvendige felter og riktige verdier
+                            tekst = "Hva skal teksten være her?"
+                            datoTekstFom = utbetaling.utbetalingslinjer.first().periode.fra.toXMLDate()
+                            datoTekstTom = utbetaling.utbetalingslinjer.first().periode.fra.plusDays(7).toXMLDate()
+                        },
+                    )
+                }
 
                 oppdragsLinje150.addAll(
                     utbetaling.utbetalingslinjer.map {
@@ -91,16 +94,18 @@ object OppdragMapper {
                             utbetalesTilId = utbetaling.stoenadsmottaker.value
                             henvisning = utbetaling.behandlingId.shortValue.value
 
-                            // TODO Denne eller Tekst140?
-                            linjeTekst158.add(
-                                LinjeTekst158().apply {
-                                    // TODO Finne nødvendige felter og riktige verdier
-                                    tekst = "Hva skal teksten være her?"
-                                    tekstKode = ""
-                                    datoTekstFom = it.periode.fra.toXMLDate()
-                                    datoTekstTom = it.periode.fra.plusDays(7).toXMLDate()
-                                },
-                            )
+                            if (erGRegulering) {
+                                // TODO Denne eller Tekst140?
+                                linjeTekst158.add(
+                                    LinjeTekst158().apply {
+                                        // TODO Finne nødvendige felter og riktige verdier
+                                        tekst = "Hva skal teksten være her?"
+                                        tekstKode = ""
+                                        datoTekstFom = it.periode.fra.toXMLDate()
+                                        datoTekstTom = it.periode.fra.plusDays(7).toXMLDate()
+                                    },
+                                )
+                            }
 
                             attestant180.add(
                                 Attestant180().apply {

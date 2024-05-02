@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
@@ -44,6 +45,7 @@ class UtbetalingService(
                 oppdragMapper.oppdragFraUtbetaling(
                     utbetaling = utbetaling,
                     erFoersteUtbetalingPaaSak = utbetalingMapper.tidligereUtbetalinger.isEmpty(),
+                    erGRegulering = vedtak.behandling.revurderingsaarsak == Revurderingaarsak.REGULERING,
                 ).also {
                     utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = it))
                     oppdragSender.sendOppdrag(it)

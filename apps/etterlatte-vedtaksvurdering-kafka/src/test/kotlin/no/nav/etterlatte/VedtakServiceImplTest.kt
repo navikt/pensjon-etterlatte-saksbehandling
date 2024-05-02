@@ -24,7 +24,7 @@ internal class VedtakServiceImplTest {
                 request = req.url
                 val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                 respond(
-                    LoependeYtelseDTO(true, LocalDate.of(2023, 5, 1)).toJson(),
+                    LoependeYtelseDTO(true, false, LocalDate.of(2023, 5, 1)).toJson(),
                     headers = headers,
                 )
             }

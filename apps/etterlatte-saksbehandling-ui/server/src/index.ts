@@ -102,6 +102,8 @@ app.use('/api/trygdetid', tokenMiddleware(ApiConfig.trygdetid.scope), proxy(ApiC
 
 app.use('/api/trygdetid_v2', tokenMiddleware(ApiConfig.trygdetid.scope), proxy(ApiConfig.trygdetid.url))
 
+app.use('/api/utbetaling', tokenMiddleware(ApiConfig.utbetaling.scope), proxy(ApiConfig.utbetaling.url))
+
 app.use(
   ['/api/brev', '/api/dokumenter', '/api/notat'],
   tokenMiddleware(ApiConfig.brev.scope),

@@ -269,7 +269,9 @@ class DoedshendelseService(
 private fun Person.under20PaaDato(dato: LocalDate): Boolean {
     // Dersom vi ikke har en fødselsdato antar vi at personen kan ha bursdag på nyttårsaften,
     // for å sikre at vi får med alle som er under 20 år.
-    val benyttetFoedselsdato = foedselsdato ?: LocalDate.of(foedselsaar, 12, 31)
+    val benyttetFoedselsdato =
+        foedselsdato ?: foedselsaar?.let { LocalDate.of(it, 12, 31) }
+            ?: throw IllegalStateException("Har ikke verken fødselsdato eller fødselsår for person ${this.foedselsnummer}")
 
     return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue < 20
 }

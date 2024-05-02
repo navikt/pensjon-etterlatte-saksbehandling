@@ -224,7 +224,7 @@ object PersonMapper {
                 etternavn = OpplysningDTO(navn.etternavn, navn.metadata.opplysningsId),
                 foedselsnummer = OpplysningDTO(request.foedselsnummer, null),
                 foedselsdato = foedsel.foedselsdato?.let { OpplysningDTO(it, foedsel.metadata.opplysningsId) },
-                foedselsaar = OpplysningDTO(foedsel.foedselsaar, foedsel.metadata.opplysningsId),
+                foedselsaar = foedsel.foedselsaar?.let { OpplysningDTO(it, foedsel.metadata.opplysningsId) },
                 doedsdato = doedsfall?.doedsdato?.let { OpplysningDTO(it, doedsfall.metadata.opplysningsId) },
                 foedeland = foedsel.foedeland?.let { OpplysningDTO(it, foedsel.metadata.opplysningsId) },
                 adressebeskyttelse =

@@ -24,7 +24,7 @@ data class Person(
     val etternavn: String,
     val foedselsnummer: Folkeregisteridentifikator,
     val foedselsdato: LocalDate?,
-    val foedselsaar: Int,
+    val foedselsaar: Int?,
     val foedeland: String?,
     val doedsdato: LocalDate?,
     val adressebeskyttelse: AdressebeskyttelseGradering?,

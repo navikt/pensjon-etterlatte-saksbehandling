@@ -1,12 +1,12 @@
 package no.nav.etterlatte.libs.common.vedtak
 
-enum class VedtakType {
-    INNVILGELSE,
-    OPPHOER,
-    AVSLAG,
-    ENDRING,
-    TILBAKEKREVING,
-    AVVIST_KLAGE,
+enum class VedtakType(val vedvarende: Boolean) {
+    INNVILGELSE(true),
+    OPPHOER(true),
+    AVSLAG(true),
+    ENDRING(true),
+    TILBAKEKREVING(false),
+    AVVIST_KLAGE(false),
     ;
 
     fun tilLesbarString() =

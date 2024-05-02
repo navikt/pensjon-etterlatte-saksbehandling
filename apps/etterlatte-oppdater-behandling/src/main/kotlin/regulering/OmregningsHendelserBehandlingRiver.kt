@@ -18,7 +18,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
-internal class OmregningsHendelserRiver(rapidsConnection: RapidsConnection, private val behandlinger: BehandlingService) :
+internal class OmregningsHendelserBehandlingRiver(rapidsConnection: RapidsConnection, private val behandlinger: BehandlingService) :
     ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 

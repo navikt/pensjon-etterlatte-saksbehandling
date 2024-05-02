@@ -15,9 +15,9 @@ import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 import java.util.UUID
 
-internal class OmregningsHendelserRiverTest {
+internal class OmregningsHendelserBehandlingRiverTest {
     private val behandlingService = mockk<BehandlingServiceImpl>()
-    private val inspector = TestRapid().apply { OmregningsHendelserRiver(this, behandlingService) }
+    private val inspector = TestRapid().apply { OmregningsHendelserBehandlingRiver(this, behandlingService) }
 
     @Test
     fun `skal opprette omregning`() {
@@ -50,5 +50,5 @@ internal class OmregningsHendelserRiverTest {
 }
 
 fun readFile(file: String) =
-    OmregningsHendelserRiverTest::class.java.getResource(file)?.readText()
+    OmregningsHendelserBehandlingRiverTest::class.java.getResource(file)?.readText()
         ?: throw FileNotFoundException("Fant ikke filen $file")

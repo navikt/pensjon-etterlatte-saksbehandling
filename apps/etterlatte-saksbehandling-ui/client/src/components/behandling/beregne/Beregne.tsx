@@ -28,6 +28,8 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { Simulering } from '~components/behandling/beregne/Simulering'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -40,6 +42,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
     : undefined
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const visSimulering = useFeatureEnabledMedDefault('vis-utbetaling-simulering', false)
 
   const vedtaksresultat = useVedtaksResultat()
 
@@ -129,6 +132,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                       return (
                         <>
                           <BarnepensjonSammendrag beregning={beregning} />
+                          {visSimulering && <Simulering behandling={behandling} />}
                           <Brevutfall
                             behandling={behandling}
                             resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
@@ -143,6 +147,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                             behandling={behandling}
                             resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
                             resetInntektsavkortingValidering={() => setManglerAvkorting(false)}
+                            visSimulering={visSimulering}
                           />
                         </>
                       )

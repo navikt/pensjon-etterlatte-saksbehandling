@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
@@ -119,5 +120,24 @@ internal class LoependeYtelserforespoerselRiverTest {
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) { vedtakServiceMock.tilbakestillVedtak(behandlinger[0]) }
         verify(exactly = 1) { vedtakServiceMock.tilbakestillVedtak(behandlinger[1]) }
+    }
+
+    @Test
+    fun `avbryter hvis sak er under samordning`() {
+        val melding = genererReguleringMelding(foersteMai2023)
+        val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
+        every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023) } returns
+            LoependeYtelseDTO(
+                erLoepende = true,
+                underSamordning = true,
+                dato = foersteMai2023,
+            )
+        val inspector = TestRapid().apply { LoependeYtelserforespoerselRiver(this, vedtakServiceMock) }
+
+        inspector.sendTestMessage(melding.toJson())
+        Assertions.assertEquals(1, inspector.inspektør.size)
+        Assertions.assertTrue(
+            "SakErUnderSamordning" in inspector.inspektør.message(0).get(FEILMELDING_KEY).textValue(),
+        )
     }
 }

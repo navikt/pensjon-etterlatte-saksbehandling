@@ -271,7 +271,34 @@ internal class VedtakstidslinjeTest {
         assertEquals(LocalDate.of(2023, 6, 1), actual.dato)
     }
 
-    // TODO
+    /**
+     *   Jan  Feb  Mar  Apr  Mai   Jun  Jul  Aug  Sep  Okt  Nov  Dec
+     * |----|----|----|----|--*--|----|----|----|----|----|----|----|
+     * |-----------------------Iverksatt----------------------------|
+     *      |------------------Til samordning-----------------------|
+     * */
+    @Test
+    fun `sak med iverksatt foerstegangsbehandling og revurdering til samordning er løpende og under samordning`() {
+        val iverksattDato =
+            lagVedtak(
+                id = 1,
+                virkningsDato = LocalDate.of(2023, 1, 1),
+                vedtakStatus = VedtakStatus.IVERKSATT,
+                vedtakType = VedtakType.INNVILGELSE,
+            )
+        val vedtakTilSamordning =
+            lagVedtak(
+                id = 1,
+                virkningsDato = LocalDate.of(2023, 2, 1),
+                vedtakStatus = VedtakStatus.TIL_SAMORDNING,
+                vedtakType = VedtakType.ENDRING,
+            )
+
+        val actual = Vedtakstidslinje(listOf(iverksattDato, vedtakTilSamordning)).erLoependePaa(fraOgMed)
+        assertEquals(true, actual.erLoepende)
+        assertEquals(true, actual.underSamordning)
+        assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
+    }
 
     @Nested
     inner class Sammenstill {

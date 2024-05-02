@@ -6,7 +6,6 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.routeLogger
@@ -25,7 +24,6 @@ internal fun Route.utbetalingRoutes(
                 withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                     logger.info("Foretar simulering mot Oppdrag for behandling=$behandlingId")
                     val beregning = service.simuler(behandlingId, brukerTokenInfo)
-                    logger.info(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(beregning))
                     call.respond(beregning ?: HttpStatusCode.NoContent)
                 }
             }

@@ -138,7 +138,7 @@ class BehandlingDao(
         return Foerstegangsbehandling(
             id = id,
             sak = mapSak(rs),
-            behandlingOpprettet = rs.somLocalDateTimeUTC("  behandling_opprettet"),
+            behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
             sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
             soeknadMottattDato = rs.getTidspunktOrNull("soeknad_mottatt_dato")?.toLocalDatetimeUTC(),
             gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },

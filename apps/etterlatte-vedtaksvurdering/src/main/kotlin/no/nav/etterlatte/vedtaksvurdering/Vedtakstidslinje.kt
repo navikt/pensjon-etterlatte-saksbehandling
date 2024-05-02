@@ -12,12 +12,11 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
     private val iverksatteVedtak = hentIverksatteVedtak()
 
     fun erLoependePaa(dato: LocalDate): LoependeYtelse {
-        val senesteVedtakPaaDato = hentSenesteVedtakPaaDato(dato)
-        val erUnderSamrodning =
-            senesteVedtakPaaDato?.status in listOf(VedtakStatus.TIL_SAMORDNING, VedtakStatus.SAMORDNET)
+        val erUnderSamrodning = vedtak.any { listOf(VedtakStatus.TIL_SAMORDNING, VedtakStatus.SAMORDNET).contains(it.status) }
 
         if (iverksatteVedtak.isEmpty()) return LoependeYtelse(false, erUnderSamrodning, dato)
 
+        val senesteVedtakPaaDato = hentSenesteVedtakPaaDato(dato)
         val erLoepende = senesteVedtakPaaDato?.type in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING)
         return LoependeYtelse(
             erLoepende = erLoepende,

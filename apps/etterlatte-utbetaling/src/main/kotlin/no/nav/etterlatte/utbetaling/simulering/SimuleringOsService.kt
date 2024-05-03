@@ -22,7 +22,6 @@ import no.nav.system.os.entiteter.typer.simpletypes.KodeStatusLinje
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.Oppdrag
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.Oppdragslinje
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningRequest
-import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningResponse
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
@@ -39,7 +38,7 @@ class SimuleringOsService(
     suspend fun simuler(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): SimulerBeregningResponse {
+    ): SimulertBeregning? {
         val vedtak =
             vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo)
 
@@ -79,7 +78,7 @@ class SimuleringOsService(
 
             return simuleringOsKlient.simuler(request).also {
                 it.infomelding?.beskrMelding?.trim().let { melding -> logger.info(melding) }
-            }
+            }.simulering?.tilSimulertBeregning()
         } else {
             throw IkkeStoettetSimulering(behandlingId)
         }

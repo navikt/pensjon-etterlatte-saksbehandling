@@ -119,5 +119,4 @@ class ApplicationContext {
             behandlingKlient = behandlingKlient,
         )
     val grunnbeloepService = GrunnbeloepService(repository = GrunnbeloepRepository)
-
 }

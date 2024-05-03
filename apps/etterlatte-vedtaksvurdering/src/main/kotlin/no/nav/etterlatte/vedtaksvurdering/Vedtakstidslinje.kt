@@ -12,12 +12,15 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
     private val iverksatteVedtak = hentIverksatteVedtak()
 
     fun erLoependePaa(dato: LocalDate): LoependeYtelse {
-        if (iverksatteVedtak.isEmpty()) return LoependeYtelse(false, dato)
+        val erUnderSamordning = vedtak.any { listOf(VedtakStatus.TIL_SAMORDNING, VedtakStatus.SAMORDNET).contains(it.status) }
+
+        if (iverksatteVedtak.isEmpty()) return LoependeYtelse(false, erUnderSamordning, dato)
 
         val senesteVedtakPaaDato = hentSenesteVedtakSomKanLoepePaaDato(dato)
         val erLoepende = senesteVedtakPaaDato?.type in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING)
         return LoependeYtelse(
             erLoepende = erLoepende,
+            underSamordning = erUnderSamordning,
             dato = if (erLoepende) foersteMuligeVedtaksdag(dato) else dato,
             behandlingId = if (erLoepende) senesteVedtakPaaDato!!.behandlingId else null,
         )
@@ -26,7 +29,10 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
     private fun hentSenesteVedtakSomKanLoepePaaDato(dato: LocalDate): Vedtak? =
         iverksatteVedtak
             .filter { it.type.kanLoepe }
-            .filter { (it.innhold as VedtakInnhold.Behandling).virkningstidspunkt.atDay(1).isAfter(foersteMuligeVedtaksdag(dato)).not() }
+            .filter {
+                (it.innhold as VedtakInnhold.Behandling).virkningstidspunkt.atDay(1)
+                    .isAfter(foersteMuligeVedtaksdag(dato)).not()
+            }
             .maxByOrNull { it.attestasjon?.tidspunkt!! }
 
     private fun hentIverksatteVedtak(): List<Vedtak> = vedtak.filter { it.status === VedtakStatus.IVERKSATT }

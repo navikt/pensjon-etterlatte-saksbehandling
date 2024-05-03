@@ -108,7 +108,11 @@ class SimuleringOsRouteTest {
         } returns true
         coEvery { simuleringOsKlient.simuler(any()) } returns
             SimulerBeregningResponse().apply {
-                simulering = Beregning()
+                simulering =
+                    Beregning().apply {
+                        gjelderId = SOEKER_FOEDSELSNUMMER.value
+                        datoBeregnet = "2024-05-02"
+                    }
                 infomelding =
                     Infomelding().apply {
                         beskrMelding = "Simulering OK"

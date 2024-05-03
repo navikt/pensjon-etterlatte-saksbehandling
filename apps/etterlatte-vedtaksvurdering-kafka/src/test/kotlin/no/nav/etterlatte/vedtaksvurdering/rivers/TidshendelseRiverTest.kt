@@ -39,13 +39,19 @@ class TidshendelseRiverTest {
     @Test
     fun `skal lese melding og sjekke loepende ytelse`() {
         every { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1)) } returns
-            LoependeYtelseDTO(true, datoFom, behandlingId)
+            LoependeYtelseDTO(erLoepende = true, underSamordning = false, dato = datoFom, behandlingId = behandlingId)
         every {
             vedtakService.harLoependeYtelserFra(
                 sakId,
                 datoFomJanuar2024,
             )
-        } returns LoependeYtelseDTO(true, datoFomJanuar2024, behandlingId)
+        } returns
+            LoependeYtelseDTO(
+                erLoepende = true,
+                underSamordning = false,
+                dato = datoFomJanuar2024,
+                behandlingId = behandlingId,
+            )
 
         val melding =
             JsonMessage.newMessage(
@@ -78,7 +84,7 @@ class TidshendelseRiverTest {
     @Test
     fun `skal lese melding og returnere negativt svar for loepende ytelse`() {
         every { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1)) } returns
-            LoependeYtelseDTO(false, datoFom)
+            LoependeYtelseDTO(erLoepende = false, underSamordning = false, dato = datoFom)
 
         val melding =
             JsonMessage.newMessage(

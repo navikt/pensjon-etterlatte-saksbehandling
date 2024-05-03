@@ -56,6 +56,9 @@ internal class LoependeYtelserforespoerselRiver(
         }
 
         val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato)
+        if (respons.underSamordning) {
+            throw SakErUnderSamordning()
+        }
         respons.takeIf { it.erLoepende }?.let {
             packet.setEventNameForHendelseType(ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET)
             packet[HENDELSE_DATA_KEY] =
@@ -70,3 +73,5 @@ internal class LoependeYtelserforespoerselRiver(
         } ?: logger.info("Grunnbeløpsreguleringmelding ble ikke sendt for sak $sakId. Dato=${respons.dato}")
     }
 }
+
+class SakErUnderSamordning : Exception("Sak er under samordning og kan ikke reguleres")

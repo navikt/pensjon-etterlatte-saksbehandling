@@ -1,0 +1,96 @@
+{
+  "allowedLicenses": [
+    {
+      "moduleLicense": "Apache-2.0"
+    },
+    {
+      "moduleLicense": "Apache 2.0"
+    },
+    {
+      "moduleLicense": "Apache License 2.0"
+    },
+    {
+      "moduleLicense": "Apache License, Version 2.0"
+    },
+    {
+      "moduleLicense": "Apache License, version 2.0"
+    },
+    {
+      "moduleLicense": "\"Apache License, version 2.0\";link=\"https://www.apache.org/licenses/LICENSE-2.0.html\""
+    },
+    {
+      "moduleLicense": "\"Apache 2.0\";link=\"http://www.apache.org/licenses/LICENSE-2.0.txt\""
+    },
+    {
+      "moduleLicense": "\"Apache-2.0\";link=\"https://www.apache.org/licenses/LICENSE-2.0.txt\""
+    },
+    {
+      "moduleLicense": "Bouncy Castle Licence"
+    },
+    {
+      "moduleLicense": "BSD 2-Clause License"
+    },
+    {
+      "moduleLicense": "BSD-2-Clause"
+    },
+    {
+      "moduleLicense": "Eclipse Public License - v 1.0"
+    },
+    {
+      "moduleLicense": "EPL 2.0"
+    },
+    {
+      "moduleLicense": "Eclipse Public License v. 2.0"
+    },
+    {
+      "moduleLicense": "Eclipse Public License v. 2.0"
+    },
+    {
+      "moduleLicense": "GNU Lesser General Public License"
+    },
+    {
+      "moduleLicense": "LGPL"
+    },
+    {
+      "moduleLicense": "GNU General Public License, version 2 with the GNU Classpath Exception"
+    },
+    {
+      "moduleLicense": "Go License",
+      "moduleName": "com.google.re2j:re2j"
+    },
+    {
+      "moduleLicense": "GPL2 w/ CPE"
+    },
+    {
+      "moduleLicense": "IBM International Program License Agreement",
+      "moduleName": "com.ibm.mq:com.ibm.mq.jakarta.client"
+    },
+    {
+      "moduleLicense": "ISC License"
+    },
+    {
+      "moduleLicense": "MIT"
+    },
+    {
+      "moduleLicense": "MIT License"
+    },
+    {
+      "moduleLicense": "The MIT License (MIT)"
+    },
+    {
+      "moduleLicense": "Public Domain"
+    },
+    {
+      "moduleLicense": "Public Domain, per Creative Commons CC0"
+    },
+    {
+      "moduleLicense": "The Apache Software License, Version 2.0"
+    },
+    {
+      "moduleLicense": "The Apache License, Version 2.0"
+    },
+    {
+      "moduleName": "no.nav.*"
+    }
+  ]
+}

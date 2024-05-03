@@ -23,7 +23,7 @@ internal fun Route.utbetalingRoutes(
             post("/simulering") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                     logger.info("Foretar simulering mot Oppdrag for behandling=$behandlingId")
-                    val beregning = service.simuler(behandlingId, brukerTokenInfo).simulering
+                    val beregning = service.simuler(behandlingId, brukerTokenInfo)
                     call.respond(beregning ?: HttpStatusCode.NoContent)
                 }
             }

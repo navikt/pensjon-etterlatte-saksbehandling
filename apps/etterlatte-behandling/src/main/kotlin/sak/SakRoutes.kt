@@ -27,11 +27,13 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
@@ -56,6 +58,15 @@ internal fun Route.sakSystemRoutes(
                 val kjoering = call.parameters[KJOERING]!!
                 val antall = call.parameters[ANTALL]!!.toInt()
                 call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall) }))
+            }
+        }
+
+        post("hent") {
+            kunSystembruker {
+                medBody<SakIderDto> { dto ->
+                    val saker = inTransaction { sakService.hentSakerMedIder(dto.sakIder) }
+                    call.respond(SakerDto(saker))
+                }
             }
         }
 
@@ -185,7 +196,7 @@ internal fun Route.sakWebRoutes(
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                             for (oppgaveIntern in oppgaveService.hentOppgaverForSak(sakId)) {
                                 if (oppgaveIntern.saksbehandler != null &&
-                                    oppgaveIntern.status == Status.UNDER_BEHANDLING
+                                    oppgaveIntern.status in listOf(Status.UNDER_BEHANDLING, Status.ATTESTERING, Status.PAA_VENT)
                                 ) {
                                     oppgaveService.fjernSaksbehandler(
                                         oppgaveIntern.id,
@@ -305,3 +316,11 @@ data class EnhetRequest(
 )
 
 data class FoersteVirkDto(val foersteIverksatteVirkISak: LocalDate, val sakId: Long)
+
+data class SakIderDto(
+    val sakIder: List<Long>,
+)
+
+data class SakerDto(
+    val saker: Map<Long, Sak>,
+)

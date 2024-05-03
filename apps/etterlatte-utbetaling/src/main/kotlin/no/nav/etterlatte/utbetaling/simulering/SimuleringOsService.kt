@@ -1,23 +1,27 @@
 package no.nav.etterlatte.utbetaling.simulering
 
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
-import no.nav.etterlatte.libs.common.toUUID30
-import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
-import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
+import no.nav.etterlatte.utbetaling.common.OppdragDefaults
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.tilKodeFagomraade
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.tilKodeklassifikasjon
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Attestasjon
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingMapper
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.VedtakFattet
 import no.nav.system.os.entiteter.oppdragskjema.Enhet
 import no.nav.system.os.entiteter.typer.simpletypes.FradragTillegg
 import no.nav.system.os.entiteter.typer.simpletypes.KodeStatusLinje
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.Oppdrag
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.Oppdragslinje
 import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningRequest
-import no.nav.system.os.tjenester.simulerfpservice.simulerfpserviceservicetypes.SimulerBeregningResponse
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
@@ -25,6 +29,7 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 class SimuleringOsService(
+    private val utbetalingDao: UtbetalingDao,
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val simuleringOsKlient: SimuleringOsKlient,
 ) {
@@ -33,131 +38,148 @@ class SimuleringOsService(
     suspend fun simuler(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): SimulerBeregningResponse {
+    ): SimulertBeregning? {
         val vedtak =
             vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo)
 
-        if (vedtak.innhold is VedtakInnholdDto.VedtakBehandlingDto) {
-            val request = mapTilSimuleringRequest(vedtak, brukerTokenInfo)
+        val innhold = vedtak.innhold
+        if (innhold is VedtakInnholdDto.VedtakBehandlingDto) {
+            val sakensUtbetalinger = utbetalingDao.hentUtbetalinger(vedtak.sak.id)
+            val utbetalingsvedtak =
+                Utbetalingsvedtak.fra(
+                    vedtak = vedtak,
+                    vedtakFattet =
+                        VedtakFattet(
+                            ansvarligSaksbehandler = brukerTokenInfo.ident(),
+                            ansvarligEnhet = OppdragDefaults.OPPDRAGSENHET.enhet,
+                        ),
+                    attestasjon =
+                        Attestasjon(
+                            attestant = OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER,
+                            attesterendeEnhet = OppdragDefaults.OPPDRAGSENHET.enhet,
+                        ),
+                )
+            val utbetalingMapper =
+                UtbetalingMapper(
+                    tidligereUtbetalinger = sakensUtbetalinger,
+                    vedtak = utbetalingsvedtak,
+                )
+            val opprettetUtbetaling = utbetalingMapper.opprettUtbetaling()
+            val erFoersteUtbetalingPaaSak = utbetalingMapper.tidligereUtbetalinger.isEmpty()
+            val vedtakVirkFom = innhold.virkningstidspunkt
+
+            val request =
+                mapTilSimuleringRequest(
+                    opprettetUtbetaling,
+                    erFoersteUtbetalingPaaSak,
+                    vedtakVirkFom,
+                    brukerTokenInfo,
+                )
 
             return simuleringOsKlient.simuler(request).also {
                 it.infomelding?.beskrMelding?.trim().let { melding -> logger.info(melding) }
-            }
+            }.simulering?.tilSimulertBeregning()
         } else {
-            throw IkkeStoettetSimulering(vedtak.type, behandlingId)
+            throw IkkeStoettetSimulering(behandlingId)
         }
     }
 
     private fun mapTilSimuleringRequest(
-        vedtak: VedtakDto,
+        utbetaling: Utbetaling,
+        erFoersteUtbetalingPaaSak: Boolean,
+        vedtakVirkFom: YearMonth,
         brukerTokenInfo: BrukerTokenInfo,
     ): SimulerBeregningRequest {
         val request =
             SimulerBeregningRequest().apply {
-                oppdrag = tilOppdrag(vedtak, brukerTokenInfo)
-                simuleringsPeriode = simuleringsperiode(vedtak.virkningstidspunkt)
+                oppdrag = tilOppdrag(utbetaling, erFoersteUtbetalingPaaSak, vedtakVirkFom, brukerTokenInfo)
+                simuleringsPeriode = simuleringsperiode(vedtakVirkFom, utbetaling.utbetalingslinjer)
             }
         return request
     }
 
-    private fun simuleringsperiode(virkningstidspunkt: YearMonth) =
-        SimulerBeregningRequest.SimuleringsPeriode().apply {
-            datoSimulerFom = virkningstidspunkt.atDay(1).toOppdragDate()
-        }
+    private fun simuleringsperiode(
+        vedtakVirkFom: YearMonth,
+        utbetalingsperioder: List<Utbetalingslinje>,
+    ) = SimulerBeregningRequest.SimuleringsPeriode().apply {
+        datoSimulerFom = vedtakVirkFom.atDay(1).toOppdragDate()
+        datoSimulerTom = utbetalingsperioder.lastOrNull()?.periode?.til?.toOppdragDate()
+    }
 
     private fun tilOppdrag(
-        vedtak: VedtakDto,
+        utbetaling: Utbetaling,
+        erFoersteUtbetalingPaaSak: Boolean,
+        vedtakVirkFom: YearMonth,
         brukerTokenInfo: BrukerTokenInfo,
     ): Oppdrag {
         return Oppdrag().apply {
-            fagsystemId = vedtak.sak.id.toString()
-            oppdragGjelderId = vedtak.sak.ident
+            fagsystemId = utbetaling.sakId.value.toString()
+            oppdragGjelderId = utbetaling.stoenadsmottaker.value
             saksbehId = brukerTokenInfo.ident()
 
-            utbetFrekvens = "MND"
-            kodeEndring = vedtak.type.toKodeEndring()
-            kodeFagomraade = vedtak.sak.sakType.toKodeFagomrade()
+            utbetFrekvens = OppdragDefaults.UTBETALINGSFREKVENS
+            kodeEndring = if (erFoersteUtbetalingPaaSak) "NY" else "ENDR"
+            kodeFagomraade = utbetaling.sakType.tilKodeFagomraade()
 
-            val innhold = vedtak.innhold
-            if (innhold is VedtakInnholdDto.VedtakBehandlingDto) {
-                datoOppdragGjelderFom = innhold.virkningstidspunkt.atDay(1).toOppdragDate()
-                oppdragslinje.addAll(
-                    innhold.utbetalingsperioder.map {
-                        tilOppdragsLinje(
-                            it,
-                            vedtak,
-                            brukerTokenInfo,
-                        )
-                    },
-                )
-                enhet.add(
-                    Enhet().apply {
-                        typeEnhet = "BOS"
-                        enhet = "4819"
-                        datoEnhetFom = LocalDate.parse("1900-01-01").toOppdragDate()
-                    },
-                )
-            }
+            datoOppdragGjelderFom = vedtakVirkFom.atDay(1).toOppdragDate()
+            oppdragslinje.addAll(
+                utbetaling.utbetalingslinjer.map {
+                    tilOppdragsLinje(
+                        utbetaling,
+                        it,
+                        brukerTokenInfo,
+                    )
+                },
+            )
+            enhet.add(
+                Enhet().apply {
+                    typeEnhet = OppdragDefaults.OPPDRAGSENHET.typeEnhet
+                    enhet = OppdragDefaults.OPPDRAGSENHET.enhet
+                    datoEnhetFom = OppdragDefaults.OPPDRAGSENHET_DATO_FOM.toOppdragDate()
+                },
+            )
         }
     }
 
     private fun tilOppdragsLinje(
-        up: Utbetalingsperiode,
-        vedtak: VedtakDto,
+        utbetaling: Utbetaling,
+        utbetalingslinje: Utbetalingslinje,
         brukerTokenInfo: BrukerTokenInfo,
     ): Oppdragslinje =
         Oppdragslinje().apply {
-            vedtakId = vedtak.id.toString()
-            delytelseId = up.id.toString()
-            datoVedtakFom = up.periode.fom.atDay(1).toOppdragDate()
-            datoVedtakTom = up.periode.tom?.atEndOfMonth()?.toOppdragDate()
-            utbetalesTilId = vedtak.sak.ident
-            henvisning = vedtak.behandlingId.toUUID30().value
+            vedtakId = utbetaling.vedtak.vedtakId.toString()
+            delytelseId = utbetalingslinje.id.value.toString()
+            datoVedtakFom = utbetalingslinje.periode.fra.toOppdragDate()
+            datoVedtakTom = utbetalingslinje.periode.til?.toOppdragDate()
+            utbetalesTilId = utbetaling.stoenadsmottaker.value
+            henvisning = utbetaling.behandlingId.shortValue.value
             saksbehId = brukerTokenInfo.ident()
 
-            kodeEndringLinje = vedtak.type.toKodeEndring()
-            kodeKlassifik = vedtak.sak.sakType.toKodeKlassifikasjon()
-            sats = up.beloep
+            kodeEndringLinje = "NY"
+            kodeKlassifik = utbetaling.sakType.tilKodeklassifikasjon()
+            sats = utbetalingslinje.beloep
             typeSats = "MND"
             fradragTillegg = FradragTillegg.T
             brukKjoreplan = "N"
 
-            if (up.type == UtbetalingsperiodeType.OPPHOER) {
+            if (utbetalingslinje.type == Utbetalingslinjetype.OPPHOER) {
                 kodeStatusLinje = KodeStatusLinje.OPPH
-                datoStatusFom = up.periode.fom.atDay(1).toOppdragDate()
+                datoStatusFom = utbetalingslinje.periode.fra.toOppdragDate()
+            }
+
+            if (utbetalingslinje.erstatterId != null) {
+                refFagsystemId = utbetaling.sakId.value.toString()
+                refDelytelseId = utbetalingslinje.erstatterId.value.toString()
             }
         }
-
-    private fun SakType.toKodeFagomrade() =
-        when (this) {
-            SakType.BARNEPENSJON -> "BARNEPE"
-            SakType.OMSTILLINGSSTOENAD -> "OMSTILL"
-        }
-
-    private fun SakType.toKodeKlassifikasjon() =
-        when (this) {
-            SakType.BARNEPENSJON -> "BARNEPENSJON-OPTP"
-            SakType.OMSTILLINGSSTOENAD -> "OMSTILLINGOR"
-        }
-
-    private fun VedtakType.toKodeEndring() =
-        when (this) {
-            VedtakType.INNVILGELSE,
-            VedtakType.AVSLAG,
-            -> "NY"
-            else -> "ENDR"
-        }
 }
-
-private val VedtakDto.virkningstidspunkt: YearMonth
-    get() = (this.innhold as VedtakInnholdDto.VedtakBehandlingDto).virkningstidspunkt
 
 private fun LocalDate.toOppdragDate(): String =
     DateTimeFormatter.ofPattern("yyyy-MM-dd")
         .withZone(norskTidssone).format(this)
 
-class IkkeStoettetSimulering(vedtakType: VedtakType, behandlingId: UUID) : UgyldigForespoerselException(
+class IkkeStoettetSimulering(behandlingId: UUID) : UgyldigForespoerselException(
     code = "SIMULERING_IKKE_STOETTET",
-    detail = "Kan ikke simulere for vedtak av type $vedtakType",
+    detail = "Kan ikke simulere for behandlingId=$behandlingId",
     meta = mapOf("behandlingId" to behandlingId),
 )

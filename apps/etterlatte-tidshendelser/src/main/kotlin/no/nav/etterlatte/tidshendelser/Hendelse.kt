@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tidshendelser
 
+import no.nav.etterlatte.libs.common.behandling.SakType
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -30,13 +31,25 @@ data class Hendelse(
     val info: Any?,
 )
 
-enum class JobbType(val beskrivelse: String, val kategori: JobbKategori) {
-    AO_BP20("Aldersovergang barnepensjon ved 20 år", JobbKategori.ALDERSOVERGANG),
-    AO_BP21("Aldersovergang barnepensjon ved 21 år", JobbKategori.ALDERSOVERGANG),
-    AO_OMS67("Aldersovergang omstillingsstønad ved 67 år", JobbKategori.ALDERSOVERGANG),
-    OMS_DOED_3AAR("Omstillingsstønad opphør 3 år etter dødsdato", JobbKategori.OMS_DOEDSDATO),
-    OMS_DOED_5AAR("Omstillingsstønad opphør 5 år etter dødsdato", JobbKategori.OMS_DOEDSDATO),
-    OMS_DOED_4MND("Omstillingsstønad varselbrev om aktivitetsplikt 4 mnd etter dødsdato", JobbKategori.OMS_DOEDSDATO),
+enum class JobbType(val beskrivelse: String, val kategori: JobbKategori, val sakType: SakType) {
+    AO_BP20("Aldersovergang barnepensjon ved 20 år", JobbKategori.ALDERSOVERGANG, SakType.BARNEPENSJON),
+    AO_BP21("Aldersovergang barnepensjon ved 21 år", JobbKategori.ALDERSOVERGANG, SakType.BARNEPENSJON),
+    AO_OMS67("Aldersovergang omstillingsstønad ved 67 år", JobbKategori.ALDERSOVERGANG, SakType.OMSTILLINGSSTOENAD),
+    OMS_DOED_3AAR(
+        "Omstillingsstønad opphør 3 år etter dødsdato",
+        JobbKategori.OMS_DOEDSDATO,
+        SakType.OMSTILLINGSSTOENAD,
+    ),
+    OMS_DOED_5AAR(
+        "Omstillingsstønad opphør 5 år etter dødsdato",
+        JobbKategori.OMS_DOEDSDATO,
+        SakType.OMSTILLINGSSTOENAD,
+    ),
+    OMS_DOED_4MND(
+        "Omstillingsstønad varselbrev om aktivitetsplikt 4 mnd etter dødsdato",
+        JobbKategori.OMS_DOEDSDATO,
+        SakType.OMSTILLINGSSTOENAD,
+    ),
 }
 
 enum class JobbKategori {

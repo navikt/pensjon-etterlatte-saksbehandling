@@ -15,13 +15,11 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.objectMapper
-import no.nav.etterlatte.producer
+import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import no.nav.etterlatte.testdata.dolly.DollyService
-import no.nav.etterlatte.testdata.features.soeknad.SoeknadMapper.opprettJsonMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
     private val logger: Logger = LoggerFactory.getLogger(DollyFeature::class.java)
@@ -85,6 +83,7 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                                 it["halvsoeskenAvdoed"]!!.toInt(),
                                 it["halvsoeskenGjenlevende"]!!.toInt(),
                                 it["gruppeId"]!!.toLong(),
+                                1,
                             )
 
                         dollyService.opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
@@ -106,7 +105,6 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
 
             post("send-soeknad") {
                 try {
-                    val noekkel = UUID.randomUUID().toString()
 
                     val request =
                         call.receiveParameters().let {
@@ -118,20 +116,8 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                             )
                         }
 
-                    val (partisjon, offset) =
-                        producer.publiser(
-                            noekkel,
-                            opprettJsonMessage(
-                                type = request.type,
-                                gjenlevendeFnr = request.gjenlevende,
-                                avdoedFnr = request.avdoed,
-                                barn = request.barn,
-                            ).toJson(),
-                            mapOf("NavIdent" to (navIdentFraToken()!!.toByteArray())),
-                        )
-                    logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
-
-                    dollyService.markerSomIBruk(request.avdoed, getDollyAccessToken())
+                    val navIdent = navIdentFraToken()
+                    val noekkel = dollyService.sendSoeknad(request, navIdent, Behandlingssteg.BEHANDLING_OPPRETTA)
 
                     call.respond(SoeknadResponse(200, noekkel).toJson())
                 } catch (e: Exception) {

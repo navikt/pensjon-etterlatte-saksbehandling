@@ -52,7 +52,9 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
 
         put("kjoering") {
             val request = call.receive<KjoeringRequest>()
-            omregningService.oppdaterKjoering(request)
+            inTransaction {
+                omregningService.oppdaterKjoering(request)
+            }
             call.respond(HttpStatusCode.OK)
         }
     }

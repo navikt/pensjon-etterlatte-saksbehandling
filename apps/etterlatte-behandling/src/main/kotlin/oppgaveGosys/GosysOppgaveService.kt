@@ -7,6 +7,7 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -110,9 +111,16 @@ class GosysOppgaveServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): List<GosysOppgave> {
         val saksbehandlerMedRoller = Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
-        // TODO spesial case hvis vikafosse, skal kun hente de og ingen andre
+        val harRolleStrengtFortrolig = saksbehandlerMedRoller.harRolleStrengtFortrolig()
 
-        val enheterSomSkalSoekesEtter = hentEnehterForSB(enhetsnr, brukerTokenInfo.ident())
+        val enheterSomSkalSoekesEtter =
+            if (harRolleStrengtFortrolig) {
+                listOf(
+                    Enheter.STRENGT_FORTROLIG.enhetNr,
+                )
+            } else {
+                hentEnehterForSB(enhetsnr, brukerTokenInfo.ident())
+            }
 
         val alleGosysOppgaver =
             coroutineScope {

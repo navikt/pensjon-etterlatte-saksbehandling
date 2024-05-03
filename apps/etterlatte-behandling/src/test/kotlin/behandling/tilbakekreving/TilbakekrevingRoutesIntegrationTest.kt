@@ -257,7 +257,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
             inTransaction {
                 val oppgave = oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first()
                 oppgave.status shouldBe Status.UNDER_BEHANDLING
-                oppgave.merknad shouldBe ""
+                oppgave.merknad shouldBe "Sperre på kravgrunnlag opphevet"
             }
         }
     }

@@ -30,8 +30,6 @@ data class TilbakekrevingBehandling(
             else -> false
         }
 
-    fun kanAvbrytes() = underBehandling() || status == TilbakekrevingStatus.FATTET_VEDTAK
-
     fun underBehandlingEllerFattetVedtak() = underBehandling() || status == TilbakekrevingStatus.FATTET_VEDTAK
 
     companion object {

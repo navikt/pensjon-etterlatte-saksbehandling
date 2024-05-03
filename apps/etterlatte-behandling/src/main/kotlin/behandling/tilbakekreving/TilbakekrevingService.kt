@@ -502,7 +502,7 @@ class TilbakekrevingService(
     }
 
     private fun sjekkAtTilbakekrevingKanAvbrytes(tilbakekreving: TilbakekrevingBehandling) {
-        if (!tilbakekreving.kanAvbrytes()) {
+        if (!tilbakekreving.underBehandlingEllerFattetVedtak()) {
             throw TilbakekrevingFeilTilstandException(
                 "Tilbakekreving har status ${tilbakekreving.status} og kan ikke avbrytes",
             )

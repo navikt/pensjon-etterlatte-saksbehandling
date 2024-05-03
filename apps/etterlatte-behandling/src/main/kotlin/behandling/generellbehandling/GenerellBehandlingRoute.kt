@@ -95,7 +95,7 @@ internal fun Route.generellbehandlingRoutes(
         }
     }
 
-    put("/api/generellbehandling/avbryt/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
+    put("/api/generellbehandling/avbryt/{$SAKID_CALL_PARAMETER}/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
         kunSaksbehandlerMedSkrivetilgang {
             inTransaction {
                 generellBehandlingService.avbrytBehandling(generellBehandlingId, brukerTokenInfo)

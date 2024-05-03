@@ -153,7 +153,7 @@ const KravpakkeUtlandBehandling = (props: {
   }
 
   const avbrytBehandling = () => {
-    avbrytBehandlingApi(utlandsBehandling.id)
+    avbrytBehandlingApi(utlandsBehandling)
   }
 
   const oppdaterGenerellbehandlingUtland = () => {

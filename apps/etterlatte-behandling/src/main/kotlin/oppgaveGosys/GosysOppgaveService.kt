@@ -87,7 +87,7 @@ class GosysOppgaveServiceImpl(
             .expireAfterWrite(Duration.ofMinutes(5))
             .build<Long, GosysOppgave>()
 
-    private fun hentEnehterForSB(
+    private fun hentEnheterForSB(
         enhetsnr: String?,
         ident: String,
     ): List<String> {
@@ -96,7 +96,7 @@ class GosysOppgaveServiceImpl(
             if (enhetsnr == null) {
                 saksbehandler.enheter
             } else {
-                listOf(enhetsnr)
+                return saksbehandler.enheter.filter { it == enhetsnr }
             }
         } else {
             emptyList()
@@ -119,7 +119,7 @@ class GosysOppgaveServiceImpl(
                     Enheter.STRENGT_FORTROLIG.enhetNr,
                 )
             } else {
-                hentEnehterForSB(enhetsnr, brukerTokenInfo.ident())
+                hentEnheterForSB(enhetsnr, brukerTokenInfo.ident())
             }
 
         val alleGosysOppgaver =

@@ -68,7 +68,7 @@ class SamordningVedtakService(
     ): Boolean {
         return hentVedtaksliste(fomDato = dato, fnr = fnr, context = context)
             .flatMap { it.perioder }
-            .any { dato >= it.fom && (it.tom == null || it.tom.isAfter(dato)) }
+            .any { dato >= it.fom && (it.tom == null || !it.tom.isBefore(dato)) }
     }
 
     private fun VedtakSamordningDto.mapSamordningsvedtak(): SamordningVedtakDto {

@@ -32,7 +32,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
-internal class OmregningHendelserRiver(
+internal class OmregningHendelserBeregningRiver(
     rapidsConnection: RapidsConnection,
     private val beregningService: BeregningService,
     private val trygdetidService: TrygdetidService,

@@ -233,9 +233,8 @@ internal class SanksjonServiceTest {
 
     @Nested
     inner class KopierSanksjon {
-
         @Test
-        fun `Skal kopiere sanksjoner fra forrige behandling`()  {
+        fun `Skal kopiere sanksjoner fra forrige behandling`() {
             val behandlingId = UUID.randomUUID()
             val forrigeBehandlingId = UUID.randomUUID()
             val sanksjon = lagreSanksjon()

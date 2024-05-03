@@ -10,13 +10,12 @@ import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
-import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import java.time.LocalTime
-import java.util.UUID
 
 fun Route.omregningRoutes(omregningService: OmregningService) {
     route("/omregning") {
@@ -59,5 +58,3 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
         }
     }
 }
-
-data class OpprettOmregningResponse(val behandlingId: UUID, val forrigeBehandlingId: UUID, val sakType: SakType)

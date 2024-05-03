@@ -1,4 +1,4 @@
-import { Button, ErrorSummary, Heading } from '@navikt/ds-react'
+import { Button, ErrorSummary, Heading, Radio, VStack } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
@@ -6,15 +6,22 @@ import React, { useEffect, useState } from 'react'
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { TilbakekrevingVurderingOppsummering } from '~components/tilbakekreving/oppsummering/TilbakekrevingVurderingOppsummering'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { fattVedtak, validerTilbakekreving } from '~shared/api/tilbakekreving'
-import { isPending, mapResult } from '~shared/api/apiUtils'
+import { fattVedtak, lagreSkalSendeBrev, validerTilbakekreving } from '~shared/api/tilbakekreving'
+import { isInitial, isPending, mapResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
 import { ApiError } from '~shared/api/apiClient'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
-import { TilbakekrevingSkalSendeBrev } from './TilbakekrevingSkalSendeBrev'
 import Spinner from '~shared/Spinner'
+import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { RadioGroupLegend } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingSkjema'
+import { Toast } from '~shared/alerts/Toast'
+import { useForm } from 'react-hook-form'
+
+interface ISkalSendeBrev {
+  skalSendeBrev: boolean
+}
 
 export function TilbakekrevingOppsummering({
   behandling,
@@ -28,15 +35,39 @@ export function TilbakekrevingOppsummering({
   const [validerTilbakekrevingStatus, validerTilbakekrevingRequest] = useApiCall(validerTilbakekreving)
   const [gyldigTilbakekreving, setGyldigTilbakekreving] = useState(!redigerbar)
 
+  const [lagreSkalSendeBrevStatus, lagreSkalSendeBrevRequest] = useApiCall(lagreSkalSendeBrev)
+  const { reset, handleSubmit, control, formState, getValues } = useForm<ISkalSendeBrev>({
+    defaultValues: {
+      skalSendeBrev: behandling.sendeBrev,
+    },
+  })
+
+  const lagreOppsummering = (skalSendeBrev: ISkalSendeBrev) => {
+    lagreSkalSendeBrevRequest(
+      { behandlingsId: behandling.id, skalSendeBrev: skalSendeBrev.skalSendeBrev },
+      (lagretTilbakekreving) => {
+        dispatch(addTilbakekreving(lagretTilbakekreving))
+        reset({ skalSendeBrev: lagretTilbakekreving.sendeBrev })
+      }
+    )
+  }
+
   const gaaTilBrev = () => {
     navigate(`/tilbakekreving/${behandling?.id}/brev`)
   }
 
   useEffect(() => {
-    if (redigerbar) {
+    if (redigerbar && isInitial(validerTilbakekrevingStatus)) {
       valider()
     }
-  }, [])
+  }, [redigerbar])
+
+  useEffect(() => {
+    if (formState.isDirty && Object.keys(formState.dirtyFields).length) {
+      reset(getValues())
+      handleSubmit(lagreOppsummering)()
+    }
+  }, [formState])
 
   const valider = () => {
     validerTilbakekrevingRequest(
@@ -62,7 +93,31 @@ export function TilbakekrevingOppsummering({
       </ContentHeader>
       <InnholdPadding>
         <TilbakekrevingVurderingOppsummering behandling={behandling} />
-        <TilbakekrevingSkalSendeBrev behandling={behandling} redigerbar={redigerbar} />
+
+        <div style={{ marginTop: '3rem' }}>
+          <VStack gap="6">
+            <ControlledRadioGruppe
+              name="skalSendeBrev"
+              control={control}
+              legend={<RadioGroupLegend label="Skal det sendes brev for tilbakekrevingen?" />}
+              size="small"
+              readOnly={!redigerbar}
+              radios={
+                <>
+                  <Radio value={true}>Ja</Radio>
+                  <Radio value={false}>Nei</Radio>
+                </>
+              }
+            />
+            {mapResult(lagreSkalSendeBrevStatus, {
+              success: () => <Toast melding="Brevvalg lagret" position="bottom-center" />,
+              error: (error) => (
+                <Toast melding={`Kunne ikke lagre brevvalg: ${error.detail}`} position="bottom-center" />
+              ),
+            })}
+          </VStack>
+        </div>
+
         {mapResult(validerTilbakekrevingStatus, {
           pending: <Spinner label="Sjekker om tilbakekreving er fylt ut" visible={true} />,
           error: (error) => <TilbakekrevingValideringsfeil error={error} />,
@@ -70,13 +125,14 @@ export function TilbakekrevingOppsummering({
       </InnholdPadding>
       <Border style={{ marginTop: '3em' }} />
       <FlexRow $spacing={true} justify="center">
-        {behandling.sendeBrev && gyldigTilbakekreving ? (
-          <Button variant="primary" onClick={gaaTilBrev} loading={isPending(validerTilbakekrevingStatus)}>
-            Neste
-          </Button>
-        ) : (
+        {!isPending(lagreSkalSendeBrevStatus) && (
           <>
-            {redigerbar && gyldigTilbakekreving && (
+            {behandling.sendeBrev && gyldigTilbakekreving && (
+              <Button variant="primary" onClick={gaaTilBrev} loading={isPending(validerTilbakekrevingStatus)}>
+                Gå til brev
+              </Button>
+            )}
+            {!behandling.sendeBrev && gyldigTilbakekreving && redigerbar && (
               <SendTilAttesteringModal
                 behandlingId={behandling.id}
                 fattVedtakApi={fattVedtak}
@@ -85,6 +141,7 @@ export function TilbakekrevingOppsummering({
             )}
           </>
         )}
+        <Spinner visible={isPending(lagreSkalSendeBrevStatus)} label="Lagrer brevvalg" />
       </FlexRow>
     </Content>
   )

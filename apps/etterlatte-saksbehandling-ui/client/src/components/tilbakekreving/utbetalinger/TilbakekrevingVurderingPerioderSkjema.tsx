@@ -12,7 +12,7 @@ import React, { useEffect } from 'react'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
 import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { Alert, Button, Select, Table, TextField, VStack } from '@navikt/ds-react'
+import { Button, Select, Table, TextField, VStack } from '@navikt/ds-react'
 
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { Toast } from '~shared/alerts/Toast'
@@ -194,7 +194,9 @@ export function TilbakekrevingVurderingPerioderSkjema({
           <VStack gap="5">
             {mapResult(lagrePerioderStatus, {
               success: () => <Toast melding="Perioder lagret" position="bottom-center" />,
-              error: (error) => <Alert variant="error">Kunne ikke lagre perioder: {error.detail}</Alert>,
+              error: (error) => (
+                <Toast melding={`Kunne ikke lagre perioder: ${error.detail}`} position="bottom-center" />
+              ),
             })}
           </VStack>
         )}
@@ -203,9 +205,8 @@ export function TilbakekrevingVurderingPerioderSkjema({
       <FlexRow $spacing={true} justify="center">
         {redigerbar ? (
           <Button
-            style={{ marginTop: '1em', maxWidth: '8em' }}
+            style={{ marginTop: '1em' }}
             variant="primary"
-            size="small"
             onClick={handleSubmit(lagrePerioderOgFortsett)}
             loading={isPending(lagrePerioderStatus)}
           >

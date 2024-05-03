@@ -1,4 +1,4 @@
-import { Alert, BodyLong, Button, Label, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
+import { BodyLong, Button, Label, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
 import {
   teksterTilbakekrevingAarsak,
   teksterTilbakekrevingBeloepBehold,
@@ -366,18 +366,20 @@ export function TilbakekrevingVurderingSkjema({
             <VStack gap="5">
               {mapResult(lagreVurderingStatus, {
                 success: () => <Toast melding="Vurdering lagret" position="bottom-center" />,
-                error: (error) => <Alert variant="error">Kunne ikke lagre vurdering: {error.detail}</Alert>,
+                error: (error) => (
+                  <Toast melding={`Kunne ikke lagre vurdering: ${error.detail}`} position="bottom-center" />
+                ),
               })}
             </VStack>
           )}
         </VStack>
       </InnholdPadding>
+
       <Border style={{ marginTop: '3em' }} />
       <FlexRow $spacing={true} justify="center">
         {redigerbar ? (
           <Button
             variant="primary"
-            size="small"
             onClick={handleSubmit(lagreVurderingOgFortsett)}
             loading={isPending(lagreVurderingStatus)}
           >

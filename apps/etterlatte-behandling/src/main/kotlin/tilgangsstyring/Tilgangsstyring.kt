@@ -35,6 +35,8 @@ class PluginConfiguration {
     -> Boolean = { _, _ -> false }
     var harTilgangTilKlage: (klageId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
+    var harTilgangTilGenerellBehandling: (generellbehandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    -> Boolean = { _, _ -> false }
     var saksbehandlerGroupIdsByKey: Map<AzureGroup, String> = emptyMap()
 }
 
@@ -73,52 +75,64 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
 
             if (bruker is Saksbehandler) {
                 val saksbehandlerGroupIdsByKey = pluginConfig.saksbehandlerGroupIdsByKey
-                val behandlingId = call.parameters[CallParamAuthId.BEHANDLINGID.value]
-                if (!behandlingId.isNullOrEmpty()) {
-                    if (!pluginConfig.harTilgangBehandling(
-                            behandlingId,
-                            SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
-                        )
-                    ) {
-                        call.respond(HttpStatusCode.NotFound)
-                    }
+                val funnetCallIdParametersType = CallParamAuthId.entries.firstOrNull { call.parameters.contains(it.value) }
+                if (funnetCallIdParametersType == null) {
+                    call.respond(HttpStatusCode.NotFound)
                     return@on
-                }
-
-                val sakId = call.parameters[CallParamAuthId.SAKID.value]
-                if (!sakId.isNullOrEmpty()) {
-                    if (!pluginConfig.harTilgangTilSak(
-                            sakId.toLong(),
-                            SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
-                        )
-                    ) {
-                        call.respond(HttpStatusCode.NotFound)
+                } else {
+                    val idForRequest = call.parameters[funnetCallIdParametersType.value]!!
+                    when (funnetCallIdParametersType) {
+                        CallParamAuthId.BEHANDLINGID -> {
+                            if (!pluginConfig.harTilgangBehandling(
+                                    idForRequest,
+                                    SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
+                                )
+                            ) {
+                                call.respond(HttpStatusCode.NotFound)
+                            }
+                            return@on
+                        }
+                        CallParamAuthId.SAKID -> {
+                            if (!pluginConfig.harTilgangTilSak(
+                                    idForRequest.toLong(),
+                                    SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
+                                )
+                            ) {
+                                call.respond(HttpStatusCode.NotFound)
+                            }
+                            return@on
+                        }
+                        CallParamAuthId.OPPGAVEID -> {
+                            if (!pluginConfig.harTilgangTilOppgave(
+                                    idForRequest,
+                                    SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
+                                )
+                            ) {
+                                call.respond(HttpStatusCode.NotFound)
+                            }
+                            return@on
+                        }
+                        CallParamAuthId.KLAGEID -> {
+                            if (!pluginConfig.harTilgangTilKlage(
+                                    idForRequest,
+                                    SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
+                                )
+                            ) {
+                                call.respond(HttpStatusCode.NotFound)
+                            }
+                            return@on
+                        }
+                        CallParamAuthId.GENERELLBEHANDLINGID -> {
+                            if (!pluginConfig.harTilgangTilGenerellBehandling(
+                                    idForRequest,
+                                    SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
+                                )
+                            ) {
+                                call.respond(HttpStatusCode.NotFound)
+                            }
+                            return@on
+                        }
                     }
-                    return@on
-                }
-
-                val oppgaveId = call.parameters[CallParamAuthId.OPPGAVEID.value]
-                if (!oppgaveId.isNullOrEmpty()) {
-                    if (!pluginConfig.harTilgangTilOppgave(
-                            oppgaveId,
-                            SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
-                        )
-                    ) {
-                        call.respond(HttpStatusCode.NotFound)
-                    }
-                    return@on
-                }
-
-                val klageId = call.parameters[CallParamAuthId.KLAGEID.value]
-                if (!klageId.isNullOrEmpty()) {
-                    if (!pluginConfig.harTilgangTilKlage(
-                            klageId,
-                            SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
-                        )
-                    ) {
-                        call.respond(HttpStatusCode.NotFound)
-                    }
-                    return@on
                 }
             }
 

@@ -14,7 +14,7 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
     fun erLoependePaa(dato: LocalDate): LoependeYtelse {
         if (iverksatteVedtak.isEmpty()) return LoependeYtelse(false, dato)
 
-        val senesteVedtakPaaDato = hentSenesteVedvarendeVedtakPaaDato(dato)
+        val senesteVedtakPaaDato = hentSenesteVedtakSomKanLoepePaaDato(dato)
         val erLoepende = senesteVedtakPaaDato?.type in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING)
         return LoependeYtelse(
             erLoepende = erLoepende,
@@ -23,9 +23,9 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
         )
     }
 
-    private fun hentSenesteVedvarendeVedtakPaaDato(dato: LocalDate): Vedtak? =
+    private fun hentSenesteVedtakSomKanLoepePaaDato(dato: LocalDate): Vedtak? =
         iverksatteVedtak
-            .filter { it.type.vedvarende }
+            .filter { it.type.kanLoepe }
             .filter { (it.innhold as VedtakInnhold.Behandling).virkningstidspunkt.atDay(1).isAfter(foersteMuligeVedtaksdag(dato)).not() }
             .maxByOrNull { it.attestasjon?.tidspunkt!! }
 

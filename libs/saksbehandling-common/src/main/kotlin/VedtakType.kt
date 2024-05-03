@@ -1,6 +1,6 @@
 package no.nav.etterlatte.libs.common.vedtak
 
-enum class VedtakType(val vedvarende: Boolean) {
+enum class VedtakType(val kanLoepe: Boolean) {
     INNVILGELSE(true),
     OPPHOER(true),
     AVSLAG(true),

@@ -21,6 +21,7 @@ import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
+import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingUnderBehandlingFinnesAlleredeException
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -54,6 +55,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.random.Random
@@ -194,6 +196,18 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
                 it[EVENT_NAME_KEY].textValue() shouldBe TilbakekrevingHendelseType.OPPRETTET.lagEventnameForType()
                 it[TILBAKEKREVING_STATISTIKK_RIVER_KEY] shouldNotBe null
             }
+        }
+    }
+
+    @Test
+    fun `skal ikke kunne opprette tilbakekrevingsbehandling dersom det allerede finnes en`() {
+        val sak = inTransaction { sakDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+
+        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
+        tilbakekreving.status shouldBe TilbakekrevingStatus.OPPRETTET
+
+        assertThrows<TilbakekrevingUnderBehandlingFinnesAlleredeException> {
+            service.opprettTilbakekreving(kravgrunnlag(sak))
         }
     }
 

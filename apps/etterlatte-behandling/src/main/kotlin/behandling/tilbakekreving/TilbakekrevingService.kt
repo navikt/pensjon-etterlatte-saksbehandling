@@ -55,6 +55,15 @@ class TilbakekrevingService(
                 sakDao.hentSak(kravgrunnlag.sakId.value)
                     ?: throw TilbakekrevingHarMangelException("Tilbakekreving mangler sak")
 
+            tilbakekrevingDao.hentTilbakekrevinger(sak.id)
+                .find { it.underBehandlingEllerFattetVedtak() }
+                ?.let {
+                    throw TilbakekrevingUnderBehandlingFinnesAlleredeException(
+                        "Det finnes allerede en tilbakekreving under behandling i denne saken. Denne må ferdigstilles " +
+                            "eller avbrytes før det kan opprettes en ny tilbakekrevingsbehandling",
+                    )
+                }
+
             val tilbakekreving =
                 tilbakekrevingDao.lagreTilbakekreving(
                     TilbakekrevingBehandling.ny(kravgrunnlag, sak),

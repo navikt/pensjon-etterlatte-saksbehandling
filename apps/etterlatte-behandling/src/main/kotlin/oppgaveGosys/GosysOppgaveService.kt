@@ -87,7 +87,7 @@ class GosysOppgaveServiceImpl(
             .expireAfterWrite(Duration.ofMinutes(5))
             .build<Long, GosysOppgave>()
 
-    private fun hentEnheterForSB(
+    private fun hentEnheterForSaksbehandler(
         enhetsnr: String?,
         ident: String,
     ): List<String> {
@@ -119,7 +119,7 @@ class GosysOppgaveServiceImpl(
                     Enheter.STRENGT_FORTROLIG.enhetNr,
                 )
             } else {
-                hentEnheterForSB(enhetsnr, brukerTokenInfo.ident())
+                hentEnheterForSaksbehandler(enhetsnr, brukerTokenInfo.ident())
             }
 
         val alleGosysOppgaver =

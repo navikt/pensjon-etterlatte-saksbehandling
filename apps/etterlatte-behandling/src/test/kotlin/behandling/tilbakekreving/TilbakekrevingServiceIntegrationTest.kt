@@ -122,12 +122,11 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     @Test
     fun `skal opprette tilbakekrevingsbehandling fra kravgrunnlag og koble mot eksisterende oppgave`() {
         val sak = inTransaction { sakDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
-        val behandlingId = UUID.randomUUID()
 
         val oppgaveFraBehandlingMedFeilutbetaling =
             inTransaction {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = behandlingId.toUUID30().value,
+                    referanse = sak.id.toString(),
                     sakId = sak.id,
                     oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
                     oppgaveType = OppgaveType.TILBAKEKREVING,
@@ -135,11 +134,11 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
                 )
             }
 
-        oppgaveFraBehandlingMedFeilutbetaling.referanse shouldBe behandlingId.toUUID30().value
+        oppgaveFraBehandlingMedFeilutbetaling.referanse shouldBe sak.id.toString()
         oppgaveFraBehandlingMedFeilutbetaling.status shouldBe Status.NY
         oppgaveFraBehandlingMedFeilutbetaling.merknad shouldBe "Venter på kravgrunnlag"
 
-        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak, behandlingId.toUUID30()))
+        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
         val sisteLagretHendelse = inTransaction { hendelseDao.hentHendelserISak(sak.id).maxBy { it.opprettet } }
         val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
 
@@ -182,7 +181,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
         oppgaverFraReferanse.size shouldBe 0
 
-        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak, behandlingId.toUUID30()))
+        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
         val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
 
         oppgave.referanse shouldBe tilbakekreving.id.toString()

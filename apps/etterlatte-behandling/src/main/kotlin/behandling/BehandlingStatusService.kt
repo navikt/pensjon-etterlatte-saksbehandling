@@ -19,7 +19,6 @@ import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.toUUID30
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -303,7 +302,7 @@ class BehandlingStatusServiceImpl(
         if (brevutfall?.feilutbetaling?.valg in listOf(FeilutbetalingValg.JA_VARSEL, FeilutbetalingValg.JA_INGEN_TK)) {
             logger.info("Oppretter oppgave av type ${OppgaveType.TILBAKEKREVING} for behandling ${behandling.id}")
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = behandling.id.toUUID30().value,
+                referanse = behandling.sak.id.toString(),
                 sakId = behandling.sak.id,
                 oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
                 oppgaveType = OppgaveType.TILBAKEKREVING,

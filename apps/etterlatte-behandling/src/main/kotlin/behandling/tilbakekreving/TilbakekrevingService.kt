@@ -60,28 +60,28 @@ class TilbakekrevingService(
                     TilbakekrevingBehandling.ny(kravgrunnlag, sak),
                 )
 
-            oppgaveService.hentOppgaverForReferanse(kravgrunnlag.sisteUtbetalingslinjeId.value)
-                .filter { it.type == OppgaveType.TILBAKEKREVING }.let {
-                    if (it.isEmpty()) {
-                        logger.info("Fant ingen tilbakekrevingsoppgave, oppretter ny")
-                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                            referanse = tilbakekreving.id.toString(),
-                            sakId = tilbakekreving.sak.id,
-                            oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
-                            oppgaveType = OppgaveType.TILBAKEKREVING,
-                            merknad = "Kravgrunnlag mottatt",
-                        )
-                    } else {
-                        val eksisterendeOppgave = it.single()
+            val oppgaveFraBehandlingMedFeilutbetaling =
+                oppgaveService.hentOppgaverForReferanse(kravgrunnlag.sakId.value.toString())
+                    .filter { it.type == OppgaveType.TILBAKEKREVING && it.merknad == "Venter på kravgrunnlag" }
+                    .maxByOrNull { it.opprettet }
 
-                        logger.info("Kobler nytt kravgrunnlag med eksisterende oppgave ${eksisterendeOppgave.id}")
-                        oppgaveService.oppdaterReferanseOgMerknad(
-                            oppgaveId = eksisterendeOppgave.id,
-                            referanse = tilbakekreving.id.toString(),
-                            merknad = "Kravgrunnlag mottatt",
-                        )
-                    }
-                }
+            if (oppgaveFraBehandlingMedFeilutbetaling != null) {
+                logger.info("Kobler nytt kravgrunnlag med eksisterende oppgave ${oppgaveFraBehandlingMedFeilutbetaling.id}")
+                oppgaveService.oppdaterReferanseOgMerknad(
+                    oppgaveId = oppgaveFraBehandlingMedFeilutbetaling.id,
+                    referanse = tilbakekreving.id.toString(),
+                    merknad = "Kravgrunnlag mottatt",
+                )
+            } else {
+                logger.info("Fant ingen tilbakekrevingsoppgave, oppretter ny")
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    referanse = tilbakekreving.id.toString(),
+                    sakId = tilbakekreving.sak.id,
+                    oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
+                    oppgaveType = OppgaveType.TILBAKEKREVING,
+                    merknad = "Kravgrunnlag mottatt",
+                )
+            }
 
             tilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.OPPRETTET)
 

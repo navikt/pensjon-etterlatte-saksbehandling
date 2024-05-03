@@ -283,10 +283,14 @@ class GenerellBehandlingService(
             ?: throw DokumentManglerDatoException("Dokument ${dokumentMedSendtDato.dokumenttype} er markert som sendt men mangler dato")
     }
 
-    fun avbrytBehandling(id: UUID) {
+    fun avbrytBehandling(
+        id: UUID,
+        saksbehandler: BrukerTokenInfo,
+    ) {
         val generellBehandling = generellBehandlingDao.hentGenerellBehandlingMedId(id)
         finnesOgErRedigerbar(generellBehandling)
         generellBehandlingDao.oppdaterGenerellBehandling(generellBehandling!!.copy(status = GenerellBehandling.Status.AVBRUTT))
+        oppgaveService.avbrytOppgaveUnderBehandling(generellBehandling.id.toString(), saksbehandler)
     }
 
     fun lagreNyeOpplysninger(generellBehandling: GenerellBehandling): GenerellBehandling {

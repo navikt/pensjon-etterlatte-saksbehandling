@@ -116,7 +116,6 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
     ): GosysOppgaver {
         try {
             logger.info("Henter oppgaver fra Gosys")
-
             val temaFilter = tema.map { "&tema=$it" }.joinToString(separator = "")
             val filters =
                 "statuskategori=AAPEN"

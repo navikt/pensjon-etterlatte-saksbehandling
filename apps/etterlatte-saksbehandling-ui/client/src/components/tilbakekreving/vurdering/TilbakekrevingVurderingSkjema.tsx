@@ -28,6 +28,7 @@ import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
 import { FlexRow } from '~shared/styled'
 import { useNavigate } from 'react-router'
+import { FixedAlert } from '~shared/alerts/FixedAlert'
 
 const initialVurdering: TilbakekrevingVurdering = {
   aarsak: null,
@@ -367,7 +368,11 @@ export function TilbakekrevingVurderingSkjema({
               {mapResult(lagreVurderingStatus, {
                 success: () => <Toast melding="Vurdering lagret" position="bottom-center" />,
                 error: (error) => (
-                  <Toast melding={`Kunne ikke lagre vurdering: ${error.detail}`} position="bottom-center" />
+                  <FixedAlert
+                    variant="error"
+                    melding={`Kunne ikke lagre vurdering: ${error.detail}`}
+                    position="bottom-center"
+                  />
                 ),
               })}
             </VStack>

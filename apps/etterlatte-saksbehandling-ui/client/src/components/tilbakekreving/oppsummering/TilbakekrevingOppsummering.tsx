@@ -18,6 +18,7 @@ import { ControlledRadioGruppe } from '~shared/components/radioGruppe/Controlled
 import { RadioGroupLegend } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingSkjema'
 import { Toast } from '~shared/alerts/Toast'
 import { useForm } from 'react-hook-form'
+import { FixedAlert } from '~shared/alerts/FixedAlert'
 
 interface ISkalSendeBrev {
   skalSendeBrev: boolean
@@ -112,7 +113,11 @@ export function TilbakekrevingOppsummering({
             {mapResult(lagreSkalSendeBrevStatus, {
               success: () => <Toast melding="Brevvalg lagret" position="bottom-center" />,
               error: (error) => (
-                <Toast melding={`Kunne ikke lagre brevvalg: ${error.detail}`} position="bottom-center" />
+                <FixedAlert
+                  variant="error"
+                  melding={`Kunne ikke lagre brevvalg: ${error.detail}`}
+                  position="bottom-center"
+                />
               ),
             })}
           </VStack>

@@ -20,6 +20,7 @@ import { format } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import { FlexRow } from '~shared/styled'
 import { useNavigate } from 'react-router'
+import { FixedAlert } from '~shared/alerts/FixedAlert'
 
 export function TilbakekrevingVurderingPerioderSkjema({
   behandling,
@@ -195,7 +196,11 @@ export function TilbakekrevingVurderingPerioderSkjema({
             {mapResult(lagrePerioderStatus, {
               success: () => <Toast melding="Perioder lagret" position="bottom-center" />,
               error: (error) => (
-                <Toast melding={`Kunne ikke lagre perioder: ${error.detail}`} position="bottom-center" />
+                <FixedAlert
+                  variant="error"
+                  melding={`Kunne ikke lagre perioder: ${error.detail}`}
+                  position="bottom-center"
+                />
               ),
             })}
           </VStack>

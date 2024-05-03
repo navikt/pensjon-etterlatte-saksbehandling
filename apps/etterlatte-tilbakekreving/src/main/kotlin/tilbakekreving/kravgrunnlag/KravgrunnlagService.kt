@@ -62,11 +62,3 @@ class KravgrunnlagService(private val behandlingKlient: BehandlingKlient) {
         }
     }
 }
-
-data class Test(val str1: String, val str2: String)
-
-fun main() {
-    val list = listOf(Test("123", "123"), Test("456", "789"))
-
-    list
-}

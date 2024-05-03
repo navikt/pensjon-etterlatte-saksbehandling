@@ -15,7 +15,7 @@ export function oppdaterGenerellBehandling(generellbehandling: Generellbehandlin
 }
 
 export function avbrytGenerellBehandling(generellbehandlingId: string): Promise<ApiResponse<void>> {
-  return apiClient.put(`/generellbehandling/oppdater/${generellbehandlingId}`, {})
+  return apiClient.put(`/generellbehandling/avbryt/${generellbehandlingId}`, {})
 }
 
 export function sendTilAttesteringGenerellBehandling(

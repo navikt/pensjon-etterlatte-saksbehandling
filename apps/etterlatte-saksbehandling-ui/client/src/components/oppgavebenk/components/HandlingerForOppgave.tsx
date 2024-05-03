@@ -6,6 +6,7 @@ import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 import { OpprettNyRevurdering } from '~components/person/OpprettNyRevurdering'
 import { OppgaveDTO, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfoModal'
 
 export const HandlingerForOppgave = ({
   oppgave,
@@ -116,13 +117,7 @@ export const HandlingerForOppgave = ({
         </>
       )
     case Oppgavetype.AKTIVITETSPLIKT:
-      return (
-        erInnloggetSaksbehandlerOppgave && (
-          <Button size="small" href={`/behandling/${referanse}`} as="a">
-            Gå til behandling
-          </Button>
-        )
-      )
+      return erInnloggetSaksbehandlerOppgave && <AktivitetspliktInfoModal fnr={fnr} />
     default:
       return null
   }

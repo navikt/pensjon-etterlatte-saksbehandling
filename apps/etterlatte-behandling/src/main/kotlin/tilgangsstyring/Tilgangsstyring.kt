@@ -77,7 +77,6 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                 val saksbehandlerGroupIdsByKey = pluginConfig.saksbehandlerGroupIdsByKey
                 val funnetCallIdParametersType = CallParamAuthId.entries.firstOrNull { call.parameters.contains(it.value) }
                 if (funnetCallIdParametersType == null) {
-                    call.respond(HttpStatusCode.NotFound)
                     return@on
                 } else {
                     val idForRequest = call.parameters[funnetCallIdParametersType.value]!!

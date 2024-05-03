@@ -159,9 +159,8 @@ class OppgaveService(
     ) {
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
-        sikreAktivOppgaveOgTildeltSaksbehandler(hentetOppgave) {
-            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, status)
-        }
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+        oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, status)
     }
 
     fun endreTilKildeBehandlingOgOppdaterReferanse(

@@ -101,7 +101,7 @@ internal fun Route.generellbehandlingRoutes(
                 generellBehandlingService.avbrytBehandling(generellBehandlingId, brukerTokenInfo)
             }
             logger.info(
-                "Setter generell behandling for behandlingid $generellBehandlingId til avbrutt",
+                "Setter generell behandling med behandlingid $generellBehandlingId til avbrutt",
             )
             call.respond(HttpStatusCode.OK)
         }

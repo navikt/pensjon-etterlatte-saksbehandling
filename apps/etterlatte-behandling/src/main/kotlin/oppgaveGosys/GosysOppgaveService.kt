@@ -9,6 +9,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -91,7 +92,7 @@ class GosysOppgaveServiceImpl(
         enhetsnr: String?,
         ident: String,
     ): List<String> {
-        val saksbehandler = saksbehandlerService.hentKomplettSaksbehandler(ident)
+        val saksbehandler = inTransaction { saksbehandlerService.hentKomplettSaksbehandler(ident) }
         return if (saksbehandler.kanSeOppgaveliste) {
             if (enhetsnr == null) {
                 saksbehandler.enheter
@@ -115,9 +116,7 @@ class GosysOppgaveServiceImpl(
 
         val enheterSomSkalSoekesEtter =
             if (harRolleStrengtFortrolig) {
-                listOf(
-                    Enheter.STRENGT_FORTROLIG.enhetNr,
-                )
+                listOf(Enheter.STRENGT_FORTROLIG.enhetNr)
             } else {
                 hentEnheterForSaksbehandler(enhetsnr, brukerTokenInfo.ident())
             }

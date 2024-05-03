@@ -22,12 +22,11 @@ export const AktivitetspliktInfoModal = ({ fnr }: { fnr: string | null }) => {
             <HStack gap="12">
               <div>
                 <Heading size="small" spacing>
-                  Opprett varsel- eller informasjonbrev rundt aktivitetsplikt til bruker
+                  Opprett informasjonbrev rundt aktivitetsplikt til bruker
                 </Heading>
                 <BodyLong spacing>
                   Den etterlatte skal informeres om aktivitetskravet som vil tre i kraft 6 måneder etter dødsfallet. Det
-                  skal opprettes et manuelt varsels- eller informasjonsbrev som skal bli sendt 3-4 måneder etter
-                  dødsfallet.
+                  skal opprettes et manuelt informasjonsbrev som skal bli sendt 3-4 måneder etter dødsfallet.
                 </BodyLong>
                 <Button
                   variant="primary"

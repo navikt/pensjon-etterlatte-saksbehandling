@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.tilbakekreving
 import behandling.tilbakekreving.kravgrunnlag
 import behandling.tilbakekreving.tilbakekrevingVurdering
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
@@ -84,6 +85,16 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
         tilbakekrevinger.forEach {
             it.tilbakekreving.perioder.size shouldBe 1
         }
+    }
+
+    @Test
+    fun `Hente tilbakekreving med sakid`() {
+        tilbakekrevingDao.lagreTilbakekreving(tilbakekreving(sak))
+        val tilbakekrevingNyeste = tilbakekrevingDao.lagreTilbakekreving(tilbakekreving(sak))
+        val tilbakekreving = tilbakekrevingDao.hentNyesteTilbakekreving(sak.id)
+
+        tilbakekreving shouldNotBe null
+        tilbakekreving.id shouldBe tilbakekrevingNyeste.id
     }
 
     companion object {

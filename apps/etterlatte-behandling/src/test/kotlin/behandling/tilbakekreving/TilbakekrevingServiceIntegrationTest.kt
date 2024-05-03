@@ -140,12 +140,26 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         oppgaveFraBehandlingMedFeilutbetaling.merknad shouldBe "Venter på kravgrunnlag"
 
         val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak, behandlingId.toUUID30()))
+        val sisteLagretHendelse = inTransaction { hendelseDao.hentHendelserISak(sak.id).maxBy { it.opprettet } }
         val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
 
         oppgave.id shouldBe oppgaveFraBehandlingMedFeilutbetaling.id
         oppgave.referanse shouldBe tilbakekreving.id.toString()
         oppgave.status shouldBe Status.NY
         oppgave.merknad shouldBe "Kravgrunnlag mottatt"
+
+        with(sisteLagretHendelse) {
+            sakId shouldBe sak.id
+            vedtakId shouldBe null
+            this.behandlingId shouldBe tilbakekreving.id
+            hendelse shouldBe TilbakekrevingHendelseType.OPPRETTET.lagEventnameForType()
+            ident shouldBe null
+            identType shouldBe null
+            inntruffet shouldNotBe null
+            opprettet shouldNotBe null
+            kommentar shouldBe null
+            valgtBegrunnelse shouldBe null
+        }
 
         rapid.publiserteMeldinger.size shouldBe 1
         rapid.publiserteMeldinger.last().let { melding ->
@@ -179,6 +193,54 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
         rapid.publiserteMeldinger.last().let { melding ->
             objectMapper.readTree(melding.verdi).let {
                 it[EVENT_NAME_KEY].textValue() shouldBe TilbakekrevingHendelseType.OPPRETTET.lagEventnameForType()
+                it[TILBAKEKREVING_STATISTIKK_RIVER_KEY] shouldNotBe null
+            }
+        }
+    }
+
+    @Test
+    fun `skal avbryte tilbakekrevingsbehandling`() {
+        coEvery { vedtakKlient.fattVedtakTilbakekreving(any(), any(), any()) } returns 1L
+        coEvery { brevApiKlient.hentVedtaksbrev(any(), any()) } returns vedtaksbrev()
+
+        // Oppretter sak og tilbakekreving basert på kravgrunnlag
+        val sak = inTransaction { sakDao.opprettSak(bruker, SakType.BARNEPENSJON, enhet) }
+        val tilbakekreving = service.opprettTilbakekreving(kravgrunnlag(sak))
+        val oppgave = inTransaction { oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first() }
+
+        // Tildeler oppgaven til saksbehandler
+        inTransaction { oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident) }
+
+        // Lagrer vurdering og perioder
+        service.lagreVurdering(tilbakekreving.id, tilbakekrevingVurdering(), saksbehandler)
+        service.lagrePerioder(tilbakekreving.id, tilbakekrevingPerioder(tilbakekreving), saksbehandler)
+        service.validerVurderingOgPerioder(tilbakekreving.id, saksbehandler)
+
+        // Avbryter tilbakekreving
+        val avbruttTilbakekreving = runBlocking { service.avbrytTilbakekreving(sak.id) }
+        val sisteLagretHendelse = inTransaction { hendelseDao.hentHendelserISak(sak.id).maxBy { it.opprettet } }
+        val avbruttOppgave = inTransaction { oppgaveService.hentOppgave(oppgave.id) }
+
+        avbruttTilbakekreving.status shouldBe TilbakekrevingStatus.AVBRUTT
+        avbruttOppgave.status shouldBe Status.AVBRUTT
+
+        with(sisteLagretHendelse) {
+            sakId shouldBe sak.id
+            vedtakId shouldBe null
+            behandlingId shouldBe tilbakekreving.id
+            hendelse shouldBe TilbakekrevingHendelseType.AVBRUTT.lagEventnameForType()
+            ident shouldBe null
+            identType shouldBe null
+            inntruffet shouldNotBe null
+            opprettet shouldNotBe null
+            kommentar shouldBe null
+            valgtBegrunnelse shouldBe null
+        }
+
+        rapid.publiserteMeldinger.size shouldBe 2
+        rapid.publiserteMeldinger.last().let { melding ->
+            objectMapper.readTree(melding.verdi).let {
+                it[EVENT_NAME_KEY].textValue() shouldBe TilbakekrevingHendelseType.AVBRUTT.lagEventnameForType()
                 it[TILBAKEKREVING_STATISTIKK_RIVER_KEY] shouldNotBe null
             }
         }
@@ -220,7 +282,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
             sakId shouldBe sak.id
             vedtakId shouldBe 1L
             behandlingId shouldBe tilbakekreving.id
-            hendelse shouldBe "VEDTAK:FATTET"
+            hendelse shouldBe TilbakekrevingHendelseType.FATTET_VEDTAK.lagEventnameForType()
             ident shouldBe saksbehandler.ident
             identType shouldBe "SAKSBEHANDLER"
             inntruffet shouldNotBe null
@@ -288,7 +350,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
             sakId shouldBe sak.id
             vedtakId shouldBe 1L
             behandlingId shouldBe tilbakekreving.id
-            hendelse shouldBe "VEDTAK:ATTESTERT"
+            hendelse shouldBe TilbakekrevingHendelseType.ATTESTERT.lagEventnameForType()
             ident shouldBe attestant.ident
             identType shouldBe "SAKSBEHANDLER"
             inntruffet shouldNotBe null
@@ -353,7 +415,7 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
             sakId shouldBe sak.id
             vedtakId shouldBe 1L
             behandlingId shouldBe tilbakekreving.id
-            hendelse shouldBe "VEDTAK:UNDERKJENT"
+            hendelse shouldBe TilbakekrevingHendelseType.UNDERKJENT.lagEventnameForType()
             ident shouldBe attestant.ident
             identType shouldBe "SAKSBEHANDLER"
             inntruffet shouldNotBe null

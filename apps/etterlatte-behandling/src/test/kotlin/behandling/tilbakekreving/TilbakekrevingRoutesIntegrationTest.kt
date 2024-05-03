@@ -22,6 +22,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
@@ -230,6 +231,57 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
         }
     }
 
+    @Test
+    fun `skal sette tilbakekreving paa vent og saa tilbake av vent`() {
+        withTestApplication { client ->
+            val tilbakekreving = opprettTilbakekrevingOgTildelOppgave(client)
+
+            client.postAndAssertOk(
+                "/tilbakekreving/${tilbakekreving.sak.id}/oppgave-status",
+                systemBruker,
+                OppgaveStatusRequest(paaVent = true),
+            )
+
+            inTransaction {
+                val oppgave = oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first()
+                oppgave.status shouldBe Status.PAA_VENT
+                oppgave.merknad shouldBe "Kravgrunnlag er sperret"
+            }
+
+            client.postAndAssertOk(
+                "/tilbakekreving/${tilbakekreving.sak.id}/oppgave-status",
+                systemBruker,
+                OppgaveStatusRequest(paaVent = false),
+            )
+
+            inTransaction {
+                val oppgave = oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first()
+                oppgave.status shouldBe Status.UNDER_BEHANDLING
+                oppgave.merknad shouldBe ""
+            }
+        }
+    }
+
+    @Test
+    fun `skal avbryte en tilbakekreving`() {
+        withTestApplication { client ->
+            val tilbakekreving = opprettTilbakekrevingOgTildelOppgave(client)
+
+            client.postAndAssertOk(
+                "/tilbakekreving/${tilbakekreving.sak.id}/avbryt",
+                systemBruker,
+            )
+
+            inTransaction {
+                val oppgave = oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first()
+                oppgave.status shouldBe Status.AVBRUTT
+            }
+
+            val avbruttTilbakekreving = tilbakekrevingService.hentTilbakekreving(tilbakekreving.id)
+            avbruttTilbakekreving.status shouldBe TilbakekrevingStatus.AVBRUTT
+        }
+    }
+
     private suspend fun opprettTilbakekrevingOgTildelOppgave(client: HttpClient): TilbakekrevingBehandling {
         val sak: Sak = opprettSak(client)
         val tilbakekreving = opprettTilbakekreving(sak, client)
@@ -251,7 +303,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
         client: HttpClient,
     ): TilbakekrevingBehandling {
         val tilbakekreving: TilbakekrevingBehandling =
-            client.post("/tilbakekreving") {
+            client.post("/tilbakekreving/${sak.id}") {
                 addAuthToken(systemBruker)
                 contentType(ContentType.Application.Json)
                 setBody(kravgrunnlag(sak))

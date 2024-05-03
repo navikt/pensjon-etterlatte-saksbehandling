@@ -128,7 +128,7 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
             )
         val opprettBehandling = service.opprettBehandling(manueltOpprettetBehandling, SAKSBEHANDLER)
         dao.oppdaterGenerellBehandling(opprettBehandling.copy(status = GenerellBehandling.Status.FATTET))
-        assertThrows<KanIkkeEndreFattetEllerAttestertBehandling> {
+        assertThrows<KanIkkeEndreGenerellBehandling> {
             service.lagreNyeOpplysninger(opprettBehandling)
         }
     }
@@ -275,6 +275,58 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
                 any(),
                 any(),
             )
+        }
+    }
+
+    @Test
+    fun `Kan avbryte redigerbar behandling`() {
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingId = randomUUID()
+        val manueltOpprettetBehandling =
+            GenerellBehandling.opprettUtland(
+                sak.id,
+                behandlingId,
+            )
+        val opprettBehandling = service.opprettBehandling(manueltOpprettetBehandling, SAKSBEHANDLER)
+        Assertions.assertEquals(GenerellBehandling.Status.OPPRETTET, opprettBehandling.status)
+        service.avbrytBehandling(opprettBehandling.id)
+        val avbruttBehandling = service.hentBehandlingMedId(opprettBehandling.id)
+        Assertions.assertEquals(GenerellBehandling.Status.AVBRUTT, avbruttBehandling!!.status)
+    }
+
+    @Test
+    fun `Kan ikke avbryte fattet behandling`() {
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingId = randomUUID()
+        val manueltOpprettetBehandling =
+            GenerellBehandling.opprettUtland(
+                sak.id,
+                behandlingId,
+            )
+        val opprettBehandling = service.opprettBehandling(manueltOpprettetBehandling, SAKSBEHANDLER)
+        Assertions.assertEquals(GenerellBehandling.Status.OPPRETTET, opprettBehandling.status)
+
+        val hentOppgaverForReferanse = oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
+        Assertions.assertEquals(1, hentOppgaverForReferanse.size)
+        val utlandsOppgave = hentOppgaverForReferanse[0]
+
+        oppgaveService.tildelSaksbehandler(utlandsOppgave.id, SAKSBEHANDLER.ident)
+        val kravpakkeUtlandInnhold =
+            Innhold.KravpakkeUtland(
+                listOf("AFG"),
+                listOf(DokumentMedSendtDato("P2000", true, LocalDate.now())),
+                "2grwg2",
+                "124124124",
+            )
+        val behandlingUtfylt = opprettBehandling.copy(innhold = kravpakkeUtlandInnhold)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
+        service.sendTilAttestering(oppdaterBehandling, SAKSBEHANDLER)
+        val fattetBehandling = service.hentBehandlingMedId(oppdaterBehandling.id)
+
+        fattetBehandling?.status shouldBe GenerellBehandling.Status.FATTET
+
+        assertThrows<KanIkkeEndreGenerellBehandling> {
+            service.avbrytBehandling(opprettBehandling.id)
         }
     }
 

@@ -58,7 +58,7 @@ class ManglerRinanummerException(message: String) :
         detail = message,
     )
 
-class KanIkkeEndreFattetEllerAttestertBehandling(message: String) : Exception(message)
+class KanIkkeEndreGenerellBehandling(message: String) : Exception(message)
 
 class UgyldigAttesteringsForespoersel(message: String, code: String) :
     UgyldigForespoerselException(
@@ -283,16 +283,22 @@ class GenerellBehandlingService(
             ?: throw DokumentManglerDatoException("Dokument ${dokumentMedSendtDato.dokumenttype} er markert som sendt men mangler dato")
     }
 
+    fun avbrytBehandling(id: UUID) {
+        val generellBehandling = generellBehandlingDao.hentGenerellBehandlingMedId(id)
+        finnesOgErRedigerbar(generellBehandling)
+        generellBehandlingDao.oppdaterGenerellBehandling(generellBehandling!!.copy(status = GenerellBehandling.Status.AVBRUTT))
+    }
+
     fun lagreNyeOpplysninger(generellBehandling: GenerellBehandling): GenerellBehandling {
         val lagretBehandling = generellBehandlingDao.hentGenerellBehandlingMedId(generellBehandling.id)
-        kanLagreNyBehandling(lagretBehandling)
+        finnesOgErRedigerbar(lagretBehandling)
         return this.oppdaterBehandling(generellBehandling)
     }
 
-    private fun kanLagreNyBehandling(generellBehandling: GenerellBehandling?) {
+    private fun finnesOgErRedigerbar(generellBehandling: GenerellBehandling?) {
         requireNotNull(generellBehandling) { "Behandlingen finnes ikke." }
         if (!generellBehandling.kanEndres()) {
-            throw KanIkkeEndreFattetEllerAttestertBehandling("Behandling kan ikke være fattet eller attestert hvis du skal endre den")
+            throw KanIkkeEndreGenerellBehandling("Behandling kan ikke være fattet, attestert eller avbrutt hvis du skal endre den")
         }
     }
 

@@ -95,6 +95,18 @@ internal fun Route.generellbehandlingRoutes(
         }
     }
 
+    put("/api/generellbehandling/avbryt/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
+        kunSaksbehandlerMedSkrivetilgang {
+            inTransaction {
+                generellBehandlingService.avbrytBehandling(generellBehandlingId)
+            }
+            logger.info(
+                "Setter generell behandling for behandlingid $generellBehandlingId til avbrutt",
+            )
+            call.respond(HttpStatusCode.OK)
+        }
+    }
+
     get("/api/generellbehandling/hent/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
         kunSaksbehandler {
             val generellBehandlingId = generellBehandlingId

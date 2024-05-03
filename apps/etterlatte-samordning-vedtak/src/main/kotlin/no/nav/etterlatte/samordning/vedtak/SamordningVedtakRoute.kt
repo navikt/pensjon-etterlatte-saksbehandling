@@ -110,6 +110,30 @@ fun Route.samordningVedtakRoute(
             call.respond(samordningVedtakDtos)
         }
 
+        get("/har-loepende-oms") {
+            val paaDato =
+                call.parameters["paaDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                    ?: throw ManglerPaaDatoException()
+            val fnr = call.fnr
+
+            val harLoependeOmsPaaDato =
+                try {
+                    samordningVedtakService.harLoependeOmstillingsstoenadPaaDato(
+                        dato = paaDato,
+                        fnr = Folkeregisteridentifikator.of(fnr),
+                        context = PensjonContext,
+                    )
+                } catch (e: IllegalArgumentException) {
+                    call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                }
+
+            call.respond(
+                mapOf(
+                    "omstillingsstoenad" to harLoependeOmsPaaDato,
+                ),
+            )
+        }
+
         get("/ping") {
             call.respond(
                 getMeta(),

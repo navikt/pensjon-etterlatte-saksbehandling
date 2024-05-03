@@ -65,6 +65,12 @@ class ManglerFomDatoException : UgyldigForespoerselException(
     meta = getMeta(),
 )
 
+class ManglerPaaDatoException : UgyldigForespoerselException(
+    code = "005-PAAMDATO-MANGLER",
+    detail = "paaDato ikke angitt",
+    meta = getMeta(),
+)
+
 fun getMeta() =
     mapOf(
         "correlation-id" to getCorrelationId(),

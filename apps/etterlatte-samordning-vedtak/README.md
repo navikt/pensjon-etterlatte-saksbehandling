@@ -24,7 +24,6 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 | fnr    | fødselsnummer til aktuell person |
 
 
-
 #### Informasjonsmodell
 
 ##### Samordningsvedtak
@@ -74,6 +73,7 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 | 002-FNR-MANGLER         | 400             | Ikke angitt header med fødselsnummer det skal spørres på |
 | 003-FOMDATO-MANGLER     | 400             | Ikke angitt fomDato som query parameter                  |
 | 004-FEIL_SAKSTYPE       | 400             | Etterspurt vedtak som ikke angår omstillingsstønad       |
+| 005-PAADATO-MANGLER     | 400             | Ikke angitt paaDato som query parameter                  |
 | 010-TP-TILGANG          | 403             | Ikke tilgang til TP/etterspurt data                      |
 | 011-TP-FORESPOERSEL     | 400             | Feil ved spørring mot TP                                 |
 | 012-TP-IKKE-FUNNET      | 404             | Kunne ikke finne TP-ressurs                              |
@@ -95,6 +95,20 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 }
 ```
 
+## Internt i NAV
+
+Endepunktene som er nevnt over finnes også til bruk for NAV-interne systemer, men da på `/api/pensjon/vedtak` osv.
+
+### Løpende omstillingsstønad
+Her finnes i tillegg et endepunkt som svarer ja/nei på dette på en spesifikk dato. Dersom ytelsen slutter dagen før angitt dato, eller starter måneden etterpå så vil svaret være _nei_ 
+- `/api/pensjon/vedtak/har-loepende-oms?paaDato=YYYY-MM-DD` 
+  - fnr i header
+  - svarformat: 
+     ```
+     {
+       "omstillingsstoenad": true
+     }
+    ```
 
 ## Kom i gang
 

@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.opprettBehandling
@@ -137,6 +138,25 @@ internal class SakDaoTest(val dataSource: DataSource) {
         val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
         Assertions.assertEquals(sakRepo.finnFlyktningForSak(opprettSak.id), null)
+    }
+
+    @Test
+    fun `hentSakerMedIder henter kun de sakene med innsendt id`() {
+        val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val alleSaker = listOf(sak1, sak2, sak3)
+
+        val alleIder = alleSaker.map { it.id }
+        val hentetAlleSaker = sakRepo.hentSakerMedIder(alleIder)
+        val hentetKunSak1 = sakRepo.hentSakerMedIder(listOf(sak1.id))
+        val hentingIngenSaker = sakRepo.hentSakerMedIder(emptyList())
+        val hentingUkjentSak = sakRepo.hentSakerMedIder(listOf(alleIder.sum()))
+
+        Assertions.assertEquals(alleSaker, hentetAlleSaker)
+        Assertions.assertEquals(listOf(sak1), hentetKunSak1)
+        Assertions.assertEquals(emptyList<Sak>(), hentingIngenSaker)
+        Assertions.assertEquals(emptyList<Sak>(), hentingUkjentSak)
     }
 
     @Test

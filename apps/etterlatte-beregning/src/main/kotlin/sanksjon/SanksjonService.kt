@@ -19,6 +19,26 @@ class SanksjonService(
         return sanksjonRepository.hentSanksjon(behandlingId)?.sortedBy { it.fom }
     }
 
+    suspend fun kopierSanksjon(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        logger.info("Kopierer sanksjoner fra forrige behandling med behandlingID=$behandlingId")
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        val forrigeBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo).id
+
+        val sanksjoner = sanksjonRepository.hentSanksjon(forrigeBehandlingId)
+        if (sanksjoner != null) {
+            sanksjoner.forEach {
+                sanksjonRepository.opprettSanksjonFraKopi(
+                    behandlingId,
+                    it.sakId,
+                    it,
+                )
+            }
+        }
+    }
+
     suspend fun opprettEllerOppdaterSanksjon(
         behandlingId: UUID,
         sanksjon: LagreSanksjon,

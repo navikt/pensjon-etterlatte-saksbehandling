@@ -11,38 +11,25 @@ import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo
 import { Alert, BodyShort, Heading, Tag } from '@navikt/ds-react'
 import { tagColors, TagList } from '~shared/Tags'
 import { SidebarPanel } from '~shared/components/Sidebar'
-import React, { useEffect } from 'react'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
-import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import React from 'react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
 import { FlexRow } from '~shared/styled'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const oppgave = useSelectorOppgaveUnderBehandling()
 
   const redigerbar = behandlingErRedigerbar(
     behandlingsInfo.status,
     behandlingsInfo.sakEnhetId,
     innloggetSaksbehandler.skriveEnheter
   )
-
-  const [oppgaveForBehandlingenStatus, requesthentOppgaveForBehandling] = useApiCall(
-    hentOppgaveForReferanseUnderBehandling
-  )
-
-  const hentOppgaveForBehandling = () => requesthentOppgaveForBehandling(behandlingsInfo.behandlingId)
-
-  useEffect(() => {
-    hentOppgaveForBehandling()
-  }, [])
 
   const hentStatus = () => {
     switch (behandlingsInfo.status) {
@@ -107,20 +94,12 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       <div className="flex">
         <div className="info">
           <Info>Saksbehandler</Info>
-          {mapApiResult(
-            oppgaveForBehandlingenStatus,
-            <Spinner visible={true} label="Henter oppgave" />,
-            () => (
-              <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
-            ),
-            (oppgave) =>
-              !!oppgave?.saksbehandler ? (
-                <Tekst>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Tekst>
-              ) : (
-                <Alert size="small" variant="warning">
-                  Ingen saksbehandler har tatt denne oppgaven
-                </Alert>
-              )
+          {!!oppgave?.saksbehandler ? (
+            <Tekst>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Tekst>
+          ) : (
+            <Alert size="small" variant="warning">
+              Ingen saksbehandler har tatt denne oppgaven
+            </Alert>
           )}
         </div>
         <div className="info">
@@ -153,9 +132,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
       </FlexRow>
 
-      {mapSuccess(oppgaveForBehandlingenStatus, (oppgave) => (
-        <SettPaaVent oppgave={oppgave} redigerbar={redigerbar} refreshOppgave={hentOppgaveForBehandling} />
-      ))}
+      <SettPaaVent oppgave={oppgave} redigerbar={redigerbar} />
     </SidebarPanel>
   )
 }

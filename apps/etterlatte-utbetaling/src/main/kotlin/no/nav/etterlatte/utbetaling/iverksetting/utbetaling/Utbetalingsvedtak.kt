@@ -15,7 +15,11 @@ data class Utbetalingsvedtak(
     val attestasjon: Attestasjon,
 ) {
     companion object {
-        fun fra(vedtak: VedtakDto): Utbetalingsvedtak {
+        fun fra(
+            vedtak: VedtakDto,
+            vedtakFattet: VedtakFattet? = null,
+            attestasjon: Attestasjon? = null,
+        ): Utbetalingsvedtak {
             val innhold = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
             return Utbetalingsvedtak(
                 vedtakId = vedtak.id,
@@ -41,14 +45,14 @@ data class Utbetalingsvedtak(
                         )
                     },
                 vedtakFattet =
-                    vedtak.vedtakFattet?.let {
+                    vedtakFattet ?: vedtak.vedtakFattet?.let {
                         VedtakFattet(
                             ansvarligSaksbehandler = it.ansvarligSaksbehandler,
                             ansvarligEnhet = it.ansvarligEnhet,
                         )
                     } ?: throw Exception("Mangler saksbehandler og enhet på vedtak"),
                 attestasjon =
-                    vedtak.attestasjon?.let {
+                    attestasjon ?: vedtak.attestasjon?.let {
                         Attestasjon(
                             attestant = it.attestant,
                             attesterendeEnhet = it.attesterendeEnhet,

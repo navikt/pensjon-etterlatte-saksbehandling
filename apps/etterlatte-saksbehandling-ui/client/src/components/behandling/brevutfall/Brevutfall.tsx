@@ -110,7 +110,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
   return behandling.sendeBrev ? (
     <BrevutfallContent id="brevutfall">
       <SkalSendeBrev behandling={behandling} behandlingRedigerbart={redigerbar} />
-      <Heading size="medium" spacing>
+      <Heading level="2" size="small" spacing>
         Valg av utfall i brev
       </Heading>
       <BodyLong spacing>
@@ -153,12 +153,12 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
 }
 
 const BrevutfallContent = styled.div`
-  margin-top: 4em;
-  margin-bottom: 2em;
+  margin-top: 4rem;
+  margin-bottom: 4rem;
   max-width: 500px;
 `
 const InfoAlert = styled(Alert)`
-  margin-top: 4rem;
-  margin-bottom: 2rem;
+  margin-top: 2rem;
+  margin-bottom: 4rem;
   max-width: fit-content;
 `

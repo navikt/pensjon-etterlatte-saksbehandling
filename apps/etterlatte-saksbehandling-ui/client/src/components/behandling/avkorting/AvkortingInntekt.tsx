@@ -133,7 +133,13 @@ export const AvkortingInntekt = ({
               <Table.Row>
                 <Table.HeaderCell>Forventet inntekt Norge</Table.HeaderCell>
                 <Table.HeaderCell>Forventet inntekt utland</Table.HeaderCell>
-                <Table.HeaderCell>Forventet inntekt totalt</Table.HeaderCell>
+                <Table.HeaderCell>
+                  Forventet inntekt totalt
+                  <HelpText title="Hva innebærer forventet inntekt totalt">
+                    Forventet inntekt totalt er registrert inntekt Norge pluss inntekt utland minus eventuelt fratrekk
+                    for inn-år. Beløpet vil automatisk avrundes ned til nærmeste tusen når avkorting beregnes.
+                  </HelpText>
+                </Table.HeaderCell>
                 <Table.HeaderCell>
                   Innvilgede måneder
                   <HelpText title="Hva betyr innvilgede måneder">

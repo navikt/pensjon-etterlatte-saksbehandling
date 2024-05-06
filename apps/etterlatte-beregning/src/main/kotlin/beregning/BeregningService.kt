@@ -1,11 +1,13 @@
 package no.nav.etterlatte.beregning
 
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -15,6 +17,7 @@ class BeregningService(
     private val beregnBarnepensjonService: BeregnBarnepensjonService,
     private val beregnOmstillingsstoenadService: BeregnOmstillingsstoenadService,
     private val beregnOverstyrBeregningService: BeregnOverstyrBeregningService,
+    private val sanksjonService: SanksjonService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregningService::class.java)
 
@@ -54,6 +57,11 @@ class BeregningService(
 
             val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
             behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, commit = true)
+
+            if (behandling.sakType == SakType.OMSTILLINGSSTOENAD && behandling.behandlingType == BehandlingType.REVURDERING) {
+                sanksjonService.kopierSanksjon(behandlingId, brukerTokenInfo)
+            }
+
             return lagretBeregning.berikMedOverstyrBeregning(brukerTokenInfo) ?: lagretBeregning
         } else {
             throw IllegalStateException("Kan ikke beregne behandlingId=$behandlingId, behandling er i feil tilstand")

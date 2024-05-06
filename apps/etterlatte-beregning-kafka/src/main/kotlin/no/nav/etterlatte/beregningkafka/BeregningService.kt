@@ -12,6 +12,11 @@ class BeregningService(
     private val beregningApp: HttpClient,
     private val url: String,
 ) {
+    fun hentOverstyrt(behandlingId: UUID): HttpResponse =
+        runBlocking {
+            beregningApp.get("$url/api/beregning/$behandlingId/overstyrt")
+        }
+
     fun beregn(behandlingId: UUID): HttpResponse =
         runBlocking {
             beregningApp.post("$url/api/beregning/$behandlingId")

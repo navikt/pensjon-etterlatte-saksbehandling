@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilLoggerException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.ktor.erDeserialiseringsException
+import no.nav.etterlatte.libs.ktor.route.routeLogger
 import org.slf4j.Logger
 
 class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
@@ -55,6 +56,7 @@ class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
         }
 
         status(*statusCodes4xx) { call, code ->
+            routeLogger.debug("Fikk kode {}", code)
             when (code) {
                 HttpStatusCode.NotFound -> call.respond(GenerellIkkeFunnetException())
 
@@ -95,6 +97,7 @@ class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
         }
 
         status(*statusCodes5xx) { call, code ->
+            routeLogger.debug("Fikk kode {}", code)
             val feil =
                 InternfeilLoggerException(
                     status = code.value,

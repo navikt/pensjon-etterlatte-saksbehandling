@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.behandling.KanBrukesIMiljoe.DevOgProd
+import no.nav.etterlatte.libs.common.behandling.KanBrukesIMiljoe.IngenMiljoe
 import no.nav.etterlatte.libs.common.behandling.KanBrukesIMiljoe.KunIDev
 import no.nav.etterlatte.libs.common.clusterNavn
 
@@ -42,12 +43,11 @@ enum class Revurderingaarsak(
     INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     RETT_UTEN_TIDSBEGRENSNING(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
-    FORELDRELOES(SAKTYPE_BP, KunIDev, skalSendeBrev = true),
+    FORELDRELOES(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
 
     // Opphør
     ALDERSOVERGANG(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
     DOEDSFALL(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
-    OPPHOER_UTEN_BREV(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
     ADOPSJON(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
     SIVILSTAND(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
     OMGJOERING_AV_FARSKAP(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
@@ -56,34 +56,37 @@ enum class Revurderingaarsak(
     EKSPORT(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     IMPORT(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
     ANNEN(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
-    ANNEN_UTEN_BREV(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
 
-    UTSENDELSE_AV_KRAVPAKKE(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = false),
+    UTSENDELSE_AV_KRAVPAKKE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
 
-    // TODO vurdere disse
-    OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
-    SLUTTBEHANDLING_UTLAND(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
+    OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    SLUTTBEHANDLING_UTLAND(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
 
-    // TODO ikke i noe miljø ennå
-    FENGSELSOPPHOLD(SAKTYPE_BP, KunIDev, skalSendeBrev = true),
-    UT_AV_FENGSEL(SAKTYPE_BP, KunIDev, skalSendeBrev = true),
-    UTLAND(SAKTYPE_BP, KunIDev, skalSendeBrev = true),
-    BARN(SAKTYPE_BP, KunIDev, skalSendeBrev = true),
-    ANSVARLIGE_FORELDRE(SAKTYPE_BP, KunIDev, skalSendeBrev = true),
-    VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, KunIDev, skalSendeBrev = true),
+    FENGSELSOPPHOLD(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
+    UT_AV_FENGSEL(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
+    UTLAND(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
+    BARN(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
+    ANSVARLIGE_FORELDRE(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
+    VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
 
-    AVKORTING_MOT_UFOERETRYGD(SAKTYPE_BP, KunIDev, skalSendeBrev = true),
+    AVKORTING_MOT_UFOERETRYGD(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
 
-    ETTEROPPGJOER(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
-    OPPHOER_3_AAR_ETTER_DOEDSFALL(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
-    OPPHOER_AV_2_UTVIDEDE_AAR(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
-    SANKSJON_PGA_MANGLENDE_OPPLYSNINGER(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
-    SOEKNAD_OM_GJENOPPTAK(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
+    OPPHOER_3_AAR_ETTER_DOEDSFALL(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
+    SOEKNAD_OM_GJENOPPTAK(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
 
-    OMGJOERING_ETTER_ANKE(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
-    OMGJOERING_PAA_EGET_INITIATIV(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
-    OMGJOERING_ETTER_KRAV_FRA_BRUKER(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
+    OMGJOERING_ETTER_ANKE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    OMGJOERING_PAA_EGET_INITIATIV(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    OMGJOERING_ETTER_KRAV_FRA_BRUKER(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+
+    // Mangler funksjonalitet
     UTSENDELSE_AV_SED(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
+    ETTEROPPGJOER(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
+    SANKSJON_PGA_MANGLENDE_OPPLYSNINGER(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
+    OPPHOER_AV_2_UTVIDEDE_AAR(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
+
+    // Utgår men har blitt brukt
+    ANNEN_UTEN_BREV(SAKTYPE_BP_OMS, IngenMiljoe, skalSendeBrev = false),
+    OPPHOER_UTEN_BREV(SAKTYPE_BP_OMS, IngenMiljoe, skalSendeBrev = false),
     ;
 
     fun kanBrukesIMiljo(): Boolean =

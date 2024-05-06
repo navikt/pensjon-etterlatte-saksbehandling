@@ -84,7 +84,14 @@ class DoedshendelseJobService(
     }
 
     private fun haandterDoedshendelse(doedshendelse: DoedshendelseInternal) {
-        val kontrollpunkter = doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
+        val kontrollpunkter =
+            try {
+                doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
+            } catch (e: Exception) {
+                val sak = doedshendelse.sakId?.toString() ?: "sak mangler"
+                logger.error("Kunne ikke identifisere kontrollpunkter for sak $sak", e)
+                throw e
+            }
 
         when (kontrollpunkter.any { it.avbryt }) {
             true -> {

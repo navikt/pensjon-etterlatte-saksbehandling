@@ -1,11 +1,13 @@
 package no.nav.etterlatte.tidshendelser
 
+import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import org.slf4j.LoggerFactory
 
 class OmstillingsstoenadService(
     private val hendelseDao: HendelseDao,
     private val grunnlagKlient: GrunnlagKlient,
+    private val behandlingKlient: BehandlingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -25,10 +27,21 @@ class OmstillingsstoenadService(
 
         logger.info("Hentet ${saker.size} saker hvor dødsfall forekom i $doedsfallsmaaned")
 
-        if (saker.isNotEmpty()) {
-            hendelseDao.opprettHendelserForSaker(jobb.id, saker, Steg.IDENTIFISERT_SAK)
+        // filtrer bort saker som ikke er aktuelle
+        val sakerMap = behandlingKlient.hentSaker(saker)
+        val aktuelleSaker =
+            saker.filter {
+                sakerMap[it]?.sakType == jobb.type.sakType
+            }
+        logger.info(
+            "Hentet ${saker.size} saker hvor dødsfall forekom i $doedsfallsmaaned, med " +
+                "${aktuelleSaker.size} saker med riktig saktype",
+        )
+
+        if (aktuelleSaker.isNotEmpty()) {
+            hendelseDao.opprettHendelserForSaker(jobb.id, aktuelleSaker, Steg.IDENTIFISERT_SAK)
         }
 
-        return saker
+        return aktuelleSaker
     }
 }

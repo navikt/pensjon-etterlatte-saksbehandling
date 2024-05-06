@@ -3,9 +3,6 @@ package no.nav.etterlatte.vedtaksvurdering.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -42,20 +39,6 @@ import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-private fun featureToggleProperties(config: Config) =
-    FeatureToggleProperties(
-        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
-        host = config.getString("funksjonsbrytere.unleash.host"),
-        apiKey = config.getString("funksjonsbrytere.unleash.token"),
-    )
-
-enum class VedtaksvurderingFeatureToggle(private val key: String) : FeatureToggle {
-    Foreldreloes("foreldreloes"),
-    ;
-
-    override fun key(): String = key
-}
-
 class ApplicationContext {
     init {
         sikkerLoggOppstartOgAvslutning("etterlatte-vedtaksvurdering")
@@ -65,11 +48,6 @@ class ApplicationContext {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val config: Config = ConfigFactory.load()
     val dataSource = DataSourceBuilder.createDataSource(env)
-
-    private val featureToggleService: FeatureToggleService =
-        FeatureToggleService.initialiser(
-            properties = featureToggleProperties(config),
-        )
 
     val leaderElectionHttpClient: HttpClient = httpClient()
     val leaderElectionKlient = LeaderElection(env["ELECTOR_PATH"], leaderElectionHttpClient)
@@ -95,7 +73,6 @@ class ApplicationContext {
             behandlingKlient = behandlingKlient,
             samKlient = samKlient,
             trygdetidKlient = trygdetidKlient,
-            featureToggleService = featureToggleService,
         )
     val vedtaksvurderingRapidService = VedtaksvurderingRapidService(publiser = ::publiser)
     val vedtakTilbakekrevingService =

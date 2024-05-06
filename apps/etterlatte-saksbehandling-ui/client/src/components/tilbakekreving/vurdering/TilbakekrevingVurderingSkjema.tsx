@@ -16,8 +16,6 @@ import {
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect } from 'react'
 import { lagreTilbakekrevingsvurdering } from '~shared/api/tilbakekreving'
-import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
-import { useAppDispatch } from '~store/Store'
 
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
@@ -26,8 +24,10 @@ import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
+import { useAppDispatch } from '~store/Store'
 
-const initialVurdering = {
+const initialVurdering: TilbakekrevingVurdering = {
   aarsak: null,
   beskrivelse: null,
   forhaandsvarsel: null,
@@ -37,7 +37,6 @@ const initialVurdering = {
   tilsvar: null,
   rettsligGrunnlag: null,
   objektivtVilkaarOppfylt: null,
-  subjektivtVilkaarOppfylt: null,
   uaktsomtForaarsaketFeilutbetaling: null,
   burdeBrukerForstaatt: null,
   burdeBrukerForstaattEllerUaktsomtForaarsaket: null,
@@ -58,33 +57,71 @@ export function TilbakekrevingVurderingSkjema({
   behandling: TilbakekrevingBehandling
   redigerbar: boolean
 }) {
+  if (!behandling) {
+    return
+  }
   const dispatch = useAppDispatch()
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
-  const { register, handleSubmit, watch, control, getValues, setValue } = useForm<TilbakekrevingVurdering>({
-    defaultValues: behandling.tilbakekreving.vurdering ? behandling.tilbakekreving.vurdering : initialVurdering,
-    shouldUnregister: true,
-  })
+
+  const { register, handleSubmit, watch, control, getValues, setValue, formState, reset } =
+    useForm<TilbakekrevingVurdering>({
+      defaultValues: behandling.tilbakekreving.vurdering || initialVurdering,
+      shouldUnregister: true,
+    })
 
   useEffect(() => {
-    if (watch().vilkaarsresultat === TilbakekrevingVilkaar.IKKE_OPPFYLT) {
-      setValue('hjemmel', TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD)
-    } else {
-      setValue('hjemmel', watch().rettsligGrunnlag)
+    const values = getValues()
+    const utledetHjemmel =
+      values.vilkaarsresultat === TilbakekrevingVilkaar.IKKE_OPPFYLT
+        ? TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD
+        : values.rettsligGrunnlag
+    if (values.hjemmel !== utledetHjemmel) {
+      setValue('hjemmel', utledetHjemmel, { shouldDirty: false })
     }
-  }, [watch().vilkaarsresultat, watch().rettsligGrunnlag])
+
+    if (formState.isDirty && Object.keys(formState.dirtyFields).length) {
+      const delay = setTimeout(() => {
+        lagreVurdering(values)
+      }, 2000)
+
+      return () => clearTimeout(delay)
+    }
+  }, [formState])
 
   const lagreVurdering = (vurdering: TilbakekrevingVurdering) => {
-    lagreVurderingRequest({ behandlingsId: behandling.id, vurdering }, (lagretTilbakekreving) => {
-      dispatch(addTilbakekreving(lagretTilbakekreving))
-    })
+    lagreVurderingRequest(
+      {
+        behandlingsId: behandling.id,
+        vurdering: vurdering,
+      },
+      (lagretBehandling) => {
+        dispatch(addTilbakekreving(lagretBehandling))
+        reset(lagretBehandling.tilbakekreving.vurdering || initialVurdering)
+      }
+    )
   }
 
   const vilkaarOppfylt = () =>
-    watch().vilkaarsresultat &&
-    [TilbakekrevingVilkaar.OPPFYLT, TilbakekrevingVilkaar.DELVIS_OPPFYLT].includes(watch().vilkaarsresultat!)
+    watch().vilkaarsresultat
+      ? [TilbakekrevingVilkaar.OPPFYLT, TilbakekrevingVilkaar.DELVIS_OPPFYLT].includes(watch().vilkaarsresultat!)
+      : false
 
   const beloepIBehold = () =>
-    watch().beloepBehold && watch().beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD
+    watch().beloepBehold ? watch().beloepBehold?.behold == TilbakekrevingBeloepBeholdSvar.BELOEP_I_BEHOLD : false
+
+  const skalHaForhaandsvarsel = () =>
+    watch().forhaandsvarsel
+      ? [TilbakekrevingVarsel.MED_I_ENDRINGSBREV, TilbakekrevingVarsel.EGET_BREV].includes(watch().forhaandsvarsel!)
+      : false
+
+  const rettsligGrunnlagForVilkaarOppfyltEllerDelvisOppfylt = () =>
+    watch().rettsligGrunnlag
+      ? [
+          TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
+          TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM,
+          TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM,
+        ].includes(watch().rettsligGrunnlag!)
+      : false
 
   return (
     <InnholdPadding>
@@ -115,18 +152,14 @@ export function TilbakekrevingVurderingSkjema({
           }
         />
 
-        {watch().forhaandsvarsel &&
-          [TilbakekrevingVarsel.MED_I_ENDRINGSBREV, TilbakekrevingVarsel.EGET_BREV].includes(
-            watch().forhaandsvarsel!
-          ) && (
-            <ControlledDatoVelger
-              name="forhaandsvarselDato"
-              label="Forhåndsvarsel dato"
-              control={control}
-              defaultValue={getValues().forhaandsvarselDato ?? undefined}
-              readOnly={!redigerbar}
-            />
-          )}
+        {skalHaForhaandsvarsel() && (
+          <ControlledDatoVelger
+            name="forhaandsvarselDato"
+            label="Forhåndsvarsel dato"
+            control={control}
+            readOnly={!redigerbar}
+          />
+        )}
 
         <Textarea
           {...register('beskrivelse')}
@@ -170,16 +203,9 @@ export function TilbakekrevingVurderingSkjema({
             </>
           }
         />
-
         {watch().tilsvar?.tilsvar == JaNei.JA && (
           <>
-            <ControlledDatoVelger
-              name="tilsvar.dato"
-              label="Tilsvar dato"
-              control={control}
-              defaultValue={getValues().tilsvar?.dato ?? undefined}
-              readOnly={!redigerbar}
-            />
+            <ControlledDatoVelger name="tilsvar.dato" label="Tilsvar dato" control={control} readOnly={!redigerbar} />
 
             <Textarea {...register('tilsvar.beskrivelse')} label="Beskriv tilsvar" readOnly={!redigerbar} />
           </>
@@ -204,131 +230,124 @@ export function TilbakekrevingVurderingSkjema({
           }
         />
 
-        {watch().rettsligGrunnlag &&
-          [
-            TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
-            TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM,
-            TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM,
-          ].includes(watch().rettsligGrunnlag!) && (
-            <>
+        {rettsligGrunnlagForVilkaarOppfyltEllerDelvisOppfylt() && (
+          <>
+            <Textarea
+              {...register('objektivtVilkaarOppfylt')}
+              label="Er det objektive vilkåret oppfylt?"
+              description="Foreligger det en feilutbetaling?"
+              readOnly={!redigerbar}
+            />
+
+            {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM].includes(watch().rettsligGrunnlag!) && (
               <Textarea
-                {...register('objektivtVilkaarOppfylt')}
-                label="Er det objektive vilkåret oppfylt?"
-                description="Foreligger det en feilutbetaling?"
+                {...register('burdeBrukerForstaatt')}
+                label="Er de subjektive vilkårene oppfylt?"
+                description="Forstod eller burde brukeren forstått at ubetalingen skyldes en feil?"
                 readOnly={!redigerbar}
               />
+            )}
 
-              {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM].includes(
-                watch().rettsligGrunnlag!
-              ) && (
-                <Textarea
-                  {...register('burdeBrukerForstaatt')}
-                  label="Er de subjektive vilkårene oppfylt?"
-                  description="Forstod eller burde brukeren forstått at ubetalingen skyldes en feil?"
-                  readOnly={!redigerbar}
-                />
-              )}
-
-              {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM].includes(watch().rettsligGrunnlag!) && (
-                <Textarea
-                  {...register('uaktsomtForaarsaketFeilutbetaling')}
-                  label="Er de subjektive vilkårene oppfylt?"
-                  description="Har brukeren uaktsomt forårsaket feilutbetalingen?"
-                  readOnly={!redigerbar}
-                />
-              )}
-
-              {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM].includes(
-                watch().rettsligGrunnlag!
-              ) && (
-                <Textarea
-                  {...register('burdeBrukerForstaattEllerUaktsomtForaarsaket')}
-                  label="Er de subjektive vilkårene oppfylt?"
-                  description="Forstod eller burde brukeren forstått at utbetalingen skyldtes en feil, og/eller har brukeren uaktsomt forårsaket feilutbetalingen?"
-                  readOnly={!redigerbar}
-                />
-              )}
-
-              <ControlledRadioGruppe
-                name="vilkaarsresultat"
-                control={control}
-                legend=""
-                size="small"
+            {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM].includes(watch().rettsligGrunnlag!) && (
+              <Textarea
+                {...register('uaktsomtForaarsaketFeilutbetaling')}
+                label="Er de subjektive vilkårene oppfylt?"
+                description="Har brukeren uaktsomt forårsaket feilutbetalingen?"
                 readOnly={!redigerbar}
-                radios={
-                  <>
-                    {Object.values(TilbakekrevingVilkaar).map((vilkaar) => (
-                      <Radio key={vilkaar} value={vilkaar}>
-                        {teksterTilbakekrevingVilkaar[vilkaar]}
-                      </Radio>
-                    ))}
-                  </>
-                }
               />
+            )}
 
-              {!vilkaarOppfylt() && (
+            {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_OG_ANDRE_PUNKTUM].includes(
+              watch().rettsligGrunnlag!
+            ) && (
+              <Textarea
+                {...register('burdeBrukerForstaattEllerUaktsomtForaarsaket')}
+                label="Er de subjektive vilkårene oppfylt?"
+                description="Forstod eller burde brukeren forstått at utbetalingen skyldtes en feil, og/eller har brukeren uaktsomt forårsaket feilutbetalingen?"
+                readOnly={!redigerbar}
+              />
+            )}
+
+            <ControlledRadioGruppe
+              name="vilkaarsresultat"
+              control={control}
+              legend=""
+              size="small"
+              readOnly={!redigerbar}
+              radios={
                 <>
-                  <Textarea
-                    {...register('beloepBehold.beskrivelse')}
-                    label="Tilbakekreving etter folketrygdloven § 22-15 femte ledd?"
-                    description="Er noe av det feilutbetalte beløpet i behold?"
-                    readOnly={!redigerbar}
-                  />
-
-                  <ControlledRadioGruppe
-                    name="beloepBehold.behold"
-                    control={control}
-                    legend=""
-                    size="small"
-                    readOnly={!redigerbar}
-                    radios={
-                      <>
-                        {Object.values(TilbakekrevingBeloepBeholdSvar).map((behold) => (
-                          <Radio key={behold} value={behold}>
-                            {teksterTilbakekrevingBeloepBehold[behold]}
-                          </Radio>
-                        ))}
-                      </>
-                    }
-                  />
-
-                  {!beloepIBehold() && <Textarea {...register('vedtak')} label="Vedtak" readOnly={!redigerbar} />}
+                  {Object.values(TilbakekrevingVilkaar).map((vilkaar) => (
+                    <Radio key={vilkaar} value={vilkaar}>
+                      {teksterTilbakekrevingVilkaar[vilkaar]}
+                    </Radio>
+                  ))}
                 </>
-              )}
-              {(vilkaarOppfylt() || beloepIBehold()) && (
-                <>
-                  <Textarea
-                    {...register('reduseringAvKravet')}
-                    label="Er det særlige grunner til å frafalle eller redusere kravet?"
-                    description="Det legges blant annet vekt på graden av uaktsomhet hos brukeren, størrelsen på det feilutbetalte beløpet, hvor lang tid det er gått siden utbetalingen fant sted og om noe av feilen helt eller delvis kan tilskrives NAV. Kravet kan frafalles helt, eller settes til en del av det feilutbetalte beløpet. Ved utvist forsett skal krav alltid fremmes, og beløpet kan ikke settes ned."
-                    readOnly={!redigerbar}
-                  />
+              }
+            />
 
-                  <Textarea
-                    {...register('foreldet')}
-                    label="Er noen deler av kravet foreldet?"
-                    description="Det er bestemt i folketrygdloven § 22-14 første ledd at våre krav om tilbakebetaling i utgangspunktet foreldes etter foreldelsesloven. Etter foreldelsesloven § 2, jf. § 3 nr. 1 er den alminnelige foreldelsesfristen tre år. Fristen løper særskilt for hver månedsutbetaling. Vurder også om foreldelsesloven § 10 om ett års tilleggsfrist får anvendelse."
-                    readOnly={!redigerbar}
-                  />
+            {!vilkaarOppfylt() && (
+              <>
+                <Textarea
+                  {...register('beloepBehold.beskrivelse')}
+                  label="Tilbakekreving etter folketrygdloven § 22-15 femte ledd?"
+                  description="Er noe av det feilutbetalte beløpet i behold?"
+                  readOnly={!redigerbar}
+                />
 
-                  <Textarea
-                    {...register('rentevurdering')}
-                    label="Skal det ilegges renter?"
-                    description="Det følger av folketrygdloven § 22-17 a at det skal beregnes et rentetillegg på 10 prosent av det beløpet som kreves tilbake når brukeren har opptrådt grovt uaktsomt eller med forsett."
-                    readOnly={!redigerbar}
-                  />
+                <ControlledRadioGruppe
+                  name="beloepBehold.behold"
+                  control={control}
+                  legend=""
+                  size="small"
+                  readOnly={!redigerbar}
+                  radios={
+                    <>
+                      {Object.values(TilbakekrevingBeloepBeholdSvar).map((behold) => (
+                        <Radio key={behold} value={behold}>
+                          {teksterTilbakekrevingBeloepBehold[behold]}
+                        </Radio>
+                      ))}
+                    </>
+                  }
+                />
 
-                  <Textarea {...register('vedtak')} label="Vedtak" readOnly={!redigerbar} />
+                {!beloepIBehold() && <Textarea {...register('vedtak')} label="Vedtak" readOnly={!redigerbar} />}
+              </>
+            )}
+            {(vilkaarOppfylt() || beloepIBehold()) && (
+              <>
+                <Textarea
+                  {...register('reduseringAvKravet')}
+                  label="Er det særlige grunner til å frafalle eller redusere kravet?"
+                  description="Det legges blant annet vekt på graden av uaktsomhet hos brukeren, størrelsen på det feilutbetalte beløpet, hvor lang tid det er gått siden utbetalingen fant sted og om noe av feilen helt eller delvis kan tilskrives NAV. Kravet kan frafalles helt, eller settes til en del av det feilutbetalte beløpet. Ved utvist forsett skal krav alltid fremmes, og beløpet kan ikke settes ned."
+                  readOnly={!redigerbar}
+                />
 
-                  <Textarea
-                    {...register('vurderesForPaatale')}
-                    label="Skal saken vurderes for påtale?"
-                    readOnly={!redigerbar}
-                  />
-                </>
-              )}
-            </>
-          )}
+                <Textarea
+                  {...register('foreldet')}
+                  label="Er noen deler av kravet foreldet?"
+                  description="Det er bestemt i folketrygdloven § 22-14 første ledd at våre krav om tilbakebetaling i utgangspunktet foreldes etter foreldelsesloven. Etter foreldelsesloven § 2, jf. § 3 nr. 1 er den alminnelige foreldelsesfristen tre år. Fristen løper særskilt for hver månedsutbetaling. Vurder også om foreldelsesloven § 10 om ett års tilleggsfrist får anvendelse."
+                  readOnly={!redigerbar}
+                />
+
+                <Textarea
+                  {...register('rentevurdering')}
+                  label="Skal det ilegges renter?"
+                  description="Det følger av folketrygdloven § 22-17 a at det skal beregnes et rentetillegg på 10 prosent av det beløpet som kreves tilbake når brukeren har opptrådt grovt uaktsomt eller med forsett."
+                  readOnly={!redigerbar}
+                />
+
+                <Textarea {...register('vedtak')} label="Vedtak" readOnly={!redigerbar} />
+
+                <Textarea
+                  {...register('vurderesForPaatale')}
+                  label="Skal saken vurderes for påtale?"
+                  readOnly={!redigerbar}
+                />
+              </>
+            )}
+          </>
+        )}
 
         <div>
           <Label>Hjemmel</Label>

@@ -1,11 +1,26 @@
-import { BodyLong, Button, Heading, HStack, Modal } from '@navikt/ds-react'
+import { BodyLong, Button, Heading, HStack, Modal, Textarea } from '@navikt/ds-react'
 import React, { useContext, useState } from 'react'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { ConfigContext } from '~clientConfig'
+import { ferdigstillOppgaveMedMerknad } from '~shared/api/oppgaver'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { isPending } from '@reduxjs/toolkit'
+import { mapFailure } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 
-export const AktivitetspliktInfoModal = ({ fnr }: { fnr: string | null }) => {
+export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const [visModal, setVisModal] = useState(false)
+  const [merknad, setMerknad] = useState<string | null>(null)
   const configContext = useContext(ConfigContext)
+
+  const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
+
+  const ferdigstill = () => {
+    apiFerdigstillOppgave({ id: oppgave.id, merknad }, () => {
+      setVisModal(false)
+    })
+  }
 
   return (
     <>
@@ -32,7 +47,7 @@ export const AktivitetspliktInfoModal = ({ fnr }: { fnr: string | null }) => {
                   variant="primary"
                   size="small"
                   as="a"
-                  href={`/person/${fnr?.toString()}?fane=BREV`}
+                  href={`/person/${oppgave.fnr?.toString()}?fane=BREV`}
                   target="_blank"
                 >
                   Opprett manuelt brev
@@ -52,17 +67,40 @@ export const AktivitetspliktInfoModal = ({ fnr }: { fnr: string | null }) => {
                   variant="primary"
                   size="small"
                   as="a"
-                  href={`${configContext['gosysUrl']}/personoversikt/fnr=${fnr?.toString()}`}
+                  href={`${configContext['gosysUrl']}/personoversikt/fnr=${oppgave.fnr?.toString()}`}
                   target="_blank"
                 >
                   Lag oppfølgingsoppgave i Gosys <ExternalLinkIcon />
                 </Button>
               </div>
+              <Textarea
+                label="Merknad"
+                description="Er det noe spesielt å merke seg ved denne saken?"
+                onChange={(e) => {
+                  if (e.target.value === '') {
+                    setMerknad(null)
+                  } else {
+                    setMerknad(e.target.value)
+                  }
+                }}
+              />
             </HStack>
+            {mapFailure(ferdigstillOppgaveStatus, (error) => (
+              <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved ferdigstilling av oppgave'}</ApiErrorAlert>
+            ))}
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setVisModal(false)}>
-              Lukk
+            {oppgave.status === Oppgavestatus.UNDER_BEHANDLING && (
+              <Button loading={isPending(ferdigstillOppgaveStatus)} variant="primary" onClick={ferdigstill}>
+                Ferdigstill oppgave
+              </Button>
+            )}
+            <Button
+              loading={isPending(ferdigstillOppgaveStatus)}
+              variant="secondary"
+              onClick={() => setVisModal(false)}
+            >
+              Lukk modal
             </Button>
           </Modal.Footer>
         </Modal>

@@ -1,4 +1,4 @@
-import { BodyLong, Button, Heading, HStack, Modal, Textarea } from '@navikt/ds-react'
+import { BodyLong, BodyShort, Button, Heading, HStack, Label, Modal, Textarea, VStack } from '@navikt/ds-react'
 import React, { useContext, useState } from 'react'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { ConfigContext } from '~clientConfig'
@@ -73,17 +73,24 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
                   Lag oppfølgingsoppgave i Gosys <ExternalLinkIcon />
                 </Button>
               </div>
-              <Textarea
-                label="Merknad"
-                description="Er det noe spesielt å merke seg ved denne saken?"
-                onChange={(e) => {
-                  if (e.target.value === '') {
-                    setMerknad(null)
-                  } else {
-                    setMerknad(e.target.value)
-                  }
-                }}
-              />
+              {oppgave.status === Oppgavestatus.UNDER_BEHANDLING ? (
+                <Textarea
+                  label="Merknad"
+                  description="Er det noe spesielt å merke seg ved denne saken?"
+                  onChange={(e) => {
+                    if (e.target.value === '') {
+                      setMerknad(null)
+                    } else {
+                      setMerknad(e.target.value)
+                    }
+                  }}
+                />
+              ) : (
+                <VStack>
+                  <Label>Merknad</Label>
+                  <BodyShort>{oppgave.merknad || 'Ingen merknad'}</BodyShort>
+                </VStack>
+              )}
             </HStack>
             {mapFailure(ferdigstillOppgaveStatus, (error) => (
               <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved ferdigstilling av oppgave'}</ApiErrorAlert>

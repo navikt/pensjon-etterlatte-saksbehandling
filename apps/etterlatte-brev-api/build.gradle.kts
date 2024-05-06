@@ -19,7 +19,7 @@ dependencies {
     implementation(project(":libs:etterlatte-brev-model"))
     implementation(project(":libs:etterlatte-oppgave-model"))
 
-    implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.1.0")
+    implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.2.0")
 
     implementation(libs.database.kotliquery)
 

@@ -76,7 +76,7 @@ internal class EgenAnsattServiceTest(val dataSource: DataSource) {
             )
         oppgaveService =
             spyk(
-                OppgaveService(oppgaveRepoMedSporing, sakRepo, hendelser),
+                OppgaveService(oppgaveRepoMedSporing, sakRepo, mockk(), hendelser),
             )
         egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, brukerService)
 

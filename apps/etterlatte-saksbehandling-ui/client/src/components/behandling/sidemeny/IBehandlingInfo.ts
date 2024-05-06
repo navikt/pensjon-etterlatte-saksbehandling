@@ -29,4 +29,5 @@ export interface IBehandlingInfo {
 export enum BehandlingFane {
   DOKUMENTER = 'DOKUMENTER',
   SJEKKLISTE = 'SJEKKLISTE',
+  HISTORIKK = 'HISTORIKK',
 }

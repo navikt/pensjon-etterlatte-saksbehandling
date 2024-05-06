@@ -16,6 +16,7 @@ import no.nav.etterlatte.azureAdAttestantClaim
 import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
@@ -55,9 +56,10 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
     private val sakDao: SakDao = SakDao(ConnectionAutoclosingTest(dataSource))
     private val oppgaveDao: OppgaveDao = spyk(OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource)))
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
+    private val hendelseDao = mockk<HendelseDao>()
     private val oppgaveDaoMedEndringssporing: OppgaveDaoMedEndringssporing =
         OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource))
-    private val oppgaveService: OppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao, hendelser)
+    private val oppgaveService: OppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao, hendelseDao, hendelser)
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     private val azureGroupToGroupIDMap =

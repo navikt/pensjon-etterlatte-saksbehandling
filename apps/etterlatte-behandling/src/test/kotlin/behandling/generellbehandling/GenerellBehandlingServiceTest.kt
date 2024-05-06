@@ -96,6 +96,7 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
             OppgaveService(
                 OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource)),
                 sakRepo,
+                hendelseDao,
                 hendelser,
             )
 

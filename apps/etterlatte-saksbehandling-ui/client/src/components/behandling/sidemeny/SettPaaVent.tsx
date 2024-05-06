@@ -9,17 +9,18 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { isPending } from '~shared/api/apiUtils'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
+import { useAppDispatch } from '~store/Store'
+import { settOppgave } from '~store/reducers/OppgaveReducer'
 
-export const SettPaaVent = ({
-  oppgave,
-  redigerbar,
-  refreshOppgave,
-}: {
-  oppgave: OppgaveDTO
+interface Props {
+  oppgave: OppgaveDTO | null
   redigerbar: boolean
-  refreshOppgave: () => void
-}) => {
+}
+
+export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
   if (!oppgave || !erOppgaveRedigerbar(oppgave?.status)) return null
+
+  const dispatch = useAppDispatch()
 
   const [frist, setFrist] = useState<string>(oppgave.frist)
   const [merknad, setMerknad] = useState<string>(oppgave.merknad || '')
@@ -36,8 +37,9 @@ export const SettPaaVent = ({
           paaVent: !(oppgave.status === 'PAA_VENT'),
         },
       },
-      () => {
-        refreshOppgave()
+      (oppgave) => {
+        dispatch(settOppgave(oppgave))
+
         setVisPaaVent(false)
       }
     )

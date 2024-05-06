@@ -99,6 +99,6 @@ export const redigerFristApi = async (args: {
 export const settOppgavePaaVentApi = async (args: {
   oppgaveId: string
   settPaaVentRequest: EndrePaaVentRequest
-}): Promise<ApiResponse<void>> => {
+}): Promise<ApiResponse<OppgaveDTO>> => {
   return apiClient.post(`/oppgaver/${args.oppgaveId}/sett-paa-vent`, { ...args.settPaaVentRequest })
 }

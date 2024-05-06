@@ -193,10 +193,10 @@ class OppgaveService(
         oppgaveId: UUID,
         merknad: String,
         paaVent: Boolean,
-    ) {
+    ): OppgaveIntern {
         val oppgave = hentOppgave(oppgaveId)
-        if (paaVent && oppgave.status == Status.PAA_VENT) return
-        if (!paaVent && oppgave.status != Status.PAA_VENT) return
+        if (paaVent && oppgave.status == Status.PAA_VENT) return oppgave
+        if (!paaVent && oppgave.status != Status.PAA_VENT) return oppgave
 
         sikreAktivOppgaveOgTildeltSaksbehandler(oppgave) {
             val nyStatus = if (paaVent) Status.PAA_VENT else hentForrigeStatus(oppgaveId)
@@ -218,6 +218,8 @@ class OppgaveService(
                 else -> {} // Ingen statistikk for resten
             }
         }
+
+        return hentOppgave(oppgaveId)
     }
 
     private fun sikreAktivOppgaveOgTildeltSaksbehandler(

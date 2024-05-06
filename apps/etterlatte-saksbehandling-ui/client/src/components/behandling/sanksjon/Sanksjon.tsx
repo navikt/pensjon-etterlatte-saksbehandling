@@ -15,7 +15,7 @@ import { useForm } from 'react-hook-form'
 import { formatISO, isBefore, startOfDay } from 'date-fns'
 import { hentSanksjon, lagreSanksjon, slettSanksjon } from '~shared/api/sanksjon'
 import { TableWrapper } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
-import { ISanksjon, ISanksjonLagre, SanksjonType, tekstSanksjon } from '~shared/types/Sanksjon'
+import { ISanksjon, ISanksjonLagre, SanksjonType, tekstSanksjon } from '~shared/types/sanksjon'
 
 interface SanksjonDefaultValue {
   datoFom?: Date

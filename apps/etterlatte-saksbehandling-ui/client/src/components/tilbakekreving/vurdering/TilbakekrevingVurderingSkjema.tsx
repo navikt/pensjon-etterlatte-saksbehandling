@@ -302,7 +302,14 @@ export function TilbakekrevingVurderingSkjema({
                   }
                 />
 
-                {!beloepIBehold() && <Textarea {...register('vedtak')} label="Vedtak" readOnly={!redigerbar} />}
+                {!beloepIBehold() && (
+                  <Textarea
+                    {...register('vedtak')}
+                    label="Vedtak"
+                    description="Oppgi resultat og hjemmel."
+                    readOnly={!redigerbar}
+                  />
+                )}
               </>
             )}
             {(vilkaarOppfylt() || beloepIBehold()) && (
@@ -328,7 +335,12 @@ export function TilbakekrevingVurderingSkjema({
                   readOnly={!redigerbar}
                 />
 
-                <Textarea {...register('vedtak')} label="Vedtak" readOnly={!redigerbar} />
+                <Textarea
+                  {...register('vedtak')}
+                  label="Vedtak"
+                  description="Oppgi resultat og hjemmel."
+                  readOnly={!redigerbar}
+                />
 
                 <Textarea
                   {...register('vurderesForPaatale')}

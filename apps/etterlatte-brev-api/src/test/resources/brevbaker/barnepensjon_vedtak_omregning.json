@@ -55,12 +55,14 @@
     "content" : [ {
       "id" : 2111871904,
       "items" : [ {
+        "id": 192391230,
         "content" : [ {
           "id" : 924380383,
           "text" : "Barnepensjonen din øker.",
           "type" : "LITERAL"
         } ]
       }, {
+        "id" : 924380384,
         "content" : [ {
           "id" : -774118146,
           "text" : "Du får barnepensjon til du blir 20 år.",

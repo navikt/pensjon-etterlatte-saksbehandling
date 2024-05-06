@@ -75,7 +75,7 @@ import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
+import no.nav.pensjon.brevbaker.api.model.RenderedLetterMarkdown
 import org.slf4j.Logger
 
 val sikkerLogg: Logger = sikkerlogger()
@@ -270,8 +270,8 @@ class ApplicationBuilder {
     ) = httpClient(
         forventSuksess = forventStatusSuccess,
         ekstraJacksoninnstillinger = {
-            it.addMixIn(RenderedJsonLetter.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
-            it.addMixIn(RenderedJsonLetter.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
+            it.addMixIn(RenderedLetterMarkdown.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
+            it.addMixIn(RenderedLetterMarkdown.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
         },
         auth = {
             if (scope != null) {

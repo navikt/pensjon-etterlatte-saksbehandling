@@ -71,7 +71,7 @@ class TilbakekrevingService(
 
             val oppgaveFraBehandlingMedFeilutbetaling =
                 oppgaveService.hentOppgaverForReferanse(kravgrunnlag.sakId.value.toString())
-                    .filter { it.type == OppgaveType.TILBAKEKREVING && it.merknad == "Venter på kravgrunnlag" }
+                    .filter { it.type == OppgaveType.TILBAKEKREVING }
                     .maxByOrNull { it.opprettet }
 
             if (oppgaveFraBehandlingMedFeilutbetaling != null) {
@@ -292,7 +292,7 @@ class TilbakekrevingService(
                 tilbakekreving.copy(status = TilbakekrevingStatus.FATTET_VEDTAK),
             )
 
-        tilbakekrevingHendelse(tilbakekreving, vedtakId, saksbehandler, TilbakekrevingHendelseType.FATTET_VEDTAK)
+        tilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.FATTET_VEDTAK, vedtakId, saksbehandler)
 
         tilbakekrevinghendelser.sendTilbakekreving(
             statistikkTilbakekreving = tilbakekrevingForStatistikk(tilbakekreving),
@@ -341,7 +341,7 @@ class TilbakekrevingService(
                     tilbakekreving.copy(status = TilbakekrevingStatus.ATTESTERT),
                 )
 
-            tilbakekrevingHendelse(tilbakekreving, vedtak.id, saksbehandler, TilbakekrevingHendelseType.ATTESTERT, kommentar)
+            tilbakekrevingHendelse(tilbakekreving, TilbakekrevingHendelseType.ATTESTERT, vedtak.id, saksbehandler, kommentar)
 
             oppgaveService.ferdigStillOppgaveUnderBehandling(
                 referanse = tilbakekreving.id.toString(),
@@ -414,15 +414,8 @@ class TilbakekrevingService(
     private fun tilbakekrevingHendelse(
         tilbakekreving: TilbakekrevingBehandling,
         hendelseType: TilbakekrevingHendelseType,
-    ) {
-        tilbakekrevingHendelse(tilbakekreving, null, null, hendelseType, null, null)
-    }
-
-    private fun tilbakekrevingHendelse(
-        tilbakekreving: TilbakekrevingBehandling,
-        vedtakId: Long?,
-        saksbehandler: Saksbehandler?,
-        hendelseType: TilbakekrevingHendelseType,
+        vedtakId: Long? = null,
+        saksbehandler: Saksbehandler? = null,
         kommentar: String? = null,
         begrunnelse: String? = null,
     ) {

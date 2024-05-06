@@ -30,14 +30,16 @@ class KravgrunnlagService(private val behandlingKlient: BehandlingKlient) {
 
     private fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag) {
         runBlocking {
-            logger.info("Oppretter tilbakekreving fra kravgrunnlag ${kravgrunnlag.kravgrunnlagId}")
+            logger.info("Oppretter tilbakekreving fra kravgrunnlag ${kravgrunnlag.kravgrunnlagId.value}")
             behandlingKlient.opprettTilbakekreving(kravgrunnlag.sakId, kravgrunnlag)
         }
     }
 
     private fun settTilbakekrevingPaaVent(kravgrunnlag: Kravgrunnlag) {
         runBlocking {
-            logger.info("Setter tilbakekreving på vent pga endret status i kravgrunnlag ${kravgrunnlag.kravgrunnlagId}")
+            logger.info(
+                "Setter tilbakekreving på vent pga endret status i kravgrunnlag ${kravgrunnlag.kravgrunnlagId.value}",
+            )
             behandlingKlient.endreOppgaveStatusForTilbakekreving(kravgrunnlag.sakId, paaVent = true)
         }
     }
@@ -45,10 +47,16 @@ class KravgrunnlagService(private val behandlingKlient: BehandlingKlient) {
     private fun endreTilbakekreving(kravgrunnlag: Kravgrunnlag) {
         runBlocking {
             if (kravgrunnlag.perioder.isEmpty()) {
-                logger.info("Kravgrunnlag er ikke endret - setter oppgave tilbake dersom den har status \"På vent\"")
+                logger.info(
+                    "Kravgrunnlag ${kravgrunnlag.kravgrunnlagId.value} er ikke endret - setter oppgave tilbake " +
+                        "dersom den har status \"På vent\"",
+                )
                 behandlingKlient.endreOppgaveStatusForTilbakekreving(kravgrunnlag.sakId, paaVent = false)
             } else {
-                logger.info("Kravgrunnlag er endret - avbryter eksisterende tilbakekreving og oppretter ny")
+                logger.info(
+                    "Kravgrunnlag ${kravgrunnlag.kravgrunnlagId.value} er endret - avbryter eksisterende " +
+                        "tilbakekreving og oppretter ny",
+                )
                 behandlingKlient.avbrytTilbakekreving(kravgrunnlag.sakId)
                 behandlingKlient.opprettTilbakekreving(kravgrunnlag.sakId, kravgrunnlag)
             }
@@ -57,7 +65,10 @@ class KravgrunnlagService(private val behandlingKlient: BehandlingKlient) {
 
     private fun avsluttTilbakekreving(kravgrunnlag: Kravgrunnlag) {
         runBlocking {
-            logger.info("Kravgrunnlag har blitt nullet ut og er ikke lenger aktuelt - avbryter tilbakekreving")
+            logger.info(
+                "Kravgrunnlag ${kravgrunnlag.kravgrunnlagId.value} har blitt nullet ut og er ikke lenger aktuelt - " +
+                    "avbryter tilbakekreving",
+            )
             behandlingKlient.avbrytTilbakekreving(kravgrunnlag.sakId)
         }
     }

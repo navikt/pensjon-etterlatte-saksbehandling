@@ -1,4 +1,4 @@
-import { Button, BodyShort, Detail, Heading, Link, Alert } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Detail, Heading, Link } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { Journalstatus } from '~shared/types/Journalpost'
@@ -36,35 +36,31 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
         (error) => (
           <ApiErrorAlert>{error.detail || 'Det har oppstått en feil ved henting av dokumenter'}</ApiErrorAlert>
         ),
-        (dokumenter) => (
+        (journalposter) => (
           <>
-            {dokumenter.map((dokument) => (
-              <div key={dokument.journalpostId}>
-                {dokument.dokumenter.map((dokumentInfo) => (
+            {journalposter.map((journalpost) => (
+              <div key={journalpost.journalpostId}>
+                {journalpost.dokumenter.map((dokumentInfo) => (
                   <BodyShort key={dokumentInfo.dokumentInfoId} as="div" size="small" spacing>
                     {dokumentInfo.dokumentvarianter[0]?.saksbehandlerHarTilgang ? (
-                      <>
-                        <Link
-                          href={`/api/dokumenter/${dokument.journalpostId}/${dokumentInfo.dokumentInfoId}`}
-                          target="_blank"
-                          rel="noreferrer noopener"
-                        >
-                          {dokumentInfo.tittel}
-                          <ExternalLinkIcon aria-hidden title={dokument.tittel} />
-                        </Link>
-                        <DokumentInfoDetail dokument={dokument} />
-                      </>
+                      <Link
+                        href={`/api/dokumenter/${journalpost.journalpostId}/${dokumentInfo.dokumentInfoId}`}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                      >
+                        {dokumentInfo.tittel}
+                        <ExternalLinkIcon aria-hidden title={journalpost.tittel} />
+                      </Link>
                     ) : (
-                      <FlexRow justify="space-between">
-                        <div>
-                          {dokumentInfo.tittel}
-                          <DokumentInfoDetail dokument={dokument} />
-                        </div>
-                        <Alert variant="warning" size="small">
-                          Ingen tilgang
+                      <>
+                        {dokumentInfo.tittel}
+                        <Alert variant="warning" size="small" inline>
+                          Mangler tilgang
                         </Alert>
-                      </FlexRow>
+                      </>
                     )}
+
+                    <DokumentInfoDetail dokument={journalpost} />
                   </BodyShort>
                 ))}
               </div>

@@ -15,10 +15,12 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriodeVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVilkaar
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -390,7 +392,7 @@ class TilbakekrevingService(
                 dato = vedtak.dato,
             ),
         aarsak = requireNotNull(tilbakekreving.tilbakekreving.vurdering?.aarsak),
-        hjemmel = requireNotNull(tilbakekreving.tilbakekreving.vurdering?.hjemmel),
+        hjemmel = hjemmelFraVurdering(requireNotNull(tilbakekreving.tilbakekreving.vurdering)),
         kravgrunnlagId = tilbakekreving.tilbakekreving.kravgrunnlag.kravgrunnlagId.value.toString(),
         kontrollfelt = tilbakekreving.tilbakekreving.kravgrunnlag.kontrollFelt.value,
         perioder =
@@ -402,6 +404,14 @@ class TilbakekrevingService(
                 )
             },
     )
+
+    private fun hjemmelFraVurdering(vurdering: TilbakekrevingVurdering): TilbakekrevingHjemmel {
+        return if (vurdering.vilkaarsresultat == TilbakekrevingVilkaar.IKKE_OPPFYLT) {
+            TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD
+        } else {
+            requireNotNull(vurdering.rettsligGrunnlag)
+        }
+    }
 
     private fun tilbakekrevingForStatistikk(tilbakekreving: TilbakekrevingBehandling) =
         StatistikkTilbakekrevingDto(

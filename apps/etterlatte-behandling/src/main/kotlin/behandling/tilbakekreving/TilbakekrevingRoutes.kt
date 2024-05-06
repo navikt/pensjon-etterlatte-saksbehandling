@@ -80,10 +80,10 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
         }
     }
 
-    route("/tilbakekreving") {
+    route("/tilbakekreving/{$SAKID_CALL_PARAMETER}") {
         post {
-            medBody<Kravgrunnlag> {
-                kunSystembruker {
+            kunSystembruker {
+                medBody<Kravgrunnlag> {
                     try {
                         val tilbakekreving = service.opprettTilbakekreving(it)
                         call.respond(HttpStatusCode.OK, tilbakekreving)
@@ -96,8 +96,30 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
                 }
             }
         }
+
+        put("/oppgave-status") {
+            kunSystembruker {
+                medBody<OppgaveStatusRequest> {
+                    val sakId = requireNotNull(call.parameters["sakId"]).toLong()
+                    service.endreTilbakekrevingOppgaveStatus(sakId, it.paaVent)
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+        }
+
+        put("/avbryt") {
+            kunSystembruker {
+                val sakId = requireNotNull(call.parameters["sakId"]).toLong()
+                service.avbrytTilbakekreving(sakId)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
     }
 }
+
+data class OppgaveStatusRequest(
+    val paaVent: Boolean,
+)
 
 data class TilbakekrevingSendeBrevRequest(
     val skalSendeBrev: Boolean,

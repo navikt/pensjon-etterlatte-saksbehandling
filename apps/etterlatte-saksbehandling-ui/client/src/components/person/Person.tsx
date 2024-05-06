@@ -29,6 +29,7 @@ import { SakType } from '~shared/types/sak'
 import { Personopplysninger } from '~components/person/personopplysninger/Personopplysninger'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
+import { Hendelser } from '~components/person/hendelser/Hendelser'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -118,9 +119,10 @@ export const Person = () => {
               <Personopplysninger sakResult={sakResult} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.HENDELSER}>
-              {mapResult(sakResult, {
-                success: ({ sak, behandlinger }) => <RelevanteHendelser sak={sak} behandlingliste={behandlinger} />,
-              })}
+              <Hendelser sakResult={sakResult} fnr={person.foedselsnummer} />
+              {/*{mapResult(sakResult, {*/}
+              {/*  success: ({ sak, behandlinger }) => <RelevanteHendelser sak={sak} behandlingliste={behandlinger} />,*/}
+              {/*})}*/}
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.DOKUMENTER}>
               <Dokumentliste sakResult={sakResult} fnr={person.foedselsnummer} />

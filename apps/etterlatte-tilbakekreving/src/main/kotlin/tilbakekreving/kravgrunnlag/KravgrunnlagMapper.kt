@@ -30,6 +30,7 @@ object KravgrunnlagMapper {
             status = KravgrunnlagStatus.valueOf(grunnlag.kodeStatusKrav),
             saksbehandler = NavIdent(grunnlag.saksbehId),
             sisteUtbetalingslinjeId = UUID30(grunnlag.referanse),
+            referanse = UUID30(grunnlag.referanse),
             perioder =
                 grunnlag.tilbakekrevingsPeriode.map { periode ->
                     toGrunnlagsperiode(periode)

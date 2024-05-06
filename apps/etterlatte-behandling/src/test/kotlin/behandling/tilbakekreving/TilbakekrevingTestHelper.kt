@@ -40,6 +40,7 @@ fun kravgrunnlag(
     status = KravgrunnlagStatus.NY,
     saksbehandler = NavIdent(""),
     sisteUtbetalingslinjeId = behandlingId,
+    referanse = behandlingId,
     perioder =
         listOf(
             KravgrunnlagPeriode(

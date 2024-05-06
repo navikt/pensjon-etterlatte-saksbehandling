@@ -29,7 +29,9 @@ data class Kravgrunnlag(
     val kontrollFelt: Kontrollfelt,
     val status: KravgrunnlagStatus,
     val saksbehandler: NavIdent,
-    val sisteUtbetalingslinjeId: UUID30,
+    @Deprecated("Endret navn til referanse")
+    val sisteUtbetalingslinjeId: UUID30? = null,
+    val referanse: UUID30?,
     val perioder: List<KravgrunnlagPeriode>,
 )
 

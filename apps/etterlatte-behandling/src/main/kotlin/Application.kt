@@ -230,6 +230,9 @@ private fun Route.settOppTilganger(
                     saksbehandlerMedRoller,
                 )
             }
+            harTilgangTilGenerellBehandling = { generellbehandlingId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilGenerellBehandling(generellbehandlingId, saksbehandlerMedRoller)
+            }
         }
     }
 }

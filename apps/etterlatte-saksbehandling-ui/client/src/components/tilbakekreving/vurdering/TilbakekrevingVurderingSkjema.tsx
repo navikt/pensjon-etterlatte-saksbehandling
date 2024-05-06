@@ -1,4 +1,4 @@
-import { BodyLong, Button, Label, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
+import { Button, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
 import {
   teksterTilbakekrevingAarsak,
   teksterTilbakekrevingBeloepBehold,
@@ -50,7 +50,6 @@ const initialVurdering: TilbakekrevingVurdering = {
   rentevurdering: null,
   vedtak: null,
   vurderesForPaatale: null,
-  hjemmel: null,
 }
 
 export function TilbakekrevingVurderingSkjema({
@@ -67,30 +66,18 @@ export function TilbakekrevingVurderingSkjema({
   const navigate = useNavigate()
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
 
-  const { register, handleSubmit, watch, control, getValues, setValue, formState, reset } =
-    useForm<TilbakekrevingVurdering>({
-      defaultValues: behandling.tilbakekreving.vurdering || initialVurdering,
-      shouldUnregister: true,
-    })
+  const { register, handleSubmit, watch, control, formState, reset } = useForm<TilbakekrevingVurdering>({
+    defaultValues: behandling.tilbakekreving.vurdering || initialVurdering,
+    shouldUnregister: true,
+  })
 
   useEffect(() => {
-    const values = getValues()
-    const utledetHjemmel =
-      values.vilkaarsresultat === TilbakekrevingVilkaar.IKKE_OPPFYLT
-        ? TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD
-        : values.rettsligGrunnlag
-    if (values.hjemmel !== utledetHjemmel) {
-      setValue('hjemmel', utledetHjemmel, { shouldDirty: false })
-    }
-
     if (formState.isDirty && Object.keys(formState.dirtyFields).length) {
       const delay = setTimeout(handleSubmit(lagreVurdering), 2000)
 
       return () => clearTimeout(delay)
     }
   }, [formState])
-
-  watch((data, { name, type }) => console.log('watch', data, name, type))
 
   const lagreVurdering = (vurdering: TilbakekrevingVurdering) => {
     lagreVurderingRequest({ behandlingsId: behandling.id, vurdering: vurdering }, (lagretBehandling) => {
@@ -357,11 +344,6 @@ export function TilbakekrevingVurderingSkjema({
               )}
             </>
           )}
-
-          <div>
-            <Label>Hjemmel</Label>
-            <BodyLong>{watch().hjemmel ? teksterTilbakekrevingHjemmel[watch().hjemmel!] : 'Ikke satt'}</BodyLong>
-          </div>
 
           {redigerbar && (
             <VStack gap="5">

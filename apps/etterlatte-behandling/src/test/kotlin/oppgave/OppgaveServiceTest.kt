@@ -1109,4 +1109,20 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
         return attestantmock
     }
+
+    @Test
+    fun `kan oppdatere status uten aa ha tildelt`() {
+        val behandlingId = UUID.randomUUID().toString()
+        val opprettetSak = sakDao.opprettSak("123", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        val oppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse = behandlingId,
+                sakId = opprettetSak.id,
+                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+                merknad = null,
+            )
+        oppgaveService.oppdaterStatusOgMerknad(oppgaveId = oppgave.id, merknad = "", status = Status.PAA_VENT)
+        oppgaveService.oppdaterStatusOgMerknad(oppgaveId = oppgave.id, merknad = "", status = Status.UNDER_BEHANDLING)
+    }
 }

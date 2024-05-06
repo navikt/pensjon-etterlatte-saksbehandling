@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
@@ -39,9 +40,25 @@ class GosysOppgaveServiceImplTest {
     private val gosysOppgaveKlient = mockk<GosysOppgaveKlient>()
     private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
     private val oppgaveService = mockk<OppgaveService>()
-    private val brukerTokenInfo = mockk<BrukerTokenInfo>()
+    private val sbident = "SB1234"
+    private val brukerTokenInfo =
+        mockk<BrukerTokenInfo> {
+            every { ident() } returns sbident
+        }
+    private val saksbehandlerService =
+        mockk<SaksbehandlerService> {
+            every { hentKomplettSaksbehandler(sbident) } returns
+                no.nav.etterlatte.saksbehandler.Saksbehandler(
+                    sbident,
+                    "Ola Nordmann",
+                    listOf(Enheter.PORSGRUNN.enhetNr),
+                    false,
+                    listOf(Enheter.PORSGRUNN.enhetNr),
+                    true,
+                )
+        }
 
-    private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdltjenesterKlient, oppgaveService)
+    private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdltjenesterKlient, oppgaveService, saksbehandlerService)
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     val azureGroupToGroupIDMap =

@@ -2,11 +2,14 @@ package no.nav.etterlatte.oppgaveGosys
 
 import GosysOppgave
 import com.github.benmanes.caffeine.cache.Caffeine
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -15,6 +18,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalTime
@@ -23,7 +27,7 @@ interface GosysOppgaveService {
     suspend fun hentOppgaver(
         saksbehandler: String?,
         tema: String?,
-        enhet: String?,
+        enhetsnr: String?,
         harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<GosysOppgave>
@@ -75,6 +79,7 @@ class GosysOppgaveServiceImpl(
     private val gosysOppgaveKlient: GosysOppgaveKlient,
     private val pdltjenesterKlient: PdlTjenesterKlient,
     private val oppgaveService: OppgaveService,
+    private val saksbehandlerService: SaksbehandlerService,
 ) : GosysOppgaveService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -83,23 +88,56 @@ class GosysOppgaveServiceImpl(
             .expireAfterWrite(Duration.ofMinutes(5))
             .build<Long, GosysOppgave>()
 
+    private fun hentEnheterForSaksbehandler(
+        enhetsnr: String?,
+        ident: String,
+    ): List<String> {
+        val saksbehandler = inTransaction { saksbehandlerService.hentKomplettSaksbehandler(ident) }
+        return if (saksbehandler.kanSeOppgaveliste) {
+            if (enhetsnr == null) {
+                saksbehandler.enheter
+            } else {
+                return saksbehandler.enheter.filter { it == enhetsnr }
+            }
+        } else {
+            emptyList()
+        }
+    }
+
     override suspend fun hentOppgaver(
         saksbehandler: String?,
         tema: String?,
-        enhet: String?,
+        enhetsnr: String?,
         harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<GosysOppgave> {
         val saksbehandlerMedRoller = Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
+        val harRolleStrengtFortrolig = saksbehandlerMedRoller.harRolleStrengtFortrolig()
 
-        val gosysOppgaver =
-            gosysOppgaveKlient.hentOppgaver(
-                saksbehandler = saksbehandler,
-                tema = if (tema.isNullOrBlank()) listOf("EYO", "EYB") else listOf(tema),
-                enhetsnr = if (saksbehandlerMedRoller.harRolleStrengtFortrolig()) Enheter.STRENGT_FORTROLIG.enhetNr else enhet,
-                harTildeling = harTildeling,
-                brukerTokenInfo = brukerTokenInfo,
-            )
+        val enheterSomSkalSoekesEtter =
+            if (harRolleStrengtFortrolig) {
+                listOf(Enheter.STRENGT_FORTROLIG.enhetNr)
+            } else {
+                hentEnheterForSaksbehandler(enhetsnr, brukerTokenInfo.ident())
+            }
+
+        val alleGosysOppgaver =
+            coroutineScope {
+                enheterSomSkalSoekesEtter.map {
+                    async {
+                        gosysOppgaveKlient.hentOppgaver(
+                            saksbehandler = saksbehandler,
+                            tema = if (tema.isNullOrBlank()) listOf("EYO", "EYB") else listOf(tema),
+                            enhetsnr = it,
+                            harTildeling = harTildeling,
+                            brukerTokenInfo = brukerTokenInfo,
+                        )
+                    }
+                }.map {
+                    it.await()
+                }.flatMap { it.oppgaver }
+            }
+        val gosysOppgaver = GosysOppgaver(alleGosysOppgaver.size, alleGosysOppgaver)
 
         logger.info("Fant ${gosysOppgaver.antallTreffTotalt} oppgave(r) med tema: $tema")
 

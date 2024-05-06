@@ -56,7 +56,6 @@ fun tilbakekrevingvurdering() =
         rentevurdering = null,
         vedtak = "konklusjon",
         vurderesForPaatale = null,
-        hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_FOERSTE_PUNKTUM,
     )
 
 fun kravgrunnlag() =

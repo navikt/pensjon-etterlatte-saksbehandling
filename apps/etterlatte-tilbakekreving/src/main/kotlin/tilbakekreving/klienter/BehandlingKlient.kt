@@ -2,6 +2,7 @@ package no.nav.etterlatte.tilbakekreving.klienter
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
@@ -40,7 +41,7 @@ class BehandlingKlient(
     ) {
         logger.info("Setter tilbakekreving på vent i sak ${sakId.value}")
         try {
-            httpClient.post("$url/tilbakekreving/${sakId.value}/oppgave-status") {
+            httpClient.put("$url/tilbakekreving/${sakId.value}/oppgave-status") {
                 contentType(ContentType.Application.Json)
                 setBody(OppgaveStatusRequest(paaVent))
             }
@@ -52,7 +53,7 @@ class BehandlingKlient(
     suspend fun avbrytTilbakekreving(sakId: SakId) {
         logger.info("Avbryter tilbakekreving i sak ${sakId.value}")
         try {
-            httpClient.post("$url/tilbakekreving/${sakId.value}/avbryt") {
+            httpClient.put("$url/tilbakekreving/${sakId.value}/avbryt") {
                 contentType(ContentType.Application.Json)
             }
         } catch (e: Exception) {

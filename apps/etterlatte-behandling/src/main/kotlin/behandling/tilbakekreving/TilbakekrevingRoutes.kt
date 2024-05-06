@@ -97,7 +97,7 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
             }
         }
 
-        post("/oppgave-status") {
+        put("/oppgave-status") {
             kunSystembruker {
                 medBody<OppgaveStatusRequest> {
                     val sakId = requireNotNull(call.parameters["sakId"]).toLong()
@@ -107,7 +107,7 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
             }
         }
 
-        post("/avbryt") {
+        put("/avbryt") {
             kunSystembruker {
                 val sakId = requireNotNull(call.parameters["sakId"]).toLong()
                 service.avbrytTilbakekreving(sakId)

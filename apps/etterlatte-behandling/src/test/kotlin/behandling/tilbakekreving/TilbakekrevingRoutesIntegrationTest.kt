@@ -236,7 +236,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
         withTestApplication { client ->
             val tilbakekreving = opprettTilbakekrevingOgTildelOppgave(client)
 
-            client.postAndAssertOk(
+            client.putAndAssertOk(
                 "/tilbakekreving/${tilbakekreving.sak.id}/oppgave-status",
                 systemBruker,
                 OppgaveStatusRequest(paaVent = true),
@@ -248,7 +248,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
                 oppgave.merknad shouldBe "Kravgrunnlag er sperret"
             }
 
-            client.postAndAssertOk(
+            client.putAndAssertOk(
                 "/tilbakekreving/${tilbakekreving.sak.id}/oppgave-status",
                 systemBruker,
                 OppgaveStatusRequest(paaVent = false),
@@ -267,7 +267,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
         withTestApplication { client ->
             val tilbakekreving = opprettTilbakekrevingOgTildelOppgave(client)
 
-            client.postAndAssertOk(
+            client.putAndAssertOk(
                 "/tilbakekreving/${tilbakekreving.sak.id}/avbryt",
                 systemBruker,
             )

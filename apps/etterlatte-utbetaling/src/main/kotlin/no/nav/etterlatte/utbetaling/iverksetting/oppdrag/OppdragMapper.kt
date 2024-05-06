@@ -57,6 +57,7 @@ object OppdragMapper {
                     tekst140.add(
                         Tekst140().apply {
                             tekst = "Grunnbeløpet har økt fra <1. mai 20XX>. De aller fleste vil få etterbetalt i juni."
+                            datoTekstFom = utbetaling.utbetalingslinjer.first().periode.fra.toXMLDate()
                             datoTekstTom =
                                 utbetaling.utbetalingslinjer.first().periode.fra.let {
                                     LocalDate.of(it.year, it.month, 20)

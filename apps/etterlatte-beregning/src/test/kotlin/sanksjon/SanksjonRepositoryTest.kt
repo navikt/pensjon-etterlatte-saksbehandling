@@ -34,7 +34,7 @@ internal class SanksjonRepositoryTest(ds: DataSource) {
 
         lagretSanksjon!!.asClue {
             it[0].asClue { sanksjon ->
-                behandlingId shouldBe behandlingId
+                sanksjon.behandlingId shouldBe behandlingId
             }
         }
     }

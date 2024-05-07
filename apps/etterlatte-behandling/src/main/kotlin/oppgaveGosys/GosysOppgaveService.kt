@@ -1,6 +1,5 @@
 package no.nav.etterlatte.oppgaveGosys
 
-import GosysOppgave
 import com.github.benmanes.caffeine.cache.Caffeine
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -8,7 +7,6 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -77,7 +75,6 @@ interface GosysOppgaveService {
 
 class GosysOppgaveServiceImpl(
     private val gosysOppgaveKlient: GosysOppgaveKlient,
-    private val pdltjenesterKlient: PdlTjenesterKlient,
     private val oppgaveService: OppgaveService,
     private val saksbehandlerService: SaksbehandlerService,
 ) : GosysOppgaveService {
@@ -121,13 +118,15 @@ class GosysOppgaveServiceImpl(
                 hentEnheterForSaksbehandler(enhetsnr, brukerTokenInfo.ident())
             }
 
+        val temaListe = if (tema.isNullOrBlank()) listOf("EYO", "EYB") else listOf(tema)
+
         val alleGosysOppgaver =
             coroutineScope {
                 enheterSomSkalSoekesEtter.map {
                     async {
                         gosysOppgaveKlient.hentOppgaver(
                             saksbehandler = saksbehandler,
-                            tema = if (tema.isNullOrBlank()) listOf("EYO", "EYB") else listOf(tema),
+                            tema = temaListe,
                             enhetsnr = it,
                             harTildeling = harTildeling,
                             brukerTokenInfo = brukerTokenInfo,
@@ -139,19 +138,10 @@ class GosysOppgaveServiceImpl(
             }
         val gosysOppgaver = GosysOppgaver(alleGosysOppgaver.size, alleGosysOppgaver)
 
-        logger.info("Fant ${gosysOppgaver.antallTreffTotalt} oppgave(r) med tema: $tema")
-
-        // Utveksle unike aktørIds til fnr for mapping
-        val fnrByAktoerId =
-            if (gosysOppgaver.oppgaver.isEmpty()) {
-                emptyMap<String, String>()
-            } else {
-                val aktoerIds = gosysOppgaver.oppgaver.mapNotNull { it.aktoerId }.toSet()
-                pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds)
-            }
+        logger.info("Fant ${gosysOppgaver.antallTreffTotalt} oppgave(r) med tema: $temaListe")
 
         return gosysOppgaver.oppgaver
-            .map { it.fraGosysOppgaveTilNy(fnrByAktoerId) }
+            .map { it.tilGosysOppgave() }
             .filterForEnheter(Kontekst.get().AppUser)
     }
 
@@ -161,17 +151,8 @@ class GosysOppgaveServiceImpl(
     ): List<GosysOppgave> {
         val gosysOppgaver = gosysOppgaveKlient.hentJournalfoeringsoppgave(journalpostId, brukerTokenInfo)
 
-        // Utveksle unike aktørIds til fnr for mapping
-        val fnrByAktoerId =
-            if (gosysOppgaver.oppgaver.isEmpty()) {
-                emptyMap<String, String>()
-            } else {
-                val aktoerIds = gosysOppgaver.oppgaver.mapNotNull { it.aktoerId }.toSet()
-                pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds)
-            }
-
         return gosysOppgaver.oppgaver
-            .map { it.fraGosysOppgaveTilNy(fnrByAktoerId) }
+            .map { it.tilGosysOppgave() }
             .filterForEnheter(Kontekst.get().AppUser)
     }
 
@@ -190,9 +171,9 @@ class GosysOppgaveServiceImpl(
         id: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgave {
-        return cache.getIfPresent(id) ?: gosysOppgaveKlient.hentOppgave(id, brukerTokenInfo).let {
-            it.fraGosysOppgaveTilNy(pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(it.aktoerId!!)))
-        }.also { cache.put(id, it) }
+        return cache.getIfPresent(id) ?: gosysOppgaveKlient.hentOppgave(id, brukerTokenInfo)
+            .let { it.tilGosysOppgave() }
+            .also { cache.put(id, it) }
     }
 
     override suspend fun flyttTilGjenny(
@@ -267,9 +248,8 @@ class GosysOppgaveServiceImpl(
         oppgaveVersjon: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgave {
-        return gosysOppgaveKlient.ferdigstill(oppgaveId, oppgaveVersjon, brukerTokenInfo).let {
-            it.fraGosysOppgaveTilNy(pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(it.aktoerId!!)))
-        }
+        return gosysOppgaveKlient.ferdigstill(oppgaveId, oppgaveVersjon, brukerTokenInfo)
+            .let { it.tilGosysOppgave() }
     }
 
     override suspend fun feilregistrer(
@@ -288,7 +268,7 @@ class GosysOppgaveServiceImpl(
     }
 
     companion object {
-        private fun GosysApiOppgave.fraGosysOppgaveTilNy(fnrByAktoerId: Map<String, String?>): GosysOppgave {
+        private fun GosysApiOppgave.tilGosysOppgave(): GosysOppgave {
             return GosysOppgave(
                 id = this.id,
                 versjon = this.versjon,
@@ -300,11 +280,11 @@ class GosysOppgaveServiceImpl(
                     this.fristFerdigstillelse?.let { frist ->
                         Tidspunkt.ofNorskTidssone(frist, LocalTime.MIDNIGHT)
                     },
-                fnr = fnrByAktoerId[this.aktoerId],
                 enhet = this.tildeltEnhetsnr,
                 saksbehandler = this.tilordnetRessurs?.let { OppgaveSaksbehandler(it, it) },
                 beskrivelse = this.beskrivelse,
                 journalpostId = this.journalpostId,
+                bruker = this.bruker,
             )
         }
     }

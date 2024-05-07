@@ -1,3 +1,6 @@
+package no.nav.etterlatte.oppgaveGosys
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 
@@ -11,7 +14,19 @@ data class GosysOppgave(
     val enhet: String,
     val opprettet: Tidspunkt,
     val frist: Tidspunkt?,
-    val fnr: String? = null,
     val beskrivelse: String?,
     val journalpostId: String?,
+    val bruker: GosysOppgaveBruker?,
 )
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class GosysOppgaveBruker(
+    val ident: String?,
+    val type: Type?,
+) {
+    enum class Type {
+        PERSON,
+        ARBEIDSGIVER,
+        SAMHANDLER,
+    }
+}

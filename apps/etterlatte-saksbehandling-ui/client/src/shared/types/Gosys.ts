@@ -11,9 +11,20 @@ export interface GosysOppgave {
   enhet: string
   opprettet: string
   frist?: string
-  fnr?: string
   beskrivelse?: string
   journalpostId?: string
+  bruker?: GosysOppgaveBruker
+}
+
+export interface GosysOppgaveBruker {
+  ident?: string
+  type?: GosysBrukerType
+}
+
+export enum GosysBrukerType {
+  PERSON = 'PERSON',
+  ARBEIDSGIVER = 'ARBEIDSGIVER',
+  SAMHANDLER = 'SAMHANDLER',
 }
 
 export enum GosysTema {

@@ -53,7 +53,7 @@ export const StartRevurderingModal = ({ hendelse, sakId, revurderinger }: Props)
 
   return (
     <>
-      <Button size="small" icon={<ArrowsCirclepathIcon aria-hidden />}>
+      <Button size="small" icon={<ArrowsCirclepathIcon aria-hidden />} onClick={() => setOpen(true)}>
         Start revurdering
       </Button>
 

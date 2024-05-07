@@ -6,7 +6,7 @@ import { FlexRow } from '~shared/styled'
 import { GosysActionToggle } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { GosysOppgave, GosysTema, sakTypeFraTema } from '~shared/types/Gosys'
+import { GosysBrukerType, GosysOppgave, GosysTema, sakTypeFraTema } from '~shared/types/Gosys'
 import { flyttTilGjenny } from '~shared/api/gosys'
 import { SakType } from '~shared/types/sak'
 import { formaterSakstype } from '~utils/formattering'
@@ -30,7 +30,9 @@ export const OverfoerOppgaveTilGjenny = ({
   const [flyttOppgaveResult, flyttOppgaveTilGjenny] = useApiCall(flyttTilGjenny)
 
   const konverterTilGjennyoppgave = () => {
-    hentSak({ fnr: oppgave.fnr!!, type: sakType!!, opprettHvisIkkeFinnes: skalOppretteSak }, (sak) => {
+    if (!oppgave.bruker?.ident) throw Error('Kan ikke opprette sak i Gjenny uten fødselsnummer')
+
+    hentSak({ fnr: oppgave.bruker.ident, type: sakType!!, opprettHvisIkkeFinnes: skalOppretteSak }, (sak) => {
       if (!sak) return
 
       flyttOppgaveTilGjenny({ oppgaveId: oppgave.id, sakId: sak.id })
@@ -41,6 +43,10 @@ export const OverfoerOppgaveTilGjenny = ({
 
   if (oppgave.saksbehandler?.ident !== innloggetSaksbehandler.ident)
     return <Alert variant="warning">Oppgaven er ikke tildelt deg!</Alert>
+
+  if (oppgave.bruker?.type !== GosysBrukerType.PERSON || !oppgave.bruker?.ident) {
+    return <Alert variant="warning">Kan ikke konvertere oppgave med ugyldig bruker</Alert>
+  }
 
   return (
     <>
@@ -76,7 +82,7 @@ export const OverfoerOppgaveTilGjenny = ({
             <Alert variant="warning">
               Kan ikke overføre oppgave siden brukeren mangler sak i Gjenny.
               <br />
-              Vil du opprette en {formaterSakstype(sakType!!)}-sak på brukeren ({oppgave.fnr})?
+              Vil du opprette en {formaterSakstype(sakType!!)}-sak på brukeren ({oppgave.bruker?.ident})?
               <br />
               <br />
               <Checkbox value={skalOppretteSak} onChange={(e) => setSkalOppretteSak(e.target.checked)}>

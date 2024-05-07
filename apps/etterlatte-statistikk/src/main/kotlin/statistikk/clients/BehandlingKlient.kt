@@ -5,12 +5,15 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import java.util.UUID
 
 interface BehandlingKlient {
     suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
 
     suspend fun hentStatistikkBehandling(behandlingId: UUID): StatistikkBehandling
+
+    suspend fun hentUtlandstilknytning(behandlingId: UUID): Utlandstilknytning?
 }
 
 class BehandlingKlientImpl(
@@ -28,6 +31,10 @@ class BehandlingKlientImpl(
         } catch (e: Exception) {
             throw KunneIkkeHenteFraBehandling("Kunne ikke hente behandling med id $behandlingId fra Behandling", e)
         }
+    }
+
+    override suspend fun hentUtlandstilknytning(behandlingId: UUID): Utlandstilknytning? {
+        return hentStatistikkBehandling(behandlingId).utlandstilknytning
     }
 }
 

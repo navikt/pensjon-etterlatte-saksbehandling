@@ -21,6 +21,7 @@ data class StatistikkBehandling(
     val behandlingType: BehandlingType,
     val virkningstidspunkt: Virkningstidspunkt?,
     val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
+    val utlandstilknytning: Utlandstilknytning?,
     val revurderingsaarsak: Revurderingaarsak? = null,
     val revurderingInfo: RevurderingInfo?,
     val prosesstype: Prosesstype,

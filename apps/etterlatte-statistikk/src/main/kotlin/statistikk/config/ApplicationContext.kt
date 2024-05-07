@@ -11,10 +11,12 @@ import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BehandlingKlientImpl
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlientImpl
+import no.nav.etterlatte.statistikk.database.RyddUtlandstilsnittDao
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.SoeknadStatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.jobs.MaanedligStatistikkJob
+import no.nav.etterlatte.statistikk.jobs.RyddUtlandstilsnittJob
 import no.nav.etterlatte.statistikk.river.BehandlingPaaVentHendelseRiver
 import no.nav.etterlatte.statistikk.river.BehandlinghendelseRiver
 import no.nav.etterlatte.statistikk.river.KlagehendelseRiver
@@ -93,6 +95,20 @@ class ApplicationContext {
             leaderElection,
             Duration.of(10, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(4, ChronoUnit.HOURS),
+        )
+    }
+
+    private val ryddUtlandstilsnittDao: RyddUtlandstilsnittDao by lazy {
+        RyddUtlandstilsnittDao(datasource)
+    }
+
+    val fikseJobb: RyddUtlandstilsnittJob by lazy {
+        RyddUtlandstilsnittJob(
+            behandlingKlient = behandlingKlient,
+            ryddUtlandstilsnittDao = ryddUtlandstilsnittDao,
+            leaderElection = leaderElection,
+            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+            periode = Duration.of(2, ChronoUnit.MINUTES),
         )
     }
 

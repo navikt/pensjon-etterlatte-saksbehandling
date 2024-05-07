@@ -1,6 +1,8 @@
 package no.nav.etterlatte.statistikk.domain
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.UUID
@@ -14,6 +16,27 @@ enum class BehandlingMetode {
 
 enum class SakUtland {
     NASJONAL,
+    UTLANDSTILSNITT,
+    BOSATT_UTLAND,
+    ;
+
+    companion object {
+        fun fraUtlandstilknytning(utlandstilknytning: Utlandstilknytning?): SakUtland? {
+            if (utlandstilknytning == null) {
+                return null
+            }
+
+            return fraUtlandstilknytningType(utlandstilknytning.type)
+        }
+
+        fun fraUtlandstilknytningType(utlandstilknytningType: UtlandstilknytningType): SakUtland {
+            return when (utlandstilknytningType) {
+                UtlandstilknytningType.NASJONAL -> NASJONAL
+                UtlandstilknytningType.BOSATT_UTLAND -> BOSATT_UTLAND
+                UtlandstilknytningType.UTLANDSTILSNITT -> UTLANDSTILSNITT
+            }
+        }
+    }
 }
 
 enum class SoeknadFormat {

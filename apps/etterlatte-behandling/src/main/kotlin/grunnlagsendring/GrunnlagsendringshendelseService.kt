@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -381,10 +382,7 @@ class GrunnlagsendringshendelseService(
                 personRolle,
                 sak.sakType,
             )
-        val grunnlag =
-            runBlocking {
-                grunnlagKlient.hentGrunnlag(sak.id)
-            }
+        val grunnlag = runBlocking { grunnlagKlient.hentGrunnlag(sak.id) }
         try {
             val samsvarMellomPdlOgGrunnlag =
                 finnSamsvarForHendelse(grunnlagsendringshendelse, pdlData, grunnlag, personRolle, sak.sakType)
@@ -486,9 +484,9 @@ class GrunnlagsendringshendelseService(
                 sakId,
                 listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB),
             ).filter {
-                (fnr == null) || it.gjelderPerson == fnr && it.type == hendelsesType
+                (fnr == null) || (it.gjelderPerson == fnr && it.type == hendelsesType)
             }
-
+        logger.info("Hendelser på samme sakid ${sakId} antall ${relevanteHendelser.size} fnr: ${fnr?.maskerFnr()}")
         return relevanteHendelser.any { it.samsvarMellomKildeOgGrunnlag == samsvarMellomKildeOgGrunnlag }
     }
 }

@@ -28,8 +28,10 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
       {mapApiResult(
         vergeadresse,
         <Spinner visible label="Henter eventuell verges adresse" margin="0" />,
-        () => (
-          <ApiErrorAlert>Feil oppsto ved henting av eventuell verges adresse. Prøv igjen senere</ApiErrorAlert>
+        (error) => (
+          <ApiErrorAlert>
+            {error.detail || 'Feil oppsto ved henting av eventuell verges adresse. Prøv igjen senere'}
+          </ApiErrorAlert>
         ),
         (adresse) =>
           adresse && (

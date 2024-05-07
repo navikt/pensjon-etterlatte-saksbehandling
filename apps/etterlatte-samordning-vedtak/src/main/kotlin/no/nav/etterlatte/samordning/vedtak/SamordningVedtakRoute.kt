@@ -42,7 +42,7 @@ fun Route.samordningVedtakRoute(
                         ),
                     )
                 } catch (e: IllegalArgumentException) {
-                    call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }
 
             call.respond(samordningVedtakDto)
@@ -71,7 +71,7 @@ fun Route.samordningVedtakRoute(
                         ),
                     )
                 } catch (e: IllegalArgumentException) {
-                    call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }
 
             call.respond(samordningVedtakDtos)
@@ -104,7 +104,7 @@ fun Route.samordningVedtakRoute(
                         PensjonContext,
                     )
                 } catch (e: IllegalArgumentException) {
-                    call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }
 
             call.respond(samordningVedtakDtos)
@@ -124,7 +124,7 @@ fun Route.samordningVedtakRoute(
                         context = PensjonContext,
                     )
                 } catch (e: IllegalArgumentException) {
-                    call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }
 
             call.respond(

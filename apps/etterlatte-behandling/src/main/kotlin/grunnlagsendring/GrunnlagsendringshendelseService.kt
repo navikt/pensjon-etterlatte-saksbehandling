@@ -308,7 +308,6 @@ class GrunnlagsendringshendelseService(
         fnr: String,
         grunnlagendringType: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> {
-        val grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakiderOgRoller }
 
@@ -323,7 +322,6 @@ class GrunnlagsendringshendelseService(
                     Grunnlagsendringshendelse(
                         id = UUID.randomUUID(),
                         sakId = rolleOgSak.sak.id,
-                        status = grunnlagsEndringsStatus,
                         type = grunnlagendringType,
                         opprettet = tidspunktForMottakAvHendelse,
                         hendelseGjelderRolle = rolleOgSak.sakiderOgRolle.rolle,
@@ -359,7 +357,6 @@ class GrunnlagsendringshendelseService(
             Grunnlagsendringshendelse(
                 id = hendelseId,
                 sakId = sakId,
-                status = GrunnlagsendringStatus.VENTER_PAA_JOBB,
                 type = grunnlagendringType,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 hendelseGjelderRolle = Saksrolle.SOEKER,
@@ -467,7 +464,7 @@ class GrunnlagsendringshendelseService(
         val relevanteHendelser =
             grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
                 sakId,
-                listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+                listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
             ).filter {
                 (fnr == null) || (it.gjelderPerson == fnr && it.type == hendelsesType)
             }

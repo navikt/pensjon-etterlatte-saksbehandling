@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.MaskinportenScopeAuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
-import java.time.LocalDate
+import no.nav.etterlatte.libs.ktor.route.dato
 
 fun Route.samordningVedtakRoute(
     samordningVedtakService: SamordningVedtakService,
@@ -50,8 +50,8 @@ fun Route.samordningVedtakRoute(
 
         get {
             val fomDato =
-                call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                call.dato("fomDato")
+                    ?: call.dato("virkFom")
                     ?: throw ManglerFomDatoException()
 
             val fnr = call.fnr
@@ -90,8 +90,8 @@ fun Route.samordningVedtakRoute(
 
         get {
             val fomDato =
-                call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                call.dato("fomDato")
+                    ?: call.dato("virkFom")
                     ?: throw ManglerFomDatoException()
 
             val fnr = call.fnr
@@ -111,9 +111,7 @@ fun Route.samordningVedtakRoute(
         }
 
         get("/har-loepende-oms") {
-            val paaDato =
-                call.parameters["paaDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: throw ManglerPaaDatoException()
+            val paaDato = call.dato("paaDato") ?: throw ManglerPaaDatoException()
             val fnr = call.fnr
 
             val harLoependeOmsPaaDato =

@@ -7,7 +7,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lukkGrunnlagshendelse } from '~shared/api/behandling'
-import { XMarkIcon } from '@navikt/aksel-icons'
+import { ArchiveIcon } from '@navikt/aksel-icons'
 import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
@@ -39,8 +39,8 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
 
   return (
     <>
-      <Button variant="tertiary" onClick={aapneModal} icon={<XMarkIcon />} style={{ float: 'right' }}>
-        Lukk hendelse
+      <Button variant="tertiary" onClick={aapneModal} icon={<ArchiveIcon />} size="small">
+        Arkiver hendelse
       </Button>
 
       <Modal
@@ -107,7 +107,7 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
                   disabled={!kommentar}
                   loading={isPending(lukkHendelseResult)}
                 >
-                  Lagre
+                  Arkiver
                 </Button>
               </ButtonGroup>
             </>

@@ -8,7 +8,7 @@ import { HendelseBeskrivelse } from '~components/person/hendelser/HendelseBeskri
 import styled from 'styled-components'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 import { SakType } from '~shared/types/sak'
-import { LukkHendelseModal } from '~components/person/uhaandtereHendelser/LukkHendelseModal'
+import { LukkHendelseModal } from '~components/person/hendelser/LukkHendelseModal'
 
 interface Props {
   sakType: SakType

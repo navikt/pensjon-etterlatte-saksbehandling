@@ -10,8 +10,6 @@ import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentGrunnlagsendringshendelserForSak } from '~shared/api/behandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import UhaandtertHendelse from '~components/person/uhaandtereHendelser/UhaandtertHendelse'
-import { harAapenRevurdering } from '~components/person/hendelser/utils'
 import { NyHendelseExpandableRow } from '~components/person/hendelser/NyHendelseExpandableRow'
 import { hentStoettedeRevurderinger } from '~shared/api/revurdering'
 
@@ -86,8 +84,9 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
                       <Table.Body>
                         {relevanteHendelser(hendelser).map((hendelse) => (
                           <NyHendelseExpandableRow
+                            key={hendelse.id}
                             hendelse={hendelse}
-                            sakType={sak.sakType}
+                            sak={sak}
                             behandlinger={behandlinger}
                             revurderinger={
                               isSuccess(stoettedeRevurderingerResult) ? stoettedeRevurderingerResult.data : []

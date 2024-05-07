@@ -80,6 +80,10 @@ data class Vedtak(
                 },
         )
     }
+
+    fun underArbeid(): Boolean {
+        return status in listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT)
+    }
 }
 
 sealed interface VedtakInnhold {

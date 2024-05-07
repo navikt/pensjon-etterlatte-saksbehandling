@@ -173,24 +173,6 @@ internal class PersonServiceTest {
     }
 
     @Test
-    @Disabled("TODO - få inn datagrunnlag for denne")
-    fun `skal mappe person som inkluderer familierelasjon (barn)`() {
-        val person =
-            runBlocking {
-                personService.hentOpplysningsperson(
-                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, listOf(SakType.BARNEPENSJON)),
-                )
-            }
-
-        val foreldreFnr = listOf("18498248795", "16478313601")
-
-        assertNotNull(person.familieRelasjon?.verdi?.barn)
-        assertEquals(2, person.familieRelasjon?.verdi?.barn?.size)
-        assertTrue(person.familieRelasjon?.verdi?.barn?.get(0)?.value in foreldreFnr)
-        assertTrue(person.familieRelasjon?.verdi?.barn?.get(1)?.value in foreldreFnr)
-    }
-
-    @Test
     fun `Hent utland med innflytting mappes korrekt`() {
         val person =
             runBlocking {

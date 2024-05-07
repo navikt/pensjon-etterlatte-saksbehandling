@@ -9,6 +9,7 @@ jackson-version = "2.17.0"
 jupiter-version = "5.10.2"
 kotlinx-version = "1.8.0"
 ktor2-version = "2.3.10"
+bcpkix-version = "1.78.1"
 navfelles-token-version = "4.1.4"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.19.7"
@@ -104,7 +105,11 @@ test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", vers
 commons-compress = { module = "org.apache.commons:commons-compress", version = "1.26.1"}
 unleash-client = { module = "io.getunleash:unleash-client-java", version = "9.2.0" }
 
+#Workarounds
+bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bcpkix-version"}
+bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bcpkix-version"}
+bcutil = { module = "org.bouncycastle:bcutil-jdk18on", version.ref = "bcpkix-version"}
+
 [bundles]
 jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]
 navfelles-token = ["navfelles-tokenclientcore", "navfelles-tokenvalidationktor2"]
-

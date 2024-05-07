@@ -129,6 +129,7 @@ class VedtakBehandlingService(
                                             saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler,
                                         ),
                                     vedtakType = fattetVedtak.type,
+                                    opphoerFraOgMed = (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed,
                                 ),
                         )
                     }
@@ -475,6 +476,13 @@ class VedtakBehandlingService(
                             ),
                         revurderingAarsak = behandling.revurderingsaarsak,
                         revurderingInfo = behandling.revurderingInfo,
+                        opphoerFraOgMed =
+                            when (vedtakType) {
+                                VedtakType.OPPHOER -> {
+                                    virkningstidspunkt
+                                }
+                                else -> behandling.opphoerFraOgMed
+                            },
                     ),
             )
 
@@ -506,6 +514,13 @@ class VedtakBehandlingService(
                                 behandling.sakType,
                             ),
                         revurderingInfo = behandling.revurderingInfo,
+                        opphoerFraOgMed =
+                            when (vedtakType) {
+                                VedtakType.OPPHOER -> {
+                                    virkningstidspunkt
+                                }
+                                else -> behandling.opphoerFraOgMed
+                            },
                     ),
             )
         return repository.oppdaterVedtak(oppdatertVedtak)

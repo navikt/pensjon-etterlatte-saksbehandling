@@ -92,6 +92,7 @@ sealed interface VedtakInnhold {
         val vilkaarsvurdering: ObjectNode?,
         val utbetalingsperioder: List<Utbetalingsperiode>,
         val revurderingInfo: RevurderingInfo? = null,
+        val opphoerFraOgMed: YearMonth? = null,
     ) : VedtakInnhold
 
     data class Tilbakekreving(

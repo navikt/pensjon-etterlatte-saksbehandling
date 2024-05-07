@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 sealed class Revurdering(
@@ -29,6 +30,7 @@ sealed class Revurdering(
     override val kilde: Vedtaksloesning,
     open val begrunnelse: String?,
     override val relatertBehandlingId: String?,
+    override val opphoerFraOgMed: YearMonth? = null,
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.REVURDERING
 

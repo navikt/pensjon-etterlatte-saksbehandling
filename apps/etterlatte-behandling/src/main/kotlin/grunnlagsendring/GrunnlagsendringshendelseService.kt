@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -485,7 +486,7 @@ class GrunnlagsendringshendelseService(
             ).filter {
                 (fnr == null) || (it.gjelderPerson == fnr && it.type == hendelsesType)
             }
-        logger.info("Hendelser på samme sakid ${sakId} antall ${relevanteHendelser.size}")
+        logger.info("Hendelser på samme sakid ${sakId} antall ${relevanteHendelser.size} fnr: ${fnr?.maskerFnr()}")
         return relevanteHendelser.any { it.samsvarMellomKildeOgGrunnlag == samsvarMellomKildeOgGrunnlag }
     }
 }

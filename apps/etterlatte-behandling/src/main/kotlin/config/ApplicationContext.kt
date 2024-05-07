@@ -304,7 +304,7 @@ internal class ApplicationContext(
     // Service
     val klageHendelser = KlageHendelserServiceImpl(rapid)
     val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
-    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, behandlingsHendelser)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, hendelseDao, behandlingsHendelser)
 
     val grunnlagsService = GrunnlagServiceImpl(grunnlagKlient)
     val behandlingService =

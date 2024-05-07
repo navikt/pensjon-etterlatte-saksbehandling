@@ -155,6 +155,15 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 call.respond(oppgave)
             }
 
+            get("endringer") {
+                val endringer =
+                    inTransaction {
+                        service.hentEndringerOppgave(oppgaveId)
+                    }
+
+                call.respond(endringer)
+            }
+
             put("ferdigstill") {
                 kunSkrivetilgang {
                     val merknad = call.receive<FerdigstillRequest>().merknad

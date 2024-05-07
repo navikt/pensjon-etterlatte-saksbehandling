@@ -83,6 +83,15 @@ class AktivitetspliktService(
             aktivitetspliktDao.slettAktivitet(aktivitetId, behandlingId)
         }
     }
+
+    fun kopierAktiviteter(
+        fraBehandlingId: UUID,
+        tilBehandlingId: UUID,
+    ) {
+        requireNotNull(behandlingService.hentBehandling(tilBehandlingId)) { "Fant ikke behandling $tilBehandlingId" }
+
+        aktivitetspliktDao.kopierAktiviteter(fraBehandlingId, tilBehandlingId)
+    }
 }
 
 class SakidTilhoererIkkeBehandlingException :

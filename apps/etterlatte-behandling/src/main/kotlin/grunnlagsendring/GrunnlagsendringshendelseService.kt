@@ -381,10 +381,7 @@ class GrunnlagsendringshendelseService(
                 personRolle,
                 sak.sakType,
             )
-        val grunnlag =
-            runBlocking {
-                grunnlagKlient.hentGrunnlag(sak.id)
-            }
+        val grunnlag = runBlocking { grunnlagKlient.hentGrunnlag(sak.id) }
         try {
             val samsvarMellomPdlOgGrunnlag =
                 finnSamsvarForHendelse(grunnlagsendringshendelse, pdlData, grunnlag, personRolle, sak.sakType)
@@ -486,9 +483,9 @@ class GrunnlagsendringshendelseService(
                 sakId,
                 listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB),
             ).filter {
-                (fnr == null) || it.gjelderPerson == fnr && it.type == hendelsesType
+                (fnr == null) || (it.gjelderPerson == fnr && it.type == hendelsesType)
             }
-
+        logger.info("Hendelser på samme sakid ${sakId} antall ${relevanteHendelser.size}")
         return relevanteHendelser.any { it.samsvarMellomKildeOgGrunnlag == samsvarMellomKildeOgGrunnlag }
     }
 }

@@ -56,12 +56,10 @@ object OppdragMapper {
                 if (erGRegulering) {
                     tekst140.add(
                         Tekst140().apply {
-                            tekst = "Grunnbeløpet har økt fra <1. mai 20XX>. De aller fleste vil få etterbetalt i juni."
-                            datoTekstFom = utbetaling.utbetalingslinjer.first().periode.fra.toXMLDate()
-                            datoTekstTom =
-                                utbetaling.utbetalingslinjer.first().periode.fra.let {
-                                    LocalDate.of(it.year, it.month, 20)
-                                }.toXMLDate()
+                            val fraOgMed = utbetaling.utbetalingslinjer.first().periode.fra
+                            tekst = "Grunnbeløpet har økt fra 1. mai ${fraOgMed.year}. De aller fleste vil få etterbetalt i juni."
+                            datoTekstFom = fraOgMed.toXMLDate()
+                            datoTekstTom = LocalDate.of(fraOgMed.year, fraOgMed.month.plus(1), 20).toXMLDate()
                         },
                     )
                 }

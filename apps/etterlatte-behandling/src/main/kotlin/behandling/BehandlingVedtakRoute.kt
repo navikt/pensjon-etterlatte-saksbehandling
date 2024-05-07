@@ -8,6 +8,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -35,7 +36,13 @@ internal fun Route.behandlingVedtakRoute(
                     inTransaction {
                         behandlingsstatusService.settFattetVedtak(behandling, vedtak, brukerTokenInfo)
                         if (vedtak.vedtakType == VedtakType.OPPHOER) {
-                            // behandlingService.lagreOpphoerFom(behandling.id, vedtak.opphoerFraOgMed)
+                            behandlingService.lagreOpphoerFom(
+                                behandling.id,
+                                vedtak.opphoerFraOgMed ?: throw UgyldigForespoerselException(
+                                    code = "MANGLER_OPPHOER_FOM",
+                                    detail = "Vedtak for ${behandling.id} mangler opphør fra og med dato",
+                                ),
+                            )
                         }
                     }
                     call.respond(HttpStatusCode.OK)

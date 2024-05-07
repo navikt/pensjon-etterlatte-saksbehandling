@@ -287,13 +287,18 @@ internal class GrunnlagsendringshendelseServiceTest {
                     endringstype = Endringstype.OPPRETTET,
                 ),
             )
-        assertAll(
-            "oppretter grunnlagshendringer i databasen for doedshendelser",
-            { assertEquals(1, lagredeGrunnlagsendringshendelser.size) },
-            { assertEquals(sakId, opprettGrunnlagsendringshendelse.captured.sakId) },
-            { assertEquals(GrunnlagsendringsType.DOEDSFALL, opprettGrunnlagsendringshendelse.captured.type) },
-            { assertEquals(grunnlagsendringshendelse, lagredeGrunnlagsendringshendelser.first()) },
-        )
+            //oppretter grunnlagshendringer i databasen for doedshendelser
+            val opprettetHendelse = lagredeGrunnlagsendringshendelser.first()
+            assertEquals(grunnlagsendringshendelse.gjelderPerson, opprettetHendelse.gjelderPerson)
+            assertEquals(grunnlagsendringshendelse.type, opprettetHendelse.type)
+            assertEquals(grunnlagsendringshendelse.status, opprettetHendelse.status)
+            assertEquals(grunnlagsendringshendelse.hendelseGjelderRolle, opprettetHendelse.hendelseGjelderRolle)
+            assertEquals(grunnlagsendringshendelse.samsvarMellomKildeOgGrunnlag, opprettetHendelse.samsvarMellomKildeOgGrunnlag)
+
+            assertEquals(1, lagredeGrunnlagsendringshendelser.size)
+            assertEquals(sakId, opprettGrunnlagsendringshendelse.captured.sakId)
+            assertEquals(GrunnlagsendringsType.DOEDSFALL, opprettGrunnlagsendringshendelse.captured.type)
+
     }
 
     @Test
@@ -301,14 +306,6 @@ internal class GrunnlagsendringshendelseServiceTest {
         val sakId = 1L
         val fnr = KONTANT_FOT.value
         val doedsdato = LocalDate.of(2022, 7, 8)
-        val doedsfallhendelse =
-            grunnlagsendringshendelseMedSamsvar(
-                type = GrunnlagsendringsType.DOEDSFALL,
-                id = randomUUID(),
-                sakId = sakId,
-                gjelderPerson = fnr,
-                samsvarMellomKildeOgGrunnlag = null,
-            )
 
         every { sakService.finnSak(sakId) } returns
             Sak(
@@ -318,15 +315,6 @@ internal class GrunnlagsendringshendelseServiceTest {
                 Enheter.defaultEnhet.enhetNr,
             )
 
-        every {
-            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any())
-        } returns doedsfallhendelse
-        every {
-            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
-        } returns emptyList() andThen
-            listOf(
-                doedsfallhendelse,
-            )
         coEvery {
             grunnlagKlient.hentPersonSakOgRolle(any())
         } returns PersonMedSakerOgRoller(fnr, listOf(SakidOgRolle(sakId, Saksrolle.SOEKER)))
@@ -344,7 +332,20 @@ internal class GrunnlagsendringshendelseServiceTest {
             mockPerson()
                 .copy(doedsdato = OpplysningDTO(doedsdato, "doedsdato"))
 
+        val doedsfallhendelse =
+            grunnlagsendringshendelseMedSamsvar(
+                type = GrunnlagsendringsType.DOEDSFALL,
+                id = randomUUID(),
+                sakId = sakId,
+                gjelderPerson = fnr,
+                samsvarMellomKildeOgGrunnlag = null,
+            )
+        every { grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any()) } returns doedsfallhendelse
+
         coEvery { grunnlagKlient.hentGrunnlag(sakId) } returns Grunnlag.empty()
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+        } returns emptyList()
         val lagredeGrunnlagsendringshendelser1 =
             grunnlagsendringshendelseService.opprettDoedshendelse(
                 DoedshendelsePdl(
@@ -354,10 +355,17 @@ internal class GrunnlagsendringshendelseServiceTest {
                     endringstype = Endringstype.OPPRETTET,
                 ),
             )
-        verify(exactly = 1) { grunnlagsendringshendelseService.oppdaterHendelseSjekket(any(), any()) }
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+        } returns lagredeGrunnlagsendringshendelser1
+        verify(exactly = 1) { grunnlagsendringshendelseService.opprettRelevantHendelse(any(), any()) }
         verify(exactly = 0) { grunnlagsendringshendelseService.forkastHendelse(any(), any()) }
-
-        assertEquals(listOf(doedsfallhendelse), lagredeGrunnlagsendringshendelser1)
+        val lagretHendelse = lagredeGrunnlagsendringshendelser1.first()
+        assertEquals(doedsfallhendelse.gjelderPerson, lagretHendelse.gjelderPerson)
+        assertEquals(doedsfallhendelse.type, lagretHendelse.type)
+        assertEquals(doedsfallhendelse.status, lagretHendelse.status)
+        assertEquals(doedsfallhendelse.hendelseGjelderRolle, lagretHendelse.hendelseGjelderRolle)
+        assertEquals(doedsfallhendelse.samsvarMellomKildeOgGrunnlag, lagretHendelse.samsvarMellomKildeOgGrunnlag)
 
         mockkStatic(Grunnlag::doedsdato)
         val grunnlagMock = mockk<Grunnlag>()
@@ -436,10 +444,15 @@ internal class GrunnlagsendringshendelseServiceTest {
                     endringstype = Endringstype.OPPRETTET,
                 ),
             )
-        verify(exactly = 1) { grunnlagsendringshendelseService.oppdaterHendelseSjekket(any(), any()) }
+        verify(exactly = 1) { grunnlagsendringshendelseService.opprettRelevantHendelse(any(), any()) }
         verify(exactly = 0) { grunnlagsendringshendelseService.forkastHendelse(any(), any()) }
 
-        assertEquals(listOf(doedsfallhendelse), lagredeGrunnlagsendringshendelser1)
+        val lagretHendelse = lagredeGrunnlagsendringshendelser1.first()
+        assertEquals(doedsfallhendelse.gjelderPerson, lagretHendelse.gjelderPerson)
+        assertEquals(doedsfallhendelse.type, lagretHendelse.type)
+        assertEquals(doedsfallhendelse.status, lagretHendelse.status)
+        assertEquals(doedsfallhendelse.hendelseGjelderRolle, lagretHendelse.hendelseGjelderRolle)
+        assertEquals(doedsfallhendelse.samsvarMellomKildeOgGrunnlag, lagretHendelse.samsvarMellomKildeOgGrunnlag)
 
         val nyDoedsdato = LocalDate.of(2022, 8, 8)
         mockkStatic(Grunnlag::doedsdato)
@@ -459,7 +472,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         )
 
         verify(exactly = 0) { grunnlagsendringshendelseService.forkastHendelse(any(), any()) }
-        verify(exactly = 2) { grunnlagsendringshendelseService.oppdaterHendelseSjekket(any(), any()) }
+        verify(exactly = 2) { grunnlagsendringshendelseService.opprettRelevantHendelse(any(), any()) }
     }
 
     @Test
@@ -517,7 +530,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 endringstype = Endringstype.OPPRETTET,
             ),
         )
-        verify(exactly = 1) { grunnlagsendringshendelseService.oppdaterHendelseSjekket(any(), any()) }
+        verify(exactly = 1) { grunnlagsendringshendelseService.opprettRelevantHendelse(any(), any()) }
         verify(exactly = 1) { grunnlagsendringshendelseService.forkastHendelse(any(), any()) }
     }
 
@@ -589,7 +602,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 endringstype = Endringstype.OPPRETTET,
             ),
         )
-        verify(exactly = 1) { grunnlagsendringshendelseService.oppdaterHendelseSjekket(any(), any()) }
+        verify(exactly = 1) { grunnlagsendringshendelseService.opprettRelevantHendelse(any(), any()) }
         verify(exactly = 0) { grunnlagsendringshendelseService.forkastHendelse(any(), any()) }
     }
 

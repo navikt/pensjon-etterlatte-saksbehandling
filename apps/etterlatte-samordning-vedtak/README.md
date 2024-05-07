@@ -35,7 +35,7 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 | virkningsdato    | YYYY-MM-DD  | Dato vedtaket gjelder fra |
 | opphoersdato     | YYYY-MM-DD  | Eventuell sluttdato       |
 | type             | string      | START/ENDRING/OPPHOER     |
-| arsak*           | string      | INNTEKT/ANNET             |
+| arsak*           | string      | INNTEKT/REGULERING/ANNET  |
 | anvendtTrygdetid | int         | Avdødes trygdetid         |
 | perioder         | Periode[]   | Periodiserte beløp        |
 

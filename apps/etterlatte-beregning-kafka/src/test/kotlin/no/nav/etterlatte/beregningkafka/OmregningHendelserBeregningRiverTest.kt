@@ -97,16 +97,7 @@ class OmregningHendelserBeregningRiverTest {
     private fun initialiserRiver(): Pair<BeregningService, OmregningHendelserBeregningRiver> {
         val rapidsConnection = mockk<RapidsConnection>().also { every { it.register(any<River>()) } just runs }
         val beregningService = mockk<BeregningService>()
-        val trygdetidService =
-            mockk<TrygdetidService>().also {
-                every {
-                    it.kopierTrygdetidFraForrigeBehandling(
-                        any(),
-                        any(),
-                    )
-                } returns mockk()
-            }
-        val river = OmregningHendelserBeregningRiver(rapidsConnection, beregningService, trygdetidService)
+        val river = OmregningHendelserBeregningRiver(rapidsConnection, beregningService)
         return Pair(beregningService, river)
     }
 

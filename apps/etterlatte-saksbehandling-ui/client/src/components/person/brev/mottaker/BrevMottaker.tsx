@@ -3,12 +3,13 @@ import { Alert, Box, Heading, Tag } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { getVergeadresseForPerson } from '~shared/api/grunnlag'
-import { VergeFeilhaandtering } from '~components/person/VergeFeilhaandtering'
-import { isSuccess } from '~shared/api/apiUtils'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { FlexRow } from '~shared/styled'
 import { BrevMottakerModal } from '~components/person/brev/mottaker/BrevMottakerModal'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import { mapApiResult } from '~shared/api/apiUtils'
+import Spinner from '~shared/Spinner'
 
 export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres: boolean }) {
   const [brevState, setBrevState] = useState<IBrev>(brev)
@@ -24,10 +25,18 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
 
   return (
     <Box padding="4" borderWidth="1" borderRadius="small">
-      {isSuccess(vergeadresse) && (
-        <Alert variant="info" size="small" inline>
-          Søker har verge
-        </Alert>
+      {mapApiResult(
+        vergeadresse,
+        <Spinner visible label="Henter eventuell verges adresse" margin="0" />,
+        () => (
+          <ApiErrorAlert>Feil oppsto ved henting av eventuell verges adresse. Prøv igjen senere</ApiErrorAlert>
+        ),
+        (adresse) =>
+          adresse && (
+            <Alert variant="info" size="small" inline>
+              Søker har verge
+            </Alert>
+          )
       )}
       <FlexRow justify="space-between">
         <Heading spacing level="2" size="medium">
@@ -117,8 +126,6 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
           }
         />
       </InfoWrapper>
-
-      {VergeFeilhaandtering(vergeadresse)}
     </Box>
   )
 }

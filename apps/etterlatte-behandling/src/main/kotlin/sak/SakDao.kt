@@ -92,6 +92,7 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
     fun hentSaker(
         kjoering: String,
         antall: Int,
+        saker: List<Long>,
     ): List<Sak> {
         return connectionAutoclosing.hentConnection { connection ->
             with(connection) {
@@ -99,10 +100,12 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                     prepareStatement(
                         """SELECT id, sakType, fnr, enhet from sak s 
                     where not exists(select 1 from omregningskjoering k where k.sak_id=s.id and k.kjoering='$kjoering' and k.status != '${KjoeringStatus.FEILA.name}')
+                    and ${if (saker.isEmpty()) "" else " and id in $?"}
                     ORDER by id DESC
                     LIMIT $antall"""
                             .trimMargin(),
                     )
+                statement.setArray(1, createArrayOf("bigint", saker.toTypedArray()))
                 statement.executeQuery().toList { this.toSak() }
             }
         }

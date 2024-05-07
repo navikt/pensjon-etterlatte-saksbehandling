@@ -53,11 +53,12 @@ internal fun Route.sakSystemRoutes(
     val logger = LoggerFactory.getLogger(this::class.java)
 
     route("/saker") {
-        get("/$KJOERING/$ANTALL") {
+        post("/$KJOERING/$ANTALL") {
             kunSystembruker {
                 val kjoering = call.parameters[KJOERING]!!
                 val antall = call.parameters[ANTALL]!!.toInt()
-                call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall) }))
+                val saker = call.receive<SakIderDto>().sakIder
+                call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall, saker) }))
             }
         }
 

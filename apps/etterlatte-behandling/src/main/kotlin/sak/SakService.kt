@@ -36,6 +36,7 @@ interface SakService {
     fun hentSaker(
         kjoering: String,
         antall: Int,
+        saker: List<Long>,
     ): List<Sak>
 
     fun finnSaker(person: String): List<Sak>
@@ -140,8 +141,9 @@ class SakServiceImpl(
     override fun hentSaker(
         kjoering: String,
         antall: Int,
+        saker: List<Long>,
     ): List<Sak> {
-        return dao.hentSaker(kjoering, antall).filterForEnheter()
+        return dao.hentSaker(kjoering, antall, saker).filterForEnheter()
     }
 
     private fun finnSakerForPerson(person: String) = dao.finnSaker(person)

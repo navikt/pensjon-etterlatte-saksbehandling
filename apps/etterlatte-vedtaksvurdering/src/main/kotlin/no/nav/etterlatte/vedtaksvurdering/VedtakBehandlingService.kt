@@ -481,7 +481,13 @@ class VedtakBehandlingService(
                                 VedtakType.OPPHOER -> {
                                     virkningstidspunkt
                                 }
-                                else -> behandling.opphoerFraOgMed
+                                else -> {
+                                    if (virkningstidspunkt == behandling.opphoerFraOgMed) {
+                                        null
+                                    } else {
+                                        behandling.opphoerFraOgMed
+                                    }
+                                }
                             },
                     ),
             )
@@ -519,7 +525,13 @@ class VedtakBehandlingService(
                                 VedtakType.OPPHOER -> {
                                     virkningstidspunkt
                                 }
-                                else -> behandling.opphoerFraOgMed
+                                else -> {
+                                    if (virkningstidspunkt == behandling.opphoerFraOgMed) {
+                                        null
+                                    } else {
+                                        behandling.opphoerFraOgMed
+                                    }
+                                }
                             },
                     ),
             )

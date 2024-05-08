@@ -61,6 +61,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -113,7 +114,58 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
-    fun `Skal ignorere duplikate hendelser`() {
+    fun `Skal ignorere duplikate hendelser men ikke om det er tomt`() {
+        val sakId = 1L
+        val sak = Sak(KONTANT_FOT.value, SakType.BARNEPENSJON, sakId, Enheter.STEINKJER.enhetNr)
+
+        val adresse =
+            Adresse(
+                type = AdresseType.VEGADRESSE,
+                aktiv = true,
+                kilde = "FREG",
+                postnr = "2040",
+                adresseLinje1 = "Furukollveien 189",
+            )
+        val samsvarBostedAdresse =
+            SamsvarMellomKildeOgGrunnlag.Adresse(
+                samsvar = false,
+                fraPdl = listOf(adresse),
+                fraGrunnlag = null,
+            )
+        val grlhendelse = grunnlagsendringshendelseMedSamsvar(
+            gjelderPerson = KONTANT_FOT.value,
+            hendelseGjelderRolle = Saksrolle.GJENLEVENDE,
+            samsvarMellomKildeOgGrunnlag = null,
+        ).copy(
+            status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+            type = GrunnlagsendringsType.BOSTED,
+        )
+
+        every { grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB)) } returns emptyList()
+
+        val erIkkeDuplikat = grunnlagsendringshendelseService.erDuplikatHendelse(
+            sak,
+            grlhendelse,
+            samsvarBostedAdresse
+        )
+
+        assertFalse(erIkkeDuplikat)
+
+        every { grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB)) } returns listOf(grlhendelse.copy(id = randomUUID(), samsvarMellomKildeOgGrunnlag = samsvarBostedAdresse))
+
+        val erDuplikat = grunnlagsendringshendelseService.erDuplikatHendelse(
+            sak,
+            grlhendelse,
+            samsvarBostedAdresse
+        )
+
+        assertTrue(erDuplikat)
+
+    }
+
+
+    @Test
+    fun `Skal ignorere duplikate hendelser ulikt samsvar adresse`() {
         val sakId = 1L
 
         val adresse =
@@ -144,11 +196,10 @@ internal class GrunnlagsendringshendelseServiceTest {
             listOf(
                 grlhendelse
             )
-
+        val sak = Sak(KONTANT_FOT.value, SakType.BARNEPENSJON, sakId, Enheter.STEINKJER.enhetNr)
         val erDuplikat =
             grunnlagsendringshendelseService.erDuplikatHendelse(
-                sakId,
-                KONTANT_FOT.value,
+                sak,
                 grlhendelse,
                 samsvarBostedAdresse,
             )
@@ -156,8 +207,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val erIkkeDuplikat =
             grunnlagsendringshendelseService.erDuplikatHendelse(
-                sakId,
-                KONTANT_FOT.value,
+                sak,
                 grlhendelse,
                 samsvarBostedAdresse.copy(
                     fraPdl =

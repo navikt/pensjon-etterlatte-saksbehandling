@@ -466,7 +466,7 @@ class GrunnlagsendringshendelseService(
             ).filter {
                 it.gjelderPerson == grunnlagsendringshendelse.gjelderPerson && it.type == grunnlagsendringshendelse.type
             }
-        logger.info("Hendelser på samme sakid ${sakId} antall ${relevanteHendelser.size} fnr: ${fnr?.maskerFnr()} grlid: ${grunnlagsendringshendelse.id}")
+        logger.info("Hendelser på samme sakid ${sakId} antall ${relevanteHendelser.size} fnr: ${grunnlagsendringshendelse.gjelderPerson.maskerFnr()} grlid: ${grunnlagsendringshendelse.id}")
         return relevanteHendelser.any { it.samsvarMellomKildeOgGrunnlag == samsvarMellomKildeOgGrunnlag }
     }
 }

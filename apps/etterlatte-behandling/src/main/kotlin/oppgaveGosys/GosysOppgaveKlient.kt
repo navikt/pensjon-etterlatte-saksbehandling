@@ -36,10 +36,10 @@ data class GosysApiOppgave(
     val opprettetTidspunkt: Tidspunkt,
     val tildeltEnhetsnr: String,
     val tilordnetRessurs: String?,
-    val aktoerId: String?,
     val beskrivelse: String?,
     val status: String,
     val fristFerdigstillelse: LocalDate? = null,
+    val bruker: GosysOppgaveBruker?,
 )
 
 data class GosysEndreSaksbehandlerRequest(
@@ -116,7 +116,6 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
     ): GosysOppgaver {
         try {
             logger.info("Henter oppgaver fra Gosys")
-
             val temaFilter = tema.map { "&tema=$it" }.joinToString(separator = "")
             val filters =
                 "statuskategori=AAPEN"

@@ -155,6 +155,15 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 call.respond(oppgave)
             }
 
+            get("endringer") {
+                val endringer =
+                    inTransaction {
+                        service.hentEndringerOppgave(oppgaveId)
+                    }
+
+                call.respond(endringer)
+            }
+
             put("ferdigstill") {
                 kunSkrivetilgang {
                     val merknad = call.receive<FerdigstillRequest>().merknad
@@ -168,10 +177,11 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             post("sett-paa-vent") {
                 kunSkrivetilgang {
                     val settPaaVentRequest = call.receive<EndrePaaVentRequest>()
-                    inTransaction {
-                        service.endrePaaVent(oppgaveId, settPaaVentRequest.merknad, settPaaVentRequest.paaVent)
-                    }
-                    call.respond(HttpStatusCode.OK)
+                    val oppgave =
+                        inTransaction {
+                            service.endrePaaVent(oppgaveId, settPaaVentRequest.merknad, settPaaVentRequest.paaVent)
+                        }
+                    call.respond(oppgave)
                 }
             }
 

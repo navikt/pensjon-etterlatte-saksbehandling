@@ -88,6 +88,8 @@ interface SakService {
     fun hentEnkeltSakForPerson(fnr: String): Sak
 
     suspend fun finnNavkontorForPerson(fnr: String): Navkontor
+
+    fun hentSakerMedIder(sakIder: List<Long>): Map<Long, Sak>
 }
 
 class ManglerTilgangTilEnhet(enheter: List<String>) :
@@ -128,6 +130,11 @@ class SakServiceImpl(
                 hentEnkeltSakForPerson(fnr)
             }
         return brukerService.finnNavkontorForPerson(fnr, sak.sakType)
+    }
+
+    override fun hentSakerMedIder(sakIder: List<Long>): Map<Long, Sak> {
+        val saker = dao.hentSakerMedIder(sakIder)
+        return saker.associateBy { it.id }
     }
 
     override fun hentSaker(

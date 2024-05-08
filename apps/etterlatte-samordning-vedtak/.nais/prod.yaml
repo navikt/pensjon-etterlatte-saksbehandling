@@ -108,6 +108,12 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+        - application: pensjonskalkulator-backend
+          namespace: pensjonskalkulator
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

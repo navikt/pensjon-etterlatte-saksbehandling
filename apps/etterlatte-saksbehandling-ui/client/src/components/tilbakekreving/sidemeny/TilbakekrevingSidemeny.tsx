@@ -14,40 +14,28 @@ import { IBeslutning } from '~components/behandling/attestering/types'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { updateVedtakSammendrag } from '~store/reducers/VedtakReducer'
 
-import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
+import { mapApiResult } from '~shared/api/apiUtils'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
 import { tagColors, TagList } from '~shared/Tags'
 import { formaterSakstype } from '~utils/formattering'
 import { Info, Tekst } from '~components/behandling/attestering/styled'
-import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { erOppgaveRedigerbar } from '~shared/types/oppgave'
+import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
 
 export function TilbakekrevingSidemeny() {
-  const tilbakekreving = useTilbakekreving()
   const dispatch = useAppDispatch()
-  const innloggetSaksbehandler = useInnloggetSaksbehandler()
-  const [collapsed, setCollapsed] = useState(false)
 
-  const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
+  const tilbakekreving = useTilbakekreving()
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
+  const oppgave = useSelectorOppgaveUnderBehandling()
+
+  const [collapsed, setCollapsed] = useState(false)
   const [beslutning, setBeslutning] = useState<IBeslutning>()
 
-  const [oppgaveForBehandlingenStatus, requesthentOppgaveForBehandling] = useApiCall(
-    hentOppgaveForReferanseUnderBehandling
-  )
-
-  const hentOppgaveForBehandling = () => {
-    if (tilbakekreving) {
-      requesthentOppgaveForBehandling(tilbakekreving.id)
-    }
-  }
-
-  useEffect(() => {
-    hentOppgaveForBehandling()
-  }, [])
+  const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
 
   const kanAttestere =
     !!tilbakekreving &&
@@ -71,7 +59,7 @@ export function TilbakekrevingSidemeny() {
     )
   }
 
-  useOppgaveUnderBehandling({ referanse: tilbakekreving.id })
+  const [oppgaveResult] = useOppgaveUnderBehandling({ referanse: tilbakekreving.id })
 
   return (
     <CollapsibleSidebar collapsed={collapsed}>
@@ -96,7 +84,7 @@ export function TilbakekrevingSidemeny() {
           <div className="info">
             <Info>Saksbehandler</Info>
             {mapApiResult(
-              oppgaveForBehandlingenStatus,
+              oppgaveResult,
               <Spinner visible={true} label="Henter oppgave" />,
               () => (
                 <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
@@ -115,12 +103,8 @@ export function TilbakekrevingSidemeny() {
             <Info>Sakid:</Info>
             <KopierbarVerdi value={tilbakekreving!!.sak.id.toString()} />
           </div>
-          {mapSuccess(oppgaveForBehandlingenStatus, (oppgave) => {
-            if (erOppgaveRedigerbar(oppgave?.status)) {
-              return <SettPaaVent oppgave={oppgave} redigerbar={true} refreshOppgave={hentOppgaveForBehandling} />
-            }
-            return null
-          })}
+
+          <SettPaaVent oppgave={oppgave} redigerbar={true} />
         </SidebarPanel>
       </SidebarContent>
       {kanAttestere && (

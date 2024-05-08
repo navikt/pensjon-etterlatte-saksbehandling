@@ -1,4 +1,4 @@
-import { Alert, BodyLong, Button, Label, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, Button, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
 import {
   teksterTilbakekrevingAarsak,
   teksterTilbakekrevingBeloepBehold,
@@ -47,7 +47,6 @@ const initialVurdering: TilbakekrevingVurdering = {
   rentevurdering: null,
   vedtak: null,
   vurderesForPaatale: null,
-  hjemmel: null,
 }
 
 export function TilbakekrevingVurderingSkjema({
@@ -63,21 +62,13 @@ export function TilbakekrevingVurderingSkjema({
   const dispatch = useAppDispatch()
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
 
-  const { register, handleSubmit, watch, control, getValues, setValue, formState, reset } =
-    useForm<TilbakekrevingVurdering>({
-      defaultValues: behandling.tilbakekreving.vurdering || initialVurdering,
-      shouldUnregister: true,
-    })
+  const { register, handleSubmit, watch, control, getValues, formState, reset } = useForm<TilbakekrevingVurdering>({
+    defaultValues: behandling.tilbakekreving.vurdering || initialVurdering,
+    shouldUnregister: true,
+  })
 
   useEffect(() => {
     const values = getValues()
-    const utledetHjemmel =
-      values.vilkaarsresultat === TilbakekrevingVilkaar.IKKE_OPPFYLT
-        ? TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD
-        : values.rettsligGrunnlag
-    if (values.hjemmel !== utledetHjemmel) {
-      setValue('hjemmel', utledetHjemmel, { shouldDirty: false })
-    }
 
     if (formState.isDirty && Object.keys(formState.dirtyFields).length) {
       const delay = setTimeout(() => {
@@ -311,7 +302,14 @@ export function TilbakekrevingVurderingSkjema({
                   }
                 />
 
-                {!beloepIBehold() && <Textarea {...register('vedtak')} label="Vedtak" readOnly={!redigerbar} />}
+                {!beloepIBehold() && (
+                  <Textarea
+                    {...register('vedtak')}
+                    label="Vedtak"
+                    description="Oppgi resultat og hjemmel."
+                    readOnly={!redigerbar}
+                  />
+                )}
               </>
             )}
             {(vilkaarOppfylt() || beloepIBehold()) && (
@@ -337,7 +335,12 @@ export function TilbakekrevingVurderingSkjema({
                   readOnly={!redigerbar}
                 />
 
-                <Textarea {...register('vedtak')} label="Vedtak" readOnly={!redigerbar} />
+                <Textarea
+                  {...register('vedtak')}
+                  label="Vedtak"
+                  description="Oppgi resultat og hjemmel."
+                  readOnly={!redigerbar}
+                />
 
                 <Textarea
                   {...register('vurderesForPaatale')}
@@ -348,11 +351,6 @@ export function TilbakekrevingVurderingSkjema({
             )}
           </>
         )}
-
-        <div>
-          <Label>Hjemmel</Label>
-          <BodyLong>{watch().hjemmel ? teksterTilbakekrevingHjemmel[watch().hjemmel!] : 'Ikke satt'}</BodyLong>
-        </div>
 
         {redigerbar && (
           <VStack gap="5">

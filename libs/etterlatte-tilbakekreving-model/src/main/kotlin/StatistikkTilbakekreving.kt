@@ -15,6 +15,7 @@ enum class TilbakekrevingHendelseType : EventnameHendelseType {
     FATTET_VEDTAK,
     ATTESTERT,
     UNDERKJENT,
+    AVBRUTT,
     ;
 
     override fun lagEventnameForType(): String = "TILBAKEKREVING:${this.name}"

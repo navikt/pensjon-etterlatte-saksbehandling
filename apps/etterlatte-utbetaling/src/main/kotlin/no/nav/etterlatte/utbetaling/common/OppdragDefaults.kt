@@ -4,6 +4,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdragKlassifikasjo
 import no.trygdeetaten.skjema.oppdrag.OppdragsEnhet120
 import no.trygdeetaten.skjema.oppdrag.TfradragTillegg
 import java.time.LocalDate
+import java.time.Month
 
 object OppdragDefaults {
     const val AVLEVERENDE_KOMPONENTKODE = "ETTERLAT" // felles for alle etterlatteytelser
@@ -15,11 +16,12 @@ object OppdragDefaults {
     const val AKSJONSKODE_OPPDATER = "1"
     val KODEKOMPONENT = OppdragKlassifikasjonskode.BARNEPENSJON_OPTP
     val DATO_OPPDRAG_GJELDER_FOM = LocalDate.EPOCH.toXMLDate()
+    val OPPDRAGSENHET_DATO_FOM: LocalDate = LocalDate.of(1900, Month.JANUARY, 1)
     val OPPDRAGSENHET =
         OppdragsEnhet120().apply {
             typeEnhet = "BOS"
             enhet = "4819"
-            datoEnhetFom = LocalDate.parse("1900-01-01").toXMLDate()
+            datoEnhetFom = OPPDRAGSENHET_DATO_FOM.toXMLDate()
         }
     val TILLEGG = TfradragTillegg.T
 }

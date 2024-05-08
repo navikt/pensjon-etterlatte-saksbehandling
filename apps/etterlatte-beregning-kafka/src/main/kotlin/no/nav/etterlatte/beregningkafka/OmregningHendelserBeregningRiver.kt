@@ -32,15 +32,14 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
-internal class OmregningHendelserRiver(
+internal class OmregningHendelserBeregningRiver(
     rapidsConnection: RapidsConnection,
     private val beregningService: BeregningService,
-    private val trygdetidService: TrygdetidService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringHendelseType.VILKAARSVURDERT) {
+        initialiserRiver(rapidsConnection, ReguleringHendelseType.TRYGDETID_KOPIERT) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(SAK_TYPE) }
             validate { it.rejectKey(BEREGNING_KEY) }
@@ -76,7 +75,6 @@ internal class OmregningHendelserRiver(
         behandlingViOmregnerFra: UUID,
         dato: LocalDate,
     ): Pair<BeregningDTO, AvkortingDto?> {
-        trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(behandlingId)
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()

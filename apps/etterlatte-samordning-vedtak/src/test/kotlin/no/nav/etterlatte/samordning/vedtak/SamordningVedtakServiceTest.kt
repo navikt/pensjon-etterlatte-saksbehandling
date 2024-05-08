@@ -26,7 +26,9 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
 import java.time.YearMonth.now
 import java.util.UUID
 
@@ -141,7 +143,13 @@ class SamordningVedtakServiceTest {
                 ),
             )
 
-        coEvery { vedtakKlient.hentVedtaksliste(fomDato, fnr = FNR, MaskinportenTpContext(tpnrSPK, ORGNO)) } returns vedtakliste
+        coEvery {
+            vedtakKlient.hentVedtaksliste(
+                fomDato,
+                fnr = FNR,
+                MaskinportenTpContext(tpnrSPK, ORGNO),
+            )
+        } returns vedtakliste
         coEvery { tpKlient.harTpYtelseOnDate(FNR, tpnr = tpnrSPK, fomDato = fomDato) } returns true
 
         val vedtaksliste =
@@ -157,11 +165,168 @@ class SamordningVedtakServiceTest {
 
         coVerify { tpKlient.harTpYtelseOnDate(FNR, tpnr = tpnrSPK, fomDato = fomDato) }
     }
+
+    @Nested
+    internal inner class LoependeOmstillingsstoenadTests {
+        @Test
+        fun `skal gi nei for loepende OMS, den starter etter angitt dato`() {
+            val dato = now()
+            val vedtakliste =
+                listOf(
+                    vedtak(
+                        vedtakId = 123L,
+                        virkningstidspunkt = dato.plusMonths(1),
+                        beregning = beregning(trygdetid = 32),
+                        utbetalingsperioder =
+                            listOf(
+                                VedtakSamordningPeriode(
+                                    fom = dato.plusMonths(1),
+                                    tom = null,
+                                    ytelseFoerAvkorting = 13000,
+                                    ytelseEtterAvkorting = 12000,
+                                ),
+                            ),
+                    ),
+                )
+
+            coEvery {
+                vedtakKlient.hentVedtaksliste(
+                    dato.atStartOfMonth(),
+                    fnr = FNR,
+                    PensjonContext,
+                )
+            } returns vedtakliste
+
+            runBlocking {
+                samordningVedtakService.harLoependeOmstillingsstoenadPaaDato(
+                    dato.atStartOfMonth(),
+                    Folkeregisteridentifikator.of(FNR),
+                    PensjonContext,
+                ) shouldBe false
+            }
+        }
+
+        @Test
+        fun `skal gi ja for loepende OMS, starter paa angitt dato`() {
+            val dato = now()
+            val vedtakliste =
+                listOf(
+                    vedtak(
+                        vedtakId = 123L,
+                        virkningstidspunkt = dato,
+                        beregning = beregning(trygdetid = 32),
+                        utbetalingsperioder =
+                            listOf(
+                                VedtakSamordningPeriode(
+                                    fom = dato,
+                                    tom = null,
+                                    ytelseFoerAvkorting = 13000,
+                                    ytelseEtterAvkorting = 12000,
+                                ),
+                            ),
+                    ),
+                )
+
+            coEvery {
+                vedtakKlient.hentVedtaksliste(
+                    dato.atStartOfMonth(),
+                    fnr = FNR,
+                    PensjonContext,
+                )
+            } returns vedtakliste
+
+            runBlocking {
+                samordningVedtakService.harLoependeOmstillingsstoenadPaaDato(
+                    dato.atStartOfMonth(),
+                    Folkeregisteridentifikator.of(FNR),
+                    PensjonContext,
+                ) shouldBe true
+            }
+        }
+
+        @Test
+        fun `skal gi ja for loepende OMS, starter foer angitt dato`() {
+            val dato = now()
+            val vedtakliste =
+                listOf(
+                    vedtak(
+                        vedtakId = 123L,
+                        virkningstidspunkt = dato.minusMonths(1),
+                        beregning = beregning(trygdetid = 32),
+                        utbetalingsperioder =
+                            listOf(
+                                VedtakSamordningPeriode(
+                                    fom = dato.minusMonths(1),
+                                    tom = null,
+                                    ytelseFoerAvkorting = 13000,
+                                    ytelseEtterAvkorting = 12000,
+                                ),
+                            ),
+                    ),
+                )
+
+            coEvery {
+                vedtakKlient.hentVedtaksliste(
+                    dato.atStartOfMonth(),
+                    fnr = FNR,
+                    PensjonContext,
+                )
+            } returns vedtakliste
+
+            runBlocking {
+                samordningVedtakService.harLoependeOmstillingsstoenadPaaDato(
+                    dato.atStartOfMonth(),
+                    Folkeregisteridentifikator.of(FNR),
+                    PensjonContext,
+                ) shouldBe true
+            }
+        }
+
+        @Test
+        fun `skal gi nei for loepende OMS, perioder avsluttet foer angitt dato`() {
+            // NB merk at et opphoersvedtak ikke har utbetalingsperioder
+            val dato = now()
+            val vedtakliste =
+                listOf(
+                    vedtak(
+                        vedtakId = 123L,
+                        virkningstidspunkt = dato.minusMonths(5),
+                        beregning = beregning(trygdetid = 32),
+                        utbetalingsperioder =
+                            listOf(
+                                VedtakSamordningPeriode(
+                                    fom = dato.minusMonths(5),
+                                    tom = dato.minusMonths(1),
+                                    ytelseFoerAvkorting = 13000,
+                                    ytelseEtterAvkorting = 12000,
+                                ),
+                            ),
+                    ),
+                )
+
+            coEvery {
+                vedtakKlient.hentVedtaksliste(
+                    dato.atStartOfMonth(),
+                    fnr = FNR,
+                    PensjonContext,
+                )
+            } returns vedtakliste
+
+            runBlocking {
+                samordningVedtakService.harLoependeOmstillingsstoenadPaaDato(
+                    dato.atStartOfMonth(),
+                    Folkeregisteridentifikator.of(FNR),
+                    PensjonContext,
+                ) shouldBe false
+            }
+        }
+    }
 }
 
 fun vedtak(
     vedtakId: Long? = null,
     sakstype: SakType = SakType.OMSTILLINGSSTOENAD,
+    virkningstidspunkt: YearMonth = now(),
     beregning: BeregningDTO? = null,
     utbetalingsperioder: List<VedtakSamordningPeriode> = emptyList(),
 ): VedtakSamordningDto =
@@ -169,7 +334,7 @@ fun vedtak(
         vedtakId = vedtakId ?: 5678L,
         fnr = FNR,
         status = VedtakStatus.ATTESTERT,
-        virkningstidspunkt = now(),
+        virkningstidspunkt = virkningstidspunkt,
         sak = VedtakSak(ident = "123", sakstype, id = 1234L),
         behandling = Behandling(id = UUID.randomUUID(), type = BehandlingType.FØRSTEGANGSBEHANDLING),
         type = VedtakType.INNVILGELSE,

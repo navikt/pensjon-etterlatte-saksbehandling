@@ -3,6 +3,7 @@ package no.nav.etterlatte.oppgave
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -41,11 +42,15 @@ class FristGaarUtJobb(
                     )
                 service.hentFristGaarUt(request).forEach {
                     logger.info("Frist er gått ut for ${it.oppgaveID}, tar av vent")
-                    service.oppdaterStatusOgMerknad(
-                        it.oppgaveID,
-                        it.merknad ?: "",
-                        Status.UNDER_BEHANDLING,
-                    )
+                    try {
+                        service.oppdaterStatusOgMerknad(
+                            it.oppgaveID,
+                            it.merknad ?: "",
+                            Status.UNDER_BEHANDLING,
+                        )
+                    } catch (e: ForespoerselException) {
+                        logger.warn("Klarte ikke ta oppgave ${it.oppgaveID} av vent. Fortsetter med neste", e)
+                    }
                     logger.info("Tok ${it.oppgaveID} av vent")
                 }
                 logger.info("Ferdig med å ta oppgaver av vent")

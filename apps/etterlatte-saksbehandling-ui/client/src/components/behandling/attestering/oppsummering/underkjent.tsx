@@ -3,15 +3,15 @@ import { formaterBehandlingstype, formaterDatoMedKlokkeslett } from '~utils/form
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { mapSuccess } from '~shared/api/apiUtils'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
-import React, { useEffect } from 'react'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
+import React from 'react'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { useSelectorOppgaveUnderBehandling } from '~store/selectors/useSelectorOppgaveUnderBehandling'
 
 export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const { ident: innloggetId } = useInnloggetSaksbehandler()
+  const oppgave = useSelectorOppgaveUnderBehandling()
+
   const underkjentSiste = behandlingsInfo.underkjentLogg?.slice(-1)[0]
   const fattetSiste = behandlingsInfo.fattetLogg?.slice(-1)[0]
 
@@ -19,14 +19,6 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingIn
   const saksbehandler = fattetSiste?.ident
   const attestant = erReturnert ? underkjentSiste?.ident : innloggetId
 
-  const [oppgaveForBehandlingenStatus, requesthentOppgaveForBehandling] = useApiCall(
-    hentOppgaveForReferanseUnderBehandling
-  )
-  const hentOppgaveForBehandling = () => requesthentOppgaveForBehandling(behandlingsInfo.behandlingId)
-
-  useEffect(() => {
-    hentOppgaveForBehandling()
-  }, [])
   return (
     <Wrapper innvilget={false}>
       <Overskrift>{formaterBehandlingstype(behandlingsInfo.type)}</Overskrift>
@@ -55,9 +47,8 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingIn
         </>
       )}
       <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
-      {mapSuccess(oppgaveForBehandlingenStatus, (oppgave) => (
-        <SettPaaVent oppgave={oppgave} redigerbar={true} refreshOppgave={hentOppgaveForBehandling} />
-      ))}
+
+      <SettPaaVent oppgave={oppgave} redigerbar={true} />
     </Wrapper>
   )
 }

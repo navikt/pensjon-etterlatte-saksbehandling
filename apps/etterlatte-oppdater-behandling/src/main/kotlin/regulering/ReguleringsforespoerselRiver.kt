@@ -17,6 +17,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import kotlin.math.min
 
 internal class ReguleringsforespoerselRiver(
     rapidsConnection: RapidsConnection,
@@ -48,23 +49,40 @@ internal class ReguleringsforespoerselRiver(
 
         val kjoering = packet[KJOERING].asText()
         val antall = packet[ANTALL].asInt()
-        val sakerTilOmregning = behandlingService.hentAlleSaker(kjoering, antall)
 
-        val tilbakemigrerte =
-            behandlingService.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
-                .also { sakIdListe ->
-                    logger.info(
-                        "Tilbakeført ${sakIdListe.ider.size} behandlinger til trygdetid oppdatert:\n" +
-                            sakIdListe.ider.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" },
-                    )
-                }
+        val maksBatchstoerrelse = MAKS_BATCHSTOERRELSE
+        var tatt = 0
 
-        sakerTilOmregning.saker.forEach {
-            packet.setEventNameForHendelseType(ReguleringHendelseType.SAK_FUNNET)
-            packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)
-            packet.sakId = it.id
-            context.publish(packet.toJson())
+        while (tatt < antall) {
+            val antallIDenneRunden = min(maksBatchstoerrelse, antall)
+            logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
+            val sakerTilOmregning = behandlingService.hentAlleSaker(kjoering, antallIDenneRunden)
+
+            val tilbakemigrerte =
+                behandlingService.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
+                    .also { sakIdListe ->
+                        logger.info(
+                            "Tilbakeført ${sakIdListe.ider.size} behandlinger til trygdetid oppdatert:\n" +
+                                sakIdListe.ider.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" },
+                        )
+                    }
+
+            sakerTilOmregning.saker.forEach {
+                packet.setEventNameForHendelseType(ReguleringHendelseType.SAK_FUNNET)
+                packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)
+                packet.sakId = it.id
+                context.publish(packet.toJson())
+            }
+            tatt += sakerTilOmregning.saker.size
+            logger.info("Ferdig med $tatt av totalt $antall saker")
+            if (sakerTilOmregning.saker.isEmpty() || sakerTilOmregning.saker.size < maksBatchstoerrelse) {
+                break
+            }
         }
+    }
+
+    companion object {
+        const val MAKS_BATCHSTOERRELSE = 100
     }
 }
 

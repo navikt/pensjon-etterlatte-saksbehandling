@@ -344,10 +344,10 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
             Tidspunkt.now(),
             "4808",
             null,
-            "aktoerId",
             "beskrivelse",
             "NY",
             LocalDate.now(),
+            bruker = null,
         )
     }
 

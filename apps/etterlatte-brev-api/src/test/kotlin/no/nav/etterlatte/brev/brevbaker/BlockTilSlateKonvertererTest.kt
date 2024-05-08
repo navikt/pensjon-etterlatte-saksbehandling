@@ -3,7 +3,7 @@ package no.nav.etterlatte.brev.brevbaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
+import no.nav.pensjon.brevbaker.api.model.RenderedLetterMarkdown
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -12,12 +12,12 @@ class BlockTilSlateKonvertererTest {
     @Test
     fun `kan lese inn json fra brevbakeren`() {
         val originalJson = this.javaClass.getResource("/brevbaker/barnepensjon_vedtak_omregning.json")!!.readText()
-        objectMapper.addMixIn(RenderedJsonLetter.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
-        objectMapper.addMixIn(RenderedJsonLetter.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
-        val renderedJsonLetter = deserialize<RenderedJsonLetter>(originalJson)
+        objectMapper.addMixIn(RenderedLetterMarkdown.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
+        objectMapper.addMixIn(RenderedLetterMarkdown.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
+        val renderedLetterMarkdown = deserialize<RenderedLetterMarkdown>(originalJson)
 
-        val konvertert = BlockTilSlateKonverterer.konverter(renderedJsonLetter)
-        assertEquals(konvertert.elements.size, renderedJsonLetter.blocks.size)
+        val konvertert = BlockTilSlateKonverterer.konverter(renderedLetterMarkdown)
+        assertEquals(konvertert.elements.size, renderedLetterMarkdown.blocks.size)
     }
 
     @Test
@@ -25,11 +25,11 @@ class BlockTilSlateKonvertererTest {
         val originalJson =
             this.javaClass
                 .getResource("/brevbaker/brevbaker_payload_med_title1_title2_og_paragraf.json")!!.readText()
-        objectMapper.addMixIn(RenderedJsonLetter.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
-        objectMapper.addMixIn(RenderedJsonLetter.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
-        val renderedJsonLetter = deserialize<RenderedJsonLetter>(originalJson)
+        objectMapper.addMixIn(RenderedLetterMarkdown.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
+        objectMapper.addMixIn(RenderedLetterMarkdown.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
+        val renderedLetterMarkdown = deserialize<RenderedLetterMarkdown>(originalJson)
 
-        val konvertert = BlockTilSlateKonverterer.konverter(renderedJsonLetter)
+        val konvertert = BlockTilSlateKonverterer.konverter(renderedLetterMarkdown)
 
         assertEquals(Slate.ElementType.HEADING_TWO, konvertert.elements[0].type)
         assertEquals(Slate.ElementType.HEADING_THREE, konvertert.elements[1].type)
@@ -40,11 +40,11 @@ class BlockTilSlateKonvertererTest {
     @Test
     fun `skal konvertere item_list til BULLETED_LIST og flytte fra paragraph til toppnode`() {
         val originalJson = this.javaClass.getResource("/brevbaker/brevbaker_payload_med_item_list.json")!!.readText()
-        objectMapper.addMixIn(RenderedJsonLetter.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
-        objectMapper.addMixIn(RenderedJsonLetter.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
-        val renderedJsonLetter = deserialize<RenderedJsonLetter>(originalJson)
+        objectMapper.addMixIn(RenderedLetterMarkdown.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
+        objectMapper.addMixIn(RenderedLetterMarkdown.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
+        val renderedLetterMarkdown = deserialize<RenderedLetterMarkdown>(originalJson)
 
-        val konvertert = BlockTilSlateKonverterer.konverter(renderedJsonLetter)
+        val konvertert = BlockTilSlateKonverterer.konverter(renderedLetterMarkdown)
 
         assertEquals(Slate.ElementType.PARAGRAPH, konvertert.elements[0].type)
         assertEquals(Slate.ElementType.BULLETED_LIST, konvertert.elements[1].type)

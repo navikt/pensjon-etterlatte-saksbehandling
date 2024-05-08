@@ -14,7 +14,6 @@ import no.nav.etterlatte.azureAdAttestantClaim
 import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -22,6 +21,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
@@ -37,11 +37,26 @@ import kotlin.random.Random
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class GosysOppgaveServiceImplTest {
     private val gosysOppgaveKlient = mockk<GosysOppgaveKlient>()
-    private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
     private val oppgaveService = mockk<OppgaveService>()
-    private val brukerTokenInfo = mockk<BrukerTokenInfo>()
+    private val sbident = "SB1234"
+    private val brukerTokenInfo =
+        mockk<BrukerTokenInfo> {
+            every { ident() } returns sbident
+        }
+    private val saksbehandlerService =
+        mockk<SaksbehandlerService> {
+            every { hentKomplettSaksbehandler(sbident) } returns
+                no.nav.etterlatte.saksbehandler.Saksbehandler(
+                    sbident,
+                    "Ola Nordmann",
+                    listOf(Enheter.PORSGRUNN.enhetNr),
+                    false,
+                    listOf(Enheter.PORSGRUNN.enhetNr),
+                    true,
+                )
+        }
 
-    private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdltjenesterKlient, oppgaveService)
+    private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService)
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     val azureGroupToGroupIDMap =
@@ -100,10 +115,10 @@ class GosysOppgaveServiceImplTest {
                             opprettetTidspunkt = Tidspunkt.now(),
                             tildeltEnhetsnr = Enheter.PORSGRUNN.enhetNr,
                             tilordnetRessurs = null,
-                            aktoerId = "53771238272763",
                             beskrivelse = "Beskrivelse av oppgaven",
                             status = "NY",
                             fristFerdigstillelse = LocalDate.now().plusDays(7),
+                            bruker = GosysOppgaveBruker("01010812345", GosysOppgaveBruker.Type.PERSON),
                         ),
                         GosysApiOppgave(
                             id = 2,
@@ -115,10 +130,10 @@ class GosysOppgaveServiceImplTest {
                             opprettetTidspunkt = Tidspunkt.now().minus(5L, ChronoUnit.DAYS),
                             tildeltEnhetsnr = Enheter.PORSGRUNN.enhetNr,
                             tilordnetRessurs = "A123456",
-                            aktoerId = "53771238272763",
                             beskrivelse = "Beskrivelse av oppgave med id 2",
                             status = "TIL_ATTESTERING",
                             fristFerdigstillelse = LocalDate.now().plusDays(14),
+                            bruker = GosysOppgaveBruker("01010812345", GosysOppgaveBruker.Type.PERSON),
                         ),
                         GosysApiOppgave(
                             id = 3,
@@ -130,17 +145,12 @@ class GosysOppgaveServiceImplTest {
                             opprettetTidspunkt = Tidspunkt.now().minus(3L, ChronoUnit.DAYS),
                             tildeltEnhetsnr = Enheter.PORSGRUNN.enhetNr,
                             tilordnetRessurs = null,
-                            aktoerId = "78324720383742",
                             beskrivelse = "Omstillingsstønad oppgavebeskrivelse",
                             status = "NY",
                             fristFerdigstillelse = LocalDate.now().plusDays(4),
+                            bruker = GosysOppgaveBruker("29048012345", GosysOppgaveBruker.Type.PERSON),
                         ),
                     ),
-            )
-        every { pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf("53771238272763", "78324720383742")) } returns
-            mapOf(
-                "53771238272763" to "01010812345",
-                "78324720383742" to "29048012345",
             )
 
         val resultat =
@@ -149,8 +159,8 @@ class GosysOppgaveServiceImplTest {
             }
 
         resultat shouldHaveSize 3
-        resultat.filter { it.fnr == "01010812345" } shouldHaveSize 2
-        resultat.filter { it.fnr == "29048012345" } shouldHaveSize 1
+        resultat.filter { it.bruker?.ident == "01010812345" } shouldHaveSize 2
+        resultat.filter { it.bruker?.ident == "29048012345" } shouldHaveSize 1
     }
 
     fun enhetsfiltrererGosysOppgaver(
@@ -193,10 +203,10 @@ class GosysOppgaveServiceImplTest {
                         opprettetTidspunkt = Tidspunkt.now(),
                         tildeltEnhetsnr = Enheter.PORSGRUNN.enhetNr,
                         tilordnetRessurs = null,
-                        aktoerId = "53771238272763",
                         beskrivelse = "Beskrivelse av oppgaven",
                         status = "NY",
                         fristFerdigstillelse = LocalDate.now().plusDays(7),
+                        bruker = null,
                     ),
                     GosysApiOppgave(
                         id = 2,
@@ -208,10 +218,10 @@ class GosysOppgaveServiceImplTest {
                         opprettetTidspunkt = Tidspunkt.now().minus(5L, ChronoUnit.DAYS),
                         tildeltEnhetsnr = Enheter.PORSGRUNN.enhetNr,
                         tilordnetRessurs = "A123456",
-                        aktoerId = "53771238272763",
                         beskrivelse = "Beskrivelse av oppgave med id 2",
                         status = "TIL_ATTESTERING",
                         fristFerdigstillelse = LocalDate.now().plusDays(14),
+                        bruker = null,
                     ),
                     GosysApiOppgave(
                         id = 3,
@@ -223,17 +233,12 @@ class GosysOppgaveServiceImplTest {
                         opprettetTidspunkt = Tidspunkt.now().minus(3L, ChronoUnit.DAYS),
                         tildeltEnhetsnr = Enheter.STRENGT_FORTROLIG.enhetNr,
                         tilordnetRessurs = null,
-                        aktoerId = "78324720383742",
                         beskrivelse = "Omstillingsstønad oppgavebeskrivelse",
                         status = "NY",
                         fristFerdigstillelse = LocalDate.now().plusDays(4),
+                        bruker = GosysOppgaveBruker("29048012345", GosysOppgaveBruker.Type.PERSON),
                     ),
                 ),
-            )
-
-        every { pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf("78324720383742")) } returns
-            mapOf(
-                "78324720383742" to "29048012345",
             )
 
         val resultat =
@@ -242,8 +247,8 @@ class GosysOppgaveServiceImplTest {
             }
 
         resultat shouldHaveSize 1
-        resultat.filter { it.fnr == "01010812345" } shouldHaveSize 0
-        resultat.filter { it.fnr == "29048012345" } shouldHaveSize 1
+        resultat.filter { it.bruker?.ident == "01010812345" } shouldHaveSize 0
+        resultat.filter { it.bruker?.ident == "29048012345" } shouldHaveSize 1
     }
 
     @Test
@@ -273,9 +278,6 @@ class GosysOppgaveServiceImplTest {
         coEvery {
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any(), any(), any())
         } returns mockk()
-        every {
-            pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(gosysOppgave.aktoerId!!))
-        } returns mapOf("78324720383742" to "29048012345")
 
         runBlocking {
             service.flyttTilGjenny(gosysOppgave.id, sakId, brukerTokenInfo)
@@ -304,9 +306,6 @@ class GosysOppgaveServiceImplTest {
                 brukerTokenInfo = brukerTokenInfo,
             )
         }
-        coVerify(exactly = 1) {
-            pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(gosysOppgave.aktoerId!!))
-        }
     }
 
     private fun mockGosysOppgave(
@@ -323,9 +322,9 @@ class GosysOppgaveServiceImplTest {
         opprettetTidspunkt = Tidspunkt.now().minus(3L, ChronoUnit.DAYS),
         tildeltEnhetsnr = Enheter.STEINKJER.enhetNr,
         tilordnetRessurs = "A012345",
-        aktoerId = "78324720383742",
         beskrivelse = "Beskrivelse for oppgaven",
         status = "OPPRETTET",
         fristFerdigstillelse = LocalDate.now().plusDays(4),
+        bruker = null,
     )
 }

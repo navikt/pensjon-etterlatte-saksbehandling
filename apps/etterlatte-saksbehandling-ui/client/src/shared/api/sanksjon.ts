@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { ISanksjon, ISanksjonLagre } from '~components/behandling/sanksjon/Sanksjon'
+import { ISanksjon, ISanksjonLagre } from '~shared/types/sanksjon'
 
 export const hentSanksjon = async (behandlingId: string): Promise<ApiResponse<ISanksjon[]>> => {
   return apiClient.get(`/beregning/sanksjon/${behandlingId}`)

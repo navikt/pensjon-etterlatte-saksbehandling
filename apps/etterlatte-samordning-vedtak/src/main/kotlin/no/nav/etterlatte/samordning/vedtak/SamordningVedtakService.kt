@@ -57,7 +57,18 @@ class SamordningVedtakService(
             fnr = fnr.value,
             callerContext = context,
         )
+            .filter { it.sak.sakType == SakType.OMSTILLINGSSTOENAD }
             .map { it.mapSamordningsvedtak() }
+    }
+
+    suspend fun harLoependeOmstillingsstoenadPaaDato(
+        dato: LocalDate,
+        fnr: Folkeregisteridentifikator,
+        context: CallerContext,
+    ): Boolean {
+        return hentVedtaksliste(fomDato = dato, fnr = fnr, context = context)
+            .flatMap { it.perioder }
+            .any { dato >= it.fom && (it.tom == null || !it.tom.isBefore(dato)) }
     }
 
     private fun VedtakSamordningDto.mapSamordningsvedtak(): SamordningVedtakDto {
@@ -93,6 +104,7 @@ class SamordningVedtakService(
         return when (this) {
             Revurderingaarsak.INNTEKTSENDRING -> SamordningVedtakAarsak.INNTEKT
             Revurderingaarsak.DOEDSFALL -> SamordningVedtakAarsak.DOEDSFALL
+            Revurderingaarsak.REGULERING -> SamordningVedtakAarsak.REGULERING
             else -> SamordningVedtakAarsak.ANNET
         }.name
     }

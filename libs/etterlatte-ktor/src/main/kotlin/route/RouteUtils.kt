@@ -9,6 +9,7 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -18,6 +19,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.UUID
 
 const val BEHANDLINGID_CALL_PARAMETER = "behandlingId"
@@ -224,6 +226,17 @@ fun ApplicationCall.uuid(param: String) =
     } ?: throw NullPointerException(
         "$param er ikke i path params",
     )
+
+class UgyldigDatoFormatException : UgyldigForespoerselException(
+    code = "UGYLDIG-DATOFORMAT",
+    detail = "Forventet format YYYY-MM-DD (ISO-8601)",
+)
+
+fun ApplicationCall.dato(param: String) =
+    this.parameters[param]?.let {
+        runCatching { LocalDate.parse(it) }
+            .getOrElse { throw UgyldigDatoFormatException() }
+    }
 
 suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
     featureToggleService: FeatureToggleService,

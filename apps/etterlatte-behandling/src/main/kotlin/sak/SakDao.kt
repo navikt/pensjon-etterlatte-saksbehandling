@@ -99,6 +99,7 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                     prepareStatement(
                         """SELECT id, sakType, fnr, enhet from sak s 
                     where not exists(select 1 from omregningskjoering k where k.sak_id=s.id and k.kjoering='$kjoering' and k.status != '${KjoeringStatus.FEILA.name}')
+                    ORDER by id DESC
                     LIMIT $antall"""
                             .trimMargin(),
                     )
@@ -228,4 +229,25 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
             id = getLong("id"),
             enhet = getString("enhet"),
         )
+
+    fun hentSakerMedIder(sakIder: List<Long>): List<Sak> {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT id, fnr, enhet, sakType 
+                        FROM sak 
+                        WHERE id = ANY (?)
+                        """.trimIndent(),
+                    )
+                statement.setArray(1, createArrayOf("bigint", sakIder.toTypedArray()))
+                val resultSet = statement.executeQuery()
+
+                resultSet.toList {
+                    toSak()
+                }
+            }
+        }
+    }
 }

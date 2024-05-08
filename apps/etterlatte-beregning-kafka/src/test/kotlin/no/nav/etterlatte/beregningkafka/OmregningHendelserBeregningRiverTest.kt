@@ -23,7 +23,7 @@ import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
-class OmregningHendelserRiverTest {
+class OmregningHendelserBeregningRiverTest {
     @Test
     fun `verifiserer naar alt er ok`() {
         val (beregningService, river) = initialiserRiver()
@@ -94,19 +94,10 @@ class OmregningHendelserRiverTest {
         }
     }
 
-    private fun initialiserRiver(): Pair<BeregningService, OmregningHendelserRiver> {
+    private fun initialiserRiver(): Pair<BeregningService, OmregningHendelserBeregningRiver> {
         val rapidsConnection = mockk<RapidsConnection>().also { every { it.register(any<River>()) } just runs }
         val beregningService = mockk<BeregningService>()
-        val trygdetidService =
-            mockk<TrygdetidService>().also {
-                every {
-                    it.kopierTrygdetidFraForrigeBehandling(
-                        any(),
-                        any(),
-                    )
-                } returns mockk()
-            }
-        val river = OmregningHendelserRiver(rapidsConnection, beregningService, trygdetidService)
+        val river = OmregningHendelserBeregningRiver(rapidsConnection, beregningService)
         return Pair(beregningService, river)
     }
 

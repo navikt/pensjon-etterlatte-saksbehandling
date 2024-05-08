@@ -4,20 +4,19 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.BehandlingServiceImpl
-import no.nav.etterlatte.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 import java.util.UUID
 
-internal class OmregningsHendelserRiverTest {
+internal class OmregningsHendelserBehandlingRiverTest {
     private val behandlingService = mockk<BehandlingServiceImpl>()
-    private val inspector = TestRapid().apply { OmregningsHendelserRiver(this, behandlingService) }
+    private val inspector = TestRapid().apply { OmregningsHendelserBehandlingRiver(this, behandlingService) }
 
     @Test
     fun `skal opprette omregning`() {
@@ -36,12 +35,6 @@ internal class OmregningsHendelserRiverTest {
         Assertions.assertEquals(1, omregningshendelseSlot.captured.sakId)
         Assertions.assertEquals(2, inspector.inspektør.size)
         Assertions.assertEquals(behandlingId.toString(), inspector.inspektør.message(1).get(BEHANDLING_ID_KEY).asText())
-        Assertions.assertEquals(
-            behandlingViOmregnerFra.toString(),
-            inspector.inspektør.message(1).get(
-                BEHANDLING_VI_OMREGNER_FRA_KEY,
-            ).asText(),
-        )
     }
 
     companion object {
@@ -50,5 +43,5 @@ internal class OmregningsHendelserRiverTest {
 }
 
 fun readFile(file: String) =
-    OmregningsHendelserRiverTest::class.java.getResource(file)?.readText()
+    OmregningsHendelserBehandlingRiverTest::class.java.getResource(file)?.readText()
         ?: throw FileNotFoundException("Fant ikke filen $file")

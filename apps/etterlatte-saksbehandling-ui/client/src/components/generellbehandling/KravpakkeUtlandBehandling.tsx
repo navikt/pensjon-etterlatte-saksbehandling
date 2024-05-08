@@ -22,7 +22,7 @@ import {
 } from '@navikt/ds-react'
 import React, { Fragment, useContext, useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
+import { avbrytGenerellBehandling, oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
@@ -81,7 +81,8 @@ const KravpakkeUtlandBehandling = (props: {
 }) => {
   const { utlandsBehandling } = props
   const innhold = utlandsBehandling.innhold
-  const [putOppdaterGenerellBehandlingStatus, putOppdaterGenerellBehandling] = useApiCall(oppdaterGenerellBehandling)
+  const [oppdaterGenerellBehandlingStatus, oppdaterGenerellBehandlingApi] = useApiCall(oppdaterGenerellBehandling)
+  const [avbrytbehandlingStatus, avbrytBehandlingApi] = useApiCall(avbrytGenerellBehandling)
   const [avdoedeStatus, avdoedeFetch] = useApiCall(getGrunnlagsAvOpplysningstype)
   const [avdoed, setAvdoed] = useState<Grunnlagsopplysning<IPdlPerson, KildePdl> | null>(null)
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -151,10 +152,14 @@ const KravpakkeUtlandBehandling = (props: {
     },
   }
 
+  const avbrytBehandling = () => {
+    avbrytBehandlingApi(utlandsBehandling)
+  }
+
   const oppdaterGenerellbehandlingUtland = () => {
     if (valgtLandIsoKode !== undefined) {
       setErrLand(false)
-      putOppdaterGenerellBehandling(generellBehandlingMedLocalState)
+      oppdaterGenerellBehandlingApi(generellBehandlingMedLocalState)
     } else {
       setErrLand(true)
     }
@@ -456,10 +461,10 @@ const KravpakkeUtlandBehandling = (props: {
               onChange={(e) => setNotater(e.target.value)}
             />
             {isFailureHandler({
-              apiResult: putOppdaterGenerellBehandlingStatus,
+              apiResult: oppdaterGenerellBehandlingStatus,
               errorMessage: 'Kunne ikke oppdatere generell behandling utland',
             })}
-            {isSuccess(putOppdaterGenerellBehandlingStatus) && (
+            {isSuccess(oppdaterGenerellBehandlingStatus || avbrytbehandlingStatus) && (
               <Alert style={{ margin: '1rem', width: '20rem' }} variant="success">
                 Behandlingen er oppdatert
               </Alert>
@@ -469,12 +474,19 @@ const KravpakkeUtlandBehandling = (props: {
               errorMessage: 'Vi klarte ikke å hente gjeldende sak',
               apiResult: gjeldendeSakStatus,
             })}
+            {isFailureHandler({
+              apiResult: avbrytbehandlingStatus,
+              errorMessage: 'Kunne ikke avbryte generell behandling utland',
+            })}
             <ButtonGroup>
               {redigerbar && (
                 <>
+                  <Button onClick={() => avbrytBehandling()} loading={isPending(avbrytbehandlingStatus)}>
+                    Avbryt
+                  </Button>
                   <Button
                     onClick={() => oppdaterGenerellbehandlingUtland()}
-                    loading={isPending(putOppdaterGenerellBehandlingStatus)}
+                    loading={isPending(oppdaterGenerellBehandlingStatus)}
                   >
                     Lagre opplysninger
                   </Button>

@@ -8,6 +8,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
@@ -36,6 +37,7 @@ import java.util.UUID
 class OppgaveService(
     private val oppgaveDao: OppgaveDaoMedEndringssporing,
     private val sakDao: SakDao,
+    private val hendelseDao: HendelseDao,
     private val hendelser: BehandlingHendelserKafkaProducer,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
@@ -159,9 +161,8 @@ class OppgaveService(
     ) {
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
-        sikreAktivOppgaveOgTildeltSaksbehandler(hentetOppgave) {
-            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, status)
-        }
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+        oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, status)
     }
 
     fun endreTilKildeBehandlingOgOppdaterReferanse(
@@ -194,10 +195,10 @@ class OppgaveService(
         oppgaveId: UUID,
         merknad: String,
         paaVent: Boolean,
-    ) {
+    ): OppgaveIntern {
         val oppgave = hentOppgave(oppgaveId)
-        if (paaVent && oppgave.status == Status.PAA_VENT) return
-        if (!paaVent && oppgave.status != Status.PAA_VENT) return
+        if (paaVent && oppgave.status == Status.PAA_VENT) return oppgave
+        if (!paaVent && oppgave.status != Status.PAA_VENT) return oppgave
 
         sikreAktivOppgaveOgTildeltSaksbehandler(oppgave) {
             val nyStatus = if (paaVent) Status.PAA_VENT else hentForrigeStatus(oppgaveId)
@@ -219,6 +220,8 @@ class OppgaveService(
                 else -> {} // Ingen statistikk for resten
             }
         }
+
+        return hentOppgave(oppgaveId)
     }
 
     private fun sikreAktivOppgaveOgTildeltSaksbehandler(
@@ -347,6 +350,36 @@ class OppgaveService(
                 "Oppgave med id=$id finnes ikke – avbryter ferdigstilling av oppgaven"
             }
         ferdigstillOppgave(oppgave, saksbehandler, merknad)
+    }
+
+    fun hentEndringerOppgave(id: UUID): List<GenerellEndringshendelse> {
+        val oppgave = hentOppgave(id)
+
+        val behandlingHendelser =
+            if (oppgave.kilde == OppgaveKilde.BEHANDLING) {
+                hendelseDao.finnHendelserIBehandling(UUID.fromString(oppgave.referanse))
+                    .map {
+                        val hendelse = EndringMapper.mapBehandlingHendelse(it)
+                        GenerellEndringshendelse(
+                            tidspunkt = it.opprettet,
+                            saksbehandler = it.ident,
+                            endringer =
+                                listOf(
+                                    EndringLinje(
+                                        hendelse,
+                                        it.kommentar?.let { kommentar -> "Kommentar: $kommentar" },
+                                    ),
+                                ),
+                        )
+                    }
+            } else {
+                emptyList()
+            }
+
+        val oppgaveHendelser = EndringMapper.mapOppgaveEndringer(oppgaveDao.hentEndringerForOppgave(id))
+
+        return (oppgaveHendelser + behandlingHendelser)
+            .sortedByDescending { it.tidspunkt }
     }
 
     private fun ferdigstillOppgave(

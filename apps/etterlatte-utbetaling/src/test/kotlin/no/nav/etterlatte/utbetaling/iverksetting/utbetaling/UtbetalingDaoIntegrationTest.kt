@@ -199,7 +199,12 @@ internal class UtbetalingDaoIntegrationTest(dataSource: DataSource) {
     fun `skal sette kvittering paa utbetaling`() {
         val opprettetTidspunkt = Tidspunkt.now()
         val utbetaling = utbetaling(avstemmingsnoekkel = opprettetTidspunkt)
-        val oppdrag = OppdragMapper.oppdragFraUtbetaling(utbetaling, true)
+        val oppdrag =
+            OppdragMapper.oppdragFraUtbetaling(
+                utbetaling,
+                erFoersteUtbetalingPaaSak = true,
+                erGRegulering = false,
+            )
 
         utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
 
@@ -216,12 +221,13 @@ internal class UtbetalingDaoIntegrationTest(dataSource: DataSource) {
 
         assertAll(
             "skal sjekke at kvittering er opprettet korrekt på utbetaling",
+            // SKAL VEL EGENTLIG VÆRE AVVIST HER??? MÅ GRAVE LITT
             {
                 assertEquals(
                     UtbetalingStatus.AVVIST,
                     utbetalingOppdatert?.status(),
                 )
-            }, // SKAL VEL EGENTLIG VÆRE AVVIST HER??? MÅ GRAVE LITT
+            },
             { assertNotNull(utbetalingOppdatert?.kvittering) },
             { assertNotNull(utbetalingOppdatert?.kvittering?.oppdrag?.mmel) },
             {

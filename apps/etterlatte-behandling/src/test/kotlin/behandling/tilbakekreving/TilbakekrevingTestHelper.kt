@@ -112,5 +112,4 @@ fun tilbakekrevingVurdering(
     rentevurdering = null,
     vedtak = "Bruker må betale tilbake.",
     vurderesForPaatale = null,
-    hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD,
 )

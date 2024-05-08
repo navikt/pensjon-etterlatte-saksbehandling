@@ -118,23 +118,6 @@ internal class BehandlingTest {
     }
 
     @Test
-    @Disabled // TODO EY-2927
-    fun `kan ikke ga fra VILKAARSVURDERT til FATTET VEDTAK`() {
-        val fyltUtBehandling =
-            behandling
-                .oppdaterVirkningstidspunkt(virkningstidspunkt)
-                .oppdaterGyldighetsproeving(gyldighetsResultat)
-
-        assertThrows<TilstandException.UgyldigTilstand> { fyltUtBehandling.tilVilkaarsvurdert().tilFattetVedtak() }
-        assertThrows<TilstandException.UgyldigTilstand> {
-            fyltUtBehandling.tilVilkaarsvurdert().tilFattetVedtak()
-        }
-        assertThrows<TilstandException.UgyldigTilstand> {
-            fyltUtBehandling.tilVilkaarsvurdert().tilFattetVedtak()
-        }
-    }
-
-    @Test
     fun `behandling kan endres igjen etter den har blitt returnet av attestant`() {
         val returnertBehandling =
             behandling

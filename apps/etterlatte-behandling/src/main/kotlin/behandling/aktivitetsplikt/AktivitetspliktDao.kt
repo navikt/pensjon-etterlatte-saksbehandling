@@ -157,6 +157,25 @@ class AktivitetspliktDao(private val connectionAutoclosing: ConnectionAutoclosin
         }
     }
 
+    fun kopierAktiviteter(
+        forrigeBehandlingId: UUID,
+        nyBehandlingId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                        INSERT INTO aktivitetsplikt_aktivitet (id, sak_id, behandling_id, aktivitet_type, fom, tom, opprettet, endret, beskrivelse)
+                        (SELECT gen_random_uuid(), sak_id, ?, aktivitet_type, fom, tom, opprettet, endret, beskrivelse FROM aktivitetsplikt_aktivitet WHERE behandling_id = ?)
+                    """.trimMargin(),
+                )
+            stmt.setObject(1, nyBehandlingId)
+            stmt.setObject(2, forrigeBehandlingId)
+
+            stmt.executeUpdate()
+        }
+    }
+
     private fun ResultSet.toAktivitet() =
         AktivitetspliktAktivitet(
             id = getUUID("id"),

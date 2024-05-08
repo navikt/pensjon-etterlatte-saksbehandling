@@ -68,7 +68,6 @@ export function TilbakekrevingVurderingSkjema({
 
   const { register, handleSubmit, watch, control, formState, reset } = useForm<TilbakekrevingVurdering>({
     defaultValues: behandling.tilbakekreving.vurdering || initialVurdering,
-    shouldUnregister: true,
   })
 
   useEffect(() => {
@@ -152,6 +151,7 @@ export function TilbakekrevingVurderingSkjema({
               label="Forhåndsvarsel dato"
               control={control}
               readOnly={!redigerbar}
+              shouldUnregister={true}
             />
           )}
 
@@ -199,9 +199,19 @@ export function TilbakekrevingVurderingSkjema({
           />
           {watch().tilsvar?.tilsvar == JaNei.JA && (
             <>
-              <ControlledDatoVelger name="tilsvar.dato" label="Tilsvar dato" control={control} readOnly={!redigerbar} />
+              <ControlledDatoVelger
+                name="tilsvar.dato"
+                label="Tilsvar dato"
+                control={control}
+                readOnly={!redigerbar}
+                shouldUnregister={true}
+              />
 
-              <Textarea {...register('tilsvar.beskrivelse')} label="Beskriv tilsvar" readOnly={!redigerbar} />
+              <Textarea
+                {...register('tilsvar.beskrivelse', { shouldUnregister: true })}
+                label="Beskriv tilsvar"
+                readOnly={!redigerbar}
+              />
             </>
           )}
 
@@ -227,7 +237,7 @@ export function TilbakekrevingVurderingSkjema({
           {rettsligGrunnlagForVilkaarOppfyltEllerDelvisOppfylt() && (
             <>
               <Textarea
-                {...register('objektivtVilkaarOppfylt')}
+                {...register('objektivtVilkaarOppfylt', { shouldUnregister: true })}
                 label="Er det objektive vilkåret oppfylt?"
                 description="Foreligger det en feilutbetaling?"
                 readOnly={!redigerbar}
@@ -237,7 +247,7 @@ export function TilbakekrevingVurderingSkjema({
                 watch().rettsligGrunnlag!
               ) && (
                 <Textarea
-                  {...register('burdeBrukerForstaatt')}
+                  {...register('burdeBrukerForstaatt', { shouldUnregister: true })}
                   label="Er de subjektive vilkårene oppfylt?"
                   description="Forstod eller burde brukeren forstått at ubetalingen skyldes en feil?"
                   readOnly={!redigerbar}
@@ -246,7 +256,7 @@ export function TilbakekrevingVurderingSkjema({
 
               {[TilbakekrevingHjemmel.TJUETO_FEMTEN_FOERSTE_LEDD_ANDRE_PUNKTUM].includes(watch().rettsligGrunnlag!) && (
                 <Textarea
-                  {...register('uaktsomtForaarsaketFeilutbetaling')}
+                  {...register('uaktsomtForaarsaketFeilutbetaling', { shouldUnregister: true })}
                   label="Er de subjektive vilkårene oppfylt?"
                   description="Har brukeren uaktsomt forårsaket feilutbetalingen?"
                   readOnly={!redigerbar}
@@ -257,7 +267,7 @@ export function TilbakekrevingVurderingSkjema({
                 watch().rettsligGrunnlag!
               ) && (
                 <Textarea
-                  {...register('burdeBrukerForstaattEllerUaktsomtForaarsaket')}
+                  {...register('burdeBrukerForstaattEllerUaktsomtForaarsaket', { shouldUnregister: true })}
                   label="Er de subjektive vilkårene oppfylt?"
                   description="Forstod eller burde brukeren forstått at utbetalingen skyldtes en feil, og/eller har brukeren uaktsomt forårsaket feilutbetalingen?"
                   readOnly={!redigerbar}
@@ -279,12 +289,13 @@ export function TilbakekrevingVurderingSkjema({
                     ))}
                   </>
                 }
+                shouldUnregister={true}
               />
 
               {!vilkaarOppfylt() && (
                 <>
                   <Textarea
-                    {...register('beloepBehold.beskrivelse')}
+                    {...register('beloepBehold.beskrivelse', { shouldUnregister: true })}
                     label="Tilbakekreving etter folketrygdloven § 22-15 femte ledd?"
                     description="Er noe av det feilutbetalte beløpet i behold?"
                     readOnly={!redigerbar}
@@ -305,38 +316,45 @@ export function TilbakekrevingVurderingSkjema({
                         ))}
                       </>
                     }
+                    shouldUnregister={true}
                   />
 
-                  {!beloepIBehold() && <Textarea {...register('vedtak')} label="Vedtak" readOnly={!redigerbar} />}
+                  {!beloepIBehold() && (
+                    <Textarea
+                      {...register('vedtak', { shouldUnregister: true })}
+                      label="Vedtak"
+                      readOnly={!redigerbar}
+                    />
+                  )}
                 </>
               )}
               {(vilkaarOppfylt() || beloepIBehold()) && (
                 <>
                   <Textarea
-                    {...register('reduseringAvKravet')}
+                    {...register('reduseringAvKravet', { shouldUnregister: true })}
                     label="Er det særlige grunner til å frafalle eller redusere kravet?"
                     description="Det legges blant annet vekt på graden av uaktsomhet hos brukeren, størrelsen på det feilutbetalte beløpet, hvor lang tid det er gått siden utbetalingen fant sted og om noe av feilen helt eller delvis kan tilskrives NAV. Kravet kan frafalles helt, eller settes til en del av det feilutbetalte beløpet. Ved utvist forsett skal krav alltid fremmes, og beløpet kan ikke settes ned."
                     readOnly={!redigerbar}
                   />
 
                   <Textarea
-                    {...register('foreldet')}
+                    {...register('foreldet', { shouldUnregister: true })}
                     label="Er noen deler av kravet foreldet?"
                     description="Det er bestemt i folketrygdloven § 22-14 første ledd at våre krav om tilbakebetaling i utgangspunktet foreldes etter foreldelsesloven. Etter foreldelsesloven § 2, jf. § 3 nr. 1 er den alminnelige foreldelsesfristen tre år. Fristen løper særskilt for hver månedsutbetaling. Vurder også om foreldelsesloven § 10 om ett års tilleggsfrist får anvendelse."
                     readOnly={!redigerbar}
                   />
 
                   <Textarea
-                    {...register('rentevurdering')}
+                    {...register('rentevurdering', { shouldUnregister: true })}
                     label="Skal det ilegges renter?"
                     description="Det følger av folketrygdloven § 22-17 a at det skal beregnes et rentetillegg på 10 prosent av det beløpet som kreves tilbake når brukeren har opptrådt grovt uaktsomt eller med forsett."
                     readOnly={!redigerbar}
                   />
 
-                  <Textarea {...register('vedtak')} label="Vedtak" readOnly={!redigerbar} />
+                  <Textarea {...register('vedtak', { shouldUnregister: true })} label="Vedtak" readOnly={!redigerbar} />
 
                   <Textarea
-                    {...register('vurderesForPaatale')}
+                    {...register('vurderesForPaatale', { shouldUnregister: true })}
                     label="Skal saken vurderes for påtale?"
                     readOnly={!redigerbar}
                   />

@@ -316,6 +316,10 @@ class GrunnlagsendringshendelseService(
         return sakerOgRollerGruppert
             .map { sakiderOgRoller -> Pair(sakService.finnSak(sakiderOgRoller.sakId), sakiderOgRoller) }
             .filter { rollerogSak -> rollerogSak.first != null }
+            .filter {
+                    rollerogSak ->
+                grunnlagendringType == GrunnlagsendringsType.SIVILSTAND && rollerogSak.first!!.sakType != SakType.BARNEPENSJON
+            }
             .map { SakOgRolle(it.first!!, it.second) }
             .map { rolleOgSak ->
                 val hendelse =
@@ -418,10 +422,12 @@ class GrunnlagsendringshendelseService(
         } else {
             logger.info(
                 "Grunnlagsendringshendelse for ${hendelse.type} med id ${hendelse.id} er naa sjekket " +
-                        "og informasjonen i pdl og grunnlag samsvarer ikke. " +
-                        "Hendelsen vises derfor til saksbehandler.",
+                    "og informasjonen i pdl og grunnlag samsvarer ikke. " +
+                    "Hendelsen vises derfor til saksbehandler.",
             )
-            grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse.copy(samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag, status = GrunnlagsendringStatus.SJEKKET_AV_JOBB))
+            grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+                hendelse.copy(samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag, status = GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+            )
             opprettOppgave(hendelse)
         }
     }
@@ -444,12 +450,11 @@ class GrunnlagsendringshendelseService(
     ) {
         logger.info("Forkaster grunnlagsendringshendelse med id ${hendelse.id}.")
         grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-            hendelse.copy(samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag, status = GrunnlagsendringStatus.FORKASTET))
+            hendelse.copy(samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag, status = GrunnlagsendringStatus.FORKASTET),
+        )
     }
 
-    private fun hendelseHarKunAvbrytteBehandlinger(
-        hendelse: Grunnlagsendringshendelse,
-    ): Boolean {
+    private fun hendelseHarKunAvbrytteBehandlinger(hendelse: Grunnlagsendringshendelse): Boolean {
         val behandlingerISak = behandlingService.hentBehandlingerForSak(hendelse.sakId)
 
         return behandlingerISak.all { it.status == BehandlingStatus.AVBRUTT }
@@ -467,7 +472,10 @@ class GrunnlagsendringshendelseService(
             ).filter {
                 it.gjelderPerson == grunnlagsendringshendelse.gjelderPerson && it.type == grunnlagsendringshendelse.type
             }
-        logger.info("Hendelser på samme sakid ${sakId} antall ${relevanteHendelser.size} fnr: ${grunnlagsendringshendelse.gjelderPerson.maskerFnr()} grlid: ${grunnlagsendringshendelse.id}")
+        logger.info(
+            "Hendelser på samme sakid $sakId antall ${relevanteHendelser.size} " +
+                "fnr: ${grunnlagsendringshendelse.gjelderPerson.maskerFnr()} grlid: ${grunnlagsendringshendelse.id}",
+        )
         return relevanteHendelser.any { it.samsvarMellomKildeOgGrunnlag == samsvarMellomKildeOgGrunnlag }
     }
 }

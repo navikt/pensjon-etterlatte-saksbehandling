@@ -35,3 +35,36 @@ export enum AktivitetspliktType {
   ARBEIDSSOEKER = 'ARBEIDSSOEKER',
   UTDANNING = 'UTDANNING',
 }
+
+export enum AktivitetspliktVurderingType {
+  AKTIVITET_UNDER_50 = 'AKTIVITET_UNDER_50',
+  AKTIVITET_OVER_50 = 'AKTIVITET_OVER_50',
+  AKTIVITET_100 = 'AKTIVITET_100',
+}
+
+export const tekstAktivitetspliktVurderingType: Record<AktivitetspliktVurderingType, string> = {
+  AKTIVITET_UNDER_50: 'Under 50%',
+  AKTIVITET_OVER_50: 'Over 50%',
+  AKTIVITET_100: '100%',
+}
+
+export interface IAktivitetspliktVurdering {
+  id: string
+  sakId: number
+  behandlingId: string | undefined
+  oppgaveId: string
+  vurdering: AktivitetspliktVurderingType
+  unntak: boolean
+  fom: string
+  opprettet: KildeSaksbehandler
+  endret: KildeSaksbehandler
+  beskrivelse: string
+}
+
+export interface IOpprettAktivitetspliktVurdering {
+  id: string | undefined
+  vurdering: AktivitetspliktVurderingType
+  unntak: boolean
+  fom: string
+  beskrivelse: string
+}

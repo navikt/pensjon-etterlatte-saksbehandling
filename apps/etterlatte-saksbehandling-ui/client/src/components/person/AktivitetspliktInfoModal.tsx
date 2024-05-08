@@ -1,26 +1,94 @@
-import { BodyLong, BodyShort, Button, Heading, HStack, Label, Modal, Textarea, VStack } from '@navikt/ds-react'
-import React, { useContext, useState } from 'react'
-import { ExternalLinkIcon } from '@navikt/aksel-icons'
-import { ConfigContext } from '~clientConfig'
-import { ferdigstillOppgaveMedMerknad } from '~shared/api/oppgaver'
+import {
+  BodyLong,
+  BodyShort,
+  Button,
+  Detail,
+  Heading,
+  HStack,
+  Label,
+  Modal,
+  Radio,
+  Select,
+  Textarea,
+  VStack,
+} from '@navikt/ds-react'
+import React, { useEffect, useState } from 'react'
+import { ferdigstillOppgave } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending } from '@reduxjs/toolkit'
 import { mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
+import { useForm } from 'react-hook-form'
+import {
+  AktivitetspliktVurderingType,
+  IAktivitetspliktVurdering,
+  tekstAktivitetspliktVurderingType,
+} from '~shared/types/Aktivitetsplikt'
+import { hentAktivitspliktVurdering, opprettAktivitspliktVurdering } from '~shared/api/aktivitetsplikt'
+import Spinner from '~shared/Spinner'
+import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+
+interface AktivitetspliktVurderingValues {
+  aktivitetsgrad: AktivitetspliktVurderingType | ''
+  unntak: boolean | null
+  beskrivelse: string
+}
+
+const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValues = {
+  aktivitetsgrad: '',
+  unntak: null,
+  beskrivelse: '',
+}
 
 export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const [visModal, setVisModal] = useState(false)
-  const [merknad, setMerknad] = useState<string | null>(null)
-  const configContext = useContext(ConfigContext)
+  const [vurdering, setVurdering] = useState<IAktivitetspliktVurdering>()
 
-  const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgaveMedMerknad)
+  const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
+  const [opprettet, opprett] = useApiCall(opprettAktivitspliktVurdering)
+  const [hentet, hent] = useApiCall(hentAktivitspliktVurdering)
 
-  const ferdigstill = () => {
-    apiFerdigstillOppgave({ id: oppgave.id, merknad }, () => {
-      setVisModal(false)
-    })
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    control,
+  } = useForm<AktivitetspliktVurderingValues>({
+    defaultValues: AktivitetspliktVurderingValuesDefault,
+  })
+
+  const ferdigstill = (data: AktivitetspliktVurderingValues) => {
+    opprett(
+      {
+        sakId: oppgave.sakId,
+        oppgaveId: oppgave.id,
+        request: {
+          id: undefined,
+          vurdering: data.aktivitetsgrad as AktivitetspliktVurderingType,
+          unntak: data.unntak!!,
+          fom: new Date().toISOString(),
+          beskrivelse: data.beskrivelse,
+        },
+      },
+      () => {
+        console.log('Opprettet aktivitetsplikt vurdering')
+        apiFerdigstillOppgave(oppgave.id, () => {
+          setVisModal(false)
+        })
+      }
+    )
   }
+
+  useEffect(() => {
+    console.log(visModal, oppgave.status, Oppgavestatus.UNDER_BEHANDLING)
+    if (oppgave.status !== Oppgavestatus.UNDER_BEHANDLING) {
+      hent({ sakId: oppgave.sakId, oppgaveId: oppgave.id }, (result) => {
+        console.log('Hentet aktivitetsplikt vurdering')
+        setVurdering(result)
+      })
+    }
+  }, [])
 
   return (
     <>
@@ -54,56 +122,100 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
                 </Button>
               </div>
 
-              <div>
-                <Heading size="small" spacing>
-                  Lag intern oppfølgingsoppgave med frist
-                </Heading>
-                <BodyLong spacing>
-                  Den etterlatte skal påminnes og følges opp rundt aktivitetskravet både ved 3-4 måneder etter
-                  dødsfallet og på nytt ved 9-10 måneder. Andre frister bør vurderes hvis den etterlatte har andre
-                  ytelser eller andre grunner som krever alternativ oppfølging.
-                </BodyLong>
-                <Button
-                  variant="primary"
-                  size="small"
-                  as="a"
-                  href={`${configContext['gosysUrl']}/personoversikt/fnr=${oppgave.fnr?.toString()}`}
-                  target="_blank"
-                >
-                  Lag oppfølgingsoppgave i Gosys <ExternalLinkIcon />
-                </Button>
-              </div>
               {oppgave.status === Oppgavestatus.UNDER_BEHANDLING ? (
-                <Textarea
-                  label="Merknad"
-                  description="Er det noe spesielt å merke seg ved denne saken?"
-                  onChange={(e) => {
-                    if (e.target.value === '') {
-                      setMerknad(null)
-                    } else {
-                      setMerknad(e.target.value)
+                <VStack gap="4">
+                  <Select
+                    label="Hva er brukers aktivitetsgrad?"
+                    {...register('aktivitetsgrad', {
+                      required: { value: true, message: 'Du må velge aktivitetsgrad' },
+                    })}
+                    error={errors.aktivitetsgrad?.message}
+                  >
+                    <option value="">Velg hvilken grad</option>
+                    {Object.values(AktivitetspliktVurderingType).map((type) => (
+                      <option key={type} value={type}>
+                        {tekstAktivitetspliktVurderingType[type]}
+                      </option>
+                    ))}
+                  </Select>
+                  <ControlledRadioGruppe
+                    name="unntak"
+                    control={control}
+                    errorVedTomInput="Du må velge om bruker har unntak fra aktivitetsplikt"
+                    legend="Er det unntak for bruker?"
+                    radios={
+                      <>
+                        <Radio size="small" value={true}>
+                          Ja
+                        </Radio>
+                        <Radio size="small" value={false}>
+                          Nei
+                        </Radio>
+                      </>
                     }
-                  }}
-                />
-              ) : (
-                <VStack>
-                  <Label>Merknad</Label>
-                  <BodyShort>{oppgave.merknad || 'Ingen merknad'}</BodyShort>
+                  />
+                  <Textarea
+                    label="Beskrivelse"
+                    {...register('beskrivelse', {
+                      required: { value: true, message: 'Du må fylle inn beskrivelse' },
+                    })}
+                    error={errors.beskrivelse?.message}
+                  />
                 </VStack>
+              ) : (
+                <>
+                  <Spinner label="Henter vurdering av aktivitetsplikt" visible={isPending(hentet)} />
+
+                  {mapFailure(hentet, (error) => (
+                    <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved henting av vurdering'}</ApiErrorAlert>
+                  ))}
+
+                  {!isPending(hentet) && vurdering && (
+                    <VStack gap="4">
+                      <>
+                        <Label>Aktivitetsgrad</Label>
+                        <BodyShort>{tekstAktivitetspliktVurderingType[vurdering.vurdering]}</BodyShort>
+                      </>
+
+                      <>
+                        <Label>Unntak</Label>
+                        <BodyShort>{vurdering.unntak ? 'Ja' : 'Nei'}</BodyShort>
+                      </>
+
+                      <>
+                        <Label>Beskrivelse</Label>
+                        <BodyShort>{vurdering.beskrivelse}</BodyShort>
+                      </>
+
+                      <Detail>
+                        Vurdering ble utført {vurdering.opprettet.tidspunkt} av saksbehandler{' '}
+                        {vurdering.opprettet.ident}
+                      </Detail>
+                    </VStack>
+                  )}
+                </>
               )}
             </HStack>
+            {mapFailure(opprettet, (error) => (
+              <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved oppretting av vurdering'}</ApiErrorAlert>
+            ))}
             {mapFailure(ferdigstillOppgaveStatus, (error) => (
               <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved ferdigstilling av oppgave'}</ApiErrorAlert>
             ))}
           </Modal.Body>
           <Modal.Footer>
             {oppgave.status === Oppgavestatus.UNDER_BEHANDLING && (
-              <Button loading={isPending(ferdigstillOppgaveStatus)} variant="primary" onClick={ferdigstill}>
+              <Button
+                loading={isPending(ferdigstillOppgaveStatus) || isPending(opprettet)}
+                variant="primary"
+                type="button"
+                onClick={handleSubmit(ferdigstill)}
+              >
                 Ferdigstill oppgave
               </Button>
             )}
             <Button
-              loading={isPending(ferdigstillOppgaveStatus)}
+              loading={isPending(ferdigstillOppgaveStatus) || isPending(opprettet)}
               variant="secondary"
               onClick={() => setVisModal(false)}
             >

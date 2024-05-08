@@ -365,12 +365,42 @@ internal class GrunnlagsendringshendelseServiceTest {
             sakService.finnSak(sakId)
         } returns Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
 
-        val tom =
+        val tomSivilstandhendelserBP =
             grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(
                 soekerFnr,
                 GrunnlagsendringsType.SIVILSTAND,
             )
-        assertTrue(tom.isEmpty())
+        assertTrue(tomSivilstandhendelserBP.isEmpty())
+
+        every {
+            sakService.finnSak(sakId)
+        } returns Sak(soekerFnr, SakType.OMSTILLINGSSTOENAD, sakId, Enheter.defaultEnhet.enhetNr)
+
+        every { pdlService.hentPdlModellFlereSaktyper(soekerFnr, any(), SakType.OMSTILLINGSSTOENAD) } returns
+            mockPerson()
+        coEvery { grunnlagKlient.hentGrunnlag(any()) } returns Grunnlag.empty()
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB))
+        } returns emptyList()
+        val grlhendelse =
+            grunnlagsendringshendelseMedSamsvar(
+                gjelderPerson = soekerFnr,
+                hendelseGjelderRolle = Saksrolle.SOEKER,
+                samsvarMellomKildeOgGrunnlag = null,
+            ).copy(
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                type = GrunnlagsendringsType.BOSTED,
+            )
+
+        every {
+            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any())
+        } returns grlhendelse
+        val ikketomOmsHendelser =
+            grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(
+                soekerFnr,
+                GrunnlagsendringsType.SIVILSTAND,
+            )
+        assertTrue(ikketomOmsHendelser.isNotEmpty())
     }
 
     @Test

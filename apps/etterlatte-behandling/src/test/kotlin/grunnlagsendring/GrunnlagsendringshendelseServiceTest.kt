@@ -130,25 +130,26 @@ internal class GrunnlagsendringshendelseServiceTest {
                 fraPdl = listOf(adresse),
                 fraGrunnlag = null,
             )
+        val grlhendelse = grunnlagsendringshendelseMedSamsvar(
+            gjelderPerson = KONTANT_FOT.value,
+            samsvarMellomKildeOgGrunnlag = samsvarBostedAdresse,
+        ).copy(
+            status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+            type = GrunnlagsendringsType.BOSTED,
+            hendelseGjelderRolle = Saksrolle.SOESKEN,
+        )
         every {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
         } returns
             listOf(
-                grunnlagsendringshendelseMedSamsvar(
-                    gjelderPerson = KONTANT_FOT.value,
-                    samsvarMellomKildeOgGrunnlag = samsvarBostedAdresse,
-                ).copy(
-                    status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                    type = GrunnlagsendringsType.BOSTED,
-                    hendelseGjelderRolle = Saksrolle.SOESKEN,
-                ),
+                grlhendelse
             )
 
         val erDuplikat =
             grunnlagsendringshendelseService.erDuplikatHendelse(
                 sakId,
                 KONTANT_FOT.value,
-                GrunnlagsendringsType.BOSTED,
+                grlhendelse,
                 samsvarBostedAdresse,
             )
         assertTrue(erDuplikat)
@@ -157,7 +158,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagsendringshendelseService.erDuplikatHendelse(
                 sakId,
                 KONTANT_FOT.value,
-                GrunnlagsendringsType.BOSTED,
+                grlhendelse,
                 samsvarBostedAdresse.copy(
                     fraPdl =
                         listOf(

@@ -387,7 +387,12 @@ class GrunnlagsendringshendelseService(
             val samsvarMellomPdlOgGrunnlag =
                 finnSamsvarForHendelse(grunnlagsendringshendelse, pdlData, grunnlag, personRolle, sak.sakType)
             val erDuplikat =
-                erDuplikatHendelse(sak.id, sak.ident, grunnlagsendringshendelse.type, samsvarMellomPdlOgGrunnlag)
+                erDuplikatHendelse(
+                    sak.id,
+                    grunnlagsendringshendelse.gjelderPerson,
+                    grunnlagsendringshendelse.type,
+                    samsvarMellomPdlOgGrunnlag,
+                )
 
             if (!samsvarMellomPdlOgGrunnlag.samsvar) {
                 if (erDuplikat) {
@@ -486,7 +491,7 @@ class GrunnlagsendringshendelseService(
             ).filter {
                 (fnr == null) || (it.gjelderPerson == fnr && it.type == hendelsesType)
             }
-        logger.info("Hendelser på samme sakid ${sakId} antall ${relevanteHendelser.size} fnr: ${fnr?.maskerFnr()}")
+        logger.info("Hendelser på samme sakid $sakId antall ${relevanteHendelser.size} fnr: ${fnr?.maskerFnr()}")
         return relevanteHendelser.any { it.samsvarMellomKildeOgGrunnlag == samsvarMellomKildeOgGrunnlag }
     }
 }

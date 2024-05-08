@@ -1,5 +1,5 @@
-import React, { ReactNode, useState } from 'react'
-import { DatePicker, DateValidationT, useDatepicker } from '@navikt/ds-react'
+import React, { ReactNode } from 'react'
+import { DatePicker, useDatepicker } from '@navikt/ds-react'
 import { UseDatepickerOptions } from '@navikt/ds-react/esm/date/hooks/useDatepicker'
 import { Control, FieldValues, Path, useController } from 'react-hook-form'
 import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
@@ -20,7 +20,6 @@ export const ControlledDatoVelger = <T extends FieldValues>({
   errorVedTomInput?: string
   readOnly?: boolean
 }): ReactNode => {
-  const [, setDateError] = useState<DateValidationT | null>(null)
   const {
     field,
     fieldState: { error },
@@ -43,11 +42,10 @@ export const ControlledDatoVelger = <T extends FieldValues>({
     },
     locale: 'nb',
     inputFormat: 'dd.MM.yyyy',
-    onValidate: setDateError,
     defaultSelected: field.value ? new Date(field.value) : undefined,
   } as UseDatepickerOptions)
 
-  const handleOnBlur = () => {
+  const handleBlur = () => {
     if (selectedDay && !field.value) {
       setSelected(undefined)
     } else if (selectedDay && !isEqual(new Date(field.value), selectedDay)) {
@@ -65,7 +63,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
         description={description}
         error={error?.message}
         readOnly={readOnly}
-        onBlur={handleOnBlur}
+        onBlur={handleBlur}
       />
     </DatePicker>
   )

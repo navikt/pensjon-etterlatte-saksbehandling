@@ -24,8 +24,7 @@ import java.util.UUID
 
 internal class OmregningsHendelserTest {
     private val beregningService = mockk<BeregningService>()
-    private val trygdetidService = mockk<TrygdetidService>()
-    private val inspector = TestRapid().apply { OmregningHendelserBeregningRiver(this, beregningService, trygdetidService) }
+    private val inspector = TestRapid().apply { OmregningHendelserBeregningRiver(this, beregningService) }
 
     @Test
     fun `skal opprette omregning`() {
@@ -66,12 +65,6 @@ internal class OmregningsHendelserTest {
                 } returns HttpStatusCode.NoContent
             }
 
-        every {
-            trygdetidService.kopierTrygdetidFraForrigeBehandling(
-                capture(behandlingsId),
-                capture(forrigeBehandlingId),
-            )
-        }.returns(noContentValue)
         every {
             beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(
                 capture(behandlingsId),

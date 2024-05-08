@@ -323,6 +323,7 @@ export function TilbakekrevingVurderingSkjema({
                     <Textarea
                       {...register('vedtak', { shouldUnregister: true })}
                       label="Vedtak"
+                      description="Oppgi resultat og hjemmel."
                       readOnly={!redigerbar}
                     />
                   )}
@@ -351,7 +352,12 @@ export function TilbakekrevingVurderingSkjema({
                     readOnly={!redigerbar}
                   />
 
-                  <Textarea {...register('vedtak', { shouldUnregister: true })} label="Vedtak" readOnly={!redigerbar} />
+                  <Textarea
+                    {...register('vedtak', { shouldUnregister: true })}
+                    label="Vedtak"
+                    description="Oppgi resultat og hjemmel."
+                    readOnly={!redigerbar}
+                  />
 
                   <Textarea
                     {...register('vurderesForPaatale', { shouldUnregister: true })}

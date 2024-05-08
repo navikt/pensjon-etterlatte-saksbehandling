@@ -114,7 +114,7 @@ export const NyAktivitet = ({
                   required: { value: true, message: 'Du må velge aktivitetstype' },
                 })}
                 label="Aktivitetstype"
-                error={errors.beskrivelse?.message}
+                error={errors.type?.message}
               >
                 <option value="">Velg aktivitet</option>
                 {Object.keys(AktivitetspliktType).map((type, index) => (

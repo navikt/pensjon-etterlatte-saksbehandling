@@ -7,7 +7,7 @@ import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { isFailure, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
-import { Alert, BodyShort, Button, Detail, Heading, HStack, Table, Textarea, VStack } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Detail, Heading, HStack, Select, Table, Textarea, VStack } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { formaterStringDato } from '~utils/formattering'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
@@ -15,42 +15,20 @@ import { useForm } from 'react-hook-form'
 import { formatISO, isBefore, startOfDay } from 'date-fns'
 import { hentSanksjon, lagreSanksjon, slettSanksjon } from '~shared/api/sanksjon'
 import { TableWrapper } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
-
-export interface ISanksjon {
-  id?: string
-  behandlingId: string
-  sakId: number
-  fom: string
-  tom?: string
-  opprettet: {
-    tidspunkt: string
-    ident: string
-  }
-  endret?: {
-    tidspunkt: string
-    ident: string
-  }
-  beskrivelse: string
-}
-
-export interface ISanksjonLagre {
-  id?: string
-  sakId: number
-  fom: string
-  tom?: string
-  beskrivelse: string
-}
+import { ISanksjon, ISanksjonLagre, SanksjonType, tekstSanksjon } from '~shared/types/sanksjon'
 
 interface SanksjonDefaultValue {
   datoFom?: Date
   datoTom?: Date | null
   beskrivelse: string
+  type: SanksjonType | ''
 }
 
 const sanksjonDefaultValue: SanksjonDefaultValue = {
   datoFom: undefined,
   datoTom: undefined,
   beskrivelse: '',
+  type: '',
 }
 
 export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => {
@@ -85,6 +63,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
     const lagreSanksjon: ISanksjonLagre = {
       id: redigerSanksjonId ? redigerSanksjonId : '',
       sakId: behandling.sakId,
+      type: data.type as SanksjonType,
       fom: formatISO(datoFom!, { representation: 'date' }),
       tom: datoTom ? formatISO(datoTom!, { representation: 'date' }) : undefined,
       beskrivelse: beskrivelse,
@@ -170,6 +149,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                   <Table.Row>
                     <Table.HeaderCell>Fra dato</Table.HeaderCell>
                     <Table.HeaderCell>Til dato</Table.HeaderCell>
+                    <Table.HeaderCell>Type sanksjon</Table.HeaderCell>
                     <Table.HeaderCell>Beskrivelse</Table.HeaderCell>
                     <Table.HeaderCell>Registrert</Table.HeaderCell>
                     <Table.HeaderCell>Endret</Table.HeaderCell>
@@ -185,6 +165,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                           <Table.DataCell>
                             {lagretSanksjon.tom ? formaterStringDato(lagretSanksjon.tom) : '-'}
                           </Table.DataCell>
+                          <Table.DataCell>{tekstSanksjon[lagretSanksjon.type]}</Table.DataCell>
                           <Table.DataCell>{lagretSanksjon.beskrivelse}</Table.DataCell>
                           <Table.DataCell>
                             <BodyShort>{lagretSanksjon.opprettet.ident}</BodyShort>
@@ -210,6 +191,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                                     reset({
                                       datoFom: new Date(lagretSanksjon.fom),
                                       datoTom: lagretSanksjon.tom ? new Date(lagretSanksjon.tom) : null,
+                                      type: lagretSanksjon.type,
                                       beskrivelse: lagretSanksjon.beskrivelse,
                                     })
                                     setRedigerSanksjonId(lagretSanksjon.id!!)
@@ -256,7 +238,7 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                 <Heading size="small" level="3" spacing>
                   Ny sanksjon
                 </Heading>
-                <VStack gap="4">
+                <VStack gap="4" align="start">
                   <HStack gap="4">
                     <ControlledMaanedVelger
                       label="Dato fra og med"
@@ -274,15 +256,27 @@ export const Sanksjon = ({ behandling }: { behandling: IBehandlingReducer }) => 
                       validate={validerTom}
                     />
                   </HStack>
-                  <HStack>
-                    <Textarea
-                      {...register('beskrivelse', {
-                        required: { value: true, message: 'Må fylles ut' },
-                      })}
-                      label="Beskrivelse"
-                      error={errors.beskrivelse?.message}
-                    />
-                  </HStack>
+                  <Select
+                    {...register('type', {
+                      required: { value: true, message: 'Du må velge sanksjonstype' },
+                    })}
+                    label="Type sanksjon"
+                    error={errors.type?.message}
+                  >
+                    <option value="">Velg sanksjon</option>
+                    {Object.keys(SanksjonType).map((type, index) => (
+                      <option key={index} value={type}>
+                        {tekstSanksjon[type as SanksjonType]}
+                      </option>
+                    ))}
+                  </Select>
+                  <Textarea
+                    {...register('beskrivelse', {
+                      required: { value: true, message: 'Må fylles ut' },
+                    })}
+                    label="Beskrivelse"
+                    error={errors.beskrivelse?.message}
+                  />
                   <HStack gap="4">
                     <Button
                       size="small"

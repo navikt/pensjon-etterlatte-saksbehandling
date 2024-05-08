@@ -32,7 +32,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toUUID30
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.nyKontekstMedBruker
@@ -353,7 +352,7 @@ internal class BehandlingStatusServiceTest {
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = behandlingId.toUUID30().value,
+                referanse = sakId.toString(),
                 sakId = sakId,
                 oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
                 oppgaveType = OppgaveType.TILBAKEKREVING,

@@ -2,7 +2,7 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { konverterOppgavestatusFilterValuesTilKeys } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { OppgavebenkStats } from '~components/oppgavebenk/state/oppgavebenkState'
-import { NyOppgaveDto, OppgaveDTO } from '~shared/types/oppgave'
+import { GenerellEndringshendelse, NyOppgaveDto, OppgaveDTO } from '~shared/types/oppgave'
 
 export const hentOppgaverMedStatus = async (args: {
   oppgavestatusFilter: Array<string>
@@ -25,6 +25,9 @@ export const hentOppgaverMedStatus = async (args: {
 }
 
 export const hentOppgave = async (id: string): Promise<ApiResponse<OppgaveDTO>> => apiClient.get(`/oppgaver/${id}`)
+
+export const hentEndringer = async (id: string): Promise<ApiResponse<GenerellEndringshendelse[]>> =>
+  apiClient.get(`/oppgaver/${id}/endringer`)
 
 export const hentOppgaverMedReferanse = async (referanse: string): Promise<ApiResponse<OppgaveDTO[]>> =>
   apiClient.get(`/oppgaver/referanse/${referanse}`)

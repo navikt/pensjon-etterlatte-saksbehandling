@@ -90,7 +90,7 @@ fun utbetalingsvedtak(
 fun oppdrag(
     utbetaling: Utbetaling,
     foerstegangsbehandling: Boolean = true,
-) = OppdragMapper.oppdragFraUtbetaling(utbetaling, foerstegangsbehandling)
+) = OppdragMapper.oppdragFraUtbetaling(utbetaling, foerstegangsbehandling, false)
 
 fun kvittering(oppdragMedKvittering: Oppdrag) =
     Kvittering(

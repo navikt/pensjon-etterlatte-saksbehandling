@@ -36,6 +36,7 @@ enum class SamordningVedtakType {
 enum class SamordningVedtakAarsak {
     INNTEKT,
     DOEDSFALL,
+    REGULERING,
     ANNET,
 }
 
@@ -62,6 +63,12 @@ class ManglerFoedselsnummerException : UgyldigForespoerselException(
 class ManglerFomDatoException : UgyldigForespoerselException(
     code = "003-FOMDATO-MANGLER",
     detail = "fomDato ikke angitt",
+    meta = getMeta(),
+)
+
+class ManglerPaaDatoException : UgyldigForespoerselException(
+    code = "005-PAAMDATO-MANGLER",
+    detail = "paaDato ikke angitt",
     meta = getMeta(),
 )
 

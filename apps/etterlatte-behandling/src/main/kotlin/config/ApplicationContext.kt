@@ -304,7 +304,7 @@ internal class ApplicationContext(
     // Service
     val klageHendelser = KlageHendelserServiceImpl(rapid)
     val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
-    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, behandlingsHendelser)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, hendelseDao, behandlingsHendelser)
 
     val grunnlagsService = GrunnlagServiceImpl(grunnlagKlient)
     val behandlingService =
@@ -335,7 +335,7 @@ internal class ApplicationContext(
         )
     val kommerBarnetTilGodeService =
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
-    val aktivtetspliktService = AktivitetspliktService(aktivitetspliktDao, behandlingService)
+    val aktivitetspliktService = AktivitetspliktService(aktivitetspliktDao, behandlingService)
     val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
 
     val klageBrevService = KlageBrevService(brevApiKlient)
@@ -364,6 +364,7 @@ internal class ApplicationContext(
             revurderingDao = revurderingDao,
             klageService = klageService,
             behandlingService = behandlingService,
+            aktivitetspliktService = aktivitetspliktService,
         )
     val automatiskRevurderingService = AutomatiskRevurderingService(revurderingService)
 
@@ -468,7 +469,7 @@ internal class ApplicationContext(
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
     val saksbehandlerService: SaksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
-    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlTjenesterKlient, oppgaveService, saksbehandlerService)
+    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService)
     val behandlingFactory =
         BehandlingFactory(
             oppgaveService = oppgaveService,

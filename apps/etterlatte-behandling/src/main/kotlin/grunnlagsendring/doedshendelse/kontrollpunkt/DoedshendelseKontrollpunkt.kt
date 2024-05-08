@@ -31,7 +31,7 @@ sealed class DoedshendelseKontrollpunkt {
         override val avbryt: Boolean = false
         override val oppgaveTekst: String
             get() =
-                "Bruker har krav til behandling som ikke kan avsluttes automatisk." +
+                "OPPHØR: Bruker har krav til behandling som ikke kan avsluttes automatisk." +
                     " Kravet må ferdigbehandles, eventuelt feilregistreres, før det opphøres manuelt."
     }
 

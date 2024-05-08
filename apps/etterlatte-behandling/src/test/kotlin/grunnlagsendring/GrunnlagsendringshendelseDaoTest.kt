@@ -181,63 +181,6 @@ internal class GrunnlagsendringshendelseDaoTest(val dataSource: DataSource) {
     }
 
     @Test
-    fun `skal hente grunnlagsendringshendelser som er eldre enn en time`() {
-        val sakid = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
-        listOf(
-            grunnlagsendringshendelseMedSamsvar(
-                sakId = sakid,
-                opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                gjelderPerson = grunnlagsinformasjonDoedshendelse().fnr,
-                samsvarMellomKildeOgGrunnlag = null,
-            ),
-            grunnlagsendringshendelseMedSamsvar(
-                sakId = sakid,
-                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusMinutes(30),
-                gjelderPerson = grunnlagsinformasjonDoedshendelse().fnr,
-                samsvarMellomKildeOgGrunnlag = null,
-            ),
-            grunnlagsendringshendelseMedSamsvar(
-                sakId = sakid,
-                // eldre enn en time
-                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusHours(1),
-                gjelderPerson = grunnlagsinformasjonDoedshendelse().fnr,
-                samsvarMellomKildeOgGrunnlag = null,
-            ),
-            grunnlagsendringshendelseMedSamsvar(
-                sakId = sakid,
-                // eldre enn en time
-                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusDays(4),
-                gjelderPerson = grunnlagsinformasjonDoedshendelse().fnr,
-                samsvarMellomKildeOgGrunnlag = null,
-            ),
-            grunnlagsendringshendelseMedSamsvar(
-                sakId = sakid,
-                // eldre enn en time
-                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
-                gjelderPerson = grunnlagsinformasjonDoedshendelse().fnr,
-                samsvarMellomKildeOgGrunnlag = null,
-            ),
-        ).forEach {
-            grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
-        }
-        val hendelserEldreEnn1Time =
-            grunnlagsendringshendelsesRepo.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
-                60,
-            )
-        assertAll(
-            "henter kun grunnlagsendringshendelser som er eldre enn 1 time",
-            { assertEquals(3, hendelserEldreEnn1Time.size) },
-            {
-                assertTrue {
-                    hendelserEldreEnn1Time.all {
-                        it.opprettet <= Tidspunkt.now().toLocalDatetimeUTC().minusHours(1)
-                    }
-                }
-            },
-        )
-    }
-
-    @Test
     fun `hentGrunnlagsendringshendelserMedStatuserISak henter kun statuser som er angitt`() {
         val sakid = sakRepo.opprettSak("1234", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         listOf(

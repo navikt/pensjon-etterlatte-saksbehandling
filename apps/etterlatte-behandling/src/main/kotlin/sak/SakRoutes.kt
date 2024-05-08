@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.Saker
@@ -196,7 +195,7 @@ internal fun Route.sakWebRoutes(
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                             for (oppgaveIntern in oppgaveService.hentOppgaverForSak(sakId)) {
                                 if (oppgaveIntern.saksbehandler != null &&
-                                    oppgaveIntern.status in listOf(Status.UNDER_BEHANDLING, Status.ATTESTERING, Status.PAA_VENT)
+                                    oppgaveIntern.erUnderBehandling()
                                 ) {
                                     oppgaveService.fjernSaksbehandler(
                                         oppgaveIntern.id,

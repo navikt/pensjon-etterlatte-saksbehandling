@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -128,17 +129,27 @@ class HendelseDao(private val connectionAutoclosing: ConnectionAutoclosing) {
         ),
     )
 
-    fun tilbakekrevingOpprettet(
+    fun tilbakekrevingHendelse(
         tilbakekrevingId: UUID,
         sakId: Long,
-    ) = behandlingOpprettet(
-        hendelseType = "TILBAKEKREVING:OPPRETTET",
-        behandling =
-            BehandlingOpprettet(
-                Tidspunkt.now(),
-                tilbakekrevingId,
-                sakId,
-            ),
+        vedtakId: Long?,
+        hendelse: TilbakekrevingHendelseType,
+        inntruffet: Tidspunkt,
+        saksbehandler: String?,
+        kommentar: String?,
+        begrunnelse: String?,
+    ) = lagreHendelse(
+        UlagretHendelse(
+            hendelse = "TILBAKEKREVING:${hendelse.name}",
+            inntruffet = inntruffet,
+            vedtakId = vedtakId,
+            behandlingId = tilbakekrevingId,
+            sakId = sakId,
+            ident = saksbehandler,
+            identType = "SAKSBEHANDLER".takeIf { saksbehandler != null },
+            kommentar = kommentar,
+            valgtBegrunnelse = begrunnelse,
+        ),
     )
 
     fun vedtakHendelse(

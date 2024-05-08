@@ -571,7 +571,11 @@ class VedtakBehandlingService(
                                 }
                             beregningsperioder.map {
                                 Utbetalingsperiode(
-                                    periode = Periode(it.datoFOM, it.datoTOM),
+                                    periode =
+                                        Periode(
+                                            fom = it.datoFOM,
+                                            tom = it.datoTOM ?: opphoerFraOgMed?.minusMonths(1),
+                                        ),
                                     beloep = it.utbetaltBeloep.toBigDecimal(),
                                     type = UtbetalingsperiodeType.UTBETALING,
                                 )
@@ -585,7 +589,11 @@ class VedtakBehandlingService(
 
                             avkortetYtelse.map {
                                 Utbetalingsperiode(
-                                    periode = Periode(it.fom, it.tom),
+                                    periode =
+                                        Periode(
+                                            fom = it.fom,
+                                            tom = it.tom ?: opphoerFraOgMed?.minusMonths(1),
+                                        ),
                                     beloep = it.ytelseEtterAvkorting.toBigDecimal(),
                                     type = UtbetalingsperiodeType.UTBETALING,
                                 )

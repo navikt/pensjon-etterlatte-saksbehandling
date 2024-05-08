@@ -1370,9 +1370,11 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
             innhold.utbetalingsperioder.size shouldBe 2
             innhold.utbetalingsperioder[0].beloep shouldBe BigDecimal(100)
             innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+            innhold.utbetalingsperioder[0].periode.tom shouldBe virkningstidspunkt
 
             innhold.utbetalingsperioder[1].beloep shouldBe null
             innhold.utbetalingsperioder[1].periode.fom shouldBe opphoer
+            innhold.utbetalingsperioder[1].periode.tom shouldBe null
         }
     }
 

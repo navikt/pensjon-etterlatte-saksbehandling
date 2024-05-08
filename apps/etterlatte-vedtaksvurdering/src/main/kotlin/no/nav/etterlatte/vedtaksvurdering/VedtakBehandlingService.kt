@@ -471,7 +471,6 @@ class VedtakBehandlingService(
                         utbetalingsperioder =
                             opprettUtbetalingsperioder(
                                 vedtakType = vedtakType,
-                                virkningstidspunkt = virkningstidspunkt,
                                 beregningOgAvkorting = beregningOgAvkorting,
                                 behandling.sakType,
                                 opphoerFraOgMed = opphoerFraOgMed,
@@ -506,7 +505,6 @@ class VedtakBehandlingService(
                         utbetalingsperioder =
                             opprettUtbetalingsperioder(
                                 vedtakType = vedtakType,
-                                virkningstidspunkt = virkningstidspunkt,
                                 beregningOgAvkorting = beregningOgAvkorting,
                                 behandling.sakType,
                                 opphoerFraOgMed = opphoerFraOgMed,
@@ -558,7 +556,6 @@ class VedtakBehandlingService(
 
     private fun opprettUtbetalingsperioder(
         vedtakType: VedtakType,
-        virkningstidspunkt: YearMonth,
         beregningOgAvkorting: BeregningOgAvkorting?,
         sakType: SakType,
         opphoerFraOgMed: YearMonth?,
@@ -588,11 +585,7 @@ class VedtakBehandlingService(
 
                             avkortetYtelse.map {
                                 Utbetalingsperiode(
-                                    periode =
-                                        Periode(
-                                            fom = YearMonth.from(it.fom),
-                                            tom = it.tom?.let { tom -> YearMonth.from(tom) },
-                                        ),
+                                    periode = Periode(it.fom, it.tom),
                                     beloep = it.ytelseEtterAvkorting.toBigDecimal(),
                                     type = UtbetalingsperiodeType.UTBETALING,
                                 )

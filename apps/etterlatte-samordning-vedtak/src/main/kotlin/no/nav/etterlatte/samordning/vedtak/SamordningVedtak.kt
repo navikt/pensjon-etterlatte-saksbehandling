@@ -36,6 +36,7 @@ enum class SamordningVedtakType {
 enum class SamordningVedtakAarsak {
     INNTEKT,
     DOEDSFALL,
+    REGULERING,
     ANNET,
 }
 

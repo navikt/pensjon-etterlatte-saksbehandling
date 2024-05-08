@@ -452,6 +452,7 @@ class VedtakBehandlingService(
         beregningOgAvkorting: BeregningOgAvkorting?,
         vilkaarsvurdering: VilkaarsvurderingDto?,
     ): Vedtak {
+        val opphoerFraOgMed = utledOpphoerFraOgMed(vedtakType, virkningstidspunkt, behandling)
         val opprettetVedtak =
             OpprettVedtak(
                 soeker = behandling.soeker.let { Folkeregisteridentifikator.of(it) },
@@ -473,22 +474,11 @@ class VedtakBehandlingService(
                                 virkningstidspunkt = virkningstidspunkt,
                                 beregningOgAvkorting = beregningOgAvkorting,
                                 behandling.sakType,
+                                opphoerFraOgMed = opphoerFraOgMed,
                             ),
                         revurderingAarsak = behandling.revurderingsaarsak,
                         revurderingInfo = behandling.revurderingInfo,
-                        opphoerFraOgMed =
-                            when (vedtakType) {
-                                VedtakType.OPPHOER -> {
-                                    virkningstidspunkt
-                                }
-                                else -> {
-                                    if (virkningstidspunkt == behandling.opphoerFraOgMed) {
-                                        null
-                                    } else {
-                                        behandling.opphoerFraOgMed
-                                    }
-                                }
-                            },
+                        opphoerFraOgMed = opphoerFraOgMed,
                     ),
             )
 
@@ -503,6 +493,7 @@ class VedtakBehandlingService(
         beregningOgAvkorting: BeregningOgAvkorting?,
         vilkaarsvurdering: VilkaarsvurderingDto?,
     ): Vedtak {
+        val opphoerFraOgMed = utledOpphoerFraOgMed(vedtakType, virkningstidspunkt, behandling)
         val oppdatertVedtak =
             eksisterendeVedtak.copy(
                 type = vedtakType,
@@ -518,24 +509,30 @@ class VedtakBehandlingService(
                                 virkningstidspunkt = virkningstidspunkt,
                                 beregningOgAvkorting = beregningOgAvkorting,
                                 behandling.sakType,
+                                opphoerFraOgMed = opphoerFraOgMed,
                             ),
                         revurderingInfo = behandling.revurderingInfo,
-                        opphoerFraOgMed =
-                            when (vedtakType) {
-                                VedtakType.OPPHOER -> {
-                                    virkningstidspunkt
-                                }
-                                else -> {
-                                    if (virkningstidspunkt == behandling.opphoerFraOgMed) {
-                                        null
-                                    } else {
-                                        behandling.opphoerFraOgMed
-                                    }
-                                }
-                            },
+                        opphoerFraOgMed = opphoerFraOgMed,
                     ),
             )
         return repository.oppdaterVedtak(oppdatertVedtak)
+    }
+
+    private fun utledOpphoerFraOgMed(
+        vedtakType: VedtakType,
+        virkningstidspunkt: YearMonth,
+        behandling: DetaljertBehandling,
+    ) = when (vedtakType) {
+        VedtakType.OPPHOER -> {
+            virkningstidspunkt
+        }
+        else -> {
+            if (virkningstidspunkt == behandling.opphoerFraOgMed) {
+                null
+            } else {
+                behandling.opphoerFraOgMed
+            }
+        }
     }
 
     private fun vedtakType(
@@ -564,58 +561,67 @@ class VedtakBehandlingService(
         virkningstidspunkt: YearMonth,
         beregningOgAvkorting: BeregningOgAvkorting?,
         sakType: SakType,
+        opphoerFraOgMed: YearMonth?,
     ): List<Utbetalingsperiode> {
-        return when (vedtakType) {
-            VedtakType.INNVILGELSE, VedtakType.ENDRING -> {
-                when (sakType) {
-                    SakType.BARNEPENSJON -> {
-                        val beregningsperioder =
-                            requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
-                                "Mangler beregning"
+        val perioderMedUtbetaling =
+            when (vedtakType) {
+                VedtakType.INNVILGELSE, VedtakType.ENDRING -> {
+                    when (sakType) {
+                        SakType.BARNEPENSJON -> {
+                            val beregningsperioder =
+                                requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
+                                    "Mangler beregning"
+                                }
+                            beregningsperioder.map {
+                                Utbetalingsperiode(
+                                    periode = Periode(it.datoFOM, it.datoTOM),
+                                    beloep = it.utbetaltBeloep.toBigDecimal(),
+                                    type = UtbetalingsperiodeType.UTBETALING,
+                                )
                             }
-                        beregningsperioder.map {
-                            Utbetalingsperiode(
-                                periode = Periode(it.datoFOM, it.datoTOM),
-                                beloep = it.utbetaltBeloep.toBigDecimal(),
-                                type = UtbetalingsperiodeType.UTBETALING,
-                            )
                         }
-                    }
 
-                    SakType.OMSTILLINGSSTOENAD -> {
-                        val avkortetYtelse =
-                            beregningOgAvkorting?.avkorting?.avkortetYtelse
-                                ?: throw ManglerAvkortetYtelse()
+                        SakType.OMSTILLINGSSTOENAD -> {
+                            val avkortetYtelse =
+                                beregningOgAvkorting?.avkorting?.avkortetYtelse
+                                    ?: throw ManglerAvkortetYtelse()
 
-                        avkortetYtelse.map {
-                            Utbetalingsperiode(
-                                periode =
-                                    Periode(
-                                        fom = YearMonth.from(it.fom),
-                                        tom = it.tom?.let { tom -> YearMonth.from(tom) },
-                                    ),
-                                beloep = it.ytelseEtterAvkorting.toBigDecimal(),
-                                type = UtbetalingsperiodeType.UTBETALING,
-                            )
+                            avkortetYtelse.map {
+                                Utbetalingsperiode(
+                                    periode =
+                                        Periode(
+                                            fom = YearMonth.from(it.fom),
+                                            tom = it.tom?.let { tom -> YearMonth.from(tom) },
+                                        ),
+                                    beloep = it.ytelseEtterAvkorting.toBigDecimal(),
+                                    type = UtbetalingsperiodeType.UTBETALING,
+                                )
+                            }
                         }
                     }
                 }
+
+                VedtakType.OPPHOER,
+                VedtakType.TILBAKEKREVING,
+                VedtakType.AVSLAG,
+                VedtakType.AVVIST_KLAGE,
+                -> emptyList()
             }
 
-            VedtakType.OPPHOER ->
+        val perioderMedOpphoer =
+            if (opphoerFraOgMed != null) {
                 listOf(
                     Utbetalingsperiode(
-                        periode = Periode(virkningstidspunkt, null),
+                        periode = Periode(opphoerFraOgMed, null),
                         beloep = null,
                         type = UtbetalingsperiodeType.OPPHOER,
                     ),
                 )
+            } else {
+                emptyList()
+            }
 
-            VedtakType.TILBAKEKREVING,
-            VedtakType.AVSLAG,
-            VedtakType.AVVIST_KLAGE,
-            -> emptyList()
-        }
+        return perioderMedUtbetaling + perioderMedOpphoer
     }
 
     private suspend fun hentDataForVedtak(

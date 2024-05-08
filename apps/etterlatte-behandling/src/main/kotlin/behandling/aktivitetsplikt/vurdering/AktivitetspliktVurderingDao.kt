@@ -93,7 +93,6 @@ data class LagreAktivitetspliktVurdering(
 
 enum class AktivitetspliktVurderingType {
     AKTIVITET_UNDER_50,
-    AKTIVITET_50,
-    AKTIVITET_MELLOM_50_OG_100,
+    AKTIVITET_OVER_50,
     AKTIVITET_100,
 }

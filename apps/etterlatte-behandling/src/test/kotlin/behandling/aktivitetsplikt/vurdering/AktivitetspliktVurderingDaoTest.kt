@@ -32,7 +32,7 @@ class AktivitetspliktVurderingDaoTest(ds: DataSource) {
         val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
         val vurdering =
             LagreAktivitetspliktVurdering(
-                vurdering = AktivitetspliktVurderingType.AKTIVITET_50,
+                vurdering = AktivitetspliktVurderingType.AKTIVITET_OVER_50,
                 beskrivelse = "Beskrivelse",
             )
 

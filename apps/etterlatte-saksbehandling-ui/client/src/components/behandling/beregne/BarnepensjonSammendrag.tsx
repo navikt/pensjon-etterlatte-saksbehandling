@@ -1,6 +1,6 @@
 import { Heading, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { compareDesc, lastDayOfMonth } from 'date-fns'
+import { compareDesc, isBefore, lastDayOfMonth } from 'date-fns'
 import { formaterDato, formaterStringDato } from '~utils/formattering'
 import { Beregning } from '~shared/types/Beregning'
 import { Barnepensjonberegningssammendrag } from '~components/behandling/beregne/Barnepensjonberegningssammendrag'
@@ -98,7 +98,9 @@ export const BarnepensjonSammendrag = ({ beregning }: Props) => {
               </Table.DataCell>
               <Table.DataCell>{beregningsperiode.grunnbelop} kr</Table.DataCell>
               <Table.DataCell>
-                {beregningsperiode.soeskenFlokk && `${beregningsperiode.soeskenFlokk.length + 1} barn`}{' '}
+                {beregningsperiode.soeskenFlokk &&
+                  isBefore(beregningsperiode.datoTOM, new Date(2024, 0, 1)) &&
+                  `${beregningsperiode.soeskenFlokk.length + 1} barn`}{' '}
                 {beregningsperiode.institusjonsopphold && ' institusjonsopphold'}
               </Table.DataCell>
               <Table.DataCell>{beregningsperiode.utbetaltBeloep} kr</Table.DataCell>

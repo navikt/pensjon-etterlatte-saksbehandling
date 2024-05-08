@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktAktivitet
@@ -13,6 +14,9 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.aktivitetsplikt.LagreAktivitetspliktAktivitet
 import no.nav.etterlatte.behandling.aktivitetsplikt.SakidTilhoererIkkeBehandlingException
 import no.nav.etterlatte.behandling.aktivitetsplikt.TomErFoerFomException
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktVurderingDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktVurderingType
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktVurdering
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -27,8 +31,9 @@ import java.util.UUID
 
 class AktivitetspliktServiceTest {
     private val aktivitetspliktDao: AktivitetspliktDao = mockk()
+    private val aktivitetspliktVurderingDao: AktivitetspliktVurderingDao = mockk()
     private val behandlingService: BehandlingService = mockk()
-    private val service = AktivitetspliktService(aktivitetspliktDao, behandlingService)
+    private val service = AktivitetspliktService(aktivitetspliktDao, aktivitetspliktVurderingDao, behandlingService)
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val brukerTokenInfo =
         mockk<BrukerTokenInfo> {
@@ -137,6 +142,35 @@ class AktivitetspliktServiceTest {
             assertThrows<BehandlingKanIkkeEndres> {
                 service.slettAktivitet(behandling.id, aktivitetId)
             }
+        }
+    }
+
+    @Nested
+    inner class LeggTilOgHentVurdering {
+        private val oppgaveId = UUID.randomUUID()
+        private val sakId = 1L
+
+        @Test
+        fun `Skal opprette en ny vurdering`() {
+            val vurdering =
+                LagreAktivitetspliktVurdering(
+                    vurdering = AktivitetspliktVurderingType.AKTIVITET_UNDER_50,
+                    beskrivelse = "Beskrivelse",
+                )
+            every { aktivitetspliktVurderingDao.opprettVurdering(vurdering, sakId, any(), oppgaveId) } returns 1
+
+            service.opprettVurdering(vurdering, oppgaveId, sakId, brukerTokenInfo)
+
+            verify { aktivitetspliktVurderingDao.opprettVurdering(vurdering, sakId, any(), oppgaveId) }
+        }
+
+        @Test
+        fun `Skal hente en vurdering basert paa oppgaveId`() {
+            every { aktivitetspliktVurderingDao.hentVurdering(oppgaveId) } returns mockk()
+
+            service.hentVurdering(oppgaveId)
+
+            verify { aktivitetspliktVurderingDao.hentVurdering(oppgaveId) }
         }
     }
 

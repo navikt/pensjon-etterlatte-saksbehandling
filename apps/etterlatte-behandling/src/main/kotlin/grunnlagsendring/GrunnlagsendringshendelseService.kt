@@ -386,8 +386,7 @@ class GrunnlagsendringshendelseService(
             val erDuplikat =
                 erDuplikatHendelse(
                     sak.id,
-                    grunnlagsendringshendelse.gjelderPerson,
-                    grunnlagsendringshendelse.type,
+                    grunnlagsendringshendelse,
                     samsvarMellomPdlOgGrunnlag,
                 )
 
@@ -457,8 +456,7 @@ class GrunnlagsendringshendelseService(
 
     internal fun erDuplikatHendelse(
         sakId: Long,
-        fnr: String?,
-        hendelsesType: GrunnlagsendringsType,
+        grunnlagsendringshendelse: Grunnlagsendringshendelse,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ): Boolean {
         val relevanteHendelser =
@@ -466,9 +464,9 @@ class GrunnlagsendringshendelseService(
                 sakId,
                 listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
             ).filter {
-                (fnr == null) || (it.gjelderPerson == fnr && it.type == hendelsesType)
+                it.gjelderPerson == grunnlagsendringshendelse.gjelderPerson && it.type == grunnlagsendringshendelse.type
             }
-        logger.info("Hendelser på samme sakid $sakId antall ${relevanteHendelser.size} fnr: ${fnr?.maskerFnr()}")
+        logger.info("Hendelser på samme sakid ${sakId} antall ${relevanteHendelser.size} fnr: ${fnr?.maskerFnr()} grlid: ${grunnlagsendringshendelse.id}")
         return relevanteHendelser.any { it.samsvarMellomKildeOgGrunnlag == samsvarMellomKildeOgGrunnlag }
     }
 }

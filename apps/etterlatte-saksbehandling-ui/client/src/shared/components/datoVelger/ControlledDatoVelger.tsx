@@ -65,9 +65,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
         description={description}
         error={error?.message}
         readOnly={readOnly}
-        onBlur={() => {
-          handleOnBlur()
-        }}
+        onBlur={handleOnBlur}
       />
     </DatePicker>
   )

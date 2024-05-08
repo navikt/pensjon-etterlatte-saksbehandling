@@ -362,7 +362,7 @@ class OppgaveService(
                         val hendelse = EndringMapper.mapBehandlingHendelse(it)
                         GenerellEndringshendelse(
                             tidspunkt = it.opprettet,
-                            saksbehandler = "Z12345",
+                            saksbehandler = it.ident,
                             endringer =
                                 listOf(
                                     EndringLinje(

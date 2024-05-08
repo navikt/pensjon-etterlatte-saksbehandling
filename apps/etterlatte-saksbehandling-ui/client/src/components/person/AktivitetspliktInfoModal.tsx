@@ -7,7 +7,6 @@ import {
   HStack,
   Label,
   Modal,
-  Radio,
   Select,
   Textarea,
   VStack,
@@ -27,17 +26,17 @@ import {
 } from '~shared/types/Aktivitetsplikt'
 import { hentAktivitspliktVurdering, opprettAktivitspliktVurdering } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
-import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { formaterStringDato } from '~utils/formattering'
 
 interface AktivitetspliktVurderingValues {
   aktivitetsgrad: AktivitetspliktVurderingType | ''
-  unntak: boolean | null
+  // unntak: boolean | null
   beskrivelse: string
 }
 
 const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValues = {
   aktivitetsgrad: '',
-  unntak: null,
+  // unntak: null,
   beskrivelse: '',
 }
 
@@ -53,7 +52,7 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
     register,
     handleSubmit,
     formState: { errors },
-    control,
+    // control,
   } = useForm<AktivitetspliktVurderingValues>({
     defaultValues: AktivitetspliktVurderingValuesDefault,
   })
@@ -66,7 +65,7 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
         request: {
           id: undefined,
           vurdering: data.aktivitetsgrad as AktivitetspliktVurderingType,
-          unntak: data.unntak!!,
+          // unntak: data.unntak!!,
           fom: new Date().toISOString(),
           beskrivelse: data.beskrivelse,
         },
@@ -138,6 +137,7 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
                       </option>
                     ))}
                   </Select>
+                  {/*
                   <ControlledRadioGruppe
                     name="unntak"
                     control={control}
@@ -154,6 +154,7 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
                       </>
                     }
                   />
+                  */}
                   <Textarea
                     label="Beskrivelse"
                     {...register('beskrivelse', {
@@ -177,18 +178,19 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
                         <BodyShort>{tekstAktivitetspliktVurderingType[vurdering.vurdering]}</BodyShort>
                       </>
 
+                      {/*
                       <>
                         <Label>Unntak</Label>
                         <BodyShort>{vurdering.unntak ? 'Ja' : 'Nei'}</BodyShort>
                       </>
-
+                      */}
                       <>
                         <Label>Beskrivelse</Label>
                         <BodyShort>{vurdering.beskrivelse}</BodyShort>
                       </>
 
                       <Detail>
-                        Vurdering ble utført {vurdering.opprettet.tidspunkt} av saksbehandler{' '}
+                        Vurdering ble utført {formaterStringDato(vurdering.opprettet.tidspunkt)} av saksbehandler{' '}
                         {vurdering.opprettet.ident}
                       </Detail>
                     </VStack>

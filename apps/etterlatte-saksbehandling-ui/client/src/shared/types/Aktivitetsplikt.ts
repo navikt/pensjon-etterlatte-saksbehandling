@@ -54,7 +54,7 @@ export interface IAktivitetspliktVurdering {
   behandlingId: string | undefined
   oppgaveId: string
   vurdering: AktivitetspliktVurderingType
-  unntak: boolean
+  // unntak: boolean
   fom: string
   opprettet: KildeSaksbehandler
   endret: KildeSaksbehandler
@@ -64,7 +64,7 @@ export interface IAktivitetspliktVurdering {
 export interface IOpprettAktivitetspliktVurdering {
   id: string | undefined
   vurdering: AktivitetspliktVurderingType
-  unntak: boolean
+  // unntak: boolean
   fom: string
   beskrivelse: string
 }

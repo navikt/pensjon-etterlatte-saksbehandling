@@ -13,7 +13,7 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.KONTANT_FOT
+import no.nav.etterlatte.*
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
@@ -23,10 +23,8 @@ import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
-import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -47,12 +45,9 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
-import no.nav.etterlatte.mockPerson
-import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -61,7 +56,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -114,10 +108,55 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
-    fun `Skal ignorere duplikate hendelser men ikke om det er tomt`() {
+    fun `Sjekk at fnr matcher hendelse fnr og ikke sak ident i duplikatsjekk`() {
         val sakId = 1L
         val sak = Sak(KONTANT_FOT.value, SakType.BARNEPENSJON, sakId, Enheter.STEINKJER.enhetNr)
+        val grlhendelse = grunnlagsendringshendelseMedSamsvar(
+            gjelderPerson = KONTANT_FOT.value,
+            hendelseGjelderRolle = Saksrolle.GJENLEVENDE,
+            samsvarMellomKildeOgGrunnlag = null,
+        ).copy(
+            status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+            type = GrunnlagsendringsType.BOSTED,
+        )
 
+        val adresse =
+            Adresse(
+                type = AdresseType.VEGADRESSE,
+                aktiv = true,
+                kilde = "FREG",
+                postnr = "2040",
+                adresseLinje1 = "Furukollveien 189",
+            )
+        val samsvarBostedAdresse =
+            SamsvarMellomKildeOgGrunnlag.Adresse(
+                samsvar = false,
+                fraPdl = listOf(adresse),
+                fraGrunnlag = null,
+            )
+
+        every { grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB)) } returns
+                listOf(grlhendelse.copy(id = randomUUID(), samsvarMellomKildeOgGrunnlag = samsvarBostedAdresse, gjelderPerson = sak.ident))
+        val erDuplikatHvisGjelderPersonErSakident = grunnlagsendringshendelseService.erDuplikatHendelse(
+            sakId,
+            grlhendelse,
+            samsvarBostedAdresse
+        )
+        assertTrue(erDuplikatHvisGjelderPersonErSakident)
+
+        every { grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB)) } returns
+                listOf(grlhendelse.copy(id = randomUUID(), samsvarMellomKildeOgGrunnlag = samsvarBostedAdresse, gjelderPerson = JOVIAL_LAMA.value))
+        val erIkkeDuplikatHvisGjelderPersonIkkeErSakident = grunnlagsendringshendelseService.erDuplikatHendelse(
+            sakId,
+            grlhendelse,
+            samsvarBostedAdresse
+        )
+        assertFalse(erIkkeDuplikatHvisGjelderPersonIkkeErSakident)
+    }
+
+    @Test
+    fun `Skal ignorere duplikate hendelser men ikke om det er 0 hendelser fra før av`() {
+        val sakId = 1L
         val adresse =
             Adresse(
                 type = AdresseType.VEGADRESSE,
@@ -144,7 +183,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB)) } returns emptyList()
 
         val erIkkeDuplikat = grunnlagsendringshendelseService.erDuplikatHendelse(
-            sak,
+            sakId,
             grlhendelse,
             samsvarBostedAdresse
         )
@@ -154,7 +193,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB)) } returns listOf(grlhendelse.copy(id = randomUUID(), samsvarMellomKildeOgGrunnlag = samsvarBostedAdresse))
 
         val erDuplikat = grunnlagsendringshendelseService.erDuplikatHendelse(
-            sak,
+            sakId,
             grlhendelse,
             samsvarBostedAdresse
         )
@@ -199,7 +238,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val sak = Sak(KONTANT_FOT.value, SakType.BARNEPENSJON, sakId, Enheter.STEINKJER.enhetNr)
         val erDuplikat =
             grunnlagsendringshendelseService.erDuplikatHendelse(
-                sak,
+                sakId,
                 grlhendelse,
                 samsvarBostedAdresse,
             )
@@ -207,7 +246,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val erIkkeDuplikat =
             grunnlagsendringshendelseService.erDuplikatHendelse(
-                sak,
+                sakId,
                 grlhendelse,
                 samsvarBostedAdresse.copy(
                     fraPdl =
@@ -226,7 +265,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
-    fun `Skal opprette hendelser for hendelse`() {
+    fun `Skal opprette hendelser for hendelse - distinct på sakker og roller fra grunnlag`() {
         val sakId = 1L
         val fnr = KONTANT_FOT.value
 
@@ -279,6 +318,61 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(fnr, GrunnlagsendringsType.DOEDSFALL)
         assertEquals(6, opprettedeHendelser.size)
     }
+
+    @Test
+    fun `Skal matche på hendelse fnr mot tidligere grl hendelser gjelder_person og ikke relatert sak sin ident men på egen`() {
+        val sakId = 1L
+        val soekerFnr = KONTANT_FOT.value
+        val gjenlevendeFnr = JOVIAL_LAMA.value
+        val bostedAdresse =
+            Adresse(
+                type = AdresseType.VEGADRESSE,
+                aktiv = true,
+                kilde = "FREG",
+                postnr = "2040",
+                adresseLinje1 = "Furukollveien 189",
+            )
+        every { pdlService.hentPdlModellFlereSaktyper(gjenlevendeFnr, any(), SakType.BARNEPENSJON) } returns mockPerson()
+            .copy(bostedsadresse = listOf(OpplysningDTO(bostedAdresse,"adresse")))
+        coEvery { grunnlagKlient.hentGrunnlag(any()) } returns Grunnlag.empty()
+        every { behandlingService.hentBehandlingerForSak(sakId) } returns emptyList()
+        every {
+            sakService.finnSak(sakId)
+        } returns Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }
+            .returns(
+                PersonMedSakerOgRoller(
+                    soekerFnr,
+                    listOf(SakidOgRolle(sakId, Saksrolle.GJENLEVENDE))))
+
+
+        val samsvarBostedAdresse =
+            SamsvarMellomKildeOgGrunnlag.Adresse(
+                samsvar = false,
+                fraPdl = listOf(bostedAdresse),
+                fraGrunnlag = null,
+            )
+
+        val grlhendelse = grunnlagsendringshendelseMedSamsvar(
+            gjelderPerson = gjenlevendeFnr,
+            hendelseGjelderRolle = Saksrolle.GJENLEVENDE,
+            samsvarMellomKildeOgGrunnlag = samsvarBostedAdresse,
+        ).copy(
+            status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+            type = GrunnlagsendringsType.BOSTED,
+        )
+
+        every { grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(match{ it.status == GrunnlagsendringStatus.FORKASTET && it.samsvarMellomKildeOgGrunnlag == samsvarBostedAdresse}) } returns grlhendelse
+
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB))
+        } returns listOf(grlhendelse)
+        grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(gjenlevendeFnr, GrunnlagsendringsType.BOSTED)
+
+        verify(exactly = 1) { grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(match { it.status == GrunnlagsendringStatus.FORKASTET}) }
+        verify(exactly = 0) { grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(match { it.status != GrunnlagsendringStatus.FORKASTET}) }
+    }
+
 
     @Test
     fun `skal opprette grunnlagsendringshendelser i databasen for doedshendelser - base case`() {

@@ -443,7 +443,8 @@ class GrunnlagsendringshendelseService(
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ) {
         logger.info("Forkaster grunnlagsendringshendelse med id ${hendelse.id}.")
-        grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse.copy(samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag, status = GrunnlagsendringStatus.FORKASTET))
+        grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+            hendelse.copy(samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag, status = GrunnlagsendringStatus.FORKASTET))
     }
 
     private fun hendelseHarKunAvbrytteBehandlinger(

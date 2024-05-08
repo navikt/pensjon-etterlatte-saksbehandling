@@ -1,6 +1,9 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktVurdering
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktVurderingDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktVurdering
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
@@ -13,6 +16,7 @@ import java.util.UUID
 
 class AktivitetspliktService(
     private val aktivitetspliktDao: AktivitetspliktDao,
+    private val aktivitetspliktVurderingDao: AktivitetspliktVurderingDao,
     private val behandlingService: BehandlingService,
 ) {
     fun hentAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? {
@@ -92,6 +96,23 @@ class AktivitetspliktService(
 
         aktivitetspliktDao.kopierAktiviteter(fraBehandlingId, tilBehandlingId)
     }
+
+    fun opprettVurdering(
+        vurdering: LagreAktivitetspliktVurdering,
+        oppgaveId: UUID,
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
+        inTransaction {
+            aktivitetspliktVurderingDao.opprettVurdering(vurdering, sakId, kilde, oppgaveId)
+        }
+    }
+
+    fun hentVurdering(oppgaveId: UUID): AktivitetspliktVurdering =
+        inTransaction {
+            aktivitetspliktVurderingDao.hentVurdering(oppgaveId)
+        }
 }
 
 class SakidTilhoererIkkeBehandlingException :

@@ -57,29 +57,37 @@ internal class OppgaveDaoReguleringTest(val dataSource: DataSource) {
     }
 
     @Test
-    fun `skal tilbakestille oppgaver under attestering`() {
+    fun `Skal tilbakestille oppgaver under attestering`() {
         val sakEn = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val sakTo = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val sakTre = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
 
         val sakerTilRegulering = Saker(listOf(sakEn, sakTo))
 
-        val oppgaveAttestert =
-            lagOppgave(sakId = sakEn.id, status = Status.UNDER_BEHANDLING).also {
-                oppgaveDaoMedEndringssporing.oppdaterStatusOgMerknad(it.id, "", Status.ATTESTERING)
-                oppgaveDao.settNySaksbehandler(it.id, "Ikke Ole")
-            }
+        val oppgaveAttestert = lagOppgave(sakId = sakEn.id, status = Status.ATTESTERING)
         val oppgaveIkkeAttestert = lagOppgave(sakId = sakTo.id, status = Status.NY)
         val ikkeMedIRegulering = lagOppgave(sakId = sakTre.id, status = Status.ATTESTERING)
 
         oppgaveService.tilbakestillOppgaverUnderAttestering(sakerTilRegulering)
 
+        oppgaveDao.hentOppgave(oppgaveAttestert.id)!!.status shouldBe Status.UNDER_BEHANDLING
+        oppgaveDao.hentOppgave(oppgaveIkkeAttestert.id)!!.status shouldBe Status.NY
+        oppgaveDao.hentOppgave(ikkeMedIRegulering.id)!!.status shouldBe Status.ATTESTERING
+    }
+
+    @Test
+    fun `Setter forrige saksbehandler ved tilbakestilling`() {
+        val sak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveAttestert = lagOppgave(sakId = sak.id, status = Status.UNDER_BEHANDLING)
+        oppgaveDaoMedEndringssporing.oppdaterStatusOgMerknad(oppgaveAttestert.id, "", Status.ATTESTERING)
+        oppgaveDao.settNySaksbehandler(oppgaveAttestert.id, "Ikke Ole")
+
+        oppgaveService.tilbakestillOppgaverUnderAttestering(Saker(listOf(sak)))
+
         oppgaveDao.hentOppgave(oppgaveAttestert.id)!!.let {
             it.status shouldBe Status.UNDER_BEHANDLING
             it.saksbehandler shouldBe OppgaveSaksbehandler("Ole", "Ole")
         }
-        oppgaveDao.hentOppgave(oppgaveIkkeAttestert.id)!!.status shouldBe Status.NY
-        oppgaveDao.hentOppgave(ikkeMedIRegulering.id)!!.status shouldBe Status.ATTESTERING
     }
 
     private fun lagOppgave(

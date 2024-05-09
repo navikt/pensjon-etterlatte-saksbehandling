@@ -237,8 +237,8 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde
-                        FROM oppgave o 
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
+                        FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE (? OR o.status = ANY(?))
                         AND o.sak_id = ANY(?)
                         """.trimIndent(),

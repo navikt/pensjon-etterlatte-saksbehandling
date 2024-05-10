@@ -29,8 +29,14 @@ class BeregningService(
         behandlingId: UUID,
         sakType: SakType,
     ) = retryOgPakkUt {
+        val sakTypeArg =
+            when (sakType) {
+                // Endepunkt har skriveleif..
+                SakType.OMSTILLINGSSTOENAD -> "omstillingstoenad"
+                SakType.BARNEPENSJON -> sakType.name.lowercase()
+            }
         klient.post(
-            Resource(clientId, "$url/api/beregning/beregningsgrunnlag/$behandlingId/${sakType.name.lowercase()}"),
+            Resource(clientId, "$url/api/beregning/beregningsgrunnlag/$behandlingId/$sakTypeArg"),
             Systembruker.testdata,
             LagreBeregningsGrunnlag(
                 soeskenMedIBeregning = listOf(),

@@ -267,7 +267,6 @@ internal class GrunnlagsendringshendelseServiceTest {
             listOf(
                 grlhendelse,
             )
-        val sak = Sak(KONTANT_FOT.value, SakType.BARNEPENSJON, sakId, Enheter.STEINKJER.enhetNr)
         val erDuplikat =
             grunnlagsendringshendelseService.erDuplikatHendelse(
                 sakId,
@@ -357,7 +356,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         mode = EnumSource.Mode.EXCLUDE,
         names = ["INSTITUSJONSOPPHOLD", "SIVILSTAND"],
     )
-    fun `BP skal få alle hendelser unntatt Sivilstand`(grltype: GrunnlagsendringsType) {
+    fun `Gyldige hendelser for saktype BP`(grltype: GrunnlagsendringsType) {
         val soekerFnr = KONTANT_FOT.value
         val sakId = 1L
         coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }
@@ -369,6 +368,60 @@ internal class GrunnlagsendringshendelseServiceTest {
             )
 
         val sak = Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        every {
+            sakService.finnSak(sakId)
+        } returns sak
+        every { pdlService.hentPdlModellFlereSaktyper(soekerFnr, any(), sak.sakType) } returns
+            mockPerson()
+        coEvery { grunnlagKlient.hentGrunnlag(any()) } returns Grunnlag.empty()
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB))
+        } returns emptyList()
+        every { behandlingService.hentBehandlingerForSak(sak.id) } returns emptyList()
+        val grunnlagsendringshendelse =
+            grunnlagsendringshendelseMedSamsvar(
+                id = randomUUID(),
+                sakId = sakId,
+                gjelderPerson = soekerFnr,
+                samsvarMellomKildeOgGrunnlag = null,
+            )
+
+        every {
+            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(
+                match {
+                    it.type == grltype
+                },
+            )
+        } returns grunnlagsendringshendelse
+
+        val opprettetBostedHendelse =
+            grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(
+                soekerFnr,
+                grltype,
+            )
+        assertTrue(opprettetBostedHendelse.isNotEmpty() && opprettetBostedHendelse.size == 1)
+        assertEquals(grltype, opprettetBostedHendelse.first().type)
+        assertEquals(Saksrolle.SOEKER, opprettetBostedHendelse.first().hendelseGjelderRolle)
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        GrunnlagsendringsType::class,
+        mode = EnumSource.Mode.EXCLUDE,
+        names = ["INSTITUSJONSOPPHOLD"],
+    )
+    fun `Gyldige hendelser for saktype OMS`(grltype: GrunnlagsendringsType) {
+        val soekerFnr = KONTANT_FOT.value
+        val sakId = 1L
+        coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }
+            .returns(
+                PersonMedSakerOgRoller(
+                    soekerFnr,
+                    listOf(SakidOgRolle(sakId, Saksrolle.SOEKER)),
+                ),
+            )
+
+        val sak = Sak(soekerFnr, SakType.OMSTILLINGSSTOENAD, sakId, Enheter.defaultEnhet.enhetNr)
         every {
             sakService.finnSak(sakId)
         } returns sak

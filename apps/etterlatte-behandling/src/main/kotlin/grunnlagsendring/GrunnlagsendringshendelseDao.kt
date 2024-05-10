@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclosing) {

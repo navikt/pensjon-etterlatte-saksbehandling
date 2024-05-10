@@ -52,7 +52,7 @@ internal fun Route.sakSystemRoutes(
     val logger = LoggerFactory.getLogger(this::class.java)
 
     route("/saker") {
-        get("/$KJOERING/$ANTALL") {
+        get("/{$KJOERING}/{$ANTALL}") {
             kunSystembruker {
                 val kjoering = call.parameters[KJOERING]!!
                 val antall = call.parameters[ANTALL]!!.toInt()

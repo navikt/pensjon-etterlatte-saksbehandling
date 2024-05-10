@@ -716,7 +716,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
-    fun `skal ikke opprette ny doedshendelse da man ikke har gyldige behandlinger`() {
+    fun `skal ikke opprette ny doedshendelse hvis man ikke har gyldige behandlinger`() {
         val sakId = 1L
         val fnr = KONTANT_FOT.value
         val doedsdato = LocalDate.of(2022, 7, 8)
@@ -770,8 +770,12 @@ internal class GrunnlagsendringshendelseServiceTest {
                 endringstype = Endringstype.OPPRETTET,
             ),
         )
-        verify(exactly = 1) { grunnlagsendringshendelseService.opprettRelevantHendelse(any(), any()) }
-        verify(exactly = 1) { grunnlagsendringshendelseService.forkastHendelse(any(), any()) }
+        verify(exactly = 1) {
+            grunnlagsendringshendelseService.opprettRelevantHendelse(match { it.type == GrunnlagsendringsType.DOEDSFALL }, any())
+        }
+        verify(
+            exactly = 1,
+        ) { grunnlagsendringshendelseService.forkastHendelse(match { it.type == GrunnlagsendringsType.DOEDSFALL }, any()) }
     }
 
     @Test

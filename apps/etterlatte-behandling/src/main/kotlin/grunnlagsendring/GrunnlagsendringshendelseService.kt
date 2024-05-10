@@ -175,7 +175,7 @@ class GrunnlagsendringshendelseService(
     }
 
     fun opprettInstitusjonsOppholdhendelse(oppholdsHendelse: InstitusjonsoppholdHendelseBeriket): List<Grunnlagsendringshendelse> {
-        return opprettHendelseInstitusjonsoppholdForPersonSjekketAvJobb(
+        return opprettHendelseInstitusjonsoppholdForPerson(
             fnr = oppholdsHendelse.norskident,
             samsvar =
                 SamsvarMellomKildeOgGrunnlag.INSTITUSJONSOPPHOLD(
@@ -252,9 +252,14 @@ class GrunnlagsendringshendelseService(
         }
     }
 
+    fun opprettDoedshendelseForPerson(grunnlagsendringshendelse: Grunnlagsendringshendelse): OppgaveIntern {
+        grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(grunnlagsendringshendelse)
+        return opprettOppgave(grunnlagsendringshendelse)
+    }
+
     data class SakMedEnhet(val id: Long, val enhet: String)
 
-    private fun opprettHendelseInstitusjonsoppholdForPersonSjekketAvJobb(
+    private fun opprettHendelseInstitusjonsoppholdForPerson(
         fnr: String,
         samsvar: SamsvarMellomKildeOgGrunnlag,
     ): List<Grunnlagsendringshendelse> {
@@ -316,11 +321,17 @@ class GrunnlagsendringshendelseService(
         return sakerOgRollerGruppert
             .map { sakiderOgRoller -> Pair(sakService.finnSak(sakiderOgRoller.sakId), sakiderOgRoller) }
             .filter { rollerogSak -> rollerogSak.first != null }
+            .map {
+                SakOgRolle(it.first!!, it.second)
+            }
             .filter {
                     rollerogSak ->
-                grunnlagendringType == GrunnlagsendringsType.SIVILSTAND && rollerogSak.first!!.sakType != SakType.BARNEPENSJON
+                if (grunnlagendringType == GrunnlagsendringsType.SIVILSTAND) {
+                    rollerogSak.sak.sakType != SakType.BARNEPENSJON
+                } else {
+                    true
+                }
             }
-            .map { SakOgRolle(it.first!!, it.second) }
             .map { rolleOgSak ->
                 val hendelse =
                     Grunnlagsendringshendelse(
@@ -339,11 +350,6 @@ class GrunnlagsendringshendelseService(
             }.onEach {
                 verifiserOgHaandterHendelse(it.first, it.second.sak)
             }.map { it.first }
-    }
-
-    fun opprettDoedshendelseForPerson(grunnlagsendringshendelse: Grunnlagsendringshendelse): OppgaveIntern {
-        grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(grunnlagsendringshendelse)
-        return opprettOppgave(grunnlagsendringshendelse)
     }
 
     private fun opprettHendelseAvTypeForSak(

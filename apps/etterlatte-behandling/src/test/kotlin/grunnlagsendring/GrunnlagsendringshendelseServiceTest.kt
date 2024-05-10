@@ -59,6 +59,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID.randomUUID
@@ -349,8 +351,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         assertEquals(6, opprettedeHendelser.size)
     }
 
-    @Test
-    fun `BP skal få hendelser som ikke er Sivilstand`() {
+    @ParameterizedTest
+    @EnumSource(
+        GrunnlagsendringsType::class,
+        mode = EnumSource.Mode.EXCLUDE,
+        names = ["INSTITUSJONSOPPHOLD", "SIVILSTAND"],
+    )
+    fun `BP skal få alle hendelser unntatt Sivilstand`(grltype: GrunnlagsendringsType) {
         val soekerFnr = KONTANT_FOT.value
         val sakId = 1L
         coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }
@@ -383,7 +390,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every {
             grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(
                 match {
-                    it.type == GrunnlagsendringsType.BOSTED
+                    it.type == grltype
                 },
             )
         } returns grunnlagsendringshendelse
@@ -391,15 +398,15 @@ internal class GrunnlagsendringshendelseServiceTest {
         val opprettetBostedHendelse =
             grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(
                 soekerFnr,
-                GrunnlagsendringsType.BOSTED,
+                grltype,
             )
         assertTrue(opprettetBostedHendelse.isNotEmpty() && opprettetBostedHendelse.size == 1)
-        assertEquals(GrunnlagsendringsType.BOSTED, opprettetBostedHendelse.first().type)
+        assertEquals(grltype, opprettetBostedHendelse.first().type)
         assertEquals(Saksrolle.SOEKER, opprettetBostedHendelse.first().hendelseGjelderRolle)
     }
 
     @Test
-    fun `Skal filtrere bort sivilstandshendelser for BP saker men ikke andre`() {
+    fun `Skal filtrere bort sivilstandshendelser for BP saker men ikke andre, OMS skal få de`() {
         val soekerFnr = KONTANT_FOT.value
         val sakId = 1L
         coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }

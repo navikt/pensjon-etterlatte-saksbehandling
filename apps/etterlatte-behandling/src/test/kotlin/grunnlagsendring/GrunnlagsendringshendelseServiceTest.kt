@@ -350,7 +350,56 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
-    fun `skal filtrere bort sivilstandshendelser for BP saker`() {
+    fun `BP skal få hendelser som ikke er Sivilstand`() {
+        val soekerFnr = KONTANT_FOT.value
+        val sakId = 1L
+        coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }
+            .returns(
+                PersonMedSakerOgRoller(
+                    soekerFnr,
+                    listOf(SakidOgRolle(sakId, Saksrolle.SOEKER)),
+                ),
+            )
+
+        val sak = Sak(soekerFnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        every {
+            sakService.finnSak(sakId)
+        } returns sak
+        every { pdlService.hentPdlModellFlereSaktyper(soekerFnr, any(), sak.sakType) } returns
+            mockPerson()
+        coEvery { grunnlagKlient.hentGrunnlag(any()) } returns Grunnlag.empty()
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakId, listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB))
+        } returns emptyList()
+        every { behandlingService.hentBehandlingerForSak(sak.id) } returns emptyList()
+        val grunnlagsendringshendelse =
+            grunnlagsendringshendelseMedSamsvar(
+                id = randomUUID(),
+                sakId = sakId,
+                gjelderPerson = soekerFnr,
+                samsvarMellomKildeOgGrunnlag = null,
+            )
+
+        every {
+            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(
+                match {
+                    it.type == GrunnlagsendringsType.BOSTED
+                },
+            )
+        } returns grunnlagsendringshendelse
+
+        val opprettetBostedHendelse =
+            grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(
+                soekerFnr,
+                GrunnlagsendringsType.BOSTED,
+            )
+        assertTrue(opprettetBostedHendelse.isNotEmpty() && opprettetBostedHendelse.size == 1)
+        assertEquals(GrunnlagsendringsType.BOSTED, opprettetBostedHendelse.first().type)
+        assertEquals(Saksrolle.SOEKER, opprettetBostedHendelse.first().hendelseGjelderRolle)
+    }
+
+    @Test
+    fun `Skal filtrere bort sivilstandshendelser for BP saker men ikke andre`() {
         val soekerFnr = KONTANT_FOT.value
         val sakId = 1L
         coEvery { grunnlagKlient.hentPersonSakOgRolle(any()) }

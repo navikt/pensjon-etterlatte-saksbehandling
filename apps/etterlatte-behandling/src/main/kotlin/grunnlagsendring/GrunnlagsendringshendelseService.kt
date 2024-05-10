@@ -322,8 +322,7 @@ class GrunnlagsendringshendelseService(
             .map {
                 SakOgRolle(it.first!!, it.second)
             }
-            .filter {
-                    rollerogSak ->
+            .filter { rollerogSak ->
                 if (grunnlagendringType == GrunnlagsendringsType.SIVILSTAND) {
                     rollerogSak.sak.sakType != SakType.BARNEPENSJON
                 } else {

@@ -9,7 +9,7 @@ import no.nav.etterlatte.Self
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -431,7 +431,7 @@ class OppgaveService(
         }
     }
 
-    fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
+    fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<SakMedEnhet>) {
         sakerMedNyEnhet.forEach {
             endreEnhetForOppgaverTilknyttetSak(it.id, it.enhet)
         }

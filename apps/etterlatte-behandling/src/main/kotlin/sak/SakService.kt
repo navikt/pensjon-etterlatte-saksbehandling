@@ -11,7 +11,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -71,7 +71,7 @@ interface SakService {
         skjermet: Boolean,
     )
 
-    fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>)
+    fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>)
 
     fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering>
 
@@ -235,14 +235,14 @@ class SakServiceImpl(
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> {
                 if (sak.enhet != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr) {
                     dao.oppdaterEnheterPaaSaker(
-                        listOf(GrunnlagsendringshendelseService.SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)),
+                        listOf(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)),
                     )
                 }
             }
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
                 if (sak.enhet != Enheter.STRENGT_FORTROLIG.enhetNr) {
                     dao.oppdaterEnheterPaaSaker(
-                        listOf(GrunnlagsendringshendelseService.SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG.enhetNr)),
+                        listOf(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG.enhetNr)),
                     )
                 }
             }
@@ -337,13 +337,13 @@ class SakServiceImpl(
             }
         if (erSkjermet) {
             dao.oppdaterEnheterPaaSaker(
-                listOf(GrunnlagsendringshendelseService.SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)),
+                listOf(SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)),
             )
         }
         dao.markerSakerMedSkjerming(sakIder = listOf(sakId), skjermet = erSkjermet)
     }
 
-    override fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
+    override fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>) {
         dao.oppdaterEnheterPaaSaker(saker)
     }
 

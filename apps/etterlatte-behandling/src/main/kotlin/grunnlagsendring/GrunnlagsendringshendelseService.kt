@@ -257,8 +257,6 @@ class GrunnlagsendringshendelseService(
         return opprettOppgave(grunnlagsendringshendelse)
     }
 
-    data class SakMedEnhet(val id: Long, val enhet: String)
-
     private fun opprettHendelseInstitusjonsoppholdForPerson(
         fnr: String,
         samsvar: SamsvarMellomKildeOgGrunnlag,

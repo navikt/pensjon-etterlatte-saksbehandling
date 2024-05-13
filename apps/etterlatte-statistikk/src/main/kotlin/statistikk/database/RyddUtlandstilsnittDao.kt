@@ -5,7 +5,6 @@ import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import org.slf4j.LoggerFactory
 import java.sql.Connection
-import java.sql.Types.NVARCHAR
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -56,7 +55,7 @@ class RyddUtlandstilsnittDao(
                 )
 
             if (utlandstilknytning == null) {
-                statement.setNull(1, NVARCHAR)
+                statement.setString(1, null)
                 statement.setString(2, HentetStatus.IKKE_FUNNET.name)
             } else {
                 statement.setString(1, utlandstilknytning.name)

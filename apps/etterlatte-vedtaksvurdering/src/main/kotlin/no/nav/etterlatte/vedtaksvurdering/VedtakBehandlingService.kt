@@ -527,6 +527,11 @@ class VedtakBehandlingService(
         else -> {
             if (virkningstidspunkt == behandling.opphoerFraOgMed) {
                 null
+            } else if (behandling.opphoerFraOgMed != null && virkningstidspunkt > behandling.opphoerFraOgMed) {
+                throw UgyldigForespoerselException(
+                    code = "VIRKNINGSTIDSPUNKT_ETTER_OPPHOER",
+                    detail = "Virkningstidspunkt kan ikke være senere enn opphør fra og med",
+                )
             } else {
                 behandling.opphoerFraOgMed
             }

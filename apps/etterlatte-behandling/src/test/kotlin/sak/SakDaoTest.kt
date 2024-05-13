@@ -3,6 +3,8 @@ package no.nav.etterlatte.sak
 import io.kotest.matchers.date.shouldBeBetween
 import io.kotest.matchers.date.shouldBeToday
 import io.kotest.matchers.date.shouldNotBeToday
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
@@ -183,5 +185,28 @@ internal class SakDaoTest(val dataSource: DataSource) {
         sakerMedEgenAnsattEnhet.forEach {
             Assertions.assertEquals(Enheter.EGNE_ANSATTE.enhetNr, it.enhet)
         }
+    }
+
+    @Test
+    fun `Skal hente angitte saker`() {
+        val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+        val saker = sakRepo.hentSaker("", 2, listOf(sak2.id, sak3.id))
+
+        saker.size shouldBe 2
+        saker.forEach { it.id shouldNotBe sak1.id }
+    }
+
+    @Test
+    fun `Skal hente alle saker dersom ingen spesifikke er angitt`() {
+        sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+        val saker = sakRepo.hentSaker("", 3, emptyList())
+
+        saker.size shouldBe 3
     }
 }

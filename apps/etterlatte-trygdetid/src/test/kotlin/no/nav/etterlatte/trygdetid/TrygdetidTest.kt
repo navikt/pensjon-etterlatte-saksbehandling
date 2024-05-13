@@ -130,4 +130,38 @@ internal class TrygdetidTest {
             trygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(overlappendePeriode)
         }
     }
+
+    @Test
+    fun `Skal kunne legge til uansett input sorteringsrekkefølge`() {
+        val usortertTrygdetid =
+            trygdetid(
+                trygdetidGrunnlag =
+                    listOf(
+                        trygdetidGrunnlag(
+                            periode = TrygdetidPeriode(LocalDate.of(2014, 5, 20), LocalDate.of(2027, 12, 31)),
+                            trygdetidType = TrygdetidType.FREMTIDIG,
+                        ),
+                        trygdetidGrunnlag(
+                            periode = TrygdetidPeriode(LocalDate.of(2006, 1, 1), LocalDate.of(2014, 4, 30)),
+                            poengInnAar = true,
+                            trygdetidType = TrygdetidType.FAKTISK,
+                        ),
+                        trygdetidGrunnlag(
+                            periode = TrygdetidPeriode(LocalDate.of(2002, 1, 1), LocalDate.of(2005, 12, 31)),
+                            trygdetidType = TrygdetidType.FAKTISK,
+                            bosted = LandNormalisert.POLEN.isoCode,
+                        ),
+                    ),
+            )
+
+        val oppdatert =
+            usortertTrygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(
+                trygdetidGrunnlag(
+                    periode = TrygdetidPeriode(LocalDate.of(2000, 6, 1), LocalDate.of(2000, 6, 18)),
+                    trygdetidType = TrygdetidType.FAKTISK,
+                ),
+            )
+
+        oppdatert.trygdetidGrunnlag.size shouldBe 4
+    }
 }

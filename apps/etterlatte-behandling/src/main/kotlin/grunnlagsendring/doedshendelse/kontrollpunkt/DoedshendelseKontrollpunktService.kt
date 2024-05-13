@@ -125,7 +125,7 @@ class DoedshendelseKontrollpunktService(
         val duplikatHendelse =
             grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
                 sakId = sak.id,
-                statuser = listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+                statuser = listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
             ).filter {
                 it.gjelderPerson == hendelse.avdoedFnr && it.type == GrunnlagsendringsType.DOEDSFALL
             }

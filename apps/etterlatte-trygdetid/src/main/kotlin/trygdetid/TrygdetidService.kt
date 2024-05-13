@@ -105,6 +105,7 @@ interface TrygdetidService {
 
     suspend fun opprettOverstyrtBeregnetTrygdetid(
         behandlingId: UUID,
+        overskriv: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     )
 }
@@ -428,10 +429,18 @@ class TrygdetidServiceImpl(
 
     override suspend fun opprettOverstyrtBeregnetTrygdetid(
         behandlingId: UUID,
+        overskriv: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        if (trygdetidRepository.hentTrygdetiderForBehandling(behandlingId).isNotEmpty()) {
-            throw TrygdetidAlleredeOpprettetException()
+        val trygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
+
+        if (trygdetider.isNotEmpty()) {
+            if (overskriv) {
+                logger.warn("Sletter ${trygdetider.size} trygdetid(er) for behandling (id=$behandlingId)")
+                trygdetider.forEach { trygdetidRepository.slettTrygdetid(it.id) }
+            } else {
+                throw TrygdetidAlleredeOpprettetException()
+            }
         }
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         logger.info("Oppretter manuell overstyrt trygdetid for behandling $behandlingId")

@@ -117,7 +117,7 @@ export const HandlingerForOppgave = ({
         </>
       )
     case Oppgavetype.AKTIVITETSPLIKT:
-      return erInnloggetSaksbehandlerOppgave && <AktivitetspliktInfoModal fnr={fnr} />
+      return erInnloggetSaksbehandlerOppgave && <AktivitetspliktInfoModal oppgave={oppgave} />
     default:
       return null
   }

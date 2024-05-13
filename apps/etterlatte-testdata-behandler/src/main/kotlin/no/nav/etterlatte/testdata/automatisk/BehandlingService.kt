@@ -7,6 +7,8 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
+import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -121,7 +123,10 @@ class BehandlingService(private val klient: DownstreamResourceClient, private va
         }
     }
 
-    suspend fun lagreBrevutfall(behandling: UUID) {
+    suspend fun lagreBrevutfall(
+        behandling: UUID,
+        sakType: SakType,
+    ) {
         retryOgPakkUt {
             klient.post(
                 Resource(clientId, "$url/api/behandling/$behandling/info/brevutfall"),
@@ -133,8 +138,8 @@ class BehandlingService(private val klient: DownstreamResourceClient, private va
                     brevutfall =
                         BrevutfallDto(
                             behandlingId = behandling,
-                            aldersgruppe = Aldersgruppe.UNDER_18,
-                            lavEllerIngenInntekt = null,
+                            aldersgruppe = if (sakType == SakType.BARNEPENSJON) Aldersgruppe.UNDER_18 else null,
+                            lavEllerIngenInntekt = if (sakType == SakType.OMSTILLINGSSTOENAD) LavEllerIngenInntekt.NEI else null,
                             feilutbetaling = null,
                             kilde = null,
                         ),

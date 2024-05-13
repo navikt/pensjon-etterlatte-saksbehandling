@@ -9,7 +9,7 @@ import no.nav.etterlatte.Self
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -286,13 +286,7 @@ class OppgaveService(
         val oppdatertMerknad = merknad ?: oppgave.merknad ?: ""
         oppgaveDao.oppdaterStatusOgMerknad(oppgave.id, oppdatertMerknad, Status.UNDERKJENT)
 
-        val saksbehandler =
-            oppgaveDao.hentEndringerForOppgave(oppgave.id)
-                .sortedByDescending { it.tidspunkt }
-                .firstOrNull(OppgaveEndring::sendtTilAttestering)
-                ?.oppgaveFoer
-                ?.saksbehandler
-
+        val saksbehandler = saksbehandlerSomFattetVedtak(oppgave)
         if (saksbehandler != null) {
             oppgaveDao.settNySaksbehandler(oppgave.id, saksbehandler.ident)
         } else {
@@ -304,6 +298,13 @@ class OppgaveService(
 
         return oppgave
     }
+
+    private fun saksbehandlerSomFattetVedtak(oppgave: OppgaveIntern) =
+        oppgaveDao.hentEndringerForOppgave(oppgave.id)
+            .sortedByDescending { it.tidspunkt }
+            .firstOrNull(OppgaveEndring::sendtTilAttestering)
+            ?.oppgaveFoer
+            ?.saksbehandler
 
     // TODO: Slå sammen med de 3 andre "ferdigstill"-funksjonene
     fun ferdigStillOppgaveUnderBehandling(
@@ -431,7 +432,7 @@ class OppgaveService(
         }
     }
 
-    fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
+    fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<SakMedEnhet>) {
         sakerMedNyEnhet.forEach {
             endreEnhetForOppgaverTilknyttetSak(it.id, it.enhet)
         }
@@ -580,7 +581,19 @@ class OppgaveService(
     fun hentFristGaarUt(request: VentefristGaarUtRequest): List<VentefristGaarUt> =
         oppgaveDao.hentFristGaarUt(request.dato, request.type, request.oppgaveKilde, request.oppgaver, request.grense)
 
-    fun tilbakestillOppgaveTilAttestering(saker: Saker) = oppgaveDao.tilbakestillOppgaveUnderAttestering(saker)
+    fun tilbakestillOppgaverUnderAttestering(saker: Saker) {
+        val oppgaverTilAttestering =
+            oppgaveDao.hentOppgaverTilSaker(
+                saker.saker.map { it.id },
+                listOf(Status.ATTESTERING.name),
+            )
+        oppgaverTilAttestering.forEach { oppgave ->
+            oppgaveDao.tilbakestillOppgaveUnderAttestering(oppgave)
+            saksbehandlerSomFattetVedtak(oppgave)?.let { saksbehandler ->
+                oppgaveDao.settNySaksbehandler(oppgave.id, saksbehandler.ident)
+            }
+        }
+    }
 }
 
 class BrukerManglerAttestantRolleException(ident: String) : UgyldigForespoerselException(

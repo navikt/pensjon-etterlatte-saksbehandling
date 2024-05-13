@@ -18,7 +18,7 @@ import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -745,7 +745,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(
             listOf(
-                GrunnlagsendringshendelseService.SakMedEnhet(
+                SakMedEnhet(
                     oppgaverUtenEndring[0].sakId,
                     Enheter.STEINKJER.enhetNr,
                 ),

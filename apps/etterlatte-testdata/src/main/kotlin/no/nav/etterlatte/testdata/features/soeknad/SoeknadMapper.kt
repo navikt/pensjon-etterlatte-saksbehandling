@@ -57,7 +57,6 @@ object SoeknadMapper {
                         "@template" to "soeknad",
                         "@fnr_soeker" to gjenlevendeFnr,
                         "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
-                        "@adressebeskyttelse" to "UGRADERT",
                         Behandlingssteg.KEY to behandlingssteg.name,
                     ),
                 )
@@ -77,7 +76,6 @@ object SoeknadMapper {
                         "@template" to "soeknad",
                         "@fnr_soeker" to barn.first(),
                         "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
-                        "@adressebeskyttelse" to "UGRADERT",
                         Behandlingssteg.KEY to behandlingssteg.name,
                     ),
                 )

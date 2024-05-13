@@ -115,7 +115,10 @@ export const OppgaveFraJournalpostModal = ({
                   <Alert variant="warning">
                     Fant {oppgaver.length} oppgave(r) tilknyttet journalposten i Gosys.
                     <br />
-                    <Link href={`${configContext['gosysUrl']}/personoversikt/fnr=${oppgaver[0].fnr}`} target="_blank">
+                    <Link
+                      href={`${configContext['gosysUrl']}/personoversikt/fnr=${oppgaver[0].bruker?.ident}`}
+                      target="_blank"
+                    >
                       Åpne i Gosys <ExternalLinkIcon />
                     </Link>
                   </Alert>

@@ -76,7 +76,7 @@ class Behandler(
             return
         }
         logger.info("Klar til å lagre brevutfall for $behandling")
-        behandlingService.lagreBrevutfall(behandling)
+        behandlingService.lagreBrevutfall(behandling, sak.sakType)
         logger.info("Ferdig med å lagre brevutfall for behandling $behandling. Klar til å fatte vedtak")
         val fattaVedtak = vedtaksvurderingService.fattVedtak(sakId, behandling)
         RapidUtsender.sendUt(fattaVedtak, packet, context)

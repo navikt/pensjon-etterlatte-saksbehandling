@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { ChevronDownIcon, ExternalLinkIcon, EyeIcon } from '@navikt/aksel-icons'
 import React, { useContext, useState } from 'react'
 import { TemaTag } from '~components/oppgavebenk/components/Tags'
-import { formaterFnr, formaterStringDato } from '~utils/formattering'
+import { formaterStringDato } from '~utils/formattering'
 import { ConfigContext } from '~clientConfig'
 import { FlexRow } from '~shared/styled'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
@@ -11,6 +11,7 @@ import { FerdigstillGosysOppgave } from '../gosys/FerdigstillGosysOppgave'
 import { OverfoerOppgaveTilGjenny } from '../gosys/OverfoerOppgaveTilGjenny'
 import { formaterOppgavetype, GosysOppgave } from '~shared/types/Gosys'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { GosysBrukerWrapper } from '~components/oppgavebenk/gosys/GosysBrukerWrapper'
 
 const TagRow = styled.div`
   display: flex;
@@ -36,7 +37,8 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
   const [open, setOpen] = useState(false)
   const [toggle, setToggle] = useState<GosysActionToggle>({})
 
-  const { opprettet, frist, status, fnr, enhet, saksbehandler, beskrivelse, tema, oppgavetype, journalpostId } = oppgave
+  const { opprettet, frist, status, bruker, enhet, saksbehandler, beskrivelse, tema, oppgavetype, journalpostId } =
+    oppgave
 
   const configContext = useContext(ConfigContext)
 
@@ -45,6 +47,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
       <Button variant="primary" size="small" icon={<EyeIcon />} onClick={() => setOpen(true)}>
         Se oppgave
       </Button>
+
       <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
         <Modal.Header>
           <Heading size="medium" id="modal-heading">
@@ -77,7 +80,9 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
             </div>
             <div>
               <Label>Fødselsnummer</Label>
-              <BodyShort>{fnr ? formaterFnr(fnr) : <i>Mangler</i>}</BodyShort>
+              <BodyShort as="div">
+                <GosysBrukerWrapper bruker={bruker} />
+              </BodyShort>
             </div>
             <div>
               <Label>Enhet</Label>
@@ -144,7 +149,11 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
                 size="small"
                 variant="primary"
                 as="a"
-                href={fnr ? `${configContext['gosysUrl']}/personoversikt/fnr=${fnr}` : configContext['gosysUrl']}
+                href={
+                  bruker?.ident
+                    ? `${configContext['gosysUrl']}/personoversikt/fnr=${bruker?.ident}`
+                    : configContext['gosysUrl']
+                }
                 target="_blank"
                 icon={<ExternalLinkIcon />}
               >

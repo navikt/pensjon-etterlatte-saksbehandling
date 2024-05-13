@@ -14,7 +14,6 @@ fun main() {
         OmregningHendelserBeregningRiver(
             rapidsConnection,
             beregningService,
-            AppBuilder(Miljoevariabler(rapidEnv)).createTrygdetidService(),
         )
         SjekkOmOverstyrtBeregningRiver(
             rapidsConnection,

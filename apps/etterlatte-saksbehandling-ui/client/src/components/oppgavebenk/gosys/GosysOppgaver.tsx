@@ -20,7 +20,7 @@ export interface Props {
 export const GosysOppgaver = ({ oppgaver, saksbehandlereIEnhet, fnrFilter }: Props): ReactNode => {
   const [sortering, setSortering] = useState<OppgaveSortering>(hentSorteringFraLocalStorage())
 
-  const filtrerteOppgaver = fnrFilter ? oppgaver.filter(({ fnr }) => fnr === fnrFilter.trim()) : oppgaver
+  const filtrerteOppgaver = fnrFilter ? oppgaver.filter(({ bruker }) => bruker?.ident === fnrFilter.trim()) : oppgaver
   const sorterteOppgaver = sorterGosysOppgaver(filtrerteOppgaver, sortering)
 
   const [page, setPage] = useState<number>(1)

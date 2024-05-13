@@ -43,7 +43,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.fail
@@ -170,24 +169,6 @@ internal class PersonServiceTest {
         assertEquals(2, person.familieRelasjon?.verdi?.ansvarligeForeldre?.size)
         assertTrue(person.familieRelasjon?.verdi?.foreldre?.get(0)?.value in expectedForeldreFnr)
         assertTrue(person.familieRelasjon?.verdi?.foreldre?.get(1)?.value in expectedForeldreFnr)
-    }
-
-    @Test
-    @Disabled("TODO - få inn datagrunnlag for denne")
-    fun `skal mappe person som inkluderer familierelasjon (barn)`() {
-        val person =
-            runBlocking {
-                personService.hentOpplysningsperson(
-                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, listOf(SakType.BARNEPENSJON)),
-                )
-            }
-
-        val foreldreFnr = listOf("18498248795", "16478313601")
-
-        assertNotNull(person.familieRelasjon?.verdi?.barn)
-        assertEquals(2, person.familieRelasjon?.verdi?.barn?.size)
-        assertTrue(person.familieRelasjon?.verdi?.barn?.get(0)?.value in foreldreFnr)
-        assertTrue(person.familieRelasjon?.verdi?.barn?.get(1)?.value in foreldreFnr)
     }
 
     @Test

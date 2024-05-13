@@ -91,6 +91,7 @@ class StatistikkServiceTest {
                 revurderingsaarsak = null,
                 revurderingInfo = null,
                 prosesstype = Prosesstype.MANUELL,
+                utlandstilknytning = null,
                 enhet = enhet,
                 kilde = Vedtaksloesning.GJENNY,
                 sistEndret = LocalDateTime.now(),
@@ -135,7 +136,7 @@ class StatistikkServiceTest {
         registrertSakRad?.asClue { registrertSak ->
             registrertSak.sakId shouldBe sakId
             registrertSak.sakYtelse shouldBe SakType.BARNEPENSJON.name
-            registrertSak.sakUtland shouldBe SakUtland.NASJONAL
+            registrertSak.sakUtland shouldBe null
             registrertSak.referanseId shouldBe behandlingId
             registrertSak.tekniskTid shouldBe tekniskTidForHendelse.toTidspunkt()
             registrertSak.ansvarligEnhet shouldBe "attestantEnhet"
@@ -155,7 +156,7 @@ class StatistikkServiceTest {
             registrertStoenad.attestant shouldBe "Attestant"
             registrertStoenad.saksbehandler shouldBe "Saksbehandler"
 
-            registrertStoenad.sakUtland shouldBe SakUtland.NASJONAL
+            registrertStoenad.sakUtland shouldBe null
             registrertStoenad.virkningstidspunkt shouldBe virkningstidspunkt
             registrertStoenad.utbetalingsdato shouldBe fattetVedtakMaaned.plusMonths(1).plusDays(19)
         }
@@ -229,6 +230,7 @@ class StatistikkServiceTest {
                 prosesstype = Prosesstype.MANUELL,
                 enhet = enhet,
                 kilde = Vedtaksloesning.GJENNY,
+                utlandstilknytning = null,
                 sistEndret = LocalDateTime.now(),
                 pesysId = 123L,
                 relatertBehandlingId = null,
@@ -369,6 +371,7 @@ fun behandling(
     revurderingsaarsak = null,
     revurderingInfo = null,
     prosesstype = Prosesstype.MANUELL,
+    utlandstilknytning = null,
     kilde = Vedtaksloesning.GJENNY,
     pesysId = 123L,
     relatertBehandlingId = null,

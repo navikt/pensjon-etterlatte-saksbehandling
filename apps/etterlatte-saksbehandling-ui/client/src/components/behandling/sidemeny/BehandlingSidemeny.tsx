@@ -17,7 +17,7 @@ import { useVedtak } from '~components/vedtak/useVedtak'
 import { VedtakSammendrag } from '~components/vedtak/typer'
 import { updateVedtakSammendrag } from '~store/reducers/VedtakReducer'
 import { Tabs } from '@navikt/ds-react'
-import { DocPencilIcon, FileTextIcon } from '@navikt/aksel-icons'
+import { ClockDashedIcon, DocPencilIcon, FileTextIcon } from '@navikt/aksel-icons'
 import { Sjekkliste } from '~components/behandling/sjekkliste/Sjekkliste'
 import { useSelectorBehandlingSidemenyFane } from '~components/behandling/sidemeny/useSelectorBehandlingSidemeny'
 import { visFane } from '~store/reducers/BehandlingSidemenyReducer'
@@ -31,6 +31,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
+import { OppgaveEndring } from './OppgaveEndring'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtlandstilknytningType | null => {
   if (behandling.utlandstilknytning?.type) {
@@ -141,34 +142,38 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
         errorMessage: 'Kunne ikke hente saksbehandler gjeldende oppgave. Husk å tildele oppgaven.',
       })}
       {isPending(oppgaveResult) && <Spinner visible={true} label="Henter saksbehandler for oppgave" />}
-      {erFoerstegangsbehandling && (
-        <Tabs value={fane} iconPosition="top" onChange={(val) => dispatch(visFane(val as BehandlingFane))}>
-          <Tabs.List>
-            <Tabs.Tab value={BehandlingFane.DOKUMENTER} label="Dokumenter" icon={<FileTextIcon title="dokumenter" />} />
+      <Tabs value={fane} iconPosition="top" onChange={(val) => dispatch(visFane(val as BehandlingFane))}>
+        <Tabs.List>
+          <Tabs.Tab value={BehandlingFane.DOKUMENTER} label="Dokumenter" icon={<FileTextIcon title="dokumenter" />} />
+          {erFoerstegangsbehandling && (
             <Tabs.Tab
               value={BehandlingFane.SJEKKLISTE}
               label="Sjekkliste"
               icon={<DocPencilIcon title="sjekkliste" />}
             />
-          </Tabs.List>
-          <Tabs.Panel value={BehandlingFane.DOKUMENTER}>
-            {soeker?.foedselsnummer && <DokumentlisteLiten fnr={soeker.foedselsnummer} />}
-          </Tabs.Panel>
+          )}
+          <Tabs.Tab value={BehandlingFane.HISTORIKK} label="Historikk" icon={<ClockDashedIcon />} />
+        </Tabs.List>
+
+        <Tabs.Panel value={BehandlingFane.DOKUMENTER}>
+          {soeker?.foedselsnummer && <DokumentlisteLiten fnr={soeker.foedselsnummer} />}
+        </Tabs.Panel>
+        <Tabs.Panel value={BehandlingFane.HISTORIKK}>
+          <OppgaveEndring oppgaveResult={oppgaveResult} />
+        </Tabs.Panel>
+
+        {erFoerstegangsbehandling && (
           <Tabs.Panel value={BehandlingFane.SJEKKLISTE}>
-            <>
-              <Sjekkliste behandling={behandling} />
-              {isPending(hentSjekklisteResult) && <Spinner label="Henter sjekkliste ..." visible />}
-              {erFoerstegangsbehandling &&
-                !erFerdigBehandlet(behandling.status) &&
-                isFailureHandler({
-                  apiResult: hentSjekklisteResult,
-                  errorMessage: 'Kunne ikke hente konfigurasjonsverdier',
-                })}
-            </>
+            <Sjekkliste behandling={behandling} />
+            {isPending(hentSjekklisteResult) && <Spinner label="Henter sjekkliste ..." visible />}
+            {!erFerdigBehandlet(behandling.status) &&
+              isFailureHandler({
+                apiResult: hentSjekklisteResult,
+                errorMessage: 'Kunne ikke hente konfigurasjonsverdier',
+              })}
           </Tabs.Panel>
-        </Tabs>
-      )}
-      {!erFoerstegangsbehandling && soeker?.foedselsnummer && <DokumentlisteLiten fnr={soeker.foedselsnummer} />}
+        )}
+      </Tabs>
       <AnnullerBehandling />
     </Sidebar>
   )

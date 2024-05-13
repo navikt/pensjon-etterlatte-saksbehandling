@@ -35,18 +35,6 @@ class BehandlingClient(
         }
     }
 
-    fun hentSak(
-        fnr: String,
-        saktype: String,
-    ): Sak {
-        return runBlocking {
-            sakOgBehandlingApp.post("$url/personer/getsak/$saktype") {
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(fnr))
-            }.body()
-        }
-    }
-
     fun finnEllerOpprettSak(
         fnr: String,
         saktype: SakType,

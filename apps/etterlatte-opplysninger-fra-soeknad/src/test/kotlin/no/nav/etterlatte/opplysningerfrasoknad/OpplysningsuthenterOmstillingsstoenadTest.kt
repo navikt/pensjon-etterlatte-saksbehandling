@@ -157,8 +157,7 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
                       "instance": "sjekk-adressebeskyttelse-66bffc6ccc-4wmsn",
                       "time": "2022-01-03T13:45:31.256701251"
                     }
-                  ],
-                  "@adressebeskyttelse": "STRENGT_FORTROLIG_UTLAND"
+                  ]
                 }
                 """.trimIndent()
         }

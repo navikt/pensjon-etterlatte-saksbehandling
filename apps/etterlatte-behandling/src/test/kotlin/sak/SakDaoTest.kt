@@ -11,7 +11,7 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -176,7 +176,7 @@ internal class SakDaoTest(val dataSource: DataSource) {
 
         val sakerMedNyEnhet =
             funnetSakermed2saker.map {
-                GrunnlagsendringshendelseService.SakMedEnhet(it.id, Enheter.EGNE_ANSATTE.enhetNr)
+                SakMedEnhet(it.id, Enheter.EGNE_ANSATTE.enhetNr)
             }
 
         sakRepo.oppdaterEnheterPaaSaker(sakerMedNyEnhet)

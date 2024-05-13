@@ -173,7 +173,7 @@ class StatistikkService(
             vedtakLoependeTom = vedtakInnhold.virkningstidspunkt.atEndOfMonth(),
             saksbehandler = vedtak.vedtakFattet?.ansvarligSaksbehandler,
             ansvarligEnhet = vedtak.attestasjon?.attesterendeEnhet ?: statistikkBehandling.enhet,
-            sakUtland = SakUtland.NASJONAL,
+            sakUtland = SakUtland.fraUtlandstilknytning(statistikkBehandling.utlandstilknytning),
             beregning = beregning,
             avkorting = avkorting,
             sakYtelsesgruppe =
@@ -235,6 +235,7 @@ class StatistikkService(
 
         val beregning = hentBeregningForBehandling(vedtak.behandlingId)
         val avkorting = hentAvkortingForBehandling(vedtak)
+        val statistikkBehandling = hentStatistikkBehandling(vedtak.behandlingId)
         val utbetalingsdato =
             vedtak.vedtakFattet?.tidspunkt?.let {
                 val vedtattDato = it.toLocalDate()
@@ -264,7 +265,7 @@ class StatistikkService(
             beregning = beregning,
             avkorting = avkorting,
             vedtakType = vedtak.type,
-            sakUtland = SakUtland.NASJONAL,
+            sakUtland = SakUtland.fraUtlandstilknytning(statistikkBehandling.utlandstilknytning),
             virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
             utbetalingsdato = utbetalingsdato,
             kilde = vedtaksloesning,

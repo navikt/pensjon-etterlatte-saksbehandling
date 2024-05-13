@@ -20,7 +20,8 @@ internal class OppdragJaxbTest {
         val oppdrag =
             OppdragMapper.oppdragFraUtbetaling(
                 utbetaling(behandlingId = behandlingId, avstemmingsnoekkel = now, opprettet = now),
-                true,
+                erFoersteUtbetalingPaaSak = true,
+                erGRegulering = false,
             )
         val oppdragAsXml = OppdragJaxb.toXml(oppdrag)
 

@@ -104,6 +104,7 @@ class SamordningVedtakService(
         return when (this) {
             Revurderingaarsak.INNTEKTSENDRING -> SamordningVedtakAarsak.INNTEKT
             Revurderingaarsak.DOEDSFALL -> SamordningVedtakAarsak.DOEDSFALL
+            Revurderingaarsak.REGULERING -> SamordningVedtakAarsak.REGULERING
             else -> SamordningVedtakAarsak.ANNET
         }.name
     }

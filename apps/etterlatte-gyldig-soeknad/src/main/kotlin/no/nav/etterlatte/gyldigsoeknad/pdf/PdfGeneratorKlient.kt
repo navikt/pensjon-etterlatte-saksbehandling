@@ -1,4 +1,4 @@
-package pdf
+package no.nav.etterlatte.gyldigsoeknad.pdf
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient

@@ -4,10 +4,10 @@ import io.ktor.client.plugins.auth.Auth
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.DokarkivKlient
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalfoerSoeknadService
+import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.clientCredential
-import pdf.PdfGeneratorKlient
 
 class AppBuilder(private val env: Miljoevariabler) {
     val behandlingKlient: BehandlingClient by lazy {
@@ -27,16 +27,14 @@ class AppBuilder(private val env: Miljoevariabler) {
         )
     }
 
-    private fun httpClient(scope: String? = null) =
+    private fun httpClient(scope: String) =
         httpClient(
             auth = {
-                if (scope != null) {
-                    it.install(Auth) {
-                        clientCredential {
-                            config =
-                                env.props.toMutableMap()
-                                    .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
-                        }
+                it.install(Auth) {
+                    clientCredential {
+                        config =
+                            env.props.toMutableMap()
+                                .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
                     }
                 }
             },

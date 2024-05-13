@@ -3,6 +3,7 @@ package no.nav.etterlatte.gyldigsoeknad.journalfoering
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGenerator
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
@@ -10,7 +11,6 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJsonNode
 import org.slf4j.LoggerFactory
-import pdf.PdfGenerator
 import java.util.Base64
 
 class JournalfoerSoeknadService(

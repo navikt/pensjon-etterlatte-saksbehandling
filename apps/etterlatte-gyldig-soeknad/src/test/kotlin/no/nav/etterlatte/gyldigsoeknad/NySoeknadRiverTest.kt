@@ -17,6 +17,7 @@ import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalfoerSoeknadService
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.JournalpostSak
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostRequest
 import no.nav.etterlatte.gyldigsoeknad.journalfoering.OpprettJournalpostResponse
+import no.nav.etterlatte.gyldigsoeknad.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import pdf.PdfGeneratorKlient
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

@@ -43,6 +43,7 @@ fun opprettVedtak(
     avkorting: ObjectNode? = objectMapper.createObjectNode(),
     sakType: SakType = SakType.BARNEPENSJON,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+    revurderingAarsak: Revurderingaarsak? = null,
 ) = OpprettVedtak(
     soeker = soeker,
     sakId = sakId,
@@ -53,7 +54,7 @@ fun opprettVedtak(
     innhold =
         VedtakInnhold.Behandling(
             behandlingType = behandlingType,
-            revurderingAarsak = null,
+            revurderingAarsak = revurderingAarsak,
             virkningstidspunkt = virkningstidspunkt,
             beregning = beregning,
             avkorting = avkorting,

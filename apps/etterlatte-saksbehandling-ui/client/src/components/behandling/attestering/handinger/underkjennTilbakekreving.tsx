@@ -21,7 +21,7 @@ export const UnderkjennTilbakekreving = ({ tilbakekreving, kommentar, valgtBegru
   const [underkjennStatus, apiUnderkjennVedtak] = useApiCall(underkjennVedtak)
 
   const underkjenn = () => {
-    apiUnderkjennVedtak({ behandlingsId: tilbakekreving.id, kommentar, valgtBegrunnelse }, () => {
+    apiUnderkjennVedtak({ tilbakekrevingId: tilbakekreving.id, kommentar, valgtBegrunnelse }, () => {
       navigate(`/person/${tilbakekreving.sak.ident}`)
     })
   }

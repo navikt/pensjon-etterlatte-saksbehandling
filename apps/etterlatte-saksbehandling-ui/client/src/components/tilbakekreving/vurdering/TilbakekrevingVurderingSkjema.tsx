@@ -79,14 +79,14 @@ export function TilbakekrevingVurderingSkjema({
   }, [formState])
 
   const lagreVurdering = (vurdering: TilbakekrevingVurdering) => {
-    lagreVurderingRequest({ behandlingsId: behandling.id, vurdering: vurdering }, (lagretBehandling) => {
+    lagreVurderingRequest({ tilbakekrevingId: behandling.id, vurdering: vurdering }, (lagretBehandling) => {
       dispatch(addTilbakekreving(lagretBehandling))
       reset(lagretBehandling.tilbakekreving.vurdering || initialVurdering)
     })
   }
 
   const lagreVurderingOgFortsett = (vurdering: TilbakekrevingVurdering) => {
-    lagreVurderingRequest({ behandlingsId: behandling.id, vurdering: vurdering }, (lagretBehandling) => {
+    lagreVurderingRequest({ tilbakekrevingId: behandling.id, vurdering: vurdering }, (lagretBehandling) => {
       dispatch(addTilbakekreving(lagretBehandling))
       reset(lagretBehandling.tilbakekreving.vurdering || initialVurdering)
       navigate(`/tilbakekreving/${behandling?.id}/utbetalinger`)

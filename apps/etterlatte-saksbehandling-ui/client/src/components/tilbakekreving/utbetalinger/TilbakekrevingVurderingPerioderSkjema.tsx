@@ -54,7 +54,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
   }, [formState])
 
   const lagrePerioderOgFortsett = (data: { values: TilbakekrevingPeriode[] }) => {
-    lagrePerioderRequest({ behandlingsId: behandling.id, perioder: data.values }, (lagretTilbakekreving) => {
+    lagrePerioderRequest({ tilbakekrevingId: behandling.id, perioder: data.values }, (lagretTilbakekreving) => {
       dispatch(addTilbakekreving(lagretTilbakekreving))
       reset({ values: lagretTilbakekreving.tilbakekreving.perioder })
       navigate(`/tilbakekreving/${behandling?.id}/oppsummering`)
@@ -62,7 +62,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
   }
 
   const lagrePerioder = (data: { values: TilbakekrevingPeriode[] }) => {
-    lagrePerioderRequest({ behandlingsId: behandling.id, perioder: data.values }, (lagretTilbakekreving) => {
+    lagrePerioderRequest({ tilbakekrevingId: behandling.id, perioder: data.values }, (lagretTilbakekreving) => {
       dispatch(addTilbakekreving(lagretTilbakekreving))
       reset({ values: lagretTilbakekreving.tilbakekreving.perioder })
     })

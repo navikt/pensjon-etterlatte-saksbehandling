@@ -45,7 +45,7 @@ export function TilbakekrevingOppsummering({
 
   const lagreOppsummering = (skalSendeBrev: ISkalSendeBrev) => {
     lagreSkalSendeBrevRequest(
-      { behandlingsId: behandling.id, skalSendeBrev: skalSendeBrev.skalSendeBrev },
+      { tilbakekrevingId: behandling.id, skalSendeBrev: skalSendeBrev.skalSendeBrev },
       (lagretTilbakekreving) => {
         dispatch(addTilbakekreving(lagretTilbakekreving))
         reset({ skalSendeBrev: lagretTilbakekreving.sendeBrev })

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.adressebeskyttelse
 
+import behandling.tilbakekreving.kravgrunnlag
+import behandling.tilbakekreving.tilbakekrevingVurdering
 import com.nimbusds.jwt.JWTClaimsSet
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
@@ -14,6 +16,7 @@ import no.nav.etterlatte.behandling.klage.KlageDao
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
+import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
@@ -22,6 +25,10 @@ import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.opprettBehandling
@@ -41,6 +48,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -51,6 +59,7 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
     private lateinit var sakRepo: SakDao
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var klageDao: KlageDao
+    private lateinit var tilbakekrevingDao: TilbakekrevingDao
     private val brukerService = mockk<BrukerService>()
     private val skjermingKlient = mockk<SkjermingKlient>()
     private val grunnlagservice = mockk<GrunnlagService>()
@@ -70,6 +79,7 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
                 (ConnectionAutoclosingTest(dataSource)),
             )
         klageDao = KlageDaoImpl(ConnectionAutoclosingTest(dataSource))
+        tilbakekrevingDao = TilbakekrevingDao(ConnectionAutoclosingTest(dataSource))
     }
 
     @Test
@@ -142,6 +152,63 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
                 saksbehandlerUtenStrengtFortrolig,
             )
         val harTilgangIkkeFortroligKlage = tilgangService.harTilgangTilKlage(klage.id.toString(), saksbehandlerUtenStrengtFortrolig)
+
+        Assertions.assertFalse(harTilgangIkkeFortroligBehandling)
+        Assertions.assertFalse(harTilgangIkkeFortroligKlage)
+    }
+
+    @Test
+    fun `Skal sjekke tilganger til tilbakekreving med tilbakekrevingId for behandlingId`() {
+        val fnr = AVDOED_FOEDSELSNUMMER.value
+        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+        val jwtclaims = JWTClaimsSet.Builder().claim("groups", azureAdStrengtFortroligClaim).build()
+
+        val saksbehandlerMedStrengtfortrolig =
+            SaksbehandlerMedRoller(
+                Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
+                mapOf(AzureGroup.STRENGT_FORTROLIG to azureAdStrengtFortroligClaim),
+            )
+        sakService.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        val tilbakekreving =
+            TilbakekrevingBehandling(
+                UUID.randomUUID(),
+                TilbakekrevingStatus.OPPRETTET,
+                sak,
+                Tidspunkt.now(),
+                Tilbakekreving(tilbakekrevingVurdering(), emptyList(), kravgrunnlag(sak)),
+                true,
+            )
+        tilbakekrevingDao.lagreTilbakekreving(tilbakekreving)
+
+        val saksbehandlerUtenStrengtFortrolig =
+            SaksbehandlerMedRoller(
+                Saksbehandler("", "annenIdent", JwtTokenClaims(jwtclaims)),
+                mapOf(),
+            )
+        val harTilgangStrengtFortroligBehandling =
+            tilgangService.harTilgangTilBehandling(
+                tilbakekreving.id.toString(),
+                saksbehandlerMedStrengtfortrolig,
+            )
+        val harTilgangStrengtFortroligTilbakekreving =
+            tilgangService.harTilgangTilTilbakekreving(
+                tilbakekreving.id.toString(),
+                saksbehandlerMedStrengtfortrolig,
+            )
+
+        Assertions.assertTrue(harTilgangStrengtFortroligTilbakekreving)
+        Assertions.assertTrue(harTilgangStrengtFortroligBehandling)
+
+        val harTilgangIkkeFortroligBehandling =
+            tilgangService.harTilgangTilBehandling(
+                tilbakekreving.id.toString(),
+                saksbehandlerUtenStrengtFortrolig,
+            )
+        val harTilgangIkkeFortroligKlage =
+            tilgangService.harTilgangTilTilbakekreving(
+                tilbakekreving.id.toString(),
+                saksbehandlerUtenStrengtFortrolig,
+            )
 
         Assertions.assertFalse(harTilgangIkkeFortroligBehandling)
         Assertions.assertFalse(harTilgangIkkeFortroligKlage)

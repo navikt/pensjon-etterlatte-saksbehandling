@@ -42,13 +42,23 @@ spec:
     - name: KAFKA_RESET_POLICY
       #sette tilbake til none senere
       value: latest
+    - name: BEHANDLING_URL
+      value: http://etterlatte-behandling
     - name: BEHANDLING_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
+    - name: DOKARKIV_URL
+      value: https://dokarkiv.prod-fss-pub.nais.io/rest/journalpostapi/v1/journalpost
+    - name: DOKARKIV_SCOPE
+      value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
+    - name: PDFGEN_URL
+      value: http://ey-pdfgen/api/v1/genpdf/eypdfgen
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-behandling
+        - application: ey-pdfgen
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: dokarkiv.prod-fss-pub.nais.io

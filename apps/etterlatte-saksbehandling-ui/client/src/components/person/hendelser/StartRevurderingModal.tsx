@@ -5,11 +5,11 @@ import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import { isPending } from '~shared/api/apiUtils'
-import { ButtonGroup } from '~components/person/VurderHendelseModal'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/revurdering'
+import { ButtonGroup } from '~shared/styled'
 
 interface Props {
   hendelse: Grunnlagsendringshendelse

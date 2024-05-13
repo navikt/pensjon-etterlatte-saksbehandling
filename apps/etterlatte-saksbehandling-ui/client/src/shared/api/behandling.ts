@@ -10,7 +10,7 @@ import {
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe } from '~components/person/typer'
-import { InstitusjonsoppholdBegrunnelse } from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
+import { InstitusjonsoppholdBegrunnelse } from '~components/person/hendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { FoersteVirk, ISak } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 import { format } from 'date-fns'

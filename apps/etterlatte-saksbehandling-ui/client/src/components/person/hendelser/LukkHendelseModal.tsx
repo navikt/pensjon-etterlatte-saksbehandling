@@ -1,7 +1,6 @@
 import { Alert, BodyShort, Button, Modal, Textarea } from '@navikt/ds-react'
 import { Grunnlagsendringshendelse, GrunnlagsendringsType } from '~components/person/typer'
-import InstitusjonsoppholdVurderingBegrunnelse from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
-import { ButtonGroup } from '~components/person/VurderHendelseModal'
+import InstitusjonsoppholdVurderingBegrunnelse from '~components/person/hendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { isPending, mapSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import React, { useState } from 'react'
@@ -10,6 +9,7 @@ import { lukkGrunnlagshendelse } from '~shared/api/behandling'
 import { ArchiveIcon } from '@navikt/aksel-icons'
 import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { ButtonGroup } from '~shared/styled'
 
 export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshendelse }) => {
   const [open, setOpen] = useState(false)

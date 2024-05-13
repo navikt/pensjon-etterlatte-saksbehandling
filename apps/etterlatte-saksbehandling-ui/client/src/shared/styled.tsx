@@ -64,6 +64,12 @@ export const Content = styled.div`
 export const ContentHeader = styled.div`
   padding: 1em 4em;
 `
+export const ButtonGroup = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5em;
+  padding-top: 2em;
+`
 
 export const FlexRow = styled.div<{
   justify?: 'left' | 'center' | 'right' | 'space-between'

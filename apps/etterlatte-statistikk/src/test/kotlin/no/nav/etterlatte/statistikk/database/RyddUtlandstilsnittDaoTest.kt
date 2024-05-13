@@ -36,6 +36,49 @@ class RyddUtlandstilsnittDaoTest(private val dataSource: DataSource) {
     }
 
     @Test
+    fun `lagreUtlandstilknytning håndterer null`() {
+        val ryddeRepo = RyddUtlandstilsnittDao.using(dataSource)
+        val behandlingId = UUID.randomUUID()
+        val sakId = 1L
+
+        val connection = dataSource.connection
+
+        connection.use { connection ->
+            val statement =
+                connection.prepareStatement(
+                    """
+                    INSERT INTO utlandstilknytning_fiksing VALUES (?, ?, ?, ?, ?)
+                    """.trimIndent(),
+                )
+            statement.setObject(1, behandlingId)
+            statement.setLong(2, sakId)
+            statement.setString(3, null)
+            statement.setString(4, HentetStatus.IKKE_HENTET.name)
+            statement.setString(5, PatchStatus.IKKE_PATCHET.name)
+            statement.executeUpdate()
+        }
+        ryddeRepo.lagreUtlandstilknytning(behandlingId, null)
+
+        with(
+            dataSource.connection.prepareStatement(
+                """
+                SELECT behandling_id, hentet_status FROM utlandstilknytning_fiksing
+                WHERE behandling_id = ? 
+                """.trimIndent(),
+            ),
+        ) {
+            setObject(1, behandlingId)
+            executeQuery()
+                .single {
+                    val hentetBehandlingId = getObject("behandling_id", UUID::class.java)
+                    val hentetStatus = enumValueOf<HentetStatus>(getString("hentet_status"))
+                    Assertions.assertEquals(behandlingId, hentetBehandlingId)
+                    Assertions.assertEquals(HentetStatus.IKKE_FUNNET, hentetStatus)
+                }
+        }
+    }
+
+    @Test
     fun `lagrePatchetStatus kan gjenbruke innsendt connection`() {
         val ryddeRepo = RyddUtlandstilsnittDao.using(dataSource)
 

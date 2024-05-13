@@ -9,7 +9,9 @@ Appen er bygget med kotlin/ktor og gui'et er laget ved hjelp av handlebars.
 
 
 Kjør opp kafka i docker med: \
-`docker-compose up -d` 
+`docker-compose up -d` \
+og hent secret med \
+`get-secret etterlatte-testdata`
 
 Deretter kan du kjøre `ApplicationKt` med følgende environment variables:
 

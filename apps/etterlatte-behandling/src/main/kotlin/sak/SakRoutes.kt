@@ -18,6 +18,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.ForenkletBehandling
 import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
@@ -52,7 +53,7 @@ internal fun Route.sakSystemRoutes(
     val logger = LoggerFactory.getLogger(this::class.java)
 
     route("/saker") {
-        get("/$KJOERING/$ANTALL") {
+        get("/{$KJOERING}/{$ANTALL}") {
             kunSystembruker {
                 val kjoering = call.parameters[KJOERING]!!
                 val antall = call.parameters[ANTALL]!!.toInt()
@@ -185,7 +186,7 @@ internal fun Route.sakWebRoutes(
                             ?: throw SakIkkeFunnetException("Fant ingen sak å endre enhet på sakid: $sakId")
 
                         val sakMedEnhet =
-                            GrunnlagsendringshendelseService.SakMedEnhet(
+                            SakMedEnhet(
                                 enhet = enhetrequest.enhet,
                                 id = sakId,
                             )

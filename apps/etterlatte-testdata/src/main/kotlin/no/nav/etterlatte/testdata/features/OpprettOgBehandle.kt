@@ -50,11 +50,12 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
             }
 
             post {
-                val gruppeid = call.receiveParameters()["gruppeId"]!!.toLong()
-                val soeknadType = SoeknadType.BARNEPENSJON
+                val params = call.receiveParameters()
+                val gruppeid = params["gruppeId"]!!.toLong()
+                val soeknadType = params["type"]?.let { SoeknadType.valueOf(it) } ?: throw IllegalArgumentException("Mangler søknadstype")
+                val oenskaAntall = params["antall"]?.toInt() ?: throw IllegalArgumentException("Mangler antall")
                 val behandlingssteg = Behandlingssteg.IVERKSATT
                 val navIdent = navIdentFraToken()
-                val oenskaAntall = 3
 
                 opprettOgSendInn(oenskaAntall, gruppeid, soeknadType, navIdent, behandlingssteg)
                 call.respond(HttpStatusCode.Created)
@@ -69,7 +70,7 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
         behandlingssteg: Behandlingssteg,
     ) {
         thread {
-            logger.info("Oppretter $oenskaAntall familier og sender inn søknad for hver")
+            logger.info("Oppretter $oenskaAntall familier og sender inn søknad for hver av type ${soeknadType.name}")
             val baselineFamilier =
                 familieoppretter.hentFamilier(gruppeid, getDollyAccessToken()).also {
                     logger.debug("Baseline for gruppeid $gruppeid er ${it.size} saker")

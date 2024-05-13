@@ -137,7 +137,7 @@ data class TrygdetidPeriode(
 }
 
 fun List<TrygdetidGrunnlag>.normaliser() =
-    this.mapIndexed { idx, trygdetidGrunnlag ->
+    this.sortedBy { it.periode.fra }.mapIndexed { idx, trygdetidGrunnlag ->
         var fra = trygdetidGrunnlag.periode.fra
         var til = trygdetidGrunnlag.periode.til
 

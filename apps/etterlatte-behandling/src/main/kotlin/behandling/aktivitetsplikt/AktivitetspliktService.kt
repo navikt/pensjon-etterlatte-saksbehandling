@@ -105,11 +105,12 @@ class AktivitetspliktService(
     ) {
         val kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
         inTransaction {
+            require(aktivitetspliktVurderingDao.hentVurdering(oppgaveId) == null) { "Vurdering finnes allerede for oppgave $oppgaveId" }
             aktivitetspliktVurderingDao.opprettVurdering(vurdering, sakId, kilde, oppgaveId)
         }
     }
 
-    fun hentVurdering(oppgaveId: UUID): AktivitetspliktVurdering =
+    fun hentVurdering(oppgaveId: UUID): AktivitetspliktVurdering? =
         inTransaction {
             aktivitetspliktVurderingDao.hentVurdering(oppgaveId)
         }

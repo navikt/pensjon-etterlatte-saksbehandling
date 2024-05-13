@@ -96,7 +96,7 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
     route("/api/sak/{$SAKID_CALL_PARAMETER}/oppgave/{$OPPGAVEID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {
         get {
             logger.info("Henter aktivitetsplikt vurdering for oppgaveId=$oppgaveId")
-            call.respond(aktivitetspliktService.hentVurdering(oppgaveId))
+            call.respond(aktivitetspliktService.hentVurdering(oppgaveId) ?: HttpStatusCode.NotFound)
         }
 
         post {

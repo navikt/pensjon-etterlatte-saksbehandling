@@ -158,10 +158,27 @@ class AktivitetspliktServiceTest {
                     beskrivelse = "Beskrivelse",
                 )
             every { aktivitetspliktVurderingDao.opprettVurdering(vurdering, sakId, any(), oppgaveId) } returns 1
+            every { aktivitetspliktVurderingDao.hentVurdering(oppgaveId) } returns null
 
             service.opprettVurdering(vurdering, oppgaveId, sakId, brukerTokenInfo)
 
             verify { aktivitetspliktVurderingDao.opprettVurdering(vurdering, sakId, any(), oppgaveId) }
+            verify { aktivitetspliktVurderingDao.hentVurdering(oppgaveId) }
+        }
+
+        @Test
+        fun `Skal ikke opprette en ny vurdering hvis det finnes fra foer`() {
+            val vurdering =
+                LagreAktivitetspliktVurdering(
+                    vurdering = AktivitetspliktVurderingType.AKTIVITET_UNDER_50,
+                    beskrivelse = "Beskrivelse",
+                )
+            every { aktivitetspliktVurderingDao.opprettVurdering(vurdering, sakId, any(), oppgaveId) } returns 1
+            every { aktivitetspliktVurderingDao.hentVurdering(oppgaveId) } returns mockk()
+
+            assertThrows<IllegalArgumentException> {
+                service.opprettVurdering(vurdering, oppgaveId, sakId, brukerTokenInfo)
+            }
         }
 
         @Test

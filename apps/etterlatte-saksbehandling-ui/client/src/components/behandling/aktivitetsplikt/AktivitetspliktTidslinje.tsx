@@ -112,7 +112,12 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
         </Timeline>
       )}
 
-      <NyAktivitet behandling={behandling} oppdaterAktiviteter={oppdaterAktiviteter} redigerAktivitet={rediger} />
+      <NyAktivitet
+        key={rediger?.id}
+        behandling={behandling}
+        oppdaterAktiviteter={oppdaterAktiviteter}
+        redigerAktivitet={rediger}
+      />
 
       {isFailureHandler({
         errorMessage: 'En feil oppsto ved henting av aktiviteter',

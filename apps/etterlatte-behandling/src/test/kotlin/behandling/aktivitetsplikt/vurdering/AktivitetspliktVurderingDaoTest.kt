@@ -38,7 +38,7 @@ class AktivitetspliktVurderingDaoTest(ds: DataSource) {
 
         dao.opprettVurdering(vurdering, sak.id, kilde, oppgave.id, behandlingId)
 
-        dao.hentVurdering(oppgave.id).asClue {
+        dao.hentVurdering(oppgave.id)!!.asClue {
             it.sakId shouldBe sak.id
             it.behandlingId shouldBe behandlingId
             it.oppgaveId shouldBe oppgave.id

@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.ReguleringFeiletHendelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
+import no.nav.etterlatte.libs.common.sak.SakIderDto
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
@@ -63,6 +64,7 @@ interface BehandlingService {
     fun hentAlleSaker(
         kjoering: String,
         antall: Int,
+        saker: List<Long> = listOf(),
     ): Saker
 
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
@@ -208,9 +210,13 @@ class BehandlingServiceImpl(
     override fun hentAlleSaker(
         kjoering: String,
         antall: Int,
+        saker: List<Long>,
     ): Saker =
         runBlocking {
-            behandlingKlient.get("$url/saker/$kjoering/$antall").body()
+            behandlingKlient.post("$url/saker/$kjoering/$antall") {
+                contentType(ContentType.Application.Json)
+                setBody(SakIderDto(saker))
+            }.body()
         }
 
     override fun avbryt(behandlingId: UUID) =

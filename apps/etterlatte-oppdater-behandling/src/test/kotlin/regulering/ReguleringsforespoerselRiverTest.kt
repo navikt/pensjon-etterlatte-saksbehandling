@@ -18,6 +18,7 @@ import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.ANTALL
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.SPESIFIKKE_SAKER
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
@@ -38,6 +39,7 @@ internal class ReguleringsforespoerselRiverTest {
                 DATO_KEY to dato,
                 KJOERING to "Regulering2023",
                 ANTALL to 12000,
+                SPESIFIKKE_SAKER to listOf<Long>(),
             ),
         )
 
@@ -91,7 +93,7 @@ internal class ReguleringsforespoerselRiverTest {
     fun `skal sende med sakId for alle saker i basen`() {
         val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
-        every { behandlingServiceMock.hentAlleSaker("Regulering2023", any()) } returns
+        every { behandlingServiceMock.hentAlleSaker("Regulering2023", any(), any()) } returns
             Saker(
                 listOf(
                     Sak("saksbehandler1", SakType.BARNEPENSJON, 1000L, "4808"),

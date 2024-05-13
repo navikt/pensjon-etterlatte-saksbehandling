@@ -71,7 +71,6 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
         },
       },
       () => {
-        console.log('Opprettet aktivitetsplikt vurdering')
         apiFerdigstillOppgave(oppgave.id, () => {
           setVisModal(false)
         })
@@ -80,10 +79,8 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
   }
 
   useEffect(() => {
-    console.log(visModal, oppgave.status, Oppgavestatus.UNDER_BEHANDLING)
     if (oppgave.status !== Oppgavestatus.UNDER_BEHANDLING) {
       hent({ sakId: oppgave.sakId, oppgaveId: oppgave.id }, (result) => {
-        console.log('Hentet aktivitetsplikt vurdering')
         setVurdering(result)
       })
     }

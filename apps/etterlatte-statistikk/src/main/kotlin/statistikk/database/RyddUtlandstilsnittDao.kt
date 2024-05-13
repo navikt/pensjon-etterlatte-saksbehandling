@@ -51,7 +51,7 @@ class RyddUtlandstilsnittDao(
                 connection.prepareStatement(
                     """
                     UPDATE utlandstilknytning_fiksing SET utlandstilknytning_behandling = ?, hentet_status = ? 
-                    WHERE id = ?
+                    WHERE behandling_id = ?
                     """.trimIndent(),
                 )
 

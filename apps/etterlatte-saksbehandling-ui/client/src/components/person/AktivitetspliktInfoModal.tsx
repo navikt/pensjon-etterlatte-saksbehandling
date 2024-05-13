@@ -15,7 +15,7 @@ import React, { useEffect, useState } from 'react'
 import { ferdigstillOppgave } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending } from '@reduxjs/toolkit'
-import { mapFailure } from '~shared/api/apiUtils'
+import { isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { useForm } from 'react-hook-form'
@@ -27,6 +27,7 @@ import {
 import { hentAktivitspliktVurdering, opprettAktivitspliktVurdering } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { formaterStringDato } from '~utils/formattering'
+import { Toast } from '~shared/alerts/Toast'
 
 interface AktivitetspliktVurderingValues {
   aktivitetsgrad: AktivitetspliktVurderingType | ''
@@ -88,6 +89,7 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
 
   return (
     <>
+      {isSuccess(opprettet) && <Toast melding="Vurdering lagret og oppgave ferdigstilt" />}
       <Button size="small" onClick={() => setVisModal(true)}>
         Se oppgave
       </Button>

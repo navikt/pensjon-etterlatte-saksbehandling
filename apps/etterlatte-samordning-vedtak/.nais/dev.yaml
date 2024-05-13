@@ -133,6 +133,12 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+        - application: pensjonskalkulator-backend
+          namespace: pensjonskalkulator
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
         - application: ida
           namespace: traktor
           cluster: prod-fss

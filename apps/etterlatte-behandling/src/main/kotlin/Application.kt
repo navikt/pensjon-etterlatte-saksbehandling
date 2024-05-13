@@ -163,7 +163,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
         behandlingFactory = applicationContext.behandlingFactory,
     )
-    aktivitetspliktRoutes(aktivitetspliktService = applicationContext.aktivtetspliktService)
+    aktivitetspliktRoutes(aktivitetspliktService = applicationContext.aktivitetspliktService)
     sjekklisteRoute(sjekklisteService = applicationContext.sjekklisteService)
     statistikkRoutes(behandlingService = applicationContext.behandlingService)
     generellbehandlingRoutes(
@@ -229,6 +229,9 @@ private fun Route.settOppTilganger(
                     klageId,
                     saksbehandlerMedRoller,
                 )
+            }
+            harTilgangTilGenerellBehandling = { generellbehandlingId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilGenerellBehandling(generellbehandlingId, saksbehandlerMedRoller)
             }
         }
     }

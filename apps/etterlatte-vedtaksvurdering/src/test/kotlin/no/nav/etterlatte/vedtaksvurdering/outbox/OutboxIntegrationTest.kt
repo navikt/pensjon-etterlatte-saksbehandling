@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering.outbox
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.kafka.TestProdusent
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -64,6 +65,7 @@ class OutboxIntegrationTest(private val dataSource: DataSource) {
                     soeker = Folkeregisteridentifikator.of("04417103428"),
                     sakId = 2022L,
                     type = VedtakType.ENDRING,
+                    behandlingType = BehandlingType.REVURDERING,
                     behandlingId = UUID.randomUUID(),
                     status = VedtakStatus.ATTESTERT,
                     sakType = SakType.OMSTILLINGSSTOENAD,
@@ -93,7 +95,7 @@ class OutboxIntegrationTest(private val dataSource: DataSource) {
                     Vedtakshendelse(
                         ident = it.soeker.value,
                         sakstype = it.sakType.toEksternApi(),
-                        type = it.type.toEksternApi(),
+                        type = it.typeToEksternApi(),
                         vedtakId = it.id,
                         vedtaksdato = it.vedtakFattet?.tidspunkt?.toLocalDate(),
                         virkningFom = (it.innhold as VedtakInnhold.Behandling).virkningstidspunkt.atDay(1),

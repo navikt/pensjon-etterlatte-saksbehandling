@@ -3,7 +3,7 @@ package no.nav.etterlatte.sak
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -99,6 +99,7 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                     prepareStatement(
                         """SELECT id, sakType, fnr, enhet from sak s 
                     where not exists(select 1 from omregningskjoering k where k.sak_id=s.id and k.kjoering='$kjoering' and k.status != '${KjoeringStatus.FEILA.name}')
+                    ORDER by id DESC
                     LIMIT $antall"""
                             .trimMargin(),
                     )
@@ -169,7 +170,7 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
         }
     }
 
-    fun oppdaterEnheterPaaSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
+    fun oppdaterEnheterPaaSaker(saker: List<SakMedEnhet>) {
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val statement =

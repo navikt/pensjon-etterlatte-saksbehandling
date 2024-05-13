@@ -35,7 +35,6 @@ export interface TilbakekrevingVurdering {
   rentevurdering: string | null
   vedtak: string | null
   vurderesForPaatale: string | null
-  hjemmel: TilbakekrevingHjemmel | null
 }
 
 export interface TilbakekrevingTilsvar {

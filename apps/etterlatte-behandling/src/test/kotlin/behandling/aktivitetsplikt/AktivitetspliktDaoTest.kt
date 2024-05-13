@@ -144,6 +144,37 @@ class AktivitetspliktDaoTest(ds: DataSource) {
         }
     }
 
+    @Nested
+    inner class KopierAktiviteter {
+        @Test
+        fun `skal kopiere aktiviteter fra tidligere behandling`() {
+            val forrigeBehandling = UUID.randomUUID()
+            val nyBehandling = UUID.randomUUID()
+            val nyAktivitet = opprettAktivitet(sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000"))
+            dao.opprettAktivitet(forrigeBehandling, nyAktivitet, kilde)
+            dao.opprettAktivitet(forrigeBehandling, nyAktivitet, kilde)
+            dao.opprettAktivitet(forrigeBehandling, nyAktivitet, kilde)
+            dao.hentAktiviteter(forrigeBehandling) shouldHaveSize 3
+            dao.hentAktiviteter(nyBehandling) shouldHaveSize 0
+
+            dao.kopierAktiviteter(forrigeBehandling, nyBehandling) shouldBe 3
+
+            dao.hentAktiviteter(nyBehandling).asClue {
+                it shouldHaveSize 3
+                it.forEach { aktivitet ->
+                    aktivitet.sakId shouldBe nyAktivitet.sakId
+                    aktivitet.behandlingId shouldBe nyBehandling
+                    aktivitet.type shouldBe nyAktivitet.type
+                    aktivitet.fom shouldBe nyAktivitet.fom
+                    aktivitet.tom shouldBe nyAktivitet.tom
+                    aktivitet.opprettet shouldBe kilde
+                    aktivitet.endret shouldBe kilde
+                    aktivitet.beskrivelse shouldBe nyAktivitet.beskrivelse
+                }
+            }
+        }
+    }
+
     companion object {
         fun opprettAktivitet(sak: Sak) =
             LagreAktivitetspliktAktivitet(

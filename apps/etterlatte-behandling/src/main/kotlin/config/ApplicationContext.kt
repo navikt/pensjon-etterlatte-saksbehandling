@@ -16,6 +16,7 @@ import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktVurderingDao
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
@@ -265,6 +266,7 @@ internal class ApplicationContext(
     val hendelseDao = HendelseDao(autoClosingDatabase)
     val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(autoClosingDatabase)
     val aktivitetspliktDao = AktivitetspliktDao(autoClosingDatabase)
+    val aktivitetspliktVurderingDao = AktivitetspliktVurderingDao(autoClosingDatabase)
     val sjekklisteDao = SjekklisteDao(autoClosingDatabase)
     val revurderingDao = RevurderingDao(autoClosingDatabase)
     val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao, autoClosingDatabase)
@@ -304,7 +306,7 @@ internal class ApplicationContext(
     // Service
     val klageHendelser = KlageHendelserServiceImpl(rapid)
     val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
-    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, behandlingsHendelser)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, hendelseDao, behandlingsHendelser)
 
     val grunnlagsService = GrunnlagServiceImpl(grunnlagKlient)
     val behandlingService =
@@ -335,7 +337,7 @@ internal class ApplicationContext(
         )
     val kommerBarnetTilGodeService =
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
-    val aktivtetspliktService = AktivitetspliktService(aktivitetspliktDao, behandlingService)
+    val aktivitetspliktService = AktivitetspliktService(aktivitetspliktDao, aktivitetspliktVurderingDao, behandlingService)
     val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
 
     val klageBrevService = KlageBrevService(brevApiKlient)
@@ -364,6 +366,7 @@ internal class ApplicationContext(
             revurderingDao = revurderingDao,
             klageService = klageService,
             behandlingService = behandlingService,
+            aktivitetspliktService = aktivitetspliktService,
         )
     val automatiskRevurderingService = AutomatiskRevurderingService(revurderingService)
 
@@ -468,7 +471,7 @@ internal class ApplicationContext(
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
     val saksbehandlerService: SaksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
-    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlTjenesterKlient, oppgaveService, saksbehandlerService)
+    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService)
     val behandlingFactory =
         BehandlingFactory(
             oppgaveService = oppgaveService,

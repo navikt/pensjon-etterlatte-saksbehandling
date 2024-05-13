@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering.outbox
 
 import net.logstash.logback.marker.Markers
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -45,7 +46,7 @@ class OutboxService(
                 Vedtakshendelse(
                     ident = vedtak.soeker.value,
                     sakstype = vedtak.sakType.toEksternApi(),
-                    type = vedtak.type.toEksternApi(),
+                    type = vedtak.typeToEksternApi(),
                     vedtakId = vedtak.id,
                     vedtaksdato = vedtak.attestasjon?.tidspunkt?.toLocalDate(),
                     virkningFom = vedtak.innhold.virkningstidspunkt.atDay(1),
@@ -58,8 +59,13 @@ class OutboxService(
     }
 }
 
-internal fun VedtakType.toEksternApi(): String {
-    return when (this) {
+internal fun VedtakInnhold.Behandling.isRegulering() = Revurderingaarsak.REGULERING == this.revurderingAarsak
+
+internal fun Vedtak.typeToEksternApi(): String {
+    if ((this.innhold as VedtakInnhold.Behandling).isRegulering()) {
+        return "REGULERING"
+    }
+    return when (this.type) {
         VedtakType.AVSLAG -> "AVSLAG"
         VedtakType.ENDRING -> "ENDRING"
         VedtakType.INNVILGELSE -> "INNVILGELSE"

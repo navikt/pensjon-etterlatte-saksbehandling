@@ -11,9 +11,10 @@ import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 fun Route.testKravgrunnlagRoutes(service: KravgrunnlagService) {
     route("kravgrunnlag") {
         post {
-            val xml = call.receive<DetaljertKravgrunnlagDto>()
-            service.opprettTilbakekreving(xml)
-            call.respond(xml)
+            val dto = call.receive<DetaljertKravgrunnlagDto>()
+            val kravgrunnlag = KravgrunnlagMapper.toKravgrunnlag(dto)
+            service.haandterKravgrunnlag(kravgrunnlag)
+            call.respond(dto)
         }
     }
 }

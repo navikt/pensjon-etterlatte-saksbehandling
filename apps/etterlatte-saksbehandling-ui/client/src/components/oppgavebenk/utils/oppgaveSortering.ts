@@ -32,12 +32,12 @@ function sorterDato(retning: Retning, oppgaver: OppgaveDTO[] | GosysOppgave[]) {
   }
 }
 
-const sammenlignFnr = (a: OppgaveDTO | GosysOppgave, b: OppgaveDTO | GosysOppgave) => {
+const sammenlignFnr = (a: OppgaveDTO, b: OppgaveDTO) => {
   // Sammenligner de første 6 sifrene i fødselsnummerene
   return (!!a.fnr ? Number(a.fnr.slice(0, 5)) : 0) - (!!b.fnr ? Number(b.fnr.slice(0, 5)) : 0)
 }
 
-function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[] | GosysOppgave[]) {
+function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[]) {
   switch (retning) {
     case 'ascending':
       return oppgaver.sort(sammenlignFnr)
@@ -48,18 +48,33 @@ function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[] | GosysOppgave[]) {
   }
 }
 
+const sammenlignGosysBruker = (a: GosysOppgave, b: GosysOppgave) =>
+  (!!a.bruker?.ident ? Number(a.bruker?.ident.slice(0, 5)) : 0) -
+  (!!b.bruker?.ident ? Number(b.bruker?.ident.slice(0, 5)) : 0)
+
+const sorterGosysBruker = (retning: Retning, oppgaver: GosysOppgave[]) => {
+  switch (retning) {
+    case 'ascending':
+      return oppgaver.sort(sammenlignGosysBruker)
+    case 'descending':
+      return oppgaver.sort(sammenlignGosysBruker).reverse()
+    case 'none':
+      return oppgaver
+  }
+}
+
 export function sorterOppgaver(oppgaver: OppgaveDTO[], sortering: OppgaveSortering): OppgaveDTO[] {
   const sortertRegistreringsdato = sorterDato(sortering.registreringsdatoSortering, oppgaver)
-  const sortertFrist = sorterDato(sortering.fristSortering, sortertRegistreringsdato)
+  const sortertFrist = sorterDato(sortering.fristSortering, sortertRegistreringsdato) as OppgaveDTO[]
 
-  return sorterFnr(sortering.fnrSortering, sortertFrist) as OppgaveDTO[]
+  return sorterFnr(sortering.fnrSortering, sortertFrist)
 }
 
 export function sorterGosysOppgaver(oppgaver: GosysOppgave[], sortering: OppgaveSortering): GosysOppgave[] {
   const sortertRegistreringsdato = sorterDato(sortering.registreringsdatoSortering, oppgaver)
-  const sortertFrist = sorterDato(sortering.fristSortering, sortertRegistreringsdato)
+  const sortertFrist = sorterDato(sortering.fristSortering, sortertRegistreringsdato) as GosysOppgave[]
 
-  return sorterFnr(sortering.fnrSortering, sortertFrist) as GosysOppgave[]
+  return sorterGosysBruker(sortering.fnrSortering, sortertFrist)
 }
 
 const SORTERING_KEY_LOCAL_STORAGE = 'OPPGAVESORTERING'

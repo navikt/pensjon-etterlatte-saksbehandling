@@ -18,6 +18,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.ForenkletBehandling
 import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
@@ -25,7 +26,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.Saker
@@ -53,7 +53,7 @@ internal fun Route.sakSystemRoutes(
     val logger = LoggerFactory.getLogger(this::class.java)
 
     route("/saker") {
-        get("/$KJOERING/$ANTALL") {
+        get("/{$KJOERING}/{$ANTALL}") {
             kunSystembruker {
                 val kjoering = call.parameters[KJOERING]!!
                 val antall = call.parameters[ANTALL]!!.toInt()
@@ -186,7 +186,7 @@ internal fun Route.sakWebRoutes(
                             ?: throw SakIkkeFunnetException("Fant ingen sak å endre enhet på sakid: $sakId")
 
                         val sakMedEnhet =
-                            GrunnlagsendringshendelseService.SakMedEnhet(
+                            SakMedEnhet(
                                 enhet = enhetrequest.enhet,
                                 id = sakId,
                             )
@@ -196,7 +196,7 @@ internal fun Route.sakWebRoutes(
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                             for (oppgaveIntern in oppgaveService.hentOppgaverForSak(sakId)) {
                                 if (oppgaveIntern.saksbehandler != null &&
-                                    oppgaveIntern.status in listOf(Status.UNDER_BEHANDLING, Status.ATTESTERING, Status.PAA_VENT)
+                                    oppgaveIntern.erUnderBehandling()
                                 ) {
                                     oppgaveService.fjernSaksbehandler(
                                         oppgaveIntern.id,

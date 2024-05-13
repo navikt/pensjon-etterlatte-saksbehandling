@@ -9,6 +9,7 @@ enum class ReguleringHendelseType : EventnameHendelseType {
     UTFORT_SJEKK_AAPEN_OVERSTYRT,
     BEHANDLING_OPPRETTA,
     VILKAARSVURDERT,
+    TRYGDETID_KOPIERT,
     BEREGNA,
     ;
 

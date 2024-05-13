@@ -9,7 +9,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
@@ -81,7 +81,7 @@ class BehandlingFactory(
                 inTransaction {
                     sakService.oppdaterEnhetForSaker(
                         listOf(
-                            GrunnlagsendringshendelseService.SakMedEnhet(
+                            SakMedEnhet(
                                 enhet = it,
                                 id = sak.id,
                             ),

@@ -14,7 +14,9 @@ import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import no.trygdeetaten.skjema.oppdrag.Oppdrag110
 import no.trygdeetaten.skjema.oppdrag.OppdragsEnhet120
 import no.trygdeetaten.skjema.oppdrag.OppdragsLinje150
+import no.trygdeetaten.skjema.oppdrag.Tekst140
 import no.trygdeetaten.skjema.oppdrag.TkodeStatusLinje
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 object OppdragMapper {
@@ -23,6 +25,7 @@ object OppdragMapper {
     fun oppdragFraUtbetaling(
         utbetaling: Utbetaling,
         erFoersteUtbetalingPaaSak: Boolean,
+        erGRegulering: Boolean,
     ): Oppdrag {
         val oppdrag110 =
             Oppdrag110().apply {
@@ -50,6 +53,17 @@ object OppdragMapper {
                     },
                 )
 
+                if (erGRegulering) {
+                    tekst140.add(
+                        Tekst140().apply {
+                            val fraOgMed = utbetaling.utbetalingslinjer.first().periode.fra
+                            tekst = "Grunnbeløpet har økt fra 1. mai ${fraOgMed.year}. De aller fleste vil få etterbetalt i juni."
+                            datoTekstFom = fraOgMed.toXMLDate()
+                            datoTekstTom = LocalDate.of(fraOgMed.year, fraOgMed.month.plus(1), 20).toXMLDate()
+                        },
+                    )
+                }
+
                 oppdragsLinje150.addAll(
                     utbetaling.utbetalingslinjer.map {
                         OppdragsLinje150().apply {
@@ -65,7 +79,6 @@ object OppdragMapper {
                                 }
                                 else -> {}
                             }
-
                             vedtakId = utbetaling.vedtakId.value.toString()
                             delytelseId = it.id.value.toString()
                             kodeKlassifik = utbetaling.sakType.tilKodeklassifikasjon()
@@ -78,7 +91,6 @@ object OppdragMapper {
                             saksbehId = utbetaling.saksbehandler.value
                             utbetalesTilId = utbetaling.stoenadsmottaker.value
                             henvisning = utbetaling.behandlingId.shortValue.value
-
                             attestant180.add(
                                 Attestant180().apply {
                                     attestantId = utbetaling.attestant.value

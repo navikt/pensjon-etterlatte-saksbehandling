@@ -194,26 +194,6 @@ class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclos
         }
     }
 
-    fun hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(minutter: Long): List<Grunnlagsendringshendelse> {
-        return connectionAutoclosing.hentConnection {
-            with(it) {
-                prepareStatement(
-                    """
-                    SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
-                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
-                    FROM grunnlagsendringshendelse
-                    WHERE opprettet <= ?
-                    AND status = ?
-                    """.trimIndent(),
-                ).use {
-                    it.setTidspunkt(1, Tidspunkt.now().minus(minutter, ChronoUnit.MINUTES))
-                    it.setString(2, GrunnlagsendringStatus.VENTER_PAA_JOBB.name)
-                    it.executeQuery().toList { asGrunnlagsendringshendelse() }
-                }
-            }
-        }
-    }
-
     fun hentGrunnlagsendringshendelserMedStatuserISak(
         sakId: Long,
         statuser: List<GrunnlagsendringStatus>,

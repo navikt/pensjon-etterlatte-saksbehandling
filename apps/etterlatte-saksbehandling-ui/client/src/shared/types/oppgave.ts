@@ -16,6 +16,17 @@ export interface OppgaveDTO {
   saksbehandler: OppgaveSaksbehandler | null
 }
 
+export interface GenerellEndringshendelse {
+  tidspunkt: string
+  saksbehandler?: string
+  endringer: EndringLinje[]
+}
+
+export interface EndringLinje {
+  tittel: string
+  beskrivelse?: string
+}
+
 export interface OppgaveSaksbehandler {
   ident: string
   navn?: string

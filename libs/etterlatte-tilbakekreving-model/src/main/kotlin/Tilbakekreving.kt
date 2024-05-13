@@ -31,7 +31,6 @@ data class TilbakekrevingVurdering(
     val rentevurdering: String?,
     val vedtak: String?,
     val vurderesForPaatale: String?,
-    val hjemmel: TilbakekrevingHjemmel?,
 )
 
 enum class TilbakekrevingVarsel {

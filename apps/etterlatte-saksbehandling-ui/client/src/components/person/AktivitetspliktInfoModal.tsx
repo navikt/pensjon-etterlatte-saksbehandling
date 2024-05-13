@@ -205,7 +205,7 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
             ))}
           </Modal.Body>
           <Modal.Footer>
-            {oppgave.status === Oppgavestatus.UNDER_BEHANDLING && (
+            {oppgave.status === Oppgavestatus.UNDER_BEHANDLING && !vurdering && (
               <Button
                 loading={isPending(ferdigstillOppgaveStatus) || isPending(opprettet)}
                 variant="primary"

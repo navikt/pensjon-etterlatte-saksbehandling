@@ -12,6 +12,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
   control,
   errorVedTomInput,
   readOnly,
+  shouldUnregister = false,
 }: {
   name: Path<T>
   label: string
@@ -19,6 +20,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
   control: Control<T>
   errorVedTomInput?: string
   readOnly?: boolean
+  shouldUnregister?: boolean
 }): ReactNode => {
   const {
     field,
@@ -34,6 +36,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
         return undefined
       },
     },
+    shouldUnregister: shouldUnregister,
   })
 
   const { datepickerProps, inputProps, setSelected, selectedDay } = useDatepicker({

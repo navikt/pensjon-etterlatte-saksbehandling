@@ -1,7 +1,6 @@
-import { Button, Heading } from '@navikt/ds-react'
-import { Content, ContentHeader, FlexRow } from '~shared/styled'
-import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import { useNavigate } from 'react-router-dom'
+import { Heading } from '@navikt/ds-react'
+import { Content, ContentHeader } from '~shared/styled'
+import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import React from 'react'
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { TilbakekrevingVurderingSkjema } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingSkjema'
@@ -13,7 +12,6 @@ export function TilbakekrevingVurdering({
   behandling: TilbakekrevingBehandling
   redigerbar: boolean
 }) {
-  const navigate = useNavigate()
   return (
     <Content>
       <ContentHeader>
@@ -24,12 +22,6 @@ export function TilbakekrevingVurdering({
         </HeadingWrapper>
       </ContentHeader>
       <TilbakekrevingVurderingSkjema behandling={behandling} redigerbar={redigerbar} />
-      <Border style={{ marginTop: '3em' }} />
-      <FlexRow $spacing={true} justify="center">
-        <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/utbetalinger`)}>
-          Neste
-        </Button>
-      </FlexRow>
     </Content>
   )
 }

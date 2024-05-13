@@ -80,12 +80,12 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
   }
 
   useEffect(() => {
-    if (oppgave.status !== Oppgavestatus.UNDER_BEHANDLING) {
+    if (visModal) {
       hent({ sakId: oppgave.sakId, oppgaveId: oppgave.id }, (result) => {
         setVurdering(result)
       })
     }
-  }, [])
+  }, [visModal])
 
   return (
     <>
@@ -120,7 +120,9 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
                 </Button>
               </div>
 
-              {oppgave.status === Oppgavestatus.UNDER_BEHANDLING ? (
+              <Spinner label="Henter vurdering av aktivitetsplikt" visible={isPending(hentet)} />
+
+              {oppgave.status === Oppgavestatus.UNDER_BEHANDLING && !vurdering ? (
                 <VStack gap="4">
                   <Select
                     label="Hva er brukers aktivitetsgrad?"
@@ -164,8 +166,6 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
                 </VStack>
               ) : (
                 <>
-                  <Spinner label="Henter vurdering av aktivitetsplikt" visible={isPending(hentet)} />
-
                   {mapFailure(hentet, (error) => (
                     <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved henting av vurdering'}</ApiErrorAlert>
                   ))}

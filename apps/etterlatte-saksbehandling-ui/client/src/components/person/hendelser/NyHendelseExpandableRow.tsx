@@ -8,7 +8,7 @@ import { grunnlagsendringsTittel, stoetterRevurderingAvHendelse } from '~compone
 import { formaterStringDato } from '~utils/formattering'
 import { harAapenRevurdering, revurderingKanOpprettes } from '~components/person/hendelser/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { FlexRow } from '~shared/styled'
+import { FlexRow, SpaceChildren } from '~shared/styled'
 import { StartRevurderingModal } from '~components/person/hendelser/StartRevurderingModal'
 import { LukkHendelseModal } from '~components/person/hendelser/LukkHendelseModal'
 
@@ -25,7 +25,7 @@ export const NyHendelseExpandableRow = ({ hendelse, sak, behandlinger, revurderi
   return (
     <Table.ExpandableRow
       content={
-        <>
+        <SpaceChildren direction="column">
           <HendelseBeskrivelse sakType={sak.sakType} hendelse={hendelse} />
 
           {hendelse.status === 'TATT_MED_I_BEHANDLING' ? (
@@ -54,7 +54,7 @@ export const NyHendelseExpandableRow = ({ hendelse, sak, behandlinger, revurderi
                 <StartRevurderingModal hendelse={hendelse} revurderinger={revurderinger} sakId={sak.id} />
               )}
           </FlexRow>
-        </>
+        </SpaceChildren>
       }
     >
       <Table.DataCell>{grunnlagsendringsTittel[hendelse.samsvarMellomKildeOgGrunnlag.type]}</Table.DataCell>

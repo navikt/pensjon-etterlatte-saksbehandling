@@ -107,7 +107,7 @@ class RyddUtlandstilsnittDao(
                     """
                     SELECT behandling_id, utlandstilknytning_behandling from utlandstilknytning_fiksing 
                     WHERE hentet_status = ?
-                    AND patchet_status = ?
+                    AND patch_status = ?
                     LIMIT ?
                     """.trimIndent(),
                 )

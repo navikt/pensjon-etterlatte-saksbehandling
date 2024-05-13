@@ -20,7 +20,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
-import { isSuccess, mapAllApiResult, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
+import { isSuccess, mapAllApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
 import { hentPersonNavn } from '~shared/api/pdltjenester'
 import { SamordningSak } from '~components/person/SamordningSak'
@@ -28,7 +28,6 @@ import { SakMedBehandlinger } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
 import { Personopplysninger } from '~components/person/personopplysninger/Personopplysninger'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
-import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
 import { Hendelser } from '~components/person/hendelser/Hendelser'
 
 export enum PersonOversiktFane {
@@ -120,9 +119,6 @@ export const Person = () => {
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.HENDELSER}>
               <Hendelser sakResult={sakResult} fnr={person.foedselsnummer} />
-              {/*{mapResult(sakResult, {*/}
-              {/*  success: ({ sak, behandlinger }) => <RelevanteHendelser sak={sak} behandlingliste={behandlinger} />,*/}
-              {/*})}*/}
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.DOKUMENTER}>
               <Dokumentliste sakResult={sakResult} fnr={person.foedselsnummer} />

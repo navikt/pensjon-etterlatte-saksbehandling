@@ -203,7 +203,7 @@ fun Route.vedtaksvurderingRoute(
                     call.request.queryParameters["dato"]?.let { LocalDate.parse(it) }
                         ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
 
-                logger.info("Sjekker om vedtak er løpende for sak $sakId på dato $dato")
+                logger.info("Sjekker om sak har løpende for vedtak $sakId på dato $dato")
                 val loependeYtelse = vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(sakId, dato)
                 call.respond(loependeYtelse.toDto())
             }

@@ -82,6 +82,4 @@ class BrevbakerPdfResponse(val base64pdf: String, val letterMetadata: LetterMeta
 
 class BrevbakerHTMLResponse(val html: Map<String, String>, val letterMetadata: LetterMetadata)
 
-class BrevbakerJSONResponse(val json: RenderedLetterMarkdown, val letterMetadata: LetterMetadata)
-
 private fun BrevbakerRequest.toJsonNode(): JsonNode = objectMapper.readTree(toJson())

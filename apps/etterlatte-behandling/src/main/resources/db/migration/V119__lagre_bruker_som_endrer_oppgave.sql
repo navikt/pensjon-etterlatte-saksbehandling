@@ -1,2 +1,2 @@
 ALTER TABLE oppgaveendringer
-    ADD COLUMN saksbehandler VARCHAR;
+    ADD COLUMN saksbehandler TEXT;

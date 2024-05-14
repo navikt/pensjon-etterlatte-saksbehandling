@@ -25,7 +25,7 @@ export const AttesterTilbakekreving = ({
 
   const attester = () => {
     apiAttesterVedtak(
-      { behandlingsId: tilbakekreving.id, kommentar },
+      { tilbakekrevingId: tilbakekreving.id, kommentar },
       () => navigate(`/person/${tilbakekreving.sak.ident}`),
       (error) => {
         setError(`Ukjent feil oppsto ved attestering av vedtaket: ${error.detail}`)

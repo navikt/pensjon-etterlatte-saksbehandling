@@ -233,6 +233,9 @@ private fun Route.settOppTilganger(
             harTilgangTilGenerellBehandling = { generellbehandlingId, saksbehandlerMedRoller ->
                 tilgangService.harTilgangTilGenerellBehandling(generellbehandlingId, saksbehandlerMedRoller)
             }
+            harTilgangTilTilbakekreving = { tilbakekrevingId, saksbehandlerMedRoller ->
+                tilgangService.harTilgangTilTilbakekreving(tilbakekrevingId, saksbehandlerMedRoller)
+            }
         }
     }
 }

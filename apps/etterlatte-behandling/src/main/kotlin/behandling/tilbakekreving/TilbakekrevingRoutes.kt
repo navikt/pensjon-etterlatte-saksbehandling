@@ -12,62 +12,62 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
-import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.behandlingId
+import no.nav.etterlatte.libs.ktor.route.TILBAKEKREVINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.sakId
+import no.nav.etterlatte.libs.ktor.route.tilbakekrevingId
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 
 internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
     route("/api/tilbakekreving") {
-        route("{$BEHANDLINGID_CALL_PARAMETER}") {
+        route("{$TILBAKEKREVINGID_CALL_PARAMETER}") {
             get {
-                call.respond(service.hentTilbakekreving(behandlingId))
+                call.respond(service.hentTilbakekreving(tilbakekrevingId))
             }
             put("/vurdering") {
                 kunSaksbehandlerMedSkrivetilgang {
                     val vurdering = call.receive<TilbakekrevingVurdering>()
-                    call.respond(service.lagreVurdering(behandlingId, vurdering, it))
+                    call.respond(service.lagreVurdering(tilbakekrevingId, vurdering, it))
                 }
             }
             put("/perioder") {
                 kunSaksbehandlerMedSkrivetilgang {
                     val request = call.receive<TilbakekrevingPerioderRequest>()
-                    call.respond(service.lagrePerioder(behandlingId, request.perioder, it))
+                    call.respond(service.lagrePerioder(tilbakekrevingId, request.perioder, it))
                 }
             }
             put("/skal-sende-brev") {
                 kunSaksbehandlerMedSkrivetilgang {
                     val request = call.receive<TilbakekrevingSendeBrevRequest>()
-                    call.respond(service.lagreSkalSendeBrev(behandlingId, request.skalSendeBrev, it))
+                    call.respond(service.lagreSkalSendeBrev(tilbakekrevingId, request.skalSendeBrev, it))
                 }
             }
             post("/valider") {
                 kunSaksbehandlerMedSkrivetilgang {
-                    call.respond(service.validerVurderingOgPerioder(behandlingId, it))
+                    call.respond(service.validerVurderingOgPerioder(tilbakekrevingId, it))
                 }
             }
 
             route("vedtak") {
                 post("fatt") {
                     kunSaksbehandlerMedSkrivetilgang {
-                        service.fattVedtak(behandlingId, it)
+                        service.fattVedtak(tilbakekrevingId, it)
                         call.respond(HttpStatusCode.OK)
                     }
                 }
                 post("attester") {
                     kunSaksbehandlerMedSkrivetilgang {
                         val (kommentar) = call.receive<TilbakekrevingAttesterRequest>()
-                        service.attesterVedtak(behandlingId, kommentar, it)
+                        service.attesterVedtak(tilbakekrevingId, kommentar, it)
                         call.respond(HttpStatusCode.OK)
                     }
                 }
                 post("underkjenn") {
                     kunSaksbehandlerMedSkrivetilgang {
                         val (kommentar, valgtBegrunnelse) = call.receive<TilbakekrevingUnderkjennRequest>()
-                        service.underkjennVedtak(behandlingId, kommentar, valgtBegrunnelse, it)
+                        service.underkjennVedtak(tilbakekrevingId, kommentar, valgtBegrunnelse, it)
                         call.respond(HttpStatusCode.OK)
                     }
                 }

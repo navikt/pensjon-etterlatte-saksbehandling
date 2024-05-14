@@ -46,6 +46,16 @@
 
 </div>
 <script>
+    const behandlingssteg = [
+        "KLAR",
+        "BEHANDLING_OPPRETTA",
+        "VILKAARSVURDERT",
+        "TRYGDETID_OPPRETTA",
+        "BEREGNA",
+        "AVKORTA",
+        "VEDTAK_FATTA",
+        "IVERKSATT"
+    ]
 
     const opprettGruppeInfo = document.querySelector('#opprettGruppeInfo')
     const mainContent = document.querySelector('#main-content')
@@ -66,12 +76,35 @@
         const inputTableElement = document.createElement('td')
 
         const antallLabel= document.createElement('label')
-        antallLabel.innerHTML = "Antall"
+        antallLabel.innerHTML = "Antall: "
         inputTableElement.appendChild(antallLabel)
 
         const antallInput = document.createElement('input')
         antallInput.setAttribute('id', 'antall')
         inputTableElement.appendChild(antallInput)
+
+        return inputTableElement
+    }
+
+    function settOppBehandlingsstegInput() {
+        const inputTableElement = document.createElement('td')
+
+        const antallLabel= document.createElement('label')
+        antallLabel.innerHTML = "Behandle frem til-og-med: "
+        inputTableElement.appendChild(antallLabel)
+
+        const select = document.createElement("select");
+        select.id = "behandlingsstegDropdown";
+
+        for (const steg in behandlingssteg) {
+            const option = document.createElement("option");
+            option.value = behandlingssteg[steg];
+            option.innerHTML = behandlingssteg[steg];
+            select.add(option);
+        }
+        select.selectedIndex = behandlingssteg.indexOf("IVERKSATT")
+
+        inputTableElement.appendChild(select)
 
         return inputTableElement
     }
@@ -102,6 +135,7 @@
 
         const tableRow = document.createElement('tr')
         tableRow.appendChild(settOppInput())
+        tableRow.appendChild(settOppBehandlingsstegInput())
         tableRow.appendChild(settOppKnapper())
 
         table.appendChild(tableRow)
@@ -111,12 +145,14 @@
         soeknadInnsendtAlert.style.display = "none"
 
         const antall = document.getElementById("antall").value
+        const steg = document.getElementById("behandlingsstegDropdown").value
+
         await fetch('opprett-og-behandle', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: `type=${type}&antall=${antall}&gruppeId={{gruppeId}}`
+            body: `type=${type}&antall=${antall}&behandlingssteg=${steg}&gruppeId={{gruppeId}}`
         }).then(res => res.json()).then(data => {
             if ((data.status === 200)) {
                 soeknadInnsendtAlert.firstElementChild.innerHTML = `Søknad er innsendt og registrert`

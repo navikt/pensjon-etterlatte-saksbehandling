@@ -14,6 +14,8 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.mockSaksbehandler
+import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporing
@@ -47,6 +49,8 @@ internal class OppgaveDaoReguleringTest(val dataSource: DataSource) {
         oppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao, mockk(), mockk())
 
         saksbehandlerInfoDao = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
+
+        nyKontekstMedBruker(mockSaksbehandler("Z123456"))
     }
 
     @AfterEach

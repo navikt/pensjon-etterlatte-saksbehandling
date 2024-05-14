@@ -106,9 +106,9 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
                       </Table.Body>
                     </HendelserTable>
                   ) : (
-                    <Alert variant="info" inline>
+                    <IngenHendelserAlert variant="info" inline>
                       Ingen nye hendelser
-                    </Alert>
+                    </IngenHendelserAlert>
                   )}
                 </>
               )}
@@ -130,9 +130,9 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
                       </Table.Body>
                     </HendelserTable>
                   ) : (
-                    <Alert variant="info" inline>
+                    <IngenHendelserAlert variant="info" inline>
                       Ingen arkiverte hendelser
-                    </Alert>
+                    </IngenHendelserAlert>
                   )}
                 </>
               )}
@@ -153,4 +153,8 @@ const HendelserTable = styled(Table)`
   margin-top: 1rem;
   max-width: 60rem;
   min-width: 30rem;
+`
+
+const IngenHendelserAlert = styled(Alert)`
+  margin-top: 1rem;
 `

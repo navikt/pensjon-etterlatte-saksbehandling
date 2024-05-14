@@ -5,9 +5,9 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -16,37 +16,39 @@ import no.nav.etterlatte.oppgave.lagNyOppgave
 import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
-class AktivitetspliktAktivitetsgradDaoTest(ds: DataSource) {
-    private val dao = AktivitetspliktAktivitetsgradDao(ConnectionAutoclosingTest(ds))
+class AktivitetspliktUnntakDaoTest(ds: DataSource) {
+    private val dao = AktivitetspliktUnntakDao(ConnectionAutoclosingTest(ds))
     private val sakDao = SakDao(ConnectionAutoclosingTest(ds))
     private val oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(ds))
 
     @Test
-    fun `skal lagre ned og hente opp en ny aktivitetsgrad`() {
+    fun `skal lagre ned og hente opp et nytt unntak`() {
         val behandlingId = null
         val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
         val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
         val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
-        val aktivitetsgrad =
-            LagreAktivitetspliktAktivitetsgrad(
-                aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50,
+        val unntak =
+            LagreAktivitetspliktUnntak(
+                unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
                 beskrivelse = "Beskrivelse",
+                tom = LocalDate.now().plusMonths(6),
             )
 
-        dao.opprettAktivitetsgrad(aktivitetsgrad, sak.id, kilde, oppgave.id, behandlingId)
+        dao.opprettUnntak(unntak, sak.id, kilde, oppgave.id, behandlingId)
 
-        dao.hentAktivitetsgrad(oppgave.id)!!.asClue {
+        dao.hentUnntak(oppgave.id)!!.asClue {
             it.sakId shouldBe sak.id
             it.behandlingId shouldBe behandlingId
             it.oppgaveId shouldBe oppgave.id
-            it.aktivitetsgrad shouldBe aktivitetsgrad.aktivitetsgrad
-            it.fom shouldNotBe null
+            it.unntak shouldBe unntak.unntak
+            it.tom shouldNotBe null
             it.opprettet shouldBe kilde
             it.endret shouldBe kilde
-            it.beskrivelse shouldBe aktivitetsgrad.beskrivelse
+            it.beskrivelse shouldBe unntak.beskrivelse
         }
     }
 }

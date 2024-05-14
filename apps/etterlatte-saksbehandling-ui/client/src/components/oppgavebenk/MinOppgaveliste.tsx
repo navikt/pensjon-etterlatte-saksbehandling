@@ -19,7 +19,10 @@ import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
+import {
+  hentMinOppgavelisteFilterFraLocalStorage,
+  leggMinOppgavelisteFilterILocalsotrage,
+} from '~components/oppgavebenk/filtreringAvOppgaver/filterLocalStorage'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -29,7 +32,7 @@ interface Props {
 export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
-  const [filter, setFilter] = useState<Filter>(minOppgavelisteFiltre())
+  const [filter, setFilter] = useState<Filter>(hentMinOppgavelisteFilterFraLocalStorage())
 
   const oppgavebenkState = useOppgaveBenkState()
   const dispatcher = useOppgavebenkStateDispatcher()
@@ -71,6 +74,10 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
       },
       (oppgaver) => dispatcher.setMinOppgavelisteOppgaver(sorterOppgaverEtterOpprettet(oppgaver))
     )
+
+  useEffect(() => {
+    leggMinOppgavelisteFilterILocalsotrage(filter)
+  }, [filter])
 
   useEffect(() => {
     if (!oppgavebenkState.minOppgavelisteOppgaver?.length) hentMinOppgavelisteOppgaver()

@@ -131,7 +131,7 @@ export const initialFilter = (): Filter => {
   }
 }
 
-export const minOppgavelisteFiltre = (): Filter => {
+export const initialMinOppgavelisteFiltre = (): Filter => {
   return {
     ...defaultFiltre,
     oppgavestatusFilter: [

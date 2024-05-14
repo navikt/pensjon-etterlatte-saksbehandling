@@ -97,12 +97,14 @@ class JmsConnectionFactory(
     ) {
         connection().createSession().use { session ->
             val producer = session.createProducer(session.createQueue(queue))
+
+            if (prioritet != Prioritet.NORMAL) {
+                producer.priority = prioritet.verdi
+            }
+
             val message =
                 session.createTextMessage(xml).apply {
                     jmsReplyTo = session.createQueue(replyQueue)
-                    if (prioritet != Prioritet.NORMAL) {
-                        jmsPriority = prioritet.verdi
-                    }
                 }
             producer.send(message)
         }

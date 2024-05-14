@@ -1,0 +1,1 @@
+update utlandstilknytning_fiksing set patch_status = 'IKKE_PATCHET' where patch_status = 'IKKE_PACHET';

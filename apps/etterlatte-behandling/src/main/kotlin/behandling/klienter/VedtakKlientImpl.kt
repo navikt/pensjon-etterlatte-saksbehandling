@@ -336,14 +336,13 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
         try {
             logger.info("Sjekker om sak $sakId er løpende på $dato")
             return downstreamResourceClient
-                .post(
+                .get(
                     resource =
                         Resource(
                             clientId = clientId,
                             url = "$resourceUrl/api/vedtak/loepende/$sakId?dato=$dato",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                    postBody = { },
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

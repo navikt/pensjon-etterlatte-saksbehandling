@@ -48,7 +48,7 @@ class UtbetalingService(
                     erGRegulering = vedtak.behandling.revurderingsaarsak == Revurderingaarsak.REGULERING,
                 ).also {
                     utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = it))
-                    oppdragSender.sendOppdrag(it)
+                    oppdragSender.sendOppdrag(it, vedtak.finnPrioritet())
                 }.let {
                     utbetalingDao.nyUtbetalingshendelse(
                         utbetaling.vedtakId.value,

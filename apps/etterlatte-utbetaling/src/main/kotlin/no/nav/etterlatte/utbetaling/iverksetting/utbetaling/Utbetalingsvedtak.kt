@@ -1,8 +1,10 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.mq.Prioritet
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -59,6 +61,14 @@ data class Utbetalingsvedtak(
                         )
                     } ?: throw Exception("Mangler attestant på vedtak"),
             )
+        }
+    }
+
+    fun finnPrioritet(): Prioritet {
+        return if (behandling.revurderingsaarsak?.equals(Revurderingaarsak.REGULERING) == true) {
+            Prioritet.LAV
+        } else {
+            Prioritet.NORMAL
         }
     }
 }

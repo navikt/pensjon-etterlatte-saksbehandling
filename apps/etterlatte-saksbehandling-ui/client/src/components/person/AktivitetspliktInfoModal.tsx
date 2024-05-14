@@ -217,7 +217,7 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
                             })}
                             error={errors.midlertidigUnntak?.message}
                           >
-                            <option value="">Velg hvilken grad</option>
+                            <option value="">Velg hvilke unntak</option>
                             {Object.values(AktivitetspliktUnntakType)
                               .filter(
                                 (unntak) =>

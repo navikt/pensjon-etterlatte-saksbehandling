@@ -472,6 +472,85 @@ internal class VedtakstidslinjeTest {
             )
         }
 
+        @Test
+        fun `Skal kunne ha et opphør og en ny revurdering med virk før opphør som bygger opp utbetalingslinjer med opphøret`() {
+            val vedtakFomJanuar2024 =
+                lagVedtak(
+                    id = 1,
+                    virkningsDato = januar2024.atDay(1),
+                    vedtakStatus = VedtakStatus.IVERKSATT,
+                    behandlingType = BehandlingType.REVURDERING,
+                    vedtakFattetDato = Tidspunkt.parse("2023-12-17T13:30:00Z"),
+                    utbetalingsperioder =
+                        listOf(
+                            Utbetalingsperiode(
+                                id = 10,
+                                periode = Periode(januar2024, null),
+                                beloep = BigDecimal.valueOf(140),
+                                type = UtbetalingsperiodeType.UTBETALING,
+                            ),
+                        ),
+                )
+
+            val opphoerFomMars =
+                lagVedtak(
+                    id = 2,
+                    virkningsDato = mars2024.atDay(1),
+                    vedtakStatus = VedtakStatus.IVERKSATT,
+                    behandlingType = BehandlingType.REVURDERING,
+                    vedtakFattetDato = Tidspunkt.parse("2024-02-02T13:30:00Z"),
+                    vedtakType = VedtakType.OPPHOER,
+                    utbetalingsperioder =
+                        listOf(
+                            Utbetalingsperiode(
+                                periode = Periode(mars2024, null),
+                                beloep = null,
+                                type = UtbetalingsperiodeType.OPPHOER,
+                            ),
+                        ),
+                )
+
+            val vedtakTilbakeITidFomFeb =
+                lagVedtak(
+                    id = 1,
+                    virkningsDato = feb2024.atDay(1),
+                    vedtakStatus = VedtakStatus.IVERKSATT,
+                    behandlingType = BehandlingType.REVURDERING,
+                    vedtakFattetDato = Tidspunkt.parse("2024-03-02T13:30:00Z"),
+                    utbetalingsperioder =
+                        listOf(
+                            Utbetalingsperiode(
+                                id = 10,
+                                periode = Periode(feb2024, feb2024),
+                                beloep = BigDecimal.valueOf(160),
+                                type = UtbetalingsperiodeType.UTBETALING,
+                            ),
+                            Utbetalingsperiode(
+                                periode = Periode(mars2024, null),
+                                beloep = null,
+                                type = UtbetalingsperiodeType.OPPHOER,
+                            ),
+                        ),
+                )
+
+            val sammenstilt =
+                Vedtakstidslinje(listOf(vedtakFomJanuar2024, opphoerFomMars, vedtakTilbakeITidFomFeb))
+                    .sammenstill(januar2024)
+
+            assertAll(
+                { sammenstilt.size shouldBe 2 },
+                { sammenstilt[0].utbetalingsperioder.size shouldBe 1 },
+                { sammenstilt[0].utbetalingsperioder[0].periode.fom shouldBe januar2024 },
+                { sammenstilt[0].utbetalingsperioder[0].periode.tom shouldBe januar2024 },
+                { sammenstilt[1].utbetalingsperioder.size shouldBe 2 },
+                { sammenstilt[1].utbetalingsperioder[0].periode.fom shouldBe feb2024 },
+                { sammenstilt[1].utbetalingsperioder[0].periode.tom shouldBe feb2024 },
+                { sammenstilt[1].utbetalingsperioder[1].periode.fom shouldBe mars2024 },
+                { sammenstilt[1].utbetalingsperioder[1].periode.tom shouldBe null },
+                { sammenstilt[1].utbetalingsperioder[1].type shouldBe UtbetalingsperiodeType.OPPHOER },
+            )
+        }
+
         private val Vedtak.utbetalingsperioder: List<Utbetalingsperiode>
             get() = (this.innhold as VedtakInnhold.Behandling).utbetalingsperioder
     }

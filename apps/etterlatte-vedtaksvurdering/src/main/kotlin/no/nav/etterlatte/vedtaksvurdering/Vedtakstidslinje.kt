@@ -119,7 +119,7 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
                 gyldighetsperiode.tom?.let { tom -> !it.periode.fom.isAfter(tom) } ?: true
             }
             .map {
-                if (it.periode.tom == null || it.periode.tom?.isAfter(gyldighetsperiode.tom) == true) {
+                if (it.periode.tom == null || gyldighetsperiode.tom?.isBefore(it.periode.tom) == true) {
                     it.copy(
                         id = it.id,
                         periode = Periode(it.periode.fom, gyldighetsperiode.tom),

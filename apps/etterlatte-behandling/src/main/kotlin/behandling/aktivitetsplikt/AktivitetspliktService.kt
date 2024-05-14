@@ -121,6 +121,10 @@ class AktivitetspliktService(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        if (unntak.fom != null && unntak.tom != null && unntak.fom > unntak.tom) {
+            throw TomErFoerFomException()
+        }
+
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
         inTransaction {
             require(

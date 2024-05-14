@@ -214,6 +214,7 @@ class AktivitetspliktServiceTest {
                 LagreAktivitetspliktUnntak(
                     unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
                     beskrivelse = "Beskrivelse",
+                    fom = null,
                     tom = LocalDate.now().plusMonths(6),
                 )
             every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), oppgaveId) } returns 1
@@ -231,12 +232,30 @@ class AktivitetspliktServiceTest {
                 LagreAktivitetspliktUnntak(
                     unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
                     beskrivelse = "Beskrivelse",
+                    fom = LocalDate.now(),
                     tom = LocalDate.now().plusMonths(6),
                 )
             every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), oppgaveId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntak(oppgaveId) } returns mockk()
 
             assertThrows<IllegalArgumentException> {
+                service.opprettUnntak(unntak, oppgaveId, sakId, brukerTokenInfo)
+            }
+        }
+
+        @Test
+        fun `Skal kaste feil hvis tom er foer fom`() {
+            val unntak =
+                LagreAktivitetspliktUnntak(
+                    unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
+                    beskrivelse = "Beskrivelse",
+                    fom = LocalDate.now().plusMonths(6),
+                    tom = LocalDate.now().plusMonths(0),
+                )
+            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), oppgaveId) } returns 1
+            every { aktivitetspliktUnntakDao.hentUnntak(oppgaveId) } returns null
+
+            assertThrows<TomErFoerFomException> {
                 service.opprettUnntak(unntak, oppgaveId, sakId, brukerTokenInfo)
             }
         }

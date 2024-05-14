@@ -66,31 +66,39 @@ export function TilbakekrevingVurderingSkjema({
   const navigate = useNavigate()
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
 
-  const { register, handleSubmit, watch, control, formState, reset } = useForm<TilbakekrevingVurdering>({
+  const { register, handleSubmit, watch, control, formState, reset, getValues } = useForm<TilbakekrevingVurdering>({
     defaultValues: behandling.tilbakekreving.vurdering || initialVurdering,
   })
 
   useEffect(() => {
     if (formState.isDirty && Object.keys(formState.dirtyFields).length) {
-      const delay = setTimeout(handleSubmit(lagreVurdering), 2000)
+      const delay = setTimeout(handleSubmit(autolagreVurdering), 2000)
 
       return () => clearTimeout(delay)
     }
   }, [formState])
 
-  const lagreVurdering = (vurdering: TilbakekrevingVurdering) => {
-    lagreVurderingRequest({ tilbakekrevingId: behandling.id, vurdering: vurdering }, (lagretBehandling) => {
-      dispatch(addTilbakekreving(lagretBehandling))
-      reset(lagretBehandling.tilbakekreving.vurdering || initialVurdering, { keepDirtyValues: true })
-    })
+  const autolagreVurdering = (vurdering: TilbakekrevingVurdering) => {
+    lagreVurdering(vurdering)
   }
 
   const lagreVurderingOgFortsett = (vurdering: TilbakekrevingVurdering) => {
-    lagreVurderingRequest({ tilbakekrevingId: behandling.id, vurdering: vurdering }, (lagretBehandling) => {
-      dispatch(addTilbakekreving(lagretBehandling))
-      reset(lagretBehandling.tilbakekreving.vurdering || initialVurdering, { keepDirtyValues: true })
-      navigate(`/tilbakekreving/${behandling?.id}/utbetalinger`)
-    })
+    lagreVurdering(vurdering, () => navigate(`/tilbakekreving/${behandling?.id}/utbetalinger`))
+  }
+
+  const lagreVurdering = (vurdering: TilbakekrevingVurdering, onSuccess?: () => void) => {
+    reset(getValues())
+    lagreVurderingRequest(
+      { tilbakekrevingId: behandling.id, vurdering: vurdering },
+      (lagretBehandling) => {
+        dispatch(addTilbakekreving(lagretBehandling))
+        reset(lagretBehandling.tilbakekreving.vurdering || initialVurdering, { keepDirtyValues: true })
+        onSuccess?.()
+      },
+      () => {
+        reset(getValues())
+      }
+    )
   }
 
   const vilkaarOppfylt = () =>

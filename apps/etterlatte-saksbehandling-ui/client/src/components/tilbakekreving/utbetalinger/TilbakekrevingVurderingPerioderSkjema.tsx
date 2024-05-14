@@ -39,13 +39,14 @@ export function TilbakekrevingVurderingPerioderSkjema({
     watch,
     formState,
     reset,
+    getValues,
   } = useForm<{ values: TilbakekrevingPeriode[] }>({
     defaultValues: { values: behandling.tilbakekreving.perioder },
   })
 
   useEffect(() => {
     if (formState.isDirty && Object.keys(formState.dirtyFields).length) {
-      const delay = setTimeout(handleSubmit(lagrePerioder), 2000)
+      const delay = setTimeout(handleSubmit(autolagrePerioder), 2000)
 
       return () => {
         clearTimeout(delay)
@@ -53,19 +54,27 @@ export function TilbakekrevingVurderingPerioderSkjema({
     }
   }, [formState])
 
-  const lagrePerioderOgFortsett = (data: { values: TilbakekrevingPeriode[] }) => {
-    lagrePerioderRequest({ tilbakekrevingId: behandling.id, perioder: data.values }, (lagretTilbakekreving) => {
-      dispatch(addTilbakekreving(lagretTilbakekreving))
-      reset({ values: lagretTilbakekreving.tilbakekreving.perioder }, { keepDirtyValues: true })
-      navigate(`/tilbakekreving/${behandling?.id}/oppsummering`)
-    })
+  const autolagrePerioder = (data: { values: TilbakekrevingPeriode[] }) => {
+    lagrePerioder(data)
   }
 
-  const lagrePerioder = (data: { values: TilbakekrevingPeriode[] }) => {
-    lagrePerioderRequest({ tilbakekrevingId: behandling.id, perioder: data.values }, (lagretTilbakekreving) => {
-      dispatch(addTilbakekreving(lagretTilbakekreving))
-      reset({ values: lagretTilbakekreving.tilbakekreving.perioder }, { keepDirtyValues: true })
-    })
+  const lagrePerioderOgFortsett = (data: { values: TilbakekrevingPeriode[] }) => {
+    lagrePerioder(data, () => navigate(`/tilbakekreving/${behandling?.id}/oppsummering`))
+  }
+
+  const lagrePerioder = (data: { values: TilbakekrevingPeriode[] }, onSuccess?: () => void) => {
+    reset(getValues())
+    lagrePerioderRequest(
+      { tilbakekrevingId: behandling.id, perioder: data.values },
+      (lagretTilbakekreving) => {
+        dispatch(addTilbakekreving(lagretTilbakekreving))
+        reset({ values: lagretTilbakekreving.tilbakekreving.perioder }, { keepDirtyValues: true })
+        onSuccess?.()
+      },
+      () => {
+        reset(getValues())
+      }
+    )
   }
 
   return (

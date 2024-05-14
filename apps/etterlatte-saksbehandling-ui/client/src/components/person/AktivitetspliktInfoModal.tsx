@@ -232,7 +232,7 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
                           <ControlledDatoVelger
                             name="sluttdato"
                             label="Angi sluttdato for unntaksperiode"
-                            description="Du trenger ikke legge til en sluttdao hvis den ikke er tilgjengelig"
+                            description="Du trenger ikke legge til en sluttdato hvis den ikke er tilgjengelig"
                             control={control}
                             required={false}
                           />

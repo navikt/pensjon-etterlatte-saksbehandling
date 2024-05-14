@@ -7,3 +7,7 @@ data class SakIDListe(val ider: List<BehandlingOgSak>) {
 }
 
 data class BehandlingOgSak(val behandlingId: UUID, val sakId: Long)
+
+data class SakIderDto(
+    val sakIder: List<Long>,
+)

@@ -9,9 +9,11 @@ import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.ANTALL
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.SPESIFIKKE_SAKER
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.sakId
+import no.nav.etterlatte.rapidsandrivers.saker
 import no.nav.etterlatte.rapidsandrivers.tilbakestilteBehandlinger
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -31,6 +33,7 @@ internal class ReguleringsforespoerselRiver(
             validate { it.requireKey(DATO_KEY) }
             validate { it.requireKey(KJOERING) }
             validate { it.requireKey(ANTALL) }
+            validate { it.requireKey(SPESIFIKKE_SAKER) }
         }
     }
 
@@ -49,6 +52,7 @@ internal class ReguleringsforespoerselRiver(
 
         val kjoering = packet[KJOERING].asText()
         val antall = packet[ANTALL].asInt()
+        val spesifikkeSaker = packet.saker
 
         val maksBatchstoerrelse = MAKS_BATCHSTOERRELSE
         var tatt = 0
@@ -56,7 +60,7 @@ internal class ReguleringsforespoerselRiver(
         while (tatt < antall) {
             val antallIDenneRunden = min(maksBatchstoerrelse, antall)
             logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
-            val sakerTilOmregning = behandlingService.hentAlleSaker(kjoering, antallIDenneRunden)
+            val sakerTilOmregning = behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker)
 
             val tilbakemigrerte =
                 behandlingService.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)

@@ -43,5 +43,6 @@ private fun createRecord(dato: LocalDate) =
             ReguleringEvents.DATO to dato.toString(),
             ReguleringEvents.KJOERING to "Regulering-$year",
             ReguleringEvents.ANTALL to 1,
+            ReguleringEvents.SPESIFIKKE_SAKER to listOf<Long>(),
         ),
     ).toJson()

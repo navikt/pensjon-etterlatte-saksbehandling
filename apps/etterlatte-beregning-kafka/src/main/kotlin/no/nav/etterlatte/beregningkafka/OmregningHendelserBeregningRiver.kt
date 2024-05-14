@@ -79,7 +79,7 @@ internal class OmregningHendelserBeregningRiver(
         beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(behandlingId)
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
         val forrigeBeregning = beregningService.hentBeregning(behandlingViOmregnerFra).body<BeregningDTO>()
-        verifiserToleransegrenser(dato, ny = beregning, gammel = forrigeBeregning)
+        verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning)
 
         return if (sakType == SakType.OMSTILLINGSSTOENAD) {
             val avkorting =
@@ -92,10 +92,10 @@ internal class OmregningHendelserBeregningRiver(
     }
 
     private fun verifiserToleransegrenser(
-        dato: LocalDate,
         ny: BeregningDTO,
         gammel: BeregningDTO,
     ) {
+        val dato = ny.beregningsperioder.first().datoFOM.atDay(1)
         val nyttBeloep =
             ny.beregningsperioder.paaDato(dato)
                 .utbetaltBeloep

@@ -16,6 +16,7 @@ import no.trygdeetaten.skjema.oppdrag.OppdragsEnhet120
 import no.trygdeetaten.skjema.oppdrag.OppdragsLinje150
 import no.trygdeetaten.skjema.oppdrag.Tekst140
 import no.trygdeetaten.skjema.oppdrag.TkodeStatusLinje
+import java.math.BigInteger
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -58,6 +59,7 @@ object OppdragMapper {
                         Tekst140().apply {
                             val fraOgMed = utbetaling.utbetalingslinjer.first().periode.fra
                             tekst = "Grunnbeløpet har økt fra 1. mai ${fraOgMed.year}. De aller fleste vil få etterbetalt i juni."
+                            tekstLnr = BigInteger.ONE
                             datoTekstFom = fraOgMed.toXMLDate()
                             datoTekstTom = LocalDate.of(fraOgMed.year, fraOgMed.month.plus(1), 20).toXMLDate()
                         },

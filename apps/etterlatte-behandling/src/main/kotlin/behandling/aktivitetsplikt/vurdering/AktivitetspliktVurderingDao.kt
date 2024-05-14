@@ -5,7 +5,7 @@ import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.database.single
+import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -41,7 +41,7 @@ class AktivitetspliktVurderingDao(private val connectionAutoclosing: ConnectionA
         }
     }
 
-    fun hentVurdering(oppgaveId: UUID): AktivitetspliktVurdering =
+    fun hentVurdering(oppgaveId: UUID): AktivitetspliktVurdering? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -54,7 +54,7 @@ class AktivitetspliktVurderingDao(private val connectionAutoclosing: ConnectionA
                     )
                 stmt.setObject(1, oppgaveId)
 
-                stmt.executeQuery().single { toVurdering() }
+                stmt.executeQuery().singleOrNull { toVurdering() }
             }
         }
 

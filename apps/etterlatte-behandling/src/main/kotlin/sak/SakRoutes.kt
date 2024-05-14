@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakIderDto
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -53,11 +54,12 @@ internal fun Route.sakSystemRoutes(
     val logger = LoggerFactory.getLogger(this::class.java)
 
     route("/saker") {
-        get("/{$KJOERING}/{$ANTALL}") {
+        post("/{$KJOERING}/{$ANTALL}") {
             kunSystembruker {
                 val kjoering = call.parameters[KJOERING]!!
                 val antall = call.parameters[ANTALL]!!.toInt()
-                call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall) }))
+                val saker = call.receive<SakIderDto>().sakIder
+                call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall, saker) }))
             }
         }
 
@@ -316,10 +318,6 @@ data class EnhetRequest(
 )
 
 data class FoersteVirkDto(val foersteIverksatteVirkISak: LocalDate, val sakId: Long)
-
-data class SakIderDto(
-    val sakIder: List<Long>,
-)
 
 data class SakerDto(
     val saker: Map<Long, Sak>,

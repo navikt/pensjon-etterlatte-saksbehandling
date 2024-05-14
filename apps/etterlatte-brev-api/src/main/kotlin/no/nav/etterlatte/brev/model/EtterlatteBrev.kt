@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -92,8 +93,29 @@ fun TrygdetidDto.fromDto(
 ) = this.fromDto(
     beregningsMetodeAnvendt,
     beregningsMetodeFraGrunnlag,
-    avdoede.find { it.fnr.value == ident }?.navn ?: throw FantIkkeIdentTilTrygdetidBlantAvdoede(),
+    hentAvdoedNavn(this, avdoede),
 )
+
+private fun hentAvdoedNavn(
+    trygdetidDto: TrygdetidDto,
+    avdoede: List<Avdoed>,
+): String {
+    if (avdoede.isEmpty()) {
+        throw IngenStoetteForUkjentAvdoed()
+    }
+
+    return avdoede.find { it.fnr.value == trygdetidDto.ident }?.navn ?: run {
+        if (trygdetidDto.beregnetTrygdetid?.resultat?.overstyrt == true) {
+            sikkerLogg.warn(
+                "Fant ikke avdød fra trygdetid (ident: ${trygdetidDto.ident}) blant avdøde fra " +
+                    "grunnlag (${avdoede.joinToString { it.fnr.value }})",
+            )
+            throw OverstyrtTrygdetidManglerAvdoed()
+        } else {
+            throw FantIkkeIdentTilTrygdetidBlantAvdoede()
+        }
+    }
+}
 
 fun TrygdetidDto.fromDto(
     beregningsMetodeAnvendt: BeregningsMetode,
@@ -160,4 +182,14 @@ class ManglerAvdoedBruktTilTrygdetid : UgyldigForespoerselException(
 class FantIkkeIdentTilTrygdetidBlantAvdoede : UgyldigForespoerselException(
     code = "FANT_IKKE_TRYGDETID_IDENT_BLANT_AVDOEDE",
     detail = "Ident knyttet til trygdetid er ikke blant avdøde knyttet til sak",
+)
+
+class OverstyrtTrygdetidManglerAvdoed : UgyldigForespoerselException(
+    code = "OVERSTYRT_TRYGDETID_MANGLER_AVDOED",
+    detail = "Overstyrt trygdetid mangler avdød. Trygdetiden må overskrives med ny overstyrt trygdetid",
+)
+
+class IngenStoetteForUkjentAvdoed : UgyldigForespoerselException(
+    code = "INGEN_STOETTE_FOR_UKJENT_AVDOED",
+    detail = "Brevløsningen støtter ikke ukjent avdød",
 )

@@ -226,6 +226,7 @@ internal fun Behandling.toStatistikkBehandling(
         kilde = kilde,
         pesysId = pesysId,
         relatertBehandlingId = relatertBehandlingId,
+        utlandstilknytning = utlandstilknytning,
     )
 }
 

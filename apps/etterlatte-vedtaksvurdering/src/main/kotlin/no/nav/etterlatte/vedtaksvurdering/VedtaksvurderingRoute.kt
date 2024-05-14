@@ -88,6 +88,22 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/simulering") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                logger.info("Henter/oppdaterer vedtak for sinulering (behandling=$behandlingId)")
+
+                vedtakService.hentVedtakMedBehandlingId(behandlingId)?.let {
+                    if (!it.underArbeid()) {
+                        return@post call.respond(it.toDto())
+                    }
+                }
+
+                val vedtak =
+                    vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
+                call.respond(vedtak.toDto())
+            }
+        }
+
         post("/{$BEHANDLINGID_CALL_PARAMETER}/upsert") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")

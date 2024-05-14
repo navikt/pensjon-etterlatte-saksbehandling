@@ -30,9 +30,10 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
         try {
             logger.info("Henter vedtak for behandlingId=$behandlingId")
 
-            return downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId"),
+            return downstreamResourceClient.post(
+                Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId/simulering"),
                 brukerTokenInfo,
+                {},
             ).mapBoth(
                 success = { resource -> deserialize(resource.response.toString()) },
                 failure = { errorResponse -> throw errorResponse },

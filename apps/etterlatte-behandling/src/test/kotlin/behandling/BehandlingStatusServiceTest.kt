@@ -404,7 +404,7 @@ internal class BehandlingStatusServiceTest {
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
             oppgaveService.hentOppgaverForSak(sakId)
-            oppgaveService.endrePaaVent(oppgaveId, "Kravgrunnlag er sperret", true)
+            oppgaveService.endrePaaVent(oppgaveId, "Venter på oppdatert kravgrunnlag", true)
             grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
         }
     }

@@ -310,7 +310,7 @@ class BehandlingStatusServiceImpl(
 
             if (oppgaveFraBehandlingMedFeilutbetaling != null) {
                 logger.info("Det finnes allerede en oppgave under behandling på tilbakekreving for sak ${behandling.sak.id}")
-                oppgaveService.endrePaaVent(oppgaveFraBehandlingMedFeilutbetaling.id, "Kravgrunnlag er sperret", paaVent = true)
+                oppgaveService.endrePaaVent(oppgaveFraBehandlingMedFeilutbetaling.id, "Venter på oppdatert kravgrunnlag", paaVent = true)
             } else {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     referanse = behandling.sak.id.toString(),

@@ -32,7 +32,6 @@ import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
-import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.person.krr.KrrKlient
@@ -142,14 +141,8 @@ internal class SakServiceTest {
 
         every { tokenValidationContext.getJwtToken(any()) } returns token
 
-        val brukerTokenInfo =
-            BrukerTokenInfo.of(
-                accessToken = "a",
-                oid = "b",
-                sub = "ba",
-                saksbehandler = Fagsaksystem.EY.navn,
-                claims = null,
-            )
+        val brukerTokenInfo = mockk<BrukerTokenInfo>()
+
         nyKontekstMedBruker(
             SystemUser(tokenValidationContext, brukerTokenInfo),
         )

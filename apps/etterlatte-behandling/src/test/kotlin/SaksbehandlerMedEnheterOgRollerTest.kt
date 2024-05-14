@@ -31,6 +31,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
         val identifiedBy = mockk<TokenValidationContext>()
         val tokenClaims = mockk<JwtTokenClaims>()
         val saksbehandlerMedRoller = mockk<SaksbehandlerMedRoller>()
+        val brukerTokenInfo = mockk<BrukerTokenInfo>()
 
         every {
             tokenClaims.getStringClaim(any())
@@ -44,14 +45,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
             saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any())
         } returns enheterForSaksbehandler
 
-        val brukerTokenInfo =
-            BrukerTokenInfo.of(
-                accessToken = "a",
-                oid = "b",
-                sub = "ba",
-                saksbehandler = "ident",
-                claims = null,
-            )
         val saksbehandler = SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
         val skriveEnheter = saksbehandler.enheterMedSkrivetilgang()
         val leseEnheter = saksbehandler.enheterMedLesetilgang(enheterForSaksbehandler.map { it.enhetsNummer }.toSet())

@@ -57,7 +57,7 @@ class VedtakBehandlingService(
     ): LoependeYtelse {
         logger.info("Sjekker om det finnes løpende vedtak for sak $sakId på dato $dato")
         val alleVedtakForSak = repository.hentVedtakForSak(sakId)
-        return Vedtakstidslinje(alleVedtakForSak).erLoependePaa(dato)
+        return Vedtakstidslinje(alleVedtakForSak).harLoependePeriodeEtter(dato)
     }
 
     suspend fun opprettEllerOppdaterVedtak(

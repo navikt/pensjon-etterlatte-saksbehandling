@@ -11,7 +11,7 @@ import java.time.YearMonth
 class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
     private val iverksatteVedtak = hentIverksatteVedtak()
 
-    fun erLoependePaa(dato: LocalDate): LoependeYtelse {
+    fun harLoependePeriodeEtter(dato: LocalDate): LoependeYtelse {
         val erUnderSamordning = vedtak.any { listOf(VedtakStatus.TIL_SAMORDNING, VedtakStatus.SAMORDNET).contains(it.status) }
 
         if (iverksatteVedtak.isEmpty()) return LoependeYtelse(false, erUnderSamordning, dato)
@@ -30,20 +30,21 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
         iverksatteVedtak
             .filter { it.type.kanLoepe }
             .filter {
-                (it.innhold as VedtakInnhold.Behandling).virkningstidspunkt.atDay(1)
-                    .isAfter(foersteMuligeVedtaksdag(dato)).not()
+                it.virkningstidspunkt.atDay(1).isAfter(foersteMuligeVedtaksdag(dato)).not()
+            }.maxByOrNull { it.attestasjon?.tidspunkt!! }?.let { senesteVedtak ->
+                return if (senesteVedtak.opphoerFraOgMed != null && senesteVedtak.opphoerFraOgMed!!.atDay(1) >= dato) {
+                    null
+                } else {
+                    senesteVedtak
+                }
             }
-            .maxByOrNull { it.attestasjon?.tidspunkt!! }
 
     private fun hentIverksatteVedtak(): List<Vedtak> = vedtak.filter { it.status === VedtakStatus.IVERKSATT }
 
     private fun foersteMuligeVedtaksdag(fraDato: LocalDate): LocalDate {
         val foersteVirkningsdato =
-            (
-                iverksatteVedtak.minBy {
-                    it.attestasjon?.tidspunkt ?: throw Error("Kunne ikke finne datoattestert paa vedtak")
-                }.innhold as VedtakInnhold.Behandling
-            ).virkningstidspunkt.atDay(1)
+            (iverksatteVedtak.minBy { it.virkningstidspunkt }.innhold as VedtakInnhold.Behandling)
+                .virkningstidspunkt.atDay(1)
         return maxOf(foersteVirkningsdato, fraDato)
     }
 
@@ -134,4 +135,7 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
 
     private val Vedtak.virkningstidspunkt: YearMonth
         get() = (this.innhold as VedtakInnhold.Behandling).virkningstidspunkt
+
+    private val Vedtak.opphoerFraOgMed: YearMonth?
+        get() = (this.innhold as VedtakInnhold.Behandling).opphoerFraOgMed
 }

@@ -231,9 +231,10 @@ internal fun Route.sakWebRoutes(
                 }
             }
 
-            get("hendelser") {
+            get("/hendelser") {
                 logger.info("Henter behandlingshendelser i sak med sakId=$sakId")
-                call.respond(hendelseDao.hentHendelserISak(sakId))
+                val hendelser = inTransaction { hendelseDao.hentHendelserISak(sakId) }
+                call.respond(hendelser)
             }
         }
 

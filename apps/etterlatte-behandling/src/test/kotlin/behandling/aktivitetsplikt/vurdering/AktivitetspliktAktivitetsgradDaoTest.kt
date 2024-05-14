@@ -5,9 +5,9 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktVurderingDao
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktVurderingType
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktVurdering
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -19,8 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
-class AktivitetspliktVurderingDaoTest(ds: DataSource) {
-    private val dao = AktivitetspliktVurderingDao(ConnectionAutoclosingTest(ds))
+class AktivitetspliktAktivitetsgradDaoTest(ds: DataSource) {
+    private val dao = AktivitetspliktAktivitetsgradDao(ConnectionAutoclosingTest(ds))
     private val sakDao = SakDao(ConnectionAutoclosingTest(ds))
     private val oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(ds))
 
@@ -31,18 +31,18 @@ class AktivitetspliktVurderingDaoTest(ds: DataSource) {
         val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
         val oppgave = lagNyOppgave(sak).also { oppgaveDao.opprettOppgave(it) }
         val vurdering =
-            LagreAktivitetspliktVurdering(
-                vurdering = AktivitetspliktVurderingType.AKTIVITET_OVER_50,
+            LagreAktivitetspliktAktivitetsgrad(
+                aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50,
                 beskrivelse = "Beskrivelse",
             )
 
-        dao.opprettVurdering(vurdering, sak.id, kilde, oppgave.id, behandlingId)
+        dao.opprettAktivitetsgrad(vurdering, sak.id, kilde, oppgave.id, behandlingId)
 
-        dao.hentVurdering(oppgave.id)!!.asClue {
+        dao.hentAktivitetsgrad(oppgave.id)!!.asClue {
             it.sakId shouldBe sak.id
             it.behandlingId shouldBe behandlingId
             it.oppgaveId shouldBe oppgave.id
-            it.vurdering shouldBe vurdering.vurdering
+            it.aktivitetsgrad shouldBe vurdering.aktivitetsgrad
             it.fom shouldNotBe null
             it.opprettet shouldBe kilde
             it.endret shouldBe kilde

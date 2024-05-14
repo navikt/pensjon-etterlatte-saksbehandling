@@ -1,9 +1,9 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktVurdering
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktVurderingDao
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktVurdering
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
@@ -16,7 +16,7 @@ import java.util.UUID
 
 class AktivitetspliktService(
     private val aktivitetspliktDao: AktivitetspliktDao,
-    private val aktivitetspliktVurderingDao: AktivitetspliktVurderingDao,
+    private val aktivitetspliktAktivitetsgradDao: AktivitetspliktAktivitetsgradDao,
     private val behandlingService: BehandlingService,
 ) {
     fun hentAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? {
@@ -97,22 +97,24 @@ class AktivitetspliktService(
         aktivitetspliktDao.kopierAktiviteter(fraBehandlingId, tilBehandlingId)
     }
 
-    fun opprettVurdering(
-        vurdering: LagreAktivitetspliktVurdering,
+    fun opprettAktivitetsgrad(
+        aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         oppgaveId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         val kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
         inTransaction {
-            require(aktivitetspliktVurderingDao.hentVurdering(oppgaveId) == null) { "Vurdering finnes allerede for oppgave $oppgaveId" }
-            aktivitetspliktVurderingDao.opprettVurdering(vurdering, sakId, kilde, oppgaveId)
+            require(
+                aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId) == null,
+            ) { "Aktivietsgrad finnes allerede for oppgave $oppgaveId" }
+            aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, oppgaveId)
         }
     }
 
-    fun hentVurdering(oppgaveId: UUID): AktivitetspliktVurdering? =
+    fun hentVurdering(oppgaveId: UUID): AktivitetspliktAktivitetsgrad? =
         inTransaction {
-            aktivitetspliktVurderingDao.hentVurdering(oppgaveId)
+            aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId)
         }
 }
 

@@ -16,7 +16,7 @@ import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktVurderingDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
@@ -266,7 +266,7 @@ internal class ApplicationContext(
     val hendelseDao = HendelseDao(autoClosingDatabase)
     val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(autoClosingDatabase)
     val aktivitetspliktDao = AktivitetspliktDao(autoClosingDatabase)
-    val aktivitetspliktVurderingDao = AktivitetspliktVurderingDao(autoClosingDatabase)
+    val aktivitetspliktAktivitetsgradDao = AktivitetspliktAktivitetsgradDao(autoClosingDatabase)
     val sjekklisteDao = SjekklisteDao(autoClosingDatabase)
     val revurderingDao = RevurderingDao(autoClosingDatabase)
     val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao, autoClosingDatabase)
@@ -337,7 +337,7 @@ internal class ApplicationContext(
         )
     val kommerBarnetTilGodeService =
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
-    val aktivitetspliktService = AktivitetspliktService(aktivitetspliktDao, aktivitetspliktVurderingDao, behandlingService)
+    val aktivitetspliktService = AktivitetspliktService(aktivitetspliktDao, aktivitetspliktAktivitetsgradDao, behandlingService)
     val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
 
     val klageBrevService = KlageBrevService(brevApiKlient)

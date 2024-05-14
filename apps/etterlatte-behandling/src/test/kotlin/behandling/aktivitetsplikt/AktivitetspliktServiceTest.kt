@@ -14,9 +14,9 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.aktivitetsplikt.LagreAktivitetspliktAktivitet
 import no.nav.etterlatte.behandling.aktivitetsplikt.SakidTilhoererIkkeBehandlingException
 import no.nav.etterlatte.behandling.aktivitetsplikt.TomErFoerFomException
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktVurderingDao
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktVurderingType
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktVurdering
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -31,9 +31,9 @@ import java.util.UUID
 
 class AktivitetspliktServiceTest {
     private val aktivitetspliktDao: AktivitetspliktDao = mockk()
-    private val aktivitetspliktVurderingDao: AktivitetspliktVurderingDao = mockk()
+    private val aktivitetspliktAktivitetsgradDao: AktivitetspliktAktivitetsgradDao = mockk()
     private val behandlingService: BehandlingService = mockk()
-    private val service = AktivitetspliktService(aktivitetspliktDao, aktivitetspliktVurderingDao, behandlingService)
+    private val service = AktivitetspliktService(aktivitetspliktDao, aktivitetspliktAktivitetsgradDao, behandlingService)
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val brukerTokenInfo =
         mockk<BrukerTokenInfo> {
@@ -146,48 +146,48 @@ class AktivitetspliktServiceTest {
     }
 
     @Nested
-    inner class LeggTilOgHentVurdering {
+    inner class LeggTilOgHentAktivitetsgrad {
         private val oppgaveId = UUID.randomUUID()
         private val sakId = 1L
 
         @Test
         fun `Skal opprette en ny vurdering`() {
-            val vurdering =
-                LagreAktivitetspliktVurdering(
-                    vurdering = AktivitetspliktVurderingType.AKTIVITET_UNDER_50,
+            val aktivitetsgrad =
+                LagreAktivitetspliktAktivitetsgrad(
+                    aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
                     beskrivelse = "Beskrivelse",
                 )
-            every { aktivitetspliktVurderingDao.opprettVurdering(vurdering, sakId, any(), oppgaveId) } returns 1
-            every { aktivitetspliktVurderingDao.hentVurdering(oppgaveId) } returns null
+            every { aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, any(), oppgaveId) } returns 1
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId) } returns null
 
-            service.opprettVurdering(vurdering, oppgaveId, sakId, brukerTokenInfo)
+            service.opprettAktivitetsgrad(aktivitetsgrad, oppgaveId, sakId, brukerTokenInfo)
 
-            verify { aktivitetspliktVurderingDao.opprettVurdering(vurdering, sakId, any(), oppgaveId) }
-            verify { aktivitetspliktVurderingDao.hentVurdering(oppgaveId) }
+            verify { aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, any(), oppgaveId) }
+            verify { aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId) }
         }
 
         @Test
         fun `Skal ikke opprette en ny vurdering hvis det finnes fra foer`() {
-            val vurdering =
-                LagreAktivitetspliktVurdering(
-                    vurdering = AktivitetspliktVurderingType.AKTIVITET_UNDER_50,
+            val aktivitetsgrad =
+                LagreAktivitetspliktAktivitetsgrad(
+                    aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
                     beskrivelse = "Beskrivelse",
                 )
-            every { aktivitetspliktVurderingDao.opprettVurdering(vurdering, sakId, any(), oppgaveId) } returns 1
-            every { aktivitetspliktVurderingDao.hentVurdering(oppgaveId) } returns mockk()
+            every { aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, any(), oppgaveId) } returns 1
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId) } returns mockk()
 
             assertThrows<IllegalArgumentException> {
-                service.opprettVurdering(vurdering, oppgaveId, sakId, brukerTokenInfo)
+                service.opprettAktivitetsgrad(aktivitetsgrad, oppgaveId, sakId, brukerTokenInfo)
             }
         }
 
         @Test
         fun `Skal hente en vurdering basert paa oppgaveId`() {
-            every { aktivitetspliktVurderingDao.hentVurdering(oppgaveId) } returns mockk()
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId) } returns mockk()
 
             service.hentVurdering(oppgaveId)
 
-            verify { aktivitetspliktVurderingDao.hentVurdering(oppgaveId) }
+            verify { aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId) }
         }
     }
 

@@ -62,6 +62,7 @@ internal class KlagehendelseRiverTest {
                                 initieltUtfall = null,
                             ),
                             Tidspunkt.now(),
+                            null,
                         ),
                 ),
             ).toJson()

@@ -116,6 +116,7 @@ internal class TilbakekrevingHendelseRiverTest {
                             UUID.randomUUID(),
                             tilbakekreving(Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.defaultEnhet.enhetNr)),
                             Tidspunkt.now(),
+                            null,
                         ),
                 ),
             ).toJson()

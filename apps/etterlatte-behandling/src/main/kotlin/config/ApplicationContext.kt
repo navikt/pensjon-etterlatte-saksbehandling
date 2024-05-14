@@ -349,6 +349,7 @@ internal class ApplicationContext(
         KlageServiceImpl(
             klageDao = klageDao,
             sakDao = sakDao,
+            behandlingService = behandlingService,
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,
             klageKlient = klageKlient,
@@ -468,6 +469,7 @@ internal class ApplicationContext(
             tilbakekrevingDao = tilbakekrevingDao,
             sakDao = sakDao,
             hendelseDao = hendelseDao,
+            behandlingService = behandlingService,
             oppgaveService = oppgaveService,
             vedtakKlient = vedtakKlient,
             brevApiKlient = brevApiKlient,

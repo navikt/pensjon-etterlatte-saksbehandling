@@ -124,6 +124,8 @@ internal class KlageServiceImplTest : BehandlingIntegrationTest() {
                 every { saksbehandlerMedRoller } returns
                     mockk<SaksbehandlerMedRoller> {
                         every { harRolleAttestant() } returns true
+                        every { harRolleStrengtFortrolig() } returns false
+                        every { harRolleEgenAnsatt() } returns false
                     }
             }
         startServer(

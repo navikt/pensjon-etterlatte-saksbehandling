@@ -9,8 +9,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServerWithModule
@@ -24,7 +22,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -35,21 +32,11 @@ import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OmregningIntegrationTest : BehandlingIntegrationTest() {
-    private lateinit var user: SaksbehandlerMedEnheterOgRoller
-
     @BeforeAll
     fun start() {
         startServer()
-        user = mockk<SaksbehandlerMedEnheterOgRoller>()
-        val saksbehandlerMedRoller =
-            mockk<SaksbehandlerMedRoller> {
-                every { harRolleStrengtFortrolig() } returns false
-                every { harRolleEgenAnsatt() } returns false
-            }
-        every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
-        every { user.name() } returns "User"
-        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
-        nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)
+
+        nyKontekstMedBrukerOgDatabase(mockSaksbehandler("User"), applicationContext.dataSource)
     }
 
     @AfterAll

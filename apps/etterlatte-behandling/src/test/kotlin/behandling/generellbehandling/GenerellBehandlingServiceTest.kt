@@ -10,9 +10,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.ConnectionAutoclosingTest
-import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
@@ -39,7 +37,8 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
-import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
+import no.nav.etterlatte.mockSaksbehandler
+import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
@@ -76,9 +75,9 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val behandlingService = mockk<BehandlingService>()
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val saksbehandlerInfoDao = mockk<SaksbehandlerInfoDao>()
     private val saksbehandlerNavn = "Ola Nordmann"
+    private val saksbehandler = mockSaksbehandler("Z123456")
 
     @BeforeAll
     fun beforeAll() {
@@ -111,7 +110,7 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
                 saksbehandlerInfoDao,
             )
 
-        nyKontekstMedBrukerOgDatabaseContext(user, DatabaseContextTest(dataSource))
+        nyKontekstMedBrukerOgDatabase(saksbehandler, dataSource)
     }
 
     @AfterEach
@@ -578,12 +577,6 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
             oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
                 .single(OppgaveIntern::erAttestering)
 
-        val saksbehandlerMedRoller =
-            mockk<SaksbehandlerMedRoller> {
-                every { harRolleAttestant() } returns true
-            }
-        every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
-
         val trettidagerfrem = Tidspunkt.now().plus(30L, ChronoUnit.DAYS).toNorskLocalDate()
         assertEquals(trettidagerfrem, attesteringsOppgave.frist!!.toNorskLocalDate())
         oppgaveService.tildelSaksbehandler(attesteringsOppgave.id, attestant.ident)
@@ -648,7 +641,7 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
             mockk<SaksbehandlerMedRoller> {
                 every { harRolleAttestant() } returns true
             }
-        every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
         val trettidagerfrem = Tidspunkt.now().plus(30L, ChronoUnit.DAYS).toNorskLocalDate()
 
@@ -663,10 +656,7 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
 
     @Test
     fun `Kan underkjenne behandling som er fattet`() {
-        every { user.saksbehandlerMedRoller } returns
-            mockk<SaksbehandlerMedRoller> {
-                every { harRolleAttestant() } returns true
-            }
+        every { saksbehandler.saksbehandlerMedRoller.harRolleAttestant() } returns true
 
         val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandling =

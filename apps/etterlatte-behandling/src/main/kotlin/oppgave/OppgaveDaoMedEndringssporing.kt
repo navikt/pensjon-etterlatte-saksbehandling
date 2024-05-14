@@ -1,6 +1,7 @@
 package no.nav.etterlatte.oppgave
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -52,8 +53,8 @@ class OppgaveDaoMedEndringssporingImpl(
                 val statement =
                     prepareStatement(
                         """
-                        INSERT INTO oppgaveendringer(id, oppgaveId, oppgaveFoer, oppgaveEtter, tidspunkt)
-                        VALUES(?::UUID, ?::UUID, ?::JSONB, ?::JSONB, ?)
+                        INSERT INTO oppgaveendringer(id, oppgaveId, oppgaveFoer, oppgaveEtter, tidspunkt, saksbehandler)
+                        VALUES(?::UUID, ?::UUID, ?::JSONB, ?::JSONB, ?, ?)
                         """.trimIndent(),
                     )
                 statement.setObject(1, UUID.randomUUID())
@@ -61,6 +62,7 @@ class OppgaveDaoMedEndringssporingImpl(
                 statement.setJsonb(3, oppgaveFoer)
                 statement.setJsonb(4, oppgaveEtter)
                 statement.setTidspunkt(5, Tidspunkt.now())
+                statement.setString(6, Kontekst.get().AppUser.name())
 
                 statement.executeUpdate()
             }

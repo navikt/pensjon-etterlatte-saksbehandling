@@ -15,7 +15,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
-import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.inTransaction
@@ -30,6 +29,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.module
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -51,7 +51,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
         tilbakekrevingService = applicationContext.tilbakekrevingService
         oppgaveService = applicationContext.oppgaveService
 
-        nyKontekstMedBrukerOgDatabase(mockk(), applicationContext.dataSource)
+        nyKontekstMedBrukerOgDatabase(mockSaksbehandler("Z123456"), applicationContext.dataSource)
     }
 
     @BeforeEach

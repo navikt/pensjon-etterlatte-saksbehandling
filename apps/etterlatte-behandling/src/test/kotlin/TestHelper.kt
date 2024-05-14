@@ -53,9 +53,11 @@ import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.sak.SakMedGraderingOgSkjermet
 import no.nav.etterlatte.sak.SakTilgangDao
+import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
 import java.sql.Connection
 import java.time.Instant
@@ -149,6 +151,25 @@ fun Route.attachMockContext(testUser: User? = null) {
             proceed()
         }
         Kontekst.remove()
+    }
+}
+
+fun mockSaksbehandler(
+    ident: String,
+    harRolleAttestant: Boolean = false,
+    harRolleStrengtFortrolig: Boolean = false,
+    harRolleEgenAnsatt: Boolean = false,
+): SaksbehandlerMedEnheterOgRoller {
+    return mockk<SaksbehandlerMedEnheterOgRoller> {
+        every { saksbehandlerMedRoller } returns
+            mockk<SaksbehandlerMedRoller> {
+                every { saksbehandler } returns Saksbehandler("accessToken", ident, null)
+                every { harRolleAttestant() } returns harRolleAttestant
+                every { harRolleStrengtFortrolig() } returns harRolleStrengtFortrolig
+                every { harRolleEgenAnsatt() } returns harRolleEgenAnsatt
+            }
+        every { name() } returns ident
+        every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
     }
 }
 

@@ -81,14 +81,14 @@ export function TilbakekrevingVurderingSkjema({
   const lagreVurdering = (vurdering: TilbakekrevingVurdering) => {
     lagreVurderingRequest({ tilbakekrevingId: behandling.id, vurdering: vurdering }, (lagretBehandling) => {
       dispatch(addTilbakekreving(lagretBehandling))
-      reset(lagretBehandling.tilbakekreving.vurdering || initialVurdering)
+      reset(lagretBehandling.tilbakekreving.vurdering || initialVurdering, { keepDirtyValues: true })
     })
   }
 
   const lagreVurderingOgFortsett = (vurdering: TilbakekrevingVurdering) => {
     lagreVurderingRequest({ tilbakekrevingId: behandling.id, vurdering: vurdering }, (lagretBehandling) => {
       dispatch(addTilbakekreving(lagretBehandling))
-      reset(lagretBehandling.tilbakekreving.vurdering || initialVurdering)
+      reset(lagretBehandling.tilbakekreving.vurdering || initialVurdering, { keepDirtyValues: true })
       navigate(`/tilbakekreving/${behandling?.id}/utbetalinger`)
     })
   }

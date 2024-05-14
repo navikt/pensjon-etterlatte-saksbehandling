@@ -7,6 +7,8 @@ import {
   HStack,
   Label,
   Modal,
+  Radio,
+  ReadMore,
   Select,
   Textarea,
   VStack,
@@ -20,24 +22,39 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { OppgaveDTO, Oppgavestatus } from '~shared/types/oppgave'
 import { useForm } from 'react-hook-form'
 import {
+  AktivitetspliktUnntakType,
   AktivitetspliktVurderingType,
   IAktivitetspliktVurdering,
+  IValgJaNei,
+  tekstAktivitetspliktUnntakType,
   tekstAktivitetspliktVurderingType,
 } from '~shared/types/Aktivitetsplikt'
-import { hentAktivitspliktVurdering, opprettAktivitspliktVurdering } from '~shared/api/aktivitetsplikt'
+import {
+  hentAktivitspliktVurdering,
+  opprettAktivitspliktAktivitetsgrad,
+  opprettAktivitspliktUnntak,
+} from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { formaterStringDato } from '~utils/formattering'
 import { Toast } from '~shared/alerts/Toast'
+import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 
 interface AktivitetspliktVurderingValues {
+  aktivitetsplikt: IValgJaNei | null
   aktivitetsgrad: AktivitetspliktVurderingType | ''
-  // unntak: boolean | null
+  unntak: IValgJaNei | null
+  midlertidigUnntak: AktivitetspliktUnntakType | ''
+  sluttdato?: Date | null
   beskrivelse: string
 }
 
 const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValues = {
+  aktivitetsplikt: null,
   aktivitetsgrad: '',
-  // unntak: null,
+  unntak: null,
+  midlertidigUnntak: '',
+  sluttdato: undefined,
   beskrivelse: '',
 }
 
@@ -46,37 +63,61 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
   const [vurdering, setVurdering] = useState<IAktivitetspliktVurdering>()
 
   const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
-  const [opprettet, opprett] = useApiCall(opprettAktivitspliktVurdering)
+  const [opprettetAktivitetsgrad, opprettAktivitetsgrad] = useApiCall(opprettAktivitspliktAktivitetsgrad)
+  const [opprettetUnntak, opprettUnntak] = useApiCall(opprettAktivitspliktUnntak)
   const [hentet, hent] = useApiCall(hentAktivitspliktVurdering)
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    // control,
+    control,
+    watch,
   } = useForm<AktivitetspliktVurderingValues>({
     defaultValues: AktivitetspliktVurderingValuesDefault,
   })
 
   const ferdigstill = (data: AktivitetspliktVurderingValues) => {
-    opprett(
-      {
-        sakId: oppgave.sakId,
-        oppgaveId: oppgave.id,
-        request: {
-          id: undefined,
-          vurdering: data.aktivitetsgrad as AktivitetspliktVurderingType,
-          // unntak: data.unntak!!,
-          fom: new Date().toISOString(),
-          beskrivelse: data.beskrivelse,
+    if (data.aktivitetsplikt === IValgJaNei.NEI || data.unntak === IValgJaNei.JA) {
+      opprettUnntak(
+        {
+          sakId: oppgave.sakId,
+          oppgaveId: oppgave.id,
+          request: {
+            id: undefined,
+            unntak:
+              data.aktivitetsplikt === IValgJaNei.NEI
+                ? AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+                : (data.midlertidigUnntak as AktivitetspliktUnntakType),
+            beskrivelse: data.beskrivelse,
+            tom: data.aktivitetsplikt === IValgJaNei.NEI ? undefined : data.sluttdato?.toISOString(),
+          },
         },
-      },
-      () => {
-        apiFerdigstillOppgave(oppgave.id, () => {
-          setVisModal(false)
-        })
-      }
-    )
+        () => {
+          apiFerdigstillOppgave(oppgave.id, () => {
+            setVisModal(false)
+          })
+        }
+      )
+    } else {
+      opprettAktivitetsgrad(
+        {
+          sakId: oppgave.sakId,
+          oppgaveId: oppgave.id,
+          request: {
+            id: undefined,
+            aktivitetsgrad: data.aktivitetsgrad as AktivitetspliktVurderingType,
+            beskrivelse: data.beskrivelse,
+            fom: new Date().toISOString(),
+          },
+        },
+        () => {
+          apiFerdigstillOppgave(oppgave.id, () => {
+            setVisModal(false)
+          })
+        }
+      )
+    }
   }
 
   useEffect(() => {
@@ -87,18 +128,17 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
     }
   }, [visModal])
 
+  const harAktivitetsplikt = watch('aktivitetsplikt')
+  const harUnntak = watch('unntak')
+
   return (
     <>
-      {isSuccess(opprettet) && <Toast melding="Vurdering lagret og oppgave ferdigstilt" />}
+      {isSuccess(ferdigstillOppgaveStatus) && <Toast melding="Vurdering lagret og oppgave ferdigstilt" />}
       <Button size="small" onClick={() => setVisModal(true)}>
         Se oppgave
       </Button>
       {visModal && (
-        <Modal
-          open={visModal}
-          onClose={() => setVisModal(false)}
-          header={{ label: 'Oppfølging av aktivitetsplikt', heading: 'Send brev og opprett oppgave for oppfølging' }}
-        >
+        <Modal open={visModal} onClose={() => setVisModal(false)} header={{ heading: 'Vurdering av aktivitetsplikt' }}>
           <Modal.Body>
             <HStack gap="12">
               <div>
@@ -124,42 +164,102 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
 
               {oppgave.status === Oppgavestatus.UNDER_BEHANDLING && !vurdering ? (
                 <VStack gap="4">
-                  <Select
-                    label="Hva er brukers aktivitetsgrad?"
-                    {...register('aktivitetsgrad', {
-                      required: { value: true, message: 'Du må velge aktivitetsgrad' },
-                    })}
-                    error={errors.aktivitetsgrad?.message}
-                  >
-                    <option value="">Velg hvilken grad</option>
-                    {Object.values(AktivitetspliktVurderingType).map((type) => (
-                      <option key={type} value={type}>
-                        {tekstAktivitetspliktVurderingType[type]}
-                      </option>
-                    ))}
-                  </Select>
-                  {/*
                   <ControlledRadioGruppe
-                    name="unntak"
+                    name="aktivitetsplikt"
                     control={control}
-                    errorVedTomInput="Du må velge om bruker har unntak fra aktivitetsplikt"
-                    legend="Er det unntak for bruker?"
+                    errorVedTomInput="Du må velge om bruker har aktivitetsplikt"
+                    legend="Har bruker aktivitetsplikt?"
                     radios={
                       <>
-                        <Radio size="small" value={true}>
+                        <Radio size="small" value={IValgJaNei.JA}>
                           Ja
                         </Radio>
-                        <Radio size="small" value={false}>
-                          Nei
+                        <Radio size="small" value={IValgJaNei.NEI}>
+                          {
+                            tekstAktivitetspliktUnntakType[
+                              AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+                            ]
+                          }
                         </Radio>
                       </>
                     }
                   />
-                  */}
+
+                  <ReadMore header="Dette mener vi med lav inntekt">
+                    Med lav inntekt menes det at den gjenlevende ikke har hatt en gjennomsnittlig årlig arbeidsinntekt
+                    som overstiger to ganger grunnbeløpet for hvert av de fem siste årene. I tillegg må den årlige
+                    inntekten ikke ha oversteget tre ganger grunnbeløpet hvert av de siste to årene før dødsfallet.
+                  </ReadMore>
+                  {harAktivitetsplikt === IValgJaNei.JA && (
+                    <>
+                      <ControlledRadioGruppe
+                        name="unntak"
+                        control={control}
+                        errorVedTomInput="Du må velge om bruker har unntak fra aktivitetsplikt"
+                        legend="Er det unntak for bruker?"
+                        radios={
+                          <>
+                            <Radio size="small" value={IValgJaNei.JA}>
+                              Ja
+                            </Radio>
+                            <Radio size="small" value={IValgJaNei.NEI}>
+                              Nei
+                            </Radio>
+                          </>
+                        }
+                      />
+                      {harUnntak === IValgJaNei.JA && (
+                        <>
+                          <Select
+                            label="Hvilket midlertidig unntak er det?"
+                            {...register('midlertidigUnntak', {
+                              required: { value: true, message: 'Du må velge midlertidig unntak' },
+                            })}
+                            error={errors.midlertidigUnntak?.message}
+                          >
+                            <option value="">Velg hvilke unntak</option>
+                            {Object.values(AktivitetspliktUnntakType)
+                              .filter(
+                                (unntak) =>
+                                  unntak !== AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+                              )
+                              .map((type) => (
+                                <option key={type} value={type}>
+                                  {tekstAktivitetspliktUnntakType[type]}
+                                </option>
+                              ))}
+                          </Select>
+                          <ControlledDatoVelger
+                            name="sluttdato"
+                            label="Angi sluttdato for unntaksperiode"
+                            description="Du trenger ikke legge til en sluttdato hvis den ikke er tilgjengelig"
+                            control={control}
+                            required={false}
+                          />
+                        </>
+                      )}
+                      {harUnntak === IValgJaNei.NEI && (
+                        <Select
+                          label="Hva er brukers aktivitetsgrad?"
+                          {...register('aktivitetsgrad', {
+                            required: { value: true, message: 'Du må velge aktivitetsgrad' },
+                          })}
+                          error={errors.aktivitetsgrad?.message}
+                        >
+                          <option value="">Velg hvilken grad</option>
+                          {Object.values(AktivitetspliktVurderingType).map((type) => (
+                            <option key={type} value={type}>
+                              {tekstAktivitetspliktVurderingType[type]}
+                            </option>
+                          ))}
+                        </Select>
+                      )}
+                    </>
+                  )}
                   <Textarea
-                    label="Beskrivelse"
+                    label="Vurdering"
                     {...register('beskrivelse', {
-                      required: { value: true, message: 'Du må fylle inn beskrivelse' },
+                      required: { value: true, message: 'Du må fylle inn vurdering' },
                     })}
                     error={errors.beskrivelse?.message}
                   />
@@ -172,33 +272,51 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
 
                   {!isPending(hentet) && vurdering && (
                     <VStack gap="4">
-                      <>
-                        <Label>Aktivitetsgrad</Label>
-                        <BodyShort>{tekstAktivitetspliktVurderingType[vurdering.vurdering]}</BodyShort>
-                      </>
+                      {vurdering.unntak && (
+                        <>
+                          <Label>Unntak</Label>
+                          <BodyShort>{tekstAktivitetspliktUnntakType[vurdering.unntak.unntak]}</BodyShort>
 
-                      {/*
-                      <>
-                        <Label>Unntak</Label>
-                        <BodyShort>{vurdering.unntak ? 'Ja' : 'Nei'}</BodyShort>
-                      </>
-                      */}
-                      <>
-                        <Label>Beskrivelse</Label>
-                        <BodyShort>{vurdering.beskrivelse}</BodyShort>
-                      </>
+                          {vurdering.unntak.tom && (
+                            <>
+                              <Label>Sluttdato</Label>
+                              <BodyShort>{vurdering.unntak.tom}</BodyShort>
+                            </>
+                          )}
 
-                      <Detail>
-                        Vurdering ble utført {formaterStringDato(vurdering.opprettet.tidspunkt)} av saksbehandler{' '}
-                        {vurdering.opprettet.ident}
-                      </Detail>
+                          <Label>Vurdering</Label>
+                          <BodyShort>{vurdering.unntak.beskrivelse}</BodyShort>
+
+                          <Detail>
+                            Vurdering ble utført {formaterStringDato(vurdering.unntak.opprettet.tidspunkt)} av
+                            saksbehandler {vurdering.unntak.opprettet.ident}
+                          </Detail>
+                        </>
+                      )}
+                      {vurdering.aktivitet && (
+                        <>
+                          <Label>Aktivitetsgrad</Label>
+                          <BodyShort>{tekstAktivitetspliktVurderingType[vurdering.aktivitet.aktivitetsgrad]}</BodyShort>
+
+                          <Label>Vurdering</Label>
+                          <BodyShort>{vurdering.aktivitet.beskrivelse}</BodyShort>
+
+                          <Detail>
+                            Vurdering ble utført {formaterStringDato(vurdering.aktivitet.opprettet.tidspunkt)} av
+                            saksbehandler {vurdering.aktivitet.opprettet.ident}
+                          </Detail>
+                        </>
+                      )}
                     </VStack>
                   )}
                 </>
               )}
             </HStack>
-            {mapFailure(opprettet, (error) => (
-              <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved oppretting av vurdering'}</ApiErrorAlert>
+            {mapFailure(opprettetUnntak, (error) => (
+              <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved oppretting av unntak'}</ApiErrorAlert>
+            ))}
+            {mapFailure(opprettetAktivitetsgrad, (error) => (
+              <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved oppretting av aktivitetsgrad'}</ApiErrorAlert>
             ))}
             {mapFailure(ferdigstillOppgaveStatus, (error) => (
               <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved ferdigstilling av oppgave'}</ApiErrorAlert>
@@ -207,7 +325,11 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
           <Modal.Footer>
             {oppgave.status === Oppgavestatus.UNDER_BEHANDLING && !vurdering && (
               <Button
-                loading={isPending(ferdigstillOppgaveStatus) || isPending(opprettet)}
+                loading={
+                  isPending(ferdigstillOppgaveStatus) ||
+                  isPending(opprettetAktivitetsgrad) ||
+                  isPending(opprettetUnntak)
+                }
                 variant="primary"
                 type="button"
                 onClick={handleSubmit(ferdigstill)}
@@ -216,7 +338,9 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
               </Button>
             )}
             <Button
-              loading={isPending(ferdigstillOppgaveStatus) || isPending(opprettet)}
+              loading={
+                isPending(ferdigstillOppgaveStatus) || isPending(opprettetAktivitetsgrad) || isPending(opprettetUnntak)
+              }
               variant="secondary"
               onClick={() => setVisModal(false)}
             >

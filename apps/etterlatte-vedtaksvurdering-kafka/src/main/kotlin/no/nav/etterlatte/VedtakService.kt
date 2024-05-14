@@ -38,6 +38,8 @@ interface VedtakService {
 
     fun tilSamordningVedtak(behandlingId: UUID): VedtakDto
 
+    fun samordneVedtak(behandlingId: UUID): SamordneResponse
+
     fun samordnetVedtak(vedtakId: String): VedtakDto?
 
     fun iverksattVedtak(behandlingId: UUID): VedtakDto
@@ -85,6 +87,14 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
             }.body()
         }
 
+    override fun samordneVedtak(behandlingId: UUID): SamordneResponse {
+        return runBlocking {
+            vedtakKlient.post("$url/api/vedtak/$behandlingId/samordne") {
+                contentType(ContentType.Application.Json)
+            }.body<SamordneResponse>()
+        }
+    }
+
     override fun samordnetVedtak(vedtakId: String): VedtakDto? =
         runBlocking {
             vedtakKlient.post("$url/vedtak/samordnet/$vedtakId") {
@@ -99,3 +109,7 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
             }.body()
         }
 }
+
+class SamordneResponse(
+    val skalVente: Boolean,
+)

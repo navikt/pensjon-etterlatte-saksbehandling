@@ -176,6 +176,14 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/samordne") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                logger.info("Behandler samordning for behandling $behandlingId")
+                val skalVentePaaSamordning = vedtakBehandlingService.samordne(behandlingId, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK, mapOf("skalVentePaaSamordning" to skalVentePaaSamordning))
+            }
+        }
+
         post("/{$BEHANDLINGID_CALL_PARAMETER}/samordnet") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Vedtak ferdig samordning for behandling $behandlingId")

@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.samordning.TilSamordningRiver
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.regulering.AppBuilder
 import no.nav.etterlatte.regulering.LoependeYtelserforespoerselRiver
@@ -20,6 +21,7 @@ fun main() {
         LagreIverksattVedtakRiver(rapidsConnection, vedtakKlient)
         AttestertVedtakRiver(rapidsConnection, vedtakKlient)
         SamordningMottattRiver(rapidsConnection, vedtakKlient)
+        TilSamordningRiver(rapidsConnection, vedtakKlient)
         TidshendelseRiver(rapidsConnection, vedtakKlient)
     }.start()
 }

@@ -1,6 +1,7 @@
 package behandling.aktivitetsplikt
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -16,7 +17,10 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.SakidTilhoererIkkeBehandling
 import no.nav.etterlatte.behandling.aktivitetsplikt.TomErFoerFomException
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -32,8 +36,10 @@ import java.util.UUID
 class AktivitetspliktServiceTest {
     private val aktivitetspliktDao: AktivitetspliktDao = mockk()
     private val aktivitetspliktAktivitetsgradDao: AktivitetspliktAktivitetsgradDao = mockk()
+    private val aktivitetspliktUnntakDao: AktivitetspliktUnntakDao = mockk()
     private val behandlingService: BehandlingService = mockk()
-    private val service = AktivitetspliktService(aktivitetspliktDao, aktivitetspliktAktivitetsgradDao, behandlingService)
+    private val service =
+        AktivitetspliktService(aktivitetspliktDao, aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, behandlingService)
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val brukerTokenInfo =
         mockk<BrukerTokenInfo> {
@@ -146,12 +152,12 @@ class AktivitetspliktServiceTest {
     }
 
     @Nested
-    inner class LeggTilOgHentAktivitetsgrad {
+    inner class OpprettOgHentAktivitetsgrad {
         private val oppgaveId = UUID.randomUUID()
         private val sakId = 1L
 
         @Test
-        fun `Skal opprette en ny vurdering`() {
+        fun `Skal opprette en ny aktivitetsgrad`() {
             val aktivitetsgrad =
                 LagreAktivitetspliktAktivitetsgrad(
                     aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
@@ -167,7 +173,7 @@ class AktivitetspliktServiceTest {
         }
 
         @Test
-        fun `Skal ikke opprette en ny vurdering hvis det finnes fra foer`() {
+        fun `Skal ikke opprette en ny aktivitetsgrad hvis det finnes fra foer`() {
             val aktivitetsgrad =
                 LagreAktivitetspliktAktivitetsgrad(
                     aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
@@ -182,12 +188,72 @@ class AktivitetspliktServiceTest {
         }
 
         @Test
-        fun `Skal hente en vurdering basert paa oppgaveId`() {
+        fun `Skal hente en vurdering med aktivitetsgrad basert paa oppgaveId`() {
             every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId) } returns mockk()
+            every { aktivitetspliktUnntakDao.hentUnntak(oppgaveId) } returns null
 
-            service.hentVurdering(oppgaveId)
+            val vurdering = service.hentVurdering(oppgaveId)
+
+            vurdering shouldNotBe null
+            vurdering?.aktivitet shouldNotBe null
+            vurdering?.unntak shouldBe null
 
             verify { aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId) }
+            verify { aktivitetspliktUnntakDao.hentUnntak(oppgaveId) }
+        }
+    }
+
+    @Nested
+    inner class OpprettOgHentUnntak {
+        private val oppgaveId = UUID.randomUUID()
+        private val sakId = 1L
+
+        @Test
+        fun `Skal opprette en nytt unntak`() {
+            val unntak =
+                LagreAktivitetspliktUnntak(
+                    unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
+                    beskrivelse = "Beskrivelse",
+                    tom = LocalDate.now().plusMonths(6),
+                )
+            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), oppgaveId) } returns 1
+            every { aktivitetspliktUnntakDao.hentUnntak(oppgaveId) } returns null
+
+            service.opprettUnntak(unntak, oppgaveId, sakId, brukerTokenInfo)
+
+            verify { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), oppgaveId) }
+            verify { aktivitetspliktUnntakDao.hentUnntak(oppgaveId) }
+        }
+
+        @Test
+        fun `Skal ikke opprette en et nytt unntak hvis det finnes fra foer`() {
+            val unntak =
+                LagreAktivitetspliktUnntak(
+                    unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
+                    beskrivelse = "Beskrivelse",
+                    tom = LocalDate.now().plusMonths(6),
+                )
+            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), oppgaveId) } returns 1
+            every { aktivitetspliktUnntakDao.hentUnntak(oppgaveId) } returns mockk()
+
+            assertThrows<IllegalArgumentException> {
+                service.opprettUnntak(unntak, oppgaveId, sakId, brukerTokenInfo)
+            }
+        }
+
+        @Test
+        fun `Skal hente en vurdering med unntak basert paa oppgaveId`() {
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId) } returns null
+            every { aktivitetspliktUnntakDao.hentUnntak(oppgaveId) } returns mockk()
+
+            val vurdering = service.hentVurdering(oppgaveId)
+
+            vurdering shouldNotBe null
+            vurdering?.aktivitet shouldBe null
+            vurdering?.unntak shouldNotBe null
+
+            verify { aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId) }
+            verify { aktivitetspliktUnntakDao.hentUnntak(oppgaveId) }
         }
     }
 

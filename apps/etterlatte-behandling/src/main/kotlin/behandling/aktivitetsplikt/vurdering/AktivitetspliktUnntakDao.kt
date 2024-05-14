@@ -32,7 +32,7 @@ class AktivitetspliktUnntakDao(private val connectionAutoclosing: ConnectionAuto
             stmt.setObject(3, behandlingId)
             stmt.setObject(4, oppgaveId)
             stmt.setString(5, unntak.unntak.name)
-            stmt.setDate(6, Date.valueOf(unntak.tom))
+            stmt.setDate(6, unntak.tom?.let { tom -> Date.valueOf(tom) })
             stmt.setString(7, kilde.toJson())
             stmt.setString(8, kilde.toJson())
             stmt.setString(9, unntak.beskrivelse)

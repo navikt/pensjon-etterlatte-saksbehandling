@@ -1,22 +1,25 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktVurdering
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktVurderingDao
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktVurdering
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntak
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
 class AktivitetspliktService(
     private val aktivitetspliktDao: AktivitetspliktDao,
-    private val aktivitetspliktVurderingDao: AktivitetspliktVurderingDao,
+    private val aktivitetspliktAktivitetsgradDao: AktivitetspliktAktivitetsgradDao,
+    private val aktivitetspliktUnntakDao: AktivitetspliktUnntakDao,
     private val behandlingService: BehandlingService,
 ) {
     fun hentAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? {
@@ -62,7 +65,7 @@ class AktivitetspliktService(
             throw TomErFoerFomException()
         }
 
-        val kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
+        val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
         inTransaction {
             if (aktivitet.id != null) {
                 aktivitetspliktDao.oppdaterAktivitet(behandlingId, aktivitet, kilde)
@@ -97,22 +100,46 @@ class AktivitetspliktService(
         aktivitetspliktDao.kopierAktiviteter(fraBehandlingId, tilBehandlingId)
     }
 
-    fun opprettVurdering(
-        vurdering: LagreAktivitetspliktVurdering,
+    fun opprettAktivitetsgrad(
+        aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         oppgaveId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
+        val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
         inTransaction {
-            require(aktivitetspliktVurderingDao.hentVurdering(oppgaveId) == null) { "Vurdering finnes allerede for oppgave $oppgaveId" }
-            aktivitetspliktVurderingDao.opprettVurdering(vurdering, sakId, kilde, oppgaveId)
+            require(
+                aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId) == null,
+            ) { "Aktivitetsgrad finnes allerede for oppgave $oppgaveId" }
+            aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, oppgaveId)
+        }
+    }
+
+    fun opprettUnntak(
+        unntak: LagreAktivitetspliktUnntak,
+        oppgaveId: UUID,
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
+        inTransaction {
+            require(
+                aktivitetspliktUnntakDao.hentUnntak(oppgaveId) == null,
+            ) { "Unntak finnes allerede for oppgave $oppgaveId" }
+            aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, oppgaveId)
         }
     }
 
     fun hentVurdering(oppgaveId: UUID): AktivitetspliktVurdering? =
         inTransaction {
-            aktivitetspliktVurderingDao.hentVurdering(oppgaveId)
+            val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId)
+            val unntak = aktivitetspliktUnntakDao.hentUnntak(oppgaveId)
+
+            if (aktivitetsgrad == null && unntak == null) {
+                return@inTransaction null
+            }
+
+            AktivitetspliktVurdering(aktivitetsgrad, unntak)
         }
 }
 
@@ -127,3 +154,5 @@ class TomErFoerFomException :
         code = "TOM_ER_FOER_FOM",
         detail = "Til og med dato er kan ikke være før fra og med dato",
     )
+
+data class AktivitetspliktVurdering(val aktivitet: AktivitetspliktAktivitetsgrad?, val unntak: AktivitetspliktUnntak?)

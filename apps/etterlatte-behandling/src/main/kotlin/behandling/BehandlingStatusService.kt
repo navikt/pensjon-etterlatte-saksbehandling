@@ -301,13 +301,25 @@ class BehandlingStatusServiceImpl(
         val brevutfall = behandlingInfoDao.hentBrevutfall(behandling.id)
         if (brevutfall?.feilutbetaling?.valg in listOf(FeilutbetalingValg.JA_VARSEL, FeilutbetalingValg.JA_INGEN_TK)) {
             logger.info("Oppretter oppgave av type ${OppgaveType.TILBAKEKREVING} for behandling ${behandling.id}")
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = behandling.sak.id.toString(),
-                sakId = behandling.sak.id,
-                oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
-                oppgaveType = OppgaveType.TILBAKEKREVING,
-                merknad = "Venter på kravgrunnlag",
-            )
+
+            val oppgaveFraBehandlingMedFeilutbetaling =
+                oppgaveService.hentOppgaverForSak(behandling.sak.id)
+                    .filter { it.type == OppgaveType.TILBAKEKREVING }
+                    .filter { !it.erAvsluttet() }
+                    .maxByOrNull { it.opprettet }
+
+            if (oppgaveFraBehandlingMedFeilutbetaling != null) {
+                logger.info("Det finnes allerede en oppgave under behandling på tilbakekreving for sak ${behandling.sak.id}")
+                oppgaveService.endrePaaVent(oppgaveFraBehandlingMedFeilutbetaling.id, "Kravgrunnlag er sperret", paaVent = true)
+            } else {
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    referanse = behandling.sak.id.toString(),
+                    sakId = behandling.sak.id,
+                    oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
+                    oppgaveType = OppgaveType.TILBAKEKREVING,
+                    merknad = "Venter på kravgrunnlag",
+                )
+            }
         } else {
             logger.info("Behandling ${behandling.id} har ikke feilutbetaling")
         }

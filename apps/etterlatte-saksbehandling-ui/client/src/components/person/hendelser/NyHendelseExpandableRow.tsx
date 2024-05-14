@@ -11,6 +11,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { FlexRow, SpaceChildren } from '~shared/styled'
 import { StartRevurderingModal } from '~components/person/hendelser/StartRevurderingModal'
 import { LukkHendelseModal } from '~components/person/hendelser/LukkHendelseModal'
+import { useSearchParams } from 'react-router-dom'
 
 interface Props {
   hendelse: Grunnlagsendringshendelse
@@ -22,8 +23,12 @@ interface Props {
 export const NyHendelseExpandableRow = ({ hendelse, sak, behandlinger, revurderinger }: Props): ReactNode => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
+  const [search] = useSearchParams()
+
   return (
     <Table.ExpandableRow
+      defaultOpen={search.get('referanse') === hendelse.id}
+      expandOnRowClick
       content={
         <SpaceChildren direction="column">
           <HendelseBeskrivelse sakType={sak.sakType} hendelse={hendelse} />

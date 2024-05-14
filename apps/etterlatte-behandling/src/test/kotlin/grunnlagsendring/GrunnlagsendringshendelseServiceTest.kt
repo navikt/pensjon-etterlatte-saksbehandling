@@ -75,6 +75,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val brukerService = mockk<BrukerService>()
     private val doedshendelseService = mockk<DoedshendelseService>()
+    private val grunnlagsendringsHendelseFilter = mockk<GrunnlagsendringsHendelseFilter>()
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
             "hendelseid",
@@ -104,6 +105,9 @@ internal class GrunnlagsendringshendelseServiceTest {
                         every { opprettDoedshendelseForBeroertePersoner(any()) } returns Unit
                         every { kanBrukeDeodshendelserJob() } returns false
                         every { kanSendeBrevOgOppretteOppgave() } returns false
+                    },
+                    grunnlagsendringsHendelseFilter.apply {
+                        every { hendelseErRelevantForSak(any(), any()) } returns true
                     },
                 ),
             )

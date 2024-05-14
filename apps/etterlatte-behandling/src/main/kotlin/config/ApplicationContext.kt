@@ -75,6 +75,7 @@ import no.nav.etterlatte.common.klienter.PesysKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsHendelseFilter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
@@ -408,6 +409,7 @@ internal class ApplicationContext(
         )
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
 
+    val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             oppgaveService = oppgaveService,
@@ -418,6 +420,7 @@ internal class ApplicationContext(
             sakService = sakService,
             brukerService = enhetService,
             doedshendelseService = doedshendelseService,
+            grunnlagsendringsHendelseFilter = grunnlagsendringsHendelseFilter,
         )
 
     val doedshendelseReminderJob = DoedshendelseReminderService(featureToggleService, doedshendelseDao, behandlingService, oppgaveService)

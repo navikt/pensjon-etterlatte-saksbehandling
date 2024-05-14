@@ -31,6 +31,8 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.person.krr.KrrKlient
@@ -100,14 +102,25 @@ internal class SakServiceTest {
 
         val groups = AzureGroup.entries.associateWith { it.name }
 
+        val saksbehandler = "Z123456"
+        val accessToken = "a"
+        val brukerTokenInfo =
+            BrukerTokenInfo.of(
+                accessToken = accessToken,
+                oid = "b",
+                sub = "ba",
+                saksbehandler = saksbehandler,
+                claims = null,
+            )
         nyKontekstMedBruker(
             SaksbehandlerMedEnheterOgRoller(
                 tokenValidationContext,
                 saksbehandlerService,
                 SaksbehandlerMedRoller(
-                    Saksbehandler("", "Z123456", claims),
+                    Saksbehandler(accessToken, saksbehandler, claims),
                     groups,
                 ),
+                brukerTokenInfo,
             ),
         )
     }
@@ -129,8 +142,16 @@ internal class SakServiceTest {
 
         every { tokenValidationContext.getJwtToken(any()) } returns token
 
+        val brukerTokenInfo =
+            BrukerTokenInfo.of(
+                accessToken = "a",
+                oid = "b",
+                sub = "ba",
+                saksbehandler = Fagsaksystem.EY.navn,
+                claims = null,
+            )
         nyKontekstMedBruker(
-            SystemUser(tokenValidationContext),
+            SystemUser(tokenValidationContext, brukerTokenInfo),
         )
     }
 

@@ -37,7 +37,7 @@ class Self(private val prosess: String) : User {
     override fun name() = prosess
 }
 
-class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identifiedBy) {
+class SystemUser(identifiedBy: TokenValidationContext, val brukerTokenInfo: BrukerTokenInfo) : ExternalUser(identifiedBy) {
     override fun name(): String {
         return identifiedBy.hentTokenClaims(AZURE_ISSUER)
             ?.getStringClaim("azp_name") // format=cluster:namespace:app-name
@@ -49,6 +49,7 @@ class SaksbehandlerMedEnheterOgRoller(
     identifiedBy: TokenValidationContext,
     private val saksbehandlerService: SaksbehandlerService,
     val saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    val brukerTokenInfo: BrukerTokenInfo,
 ) : ExternalUser(identifiedBy) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -99,12 +100,13 @@ fun decideUser(
 ): ExternalUser {
     return if (principal.context.issuers.contains(AZURE_ISSUER)) {
         if (brukerTokenInfo is Systembruker) {
-            SystemUser(principal.context)
+            SystemUser(principal.context, brukerTokenInfo)
         } else {
             SaksbehandlerMedEnheterOgRoller(
                 principal.context,
                 saksbehandlerService,
                 SaksbehandlerMedRoller(brukerTokenInfo as Saksbehandler, saksbehandlerGroupIdsByKey),
+                brukerTokenInfo,
             )
         }
     } else {

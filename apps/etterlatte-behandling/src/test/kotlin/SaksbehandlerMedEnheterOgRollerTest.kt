@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
@@ -43,8 +44,15 @@ class SaksbehandlerMedEnheterOgRollerTest {
             saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any())
         } returns enheterForSaksbehandler
 
-        val saksbehandler = SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller)
-
+        val brukerTokenInfo =
+            BrukerTokenInfo.of(
+                accessToken = "a",
+                oid = "b",
+                sub = "ba",
+                saksbehandler = "ident",
+                claims = null,
+            )
+        val saksbehandler = SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
         val skriveEnheter = saksbehandler.enheterMedSkrivetilgang()
         val leseEnheter = saksbehandler.enheterMedLesetilgang(enheterForSaksbehandler.map { it.enhetsNummer }.toSet())
 

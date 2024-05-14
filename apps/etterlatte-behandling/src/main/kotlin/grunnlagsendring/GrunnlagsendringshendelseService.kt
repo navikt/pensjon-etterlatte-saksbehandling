@@ -56,6 +56,7 @@ class GrunnlagsendringshendelseService(
     private val sakService: SakService,
     private val brukerService: BrukerService,
     private val doedshendelseService: DoedshendelseService,
+    private val grunnlagsendringsHendelseFilter: GrunnlagsendringsHendelseFilter,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -319,9 +320,7 @@ class GrunnlagsendringshendelseService(
         return sakerOgRollerGruppert
             .map { sakiderOgRoller -> Pair(sakService.finnSak(sakiderOgRoller.sakId), sakiderOgRoller) }
             .filter { rollerogSak -> rollerogSak.first != null }
-            .map {
-                SakOgRolle(it.first!!, it.second)
-            }
+            .map { SakOgRolle(it.first!!, it.second) }
             .filter { rollerogSak ->
                 if (grunnlagendringType == GrunnlagsendringsType.SIVILSTAND) {
                     rollerogSak.sak.sakType != SakType.BARNEPENSJON
@@ -329,6 +328,7 @@ class GrunnlagsendringshendelseService(
                     true
                 }
             }
+            .filter { grunnlagsendringsHendelseFilter.hendelseErRelevantForSak(it.sak.id, grunnlagendringType) }
             .map { rolleOgSak ->
                 val hendelse =
                     Grunnlagsendringshendelse(

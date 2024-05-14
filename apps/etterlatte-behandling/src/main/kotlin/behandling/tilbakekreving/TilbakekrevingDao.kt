@@ -131,6 +131,7 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
                 prepareStatement(
                     """
                     SELECT * FROM tilbakekrevingsperiode WHERE tilbakekreving_id = ?
+                    ORDER BY maaned
                     """.trimIndent(),
                 )
             statement.setObject(1, tilbakekrevingId)

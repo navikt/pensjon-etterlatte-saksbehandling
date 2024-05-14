@@ -58,7 +58,11 @@ const Virkningstidspunkt = (props: {
   }
 
   const { monthpickerProps, inputProps } = useMonthpicker({
-    fromDate: hentMinimumsVirkningstidspunkt(avdoede?.opplysning?.doedsdato, getSoeknadMottattDato()),
+    fromDate: hentMinimumsVirkningstidspunkt(
+      avdoede?.opplysning?.doedsdato,
+      getSoeknadMottattDato(),
+      behandling.sakType
+    ),
     toDate: addMonths(new Date(), 4),
     onMonthChange: (date: Date) => setVirkningstidspunkt(date),
     inputFormat: 'dd.MM.yyyy',

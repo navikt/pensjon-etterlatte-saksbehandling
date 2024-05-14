@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 
@@ -66,7 +65,7 @@ class AktivitetspliktService(
             throw TomErFoerFomException()
         }
 
-        val kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
+        val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
         inTransaction {
             if (aktivitet.id != null) {
                 aktivitetspliktDao.oppdaterAktivitet(behandlingId, aktivitet, kilde)
@@ -107,7 +106,7 @@ class AktivitetspliktService(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
+        val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
         inTransaction {
             require(
                 aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId) == null,
@@ -122,7 +121,7 @@ class AktivitetspliktService(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
+        val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
         inTransaction {
             require(
                 aktivitetspliktUnntakDao.hentUnntak(oppgaveId) == null,

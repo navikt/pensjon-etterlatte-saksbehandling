@@ -49,6 +49,7 @@ class DummyJmsConnectionFactory : EtterlatteJmsConnectionFactory {
         xml: String,
         queue: String,
         replyQueue: String,
+        prioritet: Prioritet,
     ) {
         send(xml, queue)
     }

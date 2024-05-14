@@ -30,6 +30,7 @@ interface EtterlatteJmsConnectionFactory {
         xml: String,
         queue: String,
         replyQueue: String,
+        prioritet: Prioritet = Prioritet.NORMAL,
     )
 }
 
@@ -92,14 +93,23 @@ class JmsConnectionFactory(
         xml: String,
         queue: String,
         replyQueue: String,
+        prioritet: Prioritet,
     ) {
         connection().createSession().use { session ->
             val producer = session.createProducer(session.createQueue(queue))
             val message =
                 session.createTextMessage(xml).apply {
                     jmsReplyTo = session.createQueue(replyQueue)
+                    if (prioritet != Prioritet.NORMAL) {
+                        jmsPriority = prioritet.verdi
+                    }
                 }
             producer.send(message)
         }
     }
+}
+
+enum class Prioritet(val verdi: Int) {
+    NORMAL(4),
+    LAV(1),
 }

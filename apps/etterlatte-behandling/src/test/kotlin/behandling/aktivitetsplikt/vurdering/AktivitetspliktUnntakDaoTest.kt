@@ -2,7 +2,6 @@ package behandling.aktivitetsplikt.vurdering
 
 import io.kotest.assertions.asClue
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
@@ -35,6 +34,7 @@ class AktivitetspliktUnntakDaoTest(ds: DataSource) {
             LagreAktivitetspliktUnntak(
                 unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
                 beskrivelse = "Beskrivelse",
+                fom = LocalDate.now(),
                 tom = LocalDate.now().plusMonths(6),
             )
 
@@ -45,7 +45,8 @@ class AktivitetspliktUnntakDaoTest(ds: DataSource) {
             it.behandlingId shouldBe behandlingId
             it.oppgaveId shouldBe oppgave.id
             it.unntak shouldBe unntak.unntak
-            it.tom shouldNotBe null
+            it.fom shouldBe unntak.fom
+            it.tom shouldBe unntak.tom
             it.opprettet shouldBe kilde
             it.endret shouldBe kilde
             it.beskrivelse shouldBe unntak.beskrivelse

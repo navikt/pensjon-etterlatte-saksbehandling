@@ -23,8 +23,8 @@ class AktivitetspliktUnntakDao(private val connectionAutoclosing: ConnectionAuto
             val stmt =
                 prepareStatement(
                     """
-                        INSERT INTO aktivitetsplikt_unntak(id, sak_id, behandling_id, oppgave_id, unntak, tom, opprettet, endret, beskrivelse) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO aktivitetsplikt_unntak(id, sak_id, behandling_id, oppgave_id, unntak, fom, tom, opprettet, endret, beskrivelse) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimMargin(),
                 )
             stmt.setObject(1, UUID.randomUUID())
@@ -32,10 +32,11 @@ class AktivitetspliktUnntakDao(private val connectionAutoclosing: ConnectionAuto
             stmt.setObject(3, behandlingId)
             stmt.setObject(4, oppgaveId)
             stmt.setString(5, unntak.unntak.name)
-            stmt.setDate(6, unntak.tom?.let { tom -> Date.valueOf(tom) })
-            stmt.setString(7, kilde.toJson())
+            stmt.setDate(6, unntak.fom?.let { tom -> Date.valueOf(tom) })
+            stmt.setDate(7, unntak.tom?.let { tom -> Date.valueOf(tom) })
             stmt.setString(8, kilde.toJson())
-            stmt.setString(9, unntak.beskrivelse)
+            stmt.setString(9, kilde.toJson())
+            stmt.setString(10, unntak.beskrivelse)
 
             stmt.executeUpdate()
         }
@@ -47,7 +48,7 @@ class AktivitetspliktUnntakDao(private val connectionAutoclosing: ConnectionAuto
                 val stmt =
                     prepareStatement(
                         """
-                        SELECT id, sak_id, behandling_id, oppgave_id, unntak, tom, opprettet, endret, beskrivelse
+                        SELECT id, sak_id, behandling_id, oppgave_id, unntak, fom, tom, opprettet, endret, beskrivelse
                         FROM aktivitetsplikt_unntak
                         WHERE oppgave_id = ?
                         """.trimMargin(),
@@ -65,6 +66,7 @@ class AktivitetspliktUnntakDao(private val connectionAutoclosing: ConnectionAuto
             behandlingId = getString("behandling_id")?.let { UUID.fromString(it) },
             oppgaveId = getString("oppgave_id")?.let { UUID.fromString(it) },
             unntak = AktivitetspliktUnntakType.valueOf(getString("unntak")),
+            fom = getDate("fom")?.toLocalDate(),
             tom = getDate("tom")?.toLocalDate(),
             opprettet = objectMapper.readValue(getString("opprettet")),
             endret = objectMapper.readValue(getString("endret")),
@@ -78,6 +80,7 @@ data class AktivitetspliktUnntak(
     val behandlingId: UUID? = null,
     val oppgaveId: UUID? = null,
     val unntak: AktivitetspliktUnntakType,
+    val fom: LocalDate?,
     val tom: LocalDate?,
     val opprettet: Grunnlagsopplysning.Kilde,
     val endret: Grunnlagsopplysning.Kilde?,
@@ -87,6 +90,7 @@ data class AktivitetspliktUnntak(
 data class LagreAktivitetspliktUnntak(
     val id: UUID? = null,
     val unntak: AktivitetspliktUnntakType,
+    val fom: LocalDate?,
     val tom: LocalDate?,
     val beskrivelse: String,
 )

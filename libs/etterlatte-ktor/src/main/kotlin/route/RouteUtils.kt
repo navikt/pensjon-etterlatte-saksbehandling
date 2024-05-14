@@ -27,6 +27,7 @@ const val SAKID_CALL_PARAMETER = "sakId"
 const val OPPGAVEID_CALL_PARAMETER = "oppgaveId"
 const val KLAGEID_CALL_PARAMETER = "klageId"
 const val GENERELLBEHANDLINGID_CALL_PARAMETER = "generellBehandlingId"
+const val TILBAKEKREVINGID_CALL_PARAMETER = "tilbakekrevingId"
 
 enum class CallParamAuthId(val value: String) {
     BEHANDLINGID(BEHANDLINGID_CALL_PARAMETER),
@@ -34,6 +35,7 @@ enum class CallParamAuthId(val value: String) {
     OPPGAVEID(OPPGAVEID_CALL_PARAMETER),
     KLAGEID(KLAGEID_CALL_PARAMETER),
     GENERELLBEHANDLINGID(GENERELLBEHANDLINGID_CALL_PARAMETER),
+    TILBAKEKREVINGID(TILBAKEKREVINGID_CALL_PARAMETER),
 }
 
 const val OPPGAVEID_GOSYS_CALL_PARAMETER = "gosysOppgaveId"
@@ -73,6 +75,12 @@ inline val PipelineContext<*, ApplicationCall>.gosysOppgaveId: String
         requireNotNull(call.parameters[OPPGAVEID_GOSYS_CALL_PARAMETER]) {
             "Gosys oppgaveId er ikke i path params"
         }
+
+inline val PipelineContext<*, ApplicationCall>.tilbakekrevingId: UUID
+    get() =
+        call.parameters[TILBAKEKREVINGID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
+            "TilbakekrevingId er ikke i path params",
+        )
 
 val logger = LoggerFactory.getLogger("TilgangsSjekk")
 

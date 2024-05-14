@@ -4,6 +4,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -294,9 +295,17 @@ class VedtakBehandlingService(
                 behandlingId = behandlingId,
             )
 
-        val isEtterbetaling = erVedtakMedEtterbetaling(tilSamordningVedtakLocal, repository)
+        if (tilSamordningVedtakLocal.isRegulering()) {
+            logger.info("Oppretter ikke samordning ved regulering [behandlingId=$behandlingId]")
 
-        if (!samKlient.samordneVedtak(tilSamordningVedtakLocal, isEtterbetaling, brukerTokenInfo)) {
+            val vedtakEtterSvar = samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)!!
+            return VedtakOgRapid(vedtakEtterSvar.vedtak, tilSamordning, vedtakEtterSvar.rapidInfo1)
+        } else if (!samKlient.samordneVedtak(
+                vedtak = tilSamordningVedtakLocal,
+                etterbetaling = erVedtakMedEtterbetaling(tilSamordningVedtakLocal, repository),
+                brukerTokenInfo = brukerTokenInfo,
+            )
+        ) {
             logger.info("Svar fra samordning: ikke nødvendig å vente for vedtak=${vedtak.id} [behandlingId=$behandlingId]")
 
             val vedtakEtterSvar = samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)!!
@@ -623,6 +632,10 @@ class VedtakBehandlingService(
         return repository.hentVedtakForSak(sakId)
             .filter { it.status == VedtakStatus.IVERKSATT }
     }
+
+    private fun Vedtak.isRegulering() =
+        this.innhold is VedtakInnhold.Behandling &&
+            Revurderingaarsak.REGULERING == this.innhold.revurderingAarsak
 }
 
 class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: List<VedtakStatus>) :

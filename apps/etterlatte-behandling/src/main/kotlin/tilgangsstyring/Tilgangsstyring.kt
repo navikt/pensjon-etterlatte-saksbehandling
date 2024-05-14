@@ -37,6 +37,8 @@ class PluginConfiguration {
     -> Boolean = { _, _ -> false }
     var harTilgangTilGenerellBehandling: (generellbehandlingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
+    var harTilgangTilTilbakekreving: (klageId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    -> Boolean = { _, _ -> false }
     var saksbehandlerGroupIdsByKey: Map<AzureGroup, String> = emptyMap()
 }
 
@@ -131,6 +133,16 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                             }
                             return@on
                         }
+                        CallParamAuthId.TILBAKEKREVINGID -> {
+                            if (!pluginConfig.harTilgangTilTilbakekreving(
+                                    idForRequest,
+                                    SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
+                                )
+                            ) {
+                                call.respond(HttpStatusCode.NotFound)
+                            }
+                            return@on
+                        }
                     }
                 }
             }
@@ -204,9 +216,9 @@ private fun PipelineContext<*, ApplicationCall>.finnSkriveTilgangForId(sakId: Lo
             CallParamAuthId.OPPGAVEID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaOppgave(idForRequest)?.enhetNr
             CallParamAuthId.KLAGEID -> sakTilgangDao.hentSakMedGraderingOgSkjermingPaaKlage(idForRequest)?.enhetNr
             CallParamAuthId.GENERELLBEHANDLINGID ->
-                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaGenerellbehandling(
-                    idForRequest,
-                )?.enhetNr
+                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaGenerellbehandling(idForRequest)?.enhetNr
+            CallParamAuthId.TILBAKEKREVINGID ->
+                sakTilgangDao.hentSakMedGraderingOgSkjermingPaaTilbakekreving(idForRequest)?.enhetNr
         }
     }
 }

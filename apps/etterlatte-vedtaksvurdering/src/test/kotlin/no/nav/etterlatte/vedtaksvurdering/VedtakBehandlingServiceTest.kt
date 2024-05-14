@@ -1088,6 +1088,34 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
     }
 
     @Test
+    fun `skal sette vedtak til samordnet, skipper samordning fordi REGULERING`() {
+        val behandlingId = randomUUID()
+
+        coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
+        coEvery { behandlingKlientMock.samordnet(any(), any(), any()) } returns true
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        runBlocking {
+            repository.opprettVedtak(
+                opprettVedtak(
+                    behandlingId = behandlingId,
+                    behandlingType = BehandlingType.REVURDERING,
+                    type = VedtakType.ENDRING,
+                    status = VedtakStatus.ATTESTERT,
+                    revurderingAarsak = Revurderingaarsak.REGULERING,
+                ),
+            )
+            val oppdatertVedtak = service.tilSamordningVedtak(behandlingId, attestant)
+
+            oppdatertVedtak.vedtak.status shouldBe VedtakStatus.SAMORDNET
+
+            coVerify(exactly = 1) { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) }
+            coVerify(exactly = 1) { behandlingKlientMock.samordnet(behandlingId, any(), any()) }
+            coVerify(exactly = 0) { samKlientMock.samordneVedtak(any(), false, attestant) }
+        }
+    }
+
+    @Test
     fun `skal ikke sette vedtak til samordnet pga ugyldig vedtaksstatus for oppdatering`() {
         val behandlingId = randomUUID()
 

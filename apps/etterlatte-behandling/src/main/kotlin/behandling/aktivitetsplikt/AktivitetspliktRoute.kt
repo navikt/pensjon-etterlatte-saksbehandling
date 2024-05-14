@@ -11,7 +11,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktVurdering
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -99,11 +100,24 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
             call.respond(aktivitetspliktService.hentVurdering(oppgaveId) ?: HttpStatusCode.NotFound)
         }
 
-        post {
+        post("/aktivitetsgrad") {
             kunSkrivetilgang {
-                logger.info("Oppretter eller oppdaterer aktivitetsplikt vurdering for sakId=$sakId og oppgaveId=$oppgaveId")
-                aktivitetspliktService.opprettVurdering(
-                    vurdering = call.receive<LagreAktivitetspliktVurdering>(),
+                logger.info("Oppretter aktivitetsgrad for sakId=$sakId og oppgaveId=$oppgaveId")
+                aktivitetspliktService.opprettAktivitetsgrad(
+                    aktivitetsgrad = call.receive<LagreAktivitetspliktAktivitetsgrad>(),
+                    oppgaveId = oppgaveId,
+                    sakId = sakId,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+                call.respond(HttpStatusCode.Created)
+            }
+        }
+
+        post("/unntak") {
+            kunSkrivetilgang {
+                logger.info("Oppretter unntak for sakId=$sakId og oppgaveId=$oppgaveId")
+                aktivitetspliktService.opprettUnntak(
+                    unntak = call.receive<LagreAktivitetspliktUnntak>(),
                     oppgaveId = oppgaveId,
                     sakId = sakId,
                     brukerTokenInfo = brukerTokenInfo,

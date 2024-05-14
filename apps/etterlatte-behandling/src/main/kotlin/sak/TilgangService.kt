@@ -34,6 +34,11 @@ interface TilgangService {
         behandlingId: String,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean
+
+    fun harTilgangTilTilbakekreving(
+        tilbakekrevingId: String,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    ): Boolean
 }
 
 data class SakMedGraderingOgSkjermet(
@@ -88,6 +93,15 @@ class TilgangServiceImpl(
     ): Boolean {
         val sakMedGraderingOgSkjermet =
             dao.hentSakMedGraderingOgSkjermingPaaGenerellbehandling(behandlingId) ?: throw GenerellIkkeFunnetException()
+        return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
+    }
+
+    override fun harTilgangTilTilbakekreving(
+        tilbakekrevingId: String,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    ): Boolean {
+        val sakMedGraderingOgSkjermet =
+            dao.hentSakMedGraderingOgSkjermingPaaTilbakekreving(tilbakekrevingId) ?: throw GenerellIkkeFunnetException()
         return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
     }
 

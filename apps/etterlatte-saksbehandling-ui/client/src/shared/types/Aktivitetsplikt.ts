@@ -44,27 +44,75 @@ export enum AktivitetspliktVurderingType {
 
 export const tekstAktivitetspliktVurderingType: Record<AktivitetspliktVurderingType, string> = {
   AKTIVITET_UNDER_50: 'Under 50%',
-  AKTIVITET_OVER_50: 'Over 50%',
+  AKTIVITET_OVER_50: '50% eller mer',
   AKTIVITET_100: '100%',
 }
 
+export enum AktivitetspliktUnntakType {
+  OMSORG_BARN_UNDER_ETT_AAR = 'OMSORG_BARN_UNDER_ETT_AAR',
+  OMSORG_BARN_SYKDOM = 'OMSORG_BARN_SYKDOM',
+  MANGLENDE_TILSYNSORDNING_SYKDOM = 'MANGLENDE_TILSYNSORDNING_SYKDOM',
+  SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE = 'SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE',
+  GRADERT_UFOERETRYGD = 'GRADERT_UFOERETRYGD',
+  MIDLERTIDIG_SYKDOM = 'MIDLERTIDIG_SYKDOM',
+  FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT = 'FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT',
+}
+
+export const tekstAktivitetspliktUnntakType: Record<AktivitetspliktUnntakType, string> = {
+  OMSORG_BARN_UNDER_ETT_AAR: 'Omsorg for barn under ett år',
+  OMSORG_BARN_SYKDOM: 'Omsorg for barn som har sykdom, skade eller funksjonshemming',
+  MANGLENDE_TILSYNSORDNING_SYKDOM: 'Manglende tilsynsordning ved sykdom',
+  SYKDOM_ELLER_REDUSERT_ARBEIDSEVNE: 'Bruker har sykdom, redusert arbeidsevne, AAP',
+  GRADERT_UFOERETRYGD: 'Gradert uføretrygd',
+  MIDLERTIDIG_SYKDOM: 'Midlertidig sykdom',
+  FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT: 'Nei, bruker er født i 1963 eller tidligere og har lav inntekt',
+}
+
 export interface IAktivitetspliktVurdering {
+  aktivitet?: IAktivitetspliktAktivitetsgrad
+  unntak?: IAktivitetspliktUnntak
+}
+
+export interface IAktivitetspliktAktivitetsgrad {
   id: string
   sakId: number
   behandlingId: string | undefined
   oppgaveId: string
-  vurdering: AktivitetspliktVurderingType
-  // unntak: boolean
+  aktivitetsgrad: AktivitetspliktVurderingType
   fom: string
   opprettet: KildeSaksbehandler
   endret: KildeSaksbehandler
   beskrivelse: string
 }
 
-export interface IOpprettAktivitetspliktVurdering {
+export interface IAktivitetspliktUnntak {
+  id: string
+  sakId: number
+  behandlingId: string | undefined
+  oppgaveId: string
+  unntak: AktivitetspliktUnntakType
+  tom: string
+  opprettet: KildeSaksbehandler
+  endret: KildeSaksbehandler
+  beskrivelse: string
+}
+
+export interface IOpprettAktivitetspliktAktivitetsgrad {
   id: string | undefined
-  vurdering: AktivitetspliktVurderingType
-  // unntak: boolean
+  aktivitetsgrad: AktivitetspliktVurderingType
   fom: string
   beskrivelse: string
+}
+
+export interface IOpprettAktivitetspliktUnntak {
+  id: string | undefined
+  unntak: AktivitetspliktUnntakType
+  fom?: string
+  tom?: string
+  beskrivelse: string
+}
+
+export enum IValgJaNei {
+  JA = 'JA',
+  NEI = 'NEI',
 }

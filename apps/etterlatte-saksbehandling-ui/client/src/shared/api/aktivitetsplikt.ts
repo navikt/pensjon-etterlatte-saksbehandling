@@ -4,7 +4,8 @@ import {
   IAktivitet,
   IAktivitetspliktVurdering,
   IOpprettAktivitet,
-  IOpprettAktivitetspliktVurdering,
+  IOpprettAktivitetspliktAktivitetsgrad,
+  IOpprettAktivitetspliktUnntak,
 } from '~shared/types/Aktivitetsplikt'
 
 export const hentAktivitetspliktOppfolging = async (args: {
@@ -42,9 +43,18 @@ export const hentAktivitspliktVurdering = async (args: {
 }): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
   apiClient.get(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering`)
 
-export const opprettAktivitspliktVurdering = async (args: {
+export const opprettAktivitspliktAktivitetsgrad = async (args: {
   sakId: number
   oppgaveId: string
-  request: IOpprettAktivitetspliktVurdering
+  request: IOpprettAktivitetspliktAktivitetsgrad
 }): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
-  apiClient.post(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering`, { ...args.request })
+  apiClient.post(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/aktivitetsgrad`, {
+    ...args.request,
+  })
+
+export const opprettAktivitspliktUnntak = async (args: {
+  sakId: number
+  oppgaveId: string
+  request: IOpprettAktivitetspliktUnntak
+}): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
+  apiClient.post(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/unntak`, { ...args.request })

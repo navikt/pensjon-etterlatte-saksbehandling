@@ -3,12 +3,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import {
-  ENHETFILTER,
-  EnhetFilterKeys,
-  GosysFilter,
-  GosysOppgaveValg,
-} from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import { EnhetFilterKeys, GosysFilter, GosysOppgaveValg } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { ToggleGroup } from '@navikt/ds-react'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import styled from 'styled-components'
@@ -41,8 +36,10 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   }
 
   const harBareEnLokalSaksbehandlendeEnhet = (enheter: string[]): string[] => {
-    const lokaleEnheter = [ENHETFILTER.E4815, ENHETFILTER.E4808, ENHETFILTER.E4817]
-    return enheter.filter((enhet) => lokaleEnheter.includes(enhet))
+    const lokaleEnheter = ['E4815', 'E4808', 'E4817']
+    return enheter.filter((enhet) => {
+      return lokaleEnheter.includes(`E${enhet}`)
+    })
   }
 
   const setLokalEnhetSomStandardOmIngenLocalStorage = (): GosysFilter => {

@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { Container, SpaceChildren } from '~shared/styled'
 import Spinner from '~shared/Spinner'
-import { Heading, ToggleGroup } from '@navikt/ds-react'
+import { Heading, Loader, ToggleGroup } from '@navikt/ds-react'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import React, { useEffect, useState } from 'react'
@@ -14,6 +14,10 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { Behandlingsliste } from '~components/person/sakOgBehandling/Behandlingsliste'
 import { KlageListe } from '~components/person/sakOgBehandling/KlageListe'
 import { TilbakekrevingListe } from '~components/person/sakOgBehandling/TilbakekrevingListe'
+import { revurderingKanOpprettes } from '~components/person/hendelser/utils'
+import { OpprettNyRevurdering } from '~components/person/OpprettNyRevurdering'
+import { hentStoettedeRevurderinger } from '~shared/api/revurdering'
+import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -21,13 +25,17 @@ export enum OppgaveValg {
 }
 
 export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandlinger>; fnr: string }) => {
+  const innloggetSaksbehandler = useInnloggetSaksbehandler()
+
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
 
   const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
+  const [muligeRevurderingAarsakerResult, muligeRevurderingeraarsakerFetch] = useApiCall(hentStoettedeRevurderinger)
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
       oppgaverFetch(sakResult.data.sak.id)
+      muligeRevurderingeraarsakerFetch({ sakType: sakResult.data.sak.sakType })
     }
   }, [fnr, sakResult])
 
@@ -63,6 +71,16 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 <SpaceChildren>
                   <Heading size="medium">Behandlinger</Heading>
                   <Behandlingsliste sakOgBehandlinger={{ sak, behandlinger }} />
+                  {mapResult(muligeRevurderingAarsakerResult, {
+                    pending: <Loader />,
+                    success: (muligeRevurderingAarsaker) =>
+                      !!muligeRevurderingAarsaker?.length &&
+                      revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
+                        <div>
+                          <OpprettNyRevurdering sakId={sak.id} revurderinger={muligeRevurderingAarsaker} />
+                        </div>
+                      ),
+                  })}
                 </SpaceChildren>
 
                 <SpaceChildren>

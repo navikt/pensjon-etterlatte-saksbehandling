@@ -44,7 +44,7 @@ internal class TilSamordningRiver(
         logger.info(marker, "Behandler ekstern samordning [behandling=${vedtak.behandlingId}]")
 
         try {
-            if (vedtaksvurderingService.samordneVedtak(vedtak.behandlingId).skalVente) {
+            if (vedtaksvurderingService.samordneVedtak(vedtak.behandlingId).skalVentePaaSamordning) {
                 logger.info(marker, "Skal vente på samordning [behandling=${vedtak.behandlingId}]")
             } else {
                 // Dersom man ikke skal vente, så skal vedtaksstatus oppdateres til SAMORDNET

@@ -111,5 +111,5 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
 }
 
 class SamordneResponse(
-    val skalVente: Boolean,
+    val skalVentePaaSamordning: Boolean,
 )

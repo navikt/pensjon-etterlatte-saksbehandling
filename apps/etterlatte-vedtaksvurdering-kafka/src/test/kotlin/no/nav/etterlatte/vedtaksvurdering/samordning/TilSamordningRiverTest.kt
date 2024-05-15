@@ -28,7 +28,7 @@ internal class TilSamordningRiverTest {
     fun `skal kalle samordne, og deretter oppdatere status til samordnet pga ikke vente`() {
         val behandlingId = UUID.fromString("e89c6e25-4f22-48b3-b975-4c868d830913")
         val vedtakId = 31L
-        every { vedtakService.samordneVedtak(behandlingId) } returns SamordneResponse(skalVente = false)
+        every { vedtakService.samordneVedtak(behandlingId) } returns SamordneResponse(skalVentePaaSamordning = false)
         every { vedtakService.samordnetVedtak(vedtakId.toString()) } returns mockk()
 
         inspector.sendTestMessage(melding)
@@ -41,7 +41,7 @@ internal class TilSamordningRiverTest {
     fun `skal kalle samordne, og deretter ikke oppdatere status til samordnet fordi det skal ventes paa ekstern samordning`() {
         val behandlingId = UUID.fromString("e89c6e25-4f22-48b3-b975-4c868d830913")
         val vedtakId = 31L
-        every { vedtakService.samordneVedtak(behandlingId) } returns SamordneResponse(skalVente = true)
+        every { vedtakService.samordneVedtak(behandlingId) } returns SamordneResponse(skalVentePaaSamordning = true)
 
         inspector.sendTestMessage(melding)
 

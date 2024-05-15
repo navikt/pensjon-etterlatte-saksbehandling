@@ -313,7 +313,7 @@ class BeregningsGrunnlagService(
                     runBlocking {
                         behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                     }
-                val reguleringsmaaned = behandling.virkningstidspunkt().dato
+                val reguleringsmaaned = YearMonth.of(behandling.virkningstidspunkt!!.dato.year, 5)
                 beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
                     behandlingId,
                     grunnlag.map {

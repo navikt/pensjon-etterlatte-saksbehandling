@@ -57,7 +57,7 @@ class VedtakBehandlingService(
     ): LoependeYtelse {
         logger.info("Sjekker om det finnes løpende vedtak for sak $sakId på dato $dato")
         val alleVedtakForSak = repository.hentVedtakForSak(sakId)
-        return Vedtakstidslinje(alleVedtakForSak).harLoependePeriodeEtter(dato)
+        return Vedtakstidslinje(alleVedtakForSak).harLoependeVedtakPaaEllerEtter(dato)
     }
 
     suspend fun opprettEllerOppdaterVedtak(
@@ -526,6 +526,7 @@ class VedtakBehandlingService(
         }
         else -> {
             if (virkningstidspunkt == behandling.opphoerFraOgMed) {
+                // TODO Det burde være en løsning for å kunne fjerne et opphler uten en revurdering med samme virk som opphøret?
                 null
             } else if (behandling.opphoerFraOgMed != null && virkningstidspunkt > behandling.opphoerFraOgMed) {
                 throw UgyldigForespoerselException(

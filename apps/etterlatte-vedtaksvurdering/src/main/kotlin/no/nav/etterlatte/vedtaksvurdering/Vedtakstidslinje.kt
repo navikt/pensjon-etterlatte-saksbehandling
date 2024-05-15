@@ -11,7 +11,7 @@ import java.time.YearMonth
 class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
     private val iverksatteVedtak = hentIverksatteVedtak()
 
-    fun harLoependePeriodeEtter(dato: LocalDate): LoependeYtelse {
+    fun harLoependeVedtakPaaEllerEtter(dato: LocalDate): LoependeYtelse {
         val erUnderSamordning = vedtak.any { listOf(VedtakStatus.TIL_SAMORDNING, VedtakStatus.SAMORDNET).contains(it.status) }
 
         if (iverksatteVedtak.isEmpty()) return LoependeYtelse(false, erUnderSamordning, dato)

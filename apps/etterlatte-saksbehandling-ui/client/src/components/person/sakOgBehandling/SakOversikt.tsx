@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { Container, SpaceChildren } from '~shared/styled'
 import Spinner from '~shared/Spinner'
-import { Heading, Loader, ToggleGroup } from '@navikt/ds-react'
+import { Heading, ToggleGroup } from '@navikt/ds-react'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import React, { useEffect, useState } from 'react'
@@ -16,7 +16,6 @@ import { KlageListe } from '~components/person/sakOgBehandling/KlageListe'
 import { TilbakekrevingListe } from '~components/person/sakOgBehandling/TilbakekrevingListe'
 import { revurderingKanOpprettes } from '~components/person/hendelser/utils'
 import { OpprettNyRevurdering } from '~components/person/OpprettNyRevurdering'
-import { hentStoettedeRevurderinger } from '~shared/api/revurdering'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export enum OppgaveValg {
@@ -30,12 +29,10 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
   const [oppgaveValg, setOppgaveValg] = useState<OppgaveValg>(OppgaveValg.AKTIVE)
 
   const [oppgaverResult, oppgaverFetch] = useApiCall(hentOppgaverTilknyttetSak)
-  const [muligeRevurderingAarsakerResult, muligeRevurderingeraarsakerFetch] = useApiCall(hentStoettedeRevurderinger)
 
   useEffect(() => {
     if (isSuccess(sakResult)) {
       oppgaverFetch(sakResult.data.sak.id)
-      muligeRevurderingeraarsakerFetch({ sakType: sakResult.data.sak.sakType })
     }
   }, [fnr, sakResult])
 
@@ -71,16 +68,11 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 <SpaceChildren>
                   <Heading size="medium">Behandlinger</Heading>
                   <Behandlingsliste sakOgBehandlinger={{ sak, behandlinger }} />
-                  {mapResult(muligeRevurderingAarsakerResult, {
-                    pending: <Loader />,
-                    success: (muligeRevurderingAarsaker) =>
-                      !!muligeRevurderingAarsaker?.length &&
-                      revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
-                        <div>
-                          <OpprettNyRevurdering sakId={sak.id} revurderinger={muligeRevurderingAarsaker} />
-                        </div>
-                      ),
-                  })}
+                  {revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
+                    <OpprettRevurderingWrapper>
+                      <OpprettNyRevurdering sak={sak} />
+                    </OpprettRevurderingWrapper>
+                  )}
                 </SpaceChildren>
 
                 <SpaceChildren>
@@ -111,4 +103,8 @@ const SakHeaderWrapper = styled.div`
   border-right: 1px solid var(--a-surface-active);
   height: 100vh;
   min-width: 25rem;
+`
+
+const OpprettRevurderingWrapper = styled.div`
+  margin-top: 1rem;
 `

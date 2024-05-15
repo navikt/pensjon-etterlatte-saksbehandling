@@ -1,21 +1,20 @@
-import { Alert, Button, Heading, Modal, Select, TextField, VStack } from '@navikt/ds-react'
-import React, { useState } from 'react'
+import { Alert, Button, Heading, Loader, Modal, Select, TextField, VStack } from '@navikt/ds-react'
+import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import { useNavigate } from 'react-router-dom'
-import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/revurdering'
+import { hentStoettedeRevurderinger, opprettRevurdering as opprettRevurderingApi } from '~shared/api/revurdering'
 
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, mapResult } from '~shared/api/apiUtils'
 import { ButtonGroup } from '~shared/styled'
+import { ISak } from '~shared/types/sak'
 
 export const OpprettNyRevurdering = ({
-  sakId,
-  revurderinger,
+  sak,
   oppgaveId,
   begrunnelse,
 }: {
-  sakId: number
-  revurderinger: Array<Revurderingaarsak>
+  sak: ISak
   oppgaveId?: string
   begrunnelse?: string
 }) => {
@@ -24,7 +23,9 @@ export const OpprettNyRevurdering = ({
   const [valgtRevurdering, setValgtRevurdering] = useState<Revurderingaarsak | undefined>()
   const [fritekstgrunn, setFritekstgrunn] = useState<string>('')
 
+  const [muligeRevurderingAarsakerResult, muligeRevurderingeraarsakerFetch] = useApiCall(hentStoettedeRevurderinger)
   const [opprettRevurderingStatus, opprettRevurdering, resetApiCall] = useApiCall(opprettRevurderingApi)
+
   const navigate = useNavigate()
   const opprettBehandling = () => {
     if (valgtRevurdering === undefined) {
@@ -32,7 +33,7 @@ export const OpprettNyRevurdering = ({
     }
     opprettRevurdering(
       {
-        sakId: sakId,
+        sakId: sak.id,
         aarsak: valgtRevurdering,
         fritekstAarsak: fritekstgrunn || null,
         begrunnelse: begrunnelse,
@@ -53,62 +54,74 @@ export const OpprettNyRevurdering = ({
     resetApiCall()
   }
 
-  return (
-    <>
-      <Button
-        variant={oppgaveId ? 'primary' : 'secondary'}
-        size={oppgaveId ? 'small' : 'medium'}
-        onClick={() => setOpen(true)}
-      >
-        Opprett ny revurdering
-      </Button>
-      <Modal open={open} onClose={closeAndReset} aria-labelledby="modal-heading">
-        <Modal.Body>
-          <Modal.Header closeButton={false}>
-            <Heading spacing level="2" size="medium" id="modal-heading">
-              Opprett ny revurdering
-            </Heading>
-          </Modal.Header>
-          <Select
-            label="Årsak til revurdering"
-            value={valgtRevurdering}
-            onChange={(e) => setValgtRevurdering(e.target.value as Revurderingaarsak)}
-            error={error}
+  useEffect(() => {
+    muligeRevurderingeraarsakerFetch({ sakType: sak.sakType })
+  }, [])
+
+  return mapResult(muligeRevurderingAarsakerResult, {
+    pending: <Loader />,
+    success: (muligeRevurderingAarsaker) =>
+      !!muligeRevurderingAarsaker?.length ? (
+        <>
+          <Button
+            variant={oppgaveId ? 'primary' : 'secondary'}
+            size={oppgaveId ? 'small' : 'medium'}
+            onClick={() => setOpen(true)}
           >
-            <option>Velg type</option>
-            {revurderinger.map((revurdering, i) => {
-              return (
-                <option key={`revurdering${i}`} value={revurdering}>
-                  {tekstRevurderingsaarsak[revurdering]}
-                </option>
-              )
-            })}
-          </Select>
-          {valgtRevurdering &&
-            [Revurderingaarsak.ANNEN, Revurderingaarsak.ANNEN_UTEN_BREV].includes(valgtRevurdering) && (
-              <VStack gap="10" style={{ marginTop: '2rem' }}>
-                <TextField
-                  label="Beskriv årsak"
-                  size="medium"
-                  type="text"
-                  value={fritekstgrunn}
-                  onChange={(e) => setFritekstgrunn(e.target.value)}
-                />
-                <Alert variant="warning" style={{ maxWidth: '20em' }}>
-                  Bruk denne årsaken kun dersom andre årsaker ikke er dekkende for revurderingen.
-                </Alert>
-              </VStack>
-            )}
-          <ButtonGroup>
-            <Button variant="secondary" onClick={closeAndReset}>
-              Avbryt
-            </Button>
-            <Button loading={isPending(opprettRevurderingStatus)} onClick={opprettBehandling}>
-              Opprett
-            </Button>
-          </ButtonGroup>
-        </Modal.Body>
-      </Modal>
-    </>
-  )
+            Opprett ny revurdering
+          </Button>
+          <Modal open={open} onClose={closeAndReset} aria-labelledby="modal-heading">
+            <Modal.Header closeButton={false}>
+              <Heading level="2" size="medium" id="modal-heading">
+                Opprett ny revurdering
+              </Heading>
+            </Modal.Header>
+            <Modal.Body>
+              <Select
+                label="Årsak til revurdering"
+                value={valgtRevurdering}
+                onChange={(e) => setValgtRevurdering(e.target.value as Revurderingaarsak)}
+                error={error}
+              >
+                <option>Velg type</option>
+                {muligeRevurderingAarsaker.map((revurdering, i) => {
+                  return (
+                    <option key={`revurdering${i}`} value={revurdering}>
+                      {tekstRevurderingsaarsak[revurdering]}
+                    </option>
+                  )
+                })}
+              </Select>
+              {valgtRevurdering &&
+                [Revurderingaarsak.ANNEN, Revurderingaarsak.ANNEN_UTEN_BREV].includes(valgtRevurdering) && (
+                  <VStack gap="10" style={{ marginTop: '2rem' }}>
+                    <TextField
+                      label="Beskriv årsak"
+                      size="medium"
+                      type="text"
+                      value={fritekstgrunn}
+                      onChange={(e) => setFritekstgrunn(e.target.value)}
+                    />
+                    <Alert variant="warning" style={{ maxWidth: '20em' }}>
+                      Bruk denne årsaken kun dersom andre årsaker ikke er dekkende for revurderingen.
+                    </Alert>
+                  </VStack>
+                )}
+              <ButtonGroup>
+                <Button variant="secondary" onClick={closeAndReset}>
+                  Avbryt
+                </Button>
+                <Button loading={isPending(opprettRevurderingStatus)} onClick={opprettBehandling}>
+                  Opprett
+                </Button>
+              </ButtonGroup>
+            </Modal.Body>
+          </Modal>
+        </>
+      ) : (
+        <Alert variant="info" inline>
+          Ingen mulige revurderinger for denne saken
+        </Alert>
+      ),
+  })
 }

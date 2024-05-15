@@ -10,7 +10,7 @@ import { harAapenRevurdering, revurderingKanOpprettes } from '~components/person
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { FlexRow, SpaceChildren } from '~shared/styled'
 import { StartRevurderingModal } from '~components/person/hendelser/StartRevurderingModal'
-import { LukkHendelseModal } from '~components/person/hendelser/LukkHendelseModal'
+import { ArkiverHendelseModal } from '~components/person/hendelser/ArkiverHendelseModal'
 import { useSearchParams } from 'react-router-dom'
 
 interface Props {
@@ -51,7 +51,7 @@ export const NyHendelseExpandableRow = ({ hendelse, sak, behandlinger, revurderi
           )}
 
           <FlexRow>
-            <LukkHendelseModal hendelse={hendelse} />
+            <ArkiverHendelseModal hendelse={hendelse} />
 
             {hendelse.status !== 'TATT_MED_I_BEHANDLING' &&
               stoetterRevurderingAvHendelse(hendelse, revurderinger) &&

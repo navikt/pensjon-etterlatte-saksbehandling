@@ -11,10 +11,10 @@ import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { ButtonGroup } from '~shared/styled'
 
-export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshendelse }) => {
+export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshendelse }) => {
   const [open, setOpen] = useState(false)
-  const [kommentar, setKommentar] = useState<string>('')
-  const [lukkHendelseResult, lukkGrunnlagshendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)
+  const [begrunnelse, setBegrunnelse] = useState<string>('')
+  const [arkiverHendelseResult, arkiverHendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)
   const [oppgaveResult, hentOppgave] = useApiCall(hentOppgaveForReferanseUnderBehandling)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -24,9 +24,9 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
     setOpen(true)
   }
 
-  const lukkGrunnlagshendelseWrapper = () => {
-    lukkGrunnlagshendelseFunc(
-      { ...hendelse, kommentar },
+  const arkiverHendelse = () => {
+    arkiverHendelseFunc(
+      { ...hendelse, kommentar: begrunnelse },
       () => {
         setOpen(false)
         location.reload()
@@ -55,7 +55,7 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
               <InstitusjonsoppholdVurderingBegrunnelse
                 sakId={hendelse.sakId}
                 grunnlagsEndringshendelseId={hendelse.id}
-                lukkGrunnlagshendelseWrapper={lukkGrunnlagshendelseWrapper}
+                lukkGrunnlagshendelseWrapper={arkiverHendelse}
               />
               <Button variant="secondary" onClick={() => setOpen(false)}>
                 Avbryt
@@ -67,11 +67,11 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
                 I noen tilfeller krever ikke ny informasjon eller hendelser noen revurdering. Beskriv hvorfor en
                 revurdering ikke er nødvendig.
               </BodyShort>
-              <Textarea label="Begrunnelse" value={kommentar} onChange={(e) => setKommentar(e.target.value)} />
+              <Textarea label="Begrunnelse" value={begrunnelse} onChange={(e) => setBegrunnelse(e.target.value)} />
 
               {isFailureHandler({
-                apiResult: lukkHendelseResult,
-                errorMessage: 'Vi kunne ikke lukke hendelsen',
+                apiResult: arkiverHendelseResult,
+                errorMessage: 'Vi kunne ikke arkivere hendelsen',
               })}
 
               <br />
@@ -95,18 +95,14 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
                 <Button
                   variant="secondary"
                   onClick={() => {
-                    setKommentar('')
+                    setBegrunnelse('')
                     resetApiCall()
                     setOpen(false)
                   }}
                 >
                   Avbryt
                 </Button>
-                <Button
-                  onClick={lukkGrunnlagshendelseWrapper}
-                  disabled={!kommentar}
-                  loading={isPending(lukkHendelseResult)}
-                >
+                <Button onClick={arkiverHendelse} disabled={!begrunnelse} loading={isPending(arkiverHendelseResult)}>
                   Arkiver
                 </Button>
               </ButtonGroup>

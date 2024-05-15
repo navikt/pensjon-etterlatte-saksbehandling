@@ -109,7 +109,7 @@ spec:
     - name: NORG2_URL
       value: https://norg2.prod-fss-pub.nais.io
     - name: MODIAPERSONOVERSIKT_URL
-      value: https://app.adeo.no/modiapersonoversikt/person
+      value: https://app.adeo.no/modiapersonoversikt
     - name: PSAK_URL
       value: https://pensjon-psak.nais.adeo.no/psak
     - name: APP_VERSION

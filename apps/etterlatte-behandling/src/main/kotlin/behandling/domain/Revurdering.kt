@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 sealed class Revurdering(
@@ -29,6 +30,7 @@ sealed class Revurdering(
     override val kilde: Vedtaksloesning,
     open val begrunnelse: String?,
     override val relatertBehandlingId: String?,
+    override val opphoerFraOgMed: YearMonth?,
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.REVURDERING
 
@@ -54,6 +56,7 @@ sealed class Revurdering(
             relatertBehandlingId: String?,
             begrunnelse: String?,
             sendeBrev: Boolean,
+            opphoerFraOgMed: YearMonth? = null,
         ) = when (prosesstype) {
             Prosesstype.MANUELL ->
                 ManuellRevurdering(
@@ -72,6 +75,7 @@ sealed class Revurdering(
                     begrunnelse = begrunnelse,
                     relatertBehandlingId = relatertBehandlingId,
                     sendeBrev = sendeBrev,
+                    opphoerFraOgMed = opphoerFraOgMed,
                 )
 
             Prosesstype.AUTOMATISK ->
@@ -91,6 +95,7 @@ sealed class Revurdering(
                     begrunnelse = begrunnelse,
                     relatertBehandlingId = relatertBehandlingId,
                     sendeBrev = sendeBrev,
+                    opphoerFraOgMed = opphoerFraOgMed,
                 )
         }
     }

@@ -126,7 +126,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
 
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
-        assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler?.ident)
+        assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler.saksbehandler?.ident)
     }
 
     @Test
@@ -157,7 +157,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
         oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, systembruker)
         val systembrukerOppgave = oppgaveService.hentOppgave(sakIdOgReferanse.id)
-        assertEquals(systembruker, systembrukerOppgave?.saksbehandler!!.ident)
+        assertEquals(systembruker, systembrukerOppgave.saksbehandler!!.ident)
     }
 
     @Test
@@ -190,7 +190,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
         oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, attestantmedRoller.saksbehandler.ident)
         val attestantTildeltOppgave = oppgaveService.hentOppgave(sakIdOgReferanse.id)
-        assertEquals(attestantmedRoller.saksbehandler.ident, attestantTildeltOppgave?.saksbehandler!!.ident)
+        assertEquals(attestantmedRoller.saksbehandler.ident, attestantTildeltOppgave.saksbehandler!!.ident)
     }
 
     @Test
@@ -297,8 +297,8 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         val oppgaveBehandlingEtterAvbryt = oppgaveService.hentOppgave(oppgaveBehandling.id)
         val oppgaveAttesteringEtterAvbryt = oppgaveService.hentOppgave(oppgaveAttestering.id)
 
-        assertEquals(Status.AVBRUTT, oppgaveBehandlingEtterAvbryt?.status)
-        assertEquals(Status.AVBRUTT, oppgaveAttesteringEtterAvbryt?.status)
+        assertEquals(Status.AVBRUTT, oppgaveBehandlingEtterAvbryt.status)
+        assertEquals(Status.AVBRUTT, oppgaveAttesteringEtterAvbryt.status)
     }
 
     @Test
@@ -345,8 +345,8 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
         val oppgaveFerdigstiltEtterAvbryt = oppgaveService.hentOppgave(oppgaveFerdigstilt.id)
         val oppgaveUnderBehandlingEtterAvbryt = oppgaveService.hentOppgave(oppgaveUnderBehandlingAnnenBehandling.id)
-        assertEquals(Status.FERDIGSTILT, oppgaveFerdigstiltEtterAvbryt?.status)
-        assertEquals(Status.UNDER_BEHANDLING, oppgaveUnderBehandlingEtterAvbryt?.status)
+        assertEquals(Status.FERDIGSTILT, oppgaveFerdigstiltEtterAvbryt.status)
+        assertEquals(Status.UNDER_BEHANDLING, oppgaveUnderBehandlingEtterAvbryt.status)
     }
 
     @Test
@@ -364,7 +364,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         oppgaveService.byttSaksbehandler(nyOppgave.id, nysaksbehandler)
 
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
-        assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler?.ident)
+        assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler.saksbehandler?.ident)
     }
 
     @Test
@@ -384,7 +384,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             oppgaveService.byttSaksbehandler(nyOppgave.id, nysaksbehandler)
         }
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
-        assertEquals(nyOppgave.saksbehandler, oppgaveMedNySaksbehandler?.saksbehandler?.ident)
+        assertEquals(nyOppgave.saksbehandler, oppgaveMedNySaksbehandler.saksbehandler?.ident)
     }
 
     @Test
@@ -412,9 +412,9 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
         oppgaveService.fjernSaksbehandler(nyOppgave.id)
         val oppgaveUtenSaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
-        Assertions.assertNotNull(oppgaveUtenSaksbehandler?.id)
-        Assertions.assertNull(oppgaveUtenSaksbehandler?.saksbehandler)
-        assertEquals(Status.UNDER_BEHANDLING, oppgaveUtenSaksbehandler?.status)
+        Assertions.assertNotNull(oppgaveUtenSaksbehandler.id)
+        Assertions.assertNull(oppgaveUtenSaksbehandler.saksbehandler)
+        assertEquals(Status.UNDER_BEHANDLING, oppgaveUtenSaksbehandler.status)
     }
 
     @Test
@@ -455,7 +455,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         }
         val lagretOppgave = oppgaveService.hentOppgave(nyOppgave.id)
 
-        assertEquals(lagretOppgave?.saksbehandler?.ident, saksbehandler)
+        assertEquals(lagretOppgave.saksbehandler?.ident, saksbehandler)
     }
 
     @Test
@@ -473,7 +473,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(4L).toTidspunkt()
         oppgaveService.redigerFrist(nyOppgave.id, nyFrist)
         val oppgaveMedNyFrist = oppgaveService.hentOppgave(nyOppgave.id)
-        assertEquals(nyFrist, oppgaveMedNyFrist?.frist)
+        assertEquals(nyFrist, oppgaveMedNyFrist.frist)
     }
 
     @Test
@@ -497,7 +497,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             true,
         )
         val oppgavePaaVent = oppgaveService.hentOppgave(nyOppgave.id)
-        assertEquals(Status.PAA_VENT, oppgavePaaVent?.status)
+        assertEquals(Status.PAA_VENT, oppgavePaaVent.status)
         verify {
             hendelser.sendMeldingForHendelsePaaVent(
                 UUID.fromString(nyOppgave.referanse),
@@ -506,12 +506,12 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         }
 
         oppgaveService.endrePaaVent(
-            oppgavePaaVent!!.id,
+            oppgavePaaVent.id,
             "test",
             false,
         )
         val oppgaveTattAvVent = oppgaveService.hentOppgave(oppgavePaaVent.id)
-        assertEquals(Status.UNDER_BEHANDLING, oppgaveTattAvVent?.status)
+        assertEquals(Status.UNDER_BEHANDLING, oppgaveTattAvVent.status)
         verify {
             hendelser.sendMeldingForHendelsePaaVent(
                 UUID.fromString(nyOppgave.referanse),
@@ -559,7 +559,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             )
         }
         val lagretOppgave = oppgaveService.hentOppgave(nyOppgave.id)
-        assertEquals(nyOppgave.frist, lagretOppgave?.frist)
+        assertEquals(nyOppgave.frist, lagretOppgave.frist)
     }
 
     @Test
@@ -586,8 +586,8 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             )
 
         val saksbehandlerOppgave = oppgaveService.hentOppgave(nyOppgave.id)
-        assertNull(saksbehandlerOppgave?.saksbehandler)
-        assertEquals(Status.ATTESTERING, saksbehandlerOppgave?.status)
+        assertNull(saksbehandlerOppgave.saksbehandler)
+        assertEquals(Status.ATTESTERING, saksbehandlerOppgave.status)
         assertEquals(referanse, sakIdOgReferanse.referanse)
     }
 
@@ -840,7 +840,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
 
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
-        assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler?.ident)
+        assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler.saksbehandler?.ident)
 
         val hentEndringerForOppgave = oppgaveDaoMedEndringssporing.hentEndringerForOppgave(nyOppgave.id)
         assertEquals(2, hentEndringerForOppgave.size)
@@ -871,7 +871,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler1.ident)
         oppgaveService.ferdigStillOppgaveUnderBehandling(behandlingsref, OppgaveType.FOERSTEGANGSBEHANDLING, saksbehandler1)
         val ferdigstiltOppgave = oppgaveService.hentOppgave(oppgave.id)
-        assertEquals(Status.FERDIGSTILT, ferdigstiltOppgave?.status)
+        assertEquals(Status.FERDIGSTILT, ferdigstiltOppgave.status)
     }
 
     @Test
@@ -1064,7 +1064,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         val nyReferanse = UUID.randomUUID().toString()
         oppgaveService.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId = oppgave.id, referanse = nyReferanse)
 
-        with(oppgaveService.hentOppgave(oppgave.id)!!) {
+        with(oppgaveService.hentOppgave(oppgave.id)) {
             kilde shouldBe OppgaveKilde.BEHANDLING
             referanse shouldBe nyReferanse
         }

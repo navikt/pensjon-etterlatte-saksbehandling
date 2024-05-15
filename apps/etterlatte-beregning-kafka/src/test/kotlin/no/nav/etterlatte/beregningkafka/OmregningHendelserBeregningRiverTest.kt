@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -91,6 +92,31 @@ class OmregningHendelserBeregningRiverTest {
                     LocalDate.of(2024, Month.MAY, 10),
                 )
             }
+        }
+    }
+
+    @Test
+    fun `skal runde av endringstallet for aa unngaa ArithmeticException`() {
+        val (beregningService, river) = initialiserRiver()
+
+        val nyBehandling = UUID.randomUUID()
+        val gammelBehandling = UUID.randomUUID()
+
+        every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
+        every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
+        every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 7784)
+        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 7875)
+
+        runBlocking {
+            val resultat =
+                river.beregn(
+                    SakType.BARNEPENSJON,
+                    behandlingId = nyBehandling,
+                    behandlingViOmregnerFra = gammelBehandling,
+                    LocalDate.of(2024, Month.MAY, 10),
+                )
+
+            assertNotNull(resultat)
         }
     }
 

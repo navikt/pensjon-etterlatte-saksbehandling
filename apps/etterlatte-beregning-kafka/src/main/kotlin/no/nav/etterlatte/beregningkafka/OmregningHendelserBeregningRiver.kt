@@ -29,6 +29,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.util.UUID
 
@@ -103,7 +104,7 @@ internal class OmregningHendelserBeregningRiver(
         if (nyttBeloep < gammeltBeloep) {
             throw MindreEnnForrigeBehandling(ny.behandlingId)
         }
-        val endring = BigDecimal(nyttBeloep).divide(BigDecimal(gammeltBeloep))
+        val endring = BigDecimal(nyttBeloep).divide(BigDecimal(gammeltBeloep), 2, RoundingMode.HALF_UP)
         if (endring >= BigDecimal(1.50)) {
             throw ForStorOekning(ny.behandlingId, endring)
         }

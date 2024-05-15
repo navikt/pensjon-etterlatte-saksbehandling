@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 data class Foerstegangsbehandling(
@@ -31,6 +32,7 @@ data class Foerstegangsbehandling(
     override val prosesstype: Prosesstype = Prosesstype.MANUELL,
     override val kilde: Vedtaksloesning,
     override val sendeBrev: Boolean,
+    override val opphoerFraOgMed: YearMonth? = null,
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
 

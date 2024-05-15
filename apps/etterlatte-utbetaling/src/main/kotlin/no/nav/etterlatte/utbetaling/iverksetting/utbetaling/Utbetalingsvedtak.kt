@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.mq.Prioritet
+import no.nav.etterlatte.utbetaling.common.OppdragDefaults.SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -65,7 +66,9 @@ data class Utbetalingsvedtak(
     }
 
     fun finnPrioritet(): Prioritet {
-        return if (behandling.revurderingsaarsak?.equals(Revurderingaarsak.REGULERING) == true) {
+        return if (SAKSBEHANDLER_ID_SYSTEM_ETTERLATTEYTELSER == vedtakFattet.ansvarligSaksbehandler &&
+            behandling.revurderingsaarsak?.equals(Revurderingaarsak.REGULERING) == true
+        ) {
             Prioritet.LAV
         } else {
             Prioritet.NORMAL

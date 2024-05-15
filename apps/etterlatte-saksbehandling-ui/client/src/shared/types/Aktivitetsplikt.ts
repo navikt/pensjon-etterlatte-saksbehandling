@@ -44,7 +44,7 @@ export enum AktivitetspliktVurderingType {
 
 export const tekstAktivitetspliktVurderingType: Record<AktivitetspliktVurderingType, string> = {
   AKTIVITET_UNDER_50: 'Under 50%',
-  AKTIVITET_OVER_50: '50% eller mer',
+  AKTIVITET_OVER_50: '50% - 100%',
   AKTIVITET_100: '100%',
 }
 

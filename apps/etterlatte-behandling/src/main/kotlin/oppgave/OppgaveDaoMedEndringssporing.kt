@@ -219,7 +219,7 @@ class OppgaveDaoMedEndringssporingImpl(
         lagreEndringerPaaOppgave(oppgaveTilAttestering.id) {
             oppgaveDao.oppdaterStatusOgMerknad(
                 oppgaveId = oppgaveTilAttestering.id,
-                merknad = oppgaveTilAttestering.merknad ?: "",
+                merknad = "G-regulering - saken returnert for å få med nytt grunnbeløp",
                 oppgaveStatus = Status.UNDER_BEHANDLING,
             )
         }

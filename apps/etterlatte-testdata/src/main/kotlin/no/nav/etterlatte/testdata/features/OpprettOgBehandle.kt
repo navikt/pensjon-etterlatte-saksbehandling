@@ -54,7 +54,12 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
                 val gruppeid = params["gruppeId"]!!.toLong()
                 val soeknadType = params["type"]?.let { SoeknadType.valueOf(it) } ?: throw IllegalArgumentException("Mangler søknadstype")
                 val oenskaAntall = params["antall"]?.toInt() ?: throw IllegalArgumentException("Mangler antall")
-                val behandlingssteg = Behandlingssteg.IVERKSATT
+                val behandlingssteg =
+                    params["behandlingssteg"]?.let {
+                        Behandlingssteg.valueOf(
+                            it,
+                        )
+                    } ?: throw IllegalArgumentException("Mangler behandlingssteg")
                 val navIdent = navIdentFraToken()
 
                 opprettOgSendInn(oenskaAntall, gruppeid, soeknadType, navIdent, behandlingssteg)

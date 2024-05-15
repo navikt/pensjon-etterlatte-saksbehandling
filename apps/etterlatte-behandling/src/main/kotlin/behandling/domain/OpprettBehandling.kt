@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 data class OpprettBehandling(
@@ -28,6 +29,7 @@ data class OpprettBehandling(
     val begrunnelse: String? = null,
     val relatertBehandlingId: String? = null,
     val sendeBrev: Boolean,
+    val opphoerFraOgMed: YearMonth? = null,
 ) {
     val id: UUID = UUID.randomUUID()
     val opprettet: Tidspunkt = Tidspunkt.now()

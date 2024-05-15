@@ -156,6 +156,11 @@ interface BehandlingService {
     )
 
     fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning?
+
+    fun lagreOpphoerFom(
+        behandlingId: UUID,
+        opphoerFraOgMed: YearMonth,
+    )
 }
 
 internal class BehandlingServiceImpl(
@@ -432,6 +437,13 @@ internal class BehandlingServiceImpl(
                 .maxByOrNull { it.behandlingOpprettet }
 
         return sisteIkkeAvbrutteBehandling?.utlandstilknytning
+    }
+
+    override fun lagreOpphoerFom(
+        behandlingId: UUID,
+        opphoerFraOgMed: YearMonth,
+    ) {
+        behandlingDao.lagreOpphoerFom(behandlingId, opphoerFraOgMed)
     }
 
     data class BehandlingMedData(

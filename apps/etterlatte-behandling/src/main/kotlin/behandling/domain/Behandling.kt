@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 internal sealed class TilstandException : IllegalStateException() {
@@ -49,6 +50,7 @@ sealed class Behandling {
     abstract val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?
     abstract val kilde: Vedtaksloesning
     abstract val sendeBrev: Boolean
+    abstract val opphoerFraOgMed: YearMonth?
 
     open val relatertBehandlingId: String? = null
     open val prosesstype: Prosesstype = Prosesstype.MANUELL

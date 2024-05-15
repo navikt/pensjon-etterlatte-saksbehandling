@@ -59,7 +59,7 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
                         Behandlingssteg.valueOf(
                             it,
                         )
-                    } ?: throw IllegalArgumentException("Mangler antall")
+                    } ?: throw IllegalArgumentException("Mangler behandlingssteg")
                 val navIdent = navIdentFraToken()
 
                 opprettOgSendInn(oenskaAntall, gruppeid, soeknadType, navIdent, behandlingssteg)

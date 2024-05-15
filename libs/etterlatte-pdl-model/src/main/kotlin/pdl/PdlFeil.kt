@@ -7,9 +7,12 @@ enum class PdlFeilAarsak {
     INTERNAL_SERVER_ERROR,
 }
 
-class FantIkkePersonException(override val detail: String = "Fant ikke forespurt person i PDL") : IkkeFunnetException(
-    code = PdlFeilAarsak.FANT_IKKE_PERSON.name,
-    detail = detail,
-)
+class FantIkkePersonException(
+    override val detail: String = "Fant ikke forespurt person i PDL",
+    override val cause: Throwable? = null,
+) : IkkeFunnetException(
+        code = PdlFeilAarsak.FANT_IKKE_PERSON.name,
+        detail = detail,
+    )
 
 class PdlInternalServerError : Exception()

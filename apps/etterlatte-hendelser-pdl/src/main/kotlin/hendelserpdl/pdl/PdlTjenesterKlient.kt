@@ -2,11 +2,14 @@ package no.nav.etterlatte.hendelserpdl.pdl
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
@@ -32,7 +35,15 @@ class PdlTjenesterKlient(
                 is RetryResult.Success -> result.content
                 is RetryResult.Failure -> {
                     logger.error("Feil ved henting av ident fra PDL for fnr=${fnr.maskerFnr()}")
-                    throw result.samlaExceptions()
+                    val feil = result.samlaExceptions()
+                    if (feil !is ResponseException) {
+                        throw feil
+                    }
+                    if (feil.response.status == HttpStatusCode.NotFound) {
+                        throw FantIkkePersonException("Fant ikke angitt person (ident=${fnr.maskerFnr()}) i PDL", feil)
+                    } else {
+                        throw feil
+                    }
                 }
             }
         }

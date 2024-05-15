@@ -2,6 +2,7 @@ import {
   GrunnlagendringshendelseSamsvarType,
   Grunnlagsendringshendelse,
   GrunnlagsendringsType,
+  IBehandlingsammendrag,
   Saksrolle,
 } from '~components/person/typer'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
@@ -9,6 +10,8 @@ import React from 'react'
 import { PersonMedNavn } from '~shared/types/grunnlag'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { SakType } from '~shared/types/sak'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { behandlingErIverksatt, enhetErSkrivbar, erFerdigBehandlet } from '~components/behandling/felles/utils'
 
 export const grunnlagsendringsTittel: Record<GrunnlagendringshendelseSamsvarType, string> = {
   GRUNNBELOEP: 'Regulering feilet',
@@ -123,3 +126,22 @@ const genererNavn = (personInfo: PersonMedNavn) => {
 }
 
 export const FnrTilNavnMapContext = React.createContext<Record<string, PersonMedNavn>>({})
+
+export const harAapenRevurdering = (behandlinger: IBehandlingsammendrag[]): boolean => {
+  return (
+    behandlinger
+      .filter((behandling) => behandling.behandlingType === IBehandlingsType.REVURDERING)
+      .filter((behandling) => !erFerdigBehandlet(behandling.status)).length > 0
+  )
+}
+
+export const revurderingKanOpprettes = (
+  behandlinger: IBehandlingsammendrag[],
+  enhetId: string,
+  enheter: string[]
+): Boolean => {
+  return (
+    behandlinger.filter((behandling) => behandlingErIverksatt(behandling.status)).length > 0 &&
+    enhetErSkrivbar(enhetId, enheter)
+  )
+}

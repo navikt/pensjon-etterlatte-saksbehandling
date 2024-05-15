@@ -4,7 +4,7 @@ import {
   generellbehandlingErRedigerbar,
   KravpakkeUtland,
 } from '~shared/types/Generellbehandling'
-import { Content, ContentHeader, GridContainer, MainContent } from '~shared/styled'
+import { ButtonGroup, Content, ContentHeader, GridContainer, MainContent } from '~shared/styled'
 import { HeadingWrapper, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import {
   Alert,
@@ -30,7 +30,6 @@ import styled from 'styled-components'
 import { ExternalLinkIcon, PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
 import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
-import { ButtonGroup } from '~components/person/VurderHendelseModal'
 import { ConfigContext } from '~clientConfig'
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'

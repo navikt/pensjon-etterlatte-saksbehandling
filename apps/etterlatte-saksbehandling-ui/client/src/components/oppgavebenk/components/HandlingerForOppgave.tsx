@@ -51,7 +51,7 @@ export const HandlingerForOppgave = ({
     case Oppgavetype.VURDER_KONSEKVENS:
       return (
         <>
-          <Button size="small" icon={<EyeIcon />} href={`/person/${fnr}`} as="a">
+          <Button size="small" icon={<EyeIcon />} href={`/person/${fnr}?fane=HENDELSER&referanse=${referanse}`} as="a">
             Se hendelse
           </Button>
         </>

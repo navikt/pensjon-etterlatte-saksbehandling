@@ -6,7 +6,7 @@ import {
   formaterRolle,
   grunnlagsendringsBeskrivelse,
   grunnlagsendringsKilde,
-} from '~components/person/uhaandtereHendelser/utils'
+} from '~components/person/hendelser/utils'
 import {
   AdresseSamsvar,
   AnsvarligeForeldreSamsvar,

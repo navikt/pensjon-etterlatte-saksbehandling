@@ -10,9 +10,8 @@ import {
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe } from '~components/person/typer'
-import { InstitusjonsoppholdBegrunnelse } from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
+import { InstitusjonsoppholdBegrunnelse } from '~components/person/hendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { FoersteVirk, ISak } from '~shared/types/sak'
-import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 import { format } from 'date-fns'
 import { DatoFormat } from '~utils/formattering'
 import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
@@ -60,12 +59,6 @@ export const lagreInstitusjonsoppholdData = async (args: {
   return apiClient.post(`/institusjonsoppholdbegrunnelse/${args.sakId}`, {
     institusjonsopphold: args.institusjonsopphold,
   })
-}
-
-export const hentInstitusjonsoppholdData = async (
-  grunnlagsendringshendelseid: string
-): Promise<ApiResponse<InstitusjonsoppholdMedKilde>> => {
-  return apiClient.get(`/institusjonsoppholdbegrunnelse/${grunnlagsendringshendelseid}`)
 }
 
 export const hentManueltOpphoerDetaljer = async (

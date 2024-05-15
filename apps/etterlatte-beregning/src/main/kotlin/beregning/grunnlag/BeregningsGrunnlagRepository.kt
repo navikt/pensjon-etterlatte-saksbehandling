@@ -37,7 +37,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                     queryOf(
                         statement = query,
                         paramMap =
-                            mapOf<String, Any>(
+                            mapOf<String, Any?>(
                                 "behandlings_id" to beregningsGrunnlag.behandlingId,
                                 "soesken_med_i_beregning" to beregningsGrunnlag.soeskenMedIBeregning.somJsonb(),
                                 "institusjonsopphold" to
@@ -50,7 +50,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                                     ),
                                 "kilde" to beregningsGrunnlag.kilde.toJson(),
                                 "beregnings_metode_flere_avdoede" to
-                                    beregningsGrunnlag.avdoedeBeregningmetode.somJsonb(),
+                                    beregningsGrunnlag.begegningsmetodeFlereAvdoede.takeIf { it.isNotEmpty() }?.somJsonb(),
                             ),
                     ).asUpdate,
                 )
@@ -245,7 +245,7 @@ private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag {
                 )
             },
         kilde = objectMapper.readValue(this.string("kilde")),
-        avdoedeBeregningmetode =
+        begegningsmetodeFlereAvdoede =
             this.stringOrNull("beregnings_metode_flere_avdoede")?.let {
                 objectMapper.readValue(it)
             } ?: emptyList(),

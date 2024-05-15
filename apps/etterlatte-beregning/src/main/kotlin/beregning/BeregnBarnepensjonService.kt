@@ -98,11 +98,13 @@ class BeregnBarnepensjonService(
             )
         }
 
-        val anvendtTrygdetider = AnvendtTrygdetidPerioder.finnAnvendtTrygdetidPerioder(trygdetidListe, beregningsGrunnlag)
+        val anvendtTrygdetider =
+            AnvendtTrygdetidPerioder.finnAnvendtTrygdetidPerioder(trygdetidListe, beregningsGrunnlag)
 
         val barnepensjonGrunnlag =
             opprettBeregningsgrunnlag(
                 beregningsGrunnlag,
+                trygdetidListe,
                 anvendtTrygdetider,
                 virkningstidspunkt.atDay(1),
                 null,
@@ -202,7 +204,8 @@ class BeregnBarnepensjonService(
                                     tom
                                 }
 
-                            val trygdetidForAvdoed = trygdetider.finnForAvdoed(anvendtTrygdetidId).beregnetTrygdetid?.resultat
+                            val trygdetidForAvdoed =
+                                trygdetider.finnForAvdoed(anvendtTrygdetidId).beregnetTrygdetid?.resultat
 
                             Beregningsperiode(
                                 datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
@@ -284,6 +287,7 @@ class BeregnBarnepensjonService(
 
     private fun opprettBeregningsgrunnlag(
         beregningsGrunnlag: BeregningsGrunnlag,
+        trygdetider: List<TrygdetidDto>,
         anvendtTrygdetider: List<GrunnlagMedPeriode<List<AnvendtTrygdetid>>>,
         fom: LocalDate,
         tom: LocalDate?,
@@ -305,26 +309,42 @@ class BeregnBarnepensjonService(
                 KonstantGrunnlag(FaktumNode(emptyList(), beregningsGrunnlag.kilde, "Ingen søsken i kullet"))
             },
         avdoedesTrygdetid =
-            PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
-                anvendtTrygdetider.mapVerdier {
+            if (anvendtTrygdetider.isEmpty()) {
+                KonstantGrunnlag(
                     FaktumNode(
-                        verdi = it,
+                        verdi =
+                            AnvendtTrygdetidPerioder.finnKonstantTrygdetidPerioder(
+                                trygdetider,
+                                beregningsGrunnlag,
+                                fom,
+                            ),
                         kilde = beregningsGrunnlag.kilde,
-                        beskrivelse = "Anvendte trygdetider",
-                    )
-                },
-                fom,
-                tom,
-            ),
+                        beskrivelse = "Konstant anvendt trygdetider",
+                    ),
+                )
+            } else {
+                PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+                    anvendtTrygdetider.mapVerdier {
+                        FaktumNode(
+                            verdi = it,
+                            kilde = beregningsGrunnlag.kilde,
+                            beskrivelse = "Anvendte trygdetider",
+                        )
+                    },
+                    fom,
+                    tom,
+                )
+            },
         institusjonsopphold =
             PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-                beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag.mapVerdier { institusjonsopphold ->
-                    FaktumNode(
-                        verdi = institusjonsopphold,
-                        kilde = beregningsGrunnlag.kilde,
-                        beskrivelse = "Institusjonsopphold",
-                    )
-                },
+                beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag.mapVerdier
+                    { institusjonsopphold ->
+                        FaktumNode(
+                            verdi = institusjonsopphold,
+                            kilde = beregningsGrunnlag.kilde,
+                            beskrivelse = "Institusjonsopphold",
+                        )
+                    },
             ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") },
     )
 }
@@ -336,6 +356,30 @@ object AnvendtTrygdetidPerioder {
         trygdetider: List<TrygdetidDto>,
         beregningsGrunnlag: BeregningsGrunnlag,
     ) = anvendtPerioder(beregningsGrunnlag.finnMuligeTrygdetidPerioder(trygdetider))
+
+    fun finnKonstantTrygdetidPerioder(
+        trygdetider: List<TrygdetidDto>,
+        beregningsGrunnlag: BeregningsGrunnlag,
+        fom: LocalDate,
+    ): List<AnvendtTrygdetid> {
+        if (trygdetider.size != 1) {
+            throw UgyldigForespoerselException(
+                code = "FEIL_ANTALL_TRYGDETIDER",
+                detail = "Fant flere trygdetider - men fikk bare en beregningsgrunnlag",
+            )
+        }
+
+        return trygdetider.first().toSamlet(beregningsGrunnlag.beregningsMetode.beregningsMetode)?.let {
+            anvendtPerioder(
+                listOf(
+                    GrunnlagMedPeriode(it, fom, null),
+                ),
+            ).first().data
+        } ?: throw UgyldigForespoerselException(
+            code = "MÅ_FASTSETTE_TRYGDETID",
+            detail = "Mangler trygdetid, gå tilbake til trygdetidsiden for å opprette dette",
+        )
+    }
 
     private fun anvendtPerioder(muligePerioder: List<GrunnlagMedPeriode<SamletTrygdetidMedBeregningsMetode>>) =
         muligePerioder.map {
@@ -365,7 +409,7 @@ object AnvendtTrygdetidPerioder {
         }.kombinerOverlappendePerioder()
 
     private fun BeregningsGrunnlag.finnMuligeTrygdetidPerioder(trygdetider: List<TrygdetidDto>) =
-        avdoedeBeregningmetode.map { beregningsmetodeForAvdoedPeriode ->
+        begegningsmetodeFlereAvdoede.map { beregningsmetodeForAvdoedPeriode ->
             GrunnlagMedPeriode(
                 data =
                     trygdetider.finnForAvdoed(

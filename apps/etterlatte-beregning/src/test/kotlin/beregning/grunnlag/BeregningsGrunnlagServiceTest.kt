@@ -96,41 +96,6 @@ internal class BeregningsGrunnlagServiceTest {
     }
 
     @Test
-    fun `kan kun ha en avdøed`() {
-        val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> =
-            listOf(
-                GrunnlagMedPeriode(
-                    fom = LocalDate.of(2022, 8, 1),
-                    tom = null,
-                    data =
-                        listOf(
-                            SoeskenMedIBeregning(HELSOESKEN_FOEDSELSNUMMER, true),
-                        ),
-                ),
-            )
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
-            mockk {
-                coEvery { sakType } returns SakType.BARNEPENSJON
-            }
-        val behandlingId = randomUUID()
-        val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null)
-        coEvery { grunnlagKlient.hentGrunnlag(behandlingId, brukertokeninfo) } returns
-            grunnlagMedEkstraAvdoedForelder(
-                LocalDate.now(),
-            )
-        assertThrows<BPBeregningsgrunnlagMerEnnEnAvdoedException> {
-            runBlocking {
-                beregningsGrunnlagService.lagreBeregningsGrunnlag(
-                    behandlingId,
-                    LagreBeregningsGrunnlag(soeskenMedIBeregning, null),
-                    brukertokeninfo,
-                )
-            }
-        }
-    }
-
-    @Test
     fun `alle søsken må være avdødes barn hvis ikke kast BPBeregningsgrunnlagBrukerUgydligFnr`() {
         val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> =
             listOf(

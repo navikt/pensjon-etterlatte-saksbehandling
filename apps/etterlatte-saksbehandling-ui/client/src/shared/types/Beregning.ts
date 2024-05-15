@@ -40,6 +40,11 @@ export interface BeregningsMetodeBeregningsgrunnlag {
   begrunnelse?: string | null
 }
 
+export interface BeregningsmetodeForAvdoed {
+  beregningsMetode: BeregningsMetodeBeregningsgrunnlag
+  avdoed: string
+}
+
 export interface Beregningsperiode {
   delytelsesId: string
   datoFOM: string
@@ -72,6 +77,7 @@ export interface BeregningsGrunnlagDto {
   institusjonsoppholdBeregningsgrunnlag: InstitusjonsoppholdGrunnlagDTO
   soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto
   beregningsMetode: BeregningsMetodeBeregningsgrunnlag
+  begegningsmetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO
 }
 
 export interface BeregningsGrunnlagOMSDto {
@@ -98,6 +104,7 @@ export interface BeregningsGrunnlagPostDto {
   soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
   beregningsMetode: BeregningsMetodeBeregningsgrunnlag
+  begegningsmetodeFlereAvdoede: BeregningsmetodeFlereAvdoedeDTO | undefined
 }
 
 export interface BeregningsGrunnlagOMSPostDto {
@@ -108,6 +115,8 @@ export interface BeregningsGrunnlagOMSPostDto {
 export type SoeskenMedIBeregningGrunnlagDto = PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
 export type InstitusjonsoppholdGrunnlagData = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
 export type OverstyrBeregingsperiodeGrunnlagData = PeriodisertBeregningsgrunnlag<OverstyrBeregningsperiode>[]
+export type BeregningsmetodeFlereAvdoedeDTO = PeriodisertBeregningsgrunnlagDto<BeregningsmetodeForAvdoed>[]
+export type BeregningsmetodeFlereAvdoedeData = PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>[]
 
 export interface InstitusjonsoppholdIBeregning {
   reduksjon: ReduksjonKey

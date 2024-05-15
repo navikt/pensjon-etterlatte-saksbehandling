@@ -10,7 +10,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
-import no.nav.etterlatte.beregning.grunnlag.BeregningsmetodeForAvdoed
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
@@ -29,6 +28,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
+import no.nav.etterlatte.libs.common.beregning.BeregningsmetodeForAvdoed
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
@@ -654,7 +654,7 @@ internal class BeregnBarnepensjonServiceTest {
             ),
         institusjonsoppholdBeregningsgrunnlag = institusjonsoppholdBeregningsgrunnlag,
         beregningsMetode = beregningsMetode.toGrunnlag(),
-        avdoedeBeregningmetode = avdoedeBeregningmetode,
+        begegningsmetodeFlereAvdoede = avdoedeBeregningmetode,
     )
 
     private fun beregningsGrunnlagMedSoesken(
@@ -679,7 +679,7 @@ internal class BeregnBarnepensjonServiceTest {
             },
         institusjonsoppholdBeregningsgrunnlag = defaultInstitusjonsopphold(),
         beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
-        avdoedeBeregningmetode = defaultAvdoedeBeregningmetode(),
+        begegningsmetodeFlereAvdoede = defaultAvdoedeBeregningmetode(),
     )
 
     private fun defaultKilde(): Grunnlagsopplysning.Saksbehandler =

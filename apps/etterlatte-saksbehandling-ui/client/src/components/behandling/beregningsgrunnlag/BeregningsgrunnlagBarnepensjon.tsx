@@ -1,4 +1,4 @@
-import { Button } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Tabs } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { behandlingErRedigerbar } from '../felles/utils'
@@ -15,18 +15,24 @@ import {
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import {
+  mapListeFraDto,
+  mapListeTilDto,
+  PeriodisertBeregningsgrunnlag,
+} from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import React, { useEffect, useState } from 'react'
 import InstitusjonsoppholdBP from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdBP'
 import Soeskenjustering, {
   Soeskengrunnlag,
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import Spinner from '~shared/Spinner'
-import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
+import { formaterNavn, hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
 import {
   Beregning,
   BeregningsMetode,
   BeregningsMetodeBeregningsgrunnlag,
+  BeregningsmetodeFlereAvdoedeData,
+  BeregningsmetodeForAvdoed,
   InstitusjonsoppholdGrunnlagData,
 } from '~shared/types/Beregning'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
@@ -34,10 +40,15 @@ import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
-import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isPendingOrInitial, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingGjelderBarnepensjonPaaNyttRegelverk } from '~components/behandling/vilkaarsvurdering/utils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
+import { hentTrygdetider, ITrygdetid } from '~shared/api/trygdetid'
+import BeregningsgrunnlagMetodeForAvdoed, {
+  BeregningsgrunnlagMetodeForAvdoedOppsummering,
+} from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagMetodeForAvdoed'
+import styled from 'styled-components'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -54,14 +65,31 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const dispatch = useAppDispatch()
   const [lagreBeregningsgrunnlag, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlag)
   const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
+  const [trygdetider, fetchTrygdetider] = useApiCall(hentTrygdetider)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const [soeskenGrunnlagsData, setSoeskenGrunnlagsData] = useState<Soeskengrunnlag | null>(null)
   const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] =
     useState<InstitusjonsoppholdGrunnlagData | null>(null)
   const [beregningsMetodeBeregningsgrunnlag, setBeregningsMetodeBeregningsgrunnlag] =
     useState<BeregningsMetodeBeregningsgrunnlag | null>(null)
+  const [beregningsmetodeForAvdoede, setBeregningmetodeForAvdoede] = useState<BeregningsmetodeFlereAvdoedeData | null>(
+    null
+  )
+  const [trygdetidsListe, setTrygdetidsListe] = useState<ITrygdetid[]>([])
 
   const [manglerSoeskenJustering, setSoeskenJusteringMangler] = useState<boolean>(false)
+
+  const mapNavn = (fnr: string): string => {
+    const opplysning = personopplysninger?.avdoede?.find(
+      (personOpplysning) => personOpplysning.opplysning.foedselsnummer === fnr
+    )?.opplysning
+
+    if (!opplysning) {
+      return fnr
+    }
+
+    return `${formaterNavn(opplysning)} (${fnr})`
+  }
 
   useEffect(() => {
     fetchBeregningsgrunnlag(behandling.id, (result) => {
@@ -70,6 +98,15 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
           oppdaterBeregingsGrunnlag({ ...result, institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag })
         )
         setBeregningsMetodeBeregningsgrunnlag(result.beregningsMetode)
+        if (result.begegningsmetodeFlereAvdoede) {
+          setBeregningmetodeForAvdoede(mapListeFraDto(result.begegningsmetodeFlereAvdoede))
+        }
+      }
+    })
+
+    fetchTrygdetider(behandling.id, (result) => {
+      if (result && result.length > 1) {
+        setTrygdetidsListe(result)
       }
     })
   }, [])
@@ -86,6 +123,23 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
       )) ??
     []
   const skalViseSoeskenjustering = soesken.length > 0 && !behandlingGjelderBarnepensjonPaaNyttRegelverk(behandling)
+
+  const periodisertBeregningsmetodeForAvdoed = (
+    ident: String
+  ): PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | null =>
+    beregningsmetodeForAvdoede?.find((grunnlag) => grunnlag?.data.avdoed === ident) || null
+
+  const oppdaterPeriodisertBeregningsmetodeForAvdoed = (
+    grunnlag: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>
+  ) => {
+    const oppdaterState = beregningsmetodeForAvdoede
+      ? beregningsmetodeForAvdoede
+      : mapListeFraDto<BeregningsmetodeForAvdoed>([])
+
+    setBeregningmetodeForAvdoede(
+      oppdaterState.filter((data) => data.data.avdoed !== grunnlag.data.avdoed).concat(grunnlag)
+    )
+  }
 
   const onSubmit = () => {
     if (skalViseSoeskenjustering && !(soeskenGrunnlagsData || behandling.beregningsGrunnlag?.soeskenMedIBeregning)) {
@@ -105,6 +159,9 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
           : behandling.beregningsGrunnlag?.beregningsMetode ?? {
               beregningsMetode: BeregningsMetode.NASJONAL,
             },
+        begegningsmetodeFlereAvdoede: beregningsmetodeForAvdoede
+          ? mapListeTilDto(beregningsmetodeForAvdoede)
+          : behandling.beregningsGrunnlag?.begegningsmetodeFlereAvdoede ?? [],
       }
 
       postBeregningsgrunnlag(
@@ -126,14 +183,78 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   return (
     <>
       <>
-        {isSuccess(beregningsgrunnlag) && (
-          <BeregningsgrunnlagMetode
-            redigerbar={redigerbar}
-            grunnlag={beregningsMetodeBeregningsgrunnlag}
-            onUpdate={(grunnlag) => {
-              setBeregningsMetodeBeregningsgrunnlag({ ...grunnlag })
-            }}
-          />
+        {isSuccess(beregningsgrunnlag) && isSuccess(trygdetider) && (
+          <>
+            {trygdetider.data.length > 1 && (
+              <TabsWrapper>
+                {redigerbar && (
+                  <>
+                    <Heading size="medium" level="2">
+                      Det finnes flere avdøde - husk å oppdatere begge to
+                    </Heading>
+
+                    <Tabs defaultValue={trygdetider.data[0].ident}>
+                      <Tabs.List>
+                        {trygdetider.data.map((trygdetid) => (
+                          <Tabs.Tab key={trygdetid.ident} value={trygdetid.ident} label={mapNavn(trygdetid.ident)} />
+                        ))}
+                      </Tabs.List>
+                      {trygdetider.data.map((trygdetid) => (
+                        <Tabs.Panel value={trygdetid.ident} key={trygdetid.ident}>
+                          <BeregningsgrunnlagMetodeForAvdoed
+                            ident={trygdetid.ident}
+                            navn={mapNavn(trygdetid.ident)}
+                            grunnlag={periodisertBeregningsmetodeForAvdoed(trygdetid.ident)}
+                            onUpdate={(data: PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>) => {
+                              oppdaterPeriodisertBeregningsmetodeForAvdoed(data)
+                            }}
+                          />
+                        </Tabs.Panel>
+                      ))}
+                    </Tabs>
+                  </>
+                )}
+                <Heading size="medium" level="2">
+                  Oppsummering
+                </Heading>
+
+                {trygdetider.data.map((trygdetid) => {
+                  const grunnlag = periodisertBeregningsmetodeForAvdoed(trygdetid.ident)
+                  const navn = mapNavn(trygdetid.ident)
+
+                  if (grunnlag !== null) {
+                    return (
+                      <BeregningsgrunnlagMetodeForAvdoedOppsummering
+                        key={`oppsummering-${trygdetid.ident}`}
+                        beregningsMetode={grunnlag.data.beregningsMetode.beregningsMetode}
+                        fom={grunnlag.fom}
+                        tom={grunnlag.tom}
+                        begrunnelse={grunnlag.data.beregningsMetode.begrunnelse ?? ''}
+                        navn={navn}
+                        visNavn={true}
+                      />
+                    )
+                  } else {
+                    return (
+                      <OppsummeringMangler key={`oppsummering-${trygdetid.ident}`}>
+                        Trygdetid brukt i beregningen for {navn} mangler
+                      </OppsummeringMangler>
+                    )
+                  }
+                })}
+              </TabsWrapper>
+            )}
+
+            {trygdetidsListe.length <= 1 && (
+              <BeregningsgrunnlagMetode
+                redigerbar={redigerbar}
+                grunnlag={beregningsMetodeBeregningsgrunnlag}
+                onUpdate={(grunnlag) => {
+                  setBeregningsMetodeBeregningsgrunnlag({ ...grunnlag })
+                }}
+              />
+            )}
+          </>
         )}
         {isSuccess(beregningsgrunnlag) && skalViseSoeskenjustering && (
           <Soeskenjustering
@@ -163,6 +284,11 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         apiResult: lagreBeregningsgrunnlag,
         errorMessage: 'Kunne ikke lagre beregningsgrunnlag',
       })}
+      {isFailureHandler({
+        apiResult: trygdetider,
+        errorMessage: 'Kunne ikke hente trygdetid(er)',
+      })}
+      {isPendingOrInitial(trygdetider) && <Spinner visible={true} label="Henter trygdetidsoversikt ..." />}
 
       <Border />
 
@@ -182,5 +308,13 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
     </>
   )
 }
+
+const TabsWrapper = styled.div`
+  padding: 1em 4em;
+`
+
+const OppsummeringMangler = styled(BodyShort)`
+  padding-top: 1em;
+`
 
 export default BeregningsgrunnlagBarnepensjon

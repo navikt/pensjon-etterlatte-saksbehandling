@@ -34,3 +34,8 @@ data class SamletTrygdetidMedBeregningsMetode(
 data class BeregningsGrunnlagFellesDto(
     val beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
 )
+
+data class BeregningsmetodeForAvdoed(
+    val avdoed: String,
+    val beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
+)

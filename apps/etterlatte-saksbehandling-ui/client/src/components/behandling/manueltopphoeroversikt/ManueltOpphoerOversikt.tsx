@@ -62,6 +62,7 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
           beregningsMetode: {
             beregningsMetode: BeregningsMetode.NASJONAL,
           },
+          begegningsmetodeFlereAvdoede: [],
         },
       })
       await opprettEllerEndreBeregning(behandling.id)

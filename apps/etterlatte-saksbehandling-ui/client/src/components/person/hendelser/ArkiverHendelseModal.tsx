@@ -54,8 +54,8 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
             <>
               <InstitusjonsoppholdVurderingBegrunnelse
                 sakId={hendelse.sakId}
-                grunnlagsEndringshendelseId={hendelse.id}
-                lukkGrunnlagshendelseWrapper={arkiverHendelse}
+                hendelseId={hendelse.id}
+                arkiverHendelse={arkiverHendelse}
               />
               <Button variant="secondary" onClick={() => setOpen(false)}>
                 Avbryt

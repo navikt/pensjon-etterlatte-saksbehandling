@@ -47,8 +47,7 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
         open={open}
         onClose={() => setOpen(false)}
         aria-labelledby="modal-heading"
-        style={{ maxWidth: '60rem' }}
-        header={{ heading: 'Lukk hendelse' }}
+        header={{ heading: 'Arkiver hendelse' }}
       >
         <Modal.Body>
           {hendelse.type === GrunnlagsendringsType.INSTITUSJONSOPPHOLD ? (
@@ -82,8 +81,9 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
 
                 if (!tildeltIdent) {
                   return (
-                    <Alert variant="info">
-                      Oppgaven er ikke tildelt en saksbehandler. Om du lukker hendelsen vil den automatisk tildeles deg.
+                    <Alert variant="info" inline>
+                      Oppgaven er ikke tildelt en saksbehandler. Om du arkiverer hendelsen vil den automatisk tildeles
+                      deg.
                     </Alert>
                   )
                 } else if (tildeltIdent !== innloggetSaksbehandler.ident) {

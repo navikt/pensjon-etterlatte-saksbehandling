@@ -75,23 +75,23 @@
     function settOppInput() {
         const inputTableElement = document.createElement('td')
 
+        // Antall
         const antallLabel= document.createElement('label')
         antallLabel.innerHTML = "Antall: "
+        antallLabel.htmlFor = "antall"
         inputTableElement.appendChild(antallLabel)
 
         const antallInput = document.createElement('input')
         antallInput.setAttribute('id', 'antall')
         inputTableElement.appendChild(antallInput)
 
-        return inputTableElement
-    }
+        inputTableElement.appendChild(document.createElement('br'))
 
-    function settOppBehandlingsstegInput() {
-        const inputTableElement = document.createElement('td')
-
-        const antallLabel= document.createElement('label')
-        antallLabel.innerHTML = "Behandle frem til-og-med: "
-        inputTableElement.appendChild(antallLabel)
+        // Behandlingssteg
+        const stegLabel= document.createElement('label')
+        stegLabel.innerHTML = "Behandle frem til-og-med: "
+        stegLabel.htmlFor = "behandlingsstegDropdown"
+        inputTableElement.appendChild(stegLabel)
 
         const select = document.createElement("select");
         select.id = "behandlingsstegDropdown";
@@ -135,7 +135,6 @@
 
         const tableRow = document.createElement('tr')
         tableRow.appendChild(settOppInput())
-        tableRow.appendChild(settOppBehandlingsstegInput())
         tableRow.appendChild(settOppKnapper())
 
         table.appendChild(tableRow)

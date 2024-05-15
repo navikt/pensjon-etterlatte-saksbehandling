@@ -9,8 +9,10 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -1394,11 +1396,10 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
     }
 
     @Test
-    fun `skal sette vedtak til til_samordning, maa vente paa samordning`() {
+    fun `skal sette vedtak til til_samordning`() {
         val behandlingId = randomUUID()
 
         coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
-        coEvery { samKlientMock.samordneVedtak(any(), false, attestant) } returns true
 
         runBlocking {
             repository.opprettVedtak(
@@ -1414,31 +1415,52 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
             oppdatertVedtak.vedtak.status shouldBe VedtakStatus.TIL_SAMORDNING
 
             coVerify(exactly = 1) { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) }
+            coVerify(exactly = 0) { samKlientMock.samordneVedtak(any(), false, attestant) }
         }
     }
 
     @Test
-    fun `skal sette vedtak til samordnet, trenger ikke vente paa samordning`() {
+    fun `skal kalle SAM for aa samordne, ikke oppdatere vedtaksstatus`() {
+        mockkStatic(Vedtak::erVedtakMedEtterbetaling)
+        every { any<Vedtak>().erVedtakMedEtterbetaling(repository) } returns true
+
         val behandlingId = randomUUID()
 
-        coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
-        coEvery { samKlientMock.samordneVedtak(any(), false, attestant) } returns false
-        coEvery { behandlingKlientMock.samordnet(any(), any(), any()) } returns true
-        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+        coEvery { samKlientMock.samordneVedtak(any(), true, attestant) } returns true
 
         runBlocking {
-            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.ATTESTERT))
-            val oppdatertVedtak = service.tilSamordningVedtak(behandlingId, attestant)
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.TIL_SAMORDNING))
 
-            oppdatertVedtak.vedtak.status shouldBe VedtakStatus.SAMORDNET
+            service.samordne(behandlingId, attestant) shouldBe true
 
-            coVerify(exactly = 1) { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) }
-            coVerify(exactly = 1) { behandlingKlientMock.samordnet(behandlingId, any(), any()) }
+            coVerify(exactly = 1) { samKlientMock.samordneVedtak(any(), true, attestant) }
+            coVerify(exactly = 0) { behandlingKlientMock.samordnet(behandlingId, any(), any()) }
+        }
+
+        verify { any<Vedtak>().erVedtakMedEtterbetaling(repository) }
+    }
+
+    @Test
+    fun `skal ikke kalle SAM for aa samordne hvis REGULERING`() {
+        val behandlingId = randomUUID()
+
+        runBlocking {
+            repository.opprettVedtak(
+                opprettVedtak(
+                    behandlingId = behandlingId,
+                    status = VedtakStatus.TIL_SAMORDNING,
+                    revurderingAarsak = Revurderingaarsak.REGULERING,
+                ),
+            )
+
+            service.samordne(behandlingId, attestant) shouldBe false
+
+            coVerify(exactly = 0) { samKlientMock.samordneVedtak(any(), true, attestant) }
         }
     }
 
     @Test
-    fun `skal sette vedtak til samordnet, skipper samordning fordi REGULERING`() {
+    fun `skal sette vedtak til samordnet`() {
         val behandlingId = randomUUID()
 
         coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
@@ -1452,10 +1474,11 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
                     behandlingType = BehandlingType.REVURDERING,
                     type = VedtakType.ENDRING,
                     status = VedtakStatus.ATTESTERT,
-                    revurderingAarsak = Revurderingaarsak.REGULERING,
+                    revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING,
                 ),
             )
-            val oppdatertVedtak = service.tilSamordningVedtak(behandlingId, attestant)
+            service.tilSamordningVedtak(behandlingId, attestant)
+            val oppdatertVedtak = service.samordnetVedtak(behandlingId, attestant)!!
 
             oppdatertVedtak.vedtak.status shouldBe VedtakStatus.SAMORDNET
 

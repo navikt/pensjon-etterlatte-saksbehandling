@@ -296,35 +296,36 @@ class VedtakBehandlingService(
                 behandlingId = behandlingId,
             )
 
-        if (tilSamordningVedtakLocal.isRegulering()) {
+        return VedtakOgRapid(tilSamordningVedtakLocal.toDto(), tilSamordning)
+    }
+
+    suspend fun samordne(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        logger.info("Kaller SAM for å samordne vedtak behandlingId=$behandlingId")
+        val vedtak = hentVedtakNonNull(behandlingId)
+
+        if (vedtak.isRegulering()) {
             logger.info("Oppretter ikke samordning ved regulering [behandlingId=$behandlingId]")
-
-            val vedtakEtterSvar = samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)!!
-            return VedtakOgRapid(vedtakEtterSvar.vedtak, tilSamordning, vedtakEtterSvar.rapidInfo1)
-        } else if (!samKlient.samordneVedtak(
-                vedtak = tilSamordningVedtakLocal,
-                etterbetaling = erVedtakMedEtterbetaling(tilSamordningVedtakLocal, repository),
-                brukerTokenInfo = brukerTokenInfo,
-            )
-        ) {
-            logger.info("Svar fra samordning: ikke nødvendig å vente for vedtak=${vedtak.id} [behandlingId=$behandlingId]")
-
-            val vedtakEtterSvar = samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)!!
-            return VedtakOgRapid(vedtakEtterSvar.vedtak, tilSamordning, vedtakEtterSvar.rapidInfo1)
-        } else {
-            logger.info("Svar fra samordning: må vente for vedtak=${vedtak.id} [behandlingId=$behandlingId]")
+            return false
         }
 
-        return VedtakOgRapid(tilSamordningVedtakLocal.toDto(), tilSamordning)
+        return samKlient.samordneVedtak(
+            vedtak = vedtak,
+            etterbetaling = vedtak.erVedtakMedEtterbetaling(repository),
+            brukerTokenInfo = brukerTokenInfo,
+        ).also {
+            logger.info("Samordning: skal vente? $it [vedtak=${vedtak.id}, behandlingId=$behandlingId]")
+        }
     }
 
     fun samordnetVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        vedtakTilSamordning: Vedtak? = null,
     ): VedtakOgRapid? {
         logger.info("Setter vedtak til samordnet for behandling med behandlingId=$behandlingId")
-        val vedtak = vedtakTilSamordning ?: hentVedtakNonNull(behandlingId)
+        val vedtak = hentVedtakNonNull(behandlingId)
 
         when (vedtak.status) {
             VedtakStatus.TIL_SAMORDNING -> {

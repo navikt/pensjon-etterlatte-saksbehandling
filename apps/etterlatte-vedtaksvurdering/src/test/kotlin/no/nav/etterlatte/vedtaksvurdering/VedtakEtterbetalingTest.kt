@@ -41,7 +41,7 @@ class VedtakEtterbetalingTest {
 
         every { repository.hentFerdigstilteVedtak(vedtak.soeker) } returns emptyList()
 
-        val resultat = erVedtakMedEtterbetaling(vedtak, repository, klokkeJanuar2024)
+        val resultat = vedtak.erVedtakMedEtterbetaling(repository, klokkeJanuar2024)
 
         verify { repository wasNot called }
 
@@ -54,7 +54,7 @@ class VedtakEtterbetalingTest {
 
         every { repository.hentFerdigstilteVedtak(vedtak.soeker) } returns emptyList()
 
-        val resultat = erVedtakMedEtterbetaling(vedtak, repository, klokkeMars2024)
+        val resultat = vedtak.erVedtakMedEtterbetaling(repository, klokkeMars2024)
 
         verify { repository.hentFerdigstilteVedtak(vedtak.soeker) }
 
@@ -79,7 +79,7 @@ class VedtakEtterbetalingTest {
                 ),
             )
 
-        val resultat = erVedtakMedEtterbetaling(nyttVedtak, repository, klokkeMars2024)
+        val resultat = nyttVedtak.erVedtakMedEtterbetaling(repository, klokkeMars2024)
 
         resultat shouldBe false
     }
@@ -102,7 +102,7 @@ class VedtakEtterbetalingTest {
                 ),
             )
 
-        val resultat = erVedtakMedEtterbetaling(nyttVedtak, repository, klokkeMars2024)
+        val resultat = nyttVedtak.erVedtakMedEtterbetaling(repository, klokkeMars2024)
 
         resultat shouldBe true
     }
@@ -135,7 +135,7 @@ class VedtakEtterbetalingTest {
                 ),
             )
 
-        val resultat = erVedtakMedEtterbetaling(nyttVedtak, repository, klokkeMars2024)
+        val resultat = nyttVedtak.erVedtakMedEtterbetaling(repository, klokkeMars2024)
 
         resultat shouldBe true
     }

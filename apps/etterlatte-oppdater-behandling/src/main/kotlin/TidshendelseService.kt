@@ -30,7 +30,7 @@ class TidshendelseService(
         AO_OMS67("Aldersovergang v/67 år"),
         OMS_DOED_3AAR("Opphør OMS etter 3 år"),
         OMS_DOED_5AAR("Opphør OMS etter 5 år"),
-        OMS_DOED_4MND("Varselbrev om aktivitetsplikt OMS etter 4 mnd"),
+        OMS_DOED_4MND("Infobrev om aktivitetsplikt OMS etter 4 mnd"),
     }
 
     fun haandterHendelse(hendelse: TidshendelsePacket): TidshendelseResult {

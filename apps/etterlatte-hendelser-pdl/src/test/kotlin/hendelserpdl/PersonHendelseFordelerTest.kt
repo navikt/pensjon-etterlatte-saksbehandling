@@ -1,6 +1,7 @@
 package no.nav.etterlatte.hendelserpdl
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
@@ -10,6 +11,7 @@ import no.nav.etterlatte.hendelserpdl.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
@@ -54,6 +56,31 @@ internal class PersonHendelseFordelerTest {
         coEvery { kafkaProduser.publiser(any(), any()) } returns mockk(relaxed = true)
 
         personHendelseFordeler = PersonHendelseFordeler(kafkaProduser, pdlTjenesterKlient)
+    }
+
+    @Test
+    fun `skal ignorere hendelse for ident vi ikke finner i PDL`() {
+        clearMocks(pdlTjenesterKlient)
+        coEvery { pdlTjenesterKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) } throws
+            FantIkkePersonException()
+        val personHendelse: Personhendelse =
+            Personhendelse().apply {
+                hendelseId = "1"
+                endringstype = Endringstype.OPPRETTET
+                personidenter = listOf(SOEKER_FOEDSELSNUMMER.value)
+                opplysningstype = LeesahOpplysningstype.DOEDSFALL_V1.toString()
+                doedsfall =
+                    Doedsfall().apply {
+                        doedsdato = LocalDate.now()
+                    }
+            }
+
+        runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
+
+        coVerify(exactly = 1) { pdlTjenesterKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
+        coVerify(exactly = 0) { kafkaProduser.publiser(any(), any()) }
+
+        confirmVerified(pdlTjenesterKlient, kafkaProduser)
     }
 
     @Test

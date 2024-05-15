@@ -145,7 +145,7 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
 }
 
 const RevurderingInfo = styled(BodyShort)`
-  max-width: 26rem;
+  max-width: 32rem;
   margin-top: 1rem;
 `
 

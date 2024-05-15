@@ -27,141 +27,133 @@ import { institusjonstype } from '~components/behandling/beregningsgrunnlag/Inst
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
 import { SakType } from '~shared/types/sak'
 
-const VisAnsvarligeForeldreSamsvar = (props: { samsvar: AnsvarligeForeldreSamsvar }) => {
+const VisAnsvarligeForeldreSamsvar = ({ samsvar }: { samsvar: AnsvarligeForeldreSamsvar }) => {
   const navneMap = useContext(FnrTilNavnMapContext)
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <BodySmall>Nytt grunnlag (PDL)</BodySmall>
-        <BodySmall>
-          {props.samsvar.fraPdl?.map((fnr) => formaterFoedselsnummerMedNavn(navneMap, fnr))?.join(', ') ??
+        <KortTekst size="small">Nytt grunnlag (PDL)</KortTekst>
+        <KortTekst size="small">
+          {samsvar.fraPdl?.map((fnr) => formaterFoedselsnummerMedNavn(navneMap, fnr))?.join(', ') ??
             'Ingen ansvarlige foreldre'}
-        </BodySmall>
+        </KortTekst>
       </div>
       <div>
-        <BodySmall>Eksisterende grunnlag</BodySmall>
-        <BodySmall>
-          {props.samsvar.fraGrunnlag?.map((fnr) => formaterFoedselsnummerMedNavn(navneMap, fnr))?.join(', ') ??
+        <KortTekst size="small">Eksisterende grunnlag</KortTekst>
+        <KortTekst size="small">
+          {samsvar.fraGrunnlag?.map((fnr) => formaterFoedselsnummerMedNavn(navneMap, fnr))?.join(', ') ??
             'Ingen ansvarlige foreldre'}
-        </BodySmall>
+        </KortTekst>
       </div>
     </GrunnlagSammenligningWrapper>
   )
 }
 
-const UtlandSamsvarVisning = (props: { samsvar: UtlandSamsvar }) => {
-  const { samsvar } = props
-
+const UtlandSamsvarVisning = ({ samsvar }: { samsvar: UtlandSamsvar }) => {
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <BodySmall>Nytt grunnlag (PDL)</BodySmall>
-        <BodySmall>Ut: {formaterLandList(samsvar.fraPdl?.utflyttingFraNorge ?? [])}</BodySmall>
-        <BodySmall>Inn: {formaterLandList(samsvar.fraPdl?.innflyttingTilNorge ?? [])}</BodySmall>
+        <KortTekst size="small">Nytt grunnlag (PDL)</KortTekst>
+        <KortTekst size="small">Ut: {formaterLandList(samsvar.fraPdl?.utflyttingFraNorge ?? [])}</KortTekst>
+        <KortTekst size="small">Inn: {formaterLandList(samsvar.fraPdl?.innflyttingTilNorge ?? [])}</KortTekst>
       </div>
       <div>
-        <BodySmall>Eksisterende grunnlag</BodySmall>
-        <BodySmall>Ut: {formaterLandList(samsvar.fraGrunnlag?.utflyttingFraNorge ?? [])}</BodySmall>
-        <BodySmall>Inn: {formaterLandList(samsvar.fraGrunnlag?.innflyttingTilNorge ?? [])}</BodySmall>
+        <KortTekst size="small">Eksisterende grunnlag</KortTekst>
+        <KortTekst size="small">Ut: {formaterLandList(samsvar.fraGrunnlag?.utflyttingFraNorge ?? [])}</KortTekst>
+        <KortTekst size="small">Inn: {formaterLandList(samsvar.fraGrunnlag?.innflyttingTilNorge ?? [])}</KortTekst>
       </div>
     </GrunnlagSammenligningWrapper>
   )
 }
 
-const Doedsdato = (props: { samsvar: DoedsdatoSamsvar }) => {
-  const { samsvar } = props
+const Doedsdato = ({ samsvar }: { samsvar: DoedsdatoSamsvar }) => {
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <BodySmall>Nytt grunnlag (PDL)</BodySmall>
-        <BodySmall>{formaterKanskjeStringDatoMedFallback('Ingen', samsvar.fraPdl)}</BodySmall>
+        <KortTekst size="small">Nytt grunnlag (PDL)</KortTekst>
+        <KortTekst size="small">{formaterKanskjeStringDatoMedFallback('Ingen', samsvar.fraPdl)}</KortTekst>
       </div>
       <div>
-        <BodySmall>Eksisterende grunnlag</BodySmall>
-        <BodySmall>{formaterKanskjeStringDatoMedFallback('Ingen', samsvar.fraGrunnlag)}</BodySmall>
+        <KortTekst size="small">Eksisterende grunnlag</KortTekst>
+        <KortTekst size="small">{formaterKanskjeStringDatoMedFallback('Ingen', samsvar.fraGrunnlag)}</KortTekst>
       </div>
     </GrunnlagSammenligningWrapper>
   )
 }
 
-const Adresse = (props: { adresse: AdresseSamsvar }) => {
-  const { adresse } = props
+const Adresse = ({ adresse }: { adresse: AdresseSamsvar }) => {
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <BodySmall>Nytt grunnlag (PDL)</BodySmall>
-        <BodySmall as="div">
+        <KortTekst size="small">Nytt grunnlag (PDL)</KortTekst>
+        <KortTekst as="div">
           <Adressevisning adresser={adresse.fraPdl} soeknadsoversikt={false} />
-        </BodySmall>
+        </KortTekst>
       </div>
       <div>
-        <BodySmall>Eksisterende grunnlag</BodySmall>
-        <BodySmall as="div">
+        <KortTekst size="small">Eksisterende grunnlag</KortTekst>
+        <KortTekst as="div">
           <Adressevisning adresser={adresse.fraGrunnlag} soeknadsoversikt={false} />
-        </BodySmall>
+        </KortTekst>
       </div>
     </GrunnlagSammenligningWrapper>
   )
 }
 
-const Barn = (props: { samsvar: BarnSamsvar }) => {
-  const { samsvar } = props
+const Barn = ({ samsvar }: { samsvar: BarnSamsvar }) => {
   const fnrTilNavn = useContext(FnrTilNavnMapContext)
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <BodySmall>Nytt grunnlag (PDL)</BodySmall>
-        <BodySmall>
+        <KortTekst size="small">Nytt grunnlag (PDL)</KortTekst>
+        <KortTekst size="small">
           {samsvar.fraPdl?.map((fnr) => formaterFoedselsnummerMedNavn(fnrTilNavn, fnr)).join(', ') ?? 'Ingen barn'}
-        </BodySmall>
+        </KortTekst>
       </div>
       <div>
-        <BodySmall>Eksisterende grunnlag</BodySmall>
-        <BodySmall>
+        <KortTekst size="small">Eksisterende grunnlag</KortTekst>
+        <KortTekst size="small">
           {samsvar.fraGrunnlag?.map((fnr) => formaterFoedselsnummerMedNavn(fnrTilNavn, fnr)).join(', ') ?? 'Ingen barn'}
-        </BodySmall>
+        </KortTekst>
       </div>
     </GrunnlagSammenligningWrapper>
   )
 }
 
-const GrunnlagVergemaal = (props: { vergemaal: VergemaalEllerFremtidsfullmakt }) => {
-  const { vergemaal } = props
+const GrunnlagVergemaal = ({ vergemaal }: { vergemaal: VergemaalEllerFremtidsfullmakt }) => {
   const { vergeEllerFullmektig, embete, type } = vergemaal
   const { navn, omfang, motpartsPersonident, omfangetErInnenPersonligOmraade } = vergeEllerFullmektig
   return (
     <>
-      <BodySmall>Embete: {embete ?? 'ikke angitt'}</BodySmall>
-      <BodySmall>Type: {type ?? 'ikke angitt'}</BodySmall>
+      <KortTekst size="small">Embete: {embete ?? 'ikke angitt'}</KortTekst>
+      <KortTekst size="small">Type: {type ?? 'ikke angitt'}</KortTekst>
 
-      <BodySmall>
+      <KortTekst size="small">
         Omfang: {omfang ?? 'ikke angitt '}
         {omfangetErInnenPersonligOmraade ? 'Er innenfor personlig område' : 'Er ikke innenfor personlig område'}
-      </BodySmall>
-      <BodySmall>
+      </KortTekst>
+      <KortTekst size="small">
         Verge: {navn ?? 'ikke angitt'} ({motpartsPersonident})
-      </BodySmall>
+      </KortTekst>
     </>
   )
 }
 
-const VisSivilstand = (props: { samsvar: SivilstandSamsvar }) => {
-  const { samsvar } = props
-
+const VisSivilstand = ({ samsvar }: { samsvar: SivilstandSamsvar }) => {
   const sivilstandWrapper = (sivilstand: Sivilstand, i: number) => {
     return (
       <ListeWrapper key={i}>
         <li>
-          <BodySmall>Gyldig fra og med: {sivilstand.gyldigFraOgMed ?? 'ikke angitt'}</BodySmall>
+          <KortTekst size="small">Gyldig fra og med: {sivilstand.gyldigFraOgMed ?? 'ikke angitt'}</KortTekst>
         </li>
         <li>
-          <BodySmall>Sivilstatus: {sivilstand.sivilstatus}</BodySmall>
+          <KortTekst size="small">Sivilstatus: {sivilstand.sivilstatus}</KortTekst>
         </li>
         <li>
-          <BodySmall>Ektefelle/samboer: {sivilstand.relatertVedSiviltilstand ?? 'ikke angitt'}</BodySmall>
+          <KortTekst size="small">Ektefelle/samboer: {sivilstand.relatertVedSiviltilstand ?? 'ikke angitt'}</KortTekst>
         </li>
         <li>
-          <BodySmall>Kilde: {sivilstand.kilde}</BodySmall>
+          <KortTekst size="small">Kilde: {sivilstand.kilde}</KortTekst>
         </li>
       </ListeWrapper>
     )
@@ -170,13 +162,13 @@ const VisSivilstand = (props: { samsvar: SivilstandSamsvar }) => {
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <BodySmall>Nytt grunnlag (PDL)</BodySmall>
+        <KortTekst size="small">Nytt grunnlag (PDL)</KortTekst>
         <ListeWrapper>
           {samsvar.fraPdl?.map((sivilstand, i) => <li key={i}>{sivilstandWrapper(sivilstand, i)}</li>)}
         </ListeWrapper>
       </div>
       <div>
-        <BodySmall>Eksisterende grunnlag</BodySmall>
+        <KortTekst size="small">Eksisterende grunnlag</KortTekst>
         <ListeWrapper>
           {samsvar.fraGrunnlag?.map((sivilstand, i) => <li key={i}>{sivilstandWrapper(sivilstand, i)}</li>)}
         </ListeWrapper>
@@ -189,36 +181,36 @@ const Institusjonsopphold = (props: { samsvar: InstitusjonsoppholdSamsvar }) => 
   const { samsvar } = props
   return (
     <>
-      <BodySmall>Oppholdstype: {samsvar.oppholdstype}</BodySmall>
-      <BodySmall>
+      <KortTekst size="small">Oppholdstype: {samsvar.oppholdstype}</KortTekst>
+      <KortTekst size="small">
         Startdato:{' '}
         {samsvar.oppholdBeriket.startdato ? formaterStringDato(samsvar.oppholdBeriket.startdato) : 'Ingen startdato'}
-      </BodySmall>
-      <BodySmall>
+      </KortTekst>
+      <KortTekst size="small">
         Faktisk sluttdato:{' '}
         {samsvar.oppholdBeriket.faktiskSluttdato
           ? formaterStringDato(samsvar.oppholdBeriket.faktiskSluttdato)
           : 'Ingen sluttdato'}
-      </BodySmall>
-      <BodySmall>
+      </KortTekst>
+      <KortTekst size="small">
         Forventet sluttdato:{' '}
         {samsvar.oppholdBeriket.forventetSluttdato
           ? formaterStringDato(samsvar.oppholdBeriket.forventetSluttdato)
           : 'Ingen forventet sluttdato'}
-      </BodySmall>
-      <BodySmall>
+      </KortTekst>
+      <KortTekst size="small">
         Institusjonstype:{' '}
         {samsvar.oppholdBeriket.institusjonsType
           ? institusjonstype[samsvar.oppholdBeriket.institusjonsType]
           : `Ukjent type ${samsvar.oppholdBeriket.institusjonsType}`}
-      </BodySmall>
-      <BodySmall> Institusjonsnavn: {samsvar.oppholdBeriket.institusjonsnavn}</BodySmall>
-      <BodySmall>
+      </KortTekst>
+      <KortTekst size="small"> Institusjonsnavn: {samsvar.oppholdBeriket.institusjonsnavn}</KortTekst>
+      <KortTekst size="small">
         Organisasjonsnummer:{' '}
         {samsvar.oppholdBeriket.organisasjonsnummer
           ? samsvar.oppholdBeriket.organisasjonsnummer
           : 'Ingen organisasjonsnummer funnet'}
-      </BodySmall>
+      </KortTekst>
     </>
   )
 }
@@ -227,36 +219,41 @@ const Vergemaal = (props: { samsvar: VergemaalEllerFremtidsfullmaktForholdSamsva
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <BodySmall>Nytt grunnlag (PDL)</BodySmall>
+        <KortTekst size="small">Nytt grunnlag (PDL)</KortTekst>
         {props.samsvar.fraPdl?.map((verge, i) => <GrunnlagVergemaal key={i} vergemaal={verge} />) ?? (
-          <BodySmall>Ingen vergemål funnet</BodySmall>
+          <KortTekst size="small">Ingen vergemål funnet</KortTekst>
         )}
       </div>
       <div>
-        <BodySmall>Eksisterende grunnlag</BodySmall>
+        <KortTekst size="small">Eksisterende grunnlag</KortTekst>
         {props.samsvar.fraGrunnlag?.map((verge, i) => <GrunnlagVergemaal key={i} vergemaal={verge} />) ?? (
-          <BodySmall>Ingen vergemål funnet</BodySmall>
+          <KortTekst size="small">Ingen vergemål funnet</KortTekst>
         )}
       </div>
     </GrunnlagSammenligningWrapper>
   )
 }
 
-const HendelseDetaljer = (props: { hendelse: Grunnlagsendringshendelse; sakType: SakType }) => {
+const HendelseDetaljer = ({ hendelse, sakType }: { hendelse: Grunnlagsendringshendelse; sakType: SakType }) => {
   const navneMap = useContext(FnrTilNavnMapContext)
   return (
     <DetaljerWrapper>
-      <BodySmall>
-        {formaterRolle(props.sakType, props.hendelse.hendelseGjelderRolle)}{' '}
-        {formaterFoedselsnummerMedNavn(navneMap, props.hendelse.gjelderPerson)} har{' '}
-        {grunnlagsendringsBeskrivelse[props.hendelse.samsvarMellomKildeOgGrunnlag.type]}
-      </BodySmall>
+      <KortTekst size="small">
+        {formaterRolle(sakType, hendelse.hendelseGjelderRolle)}{' '}
+        {formaterFoedselsnummerMedNavn(navneMap, hendelse.gjelderPerson)} har{' '}
+        {grunnlagsendringsBeskrivelse[hendelse.samsvarMellomKildeOgGrunnlag.type]}
+      </KortTekst>
     </DetaljerWrapper>
   )
 }
 
-export const HendelseBeskrivelse = (props: { hendelse: Grunnlagsendringshendelse; sakType: SakType }) => {
-  const { sakType, hendelse } = props
+export const HendelseBeskrivelse = ({
+  sakType,
+  hendelse,
+}: {
+  hendelse: Grunnlagsendringshendelse
+  sakType: SakType
+}) => {
   switch (hendelse.samsvarMellomKildeOgGrunnlag.type) {
     case 'UTLAND':
       return (
@@ -317,8 +314,10 @@ export const HendelseBeskrivelse = (props: { hendelse: Grunnlagsendringshendelse
     case 'GRUNNBELOEP':
       return (
         <Header>
-          <BodySmall>Hendelse fra {grunnlagsendringsKilde(hendelse.samsvarMellomKildeOgGrunnlag.type)}</BodySmall>
-          <BodySmall>{grunnlagsendringsBeskrivelse[hendelse.samsvarMellomKildeOgGrunnlag.type]}</BodySmall>
+          <KortTekst size="small">
+            Hendelse fra {grunnlagsendringsKilde(hendelse.samsvarMellomKildeOgGrunnlag.type)}
+          </KortTekst>
+          <KortTekst size="small">{grunnlagsendringsBeskrivelse[hendelse.samsvarMellomKildeOgGrunnlag.type]}</KortTekst>
         </Header>
       )
   }
@@ -333,7 +332,7 @@ const GrunnlagSammenligningWrapper = styled.div`
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 `
-const BodySmall = styled(BodyShort).attrs({ size: 'small' })`
+const KortTekst = styled(BodyShort)`
   max-width: 25em;
 `
 const Header = styled.div`

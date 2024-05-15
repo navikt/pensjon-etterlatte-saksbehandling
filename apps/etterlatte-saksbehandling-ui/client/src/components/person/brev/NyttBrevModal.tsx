@@ -1,4 +1,4 @@
-import { Button, Heading, Modal, Radio, RadioGroup, Select, VStack } from '@navikt/ds-react'
+import { Button, Heading, Modal, Radio, Select, VStack } from '@navikt/ds-react'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -8,6 +8,8 @@ import { FlexRow } from '~shared/styled'
 import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { useNavigate } from 'react-router-dom'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { IValgJaNei } from '~shared/types/Aktivitetsplikt'
 
 export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
@@ -16,6 +18,7 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
 
   const defaultData: FilledFormData = {
     type: 'TOMT_BREV',
+    utbetaling: '',
   }
 
   const {
@@ -23,6 +26,7 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
     handleSubmit,
     watch,
     register,
+    control,
   } = useForm({ defaultValues: defaultData })
 
   const skjemaet = watch()
@@ -90,16 +94,18 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
                     <option value="UNDER_50_PROSENT">Under 50%</option>
                     <option value="OVER_50_PROSENT">Over 50%</option>
                   </Select>
-                  <RadioGroup
+                  <ControlledRadioGruppe
+                    name="utbetaling"
+                    control={control}
                     legend="Har bruker utbetaling?"
-                    {...register('utbetaling', {
-                      required: { value: true, message: 'Du må velge om bruker har utbetaling' },
-                    })}
-                    error={errors?.utbetaling?.message}
-                  >
-                    <Radio value="true">Ja</Radio>
-                    <Radio value="false">Nei</Radio>
-                  </RadioGroup>
+                    errorVedTomInput="Du må velge om bruker har utbetaling"
+                    radios={
+                      <>
+                        <Radio value={IValgJaNei.JA}>Ja</Radio>
+                        <Radio value={IValgJaNei.NEI}>Nei</Radio>
+                      </>
+                    }
+                  />
                 </>
               )}
             </VStack>
@@ -137,7 +143,7 @@ export type BrevParametre =
 type FilledFormData = {
   type: string
   aktivitetsgrad?: string
-  utbetaling?: boolean
+  utbetaling?: IValgJaNei | ''
 }
 
 function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
@@ -146,7 +152,7 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
       return {
         type: formdata.type,
         aktivitetsgrad: formdata.aktivitetsgrad!!,
-        utbetaling: formdata.utbetaling!!,
+        utbetaling: formdata.utbetaling!! === IValgJaNei.JA,
       }
     case 'TOMT_BREV':
       return {

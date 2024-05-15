@@ -84,7 +84,7 @@ class TidshendelseServiceTest {
                 sakId = 2,
                 oppgaveType = OppgaveType.AKTIVITETSPLIKT,
                 referanse = behandlingId.toString(),
-                merknad = "Varselbrev om aktivitetsplikt OMS etter 4 mnd",
+                merknad = "Infobrev om aktivitetsplikt OMS etter 4 mnd",
                 frist = withArg { it shouldNotBe null },
             )
         }

@@ -3,7 +3,7 @@ import { mapResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { GosysFilter, GosysOppgaveValg } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import { EnhetFilterKeys, GosysFilter, GosysOppgaveValg } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { ToggleGroup } from '@navikt/ds-react'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import styled from 'styled-components'
@@ -35,7 +35,27 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
     return <Tilgangsmelding />
   }
 
-  const [filter, setFilter] = useState<GosysFilter>(hentGosysOppgaverFilterFraLocalStorage())
+  const harBareEnLokalSaksbehandlendeEnhet = (enheter: string[]): string[] => {
+    const lokaleEnheter = ['E4815', 'E4808', 'E4817']
+    return enheter.filter((enhet) => {
+      return lokaleEnheter.includes(`E${enhet}`)
+    })
+  }
+
+  const setLokalEnhetSomStandardOmIngenLocalStorage = (): GosysFilter => {
+    const gosysFilter = hentGosysOppgaverFilterFraLocalStorage()
+    if (!gosysFilter.enhetFilter) {
+      const enheterForSaksbehandler = innloggetSaksbehandler.enheter
+      const lokaleEnheterForSaksbehandler = harBareEnLokalSaksbehandlendeEnhet(enheterForSaksbehandler)
+      if (lokaleEnheterForSaksbehandler.length == 1) {
+        return { ...gosysFilter, enhetFilter: lokaleEnheterForSaksbehandler[0] as EnhetFilterKeys }
+      }
+      return { ...gosysFilter }
+    }
+    return gosysFilter
+  }
+
+  const [filter, setFilter] = useState<GosysFilter>(setLokalEnhetSomStandardOmIngenLocalStorage())
   const [fnrFilter, setFnrFilter] = useState<string>()
 
   const oppgavebenkState = useOppgaveBenkState()

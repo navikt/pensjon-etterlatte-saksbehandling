@@ -127,7 +127,7 @@ export default function OpprettNyBehandling() {
           <ControlledDatoVelger
             name="mottattDato"
             label="Mottatt dato"
-            description="Datoen søknaden ble mottatt"
+            description="Datoen søknaden ble mottatt (husk at denne vises i vedtaksbrev)"
             control={control}
             errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
           />

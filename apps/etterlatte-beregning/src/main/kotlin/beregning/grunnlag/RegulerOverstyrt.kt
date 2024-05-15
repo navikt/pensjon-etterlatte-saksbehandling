@@ -36,13 +36,13 @@ fun tilpassOverstyrtBeregningsgrunnlagForRegulering(
                             ),
                         forrigeGrunnbeloep =
                             FaktumNode(
-                                verdi = Beregningstall(forrigeGrunnbeloep.grunnbeloepPerMaaned),
+                                verdi = Beregningstall(forrigeGrunnbeloep.grunnbeloep),
                                 Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now()),
                                 beskrivelse = "Forrige grunnbeløp brukt til å manuelt utregne beregning",
                             ),
                         nyttGrunnbeloep =
                             FaktumNode(
-                                verdi = Beregningstall(nyttGrunnbeloep.grunnbeloepPerMaaned),
+                                verdi = Beregningstall(nyttGrunnbeloep.grunnbeloep),
                                 Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now()),
                                 beskrivelse = "Nytt grunnbeløp beregnins skal reguleres etter",
                             ),

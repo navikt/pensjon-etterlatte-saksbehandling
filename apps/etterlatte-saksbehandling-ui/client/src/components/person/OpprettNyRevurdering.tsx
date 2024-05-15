@@ -1,4 +1,4 @@
-import { Alert, Button, Heading, Loader, Modal, Select, TextField, VStack } from '@navikt/ds-react'
+import { Alert, Button, Heading, Loader, Modal, Select } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
@@ -21,7 +21,6 @@ export const OpprettNyRevurdering = ({
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
   const [valgtRevurdering, setValgtRevurdering] = useState<Revurderingaarsak | undefined>()
-  const [fritekstgrunn, setFritekstgrunn] = useState<string>('')
 
   const [muligeRevurderingAarsakerResult, muligeRevurderingeraarsakerFetch] = useApiCall(hentStoettedeRevurderinger)
   const [opprettRevurderingStatus, opprettRevurdering, resetApiCall] = useApiCall(opprettRevurderingApi)
@@ -35,7 +34,7 @@ export const OpprettNyRevurdering = ({
       {
         sakId: sak.id,
         aarsak: valgtRevurdering,
-        fritekstAarsak: fritekstgrunn || null,
+        fritekstAarsak: null,
         begrunnelse: begrunnelse,
         paaGrunnAvOppgaveId: oppgaveId,
       },
@@ -51,6 +50,7 @@ export const OpprettNyRevurdering = ({
 
   const closeAndReset = () => {
     setOpen(false)
+    setError('')
     resetApiCall()
   }
 
@@ -92,21 +92,6 @@ export const OpprettNyRevurdering = ({
                   )
                 })}
               </Select>
-              {valgtRevurdering &&
-                [Revurderingaarsak.ANNEN, Revurderingaarsak.ANNEN_UTEN_BREV].includes(valgtRevurdering) && (
-                  <VStack gap="10" style={{ marginTop: '2rem' }}>
-                    <TextField
-                      label="Beskriv årsak"
-                      size="medium"
-                      type="text"
-                      value={fritekstgrunn}
-                      onChange={(e) => setFritekstgrunn(e.target.value)}
-                    />
-                    <Alert variant="warning" style={{ maxWidth: '20em' }}>
-                      Bruk denne årsaken kun dersom andre årsaker ikke er dekkende for revurderingen.
-                    </Alert>
-                  </VStack>
-                )}
               <ButtonGroup>
                 <Button variant="secondary" onClick={closeAndReset}>
                   Avbryt

@@ -20,20 +20,20 @@ export const OpprettNyRevurdering = ({
 }) => {
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
-  const [valgtRevurdering, setValgtRevurdering] = useState<Revurderingaarsak | undefined>()
+  const [revurderingaarsak, setRevurderingaarsak] = useState<Revurderingaarsak | undefined>()
 
   const [muligeRevurderingAarsakerResult, muligeRevurderingeraarsakerFetch] = useApiCall(hentStoettedeRevurderinger)
   const [opprettRevurderingStatus, opprettRevurdering, resetApiCall] = useApiCall(opprettRevurderingApi)
 
   const navigate = useNavigate()
   const opprettBehandling = () => {
-    if (valgtRevurdering === undefined) {
+    if (revurderingaarsak === undefined) {
       return setError('Du må velge en revurdering')
     }
     opprettRevurdering(
       {
         sakId: sak.id,
-        aarsak: valgtRevurdering,
+        aarsak: revurderingaarsak,
         fritekstAarsak: null,
         begrunnelse: begrunnelse,
         paaGrunnAvOppgaveId: oppgaveId,
@@ -79,8 +79,8 @@ export const OpprettNyRevurdering = ({
             <Modal.Body>
               <Select
                 label="Årsak til revurdering"
-                value={valgtRevurdering}
-                onChange={(e) => setValgtRevurdering(e.target.value as Revurderingaarsak)}
+                value={revurderingaarsak}
+                onChange={(e) => setRevurderingaarsak(e.target.value as Revurderingaarsak)}
                 error={error}
               >
                 <option>Velg type</option>

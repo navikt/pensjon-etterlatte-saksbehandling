@@ -14,13 +14,14 @@ sealed class BrevParametre {
 
     abstract fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar
 
-    @JsonTypeName("OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV")
+    @JsonTypeName("OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND")
     data class Aktivitetsplikt(
         val aktivitetsgrad: Aktivitetsgrad,
-        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV_INNHOLD,
+        val utbetaling: Boolean,
+        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
     ) : BrevParametre() {
         override fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar {
-            return AktivitetspliktBrevdata(aktivitetsgrad)
+            return AktivitetspliktBrevdata(aktivitetsgrad, utbetaling)
         }
     }
 

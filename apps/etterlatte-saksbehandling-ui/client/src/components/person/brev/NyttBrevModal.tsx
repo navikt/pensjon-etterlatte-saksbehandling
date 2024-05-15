@@ -1,4 +1,4 @@
-import { Button, Heading, Modal, Select } from '@navikt/ds-react'
+import { Button, Heading, Modal, Radio, RadioGroup, Select, VStack } from '@navikt/ds-react'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -61,7 +61,7 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
 
         <form onSubmit={handleSubmit(opprettBrev)}>
           <Modal.Body>
-            <FlexRow $spacing>
+            <VStack gap="4">
               <Select
                 error={errors?.type?.message}
                 label="Type"
@@ -69,28 +69,40 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
                   required: { value: true, message: 'Feltet er påkrevd' },
                 })}
               >
-                <option value="OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV">Varselbrev om aktivitetsplikt</option>
+                <option value="OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND">
+                  Informasjon om aktivitetsplikt ved 4 måneder
+                </option>
                 <option value="TOMT_BREV">Manuelt brev</option>
               </Select>
-            </FlexRow>
 
-            {skjemaet.type === 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV' && (
-              <FlexRow $spacing>
-                <Select
-                  error={errors?.aktivitetsgrad?.message}
-                  label="Aktivitetsgrad"
-                  {...register('aktivitetsgrad', {
-                    required: { value: true, message: 'Du må velge aktivitetsgrad' },
-                    validate: { notDefault: (value) => !!value },
-                  })}
-                >
-                  <option value="">Velg aktivitetsgrad</option>
-                  <option value="IKKE_I_AKTIVITET">Ikke i aktivitet</option>
-                  <option value="UNDER_50_PROSENT">Under 50%</option>
-                  <option value="OVER_50_PROSENT">Over 50%</option>
-                </Select>
-              </FlexRow>
-            )}
+              {skjemaet.type === 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND' && (
+                <>
+                  <Select
+                    error={errors?.aktivitetsgrad?.message}
+                    label="Aktivitetsgrad"
+                    {...register('aktivitetsgrad', {
+                      required: { value: true, message: 'Du må velge aktivitetsgrad' },
+                      validate: { notDefault: (value) => !!value },
+                    })}
+                  >
+                    <option value="">Velg aktivitetsgrad</option>
+                    <option value="IKKE_I_AKTIVITET">Ikke i aktivitet</option>
+                    <option value="UNDER_50_PROSENT">Under 50%</option>
+                    <option value="OVER_50_PROSENT">Over 50%</option>
+                  </Select>
+                  <RadioGroup
+                    legend="Har bruker utbetaling?"
+                    {...register('utbetaling', {
+                      required: { value: true, message: 'Du må velge om bruker har utbetaling' },
+                    })}
+                    error={errors?.utbetaling?.message}
+                  >
+                    <Radio value="true">Ja</Radio>
+                    <Radio value="false">Nei</Radio>
+                  </RadioGroup>
+                </>
+              )}
+            </VStack>
           </Modal.Body>
 
           <Modal.Footer>
@@ -114,8 +126,9 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
 
 export type BrevParametre =
   | {
-      type: 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV'
+      type: 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND'
       aktivitetsgrad: string
+      utbetaling: boolean
     }
   | {
       type: 'TOMT_BREV'
@@ -124,14 +137,16 @@ export type BrevParametre =
 type FilledFormData = {
   type: string
   aktivitetsgrad?: string
+  utbetaling?: boolean
 }
 
 function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
   switch (formdata.type) {
-    case 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV':
+    case 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND':
       return {
         type: formdata.type,
         aktivitetsgrad: formdata.aktivitetsgrad!!,
+        utbetaling: formdata.utbetaling!!,
       }
     case 'TOMT_BREV':
       return {

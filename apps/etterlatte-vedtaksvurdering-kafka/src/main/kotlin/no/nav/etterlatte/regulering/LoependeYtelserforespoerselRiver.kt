@@ -66,6 +66,7 @@ internal class LoependeYtelserforespoerselRiver(
                     sakId = sakId,
                     fradato = it.dato,
                     prosesstype = Prosesstype.AUTOMATISK,
+                    opphoerFraOgMed = respons.opphoerFraOgMed,
                 )
             it.behandlingId?.let { b -> packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = b }
             context.publish(packet.toJson())

@@ -34,6 +34,7 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
                             forrigeBehandling = forrigeBehandling,
                             persongalleri = persongalleri,
                             oppgavefrist = request.oppgavefrist?.let { Tidspunkt.ofNorskTidssone(it, LocalTime.NOON) },
+                            opphoerFraOgMed = request.opphoerFraOgMed,
                         )
                     }
                 retryOgPakkUt { revurderingOgOppfoelging.leggInnGrunnlag() }

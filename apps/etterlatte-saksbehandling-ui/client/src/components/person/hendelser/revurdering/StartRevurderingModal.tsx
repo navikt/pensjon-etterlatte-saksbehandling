@@ -1,5 +1,5 @@
 import React, { ReactNode, useState } from 'react'
-import { Grunnlagsendringshendelse, GrunnlagsendringsType } from '~components/person/typer'
+import { Grunnlagsendringshendelse } from '~components/person/typer'
 import { Alert, BodyShort, Button, Heading, Modal, Select, TextField, VStack } from '@navikt/ds-react'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/revurdering'
 import { ButtonGroup } from '~shared/styled'
+import { grunnlagsendringstekster } from '~components/person/hendelser/revurdering/grunnlagsendringtekst'
 
 interface Props {
   hendelse: Grunnlagsendringshendelse
@@ -63,12 +64,12 @@ export const StartRevurderingModal = ({ hendelse, sakId, revurderinger }: Props)
             <Heading spacing size="large">
               Vurder hendelse
             </Heading>
-            <Alert variant="warning">{hendelse ? tekster.get(hendelse.type)!.tittel : ''}</Alert>
+            <Alert variant="warning">{hendelse ? grunnlagsendringstekster.get(hendelse.type)!.tittel : ''}</Alert>
             <BodyShort>
               <HjemmelLenke tittel="§18-8 Lovparagraf" lenke="" />
             </BodyShort>
             <BodyShort spacing style={{ marginBottom: '2em' }}>
-              {hendelse ? tekster.get(hendelse.type)!.beskrivelse : ''}
+              {hendelse ? grunnlagsendringstekster.get(hendelse.type)!.beskrivelse : ''}
             </BodyShort>
             <div>
               <Select
@@ -131,67 +132,3 @@ const ModalContentWrapper = styled.div`
 const MarginTop = styled.div`
   margin-top: 1rem;
 `
-
-interface Grunnlagsendringstekst {
-  tittel: string
-  beskrivelse: string
-}
-
-const tekster = new Map<GrunnlagsendringsType, Grunnlagsendringstekst>([
-  [
-    GrunnlagsendringsType.DOEDSFALL,
-    {
-      tittel: 'Dødsfall',
-      beskrivelse: 'Dødsfallsbeskrivelse her',
-    },
-  ],
-  [
-    GrunnlagsendringsType.UTFLYTTING,
-    {
-      tittel: 'Utflytting',
-      beskrivelse: 'Utflyttingsbeskrivelse',
-    },
-  ],
-  [
-    GrunnlagsendringsType.ADRESSE,
-    {
-      tittel: 'Adresse',
-      beskrivelse: 'Adressebeskrivelse',
-    },
-  ],
-  [
-    GrunnlagsendringsType.FORELDER_BARN_RELASJON,
-    {
-      tittel: 'Foreldre-barn-relasjon',
-      beskrivelse: 'Foreldre-barn-relasjon-beskrivelse',
-    },
-  ],
-  [
-    GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT,
-    {
-      tittel: 'Vergemål eller fremtidsfullmakt',
-      beskrivelse: 'Vergemål, fremtidsfullmakt, beskrivelse her',
-    },
-  ],
-  [
-    GrunnlagsendringsType.SIVILSTAND,
-    {
-      tittel: 'Sivilstand',
-      beskrivelse: 'Sivilstand-beskrivelse',
-    },
-  ],
-  [
-    GrunnlagsendringsType.GRUNNBELOEP,
-    {
-      tittel: 'Grunnbeløp endra',
-      beskrivelse: 'Grunnbeløpet veldig endra med ein ganske lang tekst her',
-    },
-  ],
-  [
-    GrunnlagsendringsType.INSTITUSJONSOPPHOLD,
-    {
-      tittel: 'Institusjonsopphold',
-      beskrivelse: 'Institusjonsoppholdbeskrivelse her',
-    },
-  ],
-])

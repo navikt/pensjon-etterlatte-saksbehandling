@@ -9,7 +9,7 @@ import { formaterStringDato } from '~utils/formattering'
 import { harAapenRevurdering, revurderingKanOpprettes } from '~components/person/hendelser/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { FlexRow, SpaceChildren } from '~shared/styled'
-import { StartRevurderingModal } from '~components/person/hendelser/StartRevurderingModal'
+import { StartRevurderingModal } from '~components/person/hendelser/revurdering/StartRevurderingModal'
 import { ArkiverHendelseModal } from '~components/person/hendelser/ArkiverHendelseModal'
 import { useSearchParams } from 'react-router-dom'
 

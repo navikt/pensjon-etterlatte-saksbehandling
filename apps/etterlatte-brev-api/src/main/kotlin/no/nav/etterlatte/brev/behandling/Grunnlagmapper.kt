@@ -1,6 +1,8 @@
 package no.nav.etterlatte.brev.behandling
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -16,21 +18,16 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
-import no.nav.etterlatte.libs.common.grunnlag.hentVergeadresse
 import no.nav.etterlatte.libs.common.grunnlag.hentVergemaalellerfremtidsfullmakt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.ForelderVerge
-import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.person.Vergemaal
-import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.hentRelevantVerge
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.util.UUID
 
 private val logger = LoggerFactory.getLogger(Grunnlag::class.java)
 
@@ -89,8 +86,8 @@ fun Grunnlag.mapSpraak(): Spraak =
 
 fun Grunnlag.mapVerge(
     sakType: SakType,
-    behandlingId: UUID?,
     brevutfallDto: BrevutfallDto?,
+    adresseService: AdresseService,
 ): Verge? =
     with(this) {
         val relevantVerge =
@@ -99,7 +96,17 @@ fun Grunnlag.mapVerge(
                 soeker.hentFoedselsnummer()?.verdi,
             )
         if (relevantVerge != null) {
-            return hentVergemaal(relevantVerge, behandlingId)
+            val mottakerAdresse =
+                runBlocking {
+                    adresseService.hentMottakerAdresse(
+                        sakType,
+                        relevantVerge.vergeEllerFullmektig.motpartsPersonident!!.value,
+                    )
+                }
+            return Vergemaal(
+                mottakerAdresse.navn,
+                relevantVerge.vergeEllerFullmektig.motpartsPersonident!!,
+            )
         }
 
         if (sakType == SakType.BARNEPENSJON) {
@@ -147,39 +154,6 @@ private fun forelderVerge(gjenlevende: Grunnlagsdata<JsonNode>): ForelderVerge? 
         null
     }
 }
-
-private fun Grunnlag.hentVergemaal(
-    pdlVerge: VergemaalEllerFremtidsfullmakt,
-    behandlingId: UUID?,
-): Vergemaal {
-    val vergeadresse = sak.hentVergeadresse()?.verdi
-
-    val vergesNavn = vergeadresse?.navn ?: pdlVerge.vergeEllerFullmektig.navn
-    val vergesFoedselsnummer = pdlVerge.vergeEllerFullmektig.motpartsPersonident!!.value
-    if (vergesNavn == null) {
-        logger.warn("Finner ikke navn for verge i behandling med id=$behandlingId")
-        return vergemaalUtenAdresse(vergesNavn, vergesFoedselsnummer)
-    }
-    if (vergeadresse == null) {
-        logger.warn("Finner ikke adresse for verge i behandling med id=$behandlingId")
-        return vergemaalUtenAdresse(vergesNavn, vergesFoedselsnummer)
-    }
-    return Vergemaal(
-        mottaker = vergeadresse.copy(navn = vergesNavn),
-    )
-}
-
-private fun vergemaalUtenAdresse(
-    vergesNavn: String?,
-    vergesFoedselsnummer: String,
-) = Vergemaal(
-    mottaker =
-        BrevMottaker(
-            vergesNavn,
-            foedselsnummer = MottakerFoedselsnummer(vergesFoedselsnummer),
-            adresse = null,
-        ),
-)
 
 private fun Navn.fulltNavn(): String = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ") { it.storForbokstav() }
 

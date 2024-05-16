@@ -9,6 +9,7 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
@@ -58,6 +59,7 @@ internal class BrevdataFacadeImplTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val sakService = mockk<SakService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
+    private val adresseService = mockk<AdresseService>()
 
     private val service =
         BrevdataFacade(
@@ -67,6 +69,7 @@ internal class BrevdataFacadeImplTest {
             behandlingKlient,
             sakService,
             trygdetidKlient,
+            adresseService,
         )
 
     @BeforeEach

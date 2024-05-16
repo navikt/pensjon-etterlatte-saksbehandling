@@ -193,14 +193,14 @@ interface Verge {
     fun navn(): String?
 }
 
-data class Vergemaal(val mottaker: BrevMottaker) : Verge {
+data class Vergemaal(val navn: String?, val foedselsnummer: Folkeregisteridentifikator) : Verge {
     override fun navn(): String? {
-        return mottaker.navn
+        return navn
     }
 }
 
 data class ForelderVerge(val foedselsnummer: Folkeregisteridentifikator, val navn: String) : Verge {
-    override fun navn(): String {
+    override fun navn(): String { // TODO ble denne brukt?
         return navn
     }
 }

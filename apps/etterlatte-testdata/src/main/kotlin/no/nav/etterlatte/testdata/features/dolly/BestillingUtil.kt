@@ -34,7 +34,10 @@ fun generererBestilling(bestilling: BestillingRequest): String {
 
     val barnListe = listOf(listOf(soeker), helsoesken, halvsoeskenAvdoed).flatten()
 
-    return bestillingTemplateStart(Random.nextInt(20, 60), bestilling.antall) + barnListe + BESTLLING_TEMPLATE_END
+    return bestillingTemplateStart(
+        Random.nextInt(20, 60),
+        bestilling.antall,
+    ) + barnListe + bestillingTemplateEnd(LocalDateTime.now().minusDays(bestilling.antallDagerSidenDoedsfall.toLong()))
 }
 
 private fun alder18Til20() = Random.nextInt(18, 20)
@@ -86,7 +89,8 @@ fun bestillingTemplateStart(
       ],
       "forelderBarnRelasjon": """
 
-val BESTLLING_TEMPLATE_END = """,
+fun bestillingTemplateEnd(doedsdato: LocalDateTime) =
+    """,
       "sivilstand": [
         {
           "id": null,
@@ -121,7 +125,7 @@ val BESTLLING_TEMPLATE_END = """,
           "kilde": "Dolly",
           "master": "PDL",
           "folkeregistermetadata": null,
-          "doedsdato": "${LocalDateTime.now().minusWeeks(1)}"
+          "doedsdato": "$doedsdato"
         }
       ],
       "foreldreansvar": [

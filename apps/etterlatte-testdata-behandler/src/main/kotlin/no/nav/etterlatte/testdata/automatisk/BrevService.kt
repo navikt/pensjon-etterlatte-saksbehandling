@@ -31,7 +31,7 @@ class BrevService(private val klient: DownstreamResourceClient, private val url:
     private suspend fun genererPDF(
         behandlingId: UUID,
         brev: Brev,
-    ) = klient.post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak/pdf?brevId=${brev.id}"), Systembruker.testdata) {}
+    ) = klient.get(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak/pdf?brevId=${brev.id}"), Systembruker.testdata)
 
     private suspend fun ferdigstillBrev(behandlingId: UUID) =
         klient.post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak/ferdigstill"), Systembruker.testdata) {

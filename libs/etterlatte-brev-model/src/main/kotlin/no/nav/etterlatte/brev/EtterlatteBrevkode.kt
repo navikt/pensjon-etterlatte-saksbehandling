@@ -34,6 +34,7 @@ enum class EtterlatteBrevKode(val brevtype: Brevtype, val tittel: String? = null
     OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL(Brevtype.VEDLEGG, "Utfall ved beregning av omstillingsstønad"),
     OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL(Brevtype.VEDLEGG, "Utfall ved forhåndsvarsel av feilutbetaling"),
     OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV_INNHOLD(Brevtype.MANUELT, "Varsel om aktivitetsplikt for omstillingsstønad"),
+    OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD(Brevtype.MANUELT, "Informasjon om aktivitetsplikt for omstillingsstønad"),
     TILBAKEKREVING_INNHOLD(Brevtype.VEDTAK),
     TILBAKEKREVING_FERDIG(Brevtype.VEDTAK),
 

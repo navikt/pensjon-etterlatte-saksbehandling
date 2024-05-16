@@ -146,14 +146,21 @@ class SakServiceImpl(
         return dao.hentSaker(kjoering, antall, saker).filterForEnheter()
     }
 
-    private fun finnSakerForPerson(person: String) = dao.finnSaker(person)
-
-    private fun finnSakerForPersonOgType(
+    private fun finnSakForPerson(
         person: String,
-        type: SakType,
-    ) = finnSakerForPerson(person).find {
-        it.sakType == type
+        sakType: SakType,
+    ) = finnSakerForPerson(person, sakType).let {
+        if (it.isEmpty()) {
+            null
+        } else {
+            it.single()
+        }
     }
+
+    private fun finnSakerForPerson(
+        person: String,
+        sakType: SakType? = null,
+    ) = dao.finnSaker(person, sakType)
 
     override fun finnSaker(person: String): List<Sak> {
         return finnSakerForPerson(person).filterForEnheter()
@@ -207,7 +214,7 @@ class SakServiceImpl(
         type: SakType,
         overstyrendeEnhet: String?,
     ): Sak {
-        var sak = finnSakerForPersonOgType(fnr, type)
+        var sak = finnSakForPerson(fnr, type)
         if (sak == null) {
             val enhet = sjekkEnhetFraNorg(fnr, type, overstyrendeEnhet)
             sak = dao.opprettSak(fnr, type, enhet)
@@ -241,6 +248,7 @@ class SakServiceImpl(
                     )
                 }
             }
+
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
                 if (sak.enhet != Enheter.STRENGT_FORTROLIG.enhetNr) {
                     dao.oppdaterEnheterPaaSaker(
@@ -248,6 +256,7 @@ class SakServiceImpl(
                     )
                 }
             }
+
             AdressebeskyttelseGradering.FORTROLIG -> return
             AdressebeskyttelseGradering.UGRADERT -> return
         }
@@ -279,12 +288,14 @@ class SakServiceImpl(
                     sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering strengt fortrolig")
                 }
             }
+
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
                 if (this.enhetNr != Enheter.STRENGT_FORTROLIG.enhetNr) {
                     logger.error("Sak har fått satt feil enhetsnummer basert på gradering, se sikkerlogg.")
                     sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering strengt fortrolig")
                 }
             }
+
             AdressebeskyttelseGradering.FORTROLIG, AdressebeskyttelseGradering.UGRADERT, null -> return
         }
     }
@@ -305,9 +316,13 @@ class SakServiceImpl(
     override fun finnGjeldendeEnhet(
         fnr: String,
         type: SakType,
-    ) = when (val sak = finnSakerForPersonOgType(fnr, type)) {
-        null -> sjekkEnhetFraNorg(fnr, type, null)
-        else -> sak.enhet
+    ): String {
+        val sak = finnSakForPerson(fnr, type)
+
+        return when (sak) {
+            null -> sjekkEnhetFraNorg(fnr, type, null)
+            else -> sak.enhet
+        }
     }
 
     private fun sjekkEnhetFraNorg(
@@ -357,7 +372,7 @@ class SakServiceImpl(
         person: String,
         type: SakType,
     ): Sak? {
-        return finnSakerForPersonOgType(person, type).sjekkEnhet()
+        return finnSakForPerson(person, type).sjekkEnhet()
     }
 
     override fun finnSak(id: Long): Sak? {

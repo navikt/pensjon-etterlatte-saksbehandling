@@ -194,11 +194,24 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
         }
     }
 
-    fun finnSaker(fnr: String): List<Sak> {
+    fun finnSaker(
+        fnr: String,
+        type: SakType? = null,
+    ): List<Sak> {
         return connectionAutoclosing.hentConnection { connection ->
             with(connection) {
-                val statement = prepareStatement("SELECT id, sakType, fnr, enhet from sak where fnr = ?")
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT id, sakType, fnr, enhet
+                        FROM sak
+                        WHERE fnr = ?
+                            AND (? OR saktype = ?)
+                        """.trimIndent(),
+                    )
                 statement.setString(1, fnr)
+                statement.setBoolean(2, type == null)
+                statement.setString(3, type?.name)
                 statement.executeQuery().toList { this.toSak() }
             }
         }

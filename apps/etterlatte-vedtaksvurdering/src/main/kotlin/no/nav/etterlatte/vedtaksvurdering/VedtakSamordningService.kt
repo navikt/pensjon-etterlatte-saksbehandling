@@ -26,16 +26,13 @@ class VedtakSamordningService(private val repository: VedtaksvurderingRepository
         fnr: Folkeregisteridentifikator,
         sakType: SakType,
         fomDato: LocalDate,
-        tomDato: LocalDate? = null,
     ): List<VedtakSamordningDto> {
         logger.debug("Henter og sammenstiller vedtaksliste")
         val vedtaksliste = repository.hentFerdigstilteVedtak(fnr, sakType)
         val tidslinjeJustert =
             Vedtakstidslinje(vedtaksliste)
                 .sammenstill(YearMonth.of(fomDato.year, fomDato.month))
-        val tom = tomDato?.let { YearMonth.of(it.year, it.month) }
         return tidslinjeJustert.map { it.toSamordningsvedtakDto() }
-            .filter { tom?.let { t -> it.virkningstidspunkt <= t } ?: true }
     }
 }
 

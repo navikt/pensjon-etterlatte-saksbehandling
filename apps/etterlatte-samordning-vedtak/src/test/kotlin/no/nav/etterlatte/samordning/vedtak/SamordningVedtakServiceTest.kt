@@ -1,6 +1,7 @@
 package no.nav.etterlatte.samordning.vedtak
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equalityMatcher
 import io.kotest.matchers.shouldBe
@@ -165,6 +166,52 @@ class SamordningVedtakServiceTest {
         vedtaksliste shouldHaveSize 2
 
         coVerify { tpKlient.harTpYtelseOnDate(FNR, tpnr = tpnrSPK, fomDato = fomDato) }
+    }
+
+    @Test
+    fun `skal hente tre vedtak fra tjeneste, men filtrere paa tom-dato og virkningstidspunkt og kun gi ut 2`() {
+        val vedtakliste =
+            listOf(
+                vedtak(
+                    virkningstidspunkt = now().minusMonths(3),
+                    vedtakId = 123L,
+                    beregning = beregning(trygdetid = 32),
+                ),
+                vedtak(
+                    virkningstidspunkt = now().minusMonths(1),
+                    vedtakId = 234L,
+                    beregning = beregning(trygdetid = 40),
+                ),
+                vedtak(
+                    virkningstidspunkt = now().plusMonths(1),
+                    vedtakId = 345L,
+                    beregning = beregning(trygdetid = 40),
+                ),
+            )
+
+        val fomDato = now().minusMonths(2)
+
+        coEvery {
+            vedtakKlient.hentVedtaksliste(
+                fomDato = fomDato.atStartOfMonth(),
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                fnr = FNR,
+                callerContext = PensjonContext,
+            )
+        } returns vedtakliste
+
+        val vedtaksliste =
+            runBlocking {
+                samordningVedtakService.hentVedtaksliste(
+                    fomDato = fomDato.atStartOfMonth(),
+                    tomDato = now().atEndOfMonth(),
+                    fnr = Folkeregisteridentifikator.of(FNR),
+                    context = PensjonContext,
+                )
+            }
+
+        vedtaksliste shouldHaveSize 2
+        vedtaksliste.map { it.vedtakId } shouldContainExactlyInAnyOrder listOf(123L, 234L)
     }
 
     @Nested

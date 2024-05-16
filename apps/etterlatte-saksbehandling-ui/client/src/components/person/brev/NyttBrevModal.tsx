@@ -11,8 +11,9 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { IValgJaNei } from '~shared/types/Aktivitetsplikt'
 import { capitalize } from '~utils/formattering'
+import { SakType } from '~shared/types/sak'
 
-export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
+export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakType }) => {
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
@@ -74,10 +75,12 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
                   required: { value: true, message: 'Feltet er påkrevd' },
                 })}
               >
-                <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND}>
-                  Informasjon om aktivitetsplikt ved 4 måneder
-                </option>
                 <option value={FormType.TOMT_BREV}>Manuelt brev</option>
+                {sakType === SakType.OMSTILLINGSSTOENAD && (
+                  <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND}>
+                    Informasjon om aktivitetsplikt ved 4 måneder
+                  </option>
+                )}
               </Select>
 
               {skjemaet.type === FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND && (

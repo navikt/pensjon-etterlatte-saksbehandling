@@ -133,7 +133,9 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
 
   return (
     <>
-      {isSuccess(ferdigstillOppgaveStatus) && <Toast melding="Vurdering lagret og oppgave ferdigstilt" />}
+      {isSuccess(ferdigstillOppgaveStatus) && (
+        <Toast timeout={10000} melding="Oppgave ferdigstilt, har du husket å ferdigstille brev?" />
+      )}
       <Button size="small" onClick={() => setVisModal(true)}>
         Se oppgave
       </Button>

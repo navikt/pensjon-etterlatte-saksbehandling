@@ -43,6 +43,8 @@ class SamordningVedtakService(
 
     suspend fun hentVedtaksliste(
         fomDato: LocalDate,
+        tomDato: LocalDate? = null,
+        sakType: SakType = SakType.OMSTILLINGSSTOENAD,
         fnr: Folkeregisteridentifikator,
         context: CallerContext,
     ): List<SamordningVedtakDto> {
@@ -53,12 +55,12 @@ class SamordningVedtakService(
         }
 
         return vedtaksvurderingKlient.hentVedtaksliste(
+            sakType = sakType,
             fomDato = fomDato,
+            tomDato = tomDato,
             fnr = fnr.value,
             callerContext = context,
-        )
-            .filter { it.sak.sakType == SakType.OMSTILLINGSSTOENAD }
-            .map { it.mapSamordningsvedtak() }
+        ).map { it.mapSamordningsvedtak() }
     }
 
     suspend fun harLoependeOmstillingsstoenadPaaDato(

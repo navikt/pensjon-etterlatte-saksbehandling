@@ -145,9 +145,10 @@ class SamordningVedtakServiceTest {
 
         coEvery {
             vedtakKlient.hentVedtaksliste(
-                fomDato,
+                fomDato = fomDato,
+                sakType = SakType.OMSTILLINGSSTOENAD,
                 fnr = FNR,
-                MaskinportenTpContext(tpnrSPK, ORGNO),
+                callerContext = MaskinportenTpContext(tpnrSPK, ORGNO),
             )
         } returns vedtakliste
         coEvery { tpKlient.harTpYtelseOnDate(FNR, tpnr = tpnrSPK, fomDato = fomDato) } returns true
@@ -155,9 +156,9 @@ class SamordningVedtakServiceTest {
         val vedtaksliste =
             runBlocking {
                 samordningVedtakService.hentVedtaksliste(
-                    fomDato,
-                    Folkeregisteridentifikator.of(FNR),
-                    MaskinportenTpContext(tpnrSPK, ORGNO),
+                    fomDato = fomDato,
+                    fnr = Folkeregisteridentifikator.of(FNR),
+                    context = MaskinportenTpContext(tpnrSPK, ORGNO),
                 )
             }
 
@@ -191,9 +192,10 @@ class SamordningVedtakServiceTest {
 
             coEvery {
                 vedtakKlient.hentVedtaksliste(
-                    dato.atStartOfMonth(),
+                    fomDato = dato.atStartOfMonth(),
+                    sakType = SakType.OMSTILLINGSSTOENAD,
                     fnr = FNR,
-                    PensjonContext,
+                    callerContext = PensjonContext,
                 )
             } returns vedtakliste
 
@@ -229,9 +231,10 @@ class SamordningVedtakServiceTest {
 
             coEvery {
                 vedtakKlient.hentVedtaksliste(
-                    dato.atStartOfMonth(),
+                    fomDato = dato.atStartOfMonth(),
+                    sakType = SakType.OMSTILLINGSSTOENAD,
                     fnr = FNR,
-                    PensjonContext,
+                    callerContext = PensjonContext,
                 )
             } returns vedtakliste
 
@@ -267,9 +270,10 @@ class SamordningVedtakServiceTest {
 
             coEvery {
                 vedtakKlient.hentVedtaksliste(
-                    dato.atStartOfMonth(),
+                    fomDato = dato.atStartOfMonth(),
+                    sakType = SakType.OMSTILLINGSSTOENAD,
                     fnr = FNR,
-                    PensjonContext,
+                    callerContext = PensjonContext,
                 )
             } returns vedtakliste
 
@@ -306,9 +310,10 @@ class SamordningVedtakServiceTest {
 
             coEvery {
                 vedtakKlient.hentVedtaksliste(
-                    dato.atStartOfMonth(),
+                    fomDato = dato.atStartOfMonth(),
+                    sakType = SakType.OMSTILLINGSSTOENAD,
                     fnr = FNR,
-                    PensjonContext,
+                    callerContext = PensjonContext,
                 )
             } returns vedtakliste
 

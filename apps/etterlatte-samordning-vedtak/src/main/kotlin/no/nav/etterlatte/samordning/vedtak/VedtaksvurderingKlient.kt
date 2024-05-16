@@ -6,8 +6,10 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.parameter
 import io.ktor.client.request.url
 import io.ktor.http.HttpStatusCode
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -45,7 +47,9 @@ class VedtaksvurderingKlient(config: Config, private val httpClient: HttpClient)
     }
 
     suspend fun hentVedtaksliste(
+        sakType: SakType,
         fomDato: LocalDate,
+        tomDato: LocalDate? = null,
         fnr: String,
         callerContext: CallerContext,
     ): List<VedtakSamordningDto> {
@@ -53,7 +57,11 @@ class VedtaksvurderingKlient(config: Config, private val httpClient: HttpClient)
 
         return try {
             httpClient.get {
-                url("$vedtaksvurderingUrl?fomDato=$fomDato")
+                url(vedtaksvurderingUrl) {
+                    parameters.append("sakstype", sakType.name)
+                    parameters.append("fomDato", fomDato.toString())
+                    tomDato?.let { parameter("tomDato", it.toString()) }
+                }
                 header("fnr", fnr)
                 if (callerContext is MaskinportenTpContext) {
                     header("orgnr", callerContext.organisasjonsnr)

@@ -18,7 +18,7 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
   const navigate = useNavigate()
 
   const defaultData: FilledFormData = {
-    type: 'TOMT_BREV',
+    type: FormType.TOMT_BREV,
     utbetaling: '',
   }
 
@@ -74,13 +74,13 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
                   required: { value: true, message: 'Feltet er påkrevd' },
                 })}
               >
-                <option value="OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND">
+                <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND}>
                   Informasjon om aktivitetsplikt ved 4 måneder
                 </option>
-                <option value="TOMT_BREV">Manuelt brev</option>
+                <option value={FormType.TOMT_BREV}>Manuelt brev</option>
               </Select>
 
-              {skjemaet.type === 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND' && (
+              {skjemaet.type === FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND && (
                 <>
                   <Select
                     error={errors?.aktivitetsgrad?.message}
@@ -157,18 +157,18 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
 
 export type BrevParametre =
   | {
-      type: 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND'
+      type: FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND
       aktivitetsgrad: string
       utbetaling: boolean
       redusertEtterInntekt: boolean
       nasjonalEllerUtland: NasjonalEllerUtland
     }
   | {
-      type: 'TOMT_BREV'
+      type: FormType.TOMT_BREV
     }
 
 type FilledFormData = {
-  type: string
+  type: FormType
   aktivitetsgrad?: string
   utbetaling?: IValgJaNei | ''
   redusertEtterInntekt?: IValgJaNei | ''
@@ -180,9 +180,14 @@ enum NasjonalEllerUtland {
   UTLAND = 'UTLAND',
 }
 
+enum FormType {
+  TOMT_BREV = 'TOMT_BREV',
+  OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND = 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND',
+}
+
 function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
   switch (formdata.type) {
-    case 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND':
+    case FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND:
       return {
         type: formdata.type,
         aktivitetsgrad: formdata.aktivitetsgrad!!,
@@ -190,7 +195,7 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
         redusertEtterInntekt: formdata.redusertEtterInntekt!! === IValgJaNei.JA,
         nasjonalEllerUtland: formdata.nasjonalEllerUtland!!,
       }
-    case 'TOMT_BREV':
+    case FormType.TOMT_BREV:
       return {
         type: formdata.type,
       }

@@ -55,6 +55,12 @@ internal class LyttPaaIverksattVedtakRiver(
             return
         }
 
+        val status = pesysRepository.hentStatus(behandling.pesysId.id)
+        if (status == Migreringsstatus.FERDIG) {
+            logger.debug("Sak er ferdig migrert. Gjør ingenting")
+            return
+        }
+
         when (respons.status) {
             UtbetalingStatusDto.GODKJENT, UtbetalingStatusDto.GODKJENT_MED_FEIL -> {
                 pesysRepository.oppdaterStatus(behandling.pesysId, Migreringsstatus.UTBETALING_OK)

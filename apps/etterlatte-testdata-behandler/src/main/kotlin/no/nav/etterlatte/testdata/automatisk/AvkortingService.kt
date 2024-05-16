@@ -18,8 +18,8 @@ class AvkortingService(
                 Resource(clientId, "$url/api/beregning/avkorting/$behandlingId"),
                 Systembruker.testdata,
                 AvkortingGrunnlagLagreDto(
-                    aarsinntekt = 0,
-                    fratrekkInnAar = 0,
+                    aarsinntekt = 200_000,
+                    fratrekkInnAar = 50_000,
                     inntektUtland = 0,
                     fratrekkInnAarUtland = 0,
                     spesifikasjon = "kun test",

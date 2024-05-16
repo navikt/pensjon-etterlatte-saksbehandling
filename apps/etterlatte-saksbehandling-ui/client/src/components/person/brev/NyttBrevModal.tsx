@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { IValgJaNei } from '~shared/types/Aktivitetsplikt'
+import { capitalize } from '~utils/formattering'
 
 export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
@@ -106,6 +107,30 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
                       </>
                     }
                   />
+                  <ControlledRadioGruppe
+                    name="redusertEtterInntekt"
+                    control={control}
+                    legend="Er stønaden redusert etter inntekt?"
+                    errorVedTomInput="Du må velge om stønaden redusert etter inntekt"
+                    radios={
+                      <>
+                        <Radio value={IValgJaNei.JA}>Ja</Radio>
+                        <Radio value={IValgJaNei.NEI}>Nei</Radio>
+                      </>
+                    }
+                  />
+                  <ControlledRadioGruppe
+                    name="nasjonalEllerUtland"
+                    control={control}
+                    legend="Er saken nasjonal eller utland?"
+                    errorVedTomInput="Du må velge om saken nasjonal eller utland"
+                    radios={
+                      <>
+                        <Radio value={NasjonalEllerUtland.NASJONAL}>{capitalize(NasjonalEllerUtland.NASJONAL)}</Radio>
+                        <Radio value={NasjonalEllerUtland.UTLAND}>{capitalize(NasjonalEllerUtland.UTLAND)}</Radio>
+                      </>
+                    }
+                  />
                 </>
               )}
             </VStack>
@@ -135,6 +160,8 @@ export type BrevParametre =
       type: 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND'
       aktivitetsgrad: string
       utbetaling: boolean
+      redusertEtterInntekt: boolean
+      nasjonalEllerUtland: NasjonalEllerUtland
     }
   | {
       type: 'TOMT_BREV'
@@ -144,6 +171,13 @@ type FilledFormData = {
   type: string
   aktivitetsgrad?: string
   utbetaling?: IValgJaNei | ''
+  redusertEtterInntekt?: IValgJaNei | ''
+  nasjonalEllerUtland?: NasjonalEllerUtland
+}
+
+enum NasjonalEllerUtland {
+  NASJONAL = 'NASJONAL',
+  UTLAND = 'UTLAND',
 }
 
 function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
@@ -153,6 +187,8 @@ function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
         type: formdata.type,
         aktivitetsgrad: formdata.aktivitetsgrad!!,
         utbetaling: formdata.utbetaling!! === IValgJaNei.JA,
+        redusertEtterInntekt: formdata.redusertEtterInntekt!! === IValgJaNei.JA,
+        nasjonalEllerUtland: formdata.nasjonalEllerUtland!!,
       }
     case 'TOMT_BREV':
       return {

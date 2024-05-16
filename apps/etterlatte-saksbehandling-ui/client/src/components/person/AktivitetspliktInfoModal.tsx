@@ -141,25 +141,6 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
         <Modal open={visModal} onClose={() => setVisModal(false)} header={{ heading: 'Vurdering av aktivitetsplikt' }}>
           <Modal.Body>
             <HStack gap="12">
-              <div>
-                <Heading size="small" spacing>
-                  Opprett informasjonbrev rundt aktivitetsplikt til bruker
-                </Heading>
-                <BodyLong spacing>
-                  Den etterlatte skal informeres om aktivitetskravet som vil tre i kraft 6 måneder etter dødsfallet. Det
-                  skal opprettes et manuelt informasjonsbrev som skal bli sendt 3-4 måneder etter dødsfallet.
-                </BodyLong>
-                <Button
-                  variant="primary"
-                  size="small"
-                  as="a"
-                  href={`/person/${oppgave.fnr?.toString()}?fane=BREV`}
-                  target="_blank"
-                >
-                  Opprett manuelt brev
-                </Button>
-              </div>
-
               <Spinner label="Henter vurdering av aktivitetsplikt" visible={isPending(hentet)} />
 
               {oppgave.status === Oppgavestatus.UNDER_BEHANDLING && !vurdering ? (
@@ -311,6 +292,25 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
                   )}
                 </>
               )}
+
+              <div>
+                <Heading size="small" spacing>
+                  Opprett informasjonbrev rundt aktivitetsplikt til bruker
+                </Heading>
+                <BodyLong spacing>
+                  Den etterlatte skal informeres om aktivitetskravet som vil tre i kraft 6 måneder etter dødsfallet. Det
+                  skal opprettes et manuelt informasjonsbrev som skal bli sendt 3-4 måneder etter dødsfallet.
+                </BodyLong>
+                <Button
+                  variant="primary"
+                  size="small"
+                  as="a"
+                  href={`/person/${oppgave.fnr?.toString()}?fane=BREV`}
+                  target="_blank"
+                >
+                  Opprett manuelt brev
+                </Button>
+              </div>
             </HStack>
             {mapFailure(opprettetUnntak, (error) => (
               <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved oppretting av unntak'}</ApiErrorAlert>

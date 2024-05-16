@@ -10,7 +10,6 @@ import { useNavigate } from 'react-router-dom'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { IValgJaNei } from '~shared/types/Aktivitetsplikt'
-import { capitalize } from '~utils/formattering'
 import { SakType } from '~shared/types/sak'
 
 export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakType }) => {
@@ -99,14 +98,14 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                     <option value="OVER_50_PROSENT">Over 50%</option>
                   </Select>
                   <ControlledRadioGruppe
-                    name="utbetaling"
+                    name="nasjonalEllerUtland"
                     control={control}
-                    legend="Har bruker utbetaling?"
-                    errorVedTomInput="Du må velge om bruker har utbetaling"
+                    legend="Er bruker bosatt i Norge eller utlandet?"
+                    errorVedTomInput="Du må velge om bruker er bosatt i Norge eller utlandet"
                     radios={
                       <>
-                        <Radio value={IValgJaNei.JA}>Ja</Radio>
-                        <Radio value={IValgJaNei.NEI}>Nei</Radio>
+                        <Radio value={NasjonalEllerUtland.NASJONAL}>Norge</Radio>
+                        <Radio value={NasjonalEllerUtland.UTLAND}>Utlandet</Radio>
                       </>
                     }
                   />
@@ -123,14 +122,14 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
                     }
                   />
                   <ControlledRadioGruppe
-                    name="nasjonalEllerUtland"
+                    name="utbetaling"
                     control={control}
-                    legend="Er saken nasjonal eller utland?"
-                    errorVedTomInput="Du må velge om saken nasjonal eller utland"
+                    legend="Kommer stønaden til utbetaling?"
+                    errorVedTomInput="Du må velge om stønaden kommer til utbetaling"
                     radios={
                       <>
-                        <Radio value={NasjonalEllerUtland.NASJONAL}>{capitalize(NasjonalEllerUtland.NASJONAL)}</Radio>
-                        <Radio value={NasjonalEllerUtland.UTLAND}>{capitalize(NasjonalEllerUtland.UTLAND)}</Radio>
+                        <Radio value={IValgJaNei.JA}>Ja</Radio>
+                        <Radio value={IValgJaNei.NEI}>Nei</Radio>
                       </>
                     }
                   />

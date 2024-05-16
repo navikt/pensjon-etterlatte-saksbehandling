@@ -21,7 +21,7 @@ internal fun Vedtak.erVedtakMedEtterbetaling(
 
             if (innhold.virkningstidspunkt < now) {
                 val ferdigstilteVedtak =
-                    vedtaksvurderingRepository.hentFerdigstilteVedtak(this.soeker)
+                    vedtaksvurderingRepository.hentFerdigstilteVedtak(this.soeker, this.sakType)
                         .filter { it.id != this.id }
                 val tidligereVedtakTidslinje = Vedtakstidslinje(ferdigstilteVedtak).sammenstill(OMS_START_YTELSE)
                 val tidligereUtbetalingsperioder =

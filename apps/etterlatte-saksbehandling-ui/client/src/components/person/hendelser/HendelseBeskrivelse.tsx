@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { ReactNode, useContext } from 'react'
 import {
   FnrTilNavnMapContext,
   formaterFoedselsnummerMedNavn,
@@ -32,14 +32,14 @@ const VisAnsvarligeForeldreSamsvar = ({ samsvar }: { samsvar: AnsvarligeForeldre
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <KortTekst size="small">Nytt grunnlag (PDL)</KortTekst>
+        <BoldKortTekst>Nytt grunnlag (PDL)</BoldKortTekst>
         <KortTekst size="small">
           {samsvar.fraPdl?.map((fnr) => formaterFoedselsnummerMedNavn(navneMap, fnr))?.join(', ') ??
             'Ingen ansvarlige foreldre'}
         </KortTekst>
       </div>
       <div>
-        <KortTekst size="small">Eksisterende grunnlag</KortTekst>
+        <BoldKortTekst>Eksisterende grunnlag</BoldKortTekst>
         <KortTekst size="small">
           {samsvar.fraGrunnlag?.map((fnr) => formaterFoedselsnummerMedNavn(navneMap, fnr))?.join(', ') ??
             'Ingen ansvarlige foreldre'}
@@ -53,12 +53,12 @@ const UtlandSamsvarVisning = ({ samsvar }: { samsvar: UtlandSamsvar }) => {
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <KortTekst size="small">Nytt grunnlag (PDL)</KortTekst>
+        <BoldKortTekst>Nytt grunnlag (PDL)</BoldKortTekst>
         <KortTekst size="small">Ut: {formaterLandList(samsvar.fraPdl?.utflyttingFraNorge ?? [])}</KortTekst>
         <KortTekst size="small">Inn: {formaterLandList(samsvar.fraPdl?.innflyttingTilNorge ?? [])}</KortTekst>
       </div>
       <div>
-        <KortTekst size="small">Eksisterende grunnlag</KortTekst>
+        <BoldKortTekst>Eksisterende grunnlag</BoldKortTekst>
         <KortTekst size="small">Ut: {formaterLandList(samsvar.fraGrunnlag?.utflyttingFraNorge ?? [])}</KortTekst>
         <KortTekst size="small">Inn: {formaterLandList(samsvar.fraGrunnlag?.innflyttingTilNorge ?? [])}</KortTekst>
       </div>
@@ -70,11 +70,11 @@ const Doedsdato = ({ samsvar }: { samsvar: DoedsdatoSamsvar }) => {
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <KortTekst size="small">Nytt grunnlag (PDL)</KortTekst>
+        <BoldKortTekst>Nytt grunnlag (PDL)</BoldKortTekst>
         <KortTekst size="small">{formaterKanskjeStringDatoMedFallback('Ingen', samsvar.fraPdl)}</KortTekst>
       </div>
       <div>
-        <KortTekst size="small">Eksisterende grunnlag</KortTekst>
+        <BoldKortTekst>Eksisterende grunnlag</BoldKortTekst>
         <KortTekst size="small">{formaterKanskjeStringDatoMedFallback('Ingen', samsvar.fraGrunnlag)}</KortTekst>
       </div>
     </GrunnlagSammenligningWrapper>
@@ -85,13 +85,13 @@ const Adresse = ({ adresse }: { adresse: AdresseSamsvar }) => {
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <KortTekst size="small">Nytt grunnlag (PDL)</KortTekst>
+        <BoldKortTekst>Nytt grunnlag (PDL)</BoldKortTekst>
         <KortTekst as="div">
           <Adressevisning adresser={adresse.fraPdl} soeknadsoversikt={false} />
         </KortTekst>
       </div>
       <div>
-        <KortTekst size="small">Eksisterende grunnlag</KortTekst>
+        <BoldKortTekst>Eksisterende grunnlag</BoldKortTekst>
         <KortTekst as="div">
           <Adressevisning adresser={adresse.fraGrunnlag} soeknadsoversikt={false} />
         </KortTekst>
@@ -105,13 +105,13 @@ const Barn = ({ samsvar }: { samsvar: BarnSamsvar }) => {
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <KortTekst size="small">Nytt grunnlag (PDL)</KortTekst>
+        <BoldKortTekst>Nytt grunnlag (PDL)</BoldKortTekst>
         <KortTekst size="small">
           {samsvar.fraPdl?.map((fnr) => formaterFoedselsnummerMedNavn(fnrTilNavn, fnr)).join(', ') ?? 'Ingen barn'}
         </KortTekst>
       </div>
       <div>
-        <KortTekst size="small">Eksisterende grunnlag</KortTekst>
+        <BoldKortTekst>Eksisterende grunnlag</BoldKortTekst>
         <KortTekst size="small">
           {samsvar.fraGrunnlag?.map((fnr) => formaterFoedselsnummerMedNavn(fnrTilNavn, fnr)).join(', ') ?? 'Ingen barn'}
         </KortTekst>
@@ -162,13 +162,13 @@ const VisSivilstand = ({ samsvar }: { samsvar: SivilstandSamsvar }) => {
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <KortTekst size="small">Nytt grunnlag (PDL)</KortTekst>
+        <BoldKortTekst>Nytt grunnlag (PDL)</BoldKortTekst>
         <ListeWrapper>
           {samsvar.fraPdl?.map((sivilstand, i) => <li key={i}>{sivilstandWrapper(sivilstand, i)}</li>)}
         </ListeWrapper>
       </div>
       <div>
-        <KortTekst size="small">Eksisterende grunnlag</KortTekst>
+        <BoldKortTekst>Eksisterende grunnlag</BoldKortTekst>
         <ListeWrapper>
           {samsvar.fraGrunnlag?.map((sivilstand, i) => <li key={i}>{sivilstandWrapper(sivilstand, i)}</li>)}
         </ListeWrapper>
@@ -219,13 +219,13 @@ const Vergemaal = (props: { samsvar: VergemaalEllerFremtidsfullmaktForholdSamsva
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <KortTekst size="small">Nytt grunnlag (PDL)</KortTekst>
+        <BoldKortTekst>Nytt grunnlag (PDL)</BoldKortTekst>
         {props.samsvar.fraPdl?.map((verge, i) => <GrunnlagVergemaal key={i} vergemaal={verge} />) ?? (
           <KortTekst size="small">Ingen vergemål funnet</KortTekst>
         )}
       </div>
       <div>
-        <KortTekst size="small">Eksisterende grunnlag</KortTekst>
+        <BoldKortTekst>Eksisterende grunnlag</BoldKortTekst>
         {props.samsvar.fraGrunnlag?.map((verge, i) => <GrunnlagVergemaal key={i} vergemaal={verge} />) ?? (
           <KortTekst size="small">Ingen vergemål funnet</KortTekst>
         )}
@@ -321,6 +321,14 @@ export const HendelseBeskrivelse = ({
         </Header>
       )
   }
+}
+
+const BoldKortTekst = ({ children }: { children: ReactNode | Array<ReactNode> }) => {
+  return (
+    <KortTekst size="small" weight="semibold">
+      {children}
+    </KortTekst>
+  )
 }
 
 const DetaljerWrapper = styled.div`

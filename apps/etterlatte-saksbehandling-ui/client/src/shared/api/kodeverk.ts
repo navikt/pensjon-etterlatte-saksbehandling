@@ -5,4 +5,4 @@ export interface RsKode {
   term: string
 }
 
-export const hentKodeverkTema = (): Promise<ApiResponse<RsKode[]>> => apiClient.get('/norg2/kodeverk/tema')
+export const hentKodeverkArkivtemaer = (): Promise<ApiResponse<RsKode[]>> => apiClient.get('/kodeverk/Arkivtemaer')

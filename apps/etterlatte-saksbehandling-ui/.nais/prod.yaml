@@ -106,8 +106,8 @@ spec:
       value: https://pensjon-utland.intern.nav.no/gjenny
     - name: RINA_URL
       value: http://rina-ss1.adeo.no
-    - name: NORG2_URL
-      value: https://norg2.prod-fss-pub.nais.io
+    - name: KODEVERK_URL
+      value: https://kodeverk-api.nav.no
     - name: MODIAPERSONOVERSIKT_URL
       value: https://app.adeo.no/modiapersonoversikt
     - name: PSAK_URL
@@ -123,7 +123,7 @@ spec:
         - host: login.microsoftonline.com
         - host: graph.microsoft.com
         - host: etterlatte-unleash-api.nav.cloud.nais.io
-        - host: norg2.prod-fss-pub.nais.io
+        - host: kodeverk-api.nav.no
       rules:
         - application: etterlatte-brev-api
         - application: etterlatte-vilkaarsvurdering

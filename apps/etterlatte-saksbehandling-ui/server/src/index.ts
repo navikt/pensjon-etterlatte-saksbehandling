@@ -7,7 +7,7 @@ import { tokenMiddleware } from './middleware/getOboToken'
 import { proxy } from './middleware/proxy'
 import { loggerRouter } from './routers/loggerRouter'
 import prometheus from './monitoring/prometheus'
-import { norg2Router } from './routers/norg2Router'
+import { kodeverkRouter } from './routers/kodeverkRouter'
 import { githubRouter } from './routers/githubRouter'
 import { unleashRouter } from './routers/unleashRouter'
 import { requestLoggerMiddleware } from './middleware/logging'
@@ -60,7 +60,7 @@ app.get(
 )
 
 app.use(authenticateUser) // Alle ruter etter denne er authenticated
-app.use('/api/norg2', norg2Router)
+app.use('/api/kodeverk', kodeverkRouter)
 app.use('/api/github', githubRouter)
 
 app.use(

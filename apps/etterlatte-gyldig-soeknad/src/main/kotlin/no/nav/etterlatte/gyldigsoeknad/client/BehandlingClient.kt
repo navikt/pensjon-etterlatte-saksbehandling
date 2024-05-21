@@ -6,6 +6,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -29,7 +30,9 @@ class BehandlingClient(
             sakOgBehandlingApp.post("$url/behandlinger/opprettbehandling") {
                 contentType(ContentType.Application.Json)
                 setBody(BehandlingsBehov(sak, persongalleri, mottattDato.toString()))
-            }.body<String>()
+            }
+                .also { require(it.status.isSuccess()) }
+                .body<String>()
         }.let {
             UUID.fromString(it)
         }

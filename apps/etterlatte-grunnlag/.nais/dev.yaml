@@ -21,10 +21,10 @@ spec:
           - name: max_connections
             value: "100"
   liveness:
-    initialDelay: 5
+    initialDelay: 120
     path: /health/isalive
   readiness:
-    initialDelay: 5
+    initialDelay: 120
     path: /health/isready
   prometheus:
     enabled: true

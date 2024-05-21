@@ -181,8 +181,8 @@ class BehandlingDao(
                         INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                         soeknad_mottatt_dato, virkningstidspunkt, utlandstilknytning, bodd_eller_arbeidet_utlandet, 
                         revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, begrunnelse, relatert_behandling,
-                        sende_brev)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        sende_brev, opphoer_fom)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
 
@@ -205,6 +205,7 @@ class BehandlingDao(
                     stmt.setString(16, begrunnelse)
                     stmt.setString(17, relatertBehandlingId)
                     stmt.setBoolean(18, sendeBrev)
+                    stmt.setString(19, objectMapper.writeValueAsString(opphoerFraOgMed))
                 }
                 require(stmt.executeUpdate() == 1)
             }

@@ -20,7 +20,6 @@ class AppBuilder(props: Miljoevariabler) {
     val tidshendelserService: TidshendelseService by lazy {
         TidshendelseService(
             behandlingService,
-            featureToggleService,
         )
     }
 

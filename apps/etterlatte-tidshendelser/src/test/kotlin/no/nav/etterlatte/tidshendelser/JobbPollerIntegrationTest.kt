@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
@@ -26,6 +27,11 @@ class JobbPollerIntegrationTest(dataSource: DataSource) {
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
     private val jobbPoller = JobbPoller(hendelseDao, aldersovergangerService, omstillingsstoenadService)
+
+    @BeforeEach
+    fun beforeEach() {
+        jobbTestdata.slettAlleJobber()
+    }
 
     @AfterEach
     fun afterEach() {

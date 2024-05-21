@@ -33,12 +33,7 @@ interface RsKode {
 
 kodeverkRouter.get('/:kodeverkNavn', async (req: Request, res: Response) => {
   try {
-    logger.info('req.params', req.params)
-
     const kodeverkNavn = req.params.kodeverkNavn
-    if (!kodeverkNavn) {
-      return res.status(500).send('Param :kodeverkNavn mangler')
-    }
 
     const kodeverkResponse: KodeverkResponse | undefined = cache.get(kodeverkNavn)
     if (!!kodeverkResponse) {

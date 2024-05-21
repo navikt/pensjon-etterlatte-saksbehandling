@@ -37,7 +37,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Assemble
-        run: ./gradlew assemble -Dkotlin.compiler.execution.strategy="in-process"
+        run: ./gradlew assemble -Dkotlin.compiler.execution.strategy=out-of-process
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

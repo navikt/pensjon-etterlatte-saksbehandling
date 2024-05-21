@@ -18,7 +18,7 @@ fun Route.barnepensjonVedtakRoute(
     samordningVedtakService: SamordningVedtakService,
     config: Config,
 ) {
-    route("api/pensjon/barnepensjon/vedtak") {
+    route("api/barnepensjon/vedtak") {
         install(AuthorizationPlugin) {
             roles = setOf("les-bp-vedtak", config.getString("roller.pensjon-saksbehandler"))
             issuers = setOf("azure")

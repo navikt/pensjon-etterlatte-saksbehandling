@@ -123,6 +123,7 @@ spec:
         - host: login.microsoftonline.com
         - host: graph.microsoft.com
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: kodeverk-api.nav.no
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
@@ -133,9 +134,6 @@ spec:
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-utbetaling
-        - application: kodeverk-api
-          namespace: team-rocket
-          cluster: dev-gcp
     inbound:
       rules:
         - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator

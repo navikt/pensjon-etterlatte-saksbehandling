@@ -123,6 +123,7 @@ spec:
         - host: login.microsoftonline.com
         - host: graph.microsoft.com
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: kodeverk-api.nav.no
       rules:
         - application: etterlatte-brev-api
         - application: etterlatte-vilkaarsvurdering
@@ -133,6 +134,3 @@ spec:
         - application: etterlatte-trygdetid
         - application: etterlatte-pdltjenester
         - application: etterlatte-utbetaling
-        - application: kodeverk-api
-          namespace: team-rocket
-          cluster: prod-gcp

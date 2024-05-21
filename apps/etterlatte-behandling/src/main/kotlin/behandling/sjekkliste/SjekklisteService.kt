@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -44,7 +45,12 @@ class SjekklisteService(
         val items =
             when (behandling.sak.sakType) {
                 SakType.BARNEPENSJON -> defaultSjekklisteItemsBP
-                SakType.OMSTILLINGSSTOENAD -> defaultSjekklisteItemsOMS
+                SakType.OMSTILLINGSSTOENAD -> {
+                    when (behandling.type) {
+                        BehandlingType.FØRSTEGANGSBEHANDLING -> foerstegangsbehandlingItemsOms
+                        BehandlingType.REVURDERING -> defaultSjekklisteItemsOMS
+                    }
+                }
             }
 
         inTransaction {

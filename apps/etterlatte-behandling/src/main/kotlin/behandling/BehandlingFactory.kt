@@ -166,14 +166,7 @@ class BehandlingFactory(
     ): BehandlingOgOppgave? {
         logger.info("Starter behandling i sak $sakId")
 
-        val sak = requireNotNull(sakService.finnSak(sakId)) { "Fant ingen sak med id=$sakId!" }
-        val harBehandlingerForSak =
-            behandlingDao.alleBehandlingerISak(sak.id)
-
-        val harIverksattEllerAttestertBehandling =
-            harBehandlingerForSak.filter { behandling ->
-                BehandlingStatus.iverksattEllerAttestert().find { it == behandling.status } != null
-            }
+        val (sak, harBehandlingerForSak, harIverksattEllerAttestertBehandling) = hentDataForOpprettBehandling(sakId)
 
         return if (harIverksattEllerAttestertBehandling.isNotEmpty()) {
             if (kilde == Vedtaksloesning.PESYS || kilde == Vedtaksloesning.GJENOPPRETTA) {
@@ -219,6 +212,18 @@ class BehandlingFactory(
             )
             return BehandlingOgOppgave(behandling, oppgave)
         }
+    }
+
+    private fun hentDataForOpprettBehandling(sakId: Long): Triple<Sak, List<Behandling>, List<Behandling>> {
+        val sak = requireNotNull(sakService.finnSak(sakId)) { "Fant ingen sak med id=$sakId!" }
+        val harBehandlingerForSak =
+            behandlingDao.alleBehandlingerISak(sak.id)
+
+        val harIverksattEllerAttestertBehandling =
+            harBehandlingerForSak.filter { behandling ->
+                BehandlingStatus.iverksattEllerAttestert().find { it == behandling.status } != null
+            }
+        return Triple(sak, harBehandlingerForSak, harIverksattEllerAttestertBehandling)
     }
 
     fun finnGjeldendeEnhet(

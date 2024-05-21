@@ -39,7 +39,10 @@ object BlockTilSlateKonverterer {
 
                 (block as LetterMarkup.Block.Paragraph).content.map {
                     when (it.type) {
-                        LetterMarkup.ParagraphContent.Type.LITERAL, LetterMarkup.ParagraphContent.Type.VARIABLE ->
+                        LetterMarkup.ParagraphContent.Type.LITERAL,
+                        LetterMarkup.ParagraphContent.Type.VARIABLE,
+                        LetterMarkup.ParagraphContent.Type.NEW_LINE,
+                        ->
                             konverterLiteralOgVariable(it).let { innerElement -> innerElements.add(innerElement) }
 
                         LetterMarkup.ParagraphContent.Type.ITEM_LIST -> {

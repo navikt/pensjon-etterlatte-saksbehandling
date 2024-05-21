@@ -56,6 +56,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                         persongalleri(),
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
+                        prosessType = Prosesstype.MANUELL,
                     )?.behandling
             Pair(sak, behandling as Foerstegangsbehandling)
         }

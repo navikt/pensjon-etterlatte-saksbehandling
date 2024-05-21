@@ -229,7 +229,7 @@ internal class SakServiceTest {
     @Test
     fun `finnEllerOpprettSak feiler hvis PDL ikke finner geografisk tilknytning`() {
         val responseException = ResponseException(mockk(), "Oops")
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns emptyList()
+        every { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
         every {
             pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
         } throws responseException
@@ -244,7 +244,7 @@ internal class SakServiceTest {
 
         thrown.message shouldContain "Oops"
 
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
+        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify {
             listOf(norg2Klient) wasNot Called
@@ -258,7 +258,7 @@ internal class SakServiceTest {
                 ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301"),
             )
         } returns emptyList()
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns emptyList()
+        every { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
 
         val thrown =
             assertThrows<IngenEnhetFunnetException> {
@@ -268,14 +268,14 @@ internal class SakServiceTest {
         thrown.arbeidsFordelingRequest.tema shouldBe SakType.BARNEPENSJON.tema
         thrown.arbeidsFordelingRequest.geografiskOmraade shouldBe "0301"
 
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
+        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(SakType.BARNEPENSJON.tema, "0301")) }
     }
 
     @Test
     fun `finnEllerOpprettSak lagre enhet hvis enhet er funnet`() {
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns emptyList()
+        every { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
         every {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         } returns
@@ -306,7 +306,7 @@ internal class SakServiceTest {
 
         verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
+        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         coVerify(exactly = 1) {
             pdlTjenesterKlient.hentAdressebeskyttelseForPerson(
@@ -327,7 +327,7 @@ internal class SakServiceTest {
     @Test
     fun `finnEllerOpprettSak lagre enhet og setter gradering`() {
         systemBrukerKontekst()
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns emptyList()
+        every { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
         coEvery { skjermingKlient.personErSkjermet(KONTANT_FOT.value) } returns false
         every { sakDao.markerSakerMedSkjerming(any(), any()) } returns 0
         every {
@@ -375,7 +375,7 @@ internal class SakServiceTest {
         }
         verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
+        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         coVerify(exactly = 1) {
             pdlTjenesterKlient.hentAdressebeskyttelseForPerson(
@@ -395,7 +395,7 @@ internal class SakServiceTest {
     @Test
     fun `skal sette skjerming hvis skjermingstjenesten sier at person er skjermet`() {
         saksbehandlerKontekst()
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns emptyList()
+        every { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) } returns emptyList()
         every {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
         } returns
@@ -426,7 +426,7 @@ internal class SakServiceTest {
             )
 
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
+        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { sakDao.finnSakMedGraderingOgSkjerming(any()) }
         verify(exactly = 1) { pdlTjenesterKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         coVerify(exactly = 1) {

@@ -37,7 +37,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Assemble
-        run: ./gradlew assemble --max-workers=4 --stacktrace --no-daemon -Dorg.gradle.daemon=false
+        run: ./gradlew assemble -Dkotlin.compiler.execution.strategy="in-process"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

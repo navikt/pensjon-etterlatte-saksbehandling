@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
+import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
@@ -30,6 +31,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
         val identifiedBy = mockk<TokenValidationContext>()
         val tokenClaims = mockk<JwtTokenClaims>()
         val saksbehandlerMedRoller = mockk<SaksbehandlerMedRoller>()
+        val brukerTokenInfo = mockk<BrukerTokenInfo>()
 
         every {
             tokenClaims.getStringClaim(any())
@@ -43,8 +45,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
             saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any())
         } returns enheterForSaksbehandler
 
-        val saksbehandler = SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller)
-
+        val saksbehandler = SaksbehandlerMedEnheterOgRoller(identifiedBy, saksbehandlerService, saksbehandlerMedRoller, brukerTokenInfo)
         val skriveEnheter = saksbehandler.enheterMedSkrivetilgang()
         val leseEnheter = saksbehandler.enheterMedLesetilgang(enheterForSaksbehandler.map { it.enhetsNummer }.toSet())
 

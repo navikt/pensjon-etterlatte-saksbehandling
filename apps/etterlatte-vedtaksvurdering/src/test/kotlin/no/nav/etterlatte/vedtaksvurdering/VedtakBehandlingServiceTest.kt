@@ -9,8 +9,10 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -129,6 +131,100 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
 
         vedtak shouldNotBe null
         vedtak.status shouldBe VedtakStatus.OPPRETTET
+    }
+
+    @Test
+    fun `vedtak for opphoer skal legge til opphor fra og med`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
+
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
+            mockBehandling(
+                virkningstidspunkt,
+                behandlingId,
+                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
+            )
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
+            Sak(
+                SAKSBEHANDLER_1,
+                SakType.BARNEPENSJON,
+                1L,
+                ENHET_1,
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns
+            mockVilkaarsvurdering(
+                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+            )
+
+        val vedtak = runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+
+        vedtak.type shouldBe VedtakType.OPPHOER
+        (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed shouldBe VIRKNINGSTIDSPUNKT_JAN_2023
+    }
+
+    @Test
+    fun `vedtak skal viderefoere opphoer fra og med hvis finnes`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = VIRKNINGSTIDSPUNKT_JAN_2023
+
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
+            mockBehandling(
+                virkningstidspunkt,
+                behandlingId,
+                revurderingAarsak = Revurderingaarsak.REGULERING,
+                opphoerFom = YearMonth.of(2023, 3),
+            )
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
+            Sak(
+                SAKSBEHANDLER_1,
+                SakType.BARNEPENSJON,
+                1L,
+                ENHET_1,
+            )
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
+            BeregningOgAvkorting(
+                beregning = mockBeregning(virkningstidspunkt, behandlingId),
+                avkorting = mockAvkorting(),
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        val vedtak = runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+
+        (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed shouldBe YearMonth.of(2023, 3)
+    }
+
+    @Test
+    fun `vedtak skal nullstille opphoer fom hvis revurderes fra og med opphoer fom`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.of(2023, 3)
+
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
+            mockBehandling(
+                virkningstidspunkt,
+                behandlingId,
+                revurderingAarsak = Revurderingaarsak.REGULERING,
+                opphoerFom = YearMonth.of(2023, 3),
+            )
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
+            Sak(
+                SAKSBEHANDLER_1,
+                SakType.BARNEPENSJON,
+                1L,
+                ENHET_1,
+            )
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
+            BeregningOgAvkorting(
+                beregning = mockBeregning(virkningstidspunkt, behandlingId),
+                avkorting = mockAvkorting(),
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        val vedtak = runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+
+        (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed shouldBe null
     }
 
     @Test
@@ -272,6 +368,118 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
             }
 
         (oppdatertVedtak.innhold as VedtakInnhold.Behandling).virkningstidspunkt shouldBe virkningstidspunkt2024
+    }
+
+    @Test
+    fun `vedtak for opphoer skal oppdatere opphor fra og med`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.of(2023, 3)
+        val endretVirkningstidspunkt = YearMonth.of(2023, 4)
+
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
+            mockBehandling(
+                virkningstidspunkt,
+                behandlingId,
+                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
+            ) andThen
+            mockBehandling(
+                endretVirkningstidspunkt,
+                behandlingId,
+                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
+            )
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
+            Sak(
+                SAKSBEHANDLER_1,
+                SakType.BARNEPENSJON,
+                1L,
+                ENHET_1,
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns
+            mockVilkaarsvurdering(
+                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+            )
+
+        runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+        val vedtak = runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+
+        (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed shouldBe endretVirkningstidspunkt
+    }
+
+    @Test
+    fun `vedtak som oppdateres fra opphoer til endring skal viderefoere tidligere opphor fra og med`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.of(2023, 3)
+        val opphoerFom = YearMonth.of(2023, 4)
+
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
+            mockBehandling(
+                virkningstidspunkt,
+                behandlingId,
+                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
+                opphoerFom = opphoerFom,
+            )
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
+            Sak(
+                SAKSBEHANDLER_1,
+                SakType.BARNEPENSJON,
+                1L,
+                ENHET_1,
+            )
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns
+            mockVilkaarsvurdering(
+                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+            ) andThen mockVilkaarsvurdering()
+
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
+            BeregningOgAvkorting(
+                beregning = mockBeregning(virkningstidspunkt, behandlingId),
+                avkorting = mockAvkorting(),
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+        val vedtak = runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+
+        (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed shouldBe opphoerFom
+    }
+
+    @Test
+    fun `vedtak som oppdateres fra opphoer til endring med virk fom samme som opphoer fom skal nullstile opphoer fom`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.of(2023, 3)
+        val opphoerFom = YearMonth.of(2023, 3)
+
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
+            mockBehandling(
+                virkningstidspunkt,
+                behandlingId,
+                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
+                opphoerFom = opphoerFom,
+            )
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
+            Sak(
+                SAKSBEHANDLER_1,
+                SakType.BARNEPENSJON,
+                1L,
+                ENHET_1,
+            )
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns
+            mockVilkaarsvurdering(
+                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+            ) andThen mockVilkaarsvurdering()
+
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
+            BeregningOgAvkorting(
+                beregning = mockBeregning(virkningstidspunkt, behandlingId),
+                avkorting = mockAvkorting(),
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
+        runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+        val vedtak = runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+
+        (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed shouldBe null
     }
 
     @Test
@@ -1029,6 +1237,150 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
     }
 
     @Test
+    fun `skal sette utbetaling hvis opphoer`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.now()
+
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
+            mockBehandling(
+                virkningstidspunkt,
+                behandlingId,
+                SakType.BARNEPENSJON,
+                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns
+            mockVilkaarsvurdering(
+                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+            )
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
+            Sak(
+                SAKSBEHANDLER_1,
+                SakType.BARNEPENSJON,
+                1L,
+                ENHET_1,
+            )
+
+        with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
+            val innhold = innhold as VedtakInnhold.Behandling
+            innhold.utbetalingsperioder.size shouldBe 1
+            innhold.utbetalingsperioder[0].beloep shouldBe null
+            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+        }
+    }
+
+    @Test
+    fun `skal sette utbetaling hvis opphoer etter oppdatert vedtak`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.now()
+
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
+            mockBehandling(
+                virkningstidspunkt,
+                behandlingId,
+                SakType.BARNEPENSJON,
+                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns
+            mockVilkaarsvurdering(
+                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+            )
+
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
+            Sak(
+                SAKSBEHANDLER_1,
+                SakType.BARNEPENSJON,
+                1L,
+                ENHET_1,
+            )
+        runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
+        with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
+            val innhold = innhold as VedtakInnhold.Behandling
+            innhold.utbetalingsperioder.size shouldBe 1
+            innhold.utbetalingsperioder[0].beloep shouldBe null
+            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+        }
+    }
+
+    @Test
+    fun `skal sette utbetaling hvis nytt opphoer med eksisterende opphoer fra og med`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.of(2024, 3)
+
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
+            mockBehandling(
+                virkningstidspunkt,
+                behandlingId,
+                SakType.BARNEPENSJON,
+                revurderingAarsak = Revurderingaarsak.ALDERSOVERGANG,
+                opphoerFom = YearMonth.of(2024, 4),
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns
+            mockVilkaarsvurdering(
+                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+            )
+
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
+            Sak(
+                SAKSBEHANDLER_1,
+                SakType.BARNEPENSJON,
+                1L,
+                ENHET_1,
+            )
+
+        with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
+            val innhold = innhold as VedtakInnhold.Behandling
+            innhold.utbetalingsperioder.size shouldBe 1
+            innhold.utbetalingsperioder[0].beloep shouldBe null
+            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+        }
+    }
+
+    @Test
+    fun `skal sette utbetaling endring med eksisterende opphoer fra og med`() {
+        val behandlingId = randomUUID()
+        val virkningstidspunkt = YearMonth.of(2024, 3)
+        val opphoer = YearMonth.of(2024, 4)
+
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
+            mockBehandling(
+                virkningstidspunkt,
+                behandlingId,
+                SakType.BARNEPENSJON,
+                revurderingAarsak = Revurderingaarsak.REGULERING,
+                opphoerFom = opphoer,
+            )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
+            BeregningOgAvkorting(
+                beregning = mockBeregning(virkningstidspunkt, behandlingId),
+                avkorting = mockAvkorting(virkningstidspunkt),
+            )
+        coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
+            Sak(
+                SAKSBEHANDLER_1,
+                SakType.BARNEPENSJON,
+                1L,
+                ENHET_1,
+            )
+
+        with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
+            val innhold = innhold as VedtakInnhold.Behandling
+            innhold.utbetalingsperioder.size shouldBe 2
+            innhold.utbetalingsperioder[0].beloep shouldBe BigDecimal(100)
+            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+            innhold.utbetalingsperioder[0].periode.tom shouldBe virkningstidspunkt
+
+            innhold.utbetalingsperioder[1].beloep shouldBe null
+            innhold.utbetalingsperioder[1].periode.fom shouldBe opphoer
+            innhold.utbetalingsperioder[1].periode.tom shouldBe null
+        }
+    }
+
+    @Test
     fun `skal ikke sette vedtak til til_samordning pga ugyldig vedtaksstatus`() {
         val behandlingId = randomUUID()
 
@@ -1044,11 +1396,10 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
     }
 
     @Test
-    fun `skal sette vedtak til til_samordning, maa vente paa samordning`() {
+    fun `skal sette vedtak til til_samordning`() {
         val behandlingId = randomUUID()
 
         coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
-        coEvery { samKlientMock.samordneVedtak(any(), false, attestant) } returns true
 
         runBlocking {
             repository.opprettVedtak(
@@ -1064,31 +1415,52 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
             oppdatertVedtak.vedtak.status shouldBe VedtakStatus.TIL_SAMORDNING
 
             coVerify(exactly = 1) { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) }
+            coVerify(exactly = 0) { samKlientMock.samordneVedtak(any(), false, attestant) }
         }
     }
 
     @Test
-    fun `skal sette vedtak til samordnet, trenger ikke vente paa samordning`() {
+    fun `skal kalle SAM for aa samordne, ikke oppdatere vedtaksstatus`() {
+        mockkStatic(Vedtak::erVedtakMedEtterbetaling)
+        every { any<Vedtak>().erVedtakMedEtterbetaling(repository) } returns true
+
         val behandlingId = randomUUID()
 
-        coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
-        coEvery { samKlientMock.samordneVedtak(any(), false, attestant) } returns false
-        coEvery { behandlingKlientMock.samordnet(any(), any(), any()) } returns true
-        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+        coEvery { samKlientMock.samordneVedtak(any(), true, attestant) } returns true
 
         runBlocking {
-            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.ATTESTERT))
-            val oppdatertVedtak = service.tilSamordningVedtak(behandlingId, attestant)
+            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.TIL_SAMORDNING))
 
-            oppdatertVedtak.vedtak.status shouldBe VedtakStatus.SAMORDNET
+            service.samordne(behandlingId, attestant) shouldBe true
 
-            coVerify(exactly = 1) { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) }
-            coVerify(exactly = 1) { behandlingKlientMock.samordnet(behandlingId, any(), any()) }
+            coVerify(exactly = 1) { samKlientMock.samordneVedtak(any(), true, attestant) }
+            coVerify(exactly = 0) { behandlingKlientMock.samordnet(behandlingId, any(), any()) }
+        }
+
+        verify { any<Vedtak>().erVedtakMedEtterbetaling(repository) }
+    }
+
+    @Test
+    fun `skal ikke kalle SAM for aa samordne hvis REGULERING`() {
+        val behandlingId = randomUUID()
+
+        runBlocking {
+            repository.opprettVedtak(
+                opprettVedtak(
+                    behandlingId = behandlingId,
+                    status = VedtakStatus.TIL_SAMORDNING,
+                    revurderingAarsak = Revurderingaarsak.REGULERING,
+                ),
+            )
+
+            service.samordne(behandlingId, attestant) shouldBe false
+
+            coVerify(exactly = 0) { samKlientMock.samordneVedtak(any(), true, attestant) }
         }
     }
 
     @Test
-    fun `skal sette vedtak til samordnet, skipper samordning fordi REGULERING`() {
+    fun `skal sette vedtak til samordnet`() {
         val behandlingId = randomUUID()
 
         coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
@@ -1102,10 +1474,11 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
                     behandlingType = BehandlingType.REVURDERING,
                     type = VedtakType.ENDRING,
                     status = VedtakStatus.ATTESTERT,
-                    revurderingAarsak = Revurderingaarsak.REGULERING,
+                    revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING,
                 ),
             )
-            val oppdatertVedtak = service.tilSamordningVedtak(behandlingId, attestant)
+            service.tilSamordningVedtak(behandlingId, attestant)
+            val oppdatertVedtak = service.samordnetVedtak(behandlingId, attestant)!!
 
             oppdatertVedtak.vedtak.status shouldBe VedtakStatus.SAMORDNET
 
@@ -1168,9 +1541,9 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
                 )
         }
 
-    private fun mockVilkaarsvurdering(): VilkaarsvurderingDto =
+    private fun mockVilkaarsvurdering(utfall: VilkaarsvurderingUtfall = VilkaarsvurderingUtfall.OPPFYLT): VilkaarsvurderingDto =
         mockk(relaxed = true) {
-            every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
+            every { resultat?.utfall } returns utfall
         }
 
     private fun mockBehandling(
@@ -1180,6 +1553,7 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
         revurderingAarsak: Revurderingaarsak? = null,
         revurderingInfo: RevurderingInfo? = null,
         sakId: Long = 1L,
+        opphoerFom: YearMonth? = null,
     ): DetaljertBehandling =
         DetaljertBehandling(
             id = behandlingId,
@@ -1206,6 +1580,7 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
             prosesstype = Prosesstype.MANUELL,
             kilde = Vedtaksloesning.GJENNY,
             sendeBrev = true,
+            opphoerFraOgMed = opphoerFom,
         )
 
     private companion object {

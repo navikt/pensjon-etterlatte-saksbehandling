@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.tilbakekreving
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
@@ -34,6 +35,7 @@ class TilbakekrevingService(
     private val sakDao: SakDao,
     private val hendelseDao: HendelseDao,
     private val oppgaveService: OppgaveService,
+    private val behandlingService: BehandlingService,
     private val vedtakKlient: VedtakKlient,
     private val brevApiKlient: BrevApiKlient,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
@@ -468,12 +470,15 @@ class TilbakekrevingService(
         }
     }
 
-    private fun tilbakekrevingForStatistikk(tilbakekreving: TilbakekrevingBehandling) =
-        StatistikkTilbakekrevingDto(
+    private fun tilbakekrevingForStatistikk(tilbakekreving: TilbakekrevingBehandling): StatistikkTilbakekrevingDto {
+        val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(tilbakekreving.sak.id)?.type
+        return StatistikkTilbakekrevingDto(
             tilbakekreving.id,
             tilbakekreving,
             Tidspunkt.now(),
+            utlandstilknytningType,
         )
+    }
 
     private fun sjekkForventetStatus(
         tilbakekreving: TilbakekrevingBehandling,

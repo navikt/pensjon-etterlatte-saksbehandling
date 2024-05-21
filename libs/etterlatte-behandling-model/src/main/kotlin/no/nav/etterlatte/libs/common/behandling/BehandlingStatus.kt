@@ -20,6 +20,10 @@ enum class BehandlingStatus {
         return this !in iverksattEllerAttestert() && this != AVBRUTT
     }
 
+    fun aapenBehandling(): Boolean {
+        return this in underBehandling() + ATTESTERT
+    }
+
     fun kanEndres() = this in BehandlingStatus.kanEndres()
 
     companion object {

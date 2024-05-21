@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.oms.Aktivitetsgrad
 import no.nav.etterlatte.brev.model.oms.AktivitetspliktBrevdata
+import no.nav.etterlatte.brev.model.oms.NasjonalEllerUtland
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class BrevParametre {
@@ -14,13 +15,16 @@ sealed class BrevParametre {
 
     abstract fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar
 
-    @JsonTypeName("OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV")
+    @JsonTypeName("OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND")
     data class Aktivitetsplikt(
         val aktivitetsgrad: Aktivitetsgrad,
-        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV_INNHOLD,
+        val utbetaling: Boolean,
+        val redusertEtterInntekt: Boolean,
+        val nasjonalEllerUtland: NasjonalEllerUtland,
+        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
     ) : BrevParametre() {
         override fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar {
-            return AktivitetspliktBrevdata(aktivitetsgrad)
+            return AktivitetspliktBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland)
         }
     }
 

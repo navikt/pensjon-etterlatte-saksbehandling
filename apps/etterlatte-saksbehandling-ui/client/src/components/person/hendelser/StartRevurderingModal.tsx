@@ -1,30 +1,33 @@
-import { Alert, BodyShort, Button, Heading, Modal, Select, TextField, VStack } from '@navikt/ds-react'
-import React, { useState } from 'react'
-import styled from 'styled-components'
-import { useApiCall } from '~shared/hooks/useApiCall'
+import React, { ReactNode, useState } from 'react'
 import { Grunnlagsendringshendelse, GrunnlagsendringsType } from '~components/person/typer'
-import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
-import { useNavigate } from 'react-router-dom'
+import { Alert, BodyShort, Button, Heading, Modal, Select, TextField, VStack } from '@navikt/ds-react'
+import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
-import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/revurdering'
-
+import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import { isPending } from '~shared/api/apiUtils'
+import styled from 'styled-components'
+import { useNavigate } from 'react-router-dom'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/revurdering'
+import { ButtonGroup } from '~shared/styled'
 
-type Props = {
-  open: boolean
-  setOpen: (value: boolean) => void
+interface Props {
+  hendelse: Grunnlagsendringshendelse
   sakId: number
   revurderinger: Array<Revurderingaarsak>
-  valgtHendelse?: Grunnlagsendringshendelse
 }
-const VurderHendelseModal = (props: Props) => {
-  const { revurderinger, valgtHendelse } = props
+
+export const StartRevurderingModal = ({ hendelse, sakId, revurderinger }: Props): ReactNode => {
+  const navigate = useNavigate()
+
+  const [open, setOpen] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
+
   const [valgtAarsak, setValgtAarsak] = useState<Revurderingaarsak | undefined>(undefined)
-  const [opprettRevurderingStatus, opprettRevurdering] = useApiCall(opprettRevurderingApi)
   const [begrunnelse, setBegrunnelse] = useState('')
   const [fritekstgrunn, setFritekstgrunn] = useState<string>('')
-  const navigate = useNavigate()
+
+  const [opprettRevurderingResult, opprettRevurdering] = useApiCall(opprettRevurderingApi)
 
   const onSubmit = () => {
     if (valgtAarsak === undefined) {
@@ -33,9 +36,9 @@ const VurderHendelseModal = (props: Props) => {
 
     opprettRevurdering(
       {
-        sakId: props.sakId,
+        sakId: sakId,
         aarsak: valgtAarsak,
-        paaGrunnAvHendelseId: valgtHendelse?.id,
+        paaGrunnAvHendelseId: hendelse.id,
         fritekstAarsak: fritekstgrunn,
         begrunnelse: begrunnelse,
       },
@@ -50,18 +53,22 @@ const VurderHendelseModal = (props: Props) => {
 
   return (
     <>
-      <Modal open={props.open} onClose={() => props.setOpen(false)} aria-label="Vurder hendelse">
+      <Button size="small" icon={<ArrowsCirclepathIcon aria-hidden />} onClick={() => setOpen(true)}>
+        Start revurdering
+      </Button>
+
+      <Modal open={open} onClose={() => setOpen(false)} aria-label="Vurder hendelse">
         <Modal.Body>
           <ModalContentWrapper>
             <Heading spacing size="large">
               Vurder hendelse
             </Heading>
-            <Alert variant="warning">{valgtHendelse ? tekster.get(valgtHendelse.type)!.tittel : ''}</Alert>
+            <Alert variant="warning">{hendelse ? tekster.get(hendelse.type)!.tittel : ''}</Alert>
             <BodyShort>
               <HjemmelLenke tittel="§18-8 Lovparagraf" lenke="" />
             </BodyShort>
             <BodyShort spacing style={{ marginBottom: '2em' }}>
-              {valgtHendelse ? tekster.get(valgtHendelse.type)!.beskrivelse : ''}
+              {hendelse ? tekster.get(hendelse.type)!.beskrivelse : ''}
             </BodyShort>
             <div>
               <Select
@@ -104,10 +111,10 @@ const VurderHendelseModal = (props: Props) => {
           </ModalContentWrapper>
 
           <ButtonGroup>
-            <Button variant="secondary" onClick={() => props.setOpen(false)}>
+            <Button variant="secondary" onClick={() => setOpen(false)}>
               Avbryt
             </Button>
-            <Button loading={isPending(opprettRevurderingStatus)} onClick={onSubmit}>
+            <Button loading={isPending(opprettRevurderingResult)} onClick={onSubmit}>
               Start revurdering
             </Button>
           </ButtonGroup>
@@ -121,18 +128,9 @@ const ModalContentWrapper = styled.div`
   padding: 0 1em;
 `
 
-export const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5em;
-  padding-top: 2em;
-`
-
 const MarginTop = styled.div`
   margin-top: 1rem;
 `
-
-export default VurderHendelseModal
 
 interface Grunnlagsendringstekst {
   tittel: string

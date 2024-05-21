@@ -88,6 +88,22 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/simulering") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                logger.info("Henter/oppdaterer vedtak for sinulering (behandling=$behandlingId)")
+
+                vedtakService.hentVedtakMedBehandlingId(behandlingId)?.let {
+                    if (!it.underArbeid()) {
+                        return@post call.respond(it.toDto())
+                    }
+                }
+
+                val vedtak =
+                    vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
+                call.respond(vedtak.toDto())
+            }
+        }
+
         post("/{$BEHANDLINGID_CALL_PARAMETER}/upsert") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
@@ -160,6 +176,14 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/samordne") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                logger.info("Behandler samordning for behandling $behandlingId")
+                val skalVentePaaSamordning = vedtakBehandlingService.samordne(behandlingId, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK, mapOf("skalVentePaaSamordning" to skalVentePaaSamordning))
+            }
+        }
+
         post("/{$BEHANDLINGID_CALL_PARAMETER}/samordnet") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Vedtak ferdig samordning for behandling $behandlingId")
@@ -187,7 +211,7 @@ fun Route.vedtaksvurderingRoute(
                     call.request.queryParameters["dato"]?.let { LocalDate.parse(it) }
                         ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
 
-                logger.info("Sjekker om vedtak er løpende for sak $sakId på dato $dato")
+                logger.info("Sjekker om sak har løpende for vedtak $sakId på dato $dato")
                 val loependeYtelse = vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(sakId, dato)
                 call.respond(loependeYtelse.toDto())
             }
@@ -361,6 +385,7 @@ private fun LoependeYtelse.toDto() =
         underSamordning = underSamordning,
         dato = dato,
         behandlingId = behandlingId,
+        opphoerFraOgMed = opphoerFraOgMed,
     )
 
 data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: String)

@@ -530,4 +530,24 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
             assert(this.sistEndret > foerstegangsbehandling.sistEndret)
         }
     }
+
+    @Test
+    fun `lagreOpphoerFom skal oppdatere behandling med opphoer fom`() {
+        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                revurderingAarsak = Revurderingaarsak.REGULERING,
+                sakId = sak,
+                status = BehandlingStatus.OPPRETTET,
+            )
+
+        behandlingRepo.opprettBehandling(opprettBehandling)
+
+        behandlingRepo.lagreOpphoerFom(opprettBehandling.id, YearMonth.of(2024, 6))
+
+        val behandling = behandlingRepo.hentBehandling(opprettBehandling.id)
+
+        behandling?.opphoerFraOgMed shouldBe YearMonth.of(2024, 6)
+    }
 }

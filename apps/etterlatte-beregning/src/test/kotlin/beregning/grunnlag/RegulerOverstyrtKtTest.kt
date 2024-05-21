@@ -28,12 +28,12 @@ class RegulerOverstyrtKtTest {
                 kilde = Grunnlagsopplysning.Saksbehandler.create(""),
                 utbetaltBeloep = 5679,
             )
-        val virkRegulering = YearMonth.of(2023, 5)
-        val reguleringsbehandlingId = UUID.randomUUID()
 
+        val reguleringsbehandlingId = UUID.randomUUID()
         val resultat =
             tilpassOverstyrtBeregningsgrunnlagForRegulering(
-                virkRegulering,
+                YearMonth.of(2023, 5),
+                overstyrtBeregningsgrunnlag.datoFOM,
                 overstyrtBeregningsgrunnlag,
                 reguleringsbehandlingId,
             )
@@ -41,8 +41,8 @@ class RegulerOverstyrtKtTest {
             utbetaltBeloep shouldBe 6043
             id shouldNotBe overstyrtBeregningsgrunnlag.id
             behandlingId shouldBe reguleringsbehandlingId
-            datoFOM shouldBe virkRegulering.atDay(1)
-            datoTOM shouldBe null
+            datoFOM shouldBe overstyrtBeregningsgrunnlag.datoFOM
+            datoTOM shouldBe overstyrtBeregningsgrunnlag.datoTOM
             reguleringRegelresultat shouldNotBe null
         }
     }

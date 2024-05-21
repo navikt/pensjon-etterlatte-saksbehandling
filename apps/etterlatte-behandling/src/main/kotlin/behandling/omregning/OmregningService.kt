@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselExceptio
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class OmregningService(
@@ -36,6 +37,7 @@ class OmregningService(
         forrigeBehandling: Behandling,
         persongalleri: Persongalleri,
         oppgavefrist: Tidspunkt?,
+        opphoerFraOgMed: YearMonth? = null,
     ): RevurderingOgOppfoelging {
         if (prosessType == Prosesstype.MANUELL) {
             throw StoetterIkkeProsesstypeManuell()
@@ -52,6 +54,7 @@ class OmregningService(
                 kilde = Vedtaksloesning.GJENNY,
                 persongalleri = persongalleri,
                 frist = oppgavefrist,
+                opphoerFraOgMed = opphoerFraOgMed,
             ),
         ) { "Opprettelse av revurdering feilet for $sakId" }
     }

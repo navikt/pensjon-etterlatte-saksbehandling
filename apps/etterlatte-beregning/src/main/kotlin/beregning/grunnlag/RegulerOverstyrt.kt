@@ -14,11 +14,13 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.regler.Beregningstall
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
 fun tilpassOverstyrtBeregningsgrunnlagForRegulering(
     reguleringsmaaned: YearMonth,
+    fom: LocalDate,
     forrigeBeregningsgrunnlag: OverstyrBeregningGrunnlagDao,
     behandlingId: UUID,
 ): OverstyrBeregningGrunnlagDao {
@@ -36,13 +38,13 @@ fun tilpassOverstyrtBeregningsgrunnlagForRegulering(
                             ),
                         forrigeGrunnbeloep =
                             FaktumNode(
-                                verdi = Beregningstall(forrigeGrunnbeloep.grunnbeloepPerMaaned),
+                                verdi = Beregningstall(forrigeGrunnbeloep.grunnbeloep),
                                 Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now()),
                                 beskrivelse = "Forrige grunnbeløp brukt til å manuelt utregne beregning",
                             ),
                         nyttGrunnbeloep =
                             FaktumNode(
-                                verdi = Beregningstall(nyttGrunnbeloep.grunnbeloepPerMaaned),
+                                verdi = Beregningstall(nyttGrunnbeloep.grunnbeloep),
                                 Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now()),
                                 beskrivelse = "Nytt grunnbeløp beregnins skal reguleres etter",
                             ),
@@ -50,7 +52,7 @@ fun tilpassOverstyrtBeregningsgrunnlagForRegulering(
                 ),
             periode =
                 RegelPeriode(
-                    fraDato = reguleringsmaaned.atDay(1),
+                    fraDato = fom,
                 ),
         ).let {
             when (it) {
@@ -64,14 +66,12 @@ fun tilpassOverstyrtBeregningsgrunnlagForRegulering(
     return forrigeBeregningsgrunnlag.copy(
         id = UUID.randomUUID(),
         behandlingId = behandlingId,
-        datoFOM = reguleringsmaaned.atDay(1),
-        datoTOM = null,
+        datoFOM = fom,
+        datoTOM = forrigeBeregningsgrunnlag.datoTOM,
         utbetaltBeloep = resultat.resultat.verdi.toLong(),
         kilde = Grunnlagsopplysning.automatiskSaksbehandler,
         reguleringRegelresultat = objectMapper.valueToTree(resultat),
-        beskrivelse =
-            "${resultat.resultat.opprettet}: Automatisk regulert fra grunnbeløp " +
-                "${forrigeGrunnbeloep.grunnbeloep} til ${nyttGrunnbeloep.grunnbeloep}",
+        beskrivelse = forrigeBeregningsgrunnlag.beskrivelse,
     )
 }
 

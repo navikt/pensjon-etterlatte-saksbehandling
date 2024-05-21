@@ -42,6 +42,7 @@ import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 class MaksEnAktivOppgavePaaBehandling(sakId: Long) : UgyldigForespoerselException(
@@ -173,6 +174,7 @@ class RevurderingService(
             begrunnelse = begrunnelse,
             fritekstAarsak = fritekstAarsak,
             saksbehandler = saksbehandler,
+            opphoerFraOgMed = forrigeIverksatteBehandling.opphoerFraOgMed,
         )
     }
 
@@ -206,6 +208,7 @@ class RevurderingService(
         begrunnelse: String?,
         fritekstAarsak: String?,
         saksbehandler: Saksbehandler,
+        opphoerFraOgMed: YearMonth? = null,
     ): Revurdering =
         forrigeBehandling.let {
             val persongalleri = runBlocking { grunnlagService.hentPersongalleri(forrigeBehandling.id) }
@@ -227,6 +230,7 @@ class RevurderingService(
                 saksbehandlerIdent = saksbehandler.ident,
                 frist = triggendeOppgave?.frist,
                 paaGrunnAvOppgave = paaGrunnAvOppgave,
+                opphoerFraOgMed = opphoerFraOgMed,
             ).oppdater()
                 .also { revurdering ->
                     if (paaGrunnAvHendelse != null) {
@@ -291,6 +295,7 @@ class RevurderingService(
         relatertBehandlingId: String? = null,
         frist: Tidspunkt? = null,
         paaGrunnAvOppgave: UUID? = null,
+        opphoerFraOgMed: YearMonth? = null,
     ): RevurderingOgOppfoelging =
         OpprettBehandling(
             type = BehandlingType.REVURDERING,
@@ -307,6 +312,7 @@ class RevurderingService(
             fritekstAarsak = fritekstAarsak,
             relatertBehandlingId = relatertBehandlingId,
             sendeBrev = revurderingAarsak.skalSendeBrev,
+            opphoerFraOgMed = opphoerFraOgMed,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
 

@@ -18,6 +18,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -156,6 +157,11 @@ interface BehandlingService {
     )
 
     fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning?
+
+    fun lagreOpphoerFom(
+        behandlingId: UUID,
+        opphoerFraOgMed: YearMonth,
+    )
 }
 
 internal class BehandlingServiceImpl(
@@ -285,6 +291,10 @@ internal class BehandlingServiceImpl(
     ): Boolean {
         val behandling =
             requireNotNull(hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
+
+        if (behandling.kilde in listOf(Vedtaksloesning.PESYS, Vedtaksloesning.GJENOPPRETTA)) {
+            return true
+        }
 
         return when (behandling.type) {
             BehandlingType.REVURDERING -> erGyldigVirkningstidspunktRevurdering(request, behandling)
@@ -432,6 +442,13 @@ internal class BehandlingServiceImpl(
                 .maxByOrNull { it.behandlingOpprettet }
 
         return sisteIkkeAvbrutteBehandling?.utlandstilknytning
+    }
+
+    override fun lagreOpphoerFom(
+        behandlingId: UUID,
+        opphoerFraOgMed: YearMonth,
+    ) {
+        behandlingDao.lagreOpphoerFom(behandlingId, opphoerFraOgMed)
     }
 
     data class BehandlingMedData(

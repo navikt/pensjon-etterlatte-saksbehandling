@@ -28,7 +28,7 @@ const MenyWrapper = styled.ul`
   padding: 1em 0;
   background: #f8f8f8;
   border-bottom: 1px solid #c6c2bf;
-  box-shadow: 0 5px 10px 0 #ddd;
+  box-shadow: var(--a-shadow-xsmall);
 `
 
 const Separator = styled(ChevronLeftIcon)`

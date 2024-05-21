@@ -15,7 +15,9 @@ import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
+import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -286,7 +288,10 @@ class StatistikkService(
         type = "TILBAKEKREVING",
         status = hendelse.name,
         ansvarligEnhet = statistikkTilbakekreving.tilbakekreving.sak.enhet,
-        resultat = statistikkTilbakekreving.tilbakekreving.tilbakekreving.vurdering?.vedtak,
+        resultat =
+            mapTilbakekrevingResultat(statistikkTilbakekreving.tilbakekreving.tilbakekreving)?.name?.takeIf {
+                statistikkTilbakekreving.tilbakekreving.status == TilbakekrevingStatus.ATTESTERT
+            },
         tekniskTid = tekniskTid.toTidspunkt(),
         sakYtelse = statistikkTilbakekreving.tilbakekreving.sak.sakType.name,
         behandlingMetode = BehandlingMetode.MANUELL,
@@ -301,7 +306,7 @@ class StatistikkService(
         opprettetAv = null,
         pesysId = null,
         resultatBegrunnelse = null,
-        sakUtland = null,
+        sakUtland = statistikkTilbakekreving.utlandstilknytningType?.let { SakUtland.fraUtlandstilknytningType(it) },
         soeknadFormat = null,
         vedtakLoependeTom = null,
         aktorId = statistikkTilbakekreving.tilbakekreving.sak.ident,
@@ -314,6 +319,10 @@ class StatistikkService(
         saksbehandler = statistikkTilbakekreving.tilbakekreving.tilbakekreving.kravgrunnlag.saksbehandler.value,
         relatertTil = null,
     )
+
+    private fun mapTilbakekrevingResultat(tilbakekreving: Tilbakekreving): TilbakekrevingResultat? {
+        return TilbakekrevingResultat.hoyesteGradAvTilbakekreving(tilbakekreving.perioder.mapNotNull { it.ytelse.resultat })
+    }
 
     private fun klageTilSakRad(
         statistikkKlage: StatistikkKlage,
@@ -351,7 +360,7 @@ class StatistikkService(
         opprettetAv = null,
         pesysId = null,
         resultatBegrunnelse = null,
-        sakUtland = null,
+        sakUtland = statistikkKlage.utlandstilknytningType?.let { SakUtland.fraUtlandstilknytningType(it) },
         soeknadFormat = null,
         vedtakLoependeTom = null,
         relatertTil = statistikkKlage.klage.formkrav?.formkrav?.vedtaketKlagenGjelder?.behandlingId,

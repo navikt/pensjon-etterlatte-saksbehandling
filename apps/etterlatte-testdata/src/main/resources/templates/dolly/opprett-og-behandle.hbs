@@ -46,6 +46,16 @@
 
 </div>
 <script>
+    const behandlingssteg = [
+        "KLAR",
+        "BEHANDLING_OPPRETTA",
+        "VILKAARSVURDERT",
+        "TRYGDETID_OPPRETTA",
+        "BEREGNA",
+        "AVKORTA",
+        "VEDTAK_FATTA",
+        "IVERKSATT"
+    ]
 
     const opprettGruppeInfo = document.querySelector('#opprettGruppeInfo')
     const mainContent = document.querySelector('#main-content')
@@ -65,13 +75,48 @@
     function settOppInput() {
         const inputTableElement = document.createElement('td')
 
+        // Antall
         const antallLabel= document.createElement('label')
-        antallLabel.innerHTML = "Antall"
+        antallLabel.innerHTML = "Antall saker: "
+        antallLabel.htmlFor = "antall"
         inputTableElement.appendChild(antallLabel)
 
         const antallInput = document.createElement('input')
         antallInput.setAttribute('id', 'antall')
         inputTableElement.appendChild(antallInput)
+
+        inputTableElement.appendChild(document.createElement('br'))
+
+        // Antall dager siden dødsfall
+        const antallDagerSidenDoedsfallLabel = document.createElement('label')
+        antallDagerSidenDoedsfallLabel.innerHTML = "Antall dager siden dødsfall: "
+        antallDagerSidenDoedsfallLabel.htmlFor = "antallDagerSidenDoedsfall"
+        inputTableElement.appendChild(antallDagerSidenDoedsfallLabel)
+
+        const antallDagerSidenDoedsfallInput = document.createElement('input')
+        antallDagerSidenDoedsfallInput.setAttribute('id', 'antallDagerSidenDoedsfall')
+        inputTableElement.appendChild(antallDagerSidenDoedsfallInput)
+
+        inputTableElement.appendChild(document.createElement('br'))
+
+        // Behandlingssteg
+        const stegLabel= document.createElement('label')
+        stegLabel.innerHTML = "Behandle frem til-og-med: "
+        stegLabel.htmlFor = "behandlingsstegDropdown"
+        inputTableElement.appendChild(stegLabel)
+
+        const select = document.createElement("select");
+        select.id = "behandlingsstegDropdown";
+
+        for (const steg in behandlingssteg) {
+            const option = document.createElement("option");
+            option.value = behandlingssteg[steg];
+            option.innerHTML = behandlingssteg[steg];
+            select.add(option);
+        }
+        select.selectedIndex = behandlingssteg.indexOf("IVERKSATT")
+
+        inputTableElement.appendChild(select)
 
         return inputTableElement
     }
@@ -111,12 +156,15 @@
         soeknadInnsendtAlert.style.display = "none"
 
         const antall = document.getElementById("antall").value
+        const antallDagerSidenDoedsfall = document.getElementById("antallDagerSidenDoedsfall").value
+        const steg = document.getElementById("behandlingsstegDropdown").value
+
         await fetch('opprett-og-behandle', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: `type=${type}&antall=${antall}&gruppeId={{gruppeId}}`
+            body: `type=${type}&antall=${antall}&antallDagerSidenDoedsfall=${antallDagerSidenDoedsfall}&behandlingssteg=${steg}&gruppeId={{gruppeId}}`
         }).then(res => res.json()).then(data => {
             if ((data.status === 200)) {
                 soeknadInnsendtAlert.firstElementChild.innerHTML = `Søknad er innsendt og registrert`

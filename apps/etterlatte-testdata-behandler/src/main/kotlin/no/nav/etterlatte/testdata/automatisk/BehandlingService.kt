@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.readValue
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.testdata.BEGRUNNELSE
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -79,13 +80,18 @@ class BehandlingService(private val klient: DownstreamResourceClient, private va
         }
     }
 
-    suspend fun lagreVirkningstidspunkt(behandling: UUID) {
+    suspend fun lagreVirkningstidspunkt(
+        behandling: UUID,
+        doedsdato: LocalDate,
+    ) {
+        val virkningstidspunkt = doedsdato.plusMonths(1)
+
         retryOgPakkUt {
             klient.post(
                 Resource(clientId, "$url/api/behandling/$behandling/virkningstidspunkt"),
                 Systembruker.testdata,
                 VirkningstidspunktRequest(
-                    _dato = YearMonth.now().plusMonths(1).toString(),
+                    _dato = YearMonth.of(virkningstidspunkt.year, virkningstidspunkt.month).toString(),
                     begrunnelse = BEGRUNNELSE,
                     kravdato = null,
                 ),

@@ -1,7 +1,7 @@
 import { Alert, Button, Heading, Label, Select, Textarea } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
-import { PaaventAarsak, settOppgavePaaVentApi } from '~shared/api/oppgaver'
+import { settOppgavePaaVentApi } from '~shared/api/oppgaver'
 import { ClockDashedIcon, ClockIcon } from '@navikt/aksel-icons'
 import { formaterStringDato } from '~utils/formattering'
 import React, { useState } from 'react'
@@ -18,6 +18,13 @@ interface Props {
   redigerbar: boolean
 }
 
+enum PaaventAarsak {
+  OPPLYSNING_FRA_BRUKER = 'OPPLYSNING_FRA_BRUKER',
+  OPPLYSNING_FRA_ANDRE = 'OPPLYSNING_FRA_ANDRE',
+  KRAVGRUNNLAG_SPERRET = 'KRAVGRUNNLAG_SPERRET',
+  ANNET = 'ANNET',
+}
+
 export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
   if (!oppgave || !erOppgaveRedigerbar(oppgave?.status)) return null
 
@@ -26,7 +33,7 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
   type settPaaVentTyper = Array<keyof typeof PaaventAarsak>
   const [frist, setFrist] = useState<string>(oppgave.frist)
   const [merknad, setMerknad] = useState<string>(oppgave.merknad || '')
-  const [aarsak, setAarsak] = useState<settPaaVentTyper | velg>('velg')
+  const [aarsak, setAarsak] = useState<settPaaVentTyper[number] | velg>('velg')
   const [settPaaVent, setVisPaaVent] = useState(false)
   const [aarsakError, setAarsakError] = useState<boolean>(false)
 
@@ -35,11 +42,12 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
   const oppdater = () => {
     const paaVent = !(oppgave.status === 'PAA_VENT')
     if (paaVent) {
-      if (!aarsak || aarsak == 'velg') {
+      if (!aarsak || aarsak === 'velg') {
         setAarsakError(true)
         return
       }
     }
+
     settOppgavePaaVent(
       {
         oppgaveId: oppgave.id,

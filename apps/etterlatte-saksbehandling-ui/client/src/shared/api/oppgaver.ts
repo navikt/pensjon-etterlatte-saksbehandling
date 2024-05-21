@@ -95,16 +95,9 @@ export const redigerFristApi = async (args: {
 }
 
 export interface EndrePaaVentRequest {
-  aarsak?: PaaventAarsak
+  aarsak?: string
   merknad: String
   paaVent: boolean
-}
-
-export enum PaaventAarsak {
-  OPPLYSNING_FRA_BRUKER = 'OPPLYSNING_FRA_BRUKER',
-  OPPLYSNING_FRA_ANDRE = 'OPPLYSNING_FRA_ANDRE',
-  KRAVGRUNNLAG_SPERRET = 'KRAVGRUNNLAG_SPERRET',
-  ANNET = 'ANNET',
 }
 
 export const settOppgavePaaVentApi = async (args: {

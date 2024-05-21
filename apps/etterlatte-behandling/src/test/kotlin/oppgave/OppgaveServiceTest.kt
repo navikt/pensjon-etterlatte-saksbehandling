@@ -490,12 +490,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
                 null,
             )
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
-
-        oppgaveService.endrePaaVent(
-            nyOppgave.id,
-            "test",
-            true,
-        )
+        oppgaveService.endrePaaVent(Paavent(nyOppgave.id, merknad = "test", paavent = true, aarsak = PaaventAarsak.ANNET))
         val oppgavePaaVent = oppgaveService.hentOppgave(nyOppgave.id)
         assertEquals(Status.PAA_VENT, oppgavePaaVent.status)
         verify {
@@ -505,11 +500,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             )
         }
 
-        oppgaveService.endrePaaVent(
-            oppgavePaaVent.id,
-            "test",
-            false,
-        )
+        oppgaveService.endrePaaVent(Paavent(nyOppgave.id, merknad = "", paavent = false, aarsak = null))
         val oppgaveTattAvVent = oppgaveService.hentOppgave(oppgavePaaVent.id)
         assertEquals(Status.UNDER_BEHANDLING, oppgaveTattAvVent.status)
         verify {

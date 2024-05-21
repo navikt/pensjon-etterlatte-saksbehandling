@@ -1,7 +1,7 @@
-import { Alert, Button, Heading, Label, Textarea } from '@navikt/ds-react'
+import { Alert, Button, Heading, Label, Select, Textarea } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
-import { settOppgavePaaVentApi } from '~shared/api/oppgaver'
+import { PaaventAarsak, settOppgavePaaVentApi } from '~shared/api/oppgaver'
 import { ClockDashedIcon, ClockIcon } from '@navikt/aksel-icons'
 import { formaterStringDato } from '~utils/formattering'
 import React, { useState } from 'react'
@@ -11,6 +11,7 @@ import { isPending } from '~shared/api/apiUtils'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
 import { useAppDispatch } from '~store/Store'
 import { settOppgave } from '~store/reducers/OppgaveReducer'
+import { Text } from '~components/behandling/attestering/styled'
 
 interface Props {
   oppgave: OppgaveDTO | null
@@ -21,20 +22,31 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
   if (!oppgave || !erOppgaveRedigerbar(oppgave?.status)) return null
 
   const dispatch = useAppDispatch()
-
+  type velg = 'velg'
+  type settPaaVentTyper = Array<keyof typeof PaaventAarsak>
   const [frist, setFrist] = useState<string>(oppgave.frist)
   const [merknad, setMerknad] = useState<string>(oppgave.merknad || '')
+  const [aarsak, setAarsak] = useState<settPaaVentTyper | velg>('velg')
   const [settPaaVent, setVisPaaVent] = useState(false)
+  const [aarsakError, setAarsakError] = useState<boolean>(false)
 
   const [settPaaVentStatus, settOppgavePaaVent] = useApiCall(settOppgavePaaVentApi)
 
   const oppdater = () => {
+    const paaVent = !(oppgave.status === 'PAA_VENT')
+    if (paaVent) {
+      if (!aarsak || aarsak == 'velg') {
+        setAarsakError(true)
+        return
+      }
+    }
     settOppgavePaaVent(
       {
         oppgaveId: oppgave.id,
         settPaaVentRequest: {
+          aarsak: aarsak,
           merknad,
-          paaVent: !(oppgave.status === 'PAA_VENT'),
+          paaVent: paaVent,
         },
       },
       (oppgave) => {
@@ -50,6 +62,26 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
       {settPaaVent && (
         <>
           <hr />
+          <Text>Årsak til sett på vent</Text>
+          <Select
+            label="Årsak til sett på vent"
+            hideLabel={true}
+            value={aarsak || ''}
+            onChange={(e) => {
+              setAarsakError(false)
+              setAarsak(e.target.value as settPaaVentTyper[number])
+            }}
+            error={aarsakError && 'Du må velge en årsak'}
+          >
+            <option value="velg" disabled={true}>
+              Velg
+            </option>
+            {(Object.keys(PaaventAarsak) as settPaaVentTyper).map((option) => (
+              <option key={option} value={option}>
+                {PaaventAarsak[option]}
+              </option>
+            ))}
+          </Select>
           <Textarea label="Merknad" value={merknad} onChange={(e) => setMerknad(e.target.value)} />
 
           <br />

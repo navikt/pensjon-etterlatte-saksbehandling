@@ -87,16 +87,24 @@ export interface RedigerFristRequest {
   versjon: number | null
 }
 
-export interface EndrePaaVentRequest {
-  merknad: String
-  paaVent: boolean
-}
-
 export const redigerFristApi = async (args: {
   oppgaveId: string
   redigerFristRequest: RedigerFristRequest
 }): Promise<ApiResponse<void>> => {
   return apiClient.put(`/oppgaver/${args.oppgaveId}/frist`, { ...args.redigerFristRequest })
+}
+
+export interface EndrePaaVentRequest {
+  aarsak?: PaaventAarsak
+  merknad: String
+  paaVent: boolean
+}
+
+export enum PaaventAarsak {
+  OPPLYSNING_FRA_BRUKER = 'OPPLYSNING_FRA_BRUKER',
+  OPPLYSNING_FRA_ANDRE = 'OPPLYSNING_FRA_ANDRE',
+  KRAVGRUNNLAG_SPERRET = 'KRAVGRUNNLAG_SPERRET',
+  ANNET = 'ANNET',
 }
 
 export const settOppgavePaaVentApi = async (args: {

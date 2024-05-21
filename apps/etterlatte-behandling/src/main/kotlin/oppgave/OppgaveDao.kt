@@ -71,6 +71,11 @@ interface OppgaveDao {
         oppgaveStatus: Status,
     )
 
+    fun oppdaterPaaVent(
+        paavent: Paavent,
+        oppgaveStatus: Status,
+    )
+
     fun oppdaterReferanseOgMerknad(
         oppgaveId: UUID,
         referanse: String,
@@ -431,6 +436,30 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setString(1, merknad)
                 statement.setString(2, oppgaveStatus.name)
                 statement.setObject(3, oppgaveId)
+
+                statement.executeUpdate()
+            }
+        }
+    }
+
+    override fun oppdaterPaaVent(
+        paavent: Paavent,
+        oppgaveStatus: Status,
+    ) {
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        UPDATE oppgave
+                        SET merknad = ?, status = ?, paavent_aarsak ?
+                        where id = ?::UUID
+                        """.trimIndent(),
+                    )
+                statement.setString(1, paavent.merknad)
+                statement.setString(2, oppgaveStatus.name)
+                statement.setString(3, paavent.aarsak?.name)
+                statement.setObject(4, paavent.oppgaveId)
 
                 statement.executeUpdate()
             }

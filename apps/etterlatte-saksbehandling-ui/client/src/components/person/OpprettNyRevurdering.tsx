@@ -1,11 +1,11 @@
-import { Alert, Button, Heading, Loader, Modal, Select, TextField } from '@navikt/ds-react'
+import { Alert, Button, Heading, Loader, Modal, Select, TextField, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import { useNavigate } from 'react-router-dom'
 import { hentStoettedeRevurderinger, opprettRevurdering as opprettRevurderingApi } from '~shared/api/revurdering'
 import { isPending, mapResult } from '~shared/api/apiUtils'
-import { ButtonGroup, SpaceChildren } from '~shared/styled'
+import { ButtonGroup } from '~shared/styled'
 import { SakType } from '~shared/types/sak'
 import styled from 'styled-components'
 
@@ -96,19 +96,17 @@ export const OpprettNyRevurdering = ({
                 })}
               </Select>
               {revurderingaarsak === Revurderingaarsak.ANNEN && (
-                <AnnenRevurderingWrapper>
-                  <SpaceChildren direction="column">
-                    <TextField
-                      label="Beskriv årsak"
-                      size="medium"
-                      type="text"
-                      value={fritekstAarsak}
-                      onChange={(e) => setFritekstAarsak(e.target.value)}
-                    />
-                    <AnnetRevurderingAlert variant="warning" size="small" inline>
-                      Bruk denne årsaken kun dersom andre årsaker ikke er dekkende for revurderingen
-                    </AnnetRevurderingAlert>
-                  </SpaceChildren>
+                <AnnenRevurderingWrapper gap="5">
+                  <TextField
+                    label="Beskriv årsak"
+                    size="medium"
+                    type="text"
+                    value={fritekstAarsak}
+                    onChange={(e) => setFritekstAarsak(e.target.value)}
+                  />
+                  <AnnenRevurderingAlert variant="warning" size="small" inline>
+                    Bruk denne årsaken kun dersom andre årsaker ikke er dekkende for revurderingen
+                  </AnnenRevurderingAlert>
                 </AnnenRevurderingWrapper>
               )}
               <ButtonGroup>
@@ -130,10 +128,10 @@ export const OpprettNyRevurdering = ({
   })
 }
 
-const AnnenRevurderingWrapper = styled.div`
+const AnnenRevurderingWrapper = styled(VStack)`
   margin-top: 1rem;
 `
 
-const AnnetRevurderingAlert = styled(Alert)`
+const AnnenRevurderingAlert = styled(Alert)`
   max-width: 20rem;
 `

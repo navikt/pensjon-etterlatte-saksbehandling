@@ -32,7 +32,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
       case Oppgavetype.TILBAKEKREVING:
         return (
           erInnloggetSaksbehandlerOppgave &&
-          oppgave.merknad != 'Venter på kravgrunnlag' && (
+          oppgave.merknad !== 'Venter på kravgrunnlag' && (
             <Button size="small" href={`/tilbakekreving/${referanse}`} as="a">
               Gå til tilbakekreving
             </Button>
@@ -78,17 +78,21 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
         </>
       )
     case Oppgavetype.KLAGE:
-      return erInnloggetSaksbehandlerOppgave ? (
-        <Button size="small" href={`/klage/${referanse}`} as="a">
-          Gå til klage
-        </Button>
-      ) : null
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <Button size="small" href={`/klage/${referanse}`} as="a">
+            Gå til klage
+          </Button>
+        )
+      )
     case Oppgavetype.KRAVPAKKE_UTLAND:
-      return erInnloggetSaksbehandlerOppgave ? (
-        <Button size="small" href={`/generellbehandling/${referanse}`} as="a">
-          Gå til utlandssak
-        </Button>
-      ) : null
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <Button size="small" href={`/generellbehandling/${referanse}`} as="a">
+            Gå til utlandssak
+          </Button>
+        )
+      )
     case Oppgavetype.JOURNALFOERING:
       return (
         erInnloggetSaksbehandlerOppgave && (

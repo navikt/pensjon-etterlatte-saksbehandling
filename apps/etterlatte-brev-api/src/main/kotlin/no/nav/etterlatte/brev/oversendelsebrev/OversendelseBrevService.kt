@@ -22,7 +22,6 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.brev.toMottaker
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -152,16 +151,15 @@ class OversendelseBrevServiceImpl(
         personerISak: PersonerISak,
     ): Mottaker =
         with(personerISak) {
-            when (verge) {
-                is Vergemaal -> verge.toMottaker()
+            val mottakerFnr: String =
+                when (verge) {
+                    is Vergemaal -> verge.foedselsnummer.value
 
-                else -> {
-                    val mottakerFnr =
+                    else ->
                         innsender?.fnr?.value?.takeIf { Folkeregisteridentifikator.isValid(it) }
                             ?: soeker.fnr.value
-                    adresseService.hentMottakerAdresse(sakType, mottakerFnr)
                 }
-            }
+            adresseService.hentMottakerAdresse(sakType, mottakerFnr)
         }
 
     override fun ferdigstillOversendelseBrev(

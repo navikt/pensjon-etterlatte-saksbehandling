@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.hentinformasjon
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
@@ -40,6 +41,7 @@ class BrevdataFacade(
     private val behandlingKlient: BehandlingKlient,
     private val sakService: SakService,
     private val trygdetidKlient: TrygdetidKlient,
+    private val adresseService: AdresseService,
 ) {
     suspend fun hentBrevutfall(
         behandlingId: UUID,
@@ -88,7 +90,7 @@ class BrevdataFacade(
                     innsender = grunnlag.mapInnsender(),
                     soeker = grunnlag.mapSoeker(brevutfallDto),
                     avdoede = grunnlag.mapAvdoede(),
-                    verge = grunnlag.mapVerge(sak.sakType, behandlingId, brevutfallDto),
+                    verge = grunnlag.mapVerge(sak.sakType, brevutfallDto, adresseService),
                 )
             val vedtak = vedtakDeferred?.await()
             val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()

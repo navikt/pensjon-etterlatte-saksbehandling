@@ -66,7 +66,7 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
             <BellDotIcon aria-hidden /> Nye hendelser
           </ToggleGroup.Item>
           <ToggleGroup.Item value={HendelseValg.ARKIVERTE}>
-            <ArchiveIcon /> Arkiverte hendelser
+            <ArchiveIcon aria-hidden /> Arkiverte hendelser
           </ToggleGroup.Item>
         </ToggleGroup>
 

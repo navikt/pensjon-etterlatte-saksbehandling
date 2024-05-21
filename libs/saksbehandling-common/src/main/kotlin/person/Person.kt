@@ -200,7 +200,7 @@ data class Vergemaal(val navn: String?, val foedselsnummer: Folkeregisteridentif
 }
 
 data class ForelderVerge(val foedselsnummer: Folkeregisteridentifikator, val navn: String) : Verge {
-    override fun navn(): String { // TODO ble denne brukt?
+    override fun navn(): String {
         return navn
     }
 }

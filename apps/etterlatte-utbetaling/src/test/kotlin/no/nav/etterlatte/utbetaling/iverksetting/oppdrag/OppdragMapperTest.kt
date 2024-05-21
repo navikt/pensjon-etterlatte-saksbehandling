@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
+import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.utbetaling.common.toXMLDate
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
@@ -7,6 +8,7 @@ import no.nav.etterlatte.utbetaling.utbetaling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
 import java.time.LocalDate
 
 internal class OppdragMapperTest {
@@ -44,19 +46,32 @@ internal class OppdragMapperTest {
             )
 
         @Test
-        fun `Skal inneholde en fra og med dato tilsvarende vedtaket`() {
-            oppdrag.oppdrag110.tekst140.single().datoTekstFom shouldBe LocalDate.parse("2022-01-01").toXMLDate()
+        fun `Skal inneholde fra og med dato tilsvarende vedtaket`() {
+            oppdrag.oppdrag110.tekst140.forEach {
+                it.datoTekstFom shouldBe LocalDate.parse("2022-01-01").toXMLDate()
+            }
         }
 
         @Test
         fun `Skal inneholde til og med dato for tekst som er 20 i utbetalingsmaaned`() {
-            oppdrag.oppdrag110.tekst140.single().datoTekstTom shouldBe LocalDate.parse("2022-02-20").toXMLDate()
+            oppdrag.oppdrag110.tekst140.forEach {
+                it.datoTekstTom shouldBe LocalDate.parse("2022-02-20").toXMLDate()
+            }
         }
 
         @Test
-        fun `Skal inneholde riktig tekst`() {
-            oppdrag.oppdrag110.tekst140.single().tekst shouldBe
-                "Grunnbeløpet har økt fra 1. mai 2022. De aller fleste vil få etterbetalt i juni."
+        fun `Skal inneholde riktig tekst og ikke overstige 40 chars pr linje`() {
+            oppdrag.oppdrag110.tekst140[0].tekst shouldBe "Grunnbeløpet har økt fra 1. mai 2022."
+            oppdrag.oppdrag110.tekst140[0].tekstLnr shouldBe BigInteger.ONE
+
+            oppdrag.oppdrag110.tekst140[1].tekst shouldBe "De fleste vil få etterbetalt i juni."
+            oppdrag.oppdrag110.tekst140[1].tekstLnr shouldBe BigInteger.TWO
+
+            oppdrag.oppdrag110.tekst140.size shouldBe 2
+
+            oppdrag.oppdrag110.tekst140.forEach {
+                it.tekst.length shouldBeLessThanOrEqual 40
+            }
         }
     }
 }

@@ -23,7 +23,7 @@ export const OpprettNyRevurdering = ({
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
   const [revurderingaarsak, setRevurderingaarsak] = useState<Revurderingaarsak | undefined>()
-  const [fritekstgrunn, setFritekstgrunn] = useState<string>('')
+  const [fritekstAarsak, setFritekstAarsak] = useState<string>('')
 
   const [muligeRevurderingAarsakerResult, muligeRevurderingeraarsakerFetch] = useApiCall(hentStoettedeRevurderinger)
   const [opprettRevurderingStatus, opprettRevurdering, resetApiCall] = useApiCall(opprettRevurderingApi)
@@ -37,8 +37,8 @@ export const OpprettNyRevurdering = ({
       {
         sakId: sakId,
         aarsak: revurderingaarsak,
-        fritekstAarsak: fritekstgrunn,
-        begrunnelse: begrunnelse,
+        fritekstAarsak,
+        begrunnelse,
         paaGrunnAvOppgaveId: oppgaveId,
       },
       (behandlingId: string) => {
@@ -102,8 +102,8 @@ export const OpprettNyRevurdering = ({
                       label="Beskriv årsak"
                       size="medium"
                       type="text"
-                      value={fritekstgrunn}
-                      onChange={(e) => setFritekstgrunn(e.target.value)}
+                      value={fritekstAarsak}
+                      onChange={(e) => setFritekstAarsak(e.target.value)}
                     />
                     <AnnetRevurderingAlert variant="warning" size="small" inline>
                       Bruk denne årsaken kun dersom andre årsaker ikke er dekkende for revurderingen

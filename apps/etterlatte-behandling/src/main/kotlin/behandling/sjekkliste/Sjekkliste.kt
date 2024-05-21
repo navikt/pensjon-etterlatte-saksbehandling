@@ -63,6 +63,6 @@ internal val defaultSjekklisteItemsOMS =
         "Bosatt utland: Opprettet oppgave til NØP om kildeskatt",
     )
 
-internal val foerstegangsbehandlingItemsOms =
+internal val defaultFoerstegangsbehandlingItemsOms =
     defaultSjekklisteItemsOMS + "I denne saken har gjenlevende tidligere fått innvilget overgangsstønad fordi hun var alene med barn. " +
         "Tidligere samboer dør og hun har rett til omstillingsstønad og denne er høyere enn overgangsstønad."

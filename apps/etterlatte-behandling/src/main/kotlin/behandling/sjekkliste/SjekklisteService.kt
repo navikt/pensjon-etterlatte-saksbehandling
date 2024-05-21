@@ -47,7 +47,7 @@ class SjekklisteService(
                 SakType.BARNEPENSJON -> defaultSjekklisteItemsBP
                 SakType.OMSTILLINGSSTOENAD -> {
                     when (behandling.type) {
-                        BehandlingType.FØRSTEGANGSBEHANDLING -> foerstegangsbehandlingItemsOms
+                        BehandlingType.FØRSTEGANGSBEHANDLING -> defaultFoerstegangsbehandlingItemsOms
                         BehandlingType.REVURDERING -> defaultSjekklisteItemsOMS
                     }
                 }

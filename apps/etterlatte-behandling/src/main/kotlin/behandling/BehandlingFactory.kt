@@ -109,6 +109,7 @@ class BehandlingFactory(
                     persongalleri,
                     request.mottattDato,
                     request.kilde ?: Vedtaksloesning.GJENNY,
+                    request = hentDataForOpprettBehandling(sak.id),
                 ).also {
                     if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
                         oppgaveService.hentOppgaverForSak(sak.id)
@@ -162,59 +163,60 @@ class BehandlingFactory(
         persongalleri: Persongalleri,
         mottattDato: String?,
         kilde: Vedtaksloesning,
+        request: OpprettBehandlingRequest = hentDataForOpprettBehandling(sakId),
         prosessType: Prosesstype = Prosesstype.MANUELL,
     ): BehandlingOgOppgave? {
         logger.info("Starter behandling i sak $sakId")
 
-        val (sak, harBehandlingerForSak, harIverksattEllerAttestertBehandling) = hentDataForOpprettBehandling(sakId)
-
-        return if (harIverksattEllerAttestertBehandling.isNotEmpty()) {
-            if (kilde == Vedtaksloesning.PESYS || kilde == Vedtaksloesning.GJENOPPRETTA) {
-                throw ManuellMigreringHarEksisterendeIverksattBehandling()
-            }
-            val forrigeBehandling = harIverksattEllerAttestertBehandling.maxBy { it.behandlingOpprettet }
-            revurderingService.opprettAutomatiskRevurdering(
-                sakId = sakId,
-                persongalleri = persongalleri,
-                forrigeBehandling = forrigeBehandling,
-                mottattDato = mottattDato,
-                kilde = kilde,
-                revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
-            ).oppdater().let { BehandlingOgOppgave(it, null) }
-        } else {
-            val harBehandlingUnderbehandling =
-                harBehandlingerForSak.filter { behandling ->
-                    BehandlingStatus.underBehandling().find { it == behandling.status } != null
+        with(request) {
+            return if (iverksatteEllerAttesterteBehandlinger.isNotEmpty()) {
+                if (kilde == Vedtaksloesning.PESYS || kilde == Vedtaksloesning.GJENOPPRETTA) {
+                    throw ManuellMigreringHarEksisterendeIverksattBehandling()
                 }
-            val behandling =
-                opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, mottattDato, kilde, prosessType)
-                    ?: return null
-            grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri)
-            val oppgave =
-                oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
-                    referanse = behandling.id.toString(),
-                    sakId = sak.id,
-                    oppgaveKilde =
-                        if (kilde == Vedtaksloesning.GJENOPPRETTA) {
-                            OppgaveKilde.GJENOPPRETTING
-                        } else {
-                            OppgaveKilde.BEHANDLING
-                        },
-                    merknad =
-                        when (kilde) {
-                            Vedtaksloesning.GJENOPPRETTA -> "Manuell gjenopprettelse av opphørt sak i Pesys"
-                            else -> null
-                        },
+                val forrigeBehandling = iverksatteEllerAttesterteBehandlinger.maxBy { it.behandlingOpprettet }
+                revurderingService.opprettAutomatiskRevurdering(
+                    sakId = sakId,
+                    persongalleri = persongalleri,
+                    forrigeBehandling = forrigeBehandling,
+                    mottattDato = mottattDato,
+                    kilde = kilde,
+                    revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
+                ).oppdater().let { BehandlingOgOppgave(it, null) }
+            } else {
+                val harBehandlingUnderbehandling =
+                    alleBehandlingerISak.filter { behandling ->
+                        BehandlingStatus.underBehandling().find { it == behandling.status } != null
+                    }
+                val behandling =
+                    opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, mottattDato, kilde, prosessType)
+                        ?: return null
+                grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri)
+                val oppgave =
+                    oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+                        referanse = behandling.id.toString(),
+                        sakId = sak.id,
+                        oppgaveKilde =
+                            if (kilde == Vedtaksloesning.GJENOPPRETTA) {
+                                OppgaveKilde.GJENOPPRETTING
+                            } else {
+                                OppgaveKilde.BEHANDLING
+                            },
+                        merknad =
+                            when (kilde) {
+                                Vedtaksloesning.GJENOPPRETTA -> "Manuell gjenopprettelse av opphørt sak i Pesys"
+                                else -> null
+                            },
+                    )
+                behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                    behandling.toStatistikkBehandling(persongalleri),
+                    BehandlingHendelseType.OPPRETTET,
                 )
-            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                behandling.toStatistikkBehandling(persongalleri),
-                BehandlingHendelseType.OPPRETTET,
-            )
-            return BehandlingOgOppgave(behandling, oppgave)
+                return BehandlingOgOppgave(behandling, oppgave)
+            }
         }
     }
 
-    private fun hentDataForOpprettBehandling(sakId: Long): Triple<Sak, List<Behandling>, List<Behandling>> {
+    internal fun hentDataForOpprettBehandling(sakId: Long): OpprettBehandlingRequest {
         val sak = requireNotNull(sakService.finnSak(sakId)) { "Fant ingen sak med id=$sakId!" }
         val harBehandlingerForSak =
             behandlingDao.alleBehandlingerISak(sak.id)
@@ -223,7 +225,11 @@ class BehandlingFactory(
             harBehandlingerForSak.filter { behandling ->
                 BehandlingStatus.iverksattEllerAttestert().find { it == behandling.status } != null
             }
-        return Triple(sak, harBehandlingerForSak, harIverksattEllerAttestertBehandling)
+        return OpprettBehandlingRequest(
+            sak = sak,
+            alleBehandlingerISak = harBehandlingerForSak,
+            iverksatteEllerAttesterteBehandlinger = harIverksattEllerAttestertBehandling,
+        )
     }
 
     fun finnGjeldendeEnhet(
@@ -275,3 +281,9 @@ class UgyldigEnhetException : UgyldigForespoerselException(
 )
 
 fun Vedtaksloesning.foerstOpprettaIPesys() = this == Vedtaksloesning.PESYS || this == Vedtaksloesning.GJENOPPRETTA
+
+data class OpprettBehandlingRequest(
+    val sak: Sak,
+    val alleBehandlingerISak: List<Behandling>,
+    val iverksatteEllerAttesterteBehandlinger: List<Behandling>,
+)

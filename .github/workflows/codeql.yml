@@ -37,7 +37,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Assemble
-        run: ./gradlew assemble -Dkotlin.daemon.jvmargs=-Xmx16g --max-workers=4
+        run: ./gradlew assemble --max-workers=4 --stacktrace
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

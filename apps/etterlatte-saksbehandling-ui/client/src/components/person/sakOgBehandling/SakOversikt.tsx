@@ -15,8 +15,8 @@ import { Behandlingsliste } from '~components/person/sakOgBehandling/Behandlings
 import { KlageListe } from '~components/person/sakOgBehandling/KlageListe'
 import { TilbakekrevingListe } from '~components/person/sakOgBehandling/TilbakekrevingListe'
 import { revurderingKanOpprettes } from '~components/person/hendelser/utils'
-import { OpprettNyRevurdering } from '~components/person/OpprettNyRevurdering'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 
 export enum OppgaveValg {
   AKTIVE = 'AKTIVE',
@@ -70,7 +70,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                   <Behandlingsliste sakOgBehandlinger={{ sak, behandlinger }} />
                   {revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
                     <OpprettRevurderingWrapper>
-                      <OpprettNyRevurdering sakId={sak.id} sakType={sak.sakType} />
+                      <OpprettRevurderingModal sakId={sak.id} sakType={sak.sakType} />
                     </OpprettRevurderingWrapper>
                   )}
                 </SpaceChildren>

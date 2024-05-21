@@ -161,7 +161,7 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
         {mapSuccess(sakResult, (sak) => (
           <>
             {kanOppretteBrevMedGittType ? (
-              <NyttBrevModal sakId={sak.sak.id} />
+              <NyttBrevModal sakId={sak.sak.id} sakType={sak.sak.sakType} />
             ) : (
               <Button
                 variant="primary"

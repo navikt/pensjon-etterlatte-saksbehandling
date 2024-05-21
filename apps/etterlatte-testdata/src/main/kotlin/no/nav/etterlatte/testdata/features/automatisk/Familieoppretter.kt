@@ -19,6 +19,7 @@ class Familieoppretter(
         accessToken: String,
         gruppeid: Long,
         antall: Int,
+        antallDagerSidenDoedsfall: Int,
     ): BestillingStatus {
         val req =
             BestillingRequest(
@@ -28,6 +29,7 @@ class Familieoppretter(
                 halvsoeskenGjenlevende = 0,
                 gruppeId = gruppeid,
                 antall = antall,
+                antallDagerSidenDoedsfall = antallDagerSidenDoedsfall,
             )
 
         logger.info("Oppretter bestilling for gruppeid $gruppeid")

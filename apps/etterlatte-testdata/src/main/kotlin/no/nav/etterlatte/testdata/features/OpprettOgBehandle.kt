@@ -54,6 +54,10 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
                 val gruppeid = params["gruppeId"]!!.toLong()
                 val soeknadType = params["type"]?.let { SoeknadType.valueOf(it) } ?: throw IllegalArgumentException("Mangler søknadstype")
                 val oenskaAntall = params["antall"]?.toInt() ?: throw IllegalArgumentException("Mangler antall")
+                val antallDagerSidenDoedsfall =
+                    params["antallDagerSidenDoedsfall"]?.toInt() ?: throw IllegalArgumentException(
+                        "Mangler antall dager siden dødsfall",
+                    )
                 val behandlingssteg =
                     params["behandlingssteg"]?.let {
                         Behandlingssteg.valueOf(
@@ -62,13 +66,14 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
                     } ?: throw IllegalArgumentException("Mangler behandlingssteg")
                 val navIdent = navIdentFraToken()
 
-                opprettOgSendInn(oenskaAntall, gruppeid, soeknadType, navIdent, behandlingssteg)
+                opprettOgSendInn(oenskaAntall, antallDagerSidenDoedsfall, gruppeid, soeknadType, navIdent, behandlingssteg)
                 call.respond(HttpStatusCode.Created)
             }
         }
 
     private fun opprettOgSendInn(
         oenskaAntall: Int,
+        antallDagerSidenDoedsfall: Int,
         gruppeid: Long,
         soeknadType: SoeknadType,
         navIdent: String?,
@@ -80,7 +85,7 @@ class OpprettOgBehandle(private val dollyService: DollyService, private val fami
                 familieoppretter.hentFamilier(gruppeid, getDollyAccessToken()).also {
                     logger.debug("Baseline for gruppeid $gruppeid er ${it.size} saker")
                 }
-            val bestilling = familieoppretter.opprettFamilie(getDollyAccessToken(), gruppeid, oenskaAntall)
+            val bestilling = familieoppretter.opprettFamilie(getDollyAccessToken(), gruppeid, oenskaAntall, antallDagerSidenDoedsfall)
             familieoppretter.hentFamilier(gruppeid, getDollyAccessToken(), bestilling, oenskaAntall, baselineFamilier).forEach {
                 logger.info("Sender inn søknad for familie med avdød ${it.avdoed}")
                 sendSoeknad(it, soeknadType, navIdent, behandlingssteg)

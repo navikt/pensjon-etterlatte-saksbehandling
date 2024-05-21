@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -313,27 +314,46 @@ class BeregningsGrunnlagService(
                     runBlocking {
                         behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                     }
-                val reguleringsmaaned = YearMonth.of(behandling.virkningstidspunkt!!.dato.year, 5)
-                beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
-                    behandlingId,
-                    grunnlag.map {
-                        it.copy(
-                            // lukker siste periode
-                            datoTOM =
-                                if (it.datoTOM == null) {
-                                    reguleringsmaaned.minusMonths(1).atEndOfMonth()
-                                } else {
-                                    it.datoTOM
-                                },
-                        )
-                    } +
-                        listOf(
+
+                val reguleringsmaaned = LocalDate.of(behandling.virkningstidspunkt().dato.year, 5, 1)
+
+                val nyePerioder = mutableListOf<OverstyrBeregningGrunnlagDao>()
+                grunnlag.forEach {
+                    val erFoerRegulering = it.datoTOM != null && it.datoTOM!! < reguleringsmaaned
+                    val erOverRegulering = it.datoFOM < reguleringsmaaned && (it.datoTOM == null || it.datoTOM!! > reguleringsmaaned)
+
+                    if (erFoerRegulering) {
+                        nyePerioder.add(it)
+                    } else if (erOverRegulering) {
+                        val forrigeMaaned = reguleringsmaaned.minusMonths(1)
+                        val eksisterende =
+                            it.copy(
+                                datoTOM = LocalDate.of(reguleringsmaaned.year, forrigeMaaned.month, forrigeMaaned.lengthOfMonth()),
+                            )
+                        val nyPeriode =
                             tilpassOverstyrtBeregningsgrunnlagForRegulering(
-                                reguleringsmaaned,
-                                grunnlag.last(),
+                                YearMonth.from(reguleringsmaaned),
+                                fom = reguleringsmaaned,
+                                it,
+                                behandlingId,
+                            )
+                        nyePerioder.add(eksisterende)
+                        nyePerioder.add(nyPeriode)
+                    } else {
+                        nyePerioder.add(
+                            tilpassOverstyrtBeregningsgrunnlagForRegulering(
+                                YearMonth.from(reguleringsmaaned),
+                                fom = it.datoFOM,
+                                it,
                                 behandlingId,
                             ),
-                        ),
+                        )
+                    }
+                }
+
+                beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
+                    behandlingId,
+                    nyePerioder,
                 )
             }
         }

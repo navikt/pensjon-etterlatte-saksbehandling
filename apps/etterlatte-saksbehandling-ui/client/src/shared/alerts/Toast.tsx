@@ -5,19 +5,20 @@ import styled from 'styled-components'
 interface ToastProps extends Omit<AlertProps, 'variant' | 'children'> {
   melding: ReactNode
   position?: 'bottom-center' | undefined
+  timeout?: number
 }
 
 /**
  * Enkel "Toast" som vises øverst i høyre hjørne.
  * Forsvinner av seg selv etter 5 sekunder.
  **/
-export const Toast = ({ melding, position, ...rest }: ToastProps) => {
+export const Toast = ({ melding, position, timeout, ...rest }: ToastProps) => {
   const [visible, setVisible] = useState(true)
 
   useEffect(() => {
     const id = setTimeout(() => {
       setVisible(false)
-    }, 5000)
+    }, timeout || 5000)
 
     return () => clearTimeout(id)
   }, [])

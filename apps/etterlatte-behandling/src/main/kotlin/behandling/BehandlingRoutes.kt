@@ -304,7 +304,9 @@ internal fun Route.behandlingRoutes(
                                     Vedtaksloesning.GJENNY,
                                     request = request,
                                 )
-                            }?.behandling
+                            }
+                                ?.also { it.action() }
+                                ?.behandling
                     ) {
                         null -> call.respond(HttpStatusCode.NotFound)
                         else -> call.respondText(behandling.id.toString())

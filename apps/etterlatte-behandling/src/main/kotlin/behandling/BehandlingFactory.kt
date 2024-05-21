@@ -118,7 +118,9 @@ class BehandlingFactory(
                             }
                     }
                 } ?: throw IllegalStateException("Kunne ikke opprette behandling")
-            }.behandling
+            }
+                .also { it.action() }
+                .behandling
 
         val gyldighetsvurdering =
             GyldighetsResultat(
@@ -207,11 +209,12 @@ class BehandlingFactory(
                                 else -> null
                             },
                     )
-                behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                    behandling.toStatistikkBehandling(persongalleri),
-                    BehandlingHendelseType.OPPRETTET,
-                )
-                return BehandlingOgOppgave(behandling, oppgave)
+                return BehandlingOgOppgave(behandling, oppgave) {
+                    behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                        behandling.toStatistikkBehandling(persongalleri),
+                        BehandlingHendelseType.OPPRETTET,
+                    )
+                }
             }
         }
     }
@@ -268,7 +271,7 @@ class BehandlingFactory(
     }
 }
 
-data class BehandlingOgOppgave(val behandling: Behandling, val oppgave: OppgaveIntern?)
+data class BehandlingOgOppgave(val behandling: Behandling, val oppgave: OppgaveIntern?, val action: () -> Unit = {})
 
 class ManuellMigreringHarEksisterendeIverksattBehandling : UgyldigForespoerselException(
     code = "MANUELL_MIGRERING_EKSISTERENDE_IVERKSATT",

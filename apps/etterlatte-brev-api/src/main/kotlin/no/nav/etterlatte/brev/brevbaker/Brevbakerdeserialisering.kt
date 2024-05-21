@@ -27,5 +27,6 @@ interface BrevbakerJSONBlockMixIn
     JsonSubTypes.Type(value = LetterMarkup.ParagraphContent.ItemList::class, name = "ITEM_LIST"),
     JsonSubTypes.Type(value = LetterMarkup.ParagraphContent.Text.Literal::class, name = "LITERAL"),
     JsonSubTypes.Type(value = LetterMarkup.ParagraphContent.Text.Variable::class, name = "VARIABLE"),
+    JsonSubTypes.Type(value = LetterMarkup.ParagraphContent.Text.NewLine::class, name = "NEW_LINE"),
 )
 interface BrevbakerJSONParagraphMixIn

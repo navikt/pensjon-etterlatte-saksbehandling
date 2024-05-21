@@ -14,7 +14,6 @@ import { FilterRad } from '~components/oppgavebenk/filtreringAvOppgaver/FilterRa
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
-import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
@@ -26,10 +25,9 @@ import {
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
-  revurderingsaarsaker: RevurderingsaarsakerBySakstype
 }
 
-export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
+export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [filter, setFilter] = useState<Filter>(hentMinOppgavelisteFilterFraLocalStorage())
@@ -100,7 +98,6 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet, revurderingsaarsaker }: 
           oppdaterFrist(dispatcher.setMinOppgavelisteOppgaver, oppgavebenkState.minOppgavelisteOppgaver, id, nyfrist)
         }
         saksbehandlereIEnhet={saksbehandlereIEnhet}
-        revurderingsaarsaker={revurderingsaarsaker}
         filter={filter}
       />
     </>

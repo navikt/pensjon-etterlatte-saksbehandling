@@ -8,7 +8,6 @@ import {
 } from '~components/oppgavebenk/utils/oppgaveutils'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { FilterRad } from '~components/oppgavebenk/filtreringAvOppgaver/FilterRad'
@@ -25,10 +24,9 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
-  revurderingsaarsaker: RevurderingsaarsakerBySakstype
 }
 
-export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
+export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [filter, setFilter] = useState<Filter>(hentOppgavelistenFilterFraLocalStorage())
@@ -100,7 +98,6 @@ export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Pro
         oppgaver={oppgavebenkState.oppgavelistaOppgaver}
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
-        revurderingsaarsaker={revurderingsaarsaker}
         filter={filter}
       />
     </>

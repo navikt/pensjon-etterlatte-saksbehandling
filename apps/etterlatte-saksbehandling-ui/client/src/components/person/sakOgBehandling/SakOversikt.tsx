@@ -70,7 +70,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                   <Behandlingsliste sakOgBehandlinger={{ sak, behandlinger }} />
                   {revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
                     <OpprettRevurderingWrapper>
-                      <OpprettNyRevurdering sak={sak} />
+                      <OpprettNyRevurdering sakId={sak.id} sakType={sak.sakType} />
                     </OpprettRevurderingWrapper>
                   )}
                 </SpaceChildren>

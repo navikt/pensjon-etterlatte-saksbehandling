@@ -8,7 +8,6 @@ import { HandlingerForOppgave } from '~components/oppgavebenk/components/Handlin
 import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
 import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 
@@ -17,7 +16,6 @@ interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null) => void
   oppdaterFrist?: (id: string, nyfrist: string) => void
-  revurderingsaarsaker: RevurderingsaarsakerBySakstype
 }
 
 export const OppgaverTableRow = ({
@@ -25,7 +23,6 @@ export const OppgaverTableRow = ({
   saksbehandlereIEnhet,
   oppdaterTildeling,
   oppdaterFrist,
-  revurderingsaarsaker,
 }: Props): ReactNode => (
   <Table.Row>
     <Table.DataCell>{oppgave.sakId}</Table.DataCell>
@@ -60,7 +57,7 @@ export const OppgaverTableRow = ({
       />
     </Table.DataCell>
     <Table.DataCell>
-      <HandlingerForOppgave oppgave={oppgave} revurderingsaarsaker={revurderingsaarsaker} />
+      <HandlingerForOppgave oppgave={oppgave} />
     </Table.DataCell>
   </Table.Row>
 )

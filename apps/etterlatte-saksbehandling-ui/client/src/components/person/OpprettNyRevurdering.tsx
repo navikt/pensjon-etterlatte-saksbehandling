@@ -4,18 +4,19 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import { useNavigate } from 'react-router-dom'
 import { hentStoettedeRevurderinger, opprettRevurdering as opprettRevurderingApi } from '~shared/api/revurdering'
-
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { ButtonGroup, SpaceChildren } from '~shared/styled'
-import { ISak } from '~shared/types/sak'
+import { SakType } from '~shared/types/sak'
 import styled from 'styled-components'
 
 export const OpprettNyRevurdering = ({
-  sak,
+  sakId,
+  sakType,
   oppgaveId,
   begrunnelse,
 }: {
-  sak: ISak
+  sakId: number
+  sakType: SakType
   oppgaveId?: string
   begrunnelse?: string
 }) => {
@@ -34,9 +35,9 @@ export const OpprettNyRevurdering = ({
     }
     opprettRevurdering(
       {
-        sakId: sak.id,
+        sakId: sakId,
         aarsak: revurderingaarsak,
-        fritekstAarsak: null,
+        fritekstAarsak: fritekstgrunn,
         begrunnelse: begrunnelse,
         paaGrunnAvOppgaveId: oppgaveId,
       },
@@ -57,7 +58,7 @@ export const OpprettNyRevurdering = ({
   }
 
   useEffect(() => {
-    muligeRevurderingeraarsakerFetch({ sakType: sak.sakType })
+    muligeRevurderingeraarsakerFetch({ sakType })
   }, [])
 
   return mapResult(muligeRevurderingAarsakerResult, {

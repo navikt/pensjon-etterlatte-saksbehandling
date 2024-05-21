@@ -2,19 +2,12 @@ import { Button } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/OmgjoerVedtakModal'
 import React from 'react'
-import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 import { OpprettNyRevurdering } from '~components/person/OpprettNyRevurdering'
 import { OppgaveDTO, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfoModal'
 
-export const HandlingerForOppgave = ({
-  oppgave,
-  revurderingsaarsaker,
-}: {
-  oppgave: OppgaveDTO
-  revurderingsaarsaker: RevurderingsaarsakerBySakstype
-}) => {
+export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const innloggetsaksbehandler = useInnloggetSaksbehandler()
 
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
@@ -76,8 +69,8 @@ export const HandlingerForOppgave = ({
           )}
           {erInnloggetSaksbehandlerOppgave && !referanse && (
             <OpprettNyRevurdering
-              revurderinger={revurderingsaarsaker[oppgave.sakType]}
               sakId={oppgave.sakId}
+              sakType={oppgave.sakType}
               oppgaveId={oppgave.id}
               begrunnelse={oppgave.merknad}
             />

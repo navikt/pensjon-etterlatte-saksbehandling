@@ -318,6 +318,10 @@ internal class BehandlingServiceImpl(
      *   (nb. når denne kommentaren er skrevet så er det uavklart om ukjent avdød skal støttes kun for migrerte saker fra Pesys).
      * 2. Saker som migreres/gjenopprettes fra Pesys. Det vil ikke være nødvendig å validere virk opp mot rettighet
      *   da bruker allerede har en innvilgelse i Pesys.
+     *
+     * Basert på lovverk § 22-12. og § 22-13.
+     * https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_8-2#%C2%A722-12
+     * https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_8-2#%C2%A722-13
      */
     private suspend fun erGyldigVirkningstidspunktFoerstegangsbehandling(
         request: VirkningstidspunktRequest,

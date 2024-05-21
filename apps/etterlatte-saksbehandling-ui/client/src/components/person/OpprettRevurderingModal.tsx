@@ -103,7 +103,16 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
 
               {watch().aarsak === Revurderingaarsak.ANNEN && (
                 <AnnenRevurderingWrapper gap="4">
-                  <TextField {...register('fritekstAarsak')} label="Beskriv årsak" />
+                  <TextField
+                    {...register('fritekstAarsak', {
+                      required: {
+                        value: true,
+                        message: 'Du må beskrive årsaken',
+                      },
+                    })}
+                    label="Beskriv årsak"
+                    error={errors.fritekstAarsak?.message}
+                  />
                   <AnnenRevurderingAlert variant="warning" size="small" inline>
                     Bruk denne årsaken kun dersom andre årsaker ikke er dekkende for revurderingen.
                   </AnnenRevurderingAlert>

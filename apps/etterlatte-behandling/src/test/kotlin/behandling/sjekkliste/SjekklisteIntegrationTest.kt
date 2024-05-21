@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.sjekkliste
 
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
@@ -11,6 +12,7 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
@@ -66,6 +68,23 @@ class SjekklisteIntegrationTest(val dataSource: DataSource) {
         opprettet.versjon shouldBe 1
 
         opprettet.sjekklisteItems shouldHaveAtLeastSize 8
+        opprettet.sjekklisteItems.forEach {
+            it.avkrysset shouldBe false
+            it.versjon shouldBe 1
+        }
+    }
+
+    @Test
+    fun `Opprett sjekkliste for OMS`() {
+        val behandling = foerstegangsbehandling(sakId = 33L, sakType = SakType.OMSTILLINGSSTOENAD)
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        val opprettet = sjekklisteService.opprettSjekkliste(behandling.id)
+
+        opprettet.id shouldBe behandling.id
+        opprettet.versjon shouldBe 1
+        opprettet.sjekklisteItems.map { it.beskrivelse } shouldContainExactlyInAnyOrder defaultFoerstegangsbehandlingItemsOms
+
+        opprettet.sjekklisteItems shouldHaveAtLeastSize 13
         opprettet.sjekklisteItems.forEach {
             it.avkrysset shouldBe false
             it.versjon shouldBe 1

@@ -62,3 +62,6 @@ internal val defaultSjekklisteItemsOMS =
         "Bosatt utland: Nødvendige SED er opprettet og klar for utsendelse. P6000 må opprettes etter attestering",
         "Bosatt utland: Opprettet oppgave til NØP om kildeskatt",
     )
+
+internal val defaultFoerstegangsbehandlingItemsOms =
+    defaultSjekklisteItemsOMS + "Sjekk om bruker har overgangastønad"

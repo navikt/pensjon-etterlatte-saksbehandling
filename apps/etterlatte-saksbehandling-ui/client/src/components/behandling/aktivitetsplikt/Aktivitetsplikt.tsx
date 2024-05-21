@@ -136,27 +136,6 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         )}
 
         <Heading size="small" spacing>
-          Lag intern oppfølgingsoppgave med riktig frist
-        </Heading>
-        <BodyLong spacing>
-          Etterlatte skal følges opp og minnes på aktivitetskravet når det har gått 3-4 måneder og på nytt når det har
-          gått 9-10 måneder etter dødsfall. Om den etterlatte har andre ytelser eller annen grunn til videre oppfølging
-          bør man vurdere andre frister.
-        </BodyLong>
-        <BodyShort spacing>Huk av i sjekklista når oppfølgingsoppgave er opprettet.</BodyShort>
-        <SpacingWrapper>
-          <Button
-            variant="primary"
-            size="small"
-            as="a"
-            href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker?.foedselsnummer}`}
-            target="_blank"
-          >
-            Lag oppfølgingsoppgave i Gosys <ExternalLinkIcon />
-          </Button>
-        </SpacingWrapper>
-
-        <Heading size="small" spacing>
           Er oppfølging av lokalkontor nødvendig?
         </Heading>
         <BodyLong spacing>
@@ -174,6 +153,14 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             Lag oppgave til lokalkontor <ExternalLinkIcon />
           </Button>
         </SpacingWrapper>
+
+        <Heading size="small" spacing>
+          Intern oppfølgingsoppgave med riktig frist blir opprettet automatisk
+        </Heading>
+        <BodyLong spacing>
+          Etterlatte skal følges opp og minnes på aktivitetskravet når det har gått 3-4 måneder og på nytt når det har
+          gått 9-10 måneder etter dødsfall.
+        </BodyLong>
       </AktivitetspliktWrapper>
 
       <Border />

@@ -130,7 +130,12 @@ class AnvendtTrygdetidIkkeFunnet(fom: LocalDate, tom: LocalDate?) : UgyldigFores
     detail = "Anvendt trygdetid ikke funnet for perioden $fom - $tom",
 )
 
-class AnvendtTrygdetidIdentIkkeFunnet() : UgyldigForespoerselException(
+class AnvendtTrygdetidIdentIkkeFunnet : UgyldigForespoerselException(
     code = "ANVENDT_TRYGDETID_IDENT_IKKE_FUNNET",
     detail = "Anvendt trygdetid ikke funnet for avdøde",
+)
+
+class TrygdetidIkkeOpprettet : UgyldigForespoerselException(
+    code = "MÅ_FASTSETTE_TRYGDETID",
+    detail = "Mangler trygdetid, gå tilbake til trygdetidsiden for å opprette dette",
 )

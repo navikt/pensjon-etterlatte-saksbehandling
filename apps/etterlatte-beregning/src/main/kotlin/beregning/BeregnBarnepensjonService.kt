@@ -92,10 +92,7 @@ class BeregnBarnepensjonService(
         }
 
         if (trygdetidListe.isEmpty()) {
-            throw UgyldigForespoerselException(
-                code = "MÅ_FASTSETTE_TRYGDETID",
-                detail = "Mangler trygdetid, gå tilbake til trygdetidsiden for å opprette dette",
-            )
+            throw TrygdetidIkkeOpprettet()
         }
 
         val anvendtTrygdetider =
@@ -375,10 +372,7 @@ object AnvendtTrygdetidPerioder {
                     GrunnlagMedPeriode(it, fom, null),
                 ),
             ).first().data
-        } ?: throw UgyldigForespoerselException(
-            code = "MÅ_FASTSETTE_TRYGDETID",
-            detail = "Mangler trygdetid, gå tilbake til trygdetidsiden for å opprette dette",
-        )
+        } ?: throw TrygdetidIkkeOpprettet()
     }
 
     private fun anvendtPerioder(muligePerioder: List<GrunnlagMedPeriode<SamletTrygdetidMedBeregningsMetode>>) =

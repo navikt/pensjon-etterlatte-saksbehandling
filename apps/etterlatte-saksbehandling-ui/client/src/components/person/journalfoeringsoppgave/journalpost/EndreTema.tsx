@@ -1,5 +1,5 @@
 import { Journalpost } from '~shared/types/Journalpost'
-import { hentKodeverkTema, RsKode } from '~shared/api/norg2'
+import { hentKodeverkArkivtemaer, RsKode } from '~shared/api/kodeverk'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isInitial, mapApiResult } from '~shared/api/apiUtils'
@@ -18,7 +18,7 @@ export const EndreTema = ({
 }) => {
   const [gammelKode, settGammelKode] = useState<RsKode>()
   const [valgtKode, settValgtKode] = useState<RsKode>()
-  const [temaStatus, apiHentTema] = useApiCall(hentKodeverkTema)
+  const [temaStatus, apiHentTema] = useApiCall(hentKodeverkArkivtemaer)
 
   useEffect(() => {
     if (isInitial(temaStatus) && !!journalpost) {

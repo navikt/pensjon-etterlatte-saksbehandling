@@ -2,6 +2,7 @@ package no.nav.etterlatte.statistikk.database
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -94,6 +95,7 @@ class SakRepository(private val datasource: DataSource) {
             kilde = getString("kilde").let { Vedtaksloesning.valueOf(it) },
             pesysId = getLong("pesysid"),
             relatertTil = getString("relatert_til"),
+            paaVentAarsak = getString("paa_vent_aarsak")?.let { enumValueOf<PaaVentAarsak>(it) },
         )
 
     fun hentRader(): List<SakRad> {

@@ -63,4 +63,4 @@ internal val defaultSjekklisteItemsOMS =
     )
 
 internal val defaultFoerstegangsbehandlingItemsOms =
-    defaultSjekklisteItemsOMS + "Sjekk om bruker har overgangastønad"
+    defaultSjekklisteItemsOMS + "Sjekk om bruker har overgangsstønad"

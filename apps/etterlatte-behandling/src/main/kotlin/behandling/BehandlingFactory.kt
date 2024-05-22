@@ -165,7 +165,7 @@ class BehandlingFactory(
         persongalleri: Persongalleri,
         mottattDato: String?,
         kilde: Vedtaksloesning,
-        request: OpprettBehandlingRequest = hentDataForOpprettBehandling(sakId),
+        request: OpprettBehandlingRequest,
         prosessType: Prosesstype = Prosesstype.MANUELL,
     ): BehandlingOgOppgave? {
         logger.info("Starter behandling i sak $sakId")

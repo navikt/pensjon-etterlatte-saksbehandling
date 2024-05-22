@@ -55,15 +55,22 @@ object OppdragMapper {
                 )
 
                 if (erGRegulering) {
-                    tekst140.add(
+                    val fraOgMed = utbetaling.utbetalingslinjer.first().periode.fra
+
+                    listOf(
+                        // Ta høyde for maks lengde på 40 chars
+                        "Grunnbeløpet har økt fra 1. mai ${fraOgMed.year}.",
+                        "De fleste vil få etterbetalt i juni.",
+                    ).mapIndexed { index, str ->
                         Tekst140().apply {
-                            val fraOgMed = utbetaling.utbetalingslinjer.first().periode.fra
-                            tekst = "Grunnbeløpet har økt fra 1. mai ${fraOgMed.year}. De aller fleste vil få etterbetalt i juni."
-                            tekstLnr = BigInteger.ONE
+                            tekst = str
+                            tekstLnr = BigInteger.valueOf(index.toLong() + 1)
                             datoTekstFom = fraOgMed.toXMLDate()
                             datoTekstTom = LocalDate.of(fraOgMed.year, fraOgMed.month.plus(1), 20).toXMLDate()
-                        },
-                    )
+                        }
+                    }.let {
+                        tekst140.addAll(it)
+                    }
                 }
 
                 oppdragsLinje150.addAll(

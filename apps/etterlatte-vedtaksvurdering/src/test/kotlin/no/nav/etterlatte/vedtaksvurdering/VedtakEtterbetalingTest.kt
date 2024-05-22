@@ -65,6 +65,7 @@ class VedtakEtterbetalingTest {
     fun `ikke etterbetaling, tidligere periode men samme beloep`() {
         val nyttVedtak =
             aVedtakMedUtbetalingsperiode(
+                id = 2L,
                 virkningstidspunkt = februar2024,
                 beloep = 2500,
                 fattetTidspunkt = "2024-01-29T14:05:00Z",
@@ -73,6 +74,7 @@ class VedtakEtterbetalingTest {
         every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker) } returns
             listOf(
                 aVedtakMedUtbetalingsperiode(
+                    id = 1L,
                     virkningstidspunkt = januar2024,
                     beloep = 2500,
                     fattetTidspunkt = "2024-01-26T11:25:00Z",
@@ -88,6 +90,7 @@ class VedtakEtterbetalingTest {
     fun `etterbetaling - ny periode har hoeyere beloep`() {
         val nyttVedtak =
             aVedtakMedUtbetalingsperiode(
+                id = 2L,
                 virkningstidspunkt = februar2024,
                 beloep = 3500,
                 fattetTidspunkt = "2024-01-26T11:25:00Z",
@@ -96,6 +99,7 @@ class VedtakEtterbetalingTest {
         every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker) } returns
             listOf(
                 aVedtakMedUtbetalingsperiode(
+                    id = 1L,
                     virkningstidspunkt = januar2024,
                     beloep = 2500,
                     fattetTidspunkt = "2023-12-16T13:30:00Z",
@@ -111,6 +115,7 @@ class VedtakEtterbetalingTest {
     fun `etterbetaling - flere tidligere perioder, ny periode har hoeyere beloep`() {
         val nyttVedtak =
             aVedtakMedUtbetalingsperiode(
+                id = 10L,
                 virkningstidspunkt = februar2024,
                 beloep = 3500,
                 fattetTidspunkt = "2024-03-06T13:30:00Z",
@@ -119,16 +124,19 @@ class VedtakEtterbetalingTest {
         every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker) } returns
             listOf(
                 aVedtakMedUtbetalingsperiode(
+                    id = 1L,
                     virkningstidspunkt = januar2024,
                     beloep = 2000,
                     fattetTidspunkt = "2024-01-07T13:30:00Z",
                 ),
                 aVedtakMedUtbetalingsperiode(
+                    id = 2L,
                     virkningstidspunkt = februar2024,
                     beloep = 2500,
                     fattetTidspunkt = "2024-01-26T14:00:00Z",
                 ),
                 aVedtakMedUtbetalingsperiode(
+                    id = 3L,
                     virkningstidspunkt = mars2024,
                     beloep = 3000,
                     fattetTidspunkt = "2024-03-05T10:00:00Z",
@@ -141,10 +149,12 @@ class VedtakEtterbetalingTest {
     }
 
     private fun aVedtakMedUtbetalingsperiode(
+        id: Long,
         virkningstidspunkt: YearMonth,
         beloep: Long,
         fattetTidspunkt: String,
     ) = vedtak(
+        id = id,
         virkningstidspunkt = virkningstidspunkt,
         vedtakFattet =
             VedtakFattet(

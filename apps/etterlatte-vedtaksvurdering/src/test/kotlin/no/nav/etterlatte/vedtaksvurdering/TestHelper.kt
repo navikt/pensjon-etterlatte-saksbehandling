@@ -101,6 +101,7 @@ fun opprettVedtakKlage(
 )
 
 fun vedtak(
+    id: Long = 1L,
     virkningstidspunkt: YearMonth = YearMonth.of(2023, Month.JANUARY),
     sakId: Long = 1L,
     behandlingId: UUID = UUID.randomUUID(),
@@ -112,7 +113,7 @@ fun vedtak(
     vedtakFattet: VedtakFattet? = null,
     utbetalingsperioder: List<Utbetalingsperiode>? = null,
 ) = Vedtak(
-    id = 1L,
+    id = id,
     status = status,
     soeker = SOEKER_FOEDSELSNUMMER,
     sakId = sakId,

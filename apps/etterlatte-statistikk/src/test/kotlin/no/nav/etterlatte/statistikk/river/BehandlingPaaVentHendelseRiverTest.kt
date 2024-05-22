@@ -3,7 +3,7 @@ package no.nav.etterlatte.statistikk.river
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.libs.common.behandling.BEHANDLING_PAA_VENT_RIVER_KEY
+import no.nav.etterlatte.libs.common.behandling.BEHANDLING_ID_PAA_VENT_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.PAA_VENT_AARSAK_KEY
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
@@ -41,7 +41,7 @@ internal class BehandlingPaaVentHendelseRiverTest {
                     BehandlingHendelseType.PAA_VENT.lagParMedEventNameKey(),
                     CORRELATION_ID_KEY to UUID.randomUUID(),
                     TEKNISK_TID_KEY to tekniskTid,
-                    BEHANDLING_PAA_VENT_RIVER_KEY to behandlingId,
+                    BEHANDLING_ID_PAA_VENT_RIVER_KEY to behandlingId,
                     PAA_VENT_AARSAK_KEY to PaaVentAarsak.OPPLYSNING_FRA_ANDRE.name,
                 ),
             ).toJson()

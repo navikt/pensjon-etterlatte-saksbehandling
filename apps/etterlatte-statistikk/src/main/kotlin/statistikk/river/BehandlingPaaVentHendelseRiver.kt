@@ -1,6 +1,6 @@
 package no.nav.etterlatte.statistikk.river
 
-import no.nav.etterlatte.libs.common.behandling.BEHANDLING_PAA_VENT_RIVER_KEY
+import no.nav.etterlatte.libs.common.behandling.BEHANDLING_ID_PAA_VENT_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.PAA_VENT_AARSAK_KEY
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
@@ -34,7 +34,7 @@ class BehandlingPaaVentHendelseRiver(
         initialiserRiverUtenEventName(rapidsConnection) {
             validate { it.demandAny(EVENT_NAME_KEY, paaVentHendelser) }
             validate { it.requireKey(TEKNISK_TID_KEY) }
-            validate { it.requireKey(BEHANDLING_PAA_VENT_RIVER_KEY) }
+            validate { it.requireKey(BEHANDLING_ID_PAA_VENT_RIVER_KEY) }
             validate { it.requireKey(PAA_VENT_AARSAK_KEY) }
         }
     }
@@ -45,7 +45,7 @@ class BehandlingPaaVentHendelseRiver(
     ) = try {
         val hendelse: BehandlingHendelseType = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
         val tekniskTid = parseTekniskTid(packet, logger)
-        val behandlingId = UUID.fromString(packet[BEHANDLING_PAA_VENT_RIVER_KEY].textValue())
+        val behandlingId = UUID.fromString(packet[BEHANDLING_ID_PAA_VENT_RIVER_KEY].textValue())
         val aarsak: PaaVentAarsak = PaaVentAarsak.valueOf(packet[PAA_VENT_AARSAK_KEY].textValue())
 
         service.registrerStatistikkBehandlingPaaVentHendelse(behandlingId, hendelse, tekniskTid, aarsak)
@@ -66,7 +66,7 @@ class BehandlingPaaVentHendelseRiver(
             """.trimIndent(),
             e,
         )
-        logger.error("Feilet på behandlingid ${packet[BEHANDLING_PAA_VENT_RIVER_KEY]}")
+        logger.error("Feilet på behandlingid ${packet[BEHANDLING_ID_PAA_VENT_RIVER_KEY]}")
         throw e
     }
 }

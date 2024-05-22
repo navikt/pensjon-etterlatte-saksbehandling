@@ -42,7 +42,7 @@ enum class BehandlingHendelseType : EventnameHendelseType {
 }
 
 const val STATISTIKKBEHANDLING_RIVER_KEY = "behandling"
-const val BEHANDLING_PAA_VENT_RIVER_KEY = "behandling_vent"
+const val BEHANDLING_ID_PAA_VENT_RIVER_KEY = "behandling_vent"
 const val PAA_VENT_AARSAK_KEY = "paaVentAarsak"
 
 enum class PaaVentAarsak {

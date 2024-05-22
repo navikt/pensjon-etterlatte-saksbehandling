@@ -191,19 +191,15 @@ class OppgaveService(
         oppgaveDao.oppdaterReferanseOgMerknad(oppgaveId, referanse, merknad)
     }
 
-    fun endrePaaVent(
-        oppgaveId: UUID,
-        merknad: String,
-        paaVent: Boolean,
-    ): OppgaveIntern {
-        val oppgave = hentOppgave(oppgaveId)
-        if (paaVent && oppgave.status == Status.PAA_VENT) return oppgave
-        if (!paaVent && oppgave.status != Status.PAA_VENT) return oppgave
+    fun endrePaaVent(paavent: PaaVent): OppgaveIntern {
+        val oppgave = hentOppgave(paavent.oppgaveId)
+        if (paavent.paavent && oppgave.status == Status.PAA_VENT) return oppgave
+        if (!paavent.paavent && oppgave.status != Status.PAA_VENT) return oppgave
 
         sikreAktivOppgaveOgTildeltSaksbehandler(oppgave) {
-            val nyStatus = if (paaVent) Status.PAA_VENT else hentForrigeStatus(oppgaveId)
+            val nyStatus = if (paavent.paavent) Status.PAA_VENT else hentForrigeStatus(paavent.oppgaveId)
 
-            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, nyStatus)
+            oppgaveDao.oppdaterPaaVent(paavent, nyStatus)
 
             when (oppgave.type) {
                 OppgaveType.FOERSTEGANGSBEHANDLING,
@@ -221,7 +217,7 @@ class OppgaveService(
             }
         }
 
-        return hentOppgave(oppgaveId)
+        return hentOppgave(paavent.oppgaveId)
     }
 
     private fun sikreAktivOppgaveOgTildeltSaksbehandler(

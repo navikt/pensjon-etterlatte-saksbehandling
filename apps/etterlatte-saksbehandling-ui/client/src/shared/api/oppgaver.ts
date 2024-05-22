@@ -87,16 +87,17 @@ export interface RedigerFristRequest {
   versjon: number | null
 }
 
-export interface EndrePaaVentRequest {
-  merknad: String
-  paaVent: boolean
-}
-
 export const redigerFristApi = async (args: {
   oppgaveId: string
   redigerFristRequest: RedigerFristRequest
 }): Promise<ApiResponse<void>> => {
   return apiClient.put(`/oppgaver/${args.oppgaveId}/frist`, { ...args.redigerFristRequest })
+}
+
+export interface EndrePaaVentRequest {
+  aarsak?: string
+  merknad: String
+  paaVent: boolean
 }
 
 export const settOppgavePaaVentApi = async (args: {

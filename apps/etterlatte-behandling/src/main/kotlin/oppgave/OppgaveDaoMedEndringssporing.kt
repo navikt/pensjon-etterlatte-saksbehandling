@@ -183,6 +183,15 @@ class OppgaveDaoMedEndringssporingImpl(
         }
     }
 
+    override fun oppdaterPaaVent(
+        paavent: PaaVent,
+        oppgaveStatus: Status,
+    ) {
+        lagreEndringerPaaOppgave(paavent.oppgaveId) {
+            oppgaveDao.oppdaterPaaVent(paavent, oppgaveStatus)
+        }
+    }
+
     override fun oppdaterReferanseOgMerknad(
         oppgaveId: UUID,
         referanse: String,

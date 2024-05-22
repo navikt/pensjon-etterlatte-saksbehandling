@@ -13,7 +13,7 @@ import { ButtonGroup } from '~shared/styled'
 
 export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshendelse }) => {
   const [open, setOpen] = useState(false)
-  const [begrunnelse, setBegrunnelse] = useState<string>('')
+  const [kommentar, setKommentar] = useState<string>('')
   const [arkiverHendelseResult, arkiverHendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)
   const [oppgaveResult, hentOppgave] = useApiCall(hentOppgaveForReferanseUnderBehandling)
 
@@ -26,7 +26,7 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
 
   const arkiverHendelse = () => {
     arkiverHendelseFunc(
-      { ...hendelse, kommentar: begrunnelse },
+      { ...hendelse, kommentar },
       () => {
         setOpen(false)
         location.reload()
@@ -67,7 +67,7 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
                 I noen tilfeller krever ikke ny informasjon eller hendelser noen revurdering. Beskriv hvorfor en
                 revurdering ikke er nødvendig.
               </BodyShort>
-              <Textarea label="Begrunnelse" value={begrunnelse} onChange={(e) => setBegrunnelse(e.target.value)} />
+              <Textarea label="Begrunnelse" value={kommentar} onChange={(e) => setKommentar(e.target.value)} />
 
               {isFailureHandler({
                 apiResult: arkiverHendelseResult,
@@ -95,14 +95,14 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
                 <Button
                   variant="secondary"
                   onClick={() => {
-                    setBegrunnelse('')
+                    setKommentar('')
                     resetApiCall()
                     setOpen(false)
                   }}
                 >
                   Avbryt
                 </Button>
-                <Button onClick={arkiverHendelse} disabled={!begrunnelse} loading={isPending(arkiverHendelseResult)}>
+                <Button onClick={arkiverHendelse} disabled={!kommentar} loading={isPending(arkiverHendelseResult)}>
                   Arkiver
                 </Button>
               </ButtonGroup>

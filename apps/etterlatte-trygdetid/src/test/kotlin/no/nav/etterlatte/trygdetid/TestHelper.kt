@@ -44,6 +44,7 @@ fun behandling(
     prosesstype = Prosesstype.AUTOMATISK,
     kilde = Vedtaksloesning.GJENNY,
     sendeBrev = true,
+    opphoerFraOgMed = null,
 )
 
 fun trygdetid(

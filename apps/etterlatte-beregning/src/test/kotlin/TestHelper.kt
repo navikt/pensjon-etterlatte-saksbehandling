@@ -317,6 +317,7 @@ fun behandling(
     revurderingInfo = null,
     kilde = Vedtaksloesning.GJENNY,
     sendeBrev = true,
+    opphoerFraOgMed = null,
 )
 
 fun BeregningsMetode.toGrunnlag() = BeregningsMetodeBeregningsgrunnlag(this, null)

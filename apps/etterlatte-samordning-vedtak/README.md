@@ -101,7 +101,7 @@ Endepunktene som er nevnt over finnes også til bruk for NAV-interne systemer, m
 
 ### Løpende omstillingsstønad
 Her finnes i tillegg et endepunkt som svarer ja/nei på dette på en spesifikk dato. Dersom ytelsen slutter dagen før angitt dato, eller starter måneden etterpå så vil svaret være _nei_. **NB!** Merk at denne tjenesten _ikke gjør noe tolkning av faktisk utbetaling_ for å gi svaret, kun om ytelsen er innvilget. Så for eksempel om ytelsen er fullstendig avkortet, så vil svaret likevel være ja. 
-- `/api/pensjon/vedtak/har-loepende-oms?paaDato=YYYY-MM-DD` 
+- `GET /api/pensjon/vedtak/har-loepende-oms?paaDato=YYYY-MM-DD` 
   - fnr i header
   - svarformat: 
      ```
@@ -109,6 +109,11 @@ Her finnes i tillegg et endepunkt som svarer ja/nei på dette på en spesifikk d
        "omstillingsstoenad": true
      }
     ```
+    
+### Barnepensjon
+- `GET /api/barnepensjon/vedtak?fomDato=YYYY-MM-DD`
+  - Ikke-påkrevd query param `tomDato` for å avgrense søket
+  - samme responsformat som for samordningsvedtak
 
 ## Kom i gang
 

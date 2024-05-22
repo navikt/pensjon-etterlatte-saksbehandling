@@ -1,6 +1,5 @@
 package no.nav.etterlatte.avkorting
 
-import no.nav.etterlatte.avkorting.regler.virkningstidspunkt
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -51,6 +50,17 @@ class AvkortingService(
         } else {
             avkortingMedTillegg(eksisterendeAvkorting, behandling, forrigeAvkorting)
         }
+    }
+
+    suspend fun hentFullfoertAvkorting(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Avkorting {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        val avkorting =
+            avkortingRepository.hentAvkorting(behandlingId)
+                ?: throw AvkortingFinnesIkkeException(behandlingId)
+        return avkorting.medYtelseFraOgMedVirkningstidspunkt(behandling.virkningstidspunkt().dato, null)
     }
 
     suspend fun beregnAvkortingMedNyttGrunnlag(

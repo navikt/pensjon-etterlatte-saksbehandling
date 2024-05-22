@@ -248,6 +248,7 @@ internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Pe
         revurderingInfo = revurderingInfo()?.revurderingInfo,
         kilde = kilde,
         sendeBrev = sendeBrev,
+        opphoerFraOgMed = opphoerFraOgMed,
     )
 }
 

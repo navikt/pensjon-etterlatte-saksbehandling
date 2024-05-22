@@ -19,7 +19,7 @@ data class DetaljertBehandling(
     val prosesstype: Prosesstype,
     val kilde: Vedtaksloesning,
     val sendeBrev: Boolean,
-    val opphoerFraOgMed: YearMonth? = null,
+    val opphoerFraOgMed: YearMonth?,
 )
 
 fun DetaljertBehandling.virkningstidspunkt() =

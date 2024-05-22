@@ -101,8 +101,10 @@ fun opprettVedtakKlage(
 )
 
 fun vedtak(
+    id: Long = 1L,
     virkningstidspunkt: YearMonth = YearMonth.of(2023, Month.JANUARY),
     sakId: Long = 1L,
+    sakType: SakType = SakType.BARNEPENSJON,
     behandlingId: UUID = UUID.randomUUID(),
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
     beregning: ObjectNode? = objectMapper.createObjectNode(),
@@ -112,11 +114,11 @@ fun vedtak(
     vedtakFattet: VedtakFattet? = null,
     utbetalingsperioder: List<Utbetalingsperiode>? = null,
 ) = Vedtak(
-    id = 1L,
+    id = id,
     status = status,
     soeker = SOEKER_FOEDSELSNUMMER,
     sakId = sakId,
-    sakType = SakType.BARNEPENSJON,
+    sakType = sakType,
     behandlingId = behandlingId,
     type = VedtakType.INNVILGELSE,
     vedtakFattet = vedtakFattet,

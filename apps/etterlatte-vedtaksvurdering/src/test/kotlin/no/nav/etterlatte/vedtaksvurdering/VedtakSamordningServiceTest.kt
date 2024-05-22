@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.objectMapper
@@ -54,8 +55,9 @@ class VedtakSamordningServiceTest {
     fun `Skal hente sammenstilt tidslinje av vedtakslista`() {
         val virkFom2024Januar = YearMonth.of(2024, Month.JANUARY)
         val virkFom2024Februar = YearMonth.of(2024, Month.FEBRUARY)
+        val ident = Folkeregisteridentifikator.of(FNR_2)
 
-        every { vedtakRepository.hentFerdigstilteVedtak(Folkeregisteridentifikator.of(FNR_2)) } returns
+        every { vedtakRepository.hentFerdigstilteVedtak(ident, SakType.OMSTILLINGSSTOENAD) } returns
             listOf(
                 vedtak(
                     status = VedtakStatus.IVERKSATT,
@@ -105,11 +107,12 @@ class VedtakSamordningServiceTest {
 
         val resultat =
             samordningService.hentVedtaksliste(
-                Folkeregisteridentifikator.of(FNR_2),
+                fnr = ident,
+                sakType = SakType.OMSTILLINGSSTOENAD,
                 fomDato = LocalDate.of(2024, Month.JANUARY, 1),
             )
 
-        verify { vedtakRepository.hentFerdigstilteVedtak(Folkeregisteridentifikator.of(FNR_2)) }
+        verify { vedtakRepository.hentFerdigstilteVedtak(ident, SakType.OMSTILLINGSSTOENAD) }
 
         assertAll(
             { resultat shouldHaveSize 2 },

@@ -2,11 +2,11 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
-import no.nav.etterlatte.libs.common.behandling.BEHANDLING_OPPRETTET_AVBRUTT_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.BEHANDLING_PAA_VENT_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.PAA_VENT_AARSAK_KEY
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
+import no.nav.etterlatte.libs.common.behandling.STATISTIKKBEHANDLING_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
@@ -52,7 +52,7 @@ class BehandlingsHendelserKafkaProducerImpl(
                 mapOf(
                     CORRELATION_ID_KEY to correlationId,
                     TEKNISK_TID_KEY to Tidspunkt.now(),
-                    BEHANDLING_OPPRETTET_AVBRUTT_RIVER_KEY to statistikkBehandling,
+                    STATISTIKKBEHANDLING_RIVER_KEY to statistikkBehandling,
                 ),
             ).toJson(),
         ).also { (partition, offset) ->

@@ -162,6 +162,8 @@ interface BehandlingService {
         behandlingId: UUID,
         opphoerFraOgMed: YearMonth,
     )
+
+    fun hentAapenRegulering(sakId: Long): UUID?
 }
 
 internal class BehandlingServiceImpl(
@@ -637,6 +639,10 @@ internal class BehandlingServiceImpl(
                 behandlingDao.lagreUtlandstilknytning(behandlingId, utlandstilknytning)
                 behandlingDao.lagreStatus(it)
             }
+    }
+
+    override fun hentAapenRegulering(sakId: Long): UUID? {
+        return behandlingDao.hentAlleRevurderingerISakMedAarsak(sakId, Revurderingaarsak.REGULERING).singleOrNull()?.id
     }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =

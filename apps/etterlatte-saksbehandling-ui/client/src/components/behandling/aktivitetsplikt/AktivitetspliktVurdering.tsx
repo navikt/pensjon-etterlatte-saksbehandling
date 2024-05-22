@@ -1,4 +1,4 @@
-import { BodyLong, Button, Heading, HStack, Radio, ReadMore, Select, Textarea, VStack } from '@navikt/ds-react'
+import { Button, HStack, Radio, ReadMore, Select, Textarea, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending } from '@reduxjs/toolkit'
@@ -212,19 +212,18 @@ export const AktivitetspliktVurdering = ({ behandling }: { behandling: IDetaljer
                 })}
                 error={errors.beskrivelse?.message}
               />
+              <Button
+                loading={isPending(opprettetAktivitetsgrad) || isPending(opprettetUnntak)}
+                variant="primary"
+                type="button"
+                size="small"
+                onClick={handleSubmit(ferdigstill)}
+              >
+                Lagre vurdering
+              </Button>
             </VStack>
 
             {vurdering && <>{vurdering.aktivitet?.aktivitetsgrad}</>}
-
-            <div>
-              <Heading size="small" spacing>
-                Opprett informasjonbrev rundt aktivitetsplikt til bruker
-              </Heading>
-              <BodyLong spacing>
-                Den etterlatte skal informeres om aktivitetskravet som vil tre i kraft 6 måneder etter dødsfallet. Det
-                skal opprettes et manuelt informasjonsbrev som skal bli sendt 3-4 måneder etter dødsfallet.
-              </BodyLong>
-            </div>
           </HStack>
           {mapFailure(opprettetUnntak, (error) => (
             <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved oppretting av unntak'}</ApiErrorAlert>
@@ -233,14 +232,6 @@ export const AktivitetspliktVurdering = ({ behandling }: { behandling: IDetaljer
             <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved oppretting av aktivitetsgrad'}</ApiErrorAlert>
           ))}
         </div>
-        <Button
-          loading={isPending(opprettetAktivitetsgrad) || isPending(opprettetUnntak)}
-          variant="primary"
-          type="button"
-          onClick={handleSubmit(ferdigstill)}
-        >
-          Lagre vurdering
-        </Button>
       </div>
     </>
   )

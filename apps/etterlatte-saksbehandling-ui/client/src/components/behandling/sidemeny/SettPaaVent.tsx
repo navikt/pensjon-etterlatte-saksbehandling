@@ -31,6 +31,7 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
   const dispatch = useAppDispatch()
   type velg = 'velg'
   type settPaaVentTyper = Array<keyof typeof PaaventAarsak>
+
   const [frist, setFrist] = useState<string>(oppgave.frist)
   const [merknad, setMerknad] = useState<string>(oppgave.merknad || '')
   const [aarsak, setAarsak] = useState<settPaaVentTyper[number] | velg>('velg')
@@ -70,31 +71,31 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
       {settPaaVent && (
         <>
           <hr />
-          <Text>Årsak til sett på vent</Text>
-          <Select
-            label="Årsak til sett på vent"
-            hideLabel={true}
-            value={aarsak || ''}
-            onChange={(e) => {
-              setAarsakError(false)
-              setAarsak(e.target.value as settPaaVentTyper[number])
-            }}
-            error={aarsakError && 'Du må velge en årsak'}
-          >
-            <option value="velg" disabled={true}>
-              Velg
-            </option>
-            {(Object.keys(PaaventAarsak) as settPaaVentTyper).map((option) => (
-              <option key={option} value={option}>
-                {PaaventAarsak[option]}
-              </option>
-            ))}
-          </Select>
           <Textarea label="Merknad" value={merknad} onChange={(e) => setMerknad(e.target.value)} />
 
           <br />
           {oppgave.status !== 'PAA_VENT' && (
             <>
+              <Text>Årsak til sett på vent</Text>
+              <Select
+                label="Årsak til sett på vent"
+                hideLabel={true}
+                value={aarsak || ''}
+                onChange={(e) => {
+                  setAarsakError(false)
+                  setAarsak(e.target.value as settPaaVentTyper[number])
+                }}
+                error={aarsakError && 'Du må velge en årsak'}
+              >
+                <option value="velg" disabled={true}>
+                  Velg
+                </option>
+                {(Object.keys(PaaventAarsak) as settPaaVentTyper).map((option) => (
+                  <option key={option} value={option}>
+                    {PaaventAarsak[option]}
+                  </option>
+                ))}
+              </Select>
               <Label spacing>Frist</Label>
 
               <FlexRow $spacing>

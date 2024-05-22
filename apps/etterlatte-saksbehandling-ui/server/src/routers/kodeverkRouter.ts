@@ -31,17 +31,17 @@ interface RsKode {
   term: string
 }
 
-kodeverkRouter.get('/:kodeverkNavn', async (req: Request, res: Response) => {
-  try {
-    const kodeverkNavn = req.params.kodeverkNavn
+const ARKIVTEMAER = 'Arkivtemaer'
 
-    const kodeverkResponse: KodeverkResponse | undefined = cache.get(kodeverkNavn)
-    if (!!kodeverkResponse) {
-      return res.json(kodeverkResponse)
+kodeverkRouter.get(`/${ARKIVTEMAER}`, async (_: Request, res: Response) => {
+  try {
+    const koder: RsKode[] | undefined = cache.get(ARKIVTEMAER)
+    if (!!koder) {
+      return res.json(koder)
     }
 
     const data: RsKode[] = await fetch(
-      `${KODEVERK_URL}/api/v1/kodeverk/${kodeverkNavn}/koder/betydninger?ekskluderUgyldige=true&spraak=nb`,
+      `${KODEVERK_URL}/api/v1/kodeverk/${ARKIVTEMAER}/koder/betydninger?ekskluderUgyldige=true&spraak=nb`,
       {
         headers: {
           'Nav-Call-Id': randomUUID(),
@@ -57,7 +57,7 @@ kodeverkRouter.get('/:kodeverkNavn', async (req: Request, res: Response) => {
         }))
       })
 
-    if (!!data?.length) cache.set(kodeverkNavn, data)
+    if (!!data?.length) cache.set(ARKIVTEMAER, data)
 
     return res.json(data)
   } catch (e) {

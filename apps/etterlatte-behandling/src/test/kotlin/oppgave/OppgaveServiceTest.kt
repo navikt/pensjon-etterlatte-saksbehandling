@@ -22,6 +22,7 @@ import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -474,6 +475,26 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         oppgaveService.redigerFrist(nyOppgave.id, nyFrist)
         val oppgaveMedNyFrist = oppgaveService.hentOppgave(nyOppgave.id)
         assertEquals(nyFrist, oppgaveMedNyFrist.frist)
+    }
+
+    @Test
+    fun `Kan ikke sette oppgave på vente om man mangler årsak`() {
+        every { hendelser.sendMeldingForHendelsePaaVent(any(), any()) } returns Unit
+
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                UUID.randomUUID().toString(),
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
+
+        assertThrows<UgyldigForespoerselException> {
+            oppgaveService.endrePaaVent(PaaVent(nyOppgave.id, merknad = "test", paavent = true, aarsak = null))
+        }
     }
 
     @Test

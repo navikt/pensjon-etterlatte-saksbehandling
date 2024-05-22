@@ -34,10 +34,10 @@ const defaultErrorStatus = {
 type InstitusjonsoppholdProps = {
   sakId: number
   hendelseId: string
-  arkiverHendelse: () => void
+  lukkHendelse: () => void
 }
 
-const InstitusjonsoppholdVurderingBegrunnelse = ({ sakId, hendelseId, arkiverHendelse }: InstitusjonsoppholdProps) => {
+const InstitusjonsoppholdVurderingBegrunnelse = ({ sakId, hendelseId, lukkHendelse }: InstitusjonsoppholdProps) => {
   const [vurdert, setVurdert] = useState(false)
   const [svarReduksjon, setSvarReduksjon] = useState<JaNei | undefined>(undefined)
   const [begrunnelseReduksjon, setBegrunnelseReduksjon] = useState<string>('')
@@ -76,7 +76,7 @@ const InstitusjonsoppholdVurderingBegrunnelse = ({ sakId, hendelseId, arkiverHen
           },
         },
         () => {
-          arkiverHendelse()
+          lukkHendelse()
         }
       )
     } else {

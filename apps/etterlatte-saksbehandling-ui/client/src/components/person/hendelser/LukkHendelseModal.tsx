@@ -11,10 +11,10 @@ import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { ButtonGroup } from '~shared/styled'
 
-export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshendelse }) => {
+export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshendelse }) => {
   const [open, setOpen] = useState(false)
   const [kommentar, setKommentar] = useState<string>('')
-  const [arkiverHendelseResult, arkiverHendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)
+  const [lukkHendelseResult, lukkHendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)
   const [oppgaveResult, hentOppgave] = useApiCall(hentOppgaveForReferanseUnderBehandling)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -24,8 +24,8 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
     setOpen(true)
   }
 
-  const arkiverHendelse = () => {
-    arkiverHendelseFunc(
+  const lukkHendelse = () => {
+    lukkHendelseFunc(
       { ...hendelse, kommentar },
       () => {
         setOpen(false)
@@ -40,14 +40,14 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
   return (
     <>
       <Button variant="tertiary" onClick={aapneModal} icon={<ArchiveIcon />} size="small">
-        Arkiver hendelse
+        Lukk hendelse
       </Button>
 
       <Modal
         open={open}
         onClose={() => setOpen(false)}
         aria-labelledby="modal-heading"
-        header={{ heading: 'Arkiver hendelse' }}
+        header={{ heading: 'Lukk hendelse' }}
       >
         <Modal.Body>
           {hendelse.type === GrunnlagsendringsType.INSTITUSJONSOPPHOLD ? (
@@ -55,7 +55,7 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
               <InstitusjonsoppholdVurderingBegrunnelse
                 sakId={hendelse.sakId}
                 hendelseId={hendelse.id}
-                arkiverHendelse={arkiverHendelse}
+                lukkHendelse={lukkHendelse}
               />
               <Button variant="secondary" onClick={() => setOpen(false)}>
                 Avbryt
@@ -70,8 +70,8 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
               <Textarea label="Begrunnelse" value={kommentar} onChange={(e) => setKommentar(e.target.value)} />
 
               {isFailureHandler({
-                apiResult: arkiverHendelseResult,
-                errorMessage: 'Vi kunne ikke arkivere hendelsen',
+                apiResult: lukkHendelseResult,
+                errorMessage: 'Vi kunne ikke lukke hendelsen',
               })}
 
               <br />
@@ -82,8 +82,7 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
                 if (!tildeltIdent) {
                   return (
                     <Alert variant="info" inline>
-                      Oppgaven er ikke tildelt en saksbehandler. Om du arkiverer hendelsen vil den automatisk tildeles
-                      deg.
+                      Oppgaven er ikke tildelt en saksbehandler. Om du lukker hendelsen vil den automatisk tildeles deg.
                     </Alert>
                   )
                 } else if (tildeltIdent !== innloggetSaksbehandler.ident) {
@@ -102,8 +101,8 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
                 >
                   Avbryt
                 </Button>
-                <Button onClick={arkiverHendelse} disabled={!kommentar} loading={isPending(arkiverHendelseResult)}>
-                  Arkiver
+                <Button onClick={lukkHendelse} disabled={!kommentar} loading={isPending(lukkHendelseResult)}>
+                  Lukk
                 </Button>
               </ButtonGroup>
             </>

@@ -170,51 +170,49 @@ class BehandlingFactory(
     ): BehandlingOgOppgave? {
         logger.info("Starter behandling i sak $sakId")
 
-        with(request) {
-            return if (iverksatteEllerAttesterteBehandlinger.isNotEmpty()) {
-                if (kilde == Vedtaksloesning.PESYS || kilde == Vedtaksloesning.GJENOPPRETTA) {
-                    throw ManuellMigreringHarEksisterendeIverksattBehandling()
+        return if (request.iverksatteEllerAttesterteBehandlinger.isNotEmpty()) {
+            if (kilde == Vedtaksloesning.PESYS || kilde == Vedtaksloesning.GJENOPPRETTA) {
+                throw ManuellMigreringHarEksisterendeIverksattBehandling()
+            }
+            val forrigeBehandling = request.iverksatteEllerAttesterteBehandlinger.maxBy { it.behandlingOpprettet }
+            revurderingService.opprettAutomatiskRevurdering(
+                sakId = sakId,
+                persongalleri = persongalleri,
+                forrigeBehandling = forrigeBehandling,
+                mottattDato = mottattDato,
+                kilde = kilde,
+                revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
+            ).oppdater().let { BehandlingOgOppgave(it, null) }
+        } else {
+            val harBehandlingUnderbehandling =
+                request.alleBehandlingerISak.filter { behandling ->
+                    BehandlingStatus.underBehandling().find { it == behandling.status } != null
                 }
-                val forrigeBehandling = iverksatteEllerAttesterteBehandlinger.maxBy { it.behandlingOpprettet }
-                revurderingService.opprettAutomatiskRevurdering(
-                    sakId = sakId,
-                    persongalleri = persongalleri,
-                    forrigeBehandling = forrigeBehandling,
-                    mottattDato = mottattDato,
-                    kilde = kilde,
-                    revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
-                ).oppdater().let { BehandlingOgOppgave(it, null) }
-            } else {
-                val harBehandlingUnderbehandling =
-                    alleBehandlingerISak.filter { behandling ->
-                        BehandlingStatus.underBehandling().find { it == behandling.status } != null
-                    }
-                val behandling =
-                    opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, mottattDato, kilde, prosessType)
-                        ?: return null
-                grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri)
-                val oppgave =
-                    oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
-                        referanse = behandling.id.toString(),
-                        sakId = sak.id,
-                        oppgaveKilde =
-                            if (kilde == Vedtaksloesning.GJENOPPRETTA) {
-                                OppgaveKilde.GJENOPPRETTING
-                            } else {
-                                OppgaveKilde.BEHANDLING
-                            },
-                        merknad =
-                            when (kilde) {
-                                Vedtaksloesning.GJENOPPRETTA -> "Manuell gjenopprettelse av opphørt sak i Pesys"
-                                else -> null
-                            },
-                    )
-                return BehandlingOgOppgave(behandling, oppgave) {
-                    behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                        behandling.toStatistikkBehandling(persongalleri),
-                        BehandlingHendelseType.OPPRETTET,
-                    )
-                }
+            val behandling =
+                opprettFoerstegangsbehandling(harBehandlingUnderbehandling, request.sak, mottattDato, kilde, prosessType)
+                    ?: return null
+            grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri)
+            val oppgave =
+                oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+                    referanse = behandling.id.toString(),
+                    sakId = request.sak.id,
+                    oppgaveKilde =
+                        if (kilde == Vedtaksloesning.GJENOPPRETTA) {
+                            OppgaveKilde.GJENOPPRETTING
+                        } else {
+                            OppgaveKilde.BEHANDLING
+                        },
+                    merknad =
+                        when (kilde) {
+                            Vedtaksloesning.GJENOPPRETTA -> "Manuell gjenopprettelse av opphørt sak i Pesys"
+                            else -> null
+                        },
+                )
+            return BehandlingOgOppgave(behandling, oppgave) {
+                behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                    behandling.toStatistikkBehandling(persongalleri),
+                    BehandlingHendelseType.OPPRETTET,
+                )
             }
         }
     }

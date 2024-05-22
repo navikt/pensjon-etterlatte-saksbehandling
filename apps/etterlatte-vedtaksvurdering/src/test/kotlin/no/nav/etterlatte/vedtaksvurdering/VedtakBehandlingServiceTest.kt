@@ -762,6 +762,7 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
                 revurderingInfo = null,
                 kilde = Vedtaksloesning.GJENNY,
                 sendeBrev = false,
+                opphoerFraOgMed = null,
             )
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
             Sak(

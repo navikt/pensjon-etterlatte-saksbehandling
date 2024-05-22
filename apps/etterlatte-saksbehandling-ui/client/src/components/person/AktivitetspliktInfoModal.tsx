@@ -343,10 +343,10 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
               loading={
                 isPending(ferdigstillOppgaveStatus) || isPending(opprettetAktivitetsgrad) || isPending(opprettetUnntak)
               }
-              variant="secondary"
+              variant="tertiary"
               onClick={() => setVisModal(false)}
             >
-              Lukk modal
+              Avbryt
             </Button>
           </Modal.Footer>
         </Modal>

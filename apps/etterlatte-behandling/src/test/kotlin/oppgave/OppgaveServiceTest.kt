@@ -501,6 +501,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
     @Test
     fun `kan sette og fjerne oppgave paa vent`() {
         every { hendelser.sendMeldingForHendelsePaaVent(any(), any(), any()) } returns Unit
+        every { hendelser.sendMeldingForHendelseAvVent(any(), any()) } returns Unit
 
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
@@ -529,10 +530,9 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         val oppgaveTattAvVent = oppgaveService.hentOppgave(oppgavePaaVent.id)
         assertEquals(Status.UNDER_BEHANDLING, oppgaveTattAvVent.status)
         verify {
-            hendelser.sendMeldingForHendelsePaaVent(
+            hendelser.sendMeldingForHendelseAvVent(
                 UUID.fromString(nyOppgave.referanse),
                 BehandlingHendelseType.AV_VENT,
-                paavent.aarsak!!,
             )
         }
     }

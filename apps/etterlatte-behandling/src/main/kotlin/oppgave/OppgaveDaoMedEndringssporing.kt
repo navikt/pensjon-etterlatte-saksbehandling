@@ -184,7 +184,7 @@ class OppgaveDaoMedEndringssporingImpl(
     }
 
     override fun oppdaterPaaVent(
-        paavent: Paavent,
+        paavent: PaaVent,
         oppgaveStatus: Status,
     ) {
         lagreEndringerPaaOppgave(paavent.oppgaveId) {

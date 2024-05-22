@@ -72,7 +72,7 @@ interface OppgaveDao {
     )
 
     fun oppdaterPaaVent(
-        paavent: Paavent,
+        paavent: PaaVent,
         oppgaveStatus: Status,
     )
 
@@ -443,7 +443,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
     }
 
     override fun oppdaterPaaVent(
-        paavent: Paavent,
+        paavent: PaaVent,
         oppgaveStatus: Status,
     ) {
         connectionAutoclosing.hentConnection {
@@ -452,7 +452,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                     prepareStatement(
                         """
                         UPDATE oppgave
-                        SET merknad = ?, status = ?, paavent_aarsak ?
+                        SET merknad = ?, status = ?, paavent_aarsak = ?
                         where id = ?::UUID
                         """.trimIndent(),
                     )

@@ -25,8 +25,8 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.oppgave.Paavent
-import no.nav.etterlatte.oppgave.PaaventAarsak
+import no.nav.etterlatte.oppgave.PaaVent
+import no.nav.etterlatte.oppgave.PaaVentAarsak
 import no.nav.etterlatte.sak.SakDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -123,8 +123,8 @@ class TilbakekrevingService(
                 )
 
             val merknad = if (paaVent) "Kravgrunnlag er sperret" else "Sperre på kravgrunnlag opphevet"
-            val aarsak = if (paaVent) PaaventAarsak.KRAVGRUNNLAG_SPERRET else null
-            oppgaveService.endrePaaVent(Paavent(oppgaveId = oppgave.id, merknad = merknad, paavent = paaVent, aarsak = aarsak))
+            val aarsak = if (paaVent) PaaVentAarsak.KRAVGRUNNLAG_SPERRET else null
+            oppgaveService.endrePaaVent(PaaVent(oppgaveId = oppgave.id, merknad = merknad, paavent = paaVent, aarsak = aarsak))
         }
     }
 

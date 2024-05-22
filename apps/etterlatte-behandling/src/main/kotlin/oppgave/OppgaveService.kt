@@ -191,7 +191,7 @@ class OppgaveService(
         oppgaveDao.oppdaterReferanseOgMerknad(oppgaveId, referanse, merknad)
     }
 
-    fun endrePaaVent(paavent: Paavent): OppgaveIntern {
+    fun endrePaaVent(paavent: PaaVent): OppgaveIntern {
         val oppgave = hentOppgave(paavent.oppgaveId)
         if (paavent.paavent && oppgave.status == Status.PAA_VENT) return oppgave
         if (!paavent.paavent && oppgave.status != Status.PAA_VENT) return oppgave

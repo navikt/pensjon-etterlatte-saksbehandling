@@ -1,4 +1,4 @@
-import { Alert, Button, Detail, Heading, Tag } from '@navikt/ds-react'
+import { Alert, Button, Detail, Heading } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { Navigate, useNavigate } from 'react-router-dom'
@@ -41,11 +41,7 @@ export default function OppsummeringOppgavebehandling() {
       </Heading>
 
       <InfoList>
-        <div>
-          <Tag variant="success" size="medium">
-            {formaterSakstype(oppgave.sakType)}
-          </Tag>
-        </div>
+        <Info label="Saktype" tekst={formaterSakstype(nyBehandlingRequest.sakType!!)} />
 
         <Info label="Språk" tekst={formaterSpraak(spraak)} />
         <Info label="Mottatt dato" tekst={formaterStringDato(mottattDato)} />

@@ -1,6 +1,8 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.VedtakService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
@@ -18,6 +20,7 @@ import org.slf4j.LoggerFactory
 internal class OpprettVedtakforespoerselRiver(
     rapidsConnection: RapidsConnection,
     private val vedtak: VedtakService,
+    private val featureToggleService: FeatureToggleService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(OpprettVedtakforespoerselRiver::class.java)
 
@@ -38,7 +41,13 @@ internal class OpprettVedtakforespoerselRiver(
         val sakId = packet.sakId
         logger.info("Leser opprett-vedtak forespoersel for sak $sakId")
         val behandlingId = packet.behandlingId
-        val respons = vedtak.opprettVedtakFattOgAttester(packet.sakId, behandlingId)
+
+        val respons =
+            if (featureToggleService.isEnabled(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)) {
+                vedtak.opprettVedtakOgFatt(packet.sakId, behandlingId)
+            } else {
+                vedtak.opprettVedtakFattOgAttester(packet.sakId, behandlingId)
+            }
         logger.info("Opprettet vedtak ${respons.vedtak.id} for sak: $sakId og behandling: $behandlingId")
         RapidUtsender.sendUt(respons, packet, context)
     }

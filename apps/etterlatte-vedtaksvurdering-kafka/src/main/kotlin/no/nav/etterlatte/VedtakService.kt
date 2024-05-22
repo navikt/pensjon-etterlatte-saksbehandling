@@ -28,10 +28,9 @@ interface VedtakService {
         behandlingId: UUID,
     ): VedtakOgRapid
 
-    fun opprettVedtakFattOgAttester(
+    fun opprettVedtakOgFatt(
         sakId: Long,
         behandlingId: UUID,
-        kjoringVariant: MigreringKjoringVariant,
     ): VedtakOgRapid
 
     fun tilbakestillVedtak(behandlingId: UUID)
@@ -62,15 +61,14 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
             vedtakKlient.post("$url/api/vedtak/$sakId/$behandlingId/automatisk").body()
         }
 
-    override fun opprettVedtakFattOgAttester(
+    override fun opprettVedtakOgFatt(
         sakId: Long,
         behandlingId: UUID,
-        kjoringVariant: MigreringKjoringVariant,
     ): VedtakOgRapid =
         runBlocking {
             vedtakKlient.post("$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis") {
                 contentType(ContentType.Application.Json)
-                setBody(kjoringVariant.toJson())
+                setBody(MigreringKjoringVariant.MED_PAUSE.toJson())
             }.body()
         }
 

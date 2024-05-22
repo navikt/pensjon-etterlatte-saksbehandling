@@ -3,7 +3,9 @@ package no.nav.etterlatte.regulering
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.VedtakService
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
+import no.nav.etterlatte.no.nav.etterlatte.regulering.ReguleringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
@@ -33,7 +35,58 @@ internal class OpprettVedtakforespoerselRiverTest {
         val behandlingId = UUID.randomUUID()
         val melding = genererOpprettVedtakforespoersel(behandlingId)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
-        val inspector = TestRapid().apply { OpprettVedtakforespoerselRiver(this, vedtakServiceMock) }
+        val inspector =
+            TestRapid().apply {
+                OpprettVedtakforespoerselRiver(
+                    this,
+                    vedtakServiceMock,
+                    DummyFeatureToggleService(),
+                )
+            }
+
+        inspector.sendTestMessage(melding.toJson())
+
+        verify { vedtakServiceMock.opprettVedtakFattOgAttester(sakId, behandlingId) }
+    }
+
+    @Test
+    fun `skal opprette vedtak og bare fatte hvis feature toggle for stopp er paa`() {
+        val behandlingId = UUID.randomUUID()
+        val melding = genererOpprettVedtakforespoersel(behandlingId)
+        val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
+        val featureToggleService = DummyFeatureToggleService()
+        featureToggleService.settBryter(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, true)
+
+        val inspector =
+            TestRapid().apply {
+                OpprettVedtakforespoerselRiver(
+                    this,
+                    vedtakServiceMock,
+                    featureToggleService,
+                )
+            }
+
+        inspector.sendTestMessage(melding.toJson())
+
+        verify { vedtakServiceMock.opprettVedtakOgFatt(sakId, behandlingId) }
+    }
+
+    @Test
+    fun `skal baade opprette vedtak og fatte det samt attestere hvis feature toggle for stopp er av`() {
+        val behandlingId = UUID.randomUUID()
+        val melding = genererOpprettVedtakforespoersel(behandlingId)
+        val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
+        val featureToggleService = DummyFeatureToggleService()
+        featureToggleService.settBryter(ReguleringFeatureToggle.SkalStoppeEtterFattetVedtak, false)
+
+        val inspector =
+            TestRapid().apply {
+                OpprettVedtakforespoerselRiver(
+                    this,
+                    vedtakServiceMock,
+                    featureToggleService,
+                )
+            }
 
         inspector.sendTestMessage(melding.toJson())
 

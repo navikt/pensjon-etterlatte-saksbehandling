@@ -20,6 +20,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { formaterDato, formaterDatoMedKlokkeslett } from '~utils/formattering'
+import { AktivitetspliktVurdering } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurdering'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -86,6 +87,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         </BodyLong>
 
         {visTidslinje && <AktivitetspliktTidslinje behandling={behandling} doedsdato={new Date(avdoedesDoedsdato!!)} />}
+        {visTidslinje && <AktivitetspliktVurdering behandling={behandling} />}
 
         <Heading size="small" spacing>
           Beskriv etterlatte sin aktivitet idag

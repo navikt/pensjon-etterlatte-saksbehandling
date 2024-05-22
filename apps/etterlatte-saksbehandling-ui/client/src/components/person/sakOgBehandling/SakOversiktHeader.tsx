@@ -16,6 +16,7 @@ import { IBehandlingsammendrag } from '~components/person/typer'
 import { hentMigrertYrkesskadeFordel } from '~shared/api/vilkaarsvurdering'
 import { Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
+import { SaktypeTag } from '~components/oppgavebenk/components/Tags'
 
 const ETTERLATTEREFORM_DATO = '2024-01'
 
@@ -52,7 +53,7 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
       <Heading size="medium">Saksnummer {sak.id}</Heading>
       <SpaceChildren>
         <div>
-          <Tag variant={tagColors[sak.sakType]}>{formaterEnumTilLesbarString(sak.sakType)}</Tag>
+          <SaktypeTag sakType={sak.sakType} />
         </div>
         {!!sak.utlandstilknytning?.type && (
           <div>

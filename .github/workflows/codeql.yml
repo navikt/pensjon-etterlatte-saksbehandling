@@ -37,7 +37,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Assemble
-        run: ./gradlew assemble -Pkotlin.compiler.execution.strategy=in-process -Pkotlin.daemon.jvmargs=-Xmx16g
+        run: ./gradlew assemble -Dorg.gradle.jvmargs="-Dkotlin.compiler.execution.strategy=out-of-process -Dkotlin.daemon.jvmargs=-Xmx16g"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

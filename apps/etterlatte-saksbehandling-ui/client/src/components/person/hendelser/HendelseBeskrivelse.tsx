@@ -1,4 +1,4 @@
-import React, { ReactNode, useContext } from 'react'
+import React, { useContext } from 'react'
 import {
   FnrTilNavnMapContext,
   formaterFoedselsnummerMedNavn,
@@ -22,7 +22,7 @@ import {
 } from '~components/person/typer'
 import { formaterKanskjeStringDatoMedFallback, formaterStringDato } from '~utils/formattering'
 import styled from 'styled-components'
-import { BodyShort } from '@navikt/ds-react'
+import { BodyShort, Label } from '@navikt/ds-react'
 import { institusjonstype } from '~components/behandling/beregningsgrunnlag/Insthendelser'
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
 import { SakType } from '~shared/types/sak'
@@ -32,14 +32,14 @@ const VisAnsvarligeForeldreSamsvar = ({ samsvar }: { samsvar: AnsvarligeForeldre
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <Broedtekst>Nytt grunnlag (PDL)</Broedtekst>
+        <Label>Nytt grunnlag (PDL)</Label>
         <KortTekst size="small">
           {samsvar.fraPdl?.map((fnr) => formaterFoedselsnummerMedNavn(navneMap, fnr))?.join(', ') ??
             'Ingen ansvarlige foreldre'}
         </KortTekst>
       </div>
       <div>
-        <Broedtekst>Eksisterende grunnlag</Broedtekst>
+        <Label>Eksisterende grunnlag</Label>
         <KortTekst size="small">
           {samsvar.fraGrunnlag?.map((fnr) => formaterFoedselsnummerMedNavn(navneMap, fnr))?.join(', ') ??
             'Ingen ansvarlige foreldre'}
@@ -53,12 +53,12 @@ const UtlandSamsvarVisning = ({ samsvar }: { samsvar: UtlandSamsvar }) => {
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <Broedtekst>Nytt grunnlag (PDL)</Broedtekst>
+        <Label>Nytt grunnlag (PDL)</Label>
         <KortTekst size="small">Ut: {formaterLandList(samsvar.fraPdl?.utflyttingFraNorge ?? [])}</KortTekst>
         <KortTekst size="small">Inn: {formaterLandList(samsvar.fraPdl?.innflyttingTilNorge ?? [])}</KortTekst>
       </div>
       <div>
-        <Broedtekst>Eksisterende grunnlag</Broedtekst>
+        <Label>Eksisterende grunnlag</Label>
         <KortTekst size="small">Ut: {formaterLandList(samsvar.fraGrunnlag?.utflyttingFraNorge ?? [])}</KortTekst>
         <KortTekst size="small">Inn: {formaterLandList(samsvar.fraGrunnlag?.innflyttingTilNorge ?? [])}</KortTekst>
       </div>
@@ -70,11 +70,11 @@ const Doedsdato = ({ samsvar }: { samsvar: DoedsdatoSamsvar }) => {
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <Broedtekst>Nytt grunnlag (PDL)</Broedtekst>
+        <Label>Nytt grunnlag (PDL)</Label>
         <KortTekst size="small">{formaterKanskjeStringDatoMedFallback('Ingen', samsvar.fraPdl)}</KortTekst>
       </div>
       <div>
-        <Broedtekst>Eksisterende grunnlag</Broedtekst>
+        <Label>Eksisterende grunnlag</Label>
         <KortTekst size="small">{formaterKanskjeStringDatoMedFallback('Ingen', samsvar.fraGrunnlag)}</KortTekst>
       </div>
     </GrunnlagSammenligningWrapper>
@@ -85,13 +85,13 @@ const Adresse = ({ adresse }: { adresse: AdresseSamsvar }) => {
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <Broedtekst>Nytt grunnlag (PDL)</Broedtekst>
+        <Label>Nytt grunnlag (PDL)</Label>
         <KortTekst as="div">
           <Adressevisning adresser={adresse.fraPdl} soeknadsoversikt={false} />
         </KortTekst>
       </div>
       <div>
-        <Broedtekst>Eksisterende grunnlag</Broedtekst>
+        <Label>Eksisterende grunnlag</Label>
         <KortTekst as="div">
           <Adressevisning adresser={adresse.fraGrunnlag} soeknadsoversikt={false} />
         </KortTekst>
@@ -105,13 +105,13 @@ const Barn = ({ samsvar }: { samsvar: BarnSamsvar }) => {
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <Broedtekst>Nytt grunnlag (PDL)</Broedtekst>
+        <Label>Nytt grunnlag (PDL)</Label>
         <KortTekst size="small">
           {samsvar.fraPdl?.map((fnr) => formaterFoedselsnummerMedNavn(fnrTilNavn, fnr)).join(', ') ?? 'Ingen barn'}
         </KortTekst>
       </div>
       <div>
-        <Broedtekst>Eksisterende grunnlag</Broedtekst>
+        <Label>Eksisterende grunnlag</Label>
         <KortTekst size="small">
           {samsvar.fraGrunnlag?.map((fnr) => formaterFoedselsnummerMedNavn(fnrTilNavn, fnr)).join(', ') ?? 'Ingen barn'}
         </KortTekst>
@@ -162,13 +162,13 @@ const VisSivilstand = ({ samsvar }: { samsvar: SivilstandSamsvar }) => {
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <Broedtekst>Nytt grunnlag (PDL)</Broedtekst>
+        <Label>Nytt grunnlag (PDL)</Label>
         <ListeWrapper>
           {samsvar.fraPdl?.map((sivilstand, i) => <li key={i}>{sivilstandWrapper(sivilstand, i)}</li>)}
         </ListeWrapper>
       </div>
       <div>
-        <Broedtekst>Eksisterende grunnlag</Broedtekst>
+        <Label>Eksisterende grunnlag</Label>
         <ListeWrapper>
           {samsvar.fraGrunnlag?.map((sivilstand, i) => <li key={i}>{sivilstandWrapper(sivilstand, i)}</li>)}
         </ListeWrapper>
@@ -219,13 +219,13 @@ const Vergemaal = (props: { samsvar: VergemaalEllerFremtidsfullmaktForholdSamsva
   return (
     <GrunnlagSammenligningWrapper>
       <div>
-        <Broedtekst>Nytt grunnlag (PDL)</Broedtekst>
+        <Label>Nytt grunnlag (PDL)</Label>
         {props.samsvar.fraPdl?.map((verge, i) => <GrunnlagVergemaal key={i} vergemaal={verge} />) ?? (
           <KortTekst size="small">Ingen vergemål funnet</KortTekst>
         )}
       </div>
       <div>
-        <Broedtekst>Eksisterende grunnlag</Broedtekst>
+        <Label>Eksisterende grunnlag</Label>
         {props.samsvar.fraGrunnlag?.map((verge, i) => <GrunnlagVergemaal key={i} vergemaal={verge} />) ?? (
           <KortTekst size="small">Ingen vergemål funnet</KortTekst>
         )}
@@ -323,14 +323,6 @@ export const HendelseBeskrivelse = ({
   }
 }
 
-const Broedtekst = ({ children }: { children: ReactNode | Array<ReactNode> }) => {
-  return (
-    <KortTekst size="small" weight="semibold">
-      {children}
-    </KortTekst>
-  )
-}
-
 const DetaljerWrapper = styled.div`
   margin-bottom: 1rem;
 `
@@ -340,6 +332,7 @@ const GrunnlagSammenligningWrapper = styled.div`
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 `
+
 const KortTekst = styled(BodyShort)`
   max-width: 25em;
 `

@@ -170,5 +170,5 @@ private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement =
         setString(29, sakRad.kilde.name)
         sakRad.pesysId?.let { setLong(30, it) } ?: setNull(30, Types.BIGINT)
         sakRad.relatertTil?.let { setString(31, it) } ?: setNull(31, Types.CHAR)
-        sakRad.paaVentAarsak?.let { setString(32, it.name) } ?: setNull(32, Types.CHAR)
+        sakRad.paaVentAarsak?.let { setString(32, it.name) } ?: setString(32, null)
     }

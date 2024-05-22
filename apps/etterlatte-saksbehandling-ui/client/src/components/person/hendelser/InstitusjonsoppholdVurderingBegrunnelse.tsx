@@ -33,12 +33,11 @@ const defaultErrorStatus = {
 
 type InstitusjonsoppholdProps = {
   sakId: number
-  grunnlagsEndringshendelseId: string
-  lukkGrunnlagshendelseWrapper: () => void
+  hendelseId: string
+  lukkHendelse: () => void
 }
 
-const InstitusjonsoppholdVurderingBegrunnelse = (props: InstitusjonsoppholdProps) => {
-  const { sakId, grunnlagsEndringshendelseId, lukkGrunnlagshendelseWrapper } = props
+const InstitusjonsoppholdVurderingBegrunnelse = ({ sakId, hendelseId, lukkHendelse }: InstitusjonsoppholdProps) => {
   const [vurdert, setVurdert] = useState(false)
   const [svarReduksjon, setSvarReduksjon] = useState<JaNei | undefined>(undefined)
   const [begrunnelseReduksjon, setBegrunnelseReduksjon] = useState<string>('')
@@ -73,11 +72,11 @@ const InstitusjonsoppholdVurderingBegrunnelse = (props: InstitusjonsoppholdProps
             kanGiReduksjonAvYtelseBegrunnelse: begrunnelseReduksjon,
             forventetVarighetMerEnn3Maaneder: svarForventetLengerEnnTreMaaneder as JaNei,
             forventetVarighetMerEnn3MaanederBegrunnelse: begrunnelseForventetLengerEnnTreMaaender,
-            grunnlagsEndringshendelseId: grunnlagsEndringshendelseId,
+            grunnlagsEndringshendelseId: hendelseId,
           },
         },
         () => {
-          lukkGrunnlagshendelseWrapper()
+          lukkHendelse()
         }
       )
     } else {

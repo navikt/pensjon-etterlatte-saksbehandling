@@ -9,9 +9,9 @@ import { formaterStringDato } from '~utils/formattering'
 import { harAapenRevurdering, revurderingKanOpprettes } from '~components/person/hendelser/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { FlexRow, SpaceChildren } from '~shared/styled'
-import { StartRevurderingModal } from '~components/person/hendelser/StartRevurderingModal'
 import { LukkHendelseModal } from '~components/person/hendelser/LukkHendelseModal'
 import { useSearchParams } from 'react-router-dom'
+import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 
 interface Props {
   hendelse: Grunnlagsendringshendelse
@@ -56,7 +56,7 @@ export const NyHendelseExpandableRow = ({ hendelse, sak, behandlinger, revurderi
             {hendelse.status !== 'TATT_MED_I_BEHANDLING' &&
               stoetterRevurderingAvHendelse(hendelse, revurderinger) &&
               revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
-                <StartRevurderingModal hendelse={hendelse} revurderinger={revurderinger} sakId={sak.id} />
+                <OpprettRevurderingModal sakId={sak.id} sakType={sak.sakType} hendelseId={hendelse.id} />
               )}
           </FlexRow>
         </SpaceChildren>

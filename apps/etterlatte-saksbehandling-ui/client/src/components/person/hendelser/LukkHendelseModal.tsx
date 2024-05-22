@@ -14,7 +14,7 @@ import { ButtonGroup } from '~shared/styled'
 export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshendelse }) => {
   const [open, setOpen] = useState(false)
   const [kommentar, setKommentar] = useState<string>('')
-  const [lukkHendelseResult, lukkGrunnlagshendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)
+  const [lukkHendelseResult, lukkHendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)
   const [oppgaveResult, hentOppgave] = useApiCall(hentOppgaveForReferanseUnderBehandling)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -24,8 +24,8 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
     setOpen(true)
   }
 
-  const lukkGrunnlagshendelseWrapper = () => {
-    lukkGrunnlagshendelseFunc(
+  const lukkHendelse = () => {
+    lukkHendelseFunc(
       { ...hendelse, kommentar },
       () => {
         setOpen(false)
@@ -40,14 +40,13 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
   return (
     <>
       <Button variant="tertiary" onClick={aapneModal} icon={<ArchiveIcon />} size="small">
-        Arkiver hendelse
+        Lukk hendelse
       </Button>
 
       <Modal
         open={open}
         onClose={() => setOpen(false)}
         aria-labelledby="modal-heading"
-        style={{ maxWidth: '60rem' }}
         header={{ heading: 'Lukk hendelse' }}
       >
         <Modal.Body>
@@ -55,8 +54,8 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
             <>
               <InstitusjonsoppholdVurderingBegrunnelse
                 sakId={hendelse.sakId}
-                grunnlagsEndringshendelseId={hendelse.id}
-                lukkGrunnlagshendelseWrapper={lukkGrunnlagshendelseWrapper}
+                hendelseId={hendelse.id}
+                lukkHendelse={lukkHendelse}
               />
               <Button variant="secondary" onClick={() => setOpen(false)}>
                 Avbryt
@@ -82,7 +81,7 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
 
                 if (!tildeltIdent) {
                   return (
-                    <Alert variant="info">
+                    <Alert variant="info" inline>
                       Oppgaven er ikke tildelt en saksbehandler. Om du lukker hendelsen vil den automatisk tildeles deg.
                     </Alert>
                   )
@@ -102,12 +101,8 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
                 >
                   Avbryt
                 </Button>
-                <Button
-                  onClick={lukkGrunnlagshendelseWrapper}
-                  disabled={!kommentar}
-                  loading={isPending(lukkHendelseResult)}
-                >
-                  Arkiver
+                <Button onClick={lukkHendelse} disabled={!kommentar} loading={isPending(lukkHendelseResult)}>
+                  Lukk
                 </Button>
               </ButtonGroup>
             </>

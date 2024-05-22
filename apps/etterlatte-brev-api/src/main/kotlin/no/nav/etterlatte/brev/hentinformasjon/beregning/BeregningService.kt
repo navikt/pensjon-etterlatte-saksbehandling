@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
 import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.hentBenyttetTrygdetidOgProratabroek
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -34,9 +35,11 @@ class BeregningService(private val beregningKlient: BeregningKlient) {
         brukerTokenInfo: BrukerTokenInfo,
         sakType: SakType,
     ): Utbetalingsinfo =
-        requireNotNull(finnUtbetalingsinfoNullable(behandlingId, virkningstidspunkt, brukerTokenInfo, sakType)) {
-            "Utbetalingsinfo er nødvendig, men mangler"
-        }
+        finnUtbetalingsinfoNullable(behandlingId, virkningstidspunkt, brukerTokenInfo, sakType)
+            ?: throw UgyldigForespoerselException(
+                code = "UTBETALINGSINFO_MANGLER",
+                detail = "Utbetalingsinfo er nødvendig, men mangler",
+            )
 
     suspend fun finnUtbetalingsinfoNullable(
         behandlingId: UUID,

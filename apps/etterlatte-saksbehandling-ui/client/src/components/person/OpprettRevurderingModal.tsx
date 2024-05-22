@@ -3,7 +3,7 @@ import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentStoettedeRevurderinger, opprettRevurdering as opprettRevurderingApi } from '~shared/api/revurdering'
 import { isPending, mapFailure, mapResult } from '~shared/api/apiUtils'
-import { Alert, Button, Heading, Loader, Modal, Select, TextField, VStack } from '@navikt/ds-react'
+import { Alert, Button, Heading, Modal, Select, TextField, VStack } from '@navikt/ds-react'
 import { ArrowCirclepathIcon } from '@navikt/aksel-icons'
 import { useForm } from 'react-hook-form'
 import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
@@ -11,6 +11,7 @@ import styled from 'styled-components'
 import { ButtonGroup } from '~shared/styled'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useNavigate } from 'react-router-dom'
+import Spinner from '~shared/Spinner'
 
 interface OpprettRevurderingSkjema {
   aarsak: Revurderingaarsak
@@ -60,86 +61,90 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
   }
 
   useEffect(() => {
-    muligeRevurderingeraarsakerFetch({ sakType })
-  }, [])
+    if (aapen) muligeRevurderingeraarsakerFetch({ sakType })
+  }, [aapen])
 
-  return mapResult(muligeRevurderingAarsakerResult, {
-    pending: <Loader />,
-    success: (muligeRevurderingAarsaker) =>
-      !!muligeRevurderingAarsaker?.length ? (
-        <>
-          <Button
-            variant={oppgaveId || hendelseId ? 'primary' : 'secondary'}
-            size={oppgaveId || hendelseId ? 'small' : 'medium'}
-            icon={hendelseId && <ArrowCirclepathIcon aria-hidden />}
-            onClick={() => setAapen(true)}
-          >
+  return (
+    <>
+      <Button
+        variant={oppgaveId || hendelseId ? 'primary' : 'secondary'}
+        size={oppgaveId || hendelseId ? 'small' : 'medium'}
+        icon={hendelseId && <ArrowCirclepathIcon aria-hidden />}
+        onClick={() => setAapen(true)}
+      >
+        Opprett revurdering
+      </Button>
+      <Modal open={aapen} onClose={lukkModal} aria-labelledby="Opprett revurdering modal">
+        <Modal.Header closeButton>
+          <Heading level="2" size="medium">
             Opprett revurdering
-          </Button>
-          <Modal open={aapen} onClose={lukkModal} aria-labelledby="Opprett revurdering modal">
-            <Modal.Header closeButton>
-              <Heading level="2" size="medium">
-                Opprett revurdering
-              </Heading>
-            </Modal.Header>
-            <Modal.Body>
-              <Select
-                {...register('aarsak', {
-                  required: {
-                    value: true,
-                    message: 'Du må velge en årsak for revurdering',
-                  },
-                })}
-                label="Årsak til revurdering"
-                error={errors.aarsak?.message}
-              >
-                <option value="">Velg årsak</option>
-                {muligeRevurderingAarsaker.map((aarsak, index) => (
-                  <option key={index} value={aarsak}>
-                    {tekstRevurderingsaarsak[aarsak]}
-                  </option>
-                ))}
-              </Select>
-
-              {watch().aarsak === Revurderingaarsak.ANNEN && (
-                <AnnenRevurderingWrapper gap="4">
-                  <TextField
-                    {...register('fritekstAarsak', {
+          </Heading>
+        </Modal.Header>
+        <Modal.Body>
+          {mapResult(muligeRevurderingAarsakerResult, {
+            pending: <Spinner visible label="Henter revurderingsårsaker..." />,
+            success: (muligeRevurderingAarsaker) =>
+              !!muligeRevurderingAarsaker?.length ? (
+                <>
+                  <Select
+                    {...register('aarsak', {
                       required: {
                         value: true,
-                        message: 'Du må beskrive årsaken',
+                        message: 'Du må velge en årsak for revurdering',
                       },
                     })}
-                    label="Beskriv årsak"
-                    error={errors.fritekstAarsak?.message}
-                  />
-                  <AnnenRevurderingAlert variant="warning" size="small" inline>
-                    Bruk denne årsaken kun dersom andre årsaker ikke er dekkende for revurderingen.
-                  </AnnenRevurderingAlert>
-                </AnnenRevurderingWrapper>
-              )}
+                    label="Årsak til revurdering"
+                    error={errors.aarsak?.message}
+                  >
+                    <option value="">Velg årsak</option>
+                    {muligeRevurderingAarsaker.map((aarsak, index) => (
+                      <option key={index} value={aarsak}>
+                        {tekstRevurderingsaarsak[aarsak]}
+                      </option>
+                    ))}
+                  </Select>
 
-              {mapFailure(opprettRevurderingResult, (error) => (
-                <ApiErrorAlert>{error.detail || 'Kunne ikke opprette revurdering'}</ApiErrorAlert>
-              ))}
+                  {watch().aarsak === Revurderingaarsak.ANNEN && (
+                    <AnnenRevurderingWrapper gap="4">
+                      <TextField
+                        {...register('fritekstAarsak', {
+                          required: {
+                            value: true,
+                            message: 'Du må beskrive årsaken',
+                          },
+                        })}
+                        label="Beskriv årsak"
+                        error={errors.fritekstAarsak?.message}
+                      />
+                      <AnnenRevurderingAlert variant="warning" size="small" inline>
+                        Bruk denne årsaken kun dersom andre årsaker ikke er dekkende for revurderingen.
+                      </AnnenRevurderingAlert>
+                    </AnnenRevurderingWrapper>
+                  )}
 
-              <ButtonGroup>
-                <Button variant="secondary" type="button" onClick={lukkModal}>
-                  Avbryt
-                </Button>
-                <Button loading={isPending(opprettRevurderingResult)} onClick={handleSubmit(paaOpprett)}>
-                  Opprett
-                </Button>
-              </ButtonGroup>
-            </Modal.Body>
-          </Modal>
-        </>
-      ) : (
-        <Alert variant="info" inline>
-          Ingen mulige revurderinger for denne saken
-        </Alert>
-      ),
-  })
+                  {mapFailure(opprettRevurderingResult, (error) => (
+                    <ApiErrorAlert>{error.detail || 'Kunne ikke opprette revurdering'}</ApiErrorAlert>
+                  ))}
+
+                  <ButtonGroup>
+                    <Button variant="secondary" type="button" onClick={lukkModal}>
+                      Avbryt
+                    </Button>
+                    <Button loading={isPending(opprettRevurderingResult)} onClick={handleSubmit(paaOpprett)}>
+                      Opprett
+                    </Button>
+                  </ButtonGroup>
+                </>
+              ) : (
+                <Alert variant="info" size="small">
+                  Ingen revurderingsårsaker for denne saken
+                </Alert>
+              ),
+          })}
+        </Modal.Body>
+      </Modal>
+    </>
+  )
 }
 
 const AnnenRevurderingWrapper = styled(VStack)`

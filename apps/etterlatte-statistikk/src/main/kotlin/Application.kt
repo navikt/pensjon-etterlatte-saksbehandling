@@ -20,7 +20,7 @@ fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
     applicationContext.rapidsConnection
         .apply {
             applicationContext.vedtakhendelserRiver
-            applicationContext.behandlinghendelseRiver
+            applicationContext.avbruttOpprettetBehandlinghendelseRiver
             applicationContext.behandlingPaaVentHendelseRiver
             applicationContext.tilbakekrevingriver
             applicationContext.soeknadStatistikkRiver

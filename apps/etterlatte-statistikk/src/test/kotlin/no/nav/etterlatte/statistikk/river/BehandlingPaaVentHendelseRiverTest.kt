@@ -3,7 +3,7 @@ package no.nav.etterlatte.statistikk.river
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.libs.common.behandling.BEHANDLING_RIVER_KEY
+import no.nav.etterlatte.libs.common.behandling.BEHANDLING_OPPRETTET_AVBRUTT_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
@@ -39,7 +39,7 @@ internal class BehandlingPaaVentHendelseRiverTest {
                     BehandlingHendelseType.PAA_VENT.lagParMedEventNameKey(),
                     CORRELATION_ID_KEY to UUID.randomUUID(),
                     TEKNISK_TID_KEY to tekniskTid,
-                    BEHANDLING_RIVER_KEY to behandling,
+                    BEHANDLING_OPPRETTET_AVBRUTT_RIVER_KEY to behandling,
                 ),
             ).toJson()
         val inspector = testRapid.apply { sendTestMessage(message) }.inspektør

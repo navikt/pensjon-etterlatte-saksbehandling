@@ -20,6 +20,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -479,7 +480,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
     @Test
     fun `Kan ikke sette oppgave på vente om man mangler årsak`() {
-        every { hendelser.sendMeldingForHendelsePaaVent(any(), any()) } returns Unit
+        every { hendelser.sendMeldingForHendelsePaaVent(any(), any(), paavent.aarsak) } returns Unit
 
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
@@ -499,7 +500,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
     @Test
     fun `kan sette og fjerne oppgave paa vent`() {
-        every { hendelser.sendMeldingForHendelsePaaVent(any(), any()) } returns Unit
+        every { hendelser.sendMeldingForHendelsePaaVent(any(), any(), paavent.aarsak) } returns Unit
 
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
@@ -518,6 +519,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             hendelser.sendMeldingForHendelsePaaVent(
                 UUID.fromString(nyOppgave.referanse),
                 BehandlingHendelseType.PAA_VENT,
+                paavent.aarsak,
             )
         }
 
@@ -528,6 +530,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             hendelser.sendMeldingForHendelsePaaVent(
                 UUID.fromString(nyOppgave.referanse),
                 BehandlingHendelseType.AV_VENT,
+                paavent.aarsak,
             )
         }
     }

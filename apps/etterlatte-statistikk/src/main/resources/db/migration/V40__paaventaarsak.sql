@@ -1,0 +1,1 @@
+alter table sak add column paa_vent_aarsak text;

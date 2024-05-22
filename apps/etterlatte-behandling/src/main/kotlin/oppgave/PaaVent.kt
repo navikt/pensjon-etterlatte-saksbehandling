@@ -1,5 +1,6 @@
 package no.nav.etterlatte.oppgave
 
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import java.util.UUID
 import kotlin.contracts.ExperimentalContracts
@@ -11,13 +12,6 @@ data class EndrePaaVentRequest(
     val paaVent: Boolean,
 ) {
     fun toDomain(oppgaveId: UUID) = PaaVent(oppgaveId, aarsak, merknad, paaVent)
-}
-
-enum class PaaVentAarsak {
-    OPPLYSNING_FRA_BRUKER,
-    OPPLYSNING_FRA_ANDRE,
-    KRAVGRUNNLAG_SPERRET,
-    ANNET,
 }
 
 data class PaaVent(

@@ -39,8 +39,8 @@ class SakRepository(private val datasource: DataSource) {
                         opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse, 
                         vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, 
                         sak_utland, beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting,
-                        kilde, pesysid, relatert_til
-                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        kilde, pesysid, relatert_til, paa_vent_aarsak
+                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                     Statement.RETURN_GENERATED_KEYS,
                 ).apply {
@@ -124,7 +124,7 @@ class SakRepository(private val datasource: DataSource) {
                         opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse,
                         vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, sak_utland,
                         beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting, kilde, pesysid,
-                        relatert_til
+                        relatert_til, paa_vent_aarsak
                     FROM sak where behandling_id = ? order by id desc 
                     """.trimIndent(),
                 ).apply {
@@ -168,4 +168,5 @@ private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement =
         setString(29, sakRad.kilde.name)
         sakRad.pesysId?.let { setLong(30, it) } ?: setNull(30, Types.BIGINT)
         sakRad.relatertTil?.let { setString(31, it) } ?: setNull(31, Types.CHAR)
+        sakRad.paaVentAarsak?.let { setString(32, it.name) } ?: setNull(31, Types.CHAR)
     }

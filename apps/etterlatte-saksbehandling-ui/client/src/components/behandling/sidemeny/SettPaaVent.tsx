@@ -29,7 +29,7 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
   if (!oppgave || !erOppgaveRedigerbar(oppgave?.status)) return null
 
   const dispatch = useAppDispatch()
-  type settPaaVentTyper = Array<keyof typeof PaaventAarsak>
+  type settPaaVentTyper = keyof typeof PaaventAarsak
 
   const [frist, setFrist] = useState<string>(oppgave.frist)
   const [merknad, setMerknad] = useState<string>(oppgave.merknad || '')
@@ -80,16 +80,16 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
                 value={aarsak || ''}
                 onChange={(e) => {
                   setAarsakError(false)
-                  setAarsak(e.target.value as settPaaVentTyper[number])
+                  setAarsak(e.target.value as settPaaVentTyper)
                 }}
                 error={aarsakError && 'Du må velge en årsak'}
               >
                 <option value="" disabled={true}>
                   Velg
                 </option>
-                {(Object.keys(PaaventAarsak) as settPaaVentTyper).map((option) => (
-                  <option key={option} value={option}>
-                    {PaaventAarsak[option]}
+                {Object.entries(PaaventAarsak).map(([aarsak, aarsakBeskrivelse]) => (
+                  <option key={aarsak} value={aarsak}>
+                    {aarsakBeskrivelse}
                   </option>
                 ))}
               </Select>

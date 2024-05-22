@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -454,11 +455,13 @@ class StatistikkService(
         behandlingId: UUID,
         hendelse: BehandlingHendelseType,
         tekniskTid: LocalDateTime,
+        aarsak: PaaVentAarsak,
     ): SakRad? {
         val sisteRad =
             sakRepository.hentSisteRad(behandlingId)?.copy(
                 status = hendelse.name,
                 tekniskTid = tekniskTid.toTidspunkt(),
+                paaVentAarsak = aarsak,
             )
         if (sisteRad == null) {
             logger.warn(

@@ -207,10 +207,18 @@ class OppgaveService(
                 OppgaveType.TILBAKEKREVING,
                 OppgaveType.KLAGE,
                 -> {
-                    hendelser.sendMeldingForHendelsePaaVent(
-                        UUID.fromString(oppgave.referanse),
-                        if (nyStatus == Status.PAA_VENT) BehandlingHendelseType.PAA_VENT else BehandlingHendelseType.AV_VENT,
-                    )
+                    if (nyStatus == Status.PAA_VENT) {
+                        hendelser.sendMeldingForHendelsePaaVent(
+                            UUID.fromString(oppgave.referanse),
+                            BehandlingHendelseType.PAA_VENT,
+                            paavent.aarsak!!,
+                        )
+                    } else {
+                        hendelser.sendMeldingForHendelseAvVent(
+                            UUID.fromString(oppgave.referanse),
+                            BehandlingHendelseType.AV_VENT,
+                        )
+                    }
                 }
 
                 else -> {} // Ingen statistikk for resten

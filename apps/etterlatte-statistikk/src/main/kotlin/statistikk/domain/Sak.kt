@@ -1,6 +1,7 @@
 package no.nav.etterlatte.statistikk.domain
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -87,4 +88,5 @@ data class SakRad(
     val kilde: Vedtaksloesning,
     val pesysId: Long?,
     val relatertTil: String?,
+    val paaVentAarsak: PaaVentAarsak? = null,
 )

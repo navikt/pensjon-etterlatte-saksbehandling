@@ -115,7 +115,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                     )
-            }?.also { it.action() }?.behandling
+            }?.also { it.sendMeldingForHendelse() }?.behandling
 
         return Pair(sak, behandling as Foerstegangsbehandling)
     }

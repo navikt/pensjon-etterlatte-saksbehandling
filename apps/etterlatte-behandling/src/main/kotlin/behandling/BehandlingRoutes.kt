@@ -305,7 +305,7 @@ internal fun Route.behandlingRoutes(
                                     request = request,
                                 )
                             }
-                                ?.also { it.action() }
+                                ?.also { it.sendMeldingForHendelse() }
                                 ?.behandling
                     ) {
                         null -> call.respond(HttpStatusCode.NotFound)

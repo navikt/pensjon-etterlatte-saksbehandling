@@ -119,7 +119,7 @@ class BehandlingFactory(
                     }
                 } ?: throw IllegalStateException("Kunne ikke opprette behandling")
             }
-                .also { it.action() }
+                .also { it.sendMeldingForHendelse() }
                 .behandling
 
         val gyldighetsvurdering =
@@ -269,7 +269,7 @@ class BehandlingFactory(
     }
 }
 
-data class BehandlingOgOppgave(val behandling: Behandling, val oppgave: OppgaveIntern?, val action: () -> Unit = {})
+data class BehandlingOgOppgave(val behandling: Behandling, val oppgave: OppgaveIntern?, val sendMeldingForHendelse: () -> Unit = {})
 
 class ManuellMigreringHarEksisterendeIverksattBehandling : UgyldigForespoerselException(
     code = "MANUELL_MIGRERING_EKSISTERENDE_IVERKSATT",

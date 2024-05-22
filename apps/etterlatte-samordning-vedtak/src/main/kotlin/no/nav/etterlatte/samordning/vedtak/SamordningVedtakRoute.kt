@@ -65,10 +65,11 @@ fun Route.samordningVedtakRoute(
                     samordningVedtakService.hentVedtaksliste(
                         fomDato = fomDato,
                         fnr = Folkeregisteridentifikator.of(fnr),
-                        MaskinportenTpContext(
-                            tpnr = Tjenestepensjonnummer(tpnummer),
-                            organisasjonsnr = call.orgNummer,
-                        ),
+                        context =
+                            MaskinportenTpContext(
+                                tpnr = Tjenestepensjonnummer(tpnummer),
+                                organisasjonsnr = call.orgNummer,
+                            ),
                     )
                 } catch (e: IllegalArgumentException) {
                     return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
@@ -101,7 +102,7 @@ fun Route.samordningVedtakRoute(
                     samordningVedtakService.hentVedtaksliste(
                         fomDato = fomDato,
                         fnr = Folkeregisteridentifikator.of(fnr),
-                        PensjonContext,
+                        context = PensjonContext,
                     )
                 } catch (e: IllegalArgumentException) {
                     return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)

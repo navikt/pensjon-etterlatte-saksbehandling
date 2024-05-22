@@ -171,7 +171,7 @@ class SamordningVedtakRouteTest {
                     samordningVedtakService.hentVedtaksliste(
                         fomDato = virkFom,
                         fnr = Folkeregisteridentifikator.of(fnr),
-                        any<MaskinportenTpContext>(),
+                        context = any<MaskinportenTpContext>(),
                     )
                 }
             }
@@ -263,7 +263,7 @@ class SamordningVedtakRouteTest {
                     samordningVedtakService.hentVedtaksliste(
                         fomDato = virkFom,
                         fnr = Folkeregisteridentifikator.of(fnr),
-                        PensjonContext,
+                        context = PensjonContext,
                     )
                 }
             }

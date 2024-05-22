@@ -6,6 +6,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.libs.common.vedtak.Periode
@@ -37,9 +38,9 @@ class VedtakEtterbetalingTest {
 
     @Test
     fun `ikke etterbetaling grunnet ikke tilbake i tid`() {
-        val vedtak = vedtak(virkningstidspunkt = februar2024)
+        val vedtak = vedtak(sakType = SakType.OMSTILLINGSSTOENAD, virkningstidspunkt = februar2024)
 
-        every { repository.hentFerdigstilteVedtak(vedtak.soeker) } returns emptyList()
+        every { repository.hentFerdigstilteVedtak(vedtak.soeker, SakType.OMSTILLINGSSTOENAD) } returns emptyList()
 
         val resultat = vedtak.erVedtakMedEtterbetaling(repository, klokkeJanuar2024)
 
@@ -50,13 +51,13 @@ class VedtakEtterbetalingTest {
 
     @Test
     fun `etterbetaling grunnet utbetaling tilbake i tid og ingen tidligere periode`() {
-        val vedtak = vedtak(virkningstidspunkt = februar2024)
+        val vedtak = vedtak(sakType = SakType.OMSTILLINGSSTOENAD, virkningstidspunkt = februar2024)
 
-        every { repository.hentFerdigstilteVedtak(vedtak.soeker) } returns emptyList()
+        every { repository.hentFerdigstilteVedtak(vedtak.soeker, SakType.OMSTILLINGSSTOENAD) } returns emptyList()
 
         val resultat = vedtak.erVedtakMedEtterbetaling(repository, klokkeMars2024)
 
-        verify { repository.hentFerdigstilteVedtak(vedtak.soeker) }
+        verify { repository.hentFerdigstilteVedtak(vedtak.soeker, SakType.OMSTILLINGSSTOENAD) }
 
         resultat shouldBe true
     }
@@ -71,7 +72,7 @@ class VedtakEtterbetalingTest {
                 fattetTidspunkt = "2024-01-29T14:05:00Z",
             )
 
-        every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker) } returns
+        every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker, SakType.OMSTILLINGSSTOENAD) } returns
             listOf(
                 aVedtakMedUtbetalingsperiode(
                     id = 1L,
@@ -96,7 +97,7 @@ class VedtakEtterbetalingTest {
                 fattetTidspunkt = "2024-01-26T11:25:00Z",
             )
 
-        every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker) } returns
+        every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker, SakType.OMSTILLINGSSTOENAD) } returns
             listOf(
                 aVedtakMedUtbetalingsperiode(
                     id = 1L,
@@ -121,7 +122,7 @@ class VedtakEtterbetalingTest {
                 fattetTidspunkt = "2024-03-06T13:30:00Z",
             )
 
-        every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker) } returns
+        every { repository.hentFerdigstilteVedtak(nyttVedtak.soeker, SakType.OMSTILLINGSSTOENAD) } returns
             listOf(
                 aVedtakMedUtbetalingsperiode(
                     id = 1L,
@@ -155,6 +156,7 @@ class VedtakEtterbetalingTest {
         fattetTidspunkt: String,
     ) = vedtak(
         id = id,
+        sakType = SakType.OMSTILLINGSSTOENAD,
         virkningstidspunkt = virkningstidspunkt,
         vedtakFattet =
             VedtakFattet(

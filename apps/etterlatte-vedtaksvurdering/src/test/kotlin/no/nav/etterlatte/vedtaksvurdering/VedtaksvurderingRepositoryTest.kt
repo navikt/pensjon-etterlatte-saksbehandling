@@ -374,7 +374,7 @@ internal class VedtaksvurderingRepositoryTest(private val dataSource: DataSource
             .map { repository.opprettVedtak(it) }
             .forEach { repository.iverksattVedtak(it.behandlingId) }
 
-        val results = repository.hentFerdigstilteVedtak(soeker2)
+        val results = repository.hentFerdigstilteVedtak(soeker2, SakType.BARNEPENSJON)
 
         results.size shouldBeExactly 3
         results.forEach {

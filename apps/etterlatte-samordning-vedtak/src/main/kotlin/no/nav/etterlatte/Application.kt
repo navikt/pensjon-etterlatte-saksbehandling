@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.samordning.ApplicationContext
+import no.nav.etterlatte.samordning.vedtak.barnepensjonVedtakRoute
 import no.nav.etterlatte.samordning.vedtak.samordningVedtakRoute
 import no.nav.etterlatte.samordning.vedtak.serverRequestLoggerPlugin
 import no.nav.etterlatte.samordning.vedtak.userIdMdcPlugin
@@ -28,6 +29,12 @@ class Server(applicationContext: ApplicationContext) {
                 samordningVedtakService = applicationContext.samordningVedtakService,
                 config = applicationContext.config,
             )
+
+            barnepensjonVedtakRoute(
+                samordningVedtakService = applicationContext.samordningVedtakService,
+                config = applicationContext.config,
+            )
+
             install(userIdMdcPlugin)
             install(serverRequestLoggerPlugin)
         }

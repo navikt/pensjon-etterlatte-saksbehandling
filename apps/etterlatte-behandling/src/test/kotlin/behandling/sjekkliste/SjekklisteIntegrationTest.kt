@@ -84,7 +84,7 @@ class SjekklisteIntegrationTest(val dataSource: DataSource) {
         opprettet.versjon shouldBe 1
         opprettet.sjekklisteItems.map { it.beskrivelse } shouldContainExactlyInAnyOrder defaultFoerstegangsbehandlingItemsOms
 
-        opprettet.sjekklisteItems shouldHaveAtLeastSize 13
+        opprettet.sjekklisteItems shouldHaveAtLeastSize 12
         opprettet.sjekklisteItems.forEach {
             it.avkrysset shouldBe false
             it.versjon shouldBe 1

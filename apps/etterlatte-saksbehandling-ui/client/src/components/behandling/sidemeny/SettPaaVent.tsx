@@ -40,7 +40,7 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
   const [settPaaVentStatus, settOppgavePaaVent] = useApiCall(settOppgavePaaVentApi)
 
   const oppdater = () => {
-    const paaVent = !(oppgave.status === 'PAA_VENT')
+    const paaVent = oppgave.status !== 'PAA_VENT'
     if (paaVent && !aarsak) {
       setAarsakError(true)
       return

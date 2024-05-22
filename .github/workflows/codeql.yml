@@ -37,9 +37,8 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Assemble
-        run: ./gradlew assemble
+        run: ./gradlew assemble -Pkotlin.compiler.execution.strategy=in-process -Pkotlin.daemon.jvmargs=-Xmx16g
         env:
-          GRADLE_OPTS: -Dkotlin.compiler.execution.strategy=in-process
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Perform CodeQL Analysis

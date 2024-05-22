@@ -21,7 +21,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { formaterDato } from '~utils/formattering'
+import { formaterDato, formaterDatoMedKlokkeslett } from '~utils/formattering'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -106,7 +106,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
               </Button>
             )}
             <Detail>Manuelt av {aktivitetOppfolging?.opprettetAv}</Detail>
-            <Detail>Sist endret {aktivitetOppfolging?.opprettet}</Detail>
+            <Detail>Sist endret {formaterDatoMedKlokkeslett(aktivitetOppfolging?.opprettet)}</Detail>
           </SpacingWrapper>
         )}
 

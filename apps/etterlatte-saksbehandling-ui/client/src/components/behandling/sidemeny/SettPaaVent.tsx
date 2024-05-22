@@ -19,34 +19,31 @@ interface Props {
 }
 
 enum PaaventAarsak {
-  OPPLYSNING_FRA_BRUKER = 'OPPLYSNING_FRA_BRUKER',
-  OPPLYSNING_FRA_ANDRE = 'OPPLYSNING_FRA_ANDRE',
-  KRAVGRUNNLAG_SPERRET = 'KRAVGRUNNLAG_SPERRET',
-  ANNET = 'ANNET',
+  OPPLYSNING_FRA_BRUKER = 'Opplysning fra bruker',
+  OPPLYSNING_FRA_ANDRE = 'Opplysning fra andre',
+  KRAVGRUNNLAG_SPERRET = 'Kravgrunnlag sperret',
+  ANNET = 'Annet',
 }
 
 export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
   if (!oppgave || !erOppgaveRedigerbar(oppgave?.status)) return null
 
   const dispatch = useAppDispatch()
-  type velg = 'velg'
   type settPaaVentTyper = Array<keyof typeof PaaventAarsak>
 
   const [frist, setFrist] = useState<string>(oppgave.frist)
   const [merknad, setMerknad] = useState<string>(oppgave.merknad || '')
-  const [aarsak, setAarsak] = useState<settPaaVentTyper[number] | velg>('velg')
   const [settPaaVent, setVisPaaVent] = useState(false)
+  const [aarsak, setAarsak] = useState<settPaaVentTyper[number]>()
   const [aarsakError, setAarsakError] = useState<boolean>(false)
 
   const [settPaaVentStatus, settOppgavePaaVent] = useApiCall(settOppgavePaaVentApi)
 
   const oppdater = () => {
     const paaVent = !(oppgave.status === 'PAA_VENT')
-    if (paaVent) {
-      if (!aarsak || aarsak === 'velg') {
-        setAarsakError(true)
-        return
-      }
+    if (paaVent && !aarsak) {
+      setAarsakError(true)
+      return
     }
 
     settOppgavePaaVent(
@@ -76,9 +73,9 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
           <br />
           {oppgave.status !== 'PAA_VENT' && (
             <>
-              <Text>Årsak til sett på vent</Text>
+              <Text>Årsak for å sette på vent</Text>
               <Select
-                label="Årsak til sett på vent"
+                label="Årsak for å sette på vent"
                 hideLabel={true}
                 value={aarsak || ''}
                 onChange={(e) => {
@@ -87,7 +84,7 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
                 }}
                 error={aarsakError && 'Du må velge en årsak'}
               >
-                <option value="velg" disabled={true}>
+                <option value="" disabled={true}>
                   Velg
                 </option>
                 {(Object.keys(PaaventAarsak) as settPaaVentTyper).map((option) => (
@@ -128,7 +125,6 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
                 <Heading size="xsmall" spacing>
                   Oppgaven står på vent!
                 </Heading>
-
                 <Info label="Merknad" tekst={oppgave.merknad || 'Ingen'} />
                 <Info label="Ny frist" tekst={formaterStringDato(oppgave.frist)} />
               </Alert>

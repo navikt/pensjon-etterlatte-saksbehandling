@@ -8,9 +8,9 @@ import kotlin.contracts.contract
 data class EndrePaaVentRequest(
     val aarsak: PaaVentAarsak? = null,
     val merknad: String,
-    val paavent: Boolean,
+    val paaVent: Boolean,
 ) {
-    fun toDomain(oppgaveId: UUID) = PaaVent(oppgaveId, aarsak, merknad, paavent)
+    fun toDomain(oppgaveId: UUID) = PaaVent(oppgaveId, aarsak, merknad, paaVent)
 }
 
 enum class PaaVentAarsak {

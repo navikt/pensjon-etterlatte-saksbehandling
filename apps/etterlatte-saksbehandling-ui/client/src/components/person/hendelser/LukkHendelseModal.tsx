@@ -1,6 +1,5 @@
 import { Alert, BodyShort, Button, Modal, Textarea } from '@navikt/ds-react'
 import { Grunnlagsendringshendelse, GrunnlagsendringsType } from '~components/person/typer'
-import InstitusjonsoppholdVurderingBegrunnelse from '~components/person/hendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { isPending, mapSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import React, { useState } from 'react'
@@ -10,6 +9,7 @@ import { ArchiveIcon } from '@navikt/aksel-icons'
 import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { ButtonGroup } from '~shared/styled'
+import { VurderInstitusjonsoppholdModalBody } from '~components/person/hendelser/institusjonsopphold/VurderInstitusjonsoppholdModalBody'
 
 export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshendelse }) => {
   const [open, setOpen] = useState(false)
@@ -49,65 +49,59 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
         aria-labelledby="modal-heading"
         header={{ heading: 'Lukk hendelse' }}
       >
-        <Modal.Body>
-          {hendelse.type === GrunnlagsendringsType.INSTITUSJONSOPPHOLD ? (
-            <>
-              <InstitusjonsoppholdVurderingBegrunnelse
-                sakId={hendelse.sakId}
-                hendelseId={hendelse.id}
-                lukkHendelse={lukkHendelse}
-              />
-              <Button variant="secondary" onClick={() => setOpen(false)}>
+        {hendelse.type === GrunnlagsendringsType.INSTITUSJONSOPPHOLD ? (
+          <VurderInstitusjonsoppholdModalBody
+            setOpen={setOpen}
+            sakId={hendelse.sakId}
+            hendelseId={hendelse.id}
+            lukkHendelse={lukkHendelse}
+          />
+        ) : (
+          <Modal.Body>
+            <BodyShort spacing>
+              I noen tilfeller krever ikke ny informasjon eller hendelser noen revurdering. Beskriv hvorfor en
+              revurdering ikke er nødvendig.
+            </BodyShort>
+            <Textarea label="Begrunnelse" value={kommentar} onChange={(e) => setKommentar(e.target.value)} />
+
+            {isFailureHandler({
+              apiResult: lukkHendelseResult,
+              errorMessage: 'Vi kunne ikke lukke hendelsen',
+            })}
+
+            <br />
+
+            {mapSuccess(oppgaveResult, (oppgave) => {
+              const tildeltIdent = oppgave?.saksbehandler?.ident
+
+              if (!tildeltIdent) {
+                return (
+                  <Alert variant="info" inline>
+                    Oppgaven er ikke tildelt en saksbehandler. Om du lukker hendelsen vil den automatisk tildeles deg.
+                  </Alert>
+                )
+              } else if (tildeltIdent !== innloggetSaksbehandler.ident) {
+                return <Alert variant="warning">Oppgaven tilhører {oppgave?.saksbehandler?.navn}</Alert>
+              }
+            })}
+
+            <ButtonGroup>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setKommentar('')
+                  resetApiCall()
+                  setOpen(false)
+                }}
+              >
                 Avbryt
               </Button>
-            </>
-          ) : (
-            <>
-              <BodyShort spacing>
-                I noen tilfeller krever ikke ny informasjon eller hendelser noen revurdering. Beskriv hvorfor en
-                revurdering ikke er nødvendig.
-              </BodyShort>
-              <Textarea label="Begrunnelse" value={kommentar} onChange={(e) => setKommentar(e.target.value)} />
-
-              {isFailureHandler({
-                apiResult: lukkHendelseResult,
-                errorMessage: 'Vi kunne ikke lukke hendelsen',
-              })}
-
-              <br />
-
-              {mapSuccess(oppgaveResult, (oppgave) => {
-                const tildeltIdent = oppgave?.saksbehandler?.ident
-
-                if (!tildeltIdent) {
-                  return (
-                    <Alert variant="info" inline>
-                      Oppgaven er ikke tildelt en saksbehandler. Om du lukker hendelsen vil den automatisk tildeles deg.
-                    </Alert>
-                  )
-                } else if (tildeltIdent !== innloggetSaksbehandler.ident) {
-                  return <Alert variant="warning">Oppgaven tilhører {oppgave?.saksbehandler?.navn}</Alert>
-                }
-              })}
-
-              <ButtonGroup>
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    setKommentar('')
-                    resetApiCall()
-                    setOpen(false)
-                  }}
-                >
-                  Avbryt
-                </Button>
-                <Button onClick={lukkHendelse} disabled={!kommentar} loading={isPending(lukkHendelseResult)}>
-                  Lukk
-                </Button>
-              </ButtonGroup>
-            </>
-          )}
-        </Modal.Body>
+              <Button onClick={lukkHendelse} disabled={!kommentar} loading={isPending(lukkHendelseResult)}>
+                Lukk
+              </Button>
+            </ButtonGroup>
+          </Modal.Body>
+        )}
       </Modal>
     </>
   )

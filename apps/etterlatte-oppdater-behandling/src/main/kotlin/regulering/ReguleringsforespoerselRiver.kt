@@ -1,8 +1,10 @@
 package no.nav.etterlatte.regulering
 
+import com.fasterxml.jackson.databind.node.MissingNode
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
@@ -11,6 +13,7 @@ import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.ANTALL
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.SPESIFIKKE_SAKER
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.rapidsandrivers.saker
@@ -34,6 +37,7 @@ internal class ReguleringsforespoerselRiver(
             validate { it.requireKey(KJOERING) }
             validate { it.requireKey(ANTALL) }
             validate { it.requireKey(SPESIFIKKE_SAKER) }
+            validate { it.interestedIn(SAK_TYPE) }
         }
     }
 
@@ -53,6 +57,7 @@ internal class ReguleringsforespoerselRiver(
         val kjoering = packet[KJOERING].asText()
         val antall = packet[ANTALL].asInt()
         val spesifikkeSaker = packet.saker
+        val sakType = packet.optionalSakType()
 
         val maksBatchstoerrelse = MAKS_BATCHSTOERRELSE
         var tatt = 0
@@ -60,7 +65,8 @@ internal class ReguleringsforespoerselRiver(
         while (tatt < antall) {
             val antallIDenneRunden = min(maksBatchstoerrelse, antall)
             logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
-            val sakerTilOmregning = behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker)
+            val sakerTilOmregning =
+                behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker, sakType)
 
             val tilbakemigrerte =
                 behandlingService.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
@@ -82,6 +88,13 @@ internal class ReguleringsforespoerselRiver(
             if (sakerTilOmregning.saker.isEmpty() || sakerTilOmregning.saker.size < maksBatchstoerrelse) {
                 break
             }
+        }
+    }
+
+    private fun JsonMessage.optionalSakType(): SakType? {
+        return when (val node = this[SAK_TYPE]) {
+            is MissingNode -> null
+            else -> SakType.valueOf(node.asText())
         }
     }
 

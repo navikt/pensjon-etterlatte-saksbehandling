@@ -1,5 +1,7 @@
 package no.nav.etterlatte.sak
 
+import io.kotest.matchers.collections.shouldContainAnyOf
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.date.shouldBeBetween
 import io.kotest.matchers.date.shouldBeToday
 import io.kotest.matchers.date.shouldNotBeToday
@@ -21,21 +23,26 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.opprettBehandling
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ExtendWith(DatabaseExtension::class)
 internal class SakDaoTest(val dataSource: DataSource) {
     private lateinit var sakRepo: SakDao
     private lateinit var tilgangService: TilgangService
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var kommerBarnetTilGodeDao: KommerBarnetTilGodeDao
+
+    companion object {
+        @RegisterExtension
+        private val dbExtension = DatabaseExtension()
+    }
 
     @BeforeAll
     fun beforeAll() {
@@ -48,6 +55,11 @@ internal class SakDaoTest(val dataSource: DataSource) {
                 RevurderingDao(ConnectionAutoclosingTest(dataSource)),
                 ConnectionAutoclosingTest(dataSource),
             )
+    }
+
+    @AfterEach
+    fun afterEach() {
+        dbExtension.resetDb()
     }
 
     @Test
@@ -208,5 +220,23 @@ internal class SakDaoTest(val dataSource: DataSource) {
         val saker = sakRepo.hentSaker("", 3, emptyList())
 
         saker.size shouldBe 3
+    }
+
+    @Test
+    fun `Skal hente saker for gitt sakstype hvis sakstype er angitt`() {
+        sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        sakRepo.opprettSak("fnr4", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+
+        sakRepo.hentSaker("", 100, emptyList(), SakType.BARNEPENSJON)
+            .map { it.ident } shouldContainExactlyInAnyOrder listOf("fnr1", "fnr2", "fnr3")
+
+        sakRepo.hentSaker("", 100, emptyList(), SakType.OMSTILLINGSSTOENAD)
+            .map { it.ident } shouldBe listOf("fnr4")
+
+        val saker = sakRepo.hentSaker("", 2, emptyList(), SakType.BARNEPENSJON)
+        saker.map { it.ident } shouldContainAnyOf listOf("fnr1", "fnr2", "fnr3")
+        saker.size shouldBe 2
     }
 }

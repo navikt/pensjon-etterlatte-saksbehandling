@@ -37,6 +37,7 @@ interface SakService {
         kjoering: String,
         antall: Int,
         saker: List<Long>,
+        sakType: SakType? = null,
     ): List<Sak>
 
     fun finnSaker(person: String): List<Sak>
@@ -142,8 +143,9 @@ class SakServiceImpl(
         kjoering: String,
         antall: Int,
         saker: List<Long>,
+        sakType: SakType?,
     ): List<Sak> {
-        return dao.hentSaker(kjoering, antall, saker).filterForEnheter()
+        return dao.hentSaker(kjoering, antall, saker, sakType).filterForEnheter()
     }
 
     private fun finnSakForPerson(

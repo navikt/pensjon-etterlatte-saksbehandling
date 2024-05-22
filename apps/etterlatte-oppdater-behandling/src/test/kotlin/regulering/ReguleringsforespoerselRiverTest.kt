@@ -21,6 +21,7 @@ import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.SPESIFIKKE_SAKER
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
 import no.nav.etterlatte.rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -188,5 +189,31 @@ internal class ReguleringsforespoerselRiverTest {
         inspector.sendTestMessage(melding.toJson())
 
         verify(exactly = 2) { vedtakServiceMock.hentAlleSaker(kjoering, any()) }
+    }
+
+    @Test
+    fun `henter saker for gitt sakstype`() {
+        val melding =
+            JsonMessage.newMessage(
+                mapOf(
+                    ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
+                    DATO_KEY to LocalDate.now(),
+                    KJOERING to "Regulering2023",
+                    ANTALL to 10,
+                    SPESIFIKKE_SAKER to listOf<Long>(),
+                    SAK_TYPE to SakType.BARNEPENSJON.name,
+                ),
+            )
+
+        val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
+        val featureToggleService =
+            mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }
+        val inspector =
+            TestRapid().apply { ReguleringsforespoerselRiver(this, vedtakServiceMock, featureToggleService) }
+
+        inspector.sendTestMessage(melding.toJson())
+        verify(exactly = 1) {
+            vedtakServiceMock.hentAlleSaker("Regulering2023", 10, emptyList(), SakType.BARNEPENSJON)
+        }
     }
 }

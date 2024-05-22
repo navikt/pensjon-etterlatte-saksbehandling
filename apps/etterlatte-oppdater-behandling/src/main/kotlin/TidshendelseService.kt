@@ -6,7 +6,6 @@ import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.AO_OMS67
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_3AAR
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_4MND
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_5AAR
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -20,7 +19,6 @@ import java.util.UUID
 
 class TidshendelseService(
     private val behandlingService: BehandlingService,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(TidshendelseService::class.java)
 
@@ -55,10 +53,6 @@ class TidshendelseService(
                     .let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
             }
         } else {
-            if (hendelse.jobbtype == OMS_DOED_4MND && !kanOppretteOppgaveForAktivitetsplikt()) {
-                logger.info("Oppgave for varselbrev aktivitetsplikt er skrudd av.")
-                return TidshendelseResult.Skipped
-            }
             return opprettOppgave(hendelse)
                 .let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
         }
@@ -108,9 +102,6 @@ class TidshendelseService(
         logger.info("Opprettet oppgave $oppgaveId [sak=${hendelse.sakId}]")
         return oppgaveId
     }
-
-    private fun kanOppretteOppgaveForAktivitetsplikt() =
-        featureToggleService.isEnabled(TidshendelserFeatureToggle.OpprettOppgaveForVarselbrevAktivitetsplikt, false)
 
     private fun skalLageOmregning(hendelse: TidshendelsePacket) =
         when (hendelse.jobbtype) {

@@ -11,6 +11,7 @@ import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
@@ -257,6 +258,9 @@ fun Route.samordningsvedtakRoute(vedtakSamordningService: VedtakSamordningServic
         }
 
         get {
+            val sakstype =
+                call.parameters["sakstype"]?.let { runCatching { SakType.valueOf(it) }.getOrNull() }
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "sakstype ikke angitt")
             val fomDato =
                 call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "fomDato ikke angitt")
@@ -264,7 +268,12 @@ fun Route.samordningsvedtakRoute(vedtakSamordningService: VedtakSamordningServic
                 call.request.headers["fnr"]?.let { Folkeregisteridentifikator.of(it) }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
 
-            val vedtaksliste = vedtakSamordningService.hentVedtaksliste(fnr, fomDato)
+            val vedtaksliste =
+                vedtakSamordningService.hentVedtaksliste(
+                    fnr = fnr,
+                    sakType = sakstype,
+                    fomDato = fomDato,
+                )
             call.respond(vedtaksliste)
         }
 

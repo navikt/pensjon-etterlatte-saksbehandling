@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.YearMonth
 
 class SamordningVedtakService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
@@ -43,6 +44,8 @@ class SamordningVedtakService(
 
     suspend fun hentVedtaksliste(
         fomDato: LocalDate,
+        tomDato: LocalDate? = null,
+        sakType: SakType = SakType.OMSTILLINGSSTOENAD,
         fnr: Folkeregisteridentifikator,
         context: CallerContext,
     ): List<SamordningVedtakDto> {
@@ -52,12 +55,15 @@ class SamordningVedtakService(
             throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpytelse")
         }
 
+        val tilOgMed = tomDato?.let { YearMonth.of(tomDato.year, tomDato.month) }
+
         return vedtaksvurderingKlient.hentVedtaksliste(
+            sakType = sakType,
             fomDato = fomDato,
             fnr = fnr.value,
             callerContext = context,
         )
-            .filter { it.sak.sakType == SakType.OMSTILLINGSSTOENAD }
+            .filter { tilOgMed?.let { t -> it.virkningstidspunkt <= t } ?: true }
             .map { it.mapSamordningsvedtak() }
     }
 

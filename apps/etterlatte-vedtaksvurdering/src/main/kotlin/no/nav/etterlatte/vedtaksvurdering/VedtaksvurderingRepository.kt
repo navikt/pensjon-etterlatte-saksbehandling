@@ -249,6 +249,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
 
     fun hentFerdigstilteVedtak(
         fnr: Folkeregisteridentifikator,
+        sakType: SakType,
         tx: TransactionalSession? = null,
     ): List<Vedtak> {
         val hentVedtak = """
@@ -256,13 +257,19 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, opphoer_fom
             FROM vedtak  
-            WHERE vedtakstatus in ('TIL_SAMORDNING', 'SAMORDNET', 'IVERKSATT')   
-            AND fnr = :fnr
+            WHERE fnr = :fnr 
+            AND saktype = :saktype   
+            AND vedtakstatus in ('TIL_SAMORDNING', 'SAMORDNET', 'IVERKSATT')   
             """
         return tx.session {
             hentListe(
                 queryString = hentVedtak,
-                params = { mapOf("fnr" to fnr.value) },
+                params = {
+                    mapOf(
+                        "fnr" to fnr.value,
+                        "saktype" to sakType.name,
+                    )
+                },
             ) {
                 val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
                 it.toVedtak(utbetalingsperioder)

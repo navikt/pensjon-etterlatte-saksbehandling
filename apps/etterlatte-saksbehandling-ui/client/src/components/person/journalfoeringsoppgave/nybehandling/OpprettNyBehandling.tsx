@@ -3,21 +3,23 @@ import { SakType } from '~shared/types/sak'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import PersongalleriOmstillingsstoenad from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriOmstillingsstoenad'
 import { formaterSakstype, formaterSpraak, mapRHFArrayToStringArray } from '~utils/formattering'
-import { Button, Heading, Select, Tag } from '@navikt/ds-react'
+import { Alert, Button, Heading, Select } from '@navikt/ds-react'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import styled from 'styled-components'
 import { FlexRow, SpaceChildren } from '~shared/styled'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Spraak } from '~shared/types/Brev'
 import { FormProvider, useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { useAppDispatch } from '~store/Store'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
+import { temaFraSakstype } from '~components/person/journalfoeringsoppgave/journalpost/EndreSak'
 
 export interface NyBehandlingSkjema {
+  sakType: SakType
   spraak: Spraak | null
   mottattDato: string
   persongalleri: {
@@ -30,15 +32,13 @@ export interface NyBehandlingSkjema {
 }
 
 export default function OpprettNyBehandling() {
-  const { oppgave, nyBehandlingRequest } = useJournalfoeringOppgave()
+  const { oppgave, nyBehandlingRequest, journalpost } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
   if (!oppgave || !erOppgaveRedigerbar(oppgave.status)) {
     return <Navigate to="../" relative="path" />
   }
-
-  const { sakType } = oppgave
 
   const neste = () => navigate('oppsummering', { relative: 'path' })
 
@@ -60,6 +60,11 @@ export default function OpprettNyBehandling() {
     }
   }
 
+  const mapAvdoed = (sakType?: SakType, avdoed?: string[]) =>
+    sakType === SakType.OMSTILLINGSSTOENAD
+      ? konverterAvdoedForOmstillingstoenad(avdoed)
+      : mapStringArrayToRHFArray(avdoed)
+
   const methods = useForm<NyBehandlingSkjema>({
     defaultValues: {
       ...nyBehandlingRequest,
@@ -68,24 +73,24 @@ export default function OpprettNyBehandling() {
         soeker: nyBehandlingRequest?.persongalleri?.soeker,
         gjenlevende: mapStringArrayToRHFArray(nyBehandlingRequest?.persongalleri?.gjenlevende),
         soesken: mapStringArrayToRHFArray(nyBehandlingRequest?.persongalleri?.soesken),
-        avdoed:
-          sakType === SakType.OMSTILLINGSSTOENAD
-            ? konverterAvdoedForOmstillingstoenad(nyBehandlingRequest?.persongalleri?.avdoed)
-            : mapStringArrayToRHFArray(nyBehandlingRequest?.persongalleri?.avdoed),
+        avdoed: mapAvdoed(nyBehandlingRequest?.sakType, nyBehandlingRequest?.persongalleri?.avdoed),
       },
     },
   })
+
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
+    setValue,
+    watch,
   } = methods
 
   const onSubmit = (data: NyBehandlingSkjema) => {
     dispatch(
       settNyBehandlingRequest({
-        sakType,
+        sakType: data.sakType,
         spraak: data.spraak!,
         mottattDato: new Date(data.mottattDato).toISOString(),
         persongalleri: {
@@ -100,16 +105,37 @@ export default function OpprettNyBehandling() {
     neste()
   }
 
+  const valgtSakType = watch('sakType')
+
+  useEffect(() => {
+    setValue('persongalleri.avdoed', mapAvdoed(valgtSakType, nyBehandlingRequest?.persongalleri?.avdoed))
+  }, [valgtSakType])
+
   return (
     <FormWrapper column>
       <FormProvider {...methods}>
         <SpaceChildren>
           <Heading size="medium" spacing>
-            Opprett behandling{' '}
-            <Tag variant="success" size="medium">
-              {formaterSakstype(sakType)}
-            </Tag>
+            Opprett behandling
           </Heading>
+
+          <Select
+            {...register('sakType', {
+              required: { value: true, message: 'Saktype må være satt' },
+            })}
+            label="Hvilken type er saken?"
+            error={errors.sakType?.message}
+          >
+            <option value="" disabled>
+              Velg ...
+            </option>
+            <option value={SakType.BARNEPENSJON}>{formaterSakstype(SakType.BARNEPENSJON)}</option>
+            <option value={SakType.OMSTILLINGSSTOENAD}>{formaterSakstype(SakType.OMSTILLINGSSTOENAD)}</option>
+          </Select>
+
+          {journalpost?.tema !== temaFraSakstype(valgtSakType) && (
+            <Alert variant="warning">Valgt sakstype matcher ikke tema i journalposten. Er dette riktig?</Alert>
+          )}
 
           <Select
             {...register('spraak', {
@@ -118,7 +144,9 @@ export default function OpprettNyBehandling() {
             label="Hva skal språket/målform være?"
             error={errors.spraak?.message}
           >
-            <option value="">Velg ...</option>
+            <option value="" disabled>
+              Velg ...
+            </option>
             <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
             <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
             <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
@@ -136,8 +164,9 @@ export default function OpprettNyBehandling() {
             Persongalleri
           </PersongalleriHeading>
 
-          {sakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad />}
-          {sakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon />}
+          {!valgtSakType && <Alert variant="warning">Du må velge saktype!</Alert>}
+          {valgtSakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad />}
+          {valgtSakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon />}
 
           <div>
             <FlexRow justify="center" $spacing>

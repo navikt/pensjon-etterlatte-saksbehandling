@@ -12,7 +12,6 @@ import javax.sql.DataSource
 class RefreshBeregningDao(
     private val datasource: DataSource,
 ) {
-    private val connection get() = datasource.connection
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     companion object {
@@ -22,7 +21,7 @@ class RefreshBeregningDao(
     }
 
     fun hentBehandlingerUtenOppdatertBeregning(limit: Int): List<UUID> {
-        return connection.use { connection ->
+        return datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
                     """
@@ -46,7 +45,7 @@ class RefreshBeregningDao(
         behandlingId: UUID,
         beregning: Beregning?,
     ): Boolean {
-        return connection.use { connection ->
+        return datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
                     """
@@ -88,20 +87,19 @@ class RefreshBeregningDao(
 
             statement.executeUpdate() == 1
         }
-
         logger.info(
             "Patchet $antallSakRadPatchet sak-rader og $antallStoenadRadPatchet stoenad-rader " +
                 "for beregningen for behandling med id=$behandlingId",
         )
 
         if (withConnection == null) {
-            return connection.use(oppdatering)
+            return datasource.connection.use(oppdatering)
         }
         return withConnection.let(oppdatering)
     }
 
     fun hentBehandlingerSomIkkeErRefreshet(sakerAvGangen: Int): List<Pair<UUID, Beregning?>> {
-        return connection.use { connection ->
+        return datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
                     """
@@ -116,7 +114,8 @@ class RefreshBeregningDao(
             statement.setInt(3, sakerAvGangen)
             statement.executeQuery().toList {
                 val behandlingId = UUID.fromString(this.getString("behandling_id"))
-                val utlandstilknytning = getString("beregning_behandling")?.let { objectMapper.readValue<Beregning>(it) }
+                val utlandstilknytning =
+                    getString("beregning_behandling")?.let { objectMapper.readValue<Beregning>(it) }
                 behandlingId to utlandstilknytning
             }
         }
@@ -126,7 +125,7 @@ class RefreshBeregningDao(
         behandlingId: UUID,
         beregning: Beregning,
     ) {
-        return connection.use { connection ->
+        return datasource.connection.use { connection ->
             val sakerOppdatering =
                 connection.prepareStatement(
                     """

@@ -165,7 +165,7 @@ class BehandlingFactory(
         persongalleri: Persongalleri,
         mottattDato: String?,
         kilde: Vedtaksloesning,
-        request: OpprettBehandlingRequest,
+        request: DataHentetForOpprettBehandling,
         prosessType: Prosesstype = Prosesstype.MANUELL,
     ): BehandlingOgOppgave? {
         logger.info("Starter behandling i sak $sakId")
@@ -217,7 +217,7 @@ class BehandlingFactory(
         }
     }
 
-    internal fun hentDataForOpprettBehandling(sakId: Long): OpprettBehandlingRequest {
+    internal fun hentDataForOpprettBehandling(sakId: Long): DataHentetForOpprettBehandling {
         val sak = requireNotNull(sakService.finnSak(sakId)) { "Fant ingen sak med id=$sakId!" }
         val harBehandlingerForSak =
             behandlingDao.alleBehandlingerISak(sak.id)
@@ -226,7 +226,7 @@ class BehandlingFactory(
             harBehandlingerForSak.filter { behandling ->
                 BehandlingStatus.iverksattEllerAttestert().find { it == behandling.status } != null
             }
-        return OpprettBehandlingRequest(
+        return DataHentetForOpprettBehandling(
             sak = sak,
             alleBehandlingerISak = harBehandlingerForSak,
             iverksatteEllerAttesterteBehandlinger = harIverksattEllerAttestertBehandling,
@@ -283,7 +283,7 @@ class UgyldigEnhetException : UgyldigForespoerselException(
 
 fun Vedtaksloesning.foerstOpprettaIPesys() = this == Vedtaksloesning.PESYS || this == Vedtaksloesning.GJENOPPRETTA
 
-data class OpprettBehandlingRequest(
+data class DataHentetForOpprettBehandling(
     val sak: Sak,
     val alleBehandlingerISak: List<Behandling>,
     val iverksatteEllerAttesterteBehandlinger: List<Behandling>,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, Button, TextField } from '@navikt/ds-react'
+import { Alert, Button, Radio, RadioGroup, TextField } from '@navikt/ds-react'
 import { isPending, isSuccess, mapFailure, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { Journalpost, Journalstatus, Sakstype } from '~shared/types/Journalpost'
 import { ISak } from '~shared/types/sak'
@@ -16,6 +16,8 @@ import { SakOverfoeringDetailjer } from 'src/components/person/dokumenter/avvik/
 import { opprettOppgave } from '~shared/api/oppgaver'
 import { OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { JaNei } from '~shared/types/ISvar'
+import { formaterSakstype } from '~utils/formattering'
 
 const erSammeSak = (sak: ISak, journalpost: Journalpost): boolean => {
   const { sak: journalpostSak, tema } = journalpost
@@ -47,6 +49,7 @@ export const KnyttTilAnnenSak = ({
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
 
   const [sakid, setSakid] = useState<string>()
+  const [skalFeilregistrere, setSkalFeilregistrere] = useState<JaNei>()
 
   const [annenSakStatus, hentAnnenSak] = useApiCall(hentSak)
   const [knyttTilAnnenSakStatus, apiKnyttTilAnnenSak] = useApiCall(knyttTilAnnenSak)
@@ -72,12 +75,12 @@ export const KnyttTilAnnenSak = ({
   }
 
   const flyttOgFeilregistrerJournalpost = (sak: ISak) => {
-    if (journalpost.journalstatus === Journalstatus.FEILREGISTRERT) {
-      flyttJournalpost(sak)
-    } else {
+    if (skalFeilregistrere === JaNei.JA && journalpost.journalstatus !== Journalstatus.FEILREGISTRERT) {
       apiFeilregistrerSakstilknytning(journalpost.journalpostId, () => {
         flyttJournalpost(sak)
       })
+    } else {
+      flyttJournalpost(sak)
     }
   }
 
@@ -98,13 +101,21 @@ export const KnyttTilAnnenSak = ({
       }
     )
 
-  if (isSuccess(knyttTilAnnenSakStatus) && isSuccess(feilregSakstilknytningStatus)) {
+  if (
+    isSuccess(knyttTilAnnenSakStatus) &&
+    (isSuccess(feilregSakstilknytningStatus) || skalFeilregistrere === JaNei.NEI)
+  ) {
     return mapSuccess(annenSakStatus, (sak) => (
       <>
-        <Alert variant="success">
-          Journalposten ble feilregistrert og flyttet til annen sak (sakid={sak.id}, fnr={sak.ident}, saktype=
-          {sak.sakType})
-        </Alert>
+        {skalFeilregistrere === JaNei.JA ? (
+          <Alert variant="success">
+            Journalposten ble feilregistrert og flyttet til sak {sak.id} ({formaterSakstype(sak.sakType)})
+          </Alert>
+        ) : (
+          <Alert variant="success">
+            Journalposten ble knyttet til sak {sak.id} ({formaterSakstype(sak.sakType)})
+          </Alert>
+        )}
 
         <br />
 
@@ -183,10 +194,15 @@ export const KnyttTilAnnenSak = ({
             {isSuccess(sakStatus) && <SakOverfoeringDetailjer fra={sakStatus.data.sak} til={annenSak} />}
             <br />
 
-            <Alert variant="warning" inline>
-              OBS! Journalposten du flytter vil automatisk bli markert som feilregistrert, slik at kun den nye blir
-              gjeldende.
-            </Alert>
+            <RadioGroup
+              legend="Feilregistrer den gamle journalposten?"
+              description='Hvis "Ja" vil journalposten du flytter vil automatisk bli markert som feilregistrert, slik at kun den nye blir gjeldende.'
+              onChange={(verdi) => setSkalFeilregistrere(verdi)}
+            >
+              <Radio value={JaNei.JA}>Ja, feilregistrer</Radio>
+              <Radio value={JaNei.NEI}>Nei, behold begge</Radio>
+            </RadioGroup>
+
             <br />
 
             {mapFailure(knyttTilAnnenSakStatus, (error) => (
@@ -204,6 +220,7 @@ export const KnyttTilAnnenSak = ({
               <Button
                 onClick={() => flyttOgFeilregistrerJournalpost(annenSak)}
                 loading={isPending(feilregSakstilknytningStatus) || isPending(knyttTilAnnenSakStatus)}
+                disabled={skalFeilregistrere === undefined}
               >
                 Flytt journalpost til sak {annenSak.id}
               </Button>

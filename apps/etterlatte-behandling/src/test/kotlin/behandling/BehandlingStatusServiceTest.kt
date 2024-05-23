@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -39,6 +40,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.oppgave.PaaVent
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.AfterEach
@@ -391,7 +393,7 @@ internal class BehandlingStatusServiceTest {
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId, feilutbetalingValg)
         every { oppgaveService.hentOppgaverForSak(sakId) } returns listOf(oppgave(oppgaveId, sakId))
-        every { oppgaveService.endrePaaVent(oppgaveId, any(), any()) } returns oppgave(oppgaveId, sakId, Status.PAA_VENT)
+        every { oppgaveService.endrePaaVent(any()) } returns oppgave(oppgaveId, sakId, Status.PAA_VENT)
         every { grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId) } just runs
 
         inTransaction {
@@ -404,7 +406,7 @@ internal class BehandlingStatusServiceTest {
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
             oppgaveService.hentOppgaverForSak(sakId)
-            oppgaveService.endrePaaVent(oppgaveId, "Venter på oppdatert kravgrunnlag", true)
+            oppgaveService.endrePaaVent(PaaVent(oppgaveId, PaaVentAarsak.KRAVGRUNNLAG_SPERRET, "Venter på oppdatert kravgrunnlag", true))
             grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
         }
     }

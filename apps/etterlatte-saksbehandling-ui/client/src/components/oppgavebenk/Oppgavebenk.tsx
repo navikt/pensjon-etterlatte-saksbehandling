@@ -3,10 +3,7 @@ import { Container } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { saksbehandlereIEnhetApi } from '~shared/api/oppgaver'
-import { isSuccess } from '~shared/api/apiUtils'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { hentAlleStoettedeRevurderinger } from '~shared/api/revurdering'
-import { RevurderingsaarsakerBySakstype, RevurderingsaarsakerDefault } from '~shared/types/Revurderingaarsak'
 import {
   hentValgFraLocalStorage,
   leggValgILocalstorage,
@@ -35,13 +32,7 @@ export const Oppgavebenk = () => {
   const [, hentSaksbehandlereIEnheterFetch] = useApiCall(saksbehandlereIEnhetApi)
   const [saksbehandlereIEnheter, setSaksbehandlereIEnheter] = useState<Array<Saksbehandler>>([])
 
-  const [hentRevurderingsaarsakerStatus, hentRevurderingsaarsaker] = useApiCall(hentAlleStoettedeRevurderinger)
-  const [revurderingsaarsaker, setRevurderingsaarsaker] = useState<RevurderingsaarsakerBySakstype>(
-    new RevurderingsaarsakerDefault()
-  )
-
   useEffect(() => {
-    hentRevurderingsaarsaker({})
     if (!!innloggetSaksbehandler.enheter.length) {
       hentSaksbehandlereIEnheterFetch({ enheter: innloggetSaksbehandler.enheter }, (saksbehandlere) => {
         setSaksbehandlereIEnheter(saksbehandlere)
@@ -50,33 +41,15 @@ export const Oppgavebenk = () => {
   }, [])
 
   useEffect(() => {
-    if (isSuccess(hentRevurderingsaarsakerStatus)) {
-      setRevurderingsaarsaker(hentRevurderingsaarsakerStatus.data)
-    }
-  }, [hentRevurderingsaarsakerStatus])
-
-  useEffect(() => {
     leggValgILocalstorage(oppgavelisteValg)
   }, [oppgavelisteValg])
 
   const rendreValgtOppgaveliste = (): ReactNode => {
     switch (oppgavelisteValg) {
       case OppgavelisteValg.OPPGAVELISTA:
-        return (
-          <Oppgavelista
-            key={OppgavelisteValg.OPPGAVELISTA}
-            saksbehandlereIEnhet={saksbehandlereIEnheter}
-            revurderingsaarsaker={revurderingsaarsaker}
-          />
-        )
+        return <Oppgavelista key={OppgavelisteValg.OPPGAVELISTA} saksbehandlereIEnhet={saksbehandlereIEnheter} />
       case OppgavelisteValg.MIN_OPPGAVELISTE:
-        return (
-          <MinOppgaveliste
-            key={OppgavelisteValg.MIN_OPPGAVELISTE}
-            saksbehandlereIEnhet={saksbehandlereIEnheter}
-            revurderingsaarsaker={revurderingsaarsaker}
-          />
-        )
+        return <MinOppgaveliste key={OppgavelisteValg.MIN_OPPGAVELISTE} saksbehandlereIEnhet={saksbehandlereIEnheter} />
       case OppgavelisteValg.GOSYS_OPPGAVER:
         return <GosysOppgaveliste key={OppgavelisteValg.GOSYS_OPPGAVER} saksbehandlereIEnhet={saksbehandlereIEnheter} />
     }

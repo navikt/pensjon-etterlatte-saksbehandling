@@ -11,8 +11,8 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.pensjon.brevbaker.api.model.LetterMarkup
 import no.nav.pensjon.brevbaker.api.model.LetterMetadata
-import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import kotlin.time.DurationUnit
@@ -59,13 +59,13 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
             throw BrevbakerException("Feil ved kall til brevbaker", ex)
         }
 
-    suspend fun genererJSON(brevRequest: BrevbakerRequest): RenderedJsonLetter =
+    suspend fun genererJSON(brevRequest: BrevbakerRequest): LetterMarkup =
         try {
             measureTimedValue {
                 client.post("$apiUrl/etterlatte/json") {
                     contentType(ContentType.Application.Json)
                     setBody(brevRequest.toJsonNode())
-                }.body<RenderedJsonLetter>()
+                }.body<LetterMarkup>()
             }.let { (result, duration) ->
                 logger.info("Fullført brevbaker JSON OK (${duration.toString(DurationUnit.SECONDS, 2)})")
                 result
@@ -81,7 +81,5 @@ class BrevbakerException(msg: String, cause: Throwable) : Exception(msg, cause)
 class BrevbakerPdfResponse(val base64pdf: String, val letterMetadata: LetterMetadata)
 
 class BrevbakerHTMLResponse(val html: Map<String, String>, val letterMetadata: LetterMetadata)
-
-class BrevbakerJSONResponse(val json: RenderedJsonLetter, val letterMetadata: LetterMetadata)
 
 private fun BrevbakerRequest.toJsonNode(): JsonNode = objectMapper.readTree(toJson())

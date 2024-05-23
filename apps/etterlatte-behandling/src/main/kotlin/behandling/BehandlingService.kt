@@ -18,6 +18,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -156,6 +157,13 @@ interface BehandlingService {
     )
 
     fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning?
+
+    fun lagreOpphoerFom(
+        behandlingId: UUID,
+        opphoerFraOgMed: YearMonth,
+    )
+
+    fun hentAapenRegulering(sakId: Long): UUID?
 }
 
 internal class BehandlingServiceImpl(
@@ -286,6 +294,10 @@ internal class BehandlingServiceImpl(
         val behandling =
             requireNotNull(hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
 
+        if (request.dato.year !in (0..9999) || request.begrunnelse == null) {
+            return false
+        }
+
         return when (behandling.type) {
             BehandlingType.REVURDERING -> erGyldigVirkningstidspunktRevurdering(request, behandling)
             BehandlingType.FØRSTEGANGSBEHANDLING -> erGyldigVirkningstidspunktFoerstegangsbehandling(request, behandling, brukerTokenInfo)
@@ -293,15 +305,43 @@ internal class BehandlingServiceImpl(
         }
     }
 
+    /*
+     * Gyldig virkningstidspunkt for førstegangsbehandling er basert på dødsdato opp mot når bruker har krav
+     * på å søke.
+     * Kravdato er når søknad mottatt. Med unntak av utlandssak hvor egen kravdato kan være eksplisitt angitt.
+     *
+     * Virk er da gyldig hvis:
+     * 1. Saktype BP, den er etter dødsdato og den er samme dag eller etter 3 år før kravdato
+     * 2. Saktype OMS, den er etter dødsdato og den etter 3 år før kravdato
+     * 3. Den er etter dødsdato og
+     *
+     * UNNTAK:
+     * 1. I saker med ukjent avdød vil dødsdato mangle og det vil derfor ikke være mulig å validere.
+     *   (nb. når denne kommentaren er skrevet så er det uavklart om ukjent avdød skal støttes kun for migrerte saker fra Pesys).
+     * 2. Saker som migreres/gjenopprettes fra Pesys. Det vil ikke være nødvendig å validere virk opp mot rettighet
+     *   da bruker allerede har en innvilgelse i Pesys.
+     *
+     * Basert på lovverk § 22-12. og § 22-13.
+     * https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_8-2#%C2%A722-12
+     * https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_8-2#%C2%A722-13
+     */
     private suspend fun erGyldigVirkningstidspunktFoerstegangsbehandling(
         request: VirkningstidspunktRequest,
         behandling: Behandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
+        if (behandling.kilde in listOf(Vedtaksloesning.PESYS, Vedtaksloesning.GJENOPPRETTA)) {
+            return true
+        }
+
         val virkningstidspunkt = request.dato
-        val harGyldigFormat = virkningstidspunkt.year in (0..9999) && request.begrunnelse != null
         val doedsdato = hentDoedsdato(behandling.id, brukerTokenInfo)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
+
+        if (doedsdato == null) {
+            // Mangler dødsfall når avdød er ukjent
+            return true
+        }
 
         // For BP er makstidspunkt 3 år - dette gjelder også unntaksvis for OMS
         var makstidspunktFoerSoeknad = soeknadMottatt.minusYears(3)
@@ -318,35 +358,29 @@ internal class BehandlingServiceImpl(
             makstidspunktFoerSoeknad = YearMonth.from(kravdato.minusYears(3))
         }
 
-        val datoForVirkningstidspunktErGydligInnenforMaksBegrensninger =
-            when {
-                doedsdato == null -> true // Mangler dødsfall når avdød er ukjent
-                doedsdato.isBefore(makstidspunktFoerSoeknad) -> {
-                    when (behandling.sak.sakType) {
-                        SakType.OMSTILLINGSSTOENAD ->
-                            // For omstillingsstønad vil virkningstidspunktet tidligst være mnd etter makstidspunkt
-                            virkningstidspunkt.isAfter(makstidspunktFoerSoeknad)
-                        SakType.BARNEPENSJON ->
-                            // For barnepensjon vil virkningstidspunktet tidligst være samme mnd som makstidspunkt
-                            virkningstidspunkt.isAfter(makstidspunktFoerSoeknad) || virkningstidspunkt == makstidspunktFoerSoeknad
-                    }
-                }
-                else -> virkningstidspunkt.isAfter(doedsdato)
+        val virkErEtterDoedsdato = virkningstidspunkt.isAfter(doedsdato)
+        val virkErEtterMakstidspunktForSoeknad =
+            when (behandling.sak.sakType) {
+                SakType.OMSTILLINGSSTOENAD ->
+                    // For omstillingsstønad vil virkningstidspunktet tidligst være mnd etter makstidspunkt
+                    virkningstidspunkt.isAfter(makstidspunktFoerSoeknad)
+                SakType.BARNEPENSJON ->
+                    // For barnepensjon vil virkningstidspunktet tidligst være samme mnd som makstidspunkt
+                    virkningstidspunkt.isAfter(makstidspunktFoerSoeknad) || virkningstidspunkt == makstidspunktFoerSoeknad
             }
-
-        return harGyldigFormat && datoForVirkningstidspunktErGydligInnenforMaksBegrensninger
+        return virkErEtterDoedsdato && virkErEtterMakstidspunktForSoeknad
     }
 
+    /*
+     * Virkningstidspunkt for revurdering kan tidligst være første virkningstidspunkt for saken
+     */
     private fun erGyldigVirkningstidspunktRevurdering(
         request: VirkningstidspunktRequest,
         behandling: Behandling,
     ): Boolean {
         val virkningstidspunkt = request.dato
-        val harGyldigFormat = virkningstidspunkt.year in (0..9999) && request.begrunnelse != null
         val foersteVirkDato = hentFoersteVirk(behandling.sak.id)
-
-        // Virkningstidspunkt for revurdering kan tidligst være første virkningstidspunkt for saken
-        return harGyldigFormat && virkningstidspunkt.isAfter(foersteVirkDato) || virkningstidspunkt == foersteVirkDato
+        return virkningstidspunkt.isAfter(foersteVirkDato) || virkningstidspunkt == foersteVirkDato
     }
 
     private suspend fun hentDoedsdato(
@@ -432,6 +466,13 @@ internal class BehandlingServiceImpl(
                 .maxByOrNull { it.behandlingOpprettet }
 
         return sisteIkkeAvbrutteBehandling?.utlandstilknytning
+    }
+
+    override fun lagreOpphoerFom(
+        behandlingId: UUID,
+        opphoerFraOgMed: YearMonth,
+    ) {
+        behandlingDao.lagreOpphoerFom(behandlingId, opphoerFraOgMed)
     }
 
     data class BehandlingMedData(
@@ -598,6 +639,10 @@ internal class BehandlingServiceImpl(
                 behandlingDao.lagreUtlandstilknytning(behandlingId, utlandstilknytning)
                 behandlingDao.lagreStatus(it)
             }
+    }
+
+    override fun hentAapenRegulering(sakId: Long): UUID? {
+        return behandlingDao.hentAlleRevurderingerISakMedAarsak(sakId, Revurderingaarsak.REGULERING).singleOrNull()?.id
     }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =

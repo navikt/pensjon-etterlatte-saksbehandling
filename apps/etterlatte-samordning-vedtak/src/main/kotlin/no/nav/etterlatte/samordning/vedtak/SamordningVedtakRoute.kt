@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.MaskinportenScopeAuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
-import java.time.LocalDate
+import no.nav.etterlatte.libs.ktor.route.dato
 
 fun Route.samordningVedtakRoute(
     samordningVedtakService: SamordningVedtakService,
@@ -42,7 +42,7 @@ fun Route.samordningVedtakRoute(
                         ),
                     )
                 } catch (e: IllegalArgumentException) {
-                    call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }
 
             call.respond(samordningVedtakDto)
@@ -50,8 +50,8 @@ fun Route.samordningVedtakRoute(
 
         get {
             val fomDato =
-                call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                call.dato("fomDato")
+                    ?: call.dato("virkFom")
                     ?: throw ManglerFomDatoException()
 
             val fnr = call.fnr
@@ -65,13 +65,14 @@ fun Route.samordningVedtakRoute(
                     samordningVedtakService.hentVedtaksliste(
                         fomDato = fomDato,
                         fnr = Folkeregisteridentifikator.of(fnr),
-                        MaskinportenTpContext(
-                            tpnr = Tjenestepensjonnummer(tpnummer),
-                            organisasjonsnr = call.orgNummer,
-                        ),
+                        context =
+                            MaskinportenTpContext(
+                                tpnr = Tjenestepensjonnummer(tpnummer),
+                                organisasjonsnr = call.orgNummer,
+                            ),
                     )
                 } catch (e: IllegalArgumentException) {
-                    call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }
 
             call.respond(samordningVedtakDtos)
@@ -90,8 +91,8 @@ fun Route.samordningVedtakRoute(
 
         get {
             val fomDato =
-                call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                call.dato("fomDato")
+                    ?: call.dato("virkFom")
                     ?: throw ManglerFomDatoException()
 
             val fnr = call.fnr
@@ -101,13 +102,35 @@ fun Route.samordningVedtakRoute(
                     samordningVedtakService.hentVedtaksliste(
                         fomDato = fomDato,
                         fnr = Folkeregisteridentifikator.of(fnr),
-                        PensjonContext,
+                        context = PensjonContext,
                     )
                 } catch (e: IllegalArgumentException) {
-                    call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }
 
             call.respond(samordningVedtakDtos)
+        }
+
+        get("/har-loepende-oms") {
+            val paaDato = call.dato("paaDato") ?: throw ManglerPaaDatoException()
+            val fnr = call.fnr
+
+            val harLoependeOmsPaaDato =
+                try {
+                    samordningVedtakService.harLoependeOmstillingsstoenadPaaDato(
+                        dato = paaDato,
+                        fnr = Folkeregisteridentifikator.of(fnr),
+                        context = PensjonContext,
+                    )
+                } catch (e: IllegalArgumentException) {
+                    return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                }
+
+            call.respond(
+                mapOf(
+                    "omstillingsstoenad" to harLoependeOmsPaaDato,
+                ),
+            )
         }
 
         get("/ping") {

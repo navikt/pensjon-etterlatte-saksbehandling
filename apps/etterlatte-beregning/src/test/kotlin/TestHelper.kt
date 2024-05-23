@@ -47,6 +47,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.sanksjon.LagreSanksjon
 import no.nav.etterlatte.sanksjon.Sanksjon
+import no.nav.etterlatte.sanksjon.SanksjonType
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
@@ -316,6 +317,7 @@ fun behandling(
     revurderingInfo = null,
     kilde = Vedtaksloesning.GJENNY,
     sendeBrev = true,
+    opphoerFraOgMed = null,
 )
 
 fun BeregningsMetode.toGrunnlag() = BeregningsMetodeBeregningsgrunnlag(this, null)
@@ -331,6 +333,7 @@ fun sanksjon(
     id = id,
     behandlingId = behandlingId,
     sakId = sakId,
+    type = SanksjonType.STANS,
     fom = fom,
     tom = tom,
     opprettet = Grunnlagsopplysning.Saksbehandler.create("A12345"),
@@ -347,6 +350,7 @@ fun lagreSanksjon(
 ) = LagreSanksjon(
     id = id,
     sakId = sakId,
+    type = SanksjonType.STANS,
     fom = fom,
     tom = tom,
     beskrivelse = beskrivelse,

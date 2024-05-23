@@ -295,5 +295,5 @@ export const Unntaksvilkaar = styled.div`
 
 export const VilkaarVurdertInformasjon = styled.div`
   margin-bottom: 1.5em;
-  color: var(--navds-global-color-gray-700);
+  color: var(--a-gray-700);
 `

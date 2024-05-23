@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.klage
 
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.klienter.KlageKlient
@@ -120,6 +121,7 @@ class KlageServiceImpl(
     private val klageDao: KlageDao,
     private val sakDao: SakDao,
     private val hendelseDao: HendelseDao,
+    private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
     private val klageKlient: KlageKlient,
     private val klageHendelser: IKlageHendelserService,
@@ -150,9 +152,9 @@ class KlageServiceImpl(
         )
 
         opprettKlageHendelse(klage, KlageHendelseType.OPPRETTET, saksbehandler)
-
+        val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(sakId)?.type
         klageHendelser.sendKlageHendelseRapids(
-            StatistikkKlage(klage.id, klage, Tidspunkt.now()),
+            StatistikkKlage(klage.id, klage, Tidspunkt.now(), utlandstilknytningType),
             KlageHendelseType.OPPRETTET,
         )
 
@@ -334,9 +336,9 @@ class KlageServiceImpl(
             saksbehandler = saksbehandler,
         )
         opprettKlageHendelse(klageMedResultat, KlageHendelseType.FERDIGSTILT, saksbehandler)
-
+        val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(klage.sak.id)?.type
         klageHendelser.sendKlageHendelseRapids(
-            StatistikkKlage(klageMedResultat.id, klageMedResultat, Tidspunkt.now(), saksbehandler.ident),
+            StatistikkKlage(klageMedResultat.id, klageMedResultat, Tidspunkt.now(), utlandstilknytningType, saksbehandler.ident),
             KlageHendelseType.FERDIGSTILT,
         )
         klageBrevService.slettUferdigeBrev(klageMedResultat.id, saksbehandler)
@@ -371,8 +373,10 @@ class KlageServiceImpl(
             )
         }
 
+        val utlandstilknytningType = null // TODO
+
         klageHendelser.sendKlageHendelseRapids(
-            StatistikkKlage(avbruttKlage.id, avbruttKlage, Tidspunkt.now(), saksbehandler.ident),
+            StatistikkKlage(avbruttKlage.id, avbruttKlage, Tidspunkt.now(), utlandstilknytningType, saksbehandler.ident),
             KlageHendelseType.AVBRUTT,
         )
     }

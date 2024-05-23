@@ -31,7 +31,6 @@ data class TilbakekrevingVurdering(
     val rentevurdering: String?,
     val vedtak: String?,
     val vurderesForPaatale: String?,
-    val hjemmel: TilbakekrevingHjemmel?,
 )
 
 enum class TilbakekrevingVarsel {
@@ -193,12 +192,18 @@ enum class TilbakekrevingSkyld {
     SKYLDDELING,
 }
 
-enum class TilbakekrevingResultat {
-    DELVIS_TILBAKEKREV,
-    FEILREGISTRERT,
-    FORELDET,
-    FULL_TILBAKEKREV,
-    INGEN_TILBAKEKREV,
+enum class TilbakekrevingResultat(private val gradAvTilbakekreving: Int) {
+    FEILREGISTRERT(0),
+    FORELDET(1),
+    INGEN_TILBAKEKREV(2),
+    DELVIS_TILBAKEKREV(3),
+    FULL_TILBAKEKREV(4),
+    ;
+
+    companion object {
+        fun hoyesteGradAvTilbakekreving(perioder: List<TilbakekrevingResultat>): TilbakekrevingResultat? =
+            perioder.maxByOrNull { it.gradAvTilbakekreving }
+    }
 }
 
 /*

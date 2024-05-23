@@ -431,9 +431,10 @@ class BrevRepository(private val ds: DataSource) {
             INNER JOIN innhold i on b.id = i.brev_id
             WHERE b.id = ?
             AND h.id IN (
-                SELECT DISTINCT ON (brev_id) id
-                FROM hendelse
-                ORDER  BY brev_id, opprettet DESC
+                SELECT DISTINCT ON (h2.brev_id) h2.id
+                FROM hendelse h2
+                WHERE h2.brev_id = b.id
+                ORDER BY h2.brev_id, h2.opprettet DESC
             )
         """
 
@@ -449,9 +450,10 @@ class BrevRepository(private val ds: DataSource) {
             AND b.brevtype = ?
             AND h.status_id != 'SLETTET'
             AND h.id IN (
-                SELECT DISTINCT ON (brev_id) id
-                FROM hendelse
-                ORDER BY brev_id, opprettet DESC
+                SELECT DISTINCT ON (h2.brev_id) h2.id
+                FROM hendelse h2
+                WHERE h2.brev_id = b.id
+                ORDER BY h2.brev_id, h2.opprettet DESC
             )
         """
 
@@ -466,9 +468,10 @@ class BrevRepository(private val ds: DataSource) {
             WHERE b.sak_id = ?
             AND h.status_id != 'SLETTET'
             AND h.id IN (
-                SELECT DISTINCT ON (brev_id) id
-                FROM hendelse
-                ORDER BY brev_id, opprettet DESC
+                SELECT DISTINCT ON (h2.brev_id) h2.id
+                FROM hendelse h2
+                WHERE h2.brev_id = b.id
+                ORDER BY h2.brev_id, h2.opprettet DESC
             )
         """
 

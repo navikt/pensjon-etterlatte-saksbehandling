@@ -20,8 +20,8 @@ internal class SjekkOmOverstyrtBeregningRiverTest {
 
     @Test
     fun `skal feile om sak har aapen behandling med overstyrt beregning`() {
-        val tilbakestilgBehandling = UUID.fromString("63ba95c8-119b-465f-81fa-0a5316451db4")
-        every { beregningService.hentOverstyrt(tilbakestilgBehandling) } returns
+        val behandlingViOmregnerFra = UUID.fromString("63ba95c8-119b-465f-81fa-0a5316451db4")
+        every { beregningService.hentOverstyrt(behandlingViOmregnerFra) } returns
             mockk<HttpResponse>().also {
                 every { it.status } returns HttpStatusCode.OK
             }
@@ -35,8 +35,8 @@ internal class SjekkOmOverstyrtBeregningRiverTest {
 
     @Test
     fun `skal feile om ikke faar bekreftet at aapen behandling ikke har overstyrt beregning`() {
-        val tilbakestilgBehandling = UUID.fromString("63ba95c8-119b-465f-81fa-0a5316451db4")
-        every { beregningService.hentOverstyrt(tilbakestilgBehandling) } returns
+        val behandlingViOmregnerFra = UUID.fromString("63ba95c8-119b-465f-81fa-0a5316451db4")
+        every { beregningService.hentOverstyrt(behandlingViOmregnerFra) } returns
             mockk<HttpResponse>().also {
                 every { it.status } returns HttpStatusCode.BadRequest
             }
@@ -50,8 +50,8 @@ internal class SjekkOmOverstyrtBeregningRiverTest {
 
     @Test
     fun `skal fortsette om sak ikke har aapen behandling med overstyrt beregning`() {
-        val tilbakestilgBehandling = UUID.fromString("63ba95c8-119b-465f-81fa-0a5316451db4")
-        every { beregningService.hentOverstyrt(tilbakestilgBehandling) } returns
+        val behandlingViOmregnerFra = UUID.fromString("63ba95c8-119b-465f-81fa-0a5316451db4")
+        every { beregningService.hentOverstyrt(behandlingViOmregnerFra) } returns
             mockk<HttpResponse>().also {
                 every { it.status } returns HttpStatusCode.NoContent
             }

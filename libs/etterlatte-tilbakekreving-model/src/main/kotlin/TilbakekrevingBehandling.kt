@@ -30,6 +30,8 @@ data class TilbakekrevingBehandling(
             else -> false
         }
 
+    fun underBehandlingEllerFattetVedtak() = underBehandling() || status == TilbakekrevingStatus.FATTET_VEDTAK
+
     companion object {
         fun ny(
             kravgrunnlag: Kravgrunnlag,
@@ -56,7 +58,9 @@ enum class TilbakekrevingStatus {
     VALIDERT,
     FATTET_VEDTAK,
     ATTESTERT,
-    UNDERKJENT, ;
+    UNDERKJENT,
+    AVBRUTT,
+    ;
 
     fun kanEndres(): Boolean {
         return this in listOf(OPPRETTET, UNDER_ARBEID, VALIDERT, UNDERKJENT)

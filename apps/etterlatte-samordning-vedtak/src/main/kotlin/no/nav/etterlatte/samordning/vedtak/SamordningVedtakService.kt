@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.YearMonth
 
 class SamordningVedtakService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
@@ -43,6 +44,8 @@ class SamordningVedtakService(
 
     suspend fun hentVedtaksliste(
         fomDato: LocalDate,
+        tomDato: LocalDate? = null,
+        sakType: SakType = SakType.OMSTILLINGSSTOENAD,
         fnr: Folkeregisteridentifikator,
         context: CallerContext,
     ): List<SamordningVedtakDto> {
@@ -52,12 +55,26 @@ class SamordningVedtakService(
             throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpytelse")
         }
 
+        val tilOgMed = tomDato?.let { YearMonth.of(tomDato.year, tomDato.month) }
+
         return vedtaksvurderingKlient.hentVedtaksliste(
+            sakType = sakType,
             fomDato = fomDato,
             fnr = fnr.value,
             callerContext = context,
         )
+            .filter { tilOgMed?.let { t -> it.virkningstidspunkt <= t } ?: true }
             .map { it.mapSamordningsvedtak() }
+    }
+
+    suspend fun harLoependeOmstillingsstoenadPaaDato(
+        dato: LocalDate,
+        fnr: Folkeregisteridentifikator,
+        context: CallerContext,
+    ): Boolean {
+        return hentVedtaksliste(fomDato = dato, fnr = fnr, context = context)
+            .flatMap { it.perioder }
+            .any { dato >= it.fom && (it.tom == null || !it.tom.isBefore(dato)) }
     }
 
     private fun VedtakSamordningDto.mapSamordningsvedtak(): SamordningVedtakDto {
@@ -93,6 +110,7 @@ class SamordningVedtakService(
         return when (this) {
             Revurderingaarsak.INNTEKTSENDRING -> SamordningVedtakAarsak.INNTEKT
             Revurderingaarsak.DOEDSFALL -> SamordningVedtakAarsak.DOEDSFALL
+            Revurderingaarsak.REGULERING -> SamordningVedtakAarsak.REGULERING
             else -> SamordningVedtakAarsak.ANNET
         }.name
     }

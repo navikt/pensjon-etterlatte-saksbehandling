@@ -38,6 +38,7 @@ import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.libs.database.toListPassesRsToBlock
 import java.sql.ResultSet
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 class BehandlingDao(
@@ -180,8 +181,8 @@ class BehandlingDao(
                         INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                         soeknad_mottatt_dato, virkningstidspunkt, utlandstilknytning, bodd_eller_arbeidet_utlandet, 
                         revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, begrunnelse, relatert_behandling,
-                        sende_brev)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        sende_brev, opphoer_fom)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
 
@@ -204,6 +205,7 @@ class BehandlingDao(
                     stmt.setString(16, begrunnelse)
                     stmt.setString(17, relatertBehandlingId)
                     stmt.setBoolean(18, sendeBrev)
+                    stmt.setString(19, objectMapper.writeValueAsString(opphoerFraOgMed))
                 }
                 require(stmt.executeUpdate() == 1)
             }
@@ -321,6 +323,18 @@ class BehandlingDao(
                 statement.setObject(2, behandlingId)
                 statement.executeUpdate()
             }
+        }
+    }
+
+    fun lagreOpphoerFom(
+        behandlingId: UUID,
+        opphoerFraOgMed: YearMonth,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement = prepareStatement("UPDATE behandling SET opphoer_fom = ? where id = ?")
+            statement.setString(1, objectMapper.writeValueAsString(opphoerFraOgMed))
+            statement.setObject(2, behandlingId)
+            statement.executeUpdate()
         }
     }
 }

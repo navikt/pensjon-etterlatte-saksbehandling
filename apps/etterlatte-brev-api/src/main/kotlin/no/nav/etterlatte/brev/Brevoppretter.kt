@@ -9,7 +9,6 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevInnhold
@@ -19,11 +18,9 @@ import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.brev.model.tomMottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -183,16 +180,15 @@ class Brevoppretter(
         personerISak: PersonerISak,
     ): Mottaker =
         with(personerISak) {
-            when (verge) {
-                is Vergemaal -> verge.toMottaker()
+            val mottakerFnr: String =
+                when (verge) {
+                    is Vergemaal -> verge.foedselsnummer.value
 
-                else -> {
-                    val mottakerFnr =
+                    else ->
                         innsender?.fnr?.value?.takeIf { Folkeregisteridentifikator.isValid(it) }
                             ?: soeker.fnr.value
-                    adresseService.hentMottakerAdresse(sakType, mottakerFnr)
                 }
-            }
+            adresseService.hentMottakerAdresse(sakType, mottakerFnr)
         }
 }
 
@@ -201,32 +197,6 @@ private data class OpprettBrevRequest(
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
 )
-
-fun Vergemaal.toMottaker(): Mottaker {
-    if (mottaker.adresse != null) {
-        return Mottaker(
-            navn = if (mottaker.navn.isNullOrBlank()) "N/A" else mottaker.navn!!,
-            foedselsnummer = mottaker.foedselsnummer?.let { MottakerFoedselsnummer(it.value) },
-            orgnummer = null,
-            adresse =
-                with(mottaker.adresse!!) {
-                    Adresse(
-                        adresseType,
-                        adresselinje1,
-                        adresselinje2,
-                        adresselinje3,
-                        postnummer,
-                        poststed,
-                        landkode,
-                        land,
-                    )
-                },
-        )
-    }
-
-    return tomMottaker(Folkeregisteridentifikator.of(mottaker.foedselsnummer!!.value))
-        .copy(navn = if (mottaker.navn.isNullOrBlank()) "N/A" else mottaker.navn!!)
-}
 
 class KanIkkeOppretteVedtaksbrev(behandlingId: UUID) : UgyldigForespoerselException(
     code = "KAN_IKKE_ENDRE_VEDTAKSBREV",

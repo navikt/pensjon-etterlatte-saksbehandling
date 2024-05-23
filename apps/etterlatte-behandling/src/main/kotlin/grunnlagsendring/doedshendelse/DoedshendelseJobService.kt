@@ -77,19 +77,21 @@ class DoedshendelseJobService(
             doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
                 inTransaction {
                     logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
-                    try {
-                        haandterDoedshendelse(doedshendelse)
-                    } catch (e: Exception) {
-                        logger.error("Kunne ikke håndtere dødshendelse for sak ${doedshendelse.sakId}", e)
-                        throw e
-                    }
+                    haandterDoedshendelse(doedshendelse)
                 }
             }
         }
     }
 
     private fun haandterDoedshendelse(doedshendelse: DoedshendelseInternal) {
-        val kontrollpunkter = doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
+        val kontrollpunkter =
+            try {
+                doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
+            } catch (e: Exception) {
+                val sak = doedshendelse.sakId?.toString() ?: "sak mangler"
+                logger.error("Kunne ikke identifisere kontrollpunkter for sak $sak", e)
+                throw e
+            }
 
         when (kontrollpunkter.any { it.avbryt }) {
             true -> {

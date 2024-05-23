@@ -5,7 +5,6 @@ import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formatte
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/components/Tags'
 import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
-import { RevurderingsaarsakerDefault } from '~shared/types/Revurderingaarsak'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
 import { HandlingerForOppgave } from '~components/oppgavebenk/components/HandlingerForOppgave'
@@ -94,9 +93,7 @@ export const ForenkletOppgaverTable = ({
               />
             </Table.DataCell>
             <Table.DataCell>
-              {oppgave.type !== Oppgavetype.VURDER_KONSEKVENS && (
-                <HandlingerForOppgave oppgave={oppgave} revurderingsaarsaker={new RevurderingsaarsakerDefault()} />
-              )}
+              {oppgave.type !== Oppgavetype.VURDER_KONSEKVENS && <HandlingerForOppgave oppgave={oppgave} />}
             </Table.DataCell>
           </Table.Row>
         ))}

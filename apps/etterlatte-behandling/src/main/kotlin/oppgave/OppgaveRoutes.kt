@@ -8,7 +8,6 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
-import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
@@ -16,7 +15,6 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.oppgave.EndrePaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.FerdigstillRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
@@ -155,6 +153,15 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 call.respond(oppgave)
             }
 
+            get("endringer") {
+                val endringer =
+                    inTransaction {
+                        service.hentEndringerOppgave(oppgaveId)
+                    }
+
+                call.respond(endringer)
+            }
+
             put("ferdigstill") {
                 kunSkrivetilgang {
                     val merknad = call.receive<FerdigstillRequest>().merknad
@@ -168,10 +175,11 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             post("sett-paa-vent") {
                 kunSkrivetilgang {
                     val settPaaVentRequest = call.receive<EndrePaaVentRequest>()
-                    inTransaction {
-                        service.endrePaaVent(oppgaveId, settPaaVentRequest.merknad, settPaaVentRequest.paaVent)
-                    }
-                    call.respond(HttpStatusCode.OK)
+                    val oppgave =
+                        inTransaction {
+                            service.endrePaaVent(settPaaVentRequest.toDomain(oppgaveId))
+                        }
+                    call.respond(oppgave)
                 }
             }
 
@@ -206,16 +214,6 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 kunSkrivetilgang {
                     val redigerFrist = call.receive<RedigerFristRequest>()
                     inTransaction { service.redigerFrist(oppgaveId, redigerFrist.frist) }
-                    call.respond(HttpStatusCode.OK)
-                }
-            }
-            patch("merknad") {
-                kunSkrivetilgang {
-                    val merknad = call.receive<EndrePaaVentRequest>()
-                    inTransaction {
-                        service.oppdaterStatusOgMerknad(oppgaveId, merknad.merknad, Status.UNDER_BEHANDLING)
-                        service.fjernSaksbehandler(oppgaveId)
-                    }
                     call.respond(HttpStatusCode.OK)
                 }
             }

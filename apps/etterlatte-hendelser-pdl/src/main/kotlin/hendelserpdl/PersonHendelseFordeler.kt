@@ -11,6 +11,7 @@ import no.nav.etterlatte.hendelserpdl.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
@@ -55,7 +56,20 @@ class PersonHendelseFordeler(
 
         val ident =
             hendelse.personidenter.firstOrNull()?.let {
-                pdlTjenesterKlient.hentPdlIdentifikator(it)
+                try {
+                    pdlTjenesterKlient.hentPdlIdentifikator(it)
+                } catch (e: FantIkkePersonException) {
+                    logger.warn(
+                        "Mottok en hendelse med en personident vi ikke fant ved oppslag tilbake i PDL. " +
+                            "HendelseId=${hendelse.hendelseId}, ved oppslag mot ${it.maskerFnr()} " +
+                            "(se sikkerlogg for ident(er))",
+                    )
+                    sikkerLogg.warn(
+                        "Mottok en hendelse med en personident vi ikke fant ved oppslag tilbake i PDL. " +
+                            "HendelseId=${hendelse.hendelseId}, identifikator(er): ${hendelse.personidenter}",
+                    )
+                    null
+                }
             }
 
         try {

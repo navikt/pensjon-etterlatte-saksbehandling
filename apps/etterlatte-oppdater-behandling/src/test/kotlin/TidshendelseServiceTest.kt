@@ -8,11 +8,11 @@ import io.mockk.verify
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.AO_BP20
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_3AAR
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -21,17 +21,14 @@ import java.time.YearMonth
 import java.util.UUID
 
 class TidshendelseServiceTest {
-    private val featureToggleService = DummyFeatureToggleService()
     private val behandlingService = mockk<BehandlingService>()
-    private val tidshendelseService = TidshendelseService(behandlingService, featureToggleService)
+    private val tidshendelseService = TidshendelseService(behandlingService)
     private val opprettetOppgaveId = UUID.randomUUID()
     private val forrigeBehandlingId = UUID.randomUUID()
     private val behandlingId = UUID.randomUUID()
 
     @BeforeEach
     fun setUp() {
-        featureToggleService.settBryter(TidshendelserFeatureToggle.OpprettOppgaveForVarselbrevAktivitetsplikt, true)
-
         every { behandlingService.opprettOppgave(any(), any(), any(), any(), any()) } returns opprettetOppgaveId
     }
 
@@ -83,7 +80,7 @@ class TidshendelseServiceTest {
                 sakId = 2,
                 oppgaveType = OppgaveType.AKTIVITETSPLIKT,
                 referanse = behandlingId.toString(),
-                merknad = "Varselbrev om aktivitetsplikt OMS etter 4 mnd",
+                merknad = "Infobrev om aktivitetsplikt OMS etter 4 mnd",
                 frist = withArg { it shouldNotBe null },
             )
         }
@@ -153,27 +150,6 @@ class TidshendelseServiceTest {
                 merknad = "Aldersovergang v/20 år",
                 frist = any(),
             )
-        }
-    }
-
-    @Test
-    fun `skal ikke opprette noe hvis feature toggle er av for oms aktivitetsplikt`() {
-        val melding =
-            lagMeldingForVurdertLoependeYtelse(
-                sakId = 37465L,
-                behandlingsmaaned = YearMonth.of(2024, Month.MARCH),
-                type = TidshendelserJobbType.OMS_DOED_4MND,
-            )
-        featureToggleService.settBryter(
-            TidshendelserFeatureToggle.OpprettOppgaveForVarselbrevAktivitetsplikt,
-            false,
-        )
-
-        tidshendelseService.haandterHendelse(TidshendelsePacket(melding))
-
-        verify(exactly = 0) { behandlingService.opprettOmregning(any()) }
-        verify(exactly = 0) {
-            behandlingService.opprettOppgave(any(), any(), any(), any(), any())
         }
     }
 }

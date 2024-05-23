@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toObjectNode
+import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
@@ -19,6 +20,7 @@ import no.nav.etterlatte.libs.ktor.ktor.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.Resource
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.UUID
 
 interface VedtakKlient {
@@ -64,6 +66,12 @@ interface VedtakKlient {
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto
+
+    suspend fun sakHarLopendeVedtakPaaDato(
+        sakId: Long,
+        dato: LocalDate,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): LoependeYtelseDTO
 }
 
 class VedtakKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -315,6 +323,34 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
         } catch (e: Exception) {
             throw VedtakKlientException(
                 "Underkjennelse av vedtak for klage med id=$klageId feilet",
+                e,
+            )
+        }
+    }
+
+    override suspend fun sakHarLopendeVedtakPaaDato(
+        sakId: Long,
+        dato: LocalDate,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): LoependeYtelseDTO {
+        try {
+            logger.info("Sjekker om sak $sakId er løpende på $dato")
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/vedtak/loepende/$sakId?dato=$dato",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw VedtakKlientException(
+                "Kunne ikke sjekk om sak $sakId har løpende ytelse på dato $dato",
                 e,
             )
         }

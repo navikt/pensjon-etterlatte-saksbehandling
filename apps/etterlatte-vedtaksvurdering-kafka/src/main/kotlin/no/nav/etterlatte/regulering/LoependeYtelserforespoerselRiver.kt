@@ -4,6 +4,7 @@ import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
@@ -55,6 +56,9 @@ internal class LoependeYtelserforespoerselRiver(
         }
 
         val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato)
+        if (respons.underSamordning) {
+            throw SakErUnderSamordning()
+        }
         respons.takeIf { it.erLoepende }?.let {
             packet.setEventNameForHendelseType(ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET)
             packet[HENDELSE_DATA_KEY] =
@@ -62,9 +66,13 @@ internal class LoependeYtelserforespoerselRiver(
                     sakId = sakId,
                     fradato = it.dato,
                     prosesstype = Prosesstype.AUTOMATISK,
+                    opphoerFraOgMed = respons.opphoerFraOgMed,
                 )
+            it.behandlingId?.let { b -> packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = b }
             context.publish(packet.toJson())
             logger.info("Grunnbeløpsreguleringmelding ble sendt for sak $sakId. Dato=${respons.dato}")
         } ?: logger.info("Grunnbeløpsreguleringmelding ble ikke sendt for sak $sakId. Dato=${respons.dato}")
     }
 }
+
+class SakErUnderSamordning : Exception("Sak er under samordning og kan ikke reguleres")

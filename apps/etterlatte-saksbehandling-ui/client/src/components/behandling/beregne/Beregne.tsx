@@ -164,7 +164,8 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                 )}
                 {manglerAvkorting && (
                   <Alert style={{ maxWidth: '16em' }} variant="error">
-                    Du må legge til inntektsavkorting
+                    Du må legge til inntektsavkorting, også når etterlatte ikke har inntekt. Legg da inn 0 i
+                    inntektsfeltene.
                   </Alert>
                 )}
               </BeregningWrapper>

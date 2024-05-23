@@ -3,18 +3,21 @@ package no.nav.etterlatte.sak
 import io.kotest.matchers.date.shouldBeBetween
 import io.kotest.matchers.date.shouldBeToday
 import io.kotest.matchers.date.shouldNotBeToday
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.opprettBehandling
@@ -140,6 +143,25 @@ internal class SakDaoTest(val dataSource: DataSource) {
     }
 
     @Test
+    fun `hentSakerMedIder henter kun de sakene med innsendt id`() {
+        val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val alleSaker = listOf(sak1, sak2, sak3)
+
+        val alleIder = alleSaker.map { it.id }
+        val hentetAlleSaker = sakRepo.hentSakerMedIder(alleIder)
+        val hentetKunSak1 = sakRepo.hentSakerMedIder(listOf(sak1.id))
+        val hentingIngenSaker = sakRepo.hentSakerMedIder(emptyList())
+        val hentingUkjentSak = sakRepo.hentSakerMedIder(listOf(alleIder.sum()))
+
+        Assertions.assertEquals(alleSaker, hentetAlleSaker)
+        Assertions.assertEquals(listOf(sak1), hentetKunSak1)
+        Assertions.assertEquals(emptyList<Sak>(), hentingIngenSaker)
+        Assertions.assertEquals(emptyList<Sak>(), hentingUkjentSak)
+    }
+
+    @Test
     fun `Skal kunne oppdatere enhet`() {
         val fnr = "fnr"
         val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
@@ -154,7 +176,7 @@ internal class SakDaoTest(val dataSource: DataSource) {
 
         val sakerMedNyEnhet =
             funnetSakermed2saker.map {
-                GrunnlagsendringshendelseService.SakMedEnhet(it.id, Enheter.EGNE_ANSATTE.enhetNr)
+                SakMedEnhet(it.id, Enheter.EGNE_ANSATTE.enhetNr)
             }
 
         sakRepo.oppdaterEnheterPaaSaker(sakerMedNyEnhet)
@@ -163,5 +185,28 @@ internal class SakDaoTest(val dataSource: DataSource) {
         sakerMedEgenAnsattEnhet.forEach {
             Assertions.assertEquals(Enheter.EGNE_ANSATTE.enhetNr, it.enhet)
         }
+    }
+
+    @Test
+    fun `Skal hente angitte saker`() {
+        val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+        val saker = sakRepo.hentSaker("", 2, listOf(sak2.id, sak3.id))
+
+        saker.size shouldBe 2
+        saker.forEach { it.id shouldNotBe sak1.id }
+    }
+
+    @Test
+    fun `Skal hente alle saker dersom ingen spesifikke er angitt`() {
+        sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+        val saker = sakRepo.hentSaker("", 3, emptyList())
+
+        saker.size shouldBe 3
     }
 }

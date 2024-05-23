@@ -28,15 +28,16 @@ interface VedtakService {
         behandlingId: UUID,
     ): VedtakOgRapid
 
-    fun opprettVedtakFattOgAttester(
+    fun opprettVedtakOgFatt(
         sakId: Long,
         behandlingId: UUID,
-        kjoringVariant: MigreringKjoringVariant,
     ): VedtakOgRapid
 
     fun tilbakestillVedtak(behandlingId: UUID)
 
     fun tilSamordningVedtak(behandlingId: UUID): VedtakDto
+
+    fun samordneVedtak(behandlingId: UUID): SamordneResponse
 
     fun samordnetVedtak(vedtakId: String): VedtakDto?
 
@@ -60,15 +61,14 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
             vedtakKlient.post("$url/api/vedtak/$sakId/$behandlingId/automatisk").body()
         }
 
-    override fun opprettVedtakFattOgAttester(
+    override fun opprettVedtakOgFatt(
         sakId: Long,
         behandlingId: UUID,
-        kjoringVariant: MigreringKjoringVariant,
     ): VedtakOgRapid =
         runBlocking {
             vedtakKlient.post("$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis") {
                 contentType(ContentType.Application.Json)
-                setBody(kjoringVariant.toJson())
+                setBody(MigreringKjoringVariant.MED_PAUSE.toJson())
             }.body()
         }
 
@@ -85,6 +85,14 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
             }.body()
         }
 
+    override fun samordneVedtak(behandlingId: UUID): SamordneResponse {
+        return runBlocking {
+            vedtakKlient.post("$url/api/vedtak/$behandlingId/samordne") {
+                contentType(ContentType.Application.Json)
+            }.body<SamordneResponse>()
+        }
+    }
+
     override fun samordnetVedtak(vedtakId: String): VedtakDto? =
         runBlocking {
             vedtakKlient.post("$url/vedtak/samordnet/$vedtakId") {
@@ -99,3 +107,7 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
             }.body()
         }
 }
+
+class SamordneResponse(
+    val skalVentePaaSamordning: Boolean,
+)

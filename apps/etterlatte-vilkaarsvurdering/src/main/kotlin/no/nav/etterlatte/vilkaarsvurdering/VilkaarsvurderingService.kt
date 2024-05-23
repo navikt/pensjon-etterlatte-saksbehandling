@@ -172,7 +172,11 @@ class VilkaarsvurderingService(
                 )
 
             // Hvis minst ett av vilkårene mangler vurdering - slett vilkårsvurderingresultat
-            if (!kopierResultat || nyVilkaarsvurdering.vilkaar.any { v -> v.vurdering == null }) {
+            if (!kopierResultat || (
+                    behandling.revurderingsaarsak != Revurderingaarsak.REGULERING &&
+                        nyVilkaarsvurdering.vilkaar.any { v -> v.vurdering == null }
+                )
+            ) {
                 vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId)
             } else {
                 runBlocking { behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo) }

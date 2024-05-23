@@ -34,7 +34,7 @@ class SjekklisteDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                 with(it) {
                     prepareStatement(
                         """
-                        INSERT INTO sjekkliste_item (SJEKKLISTE, BESKRIVELSE, OPPRETTET_AV, ENDRET_AV) 
+                        INSERT INTO sjekkliste_item (SJEKKLISTE_ID, BESKRIVELSE, OPPRETTET_AV, ENDRET_AV) 
                         VALUES(?, ?, ?, ?)
                         """.trimIndent(),
                     ).apply {
@@ -129,7 +129,7 @@ class SjekklisteDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                          avkrysset,
                          versjon
                         FROM sjekkliste_item
-                        WHERE sjekkliste = ?
+                        WHERE sjekkliste_id = ?
                         """.trimIndent(),
                     )
                 stmt.setObject(1, sjekklisteId)

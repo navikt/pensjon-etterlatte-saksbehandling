@@ -74,7 +74,7 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
         )
     }
 
-    private fun hentStatus(
+    fun hentStatus(
         id: Long,
         tx: TransactionalSession? = null,
     ) = tx.session {

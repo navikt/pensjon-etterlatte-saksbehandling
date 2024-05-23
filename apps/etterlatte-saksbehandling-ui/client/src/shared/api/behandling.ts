@@ -10,14 +10,13 @@ import {
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe } from '~components/person/typer'
-import { InstitusjonsoppholdBegrunnelse } from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { FoersteVirk, ISak } from '~shared/types/sak'
-import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 import { format } from 'date-fns'
 import { DatoFormat } from '~utils/formattering'
 import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
 import { RedigertFamilieforhold } from '~shared/types/grunnlag'
 import { ISendBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
+import { InstitusjonsoppholdBegrunnelse } from '~components/person/hendelser/institusjonsopphold/VurderInstitusjonsoppholdModalBody'
 
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number
@@ -25,8 +24,8 @@ export const hentGrunnlagsendringshendelserForSak = async (
   return apiClient.get(`/sak/${sakId}/grunnlagsendringshendelser`)
 }
 
-export const lukkGrunnlagshendelse = async (hendelse: Grunnlagsendringshendelse): Promise<ApiResponse<void>> => {
-  return apiClient.post(`/personer/lukkgrunnlagsendringshendelse`, { ...hendelse })
+export const arkiverGrunnlagshendelse = async (hendelse: Grunnlagsendringshendelse): Promise<ApiResponse<void>> => {
+  return apiClient.post(`/personer/arkivergrunnlagsendringshendelse`, { ...hendelse })
 }
 
 export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljertBehandling>> => {
@@ -60,12 +59,6 @@ export const lagreInstitusjonsoppholdData = async (args: {
   return apiClient.post(`/institusjonsoppholdbegrunnelse/${args.sakId}`, {
     institusjonsopphold: args.institusjonsopphold,
   })
-}
-
-export const hentInstitusjonsoppholdData = async (
-  grunnlagsendringshendelseid: string
-): Promise<ApiResponse<InstitusjonsoppholdMedKilde>> => {
-  return apiClient.get(`/institusjonsoppholdbegrunnelse/${grunnlagsendringshendelseid}`)
 }
 
 export const hentManueltOpphoerDetaljer = async (

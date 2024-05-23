@@ -9,6 +9,7 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -18,6 +19,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.UUID
 
 const val BEHANDLINGID_CALL_PARAMETER = "behandlingId"
@@ -25,6 +27,7 @@ const val SAKID_CALL_PARAMETER = "sakId"
 const val OPPGAVEID_CALL_PARAMETER = "oppgaveId"
 const val KLAGEID_CALL_PARAMETER = "klageId"
 const val GENERELLBEHANDLINGID_CALL_PARAMETER = "generellBehandlingId"
+const val TILBAKEKREVINGID_CALL_PARAMETER = "tilbakekrevingId"
 
 enum class CallParamAuthId(val value: String) {
     BEHANDLINGID(BEHANDLINGID_CALL_PARAMETER),
@@ -32,6 +35,7 @@ enum class CallParamAuthId(val value: String) {
     OPPGAVEID(OPPGAVEID_CALL_PARAMETER),
     KLAGEID(KLAGEID_CALL_PARAMETER),
     GENERELLBEHANDLINGID(GENERELLBEHANDLINGID_CALL_PARAMETER),
+    TILBAKEKREVINGID(TILBAKEKREVINGID_CALL_PARAMETER),
 }
 
 const val OPPGAVEID_GOSYS_CALL_PARAMETER = "gosysOppgaveId"
@@ -71,6 +75,12 @@ inline val PipelineContext<*, ApplicationCall>.gosysOppgaveId: String
         requireNotNull(call.parameters[OPPGAVEID_GOSYS_CALL_PARAMETER]) {
             "Gosys oppgaveId er ikke i path params"
         }
+
+inline val PipelineContext<*, ApplicationCall>.tilbakekrevingId: UUID
+    get() =
+        call.parameters[TILBAKEKREVINGID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
+            "TilbakekrevingId er ikke i path params",
+        )
 
 val logger = LoggerFactory.getLogger("TilgangsSjekk")
 
@@ -224,6 +234,17 @@ fun ApplicationCall.uuid(param: String) =
     } ?: throw NullPointerException(
         "$param er ikke i path params",
     )
+
+class UgyldigDatoFormatException : UgyldigForespoerselException(
+    code = "UGYLDIG-DATOFORMAT",
+    detail = "Forventet format YYYY-MM-DD (ISO-8601)",
+)
+
+fun ApplicationCall.dato(param: String) =
+    this.parameters[param]?.let {
+        runCatching { LocalDate.parse(it) }
+            .getOrElse { throw UgyldigDatoFormatException() }
+    }
 
 suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
     featureToggleService: FeatureToggleService,

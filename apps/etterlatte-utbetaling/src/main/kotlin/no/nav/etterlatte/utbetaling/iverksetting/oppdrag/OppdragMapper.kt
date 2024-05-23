@@ -14,7 +14,10 @@ import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import no.trygdeetaten.skjema.oppdrag.Oppdrag110
 import no.trygdeetaten.skjema.oppdrag.OppdragsEnhet120
 import no.trygdeetaten.skjema.oppdrag.OppdragsLinje150
+import no.trygdeetaten.skjema.oppdrag.Tekst140
 import no.trygdeetaten.skjema.oppdrag.TkodeStatusLinje
+import java.math.BigInteger
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 object OppdragMapper {
@@ -23,16 +26,13 @@ object OppdragMapper {
     fun oppdragFraUtbetaling(
         utbetaling: Utbetaling,
         erFoersteUtbetalingPaaSak: Boolean,
+        erGRegulering: Boolean,
     ): Oppdrag {
         val oppdrag110 =
             Oppdrag110().apply {
                 kodeAksjon = OppdragDefaults.AKSJONSKODE_OPPDATER
                 kodeEndring = if (erFoersteUtbetalingPaaSak) "NY" else "ENDR"
-                kodeFagomraade =
-                    when (utbetaling.sakType) {
-                        Saktype.BARNEPENSJON -> "BARNEPE"
-                        Saktype.OMSTILLINGSSTOENAD -> "OMSTILL"
-                    }
+                kodeFagomraade = utbetaling.sakType.tilKodeFagomraade()
                 fagsystemId = utbetaling.sakId.value.toString()
                 utbetFrekvens = OppdragDefaults.UTBETALINGSFREKVENS
                 oppdragGjelderId = utbetaling.stoenadsmottaker.value
@@ -54,6 +54,25 @@ object OppdragMapper {
                     },
                 )
 
+                if (erGRegulering) {
+                    val fraOgMed = utbetaling.utbetalingslinjer.first().periode.fra
+
+                    listOf(
+                        // Ta høyde for maks lengde på 40 chars
+                        "Grunnbeløpet har økt fra 1. mai ${fraOgMed.year}.",
+                        "De fleste vil få etterbetalt i juni.",
+                    ).mapIndexed { index, str ->
+                        Tekst140().apply {
+                            tekst = str
+                            tekstLnr = BigInteger.valueOf(index.toLong() + 1)
+                            datoTekstFom = fraOgMed.toXMLDate()
+                            datoTekstTom = LocalDate.of(fraOgMed.year, fraOgMed.month.plus(1), 20).toXMLDate()
+                        }
+                    }.let {
+                        tekst140.addAll(it)
+                    }
+                }
+
                 oppdragsLinje150.addAll(
                     utbetaling.utbetalingslinjer.map {
                         OppdragsLinje150().apply {
@@ -69,14 +88,9 @@ object OppdragMapper {
                                 }
                                 else -> {}
                             }
-
                             vedtakId = utbetaling.vedtakId.value.toString()
                             delytelseId = it.id.value.toString()
-                            kodeKlassifik =
-                                when (utbetaling.sakType) {
-                                    Saktype.BARNEPENSJON -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP.toString()
-                                    Saktype.OMSTILLINGSSTOENAD -> OppdragKlassifikasjonskode.OMSTILLINGSTOENAD_OPTP.toString()
-                                }
+                            kodeKlassifik = utbetaling.sakType.tilKodeklassifikasjon()
                             datoVedtakFom = it.periode.fra.toXMLDate()
                             datoVedtakTom = it.periode.til?.toXMLDate()
                             sats = it.beloep
@@ -86,7 +100,6 @@ object OppdragMapper {
                             saksbehId = utbetaling.saksbehandler.value
                             utbetalesTilId = utbetaling.stoenadsmottaker.value
                             henvisning = utbetaling.behandlingId.shortValue.value
-
                             attestant180.add(
                                 Attestant180().apply {
                                     attestantId = utbetaling.attestant.value
@@ -102,6 +115,18 @@ object OppdragMapper {
         }
     }
 }
+
+fun Saktype.tilKodeFagomraade(): String =
+    when (this) {
+        Saktype.BARNEPENSJON -> "BARNEPE"
+        Saktype.OMSTILLINGSSTOENAD -> "OMSTILL"
+    }
+
+fun Saktype.tilKodeklassifikasjon(): String =
+    when (this) {
+        Saktype.BARNEPENSJON -> OppdragKlassifikasjonskode.BARNEPENSJON_OPTP.toString()
+        Saktype.OMSTILLINGSSTOENAD -> OppdragKlassifikasjonskode.OMSTILLINGSTOENAD_OPTP.toString()
+    }
 
 fun Oppdrag.vedtakId() = oppdrag110.oppdragsLinje150.first().vedtakId.toLong()
 

@@ -1,6 +1,9 @@
 import { Button, Select, TextField } from '@navikt/ds-react'
 import React, { ReactNode, useEffect, useState } from 'react'
-import { initialFilter, minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
+import {
+  initialFilter,
+  initialMinOppgavelisteFiltre,
+} from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { FlexRow } from '~shared/styled'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { FiltrerPaaSaksbehandler } from '~components/oppgavebenk/filtreringAvOppgaver/FiltrerPaaSaksbehandler'
@@ -135,7 +138,9 @@ export const FilterRad = ({
         <Button
           variant="secondary"
           onClick={() => {
-            setFilter(oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA ? initialFilter() : minOppgavelisteFiltre())
+            setFilter(
+              oppgavelisteValg === OppgavelisteValg.OPPGAVELISTA ? initialFilter() : initialMinOppgavelisteFiltre()
+            )
             hentAlleOppgaver()
           }}
           size="small"

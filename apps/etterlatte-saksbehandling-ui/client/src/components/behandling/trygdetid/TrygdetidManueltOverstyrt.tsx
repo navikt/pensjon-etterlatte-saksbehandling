@@ -1,24 +1,34 @@
 import React, { useState } from 'react'
-import { Button, Checkbox, TextField } from '@navikt/ds-react'
+import { Alert, Button, Checkbox, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { IDetaljertBeregnetTrygdetid, ITrygdetid, oppdaterTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
+import {
+  IDetaljertBeregnetTrygdetid,
+  ITrygdetid,
+  oppdaterTrygdetidOverstyrtMigrering,
+  opprettTrygdetidOverstyrtMigrering,
+} from '~shared/api/trygdetid'
 import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 export const TrygdetidManueltOverstyrt = ({
   behandlingId,
   trygdetidId,
+  ident,
   beregnetTrygdetid,
   oppdaterTrygdetid,
 }: {
   behandlingId: string
   trygdetidId: string
+  ident: string
   beregnetTrygdetid: IDetaljertBeregnetTrygdetid
   oppdaterTrygdetid: (trygdetid: ITrygdetid) => void
 }) => {
+  const personopplysninger = usePersonopplysninger()
+
   const [skalHaProrata, setSkalHaProrata] = useState<boolean>(beregnetTrygdetid.resultat.prorataBroek != null)
 
   const [anvendtTrygdetid, setAnvendtTrygdetid] = useState<number | undefined>(
@@ -31,6 +41,7 @@ export const TrygdetidManueltOverstyrt = ({
   const [prorataNevner, setNevner] = useState<number | undefined>(beregnetTrygdetid.resultat.prorataBroek?.nevner)
 
   const [status, oppdaterTrygdetidRequest] = useApiCall(oppdaterTrygdetidOverstyrtMigrering)
+  const [opprettStatus, opprettOverstyrtTrygdetid] = useApiCall(opprettTrygdetidOverstyrtMigrering)
 
   const lagre = () => {
     oppdaterTrygdetidRequest(
@@ -51,6 +62,32 @@ export const TrygdetidManueltOverstyrt = ({
     )
   }
 
+  const overskrivOverstyrtTrygdetid = () => {
+    opprettOverstyrtTrygdetid({ behandlingId, overskriv: true }, () => window.location.reload())
+  }
+
+  const identErIGrunnlag = personopplysninger?.avdoede?.find((person) => person.opplysning.foedselsnummer === ident)
+  if (!identErIGrunnlag) {
+    return (
+      <>
+        {ident === 'UKJENT_AVDOED' ? (
+          <Alert variant="error">
+            Brev støtter ikke ukjent avdød. Dersom avdød ikke ble oppgitt ved opprettelse av behandlingen må du opprette
+            ny overstyrt trygdetid.
+          </Alert>
+        ) : (
+          <Alert variant="error">Fant ikke avdød ident {ident} (trygdetid) i behandlingsgrunnlaget</Alert>
+        )}
+
+        <br />
+
+        <Button variant="danger" onClick={overskrivOverstyrtTrygdetid} loading={isPending(opprettStatus)}>
+          Opprett på nytt
+        </Button>
+      </>
+    )
+  }
+
   return (
     <FormWrapper>
       <TextField
@@ -59,6 +96,7 @@ export const TrygdetidManueltOverstyrt = ({
         value={anvendtTrygdetid || ''}
         pattern="[0-9]{11}"
         maxLength={11}
+        htmlSize={20}
         onChange={(e) => setAnvendtTrygdetid(Number(e.target.value))}
       />
 
@@ -105,7 +143,6 @@ export const TrygdetidManueltOverstyrt = ({
 }
 
 const FormWrapper = styled.div`
-  width: 10em;
   display: grid;
   gap: var(--a-spacing-4);
 `

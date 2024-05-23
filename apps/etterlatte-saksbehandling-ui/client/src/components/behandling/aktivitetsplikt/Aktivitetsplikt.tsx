@@ -21,7 +21,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { formaterDato } from '~utils/formattering'
+import { formaterDato, formaterDatoMedKlokkeslett } from '~utils/formattering'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -106,7 +106,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
               </Button>
             )}
             <Detail>Manuelt av {aktivitetOppfolging?.opprettetAv}</Detail>
-            <Detail>Sist endret {aktivitetOppfolging?.opprettet}</Detail>
+            <Detail>Sist endret {formaterDatoMedKlokkeslett(aktivitetOppfolging?.opprettet)}</Detail>
           </SpacingWrapper>
         )}
 
@@ -136,17 +136,21 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         )}
 
         <Heading size="small" spacing>
-          Lag intern oppfølgingsoppgave med riktig frist
+          OPPFØLGING
         </Heading>
         <BodyLong spacing>
-          Etterlatte skal følges opp og minnes på aktivitetskravet når det har gått 3-4 måneder og på nytt når det har
-          gått 9-10 måneder etter dødsfall. Om den etterlatte har andre ytelser eller annen grunn til videre oppfølging
-          bør man vurdere andre frister.
+          Etterlatte skal følges opp og minnes på aktivitetskravet med informasjonsbrev når det er gått 3 til 4 måneder
+          etter dødsfallet. Interne oppfølgingsoppgaver opprettes automatisk ut fra dødstidspunktet og må vurderes før
+          informasjonsbrevet sendes ut. Automatiske oppgaver blir opprettet som følge av hva du registrerer om burkers
+          situasjon.
+          <br />
+          <br />
+          Er det andre grunner til at den etterlatte skal følges opp utenfor normalen, så kan oppfølgingsoppgave lages
+          her:
         </BodyLong>
-        <BodyShort spacing>Huk av i sjekklista når oppfølgingsoppgave er opprettet.</BodyShort>
         <SpacingWrapper>
           <Button
-            variant="primary"
+            variant="secondary"
             size="small"
             as="a"
             href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker?.foedselsnummer}`}

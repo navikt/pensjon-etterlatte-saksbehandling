@@ -32,4 +32,8 @@ class JobbTestdata(
 
         return hendelseDao.hentJobb(id!!.toInt())
     }
+
+    fun slettAlleJobber() {
+        dataSource.transaction { it.run(queryOf("DELETE FROM jobb").asExecute) }
+    }
 }

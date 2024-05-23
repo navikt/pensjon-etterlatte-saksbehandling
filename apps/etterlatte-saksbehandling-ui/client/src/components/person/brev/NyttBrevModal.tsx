@@ -1,4 +1,4 @@
-import { Button, Heading, Modal, Select } from '@navikt/ds-react'
+import { Button, Heading, Modal, Radio, Select, VStack } from '@navikt/ds-react'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -8,14 +8,18 @@ import { FlexRow } from '~shared/styled'
 import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { useNavigate } from 'react-router-dom'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { IValgJaNei } from '~shared/types/Aktivitetsplikt'
+import { SakType } from '~shared/types/sak'
 
-export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
+export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakType }) => {
   const [opprettBrevStatus, opprettBrevApiCall] = useApiCall(opprettBrevAvSpesifikkTypeForSak)
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
 
   const defaultData: FilledFormData = {
-    type: 'TOMT_BREV',
+    type: FormType.TOMT_BREV,
+    utbetaling: '',
   }
 
   const {
@@ -23,6 +27,7 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
     handleSubmit,
     watch,
     register,
+    control,
   } = useForm({ defaultValues: defaultData })
 
   const skjemaet = watch()
@@ -61,7 +66,7 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
 
         <form onSubmit={handleSubmit(opprettBrev)}>
           <Modal.Body>
-            <FlexRow $spacing>
+            <VStack gap="4">
               <Select
                 error={errors?.type?.message}
                 label="Type"
@@ -69,28 +74,68 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
                   required: { value: true, message: 'Feltet er påkrevd' },
                 })}
               >
-                <option value="OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV">Varselbrev om aktivitetsplikt</option>
-                <option value="TOMT_BREV">Manuelt brev</option>
+                <option value={FormType.TOMT_BREV}>Manuelt brev</option>
+                {sakType === SakType.OMSTILLINGSSTOENAD && (
+                  <option value={FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND}>
+                    Informasjon om aktivitetsplikt ved 4 måneder
+                  </option>
+                )}
               </Select>
-            </FlexRow>
 
-            {skjemaet.type === 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV' && (
-              <FlexRow $spacing>
-                <Select
-                  error={errors?.aktivitetsgrad?.message}
-                  label="Aktivitetsgrad"
-                  {...register('aktivitetsgrad', {
-                    required: { value: true, message: 'Du må velge aktivitetsgrad' },
-                    validate: { notDefault: (value) => !!value },
-                  })}
-                >
-                  <option value="">Velg aktivitetsgrad</option>
-                  <option value="IKKE_I_AKTIVITET">Ikke i aktivitet</option>
-                  <option value="UNDER_50_PROSENT">Under 50%</option>
-                  <option value="OVER_50_PROSENT">Over 50%</option>
-                </Select>
-              </FlexRow>
-            )}
+              {skjemaet.type === FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND && (
+                <>
+                  <Select
+                    error={errors?.aktivitetsgrad?.message}
+                    label="Aktivitetsgrad"
+                    {...register('aktivitetsgrad', {
+                      required: { value: true, message: 'Du må velge aktivitetsgrad' },
+                      validate: { notDefault: (value) => !!value },
+                    })}
+                  >
+                    <option value="">Velg aktivitetsgrad</option>
+                    <option value="IKKE_I_AKTIVITET">Ikke i aktivitet</option>
+                    <option value="UNDER_50_PROSENT">Under 50%</option>
+                    <option value="OVER_50_PROSENT">Over 50%</option>
+                  </Select>
+                  <ControlledRadioGruppe
+                    name="nasjonalEllerUtland"
+                    control={control}
+                    legend="Er bruker bosatt i Norge eller utlandet?"
+                    errorVedTomInput="Du må velge om bruker er bosatt i Norge eller utlandet"
+                    radios={
+                      <>
+                        <Radio value={NasjonalEllerUtland.NASJONAL}>Norge</Radio>
+                        <Radio value={NasjonalEllerUtland.UTLAND}>Utlandet</Radio>
+                      </>
+                    }
+                  />
+                  <ControlledRadioGruppe
+                    name="redusertEtterInntekt"
+                    control={control}
+                    legend="Er stønaden redusert etter inntekt?"
+                    errorVedTomInput="Du må velge om stønaden redusert etter inntekt"
+                    radios={
+                      <>
+                        <Radio value={IValgJaNei.JA}>Ja</Radio>
+                        <Radio value={IValgJaNei.NEI}>Nei</Radio>
+                      </>
+                    }
+                  />
+                  <ControlledRadioGruppe
+                    name="utbetaling"
+                    control={control}
+                    legend="Kommer stønaden til utbetaling?"
+                    errorVedTomInput="Du må velge om stønaden kommer til utbetaling"
+                    radios={
+                      <>
+                        <Radio value={IValgJaNei.JA}>Ja</Radio>
+                        <Radio value={IValgJaNei.NEI}>Nei</Radio>
+                      </>
+                    }
+                  />
+                </>
+              )}
+            </VStack>
           </Modal.Body>
 
           <Modal.Footer>
@@ -114,26 +159,45 @@ export const NyttBrevModal = ({ sakId }: { sakId: number }) => {
 
 export type BrevParametre =
   | {
-      type: 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV'
+      type: FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND
       aktivitetsgrad: string
+      utbetaling: boolean
+      redusertEtterInntekt: boolean
+      nasjonalEllerUtland: NasjonalEllerUtland
     }
   | {
-      type: 'TOMT_BREV'
+      type: FormType.TOMT_BREV
     }
 
 type FilledFormData = {
-  type: string
+  type: FormType
   aktivitetsgrad?: string
+  utbetaling?: IValgJaNei | ''
+  redusertEtterInntekt?: IValgJaNei | ''
+  nasjonalEllerUtland?: NasjonalEllerUtland
+}
+
+enum NasjonalEllerUtland {
+  NASJONAL = 'NASJONAL',
+  UTLAND = 'UTLAND',
+}
+
+enum FormType {
+  TOMT_BREV = 'TOMT_BREV',
+  OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND = 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND',
 }
 
 function mapFormdataToBrevParametre(formdata: FilledFormData): BrevParametre {
   switch (formdata.type) {
-    case 'OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_VARSELBREV':
+    case FormType.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND:
       return {
         type: formdata.type,
         aktivitetsgrad: formdata.aktivitetsgrad!!,
+        utbetaling: formdata.utbetaling!! === IValgJaNei.JA,
+        redusertEtterInntekt: formdata.redusertEtterInntekt!! === IValgJaNei.JA,
+        nasjonalEllerUtland: formdata.nasjonalEllerUtland!!,
       }
-    case 'TOMT_BREV':
+    case FormType.TOMT_BREV:
       return {
         type: formdata.type,
       }

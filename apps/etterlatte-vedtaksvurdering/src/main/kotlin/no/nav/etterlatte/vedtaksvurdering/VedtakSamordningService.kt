@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering
 
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.deserialize
@@ -23,10 +24,11 @@ class VedtakSamordningService(private val repository: VedtaksvurderingRepository
 
     fun hentVedtaksliste(
         fnr: Folkeregisteridentifikator,
+        sakType: SakType,
         fomDato: LocalDate,
     ): List<VedtakSamordningDto> {
         logger.debug("Henter og sammenstiller vedtaksliste")
-        val vedtaksliste = repository.hentFerdigstilteVedtak(fnr)
+        val vedtaksliste = repository.hentFerdigstilteVedtak(fnr, sakType)
         val tidslinjeJustert =
             Vedtakstidslinje(vedtaksliste)
                 .sammenstill(YearMonth.of(fomDato.year, fomDato.month))

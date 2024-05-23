@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 data class ManuellRevurdering(
@@ -32,6 +33,7 @@ data class ManuellRevurdering(
     override val begrunnelse: String?,
     override val relatertBehandlingId: String?,
     override val sendeBrev: Boolean,
+    override val opphoerFraOgMed: YearMonth? = null,
 ) : Revurdering(
         id = id,
         sak = sak,
@@ -47,6 +49,7 @@ data class ManuellRevurdering(
         kilde = kilde,
         begrunnelse = begrunnelse,
         relatertBehandlingId = relatertBehandlingId,
+        opphoerFraOgMed = opphoerFraOgMed,
     ) {
     private fun erFyltUt(): Boolean =
         when (sak.sakType) {

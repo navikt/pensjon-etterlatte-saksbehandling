@@ -1,4 +1,4 @@
-import { BodyShort, Heading } from '@navikt/ds-react'
+import { Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 
 export const InnholdPadding = styled.div`
@@ -48,10 +48,6 @@ export const InfoList = styled.div`
 
 export const InfoElement = styled.div<{ $wide?: boolean }>`
   width: ${(props) => (props.$wide ? '100%' : '15em')};
-`
-
-export const Undertekst = styled(BodyShort)<{ $gray: boolean }>`
-  ${(props) => (props.$gray ? 'color: var(--navds-semantic-color-text-muted)' : null)};
 `
 
 export const VurderingsContainer = styled.div`

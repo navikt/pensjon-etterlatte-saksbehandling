@@ -44,6 +44,7 @@ fun behandling(
     prosesstype = Prosesstype.AUTOMATISK,
     kilde = Vedtaksloesning.GJENNY,
     sendeBrev = true,
+    opphoerFraOgMed = null,
 )
 
 fun trygdetid(
@@ -100,10 +101,11 @@ fun trygdetidGrunnlag(
     poengUtAar: Boolean = false,
     prorata: Boolean = false,
     trygdetidType: TrygdetidType = TrygdetidType.FAKTISK,
+    bosted: String = LandNormalisert.NORGE.isoCode,
 ) = TrygdetidGrunnlag(
     id = randomUUID(),
     type = trygdetidType,
-    bosted = LandNormalisert.NORGE.isoCode,
+    bosted = bosted,
     periode = periode,
     beregnetTrygdetid = beregnetTrygdetidGrunnlag,
     kilde = Grunnlagsopplysning.Saksbehandler(ident = "Z123", tidspunkt = Tidspunkt.now()),

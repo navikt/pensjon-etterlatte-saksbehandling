@@ -2,7 +2,7 @@ package no.nav.etterlatte.brev.brevbaker
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
+import no.nav.pensjon.brevbaker.api.model.LetterMarkup
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -11,9 +11,9 @@ import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
     defaultImpl = Void::class,
 )
 @JsonSubTypes(
-    JsonSubTypes.Type(value = RenderedJsonLetter.Block.Title1::class, name = "TITLE1"),
-    JsonSubTypes.Type(value = RenderedJsonLetter.Block.Title2::class, name = "TITLE2"),
-    JsonSubTypes.Type(value = RenderedJsonLetter.Block.Paragraph::class, name = "PARAGRAPH"),
+    JsonSubTypes.Type(value = LetterMarkup.Block.Title1::class, name = "TITLE1"),
+    JsonSubTypes.Type(value = LetterMarkup.Block.Title2::class, name = "TITLE2"),
+    JsonSubTypes.Type(value = LetterMarkup.Block.Paragraph::class, name = "PARAGRAPH"),
 )
 interface BrevbakerJSONBlockMixIn
 
@@ -24,8 +24,9 @@ interface BrevbakerJSONBlockMixIn
     defaultImpl = Void::class,
 )
 @JsonSubTypes(
-    JsonSubTypes.Type(value = RenderedJsonLetter.ParagraphContent.ItemList::class, name = "ITEM_LIST"),
-    JsonSubTypes.Type(value = RenderedJsonLetter.ParagraphContent.Text.Literal::class, name = "LITERAL"),
-    JsonSubTypes.Type(value = RenderedJsonLetter.ParagraphContent.Text.Variable::class, name = "VARIABLE"),
+    JsonSubTypes.Type(value = LetterMarkup.ParagraphContent.ItemList::class, name = "ITEM_LIST"),
+    JsonSubTypes.Type(value = LetterMarkup.ParagraphContent.Text.Literal::class, name = "LITERAL"),
+    JsonSubTypes.Type(value = LetterMarkup.ParagraphContent.Text.Variable::class, name = "VARIABLE"),
+    JsonSubTypes.Type(value = LetterMarkup.ParagraphContent.Text.NewLine::class, name = "NEW_LINE"),
 )
 interface BrevbakerJSONParagraphMixIn

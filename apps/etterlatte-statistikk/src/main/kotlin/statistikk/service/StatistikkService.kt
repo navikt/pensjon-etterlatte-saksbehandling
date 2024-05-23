@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -15,7 +16,9 @@ import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
+import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -173,7 +176,7 @@ class StatistikkService(
             vedtakLoependeTom = vedtakInnhold.virkningstidspunkt.atEndOfMonth(),
             saksbehandler = vedtak.vedtakFattet?.ansvarligSaksbehandler,
             ansvarligEnhet = vedtak.attestasjon?.attesterendeEnhet ?: statistikkBehandling.enhet,
-            sakUtland = SakUtland.NASJONAL,
+            sakUtland = SakUtland.fraUtlandstilknytning(statistikkBehandling.utlandstilknytning),
             beregning = beregning,
             avkorting = avkorting,
             sakYtelsesgruppe =
@@ -235,6 +238,7 @@ class StatistikkService(
 
         val beregning = hentBeregningForBehandling(vedtak.behandlingId)
         val avkorting = hentAvkortingForBehandling(vedtak)
+        val statistikkBehandling = hentStatistikkBehandling(vedtak.behandlingId)
         val utbetalingsdato =
             vedtak.vedtakFattet?.tidspunkt?.let {
                 val vedtattDato = it.toLocalDate()
@@ -264,7 +268,7 @@ class StatistikkService(
             beregning = beregning,
             avkorting = avkorting,
             vedtakType = vedtak.type,
-            sakUtland = SakUtland.NASJONAL,
+            sakUtland = SakUtland.fraUtlandstilknytning(statistikkBehandling.utlandstilknytning),
             virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
             utbetalingsdato = utbetalingsdato,
             kilde = vedtaksloesning,
@@ -285,7 +289,10 @@ class StatistikkService(
         type = "TILBAKEKREVING",
         status = hendelse.name,
         ansvarligEnhet = statistikkTilbakekreving.tilbakekreving.sak.enhet,
-        resultat = statistikkTilbakekreving.tilbakekreving.tilbakekreving.vurdering?.vedtak,
+        resultat =
+            mapTilbakekrevingResultat(statistikkTilbakekreving.tilbakekreving.tilbakekreving)?.name?.takeIf {
+                statistikkTilbakekreving.tilbakekreving.status == TilbakekrevingStatus.ATTESTERT
+            },
         tekniskTid = tekniskTid.toTidspunkt(),
         sakYtelse = statistikkTilbakekreving.tilbakekreving.sak.sakType.name,
         behandlingMetode = BehandlingMetode.MANUELL,
@@ -300,7 +307,7 @@ class StatistikkService(
         opprettetAv = null,
         pesysId = null,
         resultatBegrunnelse = null,
-        sakUtland = null,
+        sakUtland = statistikkTilbakekreving.utlandstilknytningType?.let { SakUtland.fraUtlandstilknytningType(it) },
         soeknadFormat = null,
         vedtakLoependeTom = null,
         aktorId = statistikkTilbakekreving.tilbakekreving.sak.ident,
@@ -313,6 +320,10 @@ class StatistikkService(
         saksbehandler = statistikkTilbakekreving.tilbakekreving.tilbakekreving.kravgrunnlag.saksbehandler.value,
         relatertTil = null,
     )
+
+    private fun mapTilbakekrevingResultat(tilbakekreving: Tilbakekreving): TilbakekrevingResultat? {
+        return TilbakekrevingResultat.hoyesteGradAvTilbakekreving(tilbakekreving.perioder.mapNotNull { it.ytelse.resultat })
+    }
 
     private fun klageTilSakRad(
         statistikkKlage: StatistikkKlage,
@@ -350,7 +361,7 @@ class StatistikkService(
         opprettetAv = null,
         pesysId = null,
         resultatBegrunnelse = null,
-        sakUtland = null,
+        sakUtland = statistikkKlage.utlandstilknytningType?.let { SakUtland.fraUtlandstilknytningType(it) },
         soeknadFormat = null,
         vedtakLoependeTom = null,
         relatertTil = statistikkKlage.klage.formkrav?.formkrav?.vedtaketKlagenGjelder?.behandlingId,
@@ -444,11 +455,13 @@ class StatistikkService(
         behandlingId: UUID,
         hendelse: BehandlingHendelseType,
         tekniskTid: LocalDateTime,
+        aarsak: PaaVentAarsak,
     ): SakRad? {
         val sisteRad =
             sakRepository.hentSisteRad(behandlingId)?.copy(
                 status = hendelse.name,
                 tekniskTid = tekniskTid.toTidspunkt(),
+                paaVentAarsak = aarsak,
             )
         if (sisteRad == null) {
             logger.warn(

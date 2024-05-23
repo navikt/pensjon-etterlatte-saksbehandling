@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
 import { Container } from '~shared/styled'
@@ -8,7 +8,14 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { Tabs } from '@navikt/ds-react'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
-import { BulletListIcon, CogRotationIcon, EnvelopeClosedIcon, FileTextIcon, PersonIcon } from '@navikt/aksel-icons'
+import {
+  BellIcon,
+  BulletListIcon,
+  CogRotationIcon,
+  EnvelopeClosedIcon,
+  FileTextIcon,
+  PersonIcon,
+} from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
@@ -21,6 +28,7 @@ import { SakMedBehandlinger } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
 import { Personopplysninger } from '~components/person/personopplysninger/Personopplysninger'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
+import { Hendelser } from '~components/person/hendelser/Hendelser'
 
 export enum PersonOversiktFane {
   PERSONOPPLYSNINGER = 'PERSONOPPLYSNINGER',
@@ -28,6 +36,7 @@ export enum PersonOversiktFane {
   DOKUMENTER = 'DOKUMENTER',
   BREV = 'BREV',
   SAMORDNING = 'SAMORDNING',
+  HENDELSER = 'HENDELSER',
 }
 
 export const Person = () => {
@@ -94,6 +103,7 @@ export const Person = () => {
                 label="Personopplysninger"
                 icon={<PersonIcon />}
               />
+              <Tabs.Tab value={PersonOversiktFane.HENDELSER} label="Hendelser" icon={<BellIcon />} />
               <Tabs.Tab value={PersonOversiktFane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
               <Tabs.Tab value={PersonOversiktFane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
               {isOmstillingsstoenad(sakResult) && (
@@ -106,6 +116,9 @@ export const Person = () => {
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.PERSONOPPLYSNINGER}>
               <Personopplysninger sakResult={sakResult} fnr={person.foedselsnummer} />
+            </Tabs.Panel>
+            <Tabs.Panel value={PersonOversiktFane.HENDELSER}>
+              <Hendelser sakResult={sakResult} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={PersonOversiktFane.DOKUMENTER}>
               <Dokumentliste sakResult={sakResult} fnr={person.foedselsnummer} />

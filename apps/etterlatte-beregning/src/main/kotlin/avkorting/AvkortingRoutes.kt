@@ -39,6 +39,17 @@ fun Route.avkorting(
             }
         }
 
+        get("ferdig") {
+            withBehandlingId(behandlingKlient) {
+                logger.info("Henter avkorting med behandlingId=$it")
+                val avkorting = avkortingService.hentFullfoertAvkorting(it, brukerTokenInfo)
+                when (avkorting) {
+                    null -> call.response.status(HttpStatusCode.NoContent)
+                    else -> call.respond(avkorting.toDto())
+                }
+            }
+        }
+
         post {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Lagre avkorting for behandlingId=$it")

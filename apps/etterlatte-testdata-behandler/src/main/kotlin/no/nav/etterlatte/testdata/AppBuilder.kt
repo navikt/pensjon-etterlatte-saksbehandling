@@ -9,6 +9,7 @@ import no.nav.etterlatte.testdata.automatisk.AvkortingService
 import no.nav.etterlatte.testdata.automatisk.BehandlingService
 import no.nav.etterlatte.testdata.automatisk.BeregningService
 import no.nav.etterlatte.testdata.automatisk.BrevService
+import no.nav.etterlatte.testdata.automatisk.GrunnlagService
 import no.nav.etterlatte.testdata.automatisk.TrygdetidService
 import no.nav.etterlatte.testdata.automatisk.VedtaksvurderingService
 import no.nav.etterlatte.testdata.automatisk.VilkaarsvurderingService
@@ -34,6 +35,12 @@ class AppBuilder {
                 settOppHttpClient("vilkaarsvurdering"),
                 "http://etterlatte-vilkaarsvurdering",
                 config.getString("vilkaarsvurdering.client.id"),
+            )
+        val grunnlagService =
+            GrunnlagService(
+                settOppHttpClient("grunnlag"),
+                "http://etterlatte-grunnlag",
+                config.getString("grunnlag.client.id"),
             )
         val behandlingService =
             BehandlingService(
@@ -77,6 +84,7 @@ class AppBuilder {
             avkortingService = avkortingService,
             beregningService = beregningService,
             brevService = brevService,
+            grunnlagService = grunnlagService,
             behandlingService = behandlingService,
             trygdetidService = trygdetidService,
             vedtaksvurderingService = vedtaksvurderingService,

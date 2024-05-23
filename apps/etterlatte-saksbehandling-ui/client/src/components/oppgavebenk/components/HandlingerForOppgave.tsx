@@ -2,18 +2,12 @@ import { Button } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/OmgjoerVedtakModal'
 import React from 'react'
-import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
-import { OpprettNyRevurdering } from '~components/person/OpprettNyRevurdering'
 import { OppgaveDTO, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfoModal'
+import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 
-export const HandlingerForOppgave = ({
-  oppgave,
-  revurderingsaarsaker,
-}: {
-  oppgave: OppgaveDTO
-  revurderingsaarsaker: RevurderingsaarsakerBySakstype
-}) => {
+export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const innloggetsaksbehandler = useInnloggetSaksbehandler()
 
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
@@ -23,13 +17,11 @@ export const HandlingerForOppgave = ({
     switch (type) {
       case Oppgavetype.KRAVPAKKE_UTLAND:
         return (
-          <>
-            {erInnloggetSaksbehandlerOppgave && (
-              <Button size="small" as="a" href={`/generellbehandling/${referanse}`}>
-                Gå til kravpakke utland
-              </Button>
-            )}
-          </>
+          erInnloggetSaksbehandlerOppgave && (
+            <Button size="small" as="a" href={`/generellbehandling/${referanse}`}>
+              Gå til kravpakke utland
+            </Button>
+          )
         )
     }
   }
@@ -38,7 +30,7 @@ export const HandlingerForOppgave = ({
       case Oppgavetype.TILBAKEKREVING:
         return (
           erInnloggetSaksbehandlerOppgave &&
-          oppgave.merknad != 'Venter på kravgrunnlag' && (
+          oppgave.merknad !== 'Venter på kravgrunnlag' && (
             <Button size="small" href={`/tilbakekreving/${referanse}`} as="a">
               Gå til tilbakekreving
             </Button>
@@ -49,21 +41,17 @@ export const HandlingerForOppgave = ({
   switch (type) {
     case Oppgavetype.VURDER_KONSEKVENS:
       return (
-        <>
-          <Button size="small" icon={<EyeIcon />} href={`/person/${fnr}`} as="a">
-            Se hendelse
-          </Button>
-        </>
+        <Button size="small" icon={<EyeIcon />} href={`/person/${fnr}?fane=HENDELSER&referanse=${referanse}`} as="a">
+          Se hendelse
+        </Button>
       )
     case Oppgavetype.FOERSTEGANGSBEHANDLING:
       return (
-        <>
-          {erInnloggetSaksbehandlerOppgave && (
-            <Button size="small" as="a" href={`/behandling/${referanse}`}>
-              Gå til behandling
-            </Button>
-          )}
-        </>
+        erInnloggetSaksbehandlerOppgave && (
+          <Button size="small" as="a" href={`/behandling/${referanse}`}>
+            Gå til behandling
+          </Button>
+        )
       )
     case Oppgavetype.REVURDERING:
       return (
@@ -74,9 +62,9 @@ export const HandlingerForOppgave = ({
             </Button>
           )}
           {erInnloggetSaksbehandlerOppgave && !referanse && (
-            <OpprettNyRevurdering
-              revurderinger={revurderingsaarsaker[oppgave.sakType]}
+            <OpprettRevurderingModal
               sakId={oppgave.sakId}
+              sakType={oppgave.sakType}
               oppgaveId={oppgave.id}
               begrunnelse={oppgave.merknad}
             />
@@ -84,17 +72,21 @@ export const HandlingerForOppgave = ({
         </>
       )
     case Oppgavetype.KLAGE:
-      return erInnloggetSaksbehandlerOppgave ? (
-        <Button size="small" href={`/klage/${referanse}`} as="a">
-          Gå til klage
-        </Button>
-      ) : null
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <Button size="small" href={`/klage/${referanse}`} as="a">
+            Gå til klage
+          </Button>
+        )
+      )
     case Oppgavetype.KRAVPAKKE_UTLAND:
-      return erInnloggetSaksbehandlerOppgave ? (
-        <Button size="small" href={`/generellbehandling/${referanse}`} as="a">
-          Gå til utlandssak
-        </Button>
-      ) : null
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <Button size="small" href={`/generellbehandling/${referanse}`} as="a">
+            Gå til utlandssak
+          </Button>
+        )
+      )
     case Oppgavetype.JOURNALFOERING:
       return (
         erInnloggetSaksbehandlerOppgave && (
@@ -107,22 +99,14 @@ export const HandlingerForOppgave = ({
       return erInnloggetSaksbehandlerOppgave && <OmgjoerVedtakModal oppgave={oppgave} />
     case Oppgavetype.GJENOPPRETTING_ALDERSOVERGANG:
       return (
-        <>
-          {erInnloggetSaksbehandlerOppgave && (
-            <Button size="small" as="a" href={`/manuellbehandling/${id}`}>
-              Gå til manuell opprettelse
-            </Button>
-          )}
-        </>
-      )
-    case Oppgavetype.AKTIVITETSPLIKT:
-      return (
         erInnloggetSaksbehandlerOppgave && (
-          <Button size="small" href={`/behandling/${referanse}`} as="a">
-            Gå til behandling
+          <Button size="small" as="a" href={`/manuellbehandling/${id}`}>
+            Gå til manuell opprettelse
           </Button>
         )
       )
+    case Oppgavetype.AKTIVITETSPLIKT:
+      return erInnloggetSaksbehandlerOppgave && <AktivitetspliktInfoModal oppgave={oppgave} />
     default:
       return null
   }

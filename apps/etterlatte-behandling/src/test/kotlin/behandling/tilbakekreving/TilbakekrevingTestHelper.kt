@@ -39,7 +39,7 @@ fun kravgrunnlag(
     kontrollFelt = Kontrollfelt(""),
     status = KravgrunnlagStatus.NY,
     saksbehandler = NavIdent(""),
-    sisteUtbetalingslinjeId = behandlingId,
+    referanse = behandlingId,
     perioder =
         listOf(
             KravgrunnlagPeriode(
@@ -112,5 +112,4 @@ fun tilbakekrevingVurdering(
     rentevurdering = null,
     vedtak = "Bruker må betale tilbake.",
     vurderesForPaatale = null,
-    hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_FEMTE_LEDD,
 )

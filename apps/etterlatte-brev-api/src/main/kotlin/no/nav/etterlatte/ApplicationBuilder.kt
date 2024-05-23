@@ -75,7 +75,7 @@ import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
+import no.nav.pensjon.brevbaker.api.model.LetterMarkup
 import org.slf4j.Logger
 
 val sikkerLogg: Logger = sikkerlogger()
@@ -117,6 +117,10 @@ class ApplicationBuilder {
     private val sakService = SakService(behandlingKlient)
 
     private val beregningService = BeregningService(beregningKlient)
+    private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
+    private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
+    private val datasource = DataSourceBuilder.createDataSource(env)
+
     private val brevdataFacade =
         BrevdataFacade(
             vedtakKlient,
@@ -125,15 +129,12 @@ class ApplicationBuilder {
             behandlingKlient,
             sakService,
             trygdetidKlient,
+            adresseService,
         )
-    private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
-    private val datasource = DataSourceBuilder.createDataSource(env)
-
     private val db = BrevRepository(datasource)
 
     private val brevgenereringRepository = StartBrevgenereringRepository(datasource)
 
-    private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
     private val dokarkivKlient =
         DokarkivKlient(httpClient("DOKARKIV_SCOPE", false), env.requireEnvValue("DOKARKIV_URL"))
 
@@ -270,8 +271,8 @@ class ApplicationBuilder {
     ) = httpClient(
         forventSuksess = forventStatusSuccess,
         ekstraJacksoninnstillinger = {
-            it.addMixIn(RenderedJsonLetter.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
-            it.addMixIn(RenderedJsonLetter.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
+            it.addMixIn(LetterMarkup.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
+            it.addMixIn(LetterMarkup.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
         },
         auth = {
             if (scope != null) {

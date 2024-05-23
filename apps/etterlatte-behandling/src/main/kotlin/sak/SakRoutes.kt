@@ -18,20 +18,21 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.behandling.ForenkletBehandling
-import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.SakIderDto
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSaksbehandler
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
+import no.nav.etterlatte.libs.ktor.route.medBody
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
@@ -51,11 +52,21 @@ internal fun Route.sakSystemRoutes(
     val logger = LoggerFactory.getLogger(this::class.java)
 
     route("/saker") {
-        get("/$KJOERING/$ANTALL") {
+        post("/{$KJOERING}/{$ANTALL}") {
             kunSystembruker {
                 val kjoering = call.parameters[KJOERING]!!
                 val antall = call.parameters[ANTALL]!!.toInt()
-                call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall) }))
+                val saker = call.receive<SakIderDto>().sakIder
+                call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall, saker) }))
+            }
+        }
+
+        post("hent") {
+            kunSystembruker {
+                medBody<SakIderDto> { dto ->
+                    val saker = inTransaction { sakService.hentSakerMedIder(dto.sakIder) }
+                    call.respond(SakerDto(saker))
+                }
             }
         }
 
@@ -66,17 +77,6 @@ internal fun Route.sakSystemRoutes(
                         sakService.finnSak(sakId)
                     }
                 call.respond(sak ?: HttpStatusCode.NotFound)
-            }
-
-            // TODO: Fjerne når grunnlag er versjonert (EY-2567)
-            get("/behandlinger") {
-                kunSystembruker {
-                    val behandlinger =
-                        inTransaction { behandlingService.hentBehandlingerForSak(sakId) }
-                            .map { ForenkletBehandling(it.sak.id, it.id, it.status) }
-
-                    call.respond(ForenkletBehandlingListeWrapper(behandlinger))
-                }
             }
 
             get("/behandlinger/sisteIverksatte") {
@@ -175,7 +175,7 @@ internal fun Route.sakWebRoutes(
                             ?: throw SakIkkeFunnetException("Fant ingen sak å endre enhet på sakid: $sakId")
 
                         val sakMedEnhet =
-                            GrunnlagsendringshendelseService.SakMedEnhet(
+                            SakMedEnhet(
                                 enhet = enhetrequest.enhet,
                                 id = sakId,
                             )
@@ -183,15 +183,6 @@ internal fun Route.sakWebRoutes(
                         inTransaction {
                             sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
-                            for (oppgaveIntern in oppgaveService.hentOppgaverForSak(sakId)) {
-                                if (oppgaveIntern.saksbehandler != null &&
-                                    oppgaveIntern.status in listOf(Status.UNDER_BEHANDLING, Status.ATTESTERING, Status.PAA_VENT)
-                                ) {
-                                    oppgaveService.fjernSaksbehandler(
-                                        oppgaveIntern.id,
-                                    )
-                                }
-                            }
                         }
 
                         logger.info(
@@ -218,9 +209,10 @@ internal fun Route.sakWebRoutes(
                 }
             }
 
-            get("hendelser") {
+            get("/hendelser") {
                 logger.info("Henter behandlingshendelser i sak med sakId=$sakId")
-                call.respond(hendelseDao.hentHendelserISak(sakId))
+                val hendelser = inTransaction { hendelseDao.hentHendelserISak(sakId) }
+                call.respond(hendelser)
             }
         }
 
@@ -277,22 +269,10 @@ internal fun Route.sakWebRoutes(
                 }
             }
 
-            post("grunnlagsendringshendelser") {
-                withFoedselsnummerInternal(tilgangService) { fnr ->
-                    call.respond(
-                        inTransaction {
-                            sakService.finnSaker(fnr.value).map { sak ->
-                                GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))
-                            }
-                        }.also { requestLogger.loggRequest(brukerTokenInfo, fnr, "grunnlagsendringshendelser") },
-                    )
-                }
-            }
-
-            post("lukkgrunnlagsendringshendelse") {
+            post("arkivergrunnlagsendringshendelse") {
                 kunSaksbehandler { saksbehandler ->
-                    val lukketHendelse = call.receive<Grunnlagsendringshendelse>()
-                    grunnlagsendringshendelseService.lukkHendelseMedKommentar(hendelse = lukketHendelse, saksbehandler)
+                    val arkivertHendelse = call.receive<Grunnlagsendringshendelse>()
+                    grunnlagsendringshendelseService.arkiverHendelseMedKommentar(hendelse = arkivertHendelse, saksbehandler)
                     call.respond(HttpStatusCode.OK)
                 }
             }
@@ -305,3 +285,7 @@ data class EnhetRequest(
 )
 
 data class FoersteVirkDto(val foersteIverksatteVirkISak: LocalDate, val sakId: Long)
+
+data class SakerDto(
+    val saker: Map<Long, Sak>,
+)

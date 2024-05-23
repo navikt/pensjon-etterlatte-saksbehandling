@@ -4,6 +4,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -56,7 +57,7 @@ class VedtakBehandlingService(
     ): LoependeYtelse {
         logger.info("Sjekker om det finnes løpende vedtak for sak $sakId på dato $dato")
         val alleVedtakForSak = repository.hentVedtakForSak(sakId)
-        return Vedtakstidslinje(alleVedtakForSak).erLoependePaa(dato)
+        return Vedtakstidslinje(alleVedtakForSak).harLoependeVedtakPaaEllerEtter(dato)
     }
 
     suspend fun opprettEllerOppdaterVedtak(
@@ -128,6 +129,7 @@ class VedtakBehandlingService(
                                             saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler,
                                         ),
                                     vedtakType = fattetVedtak.type,
+                                    opphoerFraOgMed = (vedtak.innhold as VedtakInnhold.Behandling).opphoerFraOgMed,
                                 ),
                         )
                     }
@@ -294,27 +296,36 @@ class VedtakBehandlingService(
                 behandlingId = behandlingId,
             )
 
-        val isEtterbetaling = erVedtakMedEtterbetaling(tilSamordningVedtakLocal, repository)
+        return VedtakOgRapid(tilSamordningVedtakLocal.toDto(), tilSamordning)
+    }
 
-        if (!samKlient.samordneVedtak(tilSamordningVedtakLocal, isEtterbetaling, brukerTokenInfo)) {
-            logger.info("Svar fra samordning: ikke nødvendig å vente for vedtak=${vedtak.id} [behandlingId=$behandlingId]")
+    suspend fun samordne(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        logger.info("Kaller SAM for å samordne vedtak behandlingId=$behandlingId")
+        val vedtak = hentVedtakNonNull(behandlingId)
 
-            val vedtakEtterSvar = samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)!!
-            return VedtakOgRapid(vedtakEtterSvar.vedtak, tilSamordning, vedtakEtterSvar.rapidInfo1)
-        } else {
-            logger.info("Svar fra samordning: må vente for vedtak=${vedtak.id} [behandlingId=$behandlingId]")
+        if (vedtak.isRegulering()) {
+            logger.info("Oppretter ikke samordning ved regulering [behandlingId=$behandlingId]")
+            return false
         }
 
-        return VedtakOgRapid(tilSamordningVedtakLocal.toDto(), tilSamordning)
+        return samKlient.samordneVedtak(
+            vedtak = vedtak,
+            etterbetaling = vedtak.erVedtakMedEtterbetaling(repository),
+            brukerTokenInfo = brukerTokenInfo,
+        ).also {
+            logger.info("Samordning: skal vente? $it [vedtak=${vedtak.id}, behandlingId=$behandlingId]")
+        }
     }
 
     fun samordnetVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        vedtakTilSamordning: Vedtak? = null,
     ): VedtakOgRapid? {
         logger.info("Setter vedtak til samordnet for behandling med behandlingId=$behandlingId")
-        val vedtak = vedtakTilSamordning ?: hentVedtakNonNull(behandlingId)
+        val vedtak = hentVedtakNonNull(behandlingId)
 
         when (vedtak.status) {
             VedtakStatus.TIL_SAMORDNING -> {
@@ -442,6 +453,7 @@ class VedtakBehandlingService(
         beregningOgAvkorting: BeregningOgAvkorting?,
         vilkaarsvurdering: VilkaarsvurderingDto?,
     ): Vedtak {
+        val opphoerFraOgMed = utledOpphoerFraOgMed(vedtakType, virkningstidspunkt, behandling)
         val opprettetVedtak =
             OpprettVedtak(
                 soeker = behandling.soeker.let { Folkeregisteridentifikator.of(it) },
@@ -460,12 +472,13 @@ class VedtakBehandlingService(
                         utbetalingsperioder =
                             opprettUtbetalingsperioder(
                                 vedtakType = vedtakType,
-                                virkningstidspunkt = virkningstidspunkt,
                                 beregningOgAvkorting = beregningOgAvkorting,
                                 behandling.sakType,
+                                opphoerFraOgMed = opphoerFraOgMed,
                             ),
                         revurderingAarsak = behandling.revurderingsaarsak,
                         revurderingInfo = behandling.revurderingInfo,
+                        opphoerFraOgMed = opphoerFraOgMed,
                     ),
             )
 
@@ -480,6 +493,7 @@ class VedtakBehandlingService(
         beregningOgAvkorting: BeregningOgAvkorting?,
         vilkaarsvurdering: VilkaarsvurderingDto?,
     ): Vedtak {
+        val opphoerFraOgMed = utledOpphoerFraOgMed(vedtakType, virkningstidspunkt, behandling)
         val oppdatertVedtak =
             eksisterendeVedtak.copy(
                 type = vedtakType,
@@ -492,14 +506,38 @@ class VedtakBehandlingService(
                         utbetalingsperioder =
                             opprettUtbetalingsperioder(
                                 vedtakType = vedtakType,
-                                virkningstidspunkt = virkningstidspunkt,
                                 beregningOgAvkorting = beregningOgAvkorting,
                                 behandling.sakType,
+                                opphoerFraOgMed = opphoerFraOgMed,
                             ),
                         revurderingInfo = behandling.revurderingInfo,
+                        opphoerFraOgMed = opphoerFraOgMed,
                     ),
             )
         return repository.oppdaterVedtak(oppdatertVedtak)
+    }
+
+    private fun utledOpphoerFraOgMed(
+        vedtakType: VedtakType,
+        virkningstidspunkt: YearMonth,
+        behandling: DetaljertBehandling,
+    ) = when (vedtakType) {
+        VedtakType.OPPHOER -> {
+            virkningstidspunkt
+        }
+        else -> {
+            if (virkningstidspunkt == behandling.opphoerFraOgMed) {
+                // TODO Det burde være en løsning for å kunne fjerne et opphler uten en revurdering med samme virk som opphøret?
+                null
+            } else if (behandling.opphoerFraOgMed != null && virkningstidspunkt > behandling.opphoerFraOgMed) {
+                throw UgyldigForespoerselException(
+                    code = "VIRKNINGSTIDSPUNKT_ETTER_OPPHOER",
+                    detail = "Virkningstidspunkt kan ikke være senere enn opphør fra og med",
+                )
+            } else {
+                behandling.opphoerFraOgMed
+            }
+        }
     }
 
     private fun vedtakType(
@@ -525,61 +563,73 @@ class VedtakBehandlingService(
 
     private fun opprettUtbetalingsperioder(
         vedtakType: VedtakType,
-        virkningstidspunkt: YearMonth,
         beregningOgAvkorting: BeregningOgAvkorting?,
         sakType: SakType,
+        opphoerFraOgMed: YearMonth?,
     ): List<Utbetalingsperiode> {
-        return when (vedtakType) {
-            VedtakType.INNVILGELSE, VedtakType.ENDRING -> {
-                when (sakType) {
-                    SakType.BARNEPENSJON -> {
-                        val beregningsperioder =
-                            requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
-                                "Mangler beregning"
+        val perioderMedUtbetaling =
+            when (vedtakType) {
+                VedtakType.INNVILGELSE, VedtakType.ENDRING -> {
+                    when (sakType) {
+                        SakType.BARNEPENSJON -> {
+                            val beregningsperioder =
+                                requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
+                                    "Mangler beregning"
+                                }
+                            beregningsperioder.map {
+                                Utbetalingsperiode(
+                                    periode =
+                                        Periode(
+                                            fom = it.datoFOM,
+                                            tom = it.datoTOM ?: opphoerFraOgMed?.minusMonths(1),
+                                        ),
+                                    beloep = it.utbetaltBeloep.toBigDecimal(),
+                                    type = UtbetalingsperiodeType.UTBETALING,
+                                )
                             }
-                        beregningsperioder.map {
-                            Utbetalingsperiode(
-                                periode = Periode(it.datoFOM, it.datoTOM),
-                                beloep = it.utbetaltBeloep.toBigDecimal(),
-                                type = UtbetalingsperiodeType.UTBETALING,
-                            )
                         }
-                    }
 
-                    SakType.OMSTILLINGSSTOENAD -> {
-                        val avkortetYtelse =
-                            beregningOgAvkorting?.avkorting?.avkortetYtelse
-                                ?: throw ManglerAvkortetYtelse()
+                        SakType.OMSTILLINGSSTOENAD -> {
+                            val avkortetYtelse =
+                                beregningOgAvkorting?.avkorting?.avkortetYtelse
+                                    ?: throw ManglerAvkortetYtelse()
 
-                        avkortetYtelse.map {
-                            Utbetalingsperiode(
-                                periode =
-                                    Periode(
-                                        fom = YearMonth.from(it.fom),
-                                        tom = it.tom?.let { tom -> YearMonth.from(tom) },
-                                    ),
-                                beloep = it.ytelseEtterAvkorting.toBigDecimal(),
-                                type = UtbetalingsperiodeType.UTBETALING,
-                            )
+                            avkortetYtelse.map {
+                                Utbetalingsperiode(
+                                    periode =
+                                        Periode(
+                                            fom = it.fom,
+                                            tom = it.tom ?: opphoerFraOgMed?.minusMonths(1),
+                                        ),
+                                    beloep = it.ytelseEtterAvkorting.toBigDecimal(),
+                                    type = UtbetalingsperiodeType.UTBETALING,
+                                )
+                            }
                         }
                     }
                 }
+
+                VedtakType.OPPHOER,
+                VedtakType.TILBAKEKREVING,
+                VedtakType.AVSLAG,
+                VedtakType.AVVIST_KLAGE,
+                -> emptyList()
             }
 
-            VedtakType.OPPHOER ->
+        val perioderMedOpphoer =
+            if (opphoerFraOgMed != null) {
                 listOf(
                     Utbetalingsperiode(
-                        periode = Periode(virkningstidspunkt, null),
+                        periode = Periode(opphoerFraOgMed, null),
                         beloep = null,
                         type = UtbetalingsperiodeType.OPPHOER,
                     ),
                 )
+            } else {
+                emptyList()
+            }
 
-            VedtakType.TILBAKEKREVING,
-            VedtakType.AVSLAG,
-            VedtakType.AVVIST_KLAGE,
-            -> emptyList()
-        }
+        return perioderMedUtbetaling + perioderMedOpphoer
     }
 
     private suspend fun hentDataForVedtak(
@@ -623,6 +673,10 @@ class VedtakBehandlingService(
         return repository.hentVedtakForSak(sakId)
             .filter { it.status == VedtakStatus.IVERKSATT }
     }
+
+    private fun Vedtak.isRegulering() =
+        this.innhold is VedtakInnhold.Behandling &&
+            Revurderingaarsak.REGULERING == this.innhold.revurderingAarsak
 }
 
 class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: List<VedtakStatus>) :

@@ -42,6 +42,8 @@ fun opprettVedtak(
     beregning: ObjectNode? = objectMapper.createObjectNode(),
     avkorting: ObjectNode? = objectMapper.createObjectNode(),
     sakType: SakType = SakType.BARNEPENSJON,
+    behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+    revurderingAarsak: Revurderingaarsak? = null,
 ) = OpprettVedtak(
     soeker = soeker,
     sakId = sakId,
@@ -51,8 +53,8 @@ fun opprettVedtak(
     status = status,
     innhold =
         VedtakInnhold.Behandling(
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            revurderingAarsak = null,
+            behandlingType = behandlingType,
+            revurderingAarsak = revurderingAarsak,
             virkningstidspunkt = virkningstidspunkt,
             beregning = beregning,
             avkorting = avkorting,
@@ -99,8 +101,10 @@ fun opprettVedtakKlage(
 )
 
 fun vedtak(
+    id: Long = 1L,
     virkningstidspunkt: YearMonth = YearMonth.of(2023, Month.JANUARY),
     sakId: Long = 1L,
+    sakType: SakType = SakType.BARNEPENSJON,
     behandlingId: UUID = UUID.randomUUID(),
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
     beregning: ObjectNode? = objectMapper.createObjectNode(),
@@ -110,11 +114,11 @@ fun vedtak(
     vedtakFattet: VedtakFattet? = null,
     utbetalingsperioder: List<Utbetalingsperiode>? = null,
 ) = Vedtak(
-    id = 1L,
+    id = id,
     status = status,
     soeker = SOEKER_FOEDSELSNUMMER,
     sakId = sakId,
-    sakType = SakType.BARNEPENSJON,
+    sakType = sakType,
     behandlingId = behandlingId,
     type = VedtakType.INNVILGELSE,
     vedtakFattet = vedtakFattet,

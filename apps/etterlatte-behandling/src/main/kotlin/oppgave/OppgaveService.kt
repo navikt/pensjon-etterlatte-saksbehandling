@@ -8,7 +8,8 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -36,6 +37,7 @@ import java.util.UUID
 class OppgaveService(
     private val oppgaveDao: OppgaveDaoMedEndringssporing,
     private val sakDao: SakDao,
+    private val hendelseDao: HendelseDao,
     private val hendelser: BehandlingHendelserKafkaProducer,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
@@ -159,9 +161,8 @@ class OppgaveService(
     ) {
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId) ?: throw OppgaveIkkeFunnet(oppgaveId)
-        sikreAktivOppgaveOgTildeltSaksbehandler(hentetOppgave) {
-            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, status)
-        }
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+        oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, status)
     }
 
     fun endreTilKildeBehandlingOgOppdaterReferanse(
@@ -190,19 +191,15 @@ class OppgaveService(
         oppgaveDao.oppdaterReferanseOgMerknad(oppgaveId, referanse, merknad)
     }
 
-    fun endrePaaVent(
-        oppgaveId: UUID,
-        merknad: String,
-        paaVent: Boolean,
-    ) {
-        val oppgave = hentOppgave(oppgaveId)
-        if (paaVent && oppgave.status == Status.PAA_VENT) return
-        if (!paaVent && oppgave.status != Status.PAA_VENT) return
+    fun endrePaaVent(paavent: PaaVent): OppgaveIntern {
+        val oppgave = hentOppgave(paavent.oppgaveId)
+        if (paavent.paavent && oppgave.status == Status.PAA_VENT) return oppgave
+        if (!paavent.paavent && oppgave.status != Status.PAA_VENT) return oppgave
 
         sikreAktivOppgaveOgTildeltSaksbehandler(oppgave) {
-            val nyStatus = if (paaVent) Status.PAA_VENT else hentForrigeStatus(oppgaveId)
+            val nyStatus = if (paavent.paavent) Status.PAA_VENT else hentForrigeStatus(paavent.oppgaveId)
 
-            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, nyStatus)
+            oppgaveDao.oppdaterPaaVent(paavent, nyStatus)
 
             when (oppgave.type) {
                 OppgaveType.FOERSTEGANGSBEHANDLING,
@@ -210,15 +207,25 @@ class OppgaveService(
                 OppgaveType.TILBAKEKREVING,
                 OppgaveType.KLAGE,
                 -> {
-                    hendelser.sendMeldingForHendelsePaaVent(
-                        UUID.fromString(oppgave.referanse),
-                        if (nyStatus == Status.PAA_VENT) BehandlingHendelseType.PAA_VENT else BehandlingHendelseType.AV_VENT,
-                    )
+                    if (nyStatus == Status.PAA_VENT) {
+                        hendelser.sendMeldingForHendelsePaaVent(
+                            UUID.fromString(oppgave.referanse),
+                            BehandlingHendelseType.PAA_VENT,
+                            paavent.aarsak!!,
+                        )
+                    } else {
+                        hendelser.sendMeldingForHendelseAvVent(
+                            UUID.fromString(oppgave.referanse),
+                            BehandlingHendelseType.AV_VENT,
+                        )
+                    }
                 }
 
                 else -> {} // Ingen statistikk for resten
             }
         }
+
+        return hentOppgave(paavent.oppgaveId)
     }
 
     private fun sikreAktivOppgaveOgTildeltSaksbehandler(
@@ -283,13 +290,7 @@ class OppgaveService(
         val oppdatertMerknad = merknad ?: oppgave.merknad ?: ""
         oppgaveDao.oppdaterStatusOgMerknad(oppgave.id, oppdatertMerknad, Status.UNDERKJENT)
 
-        val saksbehandler =
-            oppgaveDao.hentEndringerForOppgave(oppgave.id)
-                .sortedByDescending { it.tidspunkt }
-                .firstOrNull(OppgaveEndring::sendtTilAttestering)
-                ?.oppgaveFoer
-                ?.saksbehandler
-
+        val saksbehandler = saksbehandlerSomFattetVedtak(oppgave)
         if (saksbehandler != null) {
             oppgaveDao.settNySaksbehandler(oppgave.id, saksbehandler.ident)
         } else {
@@ -301,6 +302,13 @@ class OppgaveService(
 
         return oppgave
     }
+
+    private fun saksbehandlerSomFattetVedtak(oppgave: OppgaveIntern) =
+        oppgaveDao.hentEndringerForOppgave(oppgave.id)
+            .sortedByDescending { it.tidspunkt }
+            .firstOrNull(OppgaveEndring::sendtTilAttestering)
+            ?.oppgaveFoer
+            ?.saksbehandler
 
     // TODO: Slå sammen med de 3 andre "ferdigstill"-funksjonene
     fun ferdigStillOppgaveUnderBehandling(
@@ -347,6 +355,36 @@ class OppgaveService(
                 "Oppgave med id=$id finnes ikke – avbryter ferdigstilling av oppgaven"
             }
         ferdigstillOppgave(oppgave, saksbehandler, merknad)
+    }
+
+    fun hentEndringerOppgave(id: UUID): List<GenerellEndringshendelse> {
+        val oppgave = hentOppgave(id)
+
+        val behandlingHendelser =
+            if (oppgave.kilde == OppgaveKilde.BEHANDLING) {
+                hendelseDao.finnHendelserIBehandling(UUID.fromString(oppgave.referanse))
+                    .map {
+                        val hendelse = EndringMapper.mapBehandlingHendelse(it)
+                        GenerellEndringshendelse(
+                            tidspunkt = it.opprettet,
+                            saksbehandler = it.ident,
+                            endringer =
+                                listOf(
+                                    EndringLinje(
+                                        hendelse,
+                                        it.kommentar?.let { kommentar -> "Kommentar: $kommentar" },
+                                    ),
+                                ),
+                        )
+                    }
+            } else {
+                emptyList()
+            }
+
+        val oppgaveHendelser = EndringMapper.mapOppgaveEndringer(oppgaveDao.hentEndringerForOppgave(id))
+
+        return (oppgaveHendelser + behandlingHendelser)
+            .sortedByDescending { it.tidspunkt }
     }
 
     private fun ferdigstillOppgave(
@@ -398,9 +436,20 @@ class OppgaveService(
         }
     }
 
-    fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
+    fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<SakMedEnhet>) {
         sakerMedNyEnhet.forEach {
             endreEnhetForOppgaverTilknyttetSak(it.id, it.enhet)
+            fjernSaksbehandlerFraOppgaveVedFlytt(it.id)
+        }
+    }
+
+    private fun fjernSaksbehandlerFraOppgaveVedFlytt(sakId: Long) {
+        for (oppgaveIntern in hentOppgaverForSak(sakId)) {
+            if (oppgaveIntern.saksbehandler != null &&
+                oppgaveIntern.erUnderBehandling()
+            ) {
+                fjernSaksbehandler(oppgaveIntern.id)
+            }
         }
     }
 
@@ -547,7 +596,19 @@ class OppgaveService(
     fun hentFristGaarUt(request: VentefristGaarUtRequest): List<VentefristGaarUt> =
         oppgaveDao.hentFristGaarUt(request.dato, request.type, request.oppgaveKilde, request.oppgaver, request.grense)
 
-    fun tilbakestillOppgaveTilAttestering(saker: Saker) = oppgaveDao.tilbakestillOppgaveUnderAttestering(saker)
+    fun tilbakestillOppgaverUnderAttestering(saker: Saker) {
+        val oppgaverTilAttestering =
+            oppgaveDao.hentOppgaverTilSaker(
+                saker.saker.map { it.id },
+                listOf(Status.ATTESTERING.name),
+            )
+        oppgaverTilAttestering.forEach { oppgave ->
+            oppgaveDao.tilbakestillOppgaveUnderAttestering(oppgave)
+            saksbehandlerSomFattetVedtak(oppgave)?.let { saksbehandler ->
+                oppgaveDao.settNySaksbehandler(oppgave.id, saksbehandler.ident)
+            }
+        }
+    }
 }
 
 class BrukerManglerAttestantRolleException(ident: String) : UgyldigForespoerselException(

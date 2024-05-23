@@ -40,6 +40,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.toObjectNode
+import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.PingResult
@@ -165,6 +166,14 @@ class VedtakKlientTest : VedtakKlient {
         return mockk<VedtakDto> {
             every { id } returns 123L
         }
+    }
+
+    override suspend fun sakHarLopendeVedtakPaaDato(
+        sakId: Long,
+        dato: LocalDate,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): LoependeYtelseDTO {
+        return LoependeYtelseDTO(true, false, LocalDate.now())
     }
 }
 
@@ -344,10 +353,10 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
             Tidspunkt.now(),
             "4808",
             null,
-            "aktoerId",
             "beskrivelse",
             "NY",
             LocalDate.now(),
+            bruker = null,
         )
     }
 

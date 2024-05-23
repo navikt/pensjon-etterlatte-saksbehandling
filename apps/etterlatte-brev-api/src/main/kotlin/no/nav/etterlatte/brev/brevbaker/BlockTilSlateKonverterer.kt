@@ -1,10 +1,10 @@
 package no.nav.etterlatte.brev.brevbaker
 
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
+import no.nav.pensjon.brevbaker.api.model.LetterMarkup
 
 object BlockTilSlateKonverterer {
-    internal fun konverter(it: RenderedJsonLetter) =
+    internal fun konverter(it: LetterMarkup) =
         Slate(
             it
                 .blocks
@@ -12,45 +12,51 @@ object BlockTilSlateKonverterer {
                 .toList(),
         )
 
-    private fun tilSlateElement(block: RenderedJsonLetter.Block) =
+    private fun tilSlateElement(block: LetterMarkup.Block) =
         when (block.type) {
-            RenderedJsonLetter.Block.Type.TITLE1 ->
+            LetterMarkup.Block.Type.TITLE1 ->
                 listOf(
                     Slate.Element(
                         type = Slate.ElementType.HEADING_TWO,
-                        children = (block as RenderedJsonLetter.Block.Title1).content.map { konverterLiteralOgVariable(it) },
+                        children = (block as LetterMarkup.Block.Title1).content.map { konverterLiteralOgVariable(it) },
                     ),
                 )
 
-            RenderedJsonLetter.Block.Type.TITLE2 ->
+            LetterMarkup.Block.Type.TITLE2 ->
                 listOf(
                     Slate.Element(
                         type = Slate.ElementType.HEADING_THREE,
-                        children = (block as RenderedJsonLetter.Block.Title2).content.map { konverterLiteralOgVariable(it) },
+                        children = (block as LetterMarkup.Block.Title2).content.map { konverterLiteralOgVariable(it) },
                     ),
                 )
 
             // Hvis en paragraf fra brevbakeren inneholder lister, vil disse splittes ut og legges inn som en
             // Element-node i stedet for en InnerElement-node siden redigering av dette ikke støttes i slate-editoren.
             // De øvrige InnerElementene vil bli slått sammen og lagt til som egne Element-noder.
-            RenderedJsonLetter.Block.Type.PARAGRAPH -> {
+            LetterMarkup.Block.Type.PARAGRAPH -> {
                 val elements: MutableList<Slate.Element> = mutableListOf()
                 val innerElements: MutableList<Slate.InnerElement> = mutableListOf()
 
-                (block as RenderedJsonLetter.Block.Paragraph).content.map {
+                (block as LetterMarkup.Block.Paragraph).content.map {
                     when (it.type) {
-                        RenderedJsonLetter.ParagraphContent.Type.LITERAL, RenderedJsonLetter.ParagraphContent.Type.VARIABLE ->
+                        LetterMarkup.ParagraphContent.Type.LITERAL,
+                        LetterMarkup.ParagraphContent.Type.VARIABLE,
+                        LetterMarkup.ParagraphContent.Type.NEW_LINE,
+                        ->
                             konverterLiteralOgVariable(it).let { innerElement -> innerElements.add(innerElement) }
 
-                        RenderedJsonLetter.ParagraphContent.Type.ITEM_LIST -> {
+                        LetterMarkup.ParagraphContent.Type.ITEM_LIST -> {
                             opprettElementFraInnerELementsOgNullstill(innerElements, elements)
 
                             Slate.Element(
                                 type = Slate.ElementType.BULLETED_LIST,
                                 children =
-                                    (it as RenderedJsonLetter.ParagraphContent.ItemList).items
+                                    (it as LetterMarkup.ParagraphContent.ItemList).items
                                         .map { item -> konverterListItem(item) },
                             ).let { element -> elements.add(element) }
+                        }
+                        else -> {
+                            throw IllegalArgumentException("Ukjent type: ${it.type}")
                         }
                     }
                 }
@@ -75,13 +81,13 @@ object BlockTilSlateKonverterer {
         }
     }
 
-    private fun konverterLiteralOgVariable(it: RenderedJsonLetter.ParagraphContent): Slate.InnerElement =
+    private fun konverterLiteralOgVariable(it: LetterMarkup.ParagraphContent): Slate.InnerElement =
         Slate.InnerElement(
             type = Slate.ElementType.PARAGRAPH,
-            text = (it as RenderedJsonLetter.ParagraphContent.Text).text,
+            text = (it as LetterMarkup.ParagraphContent.Text).text,
         )
 
-    private fun konverterListItem(it: RenderedJsonLetter.ParagraphContent.ItemList.Item): Slate.InnerElement =
+    private fun konverterListItem(it: LetterMarkup.ParagraphContent.ItemList.Item): Slate.InnerElement =
         Slate.InnerElement(
             type = Slate.ElementType.LIST_ITEM,
             children =

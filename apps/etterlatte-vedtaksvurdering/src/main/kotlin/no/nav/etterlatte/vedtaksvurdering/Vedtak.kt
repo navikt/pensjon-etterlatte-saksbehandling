@@ -80,6 +80,10 @@ data class Vedtak(
                 },
         )
     }
+
+    fun underArbeid(): Boolean {
+        return status in listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT)
+    }
 }
 
 sealed interface VedtakInnhold {
@@ -92,6 +96,7 @@ sealed interface VedtakInnhold {
         val vilkaarsvurdering: ObjectNode?,
         val utbetalingsperioder: List<Utbetalingsperiode>,
         val revurderingInfo: RevurderingInfo? = null,
+        val opphoerFraOgMed: YearMonth? = null,
     ) : VedtakInnhold
 
     data class Tilbakekreving(
@@ -103,7 +108,14 @@ sealed interface VedtakInnhold {
     ) : VedtakInnhold
 }
 
-data class LoependeYtelse(val erLoepende: Boolean, val dato: LocalDate, val behandlingId: UUID? = null)
+data class LoependeYtelse(
+    val erLoepende: Boolean,
+    val underSamordning: Boolean,
+    val dato: LocalDate,
+    val behandlingId: UUID? = null,
+    // TODO kun relevant for regulering 2024 da feltet opphoerFraOgMed er innført i forkant av reguleringen 2024
+    val opphoerFraOgMed: YearMonth? = null,
+)
 
 class UgyldigAttestantException(ident: String) :
     IkkeTillattException(

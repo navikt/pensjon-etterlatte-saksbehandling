@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
@@ -115,23 +114,6 @@ internal class BehandlingTest {
     @Test
     fun `behandling må være fylt ut for å settes til FATTET VEDTAK`() {
         assertThrows<TilstandException.IkkeFyltUt> { behandling.tilFattetVedtak() }
-    }
-
-    @Test
-    @Disabled // TODO EY-2927
-    fun `kan ikke ga fra VILKAARSVURDERT til FATTET VEDTAK`() {
-        val fyltUtBehandling =
-            behandling
-                .oppdaterVirkningstidspunkt(virkningstidspunkt)
-                .oppdaterGyldighetsproeving(gyldighetsResultat)
-
-        assertThrows<TilstandException.UgyldigTilstand> { fyltUtBehandling.tilVilkaarsvurdert().tilFattetVedtak() }
-        assertThrows<TilstandException.UgyldigTilstand> {
-            fyltUtBehandling.tilVilkaarsvurdert().tilFattetVedtak()
-        }
-        assertThrows<TilstandException.UgyldigTilstand> {
-            fyltUtBehandling.tilVilkaarsvurdert().tilFattetVedtak()
-        }
     }
 
     @Test

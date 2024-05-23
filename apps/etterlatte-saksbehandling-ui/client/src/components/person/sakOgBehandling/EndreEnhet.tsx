@@ -2,11 +2,11 @@ import { Alert, Button, Heading, Modal, Select } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { ButtonGroup } from '~components/person/VurderHendelseModal'
 import { isPending } from '~shared/api/apiUtils'
 import { byttEnhetPaaSak } from '~shared/api/sak'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
 import { PencilIcon } from '@navikt/aksel-icons'
+import { ButtonGroup } from '~shared/styled'
 
 export const EndreEnhet = ({ sakId }: { sakId: number }) => {
   const [error, setError] = useState<string | null>(null)
@@ -30,7 +30,7 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
   }
 
   return (
-    <>
+    <div>
       <Button
         size="small"
         variant="tertiary"
@@ -76,7 +76,7 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
           </ButtonGroup>
         </Modal.Body>
       </Modal>
-    </>
+    </div>
   )
 }
 

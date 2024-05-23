@@ -16,6 +16,8 @@ import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
@@ -74,6 +76,7 @@ import no.nav.etterlatte.common.klienter.PesysKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsHendelseFilter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
@@ -265,6 +268,8 @@ internal class ApplicationContext(
     val hendelseDao = HendelseDao(autoClosingDatabase)
     val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(autoClosingDatabase)
     val aktivitetspliktDao = AktivitetspliktDao(autoClosingDatabase)
+    val aktivitetspliktAktivitetsgradDao = AktivitetspliktAktivitetsgradDao(autoClosingDatabase)
+    val aktivitetspliktUnntakDao = AktivitetspliktUnntakDao(autoClosingDatabase)
     val sjekklisteDao = SjekklisteDao(autoClosingDatabase)
     val revurderingDao = RevurderingDao(autoClosingDatabase)
     val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao, autoClosingDatabase)
@@ -304,9 +309,8 @@ internal class ApplicationContext(
     // Service
     val klageHendelser = KlageHendelserServiceImpl(rapid)
     val tilbakekrevingHendelserService = TilbakekrevingHendelserServiceImpl(rapid)
-    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, behandlingsHendelser)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, hendelseDao, behandlingsHendelser)
 
-    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlTjenesterKlient, oppgaveService)
     val grunnlagsService = GrunnlagServiceImpl(grunnlagKlient)
     val behandlingService =
         BehandlingServiceImpl(
@@ -336,7 +340,8 @@ internal class ApplicationContext(
         )
     val kommerBarnetTilGodeService =
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
-    val aktivtetspliktService = AktivitetspliktService(aktivitetspliktDao, behandlingService)
+    val aktivitetspliktService =
+        AktivitetspliktService(aktivitetspliktDao, aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, behandlingService)
     val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
 
     val klageBrevService = KlageBrevService(brevApiKlient)
@@ -344,6 +349,7 @@ internal class ApplicationContext(
         KlageServiceImpl(
             klageDao = klageDao,
             sakDao = sakDao,
+            behandlingService = behandlingService,
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,
             klageKlient = klageKlient,
@@ -365,6 +371,7 @@ internal class ApplicationContext(
             revurderingDao = revurderingDao,
             klageService = klageService,
             behandlingService = behandlingService,
+            aktivitetspliktService = aktivitetspliktService,
         )
     val automatiskRevurderingService = AutomatiskRevurderingService(revurderingService)
 
@@ -406,6 +413,7 @@ internal class ApplicationContext(
         )
     val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
 
+    val grunnlagsendringsHendelseFilter = GrunnlagsendringsHendelseFilter(vedtakKlient, behandlingService)
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             oppgaveService = oppgaveService,
@@ -416,6 +424,7 @@ internal class ApplicationContext(
             sakService = sakService,
             brukerService = enhetService,
             doedshendelseService = doedshendelseService,
+            grunnlagsendringsHendelseFilter = grunnlagsendringsHendelseFilter,
         )
 
     val doedshendelseReminderJob = DoedshendelseReminderService(featureToggleService, doedshendelseDao, behandlingService, oppgaveService)
@@ -460,6 +469,7 @@ internal class ApplicationContext(
             tilbakekrevingDao = tilbakekrevingDao,
             sakDao = sakDao,
             hendelseDao = hendelseDao,
+            behandlingService = behandlingService,
             oppgaveService = oppgaveService,
             vedtakKlient = vedtakKlient,
             brevApiKlient = brevApiKlient,
@@ -469,7 +479,7 @@ internal class ApplicationContext(
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
     val saksbehandlerService: SaksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
-
+    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService)
     val behandlingFactory =
         BehandlingFactory(
             oppgaveService = oppgaveService,
@@ -538,6 +548,8 @@ internal class ApplicationContext(
             starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
             periode = Duration.ofDays(1),
             service = oppgaveService,
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
         )
     }
 

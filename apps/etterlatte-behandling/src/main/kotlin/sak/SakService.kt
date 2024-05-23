@@ -11,7 +11,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -36,6 +36,7 @@ interface SakService {
     fun hentSaker(
         kjoering: String,
         antall: Int,
+        saker: List<Long>,
     ): List<Sak>
 
     fun finnSaker(person: String): List<Sak>
@@ -71,7 +72,7 @@ interface SakService {
         skjermet: Boolean,
     )
 
-    fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>)
+    fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>)
 
     fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering>
 
@@ -88,6 +89,8 @@ interface SakService {
     fun hentEnkeltSakForPerson(fnr: String): Sak
 
     suspend fun finnNavkontorForPerson(fnr: String): Navkontor
+
+    fun hentSakerMedIder(sakIder: List<Long>): Map<Long, Sak>
 }
 
 class ManglerTilgangTilEnhet(enheter: List<String>) :
@@ -130,21 +133,34 @@ class SakServiceImpl(
         return brukerService.finnNavkontorForPerson(fnr, sak.sakType)
     }
 
+    override fun hentSakerMedIder(sakIder: List<Long>): Map<Long, Sak> {
+        val saker = dao.hentSakerMedIder(sakIder)
+        return saker.associateBy { it.id }
+    }
+
     override fun hentSaker(
         kjoering: String,
         antall: Int,
+        saker: List<Long>,
     ): List<Sak> {
-        return dao.hentSaker(kjoering, antall).filterForEnheter()
+        return dao.hentSaker(kjoering, antall, saker).filterForEnheter()
     }
 
-    private fun finnSakerForPerson(person: String) = dao.finnSaker(person)
-
-    private fun finnSakerForPersonOgType(
+    private fun finnSakForPerson(
         person: String,
-        type: SakType,
-    ) = finnSakerForPerson(person).find {
-        it.sakType == type
+        sakType: SakType,
+    ) = finnSakerForPerson(person, sakType).let {
+        if (it.isEmpty()) {
+            null
+        } else {
+            it.single()
+        }
     }
+
+    private fun finnSakerForPerson(
+        person: String,
+        sakType: SakType? = null,
+    ) = dao.finnSaker(person, sakType)
 
     override fun finnSaker(person: String): List<Sak> {
         return finnSakerForPerson(person).filterForEnheter()
@@ -198,7 +214,7 @@ class SakServiceImpl(
         type: SakType,
         overstyrendeEnhet: String?,
     ): Sak {
-        var sak = finnSakerForPersonOgType(fnr, type)
+        var sak = finnSakForPerson(fnr, type)
         if (sak == null) {
             val enhet = sjekkEnhetFraNorg(fnr, type, overstyrendeEnhet)
             sak = dao.opprettSak(fnr, type, enhet)
@@ -228,17 +244,19 @@ class SakServiceImpl(
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> {
                 if (sak.enhet != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr) {
                     dao.oppdaterEnheterPaaSaker(
-                        listOf(GrunnlagsendringshendelseService.SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)),
+                        listOf(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr)),
                     )
                 }
             }
+
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
                 if (sak.enhet != Enheter.STRENGT_FORTROLIG.enhetNr) {
                     dao.oppdaterEnheterPaaSaker(
-                        listOf(GrunnlagsendringshendelseService.SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG.enhetNr)),
+                        listOf(SakMedEnhet(sak.id, Enheter.STRENGT_FORTROLIG.enhetNr)),
                     )
                 }
             }
+
             AdressebeskyttelseGradering.FORTROLIG -> return
             AdressebeskyttelseGradering.UGRADERT -> return
         }
@@ -270,12 +288,14 @@ class SakServiceImpl(
                     sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering strengt fortrolig")
                 }
             }
+
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> {
                 if (this.enhetNr != Enheter.STRENGT_FORTROLIG.enhetNr) {
                     logger.error("Sak har fått satt feil enhetsnummer basert på gradering, se sikkerlogg.")
                     sikkerLogg.info("Sakid: ${this.id} har fått satt feil enhetsnummer basert på gradering strengt fortrolig")
                 }
             }
+
             AdressebeskyttelseGradering.FORTROLIG, AdressebeskyttelseGradering.UGRADERT, null -> return
         }
     }
@@ -296,9 +316,13 @@ class SakServiceImpl(
     override fun finnGjeldendeEnhet(
         fnr: String,
         type: SakType,
-    ) = when (val sak = finnSakerForPersonOgType(fnr, type)) {
-        null -> sjekkEnhetFraNorg(fnr, type, null)
-        else -> sak.enhet
+    ): String {
+        val sak = finnSakForPerson(fnr, type)
+
+        return when (sak) {
+            null -> sjekkEnhetFraNorg(fnr, type, null)
+            else -> sak.enhet
+        }
     }
 
     private fun sjekkEnhetFraNorg(
@@ -330,13 +354,13 @@ class SakServiceImpl(
             }
         if (erSkjermet) {
             dao.oppdaterEnheterPaaSaker(
-                listOf(GrunnlagsendringshendelseService.SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)),
+                listOf(SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)),
             )
         }
         dao.markerSakerMedSkjerming(sakIder = listOf(sakId), skjermet = erSkjermet)
     }
 
-    override fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
+    override fun oppdaterEnhetForSaker(saker: List<SakMedEnhet>) {
         dao.oppdaterEnheterPaaSaker(saker)
     }
 
@@ -348,7 +372,7 @@ class SakServiceImpl(
         person: String,
         type: SakType,
     ): Sak? {
-        return finnSakerForPersonOgType(person, type).sjekkEnhet()
+        return finnSakForPerson(person, type).sjekkEnhet()
     }
 
     override fun finnSak(id: Long): Sak? {

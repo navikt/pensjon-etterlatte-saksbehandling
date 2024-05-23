@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
@@ -77,11 +76,4 @@ class TidshendelseRiver(
         }
         return packetUpdates
     }
-}
-
-enum class TidshendelserFeatureToggle(private val key: String) : FeatureToggle {
-    OpprettOppgaveForVarselbrevAktivitetsplikt("opprett-oppgave-for-varselbrev-aktivitetsplikt"),
-    ;
-
-    override fun key() = key
 }

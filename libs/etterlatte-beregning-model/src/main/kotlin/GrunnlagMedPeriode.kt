@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning.grunnlag
 
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.PeriodisertGrunnlag
 import java.time.LocalDate
@@ -138,7 +139,8 @@ data class VarerUtPerioden(val tom: LocalDate?, val hoeyesteTom: LocalDate?) {
     fun varerUtPerioden() = hoeyesteTom == null || (tom != null && tom <= hoeyesteTom)
 }
 
-sealed class PeriodiseringAvGrunnlagFeil(message: String, cause: Throwable? = null) : Exception(message, cause) {
+sealed class PeriodiseringAvGrunnlagFeil(detail: String) :
+    UgyldigForespoerselException("PERIODISERING_AV_GRUNNLAG_FEIL", detail) {
     class DatoUtenforPerioder(datoIPeriode: LocalDate) :
         PeriodiseringAvGrunnlagFeil("Datoen $datoIPeriode er ikke innenfor grunnlaget")
 

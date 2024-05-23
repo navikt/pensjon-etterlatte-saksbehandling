@@ -15,13 +15,13 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
-import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.module
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabase
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -50,7 +51,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
         tilbakekrevingService = applicationContext.tilbakekrevingService
         oppgaveService = applicationContext.oppgaveService
 
-        nyKontekstMedBrukerOgDatabase(mockk(), applicationContext.dataSource)
+        nyKontekstMedBrukerOgDatabase(mockSaksbehandler("Z123456"), applicationContext.dataSource)
     }
 
     @BeforeEach
@@ -230,6 +231,57 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
         }
     }
 
+    @Test
+    fun `skal sette tilbakekreving paa vent og saa tilbake av vent`() {
+        withTestApplication { client ->
+            val tilbakekreving = opprettTilbakekrevingOgTildelOppgave(client)
+
+            client.putAndAssertOk(
+                "/tilbakekreving/${tilbakekreving.sak.id}/oppgave-status",
+                systemBruker,
+                OppgaveStatusRequest(paaVent = true),
+            )
+
+            inTransaction {
+                val oppgave = oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first()
+                oppgave.status shouldBe Status.PAA_VENT
+                oppgave.merknad shouldBe "Kravgrunnlag er sperret"
+            }
+
+            client.putAndAssertOk(
+                "/tilbakekreving/${tilbakekreving.sak.id}/oppgave-status",
+                systemBruker,
+                OppgaveStatusRequest(paaVent = false),
+            )
+
+            inTransaction {
+                val oppgave = oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first()
+                oppgave.status shouldBe Status.UNDER_BEHANDLING
+                oppgave.merknad shouldBe "Sperre på kravgrunnlag opphevet"
+            }
+        }
+    }
+
+    @Test
+    fun `skal avbryte en tilbakekreving`() {
+        withTestApplication { client ->
+            val tilbakekreving = opprettTilbakekrevingOgTildelOppgave(client)
+
+            client.putAndAssertOk(
+                "/tilbakekreving/${tilbakekreving.sak.id}/avbryt",
+                systemBruker,
+            )
+
+            inTransaction {
+                val oppgave = oppgaveService.hentOppgaverForReferanse(tilbakekreving.id.toString()).first()
+                oppgave.status shouldBe Status.AVBRUTT
+            }
+
+            val avbruttTilbakekreving = tilbakekrevingService.hentTilbakekreving(tilbakekreving.id)
+            avbruttTilbakekreving.status shouldBe TilbakekrevingStatus.AVBRUTT
+        }
+    }
+
     private suspend fun opprettTilbakekrevingOgTildelOppgave(client: HttpClient): TilbakekrevingBehandling {
         val sak: Sak = opprettSak(client)
         val tilbakekreving = opprettTilbakekreving(sak, client)
@@ -251,7 +303,7 @@ class TilbakekrevingRoutesIntegrationTest : BehandlingIntegrationTest() {
         client: HttpClient,
     ): TilbakekrevingBehandling {
         val tilbakekreving: TilbakekrevingBehandling =
-            client.post("/tilbakekreving") {
+            client.post("/tilbakekreving/${sak.id}") {
                 addAuthToken(systemBruker)
                 contentType(ContentType.Application.Json)
                 setBody(kravgrunnlag(sak))

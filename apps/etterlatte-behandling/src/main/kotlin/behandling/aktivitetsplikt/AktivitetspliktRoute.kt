@@ -11,13 +11,19 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
+import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.behandlingId
 import no.nav.etterlatte.libs.ktor.route.hentNavidentFraToken
+import no.nav.etterlatte.libs.ktor.route.oppgaveId
 import no.nav.etterlatte.libs.ktor.route.routeLogger
+import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import java.util.UUID
 
@@ -84,6 +90,39 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
                         call.respond(aktivitetspliktService.hentAktiviteter(behandlingId))
                     }
                 }
+            }
+        }
+    }
+
+    route("/api/sak/{$SAKID_CALL_PARAMETER}/oppgave/{$OPPGAVEID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {
+        get {
+            logger.info("Henter aktivitetsplikt vurdering for oppgaveId=$oppgaveId")
+            call.respond(aktivitetspliktService.hentVurdering(oppgaveId) ?: HttpStatusCode.NotFound)
+        }
+
+        post("/aktivitetsgrad") {
+            kunSkrivetilgang {
+                logger.info("Oppretter aktivitetsgrad for sakId=$sakId og oppgaveId=$oppgaveId")
+                aktivitetspliktService.opprettAktivitetsgrad(
+                    aktivitetsgrad = call.receive<LagreAktivitetspliktAktivitetsgrad>(),
+                    oppgaveId = oppgaveId,
+                    sakId = sakId,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+                call.respond(HttpStatusCode.Created)
+            }
+        }
+
+        post("/unntak") {
+            kunSkrivetilgang {
+                logger.info("Oppretter unntak for sakId=$sakId og oppgaveId=$oppgaveId")
+                aktivitetspliktService.opprettUnntak(
+                    unntak = call.receive<LagreAktivitetspliktUnntak>(),
+                    oppgaveId = oppgaveId,
+                    sakId = sakId,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+                call.respond(HttpStatusCode.Created)
             }
         }
     }

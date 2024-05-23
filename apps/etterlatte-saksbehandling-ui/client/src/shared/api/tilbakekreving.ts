@@ -10,51 +10,51 @@ export function hentTilbakekrevingerISak(sakId: number): Promise<ApiResponse<Arr
 }
 
 export function lagreTilbakekrevingsvurdering(args: {
-  behandlingsId: string
+  tilbakekrevingId: string
   vurdering: TilbakekrevingVurdering
 }): Promise<ApiResponse<TilbakekrevingBehandling>> {
-  return apiClient.put(`/tilbakekreving/${args.behandlingsId}/vurdering`, { ...args.vurdering })
+  return apiClient.put(`/tilbakekreving/${args.tilbakekrevingId}/vurdering`, { ...args.vurdering })
 }
 
 export function lagreSkalSendeBrev(args: {
-  behandlingsId: string
+  tilbakekrevingId: string
   skalSendeBrev: boolean
 }): Promise<ApiResponse<TilbakekrevingBehandling>> {
-  return apiClient.put(`/tilbakekreving/${args.behandlingsId}/skal-sende-brev`, { skalSendeBrev: args.skalSendeBrev })
+  return apiClient.put(`/tilbakekreving/${args.tilbakekrevingId}/skal-sende-brev`, {
+    skalSendeBrev: args.skalSendeBrev,
+  })
 }
 
 export function lagreTilbakekrevingsperioder(args: {
-  behandlingsId: string
+  tilbakekrevingId: string
   perioder: TilbakekrevingPeriode[]
 }): Promise<ApiResponse<TilbakekrevingBehandling>> {
-  return apiClient.put(`/tilbakekreving/${args.behandlingsId}/perioder`, { perioder: args.perioder })
+  return apiClient.put(`/tilbakekreving/${args.tilbakekrevingId}/perioder`, { perioder: args.perioder })
 }
 
-export const validerTilbakekreving = async (behandlingsId: string): Promise<ApiResponse<TilbakekrevingBehandling>> => {
-  return apiClient.post(`/tilbakekreving/${behandlingsId}/valider`, {})
+export const validerTilbakekreving = async (
+  tilbakekrevingId: string
+): Promise<ApiResponse<TilbakekrevingBehandling>> => {
+  return apiClient.post(`/tilbakekreving/${tilbakekrevingId}/valider`, {})
 }
 
-export const opprettVedtak = async (behandlingsId: string): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/tilbakekreving/${behandlingsId}/vedtak/opprett`, {})
-}
-
-export const fattVedtak = async (behandlingsId: string): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/tilbakekreving/${behandlingsId}/vedtak/fatt`, {})
+export const fattVedtak = async (tilbakekrevingId: string): Promise<ApiResponse<unknown>> => {
+  return apiClient.post(`/tilbakekreving/${tilbakekrevingId}/vedtak/fatt`, {})
 }
 
 export const attesterVedtak = async (args: {
-  behandlingsId: string
+  tilbakekrevingId: string
   kommentar: string
 }): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/tilbakekreving/${args.behandlingsId}/vedtak/attester`, { kommentar: args.kommentar })
+  return apiClient.post(`/tilbakekreving/${args.tilbakekrevingId}/vedtak/attester`, { kommentar: args.kommentar })
 }
 
 export const underkjennVedtak = async (args: {
-  behandlingsId: string
+  tilbakekrevingId: string
   kommentar: string
   valgtBegrunnelse: string
 }): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/tilbakekreving/${args.behandlingsId}/vedtak/underkjenn`, {
+  return apiClient.post(`/tilbakekreving/${args.tilbakekrevingId}/vedtak/underkjenn`, {
     kommentar: args.kommentar,
     valgtBegrunnelse: args.valgtBegrunnelse,
   })

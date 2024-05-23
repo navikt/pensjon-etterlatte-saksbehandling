@@ -1,7 +1,7 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { RevurderingInfo, RevurderinginfoMedIdOgOpprettet } from '~shared/types/RevurderingInfo'
 import { SakType } from '~shared/types/sak'
-import { Revurderingaarsak, RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 export const lagreRevurderingInfo = ({
@@ -31,7 +31,7 @@ export const opprettRevurdering = async ({
   paaGrunnAvHendelseId?: string
   paaGrunnAvOppgaveId?: string
   begrunnelse?: string
-  fritekstAarsak: string | null
+  fritekstAarsak?: string
 }): Promise<ApiResponse<string>> => {
   return apiClient.post(`/revurdering/${sakId}`, {
     aarsak: aarsak,
@@ -48,10 +48,6 @@ export const hentStoettedeRevurderinger = async ({
   sakType: SakType
 }): Promise<ApiResponse<Array<Revurderingaarsak>>> => {
   return apiClient.get(`/stoettederevurderinger/${sakType}`)
-}
-
-export const hentAlleStoettedeRevurderinger = async (): Promise<ApiResponse<RevurderingsaarsakerBySakstype>> => {
-  return apiClient.get(`/stoettederevurderinger`)
 }
 
 export const hentRevurderingerForSakMedAarsak = async ({

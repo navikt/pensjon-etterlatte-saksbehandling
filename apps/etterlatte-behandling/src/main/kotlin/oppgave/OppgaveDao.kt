@@ -71,6 +71,11 @@ interface OppgaveDao {
         oppgaveStatus: Status,
     )
 
+    fun oppdaterPaaVent(
+        paavent: PaaVent,
+        oppgaveStatus: Status,
+    )
+
     fun oppdaterReferanseOgMerknad(
         oppgaveId: UUID,
         referanse: String,
@@ -237,8 +242,8 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde
-                        FROM oppgave o 
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
+                        FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE (? OR o.status = ANY(?))
                         AND o.sak_id = ANY(?)
                         """.trimIndent(),
@@ -431,6 +436,30 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setString(1, merknad)
                 statement.setString(2, oppgaveStatus.name)
                 statement.setObject(3, oppgaveId)
+
+                statement.executeUpdate()
+            }
+        }
+    }
+
+    override fun oppdaterPaaVent(
+        paavent: PaaVent,
+        oppgaveStatus: Status,
+    ) {
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        UPDATE oppgave
+                        SET merknad = ?, status = ?, paavent_aarsak = ?
+                        where id = ?::UUID
+                        """.trimIndent(),
+                    )
+                statement.setString(1, paavent.merknad)
+                statement.setString(2, oppgaveStatus.name)
+                statement.setString(3, paavent.aarsak?.name)
+                statement.setObject(4, paavent.oppgaveId)
 
                 statement.executeUpdate()
             }

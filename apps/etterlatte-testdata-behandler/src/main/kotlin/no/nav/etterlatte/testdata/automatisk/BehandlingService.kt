@@ -7,6 +7,8 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
+import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -18,6 +20,7 @@ import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.readValue
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.testdata.BEGRUNNELSE
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -77,13 +80,18 @@ class BehandlingService(private val klient: DownstreamResourceClient, private va
         }
     }
 
-    suspend fun lagreVirkningstidspunkt(behandling: UUID) {
+    suspend fun lagreVirkningstidspunkt(
+        behandling: UUID,
+        doedsdato: LocalDate,
+    ) {
+        val virkningstidspunkt = doedsdato.plusMonths(1)
+
         retryOgPakkUt {
             klient.post(
                 Resource(clientId, "$url/api/behandling/$behandling/virkningstidspunkt"),
                 Systembruker.testdata,
                 VirkningstidspunktRequest(
-                    _dato = YearMonth.now().plusMonths(1).toString(),
+                    _dato = YearMonth.of(virkningstidspunkt.year, virkningstidspunkt.month).toString(),
                     begrunnelse = BEGRUNNELSE,
                     kravdato = null,
                 ),
@@ -121,7 +129,10 @@ class BehandlingService(private val klient: DownstreamResourceClient, private va
         }
     }
 
-    suspend fun lagreBrevutfall(behandling: UUID) {
+    suspend fun lagreBrevutfall(
+        behandling: UUID,
+        sakType: SakType,
+    ) {
         retryOgPakkUt {
             klient.post(
                 Resource(clientId, "$url/api/behandling/$behandling/info/brevutfall"),
@@ -133,8 +144,8 @@ class BehandlingService(private val klient: DownstreamResourceClient, private va
                     brevutfall =
                         BrevutfallDto(
                             behandlingId = behandling,
-                            aldersgruppe = Aldersgruppe.UNDER_18,
-                            lavEllerIngenInntekt = null,
+                            aldersgruppe = if (sakType == SakType.BARNEPENSJON) Aldersgruppe.UNDER_18 else null,
+                            lavEllerIngenInntekt = if (sakType == SakType.OMSTILLINGSSTOENAD) LavEllerIngenInntekt.NEI else null,
                             feilutbetaling = null,
                             kilde = null,
                         ),

@@ -59,7 +59,7 @@ export default function OppdaterGrunnlagModal({
 
           <BodyLong spacing>
             Oppdater grunnlaget hvis opplysningene i saken ikke samsvarer med hverandre (f.eks. hvis dødsfallet eller
-            evenutell verge ikke er registrert når behandlingen ble opprettet). Status på behandlingen vil da bli satt
+            eventuell verge ikke er registrert når behandlingen ble opprettet). Status på behandlingen vil da bli satt
             til &quot;Opprettet&quot;. Hvis du har startet behandlingen allerede, må du gå gjennom stegene på nytt.
           </BodyLong>
 

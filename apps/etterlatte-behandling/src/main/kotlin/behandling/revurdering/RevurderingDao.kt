@@ -93,6 +93,7 @@ class RevurderingDao(private val connectionAutoclosing: ConnectionAutoclosing) {
             begrunnelse = rs.getString("begrunnelse"),
             relatertBehandlingId = rs.getString("relatert_behandling"),
             sendeBrev = rs.getBoolean("sende_brev"),
+            opphoerFraOgMed = rs.getString("opphoer_fom")?.let { objectMapper.readValue(it) },
         )
     }
 }

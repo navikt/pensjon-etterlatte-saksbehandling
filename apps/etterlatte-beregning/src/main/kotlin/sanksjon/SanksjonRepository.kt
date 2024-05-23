@@ -36,9 +36,9 @@ class SanksjonRepository(private val dataSource: DataSource) {
                 statement =
                     """
                     INSERT INTO sanksjon(
-                        id, behandling_id, sak_id, fom, tom, opprettet, endret, beskrivelse
+                        id, behandling_id, sak_id, sanksjon_type, fom, tom, opprettet, endret, beskrivelse
                     ) VALUES (
-                        :id, :behandlingId, :sak_id, :fom, :tom, :opprettet, :endret, :beskrivelse
+                        :id, :behandlingId, :sak_id, :type, :fom, :tom, :opprettet, :endret, :beskrivelse
                     )
                     """.trimIndent(),
                 paramMap =
@@ -46,6 +46,7 @@ class SanksjonRepository(private val dataSource: DataSource) {
                         "id" to UUID.randomUUID(),
                         "behandlingId" to behandlingId,
                         "sak_id" to sakId,
+                        "type" to sanksjon.type.name,
                         "fom" to sanksjon.fom,
                         "tom" to sanksjon.tom,
                         "opprettet" to Grunnlagsopplysning.Saksbehandler.create(saksbehandlerIdent).toJson(),
@@ -66,9 +67,9 @@ class SanksjonRepository(private val dataSource: DataSource) {
                 statement =
                     """
                     INSERT INTO sanksjon(
-                        id, behandling_id, sak_id, fom, tom, opprettet, endret, beskrivelse
+                        id, behandling_id, sak_id, sanksjon_type, fom, tom, opprettet, endret, beskrivelse
                     ) VALUES (
-                        :id, :behandlingId, :sak_id, :fom, :tom, :opprettet, :endret, :beskrivelse
+                        :id, :behandlingId, :sak_id, :type, :fom, :tom, :opprettet, :endret, :beskrivelse
                     )
                     """.trimIndent(),
                 paramMap =
@@ -76,6 +77,7 @@ class SanksjonRepository(private val dataSource: DataSource) {
                         "id" to UUID.randomUUID(),
                         "behandlingId" to behandlingId,
                         "sak_id" to sakId,
+                        "type" to sanksjon.type.name,
                         "fom" to sanksjon.fom,
                         "tom" to sanksjon.tom,
                         "opprettet" to sanksjon.opprettet.toJson(),
@@ -97,6 +99,7 @@ class SanksjonRepository(private val dataSource: DataSource) {
                     UPDATE sanksjon
                     SET fom = :fom, 
                         tom = :tom, 
+                        sanksjon_type = :type,
                         endret = :endret, 
                         beskrivelse = :beskrivelse
                     WHERE id = :id
@@ -106,6 +109,7 @@ class SanksjonRepository(private val dataSource: DataSource) {
                         "id" to sanksjon.id,
                         "fom" to sanksjon.fom,
                         "tom" to sanksjon.tom,
+                        "type" to sanksjon.type.name,
                         "endret" to Grunnlagsopplysning.Saksbehandler.create(saksbehandlerIdent).toJson(),
                         "beskrivelse" to sanksjon.beskrivelse,
                     ),
@@ -127,6 +131,7 @@ class SanksjonRepository(private val dataSource: DataSource) {
             id = uuid("id"),
             behandlingId = uuid("behandling_id"),
             sakId = long("sak_id"),
+            type = SanksjonType.valueOf(string("sanksjon_type")),
             fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
             tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) },
             opprettet = string("opprettet").let { objectMapper.readValue(it) },
@@ -139,6 +144,7 @@ data class Sanksjon(
     val id: UUID?,
     val behandlingId: UUID,
     val sakId: Long,
+    val type: SanksjonType,
     val fom: YearMonth,
     val tom: YearMonth?,
     val opprettet: Grunnlagsopplysning.Saksbehandler,
@@ -149,7 +155,15 @@ data class Sanksjon(
 data class LagreSanksjon(
     val id: UUID?,
     val sakId: Long,
+    val type: SanksjonType,
     val fom: LocalDate,
     val tom: LocalDate?,
     val beskrivelse: String,
 )
+
+enum class SanksjonType {
+    BORTFALL,
+    OPPHOER,
+    STANS,
+    UTESTENGING,
+}

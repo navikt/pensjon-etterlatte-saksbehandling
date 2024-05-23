@@ -23,6 +23,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
@@ -320,7 +321,12 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                 brev.brevId shouldNotBe null
                 vedtak.vedtakId shouldNotBe null
             }
-            val hendelserIBehandling = applicationContext.hendelseDao.finnHendelserIBehandling(klage.id)
+
+            val hendelserIBehandling: List<LagretHendelse> =
+                client.getAndAssertOk("/api/sak/${sak.id}/hendelser", tokenAttestant)
+                    .body<List<LagretHendelse>>()
+                    .filter { it.behandlingId == klage.id }
+
             hendelserIBehandling.map { it.hendelse } shouldContainExactly
                 listOf("KLAGE:OPPRETTET", "VEDTAK:FATTET", "VEDTAK:UNDERKJENT")
         }

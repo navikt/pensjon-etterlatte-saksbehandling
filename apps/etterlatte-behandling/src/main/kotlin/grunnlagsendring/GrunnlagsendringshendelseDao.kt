@@ -8,7 +8,6 @@ import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -17,7 +16,6 @@ import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclosing) {
@@ -113,7 +111,7 @@ class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclos
         }
     }
 
-    fun lukkGrunnlagsendringStatus(hendelse: Grunnlagsendringshendelse) {
+    fun arkiverGrunnlagsendringStatus(hendelse: Grunnlagsendringshendelse) {
         connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
@@ -190,26 +188,6 @@ class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclos
                         """.trimIndent(),
                     )
                 stmt.executeQuery().toList { asGrunnlagsendringshendelse() }
-            }
-        }
-    }
-
-    fun hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(minutter: Long): List<Grunnlagsendringshendelse> {
-        return connectionAutoclosing.hentConnection {
-            with(it) {
-                prepareStatement(
-                    """
-                    SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
-                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
-                    FROM grunnlagsendringshendelse
-                    WHERE opprettet <= ?
-                    AND status = ?
-                    """.trimIndent(),
-                ).use {
-                    it.setTidspunkt(1, Tidspunkt.now().minus(minutter, ChronoUnit.MINUTES))
-                    it.setString(2, GrunnlagsendringStatus.VENTER_PAA_JOBB.name)
-                    it.executeQuery().toList { asGrunnlagsendringshendelse() }
-                }
             }
         }
     }

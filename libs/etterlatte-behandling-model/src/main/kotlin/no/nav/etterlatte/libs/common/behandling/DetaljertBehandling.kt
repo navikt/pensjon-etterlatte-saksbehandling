@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import java.time.YearMonth
 import java.util.UUID
 
 data class DetaljertBehandling(
@@ -18,6 +19,7 @@ data class DetaljertBehandling(
     val prosesstype: Prosesstype,
     val kilde: Vedtaksloesning,
     val sendeBrev: Boolean,
+    val opphoerFraOgMed: YearMonth?,
 )
 
 fun DetaljertBehandling.virkningstidspunkt() =

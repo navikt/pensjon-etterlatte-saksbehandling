@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.OpeningHours
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.tidshendelser.klient.BehandlingKlient
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import java.time.Duration
 import java.util.UUID
@@ -28,15 +29,30 @@ class AppContext(
         )
     }
 
+    private val behandlingHttpClient: HttpClient by lazy {
+        httpClientClientCredentials(
+            azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
+            azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
+            azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
+            azureAppScope = env.requireEnvValue("ETTERLATTE_BEHANDLING_AZURE_SCOPE"),
+        )
+    }
+
     private val grunnlagKlient =
         GrunnlagKlient(
             grunnlagHttpClient,
             config.getString("etterlatte.grunnlag.url"),
         )
 
+    private val behandlingKlient =
+        BehandlingKlient(
+            behandlingHttpClient,
+            config.getString("etterlatte.behandling.url"),
+        )
+
     val hendelseDao = HendelseDao(dataSource)
-    private val aldersovergangerService = AldersovergangerService(hendelseDao, grunnlagKlient)
-    private val omstillingsstoenadService = OmstillingsstoenadService(hendelseDao, grunnlagKlient)
+    private val aldersovergangerService = AldersovergangerService(hendelseDao, grunnlagKlient, behandlingKlient)
+    private val omstillingsstoenadService = OmstillingsstoenadService(hendelseDao, grunnlagKlient, behandlingKlient)
 
     val jobbPollerTask =
         JobbPollerTask(

@@ -9,7 +9,6 @@ import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepositor
 import no.nav.etterlatte.tilbakekreving.readFile
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.math.BigInteger
 
 class KravgrunnlagConsumerTest {
     private val connectionFactory: EtterlatteJmsConnectionFactory = DummyJmsConnectionFactory()
@@ -35,17 +34,17 @@ class KravgrunnlagConsumerTest {
         simulerKravgrunnlagsmeldingFraTilbakekrevingskomponenten()
 
         verify(exactly = 1) {
-            kravgrunnlagService.opprettTilbakekreving(match { it.kravgrunnlagId == BigInteger.valueOf(302004) })
+            kravgrunnlagService.haandterKravgrunnlag(any())
         }
     }
 
     @Test
     fun `skal motta kravgrunnlag paa nytt dersom noe feiler`() {
-        every { kravgrunnlagService.opprettTilbakekreving(any()) } throws Exception("Noe feilet") andThen Unit
+        every { kravgrunnlagService.haandterKravgrunnlag(any()) } throws Exception("Noe feilet") andThen Unit
         simulerKravgrunnlagsmeldingFraTilbakekrevingskomponenten()
 
         verify(exactly = 2) {
-            kravgrunnlagService.opprettTilbakekreving(match { it.kravgrunnlagId == BigInteger.valueOf(302004) })
+            kravgrunnlagService.haandterKravgrunnlag(any())
         }
     }
 

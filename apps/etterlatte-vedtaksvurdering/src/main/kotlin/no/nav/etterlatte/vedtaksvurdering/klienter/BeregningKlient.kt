@@ -90,7 +90,7 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/beregning/avkorting/$behandlingId",
+                            url = "$resourceUrl/api/beregning/avkorting/$behandlingId/ferdig",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )

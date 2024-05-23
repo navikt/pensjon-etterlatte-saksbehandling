@@ -133,9 +133,9 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
-        - application: ida
-          namespace: traktor
-          cluster: prod-fss
+        - application: pensjonskalkulator-backend
+          namespace: pensjonskalkulator
+          cluster: dev-gcp
           permissions:
             roles:
               - les-oms-vedtak
@@ -145,10 +145,8 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+              - les-bp-vedtak
         - application: tokenx-token-generator
-          namespace: aura
-          cluster: dev-gcp
-        - application: azure-token-generator # https://docs.nais.io/security/auth/azure-ad/usage/#token-generator
           namespace: aura
           cluster: dev-gcp
     outbound:

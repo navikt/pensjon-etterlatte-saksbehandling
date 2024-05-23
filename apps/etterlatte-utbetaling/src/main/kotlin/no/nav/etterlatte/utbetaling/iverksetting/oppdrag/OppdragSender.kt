@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
+import no.nav.etterlatte.mq.Prioritet
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 
@@ -9,7 +10,10 @@ class OppdragSender(
     private val queue: String,
     private val replyQueue: String,
 ) {
-    fun sendOppdrag(oppdrag: Oppdrag): String {
+    fun sendOppdrag(
+        oppdrag: Oppdrag,
+        prioritet: Prioritet = Prioritet.NORMAL,
+    ): String {
         logger.info("Sender utbetaling til Oppdrag")
         logger.info(
             "Sender oppdrag for sakId=${oppdrag.oppdrag110.fagsystemId} med " +
@@ -21,6 +25,7 @@ class OppdragSender(
             xml = xml,
             queue = queue,
             replyQueue = replyQueue,
+            prioritet = prioritet,
         ).also { logger.info("Utbetaling overført til oppdrag") }
         return xml
     }

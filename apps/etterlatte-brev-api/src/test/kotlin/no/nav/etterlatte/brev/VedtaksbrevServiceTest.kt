@@ -63,8 +63,8 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
+import no.nav.pensjon.brevbaker.api.model.LetterMarkup
 import no.nav.pensjon.brevbaker.api.model.LetterMetadata
-import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -288,7 +288,7 @@ internal class VedtaksbrevServiceTest {
             val behandling = opprettGenerellBrevdata(sakType, vedtakType, revurderingsaarsak = revurderingsaarsak)
             val mottaker = opprettMottaker()
 
-            coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returns opprettRenderedJsonLetter()
+            coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returns opprettLetterMarkup()
             every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns emptyList()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(sakType, any()) } returns mottaker
@@ -749,12 +749,12 @@ internal class VedtaksbrevServiceTest {
             "Per Attestant",
         )
 
-    private fun opprettRenderedJsonLetter() =
-        RenderedJsonLetter(
+    private fun opprettLetterMarkup() =
+        LetterMarkup(
             "",
-            RenderedJsonLetter.Sakspart("", "", "", ""),
+            LetterMarkup.Sakspart("", "", "", ""),
             emptyList(),
-            RenderedJsonLetter.Signatur("", "", "", "", ""),
+            LetterMarkup.Signatur("", "", "", "", ""),
         ).let { BlockTilSlateKonverterer.konverter(it) }
 
     private fun opprettOpphoerPayload() =

@@ -3,7 +3,7 @@ package no.nav.etterlatte.sak
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -40,6 +40,15 @@ data class SakMedUtlandstilknytning(
 }
 
 class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
+    private val mapTilSak: ResultSet.() -> Sak = {
+        Sak(
+            sakType = enumValueOf(getString("sakType")),
+            ident = getString("fnr"),
+            id = getLong("id"),
+            enhet = getString("enhet"),
+        )
+    }
+
     fun oppdaterFlyktning(
         sakId: Long,
         flyktning: Flyktning,
@@ -92,6 +101,7 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
     fun hentSaker(
         kjoering: String,
         antall: Int,
+        saker: List<Long>,
     ): List<Sak> {
         return connectionAutoclosing.hentConnection { connection ->
             with(connection) {
@@ -99,10 +109,15 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                     prepareStatement(
                         """SELECT id, sakType, fnr, enhet from sak s 
                     where not exists(select 1 from omregningskjoering k where k.sak_id=s.id and k.kjoering='$kjoering' and k.status != '${KjoeringStatus.FEILA.name}')
+                    ${if (saker.isEmpty()) "" else " and id = any(?)"}
+                    ORDER by id DESC
                     LIMIT $antall"""
                             .trimMargin(),
                     )
-                statement.executeQuery().toList { this.toSak() }
+                if (saker.isNotEmpty()) statement.setArray(1, createArrayOf("bigint", saker.toTypedArray()))
+
+                statement.executeQuery()
+                    .toList(mapTilSak)
             }
         }
     }
@@ -112,7 +127,8 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
             with(connection) {
                 val statement = prepareStatement("SELECT id, sakType, fnr, enhet from sak where id = ?")
                 statement.setLong(1, id)
-                statement.executeQuery().singleOrNull { this.toSak() }
+                statement.executeQuery()
+                    .singleOrNull(mapTilSak)
             }
         }
     }
@@ -163,13 +179,14 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                 statement.setString(3, enhet)
                 statement.setTidspunkt(4, Tidspunkt.now())
                 requireNotNull(
-                    statement.executeQuery().singleOrNull { this.toSak() },
+                    statement.executeQuery()
+                        .singleOrNull(mapTilSak),
                 ) { "Kunne ikke opprette sak for fnr: $fnr" }
             }
         }
     }
 
-    fun oppdaterEnheterPaaSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
+    fun oppdaterEnheterPaaSaker(saker: List<SakMedEnhet>) {
         connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val statement =
@@ -190,12 +207,26 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
         }
     }
 
-    fun finnSaker(fnr: String): List<Sak> {
+    fun finnSaker(
+        fnr: String,
+        type: SakType? = null,
+    ): List<Sak> {
         return connectionAutoclosing.hentConnection { connection ->
             with(connection) {
-                val statement = prepareStatement("SELECT id, sakType, fnr, enhet from sak where fnr = ?")
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT id, sakType, fnr, enhet
+                        FROM sak
+                        WHERE fnr = ?
+                            AND (? OR saktype = ?)
+                        """.trimIndent(),
+                    )
                 statement.setString(1, fnr)
-                statement.executeQuery().toList { this.toSak() }
+                statement.setBoolean(2, type == null)
+                statement.setString(3, type?.name)
+                statement.executeQuery()
+                    .toList(mapTilSak)
             }
         }
     }
@@ -221,11 +252,21 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
         }
     }
 
-    private fun ResultSet.toSak() =
-        Sak(
-            sakType = enumValueOf(getString("sakType")),
-            ident = getString("fnr"),
-            id = getLong("id"),
-            enhet = getString("enhet"),
-        )
+    fun hentSakerMedIder(sakIder: List<Long>): List<Sak> {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT id, fnr, enhet, sakType 
+                        FROM sak 
+                        WHERE id = ANY (?)
+                        """.trimIndent(),
+                    )
+                statement.setArray(1, createArrayOf("bigint", sakIder.toTypedArray()))
+                statement.executeQuery()
+                    .toList(mapTilSak)
+            }
+        }
+    }
 }

@@ -73,6 +73,38 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
         }
     }
 
+    fun hentNyesteTilbakekreving(sakId: Long): TilbakekrevingBehandling {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val tilbakekreving = hentNyesteTilbakekrevingForSak(this, sakId)
+                tilbakekreving?.copy(
+                    tilbakekreving =
+                        tilbakekreving.tilbakekreving.copy(
+                            perioder = selectTilbakekrevingsperioder(this, tilbakekreving.id),
+                        ),
+                ) ?: throw TilbakekrevingFinnesIkkeException("Tilbakekreving for sakId=$sakId finnes ikke")
+            }
+        }
+    }
+
+    private fun hentNyesteTilbakekrevingForSak(
+        connection: Connection,
+        sakId: Long,
+    ): TilbakekrevingBehandling? =
+        with(connection) {
+            val statement =
+                prepareStatement(
+                    """
+                    SELECT t.id, t.sak_id, s.saktype, s.fnr, s.enhet, t.opprettet, t.status, t.kravgrunnlag, t.vurdering, t.sende_brev 
+                    FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
+                    WHERE t.sak_id = ? 
+                    ORDER BY t.opprettet DESC LIMIT 1
+                    """.trimIndent(),
+                )
+            statement.setObject(1, sakId)
+            statement.executeQuery().singleOrNull { toTilbakekreving() }
+        }
+
     private fun selectTilbakekreving(
         connection: Connection,
         tilbakekrevingId: UUID,
@@ -99,6 +131,7 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
                 prepareStatement(
                     """
                     SELECT * FROM tilbakekrevingsperiode WHERE tilbakekreving_id = ?
+                    ORDER BY maaned
                     """.trimIndent(),
                 )
             statement.setObject(1, tilbakekrevingId)

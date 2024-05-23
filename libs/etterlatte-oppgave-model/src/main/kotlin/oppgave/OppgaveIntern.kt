@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
+import java.time.YearMonth
 import java.util.UUID
 
 data class OppgaveSaksbehandler(
@@ -137,11 +138,6 @@ data class RedigerFristRequest(
     val frist: Tidspunkt,
 )
 
-data class EndrePaaVentRequest(
-    val merknad: String,
-    val paaVent: Boolean,
-)
-
 data class FerdigstillRequest(
     val merknad: String?,
 )
@@ -160,6 +156,7 @@ data class VedtakEndringDTO(
     val sakIdOgReferanse: SakIdOgReferanse,
     val vedtakHendelse: VedtakHendelse,
     val vedtakType: VedtakType,
+    val opphoerFraOgMed: YearMonth? = null,
 )
 
 data class NyOppgaveDto(

@@ -21,6 +21,7 @@ import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -709,6 +710,20 @@ class BehandlingServiceImplTest {
         gyldigVirkningstidspunkt shouldBe false
     }
 
+    @Test
+    fun `Migreringer og gjenopprettinger skal ikke validere på mottatt soeknad tidspunkt fordi det ikke noen mottatt soeknad`() {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                virkningstidspunkt = Tidspunkt.parse("2016-01-01T00:00:00Z"),
+                soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00"),
+                doedsdato = LocalDate.parse("2016-11-30"),
+                kilde = Vedtaksloesning.PESYS,
+            )
+
+        gyldigVirkningstidspunkt shouldBe true
+    }
+
     @ParameterizedTest
     @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
     fun `skal gi gyldig virkningstidspunkt for revurdering hvis virkningstidspunkt er paa foerste virk`(sakType: SakType) {
@@ -761,6 +776,7 @@ class BehandlingServiceImplTest {
         doedsdato: LocalDate? = LocalDate.parse("2016-11-30"),
         kravdato: Tidspunkt? = null,
         foersteVirk: YearMonth? = null,
+        kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     ): Boolean {
         val service =
             behandlingServiceMedMocks(
@@ -777,6 +793,7 @@ class BehandlingServiceImplTest {
                             "begrunnelse",
                         )
                     },
+                kilde = kilde,
             )
 
         val request = VirkningstidspunktRequest(virkningstidspunkt.toString(), begrunnelse, kravdato?.toLocalDate())
@@ -914,6 +931,7 @@ class BehandlingServiceImplTest {
         soeknadMottatt: LocalDateTime,
         foersteVirk: YearMonth?,
         utlandstilknytning: Utlandstilknytning? = null,
+        kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     ): BehandlingServiceImpl {
         val (behandling, tidligereBehandlinger) =
             when (behandlingType) {
@@ -925,6 +943,7 @@ class BehandlingServiceImplTest {
                             sakType = sakType,
                             soeknadMottattDato = soeknadMottatt,
                             utlandstilknytning = utlandstilknytning,
+                            kilde = kilde,
                         ),
                         emptyList(),
                     )

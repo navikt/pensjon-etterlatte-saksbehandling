@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -17,7 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.oppgave.EndrePaaVentRequest
+import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -35,6 +34,7 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.ReguleringFeiletHendelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
+import no.nav.etterlatte.libs.common.sak.SakIderDto
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
@@ -62,6 +62,7 @@ interface BehandlingService {
     fun hentAlleSaker(
         kjoering: String,
         antall: Int,
+        saker: List<Long> = listOf(),
     ): Saker
 
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
@@ -86,11 +87,6 @@ interface BehandlingService {
     ): UUID
 
     fun taAvVent(request: VentefristGaarUtRequest): VentefristerGaarUtResponse
-
-    fun oppdaterStatusOgMerknad(
-        oppgaveId: UUID,
-        merknad: String,
-    )
 
     fun leggInnBrevutfall(request: BrevutfallOgEtterbetalingDto)
 
@@ -207,9 +203,13 @@ class BehandlingServiceImpl(
     override fun hentAlleSaker(
         kjoering: String,
         antall: Int,
+        saker: List<Long>,
     ): Saker =
         runBlocking {
-            behandlingKlient.get("$url/saker/$kjoering/$antall").body()
+            behandlingKlient.post("$url/saker/$kjoering/$antall") {
+                contentType(ContentType.Application.Json)
+                setBody(SakIderDto(saker))
+            }.body()
         }
 
     override fun avbryt(behandlingId: UUID) =
@@ -267,18 +267,6 @@ class BehandlingServiceImpl(
             }.body()
         }
 
-    override fun oppdaterStatusOgMerknad(
-        oppgaveId: UUID,
-        merknad: String,
-    ) {
-        runBlocking {
-            behandlingKlient.patch("$url/api/oppgaver/$oppgaveId/merknad") {
-                contentType(ContentType.Application.Json)
-                setBody(EndrePaaVentRequest(merknad, true))
-            }
-        }
-    }
-
     override fun leggInnBrevutfall(request: BrevutfallOgEtterbetalingDto) {
         runBlocking {
             behandlingKlient.post("$url/api/behandling/${request.behandlingId}/info/brevutfall") {
@@ -307,5 +295,3 @@ class BehandlingServiceImpl(
         }
     }
 }
-
-data class OpprettOmregningResponse(val behandlingId: UUID, val forrigeBehandlingId: UUID, val sakType: SakType)

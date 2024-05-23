@@ -17,12 +17,13 @@ fun main() {
 
         NySoeknadRiver(
             rapidsConnection = rapidsConnection,
-            behandlingKlient = ab.createBehandlingClient(),
+            behandlingKlient = ab.behandlingKlient,
+            journalfoerSoeknadService = ab.journalfoerSoeknadService,
         )
 
         OpprettBehandlingRiver(
             rapidsConnection,
-            ab.createBehandlingClient(),
+            ab.behandlingKlient,
         )
     }.start()
 }

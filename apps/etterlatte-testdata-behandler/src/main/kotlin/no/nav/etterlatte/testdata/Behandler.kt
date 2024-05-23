@@ -1,12 +1,14 @@
 package no.nav.etterlatte.testdata
 
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.automatisk.AvkortingService
 import no.nav.etterlatte.testdata.automatisk.BehandlingService
 import no.nav.etterlatte.testdata.automatisk.BeregningService
 import no.nav.etterlatte.testdata.automatisk.BrevService
+import no.nav.etterlatte.testdata.automatisk.GrunnlagService
 import no.nav.etterlatte.testdata.automatisk.TrygdetidService
 import no.nav.etterlatte.testdata.automatisk.VedtaksvurderingService
 import no.nav.etterlatte.testdata.automatisk.VilkaarsvurderingService
@@ -16,6 +18,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class Behandler(
+    private val grunnlagService: GrunnlagService,
     private val behandlingService: BehandlingService,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
     private val trygdetidService: TrygdetidService,
@@ -40,10 +43,12 @@ class Behandler(
         val sak = behandlingService.hentSak(sakId)
         logger.info("Henta sak $sakId")
 
+        val doedsdato = grunnlagService.hentGrunnlagForBehandling(behandling).hentAvdoede().first().hentDoedsdato()
+
         behandlingService.settKommerBarnetTilGode(behandling)
         behandlingService.lagreGyldighetsproeving(behandling)
         behandlingService.lagreUtlandstilknytning(behandling)
-        behandlingService.lagreVirkningstidspunkt(behandling)
+        behandlingService.lagreVirkningstidspunkt(behandling, doedsdato?.verdi!!)
         behandlingService.tildelSaksbehandler(Fagsaksystem.EY.navn, sakId)
 
         logger.info("Tildelt til saksbehandler, klar til vilkårsvurdering")
@@ -76,7 +81,7 @@ class Behandler(
             return
         }
         logger.info("Klar til å lagre brevutfall for $behandling")
-        behandlingService.lagreBrevutfall(behandling)
+        behandlingService.lagreBrevutfall(behandling, sak.sakType)
         logger.info("Ferdig med å lagre brevutfall for behandling $behandling. Klar til å fatte vedtak")
         val fattaVedtak = vedtaksvurderingService.fattVedtak(sakId, behandling)
         RapidUtsender.sendUt(fattaVedtak, packet, context)

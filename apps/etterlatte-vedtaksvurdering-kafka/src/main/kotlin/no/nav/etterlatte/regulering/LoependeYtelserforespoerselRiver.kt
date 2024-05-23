@@ -68,7 +68,7 @@ internal class LoependeYtelserforespoerselRiver(
                     prosesstype = Prosesstype.AUTOMATISK,
                     opphoerFraOgMed = respons.opphoerFraOgMed,
                 )
-            it.sisteIverksatteLoependeBehandlingId?.let { b -> packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = b }
+            it.sisteLoependeBehandlingId?.let { b -> packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = b }
             context.publish(packet.toJson())
             logger.info("Grunnbeløpsreguleringmelding ble sendt for sak $sakId. Dato=${respons.dato}")
         } ?: logger.info("Grunnbeløpsreguleringmelding ble ikke sendt for sak $sakId. Dato=${respons.dato}")

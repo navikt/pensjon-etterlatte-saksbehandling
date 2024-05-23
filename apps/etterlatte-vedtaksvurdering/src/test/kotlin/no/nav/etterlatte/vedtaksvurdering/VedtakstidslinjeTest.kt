@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -37,6 +38,7 @@ internal class VedtakstidslinjeTest {
         val actual = Vedtakstidslinje(emptyList()).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(false, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
+        assertNull(actual.sisteLoependeBehandlingId)
     }
 
     /**
@@ -55,6 +57,7 @@ internal class VedtakstidslinjeTest {
         val actual = Vedtakstidslinje(listOf(fattetVedtak)).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(false, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
+        assertNull(actual.sisteLoependeBehandlingId)
     }
 
     /**
@@ -64,9 +67,12 @@ internal class VedtakstidslinjeTest {
      * */
     @Test
     fun `sak med iverksatt foerstegangsbehandling med vedtaksdato foer fraOgMed er loepende`() {
+        val sisteLoependeBehandlingId = UUID.randomUUID()
+
         val iverksattDato =
             lagVedtak(
                 id = 1,
+                behandlingId = sisteLoependeBehandlingId,
                 virkningsDato = LocalDate.of(2023, 1, 1),
                 vedtakStatus = VedtakStatus.IVERKSATT,
                 vedtakType = VedtakType.INNVILGELSE,
@@ -75,6 +81,7 @@ internal class VedtakstidslinjeTest {
         val actual = Vedtakstidslinje(listOf(iverksattDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
+        assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
     }
 
     /**
@@ -113,6 +120,7 @@ internal class VedtakstidslinjeTest {
             ).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(false, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
+        assertNull(actual.sisteLoependeBehandlingId)
     }
 
     /**
@@ -124,9 +132,12 @@ internal class VedtakstidslinjeTest {
     @Test
     fun `sak som blir opphoert maaneden etter fraOgMed er loepende`() {
         val attesteringsdato = Tidspunkt.now()
+        val sisteLoependeBehandlingId = UUID.randomUUID()
+
         val iverksattDato =
             lagVedtak(
                 id = 1,
+                behandlingId = sisteLoependeBehandlingId,
                 virkningsDato = LocalDate.of(2023, 1, 1),
                 vedtakStatus = VedtakStatus.IVERKSATT,
                 vedtakType = VedtakType.INNVILGELSE,
@@ -151,6 +162,7 @@ internal class VedtakstidslinjeTest {
             ).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
+        assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
     }
 
     /**
@@ -161,9 +173,12 @@ internal class VedtakstidslinjeTest {
     @Test
     fun `sak som er iverksatt maanaden etter fraOgMed-datoen er loepende`() {
         val attesteringsdato = Tidspunkt.now()
+        val sisteLoependeBehandlingId = UUID.randomUUID()
+
         val iverksattDato =
             lagVedtak(
                 id = 1,
+                behandlingId = sisteLoependeBehandlingId,
                 virkningsDato = LocalDate.of(2023, 6, 1),
                 vedtakStatus = VedtakStatus.IVERKSATT,
                 vedtakType = VedtakType.INNVILGELSE,
@@ -173,6 +188,7 @@ internal class VedtakstidslinjeTest {
         val actual = Vedtakstidslinje(listOf(iverksattDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 6, 1), actual.dato)
+        assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
     }
 
     /**
@@ -184,9 +200,12 @@ internal class VedtakstidslinjeTest {
     @Test
     fun `sak som er iverksatt etter fraOgMed og opphoert etterpaa er loepende`() {
         val attesteringsdato = Tidspunkt.now()
+        val sisteLoependeBehandlingId = UUID.randomUUID()
+
         val iverksattDato =
             lagVedtak(
                 id = 1,
+                behandlingId = sisteLoependeBehandlingId,
                 virkningsDato = LocalDate.of(2023, 6, 1),
                 vedtakStatus = VedtakStatus.IVERKSATT,
                 vedtakType = VedtakType.INNVILGELSE,
@@ -205,6 +224,7 @@ internal class VedtakstidslinjeTest {
         val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 6, 1), actual.dato)
+        assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
     }
 
     /**
@@ -237,6 +257,7 @@ internal class VedtakstidslinjeTest {
         val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(false, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
+        assertNull(actual.sisteLoependeBehandlingId)
     }
 
     /**
@@ -248,6 +269,7 @@ internal class VedtakstidslinjeTest {
     @Test
     fun `sak som er iverksatt maanaden etter fraOgMed og revurdert samme maanad er loepende`() {
         val attesteringsdato = Tidspunkt.now()
+        val sisteLoependeBehandlingId = UUID.randomUUID()
         val iverksattDato =
             lagVedtak(
                 id = 1,
@@ -259,6 +281,7 @@ internal class VedtakstidslinjeTest {
         val opphoertDato =
             lagVedtak(
                 id = 2,
+                behandlingId = sisteLoependeBehandlingId,
                 virkningsDato = LocalDate.of(2023, 6, 1),
                 vedtakStatus = VedtakStatus.IVERKSATT,
                 behandlingType = BehandlingType.REVURDERING,
@@ -269,6 +292,7 @@ internal class VedtakstidslinjeTest {
         val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 6, 1), actual.dato)
+        assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
     }
 
     /**
@@ -279,6 +303,8 @@ internal class VedtakstidslinjeTest {
      * */
     @Test
     fun `sak med iverksatt foerstegangsbehandling og revurdering til samordning er løpende og under samordning`() {
+        val sisteLoependeBehandlingId = UUID.randomUUID()
+
         val iverksattDato =
             lagVedtak(
                 id = 1,
@@ -289,6 +315,7 @@ internal class VedtakstidslinjeTest {
         val vedtakTilSamordning =
             lagVedtak(
                 id = 1,
+                behandlingId = sisteLoependeBehandlingId,
                 virkningsDato = LocalDate.of(2023, 2, 1),
                 vedtakStatus = VedtakStatus.TIL_SAMORDNING,
                 vedtakType = VedtakType.ENDRING,
@@ -298,6 +325,7 @@ internal class VedtakstidslinjeTest {
         assertEquals(true, actual.erLoepende)
         assertEquals(true, actual.underSamordning)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
+        assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
     }
 
     /**
@@ -310,6 +338,7 @@ internal class VedtakstidslinjeTest {
     @Test
     fun `sak som er iverksatt, opphørt og deretter revurdert tilbake i tid etter fraOgMed er loepende`() {
         val attesteringsdato = Tidspunkt.now()
+        val sisteLoependeBehandlingId = UUID.randomUUID()
         val iverksattDato =
             lagVedtak(
                 id = 1,
@@ -330,6 +359,7 @@ internal class VedtakstidslinjeTest {
         val revurdertDato =
             lagVedtak(
                 id = 1,
+                behandlingId = sisteLoependeBehandlingId,
                 virkningsDato = LocalDate.of(2023, 6, 1),
                 vedtakStatus = VedtakStatus.IVERKSATT,
                 vedtakType = VedtakType.ENDRING,
@@ -339,6 +369,7 @@ internal class VedtakstidslinjeTest {
         val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato, revurdertDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 6, 1), actual.dato)
+        assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
     }
 
     /**
@@ -382,6 +413,7 @@ internal class VedtakstidslinjeTest {
         val actual = Vedtakstidslinje(listOf(iverksattDato, opphoertDato, revurdertDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(false, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
+        assertNull(actual.sisteLoependeBehandlingId)
     }
 
     /**
@@ -423,6 +455,7 @@ internal class VedtakstidslinjeTest {
         val actual = Vedtakstidslinje(listOf(iverksattDato, revurderingDato, opphoerDato)).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(false, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
+        assertNull(actual.sisteLoependeBehandlingId)
     }
 
     /**
@@ -433,9 +466,9 @@ internal class VedtakstidslinjeTest {
      *                                     |-------Opphør-----------|
      * */
     @Test
-    fun `Revurdering blir siste løpende`() {
+    fun `Revurdering frem i tid, så opphør skal bli løpende`() {
         val attesteringsdato = Tidspunkt.now()
-        val sisteIverksatteLoependeBehandlingId = UUID.randomUUID()
+        val sisteLoependeBehandlingId = UUID.randomUUID()
 
         val innvilgelse =
             lagVedtak(
@@ -448,7 +481,7 @@ internal class VedtakstidslinjeTest {
         val revurdering =
             lagVedtak(
                 id = 2,
-                behandlingId = sisteIverksatteLoependeBehandlingId,
+                behandlingId = sisteLoependeBehandlingId,
                 virkningsDato = LocalDate.of(2023, 7, 1),
                 vedtakStatus = VedtakStatus.IVERKSATT,
                 behandlingType = BehandlingType.REVURDERING,
@@ -467,7 +500,7 @@ internal class VedtakstidslinjeTest {
         val actual = Vedtakstidslinje(listOf(innvilgelse, revurdering, opphoer)).harLoependeVedtakPaaEllerEtter(fraOgMed)
         assertEquals(true, actual.erLoepende)
         assertEquals(LocalDate.of(2023, 5, 1), actual.dato)
-        assertEquals(sisteIverksatteLoependeBehandlingId, actual.sisteIverksatteLoependeBehandlingId)
+        assertEquals(sisteLoependeBehandlingId, actual.sisteLoependeBehandlingId)
     }
 
     @Nested
@@ -477,9 +510,6 @@ internal class VedtakstidslinjeTest {
         private val mars2024 = YearMonth.of(2024, Month.MARCH)
         private val april2024 = YearMonth.of(2024, Month.APRIL)
         private val mai2024 = YearMonth.of(2024, Month.MAY)
-        private val juni2024 = YearMonth.of(2024, Month.JUNE)
-        private val juli2024 = YearMonth.of(2024, Month.JULY)
-        private val august2024 = YearMonth.of(2024, Month.AUGUST)
 
         @Test
         fun `skal benytte vedtak iverksatt foer angitt dato`() {

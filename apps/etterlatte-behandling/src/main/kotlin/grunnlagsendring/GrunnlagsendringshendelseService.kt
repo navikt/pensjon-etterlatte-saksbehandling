@@ -82,14 +82,14 @@ class GrunnlagsendringshendelseService(
         )
     }
 
-    fun lukkHendelseMedKommentar(
+    fun arkiverHendelseMedKommentar(
         hendelse: Grunnlagsendringshendelse,
         saksbehandler: Saksbehandler,
     ) {
-        logger.info("Lukker hendelse med id ${hendelse.id}")
+        logger.info("Arkiverer hendelse med id ${hendelse.id}")
 
         inTransaction {
-            grunnlagsendringshendelseDao.lukkGrunnlagsendringStatus(hendelse = hendelse)
+            grunnlagsendringshendelseDao.arkiverGrunnlagsendringStatus(hendelse = hendelse)
             try {
                 val oppgaveForReferanse =
                     oppgaveService.hentOppgaverForReferanse(hendelse.id.toString()).singleOrNull()

@@ -269,10 +269,10 @@ internal fun Route.sakWebRoutes(
                 }
             }
 
-            post("lukkgrunnlagsendringshendelse") {
+            post("arkivergrunnlagsendringshendelse") {
                 kunSaksbehandler { saksbehandler ->
-                    val lukketHendelse = call.receive<Grunnlagsendringshendelse>()
-                    grunnlagsendringshendelseService.lukkHendelseMedKommentar(hendelse = lukketHendelse, saksbehandler)
+                    val arkivertHendelse = call.receive<Grunnlagsendringshendelse>()
+                    grunnlagsendringshendelseService.arkiverHendelseMedKommentar(hendelse = arkivertHendelse, saksbehandler)
                     call.respond(HttpStatusCode.OK)
                 }
             }

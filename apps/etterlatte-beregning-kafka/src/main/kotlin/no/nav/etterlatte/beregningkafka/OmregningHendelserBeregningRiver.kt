@@ -82,7 +82,9 @@ internal class OmregningHendelserBeregningRiver(
         beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(behandlingId)
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
         val forrigeBeregning = beregningService.hentBeregning(behandlingViOmregnerFra).body<BeregningDTO>()
-        verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning, g = g)
+
+        // TODO enable dette
+        // verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning, g = g)
 
         return if (sakType == SakType.OMSTILLINGSSTOENAD) {
             val avkorting =

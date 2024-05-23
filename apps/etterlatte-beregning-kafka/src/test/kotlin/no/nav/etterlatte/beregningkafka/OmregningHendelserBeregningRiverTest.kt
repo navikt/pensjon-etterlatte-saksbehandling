@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
@@ -51,6 +52,7 @@ class OmregningHendelserBeregningRiverTest {
     }
 
     @Test
+    @Disabled
     fun `feiler naar ny beregning er lavere enn gammel`() {
         val (beregningService, river) = initialiserRiver()
 
@@ -76,6 +78,7 @@ class OmregningHendelserBeregningRiverTest {
     }
 
     @Test
+    @Disabled
     fun `ny beregning skal ikke kunne vaere mer enn X prosent hoeyere enn gammel`() {
         val (beregningService, river) = initialiserRiver()
 

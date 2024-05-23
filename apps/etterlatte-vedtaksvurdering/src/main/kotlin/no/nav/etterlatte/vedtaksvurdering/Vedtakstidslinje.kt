@@ -23,6 +23,11 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
             underSamordning = erUnderSamordning,
             dato = if (erLoepende) foersteMuligeVedtaksdag(dato) else dato,
             behandlingId = if (erLoepende) senesteVedtakPaaDato!!.behandlingId else null,
+            sisteIverksatteLoependeBehandlingId =
+                iverksatteVedtak
+                    .filter { it.type.kanLoepe }
+                    .filter { it.type != VedtakType.OPPHOER }
+                    .maxByOrNull { it.attestasjon?.tidspunkt!! }?.behandlingId,
             opphoerFraOgMed =
                 vedtak.filter { it.type == VedtakType.OPPHOER }
                     .maxByOrNull { it.attestasjon?.tidspunkt!! }?.virkningstidspunkt,

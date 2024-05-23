@@ -290,6 +290,10 @@ internal fun Route.behandlingRoutes(
                 val behandlingsBehov = call.receive<BehandlingsBehov>()
 
                 kunSkrivetilgang(sakId = behandlingsBehov.sakId) {
+                    val request =
+                        inTransaction {
+                            behandlingFactory.hentDataForOpprettBehandling(behandlingsBehov.sakId)
+                        }
                     when (
                         val behandling =
                             inTransaction {
@@ -298,8 +302,11 @@ internal fun Route.behandlingRoutes(
                                     behandlingsBehov.persongalleri,
                                     behandlingsBehov.mottattDato,
                                     Vedtaksloesning.GJENNY,
+                                    request = request,
                                 )
-                            }?.behandling
+                            }
+                                ?.also { it.sendMeldingForHendelse() }
+                                ?.behandling
                     ) {
                         null -> call.respond(HttpStatusCode.NotFound)
                         else -> call.respondText(behandling.id.toString())

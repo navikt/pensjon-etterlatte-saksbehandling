@@ -36,7 +36,7 @@ fun main() {
     exitProcess(0)
 }
 
-private fun createRecord(dato: LocalDate) =
+fun createRecord(dato: LocalDate) =
     JsonMessage.newMessage(
         mapOf(
             ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),

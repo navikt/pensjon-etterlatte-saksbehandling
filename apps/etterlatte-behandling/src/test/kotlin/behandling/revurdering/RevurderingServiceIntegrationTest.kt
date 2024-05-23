@@ -106,16 +106,18 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             inTransaction {
                 applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
             }
+        val factory = behandlingFactory ?: applicationContext.behandlingFactory
         val behandling =
             inTransaction {
-                (behandlingFactory ?: applicationContext.behandlingFactory)
+                factory
                     .opprettBehandling(
                         sak.id,
                         persongalleri(),
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
+                        factory.hentDataForOpprettBehandling(sak.id),
                     )
-            }?.behandling
+            }?.also { it.sendMeldingForHendelse() }?.behandling
 
         return Pair(sak, behandling as Foerstegangsbehandling)
     }

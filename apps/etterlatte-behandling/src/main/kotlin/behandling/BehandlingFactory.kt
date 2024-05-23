@@ -109,6 +109,7 @@ class BehandlingFactory(
                     persongalleri,
                     request.mottattDato,
                     request.kilde ?: Vedtaksloesning.GJENNY,
+                    request = hentDataForOpprettBehandling(sak.id),
                 ).also {
                     if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
                         oppgaveService.hentOppgaverForSak(sak.id)
@@ -117,7 +118,9 @@ class BehandlingFactory(
                             }
                     }
                 } ?: throw IllegalStateException("Kunne ikke opprette behandling")
-            }.behandling
+            }
+                .also { it.sendMeldingForHendelse() }
+                .behandling
 
         val gyldighetsvurdering =
             GyldighetsResultat(
@@ -162,24 +165,16 @@ class BehandlingFactory(
         persongalleri: Persongalleri,
         mottattDato: String?,
         kilde: Vedtaksloesning,
+        request: DataHentetForOpprettBehandling,
         prosessType: Prosesstype = Prosesstype.MANUELL,
     ): BehandlingOgOppgave? {
         logger.info("Starter behandling i sak $sakId")
 
-        val sak = requireNotNull(sakService.finnSak(sakId)) { "Fant ingen sak med id=$sakId!" }
-        val harBehandlingerForSak =
-            behandlingDao.alleBehandlingerISak(sak.id)
-
-        val harIverksattEllerAttestertBehandling =
-            harBehandlingerForSak.filter { behandling ->
-                BehandlingStatus.iverksattEllerAttestert().find { it == behandling.status } != null
-            }
-
-        return if (harIverksattEllerAttestertBehandling.isNotEmpty()) {
+        return if (request.iverksatteEllerAttesterteBehandlinger.isNotEmpty()) {
             if (kilde == Vedtaksloesning.PESYS || kilde == Vedtaksloesning.GJENOPPRETTA) {
                 throw ManuellMigreringHarEksisterendeIverksattBehandling()
             }
-            val forrigeBehandling = harIverksattEllerAttestertBehandling.maxBy { it.behandlingOpprettet }
+            val forrigeBehandling = request.iverksatteEllerAttesterteBehandlinger.maxBy { it.behandlingOpprettet }
             revurderingService.opprettAutomatiskRevurdering(
                 sakId = sakId,
                 persongalleri = persongalleri,
@@ -190,17 +185,17 @@ class BehandlingFactory(
             ).oppdater().let { BehandlingOgOppgave(it, null) }
         } else {
             val harBehandlingUnderbehandling =
-                harBehandlingerForSak.filter { behandling ->
+                request.alleBehandlingerISak.filter { behandling ->
                     BehandlingStatus.underBehandling().find { it == behandling.status } != null
                 }
             val behandling =
-                opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, mottattDato, kilde, prosessType)
+                opprettFoerstegangsbehandling(harBehandlingUnderbehandling, request.sak, mottattDato, kilde, prosessType)
                     ?: return null
             grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri)
             val oppgave =
                 oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
                     referanse = behandling.id.toString(),
-                    sakId = sak.id,
+                    sakId = request.sak.id,
                     oppgaveKilde =
                         if (kilde == Vedtaksloesning.GJENOPPRETTA) {
                             OppgaveKilde.GJENOPPRETTING
@@ -213,12 +208,29 @@ class BehandlingFactory(
                             else -> null
                         },
                 )
-            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                behandling.toStatistikkBehandling(persongalleri),
-                BehandlingHendelseType.OPPRETTET,
-            )
-            return BehandlingOgOppgave(behandling, oppgave)
+            return BehandlingOgOppgave(behandling, oppgave) {
+                behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                    behandling.toStatistikkBehandling(persongalleri),
+                    BehandlingHendelseType.OPPRETTET,
+                )
+            }
         }
+    }
+
+    internal fun hentDataForOpprettBehandling(sakId: Long): DataHentetForOpprettBehandling {
+        val sak = requireNotNull(sakService.finnSak(sakId)) { "Fant ingen sak med id=$sakId!" }
+        val harBehandlingerForSak =
+            behandlingDao.alleBehandlingerISak(sak.id)
+
+        val harIverksattEllerAttestertBehandling =
+            harBehandlingerForSak.filter { behandling ->
+                BehandlingStatus.iverksattEllerAttestert().find { it == behandling.status } != null
+            }
+        return DataHentetForOpprettBehandling(
+            sak = sak,
+            alleBehandlingerISak = harBehandlingerForSak,
+            iverksatteEllerAttesterteBehandlinger = harIverksattEllerAttestertBehandling,
+        )
     }
 
     fun finnGjeldendeEnhet(
@@ -257,7 +269,7 @@ class BehandlingFactory(
     }
 }
 
-data class BehandlingOgOppgave(val behandling: Behandling, val oppgave: OppgaveIntern?)
+data class BehandlingOgOppgave(val behandling: Behandling, val oppgave: OppgaveIntern?, val sendMeldingForHendelse: () -> Unit = {})
 
 class ManuellMigreringHarEksisterendeIverksattBehandling : UgyldigForespoerselException(
     code = "MANUELL_MIGRERING_EKSISTERENDE_IVERKSATT",
@@ -270,3 +282,9 @@ class UgyldigEnhetException : UgyldigForespoerselException(
 )
 
 fun Vedtaksloesning.foerstOpprettaIPesys() = this == Vedtaksloesning.PESYS || this == Vedtaksloesning.GJENOPPRETTA
+
+data class DataHentetForOpprettBehandling(
+    val sak: Sak,
+    val alleBehandlingerISak: List<Behandling>,
+    val iverksatteEllerAttesterteBehandlinger: List<Behandling>,
+)

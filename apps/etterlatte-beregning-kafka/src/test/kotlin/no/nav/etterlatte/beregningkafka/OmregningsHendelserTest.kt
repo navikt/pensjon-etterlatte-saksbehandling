@@ -3,10 +3,12 @@ package no.nav.etterlatte.beregningkafka
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
@@ -18,6 +20,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
+import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -74,6 +77,7 @@ internal class OmregningsHendelserTest {
         every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(capture(omregningsid)) } returns mockk()
         every { beregningService.beregn(capture(omregningsid)) }.returns(returnValue)
         every { beregningService.hentBeregning(any()) }.returns(returnValue)
+        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal.ONE)
 
         val inspector = inspector.apply { sendTestMessage(fullMelding) }
 

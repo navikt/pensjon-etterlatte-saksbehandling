@@ -8,6 +8,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -19,6 +20,7 @@ import no.nav.helse.rapids_rivers.River
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -36,6 +38,7 @@ class OmregningHendelserBeregningRiverTest {
         every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
         every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 500)
         every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 600)
+        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.2"))
 
         runBlocking {
             river.beregn(
@@ -58,6 +61,7 @@ class OmregningHendelserBeregningRiverTest {
         every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
         every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 1000)
         every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 500)
+        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.2"))
 
         runBlocking {
             assertThrows<MindreEnnForrigeBehandling> {
@@ -82,6 +86,7 @@ class OmregningHendelserBeregningRiverTest {
         every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
         every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 1000)
         every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 1500)
+        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.2"))
 
         runBlocking {
             assertThrows<ForStorOekning> {
@@ -106,6 +111,7 @@ class OmregningHendelserBeregningRiverTest {
         every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
         every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 7784)
         every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 7875)
+        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.01169"))
 
         runBlocking {
             val resultat =

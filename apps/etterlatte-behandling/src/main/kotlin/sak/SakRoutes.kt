@@ -8,12 +8,10 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.behandling.BehandlingListe
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.TilstandException
-import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
@@ -248,25 +246,20 @@ internal fun Route.sakWebRoutes(
 
             post("/behandlingerforsak") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
-                    val behandlinger =
+                    val sakMedBehandlinger =
                         inTransaction {
-                            val sak = sakService.hentEnkeltSakForPerson(fnr.value)
+                            val saker = sakService.finnSaker(fnr.value)
 
-                            val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(sak.id)
-                            val sakMedUtlandstilknytning = SakMedUtlandstilknytning.fra(sak, utlandstilknytning)
-
-                            requestLogger.loggRequest(
-                                brukerTokenInfo,
-                                Folkeregisteridentifikator.of(sak.ident),
-                                "behandlinger",
-                            )
-
-                            behandlingService.hentBehandlingerForSak(sakMedUtlandstilknytning.id)
-                                .map { it.toBehandlingSammendrag() }
-                                .let { BehandlingListe(sakMedUtlandstilknytning, it) }
+                            behandlingService.hentSakMedBehandlinger(saker)
                         }
 
-                    call.respond(behandlinger)
+                    requestLogger.loggRequest(
+                        brukerTokenInfo,
+                        Folkeregisteridentifikator.of(sakMedBehandlinger.sak.ident),
+                        "behandlinger",
+                    )
+
+                    call.respond(sakMedBehandlinger)
                 }
             }
 

@@ -10,7 +10,7 @@ import no.nav.etterlatte.sak.SakMedUtlandstilknytning
 import java.time.LocalDateTime
 import java.util.UUID
 
-data class BehandlingListe(
+data class SakMedBehandlinger(
     val sak: SakMedUtlandstilknytning,
     val behandlinger: List<BehandlingSammendrag>,
 )

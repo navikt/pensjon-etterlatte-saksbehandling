@@ -34,6 +34,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -60,6 +61,7 @@ import java.time.LocalDateTime
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.random.Random
 
 class BehandlingServiceImplTest {
     private val user =
@@ -922,6 +924,75 @@ class BehandlingServiceImplTest {
         assertEquals(true, slot.captured.boddEllerArbeidetUtlandet)
         assertEquals("Test", slot.captured.begrunnelse)
         assertEquals("ident", (slot.captured.kilde as Grunnlagsopplysning.Saksbehandler).ident)
+    }
+
+    @Test
+    fun `hentSakMedBehandlinger - flere saker prioriteres korrekt`() {
+        val sak1 = Sak("fnr", SakType.BARNEPENSJON, id = Random.nextLong(), "4808")
+        val sak2 = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), "4808")
+
+        val behandlingDaoMock =
+            mockk<BehandlingDao> {
+                every { alleBehandlingerISak(sak1.id) } returns
+                    listOf(
+                        foerstegangsbehandling(sakId = sak1.id, status = BehandlingStatus.AVBRUTT),
+                        foerstegangsbehandling(sakId = sak1.id, status = BehandlingStatus.AVBRUTT),
+                    )
+                every { alleBehandlingerISak(sak2.id) } returns
+                    listOf(
+                        foerstegangsbehandling(sakId = sak2.id, status = BehandlingStatus.IVERKSATT),
+                    )
+            }
+
+        val sut =
+            BehandlingServiceImpl(
+                behandlingDaoMock,
+                mockk(),
+                mockk(),
+                mockk(),
+                mockk(),
+                mockk(),
+                mockk(),
+                mockk(),
+                mockk(),
+                mockk(),
+            )
+
+        val sakMedBehandlinger = sut.hentSakMedBehandlinger(listOf(sak1, sak2))
+
+        assertEquals(sak2.id, sakMedBehandlinger.sak.id)
+        assertEquals(1, sakMedBehandlinger.behandlinger.size)
+
+        verify(exactly = 1) {
+            behandlingDaoMock.alleBehandlingerISak(sak1.id)
+            behandlingDaoMock.alleBehandlingerISak(sak2.id)
+        }
+    }
+
+    @Test
+    fun `hentSakMedBehandlinger - kun én sak`() {
+        val sak = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), "4808")
+
+        val behandlingDaoMock =
+            mockk<BehandlingDao> {
+                every { alleBehandlingerISak(sak.id) } returns
+                    listOf(
+                        foerstegangsbehandling(
+                            sakId = sak.id,
+                            status = BehandlingStatus.IVERKSATT,
+                        ),
+                    )
+            }
+
+        val sut =
+            BehandlingServiceImpl(behandlingDaoMock, mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk())
+
+        val sakMedBehandlinger = sut.hentSakMedBehandlinger(listOf(sak))
+
+        assertEquals(sak.id, sakMedBehandlinger.sak.id)
+        assertEquals(1, sakMedBehandlinger.behandlinger.size)
+
+        verify(exactly = 1) { behandlingDaoMock.alleBehandlingerISak(sak.id) }
     }
 
     private fun behandlingServiceMedMocks(

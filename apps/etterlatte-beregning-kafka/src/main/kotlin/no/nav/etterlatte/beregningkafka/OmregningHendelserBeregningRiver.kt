@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
@@ -76,11 +77,12 @@ internal class OmregningHendelserBeregningRiver(
         behandlingViOmregnerFra: UUID,
         dato: LocalDate,
     ): Pair<BeregningDTO, AvkortingDto?> {
+        val g = beregningService.hentGrunnbeloep()
         beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(behandlingId)
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
         val forrigeBeregning = beregningService.hentBeregning(behandlingViOmregnerFra).body<BeregningDTO>()
-        verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning)
+        verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning, g = g)
 
         return if (sakType == SakType.OMSTILLINGSSTOENAD) {
             val avkorting =
@@ -95,11 +97,10 @@ internal class OmregningHendelserBeregningRiver(
     private fun verifiserToleransegrenser(
         ny: BeregningDTO,
         gammel: BeregningDTO,
+        g: Grunnbeloep,
     ) {
         val dato = ny.beregningsperioder.first().datoFOM.atDay(1)
-        val nyttBeloep =
-            ny.beregningsperioder.paaDato(dato)
-                .utbetaltBeloep
+        val nyttBeloep = ny.beregningsperioder.paaDato(dato).utbetaltBeloep
         val gammeltBeloep = gammel.beregningsperioder.paaDato(dato).utbetaltBeloep
         if (nyttBeloep < gammeltBeloep) {
             throw MindreEnnForrigeBehandling(ny.behandlingId)
@@ -107,6 +108,22 @@ internal class OmregningHendelserBeregningRiver(
         val endring = BigDecimal(nyttBeloep).divide(BigDecimal(gammeltBeloep), 2, RoundingMode.HALF_UP)
         if (endring >= BigDecimal(1.50)) {
             throw ForStorOekning(ny.behandlingId, endring)
+        }
+        verifiserFaktoromregning(g, gammeltBeloep, nyttBeloep)
+    }
+
+    private fun verifiserFaktoromregning(
+        g: Grunnbeloep,
+        gammeltBeloep: Int,
+        nyttBeloep: Int,
+    ) {
+        val forventaNyttBeloep =
+            g.omregningsfaktor!!.times(gammeltBeloep.toBigDecimal()).setScale(0, RoundingMode.HALF_UP)
+        if (nyttBeloep != forventaNyttBeloep.toInt()) {
+            logger.warn(
+                "Noe skurrer for regulering. Nytt beløp er $nyttBeloep, forventa nytt beløp var $forventaNyttBeloep, " +
+                    "omregningsfaktor er ${g.omregningsfaktor}",
+            )
         }
     }
 

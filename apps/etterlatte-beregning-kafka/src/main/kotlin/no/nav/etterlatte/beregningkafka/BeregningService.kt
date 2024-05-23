@@ -1,11 +1,14 @@
 package no.nav.etterlatte.beregningkafka
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import java.util.UUID
 
 class BeregningService(
@@ -47,4 +50,9 @@ class BeregningService(
         runBlocking {
             beregningApp.post("$url/api/beregning/avkorting/$behandlingId/med/$forrigeBehandlingId")
         }
+
+    suspend fun hentGrunnbeloep(): Grunnbeloep =
+        beregningApp.get("$url/api/beregning/grunnbeloep")
+            .also { require(it.status.isSuccess()) }
+            .body<Grunnbeloep>()
 }

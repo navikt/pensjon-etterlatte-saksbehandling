@@ -7,7 +7,7 @@ import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
-import no.nav.etterlatte.oppgave.FristGaarUtJobService
+import no.nav.etterlatte.oppgave.OppgaveFristGaarUtJobService
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -15,11 +15,11 @@ import java.util.Date
 import java.util.Timer
 import javax.sql.DataSource
 
-class FristGaarUtJobb(
+class OppgaveFristGaarUtJobb(
     private val erLeader: () -> Boolean,
     private val starttidspunkt: Date,
     private val periode: Duration,
-    private val fristGaarUtJobService: FristGaarUtJobService,
+    private val oppgaveFristGaarUtJobService: OppgaveFristGaarUtJobService,
     dataSource: DataSource,
     sakTilgangDao: SakTilgangDao,
 ) : TimerJob {
@@ -27,7 +27,7 @@ class FristGaarUtJobb(
     private val jobbNavn = this::class.simpleName
 
     private var jobContext: Context =
-        Context(Self(fristGaarUtJobService::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao)
+        Context(Self(oppgaveFristGaarUtJobService::class.java.simpleName), DatabaseContext(dataSource), sakTilgangDao)
 
     override fun schedule(): Timer {
         logger.debug("{} er satt til å starte {} med periode {}", jobbNavn, starttidspunkt, periode)
@@ -40,7 +40,7 @@ class FristGaarUtJobb(
         ) {
             if (erLeader()) {
                 Kontekst.set(jobContext)
-                fristGaarUtJobService.setupKontekstAndRun(jobContext)
+                oppgaveFristGaarUtJobService.setupKontekstAndRun(jobContext)
             }
         }
     }

@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-class FristGaarUtJobService(
+class OppgaveFristGaarUtJobService(
     private val service: OppgaveService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)

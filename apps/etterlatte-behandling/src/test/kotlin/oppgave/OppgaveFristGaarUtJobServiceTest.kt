@@ -15,9 +15,9 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 import javax.sql.DataSource
 
-class FristGaarUtJobServiceTest {
+class OppgaveFristGaarUtJobServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
-    private val service = FristGaarUtJobService(oppgaveService)
+    private val service = OppgaveFristGaarUtJobService(oppgaveService)
     private val dataSource = mockk<DataSource>()
     private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource), mockk())
 

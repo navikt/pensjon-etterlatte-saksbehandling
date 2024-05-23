@@ -540,7 +540,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setInt(4, grense)
                 statement.executeQuery().toList {
                     VentefristGaarUt(
-                        oppgaveID = getUUID("id"),
+                        oppgaveId = getUUID("id"),
                         sakId = getLong("sak_id"),
                         referanse = getString("referanse"),
                         oppgavekilde = OppgaveKilde.valueOf(getString("kilde")),
@@ -548,7 +548,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                     )
                 }.also { utgaatte ->
                     logger.info("Hentet ${utgaatte.size} oppgaver der fristen går ut for dato $dato og type $type")
-                }.filter { oppgave -> oppgaver.isEmpty() || oppgaver.contains(oppgave.oppgaveID) }
+                }.filter { oppgave -> oppgaver.isEmpty() || oppgaver.contains(oppgave.oppgaveId) }
             }
         }
 

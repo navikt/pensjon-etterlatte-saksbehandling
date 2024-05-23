@@ -20,8 +20,6 @@ import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
-import no.nav.etterlatte.libs.common.oppgave.VentefristerGaarUtResponse
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
@@ -86,8 +84,6 @@ interface BehandlingService {
         merknad: String? = null,
         frist: Tidspunkt? = null,
     ): UUID
-
-    fun taAvVent(request: VentefristGaarUtRequest): VentefristerGaarUtResponse
 
     fun leggInnBrevutfall(request: BrevutfallOgEtterbetalingDto)
 
@@ -260,14 +256,6 @@ class BehandlingServiceImpl(
             }
         }
     }
-
-    override fun taAvVent(request: VentefristGaarUtRequest): VentefristerGaarUtResponse =
-        runBlocking {
-            behandlingKlient.put("$url/oppgaver/ventefrist-gaar-ut") {
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }.body()
-        }
 
     override fun leggInnBrevutfall(request: BrevutfallOgEtterbetalingDto) {
         runBlocking {

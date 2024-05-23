@@ -14,11 +14,12 @@ export function hentMinimumsVirkningstidspunkt(
   const treAarFoerSoeknad = subYears(soeknadMottattDato, 3)
   const maanedEtterDoedsdato = addMonths(doedsdato, 1)
 
+  const minimumsVirkningstidspunkt = isBefore(doedsdato, treAarFoerSoeknad) ? treAarFoerSoeknad : maanedEtterDoedsdato
+
   if (sakType === SakType.OMSTILLINGSSTOENAD) {
-    if (isBefore(treAarFoerSoeknad, reformDato) || isBefore(doedsdato, reformDato)) return reformDato
-    else return isBefore(doedsdato, treAarFoerSoeknad) ? treAarFoerSoeknad : maanedEtterDoedsdato
+    return isBefore(reformDato, minimumsVirkningstidspunkt) ? minimumsVirkningstidspunkt : reformDato
   } else {
-    return isBefore(doedsdato, treAarFoerSoeknad) ? treAarFoerSoeknad : maanedEtterDoedsdato
+    return minimumsVirkningstidspunkt
   }
 }
 

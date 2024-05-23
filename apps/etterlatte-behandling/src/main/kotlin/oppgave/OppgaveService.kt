@@ -439,6 +439,17 @@ class OppgaveService(
     fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<SakMedEnhet>) {
         sakerMedNyEnhet.forEach {
             endreEnhetForOppgaverTilknyttetSak(it.id, it.enhet)
+            fjernSaksbehandlerFraOppgaveVedFlytt(it.id)
+        }
+    }
+
+    private fun fjernSaksbehandlerFraOppgaveVedFlytt(sakId: Long) {
+        for (oppgaveIntern in hentOppgaverForSak(sakId)) {
+            if (oppgaveIntern.saksbehandler != null &&
+                oppgaveIntern.erUnderBehandling()
+            ) {
+                fjernSaksbehandler(oppgaveIntern.id)
+            }
         }
     }
 

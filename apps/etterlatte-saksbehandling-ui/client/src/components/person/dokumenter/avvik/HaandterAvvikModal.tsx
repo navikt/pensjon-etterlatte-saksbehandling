@@ -48,7 +48,7 @@ export const HaandterAvvikModal = ({
         <Modal.Body>
           <Box borderWidth="1" padding="4" borderRadius="medium" borderColor="border-subtle" background="bg-subtle">
             <Heading size="xsmall" spacing>
-              Journalpostdetailjer
+              Journalpostdetaljer
             </Heading>
 
             <InfoWrapper>
@@ -78,7 +78,7 @@ export const HaandterAvvikModal = ({
             value={aarsak || ''}
             onChange={(checked) => setAarsak(checked as AvvikHandling)}
           >
-            <Radio value={AvvikHandling.OVERFOER}>Overfør til annen sak</Radio>
+            <Radio value={AvvikHandling.OVERFOER}>Overfør til Gjenny</Radio>
             <Radio value={AvvikHandling.FEILREGISTRER}>
               {journalpost.journalstatus === Journalstatus.FEILREGISTRERT ? 'Opphev feilregistrering' : 'Feilregistrer'}
             </Radio>

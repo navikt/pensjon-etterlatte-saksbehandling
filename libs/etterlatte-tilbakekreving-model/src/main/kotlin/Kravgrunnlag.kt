@@ -29,7 +29,7 @@ data class Kravgrunnlag(
     val kontrollFelt: Kontrollfelt,
     val status: KravgrunnlagStatus,
     val saksbehandler: NavIdent,
-    val sisteUtbetalingslinjeId: UUID30,
+    val referanse: UUID30,
     val perioder: List<KravgrunnlagPeriode>,
 )
 

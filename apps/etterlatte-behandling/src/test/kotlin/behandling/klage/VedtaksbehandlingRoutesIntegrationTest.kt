@@ -242,7 +242,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
             kontrollFelt = Kontrollfelt(""),
             status = KravgrunnlagStatus.ANNU,
             saksbehandler = NavIdent(""),
-            sisteUtbetalingslinjeId = UUID30(""),
+            referanse = UUID30(""),
             perioder = emptyList(),
         )
 }

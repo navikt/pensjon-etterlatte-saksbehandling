@@ -24,8 +24,8 @@ export const hentGrunnlagsendringshendelserForSak = async (
   return apiClient.get(`/sak/${sakId}/grunnlagsendringshendelser`)
 }
 
-export const lukkGrunnlagshendelse = async (hendelse: Grunnlagsendringshendelse): Promise<ApiResponse<void>> => {
-  return apiClient.post(`/personer/lukkgrunnlagsendringshendelse`, { ...hendelse })
+export const arkiverGrunnlagshendelse = async (hendelse: Grunnlagsendringshendelse): Promise<ApiResponse<void>> => {
+  return apiClient.post(`/personer/arkivergrunnlagsendringshendelse`, { ...hendelse })
 }
 
 export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljertBehandling>> => {

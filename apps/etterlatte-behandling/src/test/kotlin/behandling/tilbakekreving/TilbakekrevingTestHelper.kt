@@ -39,7 +39,7 @@ fun kravgrunnlag(
     kontrollFelt = Kontrollfelt(""),
     status = KravgrunnlagStatus.NY,
     saksbehandler = NavIdent(""),
-    sisteUtbetalingslinjeId = behandlingId,
+    referanse = behandlingId,
     perioder =
         listOf(
             KravgrunnlagPeriode(

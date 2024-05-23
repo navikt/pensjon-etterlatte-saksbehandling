@@ -9,7 +9,7 @@ import { formaterStringDato } from '~utils/formattering'
 import { harAapenRevurdering, revurderingKanOpprettes } from '~components/person/hendelser/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { FlexRow, SpaceChildren } from '~shared/styled'
-import { LukkHendelseModal } from '~components/person/hendelser/LukkHendelseModal'
+import { ArkiverHendelseModal } from '~components/person/hendelser/ArkiverHendelseModal'
 import { useSearchParams } from 'react-router-dom'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 
@@ -51,7 +51,7 @@ export const NyHendelseExpandableRow = ({ hendelse, sak, behandlinger, revurderi
           )}
 
           <FlexRow>
-            <LukkHendelseModal hendelse={hendelse} />
+            <ArkiverHendelseModal hendelse={hendelse} />
 
             {hendelse.status !== 'TATT_MED_I_BEHANDLING' &&
               stoetterRevurderingAvHendelse(hendelse, revurderinger) &&

@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:etterlatte-oppgave-model"))
+    implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcore)

@@ -1,0 +1,1 @@
+drop table utlandstilknytning_fiksing;

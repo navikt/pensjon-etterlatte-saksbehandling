@@ -191,19 +191,15 @@ class OppgaveService(
         oppgaveDao.oppdaterReferanseOgMerknad(oppgaveId, referanse, merknad)
     }
 
-    fun endrePaaVent(
-        oppgaveId: UUID,
-        merknad: String,
-        paaVent: Boolean,
-    ): OppgaveIntern {
-        val oppgave = hentOppgave(oppgaveId)
-        if (paaVent && oppgave.status == Status.PAA_VENT) return oppgave
-        if (!paaVent && oppgave.status != Status.PAA_VENT) return oppgave
+    fun endrePaaVent(paavent: PaaVent): OppgaveIntern {
+        val oppgave = hentOppgave(paavent.oppgaveId)
+        if (paavent.paavent && oppgave.status == Status.PAA_VENT) return oppgave
+        if (!paavent.paavent && oppgave.status != Status.PAA_VENT) return oppgave
 
         sikreAktivOppgaveOgTildeltSaksbehandler(oppgave) {
-            val nyStatus = if (paaVent) Status.PAA_VENT else hentForrigeStatus(oppgaveId)
+            val nyStatus = if (paavent.paavent) Status.PAA_VENT else hentForrigeStatus(paavent.oppgaveId)
 
-            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, nyStatus)
+            oppgaveDao.oppdaterPaaVent(paavent, nyStatus)
 
             when (oppgave.type) {
                 OppgaveType.FOERSTEGANGSBEHANDLING,
@@ -211,17 +207,25 @@ class OppgaveService(
                 OppgaveType.TILBAKEKREVING,
                 OppgaveType.KLAGE,
                 -> {
-                    hendelser.sendMeldingForHendelsePaaVent(
-                        UUID.fromString(oppgave.referanse),
-                        if (nyStatus == Status.PAA_VENT) BehandlingHendelseType.PAA_VENT else BehandlingHendelseType.AV_VENT,
-                    )
+                    if (nyStatus == Status.PAA_VENT) {
+                        hendelser.sendMeldingForHendelsePaaVent(
+                            UUID.fromString(oppgave.referanse),
+                            BehandlingHendelseType.PAA_VENT,
+                            paavent.aarsak!!,
+                        )
+                    } else {
+                        hendelser.sendMeldingForHendelseAvVent(
+                            UUID.fromString(oppgave.referanse),
+                            BehandlingHendelseType.AV_VENT,
+                        )
+                    }
                 }
 
                 else -> {} // Ingen statistikk for resten
             }
         }
 
-        return hentOppgave(oppgaveId)
+        return hentOppgave(paavent.oppgaveId)
     }
 
     private fun sikreAktivOppgaveOgTildeltSaksbehandler(
@@ -435,6 +439,17 @@ class OppgaveService(
     fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<SakMedEnhet>) {
         sakerMedNyEnhet.forEach {
             endreEnhetForOppgaverTilknyttetSak(it.id, it.enhet)
+            fjernSaksbehandlerFraOppgaveVedFlytt(it.id)
+        }
+    }
+
+    private fun fjernSaksbehandlerFraOppgaveVedFlytt(sakId: Long) {
+        for (oppgaveIntern in hentOppgaverForSak(sakId)) {
+            if (oppgaveIntern.saksbehandler != null &&
+                oppgaveIntern.erUnderBehandling()
+            ) {
+                fjernSaksbehandler(oppgaveIntern.id)
+            }
         }
     }
 

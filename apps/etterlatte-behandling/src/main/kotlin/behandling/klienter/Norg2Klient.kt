@@ -8,6 +8,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
@@ -43,6 +44,9 @@ class Norg2KlientImpl(private val client: HttpClient, private val url: String) :
 
             if (response.status.isSuccess()) {
                 response.body<Navkontor>().also { cacheNavkontor.put(omraade, it) }
+            } else if (omraade == "0301" && response.status == HttpStatusCode.NotFound) {
+                // Person som ikke får bydel på geografisk område men kommunenr for Oslo(0301) som betyr ingen tilknytning mot noe lokalt navkontor
+                Navkontor("Ingen", "0000")
             } else {
                 throw ResponseException(response, "Ukjent feil fra norg2 api")
             }

@@ -15,8 +15,8 @@ import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.ktor.runServerWithModule
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.oppgave.EndrePaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -105,7 +105,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
             }
 
             client.post("/api/oppgaver/${oppgave.id}/sett-paa-vent") {
-                val dto = EndrePaaVentRequest("", true)
+                val dto = EndrePaaVentRequest(PaaVentAarsak.OPPLYSNING_FRA_ANDRE, "", true)
                 addAuthToken(this@OppgaveRoutesTest.systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(dto)

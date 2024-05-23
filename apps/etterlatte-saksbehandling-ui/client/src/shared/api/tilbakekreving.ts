@@ -38,10 +38,6 @@ export const validerTilbakekreving = async (
   return apiClient.post(`/tilbakekreving/${tilbakekrevingId}/valider`, {})
 }
 
-export const opprettVedtak = async (tilbakekrevingId: string): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/tilbakekreving/${tilbakekrevingId}/vedtak/opprett`, {})
-}
-
 export const fattVedtak = async (tilbakekrevingId: string): Promise<ApiResponse<unknown>> => {
   return apiClient.post(`/tilbakekreving/${tilbakekrevingId}/vedtak/fatt`, {})
 }

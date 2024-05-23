@@ -20,8 +20,10 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -477,8 +479,8 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
     }
 
     @Test
-    fun `kan sette og fjerne oppgave paa vent`() {
-        every { hendelser.sendMeldingForHendelsePaaVent(any(), any()) } returns Unit
+    fun `Kan ikke sette oppgave på vente om man mangler årsak`() {
+        every { hendelser.sendMeldingForHendelsePaaVent(any(), any(), any()) } returns Unit
 
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =
@@ -491,29 +493,44 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             )
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
 
-        oppgaveService.endrePaaVent(
-            nyOppgave.id,
-            "test",
-            true,
-        )
+        assertThrows<UgyldigForespoerselException> {
+            oppgaveService.endrePaaVent(PaaVent(nyOppgave.id, merknad = "test", paavent = true, aarsak = null))
+        }
+    }
+
+    @Test
+    fun `kan sette og fjerne oppgave paa vent`() {
+        every { hendelser.sendMeldingForHendelsePaaVent(any(), any(), any()) } returns Unit
+        every { hendelser.sendMeldingForHendelseAvVent(any(), any()) } returns Unit
+
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                UUID.randomUUID().toString(),
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
+        val paaVent = PaaVent(nyOppgave.id, merknad = "test", paavent = true, aarsak = PaaVentAarsak.ANNET)
+        oppgaveService.endrePaaVent(paaVent)
         val oppgavePaaVent = oppgaveService.hentOppgave(nyOppgave.id)
         assertEquals(Status.PAA_VENT, oppgavePaaVent.status)
         verify {
             hendelser.sendMeldingForHendelsePaaVent(
                 UUID.fromString(nyOppgave.referanse),
                 BehandlingHendelseType.PAA_VENT,
+                paaVent.aarsak!!,
             )
         }
 
-        oppgaveService.endrePaaVent(
-            oppgavePaaVent.id,
-            "test",
-            false,
-        )
+        val paavent = PaaVent(nyOppgave.id, merknad = "", paavent = false, aarsak = null)
+        oppgaveService.endrePaaVent(paavent)
         val oppgaveTattAvVent = oppgaveService.hentOppgave(oppgavePaaVent.id)
         assertEquals(Status.UNDER_BEHANDLING, oppgaveTattAvVent.status)
         verify {
-            hendelser.sendMeldingForHendelsePaaVent(
+            hendelser.sendMeldingForHendelseAvVent(
                 UUID.fromString(nyOppgave.referanse),
                 BehandlingHendelseType.AV_VENT,
             )

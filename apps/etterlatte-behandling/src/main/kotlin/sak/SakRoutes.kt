@@ -20,8 +20,6 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.behandling.ForenkletBehandling
-import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -81,17 +79,6 @@ internal fun Route.sakSystemRoutes(
                         sakService.finnSak(sakId)
                     }
                 call.respond(sak ?: HttpStatusCode.NotFound)
-            }
-
-            // TODO: Fjerne når grunnlag er versjonert (EY-2567)
-            get("/behandlinger") {
-                kunSystembruker {
-                    val behandlinger =
-                        inTransaction { behandlingService.hentBehandlingerForSak(sakId) }
-                            .map { ForenkletBehandling(it.sak.id, it.id, it.status) }
-
-                    call.respond(ForenkletBehandlingListeWrapper(behandlinger))
-                }
             }
 
             get("/behandlinger/sisteIverksatte") {
@@ -198,15 +185,6 @@ internal fun Route.sakWebRoutes(
                         inTransaction {
                             sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
-                            for (oppgaveIntern in oppgaveService.hentOppgaverForSak(sakId)) {
-                                if (oppgaveIntern.saksbehandler != null &&
-                                    oppgaveIntern.erUnderBehandling()
-                                ) {
-                                    oppgaveService.fjernSaksbehandler(
-                                        oppgaveIntern.id,
-                                    )
-                                }
-                            }
                         }
 
                         logger.info(
@@ -293,22 +271,10 @@ internal fun Route.sakWebRoutes(
                 }
             }
 
-            post("grunnlagsendringshendelser") {
-                withFoedselsnummerInternal(tilgangService) { fnr ->
-                    call.respond(
-                        inTransaction {
-                            sakService.finnSaker(fnr.value).map { sak ->
-                                GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))
-                            }
-                        }.also { requestLogger.loggRequest(brukerTokenInfo, fnr, "grunnlagsendringshendelser") },
-                    )
-                }
-            }
-
-            post("lukkgrunnlagsendringshendelse") {
+            post("arkivergrunnlagsendringshendelse") {
                 kunSaksbehandler { saksbehandler ->
-                    val lukketHendelse = call.receive<Grunnlagsendringshendelse>()
-                    grunnlagsendringshendelseService.lukkHendelseMedKommentar(hendelse = lukketHendelse, saksbehandler)
+                    val arkivertHendelse = call.receive<Grunnlagsendringshendelse>()
+                    grunnlagsendringshendelseService.arkiverHendelseMedKommentar(hendelse = arkivertHendelse, saksbehandler)
                     call.respond(HttpStatusCode.OK)
                 }
             }

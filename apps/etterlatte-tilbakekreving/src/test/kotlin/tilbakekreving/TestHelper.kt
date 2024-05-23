@@ -90,7 +90,7 @@ fun kravgrunnlag(
     kontrollFelt = Kontrollfelt(""),
     status = status,
     saksbehandler = NavIdent(""),
-    sisteUtbetalingslinjeId = behandlingId,
+    referanse = behandlingId,
     perioder =
         perioder ?: listOf(
             KravgrunnlagPeriode(

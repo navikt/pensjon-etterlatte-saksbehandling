@@ -98,12 +98,6 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
     }
 
     route("/api/stoettederevurderinger") {
-        get {
-            val stoettedeRevurderinger =
-                SakType.entries.associateWith { hentRevurderingaarsaker(it) }
-            call.respond(stoettedeRevurderinger)
-        }
-
         get("/{saktype}") {
             val sakType =
                 call.parameters["saktype"]?.let { SakType.valueOf(it) }

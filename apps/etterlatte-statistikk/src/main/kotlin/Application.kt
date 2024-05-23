@@ -14,14 +14,13 @@ fun main() {
 
 fun jobs(applicationContext: ApplicationContext) {
     applicationContext.maanedligStatistikkJob.schedule().also { addShutdownHook(it) }
-    applicationContext.fikseJobb.schedule().also { addShutdownHook(it) }
 }
 
 fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
     applicationContext.rapidsConnection
         .apply {
             applicationContext.vedtakhendelserRiver
-            applicationContext.behandlinghendelseRiver
+            applicationContext.avbruttOpprettetBehandlinghendelseRiver
             applicationContext.behandlingPaaVentHendelseRiver
             applicationContext.tilbakekrevingriver
             applicationContext.soeknadStatistikkRiver

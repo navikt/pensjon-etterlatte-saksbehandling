@@ -111,7 +111,7 @@ class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclos
         }
     }
 
-    fun lukkGrunnlagsendringStatus(hendelse: Grunnlagsendringshendelse) {
+    fun arkiverGrunnlagsendringStatus(hendelse: Grunnlagsendringshendelse) {
         connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(

@@ -23,11 +23,3 @@ export interface KildePdl {
   registersReferanse: string
   opplysningId: string
 }
-
-export interface KildePersondata {
-  type: KildeType.persondata
-  tidspunktForInnhenting: string
-  navn: string
-  registersReferanse: string
-  opplysningId: string
-}

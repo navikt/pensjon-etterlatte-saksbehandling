@@ -30,15 +30,6 @@ fun Route.sakGrunnlagRoute(
             }
         }
 
-        get("personer/alle") {
-            withSakId(behandlingKlient) { sakId ->
-                when (val personerISak = grunnlagService.hentPersonerISak(sakId)) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(PersonerISakDto(personerISak))
-                }
-            }
-        }
-
         post("opprett-grunnlag") {
             kunSystembruker {
                 withSakId(behandlingKlient, skrivetilgang = true) { sakId ->

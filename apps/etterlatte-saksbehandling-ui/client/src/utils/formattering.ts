@@ -29,8 +29,6 @@ export const formaterKanskjeStringDatoMedFallback = (fallback: string, dato?: st
 
 export const formaterTidspunktTimeMinutterSekunder = (dato: Date) => format(new Date(dato), 'HH:mm:ss').toString()
 
-export const formaterStringTidspunktTimeMinutter = (dato: string) => format(new Date(dato), 'HH:mm').toString()
-
 export const formaterDatoMedTidspunkt = (dato: Date) => format(new Date(dato), 'dd.MM.yyyy HH:mm').toString()
 
 export const formaterDatoMedKlokkeslett = (dato: Date | string) =>

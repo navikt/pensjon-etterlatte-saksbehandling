@@ -93,23 +93,6 @@ enum Sivilstatus {
   GJENLEVENDE_PARTNER = 'GJENLEVENDE_PARTNER',
 }
 
-export enum PersonType {
-  INNSENDER = 'INNSENDER',
-  GJENLEVENDE = ' GJENLEVENDE',
-  GJENLEVENDE_FORELDER = 'GJENLEVENDE_FORELDER',
-  AVDOED = 'AVDOED',
-  SAMBOER = 'SAMBOER',
-  VERGE = 'VERGE',
-  BARN = 'BARN',
-  FORELDER = 'FORELDER',
-}
-
-export enum PersonRolle {
-  BARN = 'BARN',
-  AVDOED = 'AVDOED',
-  GJENLEVENDE = 'GJENLEVENDE',
-}
-
 export function formaterNavn(person: PersonNavn): string {
   return [person.fornavn, person.mellomnavn, person.etternavn].filter((navn) => !!navn).join(' ')
 }

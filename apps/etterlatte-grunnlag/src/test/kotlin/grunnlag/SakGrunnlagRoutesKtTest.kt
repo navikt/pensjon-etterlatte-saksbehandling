@@ -22,7 +22,6 @@ import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -112,34 +111,6 @@ internal class SakGrunnlagRoutesKtTest {
         }
 
         verify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlagForSak(sakId) }
-        coVerify(exactly = 1) { behandlingKlient.harTilgangTilSak(sakId, any(), any()) }
-    }
-
-    @Test
-    fun `Hent alle personer i sak`() {
-        val sakId = Random.nextLong()
-        val testData =
-            mapOf(
-                SOEKER_FOEDSELSNUMMER to PersonMedNavn(SOEKER_FOEDSELSNUMMER, "John", "Doe", null),
-            )
-
-        every { grunnlagService.hentPersonerISak(any()) } returns testData
-        coEvery { behandlingKlient.harTilgangTilSak(any(), any(), any()) } returns true
-
-        testApplication {
-            val response =
-                createHttpClient().get("api/grunnlag/sak/$sakId/personer/alle") {
-                    headers {
-                        append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
-                    }
-                }
-
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(serialize(PersonerISakDto(testData)), response.body<String>())
-        }
-
-        verify(exactly = 1) { grunnlagService.hentPersonerISak(sakId) }
         coVerify(exactly = 1) { behandlingKlient.harTilgangTilSak(sakId, any(), any()) }
     }
 

@@ -1,11 +1,8 @@
 import {
   AARSAKER_OMGJOERING,
   InnstillingTilKabalUtenBrev,
-  LOVHJEMLER_BP,
-  LOVHJEMLER_OMS,
   Omgjoering,
   TEKSTER_AARSAK_OMGJOERING,
-  TEKSTER_LOVHJEMLER,
   Utfall,
 } from '~shared/types/Klage'
 import React from 'react'
@@ -13,8 +10,6 @@ import { Heading, Select, Textarea } from '@navikt/ds-react'
 import { FieldOrNull } from '~shared/types/util'
 import { Control, Controller } from 'react-hook-form'
 import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
-import { useKlage } from '~components/klage/useKlage'
-import { SakType } from '~shared/types/sak'
 
 export type FilledFormDataVurdering = {
   utfall: Utfall
@@ -98,70 +93,6 @@ export function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) 
                 <Textarea label="Begrunnelse" value={value ?? ''} {...rest} />
 
                 {fieldState.error ? <Feilmelding>Du må gi en begrunnelse for omgjøringen.</Feilmelding> : null}
-              </>
-            )
-          }}
-        />
-      </VurderingWrapper>
-    </>
-  )
-}
-
-export function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
-  const { control } = props
-
-  const klage = useKlage()
-  const aktuelleHjemler = klage?.sak.sakType === SakType.BARNEPENSJON ? LOVHJEMLER_BP : LOVHJEMLER_OMS
-
-  return (
-    <>
-      <Heading level="2" size="medium" spacing>
-        Innstilling til KA
-      </Heading>
-
-      <VurderingWrapper>
-        <Controller
-          rules={{
-            required: true,
-            minLength: 1,
-          }}
-          name="innstilling.lovhjemmel"
-          control={control}
-          render={({ field, fieldState }) => {
-            const { value, ...rest } = field
-            return (
-              <>
-                <Select
-                  label="Hjemmel"
-                  value={value ?? ''}
-                  {...rest}
-                  description="Angi hvilken hjemmel klagen hovedsakelig knytter seg til"
-                >
-                  <option value="">Velg hjemmel</option>
-                  {aktuelleHjemler.map((hjemmel) => (
-                    <option key={hjemmel} value={hjemmel}>
-                      {TEKSTER_LOVHJEMLER[hjemmel]}
-                    </option>
-                  ))}
-                </Select>
-                {fieldState.error ? (
-                  <Feilmelding>Du må angi hjemmelen klagen hovedsakelig knytter seg til.</Feilmelding>
-                ) : null}
-              </>
-            )
-          }}
-        />
-      </VurderingWrapper>
-
-      <VurderingWrapper>
-        <Controller
-          name="innstilling.internKommentar"
-          control={control}
-          render={({ field }) => {
-            const { value, ...rest } = field
-            return (
-              <>
-                <Textarea label="Intern kommentar til KA" value={value ?? ''} {...rest} />
               </>
             )
           }}

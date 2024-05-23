@@ -6,7 +6,7 @@ import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
-import no.nav.etterlatte.statistikk.database.RefreshBeregningDao
+import no.nav.etterlatte.statistikk.database.OppdaterBeregningDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -14,7 +14,7 @@ import java.util.Timer
 
 class RefreshBeregningJob(
     private val beregningKlient: BeregningKlient,
-    private val refreshBeregningDao: RefreshBeregningDao,
+    private val oppdaterBeregningDao: OppdaterBeregningDao,
     private val leaderElection: LeaderElection,
     private val initialDelay: Long,
     private val periode: Duration,
@@ -33,7 +33,7 @@ class RefreshBeregningJob(
         ) {
             FikseOppTing(
                 leaderElection = leaderElection,
-                refreshBeregningDao = refreshBeregningDao,
+                oppdaterBeregningDao = oppdaterBeregningDao,
                 beregningKlient = beregningKlient,
             ).run()
         }
@@ -41,7 +41,7 @@ class RefreshBeregningJob(
 
     class FikseOppTing(
         private val leaderElection: LeaderElection,
-        private val refreshBeregningDao: RefreshBeregningDao,
+        private val oppdaterBeregningDao: OppdaterBeregningDao,
         private val beregningKlient: BeregningKlient,
     ) {
         private val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -63,7 +63,7 @@ class RefreshBeregningJob(
 
         private fun hentNyBeregning() {
             val behandlingerMedManglendeUtland =
-                refreshBeregningDao.hentBehandlingerUtenOppdatertBeregning(sakerAvGangen)
+                oppdaterBeregningDao.hentBehandlingerUtenOppdatertBeregning(sakerAvGangen)
             behandlingerMedManglendeUtland.map {
                 it to
                     try {
@@ -76,7 +76,7 @@ class RefreshBeregningJob(
                         null
                     }
             }.forEach { (behandlingId, beregning) ->
-                refreshBeregningDao.lagreBeregning(
+                oppdaterBeregningDao.lagreBeregning(
                     behandlingId,
                     beregning,
                 )
@@ -84,10 +84,10 @@ class RefreshBeregningJob(
         }
 
         private fun oppdaterMedNyBeregning() {
-            val behandlingerSomManglerPatching = refreshBeregningDao.hentBehandlingerSomIkkeErRefreshet(sakerAvGangen)
+            val behandlingerSomManglerPatching = oppdaterBeregningDao.hentBehandlingerSomIkkeErOppdatert(sakerAvGangen)
             behandlingerSomManglerPatching.forEach { (behandlingId, beregning) ->
                 if (beregning != null) {
-                    refreshBeregningDao.patchRaderForBehandling(behandlingId, beregning)
+                    oppdaterBeregningDao.patchRaderForBehandling(behandlingId, beregning)
                 } else {
                     logger.warn("Hentet ut en refreshet beregning som ble null, behandlingId=$behandlingId")
                 }

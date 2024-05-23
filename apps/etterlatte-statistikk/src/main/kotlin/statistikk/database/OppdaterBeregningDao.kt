@@ -9,14 +9,14 @@ import java.sql.Connection
 import java.util.UUID
 import javax.sql.DataSource
 
-class RefreshBeregningDao(
+class OppdaterBeregningDao(
     private val datasource: DataSource,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     companion object {
-        fun using(datasource: DataSource): RefreshBeregningDao {
-            return RefreshBeregningDao(datasource)
+        fun using(datasource: DataSource): OppdaterBeregningDao {
+            return OppdaterBeregningDao(datasource)
         }
     }
 
@@ -26,7 +26,7 @@ class RefreshBeregningDao(
                 connection.prepareStatement(
                     """
                     SELECT behandling_id
-                    FROM beregning_refresh
+                    FROM beregning_oppdatering
                     WHERE hentet_status = ?
                     LIMIT ?
                     """.trimIndent(),
@@ -49,7 +49,7 @@ class RefreshBeregningDao(
             val statement =
                 connection.prepareStatement(
                     """
-                    UPDATE beregning_refresh SET beregning = ?, hentet_status = ? 
+                    UPDATE beregning_oppdatering SET beregning = ?, hentet_status = ? 
                     WHERE behandling_id = ?
                     """.trimIndent(),
                 )
@@ -75,7 +75,7 @@ class RefreshBeregningDao(
             val statement =
                 connection.prepareStatement(
                     """
-                    UPDATE beregning_refresh SET patchet_status = ?, antall_sak_fix = ?, antall_stoenad_fix = ? 
+                    UPDATE beregning_oppdatering SET patchet_status = ?, antall_sak_fix = ?, antall_stoenad_fix = ? 
                     WHERE behandling_id = ?
                     """.trimIndent(),
                 )
@@ -98,12 +98,12 @@ class RefreshBeregningDao(
         return withConnection.let(oppdatering)
     }
 
-    fun hentBehandlingerSomIkkeErRefreshet(sakerAvGangen: Int): List<Pair<UUID, Beregning?>> {
+    fun hentBehandlingerSomIkkeErOppdatert(sakerAvGangen: Int): List<Pair<UUID, Beregning?>> {
         return datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
                     """
-                    SELECT behandling_id, beregning_behandling from beregning_refresh 
+                    SELECT behandling_id, beregning_behandling from beregning_oppdatering 
                     WHERE hentet_status = ?
                     AND patchet_status = ?
                     LIMIT ?

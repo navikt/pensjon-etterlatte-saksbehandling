@@ -1,4 +1,4 @@
-create table beregning_refresh
+create table beregning_oppdatering
 (
     behandling_id        uuid primary key,
     sak_id               bigint,
@@ -17,6 +17,6 @@ with beregninger as (select behandling_id, sak_id
                      from stoenad
                      where beregning != 'null')
 insert
-into beregning_refresh (behandling_id, sak_id)
+into beregning_oppdatering (behandling_id, sak_id)
 select behandling_id, sak_id
 from beregninger;

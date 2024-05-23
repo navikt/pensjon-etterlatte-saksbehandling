@@ -11,7 +11,7 @@ import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BehandlingKlientImpl
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlientImpl
-import no.nav.etterlatte.statistikk.database.RefreshBeregningDao
+import no.nav.etterlatte.statistikk.database.OppdaterBeregningDao
 import no.nav.etterlatte.statistikk.database.SakRepository
 import no.nav.etterlatte.statistikk.database.SoeknadStatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
@@ -89,14 +89,14 @@ class ApplicationContext {
         KlagehendelseRiver(rapidsConnection, statistikkService)
     }
 
-    private val refreshBeregningDao: RefreshBeregningDao by lazy {
-        RefreshBeregningDao.using(datasource)
+    private val oppdaterBeregningDao: OppdaterBeregningDao by lazy {
+        OppdaterBeregningDao.using(datasource)
     }
 
     val refreshBeregningJob: RefreshBeregningJob by lazy {
         RefreshBeregningJob(
             beregningKlient,
-            refreshBeregningDao,
+            oppdaterBeregningDao,
             leaderElection,
             Duration.of(5, ChronoUnit.MINUTES).toMillis(),
             Duration.of(2, ChronoUnit.MINUTES),

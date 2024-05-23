@@ -21,8 +21,6 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class SakRepository(private val datasource: DataSource) {
-    private val connection get() = datasource.connection
-
     companion object {
         fun using(datasource: DataSource): SakRepository {
             return SakRepository(datasource)
@@ -30,7 +28,7 @@ class SakRepository(private val datasource: DataSource) {
     }
 
     fun lagreRad(sakRad: SakRad): SakRad? {
-        connection.use { connection ->
+        datasource.connection.use { connection ->
             val (statement, insertedRows) =
                 connection.prepareStatement(
                     """
@@ -99,7 +97,7 @@ class SakRepository(private val datasource: DataSource) {
         )
 
     fun hentRader(): List<SakRad> {
-        return connection.use { connection ->
+        return datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
                     """
@@ -117,7 +115,7 @@ class SakRepository(private val datasource: DataSource) {
     }
 
     fun hentSisteRad(behandlingId: UUID): SakRad? {
-        return connection.use { connection ->
+        return datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
                     """

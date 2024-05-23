@@ -56,15 +56,14 @@ class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
 export default ErrorBoundary
 
 export const ApiErrorAlert = ({ children }: { children: ReactNode | Array<ReactNode> }) => {
-  return <ErrorAlert variant="error">{children}</ErrorAlert>
+  return <BredAlert variant="error">{children}</BredAlert>
 }
 
-const ErrorAlert = styled(Alert)`
-  margin: 2rem auto;
-  max-width: fit-content;
-`
+export const ApiWarningAlert = ({ children }: { children: ReactNode | Array<ReactNode> }) => {
+  return <BredAlert variant="warning">{children}</BredAlert>
+}
 
-export const ApiWarningAlert = styled(Alert).attrs({ variant: 'warning' })`
+const BredAlert = styled(Alert)`
   margin: 2rem auto;
   max-width: fit-content;
 `

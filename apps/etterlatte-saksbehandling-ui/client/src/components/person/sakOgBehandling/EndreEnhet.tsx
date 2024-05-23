@@ -49,9 +49,9 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
         </Modal.Header>
 
         <Modal.Body>
-          <WarningAlert>
+          <AlertMedMargin variant="warning">
             Hvis du endrer til en enhet du selv ikke har tilgang til, vil du ikke kunne flytte saken tilbake
-          </WarningAlert>
+          </AlertMedMargin>
 
           <Select
             label="Endre enhet"
@@ -80,6 +80,6 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
   )
 }
 
-const WarningAlert = styled(Alert).attrs({ variant: 'warning' })`
+const AlertMedMargin = styled(Alert)`
   margin-bottom: 1em;
 `

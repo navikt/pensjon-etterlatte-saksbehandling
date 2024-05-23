@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.sak
 
+import no.nav.etterlatte.libs.common.behandling.SakType
 import java.util.UUID
 
 data class SakIDListe(val ider: List<BehandlingOgSak>) {
@@ -8,6 +9,7 @@ data class SakIDListe(val ider: List<BehandlingOgSak>) {
 
 data class BehandlingOgSak(val behandlingId: UUID, val sakId: Long)
 
-data class SakIderDto(
+data class HentSakerRequest(
     val sakIder: List<Long>,
+    val sakType: SakType?,
 )

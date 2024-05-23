@@ -25,8 +25,8 @@ import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.sak.SakIderDto
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -56,14 +56,16 @@ internal fun Route.sakSystemRoutes(
             kunSystembruker {
                 val kjoering = call.parameters[KJOERING]!!
                 val antall = call.parameters[ANTALL]!!.toInt()
-                val saker = call.receive<SakIderDto>().sakIder
-                call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall, saker) }))
+                val request = call.receive<HentSakerRequest>()
+                val saker = request.sakIder
+                val sakstype = request.sakType
+                call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall, saker, sakstype) }))
             }
         }
 
         post("hent") {
             kunSystembruker {
-                medBody<SakIderDto> { dto ->
+                medBody<HentSakerRequest> { dto ->
                     val saker = inTransaction { sakService.hentSakerMedIder(dto.sakIder) }
                     call.respond(SakerDto(saker))
                 }

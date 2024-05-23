@@ -29,12 +29,12 @@ import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.ReguleringFeiletHendelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
-import no.nav.etterlatte.libs.common.sak.SakIderDto
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
@@ -63,6 +63,7 @@ interface BehandlingService {
         kjoering: String,
         antall: Int,
         saker: List<Long> = listOf(),
+        sakType: SakType? = null,
     ): Saker
 
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
@@ -204,11 +205,12 @@ class BehandlingServiceImpl(
         kjoering: String,
         antall: Int,
         saker: List<Long>,
+        sakType: SakType?,
     ): Saker =
         runBlocking {
             behandlingKlient.post("$url/saker/$kjoering/$antall") {
                 contentType(ContentType.Application.Json)
-                setBody(SakIderDto(saker))
+                setBody(HentSakerRequest(saker, sakType))
             }.body()
         }
 

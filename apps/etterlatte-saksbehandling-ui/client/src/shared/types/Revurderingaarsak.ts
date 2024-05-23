@@ -1,7 +1,5 @@
 //Denne må matche det som er definert i backend Revurderingaarsak.kt
 
-import { SakType } from '~shared/types/sak'
-
 export enum Revurderingaarsak {
   REGULERING = 'REGULERING',
   ANSVARLIGE_FORELDRE = 'ANSVARLIGE_FORELDRE',
@@ -81,12 +79,3 @@ export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   UTSENDELSE_AV_KRAVPAKKE: 'Utsendelse av kravpakke',
   UTSENDELSE_AV_SED: 'Utsendelse av SED',
 } as const
-
-export type RevurderingsaarsakerBySakstype = {
-  [key in SakType]: Array<Revurderingaarsak>
-}
-
-export class RevurderingsaarsakerDefault implements RevurderingsaarsakerBySakstype {
-  [SakType.BARNEPENSJON]: Array<Revurderingaarsak> = [];
-  [SakType.OMSTILLINGSSTOENAD]: Array<Revurderingaarsak> = []
-}

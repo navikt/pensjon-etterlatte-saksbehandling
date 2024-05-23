@@ -5,7 +5,6 @@ import {
   VurderingsResultat,
 } from '~shared/api/vilkaarsvurdering'
 import { ISvar } from '~shared/types/ISvar'
-import { KildeType } from '~shared/types/kilde'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 
@@ -17,25 +16,6 @@ export const svarTilTotalResultat = (svar: ISvar) => {
       return VilkaarsvurderingResultat.IKKE_OPPFYLT
     case ISvar.IKKE_VURDERT:
       throw Error('IKKE_VURDERT er ikke et gyldig valg for VilkaarsvurderingResultat')
-  }
-}
-
-export function hentKildenavn(type?: KildeType): string {
-  switch (type) {
-    case KildeType.pdl:
-      return 'PDL'
-    case KildeType.privatperson:
-      return 'Søknad'
-    case KildeType.a_ordningen:
-      return 'A-ordningen'
-    case KildeType.aa_registeret:
-      return 'AA-registeret'
-    case KildeType.vilkaarskomponenten:
-      return 'Vilkårskomponenten'
-    case KildeType.saksbehandler:
-      return 'Saksbehandler'
-    default:
-      return 'Ukjent kilde'
   }
 }
 

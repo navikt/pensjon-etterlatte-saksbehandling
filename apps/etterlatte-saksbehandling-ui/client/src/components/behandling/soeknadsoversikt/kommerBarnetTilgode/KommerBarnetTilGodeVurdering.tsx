@@ -100,6 +100,8 @@ export const KommerBarnetTilGodeVurdering = ({
           </RadioGroup>
         </RadioGroupWrapper>
         <SoeknadsoversiktTextArea
+          label="Begrunnelse"
+          placeholder="Forklar brgrunnelsen"
           value={begrunnelse}
           onChange={(e) => {
             const oppdatertBegrunnelse = e.target.value

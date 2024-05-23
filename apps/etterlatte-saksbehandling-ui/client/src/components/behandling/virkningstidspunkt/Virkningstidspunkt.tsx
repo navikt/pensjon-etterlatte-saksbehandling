@@ -202,7 +202,12 @@ const Virkningstidspunkt = (props: {
                   <MonthPicker.Input label="Virkningstidspunkt" {...inputProps} />
                 </MonthPicker>
 
-                <SoeknadsoversiktTextArea value={begrunnelse} onChange={(e) => setBegrunnelse(e.target.value)} />
+                <SoeknadsoversiktTextArea
+                  label="Begrunnelse"
+                  placeholder="Forklar brgrunnelsen"
+                  value={begrunnelse}
+                  onChange={(e) => setBegrunnelse(e.target.value)}
+                />
 
                 {errorTekst !== '' ? <ErrorMessage>{errorTekst}</ErrorMessage> : null}
               </VStack>

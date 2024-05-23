@@ -22,14 +22,17 @@ import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -339,6 +342,12 @@ internal class BehandlingStatusServiceTest {
 
         every { behandlingService.hentBehandling(behandlingId) } returns behandling
         every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId, feilutbetalingValg)
+        every { oppgaveService.hentOppgaverForSak(sakId) } returns
+            listOf(
+                oppgave(UUID.randomUUID(), sakId, Status.FERDIGSTILT),
+                oppgave(UUID.randomUUID(), sakId, Status.FEILREGISTRERT),
+                oppgave(UUID.randomUUID(), sakId, Status.AVBRUTT),
+            )
         every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), sakId, any(), any(), any()) } returns mockk()
         every { grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId) } just runs
 
@@ -351,6 +360,7 @@ internal class BehandlingStatusServiceTest {
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
+            oppgaveService.hentOppgaverForSak(sakId)
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                 referanse = sakId.toString(),
                 sakId = sakId,
@@ -361,6 +371,63 @@ internal class BehandlingStatusServiceTest {
             grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
         }
     }
+
+    @ParameterizedTest()
+    @EnumSource(FeilutbetalingValg::class, names = ["JA_VARSEL", "JA_INGEN_TK"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal sette eksisterende tilbakekrevingsoppgave paa vent naar behandling med feilutbetaling blir iverksatt`(
+        feilutbetalingValg: FeilutbetalingValg,
+    ) {
+        val oppgaveId = UUID.randomUUID()
+        val sakId = 1L
+        val behandling =
+            revurdering(
+                sakId = sakId,
+                revurderingAarsak = Revurderingaarsak.ANNEN,
+                status = BehandlingStatus.ATTESTERT,
+            )
+        val behandlingId = behandling.id
+        val iverksettVedtak = VedtakHendelse(1L, Tidspunkt.now(), "sbl")
+
+        every { behandlingService.hentBehandling(behandlingId) } returns behandling
+        every { behandlingInfoDao.hentBrevutfall(behandlingId) } returns brevutfall(behandlingId, feilutbetalingValg)
+        every { oppgaveService.hentOppgaverForSak(sakId) } returns listOf(oppgave(oppgaveId, sakId))
+        every { oppgaveService.endrePaaVent(oppgaveId, any(), any()) } returns oppgave(oppgaveId, sakId, Status.PAA_VENT)
+        every { grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId) } just runs
+
+        inTransaction {
+            sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+        }
+
+        verify {
+            behandlingdao.lagreStatus(behandlingId, BehandlingStatus.IVERKSATT, any())
+            behandlingService.hentBehandling(behandlingId)
+            behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
+            behandlingInfoDao.hentBrevutfall(behandlingId)
+            oppgaveService.hentOppgaverForSak(sakId)
+            oppgaveService.endrePaaVent(oppgaveId, "Venter på oppdatert kravgrunnlag", true)
+            grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
+        }
+    }
+
+    private fun oppgave(
+        oppgaveId: UUID = UUID.randomUUID(),
+        sakId: Long,
+        status: Status = Status.UNDER_BEHANDLING,
+    ) = OppgaveIntern(
+        id = oppgaveId,
+        status = status,
+        enhet = "enhet",
+        sakId = sakId,
+        kilde = OppgaveKilde.TILBAKEKREVING,
+        type = OppgaveType.TILBAKEKREVING,
+        saksbehandler = null,
+        referanse = sakId.toString(),
+        merknad = "merknad",
+        opprettet = Tidspunkt.now(),
+        sakType = SakType.BARNEPENSJON,
+        fnr = null,
+        frist = Tidspunkt.now(),
+    )
 
     private fun brevutfall(
         behandlingId: UUID,

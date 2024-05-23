@@ -10,13 +10,13 @@ import {
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe } from '~components/person/typer'
-import { InstitusjonsoppholdBegrunnelse } from '~components/person/hendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { FoersteVirk, ISak } from '~shared/types/sak'
 import { format } from 'date-fns'
 import { DatoFormat } from '~utils/formattering'
 import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
 import { RedigertFamilieforhold } from '~shared/types/grunnlag'
 import { ISendBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
+import { InstitusjonsoppholdBegrunnelse } from '~components/person/hendelser/institusjonsopphold/VurderInstitusjonsoppholdModalBody'
 
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number

@@ -19,7 +19,7 @@ services:
       APP_VERSION: 1
       # Lokale URL-er skal kommenteres ut når de ikke er i bruk
 #      BREV_API_URL: http://host.docker.internal:8084
-      BEHANDLING_API_URL: http://host.docker.internal:8090
+#      BEHANDLING_API_URL: http://host.docker.internal:8090
 #      PDLTJENESTER_API_URL: http://host.docker.internal:8091
 #      VEDTAK_API_URL: http://host.docker.internal:8098
     env_file:

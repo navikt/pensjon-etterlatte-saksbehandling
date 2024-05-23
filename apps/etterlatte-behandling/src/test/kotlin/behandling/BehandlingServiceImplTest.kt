@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
@@ -10,8 +11,6 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.DatabaseKontekst
-import no.nav.etterlatte.GrunnlagKlientTest
-import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -26,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -36,19 +36,21 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
+import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
-import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -63,59 +65,46 @@ import java.time.YearMonth
 import java.util.UUID
 import kotlin.random.Random
 
-class BehandlingServiceImplTest {
-    private val user =
-        mockk<SaksbehandlerMedEnheterOgRoller> {
-            every { saksbehandlerMedRoller } returns
-                mockk<SaksbehandlerMedRoller> {
-                    every { harRolleStrengtFortrolig() } returns false
-                    every { harRolleEgenAnsatt() } returns false
-                }
-            every { name() } returns "ident"
-            every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
-        }
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+internal class BehandlingServiceImplTest {
+    private val behandlingDaoMock = mockk<BehandlingDao>()
+    private val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
+    private val grunnlagsendringshendelseDaoMock = mockk<GrunnlagsendringshendelseDao>()
+    private val hendelseDaoMock = mockk<HendelseDao>()
+    private val grunnlagKlientMock = mockk<GrunnlagKlient>()
+    private val oppgaveServiceMock = mockk<OppgaveService>()
 
-    @BeforeEach
-    fun before() {
-        nyKontekstMedBruker(user)
+    private val sut =
+        BehandlingServiceImpl(
+            behandlingDao = behandlingDaoMock,
+            behandlingHendelser = behandlingHendelser,
+            grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
+            hendelseDao = hendelseDaoMock,
+            grunnlagKlient = grunnlagKlientMock,
+            behandlingRequestLogger = mockk(),
+            kommerBarnetTilGodeDao = mockk(),
+            oppgaveService = oppgaveServiceMock,
+            grunnlagService = mockk(),
+            beregningKlient = mockk(),
+        )
+
+    @AfterEach
+    fun after() {
+        clearAllMocks()
     }
 
     @Test
     fun `Kan hente egne ansatte behandlínger som egen ansatt saksbehandler`() {
-        val userStrengfortrolig =
-            mockk<SaksbehandlerMedEnheterOgRoller> {
-                every { saksbehandlerMedRoller } returns
-                    mockk<SaksbehandlerMedRoller> {
-                        every { harRolleStrengtFortrolig() } returns false
-                        every { harRolleEgenAnsatt() } returns true
-                    }
-                every { name() } returns "ident"
-                every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
-            }
-        nyKontekstMedBruker(userStrengfortrolig)
-        val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { alleBehandlingerISak(1) } returns
-                    listOf(
-                        revurdering(sakId = 1, revurderingAarsak = Revurderingaarsak.REGULERING, enhet = Enheter.EGNE_ANSATTE.enhetNr),
-                        foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
-                    )
-            }
-        val hendelserMock = mockk<HendelseDao>()
+        nyKontekstMedBruker(mockSaksbehandler(harRolleEgenAnsatt = true))
 
-        val sut =
-            BehandlingServiceImpl(
-                behandlingDao = behandlingDaoMock,
-                behandlingHendelser = behandlingHendelser,
-                grunnlagsendringshendelseDao = mockk(),
-                hendelseDao = hendelserMock,
-                grunnlagKlient = mockk(),
-                behandlingRequestLogger = mockk(),
-                kommerBarnetTilGodeDao = mockk(),
-                oppgaveService = mockk(),
-                grunnlagService = mockk(),
-                beregningKlient = mockk(),
+        every { behandlingDaoMock.alleBehandlingerISak(1) } returns
+            listOf(
+                revurdering(
+                    sakId = 1,
+                    revurderingAarsak = Revurderingaarsak.REGULERING,
+                    enhet = Enheter.EGNE_ANSATTE.enhetNr,
+                ),
+                foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
             )
 
         val behandlinger = sut.hentBehandlingerForSak(1)
@@ -130,44 +119,16 @@ class BehandlingServiceImplTest {
 
     @Test
     fun `Kan hente strengt fortrolig behandlínger som streng fortrolig saksbehandler`() {
-        val userStrengfortrolig =
-            mockk<SaksbehandlerMedEnheterOgRoller> {
-                every { saksbehandlerMedRoller } returns
-                    mockk<SaksbehandlerMedRoller> {
-                        every { harRolleStrengtFortrolig() } returns true
-                        every { harRolleEgenAnsatt() } returns false
-                    }
-                every { name() } returns "ident"
-                every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
-            }
-        nyKontekstMedBruker(userStrengfortrolig)
-        val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { alleBehandlingerISak(1) } returns
-                    listOf(
-                        revurdering(
-                            sakId = 1,
-                            revurderingAarsak = Revurderingaarsak.REGULERING,
-                            enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
-                        ),
-                        foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
-                    )
-            }
-        val hendelserMock = mockk<HendelseDao>()
+        nyKontekstMedBruker(mockSaksbehandler("ident", harRolleStrengtFortrolig = true))
 
-        val sut =
-            BehandlingServiceImpl(
-                behandlingDao = behandlingDaoMock,
-                behandlingHendelser = behandlingHendelser,
-                grunnlagsendringshendelseDao = mockk(),
-                hendelseDao = hendelserMock,
-                grunnlagKlient = mockk(),
-                behandlingRequestLogger = mockk(),
-                kommerBarnetTilGodeDao = mockk(),
-                oppgaveService = mockk(),
-                grunnlagService = mockk(),
-                beregningKlient = mockk(),
+        every { behandlingDaoMock.alleBehandlingerISak(1) } returns
+            listOf(
+                revurdering(
+                    sakId = 1,
+                    revurderingAarsak = Revurderingaarsak.REGULERING,
+                    enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
+                ),
+                foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
             )
 
         val behandlinger = sut.hentBehandlingerForSak(1)
@@ -182,33 +143,16 @@ class BehandlingServiceImplTest {
 
     @Test
     fun `Kan ikke hente strengt fortrolig behandlínger som vanlig saksbehandler`() {
-        val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { alleBehandlingerISak(1) } returns
-                    listOf(
-                        revurdering(
-                            sakId = 1,
-                            revurderingAarsak = Revurderingaarsak.REGULERING,
-                            enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
-                        ),
-                        foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
-                    )
-            }
-        val hendelserMock = mockk<HendelseDao>()
+        nyKontekstMedBruker(mockSaksbehandler())
 
-        val sut =
-            BehandlingServiceImpl(
-                behandlingDao = behandlingDaoMock,
-                behandlingHendelser = behandlingHendelser,
-                grunnlagsendringshendelseDao = mockk(),
-                hendelseDao = hendelserMock,
-                grunnlagKlient = mockk(),
-                behandlingRequestLogger = mockk(),
-                kommerBarnetTilGodeDao = mockk(),
-                oppgaveService = mockk(),
-                grunnlagService = mockk(),
-                beregningKlient = mockk(),
+        every { behandlingDaoMock.alleBehandlingerISak(1) } returns
+            listOf(
+                revurdering(
+                    sakId = 1,
+                    revurderingAarsak = Revurderingaarsak.REGULERING,
+                    enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
+                ),
+                foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
             )
 
         val behandlinger = sut.hentBehandlingerForSak(1)
@@ -223,29 +167,16 @@ class BehandlingServiceImplTest {
 
     @Test
     fun `Kan ikke hente egne ansatte behandlínger som vanlig saksbehandler`() {
-        val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { alleBehandlingerISak(1) } returns
-                    listOf(
-                        revurdering(sakId = 1, revurderingAarsak = Revurderingaarsak.REGULERING, enhet = Enheter.EGNE_ANSATTE.enhetNr),
-                        foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
-                    )
-            }
-        val hendelserMock = mockk<HendelseDao>()
+        nyKontekstMedBruker(mockSaksbehandler())
 
-        val sut =
-            BehandlingServiceImpl(
-                behandlingDao = behandlingDaoMock,
-                behandlingHendelser = behandlingHendelser,
-                grunnlagsendringshendelseDao = mockk(),
-                hendelseDao = hendelserMock,
-                grunnlagKlient = mockk(),
-                behandlingRequestLogger = mockk(),
-                kommerBarnetTilGodeDao = mockk(),
-                oppgaveService = mockk(),
-                grunnlagService = mockk(),
-                beregningKlient = mockk(),
+        every { behandlingDaoMock.alleBehandlingerISak(1) } returns
+            listOf(
+                revurdering(
+                    sakId = 1,
+                    revurderingAarsak = Revurderingaarsak.REGULERING,
+                    enhet = Enheter.EGNE_ANSATTE.enhetNr,
+                ),
+                foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
             )
 
         val behandlinger = sut.hentBehandlingerForSak(1)
@@ -260,29 +191,12 @@ class BehandlingServiceImplTest {
 
     @Test
     fun `skal hente behandlinger i sak`() {
-        val behandlingHendelser = mockk<BehandlingHendelserKafkaProducer>()
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { alleBehandlingerISak(1) } returns
-                    listOf(
-                        revurdering(sakId = 1, revurderingAarsak = Revurderingaarsak.REGULERING),
-                        foerstegangsbehandling(sakId = 1),
-                    )
-            }
-        val hendelserMock = mockk<HendelseDao>()
+        nyKontekstMedBruker(mockSaksbehandler())
 
-        val sut =
-            BehandlingServiceImpl(
-                behandlingDao = behandlingDaoMock,
-                behandlingHendelser = behandlingHendelser,
-                grunnlagsendringshendelseDao = mockk(),
-                hendelseDao = hendelserMock,
-                grunnlagKlient = mockk(),
-                behandlingRequestLogger = mockk(),
-                kommerBarnetTilGodeDao = mockk(),
-                oppgaveService = mockk(),
-                grunnlagService = mockk(),
-                beregningKlient = mockk(),
+        every { behandlingDaoMock.alleBehandlingerISak(1) } returns
+            listOf(
+                revurdering(sakId = 1, revurderingAarsak = Revurderingaarsak.REGULERING),
+                foerstegangsbehandling(sakId = 1),
             )
 
         val behandlinger = sut.hentBehandlingerForSak(1)
@@ -297,108 +211,68 @@ class BehandlingServiceImplTest {
 
     @Test
     fun `avbrytBehandling sjekker om behandlingsstatusen er gyldig for avbrudd`() {
+        nyKontekstMedBruker(mockSaksbehandler())
+
         val sakId = 1L
         val avbruttBehandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.AVBRUTT)
         val attestertBehandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.ATTESTERT)
         val iverksattBehandling = foerstegangsbehandling(sakId = sakId, status = BehandlingStatus.IVERKSATT)
         val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
 
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { hentBehandling(avbruttBehandling.id) } returns avbruttBehandling
-                every { hentBehandling(attestertBehandling.id) } returns attestertBehandling
-                every { hentBehandling(iverksattBehandling.id) } returns iverksattBehandling
-                every { hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-                every { avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
-            }
-        val hendelserMock =
-            mockk<HendelseDao> {
-                every { behandlingAvbrutt(any(), any()) } returns Unit
-            }
-        val hendelseskanalMock =
-            mockk<BehandlingHendelserKafkaProducer> {
-                every { sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
-            }
-        val grunnlagsendringshendelseDaoMock =
-            mockk<GrunnlagsendringshendelseDao> {
-                every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
-                every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
-            }
+        every { behandlingDaoMock.hentBehandling(avbruttBehandling.id) } returns avbruttBehandling
+        every { behandlingDaoMock.hentBehandling(attestertBehandling.id) } returns attestertBehandling
+        every { behandlingDaoMock.hentBehandling(iverksattBehandling.id) } returns iverksattBehandling
+        every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
+        every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
 
-        val oppgaveServiceMock: OppgaveService =
-            mockk {
-                every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
-            }
+        every { hendelseDaoMock.behandlingAvbrutt(any(), any()) } returns Unit
 
-        val behandlingService =
-            lagRealGenerellBehandlingService(
-                behandlingDao = behandlingDaoMock,
-                behandlingHendelserKafkaProducer = hendelseskanalMock,
-                hendelseDao = hendelserMock,
-                grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
-                oppgaveService = oppgaveServiceMock,
-                grunnlagKlient = GrunnlagKlientTest(),
-            )
+        every { behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
+
+        every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+        every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
+
+        every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
+
+        coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
         val saksbehandler = Saksbehandler("", "saksbehandler", null)
         assertThrows<BehandlingKanIkkeAvbrytesException> {
-            behandlingService.avbrytBehandling(avbruttBehandling.id, saksbehandler)
+            sut.avbrytBehandling(avbruttBehandling.id, saksbehandler)
         }
 
         assertThrows<BehandlingKanIkkeAvbrytesException> {
-            behandlingService.avbrytBehandling(iverksattBehandling.id, saksbehandler)
+            sut.avbrytBehandling(iverksattBehandling.id, saksbehandler)
         }
 
         assertThrows<BehandlingKanIkkeAvbrytesException> {
-            behandlingService.avbrytBehandling(attestertBehandling.id, saksbehandler)
+            sut.avbrytBehandling(attestertBehandling.id, saksbehandler)
         }
         assertDoesNotThrow {
-            behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, saksbehandler)
+            sut.avbrytBehandling(nyFoerstegangsbehandling.id, saksbehandler)
         }
     }
 
     @Test
     fun `avbrytBehandling registrerer en avbruddshendelse`() {
+        nyKontekstMedBruker(mockSaksbehandler())
+
         val sakId = 1L
         val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
 
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-                every { avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
-            }
-        val hendelserMock =
-            mockk<HendelseDao> {
-                every { behandlingAvbrutt(any(), any()) } returns Unit
-            }
-        val behandlingHendelserKafkaProducer =
-            mockk<BehandlingHendelserKafkaProducer> {
-                every { sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
-            }
-        val grunnlagsendringshendelseDaoMock =
-            mockk<GrunnlagsendringshendelseDao> {
-                every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
-                every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
-            }
+        every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
+        every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
+        every { hendelseDaoMock.behandlingAvbrutt(any(), any()) } returns Unit
+        every { behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
+        every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+        every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
+        every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
+        coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
-        val oppgaveServiceMock: OppgaveService =
-            mockk {
-                every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
-            }
+        sut.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
 
-        val behandlingService =
-            lagRealGenerellBehandlingService(
-                behandlingDao = behandlingDaoMock,
-                behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducer,
-                grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
-                hendelseDao = hendelserMock,
-                oppgaveService = oppgaveServiceMock,
-                grunnlagKlient = GrunnlagKlientTest(),
-            )
-
-        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
         verify {
-            hendelserMock.behandlingAvbrutt(any(), any())
+            hendelseDaoMock.behandlingAvbrutt(any(), any())
         }
     }
 
@@ -406,7 +280,7 @@ class BehandlingServiceImplTest {
     fun `avbrytBehandling ruller tilbake alt ved exception i intransaction`() {
         var didRollback = false
         nyKontekstMedBrukerOgDatabaseContext(
-            user,
+            mockSaksbehandler("ident"),
             object : DatabaseKontekst {
                 override fun activeTx(): Connection {
                     throw IllegalArgumentException()
@@ -430,42 +304,26 @@ class BehandlingServiceImplTest {
         val sakId = 1L
         val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
 
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-                every { avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
-            }
-        val hendelserMock =
-            mockk<HendelseDao> {
-                every { behandlingAvbrutt(any(), any()) } returns Unit
-            }
-        val behandlingHendelserKafkaProducer =
-            mockk<BehandlingHendelserKafkaProducer> {
-                every { sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
-            }
-        val grunnlagsendringshendelseDaoMock =
-            mockk<GrunnlagsendringshendelseDao> {
-                every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } throws RuntimeException("Alt må rulles tilbake")
-                every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
-            }
-
-        val oppgaveServiceMock: OppgaveService =
-            mockk {
-                every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
-            }
-
-        val behandlingService =
-            lagRealGenerellBehandlingService(
-                behandlingDao = behandlingDaoMock,
-                behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducer,
-                grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
-                hendelseDao = hendelserMock,
-                oppgaveService = oppgaveServiceMock,
+        every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
+        every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
+        every { hendelseDaoMock.behandlingAvbrutt(any(), any()) } returns Unit
+        every { behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
+        every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } throws
+            RuntimeException(
+                "Alt må rulles tilbake",
             )
+        every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
+
+        every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
 
         assertFalse(didRollback)
         assertThrows<RuntimeException> {
-            inTransaction { behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null)) }
+            inTransaction {
+                sut.avbrytBehandling(
+                    nyFoerstegangsbehandling.id,
+                    Saksbehandler("", "saksbehandler", null),
+                )
+            }
         }
 
         assertTrue(didRollback)
@@ -473,51 +331,29 @@ class BehandlingServiceImplTest {
 
     @Test
     fun `avbrytBehandling sender en kafka-melding`() {
+        nyKontekstMedBruker(mockSaksbehandler())
+
         val sakId = 1L
         val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
 
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-                every { avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
-            }
-        val hendelserMock =
-            mockk<HendelseDao> {
-                every { behandlingAvbrutt(any(), any()) } returns Unit
-            }
-        val behandlingHendelserKafkaProducerMock =
-            mockk<BehandlingHendelserKafkaProducer> {
-                every {
-                    sendMeldingForHendelseMedDetaljertBehandling(
-                        any(),
-                        BehandlingHendelseType.AVBRUTT,
-                    )
-                } returns Unit
-            }
-        val grunnlagsendringshendelseDaoMock =
-            mockk<GrunnlagsendringshendelseDao> {
-                every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
-                every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
-            }
-
-        val oppgaveServiceMock: OppgaveService =
-            mockk {
-                every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
-            }
-
-        val behandlingService =
-            lagRealGenerellBehandlingService(
-                behandlingDao = behandlingDaoMock,
-                behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducerMock,
-                grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
-                hendelseDao = hendelserMock,
-                oppgaveService = oppgaveServiceMock,
-                grunnlagKlient = GrunnlagKlientTest(),
+        every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
+        every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
+        every { hendelseDaoMock.behandlingAvbrutt(any(), any()) } returns Unit
+        every {
+            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                any(),
+                BehandlingHendelseType.AVBRUTT,
             )
+        } returns Unit
+        every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+        every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
+        every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
+        coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
-        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
+        sut.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
+
         verify {
-            behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(
+            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
                 any(),
                 BehandlingHendelseType.AVBRUTT,
             )
@@ -526,48 +362,26 @@ class BehandlingServiceImplTest {
 
     @Test
     fun `avbryt behandling setter koblede grunnlagsendringshendelser tilbake til ingen kobling`() {
+        nyKontekstMedBruker(mockSaksbehandler())
+
         val sakId = 1L
         val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
 
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
-                every { avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
-            }
-        val hendelserMock =
-            mockk<HendelseDao> {
-                every { behandlingAvbrutt(any(), any()) } returns Unit
-            }
-        val behandlingHendelserKafkaProducer =
-            mockk<BehandlingHendelserKafkaProducer> {
-                every {
-                    sendMeldingForHendelseMedDetaljertBehandling(
-                        any(),
-                        BehandlingHendelseType.AVBRUTT,
-                    )
-                } returns Unit
-            }
-        val grunnlagsendringshendelseDaoMock =
-            mockk<GrunnlagsendringshendelseDao> {
-                every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
-                every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
-            }
-
-        val oppgaveServiceMock: OppgaveService =
-            mockk {
-                every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
-            }
-        val behandlingService =
-            lagRealGenerellBehandlingService(
-                behandlingDao = behandlingDaoMock,
-                behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducer,
-                grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
-                hendelseDao = hendelserMock,
-                oppgaveService = oppgaveServiceMock,
-                grunnlagKlient = GrunnlagKlientTest(),
+        every { behandlingDaoMock.hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
+        every { behandlingDaoMock.avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
+        every { hendelseDaoMock.behandlingAvbrutt(any(), any()) } returns Unit
+        every {
+            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                any(),
+                BehandlingHendelseType.AVBRUTT,
             )
+        } returns Unit
+        every { grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(any()) } just runs
+        every { grunnlagsendringshendelseDaoMock.hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
+        every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
+        coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
-        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
+        sut.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
         verify(exactly = 1) {
             grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(nyFoerstegangsbehandling.id)
         }
@@ -780,33 +594,34 @@ class BehandlingServiceImplTest {
         foersteVirk: YearMonth? = null,
         kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     ): Boolean {
-        val service =
-            behandlingServiceMedMocks(
-                sakType = sakType,
-                behandlingType = behandlingType,
-                doedsdato = doedsdato,
-                soeknadMottatt = soeknadMottatt,
-                foersteVirk = foersteVirk,
-                utlandstilknytning =
-                    utlandstilknytningType?.let {
-                        Utlandstilknytning(
-                            utlandstilknytningType,
-                            Grunnlagsopplysning.Saksbehandler.create("ident"),
-                            "begrunnelse",
-                        )
-                    },
-                kilde = kilde,
-            )
+        initFellesMocks(
+            sakType = sakType,
+            behandlingType = behandlingType,
+            doedsdato = doedsdato,
+            soeknadMottatt = soeknadMottatt,
+            foersteVirk = foersteVirk,
+            utlandstilknytning =
+                utlandstilknytningType?.let {
+                    Utlandstilknytning(
+                        utlandstilknytningType,
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    )
+                },
+            kilde = kilde,
+        )
 
         val request = VirkningstidspunktRequest(virkningstidspunkt.toString(), begrunnelse, kravdato?.toLocalDate())
 
         return runBlocking {
-            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
+            sut.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
         }
     }
 
     @Test
     fun `hentSenestIverksatteBehandling() returnerer seneste iverksatte behandlingen`() {
+        nyKontekstMedBruker(mockSaksbehandler())
+
         val behandling1 = foerstegangsbehandling(sakId = 1, status = BehandlingStatus.IVERKSATT)
         val behandling2 =
             revurdering(
@@ -814,52 +629,23 @@ class BehandlingServiceImplTest {
                 status = BehandlingStatus.BEREGNET,
                 revurderingAarsak = Revurderingaarsak.REGULERING,
             )
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { alleBehandlingerISak(any()) } returns listOf(behandling1, behandling2)
-            }
 
-        val service =
-            lagRealGenerellBehandlingService(
-                behandlingDao = behandlingDaoMock,
-            )
+        every { behandlingDaoMock.alleBehandlingerISak(any()) } returns listOf(behandling1, behandling2)
 
-        assertEquals(behandling1, service.hentSisteIverksatte(1))
+        assertEquals(behandling1, sut.hentSisteIverksatte(1))
     }
 
     @Test
     fun `skal hente behandlinger i sak hvor sak har enhet og brukeren har enhet`() {
-        every {
-            user.enheter()
-        } returns listOf(Enheter.PORSGRUNN.enhetNr)
-
-        val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>()
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { alleBehandlingerISak(1) } returns
-                    listOf(
-                        revurdering(
-                            sakId = 1,
-                            revurderingAarsak = Revurderingaarsak.REGULERING,
-                            enhet = Enheter.PORSGRUNN.enhetNr,
-                        ),
-                        foerstegangsbehandling(sakId = 1, enhet = Enheter.PORSGRUNN.enhetNr),
-                    )
-            }
-        val hendelserMock = mockk<HendelseDao>()
-
-        val sut =
-            BehandlingServiceImpl(
-                behandlingDao = behandlingDaoMock,
-                behandlingHendelser = behandlingHendelserKafkaProducerMock,
-                grunnlagsendringshendelseDao = mockk(),
-                hendelseDao = hendelserMock,
-                grunnlagKlient = mockk(),
-                behandlingRequestLogger = mockk(),
-                kommerBarnetTilGodeDao = mockk(),
-                oppgaveService = mockk(),
-                grunnlagService = mockk(),
-                beregningKlient = mockk(),
+        nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enheter.PORSGRUNN.enhetNr)))
+        every { behandlingDaoMock.alleBehandlingerISak(1) } returns
+            listOf(
+                revurdering(
+                    sakId = 1,
+                    revurderingAarsak = Revurderingaarsak.REGULERING,
+                    enhet = Enheter.PORSGRUNN.enhetNr,
+                ),
+                foerstegangsbehandling(sakId = 1, enhet = Enheter.PORSGRUNN.enhetNr),
             )
 
         val behandlinger = sut.hentBehandlingerForSak(1)
@@ -874,41 +660,21 @@ class BehandlingServiceImplTest {
 
     @Test
     fun `kan oppdatere bodd eller arbeidet i utlandet`() {
-        every {
-            user.enheter()
-        } returns listOf(Enheter.PORSGRUNN.enhetNr)
+        nyKontekstMedBruker(mockSaksbehandler(enheter = listOf(Enheter.PORSGRUNN.enhetNr)))
 
         val uuid = UUID.randomUUID()
 
         val slot = slot<BoddEllerArbeidetUtlandet>()
 
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { hentBehandling(any()) } returns
-                    foerstegangsbehandling(
-                        id = uuid,
-                        sakId = 1,
-                        enhet = Enheter.PORSGRUNN.enhetNr,
-                    )
-
-                every { lagreBoddEllerArbeidetUtlandet(any(), capture(slot)) } just runs
-
-                every { lagreStatus(any()) } just runs
-            }
-
-        val sut =
-            BehandlingServiceImpl(
-                behandlingDaoMock,
-                mockk(),
-                mockk(),
-                mockk(),
-                mockk(),
-                mockk(),
-                kommerBarnetTilGodeDao = mockk(),
-                oppgaveService = mockk(),
-                grunnlagService = mockk(),
-                beregningKlient = mockk(),
+        every { behandlingDaoMock.hentBehandling(any()) } returns
+            foerstegangsbehandling(
+                id = uuid,
+                sakId = 1,
+                enhet = Enheter.PORSGRUNN.enhetNr,
             )
+
+        every { behandlingDaoMock.lagreBoddEllerArbeidetUtlandet(any(), capture(slot)) } just runs
+        every { behandlingDaoMock.lagreStatus(any()) } just runs
 
         inTransaction {
             sut.oppdaterBoddEllerArbeidetUtlandet(
@@ -928,34 +694,19 @@ class BehandlingServiceImplTest {
 
     @Test
     fun `hentSakMedBehandlinger - flere saker prioriteres korrekt`() {
+        nyKontekstMedBruker(mockSaksbehandler())
+
         val sak1 = Sak("fnr", SakType.BARNEPENSJON, id = Random.nextLong(), "4808")
         val sak2 = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), "4808")
 
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { alleBehandlingerISak(sak1.id) } returns
-                    listOf(
-                        foerstegangsbehandling(sakId = sak1.id, status = BehandlingStatus.AVBRUTT),
-                        foerstegangsbehandling(sakId = sak1.id, status = BehandlingStatus.AVBRUTT),
-                    )
-                every { alleBehandlingerISak(sak2.id) } returns
-                    listOf(
-                        foerstegangsbehandling(sakId = sak2.id, status = BehandlingStatus.IVERKSATT),
-                    )
-            }
-
-        val sut =
-            BehandlingServiceImpl(
-                behandlingDaoMock,
-                mockk(),
-                mockk(),
-                mockk(),
-                mockk(),
-                mockk(),
-                mockk(),
-                mockk(),
-                mockk(),
-                mockk(),
+        every { behandlingDaoMock.alleBehandlingerISak(sak1.id) } returns
+            listOf(
+                foerstegangsbehandling(sakId = sak1.id, status = BehandlingStatus.AVBRUTT),
+                foerstegangsbehandling(sakId = sak1.id, status = BehandlingStatus.AVBRUTT),
+            )
+        every { behandlingDaoMock.alleBehandlingerISak(sak2.id) } returns
+            listOf(
+                foerstegangsbehandling(sakId = sak2.id, status = BehandlingStatus.IVERKSATT),
             )
 
         val sakMedBehandlinger = sut.hentSakMedBehandlinger(listOf(sak1, sak2))
@@ -971,21 +722,17 @@ class BehandlingServiceImplTest {
 
     @Test
     fun `hentSakMedBehandlinger - kun én sak`() {
+        nyKontekstMedBruker(mockSaksbehandler())
+
         val sak = Sak("fnr", SakType.OMSTILLINGSSTOENAD, id = Random.nextLong(), "4808")
 
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { alleBehandlingerISak(sak.id) } returns
-                    listOf(
-                        foerstegangsbehandling(
-                            sakId = sak.id,
-                            status = BehandlingStatus.IVERKSATT,
-                        ),
-                    )
-            }
-
-        val sut =
-            BehandlingServiceImpl(behandlingDaoMock, mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk(), mockk())
+        every { behandlingDaoMock.alleBehandlingerISak(sak.id) } returns
+            listOf(
+                foerstegangsbehandling(
+                    sakId = sak.id,
+                    status = BehandlingStatus.IVERKSATT,
+                ),
+            )
 
         val sakMedBehandlinger = sut.hentSakMedBehandlinger(listOf(sak))
 
@@ -995,7 +742,7 @@ class BehandlingServiceImplTest {
         verify(exactly = 1) { behandlingDaoMock.alleBehandlingerISak(sak.id) }
     }
 
-    private fun behandlingServiceMedMocks(
+    private fun initFellesMocks(
         sakType: SakType = SakType.BARNEPENSJON,
         behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         doedsdato: LocalDate?,
@@ -1003,7 +750,9 @@ class BehandlingServiceImplTest {
         foersteVirk: YearMonth?,
         utlandstilknytning: Utlandstilknytning? = null,
         kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    ): BehandlingServiceImpl {
+    ) {
+        nyKontekstMedBruker(mockSaksbehandler())
+
         val (behandling, tidligereBehandlinger) =
             when (behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING ->
@@ -1048,45 +797,30 @@ class BehandlingServiceImplTest {
 
         val personopplysning = personOpplysning(doedsdato = doedsdato)
         val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
-        val grunnlagKlient =
-            mockk<GrunnlagKlientTest> {
-                coEvery {
-                    finnPersonOpplysning(behandling.id, Opplysningstype.AVDOED_PDL_V1, TOKEN)
-                } returns grunnlagsopplysningMedPersonopplysning
-                coEvery { hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
-            }
 
-        return lagRealGenerellBehandlingService(
-            behandlingDao =
-                mockk {
-                    every {
-                        hentBehandling(BEHANDLINGS_ID)
-                    } returns behandling
-                    every { alleBehandlingerISak(any()) } returns tidligereBehandlinger
-                },
-            grunnlagKlient = grunnlagKlient,
-        )
+        coEvery {
+            grunnlagKlientMock.finnPersonOpplysning(behandling.id, Opplysningstype.AVDOED_PDL_V1, TOKEN)
+        } returns grunnlagsopplysningMedPersonopplysning
+        coEvery { grunnlagKlientMock.hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
+
+        every { behandlingDaoMock.hentBehandling(BEHANDLINGS_ID) } returns behandling
+        every { behandlingDaoMock.alleBehandlingerISak(any()) } returns tidligereBehandlinger
     }
 
-    private fun lagRealGenerellBehandlingService(
-        behandlingDao: BehandlingDao? = null,
-        behandlingHendelserKafkaProducer: BehandlingHendelserKafkaProducer? = null,
-        hendelseDao: HendelseDao? = null,
-        grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao = mockk(),
-        grunnlagKlient: GrunnlagKlient? = null,
-        oppgaveService: OppgaveService = mockk(),
-    ): BehandlingServiceImpl =
-        BehandlingServiceImpl(
-            behandlingDao = behandlingDao ?: mockk(),
-            behandlingHendelser = behandlingHendelserKafkaProducer ?: mockk(),
-            grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
-            hendelseDao = hendelseDao ?: mockk(),
-            grunnlagKlient = grunnlagKlient ?: mockk(),
-            behandlingRequestLogger = mockk(),
-            kommerBarnetTilGodeDao = mockk(),
-            oppgaveService = oppgaveService,
-            grunnlagService = mockk(),
-            beregningKlient = mockk(),
+    private fun mockPersongalleri() =
+        Grunnlagsopplysning(
+            id = UUID.randomUUID(),
+            kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
+            meta = emptyMap<String, String>().toObjectNode(),
+            opplysningType = Opplysningstype.PERSONGALLERI_V1,
+            opplysning =
+                Persongalleri(
+                    "soeker",
+                    "innsender",
+                    listOf("soesken"),
+                    listOf("avdoed"),
+                    listOf("gjenlevende"),
+                ),
         )
 
     companion object {

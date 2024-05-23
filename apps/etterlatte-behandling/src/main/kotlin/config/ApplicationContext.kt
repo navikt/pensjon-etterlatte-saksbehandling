@@ -548,6 +548,8 @@ internal class ApplicationContext(
             starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
             periode = Duration.ofDays(1),
             service = oppgaveService,
+            dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
         )
     }
 

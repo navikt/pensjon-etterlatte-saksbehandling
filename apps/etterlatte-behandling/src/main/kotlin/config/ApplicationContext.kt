@@ -29,6 +29,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingReminderJob
+import no.nav.etterlatte.behandling.jobs.FristGaarUtJobb
 import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
 import no.nav.etterlatte.behandling.klage.KlageBrevService
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
@@ -109,7 +110,7 @@ import no.nav.etterlatte.metrics.BehandlingMetrics
 import no.nav.etterlatte.metrics.BehandlingMetrikkerDao
 import no.nav.etterlatte.metrics.GjenopprettingMetrikkerDao
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
-import no.nav.etterlatte.oppgave.FristGaarUtJobb
+import no.nav.etterlatte.oppgave.FristGaarUtJobService
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -478,6 +479,7 @@ internal class ApplicationContext(
         )
 
     val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
+    val fristGaarUtJobService = FristGaarUtJobService(oppgaveService)
     val saksbehandlerService: SaksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient, navAnsattKlient)
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, oppgaveService, saksbehandlerService)
     val behandlingFactory =
@@ -547,7 +549,7 @@ internal class ApplicationContext(
             erLeader = { leaderElectionKlient.isLeader() },
             starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
             periode = Duration.ofDays(1),
-            service = oppgaveService,
+            fristGaarUtJobService = fristGaarUtJobService,
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
         )

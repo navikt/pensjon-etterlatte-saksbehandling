@@ -52,6 +52,7 @@ export const AvkortingInntekt = ({
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const erRedigerbar = redigerbar && enhetErSkrivbar(behandling.sakEnhetId, innloggetSaksbehandler.skriveEnheter)
   const dispatch = useAppDispatch()
+
   const avkortingGrunnlag = avkorting == null ? [] : [...avkorting.avkortingGrunnlag]
   avkortingGrunnlag?.sort((a, b) => new Date(b.fom!).getTime() - new Date(a.fom!).getTime())
 
@@ -71,8 +72,8 @@ export const AvkortingInntekt = ({
     }
     if (avkortingGrunnlag.length > 0) {
       // Preutfyller ny grunnlagsperiode med tidligere verdier
-      const nyligste = avkortingGrunnlag[0]
-      return { ...nyligste, id: undefined }
+      const nyeste = avkortingGrunnlag[0]
+      return { ...nyeste, id: undefined, spesifikasjon: '' }
     }
     // Første grunnlagsperiode
     return {

@@ -21,13 +21,13 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.O
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONROLLE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SIVILSTAND
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SIVILSTATUS
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNAD_MOTTATT_DATO
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.STATSBORGERSKAP
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UFOERE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSOPPHOLD
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTLAND
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.VERGEMAALELLERFREMTIDSFULLMAKT
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.VERGES_ADRESSE
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adresse
@@ -36,13 +36,13 @@ import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Utenlandsadresse
 import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.person.Utland
-import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.toJson
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -86,8 +86,8 @@ fun Grunnlagsdata<JsonNode>.hentFamilierelasjon() = this.hentKonstantOpplysning<
 
 fun Grunnlagsdata<JsonNode>.hentAvdoedesbarn() = this.hentKonstantOpplysning<AvdoedesBarn>(AVDOEDESBARN)
 
-fun Grunnlagsdata<JsonNode>.hentVergemaalellerfremtidsfullmakt() =
-    this.hentKonstantOpplysning<List<VergemaalEllerFremtidsfullmakt>>(VERGEMAALELLERFREMTIDSFULLMAKT)
+// TODO denne må vel alltid være not null?
+fun Grunnlagsdata<JsonNode>.hentSoekerPdlV1() = this.hentKonstantOpplysning<Person>(SOEKER_PDL_V1)
 
 fun Grunnlagsdata<JsonNode>.hentPersonrolle() = this.hentKonstantOpplysning<PersonRolle>(PERSONROLLE)
 

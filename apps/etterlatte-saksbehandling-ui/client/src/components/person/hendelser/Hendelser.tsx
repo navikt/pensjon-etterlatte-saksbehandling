@@ -17,11 +17,11 @@ import { hentGrunnlagsendringshendelserForSak } from '~shared/api/behandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { NyHendelseExpandableRow } from '~components/person/hendelser/NyHendelseExpandableRow'
 import { hentStoettedeRevurderinger } from '~shared/api/revurdering'
-import { LukketHendelseExpandableRow } from '~components/person/hendelser/LukketHendelseExpandableRow'
+import { ArkivertHendelseExpandableRow } from '~components/person/hendelser/ArkivertHendelseExpandableRow'
 
 enum HendelseValg {
   NYE = 'NYE',
-  LUKKEDE = 'LUKKEDE',
+  ARKIVERTE = 'ARKIVERTE',
 }
 
 export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandlinger>; fnr: string }): ReactNode => {
@@ -30,11 +30,11 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
   const [hendelserResult, hentHendelser] = useApiCall(hentGrunnlagsendringshendelserForSak)
   const [stoettedeRevurderingerResult, stoettedeRevurderingerFetch] = useApiCall(hentStoettedeRevurderinger)
 
-  const relevanteHendelser = (hendelser: Grunnlagsendringshendelse[]): Grunnlagsendringshendelse[] => {
+  const nyeHendelser = (hendelser: Grunnlagsendringshendelse[]): Grunnlagsendringshendelse[] => {
     return hendelser.filter((hendelse) => hendelse.status !== STATUS_IRRELEVANT)
   }
 
-  const lukkedeHendelser = (hendelser: Grunnlagsendringshendelse[]): Grunnlagsendringshendelse[] => {
+  const arkiverteHendelser = (hendelser: Grunnlagsendringshendelse[]): Grunnlagsendringshendelse[] => {
     return hendelser.filter((hendelse) => [STATUS_IRRELEVANT, HISTORISK_REVURDERING].includes(hendelse.status))
   }
 
@@ -65,8 +65,8 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
           <ToggleGroup.Item value={HendelseValg.NYE}>
             <BellDotIcon aria-hidden /> Nye hendelser
           </ToggleGroup.Item>
-          <ToggleGroup.Item value={HendelseValg.LUKKEDE}>
-            <ArchiveIcon aria-hidden /> Lukkede hendelser
+          <ToggleGroup.Item value={HendelseValg.ARKIVERTE}>
+            <ArchiveIcon aria-hidden /> Arkiverte hendelser
           </ToggleGroup.Item>
         </ToggleGroup>
 
@@ -79,10 +79,10 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
                 <>
                   <RevurderingInfo>
                     Nye hendelser kan kreve revurdering. Vurder derfor om hendelsen har konsekvens for ytelsen. Hvis
-                    ikke kan du lukke hendelsen.
+                    ikke kan du arkivere hendelsen.
                   </RevurderingInfo>
 
-                  {!!relevanteHendelser(hendelser)?.length ? (
+                  {!!nyeHendelser(hendelser)?.length ? (
                     <HendelserTable>
                       <Table.Header>
                         <Table.Row>
@@ -92,7 +92,7 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
                         </Table.Row>
                       </Table.Header>
                       <Table.Body>
-                        {relevanteHendelser(hendelser).map((hendelse) => (
+                        {nyeHendelser(hendelser).map((hendelse) => (
                           <NyHendelseExpandableRow
                             key={hendelse.id}
                             hendelse={hendelse}
@@ -112,9 +112,9 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
                   )}
                 </>
               )}
-              {hendelseValg === HendelseValg.LUKKEDE && (
+              {hendelseValg === HendelseValg.ARKIVERTE && (
                 <>
-                  {!!lukkedeHendelser(hendelser)?.length ? (
+                  {!!arkiverteHendelser(hendelser)?.length ? (
                     <HendelserTable>
                       <Table.Header>
                         <Table.Row>
@@ -124,14 +124,14 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
                         </Table.Row>
                       </Table.Header>
                       <Table.Body>
-                        {lukkedeHendelser(hendelser).map((hendelse) => (
-                          <LukketHendelseExpandableRow key={hendelse.id} sakType={sak.sakType} hendelse={hendelse} />
+                        {arkiverteHendelser(hendelser).map((hendelse) => (
+                          <ArkivertHendelseExpandableRow key={hendelse.id} sakType={sak.sakType} hendelse={hendelse} />
                         ))}
                       </Table.Body>
                     </HendelserTable>
                   ) : (
                     <IngenHendelserAlert variant="info" inline>
-                      Ingen lukkede hendelser
+                      Ingen arkiverte hendelser
                     </IngenHendelserAlert>
                   )}
                 </>

@@ -21,10 +21,10 @@ interface Props {
   setOpen: Dispatch<SetStateAction<boolean>>
   sakId: number
   hendelseId: string
-  lukkHendelse: () => void
+  arkiverHendelse: () => void
 }
 
-export const VurderInstitusjonsoppholdModalBody = ({ setOpen, sakId, hendelseId, lukkHendelse }: Props) => {
+export const VurderInstitusjonsoppholdModalBody = ({ setOpen, sakId, hendelseId, arkiverHendelse }: Props) => {
   const [lagreInstitusjonsoppholdResult, lagreInstitusjonsopphold] = useApiCall(lagreInstitusjonsoppholdData)
 
   const {
@@ -50,7 +50,7 @@ export const VurderInstitusjonsoppholdModalBody = ({ setOpen, sakId, hendelseId,
         },
       },
       () => {
-        lukkHendelse()
+        arkiverHendelse()
       }
     )
   }

@@ -137,8 +137,8 @@ internal class SakRoutesTest {
                     setBody(EnhetRequest(enhet = "4808"))
                 }
             assertEquals(200, response.status.value)
-            verify(exactly = 1) { oppgaveService.hentOppgaverForSak(any()) }
-            verify(exactly = 1) { oppgaveService.fjernSaksbehandler(any()) }
+            verify(exactly = 1) { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) }
+            verify(exactly = 1) { sakService.oppdaterEnhetForSaker(any()) }
         }
     }
 

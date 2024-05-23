@@ -10,6 +10,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
+import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -24,6 +25,7 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.oppgave.PaaVent
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -310,7 +312,14 @@ class BehandlingStatusServiceImpl(
 
             if (oppgaveFraBehandlingMedFeilutbetaling != null) {
                 logger.info("Det finnes allerede en oppgave under behandling på tilbakekreving for sak ${behandling.sak.id}")
-                oppgaveService.endrePaaVent(oppgaveFraBehandlingMedFeilutbetaling.id, "Venter på oppdatert kravgrunnlag", paaVent = true)
+                oppgaveService.endrePaaVent(
+                    PaaVent(
+                        oppgaveId = oppgaveFraBehandlingMedFeilutbetaling.id,
+                        aarsak = PaaVentAarsak.KRAVGRUNNLAG_SPERRET,
+                        merknad = "Venter på oppdatert kravgrunnlag",
+                        paavent = true,
+                    ),
+                )
             } else {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     referanse = behandling.sak.id.toString(),

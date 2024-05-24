@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -113,7 +112,7 @@ class BehandlingDao(
         }
     }
 
-    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker): SakIDListe {
+    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker): List<BehandlingOgSak> {
         return connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val stmt =
@@ -129,7 +128,26 @@ class BehandlingDao(
                 stmt.setArray(1, createArrayOf("text", BehandlingStatus.skalIkkeOmregnesVedGRegulering().toTypedArray()))
                 stmt.setArray(2, createArrayOf("bigint", saker.saker.map { it.id }.toTypedArray()))
 
-                SakIDListe(stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) })
+                stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) }
+            }
+        }
+    }
+
+    fun hentAlleBehandlingerSomTrengerNyBeregningUtenNyStatus(saker: Saker): List<BehandlingOgSak> {
+        return connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        SELECT id from behandling
+                        WHERE status <> ALL (?)
+                            AND sak_id = ANY (?)
+                        """.trimIndent(),
+                    )
+                stmt.setArray(1, createArrayOf("text", BehandlingStatus.underBehandling().toTypedArray()))
+                stmt.setArray(2, createArrayOf("bigint", saker.saker.map { it.id }.toTypedArray()))
+
+                stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) }
             }
         }
     }

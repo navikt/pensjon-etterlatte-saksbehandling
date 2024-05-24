@@ -18,6 +18,7 @@ import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.rapidsandrivers.saker
 import no.nav.etterlatte.rapidsandrivers.tilbakestilteBehandlinger
+import no.nav.etterlatte.rapidsandrivers.uendretAapenBehandling
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -80,6 +81,7 @@ internal class ReguleringsforespoerselRiver(
             sakerTilOmregning.saker.forEach {
                 packet.setEventNameForHendelseType(ReguleringHendelseType.SAK_FUNNET)
                 packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)
+                packet.uendretAapenBehandling = tilbakemigrerte.uendretBehandlingerForSak(it.id)
                 packet.sakId = it.id
                 context.publish(packet.toJson())
             }

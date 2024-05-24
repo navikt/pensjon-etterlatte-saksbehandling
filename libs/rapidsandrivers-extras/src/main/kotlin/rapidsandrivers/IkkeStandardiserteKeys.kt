@@ -19,6 +19,7 @@ const val HENDELSE_DATA_KEY = "hendelse_data"
 const val OPPGAVE_KEY = "oppgadeId"
 const val BEHANDLING_VI_OMREGNER_FRA_KEY = "behandling_vi_omregner_fra"
 const val TILBAKESTILTE_BEHANDLINGER_KEY = "tilbakestilte_behandlinger"
+const val UENDRET_AAPEN_BEHANDLINGER_KEY = "uendrede_aapen_behandlinger"
 const val GRUNNLAG_OPPDATERT = "grunnlag_oppdatert" // TODO: eventname
 const val OPPLYSNING_KEY = "opplysning"
 const val FNR_KEY = "fnr"
@@ -63,6 +64,15 @@ var JsonMessage.tilbakestilteBehandlinger: List<UUID>
             .map { UUID.fromString(it) }
     set(name) {
         this[TILBAKESTILTE_BEHANDLINGER_KEY] = name.joinToString(";") { it.toString() }
+    }
+
+var JsonMessage.uendretAapenBehandling: List<UUID>
+    get() =
+        this[UENDRET_AAPEN_BEHANDLINGER_KEY].asText().trim().split(";")
+            .filter { it.isNotEmpty() }
+            .map { UUID.fromString(it) }
+    set(name) {
+        this[UENDRET_AAPEN_BEHANDLINGER_KEY] = name.joinToString(";") { it.toString() }
     }
 
 fun JsonNode.asUUID() = this.asText().toUUID()

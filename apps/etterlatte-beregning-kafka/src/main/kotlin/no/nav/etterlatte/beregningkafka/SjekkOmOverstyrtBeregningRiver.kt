@@ -8,7 +8,9 @@ import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
+import no.nav.etterlatte.rapidsandrivers.UENDRET_AAPEN_BEHANDLINGER_KEY
 import no.nav.etterlatte.rapidsandrivers.tilbakestilteBehandlinger
+import no.nav.etterlatte.rapidsandrivers.uendretAapenBehandling
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -25,6 +27,7 @@ class SjekkOmOverstyrtBeregningRiver(
             validate { it.rejectKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.interestedIn(TILBAKESTILTE_BEHANDLINGER_KEY) }
+            validate { it.interestedIn(UENDRET_AAPEN_BEHANDLINGER_KEY) }
         }
     }
 
@@ -36,8 +39,10 @@ class SjekkOmOverstyrtBeregningRiver(
     ) {
         logger.info("Mottatt sjekk om finnes åpen behandling med overstyrt beregning hendelse")
         val tilbakestilteBehandlinger = packet.tilbakestilteBehandlinger
-        if (tilbakestilteBehandlinger.isNotEmpty()) {
-            val overstyrt = beregningService.hentOverstyrt(tilbakestilteBehandlinger.first())
+        val uendredeAapenBehandling = packet.uendretAapenBehandling
+        val aapneBehandlinger = listOf(tilbakestilteBehandlinger, uendredeAapenBehandling).flatten()
+        if (aapneBehandlinger.isNotEmpty()) {
+            val overstyrt = beregningService.hentOverstyrt(aapneBehandlinger.first())
             when (overstyrt.status) {
                 HttpStatusCode.NoContent -> {}
                 HttpStatusCode.OK -> throw KanIkkeRegulereSakMedAapenBehandlingOverstyrtBeregning()

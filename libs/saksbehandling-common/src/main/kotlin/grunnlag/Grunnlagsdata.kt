@@ -86,7 +86,6 @@ fun Grunnlagsdata<JsonNode>.hentFamilierelasjon() = this.hentKonstantOpplysning<
 
 fun Grunnlagsdata<JsonNode>.hentAvdoedesbarn() = this.hentKonstantOpplysning<AvdoedesBarn>(AVDOEDESBARN)
 
-// TODO denne må vel alltid være not null?
 fun Grunnlagsdata<JsonNode>.hentSoekerPdlV1() = this.hentKonstantOpplysning<Person>(SOEKER_PDL_V1)
 
 fun Grunnlagsdata<JsonNode>.hentPersonrolle() = this.hentKonstantOpplysning<PersonRolle>(PERSONROLLE)

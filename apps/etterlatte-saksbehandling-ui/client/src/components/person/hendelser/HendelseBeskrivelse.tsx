@@ -251,13 +251,7 @@ const HendelseKommentar = ({ kommentar }: { kommentar?: string }) => {
   return (
     <div>
       <Label>Kommentar</Label>
-      {!!kommentar ? (
-        <KortTekst size="small">{kommentar}</KortTekst>
-      ) : (
-        <KortTekst size="small">
-          <i>Ingen kommentar på hendelse</i>
-        </KortTekst>
-      )}
+      <KortTekst size="small">{!!kommentar ? kommentar : <i>Ingen kommentar på hendelse</i>}</KortTekst>
     </div>
   )
 }

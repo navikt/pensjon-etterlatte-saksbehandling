@@ -83,8 +83,7 @@ internal class OmregningHendelserBeregningRiver(
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
         val forrigeBeregning = beregningService.hentBeregning(behandlingViOmregnerFra).body<BeregningDTO>()
 
-        // TODO enable dette
-        // verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning, g = g)
+        verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning, g = g)
 
         return if (sakType == SakType.OMSTILLINGSSTOENAD) {
             val avkorting =
@@ -102,8 +101,16 @@ internal class OmregningHendelserBeregningRiver(
         g: Grunnbeloep,
     ) {
         val dato = ny.beregningsperioder.first().datoFOM.atDay(1)
-        val nyttBeloep = ny.beregningsperioder.paaDato(dato).utbetaltBeloep
-        val gammeltBeloep = gammel.beregningsperioder.paaDato(dato).utbetaltBeloep
+        val nyttBeloep = requireNotNull(ny.beregningsperioder.paaDato(dato)).utbetaltBeloep
+        val gammeltBeloep = gammel.beregningsperioder.paaDato(dato)?.utbetaltBeloep
+        if (gammeltBeloep == null) {
+            logger.debug(
+                "Gammelt beløp er null på {} for beregning {}, avbryter toleransegrensesjekk",
+                dato,
+                gammel.beregningId,
+            )
+            return
+        }
         if (nyttBeloep < gammeltBeloep) {
             throw MindreEnnForrigeBehandling(ny.behandlingId)
         }
@@ -131,7 +138,7 @@ internal class OmregningHendelserBeregningRiver(
 
     private fun List<Beregningsperiode>.paaDato(dato: LocalDate) =
         filter { it.datoFOM.atDay(1) <= dato }
-            .first { it.datoTOM == null || it.datoTOM?.plusMonths(1)?.atDay(1)?.isAfter(dato) == true }
+            .firstOrNull { it.datoTOM == null || it.datoTOM?.plusMonths(1)?.atDay(1)?.isAfter(dato) == true }
 }
 
 class MindreEnnForrigeBehandling(behandlingId: UUID) : ForespoerselException(

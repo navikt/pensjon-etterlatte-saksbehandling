@@ -129,3 +129,6 @@ class Beregningstall : Comparable<Beregningstall> {
         val AVRUNDING_BEREGNING = RoundingMode.HALF_UP
     }
 }
+
+const val ANTALL_DESIMALER_INNTENKT = -3
+val roundingModeInntekt = RoundingMode.FLOOR

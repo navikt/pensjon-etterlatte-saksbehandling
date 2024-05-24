@@ -14,8 +14,9 @@ import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
 import no.nav.etterlatte.libs.regler.velgNyesteGyldige
+import no.nav.etterlatte.regler.ANTALL_DESIMALER_INNTENKT
 import no.nav.etterlatte.regler.Beregningstall
-import java.math.RoundingMode
+import no.nav.etterlatte.regler.roundingModeInntekt
 import java.time.LocalDate
 import java.util.UUID
 
@@ -83,7 +84,7 @@ val maanedsinntekt =
             .minus(fratrekkInnAar)
             .plus(inntektutland)
             .minus(fratrekkInnAarUtland)
-            .round(-3, RoundingMode.FLOOR)
+            .round(ANTALL_DESIMALER_INNTENKT, roundingModeInntekt)
             .divide(relevanteMaaneder)
     }
 

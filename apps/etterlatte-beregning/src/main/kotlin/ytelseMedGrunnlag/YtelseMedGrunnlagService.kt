@@ -8,6 +8,8 @@ import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagPeriodisertDto
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.util.UUID
 
 class YtelseMedGrunnlagService(
@@ -38,7 +40,7 @@ class YtelseMedGrunnlagService(
                         .maxBy { it.grunnlag.periode.fom }
 
                 val grunnlag = avkortingsgrunnlagIPeriode.grunnlag
-                val aarsinntekt = grunnlag.aarsinntekt + grunnlag.inntektUtland
+                val aarsinntekt = BigDecimal(grunnlag.aarsinntekt + grunnlag.inntektUtland).round(-3, RoundingMode.FLOOR)
                 val fratrekkInnAar = grunnlag.fratrekkInnAar + grunnlag.fratrekkInnAarUtland
 
                 YtelseMedGrunnlagPeriodisertDto(

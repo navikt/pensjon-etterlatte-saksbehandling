@@ -676,7 +676,9 @@ internal class BehandlingServiceImpl(
     }
 
     override fun hentAapenRegulering(sakId: Long): UUID? {
-        return behandlingDao.hentAlleRevurderingerISakMedAarsak(sakId, Revurderingaarsak.REGULERING).singleOrNull()?.id
+        return behandlingDao.hentAlleRevurderingerISakMedAarsak(sakId, Revurderingaarsak.REGULERING).singleOrNull {
+            it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
+        }?.id
     }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =

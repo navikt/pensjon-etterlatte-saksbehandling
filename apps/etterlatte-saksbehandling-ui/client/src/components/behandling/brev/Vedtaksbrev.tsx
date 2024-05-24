@@ -176,14 +176,14 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
             <br />
             {behandling?.status === IBehandlingStatus.FATTET_VEDTAK && (
-              <WarningAlert>Kontroller innholdet nøye før attestering!</WarningAlert>
+              <AlertMedSpacing variant="warning">Kontroller innholdet nøye før attestering!</AlertMedSpacing>
             )}
 
             {visAdvarselBehandlingEndret && (
-              <WarningAlert>
+              <AlertMedSpacing variant="warning">
                 Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder om det bør tilbakestilles
                 for å få oppdaterte verdier fra behandlingen.
-              </WarningAlert>
+              </AlertMedSpacing>
             )}
 
             {vedtaksbrev && (
@@ -246,6 +246,6 @@ const Sidebar = styled.div`
   border-right: 1px solid #c6c2bf;
 `
 
-const WarningAlert = styled(Alert).attrs({ variant: 'warning' })`
+const AlertMedSpacing = styled(Alert)`
   margin-bottom: 1em;
 `

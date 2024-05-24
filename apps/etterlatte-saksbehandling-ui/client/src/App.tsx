@@ -23,7 +23,6 @@ import ManuellBehandling from '~components/manuelbehandling/ManuellBehandling'
 import BehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { FlyttJournalpost } from '~components/person/flyttjournalpost/FlyttJournalpost'
 import { setDefaultOptions } from 'date-fns'
 
 function App() {
@@ -52,7 +51,6 @@ function App() {
               <ConfigContext.Provider value={hentConfigStatus.data}>
                 <Routes>
                   <Route path="/" element={<Oppgavebenk />} />
-                  <Route path="/flyttjournalpost" element={<FlyttJournalpost />} />
                   <Route path="/person/:fnr" element={<Person />} />
                   <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
                   <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />

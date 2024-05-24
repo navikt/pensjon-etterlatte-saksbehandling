@@ -106,12 +106,13 @@ export const UtlandstilknytningVurdering = ({
           </RadioGroup>
         </RadioGroupWrapper>
         <SoeknadsoversiktTextArea
+          label="Begrunnelse"
+          placeholder="Valgfritt"
           value={begrunnelse}
           onChange={(e) => {
             const oppdatertBegrunnelse = e.target.value
             setBegrunnelse(oppdatertBegrunnelse)
           }}
-          placeholder="Valgfritt"
         />
         {isFailureHandler({
           apiResult: setUtlandstilknytningStatus,

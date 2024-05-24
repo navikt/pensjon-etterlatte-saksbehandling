@@ -74,10 +74,10 @@ const DifferanseVisning = ({
 
   return (
     <>
-      <WarningAlert>
+      <OppdatertGrunnlagAlert variant="warning">
         OBS! Grunnlaget for trygdetiden har blitt oppdatert. <br />
         Sjekk at både faktisk og fremtidig trygdetid er korrekt.
-      </WarningAlert>
+      </OppdatertGrunnlagAlert>
 
       <Heading size="small" level="4">
         Eksisterende grunnlag
@@ -104,7 +104,7 @@ const DifferanseVisning = ({
   )
 }
 
-const WarningAlert = styled(Alert).attrs({ variant: 'warning' })`
+export const OppdatertGrunnlagAlert = styled(Alert)`
   margin: 2em 4em 0 4em;
   max-width: fit-content;
 `

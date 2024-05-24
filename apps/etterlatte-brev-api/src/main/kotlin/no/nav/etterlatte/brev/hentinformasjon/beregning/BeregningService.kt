@@ -117,7 +117,7 @@ class BeregningService(private val beregningKlient: BeregningKlient) {
                     datoFOM = it.periode.fom.atDay(1),
                     datoTOM = it.periode.tom?.atEndOfMonth(),
                     grunnbeloep = Kroner(it.grunnbelop),
-                    // maanedsinntekt regel burde eksponert dette, krever omskrivning av regler som vi må bli enige om
+                    // (vises i brev) maanedsinntekt regel burde eksponert dette, krever omskrivning av regler som vi må bli enige om
                     inntekt =
                         Kroner(
                             BigDecimal(it.aarsinntekt - it.fratrekkInnAar).setScale(ANTALL_DESIMALER_INNTENKT, roundingModeInntekt).toInt(),

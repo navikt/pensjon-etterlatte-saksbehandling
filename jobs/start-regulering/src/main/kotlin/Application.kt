@@ -41,8 +41,8 @@ fun createRecord(dato: LocalDate) =
         mapOf(
             ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
             ReguleringEvents.DATO to dato.toString(),
-            ReguleringEvents.KJOERING to "Regulering-$year",
-            ReguleringEvents.ANTALL to 1,
-            ReguleringEvents.SPESIFIKKE_SAKER to listOf<Long>(1002087),
+            ReguleringEvents.KJOERING to "Regulering-pre-$year",
+            ReguleringEvents.ANTALL to 10,
+            ReguleringEvents.SPESIFIKKE_SAKER to listOf<Long>(),
         ),
     ).toJson()

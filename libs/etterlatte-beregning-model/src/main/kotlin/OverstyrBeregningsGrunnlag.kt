@@ -17,6 +17,7 @@ data class OverstyrBeregningGrunnlagDao(
     val prorataBroekNevner: Long?,
     val sakId: Long,
     val beskrivelse: String,
+    val aarsak: String?,
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val reguleringRegelresultat: JsonNode? = null,
 )
@@ -28,6 +29,7 @@ data class OverstyrBeregningGrunnlagData(
     val prorataBroekTeller: Long?,
     val prorataBroekNevner: Long?,
     val beskrivelse: String,
+    val aarsak: String?,
 )
 
 data class OverstyrBeregningGrunnlagDTO(

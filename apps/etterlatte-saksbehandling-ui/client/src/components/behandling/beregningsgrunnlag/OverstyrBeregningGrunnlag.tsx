@@ -4,6 +4,7 @@ import {
   OverstyrBeregingsperiodeGrunnlagData,
   OverstyrBeregning,
   OverstyrBeregningsperiode,
+  OverstyrtAarsak,
 } from '~shared/types/Beregning'
 import { HeadingWrapper } from '../soeknadsoversikt/styled'
 import { Button, ErrorSummary, Heading, Table } from '@navikt/ds-react'
@@ -196,10 +197,11 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
                       <Table.HeaderCell scope="col">Trygdetid</Table.HeaderCell>
                       <Table.HeaderCell scope="col">Tilhører FNR</Table.HeaderCell>
                       <Table.HeaderCell scope="col">Prorata</Table.HeaderCell>
+                      <Table.HeaderCell scope="col">Årsak</Table.HeaderCell>
                       <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
                     </Table.Row>
                   </Table.Header>
-                  <Table.Body id="forminstitusjonsopphold">
+                  <Table.Body id="formoverstyrberegning">
                     {fields.map((item, index) => (
                       <OverstyrBeregningTableWrapper
                         key={item.id}
@@ -212,6 +214,7 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
                         visFeil={visFeil}
                         feil={feil}
                         behandles={behandles}
+                        aarsaker={OverstyrtAarsak}
                       />
                     ))}
                   </Table.Body>
@@ -236,6 +239,7 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
                           prorataBroekNevner: '',
                           prorataBroekTeller: '',
                           beskrivelse: '',
+                          aarsak: 'VELG_AARSAK',
                         },
                       },
                     ])

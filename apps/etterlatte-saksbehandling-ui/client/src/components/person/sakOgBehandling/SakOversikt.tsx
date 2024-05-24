@@ -1,7 +1,7 @@
 import styled from 'styled-components'
-import { Container, SpaceChildren } from '~shared/styled'
+import { SpaceChildren } from '~shared/styled'
 import Spinner from '~shared/Spinner'
-import { Heading, ToggleGroup } from '@navikt/ds-react'
+import { Box, Heading, ToggleGroup } from '@navikt/ds-react'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import React, { useEffect, useState } from 'react'
@@ -46,7 +46,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
             <SakHeaderWrapper>
               <SakOversiktHeader sak={sak} behandlinger={behandlinger} fnr={fnr} />
             </SakHeaderWrapper>
-            <Container>
+            <Box padding="8">
               <SpaceChildren gap="2rem">
                 <SpaceChildren>
                   <Heading size="medium">Oppgaver</Heading>
@@ -85,7 +85,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                   <TilbakekrevingListe sakId={sak.id} />
                 </SpaceChildren>
               </SpaceChildren>
-            </Container>
+            </Box>
           </SpaceChildren>
         ),
       })}

@@ -1,5 +1,4 @@
-import { Alert, GuidePanel } from '@navikt/ds-react'
-import { Container } from '~shared/styled'
+import { Alert, Box, GuidePanel } from '@navikt/ds-react'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
 export const Tilgangsmelding = () => {
@@ -7,17 +6,17 @@ export const Tilgangsmelding = () => {
 
   if (!innloggetSaksbehandler.kanSeOppgaveliste) {
     return (
-      <Container>
+      <Box padding="8">
         <GuidePanel>
           Du har lesetilgang til systemet. For å søke opp personer eller saker vennligst benytt søkefelt i hjørnet.
         </GuidePanel>
-      </Container>
+      </Box>
     )
   } else {
     return (
-      <Container>
+      <Box padding="8">
         <Alert variant="error">Det er ikke registrert lese eller skrivetilgang på deg.</Alert>
-      </Container>
+      </Box>
     )
   }
 }

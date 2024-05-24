@@ -1,9 +1,5 @@
 import styled, { css } from 'styled-components'
 
-export const Container = styled.div`
-  padding: 2rem;
-`
-
 export const GridContainer = styled.div`
   display: flex;
   height: 100%;

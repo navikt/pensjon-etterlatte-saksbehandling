@@ -1,9 +1,8 @@
-import { Detail, Heading, Table } from '@navikt/ds-react'
+import { Box, Detail, Heading, Table } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import { Tema } from '~shared/types/Journalpost'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { mapApiResult, Result } from '~shared/api/apiUtils'
-import { Container } from '~shared/styled'
 import React, { useEffect, useState } from 'react'
 import { hentDokumenter } from '~shared/api/dokument'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -25,7 +24,7 @@ export const Dokumentliste = ({ fnr, sakResult }: { fnr: string; sakResult: Resu
   )
 
   return (
-    <Container>
+    <Box padding="8">
       <Heading size="medium" spacing>
         Dokumenter
       </Heading>
@@ -82,6 +81,6 @@ export const Dokumentliste = ({ fnr, sakResult }: { fnr: string; sakResult: Resu
           )}
         </Table.Body>
       </Table>
-    </Container>
+    </Box>
   )
 }

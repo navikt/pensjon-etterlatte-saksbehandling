@@ -1,12 +1,11 @@
 import React, { useEffect } from 'react'
-import { Heading, Link, Table } from '@navikt/ds-react'
+import { Box, Heading, Link, Table } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentSamordningsdataForSak } from '~shared/api/vedtaksvurdering'
 import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { formaterStringDato } from '~utils/formattering'
 import { SakMedBehandlinger } from '~components/person/typer'
-import { Container } from '~shared/styled'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Samordningsvedtak } from '~components/vedtak/typer'
 
@@ -20,7 +19,7 @@ export const SamordningSak = ({ sakResult }: { sakResult: Result<SakMedBehandlin
   }, [sakResult])
 
   return (
-    <Container>
+    <Box padding="8">
       <Heading size="medium">Samordningsmeldinger</Heading>
 
       {mapResult(samordningdataStatus, {
@@ -28,7 +27,7 @@ export const SamordningSak = ({ sakResult }: { sakResult: Result<SakMedBehandlin
         pending: <Spinner visible={true} label="Henter samordningsdata" />,
         error: () => <ApiErrorAlert>Kunne ikke hente samordningsdata</ApiErrorAlert>,
       })}
-    </Container>
+    </Box>
   )
 }
 

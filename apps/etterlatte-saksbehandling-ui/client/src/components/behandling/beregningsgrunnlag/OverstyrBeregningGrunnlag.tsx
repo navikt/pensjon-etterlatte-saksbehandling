@@ -1,4 +1,3 @@
-import { Content } from '~shared/styled'
 import {
   Beregning,
   OverstyrBeregingsperiodeGrunnlagData,
@@ -168,7 +167,7 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
   }
 
   return (
-    <Content>
+    <>
       <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading size="medium" level="2">
@@ -281,7 +280,7 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
       ) : (
         <NesteOgTilbake />
       )}
-    </Content>
+    </>
   )
 }
 

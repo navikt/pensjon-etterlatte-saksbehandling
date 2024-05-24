@@ -1,4 +1,4 @@
-import { Content, FlexRow } from '~shared/styled'
+import { FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
@@ -108,7 +108,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   }
 
   return (
-    <Content>
+    <>
       <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading spacing size="large" level="1">
@@ -198,7 +198,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
       ) : (
         <NesteOgTilbake />
       )}
-    </Content>
+    </>
   )
 }
 

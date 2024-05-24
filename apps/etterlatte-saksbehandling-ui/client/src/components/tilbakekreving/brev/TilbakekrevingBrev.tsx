@@ -1,5 +1,5 @@
 import { Alert, Box, Heading } from '@navikt/ds-react'
-import { Content, FlexRow } from '~shared/styled'
+import { FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
 import { erUnderBehandling, TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
@@ -56,7 +56,7 @@ export function TilbakekrevingBrev({
   }
 
   return (
-    <Content>
+    <>
       <BrevContent>
         <Sidebar>
           <Box paddingInline="16" paddingBlock="4">
@@ -93,7 +93,7 @@ export function TilbakekrevingBrev({
           />
         )}
       </FlexRow>
-    </Content>
+    </>
   )
 }
 

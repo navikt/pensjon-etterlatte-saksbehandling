@@ -51,12 +51,6 @@ export const SidebarTools = styled.div`
   z-index: 999;
 `
 
-export const Content = styled.div`
-  min-height: 70vh;
-  margin: 0;
-  padding: 0;
-`
-
 export const ButtonGroup = styled.div`
   display: flex;
   justify-content: flex-end;

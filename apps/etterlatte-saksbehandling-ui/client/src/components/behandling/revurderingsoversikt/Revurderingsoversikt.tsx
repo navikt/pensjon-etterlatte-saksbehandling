@@ -1,4 +1,3 @@
-import { Content } from '~shared/styled'
 import { BodyShort, Box, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
@@ -111,7 +110,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
 
   const [hjemler, beskrivelse] = hjemlerOgBeskrivelse(behandling.sakType, revurderingsaarsak)
   return (
-    <Content>
+    <>
       <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading spacing size="large" level="1">
@@ -179,7 +178,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
       ) : (
         <NesteOgTilbake />
       )}
-    </Content>
+    </>
   )
 }
 

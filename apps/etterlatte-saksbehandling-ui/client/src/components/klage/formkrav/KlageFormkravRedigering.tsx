@@ -1,5 +1,5 @@
 import { Alert, BodyLong, Box, Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
-import { Content, FlexRow } from '~shared/styled'
+import { FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
@@ -145,7 +145,7 @@ export function KlageFormkravRedigering() {
   if (!klage) return null
 
   return (
-    <Content>
+    <>
       <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading level="1" size="large">
@@ -254,7 +254,7 @@ export function KlageFormkravRedigering() {
           })}
         </InnholdPadding>
       </form>
-    </Content>
+    </>
   )
 
   function BeOmInfoFraKlager(props: { klage: Klage }) {

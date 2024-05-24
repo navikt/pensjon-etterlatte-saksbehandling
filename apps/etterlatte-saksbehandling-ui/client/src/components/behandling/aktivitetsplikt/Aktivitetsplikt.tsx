@@ -1,6 +1,5 @@
 import { BodyLong, BodyShort, Box, Button, Detail, Heading, Textarea } from '@navikt/ds-react'
 import React, { useContext, useEffect, useState } from 'react'
-import { Content } from '~shared/styled'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import styled from 'styled-components'
 import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
@@ -57,7 +56,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
   }
 
   return (
-    <Content>
+    <>
       {isFailureHandler({
         errorMessage: 'En feil oppsto ved henting av data',
         apiResult: hentet,
@@ -187,7 +186,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           {handlinger.NESTE.navn}
         </Button>
       </BehandlingHandlingKnapper>
-    </Content>
+    </>
   )
 }
 

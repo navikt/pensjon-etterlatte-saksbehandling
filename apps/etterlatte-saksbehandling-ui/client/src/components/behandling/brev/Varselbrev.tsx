@@ -1,4 +1,3 @@
-import { Content } from '~shared/styled'
 import React, { useEffect, useState } from 'react'
 import { Alert, Box, Button, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
@@ -100,7 +99,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   }
 
   return (
-    <Content>
+    <>
       <BrevContent>
         <Sidebar>
           <Box paddingInline="16" paddingBlock="4">
@@ -150,7 +149,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
       ) : (
         <NesteOgTilbake />
       )}
-    </Content>
+    </>
   )
 }
 

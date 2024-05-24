@@ -1,4 +1,3 @@
-import { Content } from '~shared/styled'
 import React, { useEffect } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import { hentVilkaarsvurdering, opprettVilkaarsvurdering, slettVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
@@ -92,7 +91,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
   }
 
   return (
-    <Content>
+    <>
       <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading size="large" level="1">
@@ -170,7 +169,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
             : 'En feil har oppstått'}
         </ApiErrorAlert>
       )}
-    </Content>
+    </>
   )
 }
 

@@ -1,6 +1,6 @@
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
-import { Content, FlexRow } from '~shared/styled'
+import { FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { BodyShort, Box, Button, Heading } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
@@ -53,7 +53,7 @@ export function KlageBrev() {
   const redigerbar = erKlageRedigerbar(klage)
 
   return (
-    <Content>
+    <>
       <BrevContent>
         <Sidebar>
           <Box paddingInline="16" paddingBlock="4">
@@ -112,7 +112,7 @@ export function KlageBrev() {
           </Button>
         </FlexRow>
       </div>
-    </Content>
+    </>
   )
 }
 

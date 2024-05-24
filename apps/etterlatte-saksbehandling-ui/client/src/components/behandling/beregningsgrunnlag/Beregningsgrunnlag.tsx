@@ -4,7 +4,6 @@ import BeregningsgrunnlagOmstillingsstoenad from '~components/behandling/beregni
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { BodyLong, Box, Button, Heading, TextField } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
-import { Content } from '~shared/styled'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 import { hentOverstyrBeregning, opprettOverstyrBeregning } from '~shared/api/beregning'
@@ -40,7 +39,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   }, [])
 
   return (
-    <Content>
+    <>
       <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading spacing size="large" level="1">
@@ -64,7 +63,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
           </>
         )}
       </>
-    </Content>
+    </>
   )
 }
 

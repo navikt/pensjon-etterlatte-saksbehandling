@@ -1,4 +1,3 @@
-import { Content } from '~shared/styled'
 import { useEffect, useState } from 'react'
 import { Alert, Heading, Box } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
@@ -156,7 +155,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   }
 
   return (
-    <Content>
+    <>
       {behandling?.status &&
         statusErRedigerbar(behandling?.status) &&
         visBrevutfall &&
@@ -231,7 +230,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
           />
         )}
       </BehandlingHandlingKnapper>
-    </Content>
+    </>
   )
 }
 

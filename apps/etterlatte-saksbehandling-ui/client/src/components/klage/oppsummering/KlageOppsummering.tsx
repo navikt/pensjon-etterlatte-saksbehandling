@@ -1,6 +1,6 @@
 import { BodyShort, Box, Button, Heading } from '@navikt/ds-react'
 import React, { useCallback, useEffect } from 'react'
-import { Content, FlexRow } from '~shared/styled'
+import { FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Innhold } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
@@ -49,7 +49,7 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
 
   const { utfall, sak } = klage
   return (
-    <Content>
+    <>
       <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading level="1" size="large">
@@ -99,6 +99,6 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
             </Button>
           ))}
       </FlexRow>
-    </Content>
+    </>
   )
 }

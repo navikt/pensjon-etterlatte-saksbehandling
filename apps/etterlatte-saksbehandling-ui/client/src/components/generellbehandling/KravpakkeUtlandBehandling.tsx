@@ -4,7 +4,7 @@ import {
   generellbehandlingErRedigerbar,
   KravpakkeUtland,
 } from '~shared/types/Generellbehandling'
-import { ButtonGroup, Content, GridContainer, MainContent } from '~shared/styled'
+import { ButtonGroup, GridContainer, MainContent } from '~shared/styled'
 import { HeadingWrapper, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import {
   Alert,
@@ -167,7 +167,7 @@ const KravpakkeUtlandBehandling = (props: {
   return (
     <GridContainer>
       <MainContent style={{ whiteSpace: 'pre-wrap' }}>
-        <Content style={{ maxWidth: '55rem', margin: 'auto' }}>
+        <div style={{ maxWidth: '55rem', margin: 'auto' }}>
           <Box paddingInline="16" paddingBlock="4">
             <HeadingWrapper>
               <Heading spacing size="large" level="1">
@@ -494,7 +494,7 @@ const KravpakkeUtlandBehandling = (props: {
               )}
             </ButtonGroup>
           </Box>
-        </Content>
+        </div>
       </MainContent>
       <GenerellbehandlingSidemeny utlandsBehandling={generellBehandlingMedLocalState} />
     </GridContainer>

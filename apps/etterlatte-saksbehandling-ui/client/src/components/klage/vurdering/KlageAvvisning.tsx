@@ -1,6 +1,6 @@
 import { Alert, BodyLong, Box, Button, Heading, Radio, RadioGroup } from '@navikt/ds-react'
 import React from 'react'
-import { Content, FlexRow } from '~shared/styled'
+import { FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Feilmelding, Innhold, VurderingWrapper } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
@@ -71,7 +71,7 @@ export function KlageAvvisning(props: { klage: Klage }) {
   const lagreUtfallAktivert = valgtUtfall !== Utfall.AVVIST || vedtakOmAvvistErAktivert
 
   return (
-    <Content>
+    <>
       <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading level="1" size="large">
@@ -128,7 +128,7 @@ export function KlageAvvisning(props: { klage: Klage }) {
           )}
         </FlexRow>
       </form>
-    </Content>
+    </>
   )
 }
 

@@ -1,4 +1,3 @@
-import { Content } from '~shared/styled'
 import { Familieforhold } from './familieforhold/Familieforhold'
 import { Border, HeadingWrapper, InnholdPadding } from './styled'
 import { Box, Heading } from '@navikt/ds-react'
@@ -77,7 +76,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
   }
 
   return (
-    <Content>
+    <>
       <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading spacing size="large" level="1">
@@ -132,6 +131,6 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       ) : (
         <NesteOgTilbake />
       )}
-    </Content>
+    </>
   )
 }

@@ -84,7 +84,7 @@ export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
     }
   }, [])
 
-  return oppgavebenkState.oppgavelistaOppgaver.length >= 0 && !isPending(oppgavelistaOppgaverResult) ? (
+  return (
     <>
       <FilterRad
         hentAlleOppgaver={hentOppgavelistaOppgaver}
@@ -94,17 +94,20 @@ export const Oppgavelista = ({ saksbehandlereIEnhet }: Props) => {
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         oppgavelisteValg={OppgavelisteValg.OPPGAVELISTA}
       />
-      <Oppgaver
-        oppgaver={oppgavebenkState.oppgavelistaOppgaver}
-        saksbehandlereIEnhet={saksbehandlereIEnhet}
-        oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
-        filter={filter}
-      />
+
+      {oppgavebenkState.oppgavelistaOppgaver.length >= 0 && !isPending(oppgavelistaOppgaverResult) ? (
+        <Oppgaver
+          oppgaver={oppgavebenkState.oppgavelistaOppgaver}
+          saksbehandlereIEnhet={saksbehandlereIEnhet}
+          oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
+          filter={filter}
+        />
+      ) : (
+        mapResult(oppgavelistaOppgaverResult, {
+          pending: <Spinner visible={true} label="Henter oppgaver" />,
+          error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente oppgaver'}</ApiErrorAlert>,
+        })
+      )}
     </>
-  ) : (
-    mapResult(oppgavelistaOppgaverResult, {
-      pending: <Spinner visible={true} label="Henter oppgaver" />,
-      error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente oppgaver'}</ApiErrorAlert>,
-    })
   )
 }

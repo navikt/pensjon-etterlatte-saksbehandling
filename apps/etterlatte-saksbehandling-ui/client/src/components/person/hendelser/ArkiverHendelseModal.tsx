@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, Modal, Textarea } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, HStack, Modal, Textarea, VStack } from '@navikt/ds-react'
 import { Grunnlagsendringshendelse, GrunnlagsendringsType } from '~components/person/typer'
 import { isPending, mapSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -8,7 +8,6 @@ import { arkiverGrunnlagshendelse } from '~shared/api/behandling'
 import { ArchiveIcon } from '@navikt/aksel-icons'
 import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { ButtonGroup } from '~shared/styled'
 import { VurderInstitusjonsoppholdModalBody } from '~components/person/hendelser/institusjonsopphold/VurderInstitusjonsoppholdModalBody'
 
 export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshendelse }) => {
@@ -58,49 +57,49 @@ export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendrings
           />
         ) : (
           <Modal.Body>
-            <BodyShort spacing>
-              I noen tilfeller krever ikke ny informasjon eller hendelser noen revurdering. Beskriv hvorfor en
-              revurdering ikke er nødvendig.
-            </BodyShort>
-            <Textarea label="Begrunnelse" value={kommentar} onChange={(e) => setKommentar(e.target.value)} />
+            <VStack gap="4">
+              <BodyShort>
+                I noen tilfeller krever ikke ny informasjon eller hendelser noen revurdering. Beskriv hvorfor en
+                revurdering ikke er nødvendig.
+              </BodyShort>
+              <Textarea label="Begrunnelse" value={kommentar} onChange={(e) => setKommentar(e.target.value)} />
 
-            {isFailureHandler({
-              apiResult: arkiverHendelseResult,
-              errorMessage: 'Vi kunne ikke arkivere hendelsen',
-            })}
+              {isFailureHandler({
+                apiResult: arkiverHendelseResult,
+                errorMessage: 'Vi kunne ikke arkivere hendelsen',
+              })}
 
-            <br />
+              {mapSuccess(oppgaveResult, (oppgave) => {
+                const tildeltIdent = oppgave?.saksbehandler?.ident
 
-            {mapSuccess(oppgaveResult, (oppgave) => {
-              const tildeltIdent = oppgave?.saksbehandler?.ident
+                if (!tildeltIdent) {
+                  return (
+                    <Alert variant="info" inline>
+                      Oppgaven er ikke tildelt en saksbehandler. Om du arkiverer hendelsen vil den automatisk tildeles
+                      deg.
+                    </Alert>
+                  )
+                } else if (tildeltIdent !== innloggetSaksbehandler.ident) {
+                  return <Alert variant="warning">Oppgaven tilhører {oppgave?.saksbehandler?.navn}</Alert>
+                }
+              })}
 
-              if (!tildeltIdent) {
-                return (
-                  <Alert variant="info" inline>
-                    Oppgaven er ikke tildelt en saksbehandler. Om du arkiverer hendelsen vil den automatisk tildeles
-                    deg.
-                  </Alert>
-                )
-              } else if (tildeltIdent !== innloggetSaksbehandler.ident) {
-                return <Alert variant="warning">Oppgaven tilhører {oppgave?.saksbehandler?.navn}</Alert>
-              }
-            })}
-
-            <ButtonGroup>
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setKommentar('')
-                  resetApiCall()
-                  setOpen(false)
-                }}
-              >
-                Avbryt
-              </Button>
-              <Button onClick={arkiverHendelse} disabled={!kommentar} loading={isPending(arkiverHendelseResult)}>
-                Arkiver
-              </Button>
-            </ButtonGroup>
+              <HStack gap="2" justify="end">
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setKommentar('')
+                    resetApiCall()
+                    setOpen(false)
+                  }}
+                >
+                  Avbryt
+                </Button>
+                <Button onClick={arkiverHendelse} disabled={!kommentar} loading={isPending(arkiverHendelseResult)}>
+                  Arkiver
+                </Button>
+              </HStack>
+            </VStack>
           </Modal.Body>
         )}
       </Modal>

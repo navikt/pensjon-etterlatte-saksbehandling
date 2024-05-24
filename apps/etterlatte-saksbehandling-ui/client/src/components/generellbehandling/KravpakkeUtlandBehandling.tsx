@@ -4,7 +4,7 @@ import {
   generellbehandlingErRedigerbar,
   KravpakkeUtland,
 } from '~shared/types/Generellbehandling'
-import { ButtonGroup, GridContainer, MainContent } from '~shared/styled'
+import { GridContainer, MainContent } from '~shared/styled'
 import { HeadingWrapper, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import {
   Alert,
@@ -14,6 +14,7 @@ import {
   Checkbox,
   Chips,
   Heading,
+  HStack,
   Link,
   Select,
   Table,
@@ -477,7 +478,7 @@ const KravpakkeUtlandBehandling = (props: {
               apiResult: avbrytbehandlingStatus,
               errorMessage: 'Kunne ikke avbryte generell behandling utland',
             })}
-            <ButtonGroup>
+            <HStack gap="2" justify="end">
               {redigerbar && (
                 <>
                   <Button onClick={() => avbrytBehandling()} loading={isPending(avbrytbehandlingStatus)}>
@@ -492,7 +493,7 @@ const KravpakkeUtlandBehandling = (props: {
                   <SendtilAttesteringModal utlandsBehandling={generellBehandlingMedLocalState} />
                 </>
               )}
-            </ButtonGroup>
+            </HStack>
           </Box>
         </div>
       </MainContent>

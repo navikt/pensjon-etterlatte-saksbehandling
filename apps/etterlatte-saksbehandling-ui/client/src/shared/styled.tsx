@@ -51,13 +51,6 @@ export const SidebarTools = styled.div`
   z-index: 999;
 `
 
-export const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5em;
-  padding-top: 2em;
-`
-
 export const FlexRow = styled.div<{
   justify?: 'left' | 'center' | 'right' | 'space-between'
   align?: 'start' | 'center' | 'end'

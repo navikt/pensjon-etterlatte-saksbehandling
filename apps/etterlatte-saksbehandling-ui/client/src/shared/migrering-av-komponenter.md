@@ -10,3 +10,6 @@ Veldig mange steder bruke vi f.eks `margin-top: 1rem` for å lage litt spacing m
 `<ContentHeader />` --> `<Box paddingInline="16" paddingBlock="4" />`
 
 `<Content />` --> `<></>` (i de fleste tilfeller hvor det ikke trengs ekstra luft i høyden)
+
+`<ButtonGroup />` --> `<HStack gap="2" justify="end" />` Kan være at man må wrappe komponentene i en `<VStack gap="4" />` for å få riktig spacing.
+

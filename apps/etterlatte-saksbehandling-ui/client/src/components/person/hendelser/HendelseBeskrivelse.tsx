@@ -249,12 +249,16 @@ const HendelseDetaljer = ({ hendelse, sakType }: { hendelse: Grunnlagsendringshe
 
 const HendelseKommentar = ({ kommentar }: { kommentar?: string }) => {
   return (
-    !!kommentar && (
-      <div>
-        <Label>Kommentar</Label>
+    <div>
+      <Label>Kommentar</Label>
+      {!!kommentar ? (
         <KortTekst size="small">{kommentar}</KortTekst>
-      </div>
-    )
+      ) : (
+        <KortTekst size="small">
+          <i>Ingen kommentar på hendelse</i>
+        </KortTekst>
+      )}
+    </div>
   )
 }
 

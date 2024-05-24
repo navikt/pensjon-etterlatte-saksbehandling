@@ -8,7 +8,7 @@ import {
   VilkaarsvurderingResultat,
 } from '~shared/api/vilkaarsvurdering'
 import { VilkaarWrapper } from './styled'
-import { Alert, BodyShort, Button, Heading, Loader, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Loader, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { svarTilTotalResultat } from './utils'
 import { TrashIcon } from '@navikt/aksel-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
@@ -23,6 +23,7 @@ import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 
 import { isPending } from '~shared/api/apiUtils'
+import { OppdatertGrunnlagAlert } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 
 type Props = {
   virkningstidspunktDato: string | undefined
@@ -189,20 +190,20 @@ export const Resultat = (props: Props) => {
       </VilkaarWrapper>
 
       {vilkaarsvurdering.resultat && !virkningstidspunktSamsvarer && (
-        <WarningAlert>
+        <OppdatertGrunnlagAlert variant="warning">
           Virkningstidspunktet er endret og vilkårene må da vurderes på nytt. For å starte ny vurdering må du slette
           nåværende vilkårsvurdering
-        </WarningAlert>
+        </OppdatertGrunnlagAlert>
       )}
 
       <Border />
       {redigerbar ? (
         <>
           {vilkaarsvurdering.isGrunnlagUtdatert && (
-            <WarningAlert>
+            <OppdatertGrunnlagAlert variant="warning">
               OBS! Grunnlaget for vilkårsvurderingen har blitt oppdatert siden sist. <br />
               Du må se over vurderingene og sjekke at de fortsatt er riktige.
-            </WarningAlert>
+            </OppdatertGrunnlagAlert>
           )}
           {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && (
             <VilkaarsvurderingKnapper behandlingId={behandlingId} />
@@ -273,9 +274,4 @@ const HeadingWrapper = styled.div`
 
 const ContentWrapper = styled.div`
   color: var(--a-gray-700);
-`
-
-const WarningAlert = styled(Alert).attrs({ variant: 'warning' })`
-  margin: 2em 4em 0 4em;
-  max-width: fit-content;
 `

@@ -1,7 +1,8 @@
-import { BodyShort, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { BodyShort, Heading, Radio, RadioGroup } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
+import { Begrunnelse } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
 
 type BeregningsgrunnlagMetodeProps = {
   redigerbar: boolean
@@ -55,6 +56,10 @@ const BeregningsgrunnlagMetode = (props: BeregningsgrunnlagMetodeProps) => {
           </RadioGroup>
 
           <Begrunnelse
+            label="Begrunnelse"
+            placeholder="Valgfritt"
+            minRows={3}
+            autoComplete="off"
             disabled={grunnlag === undefined}
             value={begrunnelse}
             onChange={(e) => setBegrunnelse(e.target.value)}
@@ -90,18 +95,6 @@ const BeregningsgrunnlagMetodeWrapper = styled.div`
   padding: 1em 4em;
   max-width: 70em;
   margin-bottom: 1rem;
-`
-
-const Begrunnelse = styled(Textarea).attrs({
-  label: 'Begrunnelse',
-  hideLabel: false,
-  placeholder: 'Valgfritt',
-  minRows: 3,
-  autoComplete: 'off',
-})`
-  margin-bottom: 10px;
-  margin-top: 10px;
-  width: 250px;
 `
 
 export default BeregningsgrunnlagMetode

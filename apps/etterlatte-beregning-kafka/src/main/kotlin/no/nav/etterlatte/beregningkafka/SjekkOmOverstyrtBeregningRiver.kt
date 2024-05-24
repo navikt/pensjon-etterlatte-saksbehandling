@@ -3,15 +3,15 @@ package no.nav.etterlatte.beregningkafka
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
+import no.nav.etterlatte.rapidsandrivers.tilbakestilteBehandlinger
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 
 class SjekkOmOverstyrtBeregningRiver(
@@ -24,7 +24,7 @@ class SjekkOmOverstyrtBeregningRiver(
         initialiserRiver(rapidsConnection, ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET) {
             validate { it.rejectKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
-            validate { it.interestedIn(BEHANDLING_VI_OMREGNER_FRA_KEY) }
+            validate { it.interestedIn(TILBAKESTILTE_BEHANDLINGER_KEY) }
         }
     }
 
@@ -35,15 +35,15 @@ class SjekkOmOverstyrtBeregningRiver(
         context: MessageContext,
     ) {
         logger.info("Mottatt sjekk om finnes åpen behandling med overstyrt beregning hendelse")
-
-        val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
-        val overstyrt = beregningService.hentOverstyrt(behandlingViOmregnerFra)
-        when (overstyrt.status) {
-            HttpStatusCode.NoContent -> {}
-            HttpStatusCode.OK -> throw KanIkkeRegulereSakMedAapenBehandlingOverstyrtBeregning()
-            else -> throw KanIkkeBekrefteAtSakIkkeHarOverstyrtBeregning()
+        val tilbakestilteBehandlinger = packet.tilbakestilteBehandlinger
+        if (tilbakestilteBehandlinger.isNotEmpty()) {
+            val overstyrt = beregningService.hentOverstyrt(tilbakestilteBehandlinger.first())
+            when (overstyrt.status) {
+                HttpStatusCode.NoContent -> {}
+                HttpStatusCode.OK -> throw KanIkkeRegulereSakMedAapenBehandlingOverstyrtBeregning()
+                else -> throw KanIkkeBekrefteAtSakIkkeHarOverstyrtBeregning()
+            }
         }
-
         packet.setEventNameForHendelseType(ReguleringHendelseType.UTFORT_SJEKK_AAPEN_OVERSTYRT)
         context.publish(packet.toJson())
         logger.info("Publiserte utført sjekk om sak har åpen behandling med overstyrt beregning")

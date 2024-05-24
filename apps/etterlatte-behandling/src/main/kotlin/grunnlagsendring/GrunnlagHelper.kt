@@ -7,8 +7,8 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFamilierelasjon
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentSivilstand
+import no.nav.etterlatte.libs.common.grunnlag.hentSoekerPdlV1
 import no.nav.etterlatte.libs.common.grunnlag.hentUtland
-import no.nav.etterlatte.libs.common.grunnlag.hentVergemaalellerfremtidsfullmakt
 
 class GrunnlagRolleException(override val message: String) : Exception(message)
 
@@ -118,7 +118,7 @@ fun Grunnlag.utland(
 fun Grunnlag.vergemaalellerfremtidsfullmakt(saksrolle: Saksrolle) =
     when (saksrolle) {
         Saksrolle.SOEKER -> {
-            soeker.hentVergemaalellerfremtidsfullmakt()?.verdi
+            soeker.hentSoekerPdlV1()?.verdi?.vergemaalEllerFremtidsfullmakt
         }
         else -> throw GrunnlagRolleException(
             "Prøvde å finne vergemål på en person som ikke er søker, men det er ikke relevant",

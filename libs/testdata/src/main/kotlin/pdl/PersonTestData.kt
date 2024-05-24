@@ -19,7 +19,6 @@ import no.nav.etterlatte.libs.common.grunnlag.hentSivilstand
 import no.nav.etterlatte.libs.common.grunnlag.hentSivilstatus
 import no.nav.etterlatte.libs.common.grunnlag.hentStatsborgerskap
 import no.nav.etterlatte.libs.common.grunnlag.hentUtland
-import no.nav.etterlatte.libs.common.grunnlag.hentVergemaalellerfremtidsfullmakt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Person
 
@@ -46,7 +45,7 @@ fun personTestData(opplysningsmap: Map<Opplysningstype, Opplysning<JsonNode>>): 
         utland = opplysningsmap.hentUtland()?.verdi,
         familieRelasjon = opplysningsmap.hentFamilierelasjon()?.verdi,
         avdoedesBarn = opplysningsmap.hentAvdoedesbarn()?.verdi?.avdoedesBarn,
-        vergemaalEllerFremtidsfullmakt = opplysningsmap.hentVergemaalellerfremtidsfullmakt()?.verdi,
+        vergemaalEllerFremtidsfullmakt = emptyList(),
         pdlStatsborgerskap = null,
         avdoedesBarnUtenIdent = null,
     )

@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -97,6 +98,12 @@ internal val soekerTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
                     foreldre = listOf(AVDOED_FOEDSELSNUMMER, GJENLEVENDE_FOEDSELSNUMMER),
                     barn = null,
                 ).toJsonNode(),
+            ),
+        Opplysningstype.SOEKER_PDL_V1 to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                soeker().toJsonNode(),
             ),
     )
 
@@ -230,7 +237,8 @@ internal val avdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
 
 val eldreAvdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> =
     avdoedTestopplysningerMap.toMutableMap().let { map ->
-        map[DOEDSDATO] = Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.getBirthDate().plusYears(67).toJsonNode())
+        map[DOEDSDATO] =
+            Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.getBirthDate().plusYears(67).toJsonNode())
 
         map
     }.toMap()
@@ -278,3 +286,30 @@ internal val gjenlevendeTestopplysningerMap: Map<Opplysningstype, Opplysning<Jso
                 ).toJsonNode(),
             ),
     )
+
+fun soeker(): Person {
+    return Person(
+        randomUUID().toString(),
+        null,
+        randomUUID().toString(),
+        SOEKER_FOEDSELSNUMMER,
+        null,
+        1234,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+    )
+}

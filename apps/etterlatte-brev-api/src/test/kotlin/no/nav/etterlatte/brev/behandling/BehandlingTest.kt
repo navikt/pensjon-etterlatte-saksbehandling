@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.VERGE_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.pdl.personTestData
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -77,7 +78,13 @@ internal class BehandlingTest {
             grunnlag.mapSoeker(null),
         )
         assertEquals(
-            listOf(Avdoed(Foedselsnummer("08498224343"), "Riv-Jern Kul-Kar Badeball-Sommer", LocalDate.of(2022, 8, 17))),
+            listOf(
+                Avdoed(
+                    Foedselsnummer("08498224343"),
+                    "Riv-Jern Kul-Kar Badeball-Sommer",
+                    LocalDate.of(2022, 8, 17),
+                ),
+            ),
             grunnlag.mapAvdoede(),
         )
     }
@@ -95,7 +102,13 @@ internal class BehandlingTest {
             grunnlag.mapSoeker(null),
         )
         assertEquals(
-            listOf(Avdoed(Foedselsnummer("08498224343"), "Riv Jern Kul Kar Badeball-Sommer", LocalDate.of(2022, 8, 17))),
+            listOf(
+                Avdoed(
+                    Foedselsnummer("08498224343"),
+                    "Riv Jern Kul Kar Badeball-Sommer",
+                    LocalDate.of(2022, 8, 17),
+                ),
+            ),
             grunnlag.mapAvdoede(),
         )
     }
@@ -119,7 +132,13 @@ internal class BehandlingTest {
             grunnlag.mapSoeker(null),
         )
         assertEquals(
-            listOf(Avdoed(Foedselsnummer("08498224343"), "Riv-Jern Tre Kul-Kar Gulv Badeball-Sommer Vinter", LocalDate.of(2022, 8, 17))),
+            listOf(
+                Avdoed(
+                    Foedselsnummer("08498224343"),
+                    "Riv-Jern Tre Kul-Kar Gulv Badeball-Sommer Vinter",
+                    LocalDate.of(2022, 8, 17),
+                ),
+            ),
             grunnlag.mapAvdoede(),
         )
     }
@@ -157,27 +176,32 @@ internal class BehandlingTest {
         val soekerFnr = SOEKER_FOEDSELSNUMMER
         val vergesFnr = VERGE_FOEDSELSNUMMER
 
+        val soekersFoedselsnummer =
+            Opplysningstype.FOEDSELSNUMMER to
+                opprettOpplysning(
+                    soekerFnr.toJsonNode(),
+                )
         val grunnlag =
             Grunnlag(
                 soeker =
                     mapOf(
-                        Opplysningstype.FOEDSELSNUMMER to
-                            opprettOpplysning(
-                                soekerFnr.toJsonNode(),
-                            ),
+                        soekersFoedselsnummer,
                         Opplysningstype.FOEDSELSDATO to
                             opprettOpplysning(
                                 // 11 år gammel
                                 LocalDate.now().minusYears(11).toJsonNode(),
                             ),
-                        Opplysningstype.VERGEMAALELLERFREMTIDSFULLMAKT to
+                        Opplysningstype.SOEKER_PDL_V1 to
                             opprettOpplysning(
-                                listOf(
-                                    VergemaalEllerFremtidsfullmakt(
-                                        null,
-                                        null,
-                                        VergeEllerFullmektig(vergesFnr, "Vergenavn", null, false),
-                                    ),
+                                personTestData(mapOf(soekersFoedselsnummer)).copy(
+                                    vergemaalEllerFremtidsfullmakt =
+                                        listOf(
+                                            VergemaalEllerFremtidsfullmakt(
+                                                null,
+                                                null,
+                                                VergeEllerFullmektig(vergesFnr, "Vergenavn", null, false),
+                                            ),
+                                        ),
                                 ).toJsonNode(),
                             ),
                     ),
@@ -201,14 +225,16 @@ internal class BehandlingTest {
     fun `Ingen verge i grunnlag gjenlevende har foreldreansvar`() {
         val gjenlevendeNavn = Navn("Elegang", "Mellomstor", "Barnevogn")
 
+        val soekersFnr =
+            Opplysningstype.FOEDSELSNUMMER to
+                opprettOpplysning(
+                    SOEKER_FOEDSELSNUMMER.toJsonNode(),
+                )
         val grunnlag =
             Grunnlag(
                 soeker =
                     mapOf(
-                        Opplysningstype.FOEDSELSNUMMER to
-                            opprettOpplysning(
-                                SOEKER_FOEDSELSNUMMER.toJsonNode(),
-                            ),
+                        soekersFnr,
                         Opplysningstype.FOEDSELSDATO to
                             opprettOpplysning(
                                 // 11 år gammel
@@ -222,6 +248,10 @@ internal class BehandlingTest {
                                     barn = listOf(),
                                     personerUtenIdent = listOf(),
                                 ).toJsonNode(),
+                            ),
+                        Opplysningstype.SOEKER_PDL_V1 to
+                            opprettOpplysning(
+                                personTestData(mapOf(soekersFnr)).toJsonNode(),
                             ),
                     ),
                 familie =
@@ -259,6 +289,8 @@ internal class BehandlingTest {
     @Test
     fun `Ingen verge i grunnlag gjenlevende har ikke foreldreansvar`() {
         val gjenlevendeNavn = Navn("Elegang", "Mellomstor", "Barnevogn")
+        val soekersFoedselsnummer =
+            Opplysningstype.FOEDSELSNUMMER to opprettOpplysning(SOEKER_FOEDSELSNUMMER.toJsonNode())
 
         val grunnlag =
             Grunnlag(
@@ -281,6 +313,10 @@ internal class BehandlingTest {
                                     barn = listOf(),
                                     personerUtenIdent = listOf(),
                                 ).toJsonNode(),
+                            ),
+                        Opplysningstype.SOEKER_PDL_V1 to
+                            opprettOpplysning(
+                                personTestData(mapOf(soekersFoedselsnummer)).toJsonNode(),
                             ),
                     ),
                 familie =
@@ -305,6 +341,8 @@ internal class BehandlingTest {
     @Test
     fun `Ingen verge i grunnlag gjenlevende har foreldreansvar soeker er over 18 ifølge brevutfall`() {
         val gjenlevendeNavn = Navn("Elegang", "Mellomstor", "Barnevogn")
+        val soekersFoedselsnummer =
+            Opplysningstype.FOEDSELSNUMMER to opprettOpplysning(SOEKER_FOEDSELSNUMMER.toJsonNode())
 
         val grunnlag =
             Grunnlag(
@@ -327,6 +365,10 @@ internal class BehandlingTest {
                                     barn = listOf(),
                                     personerUtenIdent = listOf(),
                                 ).toJsonNode(),
+                            ),
+                        Opplysningstype.SOEKER_PDL_V1 to
+                            opprettOpplysning(
+                                personTestData(mapOf(soekersFoedselsnummer)).toJsonNode(),
                             ),
                     ),
                 familie =
@@ -359,6 +401,8 @@ internal class BehandlingTest {
     @Test
     fun `Ingen verge og over 18 år gir ingen verge barnepensjon eller oms`() {
         val gjenlevendeNavn = Navn("Elegang", "Mellomstor", "Barnevogn")
+        val soekersFoedselsnummer =
+            Opplysningstype.FOEDSELSNUMMER to opprettOpplysning(SOEKER_FOEDSELSNUMMER.toJsonNode())
 
         val grunnlag =
             Grunnlag(
@@ -372,6 +416,10 @@ internal class BehandlingTest {
                             opprettOpplysning(
                                 // 19 år gammel
                                 LocalDate.now().minusYears(19).toJsonNode(),
+                            ),
+                        Opplysningstype.SOEKER_PDL_V1 to
+                            opprettOpplysning(
+                                personTestData(mapOf(soekersFoedselsnummer)).toJsonNode(),
                             ),
                     ),
                 familie =

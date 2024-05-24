@@ -90,7 +90,7 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
   return (
     <>
       {harAvvikMotPdl && visMismatchPdl && (
-        <MediumAdvarsel>
+        <BredAlert variant="warning">
           {saktype === SakType.BARNEPENSJON ? (
             <BodyShort spacing>
               Det er forskjeller mellom familieforholdet i behandlingen og det familieforholdet vi utleder ut i fra PDL.
@@ -129,14 +129,14 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
               tekst={`${samsvar.kildePdl?.type.toUpperCase()} (${formaterKanskjeStringDato(samsvar.kildePdl?.tidspunkt)})`}
             />
           </FlexRow>
-        </MediumAdvarsel>
+        </BredAlert>
       )}
       {harPersonerUtenIdenter && (
         <div>
-          <MediumAdvarsel>
+          <BredAlert variant="warning">
             Det er personer uten identer i PDL i saksgrunnlaget. Disse personene kan ikke brukes i beregning av
             trygdetid eller en eventuell søskenjustering på gammelt regelverk.
-          </MediumAdvarsel>
+          </BredAlert>
           {personerUtenIdenterSak.length > 0 && (
             <>
               <Heading size="small" level="4">
@@ -155,7 +155,7 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
   )
 }
 
-const MediumAdvarsel = styled(Alert).attrs({ variant: 'warning' })`
+const BredAlert = styled(Alert)`
   width: fit-content;
 `
 

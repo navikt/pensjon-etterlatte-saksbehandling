@@ -1,4 +1,4 @@
-import React, { ErrorInfo } from 'react'
+import React, { ErrorInfo, ReactNode } from 'react'
 import { logger } from '~utils/logger'
 import ErrorStackParser from 'error-stack-parser'
 import styled from 'styled-components'
@@ -55,12 +55,15 @@ class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
 
 export default ErrorBoundary
 
-export const ApiErrorAlert = styled(Alert).attrs({ variant: 'error' })`
-  margin: 2rem auto;
-  max-width: fit-content;
-`
+export const ApiErrorAlert = ({ children }: { children: ReactNode | Array<ReactNode> }) => {
+  return <BredAlert variant="error">{children}</BredAlert>
+}
 
-export const ApiWarningAlert = styled(Alert).attrs({ variant: 'warning' })`
+export const ApiWarningAlert = ({ children }: { children: ReactNode | Array<ReactNode> }) => {
+  return <BredAlert variant="warning">{children}</BredAlert>
+}
+
+const BredAlert = styled(Alert)`
   margin: 2rem auto;
   max-width: fit-content;
 `

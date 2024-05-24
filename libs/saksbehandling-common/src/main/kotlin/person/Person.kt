@@ -190,11 +190,11 @@ data class GeografiskTilknytning(
 }
 
 interface Verge {
-    fun navn(): String?
+    fun navn(): String
 }
 
-data class Vergemaal(val navn: String?, val foedselsnummer: Folkeregisteridentifikator) : Verge {
-    override fun navn(): String? {
+data class Vergemaal(val navn: String, val foedselsnummer: Folkeregisteridentifikator) : Verge {
+    override fun navn(): String {
         return navn
     }
 }

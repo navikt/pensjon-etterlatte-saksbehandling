@@ -9,7 +9,8 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSNUMMER
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
@@ -18,11 +19,12 @@ import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.pdl.personTestData
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class GrunnlagmapperTest {
-    private val vergesAdresseFnr = "31488338237"
     private val pdlVergeOekonomiskFnr = "17418340118"
     private val pdlVergePersonligFnr = "27458328671"
 
@@ -30,25 +32,20 @@ class GrunnlagmapperTest {
 
     @Test
     fun `mapVerge henter vergemaal hvis definert i grunnlag for sak og søker`() {
+        val soeker =
+            personTestData(mapOf(FOEDSELSNUMMER to opprettOpplysning(SOEKER_FOEDSELSNUMMER.toJsonNode())))
+                .copy(
+                    vergemaalEllerFremtidsfullmakt =
+                        listOf(
+                            vergemaal(pdlVergeOekonomiskFnr, "", "personligeOgOekonomiskeInteresser"),
+                            vergemaal(pdlVergePersonligFnr, "", "personligeInteresser"),
+                        ),
+                )
         val opplysningsgrunnlag =
             GrunnlagTestData(
                 opplysningsmapSoekerOverrides =
                     mapOf(
-                        Opplysningstype.VERGEMAALELLERFREMTIDSFULLMAKT to
-                            opprettOpplysning(
-                                listOf(
-                                    vergemaal(
-                                        pdlVergeOekonomiskFnr,
-                                        "",
-                                        "personligeOgOekonomiskeInteresser",
-                                    ),
-                                    vergemaal(
-                                        pdlVergePersonligFnr,
-                                        "",
-                                        "personligeInteresser",
-                                    ),
-                                ).toJsonNode(),
-                            ),
+                        SOEKER_PDL_V1 to opprettOpplysning(soeker.toJsonNode()),
                     ),
                 opplysningsmapSakOverrides = emptyMap(),
             ).hentOpplysningsgrunnlag()
@@ -56,40 +53,6 @@ class GrunnlagmapperTest {
         coEvery {
             adresseService.hentMottakerAdresse(any(), pdlVergeOekonomiskFnr)
         } returns lagretVergeAdresse("Vera Verge", pdlVergeOekonomiskFnr)
-        val verge = opplysningsgrunnlag.mapVerge(SakType.BARNEPENSJON, null, adresseService)!! as Vergemaal
-
-        verge.navn() shouldBe "Vera Verge"
-        verge.foedselsnummer shouldBe Folkeregisteridentifikator.of(pdlVergeOekonomiskFnr)
-    }
-
-    @Test
-    fun `mapVerge henter vergemaal uten adresse hvis adresse mangler i grunnlag for sak og søker`() {
-        val opplysningsgrunnlag =
-            GrunnlagTestData(
-                opplysningsmapSoekerOverrides =
-                    mapOf(
-                        Opplysningstype.VERGEMAALELLERFREMTIDSFULLMAKT to
-                            opprettOpplysning(
-                                listOf(
-                                    vergemaal(
-                                        pdlVergeOekonomiskFnr,
-                                        "Vera Verge",
-                                        "personligeOgOekonomiskeInteresser",
-                                    ),
-                                    vergemaal(
-                                        pdlVergePersonligFnr,
-                                        "Petter Personlig",
-                                        "personligeInteresser",
-                                    ),
-                                ).toJsonNode(),
-                            ),
-                    ),
-            ).hentOpplysningsgrunnlag()
-
-        coEvery {
-            adresseService.hentMottakerAdresse(any(), pdlVergeOekonomiskFnr)
-        } returns lagretVergeAdresse("Vera Verge", pdlVergeOekonomiskFnr)
-
         val verge = opplysningsgrunnlag.mapVerge(SakType.BARNEPENSJON, null, adresseService)!! as Vergemaal
 
         verge.navn() shouldBe "Vera Verge"

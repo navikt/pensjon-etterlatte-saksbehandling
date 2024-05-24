@@ -116,7 +116,14 @@ export const TrygdetidGrunnlag = ({
             </FormWrapper>
 
             <FormWrapper>
-              <Begrunnelse {...register('begrunnelse')} key={`begrunnelse-${trygdetidGrunnlagType}`} />
+              <Begrunnelse
+                {...register('begrunnelse')}
+                key={`begrunnelse-${trygdetidGrunnlagType}`}
+                label="Begrunnelse"
+                placeholder="Valgfritt"
+                minRows={3}
+                autoComplete="off"
+              />
               {trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK && (
                 <>
                   <PoengAar legend="Poeng i inn/ut år">
@@ -188,13 +195,7 @@ const DatoSection = styled.section`
   display: grid;
   gap: 0.5em;
 `
-export const Begrunnelse = styled(Textarea).attrs({
-  label: 'Begrunnelse',
-  hideLabel: false,
-  placeholder: 'Valgfritt',
-  minRows: 3,
-  autoComplete: 'off',
-})`
+export const Begrunnelse = styled(Textarea)`
   margin-bottom: 10px;
   margin-top: 10px;
   width: 250px;

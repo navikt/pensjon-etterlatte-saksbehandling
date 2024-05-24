@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
@@ -52,7 +51,6 @@ class OmregningHendelserBeregningRiverTest {
     }
 
     @Test
-    @Disabled
     fun `feiler naar ny beregning er lavere enn gammel`() {
         val (beregningService, river) = initialiserRiver()
 
@@ -78,7 +76,31 @@ class OmregningHendelserBeregningRiverTest {
     }
 
     @Test
-    @Disabled
+    fun `forrige beregning er revurdering fram i tid fra 1 juli, men ny er fra 1 mai, og vi har dermed ikke overlapp paa periode`() {
+        val (beregningService, river) = initialiserRiver()
+
+        val nyBehandling = UUID.randomUUID()
+        val gammelBehandling = UUID.randomUUID()
+
+        every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
+        every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
+        every {
+            beregningService.hentBeregning(gammelBehandling)
+        } returns beregningDTO(gammelBehandling, 500, beregningsperiodeFom = YearMonth.of(2024, Month.JULY))
+        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 600)
+        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.2"))
+
+        runBlocking {
+            river.beregn(
+                SakType.BARNEPENSJON,
+                behandlingId = nyBehandling,
+                behandlingViOmregnerFra = gammelBehandling,
+                LocalDate.of(2024, Month.APRIL, 10),
+            )
+        }
+    }
+
+    @Test
     fun `ny beregning skal ikke kunne vaere mer enn X prosent hoeyere enn gammel`() {
         val (beregningService, river) = initialiserRiver()
 
@@ -139,6 +161,7 @@ class OmregningHendelserBeregningRiverTest {
     private fun beregningDTO(
         behandling: UUID,
         nySum: Int,
+        beregningsperiodeFom: YearMonth = YearMonth.of(2024, Month.MARCH),
     ) = mockk<HttpResponse>().also {
         coEvery { it.body<BeregningDTO>() } returns
             BeregningDTO(
@@ -148,7 +171,7 @@ class OmregningHendelserBeregningRiverTest {
                 beregningsperioder =
                     listOf(
                         mockk<Beregningsperiode>().also {
-                            every { it.datoFOM } returns YearMonth.of(2024, Month.MARCH)
+                            every { it.datoFOM } returns beregningsperiodeFom
                             every { it.datoTOM } returns null
                             every { it.utbetaltBeloep } returns nySum
                         },

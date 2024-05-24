@@ -35,6 +35,7 @@ export const MainContent = styled.div`
 `
 
 export const CollapsibleSidebar = styled.div<{ collapsed: boolean }>`
+  background: var(--a-white);
   position: relative;
   max-height: fit-content;
   min-width: ${(props) => (props.collapsed ? '50px' : '20%')};

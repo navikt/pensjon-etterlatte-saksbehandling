@@ -292,7 +292,7 @@ export const HendelseBeskrivelse = ({
       )
     case 'ADRESSE':
       return (
-        <VStack>
+        <VStack gap="4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Adresse adresse={hendelse.samsvarMellomKildeOgGrunnlag} />
           <HendelseKommentar kommentar={hendelse.kommentar} />

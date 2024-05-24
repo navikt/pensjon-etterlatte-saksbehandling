@@ -22,7 +22,7 @@ import {
 } from '~components/person/typer'
 import { formaterKanskjeStringDatoMedFallback, formaterStringDato } from '~utils/formattering'
 import styled from 'styled-components'
-import { BodyShort, Label } from '@navikt/ds-react'
+import { BodyShort, Label, VStack } from '@navikt/ds-react'
 import { institusjonstype } from '~components/behandling/beregningsgrunnlag/Insthendelser'
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
 import { SakType } from '~shared/types/sak'
@@ -247,6 +247,15 @@ const HendelseDetaljer = ({ hendelse, sakType }: { hendelse: Grunnlagsendringshe
   )
 }
 
+const HendelseKommentar = ({ kommentar }: { kommentar?: string }) => {
+  return (
+    <div>
+      <Label>Kommentar</Label>
+      <KortTekst size="small">{!!kommentar ? kommentar : <i>Ingen kommentar på hendelse</i>}</KortTekst>
+    </div>
+  )
+}
+
 export const HendelseBeskrivelse = ({
   sakType,
   hendelse,
@@ -257,68 +266,77 @@ export const HendelseBeskrivelse = ({
   switch (hendelse.samsvarMellomKildeOgGrunnlag.type) {
     case 'UTLAND':
       return (
-        <Header>
+        <VStack gap="4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <UtlandSamsvarVisning samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
-        </Header>
+          <HendelseKommentar kommentar={hendelse.kommentar} />
+        </VStack>
       )
     case 'ANSVARLIGE_FORELDRE':
       return (
-        <Header>
+        <VStack gap="4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <VisAnsvarligeForeldreSamsvar samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
-        </Header>
+          <HendelseKommentar kommentar={hendelse.kommentar} />
+        </VStack>
       )
     case 'DOEDSDATO':
       return (
-        <Header>
+        <VStack gap="4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Doedsdato samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
-        </Header>
+          <HendelseKommentar kommentar={hendelse.kommentar} />
+        </VStack>
       )
     case 'ADRESSE':
       return (
-        <Header>
+        <VStack gap="4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Adresse adresse={hendelse.samsvarMellomKildeOgGrunnlag} />
-        </Header>
+          <HendelseKommentar kommentar={hendelse.kommentar} />
+        </VStack>
       )
     case 'BARN':
       return (
-        <Header>
+        <VStack gap="4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Barn samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
-        </Header>
+          <HendelseKommentar kommentar={hendelse.kommentar} />
+        </VStack>
       )
     case 'SIVILSTAND':
       return (
-        <Header>
+        <VStack gap="4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <VisSivilstand samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
-        </Header>
+          <HendelseKommentar kommentar={hendelse.kommentar} />
+        </VStack>
       )
     case 'INSTITUSJONSOPPHOLD':
       return (
-        <Header>
+        <VStack gap="4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Institusjonsopphold samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
-        </Header>
+          <HendelseKommentar kommentar={hendelse.kommentar} />
+        </VStack>
       )
     case 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT':
       return (
-        <Header>
+        <VStack gap="4">
           <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Vergemaal samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
-        </Header>
+          <HendelseKommentar kommentar={hendelse.kommentar} />
+        </VStack>
       )
     case 'GRUNNBELOEP':
       return (
-        <Header>
+        <VStack gap="4">
           <KortTekst size="small">
             Hendelse fra {grunnlagsendringsKilde(hendelse.samsvarMellomKildeOgGrunnlag.type)}
           </KortTekst>
           <KortTekst size="small">{grunnlagsendringsBeskrivelse[hendelse.samsvarMellomKildeOgGrunnlag.type]}</KortTekst>
-        </Header>
+          <HendelseKommentar kommentar={hendelse.kommentar} />
+        </VStack>
       )
   }
 }
@@ -335,11 +353,6 @@ const GrunnlagSammenligningWrapper = styled.div`
 
 const KortTekst = styled(BodyShort)`
   max-width: 25em;
-`
-const Header = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-self: flex-start;
 `
 
 const ListeWrapper = styled.ul`

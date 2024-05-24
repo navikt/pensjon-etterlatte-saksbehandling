@@ -1,7 +1,7 @@
 import { useKlage } from '~components/klage/useKlage'
-import { Content, ContentHeader, FlexRow } from '~shared/styled'
+import { Content, FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { BodyShort, Button, Heading } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading } from '@navikt/ds-react'
 import { formaterKanskjeStringDato, formaterVedtakType } from '~utils/formattering'
 import React from 'react'
 import { JaNei } from '~shared/types/ISvar'
@@ -20,13 +20,13 @@ export function KlageFormkravVisning() {
 
   return (
     <Content>
-      <ContentHeader>
+      <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading level="1" size="large">
             Formkrav og klagefrist
           </Heading>
         </HeadingWrapper>
-      </ContentHeader>
+      </Box>
       <InnholdPadding>
         <Heading size="small" spacing>
           Hvilket vedtak klages det på?

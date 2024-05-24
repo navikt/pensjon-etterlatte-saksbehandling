@@ -1,5 +1,5 @@
-import { Content, ContentHeader } from '~shared/styled'
-import { BodyShort, Heading } from '@navikt/ds-react'
+import { Content } from '~shared/styled'
+import { BodyShort, Box, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { behandlingErRedigerbar, requireNotNull } from '../felles/utils'
@@ -112,7 +112,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
   const [hjemler, beskrivelse] = hjemlerOgBeskrivelse(behandling.sakType, revurderingsaarsak)
   return (
     <Content>
-      <ContentHeader>
+      <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading spacing size="large" level="1">
             Revurdering
@@ -125,7 +125,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
             Revurdering på grunn av på grunn av <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
           </BodyShort>
         )}
-      </ContentHeader>
+      </Box>
       <InnholdPadding>
         <OppdaterGrunnlagModal
           behandlingId={behandling.id}

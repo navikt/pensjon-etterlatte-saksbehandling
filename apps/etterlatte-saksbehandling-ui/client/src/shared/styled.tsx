@@ -57,9 +57,6 @@ export const Content = styled.div`
   padding: 0;
 `
 
-export const ContentHeader = styled.div`
-  padding: 1em 4em;
-`
 export const ButtonGroup = styled.div`
   display: flex;
   justify-content: flex-end;

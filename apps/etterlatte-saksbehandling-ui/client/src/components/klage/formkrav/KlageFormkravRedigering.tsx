@@ -1,5 +1,5 @@
-import { Alert, BodyLong, Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
-import { Content, ContentHeader, FlexRow } from '~shared/styled'
+import { Alert, BodyLong, Box, Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
+import { Content, FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
@@ -146,13 +146,13 @@ export function KlageFormkravRedigering() {
 
   return (
     <Content>
-      <ContentHeader>
+      <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading level="1" size="large">
             Vurder formkrav og klagefrist
           </Heading>
         </HeadingWrapper>
-      </ContentHeader>
+      </Box>
       <form onSubmit={handleSubmit(sendInnFormkrav)}>
         <InnholdPadding>
           {/* Det er litt spesiell håndtering av akkurat hvilket vedtak klagen ligger på, relatert til hvordan React

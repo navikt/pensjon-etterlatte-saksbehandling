@@ -1,4 +1,4 @@
-import { Content, ContentHeader } from '~shared/styled'
+import { Content } from '~shared/styled'
 import React, { useEffect } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import { hentVilkaarsvurdering, opprettVilkaarsvurdering, slettVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
@@ -11,7 +11,7 @@ import {
   updateVilkaarsvurdering,
 } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { Alert, BodyLong, Button, Heading } from '@navikt/ds-react'
+import { Alert, BodyLong, Box, Button, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -93,13 +93,13 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
 
   return (
     <Content>
-      <ContentHeader>
+      <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading size="large" level="1">
             Vilkårsvurdering
           </Heading>
         </HeadingWrapper>
-      </ContentHeader>
+      </Box>
 
       {behandlingId && vilkaarsvurdering && !isPending(slettVilkaarsvurderingStatus) && (
         <>

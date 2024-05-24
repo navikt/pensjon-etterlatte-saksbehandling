@@ -6,8 +6,8 @@ import React from 'react'
 import { JaNei } from '~shared/types/ISvar'
 import { KlageAvvisning } from '~components/klage/vurdering/KlageAvvisning'
 import { HeadingWrapper } from '~components/person/sakOgBehandling/SakOversikt'
-import { Button, Heading } from '@navikt/ds-react'
-import { ContentHeader, FlexRow } from '~shared/styled'
+import { Box, Button, Heading } from '@navikt/ds-react'
+import { FlexRow } from '~shared/styled'
 import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { EndeligVurdering } from '~components/klage/vurdering/EndeligVurdering'
 import { EndeligVurderingVisning } from '~components/klage/vurdering/EndeligVurderingVisning'
@@ -30,13 +30,13 @@ export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
 
   return (
     <>
-      <ContentHeader>
+      <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading level="1" size="large">
             Vurder klagen
           </Heading>
         </HeadingWrapper>
-      </ContentHeader>
+      </Box>
       <InnholdPadding>
         {kanRedigere ? (
           <>

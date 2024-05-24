@@ -1,7 +1,7 @@
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import { Button, Heading } from '@navikt/ds-react'
+import { Box, Button, Heading } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
-import { Content, ContentHeader } from '~shared/styled'
+import { Content } from '~shared/styled'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
@@ -60,14 +60,14 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
 
   return (
     <Content>
-      <ContentHeader>
+      <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading spacing size="large" level="1">
             Trygdetid
           </Heading>
           <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
         </HeadingWrapper>
-      </ContentHeader>
+      </Box>
 
       <Trygdetid
         redigerbar={redigerbar}

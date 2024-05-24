@@ -1,6 +1,6 @@
-import { Alert, BodyLong, Button, Heading, Radio, RadioGroup } from '@navikt/ds-react'
+import { Alert, BodyLong, Box, Button, Heading, Radio, RadioGroup } from '@navikt/ds-react'
 import React from 'react'
-import { Content, ContentHeader, FlexRow } from '~shared/styled'
+import { Content, FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Feilmelding, Innhold, VurderingWrapper } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
@@ -72,13 +72,13 @@ export function KlageAvvisning(props: { klage: Klage }) {
 
   return (
     <Content>
-      <ContentHeader>
+      <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading level="1" size="large">
             Avvis klagen
           </Heading>
         </HeadingWrapper>
-      </ContentHeader>
+      </Box>
       <form onSubmit={handleSubmit(sendInnVurdering)}>
         <Innhold>
           <BodyLong spacing={true}>

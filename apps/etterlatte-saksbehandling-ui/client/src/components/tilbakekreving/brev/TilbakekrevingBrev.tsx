@@ -1,5 +1,5 @@
-import { Alert, Heading } from '@navikt/ds-react'
-import { Content, ContentHeader, FlexRow } from '~shared/styled'
+import { Alert, Box, Heading } from '@navikt/ds-react'
+import { Content, FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
 import { erUnderBehandling, TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
@@ -59,7 +59,7 @@ export function TilbakekrevingBrev({
     <Content>
       <BrevContent>
         <Sidebar>
-          <ContentHeader>
+          <Box paddingInline="16" paddingBlock="4">
             <HeadingWrapper>
               <Heading spacing size="large" level="1">
                 Vedtaksbrev
@@ -78,7 +78,7 @@ export function TilbakekrevingBrev({
                 <BrevMottaker brev={vedtaksbrev} kanRedigeres={redigerbar} />
               </>
             )}
-          </ContentHeader>
+          </Box>
         </Sidebar>
 
         {vedtaksbrev && <RedigerbartBrev brev={vedtaksbrev} kanRedigeres={redigerbar} />}

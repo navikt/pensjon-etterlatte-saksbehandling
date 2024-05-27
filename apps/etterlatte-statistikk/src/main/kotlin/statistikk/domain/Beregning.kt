@@ -1,9 +1,13 @@
 package no.nav.etterlatte.statistikk.domain
 
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO as CommonBeregningDTO
@@ -30,6 +34,8 @@ data class Beregning(
     val type: Beregningstype,
     val beregnetDato: Tidspunkt,
     val beregningsperioder: List<Beregningsperiode>,
+    // TODO: Sett denne som non-nullable etter at vi har refreshet hentede beregninger
+    val overstyrtBeregning: Boolean? = null,
 ) {
     companion object {
         fun fraBeregningDTO(dto: CommonBeregningDTO) =
@@ -39,7 +45,20 @@ data class Beregning(
                 type = Beregningstype.fraDtoType(dto.type),
                 beregnetDato = dto.beregnetDato,
                 beregningsperioder = dto.beregningsperioder.map(Beregningsperiode::fraBeregningsperiodeDTO),
+                overstyrtBeregning = dto.overstyrBeregning != null,
             )
+    }
+}
+
+data class InstitusjonsoppholdStatistikk(
+    val sats: BigDecimal,
+) {
+    companion object {
+        fun fra(dto: InstitusjonsoppholdBeregningsgrunnlag): InstitusjonsoppholdStatistikk {
+            return InstitusjonsoppholdStatistikk(
+                sats = dto.prosentEtterReduksjon().verdi.toBigDecimal() / 100.toBigDecimal(),
+            )
+        }
     }
 }
 
@@ -51,6 +70,11 @@ data class Beregningsperiode(
     val grunnbelopMnd: Int,
     val grunnbelop: Int,
     val trygdetid: Int,
+    val institusjonsopphold: InstitusjonsoppholdStatistikk? = null,
+    val beregningsMetode: BeregningsMetode? = null,
+    val samletNorskTrygdetid: Int? = null,
+    val samletTeoretiskTrygdetid: Int? = null,
+    val broek: IntBroek? = null,
 ) {
     companion object {
         fun fraBeregningsperiodeDTO(dto: CommonBeregningsperiode) =
@@ -62,6 +86,11 @@ data class Beregningsperiode(
                 grunnbelopMnd = dto.grunnbelopMnd,
                 grunnbelop = dto.grunnbelop,
                 trygdetid = dto.trygdetid,
+                institusjonsopphold = dto.institusjonsopphold?.let { InstitusjonsoppholdStatistikk.fra(it) },
+                beregningsMetode = dto.beregningsMetode,
+                samletNorskTrygdetid = dto.samletNorskTrygdetid,
+                samletTeoretiskTrygdetid = dto.samletTeoretiskTrygdetid,
+                broek = dto.broek,
             )
     }
 }

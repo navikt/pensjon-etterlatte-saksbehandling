@@ -6,6 +6,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
@@ -65,8 +66,14 @@ internal class ReguleringsforespoerselRiver(
         while (tatt < antall) {
             val antallIDenneRunden = min(maksBatchstoerrelse, antall)
             logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
-            val sakerTilOmregning =
+            val saker =
                 behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker, sakType)
+            val sakerTilOmregning = Saker(saker.saker.filterNot { sakerViIkkeRegulererAutomatiskNaa.contains(it.id) })
+
+            if (sakerTilOmregning.saker.isEmpty()) {
+                logger.debug("Ingen saker i denne runden. Returnerer")
+                break
+            }
 
             val tilbakemigrerte =
                 behandlingService.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
@@ -109,3 +116,14 @@ enum class ReguleringFeatureToggle(private val key: String) : FeatureToggle {
 
     override fun key() = key
 }
+
+private val sakerViIkkeRegulererAutomatiskNaa =
+    listOf<Long>(
+        16850, // Til samordning
+        17003, // Til samordning
+        16616, // Til samordning
+        3482, // Revurdering med overstyrt beregning åpen behandling
+        6323, // Revurdering med overstyrt beregning åpen behandling
+        11606, // Revurdering med overstyrt beregning åpen behandling
+        11848, // Revurdering med overstyrt beregning åpen behandling
+    )

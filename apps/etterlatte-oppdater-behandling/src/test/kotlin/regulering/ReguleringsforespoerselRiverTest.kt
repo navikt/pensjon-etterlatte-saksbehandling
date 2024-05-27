@@ -32,6 +32,8 @@ import java.util.UUID
 
 internal class ReguleringsforespoerselRiverTest {
     private val foersteMai2023 = LocalDate.of(2023, 5, 1)
+    private val featureToggleService =
+        mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }
 
     private fun genererReguleringMelding(dato: LocalDate) =
         JsonMessage.newMessage(
@@ -47,9 +49,13 @@ internal class ReguleringsforespoerselRiverTest {
     @Test
     fun `kan ta imot reguleringsmelding og kalle paa behandling`() {
         val melding = genererReguleringMelding(foersteMai2023)
-        val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
-        val featureToggleService =
-            mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }
+        val vedtakServiceMock =
+            mockk<BehandlingService>(relaxed = true).also {
+                every { it.hentAlleSaker(any(), any()) } returns
+                    Saker(
+                        listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, 0, "4808")),
+                    )
+            }
         val inspector =
             TestRapid().apply { ReguleringsforespoerselRiver(this, vedtakServiceMock, featureToggleService) }
 
@@ -72,8 +78,6 @@ internal class ReguleringsforespoerselRiverTest {
                     Sak("saksbehandler1", SakType.BARNEPENSJON, 3L, "4808"),
                 ),
             ) andThen Saker(listOf())
-        val featureToggleService =
-            mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }
         val inspector =
             TestRapid().apply { ReguleringsforespoerselRiver(this, vedtakServiceMock, featureToggleService) }
 
@@ -102,8 +106,6 @@ internal class ReguleringsforespoerselRiverTest {
                     Sak("saksbehandler1", SakType.BARNEPENSJON, 1003L, "4808"),
                 ),
             )
-        val featureToggleService =
-            mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }
         val inspector =
             TestRapid().apply { ReguleringsforespoerselRiver(this, behandlingServiceMock, featureToggleService) }
         inspector.sendTestMessage(melding.toJson())
@@ -134,8 +136,6 @@ internal class ReguleringsforespoerselRiverTest {
             SakIDListe(
                 listOf(BehandlingOgSak(behandlingId1, sakId), BehandlingOgSak(behandlingId2, sakId)),
             )
-        val featureToggleService =
-            mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }
         val inspector =
             TestRapid().apply { ReguleringsforespoerselRiver(this, behandlingServiceMock, featureToggleService) }
         inspector.sendTestMessage(melding.toJson())
@@ -148,13 +148,17 @@ internal class ReguleringsforespoerselRiverTest {
     @Test
     fun `kjoerer med feilhaandtering`() {
         val melding = genererReguleringMelding(foersteMai2023)
-        val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
+        val behandlingServiceMock =
+            mockk<BehandlingService>(relaxed = true).also {
+                every { it.hentAlleSaker(any(), any()) } returns
+                    Saker(
+                        listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, 0, "4808")),
+                    )
+            }
         coEvery {
             behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(any())
         } throws RuntimeException("feil")
 
-        val featureToggleService =
-            mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }
         val inspector =
             TestRapid().apply { ReguleringsforespoerselRiver(this, behandlingServiceMock, featureToggleService) }
 
@@ -181,8 +185,6 @@ internal class ReguleringsforespoerselRiverTest {
                     Sak("saksbehandler1", SakType.BARNEPENSJON, 4L, "4808"),
                 ),
             ) andThen Saker(listOf())
-        val featureToggleService =
-            mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }
         val inspector =
             TestRapid().apply { ReguleringsforespoerselRiver(this, vedtakServiceMock, featureToggleService) }
 
@@ -206,14 +208,33 @@ internal class ReguleringsforespoerselRiverTest {
             )
 
         val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
-        val featureToggleService =
-            mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }
         val inspector =
             TestRapid().apply { ReguleringsforespoerselRiver(this, vedtakServiceMock, featureToggleService) }
 
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) {
             vedtakServiceMock.hentAlleSaker("Regulering2023", 10, emptyList(), SakType.BARNEPENSJON)
+        }
+    }
+
+    @Test
+    fun `ignorerer spesifiserte saker`() {
+        val melding = genererReguleringMelding(LocalDate.now())
+        val vedtakServiceMock =
+            mockk<BehandlingService>(relaxed = true).also {
+                every { it.hentAlleSaker(any(), any(), any(), any()) } returns
+                    Saker(
+                        listOf(
+                            Sak("Id1", SakType.BARNEPENSJON, 17003, "enhet1"),
+                        ),
+                    )
+            }
+        val inspector =
+            TestRapid().apply { ReguleringsforespoerselRiver(this, vedtakServiceMock, featureToggleService) }
+
+        inspector.sendTestMessage(melding.toJson())
+        verify(exactly = 0) {
+            vedtakServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(any())
         }
     }
 }

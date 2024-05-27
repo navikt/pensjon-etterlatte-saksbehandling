@@ -112,7 +112,7 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                     where not exists(select 1 from omregningskjoering k where k.sak_id=s.id and k.kjoering='$kjoering' and k.status != '${KjoeringStatus.FEILA.name}')
                     ${if (saker.isEmpty()) "" else " and id = any(?)"}
                     ${if (sakType == null) "" else " and s.saktype = ?"}
-                    ORDER by id DESC
+                    ORDER by id ASC
                     LIMIT $antall"""
                             .trimMargin(),
                     )

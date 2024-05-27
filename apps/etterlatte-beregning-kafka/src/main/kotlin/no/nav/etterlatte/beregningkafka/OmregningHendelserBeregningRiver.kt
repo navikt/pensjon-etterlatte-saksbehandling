@@ -83,7 +83,7 @@ internal class OmregningHendelserBeregningRiver(
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
         val forrigeBeregning = beregningService.hentBeregning(behandlingViOmregnerFra).body<BeregningDTO>()
 
-        verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning, g = g)
+        verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning, g = g, behandlingId = behandlingId)
 
         return if (sakType == SakType.OMSTILLINGSSTOENAD) {
             val avkorting =
@@ -99,6 +99,7 @@ internal class OmregningHendelserBeregningRiver(
         ny: BeregningDTO,
         gammel: BeregningDTO,
         g: Grunnbeloep,
+        behandlingId: UUID,
     ) {
         val dato = ny.beregningsperioder.first().datoFOM.atDay(1)
         val nyttBeloep = requireNotNull(ny.beregningsperioder.paaDato(dato)).utbetaltBeloep
@@ -118,19 +119,21 @@ internal class OmregningHendelserBeregningRiver(
         if (endring >= BigDecimal(1.50)) {
             throw ForStorOekning(ny.behandlingId, endring)
         }
-        verifiserFaktoromregning(g, gammeltBeloep, nyttBeloep)
+        verifiserFaktoromregning(g, gammeltBeloep, nyttBeloep, behandlingId)
     }
 
     private fun verifiserFaktoromregning(
         g: Grunnbeloep,
         gammeltBeloep: Int,
         nyttBeloep: Int,
+        behandlingId: UUID,
     ) {
         val forventaNyttBeloep =
             g.omregningsfaktor!!.times(gammeltBeloep.toBigDecimal()).setScale(0, RoundingMode.HALF_UP)
         if (nyttBeloep != forventaNyttBeloep.toInt()) {
             logger.warn(
-                "Noe skurrer for regulering. Nytt beløp er $nyttBeloep, forventa nytt beløp var $forventaNyttBeloep, " +
+                "Noe skurrer for regulering i behandling $behandlingId. " +
+                    "Nytt beløp er $nyttBeloep, forventa nytt beløp var $forventaNyttBeloep, " +
                     "omregningsfaktor er ${g.omregningsfaktor}",
             )
         }

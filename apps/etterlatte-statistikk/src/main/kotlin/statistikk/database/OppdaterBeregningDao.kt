@@ -49,7 +49,7 @@ class OppdaterBeregningDao(
             val statement =
                 connection.prepareStatement(
                     """
-                    UPDATE beregning_oppdatering SET beregning = ?, hentet_status = ? 
+                    UPDATE beregning_oppdatering SET beregning_behandling = ?, hentet_status = ? 
                     WHERE behandling_id = ?
                     """.trimIndent(),
                 )

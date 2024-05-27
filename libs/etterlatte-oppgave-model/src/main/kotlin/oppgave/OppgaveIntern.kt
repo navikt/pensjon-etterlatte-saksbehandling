@@ -22,7 +22,7 @@ data class OppgaveIntern(
     val kilde: OppgaveKilde? = null,
     val type: OppgaveType,
     val saksbehandler: OppgaveSaksbehandler? = null,
-    val forrigeSaksbehandler: OppgaveSaksbehandler? = null,
+    val forrigeSaksbehandlerIdent: String? = null,
     val referanse: String,
     val merknad: String? = null,
     val opprettet: Tidspunkt,

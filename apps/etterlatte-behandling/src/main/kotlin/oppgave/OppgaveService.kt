@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -298,9 +297,9 @@ class OppgaveService(
         val oppgaveId = oppgave.id
         oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, oppdatertMerknad, Status.UNDERKJENT)
 
-        val saksbehandler = saksbehandlerSomFattetVedtak(oppgave)
-        if (saksbehandler != null) {
-            oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler.ident)
+        val saksbehandlerIdent = saksbehandlerSomFattetVedtak(oppgave)
+        if (saksbehandlerIdent != null) {
+            oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandlerIdent)
             oppgaveDao.fjernForrigeSaksbehandler(oppgaveId)
         } else {
             logger.error("Fant ikke siste saksbehandler for oppgave med referanse: $referanse")
@@ -310,12 +309,13 @@ class OppgaveService(
         return oppgaveDao.hentOppgave(oppgaveId)!!
     }
 
-    private fun saksbehandlerSomFattetVedtak(oppgave: OppgaveIntern): OppgaveSaksbehandler? =
-        oppgave.forrigeSaksbehandler ?: oppgaveDao.hentEndringerForOppgave(oppgave.id) // TODO: hentEndringerForOppgave Kan fjernes over tid
+    // TODO: hentEndringerForOppgave Kan fjernes over tid
+    private fun saksbehandlerSomFattetVedtak(oppgave: OppgaveIntern): String? =
+        oppgave.forrigeSaksbehandlerIdent ?: oppgaveDao.hentEndringerForOppgave(oppgave.id)
             .sortedByDescending { it.tidspunkt }
             .firstOrNull(OppgaveEndring::sendtTilAttestering)
             ?.oppgaveFoer
-            ?.saksbehandler
+            ?.saksbehandler?.ident
 
     // TODO: Slå sammen med de 3 andre "ferdigstill"-funksjonene
     fun ferdigStillOppgaveUnderBehandling(
@@ -380,7 +380,7 @@ class OppgaveService(
         logger.info("Oppgave med id=${oppgave.id} ferdigstilt av ${saksbehandler.ident()}")
 
         if (oppgave.typeKanAttesteres()) {
-            tildelOpprinneligSaksbehandler(oppgave.id)
+            tildelOpprinneligSaksbehandler(oppgave)
         }
     }
 
@@ -414,21 +414,15 @@ class OppgaveService(
             .sortedByDescending { it.tidspunkt }
     }
 
-    // TODO: sett forrige saksbehandler på OppgaveIntern når ny lages
-    private fun tildelOpprinneligSaksbehandler(oppgaveId: UUID) {
-        val forrigeSaksbehandler =
-            oppgaveDao.hentEndringerForOppgave(oppgaveId)
-                .sortedByDescending { it.tidspunkt }
-                .firstOrNull(OppgaveEndring::sendtTilAttestering)
-                ?.oppgaveFoer
-                ?.saksbehandler
-                ?.ident
+    private fun tildelOpprinneligSaksbehandler(oppgave: OppgaveIntern) {
+        val forrigeSaksbehandler = saksbehandlerSomFattetVedtak(oppgave)
 
         if (forrigeSaksbehandler.isNullOrBlank()) {
-            logger.warn("Fant ikke saksbehandleren som sendte oppgave $oppgaveId til attestering")
+            logger.warn("Fant ikke saksbehandleren som sendte oppgave $oppgave til attestering")
         } else {
-            logger.info("Tildeler oppgave $oppgaveId til $forrigeSaksbehandler som sendte oppgaven til attestering")
-            oppgaveDao.settNySaksbehandler(oppgaveId, forrigeSaksbehandler)
+            logger.info("Tildeler oppgave ${oppgave.id} til $forrigeSaksbehandler som sendte oppgaven til attestering")
+            oppgaveDao.settNySaksbehandler(oppgave.id, forrigeSaksbehandler)
+            oppgaveDao.fjernForrigeSaksbehandler(oppgave.id)
         }
     }
 
@@ -612,8 +606,8 @@ class OppgaveService(
             )
         oppgaverTilAttestering.forEach { oppgave ->
             oppgaveDao.tilbakestillOppgaveUnderAttestering(oppgave)
-            saksbehandlerSomFattetVedtak(oppgave)?.let { saksbehandler ->
-                oppgaveDao.settNySaksbehandler(oppgave.id, saksbehandler.ident)
+            saksbehandlerSomFattetVedtak(oppgave)?.let { saksbehandlerIdent ->
+                oppgaveDao.settNySaksbehandler(oppgave.id, saksbehandlerIdent)
             }
         }
     }

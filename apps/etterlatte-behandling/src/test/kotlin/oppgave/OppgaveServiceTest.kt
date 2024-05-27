@@ -604,7 +604,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
         val saksbehandlerOppgave = oppgaveService.hentOppgave(nyOppgave.id)
         assertNull(saksbehandlerOppgave.saksbehandler)
-        assertEquals(saksbehandler1.ident, saksbehandlerOppgave.forrigeSaksbehandler?.ident)
+        assertEquals(saksbehandler1.ident, saksbehandlerOppgave.forrigeSaksbehandlerIdent)
         assertEquals(Status.ATTESTERING, saksbehandlerOppgave.status)
         assertEquals(referanse, sakIdOgReferanse.referanse)
     }
@@ -634,7 +634,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
         assertEquals(Status.UNDERKJENT, underkjentOppgave.status)
         assertEquals(saksbehandler1.ident, underkjentOppgave.saksbehandler?.ident)
-        assertNull(underkjentOppgave.forrigeSaksbehandler)
+        assertNull(underkjentOppgave.forrigeSaksbehandlerIdent)
     }
 
     @Test

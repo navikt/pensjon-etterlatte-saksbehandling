@@ -610,10 +610,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 getString("saksbehandler")?.let {
                     OppgaveSaksbehandler(getString("saksbehandler"), getString("navn"))
                 },
-            forrigeSaksbehandler =
-                getString("forrige_saksbehandler")?.let {
-                    OppgaveSaksbehandler(getString("forrige_saksbehandler"), getString("navn"))
-                },
+            forrigeSaksbehandlerIdent = getString("forrige_saksbehandler"),
         )
     }
 }

@@ -237,16 +237,16 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveNy)
 
-        val nySaksbehandler = "nysaksbehandler"
-        oppgaveDao.settNySaksbehandler(oppgaveNy.id, nySaksbehandler)
+        val nySaksbehandlerIdent = "nysaksbehandler"
+        oppgaveDao.settNySaksbehandler(oppgaveNy.id, nySaksbehandlerIdent)
         oppgaveDao.settForrigeSaksbehandlerFraSaksbehandler(oppgaveNy.id)
 
         val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
-        assertEquals(nySaksbehandler, hentetOppgave?.forrigeSaksbehandler?.ident)
+        assertEquals(nySaksbehandlerIdent, hentetOppgave?.forrigeSaksbehandlerIdent)
 
         oppgaveDao.fjernForrigeSaksbehandler(oppgaveNy.id)
         val fjernetForrigeSaksbehandler = oppgaveDao.hentOppgave(oppgaveNy.id)
-        assertNull(fjernetForrigeSaksbehandler!!.forrigeSaksbehandler)
+        assertNull(fjernetForrigeSaksbehandler!!.forrigeSaksbehandlerIdent)
     }
 
     @Test

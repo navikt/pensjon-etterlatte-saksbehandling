@@ -33,6 +33,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.math.abs
 
 internal class OmregningHendelserBeregningRiver(
     rapidsConnection: RapidsConnection,
@@ -102,8 +103,10 @@ internal class OmregningHendelserBeregningRiver(
         behandlingId: UUID,
     ) {
         val dato = ny.beregningsperioder.first().datoFOM.atDay(1)
-        val nyttBeloep = requireNotNull(ny.beregningsperioder.paaDato(dato)).utbetaltBeloep
-        val gammeltBeloep = gammel.beregningsperioder.paaDato(dato)?.utbetaltBeloep
+        val sistePeriodeNy = requireNotNull(ny.beregningsperioder.paaDato(dato))
+        val nyttBeloep = sistePeriodeNy.utbetaltBeloep
+        val sistePeriodeGammel = gammel.beregningsperioder.paaDato(dato)
+        val gammeltBeloep = sistePeriodeGammel?.utbetaltBeloep
         if (gammeltBeloep == null) {
             logger.debug(
                 "Gammelt beløp er null på {} for beregning {}, avbryter toleransegrensesjekk",
@@ -119,6 +122,10 @@ internal class OmregningHendelserBeregningRiver(
         if (endring >= BigDecimal(1.50)) {
             throw ForStorOekning(ny.behandlingId, endring)
         }
+        if (sistePeriodeNy.grunnbelop == sistePeriodeGammel.grunnbelop) {
+            logger.debug("Grunnbeløpet er det samme for gammel og ny beregning for behandling {}.", behandlingId)
+            return
+        }
         verifiserFaktoromregning(g, gammeltBeloep, nyttBeloep, behandlingId)
     }
 
@@ -130,7 +137,7 @@ internal class OmregningHendelserBeregningRiver(
     ) {
         val forventaNyttBeloep =
             g.omregningsfaktor!!.times(gammeltBeloep.toBigDecimal()).setScale(0, RoundingMode.HALF_UP)
-        if (nyttBeloep != forventaNyttBeloep.toInt()) {
+        if (abs(nyttBeloep - forventaNyttBeloep.toInt()) > 1) {
             logger.warn(
                 "Noe skurrer for regulering i behandling $behandlingId. " +
                     "Nytt beløp er $nyttBeloep, forventa nytt beløp var $forventaNyttBeloep, " +

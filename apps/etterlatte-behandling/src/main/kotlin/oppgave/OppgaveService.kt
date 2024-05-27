@@ -303,11 +303,7 @@ class OppgaveService(
             oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler.ident)
             oppgaveDao.fjernForrigeSaksbehandler(oppgaveId)
         } else {
-            /*
-            TODO: Endre til error når migrering er gjennomført
-            siden det i "alle" tilfeller skal finnes en tidligere saksbehandler
-             */
-            logger.warn("Fant ikke siste saksbehandler for oppgave med referanse: $referanse")
+            logger.error("Fant ikke siste saksbehandler for oppgave med referanse: $referanse")
             oppgaveDao.fjernSaksbehandler(oppgaveId)
         }
 

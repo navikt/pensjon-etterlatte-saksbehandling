@@ -7,6 +7,7 @@ data class KjoeringRequest(
 )
 
 enum class KjoeringStatus {
+    STARTA,
     FEILA,
     IRRELEVANT,
     FERDIGSTILT,

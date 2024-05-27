@@ -6,6 +6,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
@@ -85,9 +86,13 @@ internal class ReguleringsforespoerselRiver(
                     }
 
             sakerTilOmregning.saker.forEach {
+                logger.debug("Lagrer kjøring starta for sak ${it.id}")
+                behandlingService.lagreKjoering(it.id, KjoeringStatus.STARTA, kjoering)
+                logger.debug("Ferdig lagra kjøring starta for sak ${it.id}")
                 packet.setEventNameForHendelseType(ReguleringHendelseType.SAK_FUNNET)
                 packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)
                 packet.sakId = it.id
+                logger.debug("Sender til omregning for sak ${it.id}")
                 context.publish(packet.toJson())
             }
             tatt += sakerTilOmregning.saker.size

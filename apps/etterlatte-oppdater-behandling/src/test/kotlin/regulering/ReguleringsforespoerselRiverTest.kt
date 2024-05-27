@@ -47,7 +47,13 @@ internal class ReguleringsforespoerselRiverTest {
     @Test
     fun `kan ta imot reguleringsmelding og kalle paa behandling`() {
         val melding = genererReguleringMelding(foersteMai2023)
-        val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
+        val vedtakServiceMock =
+            mockk<BehandlingService>(relaxed = true).also {
+                every { it.hentAlleSaker(any(), any()) } returns
+                    Saker(
+                        listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, 0, "4808")),
+                    )
+            }
         val featureToggleService =
             mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }
         val inspector =
@@ -148,7 +154,13 @@ internal class ReguleringsforespoerselRiverTest {
     @Test
     fun `kjoerer med feilhaandtering`() {
         val melding = genererReguleringMelding(foersteMai2023)
-        val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
+        val behandlingServiceMock =
+            mockk<BehandlingService>(relaxed = true).also {
+                every { it.hentAlleSaker(any(), any()) } returns
+                    Saker(
+                        listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, 0, "4808")),
+                    )
+            }
         coEvery {
             behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(any())
         } throws RuntimeException("feil")

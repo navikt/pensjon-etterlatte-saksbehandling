@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 import { mapResult } from '~shared/api/apiUtils'
 import { hentFlyktningStatusForSak, hentNavkontorForPerson } from '~shared/api/sak'
-import { Alert, BodyShort, Heading, Loader, ReadMore, Tag } from '@navikt/ds-react'
-import { FlexRow, SpaceChildren } from '~shared/styled'
+import { Alert, BodyShort, Heading, Loader, ReadMore, Tag, VStack } from '@navikt/ds-react'
+import { FlexRow } from '~shared/styled'
 import { tagColors } from '~shared/Tags'
 import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { Buildings3Icon, LocationPinIcon } from '@navikt/aksel-icons'
@@ -49,9 +49,9 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
   }, [])
 
   return (
-    <SpaceChildren>
+    <VStack gap="4">
       <Heading size="medium">Saksnummer {sak.id}</Heading>
-      <SpaceChildren>
+      <VStack gap="4">
         <div>
           <SaktypeTag sakType={sak.sakType} />
         </div>
@@ -63,7 +63,7 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
           </div>
         )}
         <SakStatus sakId={sak.id} />
-      </SpaceChildren>
+      </VStack>
 
       <FlexRow align="center">
         <LocationPinIcon aria-hidden width="1.75rem" height="1.75rem" />
@@ -122,7 +122,7 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
             </>
           ),
       })}
-    </SpaceChildren>
+    </VStack>
   )
 }
 

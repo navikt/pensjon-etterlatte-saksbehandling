@@ -67,12 +67,3 @@ export const FlexRow = styled.div<{
       margin-bottom: 1rem;
     `}
 `
-
-export const SpaceChildren = styled.div<{
-  direction?: 'column' | 'row'
-  gap?: string
-}>`
-  display: flex;
-  flex-direction: ${(props) => props.direction ?? 'column'};
-  gap: ${(props) => props.gap ?? '1rem'};
-`

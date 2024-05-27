@@ -1,6 +1,5 @@
 import React, { ReactNode, useEffect } from 'react'
-import { SpaceChildren } from '~shared/styled'
-import { Loader, Tag } from '@navikt/ds-react'
+import { HStack, Loader, Tag } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlleVedtakISak } from '~shared/api/vedtaksvurdering'
 import { mapResult } from '~shared/api/apiUtils'
@@ -49,7 +48,7 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
   }, [])
 
   return (
-    <SpaceChildren direction="row">
+    <HStack gap="4">
       {mapResult(vedtakISakResult, {
         pending: <Loader />,
         error: <Tag variant="error">Kunne ikke hente status</Tag>,
@@ -61,6 +60,6 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
           )
         },
       })}
-    </SpaceChildren>
+    </HStack>
   )
 }

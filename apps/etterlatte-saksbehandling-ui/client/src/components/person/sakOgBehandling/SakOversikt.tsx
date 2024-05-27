@@ -41,7 +41,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
         pending: <Spinner visible label="Henter sak og behandlinger" />,
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
         success: ({ sak, behandlinger }) => (
-          <HStack gap="4">
+          <HStack gap="4" wrap={false}>
             <SakHeaderWrapper>
               <SakOversiktHeader sak={sak} behandlinger={behandlinger} fnr={fnr} />
             </SakHeaderWrapper>

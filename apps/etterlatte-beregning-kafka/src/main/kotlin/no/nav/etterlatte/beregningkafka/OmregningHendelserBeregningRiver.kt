@@ -33,6 +33,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.math.abs
 
 internal class OmregningHendelserBeregningRiver(
     rapidsConnection: RapidsConnection,
@@ -83,7 +84,7 @@ internal class OmregningHendelserBeregningRiver(
         val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
         val forrigeBeregning = beregningService.hentBeregning(behandlingViOmregnerFra).body<BeregningDTO>()
 
-        verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning, g = g)
+        verifiserToleransegrenser(ny = beregning, gammel = forrigeBeregning, g = g, behandlingId = behandlingId)
 
         return if (sakType == SakType.OMSTILLINGSSTOENAD) {
             val avkorting =
@@ -99,10 +100,13 @@ internal class OmregningHendelserBeregningRiver(
         ny: BeregningDTO,
         gammel: BeregningDTO,
         g: Grunnbeloep,
+        behandlingId: UUID,
     ) {
         val dato = ny.beregningsperioder.first().datoFOM.atDay(1)
-        val nyttBeloep = requireNotNull(ny.beregningsperioder.paaDato(dato)).utbetaltBeloep
-        val gammeltBeloep = gammel.beregningsperioder.paaDato(dato)?.utbetaltBeloep
+        val sistePeriodeNy = requireNotNull(ny.beregningsperioder.paaDato(dato))
+        val nyttBeloep = sistePeriodeNy.utbetaltBeloep
+        val sistePeriodeGammel = gammel.beregningsperioder.paaDato(dato)
+        val gammeltBeloep = sistePeriodeGammel?.utbetaltBeloep
         if (gammeltBeloep == null) {
             logger.debug(
                 "Gammelt beløp er null på {} for beregning {}, avbryter toleransegrensesjekk",
@@ -114,23 +118,33 @@ internal class OmregningHendelserBeregningRiver(
         if (nyttBeloep < gammeltBeloep) {
             throw MindreEnnForrigeBehandling(ny.behandlingId)
         }
+        if (gammeltBeloep == 0) {
+            logger.warn("Gammelt beløp er 0. Nytt beløp er $nyttBeloep for behandling $behandlingId")
+            return
+        }
         val endring = BigDecimal(nyttBeloep).divide(BigDecimal(gammeltBeloep), 2, RoundingMode.HALF_UP)
         if (endring >= BigDecimal(1.50)) {
             throw ForStorOekning(ny.behandlingId, endring)
         }
-        verifiserFaktoromregning(g, gammeltBeloep, nyttBeloep)
+        if (sistePeriodeNy.grunnbelop == sistePeriodeGammel.grunnbelop) {
+            logger.debug("Grunnbeløpet er det samme for gammel og ny beregning for behandling {}.", behandlingId)
+            return
+        }
+        verifiserFaktoromregning(g, gammeltBeloep, nyttBeloep, behandlingId)
     }
 
     private fun verifiserFaktoromregning(
         g: Grunnbeloep,
         gammeltBeloep: Int,
         nyttBeloep: Int,
+        behandlingId: UUID,
     ) {
         val forventaNyttBeloep =
             g.omregningsfaktor!!.times(gammeltBeloep.toBigDecimal()).setScale(0, RoundingMode.HALF_UP)
-        if (nyttBeloep != forventaNyttBeloep.toInt()) {
+        if (abs(nyttBeloep - forventaNyttBeloep.toInt()) > 1) {
             logger.warn(
-                "Noe skurrer for regulering. Nytt beløp er $nyttBeloep, forventa nytt beløp var $forventaNyttBeloep, " +
+                "Noe skurrer for regulering i behandling $behandlingId. " +
+                    "Nytt beløp er $nyttBeloep, forventa nytt beløp var $forventaNyttBeloep, " +
                     "omregningsfaktor er ${g.omregningsfaktor}",
             )
         }

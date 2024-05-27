@@ -12,13 +12,11 @@ import React, { useEffect } from 'react'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
 import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { Button, Select, Table, TextField, VStack } from '@navikt/ds-react'
-
+import { Button, HStack, Select, Table, TextField, VStack } from '@navikt/ds-react'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { Toast } from '~shared/alerts/Toast'
 import { format } from 'date-fns'
 import { useForm } from 'react-hook-form'
-import { FlexRow } from '~shared/styled'
 import { useNavigate } from 'react-router'
 import { FixedAlert } from '~shared/alerts/FixedAlert'
 
@@ -216,7 +214,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
         )}
       </InnholdPadding>
       <Border style={{ marginTop: '3em' }} />
-      <FlexRow $spacing={true} justify="center">
+      <HStack justify="center">
         {redigerbar ? (
           <Button
             style={{ marginTop: '1em' }}
@@ -231,7 +229,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
             Neste
           </Button>
         )}
-      </FlexRow>
+      </HStack>
     </>
   )
 }

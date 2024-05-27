@@ -1,4 +1,4 @@
-import { Box, Detail, Heading, Table } from '@navikt/ds-react'
+import { Box, Detail, Heading, Table, VStack } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import { Tema } from '~shared/types/Journalpost'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -25,62 +25,62 @@ export const Dokumentliste = ({ fnr, sakResult }: { fnr: string; sakResult: Resu
 
   return (
     <Box padding="8">
-      <Heading size="medium" spacing>
-        Dokumenter
-      </Heading>
+      <VStack gap="2">
+        <Heading size="medium">Dokumenter</Heading>
 
-      <DokumentFilter filter={filter} setFilter={setFilter} />
+        <DokumentFilter filter={filter} setFilter={setFilter} />
 
-      <Table zebraStripes>
-        <Table.Header>
-          <Table.Row>
-            <Table.HeaderCell />
-            <Table.HeaderCell>ID</Table.HeaderCell>
-            <Table.HeaderCell>Tittel</Table.HeaderCell>
-            <Table.HeaderCell>Avsender/Mottaker</Table.HeaderCell>
-            <Table.HeaderCell>Dato</Table.HeaderCell>
-            <Table.HeaderCell>Sak</Table.HeaderCell>
-            <Table.HeaderCell>Status</Table.HeaderCell>
-            <Table.HeaderCell>Tema</Table.HeaderCell>
-            <Table.HeaderCell>Type</Table.HeaderCell>
-            <Table.HeaderCell />
-          </Table.Row>
-        </Table.Header>
-
-        <Table.Body>
-          {mapApiResult(
-            dokumenter,
+        <Table zebraStripes>
+          <Table.Header>
             <Table.Row>
-              <Table.DataCell colSpan={100}>
-                <Spinner margin="0" visible label="Henter dokumenter" />
-              </Table.DataCell>
-            </Table.Row>,
-            () => (
+              <Table.HeaderCell />
+              <Table.HeaderCell>ID</Table.HeaderCell>
+              <Table.HeaderCell>Tittel</Table.HeaderCell>
+              <Table.HeaderCell>Avsender/Mottaker</Table.HeaderCell>
+              <Table.HeaderCell>Dato</Table.HeaderCell>
+              <Table.HeaderCell>Sak</Table.HeaderCell>
+              <Table.HeaderCell>Status</Table.HeaderCell>
+              <Table.HeaderCell>Tema</Table.HeaderCell>
+              <Table.HeaderCell>Type</Table.HeaderCell>
+              <Table.HeaderCell />
+            </Table.Row>
+          </Table.Header>
+
+          <Table.Body>
+            {mapApiResult(
+              dokumenter,
               <Table.Row>
                 <Table.DataCell colSpan={100}>
-                  <ApiErrorAlert>Det har oppstått en feil ved henting av dokumenter</ApiErrorAlert>
+                  <Spinner margin="0" visible label="Henter dokumenter" />
                 </Table.DataCell>
-              </Table.Row>
-            ),
-            (dokumentListe) =>
-              !dokumentListe.length ? (
-                <Table.Row shadeOnHover={false}>
+              </Table.Row>,
+              () => (
+                <Table.Row>
                   <Table.DataCell colSpan={100}>
-                    <Detail>
-                      <i>Ingen dokumenter funnet</i>
-                    </Detail>
+                    <ApiErrorAlert>Det har oppstått en feil ved henting av dokumenter</ApiErrorAlert>
                   </Table.DataCell>
                 </Table.Row>
-              ) : (
-                <>
-                  {dokumentListe.map((dokument) => (
-                    <DokumentRad key={dokument.journalpostId} dokument={dokument} sakStatus={sakResult} />
-                  ))}
-                </>
-              )
-          )}
-        </Table.Body>
-      </Table>
+              ),
+              (dokumentListe) =>
+                !dokumentListe.length ? (
+                  <Table.Row shadeOnHover={false}>
+                    <Table.DataCell colSpan={100}>
+                      <Detail>
+                        <i>Ingen dokumenter funnet</i>
+                      </Detail>
+                    </Table.DataCell>
+                  </Table.Row>
+                ) : (
+                  <>
+                    {dokumentListe.map((dokument) => (
+                      <DokumentRad key={dokument.journalpostId} dokument={dokument} sakStatus={sakResult} />
+                    ))}
+                  </>
+                )
+            )}
+          </Table.Body>
+        </Table>
+      </VStack>
     </Box>
   )
 }

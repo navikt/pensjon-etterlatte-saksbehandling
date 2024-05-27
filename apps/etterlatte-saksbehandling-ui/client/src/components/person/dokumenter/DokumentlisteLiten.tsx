@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, Detail, Heading, Link } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Detail, Heading, HStack, Link } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { Journalstatus } from '~shared/types/Journalpost'
@@ -8,7 +8,6 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentDokumenter } from '~shared/api/dokument'
 import { useEffect } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { FlexRow } from '~shared/styled'
 import { DokumentInfoDetail } from '~components/person/dokumenter/DokumentInfoDetail'
 
 export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
@@ -72,7 +71,7 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
 
             <hr />
 
-            <FlexRow justify="right">
+            <HStack justify="end">
               <Button
                 variant="tertiary"
                 size="small"
@@ -83,7 +82,7 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
               >
                 Gå til dokumentoversikten
               </Button>
-            </FlexRow>
+            </HStack>
           </>
         )
       )}

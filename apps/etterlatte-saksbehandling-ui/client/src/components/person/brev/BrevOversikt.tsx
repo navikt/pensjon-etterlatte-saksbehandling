@@ -2,11 +2,10 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevForSak, opprettBrevForSak, slettBrev } from '~shared/api/brev'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BodyShort, Box, Button, Modal, Table, Tag } from '@navikt/ds-react'
+import { BodyShort, Box, Button, HStack, Modal, Table, Tag } from '@navikt/ds-react'
 import { BrevStatus, formaterBrevtype, IBrev, Mottaker } from '~shared/types/Brev'
 import { DocPencilIcon, ExternalLinkIcon, TrashIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
-import { FlexRow } from '~shared/styled'
 import BrevModal from '~components/person/brev/BrevModal'
 import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
 import { SakMedBehandlinger } from '~components/person/typer'
@@ -143,10 +142,10 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
                   <Table.DataCell>{b.mottaker.navn}</Table.DataCell>
                   <Table.DataCell>{mapAdresse(b.mottaker)}</Table.DataCell>
                   <Table.DataCell>
-                    <FlexRow>
+                    <HStack gap="4">
                       {handlingKnapp(b)}
                       {kanSletteBrev(b) && <SlettBrev brevId={b.id} sakId={b.sakId} />}
-                    </FlexRow>
+                    </HStack>
                   </Table.DataCell>
                 </Table.Row>
               ))}
@@ -157,7 +156,7 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
 
       <br />
 
-      <FlexRow>
+      <div>
         {mapSuccess(sakResult, (sak) => (
           <>
             {kanOppretteBrevMedGittType ? (
@@ -176,7 +175,7 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
             <LastOppBrev sak={sak.sak} />
           </>
         ))}
-      </FlexRow>
+      </div>
     </Box>
   )
 }
@@ -199,14 +198,14 @@ const SlettBrev = ({ brevId, sakId }: { brevId: number; sakId: number }) => {
         <Modal.Body>
           <BodyShort spacing>Er du sikker på at du vil slette brevet? Handlingen kan ikke angres.</BodyShort>
 
-          <FlexRow justify="center">
+          <HStack gap="4" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isPending(slettBrevStatus)}>
               Nei, avbryt
             </Button>
             <Button variant="danger" onClick={slett} loading={isPending(slettBrevStatus)}>
               Ja, slett
             </Button>
-          </FlexRow>
+          </HStack>
         </Modal.Body>
       </Modal>
     </>

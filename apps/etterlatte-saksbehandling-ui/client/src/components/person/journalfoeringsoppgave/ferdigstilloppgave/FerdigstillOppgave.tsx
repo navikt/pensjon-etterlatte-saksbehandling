@@ -1,6 +1,5 @@
-import { Alert, BodyLong, Button, Heading, Link } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Heading, HStack, Link, VStack } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
-import { FlexRow } from '~shared/styled'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
@@ -60,18 +59,18 @@ export default function FerdigstillOppgave() {
         </Alert>
       )}
 
-      <div>
-        <FlexRow justify="center" $spacing>
+      <VStack gap="2">
+        <HStack gap="4" justify="center">
           <Button variant="secondary" onClick={tilbake}>
             Tilbake
           </Button>
 
           <FerdigstillOppgaveModal oppgave={oppgave} />
-        </FlexRow>
-        <FlexRow justify="center">
+        </HStack>
+        <HStack gap="4" justify="center">
           <AvbrytBehandleJournalfoeringOppgave />
-        </FlexRow>
-      </div>
+        </HStack>
+      </VStack>
     </FormWrapper>
   )
 }

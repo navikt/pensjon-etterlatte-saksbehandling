@@ -1,7 +1,6 @@
-import { Alert, Heading } from '@navikt/ds-react'
+import { Alert, Heading, HStack, VStack } from '@navikt/ds-react'
 import { Border, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { FlexRow } from '~shared/styled'
 import React, { useState } from 'react'
 import { Journalpost } from '~shared/types/Journalpost'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
@@ -81,16 +80,16 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
           kobleTilSak={(sak) => setJournalpost({ ...journalpost, sak })}
         />
 
-        <div>
-          <FlexRow justify="center" $spacing>
+        <VStack gap="2">
+          <HStack gap="2" justify="center">
             <LagreJournalpostModal journalpost={journalpost} oppgaveId={oppgaveId} />
 
             <JournalfoerJournalpostModal journalpost={journalpost} sak={sak} />
-          </FlexRow>
-          <FlexRow justify="center">
+          </HStack>
+          <HStack justify="center">
             <AvbrytBehandleJournalfoeringOppgave />
-          </FlexRow>
-        </div>
+          </HStack>
+        </VStack>
       </FormWrapper>
     </>
   )

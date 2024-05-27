@@ -1,10 +1,9 @@
 import React from 'react'
 import { Klage, teksterKlageutfall } from '~shared/types/Klage'
-import { BodyShort, Heading } from '@navikt/ds-react'
+import { BodyShort, Heading, HStack, VStack } from '@navikt/ds-react'
 import { formaterDatoMedTidspunkt } from '~utils/formattering'
 import { BredVurderingWrapper } from '~components/klage/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { FlexRow } from '~shared/styled'
 
 export const InitiellVurderingVisning = (props: { klage: Klage }) => {
   const klage = props.klage
@@ -30,15 +29,15 @@ export const InitiellVurderingVisningContent = (props: { klage: Klage }) => {
 
   return (
     <BredVurderingWrapper>
-      <FlexRow $spacing>
-        <Info label="Utfall" tekst={utfall} />
-        <Info label="Sist endret" tekst={sistEndret} />
-        <Info label="Saksbehandler" tekst={saksbehandler} />
-      </FlexRow>
-      <Heading size="xsmall" spacing>
-        Begrunnelse
-      </Heading>
-      <BodyShort spacing>{klage.initieltUtfall?.utfallMedBegrunnelse.begrunnelse || 'Ikke registrert'}</BodyShort>
+      <VStack gap="2">
+        <HStack gap="4">
+          <Info label="Utfall" tekst={utfall} />
+          <Info label="Sist endret" tekst={sistEndret} />
+          <Info label="Saksbehandler" tekst={saksbehandler} />
+        </HStack>
+        <Heading size="xsmall">Begrunnelse</Heading>
+        <BodyShort spacing>{klage.initieltUtfall?.utfallMedBegrunnelse.begrunnelse || 'Ikke registrert'}</BodyShort>
+      </VStack>
     </BredVurderingWrapper>
   )
 }

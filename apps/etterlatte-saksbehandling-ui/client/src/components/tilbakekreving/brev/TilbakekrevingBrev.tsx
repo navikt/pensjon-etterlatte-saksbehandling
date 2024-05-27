@@ -1,5 +1,4 @@
-import { Alert, Box, Heading } from '@navikt/ds-react'
-import { FlexRow } from '~shared/styled'
+import { Alert, Box, Heading, HStack } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
 import { erUnderBehandling, TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
@@ -84,7 +83,7 @@ export function TilbakekrevingBrev({
         {vedtaksbrev && <RedigerbartBrev brev={vedtaksbrev} kanRedigeres={redigerbar} />}
       </BrevContent>
       <Border />
-      <FlexRow justify="center">
+      <HStack justify="center">
         {kanAttesteres && (
           <SendTilAttesteringModal
             behandlingId={behandling.id}
@@ -92,7 +91,7 @@ export function TilbakekrevingBrev({
             validerKanSendeTilAttestering={() => true}
           />
         )}
-      </FlexRow>
+      </HStack>
     </>
   )
 }

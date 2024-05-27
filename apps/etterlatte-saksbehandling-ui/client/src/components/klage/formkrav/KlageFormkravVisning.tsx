@@ -1,7 +1,6 @@
 import { useKlage } from '~components/klage/useKlage'
-import { FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { BodyShort, Box, Button, Heading } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, HStack } from '@navikt/ds-react'
 import { formaterKanskjeStringDato, formaterVedtakType } from '~utils/formattering'
 import React from 'react'
 import { JaNei } from '~shared/types/ISvar'
@@ -67,9 +66,9 @@ export function KlageFormkravVisning() {
         </Heading>
         <BodyShort spacing>{saksbehandler?.ident}</BodyShort>
       </InnholdPadding>
-      <FlexRow justify="center">
+      <HStack justify="center">
         <Button onClick={() => navigate(nesteSteg(klage, 'formkrav'))}>Neste side</Button>
-      </FlexRow>
+      </HStack>
     </>
   )
 }

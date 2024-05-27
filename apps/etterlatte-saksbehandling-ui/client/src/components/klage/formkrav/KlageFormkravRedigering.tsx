@@ -1,5 +1,16 @@
-import { Alert, BodyLong, Box, Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
-import { FlexRow } from '~shared/styled'
+import {
+  Alert,
+  BodyLong,
+  Box,
+  Button,
+  Heading,
+  HStack,
+  Radio,
+  RadioGroup,
+  Select,
+  Textarea,
+  VStack,
+} from '@navikt/ds-react'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
@@ -207,14 +218,14 @@ export function KlageFormkravRedigering() {
             control={control}
           />
 
-          <FlexRow>
+          <div>
             <JaNeiRadiogruppe
               name="erKlagenFramsattInnenFrist"
               legend="Er klagen framsatt innenfor klagefristen?"
               description="Vurder også ytre klagefrist jf forv.loven § 31"
               control={control}
             />
-          </FlexRow>
+          </div>
 
           <JaNeiRadiogruppe name="erFormkraveneOppfylt" control={control} legend="Er formkravene til klagen oppfylt?" />
 
@@ -223,28 +234,28 @@ export function KlageFormkravRedigering() {
           </VurderingWrapper>
 
           {redigerModus ? (
-            <FlexRow justify="center">
+            <HStack gap="4" justify="center">
               <Button type="submit" loading={isPending(lagreFormkravStatus)}>
                 Lagre vurdering av formkrav
               </Button>
-            </FlexRow>
+            </HStack>
           ) : (
-            <>
-              <FlexRow $spacing>
+            <VStack gap="2">
+              <div>
                 <Button onClick={() => setRedigerModus(true)} variant="secondary">
                   Endre vurdering
                 </Button>
-              </FlexRow>
+              </div>
               {kanVurdereUtfall(klage) ? (
-                <FlexRow justify="center">
+                <HStack justify="center">
                   <Button as="a" href={nesteSteg(klage, 'formkrav')}>
                     Neste side
                   </Button>
-                </FlexRow>
+                </HStack>
               ) : (
                 <BeOmInfoFraKlager klage={klage} />
               )}
-            </>
+            </VStack>
           )}
           {isFailureHandler({
             apiResult: lagreFormkravStatus,

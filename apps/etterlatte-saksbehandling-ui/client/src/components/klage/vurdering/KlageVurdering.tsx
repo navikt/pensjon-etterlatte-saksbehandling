@@ -6,8 +6,7 @@ import React from 'react'
 import { JaNei } from '~shared/types/ISvar'
 import { KlageAvvisning } from '~components/klage/vurdering/KlageAvvisning'
 import { HeadingWrapper } from '~components/person/sakOgBehandling/SakOversikt'
-import { Box, Button, Heading } from '@navikt/ds-react'
-import { FlexRow } from '~shared/styled'
+import { Box, Button, Heading, HStack } from '@navikt/ds-react'
 import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { EndeligVurdering } from '~components/klage/vurdering/EndeligVurdering'
 import { EndeligVurderingVisning } from '~components/klage/vurdering/EndeligVurderingVisning'
@@ -64,13 +63,13 @@ function skalAvvises(klage: Klage) {
 
 function Navigeringsknapper({ klage, navigate }: { klage: Klage; navigate: NavigateFunction }) {
   return (
-    <FlexRow justify="center">
+    <HStack gap="4" justify="center">
       <Button className="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'vurdering'))}>
         Gå tilbake
       </Button>
       <Button className="button" variant="primary" onClick={() => navigate(nesteSteg(klage, 'vurdering'))}>
         {klageKanSeBrev(klage) ? 'Gå til brev' : 'Gå til oppsummering'}
       </Button>
-    </FlexRow>
+    </HStack>
   )
 }

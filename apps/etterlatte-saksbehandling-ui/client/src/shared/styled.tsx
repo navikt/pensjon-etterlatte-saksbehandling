@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 
 export const GridContainer = styled.div`
   display: flex;
@@ -49,21 +49,4 @@ export const SidebarTools = styled.div`
   bottom: 0;
   width: 100%;
   z-index: 999;
-`
-
-export const FlexRow = styled.div<{
-  justify?: 'left' | 'center' | 'right' | 'space-between'
-  align?: 'start' | 'center' | 'end'
-  $spacing?: boolean
-  gap?: string
-}>`
-  display: flex;
-  justify-content: ${(props) => props.justify ?? 'left'};
-  align-items: ${(props) => props.align ?? 'normal'};
-  gap: ${(props) => props.gap ?? '1rem'};
-  ${(props) =>
-    props.$spacing &&
-    css`
-      margin-bottom: 1rem;
-    `}
 `

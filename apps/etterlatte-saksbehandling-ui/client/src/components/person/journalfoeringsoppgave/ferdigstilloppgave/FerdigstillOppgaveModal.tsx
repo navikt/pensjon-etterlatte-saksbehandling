@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Heading, HStack, Modal } from '@navikt/ds-react'
 import { ferdigstillOppgave } from '~shared/api/oppgaver'
-import { FlexRow } from '~shared/styled'
-
 import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { OppgaveDTO } from '~shared/types/oppgave'
@@ -38,17 +36,17 @@ export default function FerdigstillOppgaveModal({ oppgave }: { oppgave: OppgaveD
 
               <br />
 
-              <FlexRow justify="center">
+              <HStack gap="4" justify="center">
                 <Button variant="secondary" onClick={() => navigate('/')}>
                   Gå til oppgavelisten
                 </Button>
                 <Button variant="primary" onClick={() => navigate(`/person/${oppgave.fnr}`)}>
                   Gå til sakoversikten
                 </Button>
-              </FlexRow>
+              </HStack>
             </>
           ) : (
-            <FlexRow justify="center">
+            <HStack gap="4" justify="center">
               <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(ferdigstillOppgaveStatus)}>
                 Nei, avbryt
               </Button>
@@ -59,7 +57,7 @@ export default function FerdigstillOppgaveModal({ oppgave }: { oppgave: OppgaveD
               >
                 Ja, ferdigstill
               </Button>
-            </FlexRow>
+            </HStack>
           )}
 
           {mapFailure(ferdigstillOppgaveStatus, (error) => (

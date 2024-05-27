@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
-import { Alert, BodyShort, Box, Heading } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, HStack } from '@navikt/ds-react'
 import { BrevTittelModal } from '~components/person/brev/tittel/BrevTittelModal'
-import { FlexRow } from '~shared/styled'
 
 interface Props {
   brevId: number
@@ -15,14 +14,14 @@ export default function BrevTittel({ brevId, sakId, tittel, kanRedigeres }: Prop
 
   return (
     <Box padding="4" borderWidth="1" borderRadius="small">
-      <FlexRow justify="space-between">
+      <HStack gap="4" justify="space-between">
         <Heading spacing level="2" size="medium">
           Tittel
         </Heading>
         {kanRedigeres && (
           <BrevTittelModal nyTittel={nyTittel} setNyTittel={setNyTittel} brevId={brevId} sakId={sakId} />
         )}
-      </FlexRow>
+      </HStack>
 
       {nyTittel ? (
         <>

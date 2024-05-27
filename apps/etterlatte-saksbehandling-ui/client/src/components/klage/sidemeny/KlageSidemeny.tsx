@@ -1,5 +1,5 @@
 import { useKlage } from '~components/klage/useKlage'
-import { Heading, Tag } from '@navikt/ds-react'
+import { Heading, HStack, Tag, VStack } from '@navikt/ds-react'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { KlageStatus, teksterKabalstatus, teksterKlagestatus } from '~shared/types/Klage'
 import { tagColors, TagList } from '~shared/Tags'
@@ -18,7 +18,6 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { AttesteringEllerUnderkjenning } from '~components/behandling/attestering/attestering/attesteringEllerUnderkjenning'
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { FlexRow } from '~shared/styled'
 import { useOppgaveUnderBehandling } from '~shared/hooks/useOppgaveUnderBehandling'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 
@@ -63,28 +62,30 @@ export function KlageSidemeny() {
           </>
         )}
 
-        <FlexRow $spacing>
-          <TagList>
-            <li>
-              <Tag variant={tagColors[klage.sak.sakType]}>{formaterSakstype(klage.sak.sakType)}</Tag>
-            </li>
-          </TagList>
-        </FlexRow>
+        <VStack gap="2">
+          <HStack gap="4">
+            <TagList>
+              <li>
+                <Tag variant={tagColors[klage.sak.sakType]}>{formaterSakstype(klage.sak.sakType)}</Tag>
+              </li>
+            </TagList>
+          </HStack>
 
-        <FlexRow>
-          <div>
-            <Info>Klager</Info>
-            <Tekst>{klage.innkommendeDokument?.innsender ?? 'Ukjent'}</Tekst>
-          </div>
-          <div>
-            <Info>Klagedato</Info>
-            <Tekst>
-              {klage.innkommendeDokument?.mottattDato
-                ? formaterStringDato(klage.innkommendeDokument.mottattDato)
-                : 'Ukjent'}
-            </Tekst>
-          </div>
-        </FlexRow>
+          <HStack gap="4">
+            <div>
+              <Info>Klager</Info>
+              <Tekst>{klage.innkommendeDokument?.innsender ?? 'Ukjent'}</Tekst>
+            </div>
+            <div>
+              <Info>Klagedato</Info>
+              <Tekst>
+                {klage.innkommendeDokument?.mottattDato
+                  ? formaterStringDato(klage.innkommendeDokument.mottattDato)
+                  : 'Ukjent'}
+              </Tekst>
+            </div>
+          </HStack>
+        </VStack>
       </SidebarPanel>
       {kanAttestere && (
         <>

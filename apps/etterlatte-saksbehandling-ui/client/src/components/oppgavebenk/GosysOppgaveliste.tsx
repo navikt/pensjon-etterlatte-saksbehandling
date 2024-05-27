@@ -4,9 +4,8 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { EnhetFilterKeys, GosysFilter, GosysOppgaveValg } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
-import { ToggleGroup } from '@navikt/ds-react'
+import { ToggleGroup, VStack } from '@navikt/ds-react'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
-import styled from 'styled-components'
 import { useOppgaveBenkState, useOppgavebenkStateDispatcher } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
@@ -85,8 +84,8 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   }, [filter])
 
   return (
-    <>
-      <GosysOppgaveValgToggleGroup
+    <VStack gap="4">
+      <ToggleGroup
         defaultValue={GosysOppgaveValg.ALLE_OPPGAVER}
         onChange={(e) => setFilter(lagGosysFilterBasertPaaOppgaveValg(e as GosysOppgaveValg))}
         size="small"
@@ -100,7 +99,7 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
         <ToggleGroup.Item value={GosysOppgaveValg.IKKE_TILDELTE}>
           {formaterEnumTilLesbarString(GosysOppgaveValg.IKKE_TILDELTE)}
         </ToggleGroup.Item>
-      </GosysOppgaveValgToggleGroup>
+      </ToggleGroup>
 
       <GosysFilterRad
         hentAlleOppgaver={hentOppgaver}
@@ -120,10 +119,6 @@ export const GosysOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
           />
         ),
       })}
-    </>
+    </VStack>
   )
 }
-
-const GosysOppgaveValgToggleGroup = styled(ToggleGroup)`
-  margin-bottom: 2rem;
-`

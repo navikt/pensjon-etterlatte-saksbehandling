@@ -1,10 +1,9 @@
-import { Alert, Button, Heading, Link, Modal } from '@navikt/ds-react'
+import { Alert, Button, Heading, HStack, Link, Modal } from '@navikt/ds-react'
 import { useState } from 'react'
 import { DownloadIcon, UploadIcon } from '@navikt/aksel-icons'
 import { opprettBrevFraPDF } from '~shared/api/brev'
 import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { FlexRow } from '~shared/styled'
 import { DokumentVisningModal, PdfVisning } from '~shared/brev/pdf-visning'
 import { isPending } from '~shared/api/apiUtils'
 import { ISak } from '~shared/types/sak'
@@ -88,7 +87,7 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
 
           <PdfVisning fileUrl={filURL} />
 
-          <FlexRow justify="right">
+          <HStack gap="4" justify="end">
             <Button variant="secondary" onClick={avbryt} disabled={isPending(lastOppStatus)}>
               Avbryt
             </Button>
@@ -96,7 +95,7 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
             <Button onClick={lagre} disabled={!valgtFil} loading={isPending(lastOppStatus)}>
               Lagre
             </Button>
-          </FlexRow>
+          </HStack>
         </Modal.Body>
       </DokumentVisningModal>
     </>

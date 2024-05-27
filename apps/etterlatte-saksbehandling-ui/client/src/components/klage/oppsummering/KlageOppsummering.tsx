@@ -1,6 +1,5 @@
-import { BodyShort, Box, Button, Heading } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, HStack } from '@navikt/ds-react'
 import React, { useCallback, useEffect } from 'react'
-import { FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Innhold } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
@@ -84,7 +83,7 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
           'lastet siden på nytt, og meld sak hvis problemet vedvarer.',
       })}
 
-      <FlexRow justify="center" $spacing>
+      <HStack gap="4" justify="center">
         <Button variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'oppsummering'))}>
           Gå tilbake
         </Button>
@@ -98,7 +97,7 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
               Ferdigstill klagen
             </Button>
           ))}
-      </FlexRow>
+      </HStack>
     </>
   )
 }

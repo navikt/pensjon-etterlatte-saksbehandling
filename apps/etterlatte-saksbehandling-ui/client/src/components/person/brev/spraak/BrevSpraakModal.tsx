@@ -1,7 +1,6 @@
 import React, { Dispatch, ReactNode, SetStateAction, useState } from 'react'
-import { Alert, BodyShort, Button, Heading, Modal, Select } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, HStack, Modal, Select } from '@navikt/ds-react'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { FlexRow } from '~shared/styled'
 import { isPending } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterSpraak, tilbakestillManuellPayload } from '~shared/api/brev'
@@ -115,7 +114,7 @@ export const BrevSpraakModal = ({
           </Modal.Body>
 
           <Modal.Footer>
-            <FlexRow justify="right">
+            <HStack gap="4" justify="end">
               <Button
                 variant="secondary"
                 type="button"
@@ -132,7 +131,7 @@ export const BrevSpraakModal = ({
               >
                 Lagre
               </Button>
-            </FlexRow>
+            </HStack>
           </Modal.Footer>
         </form>
       </Modal>

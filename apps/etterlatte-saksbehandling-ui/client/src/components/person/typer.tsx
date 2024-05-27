@@ -37,7 +37,6 @@ export interface IBehandlingsammendrag {
 }
 
 export enum AarsaksTyper {
-  MANUELT_OPPHOER = 'MANUELT_OPPHOER',
   SOEKNAD = 'SOEKNAD',
   REVURDERING = 'REVURDERING',
 }

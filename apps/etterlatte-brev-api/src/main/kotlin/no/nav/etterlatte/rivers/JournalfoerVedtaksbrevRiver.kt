@@ -37,9 +37,6 @@ internal class JournalfoerVedtaksbrevRiver(
             validate { it.requireKey("vedtak.sak.sakType") }
             validate { it.requireKey("vedtak.vedtakFattet.ansvarligSaksbehandler") }
             validate { it.requireKey("vedtak.vedtakFattet.ansvarligEnhet") }
-            validate {
-                it.rejectValues("vedtak.innhold.behandling.type", listOf("MANUELT_OPPHOER")) // TODO: Fjerne
-            }
             validate { it.rejectValue(SKAL_SENDE_BREV, false) }
         }
     }

@@ -329,7 +329,6 @@ internal class GrunnlagsendringshendelseDaoTest(val dataSource: DataSource) {
                 soeknadMottattDato = null,
                 virkningstidspunkt = null,
                 revurderingsAarsak = Revurderingaarsak.SOESKENJUSTERING,
-                opphoerAarsaker = listOf(),
                 fritekstAarsak = null,
                 prosesstype = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,

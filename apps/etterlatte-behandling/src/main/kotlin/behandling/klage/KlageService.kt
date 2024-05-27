@@ -338,7 +338,13 @@ class KlageServiceImpl(
         opprettKlageHendelse(klageMedResultat, KlageHendelseType.FERDIGSTILT, saksbehandler)
         val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(klage.sak.id)?.type
         klageHendelser.sendKlageHendelseRapids(
-            StatistikkKlage(klageMedResultat.id, klageMedResultat, Tidspunkt.now(), utlandstilknytningType, saksbehandler.ident),
+            StatistikkKlage(
+                klageMedResultat.id,
+                klageMedResultat,
+                Tidspunkt.now(),
+                utlandstilknytningType,
+                saksbehandler.ident,
+            ),
             KlageHendelseType.FERDIGSTILT,
         )
         klageBrevService.slettUferdigeBrev(klageMedResultat.id, saksbehandler)
@@ -376,7 +382,13 @@ class KlageServiceImpl(
         val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(avbruttKlage.sak.id)?.type
 
         klageHendelser.sendKlageHendelseRapids(
-            StatistikkKlage(avbruttKlage.id, avbruttKlage, Tidspunkt.now(), utlandstilknytningType, saksbehandler.ident),
+            StatistikkKlage(
+                avbruttKlage.id,
+                avbruttKlage,
+                Tidspunkt.now(),
+                utlandstilknytningType,
+                saksbehandler.ident,
+            ),
             KlageHendelseType.AVBRUTT,
         )
     }
@@ -433,6 +445,18 @@ class KlageServiceImpl(
 
         opprettVedtakHendelse(oppdatertKlage, vedtak, HendelseType.ATTESTERT, saksbehandler, kommentar)
 
+        val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(klage.sak.id)?.type
+        klageHendelser.sendKlageHendelseRapids(
+            statistikkKlage =
+                StatistikkKlage(
+                    id = UUID.randomUUID(),
+                    klage = oppdatertKlage,
+                    tidspunkt = Tidspunkt.now(),
+                    utlandstilknytningType = utlandstilknytningType,
+                    saksbehandler = saksbehandler.ident,
+                ),
+            klageHendelseType = KlageHendelseType.FATTET,
+        )
         oppgaveService.ferdigStillOppgaveUnderBehandling(
             referanse = klageId.toString(),
             type = OppgaveType.KLAGE,

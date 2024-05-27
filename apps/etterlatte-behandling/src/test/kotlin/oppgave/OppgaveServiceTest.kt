@@ -610,6 +610,34 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
     }
 
     @Test
+    fun `Kan underkjenne behandling - oppgave`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val nyOppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
+
+        val saksbehandler1 = Saksbehandler("", "saksbehandler", null)
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler1.ident)
+        oppgaveService.tilAttestering(
+            referanse,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null,
+        )
+
+        val underkjentOppgave = oppgaveService.tilUnderkjent(referanse, OppgaveType.FOERSTEGANGSBEHANDLING, null)
+
+        assertEquals(Status.UNDERKJENT, underkjentOppgave.status)
+        assertEquals(saksbehandler1.ident, underkjentOppgave.saksbehandler?.ident)
+        assertNull(underkjentOppgave.forrigeSaksbehandler)
+    }
+
+    @Test
     fun `Kan ikke lukke oppgave hvis man ikke eier oppgaven under behandling`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"

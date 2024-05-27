@@ -311,7 +311,7 @@ class OppgaveService(
             oppgaveDao.fjernSaksbehandler(oppgaveId)
         }
 
-        return oppgave
+        return oppgaveDao.hentOppgave(oppgaveId)!!
     }
 
     private fun saksbehandlerSomFattetVedtak(oppgave: OppgaveIntern): OppgaveSaksbehandler? =

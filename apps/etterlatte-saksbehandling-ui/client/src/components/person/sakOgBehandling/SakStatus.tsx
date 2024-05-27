@@ -8,40 +8,62 @@ import { VedtakType } from '~components/vedtak/typer'
 import { formaterStringDato } from '~utils/formattering'
 import { VedtaketKlagenGjelder } from '~shared/types/Klage'
 import { RecordFillIcon, XMarkIcon } from '@navikt/aksel-icons'
-import { hentStatusPaaSak } from '~components/person/sakOgBehandling/sakStatusUtils'
+import { hentFoersteVedtak, hentSisteVedtak } from '~components/person/sakOgBehandling/sakStatusUtils'
 
 export const SakStatus = ({ sakId }: { sakId: number }) => {
   const [vedtakISakResult, vedtakISakFetch] = useApiCall(hentAlleVedtakISak)
 
   const visStatusPaaSisteVedtak = (vedtakISak: VedtaketKlagenGjelder[]): ReactNode => {
-    const sisteVedtak = hentStatusPaaSak(vedtakISak)
+    const sisteVedtak = hentSisteVedtak(vedtakISak)
 
-    switch (sisteVedtak?.vedtakType) {
-      case VedtakType.INNVILGELSE:
-        return (
-          <Tag key={VedtakType.INNVILGELSE} variant="success" icon={<RecordFillIcon aria-hidden color="#06893A" />}>
-            Løpende fra {!!sisteVedtak.virkningstidspunkt && formaterStringDato(sisteVedtak.virkningstidspunkt)}
-          </Tag>
-        )
-      case VedtakType.AVSLAG:
-        return (
-          <Tag key={VedtakType.AVSLAG} variant="error" icon={<XMarkIcon aria-hidden color="#C30000" />}>
-            Avslått den {!!sisteVedtak.virkningstidspunkt && formaterStringDato(sisteVedtak.virkningstidspunkt)}
-          </Tag>
-        )
-      case VedtakType.OPPHOER:
-        return (
-          <Tag key={VedtakType.OPPHOER} variant="alt2">
-            Ytelse opphørte den {!!sisteVedtak.virkningstidspunkt && formaterStringDato(sisteVedtak.virkningstidspunkt)}
-          </Tag>
-        )
-      default:
-        return (
-          <Tag key="annen-type" variant="warning">
-            Ubehandlet
-          </Tag>
-        )
+    if (sisteVedtak == undefined) {
+      return (
+        <Tag key="annen-type" variant="warning">
+          Ubehandlet
+        </Tag>
+      )
     }
+
+    if (sisteVedtak?.vedtakType === VedtakType.AVSLAG) {
+      return (
+        <Tag key={VedtakType.AVSLAG} variant="error" icon={<XMarkIcon aria-hidden color="#C30000" />}>
+          Avslått den {sisteVedtak.virkningstidspunkt && formaterStringDato(sisteVedtak.virkningstidspunkt)}
+        </Tag>
+      )
+    }
+
+    const iDag = new Date()
+    const opphoerFraOgMed = sisteVedtak?.opphoerFraOgMed ? new Date(sisteVedtak.opphoerFraOgMed) : undefined
+
+    console.log(sisteVedtak)
+
+    if (sisteVedtak?.vedtakType === VedtakType.OPPHOER || (opphoerFraOgMed && opphoerFraOgMed < iDag)) {
+      // TODO opphoerFraOgMed er nytt felt slik at opphørsvedtak som fantes før feltet vil ikke dette feltet populert
+      // Det skal populeres og når det er gjort kan vi anta her at et opphør alltid vil ha opphoerFraOgMed
+      const opphoerer = sisteVedtak.opphoerFraOgMed ? sisteVedtak.opphoerFraOgMed : sisteVedtak.virkningstidspunkt
+      return (
+        <Tag key={VedtakType.OPPHOER} variant="alt2">
+          Ytelse opphørte den {opphoerer && formaterStringDato(opphoerer)}
+        </Tag>
+      )
+    }
+
+    const foersteVedtak = hentFoersteVedtak(vedtakISak)
+
+    if (opphoerFraOgMed && opphoerFraOgMed >= iDag) {
+      return (
+        <Tag key={VedtakType.INNVILGELSE} variant="success" icon={<RecordFillIcon aria-hidden color="#06893A" />}>
+          Løpende fra {foersteVedtak?.virkningstidspunkt && formaterStringDato(foersteVedtak.virkningstidspunkt)} og
+          opphører {sisteVedtak.opphoerFraOgMed && formaterStringDato(sisteVedtak.opphoerFraOgMed)}
+        </Tag>
+      )
+    }
+
+    return (
+      <Tag key={VedtakType.INNVILGELSE} variant="success" icon={<RecordFillIcon aria-hidden color="#06893A" />}>
+        Løpende fra {foersteVedtak?.virkningstidspunkt && formaterStringDato(foersteVedtak.virkningstidspunkt)}
+      </Tag>
+    )
   }
 
   useEffect(() => {

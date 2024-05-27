@@ -107,6 +107,7 @@ export interface VedtaketKlagenGjelder {
   datoAttestert?: string
   vedtakType?: VedtakType
   virkningstidspunkt?: string
+  opphoerFraOgMed?: string
 }
 
 export interface Formkrav {

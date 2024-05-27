@@ -68,7 +68,6 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
 
         for (currentVedtak in vedtak
             .filter { it.innhold is VedtakInnhold.Behandling }
-            .filter { it.vedtakFattet != null }
             .sortedByDescending { it.vedtakFattet!!.tidspunkt }) {
             with(currentVedtak) {
                 if (currentVirkningstidspunkt?.isAfter(virkningstidspunkt) != false) {

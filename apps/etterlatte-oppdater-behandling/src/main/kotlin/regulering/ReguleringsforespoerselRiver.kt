@@ -6,6 +6,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
@@ -43,6 +44,8 @@ internal class ReguleringsforespoerselRiver(
 
     override fun kontekst() = Kontekst.REGULERING
 
+    private val sakerViIkkeRegulererAutomatiskNaa = listOf<Long>(16850, 17003, 16616)
+
     override fun haandterPakke(
         packet: JsonMessage,
         context: MessageContext,
@@ -65,8 +68,14 @@ internal class ReguleringsforespoerselRiver(
         while (tatt < antall) {
             val antallIDenneRunden = min(maksBatchstoerrelse, antall)
             logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
-            val sakerTilOmregning =
+            val saker =
                 behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker, sakType)
+            val sakerTilOmregning = Saker(saker.saker.filterNot { sakerViIkkeRegulererAutomatiskNaa.contains(it.id) })
+
+            if (sakerTilOmregning.saker.isEmpty()) {
+                logger.debug("Ingen saker i denne runden. Returnerer")
+                break
+            }
 
             val tilbakemigrerte =
                 behandlingService.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)

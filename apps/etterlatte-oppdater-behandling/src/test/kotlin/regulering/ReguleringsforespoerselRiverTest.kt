@@ -216,4 +216,37 @@ internal class ReguleringsforespoerselRiverTest {
             vedtakServiceMock.hentAlleSaker("Regulering2023", 10, emptyList(), SakType.BARNEPENSJON)
         }
     }
+
+    @Test
+    fun `ignorerer spesifiserte saker`() {
+        val melding =
+            JsonMessage.newMessage(
+                mapOf(
+                    ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
+                    DATO_KEY to LocalDate.now(),
+                    KJOERING to "Regulering2023",
+                    ANTALL to 10,
+                    SPESIFIKKE_SAKER to listOf<Long>(),
+                    SAK_TYPE to SakType.BARNEPENSJON.name,
+                ),
+            )
+        val vedtakServiceMock =
+            mockk<BehandlingService>(relaxed = true).also {
+                every { it.hentAlleSaker(any(), any(), any(), any()) } returns
+                    Saker(
+                        listOf(
+                            Sak("Id1", SakType.BARNEPENSJON, 17003, "enhet1"),
+                        ),
+                    )
+            }
+        val featureToggleService =
+            mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }
+        val inspector =
+            TestRapid().apply { ReguleringsforespoerselRiver(this, vedtakServiceMock, featureToggleService) }
+
+        inspector.sendTestMessage(melding.toJson())
+        verify(exactly = 0) {
+            vedtakServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(any())
+        }
+    }
 }

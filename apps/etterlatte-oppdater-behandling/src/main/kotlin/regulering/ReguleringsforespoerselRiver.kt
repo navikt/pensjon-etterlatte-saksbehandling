@@ -24,6 +24,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import kotlin.math.min
 
 internal class ReguleringsforespoerselRiver(
@@ -100,6 +101,9 @@ internal class ReguleringsforespoerselRiver(
             if (sakerTilOmregning.saker.isEmpty() || saker.saker.size < maksBatchstoerrelse) {
                 break
             }
+            val venteperiode = Duration.ofSeconds(5)
+            logger.info("Venter $venteperiode før neste runde.")
+            Thread.sleep(venteperiode)
         }
     }
 

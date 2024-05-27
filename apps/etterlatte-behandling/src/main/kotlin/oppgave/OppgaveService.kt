@@ -303,8 +303,10 @@ class OppgaveService(
             oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler.ident)
             oppgaveDao.fjernForrigeSaksbehandler(oppgaveId)
         } else {
-            // TODO: Endre til error når migrering er gjennomført
-            //   siden det i "alle" tilfeller skal finnes en tidligere saksbehandler
+            /*
+            TODO: Endre til error når migrering er gjennomført
+            siden det i "alle" tilfeller skal finnes en tidligere saksbehandler
+             */
             logger.warn("Fant ikke siste saksbehandler for oppgave med referanse: $referanse")
             oppgaveDao.fjernSaksbehandler(oppgaveId)
         }
@@ -313,7 +315,7 @@ class OppgaveService(
     }
 
     private fun saksbehandlerSomFattetVedtak(oppgave: OppgaveIntern): OppgaveSaksbehandler? =
-        oppgave.forrigeSaksbehandler ?: oppgaveDao.hentEndringerForOppgave(oppgave.id) // TODO: Kan fjernes over tid
+        oppgave.forrigeSaksbehandler ?: oppgaveDao.hentEndringerForOppgave(oppgave.id) // TODO: hentEndringerForOppgave Kan fjernes over tid
             .sortedByDescending { it.tidspunkt }
             .firstOrNull(OppgaveEndring::sendtTilAttestering)
             ?.oppgaveFoer

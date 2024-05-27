@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -271,9 +272,15 @@ class OppgaveService(
         if (frist != null) {
             oppgaveDao.redigerFrist(oppgave.id, frist)
         }
-        oppgaveDao.fjernSaksbehandler(oppgave.id)
+
+        settSaksbehandlerSomForrigeSaksbehandlerOgFjern(oppgave.id)
 
         return hentOppgave(oppgave.id)
+    }
+
+    private fun settSaksbehandlerSomForrigeSaksbehandlerOgFjern(oppgaveId: UUID) {
+        oppgaveDao.settForrigeSaksbehandlerFraSaksbehandler(oppgaveId)
+        oppgaveDao.fjernSaksbehandler(oppgaveId)
     }
 
     fun tilUnderkjent(
@@ -288,23 +295,25 @@ class OppgaveService(
                 ?: throw IllegalStateException("Fant ikke oppgave med referanse: $referanse")
 
         val oppdatertMerknad = merknad ?: oppgave.merknad ?: ""
-        oppgaveDao.oppdaterStatusOgMerknad(oppgave.id, oppdatertMerknad, Status.UNDERKJENT)
+        val oppgaveId = oppgave.id
+        oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, oppdatertMerknad, Status.UNDERKJENT)
 
         val saksbehandler = saksbehandlerSomFattetVedtak(oppgave)
         if (saksbehandler != null) {
-            oppgaveDao.settNySaksbehandler(oppgave.id, saksbehandler.ident)
+            oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler.ident)
+            oppgaveDao.fjernForrigeSaksbehandler(oppgaveId)
         } else {
             // TODO: Endre til error når migrering er gjennomført
             //   siden det i "alle" tilfeller skal finnes en tidligere saksbehandler
             logger.warn("Fant ikke siste saksbehandler for oppgave med referanse: $referanse")
-            oppgaveDao.fjernSaksbehandler(oppgave.id)
+            oppgaveDao.fjernSaksbehandler(oppgaveId)
         }
 
         return oppgave
     }
 
-    private fun saksbehandlerSomFattetVedtak(oppgave: OppgaveIntern) =
-        oppgaveDao.hentEndringerForOppgave(oppgave.id)
+    private fun saksbehandlerSomFattetVedtak(oppgave: OppgaveIntern): OppgaveSaksbehandler? =
+        oppgave.forrigeSaksbehandler ?: oppgaveDao.hentEndringerForOppgave(oppgave.id) // TODO: Kan fjernes over tid
             .sortedByDescending { it.tidspunkt }
             .firstOrNull(OppgaveEndring::sendtTilAttestering)
             ?.oppgaveFoer
@@ -357,6 +366,26 @@ class OppgaveService(
         ferdigstillOppgave(oppgave, saksbehandler, merknad)
     }
 
+    private fun ferdigstillOppgave(
+        oppgave: OppgaveIntern,
+        saksbehandler: BrukerTokenInfo,
+        merknad: String? = null,
+    ) {
+        logger.info("Ferdigstiller oppgave=${oppgave.id}")
+
+        sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgave, saksbehandler)
+
+        when (merknad) {
+            null -> oppgaveDao.endreStatusPaaOppgave(oppgave.id, Status.FERDIGSTILT)
+            else -> oppgaveDao.oppdaterStatusOgMerknad(oppgave.id, merknad, Status.FERDIGSTILT)
+        }
+        logger.info("Oppgave med id=${oppgave.id} ferdigstilt av ${saksbehandler.ident()}")
+
+        if (oppgave.typeKanAttesteres()) {
+            tildelOpprinneligSaksbehandler(oppgave.id)
+        }
+    }
+
     fun hentEndringerOppgave(id: UUID): List<GenerellEndringshendelse> {
         val oppgave = hentOppgave(id)
 
@@ -387,26 +416,7 @@ class OppgaveService(
             .sortedByDescending { it.tidspunkt }
     }
 
-    private fun ferdigstillOppgave(
-        oppgave: OppgaveIntern,
-        saksbehandler: BrukerTokenInfo,
-        merknad: String? = null,
-    ) {
-        logger.info("Ferdigstiller oppgave=${oppgave.id}")
-
-        sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgave, saksbehandler)
-
-        when (merknad) {
-            null -> oppgaveDao.endreStatusPaaOppgave(oppgave.id, Status.FERDIGSTILT)
-            else -> oppgaveDao.oppdaterStatusOgMerknad(oppgave.id, merknad, Status.FERDIGSTILT)
-        }
-        logger.info("Oppgave med id=${oppgave.id} ferdigstilt av ${saksbehandler.ident()}")
-
-        if (oppgave.typeKanAttesteres()) {
-            tildelOpprinneligSaksbehandler(oppgave.id)
-        }
-    }
-
+    // TODO: sett forrige saksbehandler på OppgaveIntern når ny lages
     private fun tildelOpprinneligSaksbehandler(oppgaveId: UUID) {
         val forrigeSaksbehandler =
             oppgaveDao.hentEndringerForOppgave(oppgaveId)

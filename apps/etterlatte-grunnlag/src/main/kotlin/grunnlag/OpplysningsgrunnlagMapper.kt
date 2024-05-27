@@ -17,7 +17,7 @@ class OpplysningsgrunnlagMapper(
         val hendelser: List<OpplysningDao.GrunnlagHendelse>,
     ) {
         init {
-            assert(alleOpplysningerErAvSammeType(hendelser.map { it.opplysning }))
+            check(alleOpplysningerErAvSammeType(hendelser.map { it.opplysning }))
         }
 
         val opplysning: Opplysning<JsonNode> =

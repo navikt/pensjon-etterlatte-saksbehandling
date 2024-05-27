@@ -4,16 +4,15 @@ import { Loader, Tag } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlleVedtakISak } from '~shared/api/vedtaksvurdering'
 import { mapResult } from '~shared/api/apiUtils'
-import { VedtakType } from '~components/vedtak/typer'
+import { VedtakSammendrag, VedtakType } from '~components/vedtak/typer'
 import { formaterStringDato } from '~utils/formattering'
-import { VedtaketKlagenGjelder } from '~shared/types/Klage'
 import { RecordFillIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { hentFoersteVedtak, hentSisteVedtak } from '~components/person/sakOgBehandling/sakStatusUtils'
 
 export const SakStatus = ({ sakId }: { sakId: number }) => {
   const [vedtakISakResult, vedtakISakFetch] = useApiCall(hentAlleVedtakISak)
 
-  const visStatusPaaSisteVedtak = (vedtakISak: VedtaketKlagenGjelder[]): ReactNode => {
+  const visStatusPaaSisteVedtak = (vedtakISak: VedtakSammendrag[]): ReactNode => {
     const sisteVedtak = hentSisteVedtak(vedtakISak)
 
     if (sisteVedtak == undefined) {

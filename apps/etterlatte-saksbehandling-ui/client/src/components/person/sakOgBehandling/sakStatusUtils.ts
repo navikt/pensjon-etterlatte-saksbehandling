@@ -1,7 +1,6 @@
-import { VedtaketKlagenGjelder } from '~shared/types/Klage'
-import { VedtakType } from '~components/vedtak/typer'
+import { VedtakSammendrag, VedtakType } from '~components/vedtak/typer'
 
-export const hentSisteVedtak = (vedtak: VedtaketKlagenGjelder[]): VedtaketKlagenGjelder | undefined => {
+export const hentSisteVedtak = (vedtak: VedtakSammendrag[]): VedtakSammendrag | undefined => {
   return vedtak
     .filter((vedtak) => ![VedtakType.AVVIST_KLAGE, VedtakType.TILBAKEKREVING].includes(vedtak.vedtakType!))
     .filter((vedtak) => !!vedtak.datoAttestert)
@@ -9,7 +8,7 @@ export const hentSisteVedtak = (vedtak: VedtaketKlagenGjelder[]): VedtaketKlagen
     .pop()
 }
 
-export const hentFoersteVedtak = (vedtak: VedtaketKlagenGjelder[]): VedtaketKlagenGjelder | undefined => {
+export const hentFoersteVedtak = (vedtak: VedtakSammendrag[]): VedtakSammendrag | undefined => {
   return vedtak
     .filter((vedtak) => vedtak.vedtakType == VedtakType.INNVILGELSE)
     .filter((vedtak) => !!vedtak.datoAttestert)

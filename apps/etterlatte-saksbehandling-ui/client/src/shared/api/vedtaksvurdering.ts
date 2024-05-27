@@ -1,12 +1,11 @@
 import { apiClient, ApiResponse } from './apiClient'
 import { Samordningsvedtak, VedtakSammendrag } from '~components/vedtak/typer'
-import { VedtaketKlagenGjelder } from '~shared/types/Klage'
 
 export const hentVedtakSammendrag = async (behandlingId: string): Promise<ApiResponse<VedtakSammendrag>> => {
   return apiClient.get(`vedtak/${behandlingId}/sammendrag`)
 }
 
-export const hentAlleVedtakISak = async (sakId: number): Promise<ApiResponse<Array<VedtaketKlagenGjelder>>> => {
+export const hentAlleVedtakISak = async (sakId: number): Promise<ApiResponse<Array<VedtakSammendrag>>> => {
   return apiClient.get(`vedtak/sak/${sakId}`)
 }
 

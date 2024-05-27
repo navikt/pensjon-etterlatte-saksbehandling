@@ -100,6 +100,7 @@ data class BarnepensjonRevurderingRedigerbartUtfall(
     val erEtterbetaling: Boolean,
     val harUtbetaling: Boolean,
     val feilutbetaling: FeilutbetalingType,
+    val brukerUnder18Aar: Boolean,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -111,6 +112,7 @@ data class BarnepensjonRevurderingRedigerbartUtfall(
                 erEtterbetaling = etterbetaling != null,
                 harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
+                brukerUnder18Aar = requireNotNull(brevutfall.aldersgruppe) == Aldersgruppe.UNDER_18,
             )
         }
     }

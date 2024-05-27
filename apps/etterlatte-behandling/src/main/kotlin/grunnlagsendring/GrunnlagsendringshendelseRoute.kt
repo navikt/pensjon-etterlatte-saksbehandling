@@ -114,7 +114,6 @@ internal fun Route.grunnlagsendringshendelseRoute(
             kunSystembruker {
                 val hendelse = call.receive<ReguleringFeiletHendelse>()
                 logger.info("Motter hendelse om at regulering har feilet i sak ${hendelse.sakId}")
-                grunnlagsendringshendelseService.opprettEndretGrunnbeloepHendelse(hendelse.sakId)
                 inTransaction {
                     omregningService.oppdaterKjoering(
                         KjoeringRequest(

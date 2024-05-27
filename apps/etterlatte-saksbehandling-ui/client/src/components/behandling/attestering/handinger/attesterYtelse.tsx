@@ -65,7 +65,9 @@ export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetalje
       </FlexRow>
       <GeneriskModal
         tittel="Er du sikker på at du vil iverksette vedtaket?"
-        beskrivelse="Vedtaksbrevet sendes ut automatisk ved iverksettelse"
+        beskrivelse={
+          skalSendeBrev ? 'Vedtaksbrevet sendes ut automatisk ved iverksettelse' : 'Det sendes ikke ut vedtaksbrev'
+        }
         tekstKnappJa="Ja, iverksett vedtak"
         tekstKnappNei="Nei, gå tilbake"
         onYesClick={attester}

@@ -21,6 +21,7 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -228,6 +229,24 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
         val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
         assertEquals(nySaksbehandler, hentetOppgave?.saksbehandler?.ident)
         assertEquals(Status.NY, hentetOppgave?.status)
+    }
+
+    @Test
+    fun `Kan lege til & fjerne forrige saksbehandler`() {
+        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
+        oppgaveDao.opprettOppgave(oppgaveNy)
+
+        val nySaksbehandlerIdent = "nysaksbehandler"
+        oppgaveDao.settNySaksbehandler(oppgaveNy.id, nySaksbehandlerIdent)
+        oppgaveDao.settForrigeSaksbehandlerFraSaksbehandler(oppgaveNy.id)
+
+        val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
+        assertEquals(nySaksbehandlerIdent, hentetOppgave?.forrigeSaksbehandlerIdent)
+
+        oppgaveDao.fjernForrigeSaksbehandler(oppgaveNy.id)
+        val fjernetForrigeSaksbehandler = oppgaveDao.hentOppgave(oppgaveNy.id)
+        assertNull(fjernetForrigeSaksbehandler!!.forrigeSaksbehandlerIdent)
     }
 
     @Test

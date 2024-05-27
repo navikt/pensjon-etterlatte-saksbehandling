@@ -527,7 +527,7 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
             assertEquals(kommerBarnetTilgode, this.kommerBarnetTilgode)
             assertEquals(virkningstidspunkt, this.virkningstidspunkt)
             assertEquals(gyldighetsResultat, this.gyldighetsproeving)
-            assert(this.sistEndret > foerstegangsbehandling.sistEndret)
+            assertTrue(this.sistEndret > foerstegangsbehandling.sistEndret)
         }
     }
 

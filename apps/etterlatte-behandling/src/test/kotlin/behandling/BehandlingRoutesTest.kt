@@ -44,6 +44,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -158,7 +159,7 @@ internal class BehandlingRoutesTest {
             assertEquals(400, response.status.value)
 
             val errormeldingtilfrontend = response.body<String>()
-            assert(errormeldingtilfrontend.contains("PERSONGALLERI_MAA_VAERE_GYLDIG"))
+            assertTrue(errormeldingtilfrontend.contains("PERSONGALLERI_MAA_VAERE_GYLDIG"))
         }
     }
 

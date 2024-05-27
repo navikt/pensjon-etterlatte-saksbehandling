@@ -44,8 +44,6 @@ internal class ReguleringsforespoerselRiver(
 
     override fun kontekst() = Kontekst.REGULERING
 
-    private val sakerViIkkeRegulererAutomatiskNaa = listOf<Long>(16850, 17003, 16616)
-
     override fun haandterPakke(
         packet: JsonMessage,
         context: MessageContext,
@@ -118,3 +116,14 @@ enum class ReguleringFeatureToggle(private val key: String) : FeatureToggle {
 
     override fun key() = key
 }
+
+private val sakerViIkkeRegulererAutomatiskNaa =
+    listOf<Long>(
+        16850, // Til samordning
+        17003, // Til samordning
+        16616, // Til samordning
+        3482, // Revurdering med overstyrt beregning åpen behandling
+        6323, // Revurdering med overstyrt beregning åpen behandling
+        11606, // Revurdering med overstyrt beregning åpen behandling
+        11848, // Revurdering med overstyrt beregning åpen behandling
+    )

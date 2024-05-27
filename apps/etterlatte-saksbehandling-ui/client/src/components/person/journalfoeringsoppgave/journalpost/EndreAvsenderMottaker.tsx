@@ -1,9 +1,8 @@
 import { AvsenderMottaker } from '~shared/types/Journalpost'
-import { Alert, BodyShort, Button, Heading, TextField } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, HStack, TextField } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import React, { useState } from 'react'
 import { InputFlexRow } from './OppdaterJournalpost'
-import { FlexRow } from '~shared/styled'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import { useForm } from 'react-hook-form'
 
@@ -66,14 +65,14 @@ export const EndreAvsenderMottaker = ({
 
           <br />
 
-          <FlexRow justify="right">
+          <HStack gap="4" justify="end">
             <Button variant="tertiary" onClick={avbryt} size="small">
               Avbryt
             </Button>
             <Button variant="secondary" onClick={handleSubmit(lagreEndretMottaker)} size="small">
               Lagre
             </Button>
-          </FlexRow>
+          </HStack>
         </>
       ) : (
         <>

@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Heading, Modal, TextField } from '@navikt/ds-react'
+import { Alert, Box, Button, Heading, HStack, Modal, TextField } from '@navikt/ds-react'
 import { InputList, InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import React, { useState } from 'react'
 import { PencilIcon, PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
@@ -9,7 +9,6 @@ import { Personopplysninger } from '~shared/types/grunnlag'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { fnrErGyldig } from '~utils/fnr'
-import { FlexRow } from '~shared/styled'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { SakType } from '~shared/types/sak'
 
@@ -157,14 +156,14 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
         </Modal.Body>
 
         <Modal.Footer>
-          <FlexRow justify="right">
+          <HStack gap="4" justify="end">
             <Button variant="secondary" onClick={avbryt} disabled={isPending(status)}>
               Avbryt
             </Button>
             <Button onClick={handleSubmit(lagre)} loading={isPending(status)}>
               Lagre
             </Button>
-          </FlexRow>
+          </HStack>
         </Modal.Footer>
       </Modal>
     </>

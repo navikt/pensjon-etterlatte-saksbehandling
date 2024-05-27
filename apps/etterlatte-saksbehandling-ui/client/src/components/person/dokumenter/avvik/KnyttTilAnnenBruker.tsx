@@ -1,12 +1,11 @@
 import React, { useState } from 'react'
-import { Alert, Button, TextField } from '@navikt/ds-react'
+import { Alert, Button, HStack, TextField } from '@navikt/ds-react'
 import { isPending, isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { BrukerIdType, Journalpost, Sakstype } from '~shared/types/Journalpost'
 import { ISak } from '~shared/types/sak'
 import { hentSak } from '~shared/api/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { SakMedBehandlinger } from '~components/person/typer'
-import { FlexRow } from '~shared/styled'
 import { temaFraSakstype } from '~components/person/journalfoeringsoppgave/journalpost/EndreSak'
 import { oppdaterJournalpost } from '~shared/api/dokument'
 import { MagnifyingGlassIcon } from '@navikt/aksel-icons'
@@ -76,14 +75,14 @@ export const KnyttTilAnnentBruker = ({
 
         <br />
 
-        <FlexRow justify="right">
+        <HStack gap="4" justify="end">
           <Button variant="tertiary" onClick={() => window.location.reload()}>
             Avslutt
           </Button>
           {mapSuccess(opprettOppgaveStatus, (oppgave) => (
             <Button onClick={() => navigate(`/oppgave/${oppgave.id}`)}>Gå til oppgaven</Button>
           ))}
-        </FlexRow>
+        </HStack>
       </>
     )
   }
@@ -92,7 +91,7 @@ export const KnyttTilAnnentBruker = ({
 
   return mapResult(annenSakStatus, {
     initial: (
-      <FlexRow align="end" $spacing>
+      <HStack gap="4" align="end">
         <TextField
           label="Hvilken sakid skal journalposten flyttes til?"
           value={sakid || ''}
@@ -107,7 +106,7 @@ export const KnyttTilAnnentBruker = ({
         >
           Søk
         </Button>
-      </FlexRow>
+      </HStack>
     ),
     pending: <Spinner visible label="Henter sak..." />,
     success: (annenSak) => (
@@ -115,14 +114,14 @@ export const KnyttTilAnnentBruker = ({
         {isSuccess(sakStatus) && <SakOverfoeringDetailjer fra={sakStatus.data.sak} til={annenSak} />}
         <br />
 
-        <FlexRow justify="right">
+        <HStack gap="4" justify="end">
           <Button variant="secondary" onClick={lukkModal} disabled={isLoading}>
             Nei, avbryt
           </Button>
           <Button onClick={() => flyttJournalpost(annenSak)} loading={isLoading}>
             Flytt journalpost til sak {annenSak.id}
           </Button>
-        </FlexRow>
+        </HStack>
       </>
     ),
     error: (error) =>

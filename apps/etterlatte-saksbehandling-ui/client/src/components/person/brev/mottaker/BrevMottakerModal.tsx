@@ -1,11 +1,9 @@
-import { Button, Heading, Modal, Select, TextField, ToggleGroup } from '@navikt/ds-react'
+import { Button, Heading, HStack, Modal, Select, TextField, ToggleGroup } from '@navikt/ds-react'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { AdresseType, IBrev, Mottaker } from '~shared/types/Brev'
 import styled, { css } from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterMottaker } from '~shared/api/brev'
-import { FlexRow } from '~shared/styled'
-
 import { isPending, Result } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Controller, useForm } from 'react-hook-form'
@@ -236,14 +234,14 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
               errorMessage: 'Kunne ikke oppdatere mottaker.',
             })}
 
-            <FlexRow justify="right">
+            <HStack gap="4" justify="end">
               <Button variant="secondary" type="button" disabled={isPending(mottakerStatus)} onClick={avbryt}>
                 Avbryt
               </Button>
               <Button variant="primary" type="submit" loading={isPending(mottakerStatus)}>
                 Lagre
               </Button>
-            </FlexRow>
+            </HStack>
           </Modal.Body>
         </Modal>
       </form>

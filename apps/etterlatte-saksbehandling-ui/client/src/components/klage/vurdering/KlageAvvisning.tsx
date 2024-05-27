@@ -1,6 +1,5 @@
-import { Alert, BodyLong, Button, Heading, Radio, RadioGroup } from '@navikt/ds-react'
+import { Alert, BodyLong, Box, Button, Heading, HStack, Radio, RadioGroup } from '@navikt/ds-react'
 import React from 'react'
-import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Feilmelding, Innhold, VurderingWrapper } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
@@ -11,7 +10,6 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterUtfallForKlage } from '~shared/api/klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
-
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { forrigeSteg, kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny'
@@ -71,14 +69,14 @@ export function KlageAvvisning(props: { klage: Klage }) {
   const lagreUtfallAktivert = valgtUtfall !== Utfall.AVVIST || vedtakOmAvvistErAktivert
 
   return (
-    <Content>
-      <ContentHeader>
+    <>
+      <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading level="1" size="large">
             Avvis klagen
           </Heading>
         </HeadingWrapper>
-      </ContentHeader>
+      </Box>
       <form onSubmit={handleSubmit(sendInnVurdering)}>
         <Innhold>
           <BodyLong spacing={true}>
@@ -117,7 +115,7 @@ export function KlageAvvisning(props: { klage: Klage }) {
           errorMessage: 'Kunne ikke lagre utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
         })}
 
-        <FlexRow justify="center">
+        <HStack gap="4" justify="center">
           <Button type="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'vurdering'))}>
             Gå tilbake
           </Button>
@@ -126,9 +124,9 @@ export function KlageAvvisning(props: { klage: Klage }) {
               {kanSeBrev(valgtUtfall) ? 'Gå til brev' : 'Gå til oppsummering'}
             </Button>
           )}
-        </FlexRow>
+        </HStack>
       </form>
-    </Content>
+    </>
   )
 }
 

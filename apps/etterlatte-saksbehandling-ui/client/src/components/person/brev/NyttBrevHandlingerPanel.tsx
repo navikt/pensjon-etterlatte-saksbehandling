@@ -1,9 +1,8 @@
-import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Heading, HStack, Modal } from '@navikt/ds-react'
 import { BrevStatus, IBrev } from '~shared/types/Brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect, useState } from 'react'
 import { distribuerBrev, ferdigstillBrev, journalfoerBrev } from '~shared/api/brev'
-import { FlexRow } from '~shared/styled'
 import Spinner from '~shared/Spinner'
 
 import { isInitial, isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
@@ -133,14 +132,14 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
         </Modal.Body>
 
         <Modal.Footer>
-          <FlexRow justify="center">
+          <HStack gap="4" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Nei, fortsett redigering
             </Button>
             <Button variant="primary" className="button" onClick={ferdigstill}>
               Ja, ferdigstill brev
             </Button>
-          </FlexRow>
+          </HStack>
         </Modal.Footer>
       </Modal>
     </>

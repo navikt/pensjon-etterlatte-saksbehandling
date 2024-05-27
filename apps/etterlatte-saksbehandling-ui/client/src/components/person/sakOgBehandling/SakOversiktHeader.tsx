@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react'
 import { mapResult } from '~shared/api/apiUtils'
 import { hentFlyktningStatusForSak, hentNavkontorForPerson } from '~shared/api/sak'
-import { Alert, BodyShort, Heading, Loader, ReadMore, Tag } from '@navikt/ds-react'
-import { FlexRow, SpaceChildren } from '~shared/styled'
+import { Alert, BodyShort, Heading, HStack, Loader, ReadMore, Tag, VStack } from '@navikt/ds-react'
 import { tagColors } from '~shared/Tags'
 import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { Buildings3Icon, LocationPinIcon } from '@navikt/aksel-icons'
@@ -49,23 +48,20 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
   }, [])
 
   return (
-    <SpaceChildren>
+    <VStack gap="4">
       <Heading size="medium">Saksnummer {sak.id}</Heading>
-      <SpaceChildren>
-        <div>
-          <SaktypeTag sakType={sak.sakType} />
-        </div>
+      <VStack gap="4" align="start">
+        <SaktypeTag sakType={sak.sakType} />
+
         {!!sak.utlandstilknytning?.type && (
-          <div>
-            <Tag variant={tagColors[sak.utlandstilknytning?.type]}>
-              {formaterEnumTilLesbarString(sak.utlandstilknytning?.type)}
-            </Tag>
-          </div>
+          <Tag variant={tagColors[sak.utlandstilknytning?.type]}>
+            {formaterEnumTilLesbarString(sak.utlandstilknytning?.type)}
+          </Tag>
         )}
         <SakStatus sakId={sak.id} />
-      </SpaceChildren>
+      </VStack>
 
-      <FlexRow align="center">
+      <HStack gap="4" wrap={false}>
         <LocationPinIcon aria-hidden width="1.75rem" height="1.75rem" />
         <BodyShort>
           Navkontor:{' '}
@@ -75,12 +71,12 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
             success: (navKontor) => <>{navKontor.navn}</>,
           })}
         </BodyShort>
-      </FlexRow>
+      </HStack>
 
-      <FlexRow align="center">
+      <HStack gap="4" wrap={false}>
         <Buildings3Icon aria-hidden width="1.75rem" height="1.75rem" />
         <BodyShort>Denne saken tilhører enhet {sak.enhet}</BodyShort>
-      </FlexRow>
+      </HStack>
       {enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter) && <EndreEnhet sakId={sak.id} />}
       {enhetErSkrivbar(sak.enhet, innloggetSaksbehandler.skriveEnheter) && (
         <ReadMore header="Ønsker du å bytte enhet?">
@@ -122,7 +118,7 @@ export const SakOversiktHeader = ({ sak, behandlinger, fnr }: Props) => {
             </>
           ),
       })}
-    </SpaceChildren>
+    </VStack>
   )
 }
 

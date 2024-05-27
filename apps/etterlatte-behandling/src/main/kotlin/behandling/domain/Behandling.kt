@@ -270,3 +270,8 @@ fun Behandling.toBehandlingSammendrag() =
         boddEllerArbeidetUtlandet = this.boddEllerArbeidetUtlandet,
         kilde = this.kilde,
     )
+
+internal fun List<Behandling>.hentUtlandstilknytning(): Utlandstilknytning? =
+    this.filter { it.status != BehandlingStatus.AVBRUTT }
+        .maxByOrNull { it.behandlingOpprettet }
+        ?.utlandstilknytning

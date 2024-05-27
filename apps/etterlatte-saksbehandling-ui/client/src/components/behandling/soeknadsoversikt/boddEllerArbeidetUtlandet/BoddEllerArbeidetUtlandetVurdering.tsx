@@ -182,6 +182,10 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
           </VStack>
         )}
         <Begrunnelse
+          label="Begrunnelse"
+          placeholder="Valgfritt"
+          minRows={3}
+          autoComplete="off"
           value={begrunnelse}
           onChange={(e) => {
             const oppdatertBegrunnelse = e.target.value

@@ -2,8 +2,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { FamilieforholdBarnepensjon } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/FamilieforholdBarnepensjon'
 import { FamilieforholdOmstillingsstoenad } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/FamilieforholdOmstillingsstoenad'
-import { Heading } from '@navikt/ds-react'
-import { ContentHeader } from '~shared/styled'
+import { Box, Heading } from '@navikt/ds-react'
 import React from 'react'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import styled from 'styled-components'
@@ -19,14 +18,14 @@ export interface PropsFamilieforhold {
 export const Familieforhold = ({ behandling, personopplysninger, redigerbar }: PropsFamilieforhold) => {
   return (
     <>
-      <ContentHeader>
+      <Box paddingInline="16" paddingBlock="4">
         <Heading spacing size="medium" level="2" as="div">
           Familieforhold
           {personopplysninger && redigerbar && (
             <RedigerFamilieforhold behandling={behandling} personopplysninger={personopplysninger} />
           )}
         </Heading>
-      </ContentHeader>
+      </Box>
 
       <FamilieforholdWrapper>
         {behandling.sakType === SakType.BARNEPENSJON ? (

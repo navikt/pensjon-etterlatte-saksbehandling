@@ -1,4 +1,4 @@
-import { BodyShort, Box, Button, Heading, TextField } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, TextField, VStack } from '@navikt/ds-react'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import {
   InputList,
@@ -11,7 +11,6 @@ import {
   validateFnrObligatorisk,
   validerFnrValgfri,
 } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
-import { SpaceChildren } from '~shared/styled'
 
 export default function PersongalleriOmstillingsstoenad() {
   const {
@@ -23,7 +22,7 @@ export default function PersongalleriOmstillingsstoenad() {
   const soeskenFormArray = useFieldArray<NyBehandlingSkjema>({ name: 'persongalleri.soesken' })
 
   return (
-    <SpaceChildren>
+    <VStack gap="4">
       <InputRow>
         <TextField
           {...register('persongalleri.soeker')}
@@ -78,6 +77,6 @@ export default function PersongalleriOmstillingsstoenad() {
           </Button>
         </InputList>
       </Box>
-    </SpaceChildren>
+    </VStack>
   )
 }

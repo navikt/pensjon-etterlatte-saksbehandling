@@ -1,7 +1,6 @@
-import { Content, ContentHeader } from '~shared/styled'
 import { Familieforhold } from './familieforhold/Familieforhold'
 import { Border, HeadingWrapper, InnholdPadding } from './styled'
-import { Heading } from '@navikt/ds-react'
+import { Box, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { Soeknadsdato } from './Soeknadsdato'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
@@ -77,15 +76,15 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
   }
 
   return (
-    <Content>
-      <ContentHeader>
+    <>
+      <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading spacing size="large" level="1">
             Søknadsoversikt
           </Heading>
         </HeadingWrapper>
         {behandling.soeknadMottattDato && <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />}
-      </ContentHeader>
+      </Box>
       <InnholdPadding>
         {redigerbar && (
           <OppdaterGrunnlagModal
@@ -132,6 +131,6 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       ) : (
         <NesteOgTilbake />
       )}
-    </Content>
+    </>
   )
 }

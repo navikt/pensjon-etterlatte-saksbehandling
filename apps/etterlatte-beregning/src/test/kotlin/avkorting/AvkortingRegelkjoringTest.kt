@@ -50,8 +50,15 @@ class AvkortingRegelkjoringTest {
             regelResultat shouldNotBe null
             tidspunkt shouldNotBe null
             periode.fom shouldBe YearMonth.of(2024, Month.MARCH)
-            periode.tom shouldBe null
+            periode.tom shouldBe YearMonth.of(2024, Month.APRIL)
             avkorting shouldBe 20276
+        }
+        with(avkortingsperioder[2]) {
+            regelResultat shouldNotBe null
+            tidspunkt shouldNotBe null
+            periode.fom shouldBe YearMonth.of(2024, Month.MAY)
+            periode.tom shouldBe null
+            avkorting shouldBe 20174
         }
     }
 

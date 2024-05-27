@@ -1,19 +1,11 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { Grunnlagsopplysning, PersongalleriSamsvar, PersonMedNavn, Personopplysninger } from '~shared/types/grunnlag'
+import { Grunnlagsopplysning, PersongalleriSamsvar, Personopplysninger } from '~shared/types/grunnlag'
 import { IPersonResult } from '~components/person/typer'
 import { Foreldreansvar } from '~shared/types/Foreldreansvar'
 import { KildePdl } from '~shared/types/kilde'
 import { IPdlPerson, Persongalleri } from '~shared/types/Person'
 import { Mottaker } from '~shared/types/Brev'
 import { SakType } from '~shared/types/sak'
-
-export const hentPersonerISak = async (sakId: number): Promise<ApiResponse<PersonerISakResponse>> => {
-  return apiClient.get(`/grunnlag/sak/${sakId}/personer/alle`)
-}
-
-export type PersonerISakResponse = {
-  personer: Record<string, PersonMedNavn>
-}
 
 export const getPerson = async (fnr: string): Promise<ApiResponse<IPersonResult>> => {
   return apiClient.post(`/grunnlag/person/navn`, {

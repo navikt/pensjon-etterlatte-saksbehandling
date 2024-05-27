@@ -6,9 +6,8 @@ import {
 } from '~shared/types/Tilbakekreving'
 import React, { useState } from 'react'
 import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { Button, Table } from '@navikt/ds-react'
+import { Button, HStack, Table } from '@navikt/ds-react'
 import { format } from 'date-fns'
-import { FlexRow } from '~shared/styled'
 import { useNavigate } from 'react-router'
 
 export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandling: TilbakekrevingBehandling }) {
@@ -57,11 +56,11 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
         </Table.Body>
       </Table>
       <Border style={{ marginTop: '3em' }} />
-      <FlexRow $spacing={true} justify="center">
+      <HStack justify="center">
         <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/oppsummering`)}>
           Neste
         </Button>
-      </FlexRow>
+      </HStack>
     </InnholdPadding>
   )
 }

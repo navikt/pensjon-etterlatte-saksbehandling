@@ -203,7 +203,8 @@ class BehandlingFactoryTest {
                 persongalleri,
                 datoNaa.toString(),
                 Vedtaksloesning.GJENNY,
-            )!!.behandling
+                behandlingFactory.hentDataForOpprettBehandling(1),
+            )!!.also { it.sendMeldingForHendelse() }.behandling
 
         Assertions.assertEquals(opprettetBehandling, resultat)
         Assertions.assertEquals(opprettetBehandling.sak, resultat.sak)
@@ -293,7 +294,8 @@ class BehandlingFactoryTest {
                 persongalleri,
                 datoNaa.toString(),
                 Vedtaksloesning.GJENNY,
-            )!!.behandling
+                behandlingFactory.hentDataForOpprettBehandling(1),
+            )!!.also { it.sendMeldingForHendelse() }.behandling
 
         Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
 
@@ -381,7 +383,8 @@ class BehandlingFactoryTest {
                 persongalleri,
                 datoNaa.toString(),
                 Vedtaksloesning.GJENNY,
-            )!!.behandling
+                behandlingFactory.hentDataForOpprettBehandling(1),
+            )!!.also { it.sendMeldingForHendelse() }.behandling
 
         Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
 
@@ -395,7 +398,9 @@ class BehandlingFactoryTest {
                 persongalleri,
                 datoNaa.toString(),
                 Vedtaksloesning.GJENNY,
-            )?.behandling
+                behandlingFactory.hentDataForOpprettBehandling(1),
+            )?.also { it.sendMeldingForHendelse() }
+                ?.behandling
         Assertions.assertTrue(nyfoerstegangsbehandling is Foerstegangsbehandling)
 
         verify(exactly = 2) {
@@ -489,7 +494,8 @@ class BehandlingFactoryTest {
                 persongalleri,
                 datoNaa.toString(),
                 Vedtaksloesning.GJENNY,
-            )!!.behandling
+                behandlingFactory.hentDataForOpprettBehandling(1),
+            )!!.also { it.sendMeldingForHendelse() }.behandling
 
         Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
 
@@ -546,7 +552,8 @@ class BehandlingFactoryTest {
                 persongalleri,
                 datoNaa.toString(),
                 Vedtaksloesning.GJENNY,
-            )?.behandling
+                behandlingFactory.hentDataForOpprettBehandling(1),
+            )?.also { it.sendMeldingForHendelse() }?.behandling
         Assertions.assertTrue(revurderingsBehandling is Revurdering)
         verify {
             grunnlagService.leggInnNyttGrunnlag(any(), any())

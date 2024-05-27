@@ -1,7 +1,6 @@
 import { Journalpost } from '~shared/types/Journalpost'
-import { Alert, BodyShort, Button, Heading, TextField } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, HStack, TextField } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { FlexRow } from '~shared/styled'
 import { InputFlexRow } from './OppdaterJournalpost'
 
 export const EndreTittelJournalpost = ({
@@ -35,14 +34,14 @@ export const EndreTittelJournalpost = ({
 
           <br />
 
-          <FlexRow justify="right">
+          <HStack gap="4" justify="end">
             <Button variant="tertiary" onClick={avbryt} size="small">
               Avbryt
             </Button>
             <Button variant="secondary" onClick={lagre} disabled={nyTittel === journalpost.tittel} size="small">
               Lagre
             </Button>
-          </FlexRow>
+          </HStack>
         </>
       ) : (
         <>

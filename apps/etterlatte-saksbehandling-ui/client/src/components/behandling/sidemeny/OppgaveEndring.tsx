@@ -11,7 +11,7 @@ export const OppgaveEndring = ({ oppgaveResult }: { oppgaveResult: Result<Oppgav
   const [endringerResult, hentOppgaveEndringer] = useApiCall(hentEndringer)
 
   useEffect(() => {
-    if (isSuccess(oppgaveResult)) {
+    if (isSuccess(oppgaveResult) && !!oppgaveResult.data) {
       hentOppgaveEndringer(oppgaveResult.data.id)
     }
   }, [oppgaveResult])

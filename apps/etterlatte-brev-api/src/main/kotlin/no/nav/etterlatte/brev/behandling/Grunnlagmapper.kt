@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
-import no.nav.etterlatte.libs.common.grunnlag.hentVergemaalellerfremtidsfullmakt
+import no.nav.etterlatte.libs.common.grunnlag.hentSoekerPdlV1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.ForelderVerge
@@ -92,7 +92,7 @@ fun Grunnlag.mapVerge(
     with(this) {
         val relevantVerge =
             hentRelevantVerge(
-                soeker.hentVergemaalellerfremtidsfullmakt()?.verdi,
+                soeker.hentSoekerPdlV1()!!.verdi.vergemaalEllerFremtidsfullmakt,
                 soeker.hentFoedselsnummer()?.verdi,
             )
         if (relevantVerge != null) {

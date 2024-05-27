@@ -3,12 +3,11 @@ import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentStoettedeRevurderinger, opprettRevurdering as opprettRevurderingApi } from '~shared/api/revurdering'
 import { isPending, mapFailure, mapResult } from '~shared/api/apiUtils'
-import { Alert, Button, Heading, Modal, Select, TextField, VStack } from '@navikt/ds-react'
+import { Alert, Button, Heading, HStack, Modal, Select, TextField, VStack } from '@navikt/ds-react'
 import { ArrowCirclepathIcon } from '@navikt/aksel-icons'
 import { useForm } from 'react-hook-form'
 import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import styled from 'styled-components'
-import { ButtonGroup } from '~shared/styled'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useNavigate } from 'react-router-dom'
 import Spinner from '~shared/Spinner'
@@ -85,7 +84,7 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
             pending: <Spinner visible label="Henter revurderingsårsaker..." />,
             success: (muligeRevurderingAarsaker) =>
               !!muligeRevurderingAarsaker?.length ? (
-                <>
+                <VStack gap="4">
                   <Select
                     {...register('aarsak', {
                       required: {
@@ -126,15 +125,15 @@ export const OpprettRevurderingModal = ({ sakId, sakType, begrunnelse, hendelseI
                     <ApiErrorAlert>{error.detail || 'Kunne ikke opprette revurdering'}</ApiErrorAlert>
                   ))}
 
-                  <ButtonGroup>
+                  <HStack gap="2" justify="end">
                     <Button variant="secondary" type="button" onClick={lukkModal}>
                       Avbryt
                     </Button>
                     <Button loading={isPending(opprettRevurderingResult)} onClick={handleSubmit(paaOpprett)}>
                       Opprett
                     </Button>
-                  </ButtonGroup>
-                </>
+                  </HStack>
+                </VStack>
               ) : (
                 <Alert variant="info" size="small">
                   Ingen revurderingsårsaker for denne saken

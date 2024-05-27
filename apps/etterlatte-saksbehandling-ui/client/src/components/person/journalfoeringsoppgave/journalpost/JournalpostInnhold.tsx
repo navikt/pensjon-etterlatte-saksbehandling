@@ -1,11 +1,10 @@
-import { Heading, Tag } from '@navikt/ds-react'
+import { Heading, HStack, Tag } from '@navikt/ds-react'
 import { Border, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import React from 'react'
 import { Journalpost } from '~shared/types/Journalpost'
 import { formaterJournalpostSakstype, formaterJournalpostStatus, formaterStringDato } from '~utils/formattering'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { FlexRow } from '~shared/styled'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
 
 const TemaTag = ({ journalpost }: { journalpost: Journalpost }) => {
@@ -38,10 +37,10 @@ export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }
       <Info
         label="Avsender/mottaker"
         tekst={
-          <FlexRow align="center">
+          <HStack gap="4" align="center">
             <span>{journalpost.avsenderMottaker.navn || '-'}</span>
             {journalpost.avsenderMottaker.id && <KopierbarVerdi value={journalpost.avsenderMottaker?.id} />}
-          </FlexRow>
+          </HStack>
         }
       />
     </InfoWrapper>

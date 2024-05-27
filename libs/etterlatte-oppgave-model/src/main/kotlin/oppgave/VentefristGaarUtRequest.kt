@@ -18,7 +18,7 @@ data class VentefristerGaarUtResponse(
 data class VentefristGaarUt(
     val sakId: Long,
     val referanse: String,
-    val oppgaveID: UUID,
+    val oppgaveId: UUID,
     val oppgavekilde: OppgaveKilde,
     val merknad: String?,
 )

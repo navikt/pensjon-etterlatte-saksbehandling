@@ -1,5 +1,5 @@
 import React from 'react'
-import { Alert, Button, Heading, Link, Radio, RadioGroup, Tag } from '@navikt/ds-react'
+import { Alert, Button, Heading, HStack, Link, Radio, RadioGroup, Tag, VStack } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
 import { useNavigate } from 'react-router-dom'
@@ -7,7 +7,6 @@ import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeri
 import { formaterOppgaveStatus, formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { FlexRow } from '~shared/styled'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgaveHandling, settOppgaveHandling } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { FormWrapper } from '../BehandleJournalfoeringOppgave'
@@ -78,15 +77,16 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
           Ferdigstill oppgaven
         </Radio>
       </RadioGroup>
-
-      <FlexRow justify="center" $spacing>
-        <Button variant="primary" onClick={neste} disabled={!oppgaveHandling}>
-          Neste
-        </Button>
-      </FlexRow>
-      <FlexRow justify="center">
-        <AvbrytBehandleJournalfoeringOppgave />
-      </FlexRow>
+      <VStack gap="2">
+        <HStack justify="center">
+          <Button variant="primary" onClick={neste} disabled={!oppgaveHandling}>
+            Neste
+          </Button>
+        </HStack>
+        <HStack justify="center">
+          <AvbrytBehandleJournalfoeringOppgave />
+        </HStack>
+      </VStack>
     </FormWrapper>
   )
 }

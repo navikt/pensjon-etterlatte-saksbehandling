@@ -5,10 +5,8 @@ import no.nav.etterlatte.statistikk.domain.SoeknadStatistikk
 import javax.sql.DataSource
 
 class SoeknadStatistikkRepository(private val datasource: DataSource) {
-    private val connection get() = datasource.connection
-
     fun lagreNedSoeknadStatistikk(soeknadStatistikk: SoeknadStatistikk): SoeknadStatistikk {
-        connection.use {
+        datasource.connection.use {
             val statement =
                 it.prepareStatement(
                     """
@@ -28,7 +26,7 @@ class SoeknadStatistikkRepository(private val datasource: DataSource) {
     }
 
     fun hentAntallSoeknader(): Long {
-        return connection.use {
+        return datasource.connection.use {
             val statement =
                 it.prepareStatement(
                     """
@@ -45,7 +43,7 @@ class SoeknadStatistikkRepository(private val datasource: DataSource) {
     fun hentAntallSoeknaderIkkeGyldigForBehandling() = hentSoeknaderMedGyldigForBehandling(false)
 
     private fun hentSoeknaderMedGyldigForBehandling(gyldig: Boolean): Long {
-        return connection.use {
+        return datasource.connection.use {
             val statement =
                 it.prepareStatement(
                     """

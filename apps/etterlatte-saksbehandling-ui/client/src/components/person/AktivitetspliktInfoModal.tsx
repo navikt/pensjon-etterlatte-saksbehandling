@@ -90,7 +90,10 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
                 ? AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
                 : (data.midlertidigUnntak as AktivitetspliktUnntakType),
             beskrivelse: data.beskrivelse,
-            tom: data.aktivitetsplikt === IValgJaNei.NEI ? undefined : data.sluttdato?.toISOString(),
+            tom:
+              data.sluttdato && data.aktivitetsplikt === IValgJaNei.JA
+                ? new Date(data.sluttdato).toISOString()
+                : undefined,
           },
         },
         () => {

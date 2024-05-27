@@ -1,4 +1,3 @@
-import { Content, ContentHeader } from '~shared/styled'
 import {
   Beregning,
   OverstyrBeregingsperiodeGrunnlagData,
@@ -6,7 +5,7 @@ import {
   OverstyrBeregningsperiode,
 } from '~shared/types/Beregning'
 import { HeadingWrapper } from '../soeknadsoversikt/styled'
-import { Button, ErrorSummary, Heading, Table } from '@navikt/ds-react'
+import { Box, Button, ErrorSummary, Heading, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { useFieldArray, useForm } from 'react-hook-form'
@@ -168,14 +167,14 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
   }
 
   return (
-    <Content>
-      <ContentHeader>
+    <>
+      <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading size="medium" level="2">
             Overstyr beregning: {overstyrBeregning.beskrivelse}
           </Heading>
         </HeadingWrapper>
-      </ContentHeader>
+      </Box>
       {mapApiResult(
         overstyrBeregningGrunnlag,
         <Spinner visible={true} label="Henter grunnlag" />,
@@ -281,7 +280,7 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
       ) : (
         <NesteOgTilbake />
       )}
-    </Content>
+    </>
   )
 }
 

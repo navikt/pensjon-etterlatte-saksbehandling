@@ -1,9 +1,12 @@
 package no.nav.etterlatte.regulering
 
+import com.fasterxml.jackson.databind.node.MissingNode
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
@@ -11,6 +14,7 @@ import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.ANTALL
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.SPESIFIKKE_SAKER
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.rapidsandrivers.saker
@@ -34,6 +38,7 @@ internal class ReguleringsforespoerselRiver(
             validate { it.requireKey(KJOERING) }
             validate { it.requireKey(ANTALL) }
             validate { it.requireKey(SPESIFIKKE_SAKER) }
+            validate { it.interestedIn(SAK_TYPE) }
         }
     }
 
@@ -53,6 +58,7 @@ internal class ReguleringsforespoerselRiver(
         val kjoering = packet[KJOERING].asText()
         val antall = packet[ANTALL].asInt()
         val spesifikkeSaker = packet.saker
+        val sakType = packet.optionalSakType()
 
         val maksBatchstoerrelse = MAKS_BATCHSTOERRELSE
         var tatt = 0
@@ -60,7 +66,14 @@ internal class ReguleringsforespoerselRiver(
         while (tatt < antall) {
             val antallIDenneRunden = min(maksBatchstoerrelse, antall)
             logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
-            val sakerTilOmregning = behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker)
+            val saker =
+                behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker, sakType)
+            val sakerTilOmregning = Saker(saker.saker.filterNot { sakerViIkkeRegulererAutomatiskNaa.contains(it.id) })
+
+            if (sakerTilOmregning.saker.isEmpty()) {
+                logger.debug("Ingen saker i denne runden. Returnerer")
+                break
+            }
 
             val tilbakemigrerte =
                 behandlingService.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
@@ -79,9 +92,16 @@ internal class ReguleringsforespoerselRiver(
             }
             tatt += sakerTilOmregning.saker.size
             logger.info("Ferdig med $tatt av totalt $antall saker")
-            if (sakerTilOmregning.saker.isEmpty() || sakerTilOmregning.saker.size < maksBatchstoerrelse) {
+            if (sakerTilOmregning.saker.isEmpty() || saker.saker.size < maksBatchstoerrelse) {
                 break
             }
+        }
+    }
+
+    private fun JsonMessage.optionalSakType(): SakType? {
+        return when (val node = this[SAK_TYPE]) {
+            is MissingNode -> null
+            else -> SakType.valueOf(node.asText())
         }
     }
 
@@ -96,3 +116,14 @@ enum class ReguleringFeatureToggle(private val key: String) : FeatureToggle {
 
     override fun key() = key
 }
+
+private val sakerViIkkeRegulererAutomatiskNaa =
+    listOf<Long>(
+        16850, // Til samordning
+        17003, // Til samordning
+        16616, // Til samordning
+        3482, // Revurdering med overstyrt beregning åpen behandling
+        6323, // Revurdering med overstyrt beregning åpen behandling
+        11606, // Revurdering med overstyrt beregning åpen behandling
+        11848, // Revurdering med overstyrt beregning åpen behandling
+    )

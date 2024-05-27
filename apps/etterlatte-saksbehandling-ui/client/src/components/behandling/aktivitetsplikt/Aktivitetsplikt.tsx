@@ -1,6 +1,5 @@
-import { BodyLong, BodyShort, Button, Detail, Heading, Textarea } from '@navikt/ds-react'
+import { BodyLong, BodyShort, Box, Button, Detail, Heading, Textarea } from '@navikt/ds-react'
 import React, { useContext, useEffect, useState } from 'react'
-import { Content, ContentHeader } from '~shared/styled'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import styled from 'styled-components'
 import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
@@ -57,7 +56,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
   }
 
   return (
-    <Content>
+    <>
       {isFailureHandler({
         errorMessage: 'En feil oppsto ved henting av data',
         apiResult: hentet,
@@ -67,7 +66,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         apiResult: lagret,
       })}
 
-      <ContentHeader>
+      <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading spacing size="large" level="1">
             Oppfølging av aktivitet
@@ -76,7 +75,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             <strong>Dødsdato: </strong> {avdoedesDoedsdato && formaterDato(new Date(avdoedesDoedsdato))}
           </BodyShort>
         </HeadingWrapper>
-      </ContentHeader>
+      </Box>
 
       <AktivitetspliktWrapper>
         <Heading level="1" spacing size="medium">
@@ -187,7 +186,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           {handlinger.NESTE.navn}
         </Button>
       </BehandlingHandlingKnapper>
-    </Content>
+    </>
   )
 }
 

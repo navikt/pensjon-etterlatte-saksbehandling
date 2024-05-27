@@ -1,7 +1,6 @@
 import React, { Dispatch, ReactNode, SetStateAction, useState } from 'react'
-import { Button, Heading, Modal, TextField } from '@navikt/ds-react'
+import { Button, Heading, HStack, Modal, TextField } from '@navikt/ds-react'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { FlexRow } from '~shared/styled'
 import { isPending } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterTittel } from '~shared/api/brev'
@@ -73,14 +72,14 @@ export const BrevTittelModal = ({ nyTittel, setNyTittel, brevId, sakId }: Props)
           </Modal.Body>
 
           <Modal.Footer>
-            <FlexRow justify="right">
+            <HStack gap="4" justify="end">
               <Button variant="secondary" type="button" disabled={isPending(status)} onClick={avbryt}>
                 Avbryt
               </Button>
               <Button variant="primary" type="submit" loading={isPending(status)}>
                 Lagre
               </Button>
-            </FlexRow>
+            </HStack>
           </Modal.Footer>
         </form>
       </Modal>

@@ -164,6 +164,18 @@ class OppgaveDaoMedEndringssporingImpl(
         }
     }
 
+    override fun settForrigeSaksbehandlerFraSaksbehandler(oppgaveId: UUID) {
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.settForrigeSaksbehandlerFraSaksbehandler(oppgaveId)
+        }
+    }
+
+    override fun fjernForrigeSaksbehandler(oppgaveId: UUID) {
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.fjernForrigeSaksbehandler(oppgaveId)
+        }
+    }
+
     override fun redigerFrist(
         oppgaveId: UUID,
         frist: Tidspunkt,

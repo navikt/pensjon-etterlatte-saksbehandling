@@ -1,12 +1,10 @@
-import { Alert, Button, Heading, Modal, Select } from '@navikt/ds-react'
+import { Alert, Button, Heading, HStack, Modal, Select, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending } from '~shared/api/apiUtils'
 import { byttEnhetPaaSak } from '~shared/api/sak'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
 import { PencilIcon } from '@navikt/aksel-icons'
-import { ButtonGroup } from '~shared/styled'
 
 export const EndreEnhet = ({ sakId }: { sakId: number }) => {
   const [error, setError] = useState<string | null>(null)
@@ -49,37 +47,35 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
         </Modal.Header>
 
         <Modal.Body>
-          <WarningAlert>
-            Hvis du endrer til en enhet du selv ikke har tilgang til, vil du ikke kunne flytte saken tilbake
-          </WarningAlert>
+          <VStack gap="4">
+            <Alert variant="warning">
+              Hvis du endrer til en enhet du selv ikke har tilgang til, vil du ikke kunne flytte saken tilbake
+            </Alert>
 
-          <Select
-            label="Endre enhet"
-            value={enhetsFilter}
-            onChange={(e) => setEnhetsfilter(e.target.value as EnhetFilterKeys)}
-            error={error}
-          >
-            {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (
-              <option key={status} value={status}>
-                {statusbeskrivelse}
-              </option>
-            ))}
-          </Select>
+            <Select
+              label="Endre enhet"
+              value={enhetsFilter}
+              onChange={(e) => setEnhetsfilter(e.target.value as EnhetFilterKeys)}
+              error={error}
+            >
+              {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (
+                <option key={status} value={status}>
+                  {statusbeskrivelse}
+                </option>
+              ))}
+            </Select>
 
-          <ButtonGroup>
-            <Button variant="secondary" onClick={closeAndReset}>
-              Avbryt
-            </Button>
-            <Button loading={isPending(endreEnhetStatus)} onClick={endreEnhet}>
-              Endre
-            </Button>
-          </ButtonGroup>
+            <HStack gap="2" justify="end">
+              <Button variant="secondary" onClick={closeAndReset}>
+                Avbryt
+              </Button>
+              <Button loading={isPending(endreEnhetStatus)} onClick={endreEnhet}>
+                Endre
+              </Button>
+            </HStack>
+          </VStack>
         </Modal.Body>
       </Modal>
     </div>
   )
 }
-
-const WarningAlert = styled(Alert).attrs({ variant: 'warning' })`
-  margin-bottom: 1em;
-`

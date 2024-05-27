@@ -1,20 +1,19 @@
-import { Alert, BodyShort, Button, Modal, Textarea } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, HStack, Modal, Textarea, VStack } from '@navikt/ds-react'
 import { Grunnlagsendringshendelse, GrunnlagsendringsType } from '~components/person/typer'
-import InstitusjonsoppholdVurderingBegrunnelse from '~components/person/hendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { isPending, mapSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { lukkGrunnlagshendelse } from '~shared/api/behandling'
+import { arkiverGrunnlagshendelse } from '~shared/api/behandling'
 import { ArchiveIcon } from '@navikt/aksel-icons'
 import { hentOppgaveForReferanseUnderBehandling } from '~shared/api/oppgaver'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { ButtonGroup } from '~shared/styled'
+import { VurderInstitusjonsoppholdModalBody } from '~components/person/hendelser/institusjonsopphold/VurderInstitusjonsoppholdModalBody'
 
-export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshendelse }) => {
+export const ArkiverHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshendelse }) => {
   const [open, setOpen] = useState(false)
   const [kommentar, setKommentar] = useState<string>('')
-  const [lukkHendelseResult, lukkHendelseFunc, resetApiCall] = useApiCall(lukkGrunnlagshendelse)
+  const [arkiverHendelseResult, arkiverHendelseFunc, resetApiCall] = useApiCall(arkiverGrunnlagshendelse)
   const [oppgaveResult, hentOppgave] = useApiCall(hentOppgaveForReferanseUnderBehandling)
 
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
@@ -24,8 +23,8 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
     setOpen(true)
   }
 
-  const lukkHendelse = () => {
-    lukkHendelseFunc(
+  const arkiverHendelse = () => {
+    arkiverHendelseFunc(
       { ...hendelse, kommentar },
       () => {
         setOpen(false)
@@ -40,41 +39,35 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
   return (
     <>
       <Button variant="tertiary" onClick={aapneModal} icon={<ArchiveIcon />} size="small">
-        Lukk hendelse
+        Arkiver hendelse
       </Button>
 
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        aria-labelledby="modal-heading"
-        header={{ heading: 'Lukk hendelse' }}
+        aria-labelledby="arkiver-hendelse-modal"
+        header={{ heading: 'Arkiver hendelse' }}
       >
-        <Modal.Body>
-          {hendelse.type === GrunnlagsendringsType.INSTITUSJONSOPPHOLD ? (
-            <>
-              <InstitusjonsoppholdVurderingBegrunnelse
-                sakId={hendelse.sakId}
-                hendelseId={hendelse.id}
-                lukkHendelse={lukkHendelse}
-              />
-              <Button variant="secondary" onClick={() => setOpen(false)}>
-                Avbryt
-              </Button>
-            </>
-          ) : (
-            <>
-              <BodyShort spacing>
+        {hendelse.type === GrunnlagsendringsType.INSTITUSJONSOPPHOLD ? (
+          <VurderInstitusjonsoppholdModalBody
+            setOpen={setOpen}
+            sakId={hendelse.sakId}
+            hendelseId={hendelse.id}
+            arkiverHendelse={arkiverHendelse}
+          />
+        ) : (
+          <Modal.Body>
+            <VStack gap="4">
+              <BodyShort>
                 I noen tilfeller krever ikke ny informasjon eller hendelser noen revurdering. Beskriv hvorfor en
                 revurdering ikke er nødvendig.
               </BodyShort>
               <Textarea label="Begrunnelse" value={kommentar} onChange={(e) => setKommentar(e.target.value)} />
 
               {isFailureHandler({
-                apiResult: lukkHendelseResult,
-                errorMessage: 'Vi kunne ikke lukke hendelsen',
+                apiResult: arkiverHendelseResult,
+                errorMessage: 'Vi kunne ikke arkivere hendelsen',
               })}
-
-              <br />
 
               {mapSuccess(oppgaveResult, (oppgave) => {
                 const tildeltIdent = oppgave?.saksbehandler?.ident
@@ -82,7 +75,8 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
                 if (!tildeltIdent) {
                   return (
                     <Alert variant="info" inline>
-                      Oppgaven er ikke tildelt en saksbehandler. Om du lukker hendelsen vil den automatisk tildeles deg.
+                      Oppgaven er ikke tildelt en saksbehandler. Om du arkiverer hendelsen vil den automatisk tildeles
+                      deg.
                     </Alert>
                   )
                 } else if (tildeltIdent !== innloggetSaksbehandler.ident) {
@@ -90,7 +84,7 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
                 }
               })}
 
-              <ButtonGroup>
+              <HStack gap="2" justify="end">
                 <Button
                   variant="secondary"
                   onClick={() => {
@@ -101,13 +95,13 @@ export const LukkHendelseModal = ({ hendelse }: { hendelse: Grunnlagsendringshen
                 >
                   Avbryt
                 </Button>
-                <Button onClick={lukkHendelse} disabled={!kommentar} loading={isPending(lukkHendelseResult)}>
-                  Lukk
+                <Button onClick={arkiverHendelse} disabled={!kommentar} loading={isPending(arkiverHendelseResult)}>
+                  Arkiver
                 </Button>
-              </ButtonGroup>
-            </>
-          )}
-        </Modal.Body>
+              </HStack>
+            </VStack>
+          </Modal.Body>
+        )}
       </Modal>
     </>
   )

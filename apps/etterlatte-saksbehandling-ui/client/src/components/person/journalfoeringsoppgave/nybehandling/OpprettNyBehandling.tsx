@@ -3,12 +3,11 @@ import { SakType } from '~shared/types/sak'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import PersongalleriOmstillingsstoenad from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriOmstillingsstoenad'
 import { formaterSakstype, formaterSpraak, mapRHFArrayToStringArray } from '~utils/formattering'
-import { Alert, Button, Heading, Select } from '@navikt/ds-react'
+import { Alert, Button, Heading, HStack, Select, VStack } from '@navikt/ds-react'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import styled from 'styled-components'
-import { FlexRow, SpaceChildren } from '~shared/styled'
 import React, { useEffect } from 'react'
 import { Spraak } from '~shared/types/Brev'
 import { FormProvider, useForm } from 'react-hook-form'
@@ -114,7 +113,7 @@ export default function OpprettNyBehandling() {
   return (
     <FormWrapper column>
       <FormProvider {...methods}>
-        <SpaceChildren>
+        <VStack gap="4">
           <Heading size="medium" spacing>
             Opprett behandling
           </Heading>
@@ -168,8 +167,8 @@ export default function OpprettNyBehandling() {
           {valgtSakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad />}
           {valgtSakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon />}
 
-          <div>
-            <FlexRow justify="center" $spacing>
+          <VStack gap="2">
+            <HStack gap="4" justify="center">
               <Button variant="secondary" onClick={tilbake} type="button">
                 Tilbake
               </Button>
@@ -177,12 +176,12 @@ export default function OpprettNyBehandling() {
               <Button variant="primary" type="submit" onClick={handleSubmit(onSubmit)}>
                 Neste
               </Button>
-            </FlexRow>
-            <FlexRow justify="center">
+            </HStack>
+            <HStack justify="center">
               <AvbrytBehandleJournalfoeringOppgave />
-            </FlexRow>
-          </div>
-        </SpaceChildren>
+            </HStack>
+          </VStack>
+        </VStack>
       </FormProvider>
     </FormWrapper>
   )

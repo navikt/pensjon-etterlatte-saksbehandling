@@ -1,5 +1,4 @@
-import { Alert, Button, Loader } from '@navikt/ds-react'
-import { FlexRow } from '~shared/styled'
+import { Alert, Button, HStack, Loader } from '@navikt/ds-react'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { feilregistrerSakstilknytning } from '~shared/api/dokument'
@@ -33,7 +32,7 @@ export const FeilregistrerJournalpost = ({ journalpost }: { journalpost: Journal
       <br />
 
       <br />
-      <FlexRow justify="right">
+      <HStack justify="end">
         <Button
           variant="danger"
           onClick={feilregistrer}
@@ -42,7 +41,7 @@ export const FeilregistrerJournalpost = ({ journalpost }: { journalpost: Journal
         >
           Feilregistrer sakstilknytning
         </Button>
-      </FlexRow>
+      </HStack>
     </>
   )
 }

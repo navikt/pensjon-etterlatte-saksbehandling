@@ -1,9 +1,8 @@
 import { DokumentInfo } from '~shared/types/Journalpost'
-import { Alert, Button, Heading, TextField } from '@navikt/ds-react'
+import { Alert, Button, Heading, HStack, TextField } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { InputFlexRow } from '~components/person/journalfoeringsoppgave/journalpost/OppdaterJournalpost'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { FlexRow } from '~shared/styled'
 
 export const EndreDokumenter = ({
   initielleDokumenter,
@@ -65,14 +64,14 @@ const Dokument = ({
 
           <br />
 
-          <FlexRow justify="right">
+          <HStack gap="4" justify="end">
             <Button variant="tertiary" onClick={avbryt} size="small">
               Avbryt
             </Button>
             <Button variant="secondary" onClick={lagre} disabled={nyTittel === dokument.tittel} size="small">
               Lagre
             </Button>
-          </FlexRow>
+          </HStack>
         </>
       ) : (
         <InputFlexRow>

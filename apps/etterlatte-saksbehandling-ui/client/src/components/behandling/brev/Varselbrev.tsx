@@ -1,6 +1,5 @@
-import { Content, ContentHeader } from '~shared/styled'
 import React, { useEffect, useState } from 'react'
-import { Alert, Button, Heading } from '@navikt/ds-react'
+import { Alert, Box, Button, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVarselbrev, opprettVarselbrev } from '~shared/api/brev'
@@ -100,10 +99,10 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   }
 
   return (
-    <Content>
+    <>
       <BrevContent>
         <Sidebar>
-          <ContentHeader>
+          <Box paddingInline="16" paddingBlock="4">
             <HeadingWrapper>
               <Heading spacing size="large" level="1">
                 Varselbrev
@@ -123,7 +122,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
                 <BrevMottaker brev={varselbrev} kanRedigeres={redigerbar} />
               </>
             )}
-          </ContentHeader>
+          </Box>
         </Sidebar>
 
         {!!varselbrev && <RedigerbartBrev brev={varselbrev!!} kanRedigeres={redigerbar} />}
@@ -150,7 +149,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
       ) : (
         <NesteOgTilbake />
       )}
-    </Content>
+    </>
   )
 }
 

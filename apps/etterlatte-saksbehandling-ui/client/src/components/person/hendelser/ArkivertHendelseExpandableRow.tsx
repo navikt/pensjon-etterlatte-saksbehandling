@@ -11,7 +11,7 @@ interface Props {
   hendelse: Grunnlagsendringshendelse
 }
 
-export const LukketHendelseExpandableRow = ({ sakType, hendelse }: Props) => {
+export const ArkivertHendelseExpandableRow = ({ sakType, hendelse }: Props) => {
   return (
     <Table.ExpandableRow content={<HendelseBeskrivelse hendelse={hendelse} sakType={sakType} />} expandOnRowClick>
       <Table.DataCell>{grunnlagsendringsTittel[hendelse.samsvarMellomKildeOgGrunnlag.type]}</Table.DataCell>

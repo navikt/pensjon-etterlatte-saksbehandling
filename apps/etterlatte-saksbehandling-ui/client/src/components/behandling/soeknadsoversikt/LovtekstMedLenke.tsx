@@ -15,7 +15,7 @@ interface LovtekstMedLenkeProps {
 export const LovtekstMedLenke = (props: LovtekstMedLenkeProps) => {
   return (
     <VurderingWrapper>
-      <HeadingMedIkon>
+      <HeadingMedIkon size="medium" level="2">
         {props.status && <StatusIcon status={props.status} />} {props.tittel}
       </HeadingMedIkon>
 
@@ -30,7 +30,7 @@ export const LovtekstMedLenke = (props: LovtekstMedLenkeProps) => {
   )
 }
 
-const HeadingMedIkon = styled(Heading).attrs({ size: 'medium', level: '2' })`
+const HeadingMedIkon = styled(Heading)`
   display: flex;
   gap: 12px;
 `

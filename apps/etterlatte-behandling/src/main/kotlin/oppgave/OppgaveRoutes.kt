@@ -264,7 +264,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                     val oppgaver = service.hentFristGaarUt(request)
                     oppgaver.forEach {
                         service.oppdaterStatusOgMerknad(
-                            it.oppgaveID,
+                            it.oppgaveId,
                             "",
                             Status.UNDER_BEHANDLING,
                         )

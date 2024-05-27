@@ -1,5 +1,4 @@
-import { Alert, Box, Button, Loader } from '@navikt/ds-react'
-import { FlexRow } from '~shared/styled'
+import { Alert, Box, Button, HStack, Loader } from '@navikt/ds-react'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opphevFeilregistrertSakstilknytning } from '~shared/api/dokument'
@@ -38,11 +37,11 @@ export const OpphevFeilregistreringJournalpost = ({ journalpost }: { journalpost
       </Box>
 
       <br />
-      <FlexRow justify="right">
+      <HStack justify="end">
         <Button onClick={opphevFeilregistrering} loading={isPending(opphevFeilregistreringStatus)}>
           Opphev feilregistrering
         </Button>
-      </FlexRow>
+      </HStack>
     </>
   )
 }

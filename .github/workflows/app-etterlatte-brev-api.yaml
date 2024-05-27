@@ -27,6 +27,7 @@ on:
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-brev-model/**
       - libs/etterlatte-oppgave-model/**
+      - libs/etterlatte-tilbakekreving-model/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -45,6 +46,7 @@ on:
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-brev-model/**
       - libs/etterlatte-oppgave-model/**
+      - libs/etterlatte-tilbakekreving-model/**
       - gradle/libs.versions.toml
 
 permissions:

@@ -1,6 +1,5 @@
-import { UNSAFE_Combobox } from '@navikt/ds-react'
+import { HStack, UNSAFE_Combobox } from '@navikt/ds-react'
 import { Journalposttype, Journalstatus, Tema } from '~shared/types/Journalpost'
-import { FlexRow } from '~shared/styled'
 import { Dispatch, SetStateAction } from 'react'
 
 const TEMA_FILTER: Record<Tema, string> = {
@@ -43,7 +42,7 @@ export const DokumentFilter = ({
   filter: DokumentFilter
   setFilter: Dispatch<SetStateAction<DokumentFilter>>
 }) => (
-  <FlexRow $spacing>
+  <HStack gap="4">
     <UNSAFE_Combobox
       label="Tema"
       options={Object.entries(TEMA_FILTER).map(([, tema]) => tema)}
@@ -88,5 +87,5 @@ export const DokumentFilter = ({
       }}
       isMultiSelect
     />
-  </FlexRow>
+  </HStack>
 )

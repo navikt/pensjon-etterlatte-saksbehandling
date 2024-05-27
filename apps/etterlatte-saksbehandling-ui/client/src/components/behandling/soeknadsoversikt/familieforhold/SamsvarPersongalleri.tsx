@@ -1,5 +1,5 @@
 import { MismatchPersongalleri, PersongalleriSamsvar } from '~shared/types/grunnlag'
-import { Alert, BodyShort, Box, Heading } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
 import styled from 'styled-components'
 import { PersonNavn, PersonUtenIdent, relativPersonrolleTekst } from '~shared/types/Person'
@@ -12,7 +12,6 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { SakType } from '~shared/types/sak'
 import { mapApiResult } from '~shared/api/apiUtils'
-import { FlexRow } from '~shared/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
@@ -90,7 +89,7 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
   return (
     <>
       {harAvvikMotPdl && visMismatchPdl && (
-        <MediumAdvarsel>
+        <BredAlert variant="warning">
           {saktype === SakType.BARNEPENSJON ? (
             <BodyShort spacing>
               Det er forskjeller mellom familieforholdet i behandlingen og det familieforholdet vi utleder ut i fra PDL.
@@ -102,41 +101,47 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
               er registrert i PDL. Merk at PDL kan ha mangler i informasjon om samboerskap.
             </BodyShort>
           )}
-          <Heading level="4" size="xsmall" spacing>
-            Familieforholdet i behandlingen
-          </Heading>
-          <FlexRow $spacing>
-            <Info label="Avdøde" tekst={formaterListeMedIdenter(samsvar.persongalleri.avdoed)} />
-            {saktype === SakType.BARNEPENSJON && (
-              <Info label="Gjenlevende" tekst={formaterListeMedIdenter(samsvar.persongalleri.gjenlevende)} />
-            )}
-            <Info
-              label="Kilde"
-              tekst={`${samsvar.kilde?.type.toUpperCase()} (${formaterKanskjeStringDato(samsvar.kilde?.tidspunkt)})`}
-            />
-          </FlexRow>
+          <VStack gap="4">
+            <VStack gap="2">
+              <Heading level="4" size="xsmall">
+                Familieforholdet i behandlingen
+              </Heading>
+              <HStack gap="4">
+                <Info label="Avdøde" tekst={formaterListeMedIdenter(samsvar.persongalleri.avdoed)} />
+                {saktype === SakType.BARNEPENSJON && (
+                  <Info label="Gjenlevende" tekst={formaterListeMedIdenter(samsvar.persongalleri.gjenlevende)} />
+                )}
+                <Info
+                  label="Kilde"
+                  tekst={`${samsvar.kilde?.type.toUpperCase()} (${formaterKanskjeStringDato(samsvar.kilde?.tidspunkt)})`}
+                />
+              </HStack>
+            </VStack>
 
-          <Heading level="4" size="xsmall" spacing>
-            Familieforholdet i PDL
-          </Heading>
-          <FlexRow $spacing>
-            <Info label="Avdøde" tekst={formaterListeMedIdenter(samsvar.persongalleriPdl?.avdoed)} />
-            {saktype === SakType.BARNEPENSJON && (
-              <Info label="Gjenlevende" tekst={formaterListeMedIdenter(samsvar.persongalleriPdl?.gjenlevende)} />
-            )}
-            <Info
-              label="Kilde"
-              tekst={`${samsvar.kildePdl?.type.toUpperCase()} (${formaterKanskjeStringDato(samsvar.kildePdl?.tidspunkt)})`}
-            />
-          </FlexRow>
-        </MediumAdvarsel>
+            <VStack gap="4">
+              <Heading level="4" size="xsmall">
+                Familieforholdet i PDL
+              </Heading>
+              <HStack gap="4">
+                <Info label="Avdøde" tekst={formaterListeMedIdenter(samsvar.persongalleriPdl?.avdoed)} />
+                {saktype === SakType.BARNEPENSJON && (
+                  <Info label="Gjenlevende" tekst={formaterListeMedIdenter(samsvar.persongalleriPdl?.gjenlevende)} />
+                )}
+                <Info
+                  label="Kilde"
+                  tekst={`${samsvar.kildePdl?.type.toUpperCase()} (${formaterKanskjeStringDato(samsvar.kildePdl?.tidspunkt)})`}
+                />
+              </HStack>
+            </VStack>
+          </VStack>
+        </BredAlert>
       )}
       {harPersonerUtenIdenter && (
         <div>
-          <MediumAdvarsel>
+          <BredAlert variant="warning">
             Det er personer uten identer i PDL i saksgrunnlaget. Disse personene kan ikke brukes i beregning av
             trygdetid eller en eventuell søskenjustering på gammelt regelverk.
-          </MediumAdvarsel>
+          </BredAlert>
           {personerUtenIdenterSak.length > 0 && (
             <>
               <Heading size="small" level="4">
@@ -155,7 +160,7 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
   )
 }
 
-const MediumAdvarsel = styled(Alert).attrs({ variant: 'warning' })`
+const BredAlert = styled(Alert)`
   width: fit-content;
 `
 

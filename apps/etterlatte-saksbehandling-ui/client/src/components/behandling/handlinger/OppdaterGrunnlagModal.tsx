@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-import { BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
-import { FlexRow } from '~shared/styled'
+import { BodyLong, Button, Heading, HStack, Modal } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterGrunnlag } from '~shared/api/behandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
@@ -63,7 +62,7 @@ export default function OppdaterGrunnlagModal({
             til &quot;Opprettet&quot;. Hvis du har startet behandlingen allerede, må du gå gjennom stegene på nytt.
           </BodyLong>
 
-          <FlexRow justify="center">
+          <HStack gap="4" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isPending(oppdatert)}>
               Nei, fortsett behandling
             </Button>
@@ -75,7 +74,7 @@ export default function OppdaterGrunnlagModal({
             >
               Ja, oppdater grunnlaget
             </Button>
-          </FlexRow>
+          </HStack>
           {isFailureHandler({ apiResult: oppdatert, errorMessage: 'Oppdatering feilet' })}
         </Modal.Body>
       </Modal>

@@ -8,6 +8,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -19,6 +20,7 @@ import no.nav.helse.rapids_rivers.River
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -34,8 +36,9 @@ class OmregningHendelserBeregningRiverTest {
 
         every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
         every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
-        every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 500)
-        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 600)
+        every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 500, 1000)
+        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 600, 1100)
+        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.2"))
 
         runBlocking {
             river.beregn(
@@ -56,8 +59,9 @@ class OmregningHendelserBeregningRiverTest {
 
         every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
         every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
-        every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 1000)
-        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 500)
+        every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 1000, 1000)
+        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 500, 1100)
+        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.2"))
 
         runBlocking {
             assertThrows<MindreEnnForrigeBehandling> {
@@ -72,6 +76,31 @@ class OmregningHendelserBeregningRiverTest {
     }
 
     @Test
+    fun `forrige beregning er revurdering fram i tid fra 1 juli, men ny er fra 1 mai, og vi har dermed ikke overlapp paa periode`() {
+        val (beregningService, river) = initialiserRiver()
+
+        val nyBehandling = UUID.randomUUID()
+        val gammelBehandling = UUID.randomUUID()
+
+        every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
+        every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
+        every {
+            beregningService.hentBeregning(gammelBehandling)
+        } returns beregningDTO(gammelBehandling, 500, 1000, beregningsperiodeFom = YearMonth.of(2024, Month.JULY))
+        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 600, 1100)
+        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.2"))
+
+        runBlocking {
+            river.beregn(
+                SakType.BARNEPENSJON,
+                behandlingId = nyBehandling,
+                behandlingViOmregnerFra = gammelBehandling,
+                LocalDate.of(2024, Month.APRIL, 10),
+            )
+        }
+    }
+
+    @Test
     fun `ny beregning skal ikke kunne vaere mer enn X prosent hoeyere enn gammel`() {
         val (beregningService, river) = initialiserRiver()
 
@@ -80,8 +109,9 @@ class OmregningHendelserBeregningRiverTest {
 
         every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
         every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
-        every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 1000)
-        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 1500)
+        every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 1000, 1000)
+        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 1500, 1100)
+        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.2"))
 
         runBlocking {
             assertThrows<ForStorOekning> {
@@ -104,8 +134,9 @@ class OmregningHendelserBeregningRiverTest {
 
         every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
         every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
-        every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 7784)
-        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 7875)
+        every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 7784, 1000)
+        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 7875, 1100)
+        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.01169"))
 
         runBlocking {
             val resultat =
@@ -130,6 +161,8 @@ class OmregningHendelserBeregningRiverTest {
     private fun beregningDTO(
         behandling: UUID,
         nySum: Int,
+        g: Int,
+        beregningsperiodeFom: YearMonth = YearMonth.of(2024, Month.MARCH),
     ) = mockk<HttpResponse>().also {
         coEvery { it.body<BeregningDTO>() } returns
             BeregningDTO(
@@ -139,9 +172,10 @@ class OmregningHendelserBeregningRiverTest {
                 beregningsperioder =
                     listOf(
                         mockk<Beregningsperiode>().also {
-                            every { it.datoFOM } returns YearMonth.of(2024, Month.MARCH)
+                            every { it.datoFOM } returns beregningsperiodeFom
                             every { it.datoTOM } returns null
                             every { it.utbetaltBeloep } returns nySum
+                            every { it.grunnbelop } returns g
                         },
                     ),
                 beregnetDato = Tidspunkt.now(),

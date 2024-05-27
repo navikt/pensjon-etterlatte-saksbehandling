@@ -16,7 +16,7 @@ data class BrevkodeRequest(
 class BrevKodeMapperVedtak {
     fun brevKode(request: BrevkodeRequest): Brevkoder {
         if (request.erMigrering && !request.erForeldreloes) {
-            assert(listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING).contains(request.vedtakType))
+            check(listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING).contains(request.vedtakType))
             return Brevkoder.OMREGNING
         }
 

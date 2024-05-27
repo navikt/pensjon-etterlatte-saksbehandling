@@ -5,6 +5,8 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.domain.hentUtlandstilknytning
+import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -42,10 +44,13 @@ import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.sak.PersonManglerSak
+import no.nav.etterlatte.sak.SakMedUtlandstilknytning
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -80,6 +85,8 @@ interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): Behandling?
 
     fun hentBehandlingerForSak(sakId: Long): List<Behandling>
+
+    fun hentSakMedBehandlinger(saker: List<Sak>): SakMedBehandlinger
 
     fun hentSisteIverksatte(sakId: Long): Behandling?
 
@@ -193,6 +200,38 @@ internal class BehandlingServiceImpl(
 
     override fun hentBehandlingerForSak(sakId: Long): List<Behandling> {
         return hentBehandlingerForSakId(sakId)
+    }
+
+    /**
+     * Funksjon for uthenting av [SakMedUtlandstilknytning] og tilknyttede [Behandling]er.
+     *
+     * Dersom det finnes flere saker vil det bli gjort en "prioritert gjetning" på hvilken som er gjeldende.
+     * Gjøres som en midlertidig løsning inntil vi får avklart hvordan vi skal håndtere tilfeller hvor det
+     * blir feilaktig opprettet flere saker på én og samme bruker.
+     **/
+    override fun hentSakMedBehandlinger(saker: List<Sak>): SakMedBehandlinger {
+        if (saker.isEmpty()) throw PersonManglerSak()
+
+        val sakerMedBehandlinger =
+            saker.map { sak ->
+                val behandlinger = hentBehandlingerForSak(sak.id)
+
+                val utlandstilknytning = behandlinger.hentUtlandstilknytning()
+                val sakMedUtlandstilknytning = SakMedUtlandstilknytning.fra(sak, utlandstilknytning)
+
+                behandlinger
+                    .map { it.toBehandlingSammendrag() }
+                    .let { SakMedBehandlinger(sakMedUtlandstilknytning, it) }
+            }
+
+        return if (sakerMedBehandlinger.size > 1) {
+            sakerMedBehandlinger.maxByOrNull {
+                it.behandlinger
+                    .count { behandling -> behandling.status != BehandlingStatus.AVBRUTT }
+            }!!
+        } else {
+            sakerMedBehandlinger.single()
+        }
     }
 
     override fun hentSisteIverksatte(sakId: Long): Behandling? {
@@ -460,12 +499,7 @@ internal class BehandlingServiceImpl(
     }
 
     override fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning? {
-        val sisteIkkeAvbrutteBehandling =
-            hentBehandlingerForSakId(sakId)
-                .filter { it.status != BehandlingStatus.AVBRUTT }
-                .maxByOrNull { it.behandlingOpprettet }
-
-        return sisteIkkeAvbrutteBehandling?.utlandstilknytning
+        return hentBehandlingerForSakId(sakId).hentUtlandstilknytning()
     }
 
     override fun lagreOpphoerFom(
@@ -642,7 +676,9 @@ internal class BehandlingServiceImpl(
     }
 
     override fun hentAapenRegulering(sakId: Long): UUID? {
-        return behandlingDao.hentAlleRevurderingerISakMedAarsak(sakId, Revurderingaarsak.REGULERING).singleOrNull()?.id
+        return behandlingDao.hentAlleRevurderingerISakMedAarsak(sakId, Revurderingaarsak.REGULERING).singleOrNull {
+            it.status != BehandlingStatus.AVBRUTT && it.status != BehandlingStatus.IVERKSATT
+        }?.id
     }
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =

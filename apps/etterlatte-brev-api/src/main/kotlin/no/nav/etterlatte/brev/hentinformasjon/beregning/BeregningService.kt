@@ -11,7 +11,10 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.regler.ANTALL_DESIMALER_INNTENKT
+import no.nav.etterlatte.regler.roundingModeInntekt
 import no.nav.pensjon.brevbaker.api.model.Kroner
+import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 
@@ -114,7 +117,11 @@ class BeregningService(private val beregningKlient: BeregningKlient) {
                     datoFOM = it.periode.fom.atDay(1),
                     datoTOM = it.periode.tom?.atEndOfMonth(),
                     grunnbeloep = Kroner(it.grunnbelop),
-                    inntekt = Kroner(it.aarsinntekt - it.fratrekkInnAar),
+                    // (vises i brev) maanedsinntekt regel burde eksponert dette, krever omskrivning av regler som vi må bli enige om
+                    inntekt =
+                        Kroner(
+                            BigDecimal(it.aarsinntekt - it.fratrekkInnAar).setScale(ANTALL_DESIMALER_INNTENKT, roundingModeInntekt).toInt(),
+                        ),
                     aarsinntekt = Kroner(it.aarsinntekt),
                     fratrekkInnAar = Kroner(it.fratrekkInnAar),
                     relevanteMaanederInnAar = it.relevanteMaanederInnAar,

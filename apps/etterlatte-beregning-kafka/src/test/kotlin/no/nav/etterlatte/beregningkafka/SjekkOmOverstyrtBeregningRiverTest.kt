@@ -20,13 +20,13 @@ internal class SjekkOmOverstyrtBeregningRiverTest {
 
     @Test
     fun `skal feile om sak har aapen behandling med overstyrt beregning`() {
-        val behandlingViOmregnerFra = UUID.fromString("63ba95c8-119b-465f-81fa-0a5316451db4")
-        every { beregningService.hentOverstyrt(behandlingViOmregnerFra) } returns
+        val tilbakestiltBehandling = UUID.fromString("63ba95c8-119b-465f-81fa-0a5316451db4")
+        every { beregningService.hentOverstyrt(tilbakestiltBehandling) } returns
             mockk<HttpResponse>().also {
                 every { it.status } returns HttpStatusCode.OK
             }
-        val inspector = inspector.apply { sendTestMessage(fullMelding) }
-        inspector.sendTestMessage(fullMelding)
+        val inspector = inspector.apply { sendTestMessage(meldingMedAapenRevurdering) }
+        inspector.sendTestMessage(meldingMedAapenRevurdering)
 
         val melding = inspector.inspektør.message(0)
         assertEquals(EventNames.FEILA.lagEventnameForType(), melding.get(EVENT_NAME_KEY).textValue())
@@ -35,13 +35,13 @@ internal class SjekkOmOverstyrtBeregningRiverTest {
 
     @Test
     fun `skal feile om ikke faar bekreftet at aapen behandling ikke har overstyrt beregning`() {
-        val behandlingViOmregnerFra = UUID.fromString("63ba95c8-119b-465f-81fa-0a5316451db4")
-        every { beregningService.hentOverstyrt(behandlingViOmregnerFra) } returns
+        val tilbakestiltBehandling = UUID.fromString("63ba95c8-119b-465f-81fa-0a5316451db4")
+        every { beregningService.hentOverstyrt(tilbakestiltBehandling) } returns
             mockk<HttpResponse>().also {
                 every { it.status } returns HttpStatusCode.BadRequest
             }
-        val inspector = inspector.apply { sendTestMessage(fullMelding) }
-        inspector.sendTestMessage(fullMelding)
+        val inspector = inspector.apply { sendTestMessage(meldingMedAapenRevurdering) }
+        inspector.sendTestMessage(meldingMedAapenRevurdering)
 
         val melding = inspector.inspektør.message(0)
         assertEquals(EventNames.FEILA.lagEventnameForType(), melding.get(EVENT_NAME_KEY).textValue())
@@ -49,14 +49,25 @@ internal class SjekkOmOverstyrtBeregningRiverTest {
     }
 
     @Test
-    fun `skal fortsette om sak ikke har aapen behandling med overstyrt beregning`() {
+    fun `skal fortsette om sak ikke har aapen behandling`() {
+        val inspector = inspector.apply { sendTestMessage(meldingUtenAapenRevurdering) }
+
+        assertEquals(inspector.inspektør.size, 1)
+        assertEquals(
+            inspector.inspektør.message(0).get("@event_name").textValue(),
+            ReguleringHendelseType.UTFORT_SJEKK_AAPEN_OVERSTYRT.lagEventnameForType(),
+        )
+    }
+
+    @Test
+    fun `skal fortsette om sak har aapen behandling uten overstyrt beregning`() {
         val behandlingViOmregnerFra = UUID.fromString("63ba95c8-119b-465f-81fa-0a5316451db4")
         every { beregningService.hentOverstyrt(behandlingViOmregnerFra) } returns
             mockk<HttpResponse>().also {
                 every { it.status } returns HttpStatusCode.NoContent
             }
 
-        val inspector = inspector.apply { sendTestMessage(fullMelding) }
+        val inspector = inspector.apply { sendTestMessage(meldingMedAapenRevurdering) }
 
         assertEquals(inspector.inspektør.size, 1)
         assertEquals(
@@ -66,6 +77,33 @@ internal class SjekkOmOverstyrtBeregningRiverTest {
     }
 
     companion object {
-        val fullMelding = readFile("/omregningshendelse_sjekk_overstyrt.json")
+        val meldingMedAapenRevurdering =
+            """
+            {
+              "system_read_count": 0,
+              "@event_name": "REGULERING:LOEPENDE_YTELSE_FUNNET",
+              "hendelse_data": {
+                "sakId": 1,
+                "fradato": "2023-02-08",
+                "aarsak": "GRUNNBELOEPREGULERING",
+                "prosesstype": "AUTOMATISK"
+              },
+              "tilbakestilte_behandlinger": "63ba95c8-119b-465f-81fa-0a5316451db4"
+            }
+            """.trimIndent()
+        val meldingUtenAapenRevurdering =
+            """
+            {
+              "system_read_count": 0,
+              "@event_name": "REGULERING:LOEPENDE_YTELSE_FUNNET",
+              "hendelse_data": {
+                "sakId": 1,
+                "fradato": "2023-02-08",
+                "aarsak": "GRUNNBELOEPREGULERING",
+                "prosesstype": "AUTOMATISK"
+              },
+              "tilbakestilte_behandlinger": ""
+            }
+            """.trimIndent()
     }
 }

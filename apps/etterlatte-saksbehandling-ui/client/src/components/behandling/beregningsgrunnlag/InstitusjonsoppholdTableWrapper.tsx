@@ -35,7 +35,8 @@ const InstitusjonsoppholdTableWrapper = (props: InstitusjonsoppholdPerioder) => 
         key={index + item.id}
         content={content}
         expandOnRowClick={true}
-        open={open}
+        open={open && behandles}
+        expansionDisabled={!behandles}
         onOpenChange={(openInternal) => setIsOpen(openInternal)}
       >
         <Table.DataCell scope="row">

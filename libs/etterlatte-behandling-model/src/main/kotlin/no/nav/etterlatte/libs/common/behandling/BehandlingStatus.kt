@@ -58,7 +58,6 @@ enum class BehandlingStatus {
                 ATTESTERT,
                 OPPRETTET,
                 VILKAARSVURDERT,
-                TRYGDETID_OPPDATERT,
                 AVSLAG,
             )
     }

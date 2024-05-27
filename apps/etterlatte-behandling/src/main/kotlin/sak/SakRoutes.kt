@@ -8,27 +8,23 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.behandling.BehandlingListe
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.TilstandException
-import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.behandling.ForenkletBehandling
-import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.sak.SakIderDto
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -58,14 +54,16 @@ internal fun Route.sakSystemRoutes(
             kunSystembruker {
                 val kjoering = call.parameters[KJOERING]!!
                 val antall = call.parameters[ANTALL]!!.toInt()
-                val saker = call.receive<SakIderDto>().sakIder
-                call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall, saker) }))
+                val request = call.receive<HentSakerRequest>()
+                val saker = request.sakIder
+                val sakstype = request.sakType
+                call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall, saker, sakstype) }))
             }
         }
 
         post("hent") {
             kunSystembruker {
-                medBody<SakIderDto> { dto ->
+                medBody<HentSakerRequest> { dto ->
                     val saker = inTransaction { sakService.hentSakerMedIder(dto.sakIder) }
                     call.respond(SakerDto(saker))
                 }
@@ -79,17 +77,6 @@ internal fun Route.sakSystemRoutes(
                         sakService.finnSak(sakId)
                     }
                 call.respond(sak ?: HttpStatusCode.NotFound)
-            }
-
-            // TODO: Fjerne når grunnlag er versjonert (EY-2567)
-            get("/behandlinger") {
-                kunSystembruker {
-                    val behandlinger =
-                        inTransaction { behandlingService.hentBehandlingerForSak(sakId) }
-                            .map { ForenkletBehandling(it.sak.id, it.id, it.status) }
-
-                    call.respond(ForenkletBehandlingListeWrapper(behandlinger))
-                }
             }
 
             get("/behandlinger/sisteIverksatte") {
@@ -196,15 +183,6 @@ internal fun Route.sakWebRoutes(
                         inTransaction {
                             sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
-                            for (oppgaveIntern in oppgaveService.hentOppgaverForSak(sakId)) {
-                                if (oppgaveIntern.saksbehandler != null &&
-                                    oppgaveIntern.erUnderBehandling()
-                                ) {
-                                    oppgaveService.fjernSaksbehandler(
-                                        oppgaveIntern.id,
-                                    )
-                                }
-                            }
                         }
 
                         logger.info(
@@ -248,25 +226,20 @@ internal fun Route.sakWebRoutes(
 
             post("/behandlingerforsak") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
-                    val behandlinger =
+                    val sakMedBehandlinger =
                         inTransaction {
-                            val sak = sakService.hentEnkeltSakForPerson(fnr.value)
+                            val saker = sakService.finnSaker(fnr.value)
 
-                            val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(sak.id)
-                            val sakMedUtlandstilknytning = SakMedUtlandstilknytning.fra(sak, utlandstilknytning)
-
-                            requestLogger.loggRequest(
-                                brukerTokenInfo,
-                                Folkeregisteridentifikator.of(sak.ident),
-                                "behandlinger",
-                            )
-
-                            behandlingService.hentBehandlingerForSak(sakMedUtlandstilknytning.id)
-                                .map { it.toBehandlingSammendrag() }
-                                .let { BehandlingListe(sakMedUtlandstilknytning, it) }
+                            behandlingService.hentSakMedBehandlinger(saker)
                         }
 
-                    call.respond(behandlinger)
+                    requestLogger.loggRequest(
+                        brukerTokenInfo,
+                        Folkeregisteridentifikator.of(sakMedBehandlinger.sak.ident),
+                        "behandlinger",
+                    )
+
+                    call.respond(sakMedBehandlinger)
                 }
             }
 
@@ -291,22 +264,10 @@ internal fun Route.sakWebRoutes(
                 }
             }
 
-            post("grunnlagsendringshendelser") {
-                withFoedselsnummerInternal(tilgangService) { fnr ->
-                    call.respond(
-                        inTransaction {
-                            sakService.finnSaker(fnr.value).map { sak ->
-                                GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))
-                            }
-                        }.also { requestLogger.loggRequest(brukerTokenInfo, fnr, "grunnlagsendringshendelser") },
-                    )
-                }
-            }
-
-            post("lukkgrunnlagsendringshendelse") {
+            post("arkivergrunnlagsendringshendelse") {
                 kunSaksbehandler { saksbehandler ->
-                    val lukketHendelse = call.receive<Grunnlagsendringshendelse>()
-                    grunnlagsendringshendelseService.lukkHendelseMedKommentar(hendelse = lukketHendelse, saksbehandler)
+                    val arkivertHendelse = call.receive<Grunnlagsendringshendelse>()
+                    grunnlagsendringshendelseService.arkiverHendelseMedKommentar(hendelse = arkivertHendelse, saksbehandler)
                     call.respond(HttpStatusCode.OK)
                 }
             }

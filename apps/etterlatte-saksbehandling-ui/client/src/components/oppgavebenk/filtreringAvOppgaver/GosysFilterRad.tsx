@@ -1,6 +1,5 @@
-import { Button, Select, TextField } from '@navikt/ds-react'
+import { Button, HStack, Select, TextField } from '@navikt/ds-react'
 import React, { ReactNode, useEffect, useState } from 'react'
-import { FlexRow } from '~shared/styled'
 import {
   ENHETFILTER,
   EnhetFilterKeys,
@@ -27,7 +26,7 @@ export const GosysFilterRad = ({ hentAlleOppgaver, filter, setFilter, filterFoed
 
   return (
     <>
-      <FlexRow $spacing align="start">
+      <HStack gap="4" align="start">
         <TextField
           label="Fødselsnummer"
           width="1rem"
@@ -62,9 +61,9 @@ export const GosysFilterRad = ({ hentAlleOppgaver, filter, setFilter, filterFoed
             </option>
           ))}
         </Select>
-      </FlexRow>
+      </HStack>
 
-      <FlexRow $spacing>
+      <HStack gap="4">
         <Button onClick={() => hentAlleOppgaver()} size="small" icon={<ArrowCirclepathIcon />} iconPosition="right">
           Hent oppgaver
         </Button>
@@ -79,7 +78,7 @@ export const GosysFilterRad = ({ hentAlleOppgaver, filter, setFilter, filterFoed
         >
           Tilbakestill filtre
         </Button>
-      </FlexRow>
+      </HStack>
     </>
   )
 }

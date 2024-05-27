@@ -1,11 +1,10 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentDokumentPDF } from '~shared/api/dokument'
 import React, { useEffect, useState } from 'react'
-import { Detail, Heading } from '@navikt/ds-react'
+import { Box, Detail, Heading } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import { Journalpost } from '~shared/types/Journalpost'
-import { Container } from '~shared/styled'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 import { isSuccess, mapApiResult, mapResult, Result } from '~shared/api/apiUtils'
@@ -67,7 +66,8 @@ export default function VelgJournalpost({ journalpostStatus }: { journalpostStat
   )
 }
 
-const JournalpostContainer = styled(Container)`
+const JournalpostContainer = styled(Box)`
+  padding: var(--a-spacing-8);
   min-width: 680px;
 `
 

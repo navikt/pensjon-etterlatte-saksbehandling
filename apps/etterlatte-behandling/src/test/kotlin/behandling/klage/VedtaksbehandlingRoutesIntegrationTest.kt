@@ -191,14 +191,16 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
             inTransaction {
                 applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
             }
+        val factory = behandlingFactory ?: applicationContext.behandlingFactory
         val behandling =
             inTransaction {
-                (behandlingFactory ?: applicationContext.behandlingFactory)
+                factory
                     .opprettBehandling(
                         sak.id,
                         persongalleri(),
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
+                        factory.hentDataForOpprettBehandling(sak.id),
                     )
             }?.behandling
 
@@ -242,7 +244,7 @@ class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
             kontrollFelt = Kontrollfelt(""),
             status = KravgrunnlagStatus.ANNU,
             saksbehandler = NavIdent(""),
-            sisteUtbetalingslinjeId = UUID30(""),
+            referanse = UUID30(""),
             perioder = emptyList(),
         )
 }

@@ -81,7 +81,7 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
     if (!oppgavebenkState.minOppgavelisteOppgaver?.length) hentMinOppgavelisteOppgaver()
   }, [])
 
-  return oppgavebenkState.minOppgavelisteOppgaver.length >= 0 && !isPending(minOppgavelisteOppgaverResult) ? (
+  return (
     <>
       <FilterRad
         hentAlleOppgaver={hentMinOppgavelisteOppgaver}
@@ -91,20 +91,23 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         oppgavelisteValg={OppgavelisteValg.MIN_OPPGAVELISTE}
       />
-      <Oppgaver
-        oppgaver={oppgavebenkState.minOppgavelisteOppgaver}
-        oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
-        oppdaterFrist={(id: string, nyfrist: string) =>
-          oppdaterFrist(dispatcher.setMinOppgavelisteOppgaver, oppgavebenkState.minOppgavelisteOppgaver, id, nyfrist)
-        }
-        saksbehandlereIEnhet={saksbehandlereIEnhet}
-        filter={filter}
-      />
+
+      {oppgavebenkState.minOppgavelisteOppgaver.length >= 0 && !isPending(minOppgavelisteOppgaverResult) ? (
+        <Oppgaver
+          oppgaver={oppgavebenkState.minOppgavelisteOppgaver}
+          oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
+          oppdaterFrist={(id: string, nyfrist: string) =>
+            oppdaterFrist(dispatcher.setMinOppgavelisteOppgaver, oppgavebenkState.minOppgavelisteOppgaver, id, nyfrist)
+          }
+          saksbehandlereIEnhet={saksbehandlereIEnhet}
+          filter={filter}
+        />
+      ) : (
+        mapResult(minOppgavelisteOppgaverResult, {
+          pending: <Spinner visible={true} label="Henter dine oppgaver" />,
+          error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente dine oppgaver'}</ApiErrorAlert>,
+        })
+      )}
     </>
-  ) : (
-    mapResult(minOppgavelisteOppgaverResult, {
-      pending: <Spinner visible={true} label="Henter dine oppgaver" />,
-      error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente dine oppgaver'}</ApiErrorAlert>,
-    })
   )
 }

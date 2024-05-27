@@ -1,8 +1,4 @@
-import styled, { css } from 'styled-components'
-
-export const Container = styled.div`
-  padding: 2rem;
-`
+import styled from 'styled-components'
 
 export const GridContainer = styled.div`
   display: flex;
@@ -35,6 +31,7 @@ export const MainContent = styled.div`
 `
 
 export const CollapsibleSidebar = styled.div<{ collapsed: boolean }>`
+  background: var(--a-white);
   position: relative;
   max-height: fit-content;
   min-width: ${(props) => (props.collapsed ? '50px' : '20%')};
@@ -53,46 +50,4 @@ export const SidebarTools = styled.div`
   bottom: 0;
   width: 100%;
   z-index: 999;
-`
-
-export const Content = styled.div`
-  min-height: 70vh;
-  margin: 0;
-  padding: 0;
-`
-
-export const ContentHeader = styled.div`
-  padding: 1em 4em;
-`
-export const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5em;
-  padding-top: 2em;
-`
-
-export const FlexRow = styled.div<{
-  justify?: 'left' | 'center' | 'right' | 'space-between'
-  align?: 'start' | 'center' | 'end'
-  $spacing?: boolean
-  gap?: string
-}>`
-  display: flex;
-  justify-content: ${(props) => props.justify ?? 'left'};
-  align-items: ${(props) => props.align ?? 'normal'};
-  gap: ${(props) => props.gap ?? '1rem'};
-  ${(props) =>
-    props.$spacing &&
-    css`
-      margin-bottom: 1rem;
-    `}
-`
-
-export const SpaceChildren = styled.div<{
-  direction?: 'column' | 'row'
-  gap?: string
-}>`
-  display: flex;
-  flex-direction: ${(props) => props.direction ?? 'column'};
-  gap: ${(props) => props.gap ?? '1rem'};
 `

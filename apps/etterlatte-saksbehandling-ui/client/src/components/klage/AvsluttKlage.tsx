@@ -1,11 +1,9 @@
 import React, { useState } from 'react'
-import { Button, Heading, Modal, Select, Textarea } from '@navikt/ds-react'
+import { Button, Heading, HStack, Modal, Select, Textarea } from '@navikt/ds-react'
 import { useNavigate } from 'react-router'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { TrashIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
-import { FlexRow } from '~shared/styled'
-
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { avsluttKlage } from '~shared/api/klage'
@@ -46,11 +44,11 @@ export default function AvsluttKlage() {
       <>
         {!showAvsluttForm && (
           <SidebarPanel>
-            <FlexRow>
+            <div>
               <Button variant="secondary" icon={<TrashIcon />} onClick={() => setShowAvsluttForm(!showAvsluttForm)}>
                 Avslutt sak
               </Button>
-            </FlexRow>
+            </div>
           </SidebarPanel>
         )}
         {showAvsluttForm && (
@@ -114,7 +112,7 @@ export default function AvsluttKlage() {
             )
           }}
         />
-        <FlexRow>
+        <HStack gap="4">
           <Button
             type="button"
             size="small"
@@ -126,7 +124,7 @@ export default function AvsluttKlage() {
           <Button type="button" size="small" variant="tertiary" onClick={() => avbrytAvslutting}>
             Avbryt
           </Button>
-        </FlexRow>
+        </HStack>
       </AvsluttForm>
     )
   }

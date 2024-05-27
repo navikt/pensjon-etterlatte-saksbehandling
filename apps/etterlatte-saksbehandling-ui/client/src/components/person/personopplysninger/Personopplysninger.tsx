@@ -1,5 +1,4 @@
 import React, { ReactNode, useEffect } from 'react'
-import { SpaceChildren } from '~shared/styled'
 import { LenkeTilAndreSystemer } from '~components/person/personopplysninger/LenkeTilAndreSystemer'
 import { Bostedsadresser } from '~components/person/personopplysninger/Bostedsadresser'
 import { isSuccess, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
@@ -8,7 +7,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Statsborgerskap } from '~components/person/personopplysninger/Statsborgerskap'
-import { Box, Heading, ReadMore } from '@navikt/ds-react'
+import { Box, Heading, ReadMore, VStack } from '@navikt/ds-react'
 import { SakType } from '~shared/types/sak'
 import { Foreldre } from '~components/person/personopplysninger/Foreldre'
 import { AvdoedesBarn } from '~components/person/personopplysninger/AvdoedesBarn'
@@ -43,7 +42,7 @@ export const Personopplysninger = ({
 
   return (
     <Box padding="8">
-      <SpaceChildren>
+      <VStack gap="4">
         {mapSuccess(sakResult, ({ sak }) => (
           <>
             <PDLInfoReadMore header="Personopplysningene kommer i sanntid fra PDL, hva betyr dette for meg?">
@@ -92,7 +91,7 @@ export const Personopplysninger = ({
             )}
           </>
         ))}
-      </SpaceChildren>
+      </VStack>
     </Box>
   )
 }

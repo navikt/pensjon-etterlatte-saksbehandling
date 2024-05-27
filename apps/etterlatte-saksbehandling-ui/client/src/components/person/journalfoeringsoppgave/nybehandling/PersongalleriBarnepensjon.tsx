@@ -1,5 +1,5 @@
 import React from 'react'
-import { BodyShort, Box, Button, Heading, TextField } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, TextField, VStack } from '@navikt/ds-react'
 import { InputList, InputRow, NyBehandlingSkjema } from './OpprettNyBehandling'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 import {
@@ -7,7 +7,6 @@ import {
   validerFnrValgfri,
 } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
-import { SpaceChildren } from '~shared/styled'
 
 export default function PersongalleriBarnepensjon({ erManuellMigrering = false }: { erManuellMigrering?: boolean }) {
   const {
@@ -22,7 +21,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
   const kanLeggeTil: boolean = (gjenlevendeFormArray.fields.length || 0) + (avdoedFormArray.fields.length || 0) < 2
 
   return (
-    <SpaceChildren>
+    <VStack gap="4">
       <TextField
         {...register('persongalleri.soeker', { validate: validateFnrObligatorisk })}
         label="Søker (barnet)"
@@ -137,6 +136,6 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
           </Button>
         </InputList>
       </Box>
-    </SpaceChildren>
+    </VStack>
   )
 }

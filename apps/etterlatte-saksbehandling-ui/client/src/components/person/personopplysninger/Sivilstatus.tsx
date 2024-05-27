@@ -1,9 +1,8 @@
 import React, { ReactNode } from 'react'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { HeartIcon } from '@navikt/aksel-icons'
-import { Heading, Table, Tag } from '@navikt/ds-react'
+import { Heading, HStack, Table, Tag } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formattering'
-import { SpaceChildren } from '~shared/styled'
 import styled from 'styled-components'
 import { lowerCase, startCase } from 'lodash'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
@@ -44,7 +43,7 @@ export const Sivilstatus = ({
                   <Table.DataCell>{startCase(lowerCase(stand.sivilstatus))}</Table.DataCell>
                   <Table.DataCell>{!!stand.gyldigFraOgMed && formaterDato(stand.gyldigFraOgMed)}</Table.DataCell>
                   <Table.DataCell>
-                    <SpaceChildren direction="row">
+                    <HStack gap="4">
                       {!!stand.relatertVedSivilstand && (
                         <>
                           <KopierbarVerdi value={stand.relatertVedSivilstand} iconPosition="right" />
@@ -61,7 +60,7 @@ export const Sivilstatus = ({
                           )}
                         </>
                       )}
-                    </SpaceChildren>
+                    </HStack>
                   </Table.DataCell>
                 </Table.Row>
               ))}

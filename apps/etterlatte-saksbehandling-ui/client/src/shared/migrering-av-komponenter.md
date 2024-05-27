@@ -13,3 +13,6 @@ Veldig mange steder bruke vi f.eks `margin-top: 1rem` for å lage litt spacing m
 
 `<ButtonGroup />` --> `<HStack gap="2" justify="end" />` Kan være at man må wrappe komponentene i en `<VStack gap="4" />` for å få riktig spacing.
 
+`<SpaceChildren />` og `<SpaceChildren direction="column" />` --> `<VStack gap="4" />`
+
+`<SpaceChildren direction="row" />` --> `<HStack gap="4" />`

@@ -42,7 +42,7 @@ fun createRecord(dato: LocalDate) =
             ReguleringHendelseType.REGULERING_STARTA.lagParMedEventNameKey(),
             ReguleringEvents.DATO to dato.toString(),
             ReguleringEvents.KJOERING to "Regulering-$year",
-            ReguleringEvents.ANTALL to 4,
-            ReguleringEvents.SPESIFIKKE_SAKER to "17258;14600;10341;12541",
+            ReguleringEvents.ANTALL to 10,
+            ReguleringEvents.SPESIFIKKE_SAKER to "",
         ),
     ).toJson()

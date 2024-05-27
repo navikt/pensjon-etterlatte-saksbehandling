@@ -56,7 +56,7 @@ export const FristHandlinger = (props: {
   }, [orginalFrist])
 
   return (
-    <>
+    <div>
       {frist ? (
         <>
           <Modal open={open} onClose={() => setOpen(false)} aria-labelledby="modal-heading">
@@ -135,6 +135,6 @@ export const FristHandlinger = (props: {
       ) : (
         'Ingen frist'
       )}
-    </>
+    </div>
   )
 }

@@ -16,3 +16,5 @@ Veldig mange steder bruke vi f.eks `margin-top: 1rem` for å lage litt spacing m
 `<SpaceChildren />` og `<SpaceChildren direction="column" />` --> `<VStack gap="4" />`
 
 `<SpaceChildren direction="row" />` --> `<HStack gap="4" />`
+
+`<FlexRow />` --> `<HStack gap="4"/>` Noen steder trenger man bare en `<div />` for å stoppe cascading av CSS. Hvis `$spacing` proppen er brukt kan det hende at man må wrappe komponenter i en `<VStack gap="2" />`

@@ -63,7 +63,7 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
                 })}
               </VStack>
 
-              <VStack gap="4">
+              <VStack gap="4" align="start">
                 <Heading size="medium">Behandlinger</Heading>
                 <Behandlingsliste sakOgBehandlinger={{ sak, behandlinger }} />
                 {revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (

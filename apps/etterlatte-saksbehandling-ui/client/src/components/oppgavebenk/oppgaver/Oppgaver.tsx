@@ -1,4 +1,4 @@
-import { Alert } from '@navikt/ds-react'
+import { Alert, VStack } from '@navikt/ds-react'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { PagineringsKontroller } from '~components/oppgavebenk/oppgaver/PagineringsKontroller'
@@ -58,7 +58,7 @@ export const Oppgaver = ({
   if (!paginerteOppgaver.length) return <Alert variant="info">Ingen oppgaver</Alert>
 
   return (
-    <>
+    <VStack gap="2">
       <PagineringsKontroller
         page={page}
         setPage={setPage}
@@ -83,6 +83,6 @@ export const Oppgaver = ({
           (page - 1) * rowsPerPage + paginerteOppgaver.length
         } av ${filtrerteOppgaver.length} oppgaver ${oppgaver.length ? `(totalt ${oppgaver.length} oppgaver)` : ''}`}
       />
-    </>
+    </VStack>
   )
 }

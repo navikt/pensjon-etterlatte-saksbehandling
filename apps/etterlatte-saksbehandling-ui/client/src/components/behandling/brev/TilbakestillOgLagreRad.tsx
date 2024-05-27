@@ -1,10 +1,9 @@
 import React, { ReactNode, useState } from 'react'
 import { LagretStatus } from '~components/behandling/brev/RedigerbartBrev'
 import styled from 'styled-components'
-import { Button, Detail } from '@navikt/ds-react'
+import { Button, Detail, HStack } from '@navikt/ds-react'
 import { FileResetIcon, FloppydiskIcon } from '@navikt/aksel-icons'
 import { GeneriskModal } from '~shared/modal/modal'
-import { FlexRow } from '~shared/styled'
 
 interface TilbakestillOgLagreRadProps {
   lagretStatus: LagretStatus
@@ -27,7 +26,7 @@ export const TilbakestillOgLagreRad = ({
 
   return (
     <>
-      <ButtonRow>
+      <ButtonHStack justify="space-between">
         {tilbakestillSynlig && (
           <Button
             icon={<FileResetIcon aria-hidden />}
@@ -39,7 +38,7 @@ export const TilbakestillOgLagreRad = ({
             Tilbakestill brev
           </Button>
         )}
-        <FlexRow align="end">
+        <HStack gap="4" align="center">
           {lagretStatus.beskrivelse && <Detail as="span">{lagretStatus.beskrivelse}</Detail>}
           <Button
             icon={<FloppydiskIcon aria-hidden />}
@@ -50,8 +49,8 @@ export const TilbakestillOgLagreRad = ({
           >
             Lagre endringer
           </Button>
-        </FlexRow>
-      </ButtonRow>
+        </HStack>
+      </ButtonHStack>
       <GeneriskModal
         tittel="Tilbakestill brevet"
         beskrivelse="Ønsker du å tilbakestille brevet og hente inn ny informasjon? Dette vil slette tidligere endringer, så husk å kopiere tekst du vil beholde først."
@@ -65,9 +64,6 @@ export const TilbakestillOgLagreRad = ({
   )
 }
 
-const ButtonRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  padding: 1rem;
+const ButtonHStack = styled(HStack)`
+  padding: var(--a-spacing-4);
 `

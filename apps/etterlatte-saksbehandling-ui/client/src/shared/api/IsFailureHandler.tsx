@@ -3,7 +3,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import React from 'react'
 
 interface Wrappercomponent {
-  component: React.ComponentType
+  component: React.ElementType
   props: any
 }
 export const isFailureHandler = ({

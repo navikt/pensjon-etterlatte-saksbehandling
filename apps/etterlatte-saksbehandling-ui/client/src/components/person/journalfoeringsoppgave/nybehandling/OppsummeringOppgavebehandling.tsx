@@ -1,4 +1,4 @@
-import { Alert, Button, Detail, Heading } from '@navikt/ds-react'
+import { Alert, Button, Detail, Heading, HStack, VStack } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { Navigate, useNavigate } from 'react-router-dom'
@@ -8,7 +8,6 @@ import { formaterSakstype, formaterSpraak, formaterStringDato } from '~utils/for
 import { InfoList } from '~components/behandling/soeknadsoversikt/styled'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import FullfoerOppgaveModal from '~components/person/journalfoeringsoppgave/nybehandling/FullfoerOppgaveModal'
-import { FlexRow } from '~shared/styled'
 import { gyldigBehandlingRequest } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 import React from 'react'
 import { erOppgaveRedigerbar } from '~shared/types/oppgave'
@@ -79,18 +78,18 @@ export default function OppsummeringOppgavebehandling() {
         </Alert>
       )}
 
-      <div>
-        <FlexRow justify="center" $spacing>
+      <VStack gap="2">
+        <HStack gap="4" justify="center">
           <Button variant="secondary" onClick={tilbake}>
             Tilbake
           </Button>
 
           <FullfoerOppgaveModal oppgave={oppgave} behandlingBehov={nyBehandlingRequest} />
-        </FlexRow>
-        <FlexRow justify="center">
+        </HStack>
+        <HStack justify="center">
           <AvbrytBehandleJournalfoeringOppgave />
-        </FlexRow>
-      </div>
+        </HStack>
+      </VStack>
     </FormWrapper>
   )
 }

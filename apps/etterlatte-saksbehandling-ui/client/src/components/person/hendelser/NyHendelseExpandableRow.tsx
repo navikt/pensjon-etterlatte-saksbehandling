@@ -2,13 +2,12 @@ import React, { ReactNode } from 'react'
 import { Grunnlagsendringshendelse, IBehandlingsammendrag } from '~components/person/typer'
 import { ISakMedUtlandstilknytning } from '~shared/types/sak'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import { Alert, Link, Table, VStack } from '@navikt/ds-react'
+import { Alert, HStack, Link, Table, VStack } from '@navikt/ds-react'
 import { HendelseBeskrivelse } from '~components/person/hendelser/HendelseBeskrivelse'
 import { grunnlagsendringsTittel, stoetterRevurderingAvHendelse } from '~components/person/hendelser/utils'
 import { formaterStringDato } from '~utils/formattering'
 import { harAapenRevurdering, revurderingKanOpprettes } from '~components/person/hendelser/utils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
-import { FlexRow } from '~shared/styled'
 import { ArkiverHendelseModal } from '~components/person/hendelser/ArkiverHendelseModal'
 import { useSearchParams } from 'react-router-dom'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
@@ -50,7 +49,7 @@ export const NyHendelseExpandableRow = ({ hendelse, sak, behandlinger, revurderi
             )
           )}
 
-          <FlexRow>
+          <HStack gap="4">
             <ArkiverHendelseModal hendelse={hendelse} />
 
             {hendelse.status !== 'TATT_MED_I_BEHANDLING' &&
@@ -58,7 +57,7 @@ export const NyHendelseExpandableRow = ({ hendelse, sak, behandlinger, revurderi
               revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
                 <OpprettRevurderingModal sakId={sak.id} sakType={sak.sakType} hendelseId={hendelse.id} />
               )}
-          </FlexRow>
+          </HStack>
         </VStack>
       }
     >

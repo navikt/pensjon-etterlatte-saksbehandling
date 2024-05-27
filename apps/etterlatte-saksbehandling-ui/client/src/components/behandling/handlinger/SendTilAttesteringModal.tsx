@@ -1,8 +1,7 @@
-import { Alert, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, HStack, Modal } from '@navikt/ds-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { FlexRow } from '~shared/styled'
 import { ApiResponse } from '~shared/api/apiClient'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -82,7 +81,7 @@ export const SendTilAttesteringModal = ({
             Er du sikker på at du vil sende vedtaket til attestering?
           </Heading>
           <BodyShort spacing>Når du sender til attestering vil vedtaket låses og du får ikke gjort endringer</BodyShort>
-          <FlexRow justify="center">
+          <HStack gap="4" justify="center">
             <Button
               variant="secondary"
               onClick={() => {
@@ -94,7 +93,7 @@ export const SendTilAttesteringModal = ({
             <Button loading={isPending(fattVedtakStatus)} variant="primary" onClick={fattVedtakWrapper}>
               Ja, send til attestering
             </Button>
-          </FlexRow>
+          </HStack>
           {isFailureHandler({
             apiResult: fattVedtakStatus,
             errorMessage: 'En feil skjedde under attestering av vedtaket',

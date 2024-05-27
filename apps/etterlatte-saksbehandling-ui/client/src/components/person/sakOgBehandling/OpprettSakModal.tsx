@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Alert, Button, Heading, Modal, Radio, RadioGroup } from '@navikt/ds-react'
+import { Alert, Button, Heading, HStack, Modal, Radio, RadioGroup } from '@navikt/ds-react'
 import { PlusCircleIcon } from '@navikt/aksel-icons'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { FlexRow } from '~shared/styled'
 import { isPending, isSuccess, mapSuccess } from '~shared/api/apiUtils'
 import { hentSakForPerson } from '~shared/api/sak'
 import { SakType } from '~shared/types/sak'
@@ -69,7 +68,7 @@ export const OpprettSakModal = ({ fnr }: { fnr: string }) => {
         </Modal.Body>
 
         <Modal.Footer>
-          <FlexRow justify="right">
+          <HStack gap="4" justify="end">
             <Button
               variant="secondary"
               type="button"
@@ -87,7 +86,7 @@ export const OpprettSakModal = ({ fnr }: { fnr: string }) => {
             >
               Opprett sak
             </Button>
-          </FlexRow>
+          </HStack>
         </Modal.Footer>
       </Modal>
     </>

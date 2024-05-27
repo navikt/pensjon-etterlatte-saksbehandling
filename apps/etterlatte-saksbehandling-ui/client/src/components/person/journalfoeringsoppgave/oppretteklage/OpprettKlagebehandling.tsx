@@ -2,9 +2,8 @@ import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppg
 import { useAppDispatch } from '~store/Store'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
-import { Button, Heading, Tag } from '@navikt/ds-react'
+import { Button, Heading, HStack, Tag } from '@navikt/ds-react'
 import { formaterSakstype } from '~utils/formattering'
-import { FlexRow } from '~shared/styled'
 import { settNyKlageRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { useState } from 'react'
 import { opprettKlageErUtfylt } from '~components/person/journalfoeringsoppgave/oppretteklage/OppsummeringKlagebehandling'
@@ -57,14 +56,14 @@ export default function OpprettKlagebehandling() {
 
       {feilmelding.length > 0 && <ApiErrorAlert>{feilmelding}</ApiErrorAlert>}
 
-      <FlexRow justify="center" $spacing>
+      <HStack gap="4" justify="center">
         <Button variant="secondary" onClick={tilbake}>
           Tilbake
         </Button>
         <Button variant="primary" onClick={neste}>
           Neste
         </Button>
-      </FlexRow>
+      </HStack>
     </FormWrapper>
   )
 }

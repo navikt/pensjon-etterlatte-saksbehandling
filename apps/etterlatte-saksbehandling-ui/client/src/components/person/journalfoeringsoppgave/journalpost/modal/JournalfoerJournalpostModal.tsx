@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Heading, HStack, Modal } from '@navikt/ds-react'
 import { Journalpost } from '~shared/types/Journalpost'
 import { oppdaterJournalpost } from '~shared/api/dokument'
-import { FlexRow } from '~shared/styled'
 import { ISak } from '~shared/types/sak'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
@@ -67,7 +66,7 @@ export default function JournalfoerJournalpostModal({ journalpost, sak }: ModalP
           {isSuccess(oppdaterStatus) ? (
             <Alert variant="success">Journalpost journalført ok! Laster siden på nytt...</Alert>
           ) : (
-            <FlexRow justify="center">
+            <HStack gap="4" justify="center">
               <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(oppdaterStatus)}>
                 Nei, avbryt
               </Button>
@@ -79,7 +78,7 @@ export default function JournalfoerJournalpostModal({ journalpost, sak }: ModalP
               >
                 Ja, journalfør
               </Button>
-            </FlexRow>
+            </HStack>
           )}
 
           {mapFailure(oppdaterStatus, (error) => (

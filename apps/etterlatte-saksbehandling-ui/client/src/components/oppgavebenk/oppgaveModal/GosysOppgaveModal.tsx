@@ -1,11 +1,10 @@
-import { BodyShort, Box, Button, Dropdown, Heading, Label, Modal } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Dropdown, Heading, HStack, Label, Modal } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { ChevronDownIcon, ExternalLinkIcon, EyeIcon } from '@navikt/aksel-icons'
 import React, { useContext, useState } from 'react'
 import { TemaTag } from '~components/oppgavebenk/components/Tags'
 import { formaterStringDato } from '~utils/formattering'
 import { ConfigContext } from '~clientConfig'
-import { FlexRow } from '~shared/styled'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { FerdigstillGosysOppgave } from '../gosys/FerdigstillGosysOppgave'
 import { OverfoerOppgaveTilGjenny } from '../gosys/OverfoerOppgaveTilGjenny'
@@ -111,7 +110,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
           ) : toggle.konverter ? (
             <OverfoerOppgaveTilGjenny oppgave={oppgave} setToggle={setToggle} />
           ) : (
-            <FlexRow justify="right">
+            <HStack gap="4" justify="end">
               <Button size="small" variant="tertiary" onClick={() => setOpen(false)}>
                 Avbryt
               </Button>
@@ -159,7 +158,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
               >
                 Åpne i Gosys
               </Button>
-            </FlexRow>
+            </HStack>
           )}
         </Modal.Body>
       </Modal>

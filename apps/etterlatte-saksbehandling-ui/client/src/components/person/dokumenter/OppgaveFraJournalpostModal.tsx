@@ -1,12 +1,11 @@
 import { Journalpost } from '~shared/types/Journalpost'
-import { Alert, Button, Detail, Heading, Link, Modal } from '@navikt/ds-react'
+import { Alert, Button, Detail, Heading, HStack, Link, Modal, VStack } from '@navikt/ds-react'
 import React, { useContext, useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentOppgaverMedReferanse, opprettOppgave } from '~shared/api/oppgaver'
 import { isPending, isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
-import { FlexRow } from '~shared/styled'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { useNavigate } from 'react-router-dom'
 import { erOppgaveRedigerbar, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
@@ -111,7 +110,7 @@ export const OppgaveFraJournalpostModal = ({
             ),
             success: (oppgaver) =>
               finnesGosysOppgave ? (
-                <>
+                <VStack gap="2">
                   <Alert variant="warning">
                     Fant {oppgaver.length} oppgave(r) tilknyttet journalposten i Gosys.
                     <br />
@@ -133,7 +132,7 @@ export const OppgaveFraJournalpostModal = ({
                       </InfoWrapper>
                       <br />
 
-                      <FlexRow $spacing justify="right">
+                      <HStack gap="4" justify="end">
                         {isSuccess(flyttOppgaveResult) ? (
                           <Alert size="small" variant="success">
                             <Link href={`/oppgave/${flyttOppgaveResult.data.id}`}>Gå til oppgave</Link>
@@ -148,10 +147,10 @@ export const OppgaveFraJournalpostModal = ({
                             Flytt til Gjenny
                           </Button>
                         )}
-                      </FlexRow>
+                      </HStack>
                     </div>
                   ))}
-                </>
+                </VStack>
               ) : null,
           })}
 
@@ -182,7 +181,7 @@ export const OppgaveFraJournalpostModal = ({
         </Modal.Body>
 
         <Modal.Footer>
-          <FlexRow justify="right">
+          <HStack gap="4" justify="end">
             <Button variant="tertiary" onClick={() => setIsOpen(false)}>
               Avbryt
             </Button>
@@ -194,7 +193,7 @@ export const OppgaveFraJournalpostModal = ({
             >
               Opprett oppgave
             </Button>
-          </FlexRow>
+          </HStack>
         </Modal.Footer>
       </Modal>
     </>

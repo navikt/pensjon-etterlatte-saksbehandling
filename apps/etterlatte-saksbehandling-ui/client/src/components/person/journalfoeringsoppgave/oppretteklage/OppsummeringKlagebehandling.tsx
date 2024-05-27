@@ -1,11 +1,10 @@
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { Alert, Button, Heading, Tag } from '@navikt/ds-react'
+import { Alert, Button, Heading, HStack, Tag } from '@navikt/ds-react'
 import { formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { InfoList } from '~components/behandling/soeknadsoversikt/styled'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { FlexRow } from '~shared/styled'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import FullfoerKlageModal from '~components/person/journalfoeringsoppgave/oppretteklage/FullfoerKlageModal'
 import { NyKlageRequestUtfylling } from '~shared/types/Klage'
@@ -54,16 +53,16 @@ export default function OppsummeringKlagebehandling() {
         </Alert>
       </InfoList>
       <div>
-        <FlexRow justify="center" $spacing>
+        <HStack gap="4" justify="center">
           <Button variant="secondary" onClick={tilbake}>
             Tilbake
           </Button>
           <FullfoerKlageModal oppgave={oppgave} klageRequest={nyKlageRequest} journalpost={journalpost} />
-        </FlexRow>
+        </HStack>
 
-        <FlexRow justify="center">
+        <HStack justify="center">
           <AvbrytBehandleJournalfoeringOppgave />
-        </FlexRow>
+        </HStack>
       </div>
     </FormWrapper>
   )

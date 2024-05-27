@@ -1,6 +1,5 @@
-import { Content, ContentHeader } from '~shared/styled'
 import { useEffect, useState } from 'react'
-import { Alert, Heading } from '@navikt/ds-react'
+import { Alert, Heading, Box } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
@@ -156,7 +155,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   }
 
   return (
-    <Content>
+    <>
       {behandling?.status &&
         statusErRedigerbar(behandling?.status) &&
         visBrevutfall &&
@@ -166,7 +165,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         )}
       <BrevContent>
         <Sidebar>
-          <ContentHeader>
+          <Box paddingInline="16" paddingBlock="4">
             <HeadingWrapper>
               <Heading spacing size="large" level="1">
                 Vedtaksbrev
@@ -200,7 +199,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                 <BrevMottaker brev={vedtaksbrev} kanRedigeres={redigerbar} />
               </>
             )}
-          </ContentHeader>
+          </Box>
         </Sidebar>
 
         {!!vedtaksbrev &&
@@ -231,7 +230,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
           />
         )}
       </BehandlingHandlingKnapper>
-    </Content>
+    </>
   )
 }
 

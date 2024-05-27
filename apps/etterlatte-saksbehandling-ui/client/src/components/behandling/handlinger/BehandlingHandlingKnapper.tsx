@@ -1,18 +1,18 @@
 import AvbrytBehandling from './AvbrytBehandling'
 import { Tilbake } from './Tilbake'
 import { ReactNode } from 'react'
-import { FlexRow } from '~shared/styled'
+import { HStack, VStack } from '@navikt/ds-react'
 
 export const BehandlingHandlingKnapper = ({ children }: { children: ReactNode }) => {
   return (
-    <div>
-      <FlexRow justify="center" $spacing>
+    <VStack gap="4">
+      <HStack gap="4" justify="center">
         <Tilbake />
         {children}
-      </FlexRow>
-      <FlexRow justify="center">
+      </HStack>
+      <HStack justify="center">
         <AvbrytBehandling />
-      </FlexRow>
-    </div>
+      </HStack>
+    </VStack>
   )
 }

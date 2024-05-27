@@ -1,10 +1,9 @@
-import { Alert, Button } from '@navikt/ds-react'
+import { Alert, Button, HStack } from '@navikt/ds-react'
 import { useState } from 'react'
 import { BeslutningWrapper } from '../styled'
 import { GeneriskModal } from '~shared/modal/modal'
 import { useNavigate } from 'react-router'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { FlexRow } from '~shared/styled'
 import { attesterVedtakOmAvvistKlage } from '~shared/api/klage'
 
 import { isPending } from '~shared/api/apiUtils'
@@ -35,11 +34,11 @@ export const AttesterKlage = ({ klage, kommentar }: { klage: Klage; kommentar: s
           {error}
         </Alert>
       )}
-      <FlexRow>
+      <HStack align="start">
         <Button variant="primary" onClick={() => setModalisOpen(true)}>
           Attester vedtak
         </Button>
-      </FlexRow>
+      </HStack>
       <GeneriskModal
         tittel="Er du sikker på at du vil attestere vedtaket?"
         beskrivelse="Vedtaksbrevet sendes ut automatisk"

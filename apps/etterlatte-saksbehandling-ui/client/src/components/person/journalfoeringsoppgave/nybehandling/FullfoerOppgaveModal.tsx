@@ -1,13 +1,11 @@
 import { useState } from 'react'
-import { Alert, BodyLong, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
+import { Alert, BodyLong, BodyShort, Button, Heading, HStack, Modal } from '@navikt/ds-react'
 import { SaktypeTag } from '~components/oppgavebenk/components/Tags'
 import { ferdigstillOppgave } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
-import { FlexRow } from '~shared/styled'
-
 import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { OppgaveDTO } from '~shared/types/oppgave'
 
@@ -61,17 +59,17 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
 
               <br />
 
-              <FlexRow justify="center">
+              <HStack gap="4" justify="center">
                 <Button variant="secondary" onClick={() => navigate('/')}>
                   Gå til oppgavelisten
                 </Button>
                 <Button variant="primary" onClick={() => navigate(`/person/${oppgave.fnr}`)}>
                   Gå til sakoversikten
                 </Button>
-              </FlexRow>
+              </HStack>
             </>
           ) : (
-            <FlexRow justify="center">
+            <HStack gap="4" justify="center">
               <Button
                 variant="secondary"
                 onClick={() => setOpen(false)}
@@ -86,7 +84,7 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
               >
                 Ferdigstill
               </Button>
-            </FlexRow>
+            </HStack>
           )}
           {mapFailure(opprettBehandlingStatus, (error) => (
             <Modal.Footer>

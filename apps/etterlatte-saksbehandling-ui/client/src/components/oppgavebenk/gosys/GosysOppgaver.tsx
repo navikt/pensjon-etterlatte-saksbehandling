@@ -1,4 +1,4 @@
-import { Alert } from '@navikt/ds-react'
+import { Alert, VStack } from '@navikt/ds-react'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { PagineringsKontroller } from '~components/oppgavebenk/oppgaver/PagineringsKontroller'
 import {
@@ -37,7 +37,7 @@ export const GosysOppgaver = ({ oppgaver, saksbehandlereIEnhet, fnrFilter }: Pro
   if (!paginerteOppgaver.length) return <Alert variant="info">Ingen oppgaver</Alert>
 
   return (
-    <>
+    <VStack gap="2">
       <PagineringsKontroller
         page={page}
         setPage={setPage}
@@ -60,6 +60,6 @@ export const GosysOppgaver = ({ oppgaver, saksbehandlereIEnhet, fnrFilter }: Pro
           (page - 1) * rowsPerPage + paginerteOppgaver.length
         } av ${filtrerteOppgaver.length} oppgaver ${oppgaver.length ? `(totalt ${oppgaver.length} oppgaver)` : ''}`}
       />
-    </>
+    </VStack>
   )
 }

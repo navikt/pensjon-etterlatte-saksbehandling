@@ -2,11 +2,10 @@ import { Journalpost, Journalposttype, Journalstatus } from '~shared/types/Journ
 import { Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
 import React, { useState } from 'react'
-import { Table, Tag } from '@navikt/ds-react'
+import { HStack, Table, Tag } from '@navikt/ds-react'
 import { JournalpostInnhold } from '~components/person/journalfoeringsoppgave/journalpost/JournalpostInnhold'
 import { formaterJournalpostStatus, formaterJournalpostType, formaterStringDato } from '~utils/formattering'
 import { Variants } from '~shared/Tags'
-import { FlexRow } from '~shared/styled'
 import { UtsendingsinfoModal } from '~components/person/dokumenter/UtsendingsinfoModal'
 import { OppgaveFraJournalpostModal } from '~components/person/dokumenter/OppgaveFraJournalpostModal'
 import DokumentModal from '~components/person/dokumenter/DokumentModal'
@@ -48,7 +47,7 @@ export const DokumentRad = ({
       </Table.DataCell>
       <Table.DataCell>{formaterJournalpostType(dokument.journalposttype)}</Table.DataCell>
       <Table.DataCell>
-        <FlexRow justify="right">
+        <HStack gap="4" justify="end">
           {visUtsendingsinfo && <UtsendingsinfoModal journalpost={dokument} />}
 
           {kanRedigeres && (
@@ -63,7 +62,7 @@ export const DokumentRad = ({
           <HaandterAvvikModal journalpost={dokument} sakStatus={sakStatus} />
 
           <DokumentModal journalpost={dokument} />
-        </FlexRow>
+        </HStack>
       </Table.DataCell>
     </Table.ExpandableRow>
   )

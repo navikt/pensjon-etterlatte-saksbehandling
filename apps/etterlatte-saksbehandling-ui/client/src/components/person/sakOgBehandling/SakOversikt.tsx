@@ -1,7 +1,6 @@
 import styled from 'styled-components'
-import { Container, SpaceChildren } from '~shared/styled'
 import Spinner from '~shared/Spinner'
-import { Heading, ToggleGroup } from '@navikt/ds-react'
+import { Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import React, { useEffect, useState } from 'react'
@@ -42,51 +41,47 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
         pending: <Spinner visible label="Henter sak og behandlinger" />,
         error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
         success: ({ sak, behandlinger }) => (
-          <SpaceChildren direction="row">
+          <HStack gap="4" wrap={false}>
             <SakHeaderWrapper>
               <SakOversiktHeader sak={sak} behandlinger={behandlinger} fnr={fnr} />
             </SakHeaderWrapper>
-            <Container>
-              <SpaceChildren gap="2rem">
-                <SpaceChildren>
-                  <Heading size="medium">Oppgaver</Heading>
-                  <ToggleGroup
-                    defaultValue={OppgaveValg.AKTIVE}
-                    onChange={(val) => setOppgaveValg(val as OppgaveValg)}
-                    size="small"
-                  >
-                    <ToggleGroup.Item value={OppgaveValg.AKTIVE}>Aktive</ToggleGroup.Item>
-                    <ToggleGroup.Item value={OppgaveValg.FERDIGSTILTE}>Ferdigstilte</ToggleGroup.Item>
-                  </ToggleGroup>
-                  {mapResult(oppgaverResult, {
-                    pending: <Spinner visible label="Henter oppgaver for sak..." />,
-                    error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
-                    success: (oppgaver) => <ForenkletOppgaverTable oppgaver={oppgaver} oppgaveValg={oppgaveValg} />,
-                  })}
-                </SpaceChildren>
+            <VStack gap="8">
+              <VStack gap="4">
+                <Heading size="medium">Oppgaver</Heading>
+                <ToggleGroup
+                  defaultValue={OppgaveValg.AKTIVE}
+                  onChange={(val) => setOppgaveValg(val as OppgaveValg)}
+                  size="small"
+                >
+                  <ToggleGroup.Item value={OppgaveValg.AKTIVE}>Aktive</ToggleGroup.Item>
+                  <ToggleGroup.Item value={OppgaveValg.FERDIGSTILTE}>Ferdigstilte</ToggleGroup.Item>
+                </ToggleGroup>
+                {mapResult(oppgaverResult, {
+                  pending: <Spinner visible label="Henter oppgaver for sak..." />,
+                  error: (error) => <ApiErrorAlert>{error.detail}</ApiErrorAlert>,
+                  success: (oppgaver) => <ForenkletOppgaverTable oppgaver={oppgaver} oppgaveValg={oppgaveValg} />,
+                })}
+              </VStack>
 
-                <SpaceChildren>
-                  <Heading size="medium">Behandlinger</Heading>
-                  <Behandlingsliste sakOgBehandlinger={{ sak, behandlinger }} />
-                  {revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
-                    <OpprettRevurderingWrapper>
-                      <OpprettRevurderingModal sakId={sak.id} sakType={sak.sakType} />
-                    </OpprettRevurderingWrapper>
-                  )}
-                </SpaceChildren>
+              <VStack gap="4" align="start">
+                <Heading size="medium">Behandlinger</Heading>
+                <Behandlingsliste sakOgBehandlinger={{ sak, behandlinger }} />
+                {revurderingKanOpprettes(behandlinger, sak.enhet, innloggetSaksbehandler.enheter) && (
+                  <OpprettRevurderingModal sakId={sak.id} sakType={sak.sakType} />
+                )}
+              </VStack>
 
-                <SpaceChildren>
-                  <Heading size="medium">Klager</Heading>
-                  <KlageListe sakId={sak.id} />
-                </SpaceChildren>
+              <VStack gap="4">
+                <Heading size="medium">Klager</Heading>
+                <KlageListe sakId={sak.id} />
+              </VStack>
 
-                <SpaceChildren>
-                  <Heading size="medium">Tilbakekrevinger</Heading>
-                  <TilbakekrevingListe sakId={sak.id} />
-                </SpaceChildren>
-              </SpaceChildren>
-            </Container>
-          </SpaceChildren>
+              <VStack gap="4">
+                <Heading size="medium">Tilbakekrevinger</Heading>
+                <TilbakekrevingListe sakId={sak.id} />
+              </VStack>
+            </VStack>
+          </HStack>
         ),
       })}
     </>
@@ -99,12 +94,8 @@ export const HeadingWrapper = styled.div`
 `
 
 const SakHeaderWrapper = styled.div`
-  padding: 2rem;
+  padding: var(--a-spacing-8);
   border-right: 1px solid var(--a-surface-active);
   height: 100vh;
   min-width: 25rem;
-`
-
-const OpprettRevurderingWrapper = styled.div`
-  margin-top: 1rem;
 `

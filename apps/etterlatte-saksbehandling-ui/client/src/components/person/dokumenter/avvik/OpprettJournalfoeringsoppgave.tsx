@@ -1,7 +1,6 @@
 import { Journalpost, Journalstatus } from '~shared/types/Journalpost'
-import { Alert, Button } from '@navikt/ds-react'
+import { Alert, Button, HStack } from '@navikt/ds-react'
 import { isPending, mapResult, Result } from '~shared/api/apiUtils'
-import { FlexRow } from '~shared/styled'
 import React from 'react'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -55,7 +54,7 @@ export const OpprettJournalfoeringsoppgave = ({
 
         <br />
 
-        <FlexRow justify="right">
+        <HStack gap="4" justify="end">
           <Button variant="tertiary" onClick={() => window.location.reload()}>
             Avslutt
           </Button>
@@ -66,7 +65,7 @@ export const OpprettJournalfoeringsoppgave = ({
           >
             Opprett oppgave
           </Button>
-        </FlexRow>
+        </HStack>
       </>
     ),
   })

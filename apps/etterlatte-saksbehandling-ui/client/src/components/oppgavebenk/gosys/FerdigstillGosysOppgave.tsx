@@ -1,7 +1,6 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { mapResult } from '~shared/api/apiUtils'
-import { Alert, Button, Loader } from '@navikt/ds-react'
-import { FlexRow } from '~shared/styled'
+import { Alert, Button, HStack, Loader } from '@navikt/ds-react'
 import { GosysActionToggle } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
 import Spinner from '~shared/Spinner'
 import { ferdigstilleGosysOppgave } from '~shared/api/gosys'
@@ -37,12 +36,12 @@ export const FerdigstillGosysOppgave = ({
 
         <br />
 
-        <FlexRow justify="right">
+        <HStack gap="4" justify="end">
           <Button variant="secondary" onClick={() => setToggle({ ferdigstill: false })}>
             Nei, avbryt
           </Button>
           <Button onClick={ferdigstill}>Ja, ferdigstill</Button>
-        </FlexRow>
+        </HStack>
       </>
     ),
   })

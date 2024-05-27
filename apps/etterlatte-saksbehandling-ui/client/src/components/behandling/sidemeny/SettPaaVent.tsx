@@ -1,5 +1,4 @@
-import { Alert, Button, Heading, Label, Select, Textarea } from '@navikt/ds-react'
-import { FlexRow } from '~shared/styled'
+import { Alert, Button, Heading, HStack, Label, Select, Textarea, VStack } from '@navikt/ds-react'
 import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
 import { settOppgavePaaVentApi } from '~shared/api/oppgaver'
 import { ClockDashedIcon, ClockIcon } from '@navikt/aksel-icons'
@@ -11,7 +10,6 @@ import { isPending } from '~shared/api/apiUtils'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/types/oppgave'
 import { useAppDispatch } from '~store/Store'
 import { settOppgave } from '~store/reducers/OppgaveReducer'
-import { Text } from '~components/behandling/attestering/styled'
 
 interface Props {
   oppgave: OppgaveDTO | null
@@ -72,11 +70,9 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
 
           <br />
           {oppgave.status !== 'PAA_VENT' && (
-            <>
-              <Text>Årsak for å sette på vent</Text>
+            <VStack gap="4">
               <Select
                 label="Årsak for å sette på vent"
-                hideLabel={true}
                 value={aarsak || ''}
                 onChange={(e) => {
                   setAarsakError(false)
@@ -93,27 +89,27 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
                   </option>
                 ))}
               </Select>
-              <Label spacing>Frist</Label>
 
-              <FlexRow $spacing>
+              <VStack gap="2" justify="start">
+                <Label>Frist</Label>
                 <FristHandlinger
                   orginalFrist={frist}
                   oppgaveId={oppgave.id}
                   oppdaterFrist={(_, frist: string) => setFrist(frist)}
                   erRedigerbar={erOppgaveRedigerbar(oppgave.status)}
                 />
-              </FlexRow>
-            </>
+              </VStack>
+            </VStack>
           )}
 
-          <FlexRow justify="right">
+          <HStack gap="4" justify="end">
             <Button size="small" variant="secondary" onClick={() => setVisPaaVent(false)}>
               Avbryt
             </Button>
             <Button size="small" variant="primary" onClick={oppdater} loading={isPending(settPaaVentStatus)}>
               Lagre
             </Button>
-          </FlexRow>
+          </HStack>
         </>
       )}
 
@@ -133,7 +129,7 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
 
           <br />
           {redigerbar && (
-            <FlexRow justify="right">
+            <HStack justify="end">
               <Button
                 size="small"
                 variant="secondary"
@@ -143,7 +139,7 @@ export const SettPaaVent = ({ oppgave, redigerbar }: Props) => {
               >
                 {oppgave.status === 'PAA_VENT' ? 'Ta av vent' : 'Sett på vent'}
               </Button>
-            </FlexRow>
+            </HStack>
           )}
         </>
       )}

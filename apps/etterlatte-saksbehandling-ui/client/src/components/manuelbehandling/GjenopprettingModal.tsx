@@ -1,6 +1,5 @@
-import { BodyLong, Button, Heading, Modal, TextField } from '@navikt/ds-react'
+import { BodyLong, Button, Heading, HStack, Modal, TextField } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { FlexRow } from '~shared/styled'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -54,14 +53,14 @@ export default function GjenopprettingModal(props: { oppgaveId: string; oppgaveS
         </Modal.Body>
 
         <Modal.Footer>
-          <FlexRow justify="center">
+          <HStack gap="4" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)} loading={isPending(ferdigstillOppgaveStatus)}>
               Nei
             </Button>
             <Button variant="danger" onClick={avbryt} loading={isPending(ferdigstillOppgaveStatus)}>
               Ja, lukke oppgave
             </Button>
-          </FlexRow>
+          </HStack>
           {isFailureHandler({
             apiResult: ferdigstillOppgaveStatus,
             errorMessage: 'Det oppsto en feil ved avbryting av behandlingen.',

@@ -1,10 +1,9 @@
-import { Alert, Button } from '@navikt/ds-react'
+import { Alert, Button, HStack } from '@navikt/ds-react'
 import { useState } from 'react'
 import { BeslutningWrapper } from '../styled'
 import { GeneriskModal } from '~shared/modal/modal'
 import { useNavigate } from 'react-router'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { FlexRow } from '~shared/styled'
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { attesterVedtak } from '~shared/api/tilbakekreving'
 
@@ -41,11 +40,11 @@ export const AttesterTilbakekreving = ({
           {error}
         </Alert>
       )}
-      <FlexRow>
+      <HStack align="start">
         <Button variant="primary" onClick={() => setModalisOpen(true)}>
           Iverksett vedtak
         </Button>
-      </FlexRow>
+      </HStack>
       <GeneriskModal
         tittel="Er du sikker på at du vil attestere vedtaket?"
         beskrivelse="Vedtak sendes økonomi, mens vedtaksbrev sendes dersom dette er valgt."

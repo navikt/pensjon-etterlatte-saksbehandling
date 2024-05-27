@@ -1,8 +1,7 @@
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
-import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import { BodyShort, Button, Heading } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, HStack } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { erKlageRedigerbar, Klage } from '~shared/types/Klage'
@@ -53,10 +52,10 @@ export function KlageBrev() {
   const redigerbar = erKlageRedigerbar(klage)
 
   return (
-    <Content>
+    <>
       <BrevContent>
         <Sidebar>
-          <ContentHeader>
+          <Box paddingInline="16" paddingBlock="4">
             <HeadingWrapper>
               <Heading spacing level="1" size="large">
                 Brev
@@ -79,7 +78,7 @@ export function KlageBrev() {
                 <BrevMottaker brev={hentetBrev.data} kanRedigeres={redigerbar} />
               </>
             )}
-          </ContentHeader>
+          </Box>
         </Sidebar>
 
         {mapApiResult(
@@ -103,16 +102,16 @@ export function KlageBrev() {
       <Border />
 
       <div>
-        <FlexRow justify="center" $spacing>
+        <HStack gap="4" justify="center">
           <Button className="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'brev'))}>
             Gå tilbake
           </Button>
           <Button className="button" variant="primary" onClick={() => navigate(`/klage/${klage.id}/oppsummering`)}>
             Se oppsummering
           </Button>
-        </FlexRow>
+        </HStack>
       </div>
-    </Content>
+    </>
   )
 }
 

@@ -1,4 +1,4 @@
-import { Alert, Button } from '@navikt/ds-react'
+import { Alert, Button, HStack } from '@navikt/ds-react'
 import { useState } from 'react'
 import { BeslutningWrapper } from '../styled'
 import { GeneriskModal } from '~shared/modal/modal'
@@ -6,7 +6,6 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router'
 import { ferdigstillVedtaksbrev } from '~shared/api/brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { FlexRow } from '~shared/styled'
 import { attesterVedtak } from '~shared/api/vedtaksvurdering'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
@@ -58,11 +57,11 @@ export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetalje
           {error}
         </Alert>
       )}
-      <FlexRow>
+      <HStack align="start">
         <Button variant="primary" onClick={() => setModalisOpen(true)}>
           Iverksett vedtak {skalSendeBrev ? 'og send brev' : ''}
         </Button>
-      </FlexRow>
+      </HStack>
       <GeneriskModal
         tittel="Er du sikker på at du vil iverksette vedtaket?"
         beskrivelse="Vedtaksbrevet sendes ut automatisk ved iverksettelse"

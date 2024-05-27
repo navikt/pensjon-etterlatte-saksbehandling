@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, BodyShort, Box, Heading } from '@navikt/ds-react'
-import { FlexRow } from '~shared/styled'
+import { Alert, BodyShort, Box, Heading, HStack } from '@navikt/ds-react'
 import { IBrev } from '~shared/types/Brev'
 import { BrevSpraakModal } from '~components/person/brev/spraak/BrevSpraakModal'
 import { formaterSpraak } from '~utils/formattering'
@@ -15,7 +14,7 @@ export default function BrevSpraak({ brev, kanRedigeres }: Props) {
 
   return (
     <Box padding="4" borderWidth="1" borderRadius="small">
-      <FlexRow justify="space-between">
+      <HStack gap="4" justify="space-between">
         <Heading spacing level="2" size="medium">
           Språk / målform
         </Heading>
@@ -29,7 +28,7 @@ export default function BrevSpraak({ brev, kanRedigeres }: Props) {
             brevtype={brev.brevtype}
           />
         )}
-      </FlexRow>
+      </HStack>
 
       {nyttSpraak ? (
         <>

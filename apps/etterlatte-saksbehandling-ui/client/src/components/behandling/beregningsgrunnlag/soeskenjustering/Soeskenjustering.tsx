@@ -1,14 +1,13 @@
 import React, { useState } from 'react'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useFieldArray, useForm } from 'react-hook-form'
-import { Button, ErrorSummary, Heading } from '@navikt/ds-react'
+import { Box, Button, ErrorSummary, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types/Person'
 import { addMonths } from 'date-fns'
 import { SoeskenMedIBeregning } from '~shared/types/Beregning'
 import { Barn } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Barn'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import { ContentHeader } from '~shared/styled'
 import {
   FEIL_I_PERIODE,
   feilIKomplettePerioderOverIntervall,
@@ -122,13 +121,13 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
 
   return (
     <>
-      <ContentHeader>
+      <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading level="2" size="medium">
             Søskenjustering
           </Heading>
         </HeadingWrapper>
-      </ContentHeader>
+      </Box>
       <FamilieforholdWrapper>
         {personopplysninger.soeker && <Barn person={personopplysninger.soeker?.opplysning} doedsdato={doedsdato} />}
         <Border />

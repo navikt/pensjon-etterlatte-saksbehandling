@@ -1,5 +1,5 @@
-import { BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
-import { FlexRow } from '~shared/styled'
+import { BodyShort, Button, Heading, HStack, Modal } from '@navikt/ds-react'
+import { Dispatch, SetStateAction } from 'react'
 
 export type Props = {
   tittel: string
@@ -7,7 +7,7 @@ export type Props = {
   tekstKnappJa: string
   tekstKnappNei: string
   onYesClick: () => void
-  setModalisOpen: React.Dispatch<React.SetStateAction<boolean>>
+  setModalisOpen: Dispatch<SetStateAction<boolean>>
   open: boolean
   loading?: boolean
 }
@@ -36,7 +36,7 @@ export const GeneriskModal = ({
           {tittel}
         </Heading>
         {beskrivelse && <BodyShort spacing>{beskrivelse}</BodyShort>}
-        <FlexRow justify="center">
+        <HStack gap="4" justify="center">
           <Button variant="primary" onClick={onYesClick} loading={!!loading}>
             {tekstKnappJa}
           </Button>
@@ -49,7 +49,7 @@ export const GeneriskModal = ({
           >
             {tekstKnappNei}
           </Button>
-        </FlexRow>
+        </HStack>
       </Modal.Body>
     </Modal>
   )

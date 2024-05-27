@@ -1,11 +1,10 @@
-import { Button, Modal, Radio, Textarea, VStack } from '@navikt/ds-react'
+import { Button, HStack, Modal, Radio, Textarea, VStack } from '@navikt/ds-react'
 import React, { Dispatch, SetStateAction } from 'react'
 import { InstitusjonsoppholdReadMore } from '~components/person/hendelser/institusjonsopphold/InstitusjonsoppholdReadMore'
 import { useForm } from 'react-hook-form'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { JaNei } from '~shared/types/ISvar'
 import { isPending } from '~shared/api/apiUtils'
-import { ButtonGroup } from '~shared/styled'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreInstitusjonsoppholdData } from '~shared/api/behandling'
 
@@ -110,14 +109,14 @@ export const VurderInstitusjonsoppholdModalBody = ({ setOpen, sakId, hendelseId,
           />
         </VStack>
 
-        <ButtonGroup>
+        <HStack gap="2" justify="end">
           <Button variant="secondary" type="button" onClick={lukkModal}>
             Avbryt
           </Button>
           <Button loading={isPending(lagreInstitusjonsoppholdResult)} onClick={handleSubmit(vurderInstitusjonsopphold)}>
             Vurder
           </Button>
-        </ButtonGroup>
+        </HStack>
       </VStack>
     </Modal.Body>
   )

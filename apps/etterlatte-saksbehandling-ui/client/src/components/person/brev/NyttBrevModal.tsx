@@ -1,10 +1,9 @@
-import { Button, Heading, Modal, Radio, Select, VStack } from '@navikt/ds-react'
+import { Button, Heading, HStack, Modal, Radio, Select, VStack } from '@navikt/ds-react'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBrevAvSpesifikkTypeForSak } from '~shared/api/brev'
 import { useForm } from 'react-hook-form'
-import { FlexRow } from '~shared/styled'
 import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { useNavigate } from 'react-router-dom'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -139,14 +138,14 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
           </Modal.Body>
 
           <Modal.Footer>
-            <FlexRow justify="right">
+            <HStack gap="4" justify="end">
               <Button variant="secondary" type="button" disabled={isPending(opprettBrevStatus)} onClick={avbryt}>
                 Avbryt
               </Button>
               <Button variant="primary" type="submit" loading={isPending(opprettBrevStatus)}>
                 Opprett brev
               </Button>
-            </FlexRow>
+            </HStack>
           </Modal.Footer>
         </form>
         {mapFailure(opprettBrevStatus, (error) => (

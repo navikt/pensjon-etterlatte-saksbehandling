@@ -1,4 +1,3 @@
-import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
@@ -10,7 +9,7 @@ import { hentBeregning } from '~shared/api/beregning'
 import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
-import { Alert, Button, Heading } from '@navikt/ds-react'
+import { Alert, Box, Button, Heading, HStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { IBehandlingStatus, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
@@ -108,15 +107,15 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   }
 
   return (
-    <Content>
-      <ContentHeader>
+    <>
+      <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading spacing size="large" level="1">
             Beregning og vedtak
           </Heading>
           <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
         </HeadingWrapper>
-      </ContentHeader>
+      </Box>
       {erOpphoer ? (
         <BeregningWrapper>
           <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
@@ -178,7 +177,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
       {isFailureHandler({
         apiResult: vedtakStatus,
         errorMessage: 'Vedtaksoppdatering feilet',
-        wrapperComponent: { component: FlexRow, props: { justify: 'center' } },
+        wrapperComponent: { component: HStack, props: { justify: 'center' } },
       })}
 
       {redigerbar ? (
@@ -198,7 +197,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
       ) : (
         <NesteOgTilbake />
       )}
-    </Content>
+    </>
   )
 }
 

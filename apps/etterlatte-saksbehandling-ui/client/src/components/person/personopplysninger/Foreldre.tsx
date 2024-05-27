@@ -1,8 +1,7 @@
 import React from 'react'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { PersonIcon } from '@navikt/aksel-icons'
-import { Heading, Table, Tag } from '@navikt/ds-react'
-import { SpaceChildren } from '~shared/styled'
+import { Heading, HStack, Table, Tag } from '@navikt/ds-react'
 import { formaterDato } from '~utils/formattering'
 import { AlderTag } from '~components/person/personopplysninger/components/AlderTag'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
@@ -39,20 +38,20 @@ export const Foreldre = ({
               {avdoed.map((doed: Familiemedlem, index: number) => (
                 <Table.Row key={index}>
                   <Table.DataCell>
-                    <SpaceChildren direction="row">
+                    <HStack gap="4">
                       {`${doed.fornavn} ${doed.etternavn}`}
                       {!!doed.doedsdato && (
                         <Tag variant="error-filled" size="small">
                           Død {formaterDato(doed.doedsdato)}
                         </Tag>
                       )}
-                    </SpaceChildren>
+                    </HStack>
                   </Table.DataCell>
                   <Table.DataCell>
-                    <SpaceChildren direction="row">
+                    <HStack gap="4">
                       <KopierbarVerdi value={doed.foedselsnummer} iconPosition="right" />
                       {!!doed.foedselsdato && <AlderTag foedselsdato={doed.foedselsdato} />}
-                    </SpaceChildren>
+                    </HStack>
                   </Table.DataCell>
                   <BostedsadresseDataCell bostedsadresse={doed.bostedsadresse} index={0} />
                   <Table.DataCell>-</Table.DataCell>
@@ -71,15 +70,15 @@ export const Foreldre = ({
               {gjenlevende.map((levende: Familiemedlem, index: number) => (
                 <Table.Row key={index}>
                   <Table.DataCell>
-                    <SpaceChildren direction="row">
+                    <HStack gap="4">
                       {levende.fornavn} {levende.etternavn}
-                    </SpaceChildren>
+                    </HStack>
                   </Table.DataCell>
                   <Table.DataCell>
-                    <SpaceChildren direction="row">
+                    <HStack gap="4">
                       <KopierbarVerdi value={levende.foedselsnummer} iconPosition="right" />
                       {!!levende.foedselsdato && <AlderTag foedselsdato={levende.foedselsdato} />}
-                    </SpaceChildren>
+                    </HStack>
                   </Table.DataCell>
                   {!!levende.bostedsadresse ? (
                     <BostedsadresseDataCell bostedsadresse={levende.bostedsadresse} index={0} />

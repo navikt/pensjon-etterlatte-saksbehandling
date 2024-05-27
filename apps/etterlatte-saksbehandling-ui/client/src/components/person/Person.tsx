@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
-import { Container } from '~shared/styled'
 import { SakOversikt } from './sakOgBehandling/SakOversikt'
 import Spinner from '~shared/Spinner'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Tabs } from '@navikt/ds-react'
+import { Box, Tabs } from '@navikt/ds-react'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import {
@@ -92,7 +91,7 @@ export const Person = () => {
         <Spinner visible label="Laster personinfo ..." />,
         null,
         (error) => (
-          <Container>{handleError(error)}</Container>
+          <Box padding="8">{handleError(error)}</Box>
         ),
         (person) => (
           <Tabs value={fane} onChange={velgFane}>

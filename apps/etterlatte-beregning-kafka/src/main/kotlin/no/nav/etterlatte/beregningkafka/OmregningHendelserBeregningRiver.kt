@@ -118,6 +118,10 @@ internal class OmregningHendelserBeregningRiver(
         if (nyttBeloep < gammeltBeloep) {
             throw MindreEnnForrigeBehandling(ny.behandlingId)
         }
+        if (gammeltBeloep == 0) {
+            logger.warn("Gammelt beløp er 0. Nytt beløp er $nyttBeloep for behandling $behandlingId")
+            return
+        }
         val endring = BigDecimal(nyttBeloep).divide(BigDecimal(gammeltBeloep), 2, RoundingMode.HALF_UP)
         if (endring >= BigDecimal(1.50)) {
             throw ForStorOekning(ny.behandlingId, endring)

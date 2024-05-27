@@ -15,7 +15,7 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
   const visStatusPaaSisteVedtak = (vedtakISak: VedtakSammendrag[]): ReactNode => {
     const sisteVedtak = hentSisteVedtak(vedtakISak)
 
-    if (sisteVedtak == undefined) {
+    if (!sisteVedtak) {
       return (
         <Tag key="annen-type" variant="warning">
           Ubehandlet
@@ -33,8 +33,6 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
 
     const iDag = new Date()
     const opphoerFraOgMed = sisteVedtak?.opphoerFraOgMed ? new Date(sisteVedtak.opphoerFraOgMed) : undefined
-
-    console.log(sisteVedtak)
 
     if (sisteVedtak?.vedtakType === VedtakType.OPPHOER || (opphoerFraOgMed && opphoerFraOgMed < iDag)) {
       // TODO opphoerFraOgMed er nytt felt slik at opphørsvedtak som fantes før feltet vil ikke dette feltet populert

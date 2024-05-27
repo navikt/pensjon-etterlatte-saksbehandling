@@ -580,7 +580,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
     }
 
     @Test
-    fun `Håndtering av vedtaksfatting`() {
+    fun `Kan sende til attestering`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val referanse = "referanse"
         val nyOppgave =
@@ -604,6 +604,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
         val saksbehandlerOppgave = oppgaveService.hentOppgave(nyOppgave.id)
         assertNull(saksbehandlerOppgave.saksbehandler)
+        assertEquals(saksbehandler1.ident, saksbehandlerOppgave.forrigeSaksbehandler?.ident)
         assertEquals(Status.ATTESTERING, saksbehandlerOppgave.status)
         assertEquals(referanse, sakIdOgReferanse.referanse)
     }

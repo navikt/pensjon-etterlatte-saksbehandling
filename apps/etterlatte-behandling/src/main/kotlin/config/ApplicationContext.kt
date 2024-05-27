@@ -341,8 +341,6 @@ internal class ApplicationContext(
         )
     val kommerBarnetTilGodeService =
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
-    val aktivitetspliktService =
-        AktivitetspliktService(aktivitetspliktDao, aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, behandlingService)
     val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
 
     val klageBrevService = KlageBrevService(brevApiKlient)
@@ -360,6 +358,13 @@ internal class ApplicationContext(
             klageBrevService = klageBrevService,
         )
 
+    val aktivitetspliktService =
+        AktivitetspliktService(
+            aktivitetspliktDao = aktivitetspliktDao,
+            aktivitetspliktAktivitetsgradDao = aktivitetspliktAktivitetsgradDao,
+            aktivitetspliktUnntakDao = aktivitetspliktUnntakDao,
+            behandlingService = behandlingService,
+        )
     val revurderingService =
         RevurderingService(
             oppgaveService = oppgaveService,

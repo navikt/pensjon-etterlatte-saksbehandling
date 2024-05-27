@@ -69,6 +69,7 @@ data class Systembruker(
         val regulering = Systembruker(Systembrukere.REGULERING)
         val tekniskRetting = Systembruker(Systembrukere.TEKNISK_RETTING)
         val testdata = Systembruker(Systembrukere.TESTDATA)
+        val automatiskJobb = Systembruker(Systembrukere.AUTOMATISK_JOBB)
     }
 }
 
@@ -108,4 +109,5 @@ enum class Systembrukere(val oid: String) {
     REGULERING("regulering"),
     TEKNISK_RETTING("teknisk_retting"),
     TESTDATA("testdata"),
+    AUTOMATISK_JOBB("automatisk_jobb"),
 }

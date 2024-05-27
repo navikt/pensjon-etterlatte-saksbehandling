@@ -58,6 +58,25 @@ class AktivitetspliktAktivitetsgradDao(private val connectionAutoclosing: Connec
             }
         }
 
+    fun hentNyesteAktivitetsgrad(sakId: Long): AktivitetspliktAktivitetsgrad? =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        SELECT id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, opprettet, endret, beskrivelse
+                        FROM aktivitetsplikt_aktivitetsgrad
+                        WHERE sak_id = ?
+                        ORDER BY endret::jsonb->>'tidspunkt' DESC
+                        LIMIT 1
+                        """.trimMargin(),
+                    )
+                stmt.setLong(1, sakId)
+
+                stmt.executeQuery().singleOrNull { toAktivitetsgrad() }
+            }
+        }
+
     private fun ResultSet.toAktivitetsgrad() =
         AktivitetspliktAktivitetsgrad(
             id = getUUID("id"),

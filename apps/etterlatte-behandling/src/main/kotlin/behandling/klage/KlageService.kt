@@ -373,7 +373,7 @@ class KlageServiceImpl(
             )
         }
 
-        val utlandstilknytningType = null // TODO
+        val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(avbruttKlage.sak.id)?.type
 
         klageHendelser.sendKlageHendelseRapids(
             StatistikkKlage(avbruttKlage.id, avbruttKlage, Tidspunkt.now(), utlandstilknytningType, saksbehandler.ident),

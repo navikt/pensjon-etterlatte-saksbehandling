@@ -155,10 +155,11 @@ fun Route.attachMockContext(testUser: User? = null) {
 }
 
 fun mockSaksbehandler(
-    ident: String,
+    ident: String = "ident",
     harRolleAttestant: Boolean = false,
     harRolleStrengtFortrolig: Boolean = false,
     harRolleEgenAnsatt: Boolean = false,
+    enheter: List<String> = listOf(Enheter.defaultEnhet.enhetNr),
 ): SaksbehandlerMedEnheterOgRoller {
     return mockk<SaksbehandlerMedEnheterOgRoller> {
         every { saksbehandlerMedRoller } returns
@@ -169,7 +170,7 @@ fun mockSaksbehandler(
                 every { harRolleEgenAnsatt() } returns harRolleEgenAnsatt
             }
         every { name() } returns ident
-        every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        every { enheter() } returns enheter
     }
 }
 

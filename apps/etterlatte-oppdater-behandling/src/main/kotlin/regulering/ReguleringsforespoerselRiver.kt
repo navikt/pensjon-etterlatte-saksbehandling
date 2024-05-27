@@ -92,7 +92,7 @@ internal class ReguleringsforespoerselRiver(
             }
             tatt += sakerTilOmregning.saker.size
             logger.info("Ferdig med $tatt av totalt $antall saker")
-            if (sakerTilOmregning.saker.isEmpty() || sakerTilOmregning.saker.size < maksBatchstoerrelse) {
+            if (sakerTilOmregning.saker.isEmpty() || saker.saker.size < maksBatchstoerrelse) {
                 break
             }
         }

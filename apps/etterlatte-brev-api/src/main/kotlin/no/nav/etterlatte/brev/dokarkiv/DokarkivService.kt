@@ -1,17 +1,9 @@
 package no.nav.etterlatte.brev.dokarkiv
 
-import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder.Companion.BREV_KODE
-import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import org.slf4j.LoggerFactory
-import java.util.Base64
 
 interface DokarkivService {
-    suspend fun journalfoer(request: JournalfoeringsMappingRequest): OpprettJournalpostResponse
+    suspend fun journalfoer(request: OpprettJournalpostRequest): OpprettJournalpostResponse
 
     suspend fun oppdater(
         journalpostId: String,
@@ -25,8 +17,6 @@ interface DokarkivService {
         enhet: String,
     ): Boolean
 
-    suspend fun journalfoerNotat(): OpprettJournalpostResponse
-
     suspend fun feilregistrerSakstilknytning(journalpostId: String)
 
     suspend fun opphevFeilregistrertSakstilknytning(journalpostId: String)
@@ -37,15 +27,13 @@ interface DokarkivService {
     ): KnyttTilAnnenSakResponse
 }
 
-internal class DokarkivServiceImpl(
-    private val client: DokarkivKlient,
-    private val db: BrevRepository,
-) : DokarkivService {
+internal class DokarkivServiceImpl(private val client: DokarkivKlient) : DokarkivService {
     private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
-    override suspend fun journalfoer(request: JournalfoeringsMappingRequest): OpprettJournalpostResponse {
-        logger.info("Oppretter journalpost for brev med id=${request.brevId}")
-        return client.opprettJournalpost(mapTilJournalpostRequest(request), ferdigstill = true)
+    override suspend fun journalfoer(request: OpprettJournalpostRequest): OpprettJournalpostResponse {
+        logger.info("Oppretter journalpost med eksternReferanseId: ${request.eksternReferanseId}")
+
+        return client.opprettJournalpost(request, ferdigstill = true)
     }
 
     override suspend fun oppdater(
@@ -82,10 +70,6 @@ internal class DokarkivServiceImpl(
         enhet: String,
     ) = client.ferdigstillJournalpost(journalpostId, enhet)
 
-    override suspend fun journalfoerNotat(): OpprettJournalpostResponse {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun feilregistrerSakstilknytning(journalpostId: String) {
         client.feilregistrerSakstilknytning(journalpostId)
     }
@@ -102,52 +86,4 @@ internal class DokarkivServiceImpl(
             logger.info("Journalpost knyttet til annen sak (nyJournalpostId=${it.nyJournalpostId})\n$request")
         }
     }
-
-    private fun mapTilJournalpostRequest(request: JournalfoeringsMappingRequest): OpprettJournalpostRequest {
-        val innhold = requireNotNull(db.hentBrevInnhold(request.brevId))
-        val pdf = requireNotNull(db.hentPdf(request.brevId))
-        return OpprettJournalpostRequest(
-            tittel = innhold.tittel,
-            journalposttype = JournalPostType.UTGAAENDE,
-            avsenderMottaker = request.avsenderMottaker(),
-            bruker = Bruker(request.brukerident),
-            eksternReferanseId = "${request.eksternReferansePrefiks}.${request.brevId}",
-            sak = JournalpostSak(Sakstype.FAGSAK, request.sakId.toString(), request.sakType.tema, Fagsaksystem.EY.navn),
-            dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
-            tema = request.sakType.tema,
-            kanal = "S",
-            journalfoerendeEnhet = request.journalfoerendeEnhet,
-        )
-    }
-
-    private fun Pdf.tilJournalpostDokument(tittel: String) =
-        JournalpostDokument(
-            tittel,
-            brevkode = BREV_KODE,
-            dokumentvarianter = listOf(DokumentVariant.ArkivPDF(Base64.getEncoder().encodeToString(bytes))),
-        )
-}
-
-data class JournalfoeringsMappingRequest(
-    val brevId: BrevID,
-    val brev: Brev,
-    val brukerident: String,
-    val eksternReferansePrefiks: Any,
-    val sakId: Long,
-    val sakType: SakType,
-    val journalfoerendeEnhet: String,
-) {
-    fun avsenderMottaker() =
-        with(brev.mottaker) {
-            AvsenderMottaker(
-                id = foedselsnummer?.value ?: orgnummer,
-                idType =
-                    when {
-                        foedselsnummer != null -> "FNR"
-                        orgnummer != null -> "ORGNR"
-                        else -> "UKJENT"
-                    },
-                navn = navn,
-            )
-        }
 }

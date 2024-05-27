@@ -1,17 +1,29 @@
 package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.dokarkiv.AvsenderMottaker
+import no.nav.etterlatte.brev.dokarkiv.Bruker
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
-import no.nav.etterlatte.brev.dokarkiv.JournalfoeringsMappingRequest
+import no.nav.etterlatte.brev.dokarkiv.DokumentVariant
+import no.nav.etterlatte.brev.dokarkiv.JournalPostType
+import no.nav.etterlatte.brev.dokarkiv.JournalpostDokument
+import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder
+import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
+import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
+import java.util.Base64
 
 class JournalfoerBrevService(
     private val db: BrevRepository,
@@ -31,18 +43,7 @@ class JournalfoerBrevService(
         }
         val sak = sakService.hentSak(brev.sakId, bruker)
 
-        return journalfoer(
-            brev,
-            JournalfoeringsMappingRequest(
-                brevId = brev.id,
-                brev = brev,
-                brukerident = brev.soekerFnr,
-                eksternReferansePrefiks = brev.sakId,
-                sakId = brev.sakId,
-                sakType = sak.sakType,
-                journalfoerendeEnhet = sak.enhet,
-            ),
-        ).journalpostId
+        return journalfoer(brev, sak).journalpostId
     }
 
     suspend fun journalfoerVedtaksbrev(vedtak: VedtakTilJournalfoering): Pair<OpprettJournalpostResponse, BrevID>? {
@@ -53,7 +54,6 @@ class JournalfoerBrevService(
             service.hentVedtaksbrev(behandlingId)
                 ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
 
-        // TODO: Forbedre denne "fiksen". Gjøres nå for å lappe sammen
         if (brev.status in listOf(Status.JOURNALFOERT, Status.DISTRIBUERT, Status.SLETTET)) {
             logger.warn("Vedtaksbrev (id=${brev.id}) er allerede ${brev.status}.")
             return null
@@ -66,43 +66,77 @@ class JournalfoerBrevService(
             )
             return null
         }
-        val mappingRequest =
-            JournalfoeringsMappingRequest(
-                brevId = brev.id,
-                brev = requireNotNull(db.hentBrev(brev.id)),
-                brukerident = vedtak.sak.ident,
-                eksternReferansePrefiks = vedtak.behandlingId,
-                sakId = vedtak.sak.id,
-                sakType = vedtak.sak.sakType,
-                journalfoerendeEnhet = vedtak.ansvarligEnhet,
-            )
 
-        return journalfoer(brev, mappingRequest)
+        val sak = sakService.hentSak(brev.sakId, Systembruker.brev)
+
+        return journalfoer(brev, sak)
             .also { logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK") }
             .let { Pair(it, brev.id) }
     }
 
     private suspend fun journalfoer(
         brev: Brev,
-        mappingRequest: JournalfoeringsMappingRequest,
+        sak: Sak,
     ): OpprettJournalpostResponse {
         logger.info("Skal journalføre brev ${brev.id}")
         if (brev.status != Status.FERDIGSTILT) {
             throw FeilStatusForJournalfoering(brev.id, brev.status)
         }
 
-        val response = dokarkivService.journalfoer(mappingRequest)
+        val response = dokarkivService.journalfoer(mapTilJournalpostRequest(brev, sak))
 
         if (response.journalpostferdigstilt) {
             db.settBrevJournalfoert(brev.id, response)
         } else {
             logger.info("Kunne ikke ferdigstille journalpost. Forsøker på nytt...")
-            dokarkivService.ferdigstillJournalpost(response.journalpostId, mappingRequest.journalfoerendeEnhet)
+            dokarkivService.ferdigstillJournalpost(response.journalpostId, sak.enhet)
                 .also { db.settBrevJournalfoert(brev.id, response.copy(journalpostferdigstilt = it)) }
         }
 
         logger.info("Brev med id=${brev.id} markert som journalført")
         return response
+    }
+
+    private fun mapTilJournalpostRequest(
+        brev: Brev,
+        sak: Sak,
+    ): OpprettJournalpostRequest {
+        val innhold = requireNotNull(db.hentBrevInnhold(brev.id))
+        val pdf = requireNotNull(db.hentPdf(brev.id))
+
+        val avsenderMottaker =
+            with(brev.mottaker) {
+                AvsenderMottaker(
+                    id = foedselsnummer?.value ?: orgnummer,
+                    idType =
+                        when {
+                            foedselsnummer != null -> "FNR"
+                            orgnummer != null -> "ORGNR"
+                            else -> "UKJENT"
+                        },
+                    navn = navn,
+                )
+            }
+
+        return OpprettJournalpostRequest(
+            tittel = innhold.tittel,
+            journalposttype = JournalPostType.UTGAAENDE,
+            avsenderMottaker = avsenderMottaker,
+            bruker = Bruker(brev.soekerFnr),
+            eksternReferanseId = "${brev.sakId}.${brev.id}",
+            sak = JournalpostSak(Sakstype.FAGSAK, brev.sakId.toString(), sak.sakType.tema, Fagsaksystem.EY.navn),
+            dokumenter =
+                listOf(
+                    JournalpostDokument(
+                        innhold.tittel,
+                        brevkode = JournalpostKoder.BREV_KODE,
+                        dokumentvarianter = listOf(DokumentVariant.ArkivPDF(Base64.getEncoder().encodeToString(pdf.bytes))),
+                    ),
+                ),
+            tema = sak.sakType.tema,
+            kanal = "S",
+            journalfoerendeEnhet = sak.enhet,
+        )
     }
 }
 

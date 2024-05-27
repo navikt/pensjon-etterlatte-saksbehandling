@@ -70,4 +70,9 @@ sealed class RevurderingInfo {
     data class SluttbehandlingUtland(
         val landMedDokumenter: List<LandMedDokumenter>,
     ) : RevurderingInfo()
+
+    @JsonTypeName("AKTIVITETSPLIKT")
+    data class Aktivitetsplikt(
+        val aarsak: String,
+    ) : RevurderingInfo()
 }

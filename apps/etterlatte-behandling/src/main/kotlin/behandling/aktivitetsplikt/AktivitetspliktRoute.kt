@@ -145,7 +145,7 @@ internal fun Route.aktivitetspliktRoutes(
                     automatiskRevurderingService.opprettAutomatiskRevurdering(
                         sakId = sakId,
                         forrigeBehandling = forrigeBehandling,
-                        revurderingAarsak = Revurderingaarsak.ANNEN, // todo: aktivitetsplikt
+                        revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
                         virkningstidspunkt = aktivitetspliktGjelderFom.withDayOfMonth(1),
                         kilde = Vedtaksloesning.GJENNY,
                         persongalleri = persongalleri,

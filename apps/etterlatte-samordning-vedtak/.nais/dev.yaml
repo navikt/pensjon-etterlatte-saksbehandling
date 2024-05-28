@@ -103,24 +103,28 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+              - les-bp-vedtak
         - application: pensjon-pen-q1
           namespace: pensjon-q1
           cluster: dev-fss
           permissions:
             roles:
               - les-oms-vedtak
+              - les-bp-vedtak
         - application: pensjon-pen-q2
           namespace: pensjon-q2
           cluster: dev-fss
           permissions:
             roles:
               - les-oms-vedtak
+              - les-bp-vedtak
         - application: pensjon-pen-q5
           namespace: pensjon-q5
           cluster: dev-fss
           permissions:
             roles:
               - les-oms-vedtak
+              - les-bp-vedtak
         - application: pensjon-selvbetjening-soknad-alder-backend
           namespace: pensjonselvbetjening
           cluster: dev-gcp

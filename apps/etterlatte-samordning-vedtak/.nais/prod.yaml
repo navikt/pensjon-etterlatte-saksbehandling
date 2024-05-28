@@ -102,6 +102,7 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+              - les-bp-vedtak
         - application: pensjon-selvbetjening-soknad-alder-backend
           namespace: pensjonselvbetjening
           cluster: prod-gcp

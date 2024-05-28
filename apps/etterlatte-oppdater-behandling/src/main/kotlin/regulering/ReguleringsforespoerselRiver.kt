@@ -136,6 +136,7 @@ private val sakerViIkkeRegulererAutomatiskNaa =
         6323, // Revurdering med overstyrt beregning åpen behandling
         11606, // Revurdering med overstyrt beregning åpen behandling
         11848, // Revurdering med overstyrt beregning åpen behandling
+        6402, // EKSPORT: Feilmelding: Virkningstidspunkt kan ikke være etter opphør
         // Herifra og ut: overstyrte beregninger. Tas seinare i separat køyring.
         11510,
         11580,

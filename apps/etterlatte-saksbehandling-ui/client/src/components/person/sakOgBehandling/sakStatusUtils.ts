@@ -1,6 +1,6 @@
 import { VedtakSammendrag, VedtakType } from '~components/vedtak/typer'
 
-export const hentSisteVedtak = (vedtak: VedtakSammendrag[]): VedtakSammendrag | undefined => {
+export const hentLoependeVedtak = (vedtak: VedtakSammendrag[]): VedtakSammendrag | undefined => {
   return vedtak
     .filter((vedtak) => ![VedtakType.AVVIST_KLAGE, VedtakType.TILBAKEKREVING].includes(vedtak.vedtakType!))
     .filter((vedtak) => !!vedtak.datoAttestert)
@@ -8,7 +8,7 @@ export const hentSisteVedtak = (vedtak: VedtakSammendrag[]): VedtakSammendrag | 
     .pop()
 }
 
-export const hentFoersteVedtak = (vedtak: VedtakSammendrag[]): VedtakSammendrag | undefined => {
+export const hentInnvilgelseVedtak = (vedtak: VedtakSammendrag[]): VedtakSammendrag | undefined => {
   return vedtak
     .filter((vedtak) => vedtak.vedtakType == VedtakType.INNVILGELSE)
     .filter((vedtak) => !!vedtak.datoAttestert)

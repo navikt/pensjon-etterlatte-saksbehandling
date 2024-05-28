@@ -1,9 +1,8 @@
-import { Alert, Button, Dropdown, Heading, Modal } from '@navikt/ds-react'
+import { Alert, Button, Dropdown, Heading, HStack, Modal } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { hentDokumentPDF } from '~shared/api/dokument'
 import Spinner from '~shared/Spinner'
 import { DokumentVisningModal, PdfVisning } from '~shared/brev/pdf-visning'
-import { FlexRow } from '~shared/styled'
 import { Journalpost } from '~shared/types/Journalpost'
 import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -45,7 +44,7 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
               <Dropdown.Menu.GroupedList.Heading>Velg dokument</Dropdown.Menu.GroupedList.Heading>
               <Dropdown.Menu.Divider />
               {dokumenter.map((dok, index) => (
-                <FlexRow key={index}>
+                <HStack key={index} gap="4">
                   <Dropdown.Menu.GroupedList.Item
                     key={dok.dokumentInfoId}
                     onClick={() => open(dok.dokumentInfoId)}
@@ -58,7 +57,7 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
                       Ikke tilgang
                     </IkkeTilgangAlert>
                   )}
-                </FlexRow>
+                </HStack>
               ))}
             </Dropdown.Menu.GroupedList>
           </DropdownMenu>
@@ -99,11 +98,11 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
         </Modal.Body>
 
         <Modal.Footer>
-          <FlexRow justify="right">
+          <HStack justify="end">
             <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Lukk
             </Button>
-          </FlexRow>
+          </HStack>
         </Modal.Footer>
       </DokumentVisningModal>
     </>

@@ -1,5 +1,4 @@
-import { Button, ErrorSummary, Heading, Radio, VStack } from '@navikt/ds-react'
-import { Content, ContentHeader, FlexRow } from '~shared/styled'
+import { Box, Button, ErrorSummary, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
 import { Border, HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
@@ -84,14 +83,14 @@ export function TilbakekrevingOppsummering({
   }
 
   return (
-    <Content>
-      <ContentHeader>
+    <>
+      <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading level="1" size="large">
             Oppsummering
           </Heading>
         </HeadingWrapper>
-      </ContentHeader>
+      </Box>
       <InnholdPadding>
         <TilbakekrevingVurderingOppsummering behandling={behandling} />
 
@@ -129,7 +128,7 @@ export function TilbakekrevingOppsummering({
         })}
       </InnholdPadding>
       <Border style={{ marginTop: '3em' }} />
-      <FlexRow $spacing={true} justify="center">
+      <HStack justify="center">
         {!isPending(lagreSkalSendeBrevStatus) && (
           <>
             {behandling.sendeBrev && gyldigTilbakekreving && (
@@ -147,8 +146,8 @@ export function TilbakekrevingOppsummering({
           </>
         )}
         <Spinner visible={isPending(lagreSkalSendeBrevStatus)} label="Lagrer brevvalg" />
-      </FlexRow>
-    </Content>
+      </HStack>
+    </>
   )
 }
 

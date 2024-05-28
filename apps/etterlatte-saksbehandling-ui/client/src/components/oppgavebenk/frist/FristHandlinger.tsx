@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerFristApi } from '~shared/api/oppgaver'
-import { Alert, Button, DatePicker, Heading, Label, Modal } from '@navikt/ds-react'
+import { Alert, Button, DatePicker, Heading, HStack, Label, Modal } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { PencilIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { add, isBefore } from 'date-fns'
-import { FlexRow } from '~shared/styled'
-
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
@@ -56,7 +54,7 @@ export const FristHandlinger = (props: {
   }, [orginalFrist])
 
   return (
-    <>
+    <div>
       {frist ? (
         <>
           <Modal open={open} onClose={() => setOpen(false)} aria-labelledby="modal-heading">
@@ -84,7 +82,7 @@ export const FristHandlinger = (props: {
               })}
               {!nyFrist && <Alert variant="warning">Du må velge en måned</Alert>}
 
-              <FlexRow justify="right">
+              <HStack gap="4" justify="end">
                 {isSuccess(redigerfristSvar) ? (
                   <Button
                     variant="secondary"
@@ -110,7 +108,7 @@ export const FristHandlinger = (props: {
                 >
                   Lagre ny frist
                 </Button>
-              </FlexRow>
+              </HStack>
             </Modal.Body>
           </Modal>
 
@@ -135,6 +133,6 @@ export const FristHandlinger = (props: {
       ) : (
         'Ingen frist'
       )}
-    </>
+    </div>
   )
 }

@@ -4,7 +4,7 @@ import { Route, Routes, useParams } from 'react-router-dom'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import VelgJournalpost from '~components/person/journalfoeringsoppgave/VelgJournalpost'
-import { Column, Container, GridContainer } from '~shared/styled'
+import { Column, GridContainer } from '~shared/styled'
 import styled from 'styled-components'
 import {
   settBruker,
@@ -34,6 +34,7 @@ import { JournalpostInnhold } from './journalpost/JournalpostInnhold'
 import { hentPersonNavn } from '~shared/api/pdltjenester'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
+import { Box } from '@navikt/ds-react'
 
 export default function BehandleJournalfoeringOppgave() {
   useSidetittel('Journalføringsoppgave')
@@ -91,7 +92,7 @@ export default function BehandleJournalfoeringOppgave() {
 
       <GridContainer>
         <Column>
-          <Container>
+          <Box padding="8">
             {!sakMedBehandlinger || isPendingOrInitial(journalpostStatus) ? (
               <Spinner visible label="Laster journalpost" />
             ) : isSuccess(journalpostStatus) && kanEndreJournalpost(journalpostStatus.data) ? (
@@ -119,7 +120,7 @@ export default function BehandleJournalfoeringOppgave() {
                 <Route path="ferdigstill" element={<FerdigstillOppgave />} />
               </Routes>
             )}
-          </Container>
+          </Box>
         </Column>
 
         <Column>

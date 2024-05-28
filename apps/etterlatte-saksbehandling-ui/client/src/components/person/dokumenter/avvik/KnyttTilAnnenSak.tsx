@@ -1,12 +1,11 @@
 import React, { useState } from 'react'
-import { Alert, Button, Radio, RadioGroup, TextField } from '@navikt/ds-react'
+import { Alert, Button, HStack, Radio, RadioGroup, TextField } from '@navikt/ds-react'
 import { isPending, isSuccess, mapFailure, mapResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { Journalpost, Journalstatus, Sakstype } from '~shared/types/Journalpost'
 import { ISak } from '~shared/types/sak'
 import { hentSak } from '~shared/api/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { SakMedBehandlinger } from '~components/person/typer'
-import { FlexRow } from '~shared/styled'
 import { temaFraSakstype } from '~components/person/journalfoeringsoppgave/journalpost/EndreSak'
 import { feilregistrerSakstilknytning, knyttTilAnnenSak } from '~shared/api/dokument'
 import { MagnifyingGlassIcon } from '@navikt/aksel-icons'
@@ -125,7 +124,7 @@ export const KnyttTilAnnenSak = ({
 
         <br />
 
-        <FlexRow justify="right">
+        <HStack gap="4" justify="end">
           <Button variant="tertiary" onClick={() => window.location.reload()}>
             Avslutt
           </Button>
@@ -139,7 +138,7 @@ export const KnyttTilAnnenSak = ({
           >
             Opprett oppgave
           </Button>
-        </FlexRow>
+        </HStack>
       </>
     ))
   }
@@ -171,7 +170,7 @@ export const KnyttTilAnnenSak = ({
 
       {mapResult(annenSakStatus, {
         initial: (
-          <FlexRow align="end" $spacing>
+          <HStack gap="4" align="end">
             <TextField
               label="Hvilken sakid skal journalposten flyttes til?"
               value={sakid || ''}
@@ -186,7 +185,7 @@ export const KnyttTilAnnenSak = ({
             >
               Søk
             </Button>
-          </FlexRow>
+          </HStack>
         ),
         pending: <Spinner visible label="Henter sak..." />,
         success: (annenSak) => (
@@ -213,7 +212,7 @@ export const KnyttTilAnnenSak = ({
               <Alert variant="error">{error.detail || 'Ukjent feil oppsto ved feilregistrering av journalpost'}</Alert>
             ))}
 
-            <FlexRow justify="right">
+            <HStack gap="4" justify="end">
               <Button variant="secondary" onClick={lukkModal}>
                 Nei, avbryt
               </Button>
@@ -224,7 +223,7 @@ export const KnyttTilAnnenSak = ({
               >
                 Flytt journalpost til sak {annenSak.id}
               </Button>
-            </FlexRow>
+            </HStack>
           </>
         ),
         error: (error) => (

@@ -1,4 +1,4 @@
-import { Button, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
+import { Button, HStack, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
 import {
   teksterTilbakekrevingAarsak,
   teksterTilbakekrevingBeloepBehold,
@@ -26,7 +26,6 @@ import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDa
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
-import { FlexRow } from '~shared/styled'
 import { useNavigate } from 'react-router'
 import { FixedAlert } from '~shared/alerts/FixedAlert'
 
@@ -395,7 +394,7 @@ export function TilbakekrevingVurderingSkjema({
       </InnholdPadding>
 
       <Border style={{ marginTop: '3em' }} />
-      <FlexRow $spacing={true} justify="center">
+      <HStack justify="center">
         {redigerbar ? (
           <Button
             variant="primary"
@@ -409,7 +408,7 @@ export function TilbakekrevingVurderingSkjema({
             Neste
           </Button>
         )}
-      </FlexRow>
+      </HStack>
     </>
   )
 }

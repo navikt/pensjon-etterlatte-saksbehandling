@@ -1,4 +1,3 @@
-import { Content } from '~shared/styled'
 import { Button, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { Infoboks } from '~components/behandling/soeknadsoversikt/styled'
@@ -76,7 +75,7 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
   const soeker = usePersonopplysninger()?.soeker?.opplysning
 
   return (
-    <Content>
+    <>
       <MainSection>
         <SectionSpacing>
           <Heading size="large" level="1">
@@ -146,7 +145,7 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
         </Button>
       </BehandlingHandlingKnapper>
       {feilmelding.length > 0 && <Feilmelding>{feilmelding}</Feilmelding>}
-    </Content>
+    </>
   )
 }
 

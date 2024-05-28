@@ -8,12 +8,11 @@ import {
   formaterStringDato,
 } from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
-import { Alert, BodyShort, Heading, Tag } from '@navikt/ds-react'
+import { Alert, BodyShort, Heading, HStack, Tag } from '@navikt/ds-react'
 import { tagColors, TagList } from '~shared/Tags'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import React from 'react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { FlexRow } from '~shared/styled'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
@@ -127,10 +126,10 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           <Tekst>{kommentarFraAttestant}</Tekst>
         </div>
       )}
-      <FlexRow align="center" $spacing={true}>
+      <HStack gap="4" align="center">
         <Info>Sakid:</Info>
         <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
-      </FlexRow>
+      </HStack>
 
       <SettPaaVent oppgave={oppgave} redigerbar={redigerbar} />
     </SidebarPanel>

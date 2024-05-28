@@ -1,6 +1,5 @@
 import React, { ReactNode, useEffect, useState } from 'react'
-import { Container } from '~shared/styled'
-import { Alert, BodyShort, Heading, Loader, Table, ToggleGroup } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading, Loader, Table, ToggleGroup } from '@navikt/ds-react'
 import { ArchiveIcon, BellDotIcon } from '@navikt/aksel-icons'
 import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import {
@@ -52,7 +51,7 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
     pending: <Loader />,
     error: (error) => <SakIkkeFunnet error={error} fnr={fnr} />,
     success: ({ sak, behandlinger }) => (
-      <Container>
+      <Box padding="8">
         <Heading size="medium" spacing>
           Hendelser
         </Heading>
@@ -139,7 +138,7 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
             </>
           ),
         })}
-      </Container>
+      </Box>
     ),
   })
 }

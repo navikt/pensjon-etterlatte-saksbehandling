@@ -372,21 +372,28 @@ fun Route.klagevedtakRoute(
     }
 }
 
-private fun Vedtak.toVedtakSammendragDto() =
-    VedtakSammendragDto(
-        id = id.toString(),
-        behandlingId = behandlingId,
-        vedtakType = type,
-        behandlendeSaksbehandler = vedtakFattet?.ansvarligSaksbehandler,
-        datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
-        attesterendeSaksbehandler = attestasjon?.attestant,
-        datoAttestert = attestasjon?.tidspunkt?.toNorskTid(),
-        virkningstidspunkt =
-            when (innhold) {
-                is VedtakInnhold.Behandling -> innhold.virkningstidspunkt
-                else -> null
-            },
-    )
+private fun Vedtak.toVedtakSammendragDto(): VedtakSammendragDto {
+    val dto =
+        VedtakSammendragDto(
+            id = id.toString(),
+            behandlingId = behandlingId,
+            vedtakType = type,
+            behandlendeSaksbehandler = vedtakFattet?.ansvarligSaksbehandler,
+            datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
+            attesterendeSaksbehandler = attestasjon?.attestant,
+            datoAttestert = attestasjon?.tidspunkt?.toNorskTid(),
+            virkningstidspunkt = null,
+            opphoerFraOgMed = null,
+        )
+    return when (innhold) {
+        is VedtakInnhold.Behandling ->
+            dto.copy(
+                virkningstidspunkt = innhold.virkningstidspunkt,
+                opphoerFraOgMed = innhold.opphoerFraOgMed,
+            )
+        else -> dto
+    }
+}
 
 private fun LoependeYtelse.toDto() =
     LoependeYtelseDTO(

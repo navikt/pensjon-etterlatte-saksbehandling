@@ -1,6 +1,5 @@
 import React from 'react'
-import { SpaceChildren } from '~shared/styled'
-import { Table, Tag } from '@navikt/ds-react'
+import { HStack, Table, Tag } from '@navikt/ds-react'
 import { Bostedsadresse } from '~shared/types/familieOpplysninger'
 
 export const BostedsadresseDataCell = ({
@@ -16,7 +15,7 @@ export const BostedsadresseDataCell = ({
     <>
       {!!bostedsadresse && !!bostedsadresse[index] ? (
         <Table.DataCell>
-          <SpaceChildren direction="row">
+          <HStack gap="4">
             <>
               {!!bostedsadresse[index].adresse ? bostedsadresse[index].adresse : '-'},
               {!!bostedsadresse[index].postnr ? bostedsadresse[index].postnr : ''}
@@ -26,7 +25,7 @@ export const BostedsadresseDataCell = ({
                 Gjeldende
               </Tag>
             )}
-          </SpaceChildren>
+          </HStack>
         </Table.DataCell>
       ) : (
         <Table.DataCell>Ingen bostedsadresse tilgjengelig</Table.DataCell>

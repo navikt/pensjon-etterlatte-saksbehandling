@@ -1,10 +1,9 @@
-import { Button, Select, TextField } from '@navikt/ds-react'
+import { Button, HStack, Select, TextField, VStack } from '@navikt/ds-react'
 import React, { ReactNode, useEffect, useState } from 'react'
 import {
   initialFilter,
   initialMinOppgavelisteFiltre,
 } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
-import { FlexRow } from '~shared/styled'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { FiltrerPaaSaksbehandler } from '~components/oppgavebenk/filtreringAvOppgaver/FiltrerPaaSaksbehandler'
 import {
@@ -49,8 +48,8 @@ export const FilterRad = ({
   }, [sakEllerFnr])
 
   return (
-    <>
-      <FlexRow $spacing align="start">
+    <VStack gap="4">
+      <HStack gap="4" align="start" wrap={false}>
         <TextField
           label="Sakid / Fnr."
           width="1rem"
@@ -129,9 +128,9 @@ export const FilterRad = ({
         )}
 
         {children}
-      </FlexRow>
+      </HStack>
 
-      <FlexRow $spacing>
+      <HStack gap="4">
         <Button onClick={() => hentAlleOppgaver()} size="small" icon={<ArrowCirclepathIcon />} iconPosition="right">
           Hent oppgaver
         </Button>
@@ -149,7 +148,7 @@ export const FilterRad = ({
         >
           Tilbakestill filtre
         </Button>
-      </FlexRow>
-    </>
+      </HStack>
+    </VStack>
   )
 }

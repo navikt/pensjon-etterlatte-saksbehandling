@@ -4,7 +4,7 @@ import {
   generellbehandlingErRedigerbar,
   KravpakkeUtland,
 } from '~shared/types/Generellbehandling'
-import { ButtonGroup, Content, ContentHeader, GridContainer, MainContent } from '~shared/styled'
+import { GridContainer, MainContent } from '~shared/styled'
 import { HeadingWrapper, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import {
   Alert,
@@ -14,6 +14,7 @@ import {
   Checkbox,
   Chips,
   Heading,
+  HStack,
   Link,
   Select,
   Table,
@@ -167,8 +168,8 @@ const KravpakkeUtlandBehandling = (props: {
   return (
     <GridContainer>
       <MainContent style={{ whiteSpace: 'pre-wrap' }}>
-        <Content style={{ maxWidth: '55rem', margin: 'auto' }}>
-          <ContentHeader>
+        <div style={{ maxWidth: '55rem', margin: 'auto' }}>
+          <Box paddingInline="16" paddingBlock="4">
             <HeadingWrapper>
               <Heading spacing size="large" level="1">
                 Kravpakke til utland
@@ -179,7 +180,7 @@ const KravpakkeUtlandBehandling = (props: {
                 behov for utfyllende informasjon.
               </p>
             </HeadingWrapper>
-          </ContentHeader>
+          </Box>
           <Box padding="4" borderRadius="small">
             <div>
               {utlandsBehandling.tilknyttetBehandling ? (
@@ -477,7 +478,7 @@ const KravpakkeUtlandBehandling = (props: {
               apiResult: avbrytbehandlingStatus,
               errorMessage: 'Kunne ikke avbryte generell behandling utland',
             })}
-            <ButtonGroup>
+            <HStack gap="2" justify="end">
               {redigerbar && (
                 <>
                   <Button onClick={() => avbrytBehandling()} loading={isPending(avbrytbehandlingStatus)}>
@@ -492,9 +493,9 @@ const KravpakkeUtlandBehandling = (props: {
                   <SendtilAttesteringModal utlandsBehandling={generellBehandlingMedLocalState} />
                 </>
               )}
-            </ButtonGroup>
+            </HStack>
           </Box>
-        </Content>
+        </div>
       </MainContent>
       <GenerellbehandlingSidemeny utlandsBehandling={generellBehandlingMedLocalState} />
     </GridContainer>

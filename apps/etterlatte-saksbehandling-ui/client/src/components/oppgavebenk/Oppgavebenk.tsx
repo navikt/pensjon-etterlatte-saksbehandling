@@ -1,5 +1,4 @@
 import React, { ReactNode, useEffect, useState } from 'react'
-import { Container } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { saksbehandlereIEnhetApi } from '~shared/api/oppgaver'
@@ -16,6 +15,7 @@ import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { ProvideOppgavebenkContext } from '~components/oppgavebenk/state/OppgavebenkContext'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { Box } from '@navikt/ds-react'
 
 export const Oppgavebenk = () => {
   useSidetittel('Oppgavebenk')
@@ -57,10 +57,10 @@ export const Oppgavebenk = () => {
 
   return (
     <ProvideOppgavebenkContext>
-      <Container>
+      <Box padding="8">
         <VelgOppgaveliste oppgavelisteValg={oppgavelisteValg} setOppgavelisteValg={setOppgavelisteValg} />
         {rendreValgtOppgaveliste()}
-      </Container>
+      </Box>
     </ProvideOppgavebenkContext>
   )
 }

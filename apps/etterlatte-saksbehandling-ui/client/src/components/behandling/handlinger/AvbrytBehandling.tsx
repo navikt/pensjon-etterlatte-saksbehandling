@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
+import { BodyLong, Button, Heading, HStack, Modal } from '@navikt/ds-react'
 import { useNavigate } from 'react-router'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
-import { FlexRow } from '~shared/styled'
 
 export default function AvbrytBehandling() {
   const navigate = useNavigate()
@@ -31,14 +30,14 @@ export default function AvbrytBehandling() {
             Endringene dine er lagret og du kan fortsette der du slapp når du går tilbake til saken.
           </BodyLong>
 
-          <FlexRow justify="center">
+          <HStack gap="4" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Nei, fortsett behandling
             </Button>
             <Button variant="primary" onClick={() => navigate('/')}>
               Ja, avbryt
             </Button>
-          </FlexRow>
+          </HStack>
         </Modal.Body>
       </Modal>
     </>

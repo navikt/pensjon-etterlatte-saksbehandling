@@ -1,12 +1,12 @@
 import React from 'react'
 import { ApiError } from '~shared/api/apiClient'
-import { Container } from '~shared/styled'
 import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
 import { OpprettSakModal } from '~components/person/sakOgBehandling/OpprettSakModal'
+import { Box } from '@navikt/ds-react'
 
 export const SakIkkeFunnet = ({ error, fnr }: { error: ApiError; fnr: string }) => {
   return (
-    <Container>
+    <Box padding="8">
       {error.status === 404 ? (
         <>
           <ApiWarningAlert>{error.detail}</ApiWarningAlert>
@@ -15,6 +15,6 @@ export const SakIkkeFunnet = ({ error, fnr }: { error: ApiError; fnr: string }) 
       ) : (
         <ApiErrorAlert>{error.detail || 'Feil ved henting av sak'}</ApiErrorAlert>
       )}
-    </Container>
+    </Box>
   )
 }

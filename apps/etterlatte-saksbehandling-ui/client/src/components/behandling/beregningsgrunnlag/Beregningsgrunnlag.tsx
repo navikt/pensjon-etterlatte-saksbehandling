@@ -2,9 +2,8 @@ import { SakType } from '~shared/types/sak'
 import BeregningsgrunnlagBarnepensjon from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagBarnepensjon'
 import BeregningsgrunnlagOmstillingsstoenad from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagOmstillingsstoenad'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import { BodyLong, Button, Heading, TextField } from '@navikt/ds-react'
+import { BodyLong, Box, Button, Heading, TextField } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
-import { Content, ContentHeader } from '~shared/styled'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 import { hentOverstyrBeregning, opprettOverstyrBeregning } from '~shared/api/beregning'
@@ -40,15 +39,15 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   }, [])
 
   return (
-    <Content>
-      <ContentHeader>
+    <>
+      <Box paddingInline="16" paddingBlock="4">
         <HeadingWrapper>
           <Heading spacing size="large" level="1">
             Beregningsgrunnlag
           </Heading>
           <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
         </HeadingWrapper>
-      </ContentHeader>
+      </Box>
       <>
         {isSuccess(overstyrtBeregning) && (
           <>
@@ -64,7 +63,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
           </>
         )}
       </>
-    </Content>
+    </>
   )
 }
 

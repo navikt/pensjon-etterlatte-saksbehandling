@@ -1,9 +1,8 @@
 import React, { ReactNode } from 'react'
 import { Personopplysning } from '~components/person/personopplysninger/Personopplysning'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
-import { Heading, Table } from '@navikt/ds-react'
+import { Heading, HStack, Table } from '@navikt/ds-react'
 import { AlderTag } from '~components/person/personopplysninger/components/AlderTag'
-import { SpaceChildren } from '~shared/styled'
 import { BostedsadresseDataCell } from '~components/person/personopplysninger/components/BostedsadresseDataCell'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { Familiemedlem } from '~shared/types/familieOpplysninger'
@@ -29,10 +28,10 @@ export const AvdoedesBarn = ({ avdoede }: { avdoede?: Familiemedlem[] }): ReactN
                       {barn.fornavn} {barn.etternavn}
                     </Table.DataCell>
                     <Table.DataCell>
-                      <SpaceChildren direction="row">
+                      <HStack gap="4">
                         <KopierbarVerdi value={barn.foedselsnummer} iconPosition="right" />
                         {!!barn.foedselsdato && <AlderTag foedselsdato={barn.foedselsdato} />}
-                      </SpaceChildren>
+                      </HStack>
                     </Table.DataCell>
                     <BostedsadresseDataCell bostedsadresse={doed.bostedsadresse} index={0} />
                   </Table.Row>

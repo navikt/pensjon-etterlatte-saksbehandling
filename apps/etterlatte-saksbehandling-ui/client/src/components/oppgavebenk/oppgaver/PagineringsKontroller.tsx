@@ -1,7 +1,6 @@
 import React, { Dispatch, ReactNode, SetStateAction } from 'react'
-import { BodyShort, Pagination } from '@navikt/ds-react'
+import { BodyShort, HStack, Pagination } from '@navikt/ds-react'
 import { leggTilPagineringLocalStorage, pagineringslisteverdier } from '~components/oppgavebenk/utils/oppgaveutils'
-import { FlexRow } from '~shared/styled'
 
 interface Props {
   page: number
@@ -21,32 +20,28 @@ export const PagineringsKontroller = ({
   totalAvOppgaverTeksts,
 }: Props): ReactNode => {
   return (
-    <div style={{ marginTop: '1rem' }}>
-      <FlexRow justify="center" $spacing>
-        <Pagination page={page} onPageChange={setPage} count={antallSider} size="small" />
-      </FlexRow>
+    <HStack gap="4" justify="center" align="center">
+      <Pagination page={page} onPageChange={setPage} count={antallSider} size="small" />
 
-      <FlexRow justify="center" align="center" $spacing>
-        {totalAvOppgaverTeksts && <BodyShort>{totalAvOppgaverTeksts}</BodyShort>}
+      {totalAvOppgaverTeksts && <BodyShort>{totalAvOppgaverTeksts}</BodyShort>}
 
-        {raderPerSide && setRaderPerSide && (
-          <select
-            value={raderPerSide}
-            onChange={(e) => {
-              const size = Number(e.target.value)
-              setRaderPerSide(size)
-              leggTilPagineringLocalStorage(size)
-            }}
-            title="Antall oppgaver som vises"
-          >
-            {pagineringslisteverdier.map((rowsPerPage) => (
-              <option key={rowsPerPage} value={rowsPerPage}>
-                Vis {rowsPerPage} oppgaver
-              </option>
-            ))}
-          </select>
-        )}
-      </FlexRow>
-    </div>
+      {raderPerSide && setRaderPerSide && (
+        <select
+          value={raderPerSide}
+          onChange={(e) => {
+            const size = Number(e.target.value)
+            setRaderPerSide(size)
+            leggTilPagineringLocalStorage(size)
+          }}
+          title="Antall oppgaver som vises"
+        >
+          {pagineringslisteverdier.map((rowsPerPage) => (
+            <option key={rowsPerPage} value={rowsPerPage}>
+              Vis {rowsPerPage} oppgaver
+            </option>
+          ))}
+        </select>
+      )}
+    </HStack>
   )
 }

@@ -1,5 +1,17 @@
 import { HandshakeIcon } from '@navikt/aksel-icons'
-import { Alert, BodyShort, Button, Heading, HelpText, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
+import {
+  Alert,
+  BodyShort,
+  Button,
+  Heading,
+  HelpText,
+  HStack,
+  Radio,
+  RadioGroup,
+  Select,
+  Textarea,
+  VStack,
+} from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
@@ -20,10 +32,8 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { IconSize } from '~shared/types/Icon'
 import { FormWrapper } from '../styled'
 import { TrygdeavtaleVisning } from './TrygdeavtaleVisning'
-import { FlexRow } from '~shared/styled'
 import { JaNei } from '~shared/types/ISvar'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
-import { Text } from '~components/behandling/attestering/styled'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
@@ -151,63 +161,61 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
         </Heading>
       </FlexHeader>
 
-      {!redigering && avtalerListe && avtaleKriterierListe && (
-        <>
-          <TrygdeavtaleVisning avtaler={avtalerListe} kriterier={avtaleKriterierListe} trygdeavtale={trygdeavtale} />
-          {redigerbar && (
-            <FlexRow $spacing>
-              <Button size="small" onClick={rediger} type="button">
-                Rediger
-              </Button>
-            </FlexRow>
-          )}
-        </>
-      )}
-      {isSuccess(hentAlleTrygdetidAvtalerRequest) &&
-        isSuccess(hentAlleTrygdetidAvtalerKriterierRequest) &&
-        isSuccess(hentTrygdeavtaleRequest) &&
-        redigerbar &&
-        redigering && (
+      <VStack gap="2">
+        {!redigering && avtalerListe && avtaleKriterierListe && (
           <>
-            <TrygdeAvtaleForm>
-              <FlexRow $spacing>
-                <FormWrapper>
-                  <Select
-                    label="Avtale"
-                    autoComplete="off"
-                    value={trygdeavtale.avtaleKode}
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        setTrygdeavtale({ ...trygdeavtale, avtaleKode: e.target.value })
-                      }
-                      velgAvtale(e.target.value)
-                    }}
-                  >
-                    <TrygdetidAvtaleOptionsView
-                      defaultBeskrivelse="Velg avtale"
-                      trygdeavtaleOptions={hentAlleTrygdetidAvtalerRequest.data}
-                    />
-                  </Select>
-                  {valgtAvtale && valgtAvtale.datoer.length > 0 && (
+            <TrygdeavtaleVisning avtaler={avtalerListe} kriterier={avtaleKriterierListe} trygdeavtale={trygdeavtale} />
+            {redigerbar && (
+              <div>
+                <Button size="small" onClick={rediger} type="button">
+                  Rediger
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+        {isSuccess(hentAlleTrygdetidAvtalerRequest) &&
+          isSuccess(hentAlleTrygdetidAvtalerKriterierRequest) &&
+          isSuccess(hentTrygdeavtaleRequest) &&
+          redigerbar &&
+          redigering && (
+            <>
+              <TrygdeAvtaleForm>
+                <VStack gap="2">
+                  <FormWrapper>
                     <Select
-                      label="Dato"
+                      label="Avtale"
                       autoComplete="off"
-                      value={trygdeavtale.avtaleDatoKode}
+                      value={trygdeavtale.avtaleKode}
                       onChange={(e) => {
-                        setTrygdeavtale({ ...trygdeavtale, avtaleDatoKode: e.target.value })
+                        if (e.target.value) {
+                          setTrygdeavtale({ ...trygdeavtale, avtaleKode: e.target.value })
+                        }
+                        velgAvtale(e.target.value)
                       }}
                     >
                       <TrygdetidAvtaleOptionsView
-                        defaultBeskrivelse="Velg avtaledato"
-                        trygdeavtaleOptions={valgtAvtale.datoer}
+                        defaultBeskrivelse="Velg avtale"
+                        trygdeavtaleOptions={hentAlleTrygdetidAvtalerRequest.data}
                       />
                     </Select>
-                  )}
-                </FormWrapper>
-              </FlexRow>
-              <FlexRow $spacing>
-                <AvtaleColumn>
-                  <FlexRow $spacing>
+                    {valgtAvtale && valgtAvtale.datoer.length > 0 && (
+                      <Select
+                        label="Dato"
+                        autoComplete="off"
+                        value={trygdeavtale.avtaleDatoKode}
+                        onChange={(e) => {
+                          setTrygdeavtale({ ...trygdeavtale, avtaleDatoKode: e.target.value })
+                        }}
+                      >
+                        <TrygdetidAvtaleOptionsView
+                          defaultBeskrivelse="Velg avtaledato"
+                          trygdeavtaleOptions={valgtAvtale.datoer}
+                        />
+                      </Select>
+                    )}
+                  </FormWrapper>
+                  <AvtaleColumn>
                     <FormWrapper>
                       <Select
                         label="Kriterier for å omfattes av avtalen"
@@ -223,15 +231,11 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                         />
                       </Select>
                     </FormWrapper>
-                  </FlexRow>
-                </AvtaleColumn>
-                <AvtaleColumn>
-                  <FlexRow $spacing>
-                    <Heading size="xsmall" spacing={false}>
+                  </AvtaleColumn>
+                  <AvtaleColumn>
+                    <Heading size="xsmall" spacing>
                       Er avdøde i personkretsen i denne avtalen?
                     </Heading>
-                  </FlexRow>
-                  <FlexRow $spacing>
                     <RadioGroupWrapper>
                       <RadioGroup
                         legend="Er avdøde i personkretsen i denne avtalen?"
@@ -249,192 +253,170 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                         </div>
                       </RadioGroup>
                     </RadioGroupWrapper>
-                  </FlexRow>
-                </AvtaleColumn>
-              </FlexRow>
-              <FlexRow $spacing>
-                <FormWrapper>
-                  <AvtaleColumn>
-                    <FlexHeader>
-                      <Heading size="xsmall" spacing={false}>
-                        Er arbeidsinntekt i avtaleland på minst 1 G på dødstidspunktet?
-                      </Heading>
-                      <HelpText strategy="fixed">
-                        Poengår (år med arbeidsinntekt på mer enn 1 G) i andre EØS-land medregnes som poengår, forutsatt
-                        at det ikke er tjent opp poengår i Norge i året. Hvis «Ja» gir det rett til fremtidige poeng,
-                        eller fremtidig trygdetid, ved en prorata beregning. Hvis «Nei» gir det ikke rett til dette.
-                      </HelpText>
-                    </FlexHeader>
-                    <BodyShort>
-                      <HjemmelLenke
-                        tittel="Rundskriv til hovednummer 45 kap. 3 punkt 3.3.2"
-                        lenke="https://lovdata.no/pro/rundskriv/r45-00/KAPITTEL_3-3-2-1"
-                      />
-                    </BodyShort>
-                    <RadioGroupWrapper>
-                      <RadioGroup
-                        legend="Er arbeidsinntekt i avtaleland på minst 1 G på dødstidspunktet?"
-                        hideLegend={true}
-                        size="small"
-                        className="radioGroup"
-                        onChange={(event) => {
-                          setTrygdeavtale({ ...trygdeavtale, arbInntekt1G: event as JaNei })
-                        }}
-                        value={trygdeavtale.arbInntekt1G || ''}
-                      >
-                        <div className="flex">
-                          <Radio value={JaNei.JA}>Ja</Radio>
-                          <Radio value={JaNei.NEI}>Nei</Radio>
-                        </div>
-                      </RadioGroup>
-                    </RadioGroupWrapper>
-                    {trygdeavtale.arbInntekt1G === JaNei.NEI && (
-                      <Alert variant="info" size="small" inline>
-                        Det gis ikke rett til fremtidig trygdetid fra utland ved en prorata beregning. Hvis det heller
-                        ikke er rett til fremtidig trygdetid etter nasjonale regler, må du ta bort registrert fremtidig
-                        trygdetid.
-                      </Alert>
-                    )}
                   </AvtaleColumn>
-                  <AvtaleColumn>
-                    <FlexRow $spacing>
-                      <Text>Kommentar (valgfri)</Text>
-                    </FlexRow>
-                    <FlexRow $spacing>
+                  <FormWrapper>
+                    <AvtaleColumn>
+                      <FlexHeader>
+                        <Heading size="xsmall" spacing={false}>
+                          Er arbeidsinntekt i avtaleland på minst 1 G på dødstidspunktet?
+                        </Heading>
+                        <HelpText strategy="fixed">
+                          Poengår (år med arbeidsinntekt på mer enn 1 G) i andre EØS-land medregnes som poengår,
+                          forutsatt at det ikke er tjent opp poengår i Norge i året. Hvis «Ja» gir det rett til
+                          fremtidige poeng, eller fremtidig trygdetid, ved en prorata beregning. Hvis «Nei» gir det ikke
+                          rett til dette.
+                        </HelpText>
+                      </FlexHeader>
+                      <BodyShort>
+                        <HjemmelLenke
+                          tittel="Rundskriv til hovednummer 45 kap. 3 punkt 3.3.2"
+                          lenke="https://lovdata.no/pro/rundskriv/r45-00/KAPITTEL_3-3-2-1"
+                        />
+                      </BodyShort>
+                      <RadioGroupWrapper>
+                        <RadioGroup
+                          legend="Er arbeidsinntekt i avtaleland på minst 1 G på dødstidspunktet?"
+                          hideLegend={true}
+                          size="small"
+                          className="radioGroup"
+                          onChange={(event) => {
+                            setTrygdeavtale({ ...trygdeavtale, arbInntekt1G: event as JaNei })
+                          }}
+                          value={trygdeavtale.arbInntekt1G || ''}
+                        >
+                          <div className="flex">
+                            <Radio value={JaNei.JA}>Ja</Radio>
+                            <Radio value={JaNei.NEI}>Nei</Radio>
+                          </div>
+                        </RadioGroup>
+                      </RadioGroupWrapper>
+                      {trygdeavtale.arbInntekt1G === JaNei.NEI && (
+                        <Alert variant="info" size="small" inline>
+                          Det gis ikke rett til fremtidig trygdetid fra utland ved en prorata beregning. Hvis det heller
+                          ikke er rett til fremtidig trygdetid etter nasjonale regler, må du ta bort registrert
+                          fremtidig trygdetid.
+                        </Alert>
+                      )}
+                    </AvtaleColumn>
+                    <AvtaleColumn>
                       <Textarea
                         style={{ padding: '10px' }}
                         label="Kommentar: Er arbeidsinntekt i avtaleland på minst 1 G på dødstidspunktet?"
-                        hideLabel={true}
                         value={trygdeavtale.arbInntekt1GKommentar}
                         onChange={(e) => setTrygdeavtale({ ...trygdeavtale, arbInntekt1GKommentar: e.target.value })}
                         minRows={2}
                         size="small"
                         autoComplete="off"
                       />
-                    </FlexRow>
-                  </AvtaleColumn>
-                </FormWrapper>
-              </FlexRow>
-              <FlexRow $spacing>
-                <FormWrapper>
-                  <AvtaleColumn>
-                    <FlexHeader>
-                      <Heading size="xsmall" spacing={false}>
-                        Beregning etter artikkel 50 (EØS-forordning 883/2004)?
-                      </Heading>
-                      <HelpText strategy="fixed">
-                        Denne artikkelen skal anvendes hvis det foreligger pensjonsrett i minst to EØS-land i tillegg
-                        til Norge, og hvis vilkårene for pensjon ikke er oppfylt i alle EØS-landene avdøde har
-                        opptjening i. Det skal gjøres en alternativ prorata-beregning med trygdetid kun for de
-                        EØS-landene der rett til pensjon er oppfylt. Dette er fordi trygdetid fra land der vilkårene
-                        ikke er oppfylte ikke skal medregnes hvis det ikke lønner seg.
-                      </HelpText>
-                    </FlexHeader>
-                    <BodyShort>
-                      <HjemmelLenke
-                        tittel="EØS-forordning 883/2004 artikkel 50"
-                        lenke="https://lovdata.no/pro/eu/32004r0883/ARTIKKEL_50"
-                      />
-                    </BodyShort>
-                    <RadioGroupWrapper>
-                      <RadioGroup
-                        legend="Beregning etter artikkel 50 (EØS-forordning 883/2004)?"
-                        hideLegend={true}
-                        size="small"
-                        className="radioGroup"
-                        defaultValue={trygdeavtale.beregArt50}
-                        onChange={(event) => {
-                          setTrygdeavtale({ ...trygdeavtale, beregArt50: event as JaNei })
-                        }}
-                        value={trygdeavtale.beregArt50 || ''}
-                      >
-                        <div className="flex">
-                          <Radio value={JaNei.JA}>Ja</Radio>
-                          <Radio value={JaNei.NEI}>Nei</Radio>
-                        </div>
-                      </RadioGroup>
-                    </RadioGroupWrapper>
-                    {trygdeavtale.beregArt50 === JaNei.JA && (
-                      <Alert variant="info" size="small" inline>
-                        Ta en alternativ prorata-beregning. Huk av for «Ikke i prorata» på trygdetidsperioder for
-                        EØS-land som har gitt avslag på ytelse.
-                      </Alert>
-                    )}
-                  </AvtaleColumn>
-                  <AvtaleColumn>
-                    <FlexRow $spacing>
-                      <Text>Kommentar (valgfri)</Text>
-                    </FlexRow>
-                    <FlexRow $spacing>
+                    </AvtaleColumn>
+                  </FormWrapper>
+                  <FormWrapper>
+                    <AvtaleColumn>
+                      <FlexHeader>
+                        <Heading size="xsmall" spacing={false}>
+                          Beregning etter artikkel 50 (EØS-forordning 883/2004)?
+                        </Heading>
+                        <HelpText strategy="fixed">
+                          Denne artikkelen skal anvendes hvis det foreligger pensjonsrett i minst to EØS-land i tillegg
+                          til Norge, og hvis vilkårene for pensjon ikke er oppfylt i alle EØS-landene avdøde har
+                          opptjening i. Det skal gjøres en alternativ prorata-beregning med trygdetid kun for de
+                          EØS-landene der rett til pensjon er oppfylt. Dette er fordi trygdetid fra land der vilkårene
+                          ikke er oppfylte ikke skal medregnes hvis det ikke lønner seg.
+                        </HelpText>
+                      </FlexHeader>
+                      <BodyShort>
+                        <HjemmelLenke
+                          tittel="EØS-forordning 883/2004 artikkel 50"
+                          lenke="https://lovdata.no/pro/eu/32004r0883/ARTIKKEL_50"
+                        />
+                      </BodyShort>
+                      <RadioGroupWrapper>
+                        <RadioGroup
+                          legend="Beregning etter artikkel 50 (EØS-forordning 883/2004)?"
+                          hideLegend={true}
+                          size="small"
+                          className="radioGroup"
+                          defaultValue={trygdeavtale.beregArt50}
+                          onChange={(event) => {
+                            setTrygdeavtale({ ...trygdeavtale, beregArt50: event as JaNei })
+                          }}
+                          value={trygdeavtale.beregArt50 || ''}
+                        >
+                          <div className="flex">
+                            <Radio value={JaNei.JA}>Ja</Radio>
+                            <Radio value={JaNei.NEI}>Nei</Radio>
+                          </div>
+                        </RadioGroup>
+                      </RadioGroupWrapper>
+                      {trygdeavtale.beregArt50 === JaNei.JA && (
+                        <Alert variant="info" size="small" inline>
+                          Ta en alternativ prorata-beregning. Huk av for «Ikke i prorata» på trygdetidsperioder for
+                          EØS-land som har gitt avslag på ytelse.
+                        </Alert>
+                      )}
+                    </AvtaleColumn>
+                    <AvtaleColumn>
                       <Textarea
                         style={{ padding: '10px' }}
                         label="Kommentar: Beregning etter artikkel 50  "
-                        hideLabel={true}
                         value={trygdeavtale.beregArt50Kommentar}
                         onChange={(e) => setTrygdeavtale({ ...trygdeavtale, beregArt50Kommentar: e.target.value })}
                         minRows={2}
                         size="small"
                         autoComplete="off"
                       />
-                    </FlexRow>
-                  </AvtaleColumn>
-                </FormWrapper>
-              </FlexRow>
-              <FlexRow $spacing>
-                <FormWrapper>
-                  <AvtaleColumn>
-                    <FlexHeader>
-                      <Heading size="xsmall">
-                        Nordisk trygdeavtale: Skal artikkel 9 anvendes - fremtidig trygdetid avkortes?
-                      </Heading>
-                      <HelpText strategy="fixed">
-                        Hvis forutgående medlemskap, og derav vilkår for å beregne framtidig trygdetid, er oppfylt etter
-                        nasjonale regler i Sverige og/eller Island i tillegg til Norge, skal framtidig trygdetid
-                        avkortes. I en prorata-beregnet ytelse, der forutgående medlemskap er oppfylt ved sammenlegging,
-                        er den framtidige trygdetiden allerede avkortet, og artikkelen skal ikke anvendes.
-                      </HelpText>
-                    </FlexHeader>
-                    <BodyShort>
-                      <HjemmelLenke
-                        tittel="Nordisk konvensjon artikkel 9"
-                        lenke="https://lovdata.no/pro/traktat/2012-06-12-18/ARTIKKEL_9"
-                      />
-                    </BodyShort>
-                    <RadioGroupWrapper>
-                      <RadioGroup
-                        legend="Nordisk trygdeavtale: Skal artikkel 9 anvendes - fremtidig trygdetid avkortes?"
-                        hideLegend={true}
-                        size="small"
-                        className="radioGroup"
-                        onChange={(event) => {
-                          setTrygdeavtale({ ...trygdeavtale, nordiskTrygdeAvtale: event as JaNei })
-                        }}
-                        value={trygdeavtale.nordiskTrygdeAvtale || ''}
-                      >
-                        <div className="flex">
-                          <Radio value={JaNei.JA}>Ja</Radio>
-                          <Radio value={JaNei.NEI}>Nei</Radio>
-                        </div>
-                      </RadioGroup>
-                    </RadioGroupWrapper>
-                    {trygdeavtale.nordiskTrygdeAvtale === JaNei.JA && (
-                      <Alert variant="info" size="small" inline>
-                        Fremtidig trygdetid skal avkortes. Gjenny støtter ikke dette. Du må derfor beregne fremtidig
-                        trygdetid manuelt, og beregning av ytelsen må manuelt overstyres. Formel: Avkortet framtidig
-                        trygdetid = Framtidig trygdetid x norsk faktisk trygdetid/samlet faktisk trygdetid i de nordiske
-                        land som beregner framtidig trygdetid (maks. 40 år).
-                      </Alert>
-                    )}
-                  </AvtaleColumn>
-                  <AvtaleColumn>
-                    <FlexRow $spacing>
-                      <Text>Kommentar (valgfri)</Text>
-                    </FlexRow>
-                    <FlexRow $spacing>
+                    </AvtaleColumn>
+                  </FormWrapper>
+                  <FormWrapper>
+                    <AvtaleColumn>
+                      <FlexHeader>
+                        <Heading size="xsmall">
+                          Nordisk trygdeavtale: Skal artikkel 9 anvendes - fremtidig trygdetid avkortes?
+                        </Heading>
+                        <HelpText strategy="fixed">
+                          Hvis forutgående medlemskap, og derav vilkår for å beregne framtidig trygdetid, er oppfylt
+                          etter nasjonale regler i Sverige og/eller Island i tillegg til Norge, skal framtidig trygdetid
+                          avkortes. I en prorata-beregnet ytelse, der forutgående medlemskap er oppfylt ved
+                          sammenlegging, er den framtidige trygdetiden allerede avkortet, og artikkelen skal ikke
+                          anvendes.
+                        </HelpText>
+                      </FlexHeader>
+                      <BodyShort>
+                        <HjemmelLenke
+                          tittel="Nordisk konvensjon artikkel 9"
+                          lenke="https://lovdata.no/pro/traktat/2012-06-12-18/ARTIKKEL_9"
+                        />
+                      </BodyShort>
+                      <RadioGroupWrapper>
+                        <RadioGroup
+                          legend="Nordisk trygdeavtale: Skal artikkel 9 anvendes - fremtidig trygdetid avkortes?"
+                          hideLegend={true}
+                          size="small"
+                          className="radioGroup"
+                          onChange={(event) => {
+                            setTrygdeavtale({ ...trygdeavtale, nordiskTrygdeAvtale: event as JaNei })
+                          }}
+                          value={trygdeavtale.nordiskTrygdeAvtale || ''}
+                        >
+                          <div className="flex">
+                            <Radio value={JaNei.JA}>Ja</Radio>
+                            <Radio value={JaNei.NEI}>Nei</Radio>
+                          </div>
+                        </RadioGroup>
+                      </RadioGroupWrapper>
+                      {trygdeavtale.nordiskTrygdeAvtale === JaNei.JA && (
+                        <Alert variant="info" size="small" inline>
+                          Fremtidig trygdetid skal avkortes. Gjenny støtter ikke dette. Du må derfor beregne fremtidig
+                          trygdetid manuelt, og beregning av ytelsen må manuelt overstyres. Formel: Avkortet framtidig
+                          trygdetid = Framtidig trygdetid x norsk faktisk trygdetid/samlet faktisk trygdetid i de
+                          nordiske land som beregner framtidig trygdetid (maks. 40 år).
+                        </Alert>
+                      )}
+                    </AvtaleColumn>
+                    <AvtaleColumn>
                       <Textarea
                         style={{ padding: '10px' }}
                         label="Kommentar : Nordisk trygdeavtale: Skal artikkel 9 anvendes - fremtidig trygdetid avkortes?"
-                        hideLabel={true}
                         value={trygdeavtale.nordiskTrygdeAvtaleKommentar}
                         onChange={(e) =>
                           setTrygdeavtale({
@@ -446,43 +428,43 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                         size="small"
                         autoComplete="off"
                       />
-                    </FlexRow>
-                  </AvtaleColumn>
-                </FormWrapper>
-              </FlexRow>
-              <FlexRow $spacing>
-                <Button size="small" loading={isPending(lagreTrygdeavtaleRequest)} type="button" onClick={lagre}>
-                  Lagre
-                </Button>
-                {trygdeavtale && (
-                  <Button size="small" onClick={avbryt} type="button">
-                    Avbryt
-                  </Button>
-                )}
-              </FlexRow>
-            </TrygdeAvtaleForm>
-          </>
-        )}
-      {(isPending(hentAlleTrygdetidAvtalerRequest) ||
-        isPending(hentAlleTrygdetidAvtalerKriterierRequest) ||
-        isPending(hentTrygdeavtaleRequest)) && <Spinner visible={true} label="Henter trgydeavtaler" />}
+                    </AvtaleColumn>
+                  </FormWrapper>
+                  <HStack gap="4">
+                    <Button size="small" loading={isPending(lagreTrygdeavtaleRequest)} type="button" onClick={lagre}>
+                      Lagre
+                    </Button>
+                    {trygdeavtale && (
+                      <Button size="small" onClick={avbryt} type="button">
+                        Avbryt
+                      </Button>
+                    )}
+                  </HStack>
+                </VStack>
+              </TrygdeAvtaleForm>
+            </>
+          )}
+        {(isPending(hentAlleTrygdetidAvtalerRequest) ||
+          isPending(hentAlleTrygdetidAvtalerKriterierRequest) ||
+          isPending(hentTrygdeavtaleRequest)) && <Spinner visible={true} label="Henter trgydeavtaler" />}
 
-      {isFailureHandler({
-        apiResult: hentAlleTrygdetidAvtalerRequest,
-        errorMessage: 'En feil har oppstått ved henting av trygdeavtaler',
-      })}
-      {isFailureHandler({
-        apiResult: hentAlleTrygdetidAvtalerKriterierRequest,
-        errorMessage: 'En feil har oppstått ved henting av trygdeavtalekriterier',
-      })}
-      {isFailureHandler({
-        apiResult: hentTrygdeavtaleRequest,
-        errorMessage: 'En feil har oppstått ved henting av trygdeavtale for behandlingen',
-      })}
-      {isFailureHandler({
-        apiResult: lagreTrygdeavtaleRequest,
-        errorMessage: 'En feil har oppstått ved lagring av trygdeavtale for behandlingen',
-      })}
+        {isFailureHandler({
+          apiResult: hentAlleTrygdetidAvtalerRequest,
+          errorMessage: 'En feil har oppstått ved henting av trygdeavtaler',
+        })}
+        {isFailureHandler({
+          apiResult: hentAlleTrygdetidAvtalerKriterierRequest,
+          errorMessage: 'En feil har oppstått ved henting av trygdeavtalekriterier',
+        })}
+        {isFailureHandler({
+          apiResult: hentTrygdeavtaleRequest,
+          errorMessage: 'En feil har oppstått ved henting av trygdeavtale for behandlingen',
+        })}
+        {isFailureHandler({
+          apiResult: lagreTrygdeavtaleRequest,
+          errorMessage: 'En feil har oppstått ved lagring av trygdeavtale for behandlingen',
+        })}
+      </VStack>
     </TrygdeAvtaleWrapper>
   )
 }

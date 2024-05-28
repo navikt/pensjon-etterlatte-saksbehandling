@@ -1,11 +1,9 @@
 import React, { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Alert, Button, Heading, Modal } from '@navikt/ds-react'
+import { Alert, Button, Heading, HStack, Modal } from '@navikt/ds-react'
 import { Journalpost } from '~shared/types/Journalpost'
 import { oppdaterJournalpost } from '~shared/api/dokument'
-import { FlexRow } from '~shared/styled'
 import { ApiErrorAlert } from '~ErrorBoundary'
-
 import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
 import { ferdigstillOppgave } from '~shared/api/oppgaver'
@@ -79,7 +77,7 @@ export default function FerdigstillJournalpostModal({ journalpost, oppgaveId }: 
                 oppgavebenken.
               </Alert>
             ) : (
-              <FlexRow justify="center">
+              <HStack gap="4" justify="center">
                 <Button
                   variant="secondary"
                   onClick={() => setOpen(false)}
@@ -94,7 +92,7 @@ export default function FerdigstillJournalpostModal({ journalpost, oppgaveId }: 
                 >
                   Ja, fortsett
                 </Button>
-              </FlexRow>
+              </HStack>
             )}
           </Modal.Body>
 

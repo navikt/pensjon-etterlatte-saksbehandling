@@ -1,8 +1,7 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentSakForPerson } from '~shared/api/sak'
 import { isPending, mapResult } from '~shared/api/apiUtils'
-import { Alert, Button, Checkbox, Select } from '@navikt/ds-react'
-import { FlexRow } from '~shared/styled'
+import { Alert, Button, Checkbox, HStack, Select } from '@navikt/ds-react'
 import { GosysActionToggle } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -101,22 +100,22 @@ export const OverfoerOppgaveTilGjenny = ({
 
       {mapResult(flyttOppgaveResult, {
         initial: (
-          <FlexRow justify="right">
+          <HStack gap="4" justify="end">
             <Button variant="secondary" onClick={() => setToggle({ ferdigstill: false })} disabled={loading}>
               Nei, avbryt
             </Button>
             <Button onClick={konverterTilGjennyoppgave} loading={loading} disabled={!sakType}>
               Ja, overfør
             </Button>
-          </FlexRow>
+          </HStack>
         ),
         success: (oppgave) => (
-          <FlexRow justify="right">
+          <HStack gap="4" justify="end">
             <Button variant="tertiary" onClick={() => window.location.reload()}>
               Avslutt
             </Button>
             <Button onClick={() => navigate(`/oppgave/${oppgave.id}`)}>Gå til oppgaven</Button>
-          </FlexRow>
+          </HStack>
         ),
       })}
     </>

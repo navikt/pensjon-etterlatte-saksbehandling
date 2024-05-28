@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 data class RegelPeriode(val fraDato: LocalDate, val tilDato: LocalDate? = null) {
     init {
-        assert(tilDato == null || tilDato >= fraDato) { "Tildato må være større eller lik fradato" }
+        check(tilDato == null || tilDato >= fraDato) { "Tildato må være større eller lik fradato" }
     }
 }
 

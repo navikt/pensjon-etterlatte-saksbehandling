@@ -1,6 +1,5 @@
-import { Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
+import { Button, Heading, HStack, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
 import React from 'react'
-import { FlexRow } from '~shared/styled'
 import { BredVurderingWrapper, Feilmelding, VurderingWrapper } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
 import { useKlage } from '~components/klage/useKlage'
@@ -169,14 +168,14 @@ export function EndeligVurdering(props: { klage: Klage }) {
           errorMessage: 'Kunne ikke lagre utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
         })}
 
-        <FlexRow justify="center">
+        <HStack gap="4" justify="center">
           <Button type="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'vurdering'))}>
             Gå tilbake
           </Button>
           <Button loading={isPending(lagreUtfallStatus)} type="submit" variant="primary">
             {kanSeBrev(valgtUtfall) ? 'Gå til brev' : 'Gå til oppsummering'}
           </Button>
-        </FlexRow>
+        </HStack>
       </form>
     </>
   )

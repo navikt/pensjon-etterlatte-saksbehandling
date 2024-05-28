@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BodyLong, Button, ExpansionCard, Heading, Modal } from '@navikt/ds-react'
+import { BodyLong, Button, ExpansionCard, Heading, HStack, Modal } from '@navikt/ds-react'
 import { avbrytBehandling } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
@@ -8,7 +8,6 @@ import { useBehandling } from '~components/behandling/useBehandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ExclamationmarkTriangleFillIcon, XMarkIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
-import { FlexRow } from '~shared/styled'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isPending } from '~shared/api/apiUtils'
@@ -92,14 +91,14 @@ export default function AnnullerBehandling() {
         </Modal.Body>
 
         <Modal.Footer>
-          <FlexRow justify="center">
+          <HStack gap="4" justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)} loading={isPending(status)}>
               Nei, fortsett behandling
             </Button>
             <Button variant="danger" onClick={avbryt} loading={isPending(status)}>
               Ja, annuller behandling
             </Button>
-          </FlexRow>
+          </HStack>
           {isFailureHandler({ apiResult: status, errorMessage: 'Det oppsto en feil ved avbryting av behandlingen.' })}
         </Modal.Footer>
       </Modal>

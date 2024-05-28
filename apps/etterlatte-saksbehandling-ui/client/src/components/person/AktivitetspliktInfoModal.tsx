@@ -14,7 +14,7 @@ import {
   VStack,
 } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
-import { ferdigstillOppgave } from '~shared/api/oppgaver'
+import { ferdigstillOppgave, hentOppgave } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending } from '@reduxjs/toolkit'
 import { isSuccess, mapFailure } from '~shared/api/apiUtils'
@@ -60,12 +60,14 @@ const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValues = {
 
 export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const [visModal, setVisModal] = useState(false)
+  const [erFerdigstilt, setErFerdigstilt] = useState(false)
   const [vurdering, setVurdering] = useState<IAktivitetspliktVurdering>()
 
   const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
   const [opprettetAktivitetsgrad, opprettAktivitetsgrad] = useApiCall(opprettAktivitspliktAktivitetsgrad)
   const [opprettetUnntak, opprettUnntak] = useApiCall(opprettAktivitspliktUnntak)
   const [hentet, hent] = useApiCall(hentAktivitspliktVurdering)
+  const [hentOppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
 
   const {
     register,
@@ -78,7 +80,11 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
   })
 
   const ferdigstill = (data: AktivitetspliktVurderingValues) => {
-    if (data.aktivitetsplikt === IValgJaNei.NEI || data.unntak === IValgJaNei.JA) {
+    if (!erFerdigstilt && vurdering) {
+      apiFerdigstillOppgave(oppgave.id, () => {
+        setVisModal(false)
+      })
+    } else if (data.aktivitetsplikt === IValgJaNei.NEI || data.unntak === IValgJaNei.JA) {
       opprettUnntak(
         {
           sakId: oppgave.sakId,
@@ -127,9 +133,22 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
     if (visModal) {
       hent({ sakId: oppgave.sakId, oppgaveId: oppgave.id }, (result) => {
         setVurdering(result)
+        if (result) sjekkOppgaveStatus()
       })
     }
   }, [visModal])
+
+  const sjekkOppgaveStatus = () => {
+    apiHentOppgave(oppgave.id, (result) => {
+      setErFerdigstilt(result.status === Oppgavestatus.FERDIGSTILT)
+    })
+  }
+
+  const kanFerdigstilleOppgave = () => {
+    if (oppgave.status === Oppgavestatus.UNDER_BEHANDLING && !vurdering) return true
+    else if (vurdering && !erFerdigstilt) return true
+    return false
+  }
 
   const harAktivitetsplikt = watch('aktivitetsplikt')
   const harUnntak = watch('unntak')
@@ -326,14 +345,18 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
             {mapFailure(ferdigstillOppgaveStatus, (error) => (
               <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved ferdigstilling av oppgave'}</ApiErrorAlert>
             ))}
+            {mapFailure(hentOppgaveStatus, (error) => (
+              <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved henting av oppgave'}</ApiErrorAlert>
+            ))}
           </Modal.Body>
           <Modal.Footer>
-            {oppgave.status === Oppgavestatus.UNDER_BEHANDLING && !vurdering && (
+            {kanFerdigstilleOppgave() && (
               <Button
                 loading={
                   isPending(ferdigstillOppgaveStatus) ||
                   isPending(opprettetAktivitetsgrad) ||
-                  isPending(opprettetUnntak)
+                  isPending(opprettetUnntak) ||
+                  isPending(hentOppgaveStatus)
                 }
                 variant="primary"
                 type="button"

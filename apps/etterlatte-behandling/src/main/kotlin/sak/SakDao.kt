@@ -109,7 +109,19 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                 val statement =
                     prepareStatement(
                         """SELECT id, sakType, fnr, enhet from sak s 
-                    where not exists(select 1 from omregningskjoering k where k.sak_id=s.id and k.kjoering='$kjoering' and k.status != '${KjoeringStatus.FEILA.name}')
+                    where
+                    (
+                    -- ikke kjørt i det hele tatt
+                    not exists (select 1 from omregningskjoering k where k.sak_id=s.id and k.kjoering='$kjoering')
+                    or exists(
+                        -- nyeste kjøring har feila
+                        select 1 from omregningskjoering k
+                            where k.sak_id=s.id 
+                            and k.kjoering='$kjoering' 
+                            and k.status = '${KjoeringStatus.FEILA.name}'
+                            and k.tidspunkt > (select max(o.tidspunkt) from omregningskjoering o where o.sak_id=k.sak_id and o.kjoering=k.kjoering and o.status != '${KjoeringStatus.FEILA.name}')
+                        )
+                        )
                     ${if (saker.isEmpty()) "" else " and id = any(?)"}
                     ${if (sakType == null) "" else " and s.saktype = ?"}
                     ORDER by id ASC

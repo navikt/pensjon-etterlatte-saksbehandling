@@ -127,8 +127,7 @@ internal class OmregningHendelserBeregningRiver(
             throw ForStorOekning(ny.behandlingId, endring)
         }
         if (sistePeriodeNy.grunnbelop == sistePeriodeGammel.grunnbelop) {
-            logger.debug("Grunnbeløpet er det samme for gammel og ny beregning for behandling {}.", behandlingId)
-            return
+            throw GrunnbeloepIkkeEndret(behandlingId, sistePeriodeNy.grunnbelop)
         }
         verifiserFaktoromregning(g, gammeltBeloep, nyttBeloep, behandlingId)
     }
@@ -164,5 +163,11 @@ class MindreEnnForrigeBehandling(behandlingId: UUID) : ForespoerselException(
 class ForStorOekning(behandlingId: UUID, endring: BigDecimal) : ForespoerselException(
     code = "OMREGNING_UTENFOR_TOLERANSEGRENSE_FOR_STOR_OEKNING",
     detail = "Ny beregning for behandling $behandlingId gir for stor økning fra forrige omregning. Endringa var $endring",
+    status = HttpStatusCode.ExpectationFailed.value,
+)
+
+class GrunnbeloepIkkeEndret(behandlingId: UUID, grunnbeloep: Int) : ForespoerselException(
+    code = "OMREGNING_GRUNNBELOEP_UENDRET",
+    detail = "Ny beregning for behandling $behandlingId bruker samme grunnbeløp som forrige beregning $grunnbeloep.",
     status = HttpStatusCode.ExpectationFailed.value,
 )

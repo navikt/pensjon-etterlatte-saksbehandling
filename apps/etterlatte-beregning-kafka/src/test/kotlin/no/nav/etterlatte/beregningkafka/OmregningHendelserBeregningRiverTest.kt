@@ -76,6 +76,31 @@ class OmregningHendelserBeregningRiverTest {
     }
 
     @Test
+    fun `feiler naar ny beregning har samme grunnbeloep som gammel`() {
+        val (beregningService, river) = initialiserRiver()
+
+        val nyBehandling = UUID.randomUUID()
+        val gammelBehandling = UUID.randomUUID()
+
+        every { beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(nyBehandling, gammelBehandling) } returns mockk()
+        every { beregningService.tilpassOverstyrtBeregningsgrunnlagForRegulering(nyBehandling) } returns mockk()
+        every { beregningService.hentBeregning(gammelBehandling) } returns beregningDTO(gammelBehandling, 1000, 1000)
+        every { beregningService.beregn(nyBehandling) } returns beregningDTO(nyBehandling, 1000, 1000)
+        coEvery { beregningService.hentGrunnbeloep() } returns Grunnbeloep(YearMonth.now(), 1000, 100, BigDecimal("1.2"))
+
+        runBlocking {
+            assertThrows<GrunnbeloepIkkeEndret> {
+                river.beregn(
+                    SakType.BARNEPENSJON,
+                    behandlingId = nyBehandling,
+                    behandlingViOmregnerFra = gammelBehandling,
+                    LocalDate.of(2024, Month.MAY, 10),
+                )
+            }
+        }
+    }
+
+    @Test
     fun `forrige beregning er revurdering fram i tid fra 1 juli, men ny er fra 1 mai, og vi har dermed ikke overlapp paa periode`() {
         val (beregningService, river) = initialiserRiver()
 

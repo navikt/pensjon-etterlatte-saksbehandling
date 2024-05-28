@@ -1,10 +1,6 @@
 import { Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 
-export const InnholdPadding = styled.div`
-  padding: 2em 2em 2em 4em;
-`
-
 export const SoeknadOversiktWrapper = styled.div`
   padding: 0em 1em 1em 0em;
   display: flex;

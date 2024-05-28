@@ -1,5 +1,5 @@
 import { Box, Button, ErrorSummary, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
-import { Border, HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
+import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
@@ -91,7 +91,7 @@ export function TilbakekrevingOppsummering({
           </Heading>
         </HeadingWrapper>
       </Box>
-      <InnholdPadding>
+      <Box paddingBlock="8" paddingInline="16 8">
         <TilbakekrevingVurderingOppsummering behandling={behandling} />
 
         <div style={{ marginTop: '3rem' }}>
@@ -126,7 +126,7 @@ export function TilbakekrevingOppsummering({
           pending: <Spinner label="Sjekker om tilbakekreving er fylt ut" visible={true} />,
           error: (error) => <TilbakekrevingValideringsfeil error={error} />,
         })}
-      </InnholdPadding>
+      </Box>
       <Border style={{ marginTop: '3em' }} />
       <HStack justify="center">
         {!isPending(lagreSkalSendeBrevStatus) && (

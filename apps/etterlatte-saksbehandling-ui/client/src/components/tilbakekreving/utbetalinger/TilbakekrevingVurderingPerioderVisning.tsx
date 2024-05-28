@@ -5,8 +5,8 @@ import {
   TilbakekrevingPeriode,
 } from '~shared/types/Tilbakekreving'
 import React, { useState } from 'react'
-import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { Button, HStack, Table } from '@navikt/ds-react'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
+import { Box, Button, HStack, Table } from '@navikt/ds-react'
 import { format } from 'date-fns'
 import { useNavigate } from 'react-router'
 
@@ -15,7 +15,7 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
   const [perioder] = useState<TilbakekrevingPeriode[]>(behandling.tilbakekreving.perioder)
 
   return (
-    <InnholdPadding>
+    <Box paddingBlock="8" paddingInline="16 8">
       <Table className="table" zebraStripes>
         <Table.Header>
           <Table.Row>
@@ -61,6 +61,6 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
           Neste
         </Button>
       </HStack>
-    </InnholdPadding>
+    </Box>
   )
 }

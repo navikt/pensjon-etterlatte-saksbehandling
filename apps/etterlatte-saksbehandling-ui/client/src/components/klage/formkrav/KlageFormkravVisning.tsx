@@ -1,5 +1,5 @@
 import { useKlage } from '~components/klage/useKlage'
-import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
+import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { BodyShort, Box, Button, Heading, HStack } from '@navikt/ds-react'
 import { formaterKanskjeStringDato, formaterVedtakType } from '~utils/formattering'
 import React from 'react'
@@ -26,7 +26,7 @@ export function KlageFormkravVisning() {
           </Heading>
         </HeadingWrapper>
       </Box>
-      <InnholdPadding>
+      <Box paddingBlock="8" paddingInline="16 8">
         <Heading size="small" spacing>
           Hvilket vedtak klages det på?
         </Heading>
@@ -65,7 +65,7 @@ export function KlageFormkravVisning() {
           Saksbehandler
         </Heading>
         <BodyShort spacing>{saksbehandler?.ident}</BodyShort>
-      </InnholdPadding>
+      </Box>
       <HStack justify="center">
         <Button onClick={() => navigate(nesteSteg(klage, 'formkrav'))}>Neste side</Button>
       </HStack>

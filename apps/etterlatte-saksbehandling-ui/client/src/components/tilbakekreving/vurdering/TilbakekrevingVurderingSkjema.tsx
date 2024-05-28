@@ -1,4 +1,4 @@
-import { Button, HStack, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
+import { Box, Button, HStack, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
 import {
   teksterTilbakekrevingAarsak,
   teksterTilbakekrevingBeloepBehold,
@@ -18,7 +18,7 @@ import React, { useEffect } from 'react'
 import { lagreTilbakekrevingsvurdering } from '~shared/api/tilbakekreving'
 
 import { isPending, mapResult } from '~shared/api/apiUtils'
-import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { Toast } from '~shared/alerts/Toast'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
@@ -124,7 +124,7 @@ export function TilbakekrevingVurderingSkjema({
 
   return (
     <>
-      <InnholdPadding>
+      <Box paddingBlock="8" paddingInline="16 8">
         <VStack gap="8" style={{ width: '50em' }}>
           <Select {...register('aarsak')} label="Årsak til sak om feilutbetaling" readOnly={!redigerbar}>
             <option value="">Velg..</option>
@@ -391,7 +391,7 @@ export function TilbakekrevingVurderingSkjema({
             </VStack>
           )}
         </VStack>
-      </InnholdPadding>
+      </Box>
 
       <Border style={{ marginTop: '3em' }} />
       <HStack justify="center">

@@ -5,7 +5,7 @@ import { behandlingErRedigerbar, requireNotNull } from '../felles/utils'
 import Virkningstidspunkt, { Hjemmel } from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { Start } from '~components/behandling/handlinger/Start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { HeadingWrapper } from '~components/person/sakOgBehandling/SakOversikt'
 import {
   BP_FORELDRELOES_BESKRIVELSE,
@@ -125,7 +125,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           </BodyShort>
         )}
       </Box>
-      <InnholdPadding>
+      <Box paddingBlock="8" paddingInline="16 8">
         <OppdaterGrunnlagModal
           behandlingId={behandling.id}
           behandlingStatus={behandling.status}
@@ -168,7 +168,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         >
           {{ info: <GrunnlagForVirkningstidspunkt /> }}
         </Virkningstidspunkt>
-      </InnholdPadding>
+      </Box>
       <Border />
       <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />
       {redigerbar ? (

@@ -1,5 +1,5 @@
 import { Familieforhold } from './familieforhold/Familieforhold'
-import { Border, HeadingWrapper, InnholdPadding } from './styled'
+import { Border, HeadingWrapper } from './styled'
 import { Box, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { Soeknadsdato } from './Soeknadsdato'
@@ -85,7 +85,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
         </HeadingWrapper>
         {behandling.soeknadMottattDato && <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />}
       </Box>
-      <InnholdPadding>
+      <Box paddingBlock="8" paddingInline="16 8">
         {redigerbar && (
           <OppdaterGrunnlagModal
             behandlingId={behandling.id}
@@ -121,7 +121,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
           </>
         )}
         <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />
-      </InnholdPadding>
+      </Box>
       <Border />
       <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />
       {redigerbar ? (

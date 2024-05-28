@@ -11,8 +11,8 @@ import { lagreTilbakekrevingsperioder } from '~shared/api/tilbakekreving'
 import React, { useEffect } from 'react'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
-import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { Button, HStack, Select, Table, TextField, VStack } from '@navikt/ds-react'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
+import { Box, Button, HStack, Select, Table, TextField, VStack } from '@navikt/ds-react'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { Toast } from '~shared/alerts/Toast'
 import { format } from 'date-fns'
@@ -77,7 +77,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
 
   return (
     <>
-      <InnholdPadding>
+      <Box paddingBlock="8" paddingInline="16 8">
         <Table className="table" zebraStripes>
           <Table.Header>
             <Table.Row>
@@ -212,7 +212,7 @@ export function TilbakekrevingVurderingPerioderSkjema({
             })}
           </VStack>
         )}
-      </InnholdPadding>
+      </Box>
       <Border style={{ marginTop: '3em' }} />
       <HStack justify="center">
         {redigerbar ? (

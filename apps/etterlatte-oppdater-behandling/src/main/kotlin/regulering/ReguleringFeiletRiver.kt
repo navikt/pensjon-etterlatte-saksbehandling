@@ -1,7 +1,7 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.BehandlingService
-import no.nav.etterlatte.libs.common.sak.ReguleringFeiletHendelse
+import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.etterlatte.rapidsandrivers.KONTEKST_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
@@ -33,6 +33,10 @@ internal class ReguleringFeiletRiver(
         context: MessageContext,
     ) {
         logger.info("Regulering har feilet for sak ${packet.sakId}")
-        behandlingService.sendReguleringFeiletHendelse(ReguleringFeiletHendelse(packet.sakId, packet[KJOERING].asText()))
+        behandlingService.lagreKjoering(
+            kjoering = packet[KJOERING].asText(),
+            sakId = packet.sakId,
+            status = KjoeringStatus.FEILA,
+        )
     }
 }

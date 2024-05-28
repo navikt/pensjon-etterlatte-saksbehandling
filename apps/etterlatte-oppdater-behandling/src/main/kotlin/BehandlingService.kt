@@ -30,7 +30,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.HentSakerRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringRequest
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
-import no.nav.etterlatte.libs.common.sak.ReguleringFeiletHendelse
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
@@ -54,8 +53,6 @@ interface BehandlingService {
     fun sendVergeMaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt)
 
     fun sendSivilstandHendelse(sivilstandHendelse: SivilstandHendelse)
-
-    fun sendReguleringFeiletHendelse(reguleringFeilethendelse: ReguleringFeiletHendelse)
 
     fun hentAlleSaker(
         kjoering: String,
@@ -166,15 +163,6 @@ class BehandlingServiceImpl(
             behandlingKlient.post("$url/grunnlagsendringshendelse/sivilstandhendelse") {
                 contentType(ContentType.Application.Json)
                 setBody(sivilstandHendelse)
-            }
-        }
-    }
-
-    override fun sendReguleringFeiletHendelse(reguleringFeilethendelse: ReguleringFeiletHendelse) {
-        runBlocking {
-            behandlingKlient.post("$url/grunnlagsendringshendelse/reguleringfeilet") {
-                contentType(ContentType.Application.Json)
-                setBody(reguleringFeilethendelse)
             }
         }
     }

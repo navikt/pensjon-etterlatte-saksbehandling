@@ -10,7 +10,7 @@ import {
 import { VilkaarWrapper } from './styled'
 import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { svarTilTotalResultat } from './utils'
-import { PencilWritingIcon } from '@navikt/aksel-icons'
+import { PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
 import { formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { ISvar } from '~shared/types/ISvar'
@@ -134,6 +134,7 @@ export const Resultat = (props: Props) => {
                   loading={isPending(slettVurderingStatus)}
                   onClick={slettVilkaarsvurderingResultat}
                   variant="tertiary"
+                  icon={<TrashIcon />}
                 >
                   Slett vurdering
                 </Button>

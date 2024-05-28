@@ -35,7 +35,7 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
                 if (erLoepende) {
                     null
                 } else {
-                    vedtak.filter { it.type == VedtakType.OPPHOER }
+                    iverksatteVedtak.filter { it.type == VedtakType.OPPHOER }
                         .maxByOrNull { it.attestasjon?.tidspunkt!! }?.virkningstidspunkt
                 },
         )

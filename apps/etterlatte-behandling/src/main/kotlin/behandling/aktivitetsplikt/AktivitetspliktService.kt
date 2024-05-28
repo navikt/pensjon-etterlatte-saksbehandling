@@ -44,7 +44,7 @@ class AktivitetspliktService(
         return hentAktivitetspliktOppfolging(behandlingId)!!
     }
 
-    fun oppfyllerAktivitetspliktVed6Mnd(
+    fun oppfyllerAktivitetsplikt(
         sakId: Long,
         aktivitetspliktDato: LocalDate,
     ): Boolean {

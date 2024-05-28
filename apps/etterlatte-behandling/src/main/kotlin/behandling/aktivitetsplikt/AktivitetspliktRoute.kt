@@ -19,8 +19,9 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
+import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
+import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
@@ -33,7 +34,6 @@ import no.nav.etterlatte.libs.ktor.route.routeLogger
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
-import java.time.LocalDate
 import java.util.UUID
 
 const val AKTIVITET_ID_CALL_PARAMETER = "id"
@@ -108,10 +108,11 @@ internal fun Route.aktivitetspliktRoutes(
         }
     }
 
-    route("/api/sak/seksmaaneder/{$SAKID_CALL_PARAMETER}/aktivitetsplikt/revurdering") {
-        get {
+    route("/api/sak/{$SAKID_CALL_PARAMETER}/aktivitetsplikt/revurdering") {
+        post {
             kunSystembruker {
                 logger.info("Sjekker om sak $sakId trenger en ny revurdering etter 6 måneder")
+                val request = call.receive<OpprettRevurderingForAktivitetspliktDto>()
                 val forrigeBehandling =
                     requireNotNull(behandlingService.hentSisteIverksatte(sakId)) {
                         "Fant ikke forrige behandling i sak $sakId"
@@ -125,36 +126,38 @@ internal fun Route.aktivitetspliktRoutes(
                     ) {
                         "Fant ikke persongalleri for behandling ${forrigeBehandling.id}"
                     }
-                val doedsdato: LocalDate =
-                    requireNotNull(
-                        grunnlagKlient.finnPersonOpplysning(
-                            behandlingId = forrigeBehandling.id,
-                            opplysningsType = Opplysningstype.AVDOED_PDL_V1,
-                            brukerTokenInfo = Systembruker.automatiskJobb,
-                        )
-                            ?.opplysning?.doedsdato,
-                    ) {
-                        "Fant ikke dødsdato for person i behandling ${forrigeBehandling.id}"
-                    }
 
-                val aktivitetspliktGjelderFom = doedsdato.plusMonths(6)
-                val oppfyllerAktivitetspliktVed6Mnd =
-                    aktivitetspliktService.oppfyllerAktivitetspliktVed6Mnd(sakId, aktivitetspliktGjelderFom)
+                val aktivitetspliktDato = request.behandlingsmaaned.atDay(1)
+                val oppfyllerAktivitetsplikt = aktivitetspliktService.oppfyllerAktivitetsplikt(sakId, aktivitetspliktDato)
 
-                if (!oppfyllerAktivitetspliktVed6Mnd) {
+                if (!oppfyllerAktivitetsplikt) {
                     automatiskRevurderingService.opprettAutomatiskRevurdering(
                         sakId = sakId,
                         forrigeBehandling = forrigeBehandling,
                         revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
-                        virkningstidspunkt = aktivitetspliktGjelderFom.withDayOfMonth(1),
+                        virkningstidspunkt = aktivitetspliktDato,
                         kilde = Vedtaksloesning.GJENNY,
                         persongalleri = persongalleri,
-                        frist = null, // todo: 2 uker?
+                        frist = request.frist,
                         begrunnelse = "Vurdering av aktivitetsplikt ved 6mnd",
-                    )
+                    ).let {
+                        call.respond(
+                            OpprettRevurderingForAktivitetspliktResponse(
+                                opprettetRevurdering = true,
+                                nyBehandlingId = it.revurdering.id,
+                                forrigeBehandlingId = forrigeBehandling.id,
+                            ),
+                        )
+                    }
                 }
 
-                call.respond(HttpStatusCode.OK)
+                call.respond(
+                    OpprettRevurderingForAktivitetspliktResponse(
+                        opprettetRevurdering = false,
+                        nyBehandlingId = null,
+                        forrigeBehandlingId = forrigeBehandling.id,
+                    ),
+                )
             }
         }
     }

@@ -6,7 +6,10 @@ import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.AO_OMS67
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_3AAR
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_4MND
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_5AAR
+import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_6MND
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
+import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto.VurderingVedMaaned
+import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -29,6 +32,7 @@ class TidshendelseService(
         OMS_DOED_3AAR("Opphør OMS etter 3 år"),
         OMS_DOED_5AAR("Opphør OMS etter 5 år"),
         OMS_DOED_4MND("Infobrev om aktivitetsplikt OMS etter 4 mnd"),
+        OMS_DOED_6MND("Vurdering av aktivitetsplikt OMS etter 6 mnd"),
     }
 
     fun haandterHendelse(hendelse: TidshendelsePacket): TidshendelseResult {
@@ -53,8 +57,11 @@ class TidshendelseService(
                     .let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
             }
         } else {
-            return opprettOppgave(hendelse)
-                .let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
+            return when (hendelse.jobbtype) {
+                OMS_DOED_4MND -> opprettOppgave(hendelse).let { oppgaveId -> TidshendelseResult.OpprettetOppgave(oppgaveId) }
+                OMS_DOED_6MND -> opprettRevurderingForAktivitetsplikt(hendelse)
+                else -> throw IllegalArgumentException("Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}")
+            }
         }
     }
 
@@ -103,6 +110,33 @@ class TidshendelseService(
         return oppgaveId
     }
 
+    private fun opprettRevurderingForAktivitetsplikt(hendelse: TidshendelsePacket): TidshendelseResult {
+        val response =
+            behandlingService.opprettRevurderingAktivitetsplikt(
+                sakId = hendelse.sakId,
+                behandlingsmaaned = hendelse.behandlingsmaaned,
+                vurderingVedMaaned =
+                    when (hendelse.jobbtype) {
+                        OMS_DOED_6MND -> VurderingVedMaaned.SEKS_MND
+                        else -> throw IllegalArgumentException(
+                            "Ingen håndtering for jobbtype: ${hendelse.jobbtype} for sak: ${hendelse.sakId}",
+                        )
+                    },
+                frist = Tidspunkt.ofNorskTidssone(hendelse.behandlingsmaaned.atEndOfMonth(), LocalTime.NOON),
+            )
+
+        return when (response.opprettetRevurdering) {
+            true -> {
+                logger.info("Det ble ikke opprettet revurdering for aktivitetsplikt [sak=${hendelse.sakId}]")
+                TidshendelseResult.Skipped
+            }
+            false -> {
+                logger.info("Opprettet revurdering for aktivitetsplikt [sak=${hendelse.sakId}, behandling=$response]")
+                TidshendelseResult.OpprettRevurderingForAktivitetsplikt(response)
+            }
+        }
+    }
+
     private fun skalLageOmregning(hendelse: TidshendelsePacket) =
         when (hendelse.jobbtype) {
             AO_BP20 -> true
@@ -111,6 +145,7 @@ class TidshendelseService(
             OMS_DOED_3AAR -> true
             OMS_DOED_5AAR -> true
             OMS_DOED_4MND -> false
+            OMS_DOED_6MND -> false
         }
 
     private fun oppgaveTypeFor(type: TidshendelserJobbType): OppgaveType =
@@ -121,14 +156,18 @@ class TidshendelseService(
             OMS_DOED_3AAR -> REVURDERING
             OMS_DOED_5AAR -> REVURDERING
             OMS_DOED_4MND -> AKTIVITETSPLIKT
+            OMS_DOED_6MND -> AKTIVITETSPLIKT
         }
 }
 
 sealed class TidshendelseResult {
     data class OpprettetOppgave(val opprettetOppgaveId: UUID) : TidshendelseResult()
 
-    data class OpprettetOmregning(val behandlingId: UUID, val forrigeBehandlingId: UUID) :
-        TidshendelseResult()
+    data class OpprettetOmregning(val behandlingId: UUID, val forrigeBehandlingId: UUID) : TidshendelseResult()
+
+    data class OpprettRevurderingForAktivitetsplikt(
+        val opprettRevurderingForAktivitetspliktResponse: OpprettRevurderingForAktivitetspliktResponse,
+    ) : TidshendelseResult()
 
     data object Skipped : TidshendelseResult()
 }

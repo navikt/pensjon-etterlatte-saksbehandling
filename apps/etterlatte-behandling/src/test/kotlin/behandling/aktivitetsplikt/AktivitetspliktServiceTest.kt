@@ -277,7 +277,7 @@ class AktivitetspliktServiceTest {
     }
 
     @Nested
-    inner class OppfyllerAktivitetspliktVed6Mnd {
+    inner class OppfyllerAktivitetsplikt {
         @Test
         fun `Skal returnere true hvis aktivitetsplikt er oppfylt`() {
             every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns
@@ -285,7 +285,7 @@ class AktivitetspliktServiceTest {
                     every { aktivitetsgrad } returns AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50
                 }
 
-            val result = service.oppfyllerAktivitetspliktVed6Mnd(aktivitet.sakId, aktivitet.fom)
+            val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
 
             result shouldBe true
         }
@@ -299,7 +299,7 @@ class AktivitetspliktServiceTest {
                 }
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns null
 
-            val result = service.oppfyllerAktivitetspliktVed6Mnd(aktivitet.sakId, aktivitet.fom)
+            val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
 
             result shouldBe false
         }
@@ -316,7 +316,7 @@ class AktivitetspliktServiceTest {
                     every { tom } returns null
                 }
 
-            val result = service.oppfyllerAktivitetspliktVed6Mnd(aktivitet.sakId, aktivitet.fom)
+            val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
 
             result shouldBe true
         }
@@ -329,7 +329,7 @@ class AktivitetspliktServiceTest {
                     every { tom } returns LocalDate.now().minusYears(1)
                 }
 
-            val result = service.oppfyllerAktivitetspliktVed6Mnd(aktivitet.sakId, aktivitet.fom)
+            val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
 
             result shouldBe false
         }

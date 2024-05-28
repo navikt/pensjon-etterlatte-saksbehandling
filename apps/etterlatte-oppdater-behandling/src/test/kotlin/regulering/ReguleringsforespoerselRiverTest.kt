@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
+import no.nav.etterlatte.rapidsandrivers.AAPNE_BEHANDLINGER_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.ANTALL
@@ -120,7 +121,7 @@ internal class ReguleringsforespoerselRiverTest {
     }
 
     @Test
-    fun `ider fra tilbakestilte behandlinger sendes med i meldinga videre`() {
+    fun `ider fra tilbakestilte og aapne behandlinger sendes med i meldinga videre`() {
         val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
         val sakId = 1000L
@@ -134,15 +135,18 @@ internal class ReguleringsforespoerselRiverTest {
         val behandlingId2 = UUID.randomUUID()
         every { behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(any()) } returns
             SakIDListe(
-                listOf(BehandlingOgSak(behandlingId1, sakId), BehandlingOgSak(behandlingId2, sakId)),
+                tilbakestileBehandlinger = listOf(BehandlingOgSak(behandlingId1, sakId), BehandlingOgSak(behandlingId2, sakId)),
+                aapneBehandlinger = listOf(BehandlingOgSak(behandlingId1, sakId)),
             )
         val inspector =
             TestRapid().apply { ReguleringsforespoerselRiver(this, behandlingServiceMock, featureToggleService) }
         inspector.sendTestMessage(melding.toJson())
 
         val melding1 = inspector.inspektør.message(0)
-        val ids = melding1.get(TILBAKESTILTE_BEHANDLINGER_KEY)
-        Assertions.assertEquals("$behandlingId1;$behandlingId2", ids.textValue())
+        val tilbakestilte = melding1.get(TILBAKESTILTE_BEHANDLINGER_KEY)
+        val aapne = melding1.get(AAPNE_BEHANDLINGER_KEY)
+        Assertions.assertEquals("$behandlingId1;$behandlingId2", tilbakestilte.textValue())
+        Assertions.assertEquals("$behandlingId1", aapne.textValue())
     }
 
     @Test

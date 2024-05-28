@@ -71,7 +71,7 @@ internal class BehandlingDaoReguleringTest(val dataSource: DataSource) {
 
             assertEquals(expected, actual)
         }
-        assertEquals(listOf(opprettBehandling.id), trengerNyBeregning.behandlingerForSak(sak.id))
+        assertEquals(listOf(opprettBehandling.id), trengerNyBeregning.filter { it.sakId == sak.id }.map { it.behandlingId })
     }
 
     @Test
@@ -93,7 +93,7 @@ internal class BehandlingDaoReguleringTest(val dataSource: DataSource) {
         val trengerNyBeregning =
             behandlingRepo.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(Saker(listOf(relevantSak)))
 
-        trengerNyBeregning.ider.map { it.sakId } shouldContainExactly listOf(relevantSak.id)
+        trengerNyBeregning.map { it.sakId } shouldContainExactly listOf(relevantSak.id)
         with(behandlingRepo.hentBehandling(sakOgBehandling.find { it.sakId == relevantSak.id }!!.id)) {
             val expected = BehandlingStatus.TRYGDETID_OPPDATERT
             val actual = (this as Foerstegangsbehandling).status

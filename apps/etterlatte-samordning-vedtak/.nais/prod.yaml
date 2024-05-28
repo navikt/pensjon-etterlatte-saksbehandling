@@ -114,6 +114,12 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+        - application: tilleggsstonader-integrasjoner
+          namespace: tilleggsstonader
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

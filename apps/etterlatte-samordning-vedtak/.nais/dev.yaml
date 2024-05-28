@@ -139,6 +139,12 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+        - application: tilleggsstonader-integrasjoner
+          namespace: tilleggsstonader
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
         - application: azure-token-generator
           namespace: aura
           cluster: dev-gcp

@@ -29,6 +29,7 @@ import no.nav.etterlatte.opprettBehandling
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
@@ -202,67 +203,107 @@ internal class SakDaoTest(val dataSource: DataSource) {
         }
     }
 
-    @Test
-    fun `Skal hente angitte saker`() {
-        val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+    @Nested
+    inner class HentAlleSaker {
+        @Test
+        fun `Skal hente angitte saker`() {
+            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
-        val saker = sakRepo.hentSaker("", 2, listOf(sak2.id, sak3.id))
+            val saker = sakRepo.hentSaker("", 2, listOf(sak2.id, sak3.id))
 
-        saker.size shouldBe 2
-        saker.forEach { it.id shouldNotBe sak1.id }
-    }
+            saker.size shouldBe 2
+            saker.forEach { it.id shouldNotBe sak1.id }
+        }
 
-    @Test
-    fun `Skal hente alle saker dersom ingen spesifikke er angitt`() {
-        sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+        @Test
+        fun `Skal hente alle saker dersom ingen spesifikke er angitt`() {
+            sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
-        val saker = sakRepo.hentSaker("", 3, emptyList())
+            val saker = sakRepo.hentSaker("", 3, emptyList())
 
-        saker.size shouldBe 3
-    }
+            saker.size shouldBe 3
+        }
 
-    @Test
-    fun `Hvis kjoering er starta, skal vi ikke hente ut`() {
-        val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
-        val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
-        omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
+        @Test
+        fun `Hvis kjoering er starta, skal vi ikke hente ut`() {
+            val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
+            omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
 
-        val saker = sakRepo.hentSaker("K1", 1, emptyList())
+            val saker = sakRepo.hentSaker("K1", 1, emptyList())
 
-        saker.size shouldBe 0
-    }
+            saker.size shouldBe 0
+        }
 
-    @Test
-    fun `Hvis kjoering er starta, og saa feila det, skal vi hente ut`() {
-        val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
-        val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
-        omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
-        omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FEILA, sakid))
+        @Test
+        fun `Hvis kjoering er starta, og saa feila det, skal vi hente ut`() {
+            val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
+            omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
+            omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FEILA, sakid))
 
-        val saker = sakRepo.hentSaker("K1", 3, emptyList())
+            val saker = sakRepo.hentSaker("K1", 3, emptyList())
 
-        saker.size shouldBe 1
-    }
+            saker.size shouldBe 1
+        }
 
-    @Test
-    fun `Skal hente saker for gitt sakstype hvis sakstype er angitt`() {
-        sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        sakRepo.opprettSak("fnr4", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+        @Test
+        fun `Hvis kjoering er starta, og saa ferdigstilt, skal vi ikke hente ut`() {
+            val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
+            omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
+            omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FERDIGSTILT, sakid))
 
-        sakRepo.hentSaker("", 100, emptyList(), SakType.BARNEPENSJON)
-            .map { it.ident } shouldContainExactlyInAnyOrder listOf("fnr1", "fnr2", "fnr3")
+            val saker = sakRepo.hentSaker("K1", 3, emptyList())
 
-        sakRepo.hentSaker("", 100, emptyList(), SakType.OMSTILLINGSSTOENAD)
-            .map { it.ident } shouldBe listOf("fnr4")
+            saker.size shouldBe 0
+        }
 
-        val saker = sakRepo.hentSaker("", 2, emptyList(), SakType.BARNEPENSJON)
-        saker.map { it.ident } shouldContainAnyOf listOf("fnr1", "fnr2", "fnr3")
-        saker.size shouldBe 2
+        @Test
+        fun `Hvis kjoering er starta, og saa feila, og saa ferdigstilt, skal vi ikke hente ut`() {
+            val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
+            omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
+            omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FEILA, sakid))
+            omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
+            omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FERDIGSTILT, sakid))
+
+            val saker = sakRepo.hentSaker("K1", 3, emptyList())
+
+            saker.size shouldBe 0
+        }
+
+        @Test
+        fun `Hvis kjoering er ferdigstilt, skal vi ikke hente ut`() {
+            val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+            val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
+            omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FERDIGSTILT, sakid))
+
+            val saker = sakRepo.hentSaker("K1", 3, emptyList())
+
+            saker.size shouldBe 0
+        }
+
+        @Test
+        fun `Skal hente saker for gitt sakstype hvis sakstype er angitt`() {
+            sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            sakRepo.opprettSak("fnr4", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
+
+            sakRepo.hentSaker("", 100, emptyList(), SakType.BARNEPENSJON)
+                .map { it.ident } shouldContainExactlyInAnyOrder listOf("fnr1", "fnr2", "fnr3")
+
+            sakRepo.hentSaker("", 100, emptyList(), SakType.OMSTILLINGSSTOENAD)
+                .map { it.ident } shouldBe listOf("fnr4")
+
+            val saker = sakRepo.hentSaker("", 2, emptyList(), SakType.BARNEPENSJON)
+            saker.map { it.ident } shouldContainAnyOf listOf("fnr1", "fnr2", "fnr3")
+            saker.size shouldBe 2
+        }
     }
 }

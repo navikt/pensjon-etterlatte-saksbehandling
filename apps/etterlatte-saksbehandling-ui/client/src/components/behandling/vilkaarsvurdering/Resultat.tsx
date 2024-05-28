@@ -3,20 +3,20 @@ import styled from 'styled-components'
 import { VilkaarsvurderingKnapper } from './VilkaarsvurderingKnapper'
 import {
   IVilkaarsvurdering,
-  lagreTotalVurdering,
+  oppdaterTotalVurdering,
   slettTotalVurdering,
   VilkaarsvurderingResultat,
 } from '~shared/api/vilkaarsvurdering'
 import { VilkaarWrapper } from './styled'
-import { BodyShort, Button, Heading, Loader, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { svarTilTotalResultat } from './utils'
-import { TrashIcon } from '@navikt/aksel-icons'
+import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
 import { formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { ISvar } from '~shared/types/ISvar'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useAppDispatch } from '~store/Store'
-import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import { oppdaterBehandlingsstatus, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
@@ -49,7 +49,7 @@ export const Resultat = (props: Props) => {
   const [radioError, setRadioError] = useState<string>()
   const [kommentar, setKommentar] = useState<string>('')
   const dispatch = useAppDispatch()
-  const [totalVurderingStatus, lagreTotalVurderingCall] = useApiCall(lagreTotalVurdering)
+  const [totalVurderingStatus, oppdaterTotalVurderingCall] = useApiCall(oppdaterTotalVurdering)
   const [slettVurderingStatus, slettTotalVurderingCall] = useApiCall(slettTotalVurdering)
 
   const alleVilkaarErVurdert = !vilkaarsvurdering.vilkaar.some((vilkaar) => !vilkaar.vurdering)
@@ -67,7 +67,7 @@ export const Resultat = (props: Props) => {
       : setRadioError(undefined)
 
     if (radioError === undefined && svar !== undefined) {
-      lagreTotalVurderingCall({ behandlingId, resultat: svarTilTotalResultat(svar), kommentar }, (res) => {
+      oppdaterTotalVurderingCall({ behandlingId, resultat: svarTilTotalResultat(svar), kommentar }, (res) => {
         oppdaterVilkaar(res)
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
       })
@@ -130,14 +130,28 @@ export const Resultat = (props: Props) => {
                 </Kommentar>
               )}
               {redigerbar && (
-                <SlettWrapper onClick={slettVilkaarsvurderingResultat}>
-                  {isPending(slettVurderingStatus) ? (
-                    <Loader variant="interaction" />
-                  ) : (
-                    <TrashIcon aria-hidden="true" />
-                  )}
-                  <span className="text">Slett vurdering</span>
-                </SlettWrapper>
+                <Button
+                  loading={isPending(slettVurderingStatus)}
+                  onClick={slettVilkaarsvurderingResultat}
+                  variant="tertiary"
+                >
+                  Slett vurdering
+                </Button>
+              )}
+              {redigerbar && (
+                <Button
+                  style={{ marginLeft: '1rem' }}
+                  onClick={() => {
+                    setKommentar(vilkaarsvurdering?.resultat?.kommentar || '')
+                    const vilkaarsvurderingUtenResultat = { ...vilkaarsvurdering, resultat: undefined }
+                    dispatch(updateVilkaarsvurdering(vilkaarsvurderingUtenResultat))
+                  }}
+                  variant="tertiary"
+                  icon={<PencilWritingIcon />}
+                  loading={isPending(totalVurderingStatus)}
+                >
+                  Rediger vurdering
+                </Button>
               )}
             </ContentWrapper>
           )}
@@ -168,10 +182,7 @@ export const Resultat = (props: Props) => {
                 hideLabel={false}
                 placeholder="Valgfritt"
                 value={kommentar}
-                onChange={(e) => {
-                  const kommentarLocal = e.target.value
-                  setKommentar(kommentarLocal)
-                }}
+                onChange={(e) => setKommentar(e.target.value)}
                 minRows={3}
                 size="medium"
                 autoComplete="off"
@@ -249,23 +260,6 @@ const Kommentar = styled.div`
 
 const ResultatKommentar = styled(BodyShort)`
   white-space: pre-wrap;
-`
-
-const SlettWrapper = styled.div`
-  margin-top: 20px;
-  display: inline-flex;
-  cursor: pointer;
-  color: #0067c5;
-
-  .text {
-    margin-left: 0.3em;
-    font-size: 0.9em;
-    font-weight: normal;
-  }
-
-  &:hover {
-    text-decoration-line: underline;
-  }
 `
 
 const HeadingWrapper = styled.div`

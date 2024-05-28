@@ -1002,7 +1002,7 @@ internal class BeregningsGrunnlagServiceTest {
     private fun mockVedtak(
         behandlingId: UUID,
         type: VedtakType,
-    ) = VedtakSammendragDto(randomUUID().toString(), behandlingId, type, null, null, null, null, null)
+    ) = VedtakSammendragDto(randomUUID().toString(), behandlingId, type, null, null, null, null, null, null)
 
     private fun overstyrtBeregningsgrunnlag(
         behandlingId: UUID = UUID.randomUUID(),

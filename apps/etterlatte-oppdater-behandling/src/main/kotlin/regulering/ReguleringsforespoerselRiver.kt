@@ -6,6 +6,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
@@ -23,6 +24,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import kotlin.math.min
 
 internal class ReguleringsforespoerselRiver(
@@ -85,9 +87,13 @@ internal class ReguleringsforespoerselRiver(
                     }
 
             sakerTilOmregning.saker.forEach {
+                logger.debug("Lagrer kjøring starta for sak ${it.id}")
+                behandlingService.lagreKjoering(it.id, KjoeringStatus.STARTA, kjoering)
+                logger.debug("Ferdig lagra kjøring starta for sak ${it.id}")
                 packet.setEventNameForHendelseType(ReguleringHendelseType.SAK_FUNNET)
                 packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)
                 packet.sakId = it.id
+                logger.debug("Sender til omregning for sak ${it.id}")
                 context.publish(packet.toJson())
             }
             tatt += sakerTilOmregning.saker.size
@@ -95,6 +101,9 @@ internal class ReguleringsforespoerselRiver(
             if (sakerTilOmregning.saker.isEmpty() || saker.saker.size < maksBatchstoerrelse) {
                 break
             }
+            val venteperiode = Duration.ofSeconds(5)
+            logger.info("Venter $venteperiode før neste runde.")
+            Thread.sleep(venteperiode)
         }
     }
 

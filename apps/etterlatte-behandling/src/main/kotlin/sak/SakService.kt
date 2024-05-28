@@ -145,7 +145,10 @@ class SakServiceImpl(
         saker: List<Long>,
         sakType: SakType?,
     ): List<Sak> {
-        return dao.hentSaker(kjoering, antall, saker, sakType).filterForEnheter()
+        return dao.hentSaker(kjoering, antall, saker, sakType)
+            .also { logger.info("Henta ${it.size} saker før filtrering") }
+            .filterForEnheter()
+            .also { logger.info("Henta ${it.size} saker etter filtrering") }
     }
 
     private fun finnSakForPerson(

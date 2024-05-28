@@ -71,7 +71,9 @@ internal class ReguleringsforespoerselRiver(
             logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
             val saker =
                 behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker, sakType)
+            logger.info("Henta ${saker.saker.size} saker før filtrering")
             val sakerTilOmregning = Saker(saker.saker.filterNot { sakerViIkkeRegulererAutomatiskNaa.contains(it.id) })
+            logger.info("Henta ${sakerTilOmregning.saker.size} saker etter filtrering")
 
             if (sakerTilOmregning.saker.isEmpty()) {
                 logger.debug("Ingen saker i denne runden. Returnerer")

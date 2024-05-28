@@ -516,7 +516,7 @@ internal class ApplicationContext(
             doedshendelseJobService,
             { leaderElectionKlient.isLeader() },
             Duration.of(3, ChronoUnit.MINUTES).toMillis(),
-            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.MINUTES),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(20, ChronoUnit.MINUTES),
             dataSource = dataSource,
             sakTilgangDao = sakTilgangDao,
         )

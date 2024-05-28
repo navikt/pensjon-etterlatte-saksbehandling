@@ -7,13 +7,20 @@ import { mapResult } from '~shared/api/apiUtils'
 import { VedtakSammendrag, VedtakType } from '~components/vedtak/typer'
 import { formaterStringDato } from '~utils/formattering'
 import { RecordFillIcon, XMarkIcon } from '@navikt/aksel-icons'
-import { hentInnvilgelseVedtak, hentLoependeVedtak } from '~components/person/sakOgBehandling/sakStatusUtils'
+import {
+  hentInnvilgelseVedtak,
+  hentLoependeVedtak,
+  ytelseErLoependeMedOpphoerFremITid,
+  ytelseErOpphoert,
+  ytelseOpphoersdato,
+} from '~components/person/sakOgBehandling/sakStatusUtils'
 
 export const SakStatus = ({ sakId }: { sakId: number }) => {
   const [vedtakISakResult, vedtakISakFetch] = useApiCall(hentAlleVedtakISak)
 
   const visStatusPaaSisteVedtak = (vedtakISak: VedtakSammendrag[]): ReactNode => {
     const loependeVedtak = hentLoependeVedtak(vedtakISak)
+    const innvilgelsesVedtak = hentInnvilgelseVedtak(vedtakISak)
 
     if (!loependeVedtak) {
       return (
@@ -31,15 +38,8 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
       )
     }
 
-    const iDag = new Date()
-    const opphoerFraOgMed = loependeVedtak?.opphoerFraOgMed ? new Date(loependeVedtak.opphoerFraOgMed) : undefined
-
-    if (loependeVedtak?.vedtakType === VedtakType.OPPHOER || (opphoerFraOgMed && opphoerFraOgMed < iDag)) {
-      // TODO opphoerFraOgMed er nytt felt slik at opphørsvedtak som fantes før feltet vil ikke dette feltet populert
-      // Det skal populeres og når det er gjort kan vi anta her at et opphør alltid vil ha opphoerFraOgMed
-      const opphoerer = loependeVedtak.opphoerFraOgMed
-        ? loependeVedtak.opphoerFraOgMed
-        : loependeVedtak.virkningstidspunkt
+    if (ytelseErOpphoert(loependeVedtak)) {
+      const opphoerer = ytelseOpphoersdato(loependeVedtak)
       return (
         <Tag key={VedtakType.OPPHOER} variant="alt2">
           Ytelse opphørte den {opphoerer && formaterStringDato(opphoerer)}
@@ -47,9 +47,7 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
       )
     }
 
-    const innvilgelsesVedtak = hentInnvilgelseVedtak(vedtakISak)
-
-    if (opphoerFraOgMed && opphoerFraOgMed >= iDag) {
+    if (ytelseErLoependeMedOpphoerFremITid(loependeVedtak)) {
       return (
         <Tag key={VedtakType.INNVILGELSE} variant="success" icon={<RecordFillIcon aria-hidden color="#06893A" />}>
           Løpende fra{' '}

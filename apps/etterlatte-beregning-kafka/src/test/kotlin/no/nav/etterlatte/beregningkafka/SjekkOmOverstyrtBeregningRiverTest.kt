@@ -88,7 +88,7 @@ internal class SjekkOmOverstyrtBeregningRiverTest {
                 "aarsak": "GRUNNBELOEPREGULERING",
                 "prosesstype": "AUTOMATISK"
               },
-              "tilbakestilte_behandlinger": "63ba95c8-119b-465f-81fa-0a5316451db4"
+              "aapne_behandlinger": "63ba95c8-119b-465f-81fa-0a5316451db4"
             }
             """.trimIndent()
         val meldingUtenAapenRevurdering =
@@ -102,7 +102,7 @@ internal class SjekkOmOverstyrtBeregningRiverTest {
                 "aarsak": "GRUNNBELOEPREGULERING",
                 "prosesstype": "AUTOMATISK"
               },
-              "tilbakestilte_behandlinger": ""
+              "aapne_behandlinger": ""
             }
             """.trimIndent()
     }

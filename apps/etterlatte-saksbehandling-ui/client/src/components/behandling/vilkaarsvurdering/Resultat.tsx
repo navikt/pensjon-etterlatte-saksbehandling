@@ -8,9 +8,9 @@ import {
   VilkaarsvurderingResultat,
 } from '~shared/api/vilkaarsvurdering'
 import { VilkaarWrapper } from './styled'
-import { BodyShort, Button, Heading, Loader, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { svarTilTotalResultat } from './utils'
-import { PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
+import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
 import { formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { ISvar } from '~shared/types/ISvar'
@@ -130,33 +130,28 @@ export const Resultat = (props: Props) => {
                 </Kommentar>
               )}
               {redigerbar && (
-                <HandlingsWrapper onClick={slettVilkaarsvurderingResultat}>
-                  {isPending(slettVurderingStatus) ? (
-                    <Loader variant="interaction" />
-                  ) : (
-                    <TrashIcon aria-hidden="true" />
-                  )}
-                  <span className="text">Slett vurdering</span>
-                </HandlingsWrapper>
+                <Button
+                  loading={isPending(slettVurderingStatus)}
+                  onClick={slettVilkaarsvurderingResultat}
+                  variant="tertiary"
+                >
+                  Slett vurdering
+                </Button>
               )}
               {redigerbar && (
-                <HandlingsWrapper
-                  style={{ marginLeft: '2rem' }}
+                <Button
+                  style={{ marginLeft: '1rem' }}
                   onClick={() => {
                     setKommentar(vilkaarsvurdering?.resultat?.kommentar || '')
                     const vilkaarsvurderingUtenResultat = { ...vilkaarsvurdering, resultat: undefined }
                     dispatch(updateVilkaarsvurdering(vilkaarsvurderingUtenResultat))
                   }}
+                  variant="tertiary"
+                  icon={<PencilWritingIcon />}
+                  loading={isPending(totalVurderingStatus)}
                 >
-                  {!isPending(totalVurderingStatus) ? (
-                    <>
-                      <PencilWritingIcon />
-                      <span className="text ">Rediger vurdering</span>
-                    </>
-                  ) : (
-                    <Loader />
-                  )}
-                </HandlingsWrapper>
+                  Rediger vurdering
+                </Button>
               )}
             </ContentWrapper>
           )}
@@ -265,23 +260,6 @@ const Kommentar = styled.div`
 
 const ResultatKommentar = styled(BodyShort)`
   white-space: pre-wrap;
-`
-
-const HandlingsWrapper = styled.div`
-  margin-top: 20px;
-  display: inline-flex;
-  cursor: pointer;
-  color: #0067c5;
-
-  .text {
-    margin-left: 0.3em;
-    font-size: 0.9em;
-    font-weight: normal;
-  }
-
-  &:hover {
-    text-decoration-line: underline;
-  }
 `
 
 const HeadingWrapper = styled.div`

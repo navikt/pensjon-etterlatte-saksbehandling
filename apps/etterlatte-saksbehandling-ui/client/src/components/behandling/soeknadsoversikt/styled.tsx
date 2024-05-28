@@ -13,12 +13,6 @@ export const Infoboks = styled.div`
   }
 `
 
-export const InfoList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`
-
 export const InfoElement = styled.div<{ $wide?: boolean }>`
   width: ${(props) => (props.$wide ? '100%' : '15em')};
 `

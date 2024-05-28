@@ -10,6 +10,7 @@ data class SakIDListe(val ider: List<BehandlingOgSak>) {
 data class BehandlingOgSak(val behandlingId: UUID, val sakId: Long)
 
 data class HentSakerRequest(
-    val sakIder: List<Long>,
+    val spesifikkeSaker: List<Long>,
+    val ekskluderteSaker: List<Long>,
     val sakType: SakType?,
 )

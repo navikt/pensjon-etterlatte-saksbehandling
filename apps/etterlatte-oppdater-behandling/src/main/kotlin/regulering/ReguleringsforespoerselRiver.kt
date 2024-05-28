@@ -7,7 +7,6 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
-import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
@@ -69,11 +68,9 @@ internal class ReguleringsforespoerselRiver(
         while (tatt < antall) {
             val antallIDenneRunden = max(0, min(maksBatchstoerrelse, antall - tatt))
             logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
-            val saker =
-                behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker, sakType)
-            logger.info("Henta ${saker.saker.size} saker før filtrering")
-            val sakerTilOmregning = Saker(saker.saker.filterNot { sakerViIkkeRegulererAutomatiskNaa.contains(it.id) })
-            logger.info("Henta ${sakerTilOmregning.saker.size} saker etter filtrering")
+            val sakerTilOmregning =
+                behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker, sakerViIkkeRegulererAutomatiskNaa, sakType)
+            logger.info("Henta ${sakerTilOmregning.saker.size} saker")
 
             if (sakerTilOmregning.saker.isEmpty()) {
                 logger.debug("Ingen saker i denne runden. Returnerer")
@@ -101,7 +98,7 @@ internal class ReguleringsforespoerselRiver(
             }
             tatt += sakerTilOmregning.saker.size
             logger.info("Ferdig med $tatt av totalt $antall saker")
-            if (sakerTilOmregning.saker.isEmpty() || saker.saker.size < maksBatchstoerrelse) {
+            if (sakerTilOmregning.saker.size < maksBatchstoerrelse) {
                 break
             }
             val venteperiode = Duration.ofSeconds(5)

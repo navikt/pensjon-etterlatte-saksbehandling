@@ -55,16 +55,17 @@ internal fun Route.sakSystemRoutes(
                 val kjoering = call.parameters[KJOERING]!!
                 val antall = call.parameters[ANTALL]!!.toInt()
                 val request = call.receive<HentSakerRequest>()
-                val saker = request.sakIder
+                val spesifikkeSaker = request.spesifikkeSaker
+                val ekskluderteSaker = request.ekskluderteSaker
                 val sakstype = request.sakType
-                call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall, saker, sakstype) }))
+                call.respond(Saker(inTransaction { sakService.hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakstype) }))
             }
         }
 
         post("hent") {
             kunSystembruker {
                 medBody<HentSakerRequest> { dto ->
-                    val saker = inTransaction { sakService.hentSakerMedIder(dto.sakIder) }
+                    val saker = inTransaction { sakService.hentSakerMedIder(dto.spesifikkeSaker) }
                     call.respond(SakerDto(saker))
                 }
             }

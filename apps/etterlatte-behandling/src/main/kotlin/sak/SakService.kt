@@ -36,7 +36,8 @@ interface SakService {
     fun hentSaker(
         kjoering: String,
         antall: Int,
-        saker: List<Long>,
+        spesifikkeSaker: List<Long>,
+        ekskluderteSaker: List<Long>,
         sakType: SakType? = null,
     ): List<Sak>
 
@@ -142,10 +143,11 @@ class SakServiceImpl(
     override fun hentSaker(
         kjoering: String,
         antall: Int,
-        saker: List<Long>,
+        spesifikkeSaker: List<Long>,
+        ekskluderteSaker: List<Long>,
         sakType: SakType?,
     ): List<Sak> {
-        return dao.hentSaker(kjoering, antall, saker, sakType)
+        return dao.hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakType)
             .also { logger.info("Henta ${it.size} saker før filtrering") }
             .filterForEnheter()
             .also { logger.info("Henta ${it.size} saker etter filtrering") }

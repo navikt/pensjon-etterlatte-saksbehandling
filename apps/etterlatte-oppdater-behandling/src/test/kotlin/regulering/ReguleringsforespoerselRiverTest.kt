@@ -51,7 +51,7 @@ internal class ReguleringsforespoerselRiverTest {
         val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock =
             mockk<BehandlingService>(relaxed = true).also {
-                every { it.hentAlleSaker(any(), any()) } returns
+                every { it.hentAlleSaker(any(), any(), any(), any()) } returns
                     Saker(
                         listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, 0, "4808")),
                     )
@@ -62,7 +62,7 @@ internal class ReguleringsforespoerselRiverTest {
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) {
             vedtakServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(any())
-            vedtakServiceMock.hentAlleSaker("Regulering2023", any())
+            vedtakServiceMock.hentAlleSaker("Regulering2023", any(), any(), any())
         }
     }
 
@@ -70,7 +70,7 @@ internal class ReguleringsforespoerselRiverTest {
     fun `skal lage ny melding for hver sak den faar tilbake`() {
         val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
-        every { vedtakServiceMock.hentAlleSaker("Regulering2023", any()) } returns
+        every { vedtakServiceMock.hentAlleSaker("Regulering2023", any(), any(), any()) } returns
             Saker(
                 listOf(
                     Sak("saksbehandler1", SakType.BARNEPENSJON, 1L, "4808"),
@@ -98,7 +98,7 @@ internal class ReguleringsforespoerselRiverTest {
     fun `skal sende med sakId for alle saker i basen`() {
         val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
-        every { behandlingServiceMock.hentAlleSaker("Regulering2023", any(), any()) } returns
+        every { behandlingServiceMock.hentAlleSaker("Regulering2023", any(), any(), any()) } returns
             Saker(
                 listOf(
                     Sak("saksbehandler1", SakType.BARNEPENSJON, 1000L, "4808"),
@@ -124,7 +124,7 @@ internal class ReguleringsforespoerselRiverTest {
         val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
         val sakId = 1000L
-        every { behandlingServiceMock.hentAlleSaker("Regulering2023", any()) } returns
+        every { behandlingServiceMock.hentAlleSaker("Regulering2023", any(), any(), any()) } returns
             Saker(
                 listOf(
                     Sak("saksbehandler1", SakType.BARNEPENSJON, sakId, "4808"),
@@ -150,7 +150,7 @@ internal class ReguleringsforespoerselRiverTest {
         val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock =
             mockk<BehandlingService>(relaxed = true).also {
-                every { it.hentAlleSaker(any(), any()) } returns
+                every { it.hentAlleSaker(any(), any(), any(), any()) } returns
                     Saker(
                         listOf(Sak("saksbehandler1", SakType.BARNEPENSJON, 0, "4808")),
                     )
@@ -174,7 +174,7 @@ internal class ReguleringsforespoerselRiverTest {
         val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
         val kjoering = "Regulering2023"
-        every { vedtakServiceMock.hentAlleSaker(kjoering, any()) } returns
+        every { vedtakServiceMock.hentAlleSaker(kjoering, any(), any(), any()) } returns
             Saker(
                 (0..ReguleringsforespoerselRiver.MAKS_BATCHSTOERRELSE).map {
                     Sak("saksbehandler1", SakType.BARNEPENSJON, it.toLong(), "4808")
@@ -190,7 +190,7 @@ internal class ReguleringsforespoerselRiverTest {
 
         inspector.sendTestMessage(melding.toJson())
 
-        verify(exactly = 2) { vedtakServiceMock.hentAlleSaker(kjoering, any()) }
+        verify(exactly = 2) { vedtakServiceMock.hentAlleSaker(kjoering, any(), any(), any()) }
     }
 
     @Test
@@ -213,7 +213,7 @@ internal class ReguleringsforespoerselRiverTest {
 
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) {
-            vedtakServiceMock.hentAlleSaker("Regulering2023", 10, emptyList(), SakType.BARNEPENSJON)
+            vedtakServiceMock.hentAlleSaker("Regulering2023", 10, emptyList(), any(), SakType.BARNEPENSJON)
         }
     }
 
@@ -222,19 +222,14 @@ internal class ReguleringsforespoerselRiverTest {
         val melding = genererReguleringMelding(LocalDate.now())
         val vedtakServiceMock =
             mockk<BehandlingService>(relaxed = true).also {
-                every { it.hentAlleSaker(any(), any(), any(), any()) } returns
-                    Saker(
-                        listOf(
-                            Sak("Id1", SakType.BARNEPENSJON, 17003, "enhet1"),
-                        ),
-                    )
+                every { it.hentAlleSaker(any(), any(), any(), any(), any()) } returns mockk()
             }
         val inspector =
             TestRapid().apply { ReguleringsforespoerselRiver(this, vedtakServiceMock, featureToggleService) }
 
         inspector.sendTestMessage(melding.toJson())
-        verify(exactly = 0) {
-            vedtakServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(any())
+        verify(exactly = 1) {
+            vedtakServiceMock.hentAlleSaker(any(), any(), any(), match { it.any { ekskludert -> ekskludert == 17003L } })
         }
     }
 }

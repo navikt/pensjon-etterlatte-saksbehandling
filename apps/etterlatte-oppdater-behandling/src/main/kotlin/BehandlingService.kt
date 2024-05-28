@@ -60,7 +60,8 @@ interface BehandlingService {
     fun hentAlleSaker(
         kjoering: String,
         antall: Int,
-        saker: List<Long> = listOf(),
+        spesifikkeSaker: List<Long> = listOf(),
+        ekskluderteSaker: List<Long> = listOf(),
         sakType: SakType? = null,
     ): Saker
 
@@ -200,13 +201,14 @@ class BehandlingServiceImpl(
     override fun hentAlleSaker(
         kjoering: String,
         antall: Int,
-        saker: List<Long>,
+        spesifikkeSaker: List<Long>,
+        ekskluderteSaker: List<Long>,
         sakType: SakType?,
     ): Saker =
         runBlocking {
             behandlingKlient.post("$url/saker/$kjoering/$antall") {
                 contentType(ContentType.Application.Json)
-                setBody(HentSakerRequest(saker, sakType))
+                setBody(HentSakerRequest(spesifikkeSaker, ekskluderteSaker, sakType))
             }.body()
         }
 

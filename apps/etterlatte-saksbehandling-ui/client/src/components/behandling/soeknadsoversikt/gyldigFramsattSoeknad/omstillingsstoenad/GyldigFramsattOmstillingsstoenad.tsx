@@ -1,11 +1,6 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
-import {
-  Beskrivelse,
-  InfobokserWrapper,
-  InfoWrapper,
-  VurderingsContainerWrapper,
-} from '~components/behandling/soeknadsoversikt/styled'
+import { Beskrivelse, InfoWrapper, VurderingsContainerWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/omstillingsstoenad/GyldigFramsattVurdering'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
@@ -14,6 +9,7 @@ import { StatusIconProps } from '~shared/icons/statusIcon'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/Verger'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { HStack } from '@navikt/ds-react'
 
 export const GyldigFramsattOmstillingsstoenad = ({
   behandling,
@@ -54,12 +50,12 @@ export const GyldigFramsattOmstillingsstoenad = ({
           Søknaden må være signert og vise hva det søkes om, og den må settes fram i bostedslandet eller i det landet
           vedkommende sist var medlem.
         </Beskrivelse>
-        <InfobokserWrapper>
+        <HStack gap="4">
           <InfoWrapper>
             <Info tekst={navn} undertekst={undertekst} label="Innsender" />
           </InfoWrapper>
           <Verger behandlingId={behandling.id} sakId={behandling.sakId} />
-        </InfobokserWrapper>
+        </HStack>
       </div>
       <VurderingsContainerWrapper>
         <GyldigFramsattVurdering

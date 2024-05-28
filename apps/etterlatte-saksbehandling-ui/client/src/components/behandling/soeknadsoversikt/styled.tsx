@@ -1,15 +1,6 @@
 import { Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 
-export const InfobokserWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: top;
-  flex-wrap: wrap;
-  gap: 20px;
-  padding-right: 20px;
-`
-
 export const Infoboks = styled.div`
   width: calc((100% / 3) - (40px / 3));
 

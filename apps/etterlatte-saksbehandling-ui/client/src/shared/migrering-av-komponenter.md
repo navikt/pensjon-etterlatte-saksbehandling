@@ -21,3 +21,5 @@ Veldig mange steder bruke vi f.eks `margin-top: 1rem` for å lage litt spacing m
 
 ## ~components/behandling/soeknadsoversikt/styled.tsx
 `<InnholdPadding />` --> `<Box paddingBlock="8" paddingInline="16 8" />`
+
+`<InfobokserWrapper />` --> `<HStack gap="4" />`

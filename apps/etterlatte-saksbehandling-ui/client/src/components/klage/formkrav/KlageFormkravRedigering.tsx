@@ -11,7 +11,6 @@ import {
   Textarea,
   VStack,
 } from '@navikt/ds-react'
-import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -157,12 +156,10 @@ export function KlageFormkravRedigering() {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading level="1" size="large">
-            Vurder formkrav og klagefrist
-          </Heading>
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Heading level="1" size="large">
+          Vurder formkrav og klagefrist
+        </Heading>
       </Box>
       <form onSubmit={handleSubmit(sendInnFormkrav)}>
         <Box paddingBlock="8" paddingInline="16 8">

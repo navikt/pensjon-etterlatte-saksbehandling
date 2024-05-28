@@ -1,5 +1,4 @@
 import { Box, Heading } from '@navikt/ds-react'
-import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import React from 'react'
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { TilbakekrevingVurderingSkjema } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingSkjema'
@@ -13,12 +12,10 @@ export function TilbakekrevingVurdering({
 }) {
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading level="1" size="large">
-            Vurdering
-          </Heading>
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Heading level="1" size="large">
+          Vurdering
+        </Heading>
       </Box>
       <TilbakekrevingVurderingSkjema behandling={behandling} redigerbar={redigerbar} />
     </>

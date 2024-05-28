@@ -51,14 +51,6 @@ export const HistorikkElement = styled.div`
   }
 `
 
-export const HeadingWrapper = styled.div`
-  margin-top: 3em;
-
-  .details {
-    margin-bottom: 0.6em;
-  }
-`
-
 export const Border = styled.div`
   border-top: 1px solid #ccc;
   margin-bottom: 1em;

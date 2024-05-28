@@ -1,4 +1,4 @@
-import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
+import { Border } from '../soeknadsoversikt/styled'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
 import { useVedtaksResultat } from '../useVedtaksResultat'
@@ -108,13 +108,11 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading spacing size="large" level="1">
-            Beregning og vedtak
-          </Heading>
-          <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Heading spacing size="large" level="1">
+          Beregning og vedtak
+        </Heading>
+        <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
       {erOpphoer ? (
         <BeregningWrapper>

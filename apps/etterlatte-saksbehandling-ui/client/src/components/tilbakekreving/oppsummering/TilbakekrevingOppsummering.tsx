@@ -1,5 +1,5 @@
 import { Box, Button, ErrorSummary, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
-import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
@@ -84,12 +84,10 @@ export function TilbakekrevingOppsummering({
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading level="1" size="large">
-            Oppsummering
-          </Heading>
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Heading level="1" size="large">
+          Oppsummering
+        </Heading>
       </Box>
       <Box paddingBlock="8" paddingInline="16 8">
         <TilbakekrevingVurderingOppsummering behandling={behandling} />

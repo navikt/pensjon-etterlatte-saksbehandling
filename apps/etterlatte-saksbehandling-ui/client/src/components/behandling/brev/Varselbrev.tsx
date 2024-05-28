@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Alert, Box, Button, Heading } from '@navikt/ds-react'
-import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
+import { Border } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVarselbrev, opprettVarselbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
@@ -102,12 +102,10 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
     <>
       <BrevContent>
         <Sidebar>
-          <Box paddingInline="16" paddingBlock="4">
-            <HeadingWrapper>
-              <Heading spacing size="large" level="1">
-                Varselbrev
-              </Heading>
-            </HeadingWrapper>
+          <Box paddingInline="16" paddingBlock="16 4">
+            <Heading spacing size="large" level="1">
+              Varselbrev
+            </Heading>
             {soeknadMottattDato && <Soeknadsdato mottattDato={soeknadMottattDato} />}
 
             {varselbrev && (

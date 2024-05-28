@@ -1,4 +1,4 @@
-import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { Box, Button, Heading } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -59,13 +59,11 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading spacing size="large" level="1">
-            Trygdetid
-          </Heading>
-          <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Heading spacing size="large" level="1">
+          Trygdetid
+        </Heading>
+        <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
       </Box>
 
       <Trygdetid

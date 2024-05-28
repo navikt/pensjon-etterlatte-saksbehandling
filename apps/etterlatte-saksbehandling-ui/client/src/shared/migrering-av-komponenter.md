@@ -27,3 +27,7 @@ Veldig mange steder bruke vi f.eks `margin-top: 1rem` for å lage litt spacing m
 `<InfoWrapper />` --> `<VStack gap="4" />` Noen steder trenger man bare en `<div />`
 
 `<InfoList />` --> `<VStack gap="4" />`
+
+`<HeadingWrapper />` er merget inn i eksisterende `<Box paddingInline="16" paddingBlock="4" />` rundt `<Heading />` --> `<Box paddingInline="16" paddingBlock="16 4"><Heading /><Box>`
+
+

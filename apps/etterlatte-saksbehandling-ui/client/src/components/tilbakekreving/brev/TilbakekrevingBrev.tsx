@@ -1,5 +1,5 @@
 import { Alert, Box, Heading, HStack } from '@navikt/ds-react'
-import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
 import { erUnderBehandling, TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { fattVedtak } from '~shared/api/tilbakekreving'
@@ -58,12 +58,10 @@ export function TilbakekrevingBrev({
     <>
       <BrevContent>
         <Sidebar>
-          <Box paddingInline="16" paddingBlock="4">
-            <HeadingWrapper>
-              <Heading spacing size="large" level="1">
-                Vedtaksbrev
-              </Heading>
-            </HeadingWrapper>
+          <Box paddingInline="16" paddingBlock="16 4">
+            <Heading spacing size="large" level="1">
+              Vedtaksbrev
+            </Heading>
 
             <br />
             <Alert variant="warning">

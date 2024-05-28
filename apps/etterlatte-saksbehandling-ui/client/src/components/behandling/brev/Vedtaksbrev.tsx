@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Alert, Heading, Box } from '@navikt/ds-react'
-import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
+import { Border } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
@@ -23,7 +23,6 @@ import Spinner from '~shared/Spinner'
 import { BrevProsessType, IBrev } from '~shared/types/Brev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
-
 import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { SjekklisteValideringErrorSummary } from '~components/behandling/sjekkliste/SjekklisteValideringErrorSummary'
 import { IHendelse } from '~shared/types/IHendelse'
@@ -165,12 +164,10 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         )}
       <BrevContent>
         <Sidebar>
-          <Box paddingInline="16" paddingBlock="4">
-            <HeadingWrapper>
-              <Heading spacing size="large" level="1">
-                Vedtaksbrev
-              </Heading>
-            </HeadingWrapper>
+          <Box paddingInline="16" paddingBlock="16 4">
+            <Heading spacing size="large" level="1">
+              Vedtaksbrev
+            </Heading>
             {soeknadMottattDato && <Soeknadsdato mottattDato={soeknadMottattDato} />}
 
             <br />

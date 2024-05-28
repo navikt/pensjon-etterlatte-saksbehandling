@@ -1,5 +1,5 @@
 import { Familieforhold } from './familieforhold/Familieforhold'
-import { Border, HeadingWrapper } from './styled'
+import { Border } from './styled'
 import { Box, Heading, HStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { Soeknadsdato } from './Soeknadsdato'
@@ -77,12 +77,10 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading spacing size="large" level="1">
-            Søknadsoversikt
-          </Heading>
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Heading spacing size="large" level="1">
+          Søknadsoversikt
+        </Heading>
         {behandling.soeknadMottattDato && <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />}
       </Box>
       <Box paddingBlock="8" paddingInline="16 8">

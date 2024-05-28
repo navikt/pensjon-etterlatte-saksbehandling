@@ -1,6 +1,5 @@
 import { BodyShort, Box, Button, Heading, HStack } from '@navikt/ds-react'
 import React, { useCallback, useEffect } from 'react'
-import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Innhold } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
 import { useKlage } from '~components/klage/useKlage'
@@ -49,12 +48,10 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
   const { utfall, sak } = klage
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading level="1" size="large">
-            Oppsummering
-          </Heading>
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Heading level="1" size="large">
+          Oppsummering
+        </Heading>
       </Box>
 
       <Innhold>

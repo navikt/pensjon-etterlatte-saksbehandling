@@ -1,6 +1,6 @@
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
-import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { BodyShort, Box, Button, Heading, HStack } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
@@ -55,12 +55,10 @@ export function KlageBrev() {
     <>
       <BrevContent>
         <Sidebar>
-          <Box paddingInline="16" paddingBlock="4">
-            <HeadingWrapper>
-              <Heading spacing level="1" size="large">
-                Brev
-              </Heading>
-            </HeadingWrapper>
+          <Box paddingInline="16" paddingBlock="16 4">
+            <Heading spacing level="1" size="large">
+              Brev
+            </Heading>
             <BodyShort spacing>
               {klage.formkrav?.formkrav.erKlagenFramsattInnenFrist === JaNei.JA
                 ? 'Oversendelsesbrev til klager'

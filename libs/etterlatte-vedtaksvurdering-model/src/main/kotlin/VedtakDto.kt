@@ -26,6 +26,7 @@ data class VedtakSammendragDto(
     val attesterendeSaksbehandler: String?,
     val datoAttestert: ZonedDateTime?,
     val virkningstidspunkt: YearMonth?,
+    val opphoerFraOgMed: YearMonth?,
 )
 
 data class VedtakDto(

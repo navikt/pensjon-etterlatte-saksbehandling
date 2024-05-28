@@ -1,5 +1,5 @@
 import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
-import { Beskrivelse, InfoWrapper, VurderingsContainerWrapper } from '../styled'
+import { Beskrivelse, VurderingsContainerWrapper } from '../styled'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { IPdlPerson } from '~shared/types/Person'
 import { formaterGrunnlagKilde, svarTilStatusIcon } from '../utils'
@@ -19,11 +19,7 @@ interface AdresseProps {
 
 const AdresseKort = (props: AdresseProps) => {
   const adresse = `${props.adresse.adresseLinje1}, ${props.adresse.postnr} ${props.adresse.poststed || ''}`
-  return (
-    <InfoWrapper>
-      <Info label={props.label} tekst={adresse} undertekst={props.kilde} />
-    </InfoWrapper>
-  )
+  return <Info label={props.label} tekst={adresse} undertekst={props.kilde} />
 }
 
 interface Props {

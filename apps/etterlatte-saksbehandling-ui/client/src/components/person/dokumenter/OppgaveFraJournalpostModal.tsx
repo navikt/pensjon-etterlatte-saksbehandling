@@ -11,7 +11,6 @@ import { useNavigate } from 'react-router-dom'
 import { erOppgaveRedigerbar, OppgaveKilde, Oppgavetype } from '~shared/types/oppgave'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
 import { ConfigContext } from '~clientConfig'
-import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { flyttTilGjenny, hentJournalfoeringsoppgaverFraGosys } from '~shared/api/gosys'
@@ -126,10 +125,10 @@ export const OppgaveFraJournalpostModal = ({
 
                   {oppgaver.map((oppgave) => (
                     <div key={oppgave.id}>
-                      <InfoWrapper>
+                      <VStack gap="4">
                         <Info label="ID" tekst={oppgave.id} />
                         <Info label="Beskrivelse" tekst={oppgave.beskrivelse} />
-                      </InfoWrapper>
+                      </VStack>
                       <br />
 
                       <HStack gap="4" justify="end">

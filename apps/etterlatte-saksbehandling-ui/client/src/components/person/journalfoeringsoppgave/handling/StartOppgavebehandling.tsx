@@ -5,7 +5,6 @@ import { useAppDispatch } from '~store/Store'
 import { useNavigate } from 'react-router-dom'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { formaterOppgaveStatus, formaterSakstype, formaterStringDato } from '~utils/formattering'
-import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgaveHandling, settOppgaveHandling } from '~store/reducers/JournalfoeringOppgaveReducer'
@@ -97,7 +96,7 @@ export const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
       Oppgavedetaljer
     </Heading>
 
-    <InfoWrapper>
+    <VStack gap="4">
       <Info
         label="Type"
         tekst={
@@ -125,6 +124,6 @@ export const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
       />
       <Info label="Opprettet" tekst={formaterStringDato(oppgave.opprettet)} />
       <Info label="Frist" tekst={<FristWrapper dato={oppgave.frist} />} />
-    </InfoWrapper>
+    </VStack>
   </SidebarPanel>
 )

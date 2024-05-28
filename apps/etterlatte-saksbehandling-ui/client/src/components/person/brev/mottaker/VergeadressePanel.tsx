@@ -2,7 +2,6 @@ import { Mottaker } from '~shared/types/Brev'
 import { formaterDato, formaterFnr } from '~utils/formattering'
 import React from 'react'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { mapSuccess, Result } from '~shared/api/apiUtils'
 
 interface Props {
@@ -16,7 +15,7 @@ export const VergeadressePanel = ({ vergeadresseResult }: Props) =>
     }
 
     return (
-      <InfoWrapper>
+      <div>
         <Info
           wide
           label="Verges adresse"
@@ -41,6 +40,6 @@ export const VergeadressePanel = ({ vergeadresseResult }: Props) =>
           undertekst={'PDL: ' + formaterDato(new Date())}
         />
         <br />
-      </InfoWrapper>
+      </div>
     )
   })

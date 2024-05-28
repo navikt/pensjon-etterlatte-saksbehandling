@@ -1,5 +1,5 @@
 import { Alert, Heading, HStack, VStack } from '@navikt/ds-react'
-import { Border, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import React, { useState } from 'react'
 import { Journalpost } from '~shared/types/Journalpost'
@@ -38,14 +38,14 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
 
       <br />
 
-      <InfoWrapper>
+      <VStack gap="4">
         <Info label="Kanal/kilde" tekst={journalpost.kanal} />
         <Info
           label="Registrert dato"
           tekst={journalpost.datoOpprettet ? formaterStringDato(journalpost.datoOpprettet) : 'Mangler opprettelsesdato'}
         />
         <Info label="Status" tekst={formaterJournalpostStatus(journalpost.journalstatus)} />
-      </InfoWrapper>
+      </VStack>
 
       <br />
 

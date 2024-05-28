@@ -13,12 +13,6 @@ export const Infoboks = styled.div`
   }
 `
 
-export const InfoWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-`
-
 export const InfoList = styled.div`
   display: flex;
   flex-direction: column;

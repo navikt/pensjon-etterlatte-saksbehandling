@@ -1,5 +1,5 @@
-import { Heading, HStack, Tag } from '@navikt/ds-react'
-import { Border, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Heading, HStack, Tag, VStack } from '@navikt/ds-react'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import React from 'react'
 import { Journalpost } from '~shared/types/Journalpost'
@@ -18,7 +18,7 @@ export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }
       Journalpostdetailjer
     </Heading>
 
-    <InfoWrapper>
+    <VStack gap="4">
       <Info label="Tema" tekst={<TemaTag journalpost={journalpost} />} />
       <Info label="Kanal/kilde" tekst={journalpost.kanal} />
       <Info label="Status" tekst={formaterJournalpostStatus(journalpost.journalstatus)} />
@@ -26,12 +26,12 @@ export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }
         label="Registrert dato"
         tekst={journalpost.datoOpprettet ? formaterStringDato(journalpost.datoOpprettet) : 'Mangler opprettelsesdato'}
       />
-    </InfoWrapper>
+    </VStack>
 
     <br />
     <Border />
 
-    <InfoWrapper>
+    <VStack gap="4">
       <Info label="Bruker" tekst={journalpost.bruker?.id ? <KopierbarVerdi value={journalpost.bruker.id} /> : '-'} />
 
       <Info
@@ -43,18 +43,18 @@ export const JournalpostInnhold = ({ journalpost }: { journalpost: Journalpost }
           </HStack>
         }
       />
-    </InfoWrapper>
+    </VStack>
 
     <br />
     <Border />
 
-    <InfoWrapper>
+    <VStack gap="4">
       <Info label="SakID" tekst={journalpost.sak?.fagsakId || '-'} />
       <Info
         label="Sakstype"
         tekst={journalpost.sak?.sakstype ? formaterJournalpostSakstype(journalpost.sak?.sakstype) : '-'}
       />
       <Info label="Fagsystem" tekst={journalpost.sak?.fagsaksystem || '-'} />
-    </InfoWrapper>
+    </VStack>
   </>
 )

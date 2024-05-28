@@ -1,4 +1,3 @@
-import { InfoWrapper } from '../../styled'
 import { Info } from '../../Info'
 import { Grunnlagsopplysning, Personopplysning } from '~shared/types/grunnlag'
 import { IPdlPerson, Persongalleri } from '~shared/types/Person'
@@ -20,11 +19,7 @@ export const Foreldreansvar = ({
 }: Props) => {
   const label = 'Foreldreansvar'
   if (harKildePesys) {
-    return (
-      <InfoWrapper>
-        <Info tekst="Ukjent" undertekst="Mangler info" label={label} />
-      </InfoWrapper>
-    )
+    return <Info tekst="Ukjent" undertekst="Mangler info" label={label} />
   }
 
   const persongalleri = persongalleriGrunnlag.opplysning
@@ -59,9 +54,5 @@ export const Foreldreansvar = ({
     return person ? [person?.fornavn, person?.mellomnavn, person?.etternavn].join(' ') : 'Ukjent'
   }
 
-  return (
-    <InfoWrapper>
-      <Info tekst={foreldreansvar ?? 'Ukjent'} undertekst={tekst} label={label} />
-    </InfoWrapper>
-  )
+  return <Info tekst={foreldreansvar ?? 'Ukjent'} undertekst={tekst} label={label} />
 }

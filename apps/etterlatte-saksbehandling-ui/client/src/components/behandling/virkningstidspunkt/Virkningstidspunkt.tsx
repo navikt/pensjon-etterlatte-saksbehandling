@@ -4,7 +4,7 @@ import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/re
 import { formaterStringDato } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { InfoWrapper, VurderingsContainerWrapper, VurderingsTitle } from '../soeknadsoversikt/styled'
+import { VurderingsContainerWrapper, VurderingsTitle } from '../soeknadsoversikt/styled'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears, subYears } from 'date-fns'
@@ -125,7 +125,7 @@ const Virkningstidspunkt = (props: {
       >
         <div>
           <Beskrivelse>{props.beskrivelse}</Beskrivelse>
-          <InfoWrapper>{props.children?.info}</InfoWrapper>
+          <div>{props.children?.info}</div>
         </div>
 
         <VurderingsContainerWrapper>

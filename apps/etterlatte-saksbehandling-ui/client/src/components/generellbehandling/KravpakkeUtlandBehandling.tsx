@@ -5,7 +5,7 @@ import {
   KravpakkeUtland,
 } from '~shared/types/Generellbehandling'
 import { GridContainer, MainContent } from '~shared/styled'
-import { HeadingWrapper, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import {
   Alert,
   BodyShort,
@@ -20,6 +20,7 @@ import {
   Table,
   Textarea,
   TextField,
+  VStack,
 } from '@navikt/ds-react'
 import React, { Fragment, useContext, useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -188,10 +189,10 @@ const KravpakkeUtlandBehandling = (props: {
                   {isSuccess(avdoedeStatus) && avdoed && (
                     <>
                       <h3>Informasjon om avdøde</h3>
-                      <InfoWrapper>
+                      <VStack gap="4">
                         <Info label="Navn" tekst={formaterNavn(avdoed.opplysning)} />
                         <Info label="Fødselsnummer" tekst={avdoed.opplysning.foedselsnummer} />
-                      </InfoWrapper>
+                      </VStack>
                     </>
                   )}
                   {isFailureHandler({

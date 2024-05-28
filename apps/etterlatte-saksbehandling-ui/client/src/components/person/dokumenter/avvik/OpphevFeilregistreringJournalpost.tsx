@@ -1,9 +1,8 @@
-import { Alert, Box, Button, HStack, Loader } from '@navikt/ds-react'
+import { Alert, Box, Button, HStack, Loader, VStack } from '@navikt/ds-react'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opphevFeilregistrertSakstilknytning } from '~shared/api/dokument'
 import { Journalpost } from '~shared/types/Journalpost'
-import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 
 export const OpphevFeilregistreringJournalpost = ({ journalpost }: { journalpost: Journalpost }) => {
@@ -28,12 +27,12 @@ export const OpphevFeilregistreringJournalpost = ({ journalpost }: { journalpost
       <br />
 
       <Box borderWidth="1" padding="4" borderRadius="medium" borderColor="border-subtle">
-        <InfoWrapper>
+        <VStack gap="4">
           <Info label="Sakstype" tekst={journalpost.sak?.sakstype || '-'} />
           <Info label="FagsakId" tekst={journalpost.sak?.fagsakId || '-'} />
           <Info label="Fagsaksystem" tekst={journalpost.sak?.fagsaksystem || '-'} />
           <Info label="Tema" tekst={journalpost.sak?.tema || '-'} />
-        </InfoWrapper>
+        </VStack>
       </Box>
 
       <br />

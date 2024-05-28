@@ -1,10 +1,9 @@
 import { AdresseType, IBrev } from '~shared/types/Brev'
-import { Alert, Box, Heading, HStack, Tag } from '@navikt/ds-react'
+import { Alert, Box, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { getVergeadresseForPerson } from '~shared/api/grunnlag'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { BrevMottakerModal } from '~components/person/brev/mottaker/BrevMottakerModal'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { mapApiResult } from '~shared/api/apiUtils'
@@ -53,7 +52,7 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
         </div>
       </HStack>
 
-      <InfoWrapper>
+      <VStack gap="4">
         <Info
           wide
           label="Navn"
@@ -126,7 +125,7 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
             </>
           }
         />
-      </InfoWrapper>
+      </VStack>
     </Box>
   )
 }

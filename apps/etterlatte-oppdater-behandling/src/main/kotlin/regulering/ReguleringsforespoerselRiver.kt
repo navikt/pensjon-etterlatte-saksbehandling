@@ -139,6 +139,7 @@ private val sakerViIkkeRegulererAutomatiskNaa =
         6402, // EKSPORT: Feilmelding: Virkningstidspunkt kan ikke være etter opphør
         8883, // Feil i grunnlag.
         // https://logs.adeo.no/app/discover#/doc/96e648c0-980a-11e9-830a-e17bbd64b4db/.ds-navlogs-2024.05.28-000011?id=aiDgv48BZiQzzTM0q6EU
+        9455, // Ulik versjon av grunnlag brukt i trygdetid og behandling
         // Herifra og ut: overstyrte beregninger. Tas seinare i separat køyring.
         11510,
         11580,

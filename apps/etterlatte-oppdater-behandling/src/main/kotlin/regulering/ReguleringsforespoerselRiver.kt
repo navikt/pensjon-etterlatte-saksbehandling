@@ -25,6 +25,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import kotlin.math.max
 import kotlin.math.min
 
 internal class ReguleringsforespoerselRiver(
@@ -66,7 +67,7 @@ internal class ReguleringsforespoerselRiver(
         var tatt = 0
 
         while (tatt < antall) {
-            val antallIDenneRunden = min(maksBatchstoerrelse, antall)
+            val antallIDenneRunden = max(0, min(maksBatchstoerrelse, antall - tatt))
             logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
             val saker =
                 behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker, sakType)

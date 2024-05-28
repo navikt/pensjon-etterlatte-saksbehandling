@@ -11,6 +11,7 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.omregning.OmregningDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
@@ -19,6 +20,8 @@ import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.sak.KjoeringRequest
+import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.database.toList
@@ -220,6 +223,29 @@ internal class SakDaoTest(val dataSource: DataSource) {
         val saker = sakRepo.hentSaker("", 3, emptyList())
 
         saker.size shouldBe 3
+    }
+
+    @Test
+    fun `Hvis kjoering er starta, skal vi ikke hente ut`() {
+        val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+        val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
+        omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
+
+        val saker = sakRepo.hentSaker("K1", 1, emptyList())
+
+        saker.size shouldBe 0
+    }
+
+    @Test
+    fun `Hvis kjoering er starta, og saa feila det, skal vi hente ut`() {
+        val sakid = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr).id
+        val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
+        omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
+        omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FEILA, sakid))
+
+        val saker = sakRepo.hentSaker("K1", 3, emptyList())
+
+        saker.size shouldBe 1
     }
 
     @Test

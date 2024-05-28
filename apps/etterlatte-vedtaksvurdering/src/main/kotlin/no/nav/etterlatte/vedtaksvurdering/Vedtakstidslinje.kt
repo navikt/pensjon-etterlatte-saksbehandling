@@ -32,11 +32,8 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
                     null
                 },
             opphoerFraOgMed =
-                if (senesteVedtakPaaDato?.type == VedtakType.OPPHOER) {
-                    senesteVedtakPaaDato.virkningstidspunkt
-                } else {
-                    null
-                },
+                vedtak.filter { it.type == VedtakType.OPPHOER }
+                    .maxByOrNull { it.attestasjon?.tidspunkt!! }?.virkningstidspunkt,
         )
     }
 

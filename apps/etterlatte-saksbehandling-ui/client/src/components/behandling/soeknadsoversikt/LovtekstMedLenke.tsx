@@ -1,7 +1,6 @@
-import { BodyLong, Heading } from '@navikt/ds-react'
+import { Heading, HStack, VStack } from '@navikt/ds-react'
 import { ReactNode } from 'react'
 import styled from 'styled-components'
-import { SoeknadOversiktWrapper } from './styled'
 import { StatusIcon, StatusIconProps } from '~shared/icons/statusIcon'
 import { HjemmelLenke, HjemmelLenkeProps } from '~components/behandling/felles/HjemmelLenke'
 
@@ -15,17 +14,20 @@ interface LovtekstMedLenkeProps {
 export const LovtekstMedLenke = (props: LovtekstMedLenkeProps) => {
   return (
     <VurderingWrapper>
-      <HeadingMedIkon size="medium" level="2">
-        {props.status && <StatusIcon status={props.status} />} {props.tittel}
-      </HeadingMedIkon>
+      <VStack gap="2">
+        <HeadingMedIkon size="medium" level="2">
+          {props.status && <StatusIcon status={props.status} />} {props.tittel}
+        </HeadingMedIkon>
+        <HStack gap="4">
+          {props.hjemler.map((hjemmel, idx) => (
+            <HjemmelLenke key={`hjemmel-${idx}`} {...hjemmel} />
+          ))}
+        </HStack>
 
-      <HjemmelWrapper>
-        {props.hjemler.map((hjemmel, idx) => (
-          <HjemmelLenke key={`hjemmel-${idx}`} {...hjemmel} />
-        ))}
-      </HjemmelWrapper>
-
-      <SoeknadOversiktWrapper>{props.children}</SoeknadOversiktWrapper>
+        <HStack justify="space-between" wrap={false}>
+          {props.children}
+        </HStack>
+      </VStack>
     </VurderingWrapper>
   )
 }
@@ -37,13 +39,4 @@ const HeadingMedIkon = styled(Heading)`
 
 const VurderingWrapper = styled.div`
   margin-top: 3em;
-`
-
-const HjemmelWrapper = styled(BodyLong)`
-  margin-top: 6px;
-  display: flex;
-  gap: 24px;
-  flex-grow: 1;
-  flex-wrap: wrap;
-  flex-direction: row;
 `

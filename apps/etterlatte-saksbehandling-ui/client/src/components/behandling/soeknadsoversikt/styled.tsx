@@ -1,14 +1,6 @@
 import { Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 
-export const SoeknadOversiktWrapper = styled.div`
-  padding: 0em 1em 1em 0em;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: top;
-`
-
 export const InfobokserWrapper = styled.div`
   display: flex;
   flex-direction: row;

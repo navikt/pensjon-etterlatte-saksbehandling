@@ -66,7 +66,7 @@ internal class ReguleringsforespoerselRiver(
         var tatt = 0
 
         while (tatt < antall) {
-            val antallIDenneRunden = min(maksBatchstoerrelse, antall)
+            val antallIDenneRunden = min(maksBatchstoerrelse, antall - tatt)
             logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
             val saker =
                 behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker, sakType)

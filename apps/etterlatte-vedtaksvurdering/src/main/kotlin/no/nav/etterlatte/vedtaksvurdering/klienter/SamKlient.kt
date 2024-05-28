@@ -10,7 +10,6 @@ import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.request.url
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
@@ -81,11 +80,10 @@ class SamKlientImpl(
     ): List<Samordningsvedtak> {
         try {
             val response =
-                httpClient.get {
-                    url("$resourceUrl/api/vedtak")
+                httpClient.get("$resourceUrl/api/vedtak") {
                     header("pid", vedtak.soeker.value)
                     parameter("fagomrade", "EYO")
-                    parameter("sakId", "${vedtak.sakId}")
+                    // parameter("sakId", "${vedtak.sakId}")
                     if (!alleVedtak) {
                         parameter("vedtakId", "${vedtak.id}")
                     }

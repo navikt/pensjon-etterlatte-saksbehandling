@@ -141,6 +141,12 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
     })
   }
 
+  const kanFerdigstilleOppgave = () => {
+    if (oppgave.status === Oppgavestatus.UNDER_BEHANDLING && !vurdering) return true
+    else if (vurdering && !erFerdigstilt) return true
+    return false
+  }
+
   const harAktivitetsplikt = watch('aktivitetsplikt')
   const harUnntak = watch('unntak')
 
@@ -341,7 +347,7 @@ export const AktivitetspliktInfoModal = ({ oppgave }: { oppgave: OppgaveDTO }) =
             ))}
           </Modal.Body>
           <Modal.Footer>
-            {((oppgave.status === Oppgavestatus.UNDER_BEHANDLING && !vurdering) || (vurdering && !erFerdigstilt)) && (
+            {kanFerdigstilleOppgave() && (
               <Button
                 loading={
                   isPending(ferdigstillOppgaveStatus) ||

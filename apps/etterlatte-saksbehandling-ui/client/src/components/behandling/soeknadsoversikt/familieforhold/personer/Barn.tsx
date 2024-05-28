@@ -30,7 +30,7 @@ export const Barn = ({ person, doedsdato }: Props) => {
         <PersonInfoFnr fnr={person.foedselsnummer} />
         <PersonInfoAdresse adresser={adresserEtterDoedsdato} visHistorikk={true} adresseDoedstidspunkt={false} />
         {aktivAdresse && (
-          <PersonDetailWrapper adresse={true}>
+          <PersonDetailWrapper $adresse={true}>
             <div>
               <strong>Aktiv adresse</strong>
             </div>

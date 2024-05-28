@@ -70,7 +70,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
   }, [])
 
   return (
-    <SidebarPanel border id="sjekklistePanel">
+    <SidebarPanel $border id="sjekklistePanel">
       {sjekklisteValideringsfeil && (
         <Alert variant="error">Før du kan sende til attestering må du bekrefte at alle punkter er gjennomgått</Alert>
       )}

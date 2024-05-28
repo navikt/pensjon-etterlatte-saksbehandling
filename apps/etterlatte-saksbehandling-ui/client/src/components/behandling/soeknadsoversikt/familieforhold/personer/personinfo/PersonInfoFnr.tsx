@@ -6,7 +6,7 @@ type Props = {
 
 export const PersonInfoFnr = ({ fnr }: Props) => {
   return (
-    <PersonDetailWrapper adresse={false}>
+    <PersonDetailWrapper $adresse={false}>
       <div>
         <strong>Fødselsnummer</strong>
       </div>

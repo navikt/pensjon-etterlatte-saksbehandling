@@ -9,9 +9,9 @@ import { add, isBefore } from 'date-fns'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
-const FristWrapper = styled.span<{ fristHarPassert: boolean; utenKnapp?: boolean }>`
-  color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};
-  padding: ${(p) => p.utenKnapp && '12px 20px'};
+const FristWrapper = styled.span<{ $fristHarPassert: boolean; $utenKnapp?: boolean }>`
+  color: ${(p) => p.$fristHarPassert && 'var(--a-text-danger)'};
+  padding: ${(p) => p.$utenKnapp && '12px 20px'};
 `
 
 export const FristHandlinger = (props: {
@@ -120,12 +120,12 @@ export const FristHandlinger = (props: {
               icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
               onClick={() => setOpen(!open)}
             >
-              <FristWrapper fristHarPassert={isBefore(new Date(frist), new Date())}>
+              <FristWrapper $fristHarPassert={isBefore(new Date(frist), new Date())}>
                 {formaterStringDato(frist)}
               </FristWrapper>
             </Button>
           ) : (
-            <FristWrapper fristHarPassert={isBefore(new Date(frist), new Date())} utenKnapp>
+            <FristWrapper $fristHarPassert={isBefore(new Date(frist), new Date())} $utenKnapp>
               <Label>{formaterStringDato(frist)}</Label>
             </FristWrapper>
           )}

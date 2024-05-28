@@ -173,7 +173,7 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
               <TextField {...register('adresse.adresselinje3')} label="Adresselinje 3" />
             </SkjemaGruppe>
 
-            <SkjemaGruppe inline>
+            <SkjemaGruppe $inline>
               <TextField
                 {...register('adresse.postnummer', {
                   required: {
@@ -202,7 +202,7 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
               />
             </SkjemaGruppe>
 
-            <SkjemaGruppe inline>
+            <SkjemaGruppe $inline>
               <TextField
                 {...register('adresse.landkode', {
                   required: {
@@ -249,13 +249,13 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
   )
 }
 
-const SkjemaGruppe = styled.div<{ inline?: boolean }>`
+const SkjemaGruppe = styled.div<{ $inline?: boolean }>`
   & > * {
     margin-bottom: 1rem;
   }
 
   ${(props) => {
-    if (props.inline)
+    if (props.$inline)
       return css`
         display: flex;
         flex-direction: row;

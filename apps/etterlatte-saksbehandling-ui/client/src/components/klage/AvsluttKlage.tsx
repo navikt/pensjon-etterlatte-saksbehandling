@@ -52,7 +52,7 @@ export default function AvsluttKlage() {
           </SidebarPanel>
         )}
         {showAvsluttForm && (
-          <SidebarPanel border>
+          <SidebarPanel $border>
             <AvsluttKlageForm />
           </SidebarPanel>
         )}

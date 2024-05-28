@@ -64,9 +64,9 @@ export const VurderingsTitle = ({ title }: { title: string }) => {
   )
 }
 
-export const PersonDetailWrapper = styled.div<{ adresse: boolean }>`
+export const PersonDetailWrapper = styled.div<{ $adresse: boolean }>`
   padding-top: 0.5em;
-  min-width: ${(props) => (props.adresse ? '300px' : '100px')};
+  min-width: ${(props) => (props.$adresse ? '300px' : '100px')};
 `
 
 export const Historikk = styled.div`

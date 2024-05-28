@@ -54,7 +54,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
   }
 
   return (
-    <SidebarPanel border>
+    <SidebarPanel $border>
       <Heading size="small">
         {formaterBehandlingstype(behandlingsInfo.type)}
 

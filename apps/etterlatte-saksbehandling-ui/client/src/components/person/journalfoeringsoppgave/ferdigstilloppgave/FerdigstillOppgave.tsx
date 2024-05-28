@@ -31,7 +31,7 @@ export default function FerdigstillOppgave() {
   const kanFerdigstilleOppgaven = journalpostErFerdigstilt || journalpostTilhoererAnnetTema
 
   return (
-    <FormWrapper column>
+    <FormWrapper $column>
       <Heading size="medium" spacing>
         Ferdigstill oppgave
       </Heading>

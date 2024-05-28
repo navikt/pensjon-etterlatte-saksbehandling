@@ -35,7 +35,7 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
     return <Alert variant="success">Oppgaven er allerede ferdigbehandlet!</Alert>
 
   return (
-    <FormWrapper column>
+    <FormWrapper $column>
       <Heading size="medium" spacing>
         Behandle journalføringsoppgave
       </Heading>
@@ -92,7 +92,7 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
 }
 
 export const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
-  <SidebarPanel border>
+  <SidebarPanel $border>
     <Heading size="small" spacing>
       Oppgavedetaljer
     </Heading>

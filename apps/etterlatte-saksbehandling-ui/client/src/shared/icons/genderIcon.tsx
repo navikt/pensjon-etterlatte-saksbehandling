@@ -8,15 +8,15 @@ export enum GenderList {
 
 export const GenderIcon = (props: { gender: GenderList }) => {
   return (
-    <Gender gender={props.gender}>
+    <Gender $gender={props.gender}>
       {props.gender === GenderList.female ? <FigureOutwardIcon color="#fff" /> : <FigureInwardIcon color="#fff" />}
     </Gender>
   )
 }
 
-const Gender = styled.div<{ gender: GenderList }>`
+const Gender = styled.div<{ $gender: GenderList }>`
   line-height: 30px;
-  background-color: ${(props) => (props.gender === GenderList.female ? '#c86151' : 'blue')};
+  background-color: ${(props) => (props.$gender === GenderList.female ? '#c86151' : 'blue')};
   padding: 3px;
   width: 30px;
   height: 30px;

@@ -1,7 +1,7 @@
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
-import { Historikk, PersonDetailWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { PersonDetailWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { IAdresse } from '~shared/types/IAdresse'
-import { Label, ReadMore } from '@navikt/ds-react'
+import { Box, Label, ReadMore } from '@navikt/ds-react'
 
 type Props = {
   adresser: Readonly<IAdresse[]> | undefined
@@ -35,11 +35,11 @@ export const PersonInfoAdresse = (props: Props) => {
       )}
 
       {adresser && props.visHistorikk && (
-        <Historikk>
+        <Box paddingBlock="2 0">
           <ReadMore header="Historikk">
             <Adressevisning adresser={adresser} soeknadsoversikt={true} />
           </ReadMore>
-        </Historikk>
+        </Box>
       )}
     </PersonDetailWrapper>
   )

@@ -36,10 +36,6 @@ export const PersonDetailWrapper = styled.div<{ $adresse: boolean }>`
   min-width: ${(props) => (props.$adresse ? '300px' : '100px')};
 `
 
-export const Historikk = styled.div`
-  padding-top: 0.5em;
-`
-
 export const HistorikkElement = styled.div`
   font-size: 16px;
   display: flex;

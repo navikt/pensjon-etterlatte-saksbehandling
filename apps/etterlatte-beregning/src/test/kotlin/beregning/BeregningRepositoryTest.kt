@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -87,11 +88,10 @@ internal class BeregningRepositoryTest(ds: DataSource) {
 
         val overstyrBeregning = beregningRepository.hentOverstyrBeregning(1L)
 
-        assertTrue(opprettetOverstyrBeregning != null)
-        assertTrue(overstyrBeregning != null)
+        assertNotNull(overstyrBeregning)
 
-        assertEquals(opprettetOverstyrBeregning?.sakId, overstyrBeregning?.sakId)
-        assertEquals(opprettetOverstyrBeregning?.beskrivelse, overstyrBeregning?.beskrivelse)
+        assertEquals(opprettetOverstyrBeregning.sakId, overstyrBeregning?.sakId)
+        assertEquals(opprettetOverstyrBeregning.beskrivelse, overstyrBeregning?.beskrivelse)
     }
 
     private fun beregning(

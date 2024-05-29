@@ -140,7 +140,11 @@ const BeregningsgrunnlagMetodeForAvdoed = (props: BeregningsgrunnlagMetodeForAvd
           />
         </DatoWrapper>
 
-        <Begrunnelse disabled={grunnlag === undefined} {...register('data.beregningsMetode.begrunnelse')} />
+        <Begrunnelse
+          label="Begrunnelse"
+          disabled={grunnlag === undefined}
+          {...register('data.beregningsMetode.begrunnelse')}
+        />
 
         <Button
           variant="secondary"

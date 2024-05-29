@@ -10,14 +10,6 @@ export const VilkaarInfobokser = styled.div`
   padding-right: 20px;
 `
 
-export const VilkaarColumn = styled.div`
-  height: fit-content;
-
-  .missing {
-    color: red;
-  }
-`
-
 export const VilkaarVurderingColumn = styled.div`
   flex: 1;
   min-width: 300px;

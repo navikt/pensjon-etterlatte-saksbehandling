@@ -233,6 +233,25 @@ internal class SakDaoTest(val dataSource: DataSource) {
         }
 
         @Test
+        fun `Skal kun returnere spesifikke saker som ikke er ekskludert`() {
+            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak4 = sakRepo.opprettSak("fnr4", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+            val saker =
+                sakRepo.hentSaker(
+                    "",
+                    4,
+                    spesifikkeSaker = listOf(sak1.id, sak3.id),
+                    ekskluderteSaker = listOf(sak1.id, sak2.id),
+                )
+
+            saker.size shouldBe 1
+            saker shouldContain sak3
+        }
+
+        @Test
         fun `Skal hente alle saker dersom ingen spesifikke er angitt`() {
             sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)

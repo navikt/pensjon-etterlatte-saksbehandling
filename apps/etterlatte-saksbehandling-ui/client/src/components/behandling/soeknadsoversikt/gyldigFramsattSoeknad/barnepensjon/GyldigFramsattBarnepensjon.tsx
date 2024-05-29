@@ -1,6 +1,6 @@
 import { GyldigFramsattType, IDetaljertBehandling, IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
-import { Beskrivelse, VurderingsContainerWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Informasjon, VurderingsContainerWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Innsender } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Innsender'
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
 import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/Verger'
@@ -65,11 +65,11 @@ export const GyldigFramsattBarnepensjon = ({
           status={gyldigFremsattTilStatusIcon}
         >
           <div>
-            <Beskrivelse>
+            <Informasjon>
               Den som har rett til ytelsen må sette frem krav (forelder/verge hvis under 18 år). Om annet må fullmakt
               ligge i saken. Søknaden må være signert og vise hva det søkes om, og den må settes fram i bostedslandet
               eller i det landet vedkommende sist var medlem.
-            </Beskrivelse>
+            </Informasjon>
             <HStack gap="4">
               <Innsender harKildePesys={harKildePesys} />
               <Foreldreansvar

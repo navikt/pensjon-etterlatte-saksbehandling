@@ -1,5 +1,5 @@
 import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
-import { Beskrivelse, VurderingsContainerWrapper } from '../styled'
+import { Informasjon, VurderingsContainerWrapper } from '../styled'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { IPdlPerson } from '~shared/types/Person'
 import { formaterGrunnlagKilde, svarTilStatusIcon } from '../utils'
@@ -53,9 +53,9 @@ export const OversiktKommerBarnetTilgode = ({
       status={svarTilStatusIcon(kommerBarnetTilgode?.svar)}
     >
       <div>
-        <Beskrivelse>
+        <Informasjon>
           Undersøk om boforholdet er avklart og det er sannsynlig at pensjonen kommer barnet til gode.
-        </Beskrivelse>
+        </Informasjon>
 
         <HStack gap="4">
           {bostedsadresse && (

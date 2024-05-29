@@ -36,7 +36,7 @@ export const VurderingsContainerWrapper = styled(VurderingsContainer)`
   width: 10em;
 `
 
-export const Beskrivelse = styled.div`
-  margin: 10px 0;
-  max-width: 41em;
+export const Informasjon = styled.div`
+  margin: var(--a-spacing-3) 0;
+  max-width: 41rem;
 `

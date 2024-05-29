@@ -229,7 +229,7 @@ internal class ReguleringsforespoerselRiverTest {
 
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) {
-            vedtakServiceMock.hentAlleSaker(any(), any(), any(), match { it.any { ekskludert -> ekskludert == 17003L } })
+            vedtakServiceMock.hentAlleSaker(any(), any(), any(), match { it.any { ekskludert -> ekskludert == 16642L } })
         }
     }
 }

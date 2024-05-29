@@ -61,17 +61,25 @@ internal class LoependeYtelserforespoerselRiver(
         }
         if (respons.erLoepende) {
             packet.setEventNameForHendelseType(ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET)
-            packet[HENDELSE_DATA_KEY] =
-                Omregningshendelse(
-                    sakId = sakId,
-                    fradato = respons.dato,
-                    prosesstype = Prosesstype.AUTOMATISK,
-                    opphoerFraOgMed = respons.opphoerFraOgMed,
-                )
-            respons.sisteLoependeBehandlingId?.let { b -> packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = b }
+            logger.info("Grunnbeløpsreguleringmelding ble sendt for sak $sakId. Dato=${respons.dato}")
+        } else {
+            logger.info("Grunnbeløpsreguleringmelding ble ikke sendt for sak $sakId. Dato=${respons.dato}")
+        }
+        packet[HENDELSE_DATA_KEY] =
+            Omregningshendelse(
+                sakId = sakId,
+                fradato = respons.dato,
+                prosesstype = Prosesstype.AUTOMATISK,
+                opphoerFraOgMed = respons.opphoerFraOgMed,
+            )
+        respons.sisteLoependeBehandlingId?.let { b -> packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = b }
+        if (respons.erLoepende) {
+            packet.setEventNameForHendelseType(ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET)
             context.publish(packet.toJson())
             logger.info("Grunnbeløpsreguleringmelding ble sendt for sak $sakId. Dato=${respons.dato}")
         } else {
+            packet.setEventNameForHendelseType(ReguleringHendelseType.YTELSE_IKKE_LOEPENDE)
+            context.publish(packet.toJson())
             logger.info("Grunnbeløpsreguleringmelding ble ikke sendt for sak $sakId. Dato=${respons.dato}")
         }
     }

@@ -65,7 +65,7 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
                     call.orgNummer
                 }
 
-            MDC.put("user", user)
+            MDC.put("x_user", user)
             call.attributes.put(userAttribute, user)
 
             return@on
@@ -89,11 +89,11 @@ val serverRequestLoggerPlugin =
                 val markers =
                     Markers.appendEntries(
                         mapOf(
-                            "method" to method,
-                            "response_code" to responseCode,
-                            "response_time" to duration,
-                            "request_uri" to requestUriTemplate,
-                            "user" to (call.attributes.getOrNull(userAttribute) ?: "unknown"),
+                            "x_method" to method,
+                            "x_response_code" to responseCode,
+                            "x_response_time" to duration,
+                            "x_request_uri" to requestUriTemplate,
+                            "x_user" to (call.attributes.getOrNull(userAttribute) ?: "unknown"),
                         ),
                     )
 

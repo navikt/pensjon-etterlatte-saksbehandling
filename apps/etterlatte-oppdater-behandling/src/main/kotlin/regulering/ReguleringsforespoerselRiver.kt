@@ -142,6 +142,7 @@ private val sakerViIkkeRegulererAutomatiskNaa =
         13046, // Feil i grunnlag
         12789, // Ulik versjon av grunnlag brukt i trygdetid og behandling
         16095, // Opprettet regulering, men stuck i OPPRETTET. Se slack for detaljer
+        16642, // Feil i grunnlag
         // Herifra og ut: overstyrte beregninger. Tas seinare i separat køyring.
         11510,
         11580,

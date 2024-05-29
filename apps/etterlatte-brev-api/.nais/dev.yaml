@@ -69,6 +69,8 @@ spec:
       value: https://pensjon-brevbaker.intern.dev.nav.no
     - name: BREVBAKER_SCOPE
       value: api://dev-gcp.pensjonsbrev.pensjon-brevbaker/.default
+    - name: PDFGEN_URL
+      value: http://ey-pdfgen/api/v1/genpdf
     - name: BRREG_URL
       value: https://data.brreg.no
     - name: NORG2_URL
@@ -127,6 +129,7 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid
+        - application: ey-pdfgen
         - application: clamav
           namespace: nais-system
       external:

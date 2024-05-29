@@ -501,15 +501,18 @@ internal class BeregnBarnepensjonServiceTest {
             with(beregning.beregningsperioder[0]) {
                 datoFOM shouldBe YearMonth.of(2023, 1)
                 datoTOM shouldBe YearMonth.of(2023, 4)
+                avdodeForeldre shouldBe null
             }
             with(beregning.beregningsperioder[1]) {
                 datoFOM shouldBe YearMonth.of(2023, 5)
                 datoTOM shouldBe YearMonth.of(2023, 12)
+                avdodeForeldre shouldBe null
             }
             with(beregning.beregningsperioder[2]) {
                 datoFOM shouldBe YearMonth.of(2024, 1)
                 datoTOM shouldBe YearMonth.of(2024, 4)
                 utbetaltBeloep shouldBe forventetUtbetalt
+                avdodeForeldre shouldBe listOf(AVDOED_FOEDSELSNUMMER.value, AVDOED2_FOEDSELSNUMMER.value)
             }
         }
     }

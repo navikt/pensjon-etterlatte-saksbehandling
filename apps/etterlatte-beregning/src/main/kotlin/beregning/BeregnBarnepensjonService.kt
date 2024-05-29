@@ -10,12 +10,14 @@ import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegelMedInstitusjon
+import no.nav.etterlatte.beregning.regler.barnepensjon.sats.avdodeForeldre2024
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.TrygdetidGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.anvendtTrygdetidRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidBruktRegel
 import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.regler.finnAnvendtTrygdetid
+import no.nav.etterlatte.beregning.regler.finnAvdodeForeldre
 import no.nav.etterlatte.beregning.regler.toSamlet
 import no.nav.etterlatte.config.BeregningFeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -230,6 +232,7 @@ class BeregnBarnepensjonService(
                                 samletNorskTrygdetid = trygdetidForAvdoed?.samletTrygdetidNorge,
                                 samletTeoretiskTrygdetid = trygdetidForAvdoed?.samletTrygdetidTeoretisk,
                                 broek = trygdetidForAvdoed?.prorataBroek,
+                                avdodeForeldre = periodisertResultat.resultat.finnAvdodeForeldre(avdodeForeldre2024),
                                 regelResultat = objectMapper.valueToTree(periodisertResultat),
                                 regelVersjon = periodisertResultat.reglerVersjon,
                             )

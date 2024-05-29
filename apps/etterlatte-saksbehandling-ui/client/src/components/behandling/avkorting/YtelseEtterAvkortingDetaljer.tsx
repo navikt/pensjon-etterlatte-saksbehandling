@@ -1,16 +1,14 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { IAvkortetYtelse } from '~shared/types/IAvkorting'
-import { BodyShort, ReadMore } from '@navikt/ds-react'
+import { BodyShort, Box, ReadMore } from '@navikt/ds-react'
 import { NOK } from '~utils/formattering'
 
 export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse }) => {
   const ytelse = props.ytelse
 
   return (
-    <>
-      <Border />
+    <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
       <Wrapper>
         <ul>
           <Rad>
@@ -35,14 +33,15 @@ export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse })
               <Verdi>{NOK(ytelse.restanse)} kr</Verdi>
             </Rad>
           )}
-          <Border />
-          <Rad>
-            <Navn>Brutto stønad etter avkorting og restanse</Navn>
-            <Operasjon>=</Operasjon>
-            <Verdi>
-              <strong>{NOK(ytelse.ytelseEtterAvkorting)}</strong>
-            </Verdi>
-          </Rad>
+          <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+            <Rad>
+              <Navn>Brutto stønad etter avkorting og restanse</Navn>
+              <Operasjon>=</Operasjon>
+              <Verdi>
+                <strong>{NOK(ytelse.ytelseEtterAvkorting)}</strong>
+              </Verdi>
+            </Rad>
+          </Box>
         </ul>
         <Beskrivelse>
           <li>
@@ -72,7 +71,7 @@ export const YtelseEtterAvkortingDetaljer = (props: { ytelse: IAvkortetYtelse })
           </li>
         </Beskrivelse>
       </Wrapper>
-    </>
+    </Box>
   )
 }
 

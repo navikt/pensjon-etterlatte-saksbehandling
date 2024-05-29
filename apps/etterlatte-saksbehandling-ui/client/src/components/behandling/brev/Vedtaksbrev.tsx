@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Alert, Heading, Box } from '@navikt/ds-react'
-import { Border } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
@@ -214,19 +213,19 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         {isFailureHandler({ apiResult: opprettBrevStatus, errorMessage: 'Kunne ikke opprette brev' })}
       </BrevContent>
 
-      <Border />
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <SjekklisteValideringErrorSummary />
 
-      <SjekklisteValideringErrorSummary />
-
-      <BehandlingHandlingKnapper>
-        {redigerbar && (
-          <SendTilAttesteringModal
-            behandlingId={props.behandling.id}
-            fattVedtakApi={fattVedtak}
-            validerKanSendeTilAttestering={kanSendeTilAttestering}
-          />
-        )}
-      </BehandlingHandlingKnapper>
+        <BehandlingHandlingKnapper>
+          {redigerbar && (
+            <SendTilAttesteringModal
+              behandlingId={props.behandling.id}
+              fattVedtakApi={fattVedtak}
+              validerKanSendeTilAttestering={kanSendeTilAttestering}
+            />
+          )}
+        </BehandlingHandlingKnapper>
+      </Box>
     </>
   )
 }

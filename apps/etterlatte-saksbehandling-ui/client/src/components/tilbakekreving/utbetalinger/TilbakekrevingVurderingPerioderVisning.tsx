@@ -5,7 +5,6 @@ import {
   TilbakekrevingPeriode,
 } from '~shared/types/Tilbakekreving'
 import React, { useState } from 'react'
-import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { Box, Button, HStack, Table } from '@navikt/ds-react'
 import { format } from 'date-fns'
 import { useNavigate } from 'react-router'
@@ -55,12 +54,13 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
           })}
         </Table.Body>
       </Table>
-      <Border style={{ marginTop: '3em' }} />
-      <HStack justify="center">
-        <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/oppsummering`)}>
-          Neste
-        </Button>
-      </HStack>
+      <Box paddingBlock="12 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <HStack justify="center">
+          <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/oppsummering`)}>
+            Neste
+          </Button>
+        </HStack>
+      </Box>
     </Box>
   )
 }

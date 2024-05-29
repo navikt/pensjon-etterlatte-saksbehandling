@@ -16,9 +16,7 @@ import {
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect } from 'react'
 import { lagreTilbakekrevingsvurdering } from '~shared/api/tilbakekreving'
-
 import { isPending, mapResult } from '~shared/api/apiUtils'
-import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { Toast } from '~shared/alerts/Toast'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
@@ -393,22 +391,23 @@ export function TilbakekrevingVurderingSkjema({
         </VStack>
       </Box>
 
-      <Border style={{ marginTop: '3em' }} />
-      <HStack justify="center">
-        {redigerbar ? (
-          <Button
-            variant="primary"
-            onClick={handleSubmit(lagreVurderingOgFortsett)}
-            loading={isPending(lagreVurderingStatus)}
-          >
-            Lagre og fortsett
-          </Button>
-        ) : (
-          <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/utbetalinger`)}>
-            Neste
-          </Button>
-        )}
-      </HStack>
+      <Box paddingBlock="12 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <HStack justify="center">
+          {redigerbar ? (
+            <Button
+              variant="primary"
+              onClick={handleSubmit(lagreVurderingOgFortsett)}
+              loading={isPending(lagreVurderingStatus)}
+            >
+              Lagre og fortsett
+            </Button>
+          ) : (
+            <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/utbetalinger`)}>
+              Neste
+            </Button>
+          )}
+        </HStack>
+      </Box>
     </>
   )
 }

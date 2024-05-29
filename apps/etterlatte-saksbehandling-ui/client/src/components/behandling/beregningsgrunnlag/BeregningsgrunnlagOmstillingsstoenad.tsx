@@ -1,4 +1,4 @@
-import { Button } from '@navikt/ds-react'
+import { Box, Button } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { behandlingErRedigerbar } from '../felles/utils'
@@ -27,11 +27,9 @@ import {
   InstitusjonsoppholdGrunnlagData,
 } from '~shared/types/Beregning'
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import Spinner from '~shared/Spinner'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 import { handlinger } from '~components/behandling/handlinger/typer'
-
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
@@ -121,21 +119,21 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
       {isFailureHandler({ apiResult: endreBeregning, errorMessage: 'Kunne ikke opprette ny beregning' })}
       {isFailureHandler({ apiResult: lagreBeregningsgrunnlagOMS, errorMessage: 'lagreBeregningsgrunnlagOMS' })}
 
-      <Border />
-
-      {redigerbar ? (
-        <BehandlingHandlingKnapper>
-          <Button
-            variant="primary"
-            onClick={onSubmit}
-            loading={isPending(lagreBeregningsgrunnlagOMS) || isPending(endreBeregning)}
-          >
-            {handlinger.NESTE.navn}
-          </Button>
-        </BehandlingHandlingKnapper>
-      ) : (
-        <NesteOgTilbake />
-      )}
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        {redigerbar ? (
+          <BehandlingHandlingKnapper>
+            <Button
+              variant="primary"
+              onClick={onSubmit}
+              loading={isPending(lagreBeregningsgrunnlagOMS) || isPending(endreBeregning)}
+            >
+              {handlinger.NESTE.navn}
+            </Button>
+          </BehandlingHandlingKnapper>
+        ) : (
+          <NesteOgTilbake />
+        )}
+      </Box>
     </>
   )
 }

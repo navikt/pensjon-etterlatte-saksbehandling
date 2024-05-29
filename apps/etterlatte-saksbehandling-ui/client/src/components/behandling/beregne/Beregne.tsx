@@ -1,4 +1,3 @@
-import { Border } from '../soeknadsoversikt/styled'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
 import { useVedtaksResultat } from '../useVedtaksResultat'
@@ -170,7 +169,6 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
           )}
         </>
       )}
-      <Border />
 
       {isFailureHandler({
         apiResult: vedtakStatus,
@@ -178,23 +176,25 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         wrapperComponent: { component: HStack, props: { justify: 'center' } },
       })}
 
-      {redigerbar ? (
-        <BehandlingHandlingKnapper>
-          {visAttesteringsmodal ? (
-            <SendTilAttesteringModal
-              behandlingId={behandling.id}
-              fattVedtakApi={fattVedtak}
-              validerKanSendeTilAttestering={() => true}
-            />
-          ) : (
-            <Button loading={isPending(vedtakStatus)} variant="primary" onClick={opprettEllerOppdaterVedtak}>
-              {behandling.sendeBrev ? handlinger.NESTE.navn : handlinger.FATT_VEDTAK.navn}
-            </Button>
-          )}
-        </BehandlingHandlingKnapper>
-      ) : (
-        <NesteOgTilbake />
-      )}
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        {redigerbar ? (
+          <BehandlingHandlingKnapper>
+            {visAttesteringsmodal ? (
+              <SendTilAttesteringModal
+                behandlingId={behandling.id}
+                fattVedtakApi={fattVedtak}
+                validerKanSendeTilAttestering={() => true}
+              />
+            ) : (
+              <Button loading={isPending(vedtakStatus)} variant="primary" onClick={opprettEllerOppdaterVedtak}>
+                {behandling.sendeBrev ? handlinger.NESTE.navn : handlinger.FATT_VEDTAK.navn}
+              </Button>
+            )}
+          </BehandlingHandlingKnapper>
+        ) : (
+          <NesteOgTilbake />
+        )}
+      </Box>
     </>
   )
 }

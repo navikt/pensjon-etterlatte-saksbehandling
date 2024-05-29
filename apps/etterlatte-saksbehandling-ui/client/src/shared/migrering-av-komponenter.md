@@ -30,4 +30,7 @@ Veldig mange steder bruke vi f.eks `margin-top: 1rem` for å lage litt spacing m
 
 `<HeadingWrapper />` er merget inn i eksisterende `<Box paddingInline="16" paddingBlock="4" />` rundt `<Heading />` --> `<Box paddingInline="16" paddingBlock="16 4"><Heading /><Box>`
 
+`<Border />` er litt komplisert siden den blir brukt i kombinasjon med andre komponenter og kan dermed ha forskjellige marginer eller paddinger. Men de fleste stedene skal dette være riktig `<Box paddingBlock="4 0" borderWidth="1" borderColor="border-subtle"/>`
 
+## ~components/behandling/vilkaarsvurdering/styled.ts
+`<Innhold />` --> `<Box paddingInline="8" />`

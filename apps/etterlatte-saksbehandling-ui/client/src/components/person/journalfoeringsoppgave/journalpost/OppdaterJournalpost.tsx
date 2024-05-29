@@ -1,5 +1,4 @@
-import { Alert, Heading, HStack, VStack } from '@navikt/ds-react'
-import { Border } from '~components/behandling/soeknadsoversikt/styled'
+import { Alert, Box, Heading, HStack, VStack } from '@navikt/ds-react'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import React, { useState } from 'react'
 import { Journalpost } from '~shared/types/Journalpost'
@@ -49,11 +48,11 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
 
       <br />
 
-      <Border />
-
-      <Heading size="medium" spacing>
-        Gjelder
-      </Heading>
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <Heading size="medium" spacing>
+          Gjelder
+        </Heading>
+      </Box>
 
       <FormWrapper column={true}>
         <EndreTema journalpost={journalpost} oppdater={(kode) => setJournalpost({ ...journalpost, tema: kode.navn })} />

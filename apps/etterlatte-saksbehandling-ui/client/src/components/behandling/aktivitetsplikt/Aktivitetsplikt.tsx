@@ -1,6 +1,5 @@
 import { BodyLong, BodyShort, Box, Button, Detail, Heading, Textarea } from '@navikt/ds-react'
 import React, { useContext, useEffect, useState } from 'react'
-import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import styled from 'styled-components'
 import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
@@ -177,13 +176,13 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         </SpacingWrapper>
       </AktivitetspliktWrapper>
 
-      <Border />
-
-      <BehandlingHandlingKnapper>
-        <Button variant="primary" onClick={() => next()}>
-          {handlinger.NESTE.navn}
-        </Button>
-      </BehandlingHandlingKnapper>
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <BehandlingHandlingKnapper>
+          <Button variant="primary" onClick={() => next()}>
+            {handlinger.NESTE.navn}
+          </Button>
+        </BehandlingHandlingKnapper>
+      </Box>
     </>
   )
 }

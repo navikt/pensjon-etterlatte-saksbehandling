@@ -1,5 +1,4 @@
 import { Familieforhold } from './familieforhold/Familieforhold'
-import { Border } from './styled'
 import { Box, Heading, HStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { Soeknadsdato } from './Soeknadsdato'
@@ -122,15 +121,19 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
         )}
         <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />
       </Box>
-      <Border />
-      <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />
-      {redigerbar ? (
-        <BehandlingHandlingKnapper>
-          {soeknadsoversiktErFerdigUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}
-        </BehandlingHandlingKnapper>
-      ) : (
-        <NesteOgTilbake />
-      )}
+
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />
+      </Box>
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        {redigerbar ? (
+          <BehandlingHandlingKnapper>
+            {soeknadsoversiktErFerdigUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}
+          </BehandlingHandlingKnapper>
+        ) : (
+          <NesteOgTilbake />
+        )}
+      </Box>
     </>
   )
 }

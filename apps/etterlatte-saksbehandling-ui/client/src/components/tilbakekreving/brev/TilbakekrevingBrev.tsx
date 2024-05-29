@@ -1,5 +1,4 @@
 import { Alert, Box, Heading, HStack } from '@navikt/ds-react'
-import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/SendTilAttesteringModal'
 import { erUnderBehandling, TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { fattVedtak } from '~shared/api/tilbakekreving'
@@ -80,16 +79,17 @@ export function TilbakekrevingBrev({
 
         {vedtaksbrev && <RedigerbartBrev brev={vedtaksbrev} kanRedigeres={redigerbar} />}
       </BrevContent>
-      <Border />
-      <HStack justify="center">
-        {kanAttesteres && (
-          <SendTilAttesteringModal
-            behandlingId={behandling.id}
-            fattVedtakApi={fattVedtak}
-            validerKanSendeTilAttestering={() => true}
-          />
-        )}
-      </HStack>
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <HStack justify="center">
+          {kanAttesteres && (
+            <SendTilAttesteringModal
+              behandlingId={behandling.id}
+              fattVedtakApi={fattVedtak}
+              validerKanSendeTilAttestering={() => true}
+            />
+          )}
+        </HStack>
+      </Box>
     </>
   )
 }

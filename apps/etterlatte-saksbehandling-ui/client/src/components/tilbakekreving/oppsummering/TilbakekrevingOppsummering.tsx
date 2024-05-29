@@ -1,5 +1,4 @@
 import { Box, Button, ErrorSummary, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
-import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
@@ -125,26 +124,28 @@ export function TilbakekrevingOppsummering({
           error: (error) => <TilbakekrevingValideringsfeil error={error} />,
         })}
       </Box>
-      <Border style={{ marginTop: '3em' }} />
-      <HStack justify="center">
-        {!isPending(lagreSkalSendeBrevStatus) && (
-          <>
-            {behandling.sendeBrev && gyldigTilbakekreving && (
-              <Button variant="primary" onClick={gaaTilBrev} loading={isPending(validerTilbakekrevingStatus)}>
-                Gå til brev
-              </Button>
-            )}
-            {!behandling.sendeBrev && gyldigTilbakekreving && redigerbar && (
-              <SendTilAttesteringModal
-                behandlingId={behandling.id}
-                fattVedtakApi={fattVedtak}
-                validerKanSendeTilAttestering={() => gyldigTilbakekreving}
-              />
-            )}
-          </>
-        )}
-        <Spinner visible={isPending(lagreSkalSendeBrevStatus)} label="Lagrer brevvalg" />
-      </HStack>
+
+      <Box paddingBlock="12 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <HStack justify="center">
+          {!isPending(lagreSkalSendeBrevStatus) && (
+            <>
+              {behandling.sendeBrev && gyldigTilbakekreving && (
+                <Button variant="primary" onClick={gaaTilBrev} loading={isPending(validerTilbakekrevingStatus)}>
+                  Gå til brev
+                </Button>
+              )}
+              {!behandling.sendeBrev && gyldigTilbakekreving && redigerbar && (
+                <SendTilAttesteringModal
+                  behandlingId={behandling.id}
+                  fattVedtakApi={fattVedtak}
+                  validerKanSendeTilAttestering={() => gyldigTilbakekreving}
+                />
+              )}
+            </>
+          )}
+          <Spinner visible={isPending(lagreSkalSendeBrevStatus)} label="Lagrer brevvalg" />
+        </HStack>
+      </Box>
     </>
   )
 }

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { Alert, Box, Button, Heading } from '@navikt/ds-react'
-import { Border } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVarselbrev, opprettVarselbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
@@ -129,24 +128,24 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
         {isFailureHandler({ apiResult: opprettBrevStatus, errorMessage: 'Kunne ikke opprette brev' })}
       </BrevContent>
 
-      <Border />
-
-      {redigerbar ? (
-        <BehandlingHandlingKnapper>
-          <Button
-            variant="primary"
-            onClick={onSubmit}
-            loading={isPending(hentBrevStatus) || isPending(opprettBrevStatus)}
-          >
-            Neste side uten å sende varselbrev
-          </Button>
-          {varselbrev && (
-            <NyttBrevHandlingerPanel brev={varselbrev} setKanRedigeres={setKanRedigeres} callback={settPaaVent} />
-          )}
-        </BehandlingHandlingKnapper>
-      ) : (
-        <NesteOgTilbake />
-      )}
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        {redigerbar ? (
+          <BehandlingHandlingKnapper>
+            <Button
+              variant="primary"
+              onClick={onSubmit}
+              loading={isPending(hentBrevStatus) || isPending(opprettBrevStatus)}
+            >
+              Neste side uten å sende varselbrev
+            </Button>
+            {varselbrev && (
+              <NyttBrevHandlingerPanel brev={varselbrev} setKanRedigeres={setKanRedigeres} callback={settPaaVent} />
+            )}
+          </BehandlingHandlingKnapper>
+        ) : (
+          <NesteOgTilbake />
+        )}
+      </Box>
     </>
   )
 }

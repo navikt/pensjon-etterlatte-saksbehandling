@@ -1,4 +1,3 @@
-import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { Box, Button, Heading } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -73,21 +72,26 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
         virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato()}
       />
 
-      <Border />
-      {isFailureHandler({
-        apiResult: oppdaterStatusResult,
-        errorMessage: 'Kunne ikke oppdatere trygdetid status',
-      })}
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        {isFailureHandler({
+          apiResult: oppdaterStatusResult,
+          errorMessage: 'Kunne ikke oppdatere trygdetid status',
+        })}
 
-      {redigerbar ? (
-        <BehandlingHandlingKnapper>
-          <Button variant="primary" loading={isPending(oppdaterStatusResult)} onClick={sjekkGyldighetOgOppdaterStatus}>
-            {handlinger.NESTE.navn}
-          </Button>
-        </BehandlingHandlingKnapper>
-      ) : (
-        <NesteOgTilbake />
-      )}
+        {redigerbar ? (
+          <BehandlingHandlingKnapper>
+            <Button
+              variant="primary"
+              loading={isPending(oppdaterStatusResult)}
+              onClick={sjekkGyldighetOgOppdaterStatus}
+            >
+              {handlinger.NESTE.navn}
+            </Button>
+          </BehandlingHandlingKnapper>
+        ) : (
+          <NesteOgTilbake />
+        )}
+      </Box>
     </>
   )
 }

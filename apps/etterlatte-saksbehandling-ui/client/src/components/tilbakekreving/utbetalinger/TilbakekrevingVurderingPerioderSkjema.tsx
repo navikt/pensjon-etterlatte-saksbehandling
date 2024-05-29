@@ -11,7 +11,6 @@ import { lagreTilbakekrevingsperioder } from '~shared/api/tilbakekreving'
 import React, { useEffect } from 'react'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
-import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { Box, Button, HStack, Select, Table, TextField, VStack } from '@navikt/ds-react'
 import { isPending, mapResult } from '~shared/api/apiUtils'
 import { Toast } from '~shared/alerts/Toast'
@@ -213,23 +212,24 @@ export function TilbakekrevingVurderingPerioderSkjema({
           </VStack>
         )}
       </Box>
-      <Border style={{ marginTop: '3em' }} />
-      <HStack justify="center">
-        {redigerbar ? (
-          <Button
-            style={{ marginTop: '1em' }}
-            variant="primary"
-            onClick={handleSubmit(lagrePerioderOgFortsett)}
-            loading={isPending(lagrePerioderStatus)}
-          >
-            Lagre og fortsett
-          </Button>
-        ) : (
-          <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/oppsummering`)}>
-            Neste
-          </Button>
-        )}
-      </HStack>
+      <Box paddingBlock="12 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <HStack justify="center">
+          {redigerbar ? (
+            <Button
+              style={{ marginTop: '1em' }}
+              variant="primary"
+              onClick={handleSubmit(lagrePerioderOgFortsett)}
+              loading={isPending(lagrePerioderStatus)}
+            >
+              Lagre og fortsett
+            </Button>
+          ) : (
+            <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/oppsummering`)}>
+              Neste
+            </Button>
+          )}
+        </HStack>
+      </Box>
     </>
   )
 }

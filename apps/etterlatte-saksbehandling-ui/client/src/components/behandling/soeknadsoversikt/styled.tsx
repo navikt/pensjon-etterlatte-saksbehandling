@@ -51,11 +51,6 @@ export const HistorikkElement = styled.div`
   }
 `
 
-export const Border = styled.div`
-  border-top: 1px solid #ccc;
-  margin-bottom: 1em;
-`
-
 export const VurderingsContainerWrapper = styled(VurderingsContainer)`
   padding-left: 20px;
   width: 10em;

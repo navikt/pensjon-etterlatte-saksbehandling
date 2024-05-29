@@ -6,7 +6,6 @@ import { Box, Heading } from '@navikt/ds-react'
 import React from 'react'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import styled from 'styled-components'
-import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { RedigerFamilieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/RedigerFamilieforhold'
 
 export interface PropsFamilieforhold {
@@ -34,7 +33,6 @@ export const Familieforhold = ({ behandling, personopplysninger, redigerbar }: P
           <FamilieforholdOmstillingsstoenad personopplysninger={personopplysninger} />
         )}
       </FamilieforholdWrapper>
-      <Border />
     </>
   )
 }

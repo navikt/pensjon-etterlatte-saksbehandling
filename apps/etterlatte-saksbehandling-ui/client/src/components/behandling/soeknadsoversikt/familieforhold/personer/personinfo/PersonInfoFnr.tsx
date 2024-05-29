@@ -1,4 +1,4 @@
-import { PersonDetailWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Box } from '@navikt/ds-react'
 
 type Props = {
   fnr: string | undefined
@@ -6,11 +6,11 @@ type Props = {
 
 export const PersonInfoFnr = ({ fnr }: Props) => {
   return (
-    <PersonDetailWrapper $adresse={false}>
+    <Box paddingBlock="2 0">
       <div>
         <strong>Fødselsnummer</strong>
       </div>
       {fnr}
-    </PersonDetailWrapper>
+    </Box>
   )
 }

@@ -1,5 +1,4 @@
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
-import { PersonDetailWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { IAdresse } from '~shared/types/IAdresse'
 import { Box, Label, ReadMore } from '@navikt/ds-react'
 
@@ -24,7 +23,7 @@ export const PersonInfoAdresse = (props: Props) => {
   }
 
   return (
-    <PersonDetailWrapper $adresse={true}>
+    <Box paddingBlock="2 0">
       <Label as="p">{props.adresseDoedstidspunkt ? 'Bostedadresse dødsfallstidspunkt' : 'Bostedadresse'}</Label>
       {sisteEllerAktivAdresse ? (
         <span>
@@ -41,6 +40,6 @@ export const PersonInfoAdresse = (props: Props) => {
           </ReadMore>
         </Box>
       )}
-    </PersonDetailWrapper>
+    </Box>
   )
 }

@@ -59,12 +59,6 @@ internal class LoependeYtelserforespoerselRiver(
         if (respons.underSamordning) {
             throw SakErUnderSamordning()
         }
-        if (respons.erLoepende) {
-            packet.setEventNameForHendelseType(ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET)
-            logger.info("Grunnbeløpsreguleringmelding ble sendt for sak $sakId. Dato=${respons.dato}")
-        } else {
-            logger.info("Grunnbeløpsreguleringmelding ble ikke sendt for sak $sakId. Dato=${respons.dato}")
-        }
         packet[HENDELSE_DATA_KEY] =
             Omregningshendelse(
                 sakId = sakId,

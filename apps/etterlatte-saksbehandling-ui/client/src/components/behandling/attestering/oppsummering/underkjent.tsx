@@ -20,7 +20,7 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingIn
   const attestant = erReturnert ? underkjentSiste?.ident : innloggetId
 
   return (
-    <Wrapper innvilget={false}>
+    <Wrapper $innvilget={false}>
       <Overskrift>{formaterBehandlingstype(behandlingsInfo.type)}</Overskrift>
       <UnderOverskrift innvilget={false}>Underkjent</UnderOverskrift>
 

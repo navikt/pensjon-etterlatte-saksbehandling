@@ -30,15 +30,15 @@ export const MainContent = styled(Box)`
   border-color: var(--a-border-subtle);
 `
 
-export const CollapsibleSidebar = styled.div<{ collapsed: boolean }>`
+export const CollapsibleSidebar = styled.div<{ $collapsed: boolean }>`
   background: var(--a-white);
   position: relative;
   max-height: fit-content;
-  min-width: ${(props) => (props.collapsed ? '50px' : '20%')};
+  min-width: ${(props) => (props.$collapsed ? '50px' : '20%')};
 `
 
-export const SidebarContent = styled.div<{ collapsed: boolean }>`
-  display: ${(props) => (props.collapsed ? 'none' : 'block')};
+export const SidebarContent = styled.div<{ $collapsed: boolean }>`
+  display: ${(props) => (props.$collapsed ? 'none' : 'block')};
   margin-bottom: 4rem;
 `
 

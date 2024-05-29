@@ -23,11 +23,11 @@ export const RadioGroupWrapper = styled.div`
   }
 `
 
-export const Wrapper = styled.div<{ innvilget: boolean }>`
+export const Wrapper = styled.div<{ $innvilget: boolean }>`
   margin: 20px 8px 0px 8px;
   padding: 1em;
   border: 1px solid #c7c0c0;
-  border-left: 5px solid ${(props) => (props.innvilget ? '#007C2E' : '#881d0c')};
+  border-left: 5px solid ${(props) => (props.$innvilget ? '#007C2E' : '#881d0c')};
   border-radius: 3px;
 
   .flex {

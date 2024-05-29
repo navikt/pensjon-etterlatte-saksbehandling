@@ -134,7 +134,7 @@ export default function BehandleJournalfoeringOppgave() {
             journalpostStatus,
             (journalpost) =>
               !kanEndreJournalpost(journalpost) && (
-                <SidebarPanel border>
+                <SidebarPanel $border>
                   <JournalpostInnhold journalpost={journalpost} />
                 </SidebarPanel>
               )
@@ -145,8 +145,8 @@ export default function BehandleJournalfoeringOppgave() {
   )
 }
 
-export const FormWrapper = styled.div<{ column?: boolean }>`
+export const FormWrapper = styled.div<{ $column?: boolean }>`
   display: flex;
-  flex-direction: ${(props) => (!!props.column ? 'column' : 'row')};
+  flex-direction: ${(props) => (props.$column ? 'column' : 'row')};
   gap: 1rem;
 `

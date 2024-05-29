@@ -21,7 +21,7 @@ const PeriodeAccordion = (props: PeriodeAccordionProps) => {
   const [open, setOpen] = useState<boolean>(defaultOpen)
   const topContent = topSummary instanceof Function ? topSummary(open) : topSummary
   return (
-    <PeriodeAccordionWrapper {...rest} feilBorder={feilBorder}>
+    <PeriodeAccordionWrapper {...rest} $feilBorder={feilBorder}>
       <PeriodeAccordionHead>
         <ExpandButton onClick={() => setOpen((o) => !o)} aria-expanded={open}>
           {open ? <ChevronUpIcon fontSize={20} aria-hidden /> : <ChevronDownIcon fontSize={20} aria-hidden />}
@@ -36,8 +36,8 @@ const PeriodeAccordion = (props: PeriodeAccordionProps) => {
   )
 }
 
-const PeriodeAccordionWrapper = styled.div<{ feilBorder: boolean }>`
-  border: ${(props) => (props.feilBorder ? '2px solid var(--a-border-danger)' : '1px solid')};
+const PeriodeAccordionWrapper = styled.div<{ $feilBorder: boolean }>`
+  border: ${(props) => (props.$feilBorder ? '2px solid var(--a-border-danger)' : '1px solid')};
   margin: 0 3em 2em 3em;
   padding: 1em 0;
 

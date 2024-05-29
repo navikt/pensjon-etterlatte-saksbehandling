@@ -111,7 +111,7 @@ export default function OpprettNyBehandling() {
   }, [valgtSakType])
 
   return (
-    <FormWrapper column>
+    <FormWrapper $column>
       <FormProvider {...methods}>
         <VStack gap="4">
           <Heading size="medium" spacing>

@@ -12,7 +12,7 @@ const Spinner = ({ visible, label, margin = '3em', variant }: Props) => {
   if (!visible) return null
 
   return (
-    <SpinnerWrap margin={margin}>
+    <SpinnerWrap $margin={margin}>
       <div className="spinner-overlay">
         <div className="spinner-content">
           <Loader variant={variant} />
@@ -23,10 +23,10 @@ const Spinner = ({ visible, label, margin = '3em', variant }: Props) => {
   )
 }
 
-const SpinnerWrap = styled.div<{ margin: string }>`
+const SpinnerWrap = styled.div<{ $margin: string }>`
   display: flex;
   justify-content: center;
-  margin: ${(props) => props.margin};
+  margin: ${(props) => props.$margin};
   text-align: center;
 `
 

@@ -24,7 +24,7 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
   )
 
   return (
-    <SidebarPanel border>
+    <SidebarPanel $border>
       <Heading size="small" spacing>
         Dokumenter
       </Heading>

@@ -18,10 +18,10 @@ export const StatusIcon = (props: { status: StatusIconProps }) => {
     }
   }
 
-  return <SvgWrapper status={props.status}>{symbol}</SvgWrapper>
+  return <SvgWrapper>{symbol}</SvgWrapper>
 }
 
-const SvgWrapper = styled.div<{ status: StatusIconProps }>`
+const SvgWrapper = styled.div`
   display: inline-flex;
   justify-content: center;
   align-items: center;

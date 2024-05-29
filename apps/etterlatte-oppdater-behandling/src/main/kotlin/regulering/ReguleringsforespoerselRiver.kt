@@ -7,7 +7,6 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.KjoeringStatus
-import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.Kontekst
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
@@ -25,6 +24,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import kotlin.math.max
 import kotlin.math.min
 
 internal class ReguleringsforespoerselRiver(
@@ -66,11 +66,11 @@ internal class ReguleringsforespoerselRiver(
         var tatt = 0
 
         while (tatt < antall) {
-            val antallIDenneRunden = min(maksBatchstoerrelse, antall)
+            val antallIDenneRunden = max(0, min(maksBatchstoerrelse, antall - tatt))
             logger.info("Starter å ta $antallIDenneRunden av totalt $antall saker")
-            val saker =
-                behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker, sakType)
-            val sakerTilOmregning = Saker(saker.saker.filterNot { sakerViIkkeRegulererAutomatiskNaa.contains(it.id) })
+            val sakerTilOmregning =
+                behandlingService.hentAlleSaker(kjoering, antallIDenneRunden, spesifikkeSaker, sakerViIkkeRegulererAutomatiskNaa, sakType)
+            logger.info("Henta ${sakerTilOmregning.saker.size} saker")
 
             if (sakerTilOmregning.saker.isEmpty()) {
                 logger.debug("Ingen saker i denne runden. Returnerer")
@@ -98,7 +98,7 @@ internal class ReguleringsforespoerselRiver(
             }
             tatt += sakerTilOmregning.saker.size
             logger.info("Ferdig med $tatt av totalt $antall saker")
-            if (sakerTilOmregning.saker.isEmpty() || saker.saker.size < maksBatchstoerrelse) {
+            if (sakerTilOmregning.saker.size < maksBatchstoerrelse) {
                 break
             }
             val venteperiode = Duration.ofSeconds(5)
@@ -135,6 +135,10 @@ private val sakerViIkkeRegulererAutomatiskNaa =
         6323, // Revurdering med overstyrt beregning åpen behandling
         11606, // Revurdering med overstyrt beregning åpen behandling
         11848, // Revurdering med overstyrt beregning åpen behandling
+        6402, // EKSPORT: Feilmelding: Virkningstidspunkt kan ikke være etter opphør
+        8883, // Feil i grunnlag.
+        // https://logs.adeo.no/app/discover#/doc/96e648c0-980a-11e9-830a-e17bbd64b4db/.ds-navlogs-2024.05.28-000011?id=aiDgv48BZiQzzTM0q6EU
+        9455, // Ulik versjon av grunnlag brukt i trygdetid og behandling
         // Herifra og ut: overstyrte beregninger. Tas seinare i separat køyring.
         11510,
         11580,

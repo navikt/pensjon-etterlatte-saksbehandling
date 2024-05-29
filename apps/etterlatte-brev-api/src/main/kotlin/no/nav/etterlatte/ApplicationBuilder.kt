@@ -138,7 +138,7 @@ class ApplicationBuilder {
     private val dokarkivKlient =
         DokarkivKlient(httpClient("DOKARKIV_SCOPE", false), env.requireEnvValue("DOKARKIV_URL"))
 
-    private val dokarkivService = DokarkivServiceImpl(dokarkivKlient, db)
+    private val dokarkivService = DokarkivServiceImpl(dokarkivKlient)
 
     private val distribusjonKlient =
         DistribusjonKlient(httpClient("DOKDIST_SCOPE", false), env.requireEnvValue("DOKDIST_URL"))

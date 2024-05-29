@@ -10,7 +10,7 @@ export const AttestertVisning = (props: {
   const { utlandsBehandling } = props
 
   return (
-    <Wrapper innvilget={true}>
+    <Wrapper $innvilget={true}>
       <Overskrift>{genbehandlingTypeTilLesbartNavn(utlandsBehandling.type)}</Overskrift>
       <div className="flex">
         <div>

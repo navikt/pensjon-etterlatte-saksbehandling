@@ -90,7 +90,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
           </Heading>
         </Modal.Header>
         <Modal.Body>
-          <FormWrapper column={true}>
+          <FormWrapper $column={true}>
             <Box padding="4" borderWidth="1" borderRadius="small">
               <InputList>
                 {avdoedListe.fields?.map((field, index) => (

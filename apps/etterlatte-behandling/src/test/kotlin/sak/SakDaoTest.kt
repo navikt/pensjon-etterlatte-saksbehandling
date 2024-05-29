@@ -1,5 +1,6 @@
 package no.nav.etterlatte.sak
 
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainAnyOf
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.date.shouldBeBetween
@@ -211,10 +212,43 @@ internal class SakDaoTest(val dataSource: DataSource) {
             val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
-            val saker = sakRepo.hentSaker("", 2, listOf(sak2.id, sak3.id))
+            val saker = sakRepo.hentSaker("", 2, listOf(sak2.id, sak3.id), emptyList())
 
             saker.size shouldBe 2
             saker.forEach { it.id shouldNotBe sak1.id }
+        }
+
+        @Test
+        fun `Skal utelate ekskluderte saker`() {
+            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak4 = sakRepo.opprettSak("fnr4", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+            val saker = sakRepo.hentSaker("", 4, emptyList(), ekskluderteSaker = listOf(sak1.id, sak2.id))
+
+            saker.size shouldBe 2
+            saker shouldContain sak3
+            saker shouldContain sak4
+        }
+
+        @Test
+        fun `Skal kun returnere spesifikke saker som ikke er ekskludert`() {
+            val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak4 = sakRepo.opprettSak("fnr4", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+            val saker =
+                sakRepo.hentSaker(
+                    "",
+                    4,
+                    spesifikkeSaker = listOf(sak1.id, sak3.id),
+                    ekskluderteSaker = listOf(sak1.id, sak2.id),
+                )
+
+            saker.size shouldBe 1
+            saker shouldContain sak3
         }
 
         @Test
@@ -223,7 +257,7 @@ internal class SakDaoTest(val dataSource: DataSource) {
             sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
-            val saker = sakRepo.hentSaker("", 3, emptyList())
+            val saker = sakRepo.hentSaker("", 3, emptyList(), emptyList())
 
             saker.size shouldBe 3
         }
@@ -234,7 +268,7 @@ internal class SakDaoTest(val dataSource: DataSource) {
             val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
 
-            val saker = sakRepo.hentSaker("K1", 1, emptyList())
+            val saker = sakRepo.hentSaker("K1", 1, emptyList(), emptyList())
 
             saker.size shouldBe 0
         }
@@ -246,7 +280,7 @@ internal class SakDaoTest(val dataSource: DataSource) {
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FEILA, sakid))
 
-            val saker = sakRepo.hentSaker("K1", 3, emptyList())
+            val saker = sakRepo.hentSaker("K1", 3, emptyList(), emptyList())
 
             saker.size shouldBe 1
         }
@@ -258,7 +292,7 @@ internal class SakDaoTest(val dataSource: DataSource) {
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FERDIGSTILT, sakid))
 
-            val saker = sakRepo.hentSaker("K1", 3, emptyList())
+            val saker = sakRepo.hentSaker("K1", 3, emptyList(), emptyList())
 
             saker.size shouldBe 0
         }
@@ -272,7 +306,7 @@ internal class SakDaoTest(val dataSource: DataSource) {
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.STARTA, sakid))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FERDIGSTILT, sakid))
 
-            val saker = sakRepo.hentSaker("K1", 3, emptyList())
+            val saker = sakRepo.hentSaker("K1", 3, emptyList(), emptyList())
 
             saker.size shouldBe 0
         }
@@ -283,7 +317,7 @@ internal class SakDaoTest(val dataSource: DataSource) {
             val omregningDao = OmregningDao(ConnectionAutoclosingTest(dataSource))
             omregningDao.oppdaterKjoering(KjoeringRequest("K1", KjoeringStatus.FERDIGSTILT, sakid))
 
-            val saker = sakRepo.hentSaker("K1", 3, emptyList())
+            val saker = sakRepo.hentSaker("K1", 3, emptyList(), emptyList())
 
             saker.size shouldBe 0
         }
@@ -295,13 +329,13 @@ internal class SakDaoTest(val dataSource: DataSource) {
             sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             sakRepo.opprettSak("fnr4", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
 
-            sakRepo.hentSaker("", 100, emptyList(), SakType.BARNEPENSJON)
+            sakRepo.hentSaker("", 100, emptyList(), emptyList(), SakType.BARNEPENSJON)
                 .map { it.ident } shouldContainExactlyInAnyOrder listOf("fnr1", "fnr2", "fnr3")
 
-            sakRepo.hentSaker("", 100, emptyList(), SakType.OMSTILLINGSSTOENAD)
+            sakRepo.hentSaker("", 100, emptyList(), emptyList(), SakType.OMSTILLINGSSTOENAD)
                 .map { it.ident } shouldBe listOf("fnr4")
 
-            val saker = sakRepo.hentSaker("", 2, emptyList(), SakType.BARNEPENSJON)
+            val saker = sakRepo.hentSaker("", 2, emptyList(), emptyList(), SakType.BARNEPENSJON)
             saker.map { it.ident } shouldContainAnyOf listOf("fnr1", "fnr2", "fnr3")
             saker.size shouldBe 2
         }

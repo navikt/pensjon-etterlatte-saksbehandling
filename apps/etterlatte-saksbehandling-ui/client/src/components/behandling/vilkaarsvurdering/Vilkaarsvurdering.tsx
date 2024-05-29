@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useLocation, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { hentVilkaarsvurdering, opprettVilkaarsvurdering, slettVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { ManueltVilkaar } from './ManueltVilkaar'
 import { Resultat } from './Resultat'
@@ -28,7 +28,6 @@ import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
 
-  const location = useLocation()
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
   const vilkaarsvurdering = behandling.vilkaarsvurdering
@@ -41,11 +40,6 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
   const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [slettVilkaarsvurderingStatus, slettGammelVilkaarsvurdering] = useApiCall(slettVilkaarsvurdering)
   const [opprettNyVilkaarsvurderingStatus, opprettNyVilkaarsvurdering] = useApiCall(opprettVilkaarsvurdering)
-
-  useEffect(() => {
-    const hash = location.hash.slice(1)
-    document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' })
-  }, [location.hash])
 
   useEffect(() => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')

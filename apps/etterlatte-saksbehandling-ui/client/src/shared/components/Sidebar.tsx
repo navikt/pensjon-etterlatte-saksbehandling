@@ -8,25 +8,25 @@ export const Sidebar = ({ children }: { children: ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
-    <CollapsibleSidebar collapsed={collapsed}>
+    <CollapsibleSidebar $collapsed={collapsed}>
       <SidebarTools>
         <Button variant={collapsed ? 'primary' : 'tertiary'} onClick={() => setCollapsed(!collapsed)}>
           {collapsed ? <ChevronLeftDoubleIcon /> : <ChevronRightDoubleIcon />}
         </Button>
       </SidebarTools>
 
-      <SidebarContent collapsed={collapsed}>{children}</SidebarContent>
+      <SidebarContent $collapsed={collapsed}>{children}</SidebarContent>
     </CollapsibleSidebar>
   )
 }
 
-export const SidebarPanel = styled.div<{ border?: boolean }>`
+export const SidebarPanel = styled.div<{ $border?: boolean }>`
   margin: 20px 8px 0 8px;
   padding: 1em;
   max-width: 800px;
 
   ${(props) =>
-    props.border
+    props.$border
       ? css`
           border-radius: 3px;
           border: 1px solid #c7c0c0;

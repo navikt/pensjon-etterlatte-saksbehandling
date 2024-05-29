@@ -101,7 +101,8 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
     fun hentSaker(
         kjoering: String,
         antall: Int,
-        saker: List<Long>,
+        spesifikkeSaker: List<Long>,
+        ekskluderteSaker: List<Long>,
         sakType: SakType? = null,
     ): List<Sak> {
         return connectionAutoclosing.hentConnection { connection ->
@@ -122,15 +123,20 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                             and k.tidspunkt > (select max(o.tidspunkt) from omregningskjoering o where o.sak_id=k.sak_id and o.kjoering=k.kjoering and o.status != '${KjoeringStatus.FEILA.name}')
                         )
                         )
-                    ${if (saker.isEmpty()) "" else " and id = any(?)"}
+                    ${if (spesifikkeSaker.isEmpty()) "" else " and id = any(?)"}
+                    ${if (ekskluderteSaker.isEmpty()) "" else " and NOT(id = any(?))"}
                     ${if (sakType == null) "" else " and s.saktype = ?"}
                     ORDER by id ASC
                     LIMIT $antall"""
                             .trimMargin(),
                     )
                 var paramIndex = 1
-                if (saker.isNotEmpty()) {
-                    statement.setArray(paramIndex, createArrayOf("bigint", saker.toTypedArray()))
+                if (spesifikkeSaker.isNotEmpty()) {
+                    statement.setArray(paramIndex, createArrayOf("bigint", spesifikkeSaker.toTypedArray()))
+                    paramIndex += 1
+                }
+                if (ekskluderteSaker.isNotEmpty()) {
+                    statement.setArray(paramIndex, createArrayOf("bigint", ekskluderteSaker.toTypedArray()))
                     paramIndex += 1
                 }
                 if (sakType != null) {

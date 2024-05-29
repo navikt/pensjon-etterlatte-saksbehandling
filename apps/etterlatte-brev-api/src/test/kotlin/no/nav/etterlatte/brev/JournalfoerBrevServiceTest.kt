@@ -1,22 +1,31 @@
 package no.nav.etterlatte.brev
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
-import no.nav.etterlatte.brev.dokarkiv.JournalfoeringsMappingRequest
+import no.nav.etterlatte.brev.dokarkiv.JournalPostType
+import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
+import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.Enheter
@@ -26,8 +35,11 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
+import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -42,6 +54,12 @@ class JournalfoerBrevServiceTest {
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
 
     private val bruker = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null)
+
+    @AfterEach
+    fun after() {
+        confirmVerified(db, sakService, dokarkivService, vedtaksbrevService)
+        clearAllMocks()
+    }
 
     @Test
     fun `Journalfoering fungerer som forventet`() {
@@ -65,6 +83,8 @@ class JournalfoerBrevServiceTest {
 
         verify {
             db.hentBrev(brev.id)
+            db.hentBrevInnhold(brev.id)
+            db.hentPdf(brev.id)
             db.settBrevJournalfoert(brev.id, journalpostResponse)
         }
         coVerify {
@@ -87,11 +107,8 @@ class JournalfoerBrevServiceTest {
                 any(),
                 any(),
             )
-        } returns
-            mockk<Sak>().also {
-                every { it.sakType } returns SakType.BARNEPENSJON
-                every { it.enhet } returns Enheter.UTLAND.enhetNr
-            }
+        } returns Sak(brev.soekerFnr, SakType.BARNEPENSJON, Random.nextLong(), Enheter.UTLAND.enhetNr)
+
         val service = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
 
         runBlocking {
@@ -100,8 +117,11 @@ class JournalfoerBrevServiceTest {
             }
         }
 
-        verify {
+        verify(exactly = 1) {
             db.hentBrev(brev.id)
+        }
+        coVerify(exactly = 1) {
+            sakService.hentSak(brev.sakId, bruker)
         }
     }
 
@@ -151,71 +171,86 @@ class JournalfoerBrevServiceTest {
     @ParameterizedTest
     @EnumSource(SakType::class)
     fun `Journalfoeringsrequest for vedtaksbrev mappes korrekt`(type: SakType) {
+        val behandlingId = UUID.randomUUID()
         val forventetBrevMottakerFnr = SOEKER_FOEDSELSNUMMER.value
+
+        val sak = Sak(forventetBrevMottakerFnr, type, Random.nextLong(), Enheter.defaultEnhet.enhetNr)
+
         val forventetBrev =
             Brev(
                 id = 123,
-                sakId = 41,
-                behandlingId = null,
+                sakId = sak.id,
+                behandlingId = behandlingId,
                 tittel = null,
                 spraak = Spraak.NB,
                 prosessType = BrevProsessType.AUTOMATISK,
-                soekerFnr = "soeker_fnr",
+                soekerFnr = forventetBrevMottakerFnr,
                 status = Status.FERDIGSTILT,
                 statusEndret = Tidspunkt.now(),
                 opprettet = Tidspunkt.now(),
-                mottaker =
-                    Mottaker(
-                        "Stor Snerk",
-                        MottakerFoedselsnummer(forventetBrevMottakerFnr),
-                        null,
-                        Adresse(
-                            adresseType = "NORSKPOSTADRESSE",
-                            "Testgaten 13",
-                            "1234",
-                            "OSLO",
-                            land = "Norge",
-                            landkode = "NOR",
-                        ),
-                    ),
+                mottaker = opprettMottaker(forventetBrevMottakerFnr),
                 brevtype = Brevtype.INFORMASJON,
             )
 
+        coEvery { sakService.hentSak(forventetBrev.sakId, any()) } returns sak
         coEvery { vedtaksbrevService.hentVedtaksbrev(any()) } returns forventetBrev
         every { db.hentBrev(any()) } returns forventetBrev
+
+        val innhold = BrevInnhold("tittel", Spraak.NB, payload = Slate())
+        every { db.hentBrevInnhold(any()) } returns innhold
 
         val vedtak =
             VedtakTilJournalfoering(
                 1,
                 VedtakSak("ident", type, forventetBrev.sakId),
-                UUID.randomUUID(),
-                "ansvarligEnhet",
+                behandlingId,
+                sak.enhet,
                 "EY",
             )
 
-        val service = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
-        coEvery { dokarkivService.journalfoer(any()) } returns
+        val journalpostResponse =
             OpprettJournalpostResponse(
                 journalpostId = Random.nextLong().toString(),
                 journalpostferdigstilt = true,
             )
+        coEvery { dokarkivService.journalfoer(any()) } returns journalpostResponse
 
+        val service = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
         runBlocking { service.journalfoerVedtaksbrev(vedtak) }
 
-        val requestSlot = slot<JournalfoeringsMappingRequest>()
-        coVerify { dokarkivService.journalfoer(capture(requestSlot)) }
-        verify {
-            db.hentBrev(forventetBrev.id)
+        verify(exactly = 1) {
+            db.hentBrevInnhold(forventetBrev.id)
+            db.hentPdf(forventetBrev.id)
+            db.settBrevJournalfoert(forventetBrev.id, journalpostResponse)
+        }
+
+        val requestSlot = slot<OpprettJournalpostRequest>()
+        coVerify(exactly = 1) {
+            vedtaksbrevService.hentVedtaksbrev(forventetBrev.behandlingId!!)
+            sakService.hentSak(forventetBrev.sakId, Systembruker.brev)
+            dokarkivService.journalfoer(capture(requestSlot))
         }
 
         with(requestSlot.captured) {
-            brevId shouldBe forventetBrev.id
-            brev shouldBe forventetBrev
-            brukerident shouldBe vedtak.sak.ident
-            eksternReferansePrefiks shouldBe vedtak.behandlingId
-            sakId shouldBe forventetBrev.sakId
-            sakType shouldBe type
-            journalfoerendeEnhet shouldBe vedtak.ansvarligEnhet
+            this.tittel shouldBe innhold.tittel
+            this.journalposttype shouldBe JournalPostType.UTGAAENDE
+            this.avsenderMottaker.id shouldBe forventetBrev.soekerFnr
+            this.bruker.id shouldBe forventetBrev.soekerFnr
+            this.bruker.idType shouldBe BrukerIdType.FNR
+            this.eksternReferanseId shouldContain forventetBrev.sakId.toString()
+            this.eksternReferanseId shouldContain forventetBrev.id.toString()
+            this.sak.sakstype shouldBe Sakstype.FAGSAK
+            this.sak.tema shouldBe sak.sakType.tema
+            this.sak.fagsakId shouldBe sak.id.toString()
+            this.sak.fagsaksystem shouldBe Fagsaksystem.EY.navn
+            this.tema shouldBe sak.sakType.tema
+            this.kanal shouldBe "S"
+            this.journalfoerendeEnhet shouldBe sak.enhet
+
+            val dokument = this.dokumenter.single()
+            dokument.tittel shouldBe innhold.tittel
+            dokument.brevkode shouldBe JournalpostKoder.BREV_KODE
+            dokument.dokumentvarianter.size shouldBe 1
         }
     }
 
@@ -231,58 +266,65 @@ class JournalfoerBrevServiceTest {
                 tittel = null,
                 spraak = Spraak.NB,
                 prosessType = BrevProsessType.AUTOMATISK,
-                soekerFnr = "soeker_fnr1",
+                soekerFnr = forventetBrevMottakerFnr,
                 status = Status.FERDIGSTILT,
                 statusEndret = Tidspunkt.now(),
                 opprettet = Tidspunkt.now(),
-                mottaker =
-                    Mottaker(
-                        "Stor Snerk",
-                        MottakerFoedselsnummer(forventetBrevMottakerFnr),
-                        null,
-                        Adresse(
-                            adresseType = "NORSKPOSTADRESSE",
-                            "Testgaten 13",
-                            "1234",
-                            "OSLO",
-                            land = "Norge",
-                            landkode = "NOR",
-                        ),
-                    ),
+                mottaker = opprettMottaker(forventetBrevMottakerFnr),
                 brevtype = Brevtype.MANUELT,
             )
 
         every { db.hentBrev(any()) } returns forventetBrev
 
-        coEvery { dokarkivService.journalfoer(any()) } returns
+        val innhold = BrevInnhold("tittel", Spraak.NB, payload = Slate())
+        every { db.hentBrevInnhold(any()) } returns innhold
+
+        val journalpostResponse =
             OpprettJournalpostResponse(
-                "444",
+                journalpostId = Random.nextLong().toString(),
                 journalpostferdigstilt = true,
             )
+        coEvery { dokarkivService.journalfoer(any()) } returns journalpostResponse
 
-        coEvery { sakService.hentSak(any(), any()) } returns
-            Sak(
-                ident = "I1",
-                sakType = type,
-                id = forventetBrev.sakId,
-                enhet = "enhet1",
-            )
+        val sak = Sak(forventetBrev.soekerFnr, type, forventetBrev.sakId, Enheter.PORSGRUNN.enhetNr)
+        coEvery { sakService.hentSak(any(), any()) } returns sak
 
         val service = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
         runBlocking { service.journalfoer(forventetBrev.id, bruker) }
 
-        val requestSlot = slot<JournalfoeringsMappingRequest>()
-        coVerify { dokarkivService.journalfoer(capture(requestSlot)) }
-        verify { db.hentBrev(forventetBrev.id) }
+        verify(exactly = 1) {
+            db.hentBrevInnhold(forventetBrev.id)
+            db.hentPdf(forventetBrev.id)
+            db.hentBrev(forventetBrev.id)
+            db.settBrevJournalfoert(forventetBrev.id, journalpostResponse)
+        }
+
+        val requestSlot = slot<OpprettJournalpostRequest>()
+        coVerify {
+            sakService.hentSak(forventetBrev.sakId, bruker)
+            dokarkivService.journalfoer(capture(requestSlot))
+        }
 
         with(requestSlot.captured) {
-            brevId shouldBe forventetBrev.id
-            brev shouldBe forventetBrev
-            brukerident shouldBe forventetBrev.soekerFnr
-            eksternReferansePrefiks shouldBe 41L
-            sakId shouldBe forventetBrev.sakId
-            sakType shouldBe type
-            journalfoerendeEnhet shouldBe "enhet1"
+            this.tittel shouldBe innhold.tittel
+            this.journalposttype shouldBe JournalPostType.UTGAAENDE
+            this.avsenderMottaker.id shouldBe forventetBrev.soekerFnr
+            this.bruker.id shouldBe forventetBrev.soekerFnr
+            this.bruker.idType shouldBe BrukerIdType.FNR
+            this.eksternReferanseId shouldContain forventetBrev.sakId.toString()
+            this.eksternReferanseId shouldContain forventetBrev.id.toString()
+            this.sak.sakstype shouldBe Sakstype.FAGSAK
+            this.sak.tema shouldBe sak.sakType.tema
+            this.sak.fagsakId shouldBe sak.id.toString()
+            this.sak.fagsaksystem shouldBe Fagsaksystem.EY.navn
+            this.tema shouldBe sak.sakType.tema
+            this.kanal shouldBe "S"
+            this.journalfoerendeEnhet shouldBe sak.enhet
+
+            val dokument = this.dokumenter.single()
+            dokument.tittel shouldBe innhold.tittel
+            dokument.brevkode shouldBe JournalpostKoder.BREV_KODE
+            dokument.dokumentvarianter.size shouldBe 1
         }
     }
 
@@ -300,14 +342,14 @@ class JournalfoerBrevServiceTest {
         status = status,
         statusEndret = Tidspunkt.now(),
         opprettet = Tidspunkt.now(),
-        mottaker = opprettMottaker(),
+        mottaker = opprettMottaker(SOEKER_FOEDSELSNUMMER.value),
         brevtype = Brevtype.INFORMASJON,
     )
 
-    private fun opprettMottaker() =
+    private fun opprettMottaker(fnr: String) =
         Mottaker(
             "Stor Snerk",
-            foedselsnummer = MottakerFoedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+            foedselsnummer = MottakerFoedselsnummer(fnr),
             orgnummer = null,
             adresse =
                 Adresse(

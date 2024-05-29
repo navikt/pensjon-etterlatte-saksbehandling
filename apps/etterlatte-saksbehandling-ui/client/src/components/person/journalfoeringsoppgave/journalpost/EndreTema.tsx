@@ -35,7 +35,7 @@ export const EndreTema = ({
     <Spinner label="Henter tilgjengelige temakoder ..." visible />,
     () => <ApiErrorAlert>Feil ved henting av temakoder</ApiErrorAlert>,
     (koder) => (
-      <FormWrapper column={true}>
+      <FormWrapper $column={true}>
         <UNSAFE_Combobox
           label="Tema"
           options={koder.sort((a, b) => a.term.localeCompare(b.term)).map((kode) => kode.term)}

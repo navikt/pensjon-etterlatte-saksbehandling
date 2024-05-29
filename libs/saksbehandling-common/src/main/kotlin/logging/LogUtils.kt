@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import java.util.UUID
 
-const val CORRELATION_ID: String = "correlation_id"
+const val CORRELATION_ID: String = "x_correlation_id"
 
 fun <T> withLogContext(
     correlationId: String? = null,

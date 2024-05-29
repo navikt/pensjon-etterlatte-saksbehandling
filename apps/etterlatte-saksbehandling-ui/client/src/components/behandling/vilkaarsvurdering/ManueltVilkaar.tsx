@@ -1,4 +1,3 @@
-import { VilkaarInfobokser, VilkaarlisteTitle, VilkaarVurderingColumn, VilkaarVurderingContainer } from './styled'
 import { IVilkaarsvurdering, Vilkaar, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
 import { Vurdering } from './Vurdering'
 import { StatusIcon, StatusIconProps } from '~shared/icons/statusIcon'
@@ -47,37 +46,29 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
     <>
       <Box paddingInline="16 4" paddingBlock="4" borderWidth="1 0 0 0" borderColor="border-subtle">
         <HStack justify="space-between">
-          <VilkaarInfobokser>
-            <VStack gap="1">
-              <HStack align="center">
-                <StatusIcon status={status()} aria-hidden />
-                <Heading size="small" level="3">
-                  {vilkaar.hovedvilkaar.tittel}
-                </Heading>
-              </HStack>
-              {vilkaar.hovedvilkaar.lovreferanse.lenke ? (
-                <Link href={vilkaar.hovedvilkaar.lovreferanse.lenke} target="_blank" rel="noopener noreferrer">
-                  {`${paragrafType(vilkaar)} ${formatertLovreferanse(vilkaar.hovedvilkaar.lovreferanse)}`}
-                  <ExternalLinkIcon title={vilkaar.hovedvilkaar.tittel} />
-                </Link>
-              ) : (
-                <>{`${paragrafType(vilkaar)} ${vilkaar.hovedvilkaar.lovreferanse.paragraf}`}</>
-              )}
-              <Informasjon>{vilkaar.hovedvilkaar.beskrivelse}</Informasjon>
-            </VStack>
-          </VilkaarInfobokser>
-          <VilkaarVurderingColumn>
-            <VilkaarVurderingContainer>
-              <VilkaarlisteTitle>
-                <Vurdering
-                  vilkaar={vilkaar}
-                  oppdaterVilkaar={props.oppdaterVilkaar}
-                  behandlingId={props.behandlingId}
-                  redigerbar={props.redigerbar}
-                />
-              </VilkaarlisteTitle>
-            </VilkaarVurderingContainer>
-          </VilkaarVurderingColumn>
+          <VStack gap="1">
+            <HStack align="center">
+              <StatusIcon status={status()} aria-hidden />
+              <Heading size="small" level="3">
+                {vilkaar.hovedvilkaar.tittel}
+              </Heading>
+            </HStack>
+            {vilkaar.hovedvilkaar.lovreferanse.lenke ? (
+              <Link href={vilkaar.hovedvilkaar.lovreferanse.lenke} target="_blank" rel="noopener noreferrer">
+                {`${paragrafType(vilkaar)} ${formatertLovreferanse(vilkaar.hovedvilkaar.lovreferanse)}`}
+                <ExternalLinkIcon title={vilkaar.hovedvilkaar.tittel} />
+              </Link>
+            ) : (
+              <>{`${paragrafType(vilkaar)} ${vilkaar.hovedvilkaar.lovreferanse.paragraf}`}</>
+            )}
+            <Informasjon>{vilkaar.hovedvilkaar.beskrivelse}</Informasjon>
+          </VStack>
+          <Vurdering
+            vilkaar={vilkaar}
+            oppdaterVilkaar={props.oppdaterVilkaar}
+            behandlingId={props.behandlingId}
+            redigerbar={props.redigerbar}
+          />
         </HStack>
       </Box>
     </>

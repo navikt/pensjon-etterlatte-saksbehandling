@@ -41,7 +41,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
   }, [])
 
   const erFerdigUtfylt = () => {
-    if (manglerAktivitetspliktVurdering === undefined) {
+    if (visTidslinje && manglerAktivitetspliktVurdering === undefined) {
       setManglerAktivitetspliktVurdering(true)
       return
     }

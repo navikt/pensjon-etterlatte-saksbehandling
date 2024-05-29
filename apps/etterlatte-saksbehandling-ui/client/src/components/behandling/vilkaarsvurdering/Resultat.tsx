@@ -159,7 +159,7 @@ export const Resultat = (props: Props) => {
                   icon={<PencilWritingIcon />}
                   loading={isPending(totalVurderingStatus)}
                 >
-                  Rediger vurdering
+                  Rediger totalvurdering
                 </Button>
               )}
             </ContentWrapper>

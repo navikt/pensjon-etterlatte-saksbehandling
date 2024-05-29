@@ -1,6 +1,6 @@
 import { GyldigFramsattType, IDetaljertBehandling, IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
-import { Informasjon, VurderingsContainerWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Informasjon, Vurdering } from '~components/behandling/soeknadsoversikt/styled'
 import { Innsender } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Innsender'
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
 import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/Verger'
@@ -81,13 +81,13 @@ export const GyldigFramsattBarnepensjon = ({
               <Verger behandlingId={behandling.id} sakId={behandling.sakId} />
             </HStack>
           </div>
-          <VurderingsContainerWrapper>
+          <Vurdering>
             <GyldigFramsattVurdering
               behandlingId={behandling.id}
               gyldigFramsatt={behandling.gyldighetsprøving}
               redigerbar={redigerbar}
             />
-          </VurderingsContainerWrapper>
+          </Vurdering>
         </LovtekstMedLenke>
       )}
     </>

@@ -1,6 +1,6 @@
 import { IDetaljertBehandling, IUtlandstilknytning } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '../LovtekstMedLenke'
-import { Informasjon, VurderingsContainerWrapper } from '../styled'
+import { Informasjon, Vurdering } from '../styled'
 import { useState } from 'react'
 import { LeggTilVurderingButton } from '../LeggTilVurderingButton'
 import { UtlandstilknytningVurdering } from './UtlandstilknytningVurdering'
@@ -29,7 +29,7 @@ export const Utlandstilknytning = ({
         bosatt utland-sak, om avdøde har bodd/arbeidet i EØS/avtale-land og gjenlevende bor i Norge er det en
         utlandstilsnitt-sak. I andre tilfeller er det en nasjonal sak.
       </Informasjon>
-      <VurderingsContainerWrapper>
+      <Vurdering>
         {vurdert && (
           <UtlandstilknytningVurdering
             utlandstilknytning={behandling.utlandstilknytning}
@@ -41,7 +41,7 @@ export const Utlandstilknytning = ({
         {!vurdert && redigerbar && (
           <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
         )}
-      </VurderingsContainerWrapper>
+      </Vurdering>
     </LovtekstMedLenke>
   )
 }

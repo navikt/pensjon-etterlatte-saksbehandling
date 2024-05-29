@@ -1,6 +1,6 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
-import { Informasjon, VurderingsContainerWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Informasjon, Vurdering } from '~components/behandling/soeknadsoversikt/styled'
 import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/omstillingsstoenad/GyldigFramsattVurdering'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
@@ -55,13 +55,13 @@ export const GyldigFramsattOmstillingsstoenad = ({
           <Verger behandlingId={behandling.id} sakId={behandling.sakId} />
         </HStack>
       </div>
-      <VurderingsContainerWrapper>
+      <Vurdering>
         <GyldigFramsattVurdering
           behandlingId={behandling.id}
           gyldigFramsatt={behandling.gyldighetsprøving}
           redigerbar={redigerbar}
         />
-      </VurderingsContainerWrapper>
+      </Vurdering>
     </LovtekstMedLenke>
   )
 }

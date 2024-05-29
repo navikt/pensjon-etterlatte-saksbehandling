@@ -38,5 +38,7 @@ Veldig mange steder bruke vi f.eks `margin-top: 1rem` for å lage litt spacing m
 
 `<PersonDetailWrapper />` --> `<Box paddingBlock="2 0" />`
 
+`<VurderingsContainerWrapper />` og `<VurderingsContainer />` --> `<Vurdering />`
+
 ## ~components/behandling/vilkaarsvurdering/styled.ts
 `<Innhold />` --> `<Box paddingInline="8" />`

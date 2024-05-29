@@ -16,15 +16,11 @@ export const InfoElement = styled.div<{ $wide?: boolean }>`
   width: ${(props) => (props.$wide ? '100%' : '15em')};
 `
 
-export const VurderingsContainer = styled.div`
-  display: flex;
-  border-left: 4px solid #e5e5e5;
-  min-width: 300px;
-`
-
-export const VurderingsContainerWrapper = styled(VurderingsContainer)`
-  padding-left: 20px;
-  width: 10em;
+export const Vurdering = styled.div`
+  padding: 0 0 0 var(--a-spacing-3);
+  min-width: 18.75rem;
+  width: 10rem;
+  border-left: 3px solid var(--a-border-subtle);
 `
 
 export const Informasjon = styled.div`

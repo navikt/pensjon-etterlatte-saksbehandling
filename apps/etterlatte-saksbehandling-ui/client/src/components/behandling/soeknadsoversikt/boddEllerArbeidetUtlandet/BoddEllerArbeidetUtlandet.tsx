@@ -1,6 +1,6 @@
 import { IBoddEllerArbeidetUtlandet, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '../LovtekstMedLenke'
-import { Informasjon, VurderingsContainerWrapper } from '../styled'
+import { Informasjon, Vurdering } from '../styled'
 import { useState } from 'react'
 import { LeggTilVurderingButton } from '../LeggTilVurderingButton'
 import { BoddEllerArbeidetUtlandetVurdering } from './BoddEllerArbeidetUtlandetVurdering'
@@ -44,7 +44,7 @@ export const BoddEllerArbeidetUtlandet = ({
           </BodyShort>
         </VStack>
       </Informasjon>
-      <VurderingsContainerWrapper>
+      <Vurdering>
         {vurdert && (
           <BoddEllerArbeidetUtlandetVurdering
             redigerbar={redigerbar}
@@ -55,7 +55,7 @@ export const BoddEllerArbeidetUtlandet = ({
         {!vurdert && redigerbar && (
           <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
         )}
-      </VurderingsContainerWrapper>
+      </Vurdering>
     </LovtekstMedLenke>
   )
 }

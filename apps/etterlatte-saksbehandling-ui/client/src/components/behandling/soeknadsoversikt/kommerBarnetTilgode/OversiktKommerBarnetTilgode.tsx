@@ -1,5 +1,5 @@
 import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
-import { Informasjon, VurderingsContainerWrapper } from '../styled'
+import { Informasjon, Vurdering } from '../styled'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { IPdlPerson } from '~shared/types/Person'
 import { formaterGrunnlagKilde, svarTilStatusIcon } from '../utils'
@@ -71,7 +71,7 @@ export const OversiktKommerBarnetTilgode = ({
         </HStack>
       </div>
 
-      <VurderingsContainerWrapper>
+      <Vurdering>
         {vurdert && (
           <KommerBarnetTilGodeVurdering
             kommerBarnetTilgode={kommerBarnetTilgode}
@@ -83,7 +83,7 @@ export const OversiktKommerBarnetTilgode = ({
         {!vurdert && redigerbar && (
           <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
         )}
-      </VurderingsContainerWrapper>
+      </Vurdering>
     </LovtekstMedLenke>
   )
 }

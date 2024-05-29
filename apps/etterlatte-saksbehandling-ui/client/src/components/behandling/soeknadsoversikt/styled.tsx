@@ -26,4 +26,5 @@ export const Vurdering = styled.div`
 export const Informasjon = styled.div`
   margin: var(--a-spacing-3) 0;
   max-width: 41rem;
+  white-space: pre-wrap;
 `

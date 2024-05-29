@@ -1,5 +1,4 @@
 import {
-  VilkaarBeskrivelse,
   VilkaarColumn,
   VilkaarInfobokser,
   VilkaarlisteTitle,
@@ -12,6 +11,7 @@ import { StatusIcon, StatusIconProps } from '~shared/icons/statusIcon'
 import { Box, Heading, HStack, Link, VStack } from '@navikt/ds-react'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { formatertLovreferanse } from '~components/behandling/vilkaarsvurdering/utils'
+import { Informasjon } from '~components/behandling/soeknadsoversikt/styled'
 
 export interface VilkaarProps {
   vilkaar: Vilkaar
@@ -70,7 +70,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
                 ) : (
                   <>{`${paragrafType(vilkaar)} ${vilkaar.hovedvilkaar.lovreferanse.paragraf}`}</>
                 )}
-                <VilkaarBeskrivelse>{vilkaar.hovedvilkaar.beskrivelse}</VilkaarBeskrivelse>
+                <Informasjon>{vilkaar.hovedvilkaar.beskrivelse}</Informasjon>
               </VStack>
             </VilkaarColumn>
           </VilkaarInfobokser>

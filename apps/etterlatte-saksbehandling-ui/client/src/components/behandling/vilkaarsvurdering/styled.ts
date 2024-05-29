@@ -1,12 +1,5 @@
 import styled from 'styled-components'
 
-export const VilkaarBeskrivelse = styled.div`
-  margin-top: 15px;
-  max-width: 600px;
-  display: flex;
-  white-space: pre-wrap;
-`
-
 export const VilkaarInfobokser = styled.div`
   display: flex;
   flex-direction: row;

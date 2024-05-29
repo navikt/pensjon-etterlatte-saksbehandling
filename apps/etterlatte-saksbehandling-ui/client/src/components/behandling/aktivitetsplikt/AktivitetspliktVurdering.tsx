@@ -14,7 +14,7 @@ import {
   tekstAktivitetspliktVurderingType,
 } from '~shared/types/Aktivitetsplikt'
 import {
-  hentAktivitspliktVurdering,
+  hentAktivitspliktVurderingForBehandling,
   opprettAktivitspliktAktivitetsgradForBehandling,
   opprettAktivitspliktUnntakForBehandling,
 } from '~shared/api/aktivitetsplikt'
@@ -54,7 +54,7 @@ export const AktivitetspliktVurdering = ({
 
   const [opprettetAktivitetsgrad, opprettAktivitetsgrad] = useApiCall(opprettAktivitspliktAktivitetsgradForBehandling)
   const [opprettetUnntak, opprettUnntak] = useApiCall(opprettAktivitspliktUnntakForBehandling)
-  const [hentet, hent] = useApiCall(hentAktivitspliktVurdering)
+  const [hentet, hent] = useApiCall(hentAktivitspliktVurderingForBehandling)
 
   const {
     register,
@@ -109,7 +109,7 @@ export const AktivitetspliktVurdering = ({
   }
 
   useEffect(() => {
-    hent({ sakId: behandling.sakId, oppgaveId: behandling.id }, (result) => {
+    hent({ sakId: behandling.sakId, behandlingId: behandling.id }, (result) => {
       setVurdering(result)
       if (result) resetManglerAktivitetspliktVurdering()
     })

@@ -143,4 +143,5 @@ private val sakerViIkkeRegulererAutomatiskNaa =
         12789, // Ulik versjon av grunnlag brukt i trygdetid og behandling
         16095, // Opprettet regulering, men stuck i OPPRETTET. Se slack for detaljer
         16642, // Feil i grunnlag
+        2912, // Feiler med Ingen perioder for grunnlaget ble gitt for periodisering
     )

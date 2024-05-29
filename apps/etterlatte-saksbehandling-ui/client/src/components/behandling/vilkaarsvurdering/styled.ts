@@ -1,11 +1,5 @@
 import styled from 'styled-components'
 
-export const Title = styled.div`
-  display: flex;
-  font-size: 1.1em;
-  font-weight: bold;
-  margin-bottom: 5px;
-`
 export const VilkaarBeskrivelse = styled.div`
   margin-top: 15px;
   max-width: 600px;

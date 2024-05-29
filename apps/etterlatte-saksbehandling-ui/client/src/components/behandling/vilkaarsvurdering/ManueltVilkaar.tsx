@@ -1,5 +1,4 @@
 import {
-  Title,
   VilkaarBeskrivelse,
   VilkaarColumn,
   VilkaarInfobokser,
@@ -10,7 +9,7 @@ import {
 import { IVilkaarsvurdering, Vilkaar, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
 import { Vurdering } from './Vurdering'
 import { StatusIcon, StatusIconProps } from '~shared/icons/statusIcon'
-import { Box, HStack, Link } from '@navikt/ds-react'
+import { Box, Heading, HStack, Link, VStack } from '@navikt/ds-react'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { formatertLovreferanse } from '~components/behandling/vilkaarsvurdering/utils'
 
@@ -56,19 +55,23 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
         <HStack justify="space-between">
           <VilkaarInfobokser>
             <VilkaarColumn>
-              <Title>
-                <StatusIcon status={status()} />
-                {vilkaar.hovedvilkaar.tittel}
-              </Title>
-              {vilkaar.hovedvilkaar.lovreferanse.lenke ? (
-                <Link href={vilkaar.hovedvilkaar.lovreferanse.lenke} target="_blank" rel="noopener noreferrer">
-                  {`${paragrafType(vilkaar)} ${formatertLovreferanse(vilkaar.hovedvilkaar.lovreferanse)}`}
-                  <ExternalLinkIcon title={vilkaar.hovedvilkaar.tittel} />
-                </Link>
-              ) : (
-                <>{`${paragrafType(vilkaar)} ${vilkaar.hovedvilkaar.lovreferanse.paragraf}`}</>
-              )}
-              <VilkaarBeskrivelse>{vilkaar.hovedvilkaar.beskrivelse}</VilkaarBeskrivelse>
+              <VStack gap="1">
+                <HStack align="center">
+                  <StatusIcon status={status()} aria-hidden />
+                  <Heading size="small" level="3">
+                    {vilkaar.hovedvilkaar.tittel}
+                  </Heading>
+                </HStack>
+                {vilkaar.hovedvilkaar.lovreferanse.lenke ? (
+                  <Link href={vilkaar.hovedvilkaar.lovreferanse.lenke} target="_blank" rel="noopener noreferrer">
+                    {`${paragrafType(vilkaar)} ${formatertLovreferanse(vilkaar.hovedvilkaar.lovreferanse)}`}
+                    <ExternalLinkIcon title={vilkaar.hovedvilkaar.tittel} />
+                  </Link>
+                ) : (
+                  <>{`${paragrafType(vilkaar)} ${vilkaar.hovedvilkaar.lovreferanse.paragraf}`}</>
+                )}
+                <VilkaarBeskrivelse>{vilkaar.hovedvilkaar.beskrivelse}</VilkaarBeskrivelse>
+              </VStack>
             </VilkaarColumn>
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>

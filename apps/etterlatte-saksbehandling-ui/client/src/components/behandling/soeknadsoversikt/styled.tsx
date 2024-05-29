@@ -1,4 +1,3 @@
-import { Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 
 export const Infoboks = styled.div`
@@ -22,14 +21,6 @@ export const VurderingsContainer = styled.div`
   border-left: 4px solid #e5e5e5;
   min-width: 300px;
 `
-
-export const VurderingsTitle = ({ title }: { title: string }) => {
-  return (
-    <Heading level="3" size="small">
-      {title}
-    </Heading>
-  )
-}
 
 export const VurderingsContainerWrapper = styled(VurderingsContainer)`
   padding-left: 20px;

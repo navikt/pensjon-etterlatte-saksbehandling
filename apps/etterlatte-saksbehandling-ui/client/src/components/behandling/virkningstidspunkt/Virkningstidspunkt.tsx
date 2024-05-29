@@ -4,7 +4,7 @@ import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/re
 import { formaterStringDato } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { VurderingsContainerWrapper, VurderingsTitle } from '../soeknadsoversikt/styled'
+import { VurderingsContainerWrapper } from '../soeknadsoversikt/styled'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears, subYears } from 'date-fns'
@@ -178,7 +178,9 @@ const Virkningstidspunkt = (props: {
               defaultRediger={behandling.virkningstidspunkt === null}
             >
               <VStack gap="4">
-                <VurderingsTitle title="Hva er virkningstidspunkt for behandlingen?" />
+                <Heading level="3" size="small">
+                  Hva er virkningstidspunkt for behandlingen?
+                </Heading>
 
                 {erBosattUtland && (
                   <DatoVelger

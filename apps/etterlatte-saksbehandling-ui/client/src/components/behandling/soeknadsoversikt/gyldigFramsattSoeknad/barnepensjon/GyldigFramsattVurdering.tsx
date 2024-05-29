@@ -8,9 +8,8 @@ import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/LeggTilVurderingButton'
 import { useState } from 'react'
-import { VurderingsTitle } from '~components/behandling/soeknadsoversikt/styled'
 import styled from 'styled-components'
-import { Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { Heading, Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
@@ -108,7 +107,9 @@ export const GyldigFramsattVurdering = ({
           }
         >
           <div>
-            <VurderingsTitle title="Er søknaden gyldig fremsatt?" />
+            <Heading level="3" size="small">
+              Er søknaden gyldig fremsatt?
+            </Heading>
             <RadioGroupWrapper>
               <RadioGroup
                 legend=""

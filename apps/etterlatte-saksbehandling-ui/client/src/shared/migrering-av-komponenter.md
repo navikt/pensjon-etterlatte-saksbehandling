@@ -34,5 +34,7 @@ Veldig mange steder bruke vi f.eks `margin-top: 1rem` for å lage litt spacing m
 
 `<Historikk />` --> `<Box paddingBlock="2 0"/>`
 
+`<HistorikkElement />` --> `<VStack />`
+
 ## ~components/behandling/vilkaarsvurdering/styled.ts
 `<Innhold />` --> `<Box paddingInline="8" />`

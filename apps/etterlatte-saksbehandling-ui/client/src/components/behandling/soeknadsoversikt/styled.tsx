@@ -36,17 +36,6 @@ export const PersonDetailWrapper = styled.div<{ $adresse: boolean }>`
   min-width: ${(props) => (props.$adresse ? '300px' : '100px')};
 `
 
-export const HistorikkElement = styled.div`
-  font-size: 16px;
-  display: flex;
-  white-space: nowrap;
-
-  .date {
-    margin-right: 1em;
-    width: 10em;
-  }
-`
-
 export const VurderingsContainerWrapper = styled(VurderingsContainer)`
   padding-left: 20px;
   width: 10em;

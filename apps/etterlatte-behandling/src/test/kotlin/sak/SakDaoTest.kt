@@ -1,5 +1,6 @@
 package no.nav.etterlatte.sak
 
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainAnyOf
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.date.shouldBeBetween
@@ -222,11 +223,13 @@ internal class SakDaoTest(val dataSource: DataSource) {
             val sak1 = sakRepo.opprettSak("fnr1", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             val sak2 = sakRepo.opprettSak("fnr2", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             val sak3 = sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+            val sak4 = sakRepo.opprettSak("fnr4", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
-            val saker = sakRepo.hentSaker("", 3, emptyList(), ekskluderteSaker = listOf(sak1.id, sak2.id))
+            val saker = sakRepo.hentSaker("", 4, emptyList(), ekskluderteSaker = listOf(sak1.id, sak2.id))
 
-            saker.size shouldBe 1
-            saker.first() shouldBe sak3
+            saker.size shouldBe 2
+            saker shouldContain sak3
+            saker shouldContain sak4
         }
 
         @Test

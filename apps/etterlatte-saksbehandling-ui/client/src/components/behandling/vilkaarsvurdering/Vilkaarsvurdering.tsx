@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { hentVilkaarsvurdering, opprettVilkaarsvurdering, slettVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { ManueltVilkaar } from './ManueltVilkaar'
@@ -40,6 +40,8 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
   const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [slettVilkaarsvurderingStatus, slettGammelVilkaarsvurdering] = useApiCall(slettVilkaarsvurdering)
   const [opprettNyVilkaarsvurderingStatus, opprettNyVilkaarsvurdering] = useApiCall(opprettVilkaarsvurdering)
+
+  const [redigerTotalvurdering, setRedigerTotalvurdering] = useState<boolean>(false)
 
   useEffect(() => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
@@ -129,12 +131,13 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
               vilkaar={value}
               oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
               behandlingId={behandlingId}
-              redigerbar={redigerbar && !vilkaarsvurdering.resultat}
+              redigerbar={redigerbar && !vilkaarsvurdering.resultat && !redigerTotalvurdering}
             />
           ))}
-          {vilkaarsvurdering.vilkaar.length === 0 && <p>Du har ingen vilkår</p>}
 
           <Resultat
+            setRedigerTotalvurdering={setRedigerTotalvurdering}
+            redigerTotalvurdering={redigerTotalvurdering}
             virkningstidspunktDato={behandling.virkningstidspunkt?.dato}
             sakstype={behandling.sakType}
             vilkaarsvurdering={vilkaarsvurdering}

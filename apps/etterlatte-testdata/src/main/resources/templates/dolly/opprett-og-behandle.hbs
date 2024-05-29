@@ -153,6 +153,7 @@
     }
 
     const sendSoeknad = async (type) => {
+        const soeknadInnsendtAlert = document.querySelector('#soeknadInnsendtAlert')
         soeknadInnsendtAlert.style.display = "none"
 
         const antall = document.getElementById("antall").value

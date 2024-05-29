@@ -34,7 +34,7 @@ export default function OppsummeringOppgavebehandling() {
   }
 
   return (
-    <FormWrapper column>
+    <FormWrapper $column>
       <Heading size="medium" spacing>
         Opprett behandling fra oppgave
       </Heading>

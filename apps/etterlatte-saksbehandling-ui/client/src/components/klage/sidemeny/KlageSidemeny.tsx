@@ -49,7 +49,7 @@ export function KlageSidemeny() {
 
   return (
     <Sidebar>
-      <SidebarPanel border>
+      <SidebarPanel $border>
         <Heading size="small">Klage</Heading>
         <Heading size="xsmall" spacing>
           {teksterKlagestatus[klage.status]}

@@ -35,7 +35,7 @@ export default function OppsummeringKlagebehandling() {
   const tilbake = () => navigate('../', { relative: 'path' })
 
   return (
-    <FormWrapper column>
+    <FormWrapper $column>
       <Heading size="medium" spacing>
         Opprett klage fra oppgave{' '}
         <Tag variant="success" size="medium">

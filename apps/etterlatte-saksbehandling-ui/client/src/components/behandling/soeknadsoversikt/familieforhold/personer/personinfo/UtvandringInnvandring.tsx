@@ -18,7 +18,7 @@ export function Utlandsopphold(props: { utland: Utland }) {
 
   return (
     <>
-      <PersonDetailWrapper adresse={false}>
+      <PersonDetailWrapper $adresse={false}>
         <Label as="p">Utvandring</Label>
         {utflyttinger.length > 0 ? (
           <UstiletListe>
@@ -37,7 +37,7 @@ export function Utlandsopphold(props: { utland: Utland }) {
           <span>Ingen</span>
         )}
       </PersonDetailWrapper>
-      <PersonDetailWrapper adresse={false}>
+      <PersonDetailWrapper $adresse={false}>
         <Label as="p">Innvandring</Label>
         {innflyttinger.length > 0 ? (
           <UstiletListe>

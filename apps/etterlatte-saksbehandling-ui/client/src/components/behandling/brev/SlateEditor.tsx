@@ -110,7 +110,7 @@ const BlockButton = ({ format, icon }: { format: any; icon: any }) => {
   const editor = useSlate()
   return (
     <StyleButton
-      active={isBlockActive(editor, format)}
+      $active={isBlockActive(editor, format)}
       onMouseDown={(event) => {
         event.preventDefault()
         toggleBlock(editor, format)
@@ -125,7 +125,7 @@ const MarkButton = ({ format, icon }: { format: Format; icon: any }) => {
   const editor = useSlate()
   return (
     <StyleButton
-      active={isMarkActive(editor, format)}
+      $active={isMarkActive(editor, format)}
       onMouseDown={(event) => {
         event.preventDefault()
         toggleMark(editor, format)
@@ -136,9 +136,9 @@ const MarkButton = ({ format, icon }: { format: Format; icon: any }) => {
   )
 }
 
-const StyleButton = styled.span<{ reversed?: boolean; active: boolean }>`
+const StyleButton = styled.span<{ $reversed?: boolean; $active: boolean }>`
   cursor: pointer;
-  color: ${(props) => (props.reversed ? (props.active ? 'white' : '#aaa') : props.active ? 'black' : '#ccc')};
+  color: ${(props) => (props.$reversed ? (props.$active ? 'white' : '#aaa') : props.$active ? 'black' : '#ccc')};
 `
 
 const Toolbar = styled.div`

@@ -62,14 +62,14 @@ export function TilbakekrevingSidemeny() {
   const [oppgaveResult] = useOppgaveUnderBehandling({ referanse: tilbakekreving.id })
 
   return (
-    <CollapsibleSidebar collapsed={collapsed}>
+    <CollapsibleSidebar $collapsed={collapsed}>
       <SidebarTools>
         <Button variant={collapsed ? 'primary' : 'tertiary'} onClick={() => setCollapsed((collapsed) => !collapsed)}>
           {collapsed ? <ChevronLeftDoubleIcon /> : <ChevronRightDoubleIcon />}
         </Button>
       </SidebarTools>
-      <SidebarContent collapsed={collapsed}>
-        <SidebarPanel border>
+      <SidebarContent $collapsed={collapsed}>
+        <SidebarPanel $border>
           <Heading size="small">Tilbakekreving</Heading>
           <Heading size="xsmall" spacing>
             {teksterTilbakekrevingStatus[tilbakekreving!!.status]}

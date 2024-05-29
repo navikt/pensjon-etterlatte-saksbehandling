@@ -24,7 +24,7 @@ export const PersonInfoAdresse = (props: Props) => {
   }
 
   return (
-    <PersonDetailWrapper adresse={true}>
+    <PersonDetailWrapper $adresse={true}>
       <Label as="p">{props.adresseDoedstidspunkt ? 'Bostedadresse dødsfallstidspunkt' : 'Bostedadresse'}</Label>
       {sisteEllerAktivAdresse ? (
         <span>

@@ -33,7 +33,7 @@ export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInf
     : formaterDato(new Date())
 
   return (
-    <Wrapper innvilget={true}>
+    <Wrapper $innvilget={true}>
       <Overskrift>{formaterBehandlingstype(behandlingsInfo.type)}</Overskrift>
       <Resultat vedtaksresultat={vedtaksResultat} />
       <div className="flex">

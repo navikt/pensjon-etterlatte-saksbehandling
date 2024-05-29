@@ -66,7 +66,7 @@ export const Search = () => {
       )}
 
       {feilInput && (
-        <Dropdown info={true}>
+        <Dropdown $info={true}>
           <span className="icon">
             <InformationSquareIcon stroke={ABlue500} fill={ABlue500} />
           </span>
@@ -77,7 +77,7 @@ export const Search = () => {
       )}
 
       {mapFailure(funnetSak, (error) => (
-        <Dropdown error={true}>
+        <Dropdown $error={true}>
           <span className="icon">
             <XMarkOctagonIcon color={ANavRed} fill={AGray900} />
           </span>
@@ -92,13 +92,13 @@ export const Search = () => {
   )
 }
 
-const Dropdown = styled.div<{ error?: boolean; info?: boolean }>`
+const Dropdown = styled.div<{ $error?: boolean; $info?: boolean }>`
   display: flex;
-  background-color: ${(props) => (props.error ? '#f9d2cc' : props.info ? '#cce1ff' : '#fff')};
+  background-color: ${(props) => (props.$error ? '#f9d2cc' : props.$info ? '#cce1ff' : '#fff')};
   width: 300px;
   height: fit-content;
   top: 53px;
-  border: 1px solid ${(props) => (props.error ? '#ba3a26' : props.info ? '#368da8' : '#000')};
+  border: 1px solid ${(props) => (props.$error ? '#ba3a26' : props.$info ? '#368da8' : '#000')};
   position: absolute;
   color: #000;
 
@@ -115,9 +115,7 @@ const SearchWrapper = styled.span`
   padding: 0.5em;
 `
 
-const SearchResult = styled.div<{ link?: boolean }>`
-  cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
-
+const SearchResult = styled.div`
   padding: 0.5em;
   padding-left: 1em;
   align-self: center;

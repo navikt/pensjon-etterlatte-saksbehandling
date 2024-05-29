@@ -10,7 +10,7 @@ export function StatsborgerskapVisning(props: { statsborgerskap?: string; pdlSta
 
   if (!pdlStatsborgerskap) {
     return (
-      <PersonDetailWrapper adresse={false}>
+      <PersonDetailWrapper $adresse={false}>
         <Label as="p">Statsborgerskap</Label>
         <span>{statsborgerskap ?? 'Ukjent'}</span>
       </PersonDetailWrapper>
@@ -18,7 +18,7 @@ export function StatsborgerskapVisning(props: { statsborgerskap?: string; pdlSta
   }
 
   return (
-    <PersonDetailWrapper adresse={false}>
+    <PersonDetailWrapper $adresse={false}>
       <Label as="p">Statsborgerskap</Label>
       <UstiletListe>
         {pdlStatsborgerskap!!.map((statsborgerskap, index) => (

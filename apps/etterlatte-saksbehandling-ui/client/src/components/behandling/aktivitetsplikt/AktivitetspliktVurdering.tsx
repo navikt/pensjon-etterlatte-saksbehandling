@@ -2,7 +2,7 @@ import { Button, HStack, Radio, ReadMore, Select, Textarea, VStack } from '@navi
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { isPending } from '@reduxjs/toolkit'
-import { mapFailure } from '~shared/api/apiUtils'
+import { isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useForm } from 'react-hook-form'
 import {
@@ -15,14 +15,15 @@ import {
 } from '~shared/types/Aktivitetsplikt'
 import {
   hentAktivitspliktVurdering,
-  opprettAktivitspliktAktivitetsgrad,
-  opprettAktivitspliktUnntak,
+  opprettAktivitspliktAktivitetsgradForBehandling,
+  opprettAktivitspliktUnntakForBehandling,
 } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
+import { Toast } from '~shared/alerts/Toast'
 
 interface AktivitetspliktVurderingValues {
   aktivitetsplikt: IValgJaNei | null
@@ -42,11 +43,17 @@ const AktivitetspliktVurderingValuesDefault: AktivitetspliktVurderingValues = {
   beskrivelse: '',
 }
 
-export const AktivitetspliktVurdering = ({ behandling }: { behandling: IDetaljertBehandling }) => {
+export const AktivitetspliktVurdering = ({
+  behandling,
+  resetManglerAktivitetspliktVurdering,
+}: {
+  behandling: IDetaljertBehandling
+  resetManglerAktivitetspliktVurdering: () => void
+}) => {
   const [vurdering, setVurdering] = useState<IAktivitetspliktVurdering>()
 
-  const [opprettetAktivitetsgrad, opprettAktivitetsgrad] = useApiCall(opprettAktivitspliktAktivitetsgrad)
-  const [opprettetUnntak, opprettUnntak] = useApiCall(opprettAktivitspliktUnntak)
+  const [opprettetAktivitetsgrad, opprettAktivitetsgrad] = useApiCall(opprettAktivitspliktAktivitetsgradForBehandling)
+  const [opprettetUnntak, opprettUnntak] = useApiCall(opprettAktivitspliktUnntakForBehandling)
   const [hentet, hent] = useApiCall(hentAktivitspliktVurdering)
 
   const {
@@ -59,12 +66,12 @@ export const AktivitetspliktVurdering = ({ behandling }: { behandling: IDetaljer
     defaultValues: AktivitetspliktVurderingValuesDefault,
   })
 
-  const ferdigstill = (data: AktivitetspliktVurderingValues) => {
+  const opprettVurdering = (data: AktivitetspliktVurderingValues) => {
     if (data.aktivitetsplikt === IValgJaNei.NEI || data.unntak === IValgJaNei.JA) {
       opprettUnntak(
         {
           sakId: behandling.sakId,
-          oppgaveId: behandling.id,
+          behandlingId: behandling.id,
           request: {
             id: undefined,
             unntak:
@@ -72,18 +79,21 @@ export const AktivitetspliktVurdering = ({ behandling }: { behandling: IDetaljer
                 ? AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
                 : (data.midlertidigUnntak as AktivitetspliktUnntakType),
             beskrivelse: data.beskrivelse,
-            tom: data.aktivitetsplikt === IValgJaNei.NEI ? undefined : data.sluttdato?.toISOString(),
+            tom:
+              data.sluttdato && data.aktivitetsplikt === IValgJaNei.JA
+                ? new Date(data.sluttdato).toISOString()
+                : undefined,
           },
         },
         () => {
-          console.log('Lagred aktivitetsgrad')
+          resetManglerAktivitetspliktVurdering()
         }
       )
     } else {
       opprettAktivitetsgrad(
         {
           sakId: behandling.sakId,
-          oppgaveId: behandling.id,
+          behandlingId: behandling.id,
           request: {
             id: undefined,
             aktivitetsgrad: data.aktivitetsgrad as AktivitetspliktVurderingType,
@@ -92,7 +102,7 @@ export const AktivitetspliktVurdering = ({ behandling }: { behandling: IDetaljer
           },
         },
         () => {
-          console.log('Lagred aktivitetsgrad')
+          resetManglerAktivitetspliktVurdering()
         }
       )
     }
@@ -101,6 +111,7 @@ export const AktivitetspliktVurdering = ({ behandling }: { behandling: IDetaljer
   useEffect(() => {
     hent({ sakId: behandling.sakId, oppgaveId: behandling.id }, (result) => {
       setVurdering(result)
+      if (result) resetManglerAktivitetspliktVurdering()
     })
   }, [])
 
@@ -109,6 +120,9 @@ export const AktivitetspliktVurdering = ({ behandling }: { behandling: IDetaljer
 
   return (
     <AktivitetspliktVurderingWrapper>
+      {(isSuccess(opprettetUnntak) || isSuccess(opprettetAktivitetsgrad)) && (
+        <Toast melding="Vurdering av aktivitetsplikt er lagret" />
+      )}
       <div>
         <HStack gap="12">
           <Spinner label="Henter vurdering av aktivitetsplikt" visible={isPending(hentet)} />
@@ -217,7 +231,7 @@ export const AktivitetspliktVurdering = ({ behandling }: { behandling: IDetaljer
               variant="primary"
               type="button"
               size="small"
-              onClick={handleSubmit(ferdigstill)}
+              onClick={handleSubmit(opprettVurdering)}
             >
               Lagre vurdering
             </Button>

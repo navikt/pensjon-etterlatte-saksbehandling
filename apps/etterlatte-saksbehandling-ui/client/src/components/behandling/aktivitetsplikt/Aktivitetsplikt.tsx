@@ -1,4 +1,4 @@
-import { BodyLong, BodyShort, Box, Button, Detail, Heading, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, BodyShort, Box, Button, Detail, Heading, VStack } from '@navikt/ds-react'
 import React, { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
@@ -27,6 +27,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
   const avdoede = usePersonopplysningerOmsAvdoede()
   const avdoedesDoedsdato = avdoede?.opplysning?.doedsdato
   const [aktivitetOppfolging, setAktivitetOppfolging] = useState<AktivitetspliktOppfolging>()
+  const [manglerAktivitetspliktVurdering, setManglerAktivitetspliktVurdering] = useState<boolean | undefined>(undefined)
 
   const [hentet, hent] = useApiCall(hentAktivitetspliktOppfolging)
 
@@ -38,6 +39,15 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
       setAktivitetOppfolging(aktivitetOppfolging)
     })
   }, [])
+
+  const erFerdigUtfylt = () => {
+    if (manglerAktivitetspliktVurdering === undefined) {
+      setManglerAktivitetspliktVurdering(true)
+      return
+    }
+
+    next()
+  }
 
   return (
     <>
@@ -69,7 +79,12 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         </div>
 
         {visTidslinje && <AktivitetspliktTidslinje behandling={behandling} doedsdato={new Date(avdoedesDoedsdato!!)} />}
-        {visTidslinje && <AktivitetspliktVurdering behandling={behandling} />}
+        {visTidslinje && (
+          <AktivitetspliktVurdering
+            behandling={behandling}
+            resetManglerAktivitetspliktVurdering={() => setManglerAktivitetspliktVurdering(false)}
+          />
+        )}
 
         {aktivitetOppfolging && (
           <div>
@@ -134,11 +149,17 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             Lag oppgave til lokalkontor <ExternalLinkIcon />
           </Button>
         </div>
+
+        {manglerAktivitetspliktVurdering && (
+          <Alert style={{ maxWidth: '16em' }} variant="error">
+            Du må fylle ut vurdering om aktivitetsplikt
+          </Alert>
+        )}
       </AktivitetspliktWrapper>
 
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
         <BehandlingHandlingKnapper>
-          <Button variant="primary" onClick={() => next()}>
+          <Button variant="primary" onClick={() => erFerdigUtfylt()}>
             {handlinger.NESTE.navn}
           </Button>
         </BehandlingHandlingKnapper>

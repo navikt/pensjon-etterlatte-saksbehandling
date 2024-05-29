@@ -42,7 +42,7 @@ class AktivitetspliktUnntakDao(private val connectionAutoclosing: ConnectionAuto
         }
     }
 
-    fun hentUnntak(oppgaveId: UUID): AktivitetspliktUnntak? =
+    fun hentUnntakForOppgave(oppgaveId: UUID): AktivitetspliktUnntak? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -73,6 +73,22 @@ class AktivitetspliktUnntakDao(private val connectionAutoclosing: ConnectionAuto
                         """.trimMargin(),
                     )
                 stmt.setLong(1, sakId)
+                stmt.executeQuery().singleOrNull { toUnntak() }
+            }
+        }
+
+    fun hentUnntakForBehandling(behandlingId: UUID): AktivitetspliktUnntak? =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        SELECT id, sak_id, behandling_id, oppgave_id, unntak, fom, tom, opprettet, endret, beskrivelse
+                        FROM aktivitetsplikt_unntak
+                        WHERE behandling_id = ?
+                        """.trimMargin(),
+                    )
+                stmt.setObject(1, behandlingId)
 
                 stmt.executeQuery().singleOrNull { toUnntak() }
             }

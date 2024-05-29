@@ -1,13 +1,5 @@
 import styled from 'styled-components'
 
-export const VilkaarWrapper = styled.div`
-  padding: 1em 1em 1em 2em;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: top;
-`
-
 export const Title = styled.div`
   display: flex;
   font-size: 1.1em;

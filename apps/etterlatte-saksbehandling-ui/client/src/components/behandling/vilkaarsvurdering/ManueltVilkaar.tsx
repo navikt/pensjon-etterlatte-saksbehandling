@@ -6,12 +6,11 @@ import {
   VilkaarlisteTitle,
   VilkaarVurderingColumn,
   VilkaarVurderingContainer,
-  VilkaarWrapper,
 } from './styled'
 import { IVilkaarsvurdering, Vilkaar, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
 import { Vurdering } from './Vurdering'
 import { StatusIcon, StatusIconProps } from '~shared/icons/statusIcon'
-import { Box, Link } from '@navikt/ds-react'
+import { Box, HStack, Link } from '@navikt/ds-react'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { formatertLovreferanse } from '~components/behandling/vilkaarsvurdering/utils'
 
@@ -53,8 +52,8 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
 
   return (
     <>
-      <Box paddingInline="8" borderWidth="1 0 0 0" borderColor="border-subtle">
-        <VilkaarWrapper>
+      <Box paddingInline="16 4" paddingBlock="4" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <HStack justify="space-between">
           <VilkaarInfobokser>
             <VilkaarColumn>
               <Title>
@@ -84,7 +83,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
               </VilkaarlisteTitle>
             </VilkaarVurderingContainer>
           </VilkaarVurderingColumn>
-        </VilkaarWrapper>
+        </HStack>
       </Box>
     </>
   )

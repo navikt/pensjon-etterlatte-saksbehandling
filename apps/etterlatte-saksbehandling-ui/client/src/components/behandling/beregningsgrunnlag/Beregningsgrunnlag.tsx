@@ -33,7 +33,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   useEffect(() => {
     getOverstyrtBeregning(behandling.id, (result) => {
       if (result) {
-        setOverstyrt(result || undefined)
+        setOverstyrt(result)
       }
     })
   }, [])

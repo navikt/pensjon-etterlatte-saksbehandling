@@ -66,7 +66,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
       </Box>
 
       <AktivitetspliktWrapper gap="10">
-        <div>
+        <TekstWrapper>
           <Heading level="1" spacing size="medium">
             Gjenlevende sin situasjon
           </Heading>
@@ -76,7 +76,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             100 % aktivitet etter 12 måneder. I visse tilfeller kan man ha rett på omstillingsstønad selv om
             aktivitetskravet ikke er oppfylt.
           </BodyLong>
-        </div>
+        </TekstWrapper>
 
         {visTidslinje && <AktivitetspliktTidslinje behandling={behandling} doedsdato={new Date(avdoedesDoedsdato!!)} />}
         {visTidslinje && (
@@ -106,7 +106,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           </div>
         )}
 
-        <div>
+        <TekstWrapper>
           <Heading size="small" spacing>
             OPPFØLGING
           </Heading>
@@ -114,7 +114,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             Etterlatte skal følges opp og minnes på aktivitetskravet med informasjonsbrev når det er gått 3 til 4
             måneder etter dødsfallet. Interne oppfølgingsoppgaver opprettes automatisk ut fra dødstidspunktet og må
             vurderes før informasjonsbrevet sendes ut. Automatiske oppgaver blir opprettet som følge av hva du
-            registrerer om burkers situasjon.
+            registrerer om brukers situasjon.
             <br />
             <br />
             Er det andre grunner til at den etterlatte skal følges opp utenfor normalen, så kan oppfølgingsoppgave lages
@@ -129,9 +129,9 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           >
             Lag oppfølgingsoppgave i Gosys <ExternalLinkIcon />
           </Button>
-        </div>
+        </TekstWrapper>
 
-        <div>
+        <TekstWrapper>
           <Heading size="small" spacing>
             Er oppfølging av lokalkontor nødvendig?
           </Heading>
@@ -148,7 +148,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           >
             Lag oppgave til lokalkontor <ExternalLinkIcon />
           </Button>
-        </div>
+        </TekstWrapper>
 
         {manglerAktivitetspliktVurdering && (
           <Alert style={{ maxWidth: '16em' }} variant="error">
@@ -169,5 +169,10 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
 }
 
 const AktivitetspliktWrapper = styled(VStack)`
-  padding: 0 4em 2em 4em;
+  padding: 0 4rem 2rem 4rem;
+  max-width: var(--a-breakpoint-2xl);
+`
+
+const TekstWrapper = styled.div`
+  max-width: var(--a-breakpoint-md-down);
 `

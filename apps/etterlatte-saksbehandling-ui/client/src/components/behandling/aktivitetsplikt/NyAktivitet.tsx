@@ -108,7 +108,7 @@ export const NyAktivitet = ({
           <VStack gap="4">
             <HStack gap="4">
               <ControlledDatoVelger name="datoFom" label="Fra dato" control={control} errorVedTomInput="Obligatorisk" />
-              <ControlledDatoVelger label="Dato til og med (valgfri)" name="datoTom" control={control} />
+              <ControlledDatoVelger label="Dato til og med" name="datoTom" control={control} required={false} />
               <Select
                 {...register('type', {
                   required: { value: true, message: 'Du må velge aktivitetstype' },

@@ -1,5 +1,5 @@
 import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
-import { Beskrivelse, InfobokserWrapper, InfoWrapper, VurderingsContainerWrapper } from '../styled'
+import { Informasjon, Vurdering } from '../styled'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { IPdlPerson } from '~shared/types/Person'
 import { formaterGrunnlagKilde, svarTilStatusIcon } from '../utils'
@@ -9,6 +9,7 @@ import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/
 import { useState } from 'react'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { IAdresse } from '~shared/types/IAdresse'
+import { HStack } from '@navikt/ds-react'
 
 interface AdresseProps {
   label: string
@@ -18,11 +19,7 @@ interface AdresseProps {
 
 const AdresseKort = (props: AdresseProps) => {
   const adresse = `${props.adresse.adresseLinje1}, ${props.adresse.postnr} ${props.adresse.poststed || ''}`
-  return (
-    <InfoWrapper>
-      <Info label={props.label} tekst={adresse} undertekst={props.kilde} />
-    </InfoWrapper>
-  )
+  return <Info label={props.label} tekst={adresse} undertekst={props.kilde} />
 }
 
 interface Props {
@@ -56,11 +53,11 @@ export const OversiktKommerBarnetTilgode = ({
       status={svarTilStatusIcon(kommerBarnetTilgode?.svar)}
     >
       <div>
-        <Beskrivelse>
+        <Informasjon>
           Undersøk om boforholdet er avklart og det er sannsynlig at pensjonen kommer barnet til gode.
-        </Beskrivelse>
+        </Informasjon>
 
-        <InfobokserWrapper>
+        <HStack gap="4">
           {bostedsadresse && (
             <AdresseKort label="Barnets adresse" adresse={bostedsadresse} kilde={bostedsadresse?.kilde} />
           )}
@@ -71,10 +68,10 @@ export const OversiktKommerBarnetTilgode = ({
               kilde={formaterGrunnlagKilde(gjenlevendeForelder?.kilde)}
             />
           )}
-        </InfobokserWrapper>
+        </HStack>
       </div>
 
-      <VurderingsContainerWrapper>
+      <Vurdering>
         {vurdert && (
           <KommerBarnetTilGodeVurdering
             kommerBarnetTilgode={kommerBarnetTilgode}
@@ -86,7 +83,7 @@ export const OversiktKommerBarnetTilgode = ({
         {!vurdert && redigerbar && (
           <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
         )}
-      </VurderingsContainerWrapper>
+      </Vurdering>
     </LovtekstMedLenke>
   )
 }

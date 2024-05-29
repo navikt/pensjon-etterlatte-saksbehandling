@@ -1,9 +1,8 @@
-import { VurderingsTitle } from '../styled'
 import styled from 'styled-components'
 import { useState } from 'react'
 import { IBehandlingStatus, IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
-import { Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { Heading, Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBegrunnelseKommerBarnetTilgode } from '~shared/api/behandling'
@@ -80,7 +79,9 @@ export const KommerBarnetTilGodeVurdering = ({
       defaultRediger={kommerBarnetTilgode === null}
     >
       <div>
-        <VurderingsTitle title="Vurderer du det som sannsynlig at pensjonen kommer barnet tilgode?" />
+        <Heading level="3" size="small">
+          Vurderer du det som sannsynlig at pensjonen kommer barnet tilgode?
+        </Heading>
         <RadioGroupWrapper>
           <RadioGroup
             legend=""

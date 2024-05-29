@@ -8,7 +8,7 @@ import {
   VilkaarsvurderingResultat,
 } from '~shared/api/vilkaarsvurdering'
 import { VilkaarWrapper } from './styled'
-import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea, Box } from '@navikt/ds-react'
 import { svarTilTotalResultat } from './utils'
 import { PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
@@ -19,7 +19,6 @@ import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
-import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 
 import { isPending } from '~shared/api/apiUtils'
@@ -208,22 +207,23 @@ export const Resultat = (props: Props) => {
         </OppdatertGrunnlagAlert>
       )}
 
-      <Border />
-      {redigerbar ? (
-        <>
-          {vilkaarsvurdering.isGrunnlagUtdatert && (
-            <OppdatertGrunnlagAlert variant="warning">
-              OBS! Grunnlaget for vilkårsvurderingen har blitt oppdatert siden sist. <br />
-              Du må se over vurderingene og sjekke at de fortsatt er riktige.
-            </OppdatertGrunnlagAlert>
-          )}
-          {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && (
-            <VilkaarsvurderingKnapper behandlingId={behandlingId} />
-          )}
-        </>
-      ) : (
-        <NesteOgTilbake></NesteOgTilbake>
-      )}
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        {redigerbar ? (
+          <>
+            {vilkaarsvurdering.isGrunnlagUtdatert && (
+              <OppdatertGrunnlagAlert variant="warning">
+                OBS! Grunnlaget for vilkårsvurderingen har blitt oppdatert siden sist. <br />
+                Du må se over vurderingene og sjekke at de fortsatt er riktige.
+              </OppdatertGrunnlagAlert>
+            )}
+            {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && (
+              <VilkaarsvurderingKnapper behandlingId={behandlingId} />
+            )}
+          </>
+        ) : (
+          <NesteOgTilbake />
+        )}
+      </Box>
     </>
   )
 }

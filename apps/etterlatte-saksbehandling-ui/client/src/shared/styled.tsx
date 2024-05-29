@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { Box } from '@navikt/ds-react'
 
 export const GridContainer = styled.div`
   display: flex;
@@ -23,11 +24,10 @@ export const Column = styled.div`
 
 // TODO: Dette er litt hacky og burde fikses.
 //       Tas i sammenheng med utvikling av brevdesigneren.
-export const MainContent = styled.div`
+export const MainContent = styled(Box)`
   width: 100%;
-  min-width: 280px;
-  border-left: 1px solid #c6c2bf;
-  border-right: 1px solid #c6c2bf;
+  border-width: 0 1px 0 0;
+  border-color: var(--a-border-subtle);
 `
 
 export const CollapsibleSidebar = styled.div<{ $collapsed: boolean }>`

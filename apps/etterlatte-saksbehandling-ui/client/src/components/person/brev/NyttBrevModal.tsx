@@ -46,13 +46,7 @@ export const NyttBrevModal = ({ sakId, sakType }: { sakId: number; sakType: SakT
 
   return (
     <>
-      <Button
-        variant="primary"
-        icon={<DocPencilIcon />}
-        iconPosition="right"
-        size="small"
-        onClick={() => setOpen(true)}
-      >
+      <Button variant="primary" icon={<DocPencilIcon />} iconPosition="right" onClick={() => setOpen(true)}>
         Nytt brev
       </Button>
 

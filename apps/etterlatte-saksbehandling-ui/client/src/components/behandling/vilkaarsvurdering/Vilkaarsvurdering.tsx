@@ -11,7 +11,6 @@ import {
 } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { Alert, BodyLong, Box, Button, Heading } from '@navikt/ds-react'
-import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -86,12 +85,10 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading size="large" level="1">
-            Vilkårsvurdering
-          </Heading>
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Heading size="large" level="1">
+          Vilkårsvurdering
+        </Heading>
       </Box>
 
       {behandlingId && vilkaarsvurdering && !isPending(slettVilkaarsvurderingStatus) && (
@@ -125,8 +122,6 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
               </Alert>
             </AlertWrapper>
           )}
-
-          <Border />
 
           {vilkaarsvurdering.vilkaar.map((value, index) => (
             <ManueltVilkaar

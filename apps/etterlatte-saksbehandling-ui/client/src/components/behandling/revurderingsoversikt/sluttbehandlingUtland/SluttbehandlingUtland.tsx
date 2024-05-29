@@ -1,10 +1,9 @@
-import { Alert, BodyShort, Button, ErrorSummary, Heading } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, ErrorSummary, Heading, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentKravpakkeforSak } from '~shared/api/generellbehandling'
 import { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterNavn } from '~shared/types/Person'
 import { KravpakkeUtland } from '~shared/types/Generellbehandling'
@@ -121,7 +120,7 @@ export default function SluttbehandlingUtland({
             return (
               <>
                 {kravpakkeMedAvdoed.kravpakke.innhold ? (
-                  <InfoWrapper>
+                  <VStack gap="4">
                     <Info label="Kravpakke gjelder" tekst={formaterNavn(kravpakkeMedAvdoed.avdoed)} />
                     <Info
                       tekst={formaterKravpakkeLand(kravpakkeMedAvdoed.kravpakke.innhold, alleLandKodeverk)}
@@ -133,7 +132,7 @@ export default function SluttbehandlingUtland({
                     />
                     <Info label="Saks-ID RINA" tekst={kravpakkeMedAvdoed.kravpakke.innhold.rinanummer} />
                     <Info label="Kommentar" tekst={kravpakkeMedAvdoed.kravpakke.innhold.begrunnelse} />
-                  </InfoWrapper>
+                  </VStack>
                 ) : (
                   <Alert variant="warning">
                     Fant ingen kravpakke for saken, kontroller at kravpakke ble opprettet. Finn sakens

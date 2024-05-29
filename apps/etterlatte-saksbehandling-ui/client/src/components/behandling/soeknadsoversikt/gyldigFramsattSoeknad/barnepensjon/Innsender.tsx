@@ -1,4 +1,3 @@
-import { InfoWrapper } from '../../styled'
 import { Info } from '../../Info'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { formaterNavn, IPdlPerson } from '~shared/types/Person'
@@ -12,11 +11,7 @@ export const Innsender = ({ harKildePesys }: Props) => {
   const personer = usePersonopplysninger()
   const label = 'Innsender'
   if (harKildePesys) {
-    return (
-      <InfoWrapper>
-        <Info tekst="Ukjent" undertekst="Mangler info" label={label} />
-      </InfoWrapper>
-    )
+    return <Info tekst="Ukjent" undertekst="Mangler info" label={label} />
   }
   const gjenlevende = personer?.gjenlevende.find((person) => person)?.opplysning
   const innsender = personer?.innsender?.opplysning
@@ -33,11 +28,7 @@ export const Innsender = ({ harKildePesys }: Props) => {
 
   const undertekst = beskrivelseInnsender(soeker, gjenlevende, innsender)
 
-  return (
-    <InfoWrapper>
-      <Info tekst={navn} undertekst={undertekst} label={label} />
-    </InfoWrapper>
-  )
+  return <Info tekst={navn} undertekst={undertekst} label={label} />
 
   function beskrivelseInnsender(soeker?: IPdlPerson, gjenlevende?: IPdlPerson, innsender?: IPdlPerson): string {
     if (!innsender?.foedselsnummer) {

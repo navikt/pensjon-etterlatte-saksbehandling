@@ -2,7 +2,6 @@ import { IBehandlingStatus, IBoddEllerArbeidetUtlandet } from '~shared/types/IDe
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { Checkbox, Heading, HelpText, Radio, RadioGroup, VStack } from '@navikt/ds-react'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
-import { VurderingsTitle } from '../styled'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -101,7 +100,9 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
       defaultRediger={boddEllerArbeidetUtlandet === null}
     >
       <>
-        <VurderingsTitle title="Har avdøde bodd eller arbeidet i utlandet?" />
+        <Heading level="3" size="small">
+          Har avdøde bodd eller arbeidet i utlandet?
+        </Heading>
         <RadioGroupWrapper>
           <RadioGroup
             legend=""

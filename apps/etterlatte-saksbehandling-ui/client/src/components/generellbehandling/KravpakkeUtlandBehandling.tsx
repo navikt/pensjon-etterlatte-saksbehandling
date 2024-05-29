@@ -5,7 +5,6 @@ import {
   KravpakkeUtland,
 } from '~shared/types/Generellbehandling'
 import { GridContainer, MainContent } from '~shared/styled'
-import { HeadingWrapper, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import {
   Alert,
   BodyShort,
@@ -20,6 +19,7 @@ import {
   Table,
   Textarea,
   TextField,
+  VStack,
 } from '@navikt/ds-react'
 import React, { Fragment, useContext, useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -169,17 +169,15 @@ const KravpakkeUtlandBehandling = (props: {
     <GridContainer>
       <MainContent style={{ whiteSpace: 'pre-wrap' }}>
         <div style={{ maxWidth: '55rem', margin: 'auto' }}>
-          <Box paddingInline="16" paddingBlock="4">
-            <HeadingWrapper>
-              <Heading spacing size="large" level="1">
-                Kravpakke til utland
-              </Heading>
-              <p>
-                Det skal opprettes P_BUC_02 og sendes kravpakke som inneholder ulike SED`er til utland i RINA.
-                Dokumenter her for hvilke SED`er som blir sendt, og fyll inn nødvendig informasjon. Bruk notatfeltet ved
-                behov for utfyllende informasjon.
-              </p>
-            </HeadingWrapper>
+          <Box paddingInline="16" paddingBlock="16 4">
+            <Heading spacing size="large" level="1">
+              Kravpakke til utland
+            </Heading>
+            <p>
+              Det skal opprettes P_BUC_02 og sendes kravpakke som inneholder ulike SED`er til utland i RINA. Dokumenter
+              her for hvilke SED`er som blir sendt, og fyll inn nødvendig informasjon. Bruk notatfeltet ved behov for
+              utfyllende informasjon.
+            </p>
           </Box>
           <Box padding="4" borderRadius="small">
             <div>
@@ -188,10 +186,10 @@ const KravpakkeUtlandBehandling = (props: {
                   {isSuccess(avdoedeStatus) && avdoed && (
                     <>
                       <h3>Informasjon om avdøde</h3>
-                      <InfoWrapper>
+                      <VStack gap="4">
                         <Info label="Navn" tekst={formaterNavn(avdoed.opplysning)} />
                         <Info label="Fødselsnummer" tekst={avdoed.opplysning.foedselsnummer} />
-                      </InfoWrapper>
+                      </VStack>
                     </>
                   )}
                   {isFailureHandler({

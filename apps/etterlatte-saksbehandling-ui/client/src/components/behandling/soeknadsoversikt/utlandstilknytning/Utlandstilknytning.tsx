@@ -1,6 +1,6 @@
 import { IDetaljertBehandling, IUtlandstilknytning } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '../LovtekstMedLenke'
-import { Beskrivelse, VurderingsContainerWrapper } from '../styled'
+import { Informasjon, Vurdering } from '../styled'
 import { useState } from 'react'
 import { LeggTilVurderingButton } from '../LeggTilVurderingButton'
 import { UtlandstilknytningVurdering } from './UtlandstilknytningVurdering'
@@ -23,13 +23,13 @@ export const Utlandstilknytning = ({
 
   return (
     <LovtekstMedLenke tittel="Utlandstilknytning" hjemler={[]} status={statusIkon(behandling.utlandstilknytning)}>
-      <Beskrivelse>
+      <Informasjon>
         Svar for om saken skal behandles som følge av utlandstilknytning basert på om avdøde har bodd/arbeidet i
         EØS/avtale-land eller ikke, og om gjenlevende bor i Norge eller utlandet. Om søker bor i utlandet er det en
         bosatt utland-sak, om avdøde har bodd/arbeidet i EØS/avtale-land og gjenlevende bor i Norge er det en
         utlandstilsnitt-sak. I andre tilfeller er det en nasjonal sak.
-      </Beskrivelse>
-      <VurderingsContainerWrapper>
+      </Informasjon>
+      <Vurdering>
         {vurdert && (
           <UtlandstilknytningVurdering
             utlandstilknytning={behandling.utlandstilknytning}
@@ -41,7 +41,7 @@ export const Utlandstilknytning = ({
         {!vurdert && redigerbar && (
           <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
         )}
-      </VurderingsContainerWrapper>
+      </Vurdering>
     </LovtekstMedLenke>
   )
 }

@@ -1,4 +1,4 @@
-import { Button } from '@navikt/ds-react'
+import { Box, Button } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { behandlingErRedigerbar } from '../felles/utils'
@@ -29,11 +29,9 @@ import {
   BeregningsMetodeBeregningsgrunnlag,
   InstitusjonsoppholdGrunnlagData,
 } from '~shared/types/Beregning'
-import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingGjelderBarnepensjonPaaNyttRegelverk } from '~components/behandling/vilkaarsvurdering/utils'
@@ -164,21 +162,21 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         errorMessage: 'Kunne ikke lagre beregningsgrunnlag',
       })}
 
-      <Border />
-
-      {redigerbar ? (
-        <BehandlingHandlingKnapper>
-          <Button
-            variant="primary"
-            onClick={onSubmit}
-            loading={isPending(lagreBeregningsgrunnlag) || isPending(endreBeregning)}
-          >
-            {handlinger.NESTE.navn}
-          </Button>
-        </BehandlingHandlingKnapper>
-      ) : (
-        <NesteOgTilbake />
-      )}
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        {redigerbar ? (
+          <BehandlingHandlingKnapper>
+            <Button
+              variant="primary"
+              onClick={onSubmit}
+              loading={isPending(lagreBeregningsgrunnlag) || isPending(endreBeregning)}
+            >
+              {handlinger.NESTE.navn}
+            </Button>
+          </BehandlingHandlingKnapper>
+        ) : (
+          <NesteOgTilbake />
+        )}
+      </Box>
     </>
   )
 }

@@ -1,5 +1,5 @@
 import { CogRotationIcon } from '@navikt/aksel-icons'
-import { BodyShort, Box, Button, Heading, Modal, Radio, RadioGroup } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, Modal, Radio, RadioGroup, VStack } from '@navikt/ds-react'
 import { useState } from 'react'
 import { Journalpost, Journalstatus } from '~shared/types/Journalpost'
 import { FeilregistrerJournalpost } from '~components/person/dokumenter/avvik/FeilregistrerJournalpost'
@@ -7,7 +7,6 @@ import { OpphevFeilregistreringJournalpost } from '~components/person/dokumenter
 import { KnyttTilAnnenSak } from '~components/person/dokumenter/avvik/KnyttTilAnnenSak'
 import { Result } from '~shared/api/apiUtils'
 import { SakMedBehandlinger } from '~components/person/typer'
-import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { kanEndreJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/validering'
 import { KnyttTilAnnentBruker } from './KnyttTilAnnenBruker'
@@ -51,7 +50,7 @@ export const HaandterAvvikModal = ({
               Journalpostdetaljer
             </Heading>
 
-            <InfoWrapper>
+            <VStack gap="4">
               <Info label="Journalpost ID" tekst={journalpost.journalpostId} />
               <Info label="Bruker" tekst={`${journalpost.bruker?.id || '-'} (${journalpost.bruker?.type})`} />
               <Info label="Sakstype" tekst={journalpost.sak?.sakstype || '-'} />
@@ -69,7 +68,7 @@ export const HaandterAvvikModal = ({
                   </>
                 }
               />
-            </InfoWrapper>
+            </VStack>
           </Box>
           <br />
 

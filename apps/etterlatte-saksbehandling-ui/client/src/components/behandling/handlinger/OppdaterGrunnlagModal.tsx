@@ -39,7 +39,7 @@ export default function OppdaterGrunnlagModal({
   }
 
   return (
-    <div style={{ float: 'right', marginBottom: '2rem' }}>
+    <>
       <Button
         variant="secondary"
         size="small"
@@ -78,6 +78,6 @@ export default function OppdaterGrunnlagModal({
           {isFailureHandler({ apiResult: oppdatert, errorMessage: 'Oppdatering feilet' })}
         </Modal.Body>
       </Modal>
-    </div>
+    </>
   )
 }

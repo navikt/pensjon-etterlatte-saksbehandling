@@ -5,7 +5,6 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { SakType } from '~shared/types/sak'
 import { formaterSakstype, formaterSpraak, formaterStringDato } from '~utils/formattering'
-import { InfoList } from '~components/behandling/soeknadsoversikt/styled'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import FullfoerOppgaveModal from '~components/person/journalfoeringsoppgave/nybehandling/FullfoerOppgaveModal'
 import { gyldigBehandlingRequest } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
@@ -39,7 +38,7 @@ export default function OppsummeringOppgavebehandling() {
         Opprett behandling fra oppgave
       </Heading>
 
-      <InfoList>
+      <VStack gap="4">
         <Info label="Saktype" tekst={formaterSakstype(nyBehandlingRequest.sakType!!)} />
 
         <Info label="Språk" tekst={formaterSpraak(spraak)} />
@@ -69,7 +68,7 @@ export default function OppsummeringOppgavebehandling() {
             tekst={soeskenEllerBarn || ''}
           />
         )) || <Info label="Innsender" tekst={<Detail>Ikke oppgitt</Detail>} />}
-      </InfoList>
+      </VStack>
 
       {!persongalleri.avdoed?.length && (
         <Alert variant="warning" size="small">

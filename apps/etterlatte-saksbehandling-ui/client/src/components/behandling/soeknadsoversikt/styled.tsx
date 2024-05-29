@@ -1,26 +1,4 @@
-import { Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
-
-export const InnholdPadding = styled.div`
-  padding: 2em 2em 2em 4em;
-`
-
-export const SoeknadOversiktWrapper = styled.div`
-  padding: 0em 1em 1em 0em;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: top;
-`
-
-export const InfobokserWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: top;
-  flex-wrap: wrap;
-  gap: 20px;
-  padding-right: 20px;
-`
 
 export const Infoboks = styled.div`
   width: calc((100% / 3) - (40px / 3));
@@ -34,75 +12,18 @@ export const Infoboks = styled.div`
   }
 `
 
-export const InfoWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-`
-
-export const InfoList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`
-
 export const InfoElement = styled.div<{ $wide?: boolean }>`
   width: ${(props) => (props.$wide ? '100%' : '15em')};
 `
 
-export const VurderingsContainer = styled.div`
-  display: flex;
-  border-left: 4px solid #e5e5e5;
-  min-width: 300px;
+export const Vurdering = styled.div`
+  padding: 0 0 0 var(--a-spacing-3);
+  min-width: 18.75rem;
+  width: 10rem;
+  border-left: 3px solid var(--a-border-subtle);
 `
 
-export const VurderingsTitle = ({ title }: { title: string }) => {
-  return (
-    <Heading level="3" size="small">
-      {title}
-    </Heading>
-  )
-}
-
-export const PersonDetailWrapper = styled.div<{ $adresse: boolean }>`
-  padding-top: 0.5em;
-  min-width: ${(props) => (props.$adresse ? '300px' : '100px')};
-`
-
-export const Historikk = styled.div`
-  padding-top: 0.5em;
-`
-
-export const HistorikkElement = styled.div`
-  font-size: 16px;
-  display: flex;
-  white-space: nowrap;
-
-  .date {
-    margin-right: 1em;
-    width: 10em;
-  }
-`
-
-export const HeadingWrapper = styled.div`
-  margin-top: 3em;
-
-  .details {
-    margin-bottom: 0.6em;
-  }
-`
-
-export const Border = styled.div`
-  border-top: 1px solid #ccc;
-  margin-bottom: 1em;
-`
-
-export const VurderingsContainerWrapper = styled(VurderingsContainer)`
-  padding-left: 20px;
-  width: 10em;
-`
-
-export const Beskrivelse = styled.div`
-  margin: 10px 0;
-  max-width: 41em;
+export const Informasjon = styled.div`
+  margin: var(--a-spacing-3) 0;
+  max-width: 41rem;
 `

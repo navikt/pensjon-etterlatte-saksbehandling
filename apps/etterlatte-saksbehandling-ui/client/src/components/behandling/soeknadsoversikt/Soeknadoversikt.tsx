@@ -1,6 +1,5 @@
 import { Familieforhold } from './familieforhold/Familieforhold'
-import { Border, HeadingWrapper, InnholdPadding } from './styled'
-import { Box, Heading } from '@navikt/ds-react'
+import { Box, Heading, HStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { Soeknadsdato } from './Soeknadsdato'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
@@ -77,21 +76,21 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading spacing size="large" level="1">
-            Søknadsoversikt
-          </Heading>
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Heading spacing size="large" level="1">
+          Søknadsoversikt
+        </Heading>
         {behandling.soeknadMottattDato && <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />}
       </Box>
-      <InnholdPadding>
+      <Box paddingBlock="8" paddingInline="16 8">
         {redigerbar && (
-          <OppdaterGrunnlagModal
-            behandlingId={behandling.id}
-            behandlingStatus={behandling.status}
-            enhetId={behandling.sakEnhetId}
-          />
+          <HStack justify="end">
+            <OppdaterGrunnlagModal
+              behandlingId={behandling.id}
+              behandlingStatus={behandling.status}
+              enhetId={behandling.sakEnhetId}
+            />
+          </HStack>
         )}
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
         {personopplysninger && (
@@ -121,16 +120,20 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
           </>
         )}
         <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />
-      </InnholdPadding>
-      <Border />
-      <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />
-      {redigerbar ? (
-        <BehandlingHandlingKnapper>
-          {soeknadsoversiktErFerdigUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}
-        </BehandlingHandlingKnapper>
-      ) : (
-        <NesteOgTilbake />
-      )}
+      </Box>
+
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />
+      </Box>
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        {redigerbar ? (
+          <BehandlingHandlingKnapper>
+            {soeknadsoversiktErFerdigUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}
+          </BehandlingHandlingKnapper>
+        ) : (
+          <NesteOgTilbake />
+        )}
+      </Box>
     </>
   )
 }

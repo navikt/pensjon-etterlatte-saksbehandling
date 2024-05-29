@@ -1,8 +1,7 @@
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { Alert, Button, Heading, HStack, Tag } from '@navikt/ds-react'
+import { Alert, Button, Heading, HStack, Tag, VStack } from '@navikt/ds-react'
 import { formaterSakstype, formaterStringDato } from '~utils/formattering'
-import { InfoList } from '~components/behandling/soeknadsoversikt/styled'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
@@ -43,7 +42,7 @@ export default function OppsummeringKlagebehandling() {
         </Tag>
       </Heading>
 
-      <InfoList>
+      <VStack gap="4">
         <Info label="Klage framsatt dato" tekst={formaterStringDato(mottattDato)} />
 
         <Alert variant="warning">
@@ -51,7 +50,7 @@ export default function OppsummeringKlagebehandling() {
           Etter at klagebehandlingen er opprettet må du sende ut et kvitteringsbrev til den som har sendt inn klagen
           manuelt.
         </Alert>
-      </InfoList>
+      </VStack>
       <div>
         <HStack gap="4" justify="center">
           <Button variant="secondary" onClick={tilbake}>

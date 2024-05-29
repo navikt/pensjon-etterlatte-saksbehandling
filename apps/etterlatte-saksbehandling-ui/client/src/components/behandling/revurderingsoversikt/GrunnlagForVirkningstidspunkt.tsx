@@ -7,8 +7,7 @@ import { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentFoersteVirk } from '~shared/api/behandling'
-import { Label } from '@navikt/ds-react'
-import { HistorikkElement } from '~components/behandling/soeknadsoversikt/styled'
+import { Box, Label, VStack } from '@navikt/ds-react'
 import { formaterNavn, IPdlPerson } from '~shared/types/Person'
 import { getHistoriskForeldreansvar } from '~shared/api/grunnlag'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
@@ -87,17 +86,17 @@ const AdopsjonGrunnlag = () => {
         {foreldreansvar.opplysning.ansvarligeForeldre.map((forelderPeriode) => {
           const forelder: IPdlPerson | undefined = foreldre[forelderPeriode.forelder]
           return (
-            <HistorikkElement key={`${forelderPeriode.forelder}-${forelderPeriode.fraDato}`}>
-              <span className="date">
+            <VStack key={`${forelderPeriode.forelder}-${forelderPeriode.fraDato}`}>
+              <Box paddingInline="0 2">
                 {formaterKanskjeStringDato(forelderPeriode.fraDato)} -{' '}
                 {formaterKanskjeStringDato(forelderPeriode.tilDato)}
-              </span>
+              </Box>
               <span>
                 {forelder !== undefined
                   ? `${formaterNavn(forelder)} (${forelder.foedselsnummer})`
                   : forelderPeriode.forelder}
               </span>
-            </HistorikkElement>
+            </VStack>
           )
         })}
       </div>

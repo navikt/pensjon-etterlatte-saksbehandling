@@ -1,9 +1,5 @@
 import styled from 'styled-components'
 
-export const Innhold = styled.div`
-  padding: 0 2em;
-`
-
 export const VilkaarWrapper = styled.div`
   padding: 1em 1em 1em 2em;
   display: flex;

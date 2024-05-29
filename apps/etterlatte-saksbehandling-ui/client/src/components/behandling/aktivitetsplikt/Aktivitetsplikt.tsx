@@ -1,6 +1,5 @@
 import { BodyLong, BodyShort, Box, Button, Detail, Heading, Textarea } from '@navikt/ds-react'
 import React, { useContext, useEffect, useState } from 'react'
-import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import styled from 'styled-components'
 import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
@@ -66,15 +65,13 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         apiResult: lagret,
       })}
 
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading spacing size="large" level="1">
-            Oppfølging av aktivitet
-          </Heading>
-          <BodyShort spacing>
-            <strong>Dødsdato: </strong> {avdoedesDoedsdato && formaterDato(new Date(avdoedesDoedsdato))}
-          </BodyShort>
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Heading spacing size="large" level="1">
+          Oppfølging av aktivitet
+        </Heading>
+        <BodyShort spacing>
+          <strong>Dødsdato: </strong> {avdoedesDoedsdato && formaterDato(new Date(avdoedesDoedsdato))}
+        </BodyShort>
       </Box>
 
       <AktivitetspliktWrapper>
@@ -179,13 +176,13 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         </SpacingWrapper>
       </AktivitetspliktWrapper>
 
-      <Border />
-
-      <BehandlingHandlingKnapper>
-        <Button variant="primary" onClick={() => next()}>
-          {handlinger.NESTE.navn}
-        </Button>
-      </BehandlingHandlingKnapper>
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <BehandlingHandlingKnapper>
+          <Button variant="primary" onClick={() => next()}>
+            {handlinger.NESTE.navn}
+          </Button>
+        </BehandlingHandlingKnapper>
+      </Box>
     </>
   )
 }

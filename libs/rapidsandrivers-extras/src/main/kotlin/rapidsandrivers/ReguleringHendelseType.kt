@@ -11,6 +11,7 @@ enum class ReguleringHendelseType : EventnameHendelseType {
     VILKAARSVURDERT,
     TRYGDETID_KOPIERT,
     BEREGNA,
+    YTELSE_IKKE_LOEPENDE,
     ;
 
     override fun lagEventnameForType(): String = "REGULERING:${this.name}"

@@ -82,7 +82,7 @@ internal class LoependeYtelserforespoerselRiverTest {
     }
 
     @Test
-    fun `sender ikke ny melding dersom det ikke er en loepende ytelse`() {
+    fun `sender avbryt-melding dersom det ikke er en loepende ytelse`() {
         val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023) } returns
@@ -94,7 +94,11 @@ internal class LoependeYtelserforespoerselRiverTest {
         val inspector = TestRapid().apply { LoependeYtelserforespoerselRiver(this, vedtakServiceMock) }
 
         inspector.sendTestMessage(melding.toJson())
-        Assertions.assertEquals(0, inspector.inspektør.size)
+        Assertions.assertEquals(1, inspector.inspektør.size)
+        Assertions.assertEquals(
+            inspector.inspektør.message(0).get(EVENT_NAME_KEY).asText(),
+            ReguleringHendelseType.YTELSE_IKKE_LOEPENDE.lagEventnameForType(),
+        )
     }
 
     @Test

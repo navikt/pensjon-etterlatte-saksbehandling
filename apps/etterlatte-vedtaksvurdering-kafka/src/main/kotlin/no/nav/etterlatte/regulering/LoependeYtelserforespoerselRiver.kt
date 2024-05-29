@@ -59,19 +59,23 @@ internal class LoependeYtelserforespoerselRiver(
         if (respons.underSamordning) {
             throw SakErUnderSamordning()
         }
-        respons.takeIf { it.erLoepende }?.let {
+        packet[HENDELSE_DATA_KEY] =
+            Omregningshendelse(
+                sakId = sakId,
+                fradato = respons.dato,
+                prosesstype = Prosesstype.AUTOMATISK,
+                opphoerFraOgMed = respons.opphoerFraOgMed,
+            )
+        respons.sisteLoependeBehandlingId?.let { b -> packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = b }
+        if (respons.erLoepende) {
             packet.setEventNameForHendelseType(ReguleringHendelseType.LOEPENDE_YTELSE_FUNNET)
-            packet[HENDELSE_DATA_KEY] =
-                Omregningshendelse(
-                    sakId = sakId,
-                    fradato = it.dato,
-                    prosesstype = Prosesstype.AUTOMATISK,
-                    opphoerFraOgMed = respons.opphoerFraOgMed,
-                )
-            it.sisteLoependeBehandlingId?.let { b -> packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = b }
             context.publish(packet.toJson())
             logger.info("Grunnbeløpsreguleringmelding ble sendt for sak $sakId. Dato=${respons.dato}")
-        } ?: logger.info("Grunnbeløpsreguleringmelding ble ikke sendt for sak $sakId. Dato=${respons.dato}")
+        } else {
+            packet.setEventNameForHendelseType(ReguleringHendelseType.YTELSE_IKKE_LOEPENDE)
+            context.publish(packet.toJson())
+            logger.info("Grunnbeløpsreguleringmelding ble ikke sendt for sak $sakId. Dato=${respons.dato}")
+        }
     }
 }
 

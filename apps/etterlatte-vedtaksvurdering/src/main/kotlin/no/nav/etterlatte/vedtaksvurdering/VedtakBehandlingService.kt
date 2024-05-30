@@ -56,7 +56,7 @@ class VedtakBehandlingService(
         dato: LocalDate,
     ): LoependeYtelse {
         logger.info("Sjekker om det finnes løpende vedtak for sak $sakId på dato $dato")
-        val alleVedtakForSak = repository.hentVedtakForSak(sakId).filter { it.vedtakFattet != null }
+        val alleVedtakForSak = repository.hentVedtakForSak(sakId).filter { it.vedtakFattet != null && it.attestasjon != null }
         return Vedtakstidslinje(alleVedtakForSak).harLoependeVedtakPaaEllerEtter(dato)
     }
 

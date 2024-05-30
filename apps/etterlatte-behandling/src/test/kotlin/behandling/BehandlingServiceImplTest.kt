@@ -74,7 +74,7 @@ internal class BehandlingServiceImplTest {
     private val grunnlagKlientMock = mockk<GrunnlagKlient>()
     private val oppgaveServiceMock = mockk<OppgaveService>()
 
-    private val sut =
+    private val behandlingService =
         BehandlingServiceImpl(
             behandlingDao = behandlingDaoMock,
             behandlingHendelser = behandlingHendelser,
@@ -107,7 +107,7 @@ internal class BehandlingServiceImplTest {
                 foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
             )
 
-        val behandlinger = sut.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(1)
 
         assertAll(
             "skal hente behandlinger",
@@ -131,7 +131,7 @@ internal class BehandlingServiceImplTest {
                 foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
             )
 
-        val behandlinger = sut.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(1)
 
         assertAll(
             "skal hente behandlinger",
@@ -155,7 +155,7 @@ internal class BehandlingServiceImplTest {
                 foerstegangsbehandling(sakId = 1, enhet = Enheter.STRENGT_FORTROLIG.enhetNr),
             )
 
-        val behandlinger = sut.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(1)
 
         assertAll(
             "skal hente behandlinger",
@@ -179,7 +179,7 @@ internal class BehandlingServiceImplTest {
                 foerstegangsbehandling(sakId = 1, enhet = Enheter.EGNE_ANSATTE.enhetNr),
             )
 
-        val behandlinger = sut.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(1)
 
         assertAll(
             "skal hente behandlinger",
@@ -199,7 +199,7 @@ internal class BehandlingServiceImplTest {
                 foerstegangsbehandling(sakId = 1),
             )
 
-        val behandlinger = sut.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(1)
 
         assertAll(
             "skal hente behandlinger",
@@ -238,18 +238,18 @@ internal class BehandlingServiceImplTest {
 
         val saksbehandler = Saksbehandler("", "saksbehandler", null)
         assertThrows<BehandlingKanIkkeAvbrytesException> {
-            sut.avbrytBehandling(avbruttBehandling.id, saksbehandler)
+            behandlingService.avbrytBehandling(avbruttBehandling.id, saksbehandler)
         }
 
         assertThrows<BehandlingKanIkkeAvbrytesException> {
-            sut.avbrytBehandling(iverksattBehandling.id, saksbehandler)
+            behandlingService.avbrytBehandling(iverksattBehandling.id, saksbehandler)
         }
 
         assertThrows<BehandlingKanIkkeAvbrytesException> {
-            sut.avbrytBehandling(attestertBehandling.id, saksbehandler)
+            behandlingService.avbrytBehandling(attestertBehandling.id, saksbehandler)
         }
         assertDoesNotThrow {
-            sut.avbrytBehandling(nyFoerstegangsbehandling.id, saksbehandler)
+            behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, saksbehandler)
         }
     }
 
@@ -269,7 +269,7 @@ internal class BehandlingServiceImplTest {
         every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
         coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
-        sut.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
+        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
 
         verify {
             hendelseDaoMock.behandlingAvbrutt(any(), any())
@@ -319,7 +319,7 @@ internal class BehandlingServiceImplTest {
         assertFalse(didRollback)
         assertThrows<RuntimeException> {
             inTransaction {
-                sut.avbrytBehandling(
+                behandlingService.avbrytBehandling(
                     nyFoerstegangsbehandling.id,
                     Saksbehandler("", "saksbehandler", null),
                 )
@@ -350,7 +350,7 @@ internal class BehandlingServiceImplTest {
         every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
         coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
-        sut.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
+        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
 
         verify {
             behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
@@ -381,7 +381,7 @@ internal class BehandlingServiceImplTest {
         every { oppgaveServiceMock.avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
         coEvery { grunnlagKlientMock.hentPersongalleri(any(), any()) } returns mockPersongalleri()
 
-        sut.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
+        behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
         verify(exactly = 1) {
             grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(nyFoerstegangsbehandling.id)
         }
@@ -614,7 +614,7 @@ internal class BehandlingServiceImplTest {
         val request = VirkningstidspunktRequest(virkningstidspunkt.toString(), begrunnelse, kravdato?.toLocalDate())
 
         return runBlocking {
-            sut.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
+            behandlingService.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
         }
     }
 
@@ -632,7 +632,7 @@ internal class BehandlingServiceImplTest {
 
         every { behandlingDaoMock.alleBehandlingerISak(any()) } returns listOf(behandling1, behandling2)
 
-        assertEquals(behandling1, sut.hentSisteIverksatte(1))
+        assertEquals(behandling1, behandlingService.hentSisteIverksatte(1))
     }
 
     @Test
@@ -648,7 +648,7 @@ internal class BehandlingServiceImplTest {
                 foerstegangsbehandling(sakId = 1, enhet = Enheter.PORSGRUNN.enhetNr),
             )
 
-        val behandlinger = sut.hentBehandlingerForSak(1)
+        val behandlinger = behandlingService.hentBehandlingerForSak(1)
 
         assertAll(
             "skal hente behandlinger",
@@ -677,7 +677,7 @@ internal class BehandlingServiceImplTest {
         every { behandlingDaoMock.lagreStatus(any()) } just runs
 
         inTransaction {
-            sut.oppdaterBoddEllerArbeidetUtlandet(
+            behandlingService.oppdaterBoddEllerArbeidetUtlandet(
                 uuid,
                 BoddEllerArbeidetUtlandet(
                     true,
@@ -709,7 +709,7 @@ internal class BehandlingServiceImplTest {
                 foerstegangsbehandling(sakId = sak2.id, status = BehandlingStatus.IVERKSATT),
             )
 
-        val sakMedBehandlinger = sut.hentSakMedBehandlinger(listOf(sak1, sak2))
+        val sakMedBehandlinger = behandlingService.hentSakMedBehandlinger(listOf(sak1, sak2))
 
         assertEquals(sak2.id, sakMedBehandlinger.sak.id)
         assertEquals(1, sakMedBehandlinger.behandlinger.size)
@@ -734,12 +734,37 @@ internal class BehandlingServiceImplTest {
                 ),
             )
 
-        val sakMedBehandlinger = sut.hentSakMedBehandlinger(listOf(sak))
+        val sakMedBehandlinger = behandlingService.hentSakMedBehandlinger(listOf(sak))
 
         assertEquals(sak.id, sakMedBehandlinger.sak.id)
         assertEquals(1, sakMedBehandlinger.behandlinger.size)
 
         verify(exactly = 1) { behandlingDaoMock.alleBehandlingerISak(sak.id) }
+    }
+
+    @Test
+    fun `Kan kun endre send brev for revurdering`() {
+        nyKontekstMedBruker(mockSaksbehandler())
+        val behandlingId = UUID.randomUUID()
+        every { behandlingDaoMock.lagreSendeBrev(behandlingId, true) } just runs
+        every {
+            behandlingDaoMock.hentBehandling(behandlingId)
+        } returns revurdering(sakId = 1L, revurderingAarsak = Revurderingaarsak.INNTEKTSENDRING)
+        behandlingService.endreSkalSendeBrev(behandlingId, true)
+        verify(exactly = 1) { behandlingDaoMock.lagreSendeBrev(behandlingId, true) }
+    }
+
+    @Test
+    fun `Kan ikke endre send brev førstegangsbehandling revurdering`() {
+        nyKontekstMedBruker(mockSaksbehandler())
+        val behandlingId = UUID.randomUUID()
+        every { behandlingDaoMock.lagreSendeBrev(behandlingId, true) } just runs
+        every { behandlingDaoMock.hentBehandling(behandlingId) } returns foerstegangsbehandling(sakId = 1L)
+        assertThrows<KanIkkeEndreSendeBrevForFoerstegangsbehandling> {
+            behandlingService.endreSkalSendeBrev(behandlingId, true)
+        }
+
+        verify(exactly = 0) { behandlingDaoMock.lagreSendeBrev(behandlingId, true) }
     }
 
     private fun initFellesMocks(

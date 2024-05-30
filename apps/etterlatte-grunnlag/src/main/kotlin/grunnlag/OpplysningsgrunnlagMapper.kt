@@ -3,7 +3,6 @@ package no.nav.etterlatte.grunnlag
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -16,12 +15,6 @@ class OpplysningsgrunnlagMapper(
     private data class GruppertHendelser(
         val hendelser: List<OpplysningDao.GrunnlagHendelse>,
     ) {
-        init {
-            check(alleOpplysningerErAvSammeType(hendelser.map { it.opplysning })) {
-                "Hendelser er ikke av samme type, antall ${hendelser.size} "
-            }
-        }
-
         val opplysning: Opplysning<JsonNode> =
             hendelser.maxBy { hendelse -> hendelse.hendelseNummer }
                 .let { Opplysning.Konstant.create(it.opplysning) }
@@ -30,13 +23,6 @@ class OpplysningsgrunnlagMapper(
             get() = hendelser.first().opplysning.opplysningType
         val fnr: Folkeregisteridentifikator?
             get() = hendelser.first().opplysning.fnr
-
-        private fun alleOpplysningerErAvSammeType(opplysninger: List<Grunnlagsopplysning<*>>): Boolean {
-            return (opplysninger.size == opplysninger.filter { erPeriodisertOpplysning(it) }.size) ||
-                (opplysninger.size == opplysninger.filterNot { erPeriodisertOpplysning(it) }.size)
-        }
-
-        private fun erPeriodisertOpplysning(grunnlagsopplysning: Grunnlagsopplysning<*>) = grunnlagsopplysning.periode != null
     }
 
     fun hentGrunnlag(): Grunnlag {

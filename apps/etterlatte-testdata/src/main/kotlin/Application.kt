@@ -40,6 +40,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.ktor.X_USER
 import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.ktorobo.AzureAdClient
@@ -126,7 +127,7 @@ fun main() {
                         )
                     }
 
-                    mdc("x_user") { call ->
+                    mdc(X_USER) { call ->
                         call.request.header("Authorization")?.let {
                             val token = JwtToken(it.substringAfterLast("Bearer "))
                             val jwtTokenClaims = token.jwtTokenClaims

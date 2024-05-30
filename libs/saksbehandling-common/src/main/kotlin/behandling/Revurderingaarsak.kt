@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.behandling.KanBrukesIMiljoe.DevOgProd
-import no.nav.etterlatte.libs.common.behandling.KanBrukesIMiljoe.IngenMiljoe
 import no.nav.etterlatte.libs.common.behandling.KanBrukesIMiljoe.KunIDev
 import no.nav.etterlatte.libs.common.clusterNavn
 
@@ -33,60 +32,55 @@ private sealed class KanBrukesIMiljoe {
 enum class Revurderingaarsak(
     private val gyldigFor: List<SakType>,
     private val miljoe: KanBrukesIMiljoe,
-    val skalSendeBrev: Boolean,
 ) {
     // Endring
-    NY_SOEKNAD(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
-    SOESKENJUSTERING(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
-    REGULERING(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
-    INNTEKTSENDRING(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
-    INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
-    YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
-    RETT_UTEN_TIDSBEGRENSNING(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
-    FORELDRELOES(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
+    NY_SOEKNAD(SAKTYPE_BP_OMS, DevOgProd),
+    SOESKENJUSTERING(SAKTYPE_BP, DevOgProd),
+    REGULERING(SAKTYPE_BP_OMS, DevOgProd),
+    INNTEKTSENDRING(SAKTYPE_OMS, DevOgProd),
+    INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd),
+    YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd),
+    RETT_UTEN_TIDSBEGRENSNING(SAKTYPE_OMS, DevOgProd),
+    FORELDRELOES(SAKTYPE_BP, DevOgProd),
 
     // Opphør
-    ALDERSOVERGANG(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
-    DOEDSFALL(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
-    ADOPSJON(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
-    SIVILSTAND(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
-    OMGJOERING_AV_FARSKAP(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
+    ALDERSOVERGANG(SAKTYPE_BP_OMS, DevOgProd),
+    DOEDSFALL(SAKTYPE_BP_OMS, DevOgProd),
+    ADOPSJON(SAKTYPE_BP, DevOgProd),
+    SIVILSTAND(SAKTYPE_OMS, DevOgProd),
+    OMGJOERING_AV_FARSKAP(SAKTYPE_BP, DevOgProd),
 
     // Opphør og endring
-    EKSPORT(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
-    IMPORT(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
-    ANNEN(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    EKSPORT(SAKTYPE_BP_OMS, DevOgProd),
+    IMPORT(SAKTYPE_BP_OMS, DevOgProd),
+    ANNEN(SAKTYPE_BP_OMS, DevOgProd),
 
-    UTSENDELSE_AV_KRAVPAKKE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = false),
+    UTSENDELSE_AV_KRAVPAKKE(SAKTYPE_BP_OMS, DevOgProd),
 
-    OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
-    SLUTTBEHANDLING_UTLAND(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, DevOgProd),
+    SLUTTBEHANDLING_UTLAND(SAKTYPE_BP_OMS, DevOgProd),
 
-    FENGSELSOPPHOLD(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
-    UT_AV_FENGSEL(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
-    UTLAND(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
-    BARN(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
-    ANSVARLIGE_FORELDRE(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
-    VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
+    FENGSELSOPPHOLD(SAKTYPE_BP, DevOgProd),
+    UT_AV_FENGSEL(SAKTYPE_BP, DevOgProd),
+    UTLAND(SAKTYPE_BP, DevOgProd),
+    BARN(SAKTYPE_BP, DevOgProd),
+    ANSVARLIGE_FORELDRE(SAKTYPE_BP, DevOgProd),
+    VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, DevOgProd),
 
-    AVKORTING_MOT_UFOERETRYGD(SAKTYPE_BP, DevOgProd, skalSendeBrev = true),
+    AVKORTING_MOT_UFOERETRYGD(SAKTYPE_BP, DevOgProd),
 
-    OPPHOER_3_AAR_ETTER_DOEDSFALL(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
-    SOEKNAD_OM_GJENOPPTAK(SAKTYPE_OMS, DevOgProd, skalSendeBrev = true),
+    OPPHOER_3_AAR_ETTER_DOEDSFALL(SAKTYPE_OMS, DevOgProd),
+    SOEKNAD_OM_GJENOPPTAK(SAKTYPE_OMS, DevOgProd),
 
-    OMGJOERING_ETTER_ANKE(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
-    OMGJOERING_PAA_EGET_INITIATIV(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
-    OMGJOERING_ETTER_KRAV_FRA_BRUKER(SAKTYPE_BP_OMS, DevOgProd, skalSendeBrev = true),
+    OMGJOERING_ETTER_ANKE(SAKTYPE_BP_OMS, DevOgProd),
+    OMGJOERING_PAA_EGET_INITIATIV(SAKTYPE_BP_OMS, DevOgProd),
+    OMGJOERING_ETTER_KRAV_FRA_BRUKER(SAKTYPE_BP_OMS, DevOgProd),
 
     // Mangler funksjonalitet
-    UTSENDELSE_AV_SED(SAKTYPE_BP_OMS, KunIDev, skalSendeBrev = true),
-    ETTEROPPGJOER(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
-    SANKSJON_PGA_MANGLENDE_OPPLYSNINGER(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
-    OPPHOER_AV_2_UTVIDEDE_AAR(SAKTYPE_OMS, KunIDev, skalSendeBrev = true),
-
-    // Utgår men har blitt brukt
-    ANNEN_UTEN_BREV(SAKTYPE_BP_OMS, IngenMiljoe, skalSendeBrev = false),
-    OPPHOER_UTEN_BREV(SAKTYPE_BP_OMS, IngenMiljoe, skalSendeBrev = false),
+    UTSENDELSE_AV_SED(SAKTYPE_BP_OMS, KunIDev),
+    ETTEROPPGJOER(SAKTYPE_OMS, KunIDev),
+    SANKSJON_PGA_MANGLENDE_OPPLYSNINGER(SAKTYPE_OMS, KunIDev),
+    OPPHOER_AV_2_UTVIDEDE_AAR(SAKTYPE_OMS, KunIDev),
     ;
 
     fun kanBrukesIMiljo(): Boolean =

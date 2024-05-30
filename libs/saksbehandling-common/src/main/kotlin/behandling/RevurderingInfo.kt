@@ -26,6 +26,7 @@ sealed class RevurderingInfo {
     @JsonTypeName("ADOPSJON")
     data object Adopsjon : RevurderingInfo()
 
+    // TODO: Kan denne slettes?
     @JsonTypeName("ANNEN_UTEN_BREV")
     data class RevurderingAarsakAnnenUtenBrev(
         val aarsak: String,

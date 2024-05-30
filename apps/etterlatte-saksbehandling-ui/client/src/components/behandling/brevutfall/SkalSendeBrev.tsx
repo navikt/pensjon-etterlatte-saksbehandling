@@ -17,7 +17,7 @@ export const SkalSendeBrev = (props: { behandling: IBehandlingReducer; behandlin
   const { behandling, behandlingRedigerbart } = props
 
   const dispatch = useAppDispatch()
-  const [requestStatus, redigereRequest] = useApiCall(redigerSendeBrev)
+  const [skalSendeBrevStatus, skalSendeBrevRequest] = useApiCall(redigerSendeBrev)
 
   const [redigere, setRedigere] = useState<boolean>(false)
 
@@ -27,7 +27,7 @@ export const SkalSendeBrev = (props: { behandling: IBehandlingReducer; behandlin
     },
   })
   const submit = (sendeBrev: ISendBrev) => {
-    redigereRequest(
+    skalSendeBrevRequest(
       {
         behandlingId: behandling.id,
         sendBrev: sendeBrev,
@@ -57,9 +57,9 @@ export const SkalSendeBrev = (props: { behandling: IBehandlingReducer; behandlin
               </RadioGroup>
             )}
           />
-          {isFailure(requestStatus) && <Alert variant="error">{requestStatus.error.detail}</Alert>}
+          {isFailure(skalSendeBrevStatus) && <Alert variant="error">{skalSendeBrevStatus.error.detail}</Alert>}
           <HStack gap="4">
-            <Button type="submit" loading={isPending(requestStatus)} variant="primary" size="small">
+            <Button type="submit" loading={isPending(skalSendeBrevStatus)} variant="primary" size="small">
               Lagre
             </Button>
             <Button variant="secondary" size="small" onClick={() => setRedigere(false)}>

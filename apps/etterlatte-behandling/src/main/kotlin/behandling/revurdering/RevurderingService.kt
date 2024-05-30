@@ -311,8 +311,8 @@ class RevurderingService(
             begrunnelse = begrunnelse,
             fritekstAarsak = fritekstAarsak,
             relatertBehandlingId = relatertBehandlingId,
-            sendeBrev = revurderingAarsak.skalSendeBrev,
             opphoerFraOgMed = opphoerFraOgMed,
+            sendeBrev = false, // TODO: Kanskje bare aldri sette noe her?
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
 

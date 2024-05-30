@@ -1,5 +1,4 @@
-import { Box, Button, Checkbox, CheckboxGroup, HGrid, Select, Textarea, VStack } from '@navikt/ds-react'
-import { FormKnapper } from '~components/behandling/trygdetid/styled'
+import { Box, Button, Checkbox, CheckboxGroup, HGrid, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   ILand,
@@ -136,7 +135,7 @@ export const TrygdetidGrunnlag = ({
             )}
           </HGrid>
 
-          <FormKnapper>
+          <HStack gap="4">
             <Button size="small" loading={isPending(trygdetidgrunnlagStatus)} type="submit">
               Lagre
             </Button>
@@ -146,10 +145,11 @@ export const TrygdetidGrunnlag = ({
                 event.preventDefault()
                 avbryt()
               }}
+              variant="secondary"
             >
               Avbryt
             </Button>
-          </FormKnapper>
+          </HStack>
         </VStack>
       </form>
       {mapFailure(trygdetidgrunnlagStatus, (error) =>

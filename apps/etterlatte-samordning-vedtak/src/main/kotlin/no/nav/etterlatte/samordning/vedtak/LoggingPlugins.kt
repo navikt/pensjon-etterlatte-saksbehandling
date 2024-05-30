@@ -16,6 +16,11 @@ import io.ktor.util.logging.KtorSimpleLogger
 import io.ktor.util.pipeline.PipelinePhase
 import net.logstash.logback.marker.Markers
 import no.nav.etterlatte.libs.ktor.PluginConfiguration
+import no.nav.etterlatte.libs.ktor.RESPONSE_TIME
+import no.nav.etterlatte.libs.ktor.STARTTIME
+import no.nav.etterlatte.libs.ktor.X_METHOD
+import no.nav.etterlatte.libs.ktor.X_REQUEST_URI
+import no.nav.etterlatte.libs.ktor.X_RESPONSE_CODE
 import no.nav.etterlatte.libs.ktor.X_USER
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
@@ -26,7 +31,7 @@ import org.slf4j.MDC
 internal val LOGGER = KtorSimpleLogger("no.nav.etterlatte.samordning.requestLogger")
 
 private val userAttribute = AttributeKey<String>(X_USER)
-private val startTimeAttribute = AttributeKey<Long>("starttime")
+private val startTimeAttribute = AttributeKey<Long>(STARTTIME)
 private val loggingPerformed = AttributeKey<Boolean>("requestLoggingPerformed")
 
 private object UserIdMdcHook : Hook<suspend (ApplicationCall) -> Unit> {
@@ -90,11 +95,11 @@ val serverRequestLoggerPlugin =
                 val markers =
                     Markers.appendEntries(
                         mapOf(
-                            "x_method" to method,
-                            "x_response_code" to responseCode,
-                            "x_response_time" to duration,
-                            "x_request_uri" to requestUriTemplate,
-                            "x_user" to (call.attributes.getOrNull(userAttribute) ?: "unknown"),
+                            X_METHOD to method,
+                            X_RESPONSE_CODE to responseCode,
+                            RESPONSE_TIME to duration,
+                            X_REQUEST_URI to requestUriTemplate,
+                            X_USER to (call.attributes.getOrNull(userAttribute) ?: "unknown"),
                         ),
                     )
 

@@ -6,6 +6,11 @@ import io.ktor.client.request.HttpSendPipeline
 import io.ktor.client.statement.HttpReceivePipeline
 import io.ktor.util.AttributeKey
 import net.logstash.logback.marker.Markers
+import no.nav.etterlatte.libs.ktor.RESPONSE_TIME
+import no.nav.etterlatte.libs.ktor.X_REQUEST_METHOD
+import no.nav.etterlatte.libs.ktor.X_REQUEST_URI
+import no.nav.etterlatte.libs.ktor.X_RESPONSE_CODE
+import no.nav.etterlatte.libs.ktor.X_UPSTREAM_HOST
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
@@ -45,11 +50,11 @@ internal class ClientCallLogging private constructor() {
                 logger.info(
                     Markers.appendEntries(
                         mapOf<String, Any?>(
-                            "x_upstream_host" to request.url.host,
-                            "x_request_uri" to request.url.encodedPath,
-                            "x_request_method" to request.method,
-                            "response_code" to response.status.value,
-                            "response_time" to executionTime,
+                            X_UPSTREAM_HOST to request.url.host,
+                            X_REQUEST_URI to request.url.encodedPath,
+                            X_REQUEST_METHOD to request.method,
+                            X_RESPONSE_CODE to response.status.value,
+                            RESPONSE_TIME to executionTime,
                         ),
                     ),
                     "{} {} {} in {} ms",

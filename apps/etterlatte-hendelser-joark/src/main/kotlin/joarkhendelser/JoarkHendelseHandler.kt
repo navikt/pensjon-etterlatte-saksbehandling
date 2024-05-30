@@ -56,8 +56,12 @@ class JoarkHendelseHandler(
             "Starter behandling av hendelse (id=$hendelseId, journalpostId=$journalpostId, tema=$temaNytt)",
         )
 
-        val journalpost = safKlient.hentJournalpost(journalpostId).journalpost
+        val response = safKlient.hentJournalpost(journalpostId)
+        if (response.error != null) {
+            throw RuntimeException("Fikk feil fra SAF: [${response.error.statusCode}] ${response.error.message}")
+        }
 
+        val journalpost = response.journalpost
         if (journalpost == null) {
             throw NullPointerException("Fant ingen journalpost med id=$journalpostId")
         } else if (journalpost.erFerdigstilt()) {

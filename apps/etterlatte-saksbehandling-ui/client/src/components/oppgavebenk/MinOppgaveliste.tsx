@@ -22,6 +22,7 @@ import {
   hentMinOppgavelisteFilterFraLocalStorage,
   leggMinOppgavelisteFilterILocalsotrage,
 } from '~components/oppgavebenk/filtreringAvOppgaver/filterLocalStorage'
+import { VStack } from '@navikt/ds-react'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -82,7 +83,7 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
   }, [])
 
   return (
-    <>
+    <VStack gap="2">
       <FilterRad
         hentAlleOppgaver={hentMinOppgavelisteOppgaver}
         hentOppgaverStatus={(oppgavestatusFilter: Array<string>) => hentMinOppgavelisteOppgaver(oppgavestatusFilter)}
@@ -108,6 +109,6 @@ export const MinOppgaveliste = ({ saksbehandlereIEnhet }: Props) => {
           error: (error) => <ApiErrorAlert>{error.detail || 'Kunne ikke hente dine oppgaver'}</ApiErrorAlert>,
         })
       )}
-    </>
+    </VStack>
   )
 }

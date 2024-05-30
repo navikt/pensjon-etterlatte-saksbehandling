@@ -1,6 +1,4 @@
 import { Alert } from '@navikt/ds-react'
-import styled from 'styled-components'
+import React from 'react'
 
-export const OppgaveAlert = styled(Alert)`
-  margin-top: 2rem;
-`
+export const AlertIngenOppgaver = <Alert variant="info">Ingen oppgaver</Alert>

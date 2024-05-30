@@ -12,7 +12,7 @@ import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils
 import { filtrerOppgaver } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
-import { OppgaveAlert } from '~components/oppgavebenk/utils/oppgaveFelles'
+import { AlertIngenOppgaver } from '~components/oppgavebenk/utils/oppgaveFelles'
 
 export interface Props {
   oppgaver: OppgaveDTO[]
@@ -56,7 +56,7 @@ export const Oppgaver = ({
 
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
-  if (!paginerteOppgaver.length) return <OppgaveAlert variant="info">Ingen oppgaver</OppgaveAlert>
+  if (!paginerteOppgaver.length) return AlertIngenOppgaver
 
   return (
     <VStack gap="2">

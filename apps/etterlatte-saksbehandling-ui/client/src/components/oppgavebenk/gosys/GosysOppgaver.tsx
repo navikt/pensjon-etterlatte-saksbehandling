@@ -10,7 +10,7 @@ import { Saksbehandler } from '~shared/types/saksbehandler'
 import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils/oppgaveHandlinger'
 import { GosysOppgave } from '~shared/types/Gosys'
 import { GosysOppgaverTable } from './GosysOppgaverTable'
-import { OppgaveAlert } from '~components/oppgavebenk/utils/oppgaveFelles'
+import { AlertIngenOppgaver } from '~components/oppgavebenk/utils/oppgaveFelles'
 
 export interface Props {
   oppgaver: GosysOppgave[]
@@ -35,7 +35,7 @@ export const GosysOppgaver = ({ oppgaver, saksbehandlereIEnhet, fnrFilter }: Pro
 
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
-  if (!paginerteOppgaver.length) return <OppgaveAlert variant="info">Ingen oppgaver</OppgaveAlert>
+  if (!paginerteOppgaver.length) return AlertIngenOppgaver
 
   return (
     <VStack gap="2">

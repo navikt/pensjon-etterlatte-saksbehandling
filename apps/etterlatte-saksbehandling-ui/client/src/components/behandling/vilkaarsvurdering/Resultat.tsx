@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { Dispatch, SetStateAction, useState } from 'react'
 import styled from 'styled-components'
 import { VilkaarsvurderingKnapper } from './VilkaarsvurderingKnapper'
 import {
@@ -9,7 +9,7 @@ import {
 } from '~shared/api/vilkaarsvurdering'
 import { VilkaarWrapper } from './styled'
 import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea, Box } from '@navikt/ds-react'
-import { svarTilTotalResultat } from './utils'
+import { svarTilTotalResultat, totalResultatTilSvar } from './utils'
 import { PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
 import { formaterSakstype, formaterStringDato } from '~utils/formattering'
@@ -32,6 +32,8 @@ type Props = {
   behandlingId: string
   redigerbar: boolean
   behandlingstype: IBehandlingsType
+  redigerTotalvurdering: boolean
+  setRedigerTotalvurdering: Dispatch<SetStateAction<boolean>>
 }
 
 export const Resultat = (props: Props) => {
@@ -43,6 +45,7 @@ export const Resultat = (props: Props) => {
     behandlingId,
     redigerbar,
     behandlingstype,
+    setRedigerTotalvurdering,
   } = props
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
@@ -50,7 +53,6 @@ export const Resultat = (props: Props) => {
   const dispatch = useAppDispatch()
   const [totalVurderingStatus, oppdaterTotalVurderingCall] = useApiCall(oppdaterTotalVurdering)
   const [slettVurderingStatus, slettTotalVurderingCall] = useApiCall(slettTotalVurdering)
-
   const alleVilkaarErVurdert = !vilkaarsvurdering.vilkaar.some((vilkaar) => !vilkaar.vurdering)
 
   const slettVilkaarsvurderingResultat = () =>
@@ -131,7 +133,10 @@ export const Resultat = (props: Props) => {
               {redigerbar && (
                 <Button
                   loading={isPending(slettVurderingStatus)}
-                  onClick={slettVilkaarsvurderingResultat}
+                  onClick={() => {
+                    slettVilkaarsvurderingResultat()
+                    setRedigerTotalvurdering(false)
+                  }}
                   variant="tertiary"
                   icon={<TrashIcon />}
                 >
@@ -143,6 +148,10 @@ export const Resultat = (props: Props) => {
                   style={{ marginLeft: '1rem' }}
                   onClick={() => {
                     setKommentar(vilkaarsvurdering?.resultat?.kommentar || '')
+                    if (vilkaarsvurdering.resultat?.utfall) {
+                      setSvar(totalResultatTilSvar(vilkaarsvurdering.resultat?.utfall))
+                    }
+                    setRedigerTotalvurdering(true)
                     const vilkaarsvurderingUtenResultat = { ...vilkaarsvurdering, resultat: undefined }
                     dispatch(updateVilkaarsvurdering(vilkaarsvurderingUtenResultat))
                   }}
@@ -150,7 +159,7 @@ export const Resultat = (props: Props) => {
                   icon={<PencilWritingIcon />}
                   loading={isPending(totalVurderingStatus)}
                 >
-                  Rediger vurdering
+                  Rediger totalvurdering
                 </Button>
               )}
             </ContentWrapper>
@@ -167,6 +176,7 @@ export const Resultat = (props: Props) => {
                   legend=""
                   size="small"
                   className="radioGroup"
+                  value={svar || ''}
                   onChange={(event) => {
                     setSvar(ISvar[event as ISvar])
                     setRadioError(undefined)

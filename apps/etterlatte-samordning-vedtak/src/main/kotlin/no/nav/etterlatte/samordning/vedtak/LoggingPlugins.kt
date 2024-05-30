@@ -24,7 +24,7 @@ import org.slf4j.MDC
 
 internal val LOGGER = KtorSimpleLogger("no.nav.etterlatte.samordning.requestLogger")
 
-private val userAttribute = AttributeKey<String>("user")
+private val userAttribute = AttributeKey<String>("x_user")
 private val startTimeAttribute = AttributeKey<Long>("starttime")
 private val loggingPerformed = AttributeKey<Boolean>("requestLoggingPerformed")
 

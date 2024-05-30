@@ -1,5 +1,5 @@
-import { Button, Checkbox, CheckboxGroup, Select, Textarea } from '@navikt/ds-react'
-import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
+import { Box, Button, Checkbox, CheckboxGroup, Select, Textarea } from '@navikt/ds-react'
+import { FormKnapper, FormWrapper } from '~components/behandling/trygdetid/styled'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   ILand,
@@ -71,7 +71,7 @@ export const TrygdetidGrunnlag = ({
 
   return (
     <TrygdetidGrunnlagWrapper>
-      <Innhold>
+      <Box paddingInline="0 8" paddingBlock="0 8">
         <TrygdetidForm onSubmit={handleSubmit((data) => onSubmit(data))}>
           <Rows>
             <FormWrapper>
@@ -162,7 +162,7 @@ export const TrygdetidGrunnlag = ({
             </FormKnapper>
           </Rows>
         </TrygdetidForm>
-      </Innhold>
+      </Box>
 
       {mapFailure(trygdetidgrunnlagStatus, (error) =>
         error.status === 409 ? (

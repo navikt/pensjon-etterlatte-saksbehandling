@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { Textarea } from '@navikt/ds-react'
 
 export const FormWrapper = styled.div`
   display: flex;
@@ -13,4 +14,8 @@ export const FormKnapper = styled.div`
   button {
     margin-right: 1em;
   }
+`
+
+export const Begrunnelse = styled(Textarea)`
+  width: 15rem;
 `

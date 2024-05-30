@@ -44,5 +44,3 @@ Veldig mange steder bruke vi f.eks `margin-top: 1rem` for å lage litt spacing m
 `<Innhold />` --> `<Box paddingInline="8" />`
 
 `<VilkaarWrapper />` --> `<Box paddingBlock="4" paddingInline="8 4"><HStack justify="space-between" /></Box>`
-
-## ~components/behandling/trygdetid/styled.tsx

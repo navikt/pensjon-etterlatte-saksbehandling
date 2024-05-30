@@ -128,24 +128,18 @@ enum class ReguleringFeatureToggle(private val key: String) : FeatureToggle {
 
 private val sakerViIkkeRegulererAutomatiskNaa =
     listOf<Long>(
+        6402, // EKSPORT: Feilmelding: Virkningstidspunkt kan ikke være etter opphør
+        8883, // Feil i grunnlag.
+        13046, // Feil i grunnlag
+        16642, // Feil i grunnlag
+        9455, // Ulik versjon av grunnlag brukt i trygdetid og behandling
+        12789, // Ulik versjon av grunnlag brukt i trygdetid og behandling
+        16095, // Opprettet regulering, men stuck i OPPRETTET. Se slack for detaljer
+        // Manuelt overstyrt
         3482, // Revurdering med overstyrt beregning åpen behandling
         6323, // Revurdering med overstyrt beregning åpen behandling
         11606, // Revurdering med overstyrt beregning åpen behandling
         11848, // Revurdering med overstyrt beregning åpen behandling
-        6402, // EKSPORT: Feilmelding: Virkningstidspunkt kan ikke være etter opphør
-        8883, // Feil i grunnlag.
-        // https://logs.adeo.no/app/discover#/doc/96e648c0-980a-11e9-830a-e17bbd64b4db/.ds-navlogs-2024.05.28-000011?id=aiDgv48BZiQzzTM0q6EU
-        9455, // Ulik versjon av grunnlag brukt i trygdetid og behandling
-        13046, // Feil i grunnlag
-        12789, // Ulik versjon av grunnlag brukt i trygdetid og behandling
-        16095, // Opprettet regulering, men stuck i OPPRETTET. Se slack for detaljer
-        16642, // Feil i grunnlag
-        // Manuelt overstyrt
         2912, // Feiler med Ingen perioder for grunnlaget ble gitt for periodisering
-        11076, // Periodene for periodisering overlapper
-        11596, // Periodene for periodisering overlapper
-        11949, // Periodene for periodisering overlapper
-        11952, // Periodene for periodisering overlapper
-        11932, // Periodene for periodisering overlapper
         14888, // List is empty
     )

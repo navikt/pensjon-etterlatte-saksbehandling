@@ -5,7 +5,7 @@ import {
   finnOgOppdaterSaksbehandlerTildeling,
   leggTilOppgavenIMinliste,
   sorterOppgaverEtterOpprettet,
-} from '~components/oppgavebenk/utils/oppgaveutils'
+} from '~components/oppgavebenk/utils/oppgaveHandlinger'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import Spinner from '~shared/Spinner'

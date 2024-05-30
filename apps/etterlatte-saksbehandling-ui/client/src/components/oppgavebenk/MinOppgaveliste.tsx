@@ -9,7 +9,7 @@ import {
   leggTilOppgavenIMinliste,
   oppdaterFrist,
   sorterOppgaverEtterOpprettet,
-} from '~components/oppgavebenk/utils/oppgaveutils'
+} from '~components/oppgavebenk/utils/oppgaveHandlinger'
 import { FilterRad } from '~components/oppgavebenk/filtreringAvOppgaver/FilterRad'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { OppgavelisteValg } from '~components/oppgavebenk/velgOppgaveliste/oppgavelisteValg'

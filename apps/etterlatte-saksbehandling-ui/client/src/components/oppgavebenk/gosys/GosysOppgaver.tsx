@@ -1,4 +1,4 @@
-import { Alert, VStack } from '@navikt/ds-react'
+import { VStack } from '@navikt/ds-react'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { PagineringsKontroller } from '~components/oppgavebenk/oppgaver/PagineringsKontroller'
 import {
@@ -7,9 +7,10 @@ import {
   sorterGosysOppgaver,
 } from '~components/oppgavebenk/utils/oppgaveSortering'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils/oppgaveutils'
+import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils/oppgaveHandlinger'
 import { GosysOppgave } from '~shared/types/Gosys'
 import { GosysOppgaverTable } from './GosysOppgaverTable'
+import { OppgaveAlert } from '~components/oppgavebenk/utils/oppgaveFelles'
 
 export interface Props {
   oppgaver: GosysOppgave[]
@@ -34,7 +35,7 @@ export const GosysOppgaver = ({ oppgaver, saksbehandlereIEnhet, fnrFilter }: Pro
 
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
-  if (!paginerteOppgaver.length) return <Alert variant="info">Ingen oppgaver</Alert>
+  if (!paginerteOppgaver.length) return <OppgaveAlert variant="info">Ingen oppgaver</OppgaveAlert>
 
   return (
     <VStack gap="2">

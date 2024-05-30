@@ -43,7 +43,7 @@ export const SidebarContent = styled.div<{ $collapsed: boolean }>`
 `
 export const Scroller = styled.div`
   overflow-y: scroll;
-  height: calc(100vh - 182px);
+  height: calc(100vh - 182px); // 182 px er høyden av dekoratøren + pdlpersonbar og stegmenyen
   padding-bottom: 4rem;
 `
 

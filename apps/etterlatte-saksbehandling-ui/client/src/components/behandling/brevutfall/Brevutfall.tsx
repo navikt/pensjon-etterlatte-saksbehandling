@@ -14,6 +14,7 @@ import { IBehandlingReducer, updateBrevutfallOgEtterbetaling } from '~store/redu
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { SkalSendeBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
 export interface BrevutfallOgEtterbetaling {
   opphoer?: boolean | null
@@ -106,10 +107,11 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
   useEffect(() => {
     hentBrevutfall()
   }, [behandling.id])
+  const erIkkeFoerstegangsbehandling = behandling.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING
 
   return behandling.sendeBrev ? (
     <BrevutfallContent id="brevutfall">
-      <SkalSendeBrev behandling={behandling} behandlingRedigerbart={redigerbar} />
+      {erIkkeFoerstegangsbehandling && <SkalSendeBrev behandling={behandling} behandlingRedigerbart={redigerbar} />}
       <Heading level="2" size="small" spacing>
         Valg av utfall i brev
       </Heading>
@@ -146,7 +148,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
     </BrevutfallContent>
   ) : (
     <>
-      <SkalSendeBrev behandling={behandling} behandlingRedigerbart={redigerbar} />
+      {erIkkeFoerstegangsbehandling && <SkalSendeBrev behandling={behandling} behandlingRedigerbart={redigerbar} />}
       <InfoAlert variant="info">Det sendes ikke vedtaksbrev for denne behandlingen.</InfoAlert>
     </>
   )

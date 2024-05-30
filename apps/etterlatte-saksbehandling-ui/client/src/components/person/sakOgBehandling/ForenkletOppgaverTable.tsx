@@ -15,7 +15,7 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import {
   finnOgOppdaterSaksbehandlerTildeling,
   sorterOppgaverEtterOpprettet,
-} from '~components/oppgavebenk/utils/oppgaveutils'
+} from '~components/oppgavebenk/utils/oppgaveHandlinger'
 
 export const ForenkletOppgaverTable = ({
   oppgaver,

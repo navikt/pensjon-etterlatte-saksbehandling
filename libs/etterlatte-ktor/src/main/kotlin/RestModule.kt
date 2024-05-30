@@ -66,10 +66,10 @@ fun Application.restModule(
         }
         callIdMdc(CORRELATION_ID)
 
-        mdc("method") { call -> call.request.httpMethod.value }
-        mdc("inbound_uri") { call -> call.request.path() }
+        mdc("x_method") { call -> call.request.httpMethod.value }
+        mdc("x_inbound_uri") { call -> call.request.path() }
 
-        mdc("user") { call ->
+        mdc("x_user") { call ->
             call.request.header("Authorization")?.let {
                 val token = JwtToken(it.substringAfterLast("Bearer "))
                 val jwtTokenClaims = token.jwtTokenClaims

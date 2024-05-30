@@ -126,7 +126,7 @@ fun main() {
                         )
                     }
 
-                    mdc("user") { call ->
+                    mdc("x_user") { call ->
                         call.request.header("Authorization")?.let {
                             val token = JwtToken(it.substringAfterLast("Bearer "))
                             val jwtTokenClaims = token.jwtTokenClaims

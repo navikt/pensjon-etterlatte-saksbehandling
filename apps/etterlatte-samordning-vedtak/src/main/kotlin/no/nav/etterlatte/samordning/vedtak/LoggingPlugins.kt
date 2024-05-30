@@ -16,6 +16,7 @@ import io.ktor.util.logging.KtorSimpleLogger
 import io.ktor.util.pipeline.PipelinePhase
 import net.logstash.logback.marker.Markers
 import no.nav.etterlatte.libs.ktor.PluginConfiguration
+import no.nav.etterlatte.libs.ktor.X_USER
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -24,7 +25,7 @@ import org.slf4j.MDC
 
 internal val LOGGER = KtorSimpleLogger("no.nav.etterlatte.samordning.requestLogger")
 
-private val userAttribute = AttributeKey<String>("x_user")
+private val userAttribute = AttributeKey<String>(X_USER)
 private val startTimeAttribute = AttributeKey<Long>("starttime")
 private val loggingPerformed = AttributeKey<Boolean>("requestLoggingPerformed")
 
@@ -65,7 +66,7 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
                     call.orgNummer
                 }
 
-            MDC.put("x_user", user)
+            MDC.put(X_USER, user)
             call.attributes.put(userAttribute, user)
 
             return@on

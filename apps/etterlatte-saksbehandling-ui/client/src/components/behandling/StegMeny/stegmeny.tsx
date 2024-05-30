@@ -5,11 +5,13 @@ import { IBehandlingReducer, updateVilkaarsvurdering } from '~store/reducers/Beh
 import { BehandlingRouteTypes, revurderingRoutes, soeknadRoutes } from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useAppDispatch } from '~store/Store'
 
-import { isSuccess } from '~shared/api/apiUtils'
+import { mapApiResult } from '~shared/api/apiUtils'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import Spinner from '~shared/Spinner'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const dispatch = useAppDispatch()
@@ -32,31 +34,39 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
     })
   }, [behandling.status])
 
-  if (isSuccess(fetchVilkaarsvurderingStatus)) {
-    return (
-      <StegMenyWrapper role="navigation">
-        {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-          soeknadRoutes_.map((pathInfo, index) => (
-            <NavLenke
-              key={pathInfo.path}
-              pathInfo={pathInfo}
-              behandling={props.behandling}
-              separator={erSisteRoute(index, soeknadRoutes_)}
-            />
-          ))}
-        {behandlingType === IBehandlingsType.REVURDERING &&
-          revurderingRoutes_.map((pathInfo, index) => (
-            <NavLenke
-              key={pathInfo.path}
-              pathInfo={pathInfo}
-              behandling={props.behandling}
-              separator={erSisteRoute(index, revurderingRoutes_)}
-            />
-          ))}
-      </StegMenyWrapper>
-    )
-  }
-  return null
+  return (
+    <>
+      {mapApiResult(
+        fetchVilkaarsvurderingStatus,
+        <Spinner label="Laste stegmeny" visible />,
+        () => (
+          <ApiErrorAlert>Kunne ikke hente lage stegmeny</ApiErrorAlert>
+        ),
+        () => (
+          <StegMenyWrapper role="navigation">
+            {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+              soeknadRoutes_.map((pathInfo, index) => (
+                <NavLenke
+                  key={pathInfo.path}
+                  pathInfo={pathInfo}
+                  behandling={props.behandling}
+                  separator={erSisteRoute(index, soeknadRoutes_)}
+                />
+              ))}
+            {behandlingType === IBehandlingsType.REVURDERING &&
+              revurderingRoutes_.map((pathInfo, index) => (
+                <NavLenke
+                  key={pathInfo.path}
+                  pathInfo={pathInfo}
+                  behandling={props.behandling}
+                  separator={erSisteRoute(index, revurderingRoutes_)}
+                />
+              ))}
+          </StegMenyWrapper>
+        )
+      )}
+    </>
+  )
 }
 
 export const StegMenyWrapper = styled.ul`

@@ -17,6 +17,7 @@ import { resetPersonopplysninger, setPersonopplysninger } from '~store/reducers/
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapAllApiResult } from '~shared/api/apiUtils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
+import styled from 'styled-components'
 
 export const Behandling = () => {
   useSidetittel('Behandling')
@@ -65,8 +66,10 @@ export const Behandling = () => {
         const behandling = behandlingFraRedux as IBehandlingReducer
         return (
           <>
-            {soeker && <PdlPersonStatusBar person={soeker} />}
-            <StegMeny behandling={behandling} />
+            <StickyIcky>
+              {soeker && <PdlPersonStatusBar person={soeker} />}
+              <StegMeny behandling={behandling} />
+            </StickyIcky>
             <GridContainer>
               <MainContent>
                 <Routes>
@@ -85,3 +88,8 @@ export const Behandling = () => {
     }
   )
 }
+
+const StickyIcky = styled.div`
+  position: sticky;
+  top: 0;
+`

@@ -32,13 +32,14 @@ export const MainContent = styled(Box)`
 
 export const CollapsibleSidebar = styled.div<{ $collapsed: boolean }>`
   background: var(--a-white);
-  position: relative;
   max-height: fit-content;
   min-width: ${(props) => (props.$collapsed ? '50px' : '20%')};
 `
 
 export const SidebarContent = styled.div<{ $collapsed: boolean }>`
   display: ${(props) => (props.$collapsed ? 'none' : 'block')};
+  position: sticky;
+  top: 8rem;
   margin-bottom: 4rem;
 `
 

@@ -46,6 +46,6 @@ class SafKlient(
                 .readText()
                 .replace(Regex("[\n\t]"), "")
 
-        return GraphqlRequest(query, JournalpostVariables(journalpostId))
+        return GraphqlRequest(query, JournalpostVariables(journalpostId.toString()))
     }
 }

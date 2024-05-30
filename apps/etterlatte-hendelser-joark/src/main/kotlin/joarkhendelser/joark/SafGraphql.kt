@@ -46,7 +46,7 @@ data class GraphqlRequest(
 )
 
 data class JournalpostVariables(
-    val journalpostId: Long,
+    val journalpostId: String,
 )
 
 data class Journalpost(

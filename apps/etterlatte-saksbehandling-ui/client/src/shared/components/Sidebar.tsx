@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react'
 import { Button } from '@navikt/ds-react'
-import { CollapsibleSidebar, SidebarContent, SidebarTools } from '~shared/styled'
+import { CollapsibleSidebar, Scroller, SidebarContent, SidebarTools } from '~shared/styled'
 import styled, { css } from 'styled-components'
 import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
 
@@ -15,7 +15,9 @@ export const Sidebar = ({ children }: { children: ReactNode }) => {
         </Button>
       </SidebarTools>
 
-      <SidebarContent $collapsed={collapsed}>{children}</SidebarContent>
+      <SidebarContent $collapsed={collapsed}>
+        <Scroller>{children}</Scroller>
+      </SidebarContent>
     </CollapsibleSidebar>
   )
 }

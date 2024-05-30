@@ -40,7 +40,11 @@ export const SidebarContent = styled.div<{ $collapsed: boolean }>`
   display: ${(props) => (props.$collapsed ? 'none' : 'block')};
   position: sticky;
   top: 8rem;
-  margin-bottom: 4rem;
+`
+export const Scroller = styled.div`
+  overflow-y: scroll;
+  height: calc(100vh - 182px);
+  padding-bottom: 4rem;
 `
 
 export const SidebarTools = styled.div`

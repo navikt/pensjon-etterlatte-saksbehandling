@@ -9,6 +9,8 @@ import { GrunnlagKilde } from '~shared/types/grunnlag'
 import { IPdlPerson } from '~shared/types/Person'
 import { Utlandsopphold } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/UtvandringInnvandring'
 import { StatsborgerskapVisning } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/StatsborgerskapVisning'
+import { Result } from '~shared/api/apiUtils'
+import { ILand } from '~shared/api/trygdetid'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
@@ -29,9 +31,10 @@ type Props = {
   person: IPdlPerson
   kilde: GrunnlagKilde
   avdoed?: boolean
+  landListeResult: Result<ILand[]>
 }
 
-export const Person = ({ person, kilde, avdoed = false }: Props) => {
+export const Person = ({ person, kilde, avdoed = false, landListeResult }: Props) => {
   return (
     <PersonBorder>
       <IconWrapper>
@@ -58,6 +61,7 @@ export const Person = ({ person, kilde, avdoed = false }: Props) => {
         <StatsborgerskapVisning
           statsborgerskap={person.statsborgerskap}
           pdlStatsborgerskap={person.pdlStatsborgerskap}
+          landListeResult={landListeResult}
         />
         <Detail>
           <Label size="small" as="p">

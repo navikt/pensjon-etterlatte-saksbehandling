@@ -3,15 +3,22 @@ import { Box, Label } from '@navikt/ds-react'
 import { UstiletListe } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import { ListeItemMedSpacingIMellom } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/UtvandringInnvandring'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
+import { Result } from '~shared/api/apiUtils'
+import { ILand } from '~shared/api/trygdetid'
+import { visLandInfoFraKodeverkEllerDefault } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
 
-export function StatsborgerskapVisning(props: { statsborgerskap?: string; pdlStatsborgerskap?: Statsborgerskap[] }) {
-  const { statsborgerskap, pdlStatsborgerskap } = props
+export function StatsborgerskapVisning(props: {
+  statsborgerskap?: string
+  pdlStatsborgerskap?: Statsborgerskap[]
+  landListeResult: Result<ILand[]>
+}) {
+  const { statsborgerskap, pdlStatsborgerskap, landListeResult } = props
 
   if (!pdlStatsborgerskap) {
     return (
       <Box paddingBlock="2 0">
         <Label as="p">Statsborgerskap</Label>
-        <span>{statsborgerskap ?? 'Ukjent'}</span>
+        <span>{visLandInfoFraKodeverkEllerDefault(landListeResult, statsborgerskap)}</span>
       </Box>
     )
   }

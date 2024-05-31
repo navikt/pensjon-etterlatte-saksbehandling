@@ -9,6 +9,8 @@ import { IconSize } from '~shared/types/Icon'
 import { GrunnlagKilde } from '~shared/types/grunnlag'
 import { Utlandsopphold } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/UtvandringInnvandring'
 import { StatsborgerskapVisning } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/StatsborgerskapVisning'
+import { ILand } from '~shared/api/trygdetid'
+import { Result } from '~shared/api/apiUtils'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
@@ -31,9 +33,17 @@ type Props = {
   avdoed?: boolean
   mottaker?: boolean
   gjenlevende?: boolean
+  landListeResult: Result<ILand[]>
 }
 
-export const Person = ({ person, kilde, avdoed = false, mottaker = false, gjenlevende = false }: Props) => {
+export const Person = ({
+  person,
+  kilde,
+  avdoed = false,
+  mottaker = false,
+  gjenlevende = false,
+  landListeResult,
+}: Props) => {
   const getHeaderTekst = () => {
     if (avdoed) {
       return 'Avdød forelder'
@@ -68,6 +78,7 @@ export const Person = ({ person, kilde, avdoed = false, mottaker = false, gjenle
         <StatsborgerskapVisning
           statsborgerskap={person.statsborgerskap}
           pdlStatsborgerskap={person.pdlStatsborgerskap}
+          landListeResult={landListeResult}
         />
         <Detail as="div">
           <Label size="small" as="p">

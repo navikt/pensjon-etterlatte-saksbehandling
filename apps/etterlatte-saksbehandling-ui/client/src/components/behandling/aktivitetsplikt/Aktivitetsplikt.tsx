@@ -9,7 +9,6 @@ import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger, usePersonopplysningerOmsAvdoede } from '~components/person/usePersonopplysninger'
 import { AktivitetspliktTidslinje } from '~components/behandling/aktivitetsplikt/AktivitetspliktTidslinje'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { formaterDato, formaterDatoMedKlokkeslett } from '~utils/formattering'
 import { AktivitetspliktVurdering } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurdering'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -32,7 +31,6 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
   const [hentet, hent] = useApiCall(hentAktivitetspliktOppfolging)
 
   const configContext = useContext(ConfigContext)
-  const visTidslinje = useFeatureEnabledMedDefault('aktivitetsplikt-tidslinje', false)
 
   useEffect(() => {
     hent({ behandlingId: behandling.id }, (aktivitetOppfolging) => {
@@ -41,7 +39,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
   }, [])
 
   const erFerdigUtfylt = () => {
-    if (visTidslinje && manglerAktivitetspliktVurdering === undefined) {
+    if (manglerAktivitetspliktVurdering === undefined) {
       setManglerAktivitetspliktVurdering(true)
       return
     }
@@ -78,13 +76,12 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           </BodyLong>
         </TekstWrapper>
 
-        {visTidslinje && <AktivitetspliktTidslinje behandling={behandling} doedsdato={new Date(avdoedesDoedsdato!!)} />}
-        {visTidslinje && (
-          <AktivitetspliktVurdering
-            behandling={behandling}
-            resetManglerAktivitetspliktVurdering={() => setManglerAktivitetspliktVurdering(false)}
-          />
-        )}
+        <AktivitetspliktTidslinje behandling={behandling} doedsdato={new Date(avdoedesDoedsdato!!)} />
+
+        <AktivitetspliktVurdering
+          behandling={behandling}
+          resetManglerAktivitetspliktVurdering={() => setManglerAktivitetspliktVurdering(false)}
+        />
 
         {aktivitetOppfolging && (
           <div>

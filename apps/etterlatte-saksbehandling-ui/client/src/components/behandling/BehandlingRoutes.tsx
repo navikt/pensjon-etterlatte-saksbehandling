@@ -219,7 +219,6 @@ export function revurderingRoutes(behandling: IBehandlingReducer, lagVarselbrev:
     : [
         routeTypes.revurderingsoversikt,
         routeTypes.vilkaarsvurdering,
-        routeTypes.aktivitetsplikt,
         routeTypes.trygdetid,
         routeTypes.beregningsgrunnlag,
         routeTypes.beregning,

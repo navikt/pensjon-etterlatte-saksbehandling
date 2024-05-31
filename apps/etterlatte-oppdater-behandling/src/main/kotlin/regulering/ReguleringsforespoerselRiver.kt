@@ -134,5 +134,4 @@ private val sakerViIkkeRegulererAutomatiskNaa =
         11606, // Revurdering med overstyrt beregning åpen behandling
         11848, // Revurdering med overstyrt beregning åpen behandling
         2912, // Feiler med Ingen perioder for grunnlaget ble gitt for periodisering
-        14888, // List is empty
     )

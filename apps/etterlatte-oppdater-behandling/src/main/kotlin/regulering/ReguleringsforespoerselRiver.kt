@@ -128,9 +128,6 @@ enum class ReguleringFeatureToggle(private val key: String) : FeatureToggle {
 
 private val sakerViIkkeRegulererAutomatiskNaa =
     listOf<Long>(
-        9455, // Ulik versjon av grunnlag brukt i trygdetid og behandling
-        12789, // Ulik versjon av grunnlag brukt i trygdetid og behandling
-        16095, // Opprettet regulering, men stuck i OPPRETTET. Se slack for detaljer
         // Manuelt overstyrt
         3482, // Revurdering med overstyrt beregning åpen behandling
         6323, // Revurdering med overstyrt beregning åpen behandling

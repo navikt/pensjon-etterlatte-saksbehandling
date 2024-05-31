@@ -146,6 +146,7 @@ class BeregnOverstyrBeregningService(
                                 prorataBroekTeller = null,
                                 prorataBroekNevner = null,
                                 beskrivelse = "Overstyr beregning grunnlag",
+                                aarsak = null,
                             ),
                         fom = fom,
                         tom = null,

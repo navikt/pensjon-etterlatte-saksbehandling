@@ -87,11 +87,10 @@ internal class BeregningRepositoryTest(ds: DataSource) {
 
         val overstyrBeregning = beregningRepository.hentOverstyrBeregning(1L)
 
-        assertTrue(opprettetOverstyrBeregning != null)
         assertTrue(overstyrBeregning != null)
 
-        assertEquals(opprettetOverstyrBeregning?.sakId, overstyrBeregning?.sakId)
-        assertEquals(opprettetOverstyrBeregning?.beskrivelse, overstyrBeregning?.beskrivelse)
+        assertEquals(opprettetOverstyrBeregning.sakId, overstyrBeregning?.sakId)
+        assertEquals(opprettetOverstyrBeregning.beskrivelse, overstyrBeregning?.beskrivelse)
     }
 
     private fun beregning(

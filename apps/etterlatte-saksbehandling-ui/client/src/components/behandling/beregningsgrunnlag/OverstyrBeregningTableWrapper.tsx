@@ -4,7 +4,7 @@ import { PeriodeVisning } from '~components/behandling/beregningsgrunnlag/Instit
 import OverstyrBeregningPeriode, { OverstyrBeregningPerioder } from './OverstyrBeregningPeriode'
 
 const OverstyrBeregningTableWrapper = (props: OverstyrBeregningPerioder) => {
-  const { item, index, control, register, remove, watch, visFeil, feil, behandles } = props
+  const { item, index, control, register, remove, watch, visFeil, feil, behandles, aarsaker } = props
   const content = (
     <OverstyrBeregningPeriode
       key={item.id}
@@ -17,6 +17,7 @@ const OverstyrBeregningTableWrapper = (props: OverstyrBeregningPerioder) => {
       visFeil={visFeil}
       feil={feil}
       behandles={behandles}
+      aarsaker={aarsaker}
     />
   )
 
@@ -32,7 +33,8 @@ const OverstyrBeregningTableWrapper = (props: OverstyrBeregningPerioder) => {
         key={index + item.id}
         content={content}
         expandOnRowClick={true}
-        open={open}
+        open={open && behandles}
+        expansionDisabled={!behandles}
         onOpenChange={(openInternal) => setIsOpen(openInternal)}
       >
         <Table.DataCell scope="row">
@@ -43,6 +45,9 @@ const OverstyrBeregningTableWrapper = (props: OverstyrBeregningPerioder) => {
         <Table.DataCell>{item.data.trygdetidForIdent}</Table.DataCell>
         <Table.DataCell>
           {item.data.prorataBroekTeller} / {item.data.prorataBroekNevner}
+        </Table.DataCell>
+        <Table.DataCell>
+          {item.data.aarsak && item.data.aarsak !== 'VELG_AARSAK' && <span>{aarsaker[item.data.aarsak]}</span>}
         </Table.DataCell>
         <Table.DataCell>{item.data.beskrivelse}</Table.DataCell>
       </Table.ExpandableRow>

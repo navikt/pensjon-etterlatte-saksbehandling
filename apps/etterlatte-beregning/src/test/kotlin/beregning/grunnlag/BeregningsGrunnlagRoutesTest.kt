@@ -535,6 +535,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     prorataBroekNevner = null,
                     sakId = 1L,
                     beskrivelse = "test periode 1",
+                    aarsak = "ANNET",
                     kilde =
                         Grunnlagsopplysning.Saksbehandler(
                             ident = "Z123456",
@@ -553,6 +554,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     prorataBroekNevner = 20,
                     sakId = 1L,
                     beskrivelse = "test periode 2",
+                    aarsak = "ANNET",
                     kilde =
                         Grunnlagsopplysning.Saksbehandler(
                             ident = "Z123456",
@@ -636,6 +638,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     prorataBroekNevner = null,
                     sakId = 222L,
                     beskrivelse = "test periode 1",
+                    aarsak = "ANNET",
                     kilde =
                         Grunnlagsopplysning.Saksbehandler(
                             ident = "Z123456",
@@ -654,6 +657,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     prorataBroekNevner = null,
                     sakId = 222L,
                     beskrivelse = "test periode 2",
+                    aarsak = "ANNET",
                     kilde =
                         Grunnlagsopplysning.Saksbehandler(
                             ident = "Z123456",
@@ -684,6 +688,7 @@ internal class BeregningsGrunnlagRoutesTest {
                                             prorataBroekTeller = null,
                                             prorataBroekNevner = null,
                                             beskrivelse = "test periode 1",
+                                            aarsak = "ANNET",
                                         ),
                                     fom = LocalDate.now().minusYears(12L),
                                     tom = LocalDate.now().minusYears(6L),
@@ -697,6 +702,7 @@ internal class BeregningsGrunnlagRoutesTest {
                                             prorataBroekTeller = null,
                                             prorataBroekNevner = null,
                                             beskrivelse = "test periode 2",
+                                            aarsak = "ANNET",
                                         ),
                                     fom = LocalDate.now().minusYears(6L),
                                     tom = null,

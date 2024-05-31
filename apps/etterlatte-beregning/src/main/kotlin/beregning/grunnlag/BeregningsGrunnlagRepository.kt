@@ -96,6 +96,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                                 "prorata_broek_nevner" to grunnlag.prorataBroekNevner,
                                 "sak_id" to grunnlag.sakId,
                                 "beskrivelse" to grunnlag.beskrivelse,
+                                "aarsak" to grunnlag.aarsak,
                                 "kilde" to grunnlag.kilde.toJson(),
                                 "regulering_regelresultat" to grunnlag.reguleringRegelresultat?.toJson(),
                             ),
@@ -158,6 +159,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                 prorata_broek_nevner,
                 sak_id,
                 beskrivelse,
+                aarsak,
                 kilde,
                 regulering_regelresultat 
             FROM overstyr_beregningsgrunnlag
@@ -184,6 +186,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                 prorata_broek_nevner,
                 sak_id,
                 beskrivelse,
+                aarsak,
                 kilde,
                 regulering_regelresultat 
             )                
@@ -199,6 +202,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                 :prorata_broek_nevner,
                 :sak_id,
                 :beskrivelse,
+                :aarsak,
                 :kilde,
                 :regulering_regelresultat 
             )
@@ -252,6 +256,7 @@ private fun Row.asOverstyrBeregningGrunnlag(): OverstyrBeregningGrunnlagDao {
         prorataBroekNevner = this.longOrNull("prorata_broek_nevner"),
         sakId = this.long("sak_id"),
         beskrivelse = this.string("beskrivelse"),
+        aarsak = this.stringOrNull("aarsak"),
         kilde = objectMapper.readValue(this.string("kilde")),
         reguleringRegelresultat = this.stringOrNull("regulering_regelresultat")?.let { objectMapper.readValue(it) },
     )

@@ -45,7 +45,7 @@ fun createRecord(dato: LocalDate) =
             ReguleringEvents.DATO to dato.toString(),
             ReguleringEvents.KJOERING to "Regulering-$year",
             ReguleringEvents.ANTALL to 20,
-            ReguleringEvents.SPESIFIKKE_SAKER to "6402;8883;13046;16642",
+            ReguleringEvents.SPESIFIKKE_SAKER to "16095",
             SAK_TYPE to SakType.BARNEPENSJON.toString(),
         ),
     ).toJson()

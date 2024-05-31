@@ -1,24 +1,11 @@
-import {
-  Alert,
-  BodyLong,
-  Box,
-  Button,
-  ErrorMessage,
-  Heading,
-  HStack,
-  Radio,
-  RadioGroup,
-  Select,
-  Textarea,
-  VStack,
-} from '@navikt/ds-react'
+import { Box, Button, ErrorMessage, Heading, HStack, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterFormkravIKlage } from '~shared/api/klage'
 import { JaNei } from '~shared/types/ISvar'
 import React, { useEffect } from 'react'
-import { Control, Controller, Path, useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { Formkrav, Klage, VedtaketKlagenGjelder } from '~shared/types/Klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
@@ -27,11 +14,12 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterKanskjeStringDato, formaterVedtakType } from '~utils/formattering'
 import { FieldOrNull } from '~shared/types/util'
-import { VurderingWrapper } from '~components/klage/styled'
 import { kanVurdereUtfall, nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { isFailure, isPending, isPendingOrInitial, mapSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { ButtonNavigerTilBrev } from '~components/klage/vurdering/KlageVurderingFelles'
+import { BeOmInfoFraKlager } from '~components/klage/formkrav/components/BeOmInfoFraKlager'
+import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import styled from 'styled-components'
 
 // Vi bruker kun id'en til vedtaket i skjemadata, og transformerer fram / tilbake før sending / lasting
 type FilledFormDataFormkrav = Omit<Formkrav, 'vedtaketKlagenGjelder'> & { vedtaketKlagenGjelderId: null | string }
@@ -168,7 +156,7 @@ export function KlageFormkravRedigering() {
             tolker controlled vs uncontrolled components. For å kunne håndtere både 1. Ikke valgt vedtak og 2. Valgt
             at det ikke er noe vedtak, tolkes null | undefined som ""), og vedtakId === "-1" som 2). Alle andre vedtakId
             tolkes som id'en til det vedtaket. */}
-          <VurderingWrapper>
+          <KlageFormkravVStack gap="4">
             <Controller
               rules={{
                 required: true,
@@ -204,32 +192,75 @@ export function KlageFormkravRedigering() {
               name="vedtaketKlagenGjelderId"
               control={control}
             />
-          </VurderingWrapper>
 
-          <JaNeiRadiogruppe name="erKlagerPartISaken" legend="Er klager part i saken?" control={control} />
+            <ControlledRadioGruppe
+              name="erKlagerPartISaken"
+              control={control}
+              legend="Er klager part i saken?"
+              errorVedTomInput="Du må sette om klager er part i saken"
+              radios={
+                <>
+                  <Radio value={JaNei.JA}>Ja</Radio>
+                  <Radio value={JaNei.NEI}>Nei</Radio>
+                </>
+              }
+            />
 
-          <JaNeiRadiogruppe name="erKlagenSignert" legend="Er klagen signert?" control={control} />
+            <ControlledRadioGruppe
+              name="erKlagenSignert"
+              control={control}
+              legend="Er klagen signert?"
+              errorVedTomInput="Du må sette om klagen er signert"
+              radios={
+                <>
+                  <Radio value={JaNei.JA}>Ja</Radio>
+                  <Radio value={JaNei.NEI}>Nei</Radio>
+                </>
+              }
+            />
 
-          <JaNeiRadiogruppe
-            name="gjelderKlagenNoeKonkretIVedtaket"
-            legend="Klages det på konkrete elementer i vedtaket?"
-            control={control}
-          />
+            <ControlledRadioGruppe
+              name="gjelderKlagenNoeKonkretIVedtaket"
+              control={control}
+              legend="Klages det på konkrete elementer i vedtaket?"
+              errorVedTomInput="Du må sette om det klages på elementer i vedtaket"
+              radios={
+                <>
+                  <Radio value={JaNei.JA}>Ja</Radio>
+                  <Radio value={JaNei.NEI}>Nei</Radio>
+                </>
+              }
+            />
 
-          <div>
-            <JaNeiRadiogruppe
+            <ControlledRadioGruppe
               name="erKlagenFramsattInnenFrist"
+              control={control}
               legend="Er klagen framsatt innenfor klagefristen?"
               description="Vurder også ytre klagefrist jf forv.loven § 31"
-              control={control}
+              errorVedTomInput="Du må sette om klagen er framsatt innenfor klagefristen"
+              radios={
+                <>
+                  <Radio value={JaNei.JA}>Ja</Radio>
+                  <Radio value={JaNei.NEI}>Nei</Radio>
+                </>
+              }
             />
-          </div>
 
-          <JaNeiRadiogruppe name="erFormkraveneOppfylt" control={control} legend="Er formkravene til klagen oppfylt?" />
+            <ControlledRadioGruppe
+              name="erFormkraveneOppfylt"
+              control={control}
+              legend="Er formkravene til klagen oppfylt?"
+              errorVedTomInput="Du må sette om formkravene til klagen er oppfylt"
+              radios={
+                <>
+                  <Radio value={JaNei.JA}>Ja</Radio>
+                  <Radio value={JaNei.NEI}>Nei</Radio>
+                </>
+              }
+            />
 
-          <VurderingWrapper>
             <Textarea {...register('begrunnelse')} label="Totalvurdering (valgfritt)" readOnly={!redigerModus} />
-          </VurderingWrapper>
+          </KlageFormkravVStack>
 
           {redigerModus ? (
             <HStack gap="4" justify="center">
@@ -265,58 +296,8 @@ export function KlageFormkravRedigering() {
       </form>
     </>
   )
-
-  function BeOmInfoFraKlager(props: { klage: Klage }) {
-    const klage = props.klage
-
-    return (
-      <VurderingWrapper>
-        <Alert variant="info">
-          <Heading level="2" size="small">
-            Hent informasjon fra klager
-          </Heading>
-          <BodyLong spacing>
-            Du må innhente mer informasjon fra klager for å avgjøre om formkravene kan oppfylles. Sett klagebehandlingen
-            på vent og opprett et nytt brev til klager.
-          </BodyLong>
-          <ButtonNavigerTilBrev klage={klage} />
-        </Alert>
-      </VurderingWrapper>
-    )
-  }
-
-  function JaNeiRadiogruppe(props: {
-    control: Control<FormDataFormkrav>
-    name: Path<FormDataFormkrav>
-    legend: string
-    description?: string
-  }) {
-    const { name, control, legend, description } = props
-    return (
-      <Controller
-        name={name}
-        rules={{
-          required: true,
-        }}
-        render={({ field, fieldState: { error } }) => (
-          <VurderingWrapper>
-            <RadioGroup
-              readOnly={!redigerModus}
-              legend={legend}
-              description={description}
-              className="radioGroup"
-              {...field}
-              error={error && (error.message || 'Du må svare på spørsmålet: ' + legend)}
-            >
-              <div className="flex">
-                <Radio value={JaNei.JA}>Ja</Radio>
-                <Radio value={JaNei.NEI}>Nei</Radio>
-              </div>
-            </RadioGroup>
-          </VurderingWrapper>
-        )}
-        control={control}
-      />
-    )
-  }
 }
+
+const KlageFormkravVStack = styled(VStack)`
+  width: 30rem;
+`

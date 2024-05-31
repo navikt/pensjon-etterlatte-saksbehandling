@@ -22,7 +22,7 @@ function innvilgelsestekst(vedtaksresultat: VedtakResultat | null): string {
 function Resultat({ vedtaksresultat }: { vedtaksresultat: VedtakResultat | null }) {
   const tekst = innvilgelsestekst(vedtaksresultat)
   const erInnvilget = vedtaksresultat == 'innvilget' || vedtaksresultat == 'endring'
-  return <UnderOverskrift innvilget={erInnvilget}>{tekst}</UnderOverskrift>
+  return <UnderOverskrift $innvilget={erInnvilget}>{tekst}</UnderOverskrift>
 }
 
 export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {

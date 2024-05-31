@@ -17,7 +17,7 @@ import { resetPersonopplysninger, setPersonopplysninger } from '~store/reducers/
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapAllApiResult } from '~shared/api/apiUtils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
-import styled from 'styled-components'
+import { StickyToppMeny } from '~shared/StickyToppMeny'
 
 export const Behandling = () => {
   useSidetittel('Behandling')
@@ -88,8 +88,3 @@ export const Behandling = () => {
     }
   )
 }
-
-const StickyToppMeny = styled.div`
-  position: sticky;
-  top: 0;
-`

@@ -35,6 +35,7 @@ import { hentPersonNavn } from '~shared/api/pdltjenester'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { Box } from '@navikt/ds-react'
+import { StickyToppMeny } from '~shared/StickyToppMeny'
 
 export default function BehandleJournalfoeringOppgave() {
   useSidetittel('Journalføringsoppgave')
@@ -87,9 +88,10 @@ export default function BehandleJournalfoeringOppgave() {
 
   return (
     <>
-      <StatusBar result={personResult} />
-      <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
-
+      <StickyToppMeny>
+        <StatusBar result={personResult} />
+        <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
+      </StickyToppMeny>
       <GridContainer>
         <Column>
           <Box padding="8">

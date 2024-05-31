@@ -3,6 +3,7 @@ import {
   BodyLong,
   Box,
   Button,
+  ErrorMessage,
   Heading,
   HStack,
   Radio,
@@ -26,7 +27,7 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterKanskjeStringDato, formaterVedtakType } from '~utils/formattering'
 import { FieldOrNull } from '~shared/types/util'
-import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
+import { VurderingWrapper } from '~components/klage/styled'
 import { kanVurdereUtfall, nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { isFailure, isPending, isPendingOrInitial, mapSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -192,11 +193,11 @@ export function KlageFormkravRedigering() {
                       ))}
                       <option value="-1">Det klages ikke på et konkret vedtak</option>
                     </Select>
-                    {fieldState.error ? (
-                      <Feilmelding>
+                    {fieldState.error && (
+                      <ErrorMessage>
                         Du må velge vedtaket det klages på, eller svare at det ikke klages på et konkret vedtak
-                      </Feilmelding>
-                    ) : null}
+                      </ErrorMessage>
+                    )}
                   </>
                 )
               }}

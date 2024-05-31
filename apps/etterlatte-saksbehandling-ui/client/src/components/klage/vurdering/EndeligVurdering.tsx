@@ -1,6 +1,6 @@
-import { Button, Heading, HStack, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
+import { Button, ErrorMessage, Heading, HStack, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
 import React from 'react'
-import { BredVurderingWrapper, Feilmelding, VurderingWrapper } from '~components/klage/styled'
+import { BredVurderingWrapper, VurderingWrapper } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
 import { useKlage } from '~components/klage/useKlage'
 import {
@@ -23,7 +23,6 @@ import { oppdaterUtfallForKlage } from '~shared/api/klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
 import { SakType } from '~shared/types/sak'
-
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { forrigeSteg, kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny'
@@ -149,7 +148,7 @@ export function EndeligVurdering(props: { klage: Klage }) {
                   )}
                   <Radio value={Utfall.STADFESTE_VEDTAK}> {teksterKlageutfall[Utfall.STADFESTE_VEDTAK]}</Radio>
                 </RadioGroup>
-                {fieldState.error ? <Feilmelding>Du må velge et utfall for klagen.</Feilmelding> : null}
+                {fieldState.error && <ErrorMessage>Du må velge et utfall for klagen.</ErrorMessage>}
               </>
             )}
           />
@@ -264,7 +263,7 @@ function KlageInnstilling(props: {
           ))}
         </Select>
         {errors.innstilling?.lovhjemmel && (
-          <Feilmelding>Du må angi hjemmelen klagen hovedsakelig knytter seg til.</Feilmelding>
+          <ErrorMessage>Du må angi hjemmelen klagen hovedsakelig knytter seg til.</ErrorMessage>
         )}
       </VurderingWrapper>
 

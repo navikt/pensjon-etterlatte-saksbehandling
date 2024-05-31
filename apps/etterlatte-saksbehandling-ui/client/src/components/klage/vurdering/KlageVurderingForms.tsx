@@ -6,10 +6,10 @@ import {
   Utfall,
 } from '~shared/types/Klage'
 import React from 'react'
-import { Heading, Select, Textarea } from '@navikt/ds-react'
+import { ErrorMessage, Heading, Select, Textarea } from '@navikt/ds-react'
 import { FieldOrNull } from '~shared/types/util'
 import { Control, Controller } from 'react-hook-form'
-import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
+import { VurderingWrapper } from '~components/klage/styled'
 
 export type FilledFormDataVurdering = {
   utfall: Utfall
@@ -71,7 +71,7 @@ export function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) 
                     </option>
                   ))}
                 </Select>
-                {fieldState.error ? <Feilmelding>Du må velge en årsak for omgjøringen.</Feilmelding> : null}
+                {fieldState.error && <ErrorMessage>Du må velge en årsak for omgjøringen.</ErrorMessage>}
               </>
             )
           }}
@@ -92,7 +92,7 @@ export function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) 
               <>
                 <Textarea label="Begrunnelse" value={value ?? ''} {...rest} />
 
-                {fieldState.error ? <Feilmelding>Du må gi en begrunnelse for omgjøringen.</Feilmelding> : null}
+                {fieldState.error && <ErrorMessage>Du må gi en begrunnelse for omgjøringen.</ErrorMessage>}
               </>
             )
           }}

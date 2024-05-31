@@ -1,6 +1,6 @@
-import { Alert, BodyLong, Box, Button, Heading, HStack, Radio, RadioGroup } from '@navikt/ds-react'
+import { Alert, BodyLong, Box, Button, ErrorMessage, Heading, HStack, Radio, RadioGroup } from '@navikt/ds-react'
 import React from 'react'
-import { Feilmelding, Innhold, VurderingWrapper } from '~components/klage/styled'
+import { Innhold, VurderingWrapper } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
 import { InnstillingTilKabalUtenBrev, Klage, KlageUtfallUtenBrev, Omgjoering, Utfall } from '~shared/types/Klage'
 import { Controller, useForm } from 'react-hook-form'
@@ -93,7 +93,7 @@ export function KlageAvvisning(props: { klage: Klage }) {
                     <Radio value={Utfall.AVVIST}>Vedtak om avvisning</Radio>
                     <Radio value={Utfall.AVVIST_MED_OMGJOERING}>Avvist med omgjøring</Radio>
                   </RadioGroup>
-                  {fieldState.error ? <Feilmelding>Du må velge et utfall for klagen.</Feilmelding> : null}
+                  {fieldState.error && <ErrorMessage>Du må velge et utfall for klagen.</ErrorMessage>}
                 </>
               )}
             />
@@ -131,7 +131,7 @@ function nesteSteg(valgtUtfall: Utfall | null, klageId: string) {
   return kanSeBrev(valgtUtfall) ? `/klage/${klageId}/brev` : `/klage/${klageId}/oppsummering`
 }
 
-const InfoAlert = styled(Alert).attrs({ variant: 'info' })`
+const InfoAlert = styled(Alert)`
   margin-top: 2rem;
   margin-bottom: 2rem;
 `

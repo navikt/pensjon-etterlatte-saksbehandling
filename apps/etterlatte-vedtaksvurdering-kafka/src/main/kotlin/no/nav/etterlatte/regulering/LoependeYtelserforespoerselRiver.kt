@@ -64,7 +64,6 @@ internal class LoependeYtelserforespoerselRiver(
                 sakId = sakId,
                 fradato = respons.dato,
                 prosesstype = Prosesstype.AUTOMATISK,
-                opphoerFraOgMed = respons.opphoerFraOgMed,
             )
         respons.sisteLoependeBehandlingId?.let { b -> packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = b }
         if (respons.erLoepende) {

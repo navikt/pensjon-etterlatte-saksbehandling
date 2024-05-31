@@ -31,19 +31,6 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
                 } else {
                     null
                 },
-            opphoerFraOgMed =
-                iverksatteVedtak.filter { it.type == VedtakType.OPPHOER }
-                    .maxByOrNull { it.attestasjon?.tidspunkt!! }?.let {
-                        if (erLoepende) {
-                            if (it.attestasjon!!.tidspunkt.isAfter(senesteVedtakPaaDato!!.attestasjon!!.tidspunkt)) {
-                                it.virkningstidspunkt
-                            } else {
-                                null
-                            }
-                        } else {
-                            it.virkningstidspunkt
-                        }
-                    },
         )
     }
 

@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 
 class OmregningService(
@@ -39,7 +38,6 @@ class OmregningService(
         forrigeBehandling: Behandling,
         persongalleri: Persongalleri,
         oppgavefrist: Tidspunkt?,
-        opphoerFraOgMed: YearMonth? = null,
     ): RevurderingOgOppfoelging {
         if (prosessType == Prosesstype.MANUELL) {
             throw StoetterIkkeProsesstypeManuell()
@@ -56,7 +54,6 @@ class OmregningService(
                 kilde = Vedtaksloesning.GJENNY,
                 persongalleri = persongalleri,
                 frist = oppgavefrist,
-                opphoerFraOgMed = opphoerFraOgMed,
             ),
         ) { "Opprettelse av revurdering feilet for $sakId" }
     }

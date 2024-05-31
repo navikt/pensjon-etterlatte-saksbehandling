@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -41,7 +41,7 @@ class DoedshendelseReminderServiceTest {
             DoedshendelseReminder(
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
-                endret = LocalDateTime.now().minusMonths(2L).toTidspunkt(),
+                endret = LocalDateTime.now().minusMonths(2L).toNorskTidspunkt(),
                 sakId = sakId,
             )
 
@@ -79,7 +79,7 @@ class DoedshendelseReminderServiceTest {
             DoedshendelseReminder(
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
-                endret = LocalDateTime.now().minusMonths(2L).toTidspunkt(),
+                endret = LocalDateTime.now().minusMonths(2L).toNorskTidspunkt(),
                 sakId = sakId,
             )
 

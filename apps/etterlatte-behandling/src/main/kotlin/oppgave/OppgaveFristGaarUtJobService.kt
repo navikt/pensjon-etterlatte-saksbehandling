@@ -2,6 +2,7 @@ package no.nav.etterlatte.oppgave
 
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -28,18 +29,20 @@ class OppgaveFristGaarUtJobService(
                 oppgaveKilde = (OppgaveKilde.entries - OppgaveKilde.GJENOPPRETTING),
                 oppgaver = listOf(),
             )
-        service.hentFristGaarUt(request).forEach {
-            logger.info("Frist er gått ut for ${it.oppgaveId}, tar av vent")
-            try {
-                service.oppdaterStatusOgMerknad(
-                    it.oppgaveId,
-                    it.merknad ?: "",
-                    Status.UNDER_BEHANDLING,
-                )
-            } catch (e: ForespoerselException) {
-                logger.warn("Klarte ikke ta oppgave ${it.oppgaveId} av vent. Fortsetter med neste", e)
+        inTransaction {
+            service.hentFristGaarUt(request).forEach {
+                logger.info("Frist er gått ut for ${it.oppgaveId}, tar av vent")
+                try {
+                    service.oppdaterStatusOgMerknad(
+                        it.oppgaveId,
+                        it.merknad ?: "",
+                        Status.UNDER_BEHANDLING,
+                    )
+                } catch (e: ForespoerselException) {
+                    logger.warn("Klarte ikke ta oppgave ${it.oppgaveId} av vent. Fortsetter med neste", e)
+                }
+                logger.info("Tok ${it.oppgaveId} av vent")
             }
-            logger.info("Tok ${it.oppgaveId} av vent")
         }
         logger.info("Ferdig med å ta oppgaver av vent")
     }

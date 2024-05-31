@@ -1,6 +1,6 @@
 import { Alert, BodyLong, Box, Button, ErrorMessage, Heading, HStack, Radio, RadioGroup } from '@navikt/ds-react'
 import React from 'react'
-import { Innhold, VurderingWrapper } from '~components/klage/styled'
+import { VurderingWrapper } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
 import { InnstillingTilKabalUtenBrev, Klage, KlageUtfallUtenBrev, Omgjoering, Utfall } from '~shared/types/Klage'
 import { Controller, useForm } from 'react-hook-form'
@@ -75,7 +75,7 @@ export function KlageAvvisning(props: { klage: Klage }) {
         </Heading>
       </Box>
       <form onSubmit={handleSubmit(sendInnVurdering)}>
-        <Innhold>
+        <Box paddingBlock="8" paddingInline="16 8">
           <BodyLong spacing={true}>
             Siden klagefristen ikke er overholdt må klagen formelt avvises, men du kan likevel bestemme at vedtaket skal
             omgjøres.
@@ -100,12 +100,12 @@ export function KlageAvvisning(props: { klage: Klage }) {
           </VurderingWrapper>
 
           {valgtUtfall === Utfall.AVVIST_MED_OMGJOERING ? <KlageOmgjoering control={control} /> : null}
-          {!lagreUtfallAktivert ? (
+          {!lagreUtfallAktivert && (
             <InfoAlert variant="info" inline>
               Det skal fattes et vedtak om avvisning. Gjenny støtter ikke dette ennå, men det kommer snart.
             </InfoAlert>
-          ) : null}
-        </Innhold>
+          )}
+        </Box>
 
         {isFailureHandler({
           apiResult: lagreUtfallStatus,

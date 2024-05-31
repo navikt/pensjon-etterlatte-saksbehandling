@@ -91,6 +91,27 @@ fun varEktefelleVedDoedsfall(
         }
         ?: false
 
+// Finner siste sivilstand, og returnerer fnr dersom det er en ektefelle/partner, og det ikke finnes en skilsmisse uten gyldig fom-dato
+fun finnEktefelleSafe(person: PersonDTO): String? =
+    person.sivilstand
+        ?.asSequence()
+        ?.map { it.verdi }
+        ?.sortedBy { it.gyldigFraOgMed }
+        ?.lastOrNull()
+        ?.let {
+            if (it.sivilstatus in
+                listOf(
+                    Sivilstatus.GIFT,
+                    Sivilstatus.SEPARERT,
+                    Sivilstatus.REGISTRERT_PARTNER,
+                    Sivilstatus.SEPARERT_PARTNER,
+                ) && !harSkiltSivilstandUtenGyldigFomDato(person)
+            ) {
+                return it.relatertVedSiviltilstand?.value
+            }
+            return null
+        }
+
 fun finnAntallAarGiftVedDoedsfall(
     avdoed: PersonDTO,
     eps: PersonDTO,

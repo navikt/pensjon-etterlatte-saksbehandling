@@ -1,7 +1,7 @@
 import { PersonIcon } from '@navikt/aksel-icons'
 import { format } from 'date-fns'
 import { PersonInfoAdresse } from '../personer/personinfo/PersonInfoAdresse'
-import { BodyShort, Detail, Heading, Label } from '@navikt/ds-react'
+import { BodyShort, CopyButton, Detail, Heading, HStack, Label, Link } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { DatoFormat, formaterFnr } from '~utils/formattering'
 import { IconSize } from '~shared/types/Icon'
@@ -42,7 +42,14 @@ export const Person = ({ person, kilde, avdoed = false }: Props) => {
           {avdoed ? 'Avdød' : 'Gjenlevende'}
         </Heading>
         <BodyShort>
-          {`${person.fornavn} ${person.etternavn}`} ({formaterFnr(person.foedselsnummer)})
+          {`${person.fornavn} ${person.etternavn}`}
+
+          <HStack>
+            <Link href={`/person/${person.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
+              ({formaterFnr(person.foedselsnummer)})
+            </Link>
+            <CopyButton copyText={person.foedselsnummer} size="small" />
+          </HStack>
         </BodyShort>
         <div>
           <PersonInfoAdresse adresser={person.bostedsadresse} visHistorikk={false} adresseDoedstidspunkt={avdoed} />

@@ -32,14 +32,19 @@ export const MainContent = styled(Box)`
 
 export const CollapsibleSidebar = styled.div<{ $collapsed: boolean }>`
   background: var(--a-white);
-  position: relative;
   max-height: fit-content;
   min-width: ${(props) => (props.$collapsed ? '50px' : '20%')};
 `
 
 export const SidebarContent = styled.div<{ $collapsed: boolean }>`
   display: ${(props) => (props.$collapsed ? 'none' : 'block')};
-  margin-bottom: 4rem;
+  position: sticky;
+  top: 8rem;
+`
+export const Scroller = styled.div`
+  overflow-y: scroll;
+  height: calc(100vh - 182px); // 182 px er høyden av dekoratøren + pdlpersonbar og stegmenyen
+  padding-bottom: 2rem;
 `
 
 export const SidebarTools = styled.div`

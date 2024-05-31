@@ -34,4 +34,5 @@ data class StoenadRad(
     val utbetalingsdato: LocalDate?,
     val kilde: Vedtaksloesning,
     val pesysId: Long?,
+    val sakYtelsesgruppe: SakYtelsesgruppe?,
 )

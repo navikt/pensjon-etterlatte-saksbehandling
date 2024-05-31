@@ -11,6 +11,7 @@ import no.nav.etterlatte.statistikk.domain.Beregning
 import no.nav.etterlatte.statistikk.domain.Beregningstype
 import no.nav.etterlatte.statistikk.domain.MaanedStoenadRad
 import no.nav.etterlatte.statistikk.domain.SakUtland
+import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
 import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.domain.stoenadRad
 import org.junit.jupiter.api.AfterEach
@@ -103,6 +104,7 @@ class StoenadRepositoryTest(private val dataSource: DataSource) {
                 utbetalingsdato = LocalDate.of(2023, 7, 20),
                 kilde = Vedtaksloesning.GJENNY,
                 pesysId = 123L,
+                sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
             ),
         )
         repo.hentStoenadRader().also {
@@ -151,6 +153,7 @@ class StoenadRepositoryTest(private val dataSource: DataSource) {
                 utbetalingsdato = LocalDate.of(2023, 7, 20),
                 kilde = Vedtaksloesning.GJENNY,
                 pesysId = 123L,
+                sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
             ),
         )
         repo.hentStoenadRader().also {
@@ -307,6 +310,7 @@ class StoenadRepositoryTest(private val dataSource: DataSource) {
                 utbetalingsdato = LocalDate.of(2023, 7, 20),
                 kilde = Vedtaksloesning.GJENNY,
                 pesysId = 123L,
+                sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
             )
 
         assertDoesNotThrow {
@@ -346,6 +350,7 @@ class StoenadRepositoryTest(private val dataSource: DataSource) {
                     utbetalingsdato = LocalDate.of(2023, 7, 20),
                     kilde = Vedtaksloesning.GJENNY,
                     pesysId = 123L,
+                    sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
                 ),
             )
 

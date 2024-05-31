@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.statistikk.domain.MaanedStoenadRad
 import no.nav.etterlatte.statistikk.domain.SakUtland
+import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
 import no.nav.etterlatte.statistikk.domain.StoenadRad
 import org.postgresql.util.PGobject
 import java.sql.Date
@@ -39,7 +40,7 @@ class StoenadRepository(private val datasource: DataSource) {
                     fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, behandlingId, sakId, 
                     sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, vedtakLoependeFom, 
                     vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland, virkningstidspunkt, utbetalingsdato,
-                    kilde, pesysid 
+                    kilde, pesysid, sakYtelsesgruppe 
                 FROM stoenad
                 """.trimIndent(),
             ).executeQuery().toList {
@@ -73,8 +74,8 @@ class StoenadRepository(private val datasource: DataSource) {
                     fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
                     behandlingId, sakId, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
                     vedtakLoependeFom, vedtakLoependeTom, statistikkMaaned, sak_utland,
-                    virkningstidspunkt, utbetalingsdato, avkortingsbeloep, aarsinntekt, kilde, pesysid 
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    virkningstidspunkt, utbetalingsdato, avkortingsbeloep, aarsinntekt, kilde, pesysid, sakYtelsesgruppe 
+                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent(),
             ).apply {
                 setString(1, maanedStatistikkRad.fnrSoeker)
@@ -101,6 +102,7 @@ class StoenadRepository(private val datasource: DataSource) {
                 setString(22, maanedStatistikkRad.aarsinntekt)
                 setString(23, maanedStatistikkRad.kilde.name)
                 maanedStatistikkRad.pesysId?.let { setLong(24, it) } ?: setNull(24, Types.BIGINT)
+                setString(25, maanedStatistikkRad.sakYtelsesgruppe?.name)
             }.executeUpdate()
         }
     }
@@ -114,8 +116,8 @@ class StoenadRepository(private val datasource: DataSource) {
                         fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
                         behandlingId, sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
                         vedtakLoependeFom, vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland,
-                         virkningstidspunkt, utbetalingsdato, kilde, pesysid 
-                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                         virkningstidspunkt, utbetalingsdato, kilde, pesysid, sakYtelsesgruppe 
+                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                     Statement.RETURN_GENERATED_KEYS,
                 ).apply {
@@ -249,6 +251,7 @@ private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedSt
         setDate(23, stoenadsrad.utbetalingsdato?.let { Date.valueOf(it) })
         setString(24, stoenadsrad.kilde.name)
         stoenadsrad.pesysId?.let { setLong(25, it) } ?: setNull(25, Types.BIGINT)
+        setString(26, stoenadsrad.sakYtelsesgruppe?.name)
     }
 
 private fun ResultSet.asStoenadRad(): StoenadRad =
@@ -279,4 +282,5 @@ private fun ResultSet.asStoenadRad(): StoenadRad =
         utbetalingsdato = getDate("utbetalingsdato")?.toLocalDate(),
         kilde = getString("kilde").let { Vedtaksloesning.valueOf(it) },
         pesysId = getLong("pesysid"),
+        sakYtelsesgruppe = getString("sakYtelsesgruppe")?.let { enumValueOf<SakYtelsesgruppe>(it) },
     )

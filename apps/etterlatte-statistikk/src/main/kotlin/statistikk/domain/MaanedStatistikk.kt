@@ -34,6 +34,7 @@ data class MaanedStoenadRad(
     val utbetalingsdato: LocalDate?,
     val kilde: Vedtaksloesning,
     val pesysId: Long?,
+    val sakYtelsesgruppe: SakYtelsesgruppe?,
 )
 
 class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
@@ -118,6 +119,7 @@ class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
                     utbetalingsdato = sisteVedtak.utbetalingsdato,
                     kilde = sisteVedtak.kilde,
                     pesysId = sisteVedtak.pesysId,
+                    sakYtelsesgruppe = sisteVedtak.sakYtelsesgruppe,
                 )
             }
     }

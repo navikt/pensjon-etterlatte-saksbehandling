@@ -66,10 +66,10 @@ export const Behandling = () => {
         const behandling = behandlingFraRedux as IBehandlingReducer
         return (
           <>
-            <StickyIcky>
+            <StickyToppMeny>
               {soeker && <PdlPersonStatusBar person={soeker} />}
               <StegMeny behandling={behandling} />
-            </StickyIcky>
+            </StickyToppMeny>
             <GridContainer>
               <MainContent>
                 <Routes>
@@ -89,7 +89,7 @@ export const Behandling = () => {
   )
 }
 
-const StickyIcky = styled.div`
+const StickyToppMeny = styled.div`
   position: sticky;
   top: 0;
 `

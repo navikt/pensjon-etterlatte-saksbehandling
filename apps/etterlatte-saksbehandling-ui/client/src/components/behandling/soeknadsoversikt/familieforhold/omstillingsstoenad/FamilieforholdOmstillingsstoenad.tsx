@@ -7,12 +7,15 @@ import { Personopplysninger } from '~shared/types/grunnlag'
 import { Familieforhold } from '~shared/types/Person'
 
 import { SamsvarPersongalleri } from '~components/behandling/soeknadsoversikt/familieforhold/SamsvarPersongalleri'
+import { Result } from '~shared/api/apiUtils'
+import { ILand } from '~shared/api/trygdetid'
 
 export interface PropsFamilieforhold {
   personopplysninger: Personopplysninger | null
+  landListeResult: Result<ILand[]>
 }
 
-export const FamilieforholdOmstillingsstoenad = ({ personopplysninger }: PropsFamilieforhold) => {
+export const FamilieforholdOmstillingsstoenad = ({ personopplysninger, landListeResult }: PropsFamilieforhold) => {
   if (personopplysninger == null || personopplysninger.soeker == null) {
     return <ErrorMessage>Familieforhold kan ikke hentes ut</ErrorMessage>
   }
@@ -24,12 +27,18 @@ export const FamilieforholdOmstillingsstoenad = ({ personopplysninger }: PropsFa
 
   return (
     <>
-      <SamsvarPersongalleri />
+      <SamsvarPersongalleri landListeResult={landListeResult} />
       <FamilieforholdVoksne>
         {avdoede.map((avdoed) => (
-          <Person person={avdoed.opplysning} kilde={avdoed.kilde} avdoed key={avdoed.id} />
+          <Person
+            person={avdoed.opplysning}
+            kilde={avdoed.kilde}
+            avdoed
+            key={avdoed.id}
+            landListeResult={landListeResult}
+          />
         ))}
-        <Person person={soeker.opplysning} kilde={soeker.kilde} />
+        <Person person={soeker.opplysning} kilde={soeker.kilde} landListeResult={landListeResult} />
       </FamilieforholdVoksne>
       {avdoede.map((avd) => (
         <Sivilstand familieforhold={familieforhold} avdoed={avd.opplysning} key={avd.id} />

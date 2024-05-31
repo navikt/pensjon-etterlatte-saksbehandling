@@ -6,12 +6,15 @@ import { Personopplysninger } from '~shared/types/grunnlag'
 import { Familieforhold } from '~shared/types/Person'
 
 import { SamsvarPersongalleri } from '~components/behandling/soeknadsoversikt/familieforhold/SamsvarPersongalleri'
+import { Result } from '~shared/api/apiUtils'
+import { ILand } from '~shared/api/trygdetid'
 
 export interface PropsFamilieforhold {
   personopplysninger: Personopplysninger | null
+  landListeResult: Result<ILand[]>
 }
 
-export const FamilieforholdBarnepensjon = ({ personopplysninger }: PropsFamilieforhold) => {
+export const FamilieforholdBarnepensjon = ({ personopplysninger, landListeResult }: PropsFamilieforhold) => {
   if (personopplysninger == null || personopplysninger.soeker == null) {
     return <ErrorMessage>Familieforhold kan ikke hentes ut</ErrorMessage>
   }
@@ -22,14 +25,26 @@ export const FamilieforholdBarnepensjon = ({ personopplysninger }: PropsFamilief
 
   return (
     <>
-      <SamsvarPersongalleri />
+      <SamsvarPersongalleri landListeResult={landListeResult} />
       <FamilieforholdVoksne>
-        <Person person={soeker.opplysning} kilde={soeker.kilde} mottaker />
+        <Person person={soeker.opplysning} kilde={soeker.kilde} landListeResult={landListeResult} mottaker />
         {alleAvdoede.map((avdoede) => (
-          <Person person={avdoede.opplysning} kilde={avdoede.kilde} avdoed key={avdoede.id} />
+          <Person
+            person={avdoede.opplysning}
+            kilde={avdoede.kilde}
+            avdoed
+            key={avdoede.id}
+            landListeResult={landListeResult}
+          />
         ))}
         {alleGjenlevende.map((gjenlevende) => (
-          <Person person={gjenlevende.opplysning} kilde={gjenlevende.kilde} gjenlevende key={gjenlevende.id} />
+          <Person
+            person={gjenlevende.opplysning}
+            kilde={gjenlevende.kilde}
+            gjenlevende
+            key={gjenlevende.id}
+            landListeResult={landListeResult}
+          />
         ))}
       </FamilieforholdVoksne>
       <Soeskenliste familieforhold={familieforhold} soekerFnr={soeker.opplysning.foedselsnummer} />

@@ -43,11 +43,11 @@ export const Wrapper = styled.div<{ $innvilget: boolean }>`
   }
 `
 
-export const UnderOverskrift = styled.div<{ innvilget: boolean }>`
+export const UnderOverskrift = styled.div<{ $innvilget: boolean }>`
   font-style: normal;
   font-weight: 600;
   font-size: 16px;
-  color: ${(props) => (props.innvilget ? '#007C2E' : '#881d0c')};
+  color: ${(props) => (props.$innvilget ? '#007C2E' : '#881d0c')};
 `
 
 export const Overskrift = styled.div`

@@ -40,7 +40,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
         fetchVilkaarsvurderingStatus,
         <Spinner label="Laste stegmeny" visible />,
         () => (
-          <ApiErrorAlert>Kunne ikke hente lage stegmeny</ApiErrorAlert>
+          <ApiErrorAlert>Kunne ikke laste stegmeny</ApiErrorAlert>
         ),
         () => (
           <StegMenyWrapper role="navigation">

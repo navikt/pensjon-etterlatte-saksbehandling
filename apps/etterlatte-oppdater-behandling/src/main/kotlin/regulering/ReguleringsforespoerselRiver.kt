@@ -128,10 +128,6 @@ enum class ReguleringFeatureToggle(private val key: String) : FeatureToggle {
 
 private val sakerViIkkeRegulererAutomatiskNaa =
     listOf<Long>(
-        6402, // EKSPORT: Feilmelding: Virkningstidspunkt kan ikke være etter opphør
-        8883, // Feil i grunnlag.
-        13046, // Feil i grunnlag
-        16642, // Feil i grunnlag
         9455, // Ulik versjon av grunnlag brukt i trygdetid og behandling
         12789, // Ulik versjon av grunnlag brukt i trygdetid og behandling
         16095, // Opprettet regulering, men stuck i OPPRETTET. Se slack for detaljer

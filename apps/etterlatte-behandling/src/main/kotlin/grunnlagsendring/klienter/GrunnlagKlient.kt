@@ -57,6 +57,11 @@ interface GrunnlagKlient : Pingable {
         sakId: Long,
         opplysningsbehov: Opplysningsbehov,
     )
+
+    suspend fun laasTilGrunnlagIBehandling(
+        id: UUID,
+        forrigeBehandling: UUID,
+    )
 }
 
 class GrunnlagKlientImpl(
@@ -89,6 +94,13 @@ class GrunnlagKlientImpl(
                 contentType(ContentType.Application.Json)
                 setBody(opplysningsbehov)
             }.body()
+    }
+
+    override suspend fun laasTilGrunnlagIBehandling(
+        id: UUID,
+        forrigeBehandling: UUID,
+    ) {
+        client.post("$apiUrl/grunnlag/behandling/$id/laas-til-behandling/$forrigeBehandling")
     }
 
     override suspend fun oppdaterGrunnlag(

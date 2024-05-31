@@ -72,7 +72,6 @@ app.use(
 app.use(
   [
     '/api/behandling',
-    '/api/behandlinger/:sakid/manueltopphoer',
     '/api/personer',
     '/api/revurdering/:sakid',
     '/api/stoettederevurderinger',

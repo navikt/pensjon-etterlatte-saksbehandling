@@ -180,9 +180,9 @@ class BehandlingDao(
                         """
                         INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                         soeknad_mottatt_dato, virkningstidspunkt, utlandstilknytning, bodd_eller_arbeidet_utlandet, 
-                        revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, begrunnelse, relatert_behandling,
+                        revurdering_aarsak, fritekst_aarsak, prosesstype, kilde, begrunnelse, relatert_behandling,
                         sende_brev, opphoer_fom)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """.trimIndent(),
                     )
 
@@ -198,14 +198,13 @@ class BehandlingDao(
                     stmt.setJsonb(9, utlandstilknytning)
                     stmt.setString(10, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
                     stmt.setString(11, revurderingsAarsak?.name)
-                    stmt.setString(12, opphoerAarsaker?.toJson())
-                    stmt.setString(13, fritekstAarsak)
-                    stmt.setString(14, prosesstype.toString())
-                    stmt.setString(15, kilde.toString())
-                    stmt.setString(16, begrunnelse)
-                    stmt.setString(17, relatertBehandlingId)
-                    stmt.setBoolean(18, sendeBrev)
-                    stmt.setString(19, objectMapper.writeValueAsString(opphoerFraOgMed))
+                    stmt.setString(12, fritekstAarsak)
+                    stmt.setString(13, prosesstype.toString())
+                    stmt.setString(14, kilde.toString())
+                    stmt.setString(15, begrunnelse)
+                    stmt.setString(16, relatertBehandlingId)
+                    stmt.setBoolean(17, sendeBrev)
+                    stmt.setString(18, objectMapper.writeValueAsString(opphoerFraOgMed))
                 }
                 require(stmt.executeUpdate() == 1)
             }

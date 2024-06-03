@@ -64,7 +64,7 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-class GenerellBehandlingServiceTest(val dataSource: DataSource) {
+internal class GenerellBehandlingServiceTest(val dataSource: DataSource) {
     private lateinit var dao: GenerellBehandlingDao
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var hendelseDao: HendelseDao

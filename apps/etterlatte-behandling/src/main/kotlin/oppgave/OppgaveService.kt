@@ -309,7 +309,7 @@ class OppgaveService(
     }
 
     // TODO: hentEndringerForOppgave Kan fjernes over tid
-    private fun saksbehandlerSomFattetVedtak(oppgave: OppgaveIntern): String? =
+    fun saksbehandlerSomFattetVedtak(oppgave: OppgaveIntern): String? =
         oppgave.forrigeSaksbehandlerIdent ?: oppgaveDao.hentEndringerForOppgave(oppgave.id)
             .sortedByDescending { it.tidspunkt }
             .firstOrNull(OppgaveEndring::sendtTilAttestering)

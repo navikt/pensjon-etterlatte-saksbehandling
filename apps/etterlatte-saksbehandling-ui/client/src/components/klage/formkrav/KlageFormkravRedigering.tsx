@@ -19,7 +19,7 @@ import { isFailure, isPending, isPendingOrInitial, mapSuccess } from '~shared/ap
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { BeOmInfoFraKlager } from '~components/klage/formkrav/components/BeOmInfoFraKlager'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
-import styled from 'styled-components'
+import { SmalVStack } from '~components/klage/styled'
 
 // Vi bruker kun id'en til vedtaket i skjemadata, og transformerer fram / tilbake før sending / lasting
 type FilledFormDataFormkrav = Omit<Formkrav, 'vedtaketKlagenGjelder'> & { vedtaketKlagenGjelderId: null | string }
@@ -156,7 +156,7 @@ export function KlageFormkravRedigering() {
             tolker controlled vs uncontrolled components. For å kunne håndtere både 1. Ikke valgt vedtak og 2. Valgt
             at det ikke er noe vedtak, tolkes null | undefined som ""), og vedtakId === "-1" som 2). Alle andre vedtakId
             tolkes som id'en til det vedtaket. */}
-          <KlageFormkravVStack gap="4">
+          <SmalVStack gap="4">
             <Controller
               rules={{
                 required: true,
@@ -260,7 +260,7 @@ export function KlageFormkravRedigering() {
             />
 
             <Textarea {...register('begrunnelse')} label="Totalvurdering (valgfritt)" readOnly={!redigerModus} />
-          </KlageFormkravVStack>
+          </SmalVStack>
 
           {redigerModus ? (
             <HStack gap="4" justify="center">
@@ -297,7 +297,3 @@ export function KlageFormkravRedigering() {
     </>
   )
 }
-
-const KlageFormkravVStack = styled(VStack)`
-  width: 30rem;
-`

@@ -304,6 +304,7 @@ private object Queries {
         SELECT *
         FROM overstyr_beregning 
         WHERE sak_id = :sakId
+        and status != '${OverstyrBeregningStatus.UGYLDIG.name}'
         """.trimIndent()
 
     val opprettOverstyrBeregning =
@@ -311,6 +312,11 @@ private object Queries {
         INSERT INTO overstyr_beregning (sak_id, beskrivelse, tidspunkt)
         VALUES (:sakId, :beskrivelse, :tidspunkt)
         """.trimIndent()
+}
+
+private enum class OverstyrBeregningStatus {
+    GYLDIG,
+    UGYLDIG,
 }
 
 private data class BeregningsperiodeDAO(

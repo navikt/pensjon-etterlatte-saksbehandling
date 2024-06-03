@@ -17,6 +17,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAktivitetspliktOppfolging } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { isPending } from '~shared/api/apiUtils'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -31,6 +32,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
   const [hentet, hent] = useApiCall(hentAktivitetspliktOppfolging)
 
   const configContext = useContext(ConfigContext)
+  const visTidslinje = useFeatureEnabledMedDefault('aktivitetsplikt-tidslinje', false)
 
   useEffect(() => {
     hent({ behandlingId: behandling.id }, (aktivitetOppfolging) => {
@@ -76,12 +78,13 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           </BodyLong>
         </TekstWrapper>
 
-        <AktivitetspliktTidslinje behandling={behandling} doedsdato={new Date(avdoedesDoedsdato!!)} />
-
-        <AktivitetspliktVurdering
-          behandling={behandling}
-          resetManglerAktivitetspliktVurdering={() => setManglerAktivitetspliktVurdering(false)}
-        />
+        {visTidslinje && <AktivitetspliktTidslinje behandling={behandling} doedsdato={new Date(avdoedesDoedsdato!!)} />}
+        {visTidslinje && (
+          <AktivitetspliktVurdering
+            behandling={behandling}
+            resetManglerAktivitetspliktVurdering={() => setManglerAktivitetspliktVurdering(false)}
+          />
+        )}
 
         {aktivitetOppfolging && (
           <div>

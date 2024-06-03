@@ -61,6 +61,10 @@ spec:
     autoInstrumentation:
       enabled: true
       runtime: nodejs
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
   resources:
     limits:
       memory: 512Mi

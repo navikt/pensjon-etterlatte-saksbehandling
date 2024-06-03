@@ -21,6 +21,10 @@ spec:
     autoInstrumentation:
       enabled: true
       runtime: java
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
   secureLogs:
     enabled: true
   kafka:

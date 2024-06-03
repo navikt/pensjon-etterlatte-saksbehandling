@@ -23,6 +23,10 @@ spec:
     autoInstrumentation:
       enabled: true
       runtime: java
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
   resources:
     requests:
       cpu: 10m

@@ -21,7 +21,6 @@ updates:
           - "org.glassfish:jakarta.el"
       backend:
         patterns:
-          - "io.micrometer*"
           - "io.prometheus*"
           - "com.fasterxml.jackson*"
           - "no.nav.security*"
@@ -55,6 +54,9 @@ updates:
         patterns:
           - "org.messaginghub:pooled-jms"
           - "com.ibm.mq:com.ibm.mq.jakarta.client"
+      micrometer:
+        patterns:
+          - "io.micrometer*"
 
 
   # =============

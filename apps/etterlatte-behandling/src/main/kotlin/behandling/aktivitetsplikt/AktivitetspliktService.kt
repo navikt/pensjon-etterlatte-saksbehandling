@@ -3,6 +3,8 @@ package no.nav.etterlatte.behandling.aktivitetsplikt
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType.AKTIVITET_100
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntak
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
@@ -13,7 +15,9 @@ import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import java.time.LocalDate
 import java.util.UUID
 
 class AktivitetspliktService(
@@ -38,6 +42,28 @@ class AktivitetspliktService(
         }
 
         return hentAktivitetspliktOppfolging(behandlingId)!!
+    }
+
+    fun oppfyllerAktivitetsplikt(
+        sakId: Long,
+        aktivitetspliktDato: LocalDate,
+    ): Boolean {
+        return inTransaction {
+            val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
+            if (aktivitetsgrad?.aktivitetsgrad in listOf(AKTIVITET_OVER_50, AKTIVITET_100)) {
+                logger.info("Aktivitetsgrad er over 50% eller 100%, ingen revurdering opprettes for sak $sakId")
+                return@inTransaction true
+            }
+
+            val unntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
+            if (unntak != null && (unntak.tom == null || unntak.tom.isAfter(aktivitetspliktDato))) {
+                logger.info("Det er unntak for aktivitetsplikt, ingen revurdering opprettes for sak $sakId")
+                return@inTransaction true
+            }
+
+            logger.info("Det er ikke gjort en vurdering av bruker på over 50% aktivitet, og finner ingen unntak for sak $sakId")
+            false
+        }
     }
 
     fun hentAktiviteter(behandlingId: UUID) =

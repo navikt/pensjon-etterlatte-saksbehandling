@@ -276,6 +276,65 @@ class AktivitetspliktServiceTest {
         }
     }
 
+    @Nested
+    inner class OppfyllerAktivitetsplikt {
+        @Test
+        fun `Skal returnere true hvis aktivitetsplikt er oppfylt`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns
+                mockk {
+                    every { aktivitetsgrad } returns AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50
+                }
+
+            val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
+
+            result shouldBe true
+        }
+
+        @Test
+        fun `Skal returnere false hvis aktivitetsplikt ikke er oppfylt og det ikke finnes unntak`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns
+                mockk {
+                    every { aktivitetsgrad } returns AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50
+                    every { fom } returns aktivitet.fom.minusMonths(1)
+                }
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns null
+
+            val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
+
+            result shouldBe false
+        }
+
+        @Test
+        fun `Skal returnere true hvis aktivitetsplikt ikke er oppfylt, men det finnes unntak`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns
+                mockk {
+                    every { aktivitetsgrad } returns AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50
+                    every { fom } returns aktivitet.fom.minusMonths(1)
+                }
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns
+                mockk {
+                    every { tom } returns null
+                }
+
+            val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
+
+            result shouldBe true
+        }
+
+        @Test
+        fun `Skal returnere false hvis aktivitetsplikt ikke er oppfylt og unntaket er utgaatt`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns null
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns
+                mockk {
+                    every { tom } returns LocalDate.now().minusYears(1)
+                }
+
+            val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
+
+            result shouldBe false
+        }
+    }
+
     companion object {
         val behandling =
             mockk<Behandling> {

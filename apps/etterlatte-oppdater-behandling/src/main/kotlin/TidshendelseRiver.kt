@@ -72,6 +72,8 @@ class TidshendelseRiver(
                 packetUpdates[HENDELSE_DATA_KEY] = mapOf("opprettetOppgaveId" to result.opprettetOppgaveId)
             }
 
+            is TidshendelseResult.OpprettRevurderingForAktivitetsplikt -> {}
+
             is TidshendelseResult.Skipped -> {}
         }
         return packetUpdates

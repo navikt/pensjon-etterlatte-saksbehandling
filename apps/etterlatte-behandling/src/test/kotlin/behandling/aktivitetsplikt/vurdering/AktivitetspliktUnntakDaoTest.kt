@@ -6,6 +6,7 @@ import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType.GRADERT_UFOERETRYGD
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -49,6 +50,33 @@ class AktivitetspliktUnntakDaoTest(ds: DataSource) {
             it.tom shouldBe unntak.tom
             it.opprettet shouldBe kilde
             it.endret shouldBe kilde
+            it.beskrivelse shouldBe unntak.beskrivelse
+        }
+    }
+
+    @Test
+    fun `Skal hente seneste unntak`() {
+        val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+        val kilde1 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
+        val kilde2 = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
+        val unntak =
+            LagreAktivitetspliktUnntak(
+                unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
+                beskrivelse = "Beskrivelse",
+                fom = LocalDate.now(),
+                tom = LocalDate.now().plusMonths(6),
+            )
+
+        dao.opprettUnntak(unntak, sak.id, kilde1, null, null)
+        dao.opprettUnntak(unntak.copy(unntak = GRADERT_UFOERETRYGD), sak.id, kilde2, null, null)
+
+        dao.hentNyesteUnntak(sak.id)!!.asClue {
+            it.sakId shouldBe sak.id
+            it.unntak shouldBe GRADERT_UFOERETRYGD
+            it.fom shouldBe unntak.fom
+            it.tom shouldBe unntak.tom
+            it.opprettet shouldBe kilde2
+            it.endret shouldBe kilde2
             it.beskrivelse shouldBe unntak.beskrivelse
         }
     }

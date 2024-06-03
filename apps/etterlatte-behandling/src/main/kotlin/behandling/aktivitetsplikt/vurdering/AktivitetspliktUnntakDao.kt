@@ -59,6 +59,25 @@ class AktivitetspliktUnntakDao(private val connectionAutoclosing: ConnectionAuto
             }
         }
 
+    fun hentNyesteUnntak(sakId: Long): AktivitetspliktUnntak? =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        SELECT id, sak_id, behandling_id, oppgave_id, unntak, fom, tom, opprettet, endret, beskrivelse
+                        FROM aktivitetsplikt_unntak
+                        WHERE sak_id = ?
+                        ORDER BY endret::jsonb->>'tidspunkt' DESC
+                        LIMIT 1
+                        """.trimMargin(),
+                    )
+                stmt.setLong(1, sakId)
+
+                stmt.executeQuery().singleOrNull { toUnntak() }
+            }
+        }
+
     private fun ResultSet.toUnntak() =
         AktivitetspliktUnntak(
             id = getUUID("id"),

@@ -204,7 +204,7 @@ class BehandlingDao(
                     stmt.setString(15, begrunnelse)
                     stmt.setString(16, relatertBehandlingId)
                     stmt.setBoolean(17, sendeBrev)
-                    stmt.setString(18, objectMapper.writeValueAsString(opphoerFraOgMed))
+                    stmt.setString(18, opphoerFraOgMed?.let { fom -> objectMapper.writeValueAsString(fom) })
                 }
                 require(stmt.executeUpdate() == 1)
             }

@@ -33,6 +33,7 @@ data class OverstyrBeregning(
     val sakId: Long,
     val beskrivelse: String,
     val tidspunkt: Tidspunkt,
+    val status: OverstyrBeregningStatus = OverstyrBeregningStatus.GYLDIG,
 )
 
 fun OverstyrBeregning.toDTO() = OverstyrBeregningDTO(this.beskrivelse)

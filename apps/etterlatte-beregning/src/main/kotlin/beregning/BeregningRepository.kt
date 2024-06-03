@@ -65,7 +65,7 @@ class BeregningRepository(private val dataSource: DataSource) {
         }
     }
 
-    fun opprettOverstyrBeregning(overstyrBeregning: OverstyrBeregning): OverstyrBeregning {
+    fun opprettOverstyrBeregning(overstyrBeregning: OverstyrBeregning): OverstyrBeregning? {
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.opprettOverstyrBeregning,
@@ -74,12 +74,16 @@ class BeregningRepository(private val dataSource: DataSource) {
                         "sakId" to overstyrBeregning.sakId,
                         "beskrivelse" to overstyrBeregning.beskrivelse,
                         "tidspunkt" to overstyrBeregning.tidspunkt.toTimestamp(),
+                        "status" to overstyrBeregning.status.name,
                     ),
             ).let { query ->
                 tx.run(query.asUpdate)
             }
         }
 
+        if (overstyrBeregning.status == OverstyrBeregningStatus.UGYLDIG) {
+            return null
+        }
         return checkNotNull(hentOverstyrBeregning(overstyrBeregning.sakId)) {
             "Vi opprettet en overstyrt beregning på sakId=${overstyrBeregning.sakId} akkurat nå men den finnes ikke >:("
         }
@@ -120,6 +124,7 @@ class BeregningRepository(private val dataSource: DataSource) {
 
 private fun toOverstyrBeregning(row: Row): OverstyrBeregning =
     with(row) {
+        println(row.underlying.getString("status"))
         OverstyrBeregning(
             sakId = long("sak_id"),
             beskrivelse = string("beskrivelse"),
@@ -304,17 +309,17 @@ private object Queries {
         SELECT *
         FROM overstyr_beregning 
         WHERE sak_id = :sakId
-        and status != '${OverstyrBeregningStatus.UGYLDIG.name}'
+        and status = '${OverstyrBeregningStatus.GYLDIG.name}'
         """.trimIndent()
 
     val opprettOverstyrBeregning =
         """
-        INSERT INTO overstyr_beregning (sak_id, beskrivelse, tidspunkt)
-        VALUES (:sakId, :beskrivelse, :tidspunkt)
+        INSERT INTO overstyr_beregning (sak_id, beskrivelse, tidspunkt, status)
+        VALUES (:sakId, :beskrivelse, :tidspunkt, :status)
         """.trimIndent()
 }
 
-private enum class OverstyrBeregningStatus {
+enum class OverstyrBeregningStatus {
     GYLDIG,
     UGYLDIG,
 }

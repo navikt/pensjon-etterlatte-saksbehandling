@@ -107,9 +107,9 @@ class GenerellBehandlingService(
                     .maxByOrNull { it.opprettet }
 
             if (kanskjeOppgaveMedSaksbehandler != null) {
-                val saksbehandler = kanskjeOppgaveMedSaksbehandler.saksbehandler
-                if (saksbehandler != null) {
-                    oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident)
+                val saksbehandlerIdent = oppgaveService.saksbehandlerSomFattetVedtak(kanskjeOppgaveMedSaksbehandler)
+                if (saksbehandlerIdent != null) {
+                    oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
                     logger.info(
                         "Opprettet generell behandling for utland for sak: ${generellBehandling.sakId} " +
                             "og behandling: ${generellBehandling.tilknyttetBehandling}. Gjelder oppgave: ${oppgave.id}",

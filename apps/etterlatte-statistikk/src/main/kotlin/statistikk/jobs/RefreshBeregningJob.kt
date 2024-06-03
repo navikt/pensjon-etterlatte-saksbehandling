@@ -59,6 +59,8 @@ class RefreshBeregningJob(
             repeat(antallKjoeringer) {
                 oppdaterMedNyBeregning()
             }
+
+            oppdaterAnvendtSats(500)
         }
 
         private fun hentNyBeregning() {
@@ -90,6 +92,36 @@ class RefreshBeregningJob(
                     oppdaterBeregningDao.patchRaderForBehandling(behandlingId, beregning)
                 } else {
                     logger.warn("Hentet ut en refreshet beregning som ble null, behandlingId=$behandlingId")
+                }
+            }
+        }
+
+        private fun oppdaterAnvendtSats(sakerAvGangen: Int) {
+            val behandlingerSomSkalRyddesI =
+                oppdaterBeregningDao.hentBehandlingerForOppdateringAnvendtSats(sakerAvGangen)
+            behandlingerSomSkalRyddesI.forEach { behandling ->
+                try {
+                    val maanederOgSatser =
+                        behandling.statistikkMaaneder.map { (statistikkMaaned, antallAvdoede) ->
+                            val beregningsperiode = behandling.beregning.beregningForMaaned(statistikkMaaned)
+                            val anvendtSats =
+                                beregningsperiode!!.anvendtSats(
+                                    beregningstype = behandling.beregning.type,
+                                    erForeldreloes = antallAvdoede > 1,
+                                    erOverstyrt = behandling.beregning.overstyrtBeregning == true,
+                                )
+                            statistikkMaaned to anvendtSats
+                        }
+                    oppdaterBeregningDao.oppdaterAnvendtSats(
+                        behandlingId = behandling.behandlingId,
+                        statistikkMaanederOgSatser = maanederOgSatser,
+                    )
+                } catch (e: Exception) {
+                    logger.info(
+                        "Fikk ikke oppdatert anvendt sats riktig for behandling med" +
+                            " id=${behandling.behandlingId}, på grunn av feil",
+                        e,
+                    )
                 }
             }
         }

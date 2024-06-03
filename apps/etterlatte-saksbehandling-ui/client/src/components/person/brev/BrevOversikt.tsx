@@ -158,7 +158,7 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
 
       <div>
         {mapSuccess(sakResult, (sak) => (
-          <>
+          <HStack gap="4">
             {kanOppretteBrevMedGittType ? (
               <NyttBrevModal sakId={sak.sak.id} sakType={sak.sak.sakType} />
             ) : (
@@ -173,7 +173,7 @@ export default function BrevOversikt({ sakResult }: { sakResult: Result<SakMedBe
               </Button>
             )}
             <LastOppBrev sak={sak.sak} />
-          </>
+          </HStack>
         ))}
       </div>
     </Box>

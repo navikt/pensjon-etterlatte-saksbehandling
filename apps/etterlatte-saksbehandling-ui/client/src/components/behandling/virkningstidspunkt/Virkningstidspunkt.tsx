@@ -4,7 +4,7 @@ import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/re
 import { formaterStringDato } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { InfobokserWrapper, InfoWrapper, VurderingsContainerWrapper, VurderingsTitle } from '../soeknadsoversikt/styled'
+import { Vurdering } from '../soeknadsoversikt/styled'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears, subYears } from 'date-fns'
@@ -125,12 +125,10 @@ const Virkningstidspunkt = (props: {
       >
         <div>
           <Beskrivelse>{props.beskrivelse}</Beskrivelse>
-          <InfobokserWrapper>
-            <InfoWrapper>{props.children?.info}</InfoWrapper>
-          </InfobokserWrapper>
+          <div>{props.children?.info}</div>
         </div>
 
-        <VurderingsContainerWrapper>
+        <Vurdering>
           {!vurdert ? (
             <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
           ) : (
@@ -180,7 +178,9 @@ const Virkningstidspunkt = (props: {
               defaultRediger={behandling.virkningstidspunkt === null}
             >
               <VStack gap="4">
-                <VurderingsTitle title="Hva er virkningstidspunkt for behandlingen?" />
+                <Heading level="3" size="small">
+                  Hva er virkningstidspunkt for behandlingen?
+                </Heading>
 
                 {erBosattUtland && (
                   <DatoVelger
@@ -213,7 +213,7 @@ const Virkningstidspunkt = (props: {
               </VStack>
             </VurderingsboksWrapper>
           )}
-        </VurderingsContainerWrapper>
+        </Vurdering>
       </LovtekstMedLenke>
     </>
   )

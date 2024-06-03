@@ -15,9 +15,9 @@ import Spinner from '~shared/Spinner'
 import { hentPersonopplysningerForBehandling } from '~shared/api/grunnlag'
 import { resetPersonopplysninger, setPersonopplysninger } from '~store/reducers/PersonopplysningerReducer'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-
 import { mapAllApiResult } from '~shared/api/apiUtils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
+import { StickyToppMeny } from '~shared/StickyToppMeny'
 
 export const Behandling = () => {
   useSidetittel('Behandling')
@@ -63,11 +63,13 @@ export const Behandling = () => {
     () => <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>,
     () => {
       if (behandlingFraRedux) {
-        const behandlingGarra = behandlingFraRedux as IBehandlingReducer
+        const behandling = behandlingFraRedux as IBehandlingReducer
         return (
           <>
-            {soeker && <PdlPersonStatusBar person={soeker} />}
-            <StegMeny behandling={behandlingGarra} />
+            <StickyToppMeny>
+              {soeker && <PdlPersonStatusBar person={soeker} />}
+              <StegMeny behandling={behandling} />
+            </StickyToppMeny>
             <GridContainer>
               <MainContent>
                 <Routes>
@@ -77,7 +79,7 @@ export const Behandling = () => {
                   <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
                 </Routes>
               </MainContent>
-              <BehandlingSidemeny behandling={behandlingGarra} />
+              <BehandlingSidemeny behandling={behandling} />
             </GridContainer>
           </>
         )

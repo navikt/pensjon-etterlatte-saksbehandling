@@ -1,10 +1,6 @@
 import { GyldigFramsattType, IDetaljertBehandling, IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
-import {
-  Beskrivelse,
-  InfobokserWrapper,
-  VurderingsContainerWrapper,
-} from '~components/behandling/soeknadsoversikt/styled'
+import { Informasjon, Vurdering } from '~components/behandling/soeknadsoversikt/styled'
 import { Innsender } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Innsender'
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
 import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/Verger'
@@ -21,6 +17,7 @@ import { Familieforhold } from '~shared/types/Person'
 
 import { isSuccess } from '~shared/api/apiUtils'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { HStack } from '@navikt/ds-react'
 
 export const GyldigFramsattBarnepensjon = ({
   behandling,
@@ -68,12 +65,12 @@ export const GyldigFramsattBarnepensjon = ({
           status={gyldigFremsattTilStatusIcon}
         >
           <div>
-            <Beskrivelse>
+            <Informasjon>
               Den som har rett til ytelsen må sette frem krav (forelder/verge hvis under 18 år). Om annet må fullmakt
               ligge i saken. Søknaden må være signert og vise hva det søkes om, og den må settes fram i bostedslandet
               eller i det landet vedkommende sist var medlem.
-            </Beskrivelse>
-            <InfobokserWrapper>
+            </Informasjon>
+            <HStack gap="4">
               <Innsender harKildePesys={harKildePesys} />
               <Foreldreansvar
                 harKildePesys={harKildePesys}
@@ -82,15 +79,15 @@ export const GyldigFramsattBarnepensjon = ({
                 gjenlevendeGrunnlag={familieforhold?.gjenlevende?.find((po) => po)}
               />
               <Verger behandlingId={behandling.id} sakId={behandling.sakId} />
-            </InfobokserWrapper>
+            </HStack>
           </div>
-          <VurderingsContainerWrapper>
+          <Vurdering>
             <GyldigFramsattVurdering
               behandlingId={behandling.id}
               gyldigFramsatt={behandling.gyldighetsprøving}
               redigerbar={redigerbar}
             />
-          </VurderingsContainerWrapper>
+          </Vurdering>
         </LovtekstMedLenke>
       )}
     </>

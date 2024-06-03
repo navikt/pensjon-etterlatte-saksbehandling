@@ -1,6 +1,5 @@
 import { Alert, BodyLong, Box, Button, Heading, HStack, Radio, RadioGroup } from '@navikt/ds-react'
 import React from 'react'
-import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Feilmelding, Innhold, VurderingWrapper } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
 import { InnstillingTilKabalUtenBrev, Klage, KlageUtfallUtenBrev, Omgjoering, Utfall } from '~shared/types/Klage'
@@ -70,12 +69,10 @@ export function KlageAvvisning(props: { klage: Klage }) {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading level="1" size="large">
-            Avvis klagen
-          </Heading>
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Heading level="1" size="large">
+          Avvis klagen
+        </Heading>
       </Box>
       <form onSubmit={handleSubmit(sendInnVurdering)}>
         <Innhold>

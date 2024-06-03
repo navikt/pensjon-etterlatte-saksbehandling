@@ -69,6 +69,7 @@ export interface OverstyrBeregningsperiode {
   prorataBroekTeller: string | undefined
   prorataBroekNevner: string | undefined
   beskrivelse: string
+  aarsak: OverstyrtAarsakKey | undefined
 }
 
 export interface BeregningsGrunnlagDto {
@@ -159,4 +160,15 @@ export const ReduksjonOMS: ReduksjonType = {
   JA_EGEN_PROSENT_AV_G: 'Ja, utgifter til bolig(egen % av G)',
   NEI_HOEYE_UTGIFTER_BOLIG: 'Nei, har høye utgifter til bolig',
   NEI_OMSORG_BARN: 'Nei, har omsorg for barn',
+}
+
+export type OverstyrtAarsakType = Record<string, string>
+
+type OverstyrtAarsakKey = 'VELG_AARSAK' | 'AVKORTET_UFOERETRYGD' | 'AVKORTET_FENGSEL' | 'ANNET'
+
+export const OverstyrtAarsak: OverstyrtAarsakType = {
+  VELG_AARSAK: 'Velg årsak',
+  AVKORTET_UFOERETRYGD: 'Avkortet pga uføretrygd',
+  AVKORTET_FENGSEL: 'Avkortet pga fengsel',
+  ANNET: 'Annet',
 }

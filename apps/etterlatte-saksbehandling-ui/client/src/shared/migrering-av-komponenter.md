@@ -18,3 +18,27 @@ Veldig mange steder bruke vi f.eks `margin-top: 1rem` for å lage litt spacing m
 `<SpaceChildren direction="row" />` --> `<HStack gap="4" />`
 
 `<FlexRow />` --> `<HStack gap="4"/>` Noen steder trenger man bare en `<div />` for å stoppe cascading av CSS. Hvis `$spacing` proppen er brukt kan det hende at man må wrappe komponenter i en `<VStack gap="2" />`
+
+## ~components/behandling/soeknadsoversikt/styled.tsx
+`<InnholdPadding />` --> `<Box paddingBlock="8" paddingInline="16 8" />`
+
+`<InfobokserWrapper />` --> `<HStack gap="4" />`
+
+`<InfoWrapper />` --> `<VStack gap="4" />` Noen steder trenger man bare en `<div />`
+
+`<InfoList />` --> `<VStack gap="4" />`
+
+`<HeadingWrapper />` er merget inn i eksisterende `<Box paddingInline="16" paddingBlock="4" />` rundt `<Heading />` --> `<Box paddingInline="16" paddingBlock="16 4"><Heading /><Box>`
+
+`<Border />` er litt komplisert siden den blir brukt i kombinasjon med andre komponenter og kan dermed ha forskjellige marginer eller paddinger. Men de fleste stedene skal dette være riktig `<Box paddingBlock="4 0" borderWidth="1" borderColor="border-subtle"/>`
+
+`<Historikk />` --> `<Box paddingBlock="2 0"/>`
+
+`<HistorikkElement />` --> `<VStack />`
+
+`<PersonDetailWrapper />` --> `<Box paddingBlock="2 0" />`
+
+`<VurderingsContainerWrapper />` og `<VurderingsContainer />` --> `<Vurdering />`
+
+## ~components/behandling/vilkaarsvurdering/styled.ts
+`<Innhold />` --> `<Box paddingInline="8" />`

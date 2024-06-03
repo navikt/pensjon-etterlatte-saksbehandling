@@ -3,19 +3,22 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.finnAntallAarGiftVedDoedsfall
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.finnEktefelleSafe
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.harBarn
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.harFellesBarn
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.safeYearsBetween
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.varEktefelleVedDoedsfall
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.person.Sivilstatus.*
-import org.slf4j.LoggerFactory
+import no.nav.etterlatte.libs.common.person.Sivilstatus.GIFT
+import no.nav.etterlatte.libs.common.person.Sivilstatus.REGISTRERT_PARTNER
+import no.nav.etterlatte.libs.common.person.Sivilstatus.SEPARERT
+import no.nav.etterlatte.libs.common.person.Sivilstatus.SEPARERT_PARTNER
+import no.nav.etterlatte.libs.common.person.Sivilstatus.SKILT
+import no.nav.etterlatte.libs.common.person.Sivilstatus.SKILT_PARTNER
 import java.time.LocalDate
 import kotlin.math.absoluteValue
 
 internal class DoedshendelseKontrollpunktEktefelleService {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     fun identifiser(
         eps: PersonDTO,
         avdoed: PersonDTO,
@@ -34,14 +37,14 @@ internal class DoedshendelseKontrollpunktEktefelleService {
                             fnr = eps.foedselsnummer.verdi.value,
                         ),
                     )
-                else -> kontrollerEktefeller(antallAarGiftVedDoedsfall, avdoed, eps)
+                else -> kontrollerEktefelle(antallAarGiftVedDoedsfall, avdoed, eps)
             }
         } else {
-            listOf(kontrollerTidligereEktefeller(avdoed, eps))
+            listOf(kontrollerTidligereEktefelle(avdoed, eps))
         }
     }
 
-    private fun kontrollerEktefeller(
+    private fun kontrollerEktefelle(
         antallAarGift: Long,
         avdoed: PersonDTO,
         eps: PersonDTO,
@@ -58,10 +61,20 @@ internal class DoedshendelseKontrollpunktEktefelleService {
             emptyList()
         }
 
-    private fun kontrollerTidligereEktefeller(
+    private fun kontrollerTidligereEktefelle(
         avdoed: PersonDTO,
         eps: PersonDTO,
     ): DoedshendelseKontrollpunkt {
+        finnEktefelleSafe(eps)?.let { epsEktefelle ->
+            if (epsEktefelle != avdoed.foedselsnummer.verdi.value) {
+                return DoedshendelseKontrollpunkt.EpsErGiftPaaNytt(
+                    doedsdato = avdoed.doedsdato!!.verdi,
+                    fnr = avdoed.foedselsnummer.verdi.value,
+                    nyEktefelleFnr = epsEktefelle,
+                )
+            }
+        }
+
         val sivilstanderMedEps =
             avdoed.sivilstand
                 ?.map { it.verdi }

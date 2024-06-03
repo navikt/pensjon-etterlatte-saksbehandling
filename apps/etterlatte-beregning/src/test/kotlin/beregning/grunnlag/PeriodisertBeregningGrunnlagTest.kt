@@ -19,6 +19,16 @@ class PeriodisertBeregningGrunnlagTest {
             YearMonth.of(2023, Month.JANUARY).atDay(1) to null,
         )
 
+    private val perioderSomErKomplettIkkeSortert =
+        listOf<Pair<LocalDate, LocalDate?>>(
+            YearMonth.of(2023, Month.JANUARY).atDay(1) to null,
+            YearMonth.of(2022, Month.AUGUST).atDay(1) to
+                YearMonth.of(
+                    2022,
+                    Month.DECEMBER,
+                ).atEndOfMonth(),
+        )
+
     private val perioderMedHull =
         listOf<Pair<LocalDate, LocalDate?>>(
             YearMonth.of(2022, Month.AUGUST).atDay(1) to
@@ -86,6 +96,19 @@ class PeriodisertBeregningGrunnlagTest {
         assertDoesNotThrow {
             PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
                 perioderTilGrunnlagMedPerioder(perioderSomErKomplett, null),
+                fom,
+                tom,
+            )
+        }
+    }
+
+    @Test
+    fun `lagKomlettPeriodisertGrunnlag kaster ikke feil selv om periodene som sendes inn ikke er sortert`() {
+        val fom = perioderSomErKomplett.minBy { it.first }.first
+        val tom = null
+        assertDoesNotThrow {
+            PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+                perioderTilGrunnlagMedPerioder(perioderSomErKomplettIkkeSortert, null),
                 fom,
                 tom,
             )

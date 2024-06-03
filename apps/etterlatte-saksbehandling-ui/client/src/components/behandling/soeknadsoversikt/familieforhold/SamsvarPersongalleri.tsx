@@ -11,15 +11,21 @@ import { hentPersongalleriSamsvar } from '~shared/api/grunnlag'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { SakType } from '~shared/types/sak'
-import { mapApiResult } from '~shared/api/apiUtils'
+import { mapApiResult, Result } from '~shared/api/apiUtils'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { ILand } from '~shared/api/trygdetid'
+import { visLandInfoFraKodeverkEllerDefault } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
 
 function formaterKanskjeNavn(navn: Partial<PersonNavn>) {
   return [navn.fornavn, navn.mellomnavn, navn.etternavn].filter((navn) => !!navn).join(' ')
 }
 
-function PersonerUtenIdenterVisning(props: { saktype: SakType; personer: Array<PersonUtenIdent> }) {
+function PersonerUtenIdenterVisning(props: {
+  saktype: SakType
+  personer: Array<PersonUtenIdent>
+  landListeResult: Result<ILand[]>
+}) {
   const { personer, saktype } = props
   if (personer.length === 0) {
     return <BodyShort spacing>Ingen.</BodyShort>
@@ -34,7 +40,10 @@ function PersonerUtenIdenterVisning(props: { saktype: SakType; personer: Array<P
             <li>Navn: {person.person.navn ? formaterKanskjeNavn(person.person.navn) || 'Ukjent' : 'Ukjent'} </li>
             <li>Kjønn: {person.person.kjoenn ?? 'Ukjent'} </li>
             <li>Fødselsdato: {formaterKanskjeStringDatoMedFallback('Ukjent', person.person.foedselsdato)} </li>
-            <li>Statsborgerskap: {person.person.statsborgerskap ?? 'Ukjent'}</li>
+            <li>
+              Statsborgerskap:{' '}
+              {visLandInfoFraKodeverkEllerDefault(props.landListeResult, person.person.statsborgerskap)}
+            </li>
           </UstiletListe>
         </Box>
       ))}
@@ -72,7 +81,11 @@ const erAvvikRelevantForSaktype = (avvik: MismatchPersongalleri, sakType: SakTyp
   }
 }
 
-function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype: SakType }) {
+function VisSamsvarPersongalleri(props: {
+  samsvar: PersongalleriSamsvar
+  saktype: SakType
+  landListeResult: Result<ILand[]>
+}) {
   const { samsvar, saktype } = props
   const visMismatchPdl = useFeatureEnabledMedDefault('familieforhold-vis-mismatch-pdl', false)
 
@@ -147,13 +160,21 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype
               <Heading size="small" level="4">
                 Personer uten identer i saksgrunnlag:
               </Heading>
-              <PersonerUtenIdenterVisning saktype={saktype} personer={personerUtenIdenterSak} />
+              <PersonerUtenIdenterVisning
+                saktype={saktype}
+                personer={personerUtenIdenterSak}
+                landListeResult={props.landListeResult}
+              />
             </>
           )}
           <Heading size="small" level="4">
             Personer uten identer i PDL:
           </Heading>
-          <PersonerUtenIdenterVisning saktype={saktype} personer={personerUtenIdenterPdl} />
+          <PersonerUtenIdenterVisning
+            saktype={saktype}
+            personer={personerUtenIdenterPdl}
+            landListeResult={props.landListeResult}
+          />
         </div>
       )}
     </>
@@ -164,7 +185,7 @@ const BredAlert = styled(Alert)`
   width: fit-content;
 `
 
-export function SamsvarPersongalleri() {
+export function SamsvarPersongalleri(props: { landListeResult: Result<ILand[]> }) {
   const behandling = useBehandling()
   const [samsvarPersongalleri, fetchSamsvarPersongalleri] = useApiCall(hentPersongalleriSamsvar)
 
@@ -182,6 +203,12 @@ export function SamsvarPersongalleri() {
     samsvarPersongalleri,
     <Spinner label="Henter samsvar persongalleri" visible />,
     (error) => <ApiErrorAlert>Kunne ikke hente samsvar persongalleri: {error.detail}</ApiErrorAlert>,
-    (samsvarPersongalleri) => <VisSamsvarPersongalleri saktype={behandling.sakType} samsvar={samsvarPersongalleri} />
+    (samsvarPersongalleri) => (
+      <VisSamsvarPersongalleri
+        saktype={behandling.sakType}
+        samsvar={samsvarPersongalleri}
+        landListeResult={props.landListeResult}
+      />
+    )
   )
 }

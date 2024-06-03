@@ -1,7 +1,6 @@
 import styled from 'styled-components'
 import { Utland } from '~shared/types/Person'
-import { PersonDetailWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import { Label } from '@navikt/ds-react'
+import { Box, Label } from '@navikt/ds-react'
 import { UstiletListe } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
 
@@ -18,7 +17,7 @@ export function Utlandsopphold(props: { utland: Utland }) {
 
   return (
     <>
-      <PersonDetailWrapper $adresse={false}>
+      <Box paddingBlock="2 0">
         <Label as="p">Utvandring</Label>
         {utflyttinger.length > 0 ? (
           <UstiletListe>
@@ -36,8 +35,8 @@ export function Utlandsopphold(props: { utland: Utland }) {
         ) : (
           <span>Ingen</span>
         )}
-      </PersonDetailWrapper>
-      <PersonDetailWrapper $adresse={false}>
+      </Box>
+      <Box paddingBlock="2 0">
         <Label as="p">Innvandring</Label>
         {innflyttinger.length > 0 ? (
           <UstiletListe>
@@ -55,7 +54,7 @@ export function Utlandsopphold(props: { utland: Utland }) {
         ) : (
           <span>Ingen</span>
         )}
-      </PersonDetailWrapper>
+      </Box>
     </>
   )
 }

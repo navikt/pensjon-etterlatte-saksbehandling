@@ -114,9 +114,9 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
 
     @Test
     fun `Skal opprette kontrollpunkt for tidligere ektefeller som har vaert gift i mer enn 15 aar og felles barn`() {
-        val gjenlevende = avdoed.copy(familieRelasjon = familieRelasjonMedBarn())
+        val gjenlevende = gjenlevende.copy(familieRelasjon = familieRelasjonMedBarn())
         val avdoed =
-            gjenlevende.copy(
+            avdoed.copy(
                 sivilstand =
                     listOf(
                         sivilstand(
@@ -140,6 +140,47 @@ internal class DoedshendelseKontrollpunktEktefelleServiceTest {
                 DoedshendelseKontrollpunkt.TidligereEpsGiftMerEnn15AarFellesBarn(
                     doedsdato,
                     avdoed.foedselsnummer.verdi.value,
+                ),
+            )
+    }
+
+    @Test
+    fun `Skal opprette kontrollpunkt for tidligere ektefeller som har giftet seg paa nytt`() {
+        val nyEktefelle = "30901699972"
+        val gjenlevende =
+            gjenlevende.copy(
+                familieRelasjon = familieRelasjonMedBarn(),
+                sivilstand =
+                    listOf(
+                        sivilstand(antallAarSiden = 1, sivilstatus = Sivilstatus.GIFT, nyEktefelle),
+                    ).flatten(),
+            )
+        val avdoed =
+            avdoed.copy(
+                sivilstand =
+                    listOf(
+                        sivilstand(
+                            antallAarSiden = 20,
+                            sivilstatus = Sivilstatus.GIFT,
+                            relatertPerson = gjenlevende.foedselsnummer.verdi.value,
+                        ),
+                        sivilstand(
+                            antallAarSiden = 3,
+                            sivilstatus = Sivilstatus.SKILT,
+                            relatertPerson = gjenlevende.foedselsnummer.verdi.value,
+                        ),
+                    ).flatten(),
+                familieRelasjon = familieRelasjonMedBarn(),
+            )
+
+        val kontrollpunkter = kontrollpunktService.identifiser(gjenlevende, avdoed)
+
+        kontrollpunkter shouldContainExactly
+            listOf(
+                DoedshendelseKontrollpunkt.EpsErGiftPaaNytt(
+                    doedsdato = doedsdato,
+                    fnr = avdoed.foedselsnummer.verdi.value,
+                    nyEktefelleFnr = nyEktefelle,
                 ),
             )
     }

@@ -11,7 +11,6 @@ import {
   Textarea,
   VStack,
 } from '@navikt/ds-react'
-import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -157,15 +156,13 @@ export function KlageFormkravRedigering() {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading level="1" size="large">
-            Vurder formkrav og klagefrist
-          </Heading>
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Heading level="1" size="large">
+          Vurder formkrav og klagefrist
+        </Heading>
       </Box>
       <form onSubmit={handleSubmit(sendInnFormkrav)}>
-        <InnholdPadding>
+        <Box paddingBlock="8" paddingInline="16 8">
           {/* Det er litt spesiell håndtering av akkurat hvilket vedtak klagen ligger på, relatert til hvordan React
             tolker controlled vs uncontrolled components. For å kunne håndtere både 1. Ikke valgt vedtak og 2. Valgt
             at det ikke er noe vedtak, tolkes null | undefined som ""), og vedtakId === "-1" som 2). Alle andre vedtakId
@@ -263,7 +260,7 @@ export function KlageFormkravRedigering() {
               'Kunne ikke lagre vurderingen av formkrav og klagefrist på grunn av en feil. Last siden på nytt og prøv igjen. Meld sak\n' +
               '            hvis problemet vedvarer.',
           })}
-        </InnholdPadding>
+        </Box>
       </form>
     </>
   )

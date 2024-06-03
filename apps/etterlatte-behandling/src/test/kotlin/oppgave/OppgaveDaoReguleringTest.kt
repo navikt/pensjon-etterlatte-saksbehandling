@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
-import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.mockSaksbehandler
 import no.nav.etterlatte.nyKontekstMedBruker
@@ -66,7 +65,7 @@ internal class OppgaveDaoReguleringTest(val dataSource: DataSource) {
         val sakTo = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val sakTre = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
 
-        val sakerTilRegulering = Saker(listOf(sakEn, sakTo))
+        val sakerTilRegulering = listOf(sakEn.id, sakTo.id)
 
         val oppgaveAttestert = lagOppgave(sakId = sakEn.id, status = Status.ATTESTERING)
         val oppgaveIkkeAttestert = lagOppgave(sakId = sakTo.id, status = Status.NY)
@@ -86,7 +85,7 @@ internal class OppgaveDaoReguleringTest(val dataSource: DataSource) {
         oppgaveDaoMedEndringssporing.oppdaterStatusOgMerknad(oppgaveAttestert.id, "", Status.ATTESTERING)
         oppgaveDao.settNySaksbehandler(oppgaveAttestert.id, "Ikke Ole")
 
-        oppgaveService.tilbakestillOppgaverUnderAttestering(Saker(listOf(sak)))
+        oppgaveService.tilbakestillOppgaverUnderAttestering(listOf(sak.id))
 
         oppgaveDao.hentOppgave(oppgaveAttestert.id)!!.let {
             it.status shouldBe Status.UNDER_BEHANDLING

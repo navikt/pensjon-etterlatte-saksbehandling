@@ -7,7 +7,6 @@ import { JaNei } from '~shared/types/ISvar'
 import { KlageAvvisning } from '~components/klage/vurdering/KlageAvvisning'
 import { HeadingWrapper } from '~components/person/sakOgBehandling/SakOversikt'
 import { Box, Button, Heading, HStack } from '@navikt/ds-react'
-import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { EndeligVurdering } from '~components/klage/vurdering/EndeligVurdering'
 import { EndeligVurderingVisning } from '~components/klage/vurdering/EndeligVurderingVisning'
 import { Klage } from '~shared/types/Klage'
@@ -36,7 +35,7 @@ export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
           </Heading>
         </HeadingWrapper>
       </Box>
-      <InnholdPadding>
+      <Box paddingBlock="8" paddingInline="16 8">
         {kanRedigere ? (
           <>
             <InitiellVurdering klage={klage} />
@@ -51,7 +50,7 @@ export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
 
         {/* Hvis vi ikke viser redigering av endelig utfall (inkl. knapper) så legges knappene inn her*/}
         {(!klage.initieltUtfall || !kanRedigere) && <Navigeringsknapper klage={klage} navigate={navigate} />}
-      </InnholdPadding>
+      </Box>
     </>
   )
 }

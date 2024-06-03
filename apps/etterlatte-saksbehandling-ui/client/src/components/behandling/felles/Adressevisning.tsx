@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import { IAdresse } from '~shared/types/IAdresse'
-import { HistorikkElement } from '../soeknadsoversikt/styled'
+import { VStack } from '@navikt/ds-react'
 
 export const Adressevisning = ({
   adresser,
@@ -10,51 +10,37 @@ export const Adressevisning = ({
   soeknadsoversikt?: boolean
 }) => {
   return (
-    <div>
+    <VStack gap="1">
       {adresser?.length > 0 ? (
         adresser
           .sort((a, b) => (new Date(b.gyldigFraOgMed!) > new Date(a.gyldigFraOgMed!) ? 1 : -1))
           .map((adresse, index) => (
-            <Adresse
-              adresse={adresse}
-              key={index}
-              soeknadsoversikt={soeknadsoversikt ? soeknadsoversikt : false}
-              index={index}
-            />
+            <Adresse adresse={adresse} key={index} soeknadsoversikt={soeknadsoversikt ? soeknadsoversikt : false} />
           ))
       ) : (
         <div>Ingen adresser</div>
       )}
-    </div>
+    </VStack>
   )
 }
 
-export const Adresse = ({
-  adresse,
-  soeknadsoversikt,
-  index,
-}: {
-  adresse: IAdresse
-  soeknadsoversikt: boolean
-  index: number
-}) => {
+export const Adresse = ({ adresse, soeknadsoversikt }: { adresse: IAdresse; soeknadsoversikt: boolean }) => {
   const fra = format(new Date(adresse.gyldigFraOgMed!), 'dd.MM.yyyy')
   const til = adresse.aktiv ? 'nå' : format(new Date(adresse.gyldigTilOgMed!), 'dd.MM.yyyy')
 
-  const padding = index > 0 ? '5px' : '0px'
   return (
     <>
       {soeknadsoversikt ? (
-        <HistorikkElement>
+        <VStack>
           <span className="date">
             {fra} - {til}:
           </span>
           <span>
             {adresse.adresseLinje1} {adresse.poststed}
           </span>
-        </HistorikkElement>
+        </VStack>
       ) : (
-        <div style={{ paddingTop: padding }}>
+        <div>
           <div>{adresse.adresseLinje1}</div>
           <div>
             {adresse.postnr} {adresse.poststed}

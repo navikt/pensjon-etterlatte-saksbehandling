@@ -20,9 +20,6 @@ internal class VedtaksbrevUnderkjentRiver(
             validate { it.requireKey("vedtak") }
             validate { it.requireKey("vedtak.id") }
             validate { it.requireKey("vedtak.behandlingId") }
-            validate {
-                it.rejectValues("vedtak.behandling.type", listOf("MANUELT_OPPHOER")) // TODO: fjerne
-            }
         }
     }
 

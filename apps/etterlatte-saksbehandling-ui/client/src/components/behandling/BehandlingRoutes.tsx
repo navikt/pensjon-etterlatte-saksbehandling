@@ -11,7 +11,6 @@ import {
   Vedtaksloesning,
 } from '~shared/types/IDetaljertBehandling'
 import { Vedtaksbrev } from './brev/Vedtaksbrev'
-import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { Revurderingsoversikt } from '~components/behandling/revurderingsoversikt/Revurderingsoversikt'
 import { soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
@@ -48,7 +47,6 @@ const behandlingRoutes = (
 ): Array<{ path: behandlingRouteTypes; element: React.JSX.Element }> => [
   { path: 'soeknadsoversikt', element: <Soeknadsoversikt behandling={behandling} /> },
   { path: 'revurderingsoversikt', element: <Revurderingsoversikt behandling={behandling} /> },
-  { path: 'opphoeroversikt', element: <ManueltOpphoerOversikt behandling={behandling} /> },
   { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering behandling={behandling} /> },
   { path: 'aktivitetsplikt', element: <Aktivitetsplikt behandling={behandling} /> },
   { path: 'trygdetid', element: <TrygdetidVisning behandling={behandling} /> },

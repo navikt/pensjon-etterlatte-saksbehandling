@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO as CommonBeregningDTO
@@ -37,6 +38,10 @@ data class Beregning(
     // TODO: Sett denne som non-nullable etter at vi har refreshet hentede beregninger
     val overstyrtBeregning: Boolean? = null,
 ) {
+    fun beregningForMaaned(maaned: YearMonth): Beregningsperiode? {
+        return beregningsperioder.find { it.datoFOM <= maaned && (it.datoTOM ?: maaned) >= maaned }
+    }
+
     companion object {
         fun fraBeregningDTO(dto: CommonBeregningDTO) =
             Beregning(
@@ -76,6 +81,29 @@ data class Beregningsperiode(
     val samletTeoretiskTrygdetid: Int? = null,
     val broek: IntBroek? = null,
 ) {
+    fun anvendtSats(
+        beregningstype: Beregningstype,
+        erForeldreloes: Boolean,
+        erOverstyrt: Boolean,
+    ): String {
+        if (institusjonsopphold != null) {
+            return "${institusjonsopphold.sats.toPlainString()} G"
+        }
+        if (erOverstyrt) {
+            return "MANUELT_OVERSTYRT"
+        }
+        if (beregningstype == Beregningstype.OMS) {
+            return "2.25 G"
+        }
+        if (datoFOM < YearMonth.of(2024, Month.JANUARY)) {
+            return "SOESKENJUSTERING"
+        }
+        return when (erForeldreloes) {
+            true -> "2.25 G"
+            false -> "1 G"
+        }
+    }
+
     companion object {
         fun fraBeregningsperiodeDTO(dto: CommonBeregningsperiode) =
             Beregningsperiode(

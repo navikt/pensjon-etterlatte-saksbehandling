@@ -1,11 +1,6 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
-import {
-  Beskrivelse,
-  InfobokserWrapper,
-  InfoWrapper,
-  VurderingsContainerWrapper,
-} from '~components/behandling/soeknadsoversikt/styled'
+import { Informasjon, Vurdering } from '~components/behandling/soeknadsoversikt/styled'
 import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/omstillingsstoenad/GyldigFramsattVurdering'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
@@ -14,6 +9,7 @@ import { StatusIconProps } from '~shared/icons/statusIcon'
 import { Personopplysning } from '~shared/types/grunnlag'
 import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/Verger'
 import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSaksbehandler'
+import { HStack } from '@navikt/ds-react'
 
 export const GyldigFramsattOmstillingsstoenad = ({
   behandling,
@@ -49,25 +45,23 @@ export const GyldigFramsattOmstillingsstoenad = ({
       status={gyldigFremsattTilStatusIcon}
     >
       <div>
-        <Beskrivelse>
+        <Informasjon>
           Den som har rett til ytelsen må sette frem krav (verge hvis aktuelt). Om annet må fullmakt ligge i saken.
           Søknaden må være signert og vise hva det søkes om, og den må settes fram i bostedslandet eller i det landet
           vedkommende sist var medlem.
-        </Beskrivelse>
-        <InfobokserWrapper>
-          <InfoWrapper>
-            <Info tekst={navn} undertekst={undertekst} label="Innsender" />
-          </InfoWrapper>
+        </Informasjon>
+        <HStack gap="4">
+          <Info tekst={navn} undertekst={undertekst} label="Innsender" />
           <Verger behandlingId={behandling.id} sakId={behandling.sakId} />
-        </InfobokserWrapper>
+        </HStack>
       </div>
-      <VurderingsContainerWrapper>
+      <Vurdering>
         <GyldigFramsattVurdering
           behandlingId={behandling.id}
           gyldigFramsatt={behandling.gyldighetsprøving}
           redigerbar={redigerbar}
         />
-      </VurderingsContainerWrapper>
+      </Vurdering>
     </LovtekstMedLenke>
   )
 }

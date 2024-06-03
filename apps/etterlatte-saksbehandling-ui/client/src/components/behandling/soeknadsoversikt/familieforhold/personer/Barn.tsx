@@ -1,11 +1,11 @@
 import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
-import { PersonDetailWrapper } from '../../styled'
 import { IPdlPerson } from '~shared/types/Person'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 import { differenceInYears } from 'date-fns'
 import { hentAdresserEtterDoedsdato } from '~components/behandling/felles/utils'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
+import { Box } from '@navikt/ds-react'
 
 type Props = {
   person: IPdlPerson
@@ -30,13 +30,13 @@ export const Barn = ({ person, doedsdato }: Props) => {
         <PersonInfoFnr fnr={person.foedselsnummer} />
         <PersonInfoAdresse adresser={adresserEtterDoedsdato} visHistorikk={true} adresseDoedstidspunkt={false} />
         {aktivAdresse && (
-          <PersonDetailWrapper $adresse={true}>
+          <Box paddingBlock="2 0">
             <div>
               <strong>Aktiv adresse</strong>
             </div>
             <div>{aktivAdresse.adresseLinje1}</div>
             <div>{aktivAdresse.land}</div>
-          </PersonDetailWrapper>
+          </Box>
         )}
       </PersonInfoWrapper>
     </PersonBorder>

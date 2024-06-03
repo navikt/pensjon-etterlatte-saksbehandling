@@ -9,6 +9,6 @@ data class KjoeringRequest(
 enum class KjoeringStatus {
     STARTA,
     FEILA,
-    IRRELEVANT,
+    IKKE_LOEPENDE,
     FERDIGSTILT,
 }

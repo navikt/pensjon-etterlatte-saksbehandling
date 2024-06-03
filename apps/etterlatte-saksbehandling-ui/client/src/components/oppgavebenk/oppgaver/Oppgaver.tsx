@@ -1,4 +1,4 @@
-import { Alert, VStack } from '@navikt/ds-react'
+import { VStack } from '@navikt/ds-react'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { PagineringsKontroller } from '~components/oppgavebenk/oppgaver/PagineringsKontroller'
@@ -8,10 +8,11 @@ import {
   sorterOppgaver,
 } from '~components/oppgavebenk/utils/oppgaveSortering'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils/oppgaveutils'
+import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils/oppgaveHandlinger'
 import { filtrerOppgaver } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
+import { AlertIngenOppgaver } from '~components/oppgavebenk/utils/oppgaveFelles'
 
 export interface Props {
   oppgaver: OppgaveDTO[]
@@ -55,7 +56,7 @@ export const Oppgaver = ({
 
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
-  if (!paginerteOppgaver.length) return <Alert variant="info">Ingen oppgaver</Alert>
+  if (!paginerteOppgaver.length) return AlertIngenOppgaver
 
   return (
     <VStack gap="2">

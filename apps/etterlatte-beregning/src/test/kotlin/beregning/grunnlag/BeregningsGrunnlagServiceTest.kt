@@ -602,6 +602,7 @@ internal class BeregningsGrunnlagServiceTest {
                     prorataBroekNevner = null,
                     sakId = 1L,
                     beskrivelse = "test periode 1",
+                    aarsak = "ANNET",
                     kilde =
                         mockk {
                             every { ident } returns "Z123456"
@@ -621,6 +622,7 @@ internal class BeregningsGrunnlagServiceTest {
                     prorataBroekNevner = null,
                     sakId = 1L,
                     beskrivelse = "test periode 2",
+                    aarsak = "ANNET",
                     kilde =
                         mockk {
                             every { ident } returns "Z123456"
@@ -690,6 +692,7 @@ internal class BeregningsGrunnlagServiceTest {
                                             prorataBroekTeller = null,
                                             prorataBroekNevner = null,
                                             beskrivelse = "test periode 1",
+                                            aarsak = "ANNET",
                                         ),
                                     fom = fom,
                                     tom = tom,
@@ -987,6 +990,7 @@ internal class BeregningsGrunnlagServiceTest {
         prorataBroekNevner = null,
         sakId = 123L,
         beskrivelse = beskrivelse,
+        aarsak = "ANNET",
         kilde = Grunnlagsopplysning.Saksbehandler.create(""),
     )
 }

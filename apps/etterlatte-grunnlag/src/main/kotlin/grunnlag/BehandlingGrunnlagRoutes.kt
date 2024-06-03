@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.withBehandlingId
+import java.util.UUID
 
 fun Route.behandlingGrunnlagRoute(
     grunnlagService: GrunnlagService,
@@ -65,6 +66,16 @@ fun Route.behandlingGrunnlagRoute(
                     opplysningsbehov.opplysninger,
                 )
                 call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        post("/laas-til-behandling/{behandlingIdLaasesTil}") {
+            kunSystembruker {
+                withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                    val idSomLaasesTil = UUID.fromString(call.parameters["behandlingIdLaasesTil"].toString())
+                    grunnlagService.laasTilVersjonForBehandling(skalLaasesId = behandlingId, idLaasesTil = idSomLaasesTil)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
 

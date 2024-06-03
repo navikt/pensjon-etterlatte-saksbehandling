@@ -8,7 +8,6 @@ import {
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
-import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe } from '~components/person/typer'
 import { FoersteVirk, ISak } from '~shared/types/sak'
 import { format } from 'date-fns'
@@ -59,12 +58,6 @@ export const lagreInstitusjonsoppholdData = async (args: {
   return apiClient.post(`/institusjonsoppholdbegrunnelse/${args.sakId}`, {
     institusjonsopphold: args.institusjonsopphold,
   })
-}
-
-export const hentManueltOpphoerDetaljer = async (
-  behandlingId: string
-): Promise<ApiResponse<ManueltOpphoerDetaljer>> => {
-  return apiClient.get(`/behandling/${behandlingId}/manueltopphoer`)
 }
 
 export const lagreGyldighetsproeving = async (args: {

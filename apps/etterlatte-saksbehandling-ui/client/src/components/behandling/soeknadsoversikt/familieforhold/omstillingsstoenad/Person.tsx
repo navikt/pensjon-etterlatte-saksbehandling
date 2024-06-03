@@ -1,7 +1,7 @@
 import { PersonIcon } from '@navikt/aksel-icons'
 import { format } from 'date-fns'
 import { PersonInfoAdresse } from '../personer/personinfo/PersonInfoAdresse'
-import { BodyShort, Detail, Heading, Label } from '@navikt/ds-react'
+import { BodyShort, CopyButton, Detail, Heading, HStack, Label, Link } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { DatoFormat, formaterFnr } from '~utils/formattering'
 import { IconSize } from '~shared/types/Icon'
@@ -9,6 +9,8 @@ import { GrunnlagKilde } from '~shared/types/grunnlag'
 import { IPdlPerson } from '~shared/types/Person'
 import { Utlandsopphold } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/UtvandringInnvandring'
 import { StatsborgerskapVisning } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/StatsborgerskapVisning'
+import { Result } from '~shared/api/apiUtils'
+import { ILand } from '~shared/api/trygdetid'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
@@ -29,9 +31,10 @@ type Props = {
   person: IPdlPerson
   kilde: GrunnlagKilde
   avdoed?: boolean
+  landListeResult: Result<ILand[]>
 }
 
-export const Person = ({ person, kilde, avdoed = false }: Props) => {
+export const Person = ({ person, kilde, avdoed = false, landListeResult }: Props) => {
   return (
     <PersonBorder>
       <IconWrapper>
@@ -42,7 +45,14 @@ export const Person = ({ person, kilde, avdoed = false }: Props) => {
           {avdoed ? 'Avdød' : 'Gjenlevende'}
         </Heading>
         <BodyShort>
-          {`${person.fornavn} ${person.etternavn}`} ({formaterFnr(person.foedselsnummer)})
+          {`${person.fornavn} ${person.etternavn}`}
+
+          <HStack>
+            <Link href={`/person/${person.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
+              ({formaterFnr(person.foedselsnummer)})
+            </Link>
+            <CopyButton copyText={person.foedselsnummer} size="small" />
+          </HStack>
         </BodyShort>
         <div>
           <PersonInfoAdresse adresser={person.bostedsadresse} visHistorikk={false} adresseDoedstidspunkt={avdoed} />
@@ -51,6 +61,7 @@ export const Person = ({ person, kilde, avdoed = false }: Props) => {
         <StatsborgerskapVisning
           statsborgerskap={person.statsborgerskap}
           pdlStatsborgerskap={person.pdlStatsborgerskap}
+          landListeResult={landListeResult}
         />
         <Detail>
           <Label size="small" as="p">

@@ -1,6 +1,6 @@
 import React, { Dispatch, ReactNode, SetStateAction } from 'react'
 import { BodyShort, HStack, Pagination } from '@navikt/ds-react'
-import { leggTilPagineringLocalStorage, pagineringslisteverdier } from '~components/oppgavebenk/utils/oppgaveutils'
+import { leggTilPagineringLocalStorage, pagineringslisteverdier } from '~components/oppgavebenk/utils/oppgaveHandlinger'
 
 interface Props {
   page: number

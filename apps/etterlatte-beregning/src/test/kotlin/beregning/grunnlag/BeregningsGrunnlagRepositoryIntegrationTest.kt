@@ -18,6 +18,9 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
@@ -27,6 +30,14 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
     companion object {
         @RegisterExtension
         val dbExtension = DatabaseExtension()
+
+        @JvmStatic
+        fun overstyrtAarsaker() =
+            listOf(
+                Arguments.of("ANNET"),
+                Arguments.of("AVKORTET_UFOERETRYGD"),
+                Arguments.of("AVKORTET_FENGSEL"),
+            )
     }
 
     private val repository = BeregningsGrunnlagRepository(dataSource)
@@ -290,8 +301,9 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
         assertNotNull(result)
     }
 
-    @Test
-    fun `skal kunne lagre og hente overstyr beregningsgrunnlag`() {
+    @ParameterizedTest
+    @MethodSource("overstyrtAarsaker")
+    fun `skal kunne lagre og hente overstyr beregningsgrunnlag`(aarsak: String) {
         val behandlingId = UUID.randomUUID()
 
         repository.lagreOverstyrBeregningGrunnlagForBehandling(
@@ -309,6 +321,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
                     prorataBroekNevner = null,
                     sakId = 1L,
                     beskrivelse = "test periode 1",
+                    aarsak = aarsak,
                     kilde =
                         Grunnlagsopplysning.Saksbehandler(
                             ident = "Z123456",
@@ -327,6 +340,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
                     prorataBroekNevner = 20,
                     sakId = 1L,
                     beskrivelse = "test periode 2",
+                    aarsak = aarsak,
                     kilde =
                         Grunnlagsopplysning.Saksbehandler(
                             ident = "Z123456",
@@ -344,11 +358,13 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
             grunnlag.utbetaltBeloep shouldBe 123L
             grunnlag.prorataBroekNevner shouldBe null
             grunnlag.prorataBroekTeller shouldBe null
+            grunnlag.aarsak shouldBe aarsak
         }
         data.maxBy { it.utbetaltBeloep }.let { grunnlag ->
             grunnlag.utbetaltBeloep shouldBe 321L
             grunnlag.prorataBroekTeller shouldBe 10
             grunnlag.prorataBroekNevner shouldBe 20
+            grunnlag.aarsak shouldBe aarsak
         }
     }
 
@@ -371,6 +387,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
                     prorataBroekNevner = null,
                     sakId = 1L,
                     beskrivelse = "test periode 1",
+                    aarsak = "ANNET",
                     kilde =
                         Grunnlagsopplysning.Saksbehandler(
                             ident = "Z123456",
@@ -389,6 +406,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
                     prorataBroekNevner = null,
                     sakId = 1L,
                     beskrivelse = "test periode 2",
+                    aarsak = "ANNET",
                     kilde =
                         Grunnlagsopplysning.Saksbehandler(
                             ident = "Z123456",
@@ -413,6 +431,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
                     prorataBroekNevner = null,
                     sakId = 1L,
                     beskrivelse = "test periode 3",
+                    aarsak = "ANNET",
                     kilde =
                         Grunnlagsopplysning.Saksbehandler(
                             ident = "Z123456",
@@ -431,6 +450,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
                     prorataBroekNevner = null,
                     sakId = 1L,
                     beskrivelse = "test periode 4",
+                    aarsak = "ANNET",
                     kilde =
                         Grunnlagsopplysning.Saksbehandler(
                             ident = "Z123456",

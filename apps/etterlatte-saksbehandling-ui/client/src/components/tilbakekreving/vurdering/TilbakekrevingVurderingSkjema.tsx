@@ -1,4 +1,4 @@
-import { Button, HStack, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
+import { Box, Button, HStack, Radio, Select, Textarea, VStack } from '@navikt/ds-react'
 import {
   teksterTilbakekrevingAarsak,
   teksterTilbakekrevingBeloepBehold,
@@ -16,9 +16,7 @@ import {
 import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect } from 'react'
 import { lagreTilbakekrevingsvurdering } from '~shared/api/tilbakekreving'
-
 import { isPending, mapResult } from '~shared/api/apiUtils'
-import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { Toast } from '~shared/alerts/Toast'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { useForm } from 'react-hook-form'
@@ -124,7 +122,7 @@ export function TilbakekrevingVurderingSkjema({
 
   return (
     <>
-      <InnholdPadding>
+      <Box paddingBlock="8" paddingInline="16 8">
         <VStack gap="8" style={{ width: '50em' }}>
           <Select {...register('aarsak')} label="Årsak til sak om feilutbetaling" readOnly={!redigerbar}>
             <option value="">Velg..</option>
@@ -391,24 +389,25 @@ export function TilbakekrevingVurderingSkjema({
             </VStack>
           )}
         </VStack>
-      </InnholdPadding>
+      </Box>
 
-      <Border style={{ marginTop: '3em' }} />
-      <HStack justify="center">
-        {redigerbar ? (
-          <Button
-            variant="primary"
-            onClick={handleSubmit(lagreVurderingOgFortsett)}
-            loading={isPending(lagreVurderingStatus)}
-          >
-            Lagre og fortsett
-          </Button>
-        ) : (
-          <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/utbetalinger`)}>
-            Neste
-          </Button>
-        )}
-      </HStack>
+      <Box paddingBlock="12 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <HStack justify="center">
+          {redigerbar ? (
+            <Button
+              variant="primary"
+              onClick={handleSubmit(lagreVurderingOgFortsett)}
+              loading={isPending(lagreVurderingStatus)}
+            >
+              Lagre og fortsett
+            </Button>
+          ) : (
+            <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/utbetalinger`)}>
+              Neste
+            </Button>
+          )}
+        </HStack>
+      </Box>
     </>
   )
 }

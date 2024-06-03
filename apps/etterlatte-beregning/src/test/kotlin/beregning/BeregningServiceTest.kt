@@ -234,8 +234,8 @@ internal class BeregningServiceTest {
 
             overstyrBeregning shouldNotBe null
 
-            overstyrBeregning?.sakId shouldBe behandling.sak
-            overstyrBeregning?.beskrivelse shouldBe "Test"
+            overstyrBeregning.sakId shouldBe behandling.sak
+            overstyrBeregning.beskrivelse shouldBe "Test"
 
             verify(exactly = 1) {
                 beregningRepository.opprettOverstyrBeregning(any())
@@ -262,8 +262,8 @@ internal class BeregningServiceTest {
 
             overstyrBeregning shouldNotBe null
 
-            overstyrBeregning?.sakId shouldBe behandling.sak
-            overstyrBeregning?.beskrivelse shouldBe "Test"
+            overstyrBeregning.sakId shouldBe behandling.sak
+            overstyrBeregning.beskrivelse shouldBe "Test"
 
             verify(exactly = 1) { beregningRepository.hentOverstyrBeregning(any()) }
         }

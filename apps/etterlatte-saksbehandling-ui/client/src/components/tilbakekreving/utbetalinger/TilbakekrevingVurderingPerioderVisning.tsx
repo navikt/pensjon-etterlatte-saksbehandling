@@ -5,8 +5,7 @@ import {
   TilbakekrevingPeriode,
 } from '~shared/types/Tilbakekreving'
 import React, { useState } from 'react'
-import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { Button, HStack, Table } from '@navikt/ds-react'
+import { Box, Button, HStack, Table } from '@navikt/ds-react'
 import { format } from 'date-fns'
 import { useNavigate } from 'react-router'
 
@@ -15,7 +14,7 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
   const [perioder] = useState<TilbakekrevingPeriode[]>(behandling.tilbakekreving.perioder)
 
   return (
-    <InnholdPadding>
+    <Box paddingBlock="8" paddingInline="16 8">
       <Table className="table" zebraStripes>
         <Table.Header>
           <Table.Row>
@@ -55,12 +54,13 @@ export function TilbakekrevingVurderingPerioderVisning({ behandling }: { behandl
           })}
         </Table.Body>
       </Table>
-      <Border style={{ marginTop: '3em' }} />
-      <HStack justify="center">
-        <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/oppsummering`)}>
-          Neste
-        </Button>
-      </HStack>
-    </InnholdPadding>
+      <Box paddingBlock="12 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <HStack justify="center">
+          <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/oppsummering`)}>
+            Neste
+          </Button>
+        </HStack>
+      </Box>
+    </Box>
   )
 }

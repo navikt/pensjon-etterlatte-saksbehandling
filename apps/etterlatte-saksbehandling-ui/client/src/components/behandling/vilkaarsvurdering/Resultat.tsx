@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { Dispatch, SetStateAction, useState } from 'react'
 import styled from 'styled-components'
 import { VilkaarsvurderingKnapper } from './VilkaarsvurderingKnapper'
 import {
@@ -8,8 +8,8 @@ import {
   VilkaarsvurderingResultat,
 } from '~shared/api/vilkaarsvurdering'
 import { VilkaarWrapper } from './styled'
-import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
-import { svarTilTotalResultat } from './utils'
+import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea, Box } from '@navikt/ds-react'
+import { svarTilTotalResultat, totalResultatTilSvar } from './utils'
 import { PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
 import { formaterSakstype, formaterStringDato } from '~utils/formattering'
@@ -19,7 +19,6 @@ import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
-import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 
 import { isPending } from '~shared/api/apiUtils'
@@ -33,6 +32,8 @@ type Props = {
   behandlingId: string
   redigerbar: boolean
   behandlingstype: IBehandlingsType
+  redigerTotalvurdering: boolean
+  setRedigerTotalvurdering: Dispatch<SetStateAction<boolean>>
 }
 
 export const Resultat = (props: Props) => {
@@ -44,6 +45,7 @@ export const Resultat = (props: Props) => {
     behandlingId,
     redigerbar,
     behandlingstype,
+    setRedigerTotalvurdering,
   } = props
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
@@ -51,7 +53,6 @@ export const Resultat = (props: Props) => {
   const dispatch = useAppDispatch()
   const [totalVurderingStatus, oppdaterTotalVurderingCall] = useApiCall(oppdaterTotalVurdering)
   const [slettVurderingStatus, slettTotalVurderingCall] = useApiCall(slettTotalVurdering)
-
   const alleVilkaarErVurdert = !vilkaarsvurdering.vilkaar.some((vilkaar) => !vilkaar.vurdering)
 
   const slettVilkaarsvurderingResultat = () =>
@@ -132,7 +133,10 @@ export const Resultat = (props: Props) => {
               {redigerbar && (
                 <Button
                   loading={isPending(slettVurderingStatus)}
-                  onClick={slettVilkaarsvurderingResultat}
+                  onClick={() => {
+                    slettVilkaarsvurderingResultat()
+                    setRedigerTotalvurdering(false)
+                  }}
                   variant="tertiary"
                   icon={<TrashIcon />}
                 >
@@ -144,6 +148,10 @@ export const Resultat = (props: Props) => {
                   style={{ marginLeft: '1rem' }}
                   onClick={() => {
                     setKommentar(vilkaarsvurdering?.resultat?.kommentar || '')
+                    if (vilkaarsvurdering.resultat?.utfall) {
+                      setSvar(totalResultatTilSvar(vilkaarsvurdering.resultat?.utfall))
+                    }
+                    setRedigerTotalvurdering(true)
                     const vilkaarsvurderingUtenResultat = { ...vilkaarsvurdering, resultat: undefined }
                     dispatch(updateVilkaarsvurdering(vilkaarsvurderingUtenResultat))
                   }}
@@ -151,7 +159,7 @@ export const Resultat = (props: Props) => {
                   icon={<PencilWritingIcon />}
                   loading={isPending(totalVurderingStatus)}
                 >
-                  Rediger vurdering
+                  Rediger totalvurdering
                 </Button>
               )}
             </ContentWrapper>
@@ -168,6 +176,7 @@ export const Resultat = (props: Props) => {
                   legend=""
                   size="small"
                   className="radioGroup"
+                  value={svar || ''}
                   onChange={(event) => {
                     setSvar(ISvar[event as ISvar])
                     setRadioError(undefined)
@@ -208,22 +217,23 @@ export const Resultat = (props: Props) => {
         </OppdatertGrunnlagAlert>
       )}
 
-      <Border />
-      {redigerbar ? (
-        <>
-          {vilkaarsvurdering.isGrunnlagUtdatert && (
-            <OppdatertGrunnlagAlert variant="warning">
-              OBS! Grunnlaget for vilkårsvurderingen har blitt oppdatert siden sist. <br />
-              Du må se over vurderingene og sjekke at de fortsatt er riktige.
-            </OppdatertGrunnlagAlert>
-          )}
-          {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && (
-            <VilkaarsvurderingKnapper behandlingId={behandlingId} />
-          )}
-        </>
-      ) : (
-        <NesteOgTilbake></NesteOgTilbake>
-      )}
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        {redigerbar ? (
+          <>
+            {vilkaarsvurdering.isGrunnlagUtdatert && (
+              <OppdatertGrunnlagAlert variant="warning">
+                OBS! Grunnlaget for vilkårsvurderingen har blitt oppdatert siden sist. <br />
+                Du må se over vurderingene og sjekke at de fortsatt er riktige.
+              </OppdatertGrunnlagAlert>
+            )}
+            {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && (
+              <VilkaarsvurderingKnapper behandlingId={behandlingId} />
+            )}
+          </>
+        ) : (
+          <NesteOgTilbake />
+        )}
+      </Box>
     </>
   )
 }

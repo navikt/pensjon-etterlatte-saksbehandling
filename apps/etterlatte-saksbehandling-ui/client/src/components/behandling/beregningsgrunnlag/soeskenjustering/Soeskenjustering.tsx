@@ -7,7 +7,6 @@ import { hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types
 import { addMonths } from 'date-fns'
 import { SoeskenMedIBeregning } from '~shared/types/Beregning'
 import { Barn } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Barn'
-import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import {
   FEIL_I_PERIODE,
   feilIKomplettePerioderOverIntervall,
@@ -121,20 +120,17 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading level="2" size="medium">
-            Søskenjustering
-          </Heading>
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Heading level="2" size="medium">
+          Søskenjustering
+        </Heading>
       </Box>
       <FamilieforholdWrapper>
         {personopplysninger.soeker && <Barn person={personopplysninger.soeker?.opplysning} doedsdato={doedsdato} />}
-        <Border />
       </FamilieforholdWrapper>
-      {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
-      <form id="formsoeskenjustering">
-        <>
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
+        <form id="formsoeskenjustering">
           <UstiletListe>
             {fields.map((item, index) => (
               <SoeskenjusteringPeriode
@@ -170,8 +166,8 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
             </Button>
           )}
           {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
-        </>
-      </form>
+        </form>
+      </Box>
     </>
   )
 }

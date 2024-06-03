@@ -81,6 +81,11 @@ class PersongalleriFinnesIkkeException : IkkeFunnetException(
     detail = "Kunne ikke finne persongalleri",
 )
 
+class KanIkkeEndreSendeBrevForFoerstegangsbehandling : UgyldigForespoerselException(
+    "KAN_IKKE_ENDRE_SEND_BREV",
+    "Kan ikke endre send brev for førstegangsbehandling, skal alltid sendes",
+)
+
 interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): Behandling?
 
@@ -494,7 +499,16 @@ internal class BehandlingServiceImpl(
         skalSendeBrev: Boolean,
     ) {
         inTransaction {
-            behandlingDao.lagreSendeBrev(behandlingId, skalSendeBrev)
+            val behandling = behandlingDao.hentBehandling(behandlingId)
+            require(behandling != null) {
+                "Behandling finnes ikke $behandlingId"
+            }
+            when (behandling.type) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> throw KanIkkeEndreSendeBrevForFoerstegangsbehandling()
+                BehandlingType.REVURDERING -> {
+                    behandlingDao.lagreSendeBrev(behandlingId, skalSendeBrev)
+                }
+            }
         }
     }
 

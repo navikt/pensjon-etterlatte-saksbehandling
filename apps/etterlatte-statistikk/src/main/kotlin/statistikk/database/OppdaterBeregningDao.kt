@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.statistikk.domain.Beregning
 import org.slf4j.LoggerFactory
 import java.sql.Connection
+import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -121,6 +122,80 @@ class OppdaterBeregningDao(
         }
     }
 
+    fun hentBehandlingerForOppdateringAnvendtSats(sakerAvGangen: Int): List<BehandlingMedStatistikkShitSomSkalFiksesI> {
+        return datasource.connection.use { connection ->
+            val statement =
+                connection.prepareStatement(
+                    """
+                    SELECT behandling_id, beregning_behandling from beregning_oppdatering
+                    where sats_oppdatert is false
+                    limit ?
+                    """.trimIndent(),
+                )
+            statement.setInt(1, sakerAvGangen)
+            val behandlinger =
+                statement.executeQuery().toList {
+                    val behandlingId = UUID.fromString(getString("behandling_id"))
+                    val beregning = getString("beregning_behandling")?.let { objectMapper.readValue<Beregning>(it) }
+                    behandlingId to beregning
+                }
+            behandlinger.map { (id, beregning) ->
+                BehandlingMedStatistikkShitSomSkalFiksesI(
+                    behandlingId = id,
+                    statistikkMaaneder = hentAktuelleStatistikkmaanederOgAvdoedForBehandling(id, connection),
+                    beregning = beregning!!,
+                )
+            }
+        }
+    }
+
+    private fun hentAktuelleStatistikkmaanederOgAvdoedForBehandling(
+        behandlingId: UUID,
+        connection: Connection,
+    ): List<Pair<YearMonth, Int>> {
+        val statement =
+            connection.prepareStatement(
+                """
+                SELECT statistikkmaaned, fnrforeldre from maaned_stoenad where behandlingid = ? and statistikkmaaned >= '2024-01'
+                """.trimIndent(),
+            )
+        statement.setObject(1, behandlingId)
+        return statement.executeQuery().toList {
+            val statistikkMaaned = YearMonth.parse(getString("statistikkmaaned"))
+            val foreldre: List<String>? = getString("fnrforeldre")?.let { objectMapper.readValue(it) }
+            statistikkMaaned to (foreldre?.size ?: 0)
+        }
+    }
+
+    fun oppdaterAnvendtSats(
+        behandlingId: UUID,
+        statistikkMaanederOgSatser: List<Pair<YearMonth, String>>,
+    ) {
+        datasource.connection.use { connection ->
+            statistikkMaanederOgSatser.forEach { (maaned, sats) ->
+                val statement =
+                    connection.prepareStatement(
+                        """
+                        update maaned_stoenad set anvendtsats = ? where behandlingid = ? and statistikkmaaned = ?
+                        """.trimIndent(),
+                    )
+                statement.setString(1, sats)
+                statement.setObject(2, behandlingId)
+                statement.setString(3, maaned.toString())
+                statement.executeUpdate()
+            }
+            // lagre at vi har ryddet opp
+            val statement =
+                connection.prepareStatement(
+                    """
+                    update beregning_oppdatering set sats_oppdatert = true where behandling_id = ?
+                    """.trimIndent(),
+                )
+            statement.setObject(1, behandlingId)
+            statement.executeUpdate()
+        }
+    }
+
     fun patchRaderForBehandling(
         behandlingId: UUID,
         beregning: Beregning,
@@ -155,6 +230,12 @@ class OppdaterBeregningDao(
         }
     }
 }
+
+data class BehandlingMedStatistikkShitSomSkalFiksesI(
+    val behandlingId: UUID,
+    val statistikkMaaneder: List<Pair<YearMonth, Int>>,
+    val beregning: Beregning,
+)
 
 enum class HentetStatus {
     IKKE_HENTET,

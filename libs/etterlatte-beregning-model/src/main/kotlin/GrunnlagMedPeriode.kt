@@ -79,10 +79,10 @@ object PeriodisertBeregningGrunnlag {
         val senesteTom: LocalDate?
 
         init {
-            if (opplysninger.isEmpty()) {
+            if (sorterteOpplysninger.isEmpty()) {
                 throw PeriodiseringAvGrunnlagFeil.IngenPerioder()
             }
-            if (perioderOverlapper(opplysninger)) {
+            if (perioderOverlapper(sorterteOpplysninger)) {
                 throw PeriodiseringAvGrunnlagFeil.PerioderOverlapper()
             }
 

@@ -17,16 +17,17 @@ class RegulerOverstyrtKtTest {
             OverstyrBeregningGrunnlagDao(
                 id = UUID.randomUUID(),
                 behandlingId = UUID.randomUUID(),
-                sakId = 123L,
                 datoFOM = LocalDate.of(2022, 5, 1),
                 datoTOM = null,
+                utbetaltBeloep = 5679,
                 trygdetid = 40,
                 trygdetidForIdent = "",
-                prorataBroekNevner = null,
                 prorataBroekTeller = null,
+                prorataBroekNevner = null,
+                sakId = 123L,
                 beskrivelse = "",
+                aarsak = "ANNET",
                 kilde = Grunnlagsopplysning.Saksbehandler.create(""),
-                utbetaltBeloep = 5679,
             )
 
         val reguleringsbehandlingId = UUID.randomUUID()

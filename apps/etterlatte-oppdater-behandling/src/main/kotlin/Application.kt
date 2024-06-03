@@ -7,6 +7,7 @@ import no.nav.etterlatte.regulering.OmregningsHendelserBehandlingRiver
 import no.nav.etterlatte.regulering.ReguleringFeiletRiver
 import no.nav.etterlatte.regulering.ReguleringsforespoerselRiver
 import no.nav.etterlatte.regulering.VedtakAttestertRiver
+import no.nav.etterlatte.regulering.YtelseIkkeLoependeRiver
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 
@@ -32,6 +33,7 @@ private fun settOppRivers(
     ReguleringFeiletRiver(rapidsConnection, behandlingservice)
     VedtakAttestertRiver(rapidsConnection, behandlingservice)
     AvbrytBehandlingHvisMigreringFeilaRiver(rapidsConnection, behandlingservice)
+    YtelseIkkeLoependeRiver(rapidsConnection, behandlingservice)
     OpprettBrevRiver(rapidsConnection, behandlingservice, featureToggleService)
     TidshendelseRiver(rapidsConnection, tidshendelseService)
     OppdaterDoedshendelseBrevDistribuert(rapidsConnection, behandlingservice)

@@ -1,4 +1,4 @@
-import { BodyShort, Button, Heading, Tabs } from '@navikt/ds-react'
+import { Box, Button, Heading, Tabs } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { behandlingErRedigerbar } from '../felles/utils'
@@ -35,11 +35,9 @@ import {
   BeregningsmetodeForAvdoed,
   InstitusjonsoppholdGrunnlagData,
 } from '~shared/types/Beregning'
-import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
-
 import { isPending, isPendingOrInitial, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingGjelderBarnepensjonPaaNyttRegelverk } from '~components/behandling/vilkaarsvurdering/utils'
@@ -49,6 +47,51 @@ import BeregningsgrunnlagMetodeForAvdoed, {
   BeregningsgrunnlagMetodeForAvdoedOppsummering,
 } from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagMetodeForAvdoed'
 import styled from 'styled-components'
+
+type BeregningsgrunnlagBarnepensjonOppsummeringProps = {
+  trygdetider: ITrygdetid[]
+  mapNavn: (fnr: string) => string
+  periodisertBeregningsmetodeForAvdoed: (
+    ident: string
+  ) => PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | null
+}
+
+const BeregningsgrunnlagBarnepensjonOppsummering = (props: BeregningsgrunnlagBarnepensjonOppsummeringProps) => {
+  const { trygdetider, mapNavn, periodisertBeregningsmetodeForAvdoed } = props
+
+  return (
+    <>
+      <Heading size="medium" level="2">
+        Oppsummering
+      </Heading>
+
+      {trygdetider.map((trygdetid) => {
+        const grunnlag = periodisertBeregningsmetodeForAvdoed(trygdetid.ident)
+        const navn = mapNavn(trygdetid.ident)
+
+        if (grunnlag !== null) {
+          return (
+            <BeregningsgrunnlagMetodeForAvdoedOppsummering
+              key={`oppsummering-${trygdetid.ident}`}
+              beregningsMetode={grunnlag.data.beregningsMetode.beregningsMetode}
+              fom={grunnlag.fom}
+              tom={grunnlag.tom}
+              begrunnelse={grunnlag.data.beregningsMetode.begrunnelse ?? ''}
+              navn={navn}
+              visNavn={true}
+            />
+          )
+        } else {
+          return (
+            <OppsummeringMangler key={`oppsummering-${trygdetid.ident}`}>
+              Trygdetid brukt i beregningen for {navn} mangler
+            </OppsummeringMangler>
+          )
+        }
+      })}
+    </>
+  )
+}
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -186,7 +229,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         {isSuccess(beregningsgrunnlag) && isSuccess(trygdetider) && (
           <>
             {trygdetider.data.length > 1 && (
-              <TabsWrapper>
+              <Box paddingBlock="16" paddingInline="4">
                 {redigerbar && (
                   <>
                     <Heading size="medium" level="2">
@@ -214,35 +257,13 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
                     </Tabs>
                   </>
                 )}
-                <Heading size="medium" level="2">
-                  Oppsummering
-                </Heading>
 
-                {trygdetider.data.map((trygdetid) => {
-                  const grunnlag = periodisertBeregningsmetodeForAvdoed(trygdetid.ident)
-                  const navn = mapNavn(trygdetid.ident)
-
-                  if (grunnlag !== null) {
-                    return (
-                      <BeregningsgrunnlagMetodeForAvdoedOppsummering
-                        key={`oppsummering-${trygdetid.ident}`}
-                        beregningsMetode={grunnlag.data.beregningsMetode.beregningsMetode}
-                        fom={grunnlag.fom}
-                        tom={grunnlag.tom}
-                        begrunnelse={grunnlag.data.beregningsMetode.begrunnelse ?? ''}
-                        navn={navn}
-                        visNavn={true}
-                      />
-                    )
-                  } else {
-                    return (
-                      <OppsummeringMangler key={`oppsummering-${trygdetid.ident}`}>
-                        Trygdetid brukt i beregningen for {navn} mangler
-                      </OppsummeringMangler>
-                    )
-                  }
-                })}
-              </TabsWrapper>
+                <BeregningsgrunnlagBarnepensjonOppsummering
+                  trygdetider={trygdetider.data}
+                  mapNavn={mapNavn}
+                  periodisertBeregningsmetodeForAvdoed={periodisertBeregningsmetodeForAvdoed}
+                />
+              </Box>
             )}
 
             {trygdetidsListe.length <= 1 && (
@@ -290,29 +311,24 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
       })}
       {isPendingOrInitial(trygdetider) && <Spinner visible={true} label="Henter trygdetidsoversikt ..." />}
 
-      <Border />
-
-      {redigerbar ? (
-        <BehandlingHandlingKnapper>
-          <Button
-            variant="primary"
-            onClick={onSubmit}
-            loading={isPending(lagreBeregningsgrunnlag) || isPending(endreBeregning)}
-          >
-            {handlinger.NESTE.navn}
-          </Button>
-        </BehandlingHandlingKnapper>
-      ) : (
-        <NesteOgTilbake />
-      )}
+      <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        {redigerbar ? (
+          <BehandlingHandlingKnapper>
+            <Button
+              variant="primary"
+              onClick={onSubmit}
+              loading={isPending(lagreBeregningsgrunnlag) || isPending(endreBeregning)}
+            >
+              {handlinger.NESTE.navn}
+            </Button>
+          </BehandlingHandlingKnapper>
+        ) : (
+          <NesteOgTilbake />
+        )}
+      </Box>
     </>
   )
 }
-
-const TabsWrapper = styled.div`
-  padding: 1em 4em;
-`
-
 const OppsummeringMangler = styled(BodyShort)`
   padding-top: 1em;
 `

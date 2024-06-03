@@ -273,6 +273,7 @@ class StatistikkService(
             utbetalingsdato = utbetalingsdato,
             kilde = vedtaksloesning,
             pesysId = pesysid,
+            sakYtelsesgruppe = hentSakYtelsesgruppe(sakType = vedtak.sak.sakType, avdoede = persongalleri.avdoed),
         )
     }
 

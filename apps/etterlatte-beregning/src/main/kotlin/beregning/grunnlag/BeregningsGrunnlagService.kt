@@ -259,6 +259,7 @@ class BeregningsGrunnlagService(
                                     prorataBroekTeller = periode.prorataBroekTeller,
                                     prorataBroekNevner = periode.prorataBroekNevner,
                                     beskrivelse = periode.beskrivelse,
+                                    aarsak = periode.aarsak,
                                 ),
                             fom = periode.datoFOM,
                             tom = periode.datoTOM,
@@ -293,6 +294,7 @@ class BeregningsGrunnlagService(
                     prorataBroekNevner = it.data.prorataBroekNevner,
                     sakId = behandling.sak,
                     beskrivelse = it.data.beskrivelse,
+                    aarsak = it.data.aarsak,
                     kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
                 )
             },

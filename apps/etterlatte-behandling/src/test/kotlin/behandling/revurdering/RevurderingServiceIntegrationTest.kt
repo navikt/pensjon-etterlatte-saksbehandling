@@ -146,7 +146,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     aktivitetspliktService,
                 ).opprettManuellRevurderingWrapper(
                     sakId = sak.id,
-                    aarsak = Revurderingaarsak.REGULERING,
+                    aarsak = Revurderingaarsak.ANNEN,
                     paaGrunnAvHendelseId = null,
                     begrunnelse = null,
                     saksbehandler = Saksbehandler("", "saksbehandler", null),
@@ -364,7 +364,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             assertEquals(revurdering.id, grunnlaghendelse?.behandlingId)
             coVerify { grunnlagService.hentPersongalleri(any()) }
             verify { grunnlagService.leggInnNyttGrunnlag(behandling as Behandling, any()) }
-            verify { grunnlagService.leggInnNyttGrunnlag(revurdering, any()) }
+            verify { grunnlagService.laasTilGrunnlagIBehandling(revurdering, behandling!!.id) }
             verify { oppgaveService.hentOppgaverForSak(sak.id) }
             verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
             verify {

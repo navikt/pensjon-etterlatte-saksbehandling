@@ -1,6 +1,6 @@
 import { IBoddEllerArbeidetUtlandet, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '../LovtekstMedLenke'
-import { Beskrivelse, VurderingsContainerWrapper } from '../styled'
+import { Informasjon, Vurdering } from '../styled'
 import { useState } from 'react'
 import { LeggTilVurderingButton } from '../LeggTilVurderingButton'
 import { BoddEllerArbeidetUtlandetVurdering } from './BoddEllerArbeidetUtlandetVurdering'
@@ -24,7 +24,7 @@ export const BoddEllerArbeidetUtlandet = ({
 
   return (
     <LovtekstMedLenke tittel="Utlandsopphold" hjemler={[]} status={statusIkon(behandling.boddEllerArbeidetUtlandet)}>
-      <Beskrivelse>
+      <Informasjon>
         <VStack gap="6">
           <BodyShort>
             Hvis avdøde har bodd og/eller arbeidet i utlandet, kan dette ha innvirkning på rettighetene til og
@@ -43,8 +43,8 @@ export const BoddEllerArbeidetUtlandet = ({
             avtaleland det ikke er sendt krav til tidligere i annen sak til avdød. Se spørsmålstegn for mer informasjon.
           </BodyShort>
         </VStack>
-      </Beskrivelse>
-      <VurderingsContainerWrapper>
+      </Informasjon>
+      <Vurdering>
         {vurdert && (
           <BoddEllerArbeidetUtlandetVurdering
             redigerbar={redigerbar}
@@ -55,7 +55,7 @@ export const BoddEllerArbeidetUtlandet = ({
         {!vurdert && redigerbar && (
           <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
         )}
-      </VurderingsContainerWrapper>
+      </Vurdering>
     </LovtekstMedLenke>
   )
 }

@@ -1,5 +1,4 @@
 import { Box, Button, ErrorSummary, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
-import { Border, HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
@@ -84,14 +83,12 @@ export function TilbakekrevingOppsummering({
 
   return (
     <>
-      <Box paddingInline="16" paddingBlock="4">
-        <HeadingWrapper>
-          <Heading level="1" size="large">
-            Oppsummering
-          </Heading>
-        </HeadingWrapper>
+      <Box paddingInline="16" paddingBlock="16 4">
+        <Heading level="1" size="large">
+          Oppsummering
+        </Heading>
       </Box>
-      <InnholdPadding>
+      <Box paddingBlock="8" paddingInline="16 8">
         <TilbakekrevingVurderingOppsummering behandling={behandling} />
 
         <div style={{ marginTop: '3rem' }}>
@@ -126,27 +123,29 @@ export function TilbakekrevingOppsummering({
           pending: <Spinner label="Sjekker om tilbakekreving er fylt ut" visible={true} />,
           error: (error) => <TilbakekrevingValideringsfeil error={error} />,
         })}
-      </InnholdPadding>
-      <Border style={{ marginTop: '3em' }} />
-      <HStack justify="center">
-        {!isPending(lagreSkalSendeBrevStatus) && (
-          <>
-            {behandling.sendeBrev && gyldigTilbakekreving && (
-              <Button variant="primary" onClick={gaaTilBrev} loading={isPending(validerTilbakekrevingStatus)}>
-                Gå til brev
-              </Button>
-            )}
-            {!behandling.sendeBrev && gyldigTilbakekreving && redigerbar && (
-              <SendTilAttesteringModal
-                behandlingId={behandling.id}
-                fattVedtakApi={fattVedtak}
-                validerKanSendeTilAttestering={() => gyldigTilbakekreving}
-              />
-            )}
-          </>
-        )}
-        <Spinner visible={isPending(lagreSkalSendeBrevStatus)} label="Lagrer brevvalg" />
-      </HStack>
+      </Box>
+
+      <Box paddingBlock="12 0" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <HStack justify="center">
+          {!isPending(lagreSkalSendeBrevStatus) && (
+            <>
+              {behandling.sendeBrev && gyldigTilbakekreving && (
+                <Button variant="primary" onClick={gaaTilBrev} loading={isPending(validerTilbakekrevingStatus)}>
+                  Gå til brev
+                </Button>
+              )}
+              {!behandling.sendeBrev && gyldigTilbakekreving && redigerbar && (
+                <SendTilAttesteringModal
+                  behandlingId={behandling.id}
+                  fattVedtakApi={fattVedtak}
+                  validerKanSendeTilAttestering={() => gyldigTilbakekreving}
+                />
+              )}
+            </>
+          )}
+          <Spinner visible={isPending(lagreSkalSendeBrevStatus)} label="Lagrer brevvalg" />
+        </HStack>
+      </Box>
     </>
   )
 }

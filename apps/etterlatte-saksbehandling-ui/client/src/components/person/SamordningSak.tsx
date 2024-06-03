@@ -67,7 +67,7 @@ function SamordningTabell({ samordningsdata }: { samordningsdata: Array<Samordni
                 <Table.DataCell>{formaterStringDato(mld.sendtDato)}</Table.DataCell>
                 <Table.DataCell>{mld.svartDato && formaterStringDato(mld.svartDato)}</Table.DataCell>
                 <Table.DataCell>{mld.purretDato && formaterStringDato(mld.purretDato)}</Table.DataCell>
-                <Table.DataCell>{mld.refusjonskrav}</Table.DataCell>
+                <Table.DataCell>{mld.svartDato && (mld.refusjonskrav ? 'Ja' : 'Nei')}</Table.DataCell>
               </Table.Row>
             ))
           )}

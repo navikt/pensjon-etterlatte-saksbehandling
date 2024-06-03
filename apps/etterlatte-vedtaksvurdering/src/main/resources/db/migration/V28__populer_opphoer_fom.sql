@@ -1,3 +1,4 @@
+-- Setter opphoer fra og med på alle opphørsvetdak som ble opprettet før feltet ble innført
 UPDATE vedtak
 SET opphoer_fom=subquery.datovirkfom
 FROM (

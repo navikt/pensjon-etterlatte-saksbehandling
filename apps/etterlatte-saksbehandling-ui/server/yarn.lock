@@ -277,10 +277,10 @@
     "@types/node" "*"
     form-data "^3.0.0"
 
-"@types/node@*", "@types/node@^20.12.8":
-  version "20.12.8"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.12.8.tgz#35897bf2bfe3469847ab04634636de09552e8256"
-  integrity sha512-NU0rJLJnshZWdE/097cdCBbyW1h4hEg0xpovcoAQYHl8dnEyp/NAOiE45pvc+Bd1Dt+2r94v2eGFpQJ4R7g+2w==
+"@types/node@*", "@types/node@^20.13.0":
+  version "20.13.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.13.0.tgz#011a76bc1e71ae9a026dddcfd7039084f752c4b6"
+  integrity sha512-FM6AOb3khNkNIXPnHFDYaHerSv8uN22C91z098AnGccVu+Pcdhi+pNUFDi0iLmPIsVE0JBD0KVS7mzUYt4nRzQ==
   dependencies:
     undici-types "~5.26.4"
 
@@ -2364,17 +2364,10 @@ safe-stable-stringify@^2.3.1:
   resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
 
-"semver@2 || 3 || 4 || 5 || 6 || 7":
+"semver@2 || 3 || 4 || 5 || 6 || 7", semver@^7.3.5, semver@^7.3.7, semver@^7.5.3, semver@^7.5.4:
   version "7.6.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.6.0.tgz#1a46a4db4bffcccd97b743b5005c8325f23d4e2d"
   integrity sha512-EnwXhrlwXMk9gKu5/flx5sv/an57AkRplG3hTK68W7FRDN+k+OWBj65M7719OkA82XLBxrcX0KSHj+X5COhOVg==
-  dependencies:
-    lru-cache "^6.0.0"
-
-semver@^7.3.5, semver@^7.3.7, semver@^7.5.3, semver@^7.5.4:
-  version "7.5.4"
-  resolved "https://registry.yarnpkg.com/semver/-/semver-7.5.4.tgz#483986ec4ed38e1c6c48c34894a9182dbff68a6e"
-  integrity sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==
   dependencies:
     lru-cache "^6.0.0"
 
@@ -2813,10 +2806,10 @@ unique-slug@^4.0.0:
   dependencies:
     imurmurhash "^0.1.4"
 
-unleash-client@^5.5.2:
-  version "5.5.2"
-  resolved "https://registry.yarnpkg.com/unleash-client/-/unleash-client-5.5.2.tgz#7e04d68dd520e633c8aa7d411636c78158e0beeb"
-  integrity sha512-w6Rj3trEHyUrRK00IuAOmhPRA71xmFot2fOMl0zBIyT+YcKwJMPY9uCXetfpc8WTsgW1TLU9ge6hIJx+4BJYYg==
+unleash-client@^5.5.3:
+  version "5.5.3"
+  resolved "https://registry.yarnpkg.com/unleash-client/-/unleash-client-5.5.3.tgz#c387a8bfb27cb488d3292b7a990a2d9614cc4d18"
+  integrity sha512-QFIsjHhuKQwkkTdICxgp0czDVzdZEPwT9BEcqcLfyxNg129+oYQpQMSnFsW3d+qcRSID1FYoth4ueaOkh7odLQ==
   dependencies:
     ip "^2.0.1"
     make-fetch-happen "^12.0.0"

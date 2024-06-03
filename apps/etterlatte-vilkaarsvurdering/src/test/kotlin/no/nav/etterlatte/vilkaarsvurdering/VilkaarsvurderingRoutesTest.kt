@@ -304,7 +304,7 @@ internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
             }
 
             val vurdertVilkaar =
-                vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)!!
+                vilkaarsvurderingServiceImpl.hentVilkaarsvurderingMedDelVilkaar(behandlingId)!!
                     .vilkaar.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
             assertNotNull(vurdertVilkaar)
@@ -339,7 +339,7 @@ internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
             }
 
             val vurdertVilkaarPaaUnntak =
-                vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)!!
+                vilkaarsvurderingServiceImpl.hentVilkaarsvurderingMedDelVilkaar(behandlingId)!!
                     .vilkaar.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
             assertEquals(Utfall.IKKE_OPPFYLT, vurdertVilkaarPaaUnntak.hovedvilkaar.resultat)
@@ -382,7 +382,7 @@ internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
             }
 
             val vurdertVilkaar =
-                vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)!!
+                vilkaarsvurderingServiceImpl.hentVilkaarsvurderingMedDelVilkaar(behandlingId)!!
                     .vilkaar.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
             assertNotNull(vurdertVilkaar)
@@ -397,7 +397,7 @@ internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
                     }
 
             val vurdertVilkaarSlettet =
-                vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)!!.vilkaar
+                vilkaarsvurderingServiceImpl.hentVilkaarsvurderingMedDelVilkaar(behandlingId)!!.vilkaar
                     .first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
             assertEquals(HttpStatusCode.OK, response.status)
@@ -736,7 +736,7 @@ internal class VilkaarsvurderingRoutesTest(private val ds: DataSource) {
                 }
 
             assertEquals(HttpStatusCode.PreconditionFailed, response.status)
-            val actual = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)
+            val actual = vilkaarsvurderingServiceImpl.hentVilkaarsvurderingMedDelVilkaar(behandlingId)
             assertEquals(vilkaarsvurdering, actual)
         }
     }

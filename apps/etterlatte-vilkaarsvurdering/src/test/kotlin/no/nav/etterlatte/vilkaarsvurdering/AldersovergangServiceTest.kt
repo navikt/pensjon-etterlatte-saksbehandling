@@ -86,7 +86,7 @@ class AldersovergangServiceTest {
                 saksbehandler = Fagsaksystem.EY.navn,
             )
 
-        coEvery { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId) } returns null
+        coEvery { vilkaarsvurderingService.hentVilkaarsvurderingMedDelVilkaar(behandlingId) } returns null
         coEvery {
             vilkaarsvurderingService.kopierVilkaarsvurdering(
                 behandlingId,
@@ -114,7 +114,7 @@ class AldersovergangServiceTest {
             res shouldBe vilkaarsvurdering
         }
 
-        coVerify { vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId) }
+        coVerify { vilkaarsvurderingService.hentVilkaarsvurderingMedDelVilkaar(behandlingId) }
         coVerify {
             vilkaarsvurderingService.kopierVilkaarsvurdering(
                 behandlingId,

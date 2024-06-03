@@ -27,7 +27,7 @@ import javax.sql.DataSource
 class VilkaarsvurderingRepository(private val ds: DataSource, private val delvilkaarRepository: DelvilkaarRepository) {
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingRepository::class.java)
 
-    fun hent(behandlingId: UUID): Vilkaarsvurdering? =
+    fun hentKomplettVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? =
         using(sessionOf(ds)) { session ->
             queryOf(Queries.HENT_VILKAARSVURDERING, mapOf("behandling_id" to behandlingId))
                 .let { query ->
@@ -39,6 +39,15 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
                     )
                 }
         }
+
+    fun hentVilkaarsvurderingSimple(behandlingId: UUID): Vilkaarsvurdering? {
+        return ds.transaction { tx ->
+            val params = mapOf("behandling_id" to behandlingId)
+            tx.hent(Queries.HENT_VILKAARSVURDERING, params) { row ->
+                row.toVilkaarsvurderingUtendelvilkaar()
+            }
+        }
+    }
 
     private fun hentNonNull(
         behandlingId: UUID,
@@ -201,7 +210,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
         } == 1
 
     private fun hentNonNull(behandlingId: UUID): Vilkaarsvurdering =
-        hent(behandlingId) ?: throw RuntimeException("Fant ikke vilkårsvurdering for $behandlingId")
+        hentKomplettVilkaarsvurdering(behandlingId) ?: throw RuntimeException("Fant ikke vilkårsvurdering for $behandlingId")
 
     private fun hentVilkaar(
         vilkaarsvurderingId: UUID,
@@ -302,6 +311,24 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
                 },
         )
 
+    private fun Row.toVilkaarsvurderingUtendelvilkaar() =
+        Vilkaarsvurdering(
+            id = uuid("id"),
+            behandlingId = uuid("behandling_id"),
+            grunnlagVersjon = long("grunnlag_versjon"),
+            virkningstidspunkt = YearMonth.from(localDate("virkningstidspunkt")),
+            vilkaar = emptyList(),
+            resultat =
+                stringOrNull("resultat_utfall")?.let { utfall ->
+                    VilkaarsvurderingResultat(
+                        utfall = VilkaarsvurderingUtfall.valueOf(utfall),
+                        kommentar = stringOrNull("resultat_kommentar"),
+                        tidspunkt = tidspunkt("resultat_tidspunkt").toLocalDatetimeUTC(),
+                        saksbehandler = string("resultat_saksbehandler"),
+                    )
+                },
+        )
+
     private fun Row.toVilkaarWrapper() =
         VilkaarDataWrapper(
             vilkaarId = uuid("id"),
@@ -337,6 +364,16 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
         const val LAGRE_VILKAAR = """
             INSERT INTO vilkaar(id, vilkaarsvurdering_id, resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler) 
             VALUES(:id, :vilkaarsvurdering_id, :resultat_kommentar, :resultat_tidspunkt, :resultat_saksbehandler) 
+        """
+
+        const val HENT_VILKAARSVURDERING_RESULTAT = """
+            SELECT vilkaarsvurdering
+            SET virkningstidspunkt = :virkningstidspunkt, 
+                resultat_utfall = :resultat_utfall, 
+                resultat_kommentar = :resultat_kommentar, 
+                resultat_tidspunkt = :resultat_tidspunkt, 
+                resultat_saksbehandler = :resultat_saksbehandler 
+            WHERE id = :id
         """
 
         const val LAGRE_VILKAARSVURDERING_RESULTAT = """

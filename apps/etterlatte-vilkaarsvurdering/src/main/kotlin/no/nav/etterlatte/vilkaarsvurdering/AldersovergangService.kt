@@ -20,7 +20,7 @@ class AldersovergangService(
         tidspunkt: () -> LocalDateTime = { LocalDateTime.now() },
     ): Vilkaarsvurdering {
         val vilkaarsvurdering =
-            vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
+            vilkaarsvurderingService.hentVilkaarsvurderingMedDelVilkaar(behandlingId)
                 ?: vilkaarsvurderingService.kopierVilkaarsvurdering(
                     behandlingId = behandlingId,
                     kopierFraBehandling = loependeBehandlingId,

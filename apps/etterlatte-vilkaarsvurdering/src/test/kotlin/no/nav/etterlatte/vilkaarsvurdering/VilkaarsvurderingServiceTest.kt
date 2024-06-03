@@ -168,11 +168,11 @@ internal class VilkaarsvurderingServiceTest(private val ds: DataSource) {
     @Test
     fun `Skal slette vilkaarsvurdering`() {
         runBlocking { service.opprettVilkaarsvurdering(uuid, brukerTokenInfo) }
-        service.hentVilkaarsvurdering(uuid) shouldNotBe null
+        service.hentVilkaarsvurderingMedDelVilkaar(uuid) shouldNotBe null
         coEvery { behandlingKlient.settBehandlingStatusOpprettet(uuid, brukerTokenInfo, any()) } returns true
 
         runBlocking { service.slettVilkaarsvurdering(uuid, brukerTokenInfo) }
-        service.hentVilkaarsvurdering(uuid) shouldBe null
+        service.hentVilkaarsvurderingMedDelVilkaar(uuid) shouldBe null
     }
 
     @Test
@@ -348,7 +348,7 @@ internal class VilkaarsvurderingServiceTest(private val ds: DataSource) {
             assertThrows<IllegalStateException> {
                 service.oppdaterVurderingPaaVilkaar(uuid, brukerTokenInfo, vurdertVilkaar)
             }
-            val actual = service.hentVilkaarsvurdering(uuid)
+            val actual = service.hentVilkaarsvurderingMedDelVilkaar(uuid)
             actual shouldBe vilkaarsvurdering
         }
     }
@@ -362,7 +362,7 @@ internal class VilkaarsvurderingServiceTest(private val ds: DataSource) {
 
         runBlocking {
             service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
-            val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)!!
+            val vilkaarsvurdering = service.hentVilkaarsvurderingMedDelVilkaar(uuid)!!
             vilkaarsvurdering.vilkaar.forEach { vilkaar ->
                 service.oppdaterVurderingPaaVilkaar(
                     uuid,
@@ -387,7 +387,7 @@ internal class VilkaarsvurderingServiceTest(private val ds: DataSource) {
             )
         }
 
-        val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)!!
+        val vilkaarsvurdering = service.hentVilkaarsvurderingMedDelVilkaar(uuid)!!
         val kopiertVilkaarsvurdering =
             runBlocking {
                 service.kopierVilkaarsvurdering(
@@ -428,7 +428,7 @@ internal class VilkaarsvurderingServiceTest(private val ds: DataSource) {
         val foerstegangsvilkaar =
             runBlocking {
                 service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
-                val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)!!
+                val vilkaarsvurdering = service.hentVilkaarsvurderingMedDelVilkaar(uuid)!!
                 vilkaarsvurdering.vilkaar.forEach { vilkaar ->
                     service.oppdaterVurderingPaaVilkaar(
                         uuid,
@@ -452,7 +452,7 @@ internal class VilkaarsvurderingServiceTest(private val ds: DataSource) {
                     ),
                 )
 
-                service.hentVilkaarsvurdering(uuid)!!
+                service.hentVilkaarsvurderingMedDelVilkaar(uuid)!!
             }
 
         val revurderingsvilkaar = runBlocking { service.opprettVilkaarsvurdering(revurderingId, brukerTokenInfo) }
@@ -482,7 +482,7 @@ internal class VilkaarsvurderingServiceTest(private val ds: DataSource) {
 
         runBlocking {
             service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
-            val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)!!
+            val vilkaarsvurdering = service.hentVilkaarsvurderingMedDelVilkaar(uuid)!!
             vilkaarsvurdering.vilkaar.forEach { vilkaar ->
                 service.oppdaterVurderingPaaVilkaar(
                     uuid,
@@ -506,7 +506,7 @@ internal class VilkaarsvurderingServiceTest(private val ds: DataSource) {
                 ),
             )
 
-            service.hentVilkaarsvurdering(uuid)!!
+            service.hentVilkaarsvurderingMedDelVilkaar(uuid)!!
         }
 
         val nyeVilkaar = runBlocking { service.opprettVilkaarsvurdering(revurderingId, brukerTokenInfo, false) }
@@ -660,7 +660,7 @@ internal class VilkaarsvurderingServiceTest(private val ds: DataSource) {
 
         val oppdatertVilkaarsvurdering =
             runBlocking {
-                service.hentVilkaarsvurdering(uuid)
+                service.hentVilkaarsvurderingMedDelVilkaar(uuid)
             }
 
         oppdatertVilkaarsvurdering shouldNotBe null

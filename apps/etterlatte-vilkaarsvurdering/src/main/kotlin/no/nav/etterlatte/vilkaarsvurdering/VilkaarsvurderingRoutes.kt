@@ -35,7 +35,7 @@ fun Route.vilkaarsvurdering(
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vilkårsvurdering for $behandlingId")
-                val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
+                val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurderingMedDelVilkaar(behandlingId)
 
                 if (vilkaarsvurdering != null) {
                     call.respond(
@@ -232,6 +232,15 @@ fun Route.vilkaarsvurdering(
         }
 
         route("/resultat") {
+            get("/{$BEHANDLINGID_CALL_PARAMETER}") {
+                withBehandlingId(behandlingKlient) { behandlingId ->
+                    val vilkaarsvurdering =
+                        vilkaarsvurderingService.hentVilkaarsvurderingUtenDelVilkaar(behandlingId) ?: call.respond(
+                            HttpStatusCode.NotFound,
+                        )
+                    call.respond(vilkaarsvurdering)
+                }
+            }
             post("/{$BEHANDLINGID_CALL_PARAMETER}") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                     val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()

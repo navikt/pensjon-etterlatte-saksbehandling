@@ -4,7 +4,7 @@ import { NavLenke } from '~components/behandling/StegMeny/NavLenke'
 import { IBehandlingReducer, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import { BehandlingRouteTypes, revurderingRoutes, soeknadRoutes } from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
+import { hentVilkaarsvurderingUtendelVilkaar } from '~shared/api/vilkaarsvurdering'
 import React, { useEffect } from 'react'
 import { useAppDispatch } from '~store/Store'
 
@@ -19,7 +19,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const { id, behandlingType } = behandling
   const personopplysninger = usePersonopplysninger()
 
-  const [fetchVilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
+  const [fetchVilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurderingUtendelVilkaar)
 
   const lagVarselbrev = behandling.kilde === Vedtaksloesning.GJENOPPRETTA
   const soeknadRoutes_ = soeknadRoutes(behandling, personopplysninger, lagVarselbrev)
@@ -38,7 +38,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
     <>
       {mapApiResult(
         fetchVilkaarsvurderingStatus,
-        <Spinner label="Laste stegmeny" visible />,
+        <Spinner label="Laster stegmeny" visible />,
         () => (
           <ApiErrorAlert>Kunne ikke laste stegmeny</ApiErrorAlert>
         ),

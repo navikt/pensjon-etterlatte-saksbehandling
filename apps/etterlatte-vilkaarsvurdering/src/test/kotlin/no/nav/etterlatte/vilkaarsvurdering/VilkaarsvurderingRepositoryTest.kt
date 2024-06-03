@@ -55,17 +55,17 @@ internal class VilkaarsvurderingRepositoryTest(ds: DataSource) {
                 opprettetVilkaarsvurdering.id,
             )
 
-        vilkaarsvurderingRepository.hent(revurdertVilkaarsvurdering.behandlingId) shouldNotBe null
+        vilkaarsvurderingRepository.hentKomplettVilkaarsvurdering(revurdertVilkaarsvurdering.behandlingId) shouldNotBe null
         vilkaarsvurderingRepository.slettVilkaarvurdering(revurdertVilkaarsvurdering.id) shouldBe true
-        vilkaarsvurderingRepository.hent(revurdertVilkaarsvurdering.behandlingId) shouldBe null
-        vilkaarsvurderingRepository.hent(opprettetVilkaarsvurdering.behandlingId) shouldNotBe null
+        vilkaarsvurderingRepository.hentKomplettVilkaarsvurdering(revurdertVilkaarsvurdering.behandlingId) shouldBe null
+        vilkaarsvurderingRepository.hentKomplettVilkaarsvurdering(opprettetVilkaarsvurdering.behandlingId) shouldNotBe null
     }
 
     @Test
     fun `skal hente vilkaarsvurdering`() {
         vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
 
-        val hentetVilkaarsvurdering = vilkaarsvurderingRepository.hent(vilkaarsvurdering.behandlingId)
+        val hentetVilkaarsvurdering = vilkaarsvurderingRepository.hentKomplettVilkaarsvurdering(vilkaarsvurdering.behandlingId)
 
         hentetVilkaarsvurdering shouldNotBe null
     }
@@ -230,7 +230,7 @@ internal class VilkaarsvurderingRepositoryTest(ds: DataSource) {
         )
 
         val resultatVilkaar =
-            vilkaarsvurderingRepository.hent(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
+            vilkaarsvurderingRepository.hentKomplettVilkaarsvurdering(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
                 .vilkaar
                 .first { it.hovedvilkaar.type == VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP }
 
@@ -260,7 +260,7 @@ internal class VilkaarsvurderingRepositoryTest(ds: DataSource) {
         )
 
         val resultatVilkaar =
-            vilkaarsvurderingRepository.hent(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
+            vilkaarsvurderingRepository.hentKomplettVilkaarsvurdering(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
                 .vilkaar
                 .first { it.hovedvilkaar.type == VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP }
 

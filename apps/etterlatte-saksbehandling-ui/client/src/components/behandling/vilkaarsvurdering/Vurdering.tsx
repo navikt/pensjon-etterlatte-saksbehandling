@@ -178,6 +178,7 @@ export const Vurdering = ({
               ? { saksbehandler: vilkaar.vurdering.saksbehandler, tidspunkt: vilkaar.vurdering.tidspunkt }
               : undefined
           }
+          key={`${redigerbar}+${vilkaar.id}`}
           kommentar={vilkaarutkast?.kommentar}
           defaultRediger={aktivVurdering}
           redigerbar={redigerbar}

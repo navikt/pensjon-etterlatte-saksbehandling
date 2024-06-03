@@ -91,6 +91,8 @@ fun grunnlagHttpClient(): HttpClient =
                     respondOk()
                 } else if (request.url.fullPath.endsWith("/opprett-grunnlag")) {
                     respondOk()
+                } else if (request.url.fullPath.contains("/laas-til-behandling/")) {
+                    respondOk()
                 } else {
                     error(request.url.fullPath)
                 }

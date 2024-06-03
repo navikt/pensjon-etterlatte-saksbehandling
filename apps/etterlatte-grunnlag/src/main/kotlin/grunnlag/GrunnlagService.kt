@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -110,6 +111,11 @@ interface GrunnlagService {
     fun hentVergeadresse(folkeregisteridentifikator: String): BrevMottaker?
 
     fun hentPersongalleriSamsvar(behandlingId: UUID): PersongalleriSamsvar
+
+    fun laasTilVersjonForBehandling(
+        skalLaasesId: UUID,
+        idLaasesTil: UUID,
+    ): BehandlingGrunnlagVersjon
 }
 
 class RealGrunnlagService(
@@ -356,6 +362,26 @@ class RealGrunnlagService(
             kildePdl = opplysningPersongalleriPdl.opplysning.kilde.tilGenerellKilde(),
             problemer = valideringsfeil,
         )
+    }
+
+    override fun laasTilVersjonForBehandling(
+        behandlingIdRegulering: UUID,
+        behandlingViLaaserTil: UUID,
+    ): BehandlingGrunnlagVersjon {
+        val laastVersjon =
+            opplysningDao.hentBehandlingVersjon(behandlingViLaaserTil) ?: throw IkkeFunnetException(
+                code = "GRUNNLAGVERSJON_IKKE_FUNNET",
+                detail = "Fant ikke grunnlagsversjonen for behandling $behandlingViLaaserTil",
+            )
+        opplysningDao.oppdaterVersjonForBehandling(
+            behandlingId = behandlingIdRegulering,
+            sakId = laastVersjon.sakId,
+            hendelsenummer = laastVersjon.hendelsenummer,
+        )
+        opplysningDao.laasGrunnlagVersjonForBehandling(behandlingIdRegulering)
+        return checkNotNull(opplysningDao.hentBehandlingVersjon(behandlingIdRegulering)) {
+            "Fant ikke låst grunnlagsversjon vi akkurat la inn :("
+        }
     }
 
     @TestOnly

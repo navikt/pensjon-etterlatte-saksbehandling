@@ -60,7 +60,7 @@ updates:
 
 
   # =============
-  # FRONTEND ROOT
+  # FRONTEND
   # =============
 
   - package-ecosystem: "npm"
@@ -81,6 +81,10 @@ updates:
           - "lint-staged"
           - "@typescript-eslint/*"
           - "@testing-library*"
+          - "@types/chai"
+          - "@types/mocha"
+          - "chai"
+          - "mocha"
       ds:
         patterns:
           - "@navikt/ds-*"
@@ -100,31 +104,6 @@ updates:
           - "@types/react*"
           - "@reduxjs/toolkit"
           - "typescript"
-
-
-  # ===============
-  # FRONTEND SERVER
-  # ===============
-
-  - package-ecosystem: "npm"
-    directory: "/apps/etterlatte-saksbehandling-ui/server"
-    schedule:
-      interval: "monthly"
-      day: "sunday"
-    open-pull-requests-limit: 10
-    groups:
-      lint-og-test:
-        patterns:
-          - "@typescript-eslint/*"
-          - "prettier"
-          - "eslint"
-          - "eslint*"
-          - "@types/chai"
-          - "@types/mocha"
-          - "chai"
-          - "mocha"
-      prod:
-        patterns:
           - "express"
           - "http-proxy-middleware"
           - "@types/express"
@@ -138,7 +117,6 @@ updates:
           - "@types/request"
           - "prom-client"
           - "unleash-client"
-          - "typescript"
 
 
   # ==============

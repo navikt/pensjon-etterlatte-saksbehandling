@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering.grunnlag
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.vedtaksvurdering.BeregningOgAvkorting
 import org.slf4j.LoggerFactory
 
@@ -16,7 +17,9 @@ object GrunnlagVersjonValidering {
     ) {
         logger.info("Sjekker at grunnlagsversjon er konsekvent på tvers av appene")
 
-        if (trygdetider.any { it.opplysningerDifferanse.differanse }) {
+        if (vilkaarsvurdering.resultat.utfall == VilkaarsvurderingUtfall.OPPFYLT &&
+            trygdetider.any { it.opplysningerDifferanse.differanse }
+        ) {
             throw UlikVersjonGrunnlag("Ulik versjon av grunnlag brukt i trygdetid og behandling")
         }
         if (vilkaarsvurdering?.grunnlagVersjon == null || beregningOgAvkorting == null) {

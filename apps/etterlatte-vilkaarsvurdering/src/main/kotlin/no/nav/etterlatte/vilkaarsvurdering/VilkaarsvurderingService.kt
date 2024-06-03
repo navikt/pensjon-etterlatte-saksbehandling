@@ -107,9 +107,11 @@ class VilkaarsvurderingService(
         vurdertVilkaar: VurdertVilkaar,
     ): Vilkaarsvurdering =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
-            if (vilkaarsvurderingRepository.hent(behandlingId)?.resultat != null) {
+            val vilkaarsvurdering = vilkaarsvurderingRepository.hent(behandlingId)
+            if (vilkaarsvurdering?.resultat != null) {
                 throw VilkaarsvurderingTilstandException(
-                    "Kan ikke endre et vilkår (${vurdertVilkaar.vilkaarId}) på en vilkårsvurdering som har et resultat",
+                    "Kan ikke endre et vilkår (${vurdertVilkaar.vilkaarId}) på en vilkårsvurdering som har et resultat. " +
+                        "Vilkårsvurderingid: ${vilkaarsvurdering.id} Behandlingid: ${vilkaarsvurdering.behandlingId}",
                 )
             }
             vilkaarsvurderingRepository.lagreVilkaarResultat(behandlingId, vurdertVilkaar)
@@ -121,9 +123,11 @@ class VilkaarsvurderingService(
         vilkaarId: UUID,
     ): Vilkaarsvurdering =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
-            if (vilkaarsvurderingRepository.hent(behandlingId)?.resultat != null) {
+            val vilkaarsvurdering = vilkaarsvurderingRepository.hent(behandlingId)
+            if (vilkaarsvurdering?.resultat != null) {
                 throw VilkaarsvurderingTilstandException(
-                    "Kan ikke slette et vilkår ($vilkaarId) på en vilkårsvurdering som har et resultat",
+                    "Kan ikke slette et vilkår ($vilkaarId) på en vilkårsvurdering som har et resultat. " +
+                        "Vilkårsvurderingid: ${vilkaarsvurdering.id} Behandlingid: ${vilkaarsvurdering.behandlingId}",
                 )
             }
 

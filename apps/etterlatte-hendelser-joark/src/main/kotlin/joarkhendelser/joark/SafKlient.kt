@@ -17,7 +17,7 @@ class SafKlient(
 ) {
     private val logger = LoggerFactory.getLogger(SafKlient::class.java)
 
-    suspend fun hentJournalpost(id: Long): HentJournalpostResult {
+    suspend fun hentJournalpost(id: Long): JournalpostResponse {
         logger.info("Forsøker å hente journalpost med id=$id")
 
         val request = opprettHentJournalpostRequest(id)
@@ -31,8 +31,7 @@ class SafKlient(
 
         if (res.status.isSuccess()) {
             try {
-                val journalpost = res.body<JournalpostResponse>().data?.journalpost
-                return HentJournalpostResult(journalpost)
+                return res.body<JournalpostResponse>()
             } catch (e: Exception) {
                 throw ResponseException(res, "Ukjent feil oppsto ved deserialisering av journalpost. id: $id")
             }
@@ -47,6 +46,6 @@ class SafKlient(
                 .readText()
                 .replace(Regex("[\n\t]"), "")
 
-        return GraphqlRequest(query, JournalpostVariables(journalpostId))
+        return GraphqlRequest(query, JournalpostVariables(journalpostId.toString()))
     }
 }

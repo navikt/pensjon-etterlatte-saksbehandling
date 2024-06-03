@@ -17,6 +17,7 @@ import { resetPersonopplysninger, setPersonopplysninger } from '~store/reducers/
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapAllApiResult } from '~shared/api/apiUtils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
+import { StickyToppMeny } from '~shared/StickyToppMeny'
 
 export const Behandling = () => {
   useSidetittel('Behandling')
@@ -65,8 +66,10 @@ export const Behandling = () => {
         const behandling = behandlingFraRedux as IBehandlingReducer
         return (
           <>
-            {soeker && <PdlPersonStatusBar person={soeker} />}
-            <StegMeny behandling={behandling} />
+            <StickyToppMeny>
+              {soeker && <PdlPersonStatusBar person={soeker} />}
+              <StegMeny behandling={behandling} />
+            </StickyToppMeny>
             <GridContainer>
               <MainContent>
                 <Routes>

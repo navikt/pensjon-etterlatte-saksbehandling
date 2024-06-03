@@ -186,6 +186,17 @@ sealed class DoedshendelseKontrollpunkt {
                     " Saksbehandler må vurdere lengden på ekteskapet og eventuelt sende informasjonsbrev til gjenlevende."
     }
 
+    @JsonTypeName("EPS_ER_GIFT_PAA_NYTT")
+    data class EpsErGiftPaaNytt(val doedsdato: LocalDate, val fnr: String, val nyEktefelleFnr: String) : DoedshendelseKontrollpunkt() {
+        override val kode = "EPS_GIFT_UKJENT_GIFTEMAAL_VARIGHET"
+        override val beskrivelse: String = "Tidligere ektefelle har giftet seg på nytt med en annen person"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = false
+        override val avbryt: Boolean = true
+        override val oppgaveTekst: String
+            get() = "Tidligere ektefelle ($fnr) døde ($doedsdato), men brukeren er gift med en ny person ($nyEktefelleFnr)."
+    }
+
     @JsonTypeName("AVDOED_HAR_UTVANDRET")
     data object AvdoedHarUtvandret : DoedshendelseKontrollpunkt() {
         override val kode = "AVDOED_HAR_UTVANDRET"
@@ -260,16 +271,6 @@ sealed class DoedshendelseKontrollpunkt {
     data object DoedshendelseErAnnullert : DoedshendelseKontrollpunkt() {
         override val kode = "ANNULERT_DOEDSHENDELSE_PDL"
         override val beskrivelse: String = "Dødshendelsen ble annulert i PDL"
-        override val sendBrev: Boolean = false
-        override val opprettOppgave: Boolean = false
-        override val oppgaveTekst: String? = null
-        override val avbryt: Boolean = true
-    }
-
-    @JsonTypeName("AVDOED_HAR_IKKE_VAERT_GIFT")
-    data object AvdoedHarIkkeVaertGift : DoedshendelseKontrollpunkt() {
-        override val kode = "AVDOED_HAR_IKKE_VAERT_GIFT"
-        override val beskrivelse: String = "Avdød er ikke tidligere gift. Gjenlevende er ikke registerert som tidligere ektefelle."
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
         override val oppgaveTekst: String? = null

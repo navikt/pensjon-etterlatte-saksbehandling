@@ -22,7 +22,6 @@ data class OpprettBehandling(
     val utlandstilknytning: Utlandstilknytning? = null,
     val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     val revurderingsAarsak: Revurderingaarsak? = null,
-    val opphoerAarsaker: List<String>? = null,
     val fritekstAarsak: String? = null,
     val prosesstype: Prosesstype = Prosesstype.MANUELL,
     val kilde: Vedtaksloesning,

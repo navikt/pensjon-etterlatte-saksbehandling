@@ -34,6 +34,7 @@ data class MaanedStoenadRad(
     val utbetalingsdato: LocalDate?,
     val kilde: Vedtaksloesning,
     val pesysId: Long?,
+    val sakYtelsesgruppe: SakYtelsesgruppe?,
 )
 
 class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
@@ -95,7 +96,13 @@ class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
                     avkortingsbeloep = avkortingsbeloep.toString(),
                     aarsinntekt = aarsinntekt.toString(),
                     beregningType = sisteVedtak.beregningType,
-                    anvendtSats = aktuellBeregnetYtelse?.grunnbelopMnd?.toString() ?: sisteVedtak.anvendtSats,
+                    anvendtSats =
+                        aktuellBeregnetYtelse?.anvendtSats(
+                            beregningstype = sisteVedtak.beregning.type,
+                            // TODO: bytt ut med felt fra beregning når flere avdøde kommer inn
+                            erForeldreloes = sisteVedtak.fnrForeldre.size > 1,
+                            erOverstyrt = sisteVedtak.beregning.overstyrtBeregning == true,
+                        ) ?: sisteVedtak.anvendtSats,
                     behandlingId = sisteVedtak.behandlingId,
                     sakId = sisteVedtak.sakId,
                     sakNummer = sisteVedtak.sakNummer,
@@ -112,6 +119,7 @@ class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
                     utbetalingsdato = sisteVedtak.utbetalingsdato,
                     kilde = sisteVedtak.kilde,
                     pesysId = sisteVedtak.pesysId,
+                    sakYtelsesgruppe = sisteVedtak.sakYtelsesgruppe,
                 )
             }
     }

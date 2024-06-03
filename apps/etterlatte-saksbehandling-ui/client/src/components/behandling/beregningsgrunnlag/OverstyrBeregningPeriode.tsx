@@ -1,7 +1,7 @@
 import { Control, Controller, FieldArrayWithId, UseFormRegister, UseFormWatch } from 'react-hook-form'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
-import { Button, TextField, Textarea } from '@navikt/ds-react'
-import { OverstyrBeregingsperiodeGrunnlagData } from '~shared/types/Beregning'
+import { Button, TextField, Textarea, Select } from '@navikt/ds-react'
+import { OverstyrBeregingsperiodeGrunnlagData, OverstyrtAarsakType } from '~shared/types/Beregning'
 import styled from 'styled-components'
 import { TrashIcon } from '@navikt/aksel-icons'
 import { FeilIPeriodeGrunnlagAlle, teksterFeilIPeriode } from './OverstyrBeregningGrunnlag'
@@ -16,10 +16,11 @@ export type OverstyrBeregningPerioder = {
   visFeil: boolean
   feil: [number, FeilIPeriodeGrunnlagAlle][]
   behandles: boolean
+  aarsaker: OverstyrtAarsakType
 }
 
 const OverstyrBeregningPeriode = (props: OverstyrBeregningPerioder) => {
-  const { item, index, control, register, remove, visFeil, feil, behandles } = props
+  const { item, index, control, register, remove, visFeil, feil, behandles, aarsaker } = props
 
   const mineFeil = [...feil.filter(([feilIndex]) => feilIndex === index).flatMap((a) => a[1])]
 
@@ -76,6 +77,22 @@ const OverstyrBeregningPeriode = (props: OverstyrBeregningPerioder) => {
             <Deler>/</Deler>
             <TextField label="" {...register(`overstyrBeregningForm.${index}.data.prorataBroekNevner`)} />
           </VerdiFelt>
+        </MinimimBeregningsperiodeWrapper>
+
+        <MinimimBeregningsperiodeWrapper>
+          <Select
+            label="Årsak"
+            {...register(`overstyrBeregningForm.${index}.data.aarsak`, {
+              required: { value: true, message: 'Feltet er påkrevd' },
+              validate: { notDefault: (v) => v !== 'VELG_AARSAK' },
+            })}
+          >
+            {Object.entries(aarsaker).map(([key, value]) => (
+              <option key={key} value={key}>
+                {value}
+              </option>
+            ))}
+          </Select>
         </MinimimBeregningsperiodeWrapper>
 
         <MinimimBeregningsperiodeWrapper>
@@ -145,6 +162,7 @@ const VerdiFelt = styled.div`
 `
 
 const Beskrivelse = styled(Textarea)`
+  margin-top: 12px;
   margin-bottom: 12px;
 `
 

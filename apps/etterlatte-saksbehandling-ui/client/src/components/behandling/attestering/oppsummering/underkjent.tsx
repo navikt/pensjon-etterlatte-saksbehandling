@@ -22,7 +22,7 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingIn
   return (
     <Wrapper $innvilget={false}>
       <Overskrift>{formaterBehandlingstype(behandlingsInfo.type)}</Overskrift>
-      <UnderOverskrift innvilget={false}>Underkjent</UnderOverskrift>
+      <UnderOverskrift $innvilget={false}>Underkjent</UnderOverskrift>
 
       {underkjentSiste && <Tekst>{formaterDatoMedKlokkeslett(underkjentSiste.opprettet)}</Tekst>}
 

@@ -3,6 +3,7 @@ package no.nav.etterlatte.joarkhendelser
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.joark.Bruker
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
+import no.nav.etterlatte.joarkhendelser.joark.Error
 import no.nav.etterlatte.joarkhendelser.joark.HendelseType
 import no.nav.etterlatte.joarkhendelser.joark.Journalpost
 import no.nav.etterlatte.joarkhendelser.joark.Kanal
@@ -19,6 +20,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.lang.RuntimeException
 
 /**
  * Håndterer hendelser fra Joark og behandler de hendelsene som tilhører Team Etterlatte.
@@ -56,7 +58,14 @@ class JoarkHendelseHandler(
             "Starter behandling av hendelse (id=$hendelseId, journalpostId=$journalpostId, tema=$temaNytt)",
         )
 
-        val journalpost = safKlient.hentJournalpost(journalpostId).journalpost
+        val response = safKlient.hentJournalpost(journalpostId)
+
+        val journalpost =
+            if (response.errors.isNullOrEmpty()) {
+                response.data?.journalpost
+            } else {
+                throw mapError(response.errors)
+            }
 
         if (journalpost == null) {
             throw NullPointerException("Fant ingen journalpost med id=$journalpostId")
@@ -169,5 +178,19 @@ class JoarkHendelseHandler(
                 "Ident tilknyttet journalpost=$journalpostId er null i PDL – avbryter behandling",
             )
         }
+    }
+
+    private fun mapError(errors: List<Error>): Exception {
+        errors.forEach {
+            if (errors.all { err -> err.extensions?.code == Error.Code.FORBIDDEN }) {
+                logger.warn("${errors.size} feil oppsto ved kall mot saf, alle var tilgangssjekk: ${it.toJson()}")
+            } else {
+                logger.error("${errors.size} feil oppsto ved kall mot saf: ${it.toJson()}")
+            }
+        }
+
+        val error = errors.firstOrNull()
+
+        return RuntimeException("Fikk error fra Saf: ${error?.message}")
     }
 }

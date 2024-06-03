@@ -1,4 +1,4 @@
-import { CollapsibleSidebar, SidebarContent, SidebarTools } from '~shared/styled'
+import { CollapsibleSidebar, Scroller, SidebarContent, SidebarTools } from '~shared/styled'
 import React, { useEffect, useState } from 'react'
 import { Alert, Button, Heading, Tag } from '@navikt/ds-react'
 import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
@@ -69,43 +69,45 @@ export function TilbakekrevingSidemeny() {
         </Button>
       </SidebarTools>
       <SidebarContent $collapsed={collapsed}>
-        <SidebarPanel $border>
-          <Heading size="small">Tilbakekreving</Heading>
-          <Heading size="xsmall" spacing>
-            {teksterTilbakekrevingStatus[tilbakekreving!!.status]}
-          </Heading>
-          <TagList>
-            <li>
-              <Tag variant={tagColors[tilbakekreving!!.sak.sakType]}>
-                {formaterSakstype(tilbakekreving!!.sak.sakType)}
-              </Tag>
-            </li>
-          </TagList>
-          <div className="info">
-            <Info>Saksbehandler</Info>
-            {mapApiResult(
-              oppgaveResult,
-              <Spinner visible={true} label="Henter oppgave" />,
-              () => (
-                <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
-              ),
-              (oppgave) =>
-                !!oppgave?.saksbehandler ? (
-                  <Tekst>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Tekst>
-                ) : (
-                  <Alert size="small" variant="warning">
-                    Ingen saksbehandler har tatt denne oppgaven
-                  </Alert>
-                )
-            )}
-          </div>
-          <div>
-            <Info>Sakid:</Info>
-            <KopierbarVerdi value={tilbakekreving!!.sak.id.toString()} />
-          </div>
+        <Scroller>
+          <SidebarPanel $border>
+            <Heading size="small">Tilbakekreving</Heading>
+            <Heading size="xsmall" spacing>
+              {teksterTilbakekrevingStatus[tilbakekreving!!.status]}
+            </Heading>
+            <TagList>
+              <li>
+                <Tag variant={tagColors[tilbakekreving!!.sak.sakType]}>
+                  {formaterSakstype(tilbakekreving!!.sak.sakType)}
+                </Tag>
+              </li>
+            </TagList>
+            <div className="info">
+              <Info>Saksbehandler</Info>
+              {mapApiResult(
+                oppgaveResult,
+                <Spinner visible={true} label="Henter oppgave" />,
+                () => (
+                  <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
+                ),
+                (oppgave) =>
+                  !!oppgave?.saksbehandler ? (
+                    <Tekst>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Tekst>
+                  ) : (
+                    <Alert size="small" variant="warning">
+                      Ingen saksbehandler har tatt denne oppgaven
+                    </Alert>
+                  )
+              )}
+            </div>
+            <div>
+              <Info>Sakid:</Info>
+              <KopierbarVerdi value={tilbakekreving!!.sak.id.toString()} />
+            </div>
 
-          <SettPaaVent oppgave={oppgave} redigerbar={true} />
-        </SidebarPanel>
+            <SettPaaVent oppgave={oppgave} redigerbar={true} />
+          </SidebarPanel>
+        </Scroller>
       </SidebarContent>
       {kanAttestere && (
         <>

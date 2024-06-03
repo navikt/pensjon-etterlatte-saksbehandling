@@ -5,8 +5,6 @@ import { GenerellBehandlingType, Status } from '~shared/types/Generellbehandling
 
 export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
   switch (aarsak) {
-    case AarsaksTyper.MANUELT_OPPHOER:
-      return 'Manuelt opphør'
     case AarsaksTyper.SOEKNAD:
       return 'Søknad'
     case AarsaksTyper.REVURDERING:

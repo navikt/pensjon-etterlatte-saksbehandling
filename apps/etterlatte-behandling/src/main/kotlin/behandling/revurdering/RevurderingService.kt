@@ -334,7 +334,19 @@ class RevurderingService(
         }.let {
             RevurderingOgOppfoelging(
                 it,
-                leggInnGrunnlag = { grunnlagService.leggInnNyttGrunnlag(it, persongalleri) },
+                leggInnGrunnlag = {
+                    when (revurderingAarsak) {
+                        Revurderingaarsak.REGULERING ->
+                            grunnlagService.laasTilGrunnlagIBehandling(
+                                it,
+                                checkNotNull(forrigeBehandling) {
+                                    "Har en regulering som ikke sender med behandlingId for sist iverksatt. " +
+                                        "Da kan vi ikke legge inn riktig grunnlag. regulering id=${it.id}"
+                                },
+                            )
+                        else -> grunnlagService.leggInnNyttGrunnlag(it, persongalleri)
+                    }
+                },
                 sendMeldingForHendelse = {
                     behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
                         it.toStatistikkBehandling(persongalleri),

@@ -85,6 +85,7 @@ fun stoenadRad(
     utbetalingsdato: LocalDate = LocalDate.of(2023, 7, 20),
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     pesysId: Long = 123L,
+    sakYtelsesgruppe: SakYtelsesgruppe? = SakYtelsesgruppe.EN_AVDOED_FORELDER,
 ): StoenadRad =
     StoenadRad(
         id = id,
@@ -113,4 +114,5 @@ fun stoenadRad(
         utbetalingsdato = utbetalingsdato,
         kilde = kilde,
         pesysId = pesysId,
+        sakYtelsesgruppe = sakYtelsesgruppe,
     )

@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -36,6 +37,11 @@ interface GrunnlagService {
     fun leggTilNyeOpplysningerBareSak(
         sakId: Long,
         opplysninger: NyeSaksopplysninger,
+    )
+
+    fun laasTilGrunnlagIBehandling(
+        revurdering: Revurdering,
+        forrigeBehandling: UUID,
     )
 
     suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
@@ -93,6 +99,13 @@ class GrunnlagServiceImpl(private val grunnlagKlient: GrunnlagKlientImpl) : Grun
         return grunnlagKlient.hentPersongalleri(behandlingId)
             ?.opplysning
             ?: throw NoSuchElementException("Persongalleri mangler for behandling id=$behandlingId")
+    }
+
+    override fun laasTilGrunnlagIBehandling(
+        revurdering: Revurdering,
+        forrigeBehandling: UUID,
+    ) {
+        return runBlocking { grunnlagKlient.laasTilGrunnlagIBehandling(revurdering.id, forrigeBehandling) }
     }
 
     private fun grunnlagsbehovSak(

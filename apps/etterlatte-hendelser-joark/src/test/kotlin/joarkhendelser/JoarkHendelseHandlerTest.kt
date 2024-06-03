@@ -17,8 +17,8 @@ import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
 import no.nav.etterlatte.joarkhendelser.joark.Dokument
 import no.nav.etterlatte.joarkhendelser.joark.Fagsak
 import no.nav.etterlatte.joarkhendelser.joark.HendelseType
-import no.nav.etterlatte.joarkhendelser.joark.HentJournalpostResult
 import no.nav.etterlatte.joarkhendelser.joark.Journalpost
+import no.nav.etterlatte.joarkhendelser.joark.JournalpostResponse
 import no.nav.etterlatte.joarkhendelser.joark.JournalpostStatus
 import no.nav.etterlatte.joarkhendelser.joark.Journalstatus
 import no.nav.etterlatte.joarkhendelser.joark.Kanal
@@ -78,7 +78,12 @@ internal class JoarkHendelseHandlerTest {
             val journalpost =
                 opprettJournalpost(journalpostId, sakType = sakType, bruker = Bruker(ident, BrukerIdType.FNR))
 
-            coEvery { safKlientMock.hentJournalpost(any()) } returns HentJournalpostResult(journalpost)
+            coEvery { safKlientMock.hentJournalpost(any()) } returns
+                JournalpostResponse(
+                    JournalpostResponse.ResponseData(
+                        journalpost,
+                    ),
+                )
             coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
@@ -105,7 +110,13 @@ internal class JoarkHendelseHandlerTest {
             val journalpost =
                 opprettJournalpost(journalpostId, sakType = sakType, bruker = Bruker(ident, BrukerIdType.FNR))
 
-            coEvery { safKlientMock.hentJournalpost(any()) } returns HentJournalpostResult(journalpost)
+            coEvery { safKlientMock.hentJournalpost(any()) } returns
+                JournalpostResponse(
+                    JournalpostResponse.ResponseData(
+                        journalpost,
+                    ),
+                )
+
             coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
@@ -132,7 +143,13 @@ internal class JoarkHendelseHandlerTest {
             val journalpost =
                 opprettJournalpost(journalpostId, sakType = sakType, bruker = Bruker(ident, BrukerIdType.FNR))
 
-            coEvery { safKlientMock.hentJournalpost(any()) } returns HentJournalpostResult(journalpost)
+            coEvery { safKlientMock.hentJournalpost(any()) } returns
+                JournalpostResponse(
+                    JournalpostResponse.ResponseData(
+                        journalpost,
+                    ),
+                )
+
             coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
@@ -162,7 +179,13 @@ internal class JoarkHendelseHandlerTest {
             val journalpost =
                 opprettJournalpost(journalpostId, sakType = sakType, bruker = Bruker(ident, BrukerIdType.FNR))
 
-            coEvery { safKlientMock.hentJournalpost(any()) } returns HentJournalpostResult(journalpost)
+            coEvery { safKlientMock.hentJournalpost(any()) } returns
+                JournalpostResponse(
+                    JournalpostResponse.ResponseData(
+                        journalpost,
+                    ),
+                )
+
             coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
@@ -189,7 +212,7 @@ internal class JoarkHendelseHandlerTest {
         fun `Journalpost finnes ikke`() {
             val journalpostId = Random.nextLong()
 
-            coEvery { safKlientMock.hentJournalpost(any()) } returns HentJournalpostResult(null, null)
+            coEvery { safKlientMock.hentJournalpost(any()) } returns JournalpostResponse()
 
             val hendelse = opprettHendelse(journalpostId, SakType.OMSTILLINGSSTOENAD.tema)
 
@@ -211,9 +234,10 @@ internal class JoarkHendelseHandlerTest {
             val journalpostId = Random.nextLong()
 
             coEvery { safKlientMock.hentJournalpost(any()) } returns
-                HentJournalpostResult(
-                    opprettJournalpost(journalpostId, status = Journalstatus.FERDIGSTILT),
-                    null,
+                JournalpostResponse(
+                    JournalpostResponse.ResponseData(
+                        opprettJournalpost(journalpostId, status = Journalstatus.FERDIGSTILT),
+                    ),
                 )
 
             val hendelse = opprettHendelse(journalpostId, SakType.OMSTILLINGSSTOENAD.tema)
@@ -234,10 +258,12 @@ internal class JoarkHendelseHandlerTest {
             val journalpostId = Random.nextLong()
 
             coEvery { safKlientMock.hentJournalpost(any()) } returns
-                HentJournalpostResult(
-                    opprettJournalpost(journalpostId, status = Journalstatus.MOTTATT, bruker = null),
-                    null,
+                JournalpostResponse(
+                    JournalpostResponse.ResponseData(
+                        opprettJournalpost(journalpostId, status = Journalstatus.MOTTATT, bruker = null),
+                    ),
                 )
+
             coEvery { oppgaveKlient.opprettManuellJournalfoeringsoppgave(any(), any()) } just Runs
 
             val hendelse = opprettHendelse(journalpostId, SakType.OMSTILLINGSSTOENAD.tema)
@@ -264,13 +290,14 @@ internal class JoarkHendelseHandlerTest {
             val journalpostId = Random.nextLong()
 
             coEvery { safKlientMock.hentJournalpost(any()) } returns
-                HentJournalpostResult(
-                    opprettJournalpost(
-                        journalpostId,
-                        status = Journalstatus.MOTTATT,
-                        bruker = Bruker("123456789", BrukerIdType.ORGNR),
+                JournalpostResponse(
+                    JournalpostResponse.ResponseData(
+                        opprettJournalpost(
+                            journalpostId,
+                            status = Journalstatus.MOTTATT,
+                            bruker = Bruker("123456789", BrukerIdType.ORGNR),
+                        ),
                     ),
-                    null,
                 )
 
             val hendelse = opprettHendelse(journalpostId, SakType.OMSTILLINGSSTOENAD.tema)
@@ -294,10 +321,12 @@ internal class JoarkHendelseHandlerTest {
             val journalpost = opprettJournalpost(journalpostId)
 
             coEvery { safKlientMock.hentJournalpost(any()) } returns
-                HentJournalpostResult(
-                    journalpost,
-                    null,
+                JournalpostResponse(
+                    JournalpostResponse.ResponseData(
+                        journalpost,
+                    ),
                 )
+
             coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
                 PdlIdentifikator.Npid(
                     NavPersonIdent("01309000000"),
@@ -326,10 +355,12 @@ internal class JoarkHendelseHandlerTest {
             val journalpost = opprettJournalpost(journalpostId)
 
             coEvery { safKlientMock.hentJournalpost(any()) } returns
-                HentJournalpostResult(
-                    journalpost,
-                    null,
+                JournalpostResponse(
+                    JournalpostResponse.ResponseData(
+                        journalpost,
+                    ),
                 )
+
             coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns null
             val hendelse = opprettHendelse(journalpostId, SakType.OMSTILLINGSSTOENAD.tema)
 
@@ -354,10 +385,12 @@ internal class JoarkHendelseHandlerTest {
             val journalpost = opprettJournalpost(journalpostId)
 
             coEvery { safKlientMock.hentJournalpost(any()) } returns
-                HentJournalpostResult(
-                    journalpost,
-                    null,
+                JournalpostResponse(
+                    JournalpostResponse.ResponseData(
+                        journalpost,
+                    ),
                 )
+
             coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of("09498230323"),
@@ -388,7 +421,13 @@ internal class JoarkHendelseHandlerTest {
             val journalpost =
                 opprettJournalpost(journalpostId, sakType = sakType, bruker = Bruker(ident, BrukerIdType.FNR))
 
-            coEvery { safKlientMock.hentJournalpost(any()) } returns HentJournalpostResult(journalpost)
+            coEvery { safKlientMock.hentJournalpost(any()) } returns
+                JournalpostResponse(
+                    JournalpostResponse.ResponseData(
+                        journalpost,
+                    ),
+                )
+
             coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),

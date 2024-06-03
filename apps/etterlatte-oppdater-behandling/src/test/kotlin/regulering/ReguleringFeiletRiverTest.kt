@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
-import no.nav.etterlatte.libs.common.sak.ReguleringFeiletHendelse
+import no.nav.etterlatte.libs.common.sak.KjoeringStatus
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.etterlatte.rapidsandrivers.KONTEKST_KEY
@@ -35,15 +35,20 @@ internal class ReguleringFeiletRiverTest {
 
     @Test
     fun `Skal varsle behandling om at det er en feilet regulering i en sak`() {
-        val sendtHendelse = slot<ReguleringFeiletHendelse>()
+        val kjoering = slot<String>()
+        val sakId = slot<Long>()
+        val status = slot<KjoeringStatus>()
+
         val melding = genererReguleringMelding()
         val behandlingService = mockk<BehandlingService>(relaxed = true)
-        every { behandlingService.sendReguleringFeiletHendelse(capture(sendtHendelse)) } returns Unit
+        every { behandlingService.lagreKjoering(capture(sakId), capture(status), capture(kjoering)) } returns Unit
         val inspector = TestRapid().apply { ReguleringFeiletRiver(this, behandlingService) }
 
         inspector.sendTestMessage(melding.toJson())
         val sendteMeldinger = inspector.inspektør.size
         Assertions.assertEquals(0, sendteMeldinger)
-        Assertions.assertEquals(83, sendtHendelse.captured.sakId)
+        Assertions.assertEquals("Regulering2023", kjoering.captured)
+        Assertions.assertEquals(83, sakId.captured)
+        Assertions.assertEquals(KjoeringStatus.FEILA, status.captured)
     }
 }

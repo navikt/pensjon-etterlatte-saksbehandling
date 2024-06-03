@@ -21,9 +21,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.maskerFnr
-import no.nav.etterlatte.libs.common.sak.KjoeringRequest
-import no.nav.etterlatte.libs.common.sak.KjoeringStatus
-import no.nav.etterlatte.libs.common.sak.ReguleringFeiletHendelse
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.kunSystembruker
 import no.nav.etterlatte.libs.ktor.route.routeLogger
@@ -106,23 +103,6 @@ internal fun Route.grunnlagsendringshendelseRoute(
                 val oppholdsHendelse = call.receive<InstitusjonsoppholdHendelseBeriket>()
                 logger.info("Mottar en institusjons-hendelse fra inst2")
                 grunnlagsendringshendelseService.opprettInstitusjonsOppholdhendelse(oppholdsHendelse)
-                call.respond(HttpStatusCode.OK)
-            }
-        }
-
-        post("/reguleringfeilet") {
-            kunSystembruker {
-                val hendelse = call.receive<ReguleringFeiletHendelse>()
-                logger.info("Motter hendelse om at regulering har feilet i sak ${hendelse.sakId}")
-                inTransaction {
-                    omregningService.oppdaterKjoering(
-                        KjoeringRequest(
-                            hendelse.kjoering,
-                            KjoeringStatus.FEILA,
-                            hendelse.sakId,
-                        ),
-                    )
-                }
                 call.respond(HttpStatusCode.OK)
             }
         }

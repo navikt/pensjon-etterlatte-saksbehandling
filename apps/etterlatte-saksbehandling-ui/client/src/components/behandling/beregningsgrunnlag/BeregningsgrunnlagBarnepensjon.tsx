@@ -43,55 +43,8 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingGjelderBarnepensjonPaaNyttRegelverk } from '~components/behandling/vilkaarsvurdering/utils'
 import { useInnloggetSaksbehandler } from '../useInnloggetSaksbehandler'
 import { hentTrygdetider, ITrygdetid } from '~shared/api/trygdetid'
-import BeregningsgrunnlagMetodeForAvdoed, {
-  BeregningsgrunnlagMetodeForAvdoedOppsummering,
-} from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagMetodeForAvdoed'
-import styled from 'styled-components'
-
-type BeregningsgrunnlagBarnepensjonOppsummeringProps = {
-  trygdetider: ITrygdetid[]
-  mapNavn: (fnr: string) => string
-  periodisertBeregningsmetodeForAvdoed: (
-    ident: string
-  ) => PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed> | null
-}
-
-const BeregningsgrunnlagBarnepensjonOppsummering = (props: BeregningsgrunnlagBarnepensjonOppsummeringProps) => {
-  const { trygdetider, mapNavn, periodisertBeregningsmetodeForAvdoed } = props
-
-  return (
-    <>
-      <Heading size="medium" level="2">
-        Oppsummering
-      </Heading>
-
-      {trygdetider.map((trygdetid) => {
-        const grunnlag = periodisertBeregningsmetodeForAvdoed(trygdetid.ident)
-        const navn = mapNavn(trygdetid.ident)
-
-        if (grunnlag !== null) {
-          return (
-            <BeregningsgrunnlagMetodeForAvdoedOppsummering
-              key={`oppsummering-${trygdetid.ident}`}
-              beregningsMetode={grunnlag.data.beregningsMetode.beregningsMetode}
-              fom={grunnlag.fom}
-              tom={grunnlag.tom}
-              begrunnelse={grunnlag.data.beregningsMetode.begrunnelse ?? ''}
-              navn={navn}
-              visNavn={true}
-            />
-          )
-        } else {
-          return (
-            <OppsummeringMangler key={`oppsummering-${trygdetid.ident}`}>
-              Trygdetid brukt i beregningen for {navn} mangler
-            </OppsummeringMangler>
-          )
-        }
-      })}
-    </>
-  )
-}
+import BeregningsgrunnlagMetodeForAvdoed from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagMetodeForAvdoed'
+import BeregningsgrunnlagBarnepensjonOppsummering from '~components/behandling/beregningsgrunnlag/BeregningsgrunnlagBarnepensjonOppsummering'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -329,8 +282,5 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
     </>
   )
 }
-const OppsummeringMangler = styled(BodyShort)`
-  padding-top: 1em;
-`
 
 export default BeregningsgrunnlagBarnepensjon

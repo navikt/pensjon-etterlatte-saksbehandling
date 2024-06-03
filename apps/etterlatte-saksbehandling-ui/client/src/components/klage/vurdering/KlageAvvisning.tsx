@@ -1,9 +1,8 @@
-import { Alert, BodyLong, Box, Button, ErrorMessage, Heading, HStack, Radio, RadioGroup } from '@navikt/ds-react'
+import { Alert, BodyLong, Box, Button, Heading, HStack, Radio, VStack } from '@navikt/ds-react'
 import React from 'react'
-import { VurderingWrapper } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
 import { InnstillingTilKabalUtenBrev, Klage, KlageUtfallUtenBrev, Omgjoering, Utfall } from '~shared/types/Klage'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { FieldOrNull } from '~shared/types/util'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterUtfallForKlage } from '~shared/api/klage'
@@ -13,8 +12,8 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { forrigeSteg, kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny'
 import { erSkjemaUtfylt, KlageOmgjoering } from '~components/klage/vurdering/KlageVurderingForms'
-import styled from 'styled-components'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -76,35 +75,32 @@ export function KlageAvvisning(props: { klage: Klage }) {
       </Box>
       <form onSubmit={handleSubmit(sendInnVurdering)}>
         <Box paddingBlock="8" paddingInline="16 8">
-          <BodyLong spacing={true}>
-            Siden klagefristen ikke er overholdt må klagen formelt avvises, men du kan likevel bestemme at vedtaket skal
-            omgjøres.
-          </BodyLong>
-          <VurderingWrapper>
-            <Controller
-              rules={{
-                required: true,
-              }}
+          <VStack gap="4">
+            <BodyLong>
+              Siden klagefristen ikke er overholdt må klagen formelt avvises, men du kan likevel bestemme at vedtaket
+              skal omgjøres.
+            </BodyLong>
+
+            <ControlledRadioGruppe
               name="utfall"
               control={control}
-              render={({ field, fieldState }) => (
+              legend="Velg utfall"
+              errorVedTomInput="Du må velge et utfall for klagen"
+              radios={
                 <>
-                  <RadioGroup legend="Velg utfall" {...field}>
-                    <Radio value={Utfall.AVVIST}>Vedtak om avvisning</Radio>
-                    <Radio value={Utfall.AVVIST_MED_OMGJOERING}>Avvist med omgjøring</Radio>
-                  </RadioGroup>
-                  {fieldState.error && <ErrorMessage>Du må velge et utfall for klagen.</ErrorMessage>}
+                  <Radio value={Utfall.AVVIST}>Vedtak om avvisning</Radio>
+                  <Radio value={Utfall.AVVIST_MED_OMGJOERING}>Avvist med omgjøring</Radio>
                 </>
-              )}
+              }
             />
-          </VurderingWrapper>
 
-          {valgtUtfall === Utfall.AVVIST_MED_OMGJOERING ? <KlageOmgjoering control={control} /> : null}
-          {!lagreUtfallAktivert && (
-            <InfoAlert variant="info" inline>
-              Det skal fattes et vedtak om avvisning. Gjenny støtter ikke dette ennå, men det kommer snart.
-            </InfoAlert>
-          )}
+            {valgtUtfall === Utfall.AVVIST_MED_OMGJOERING ? <KlageOmgjoering control={control} /> : null}
+            {!lagreUtfallAktivert && (
+              <Alert variant="info" inline>
+                Det skal fattes et vedtak om avvisning. Gjenny støtter ikke dette ennå, men det kommer snart.
+              </Alert>
+            )}
+          </VStack>
         </Box>
 
         {isFailureHandler({
@@ -130,11 +126,6 @@ export function KlageAvvisning(props: { klage: Klage }) {
 function nesteSteg(valgtUtfall: Utfall | null, klageId: string) {
   return kanSeBrev(valgtUtfall) ? `/klage/${klageId}/brev` : `/klage/${klageId}/oppsummering`
 }
-
-const InfoAlert = styled(Alert)`
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-`
 
 function mapFraFormdataTilKlageUtfall(skjema: FilledFormDataVurdering): KlageUtfallUtenBrev {
   switch (skjema.utfall) {

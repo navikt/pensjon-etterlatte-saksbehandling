@@ -37,7 +37,7 @@ class GrunnlagsendringsHendelseFilter(val vedtakKlient: VedtakKlient, val behand
 
     private fun ikkeRelevanteHendelserForOpphoertSak(grunnlagendringType: GrunnlagsendringsType) =
         when (grunnlagendringType) {
-            GrunnlagsendringsType.DOEDSFALL -> false
+            GrunnlagsendringsType.DOEDSFALL -> true
             GrunnlagsendringsType.UTFLYTTING -> true
             GrunnlagsendringsType.FORELDER_BARN_RELASJON -> true
             GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> true

@@ -336,8 +336,9 @@ class BehandlingStatusServiceImpl(
 
     override fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker) =
         inTransaction {
-            oppgaveService.tilbakestillOppgaverUnderAttestering(saker)
-            behandlingDao.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker)
+            behandlingDao.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker).also { tilbakestilte ->
+                oppgaveService.tilbakestillOppgaverUnderAttestering(tilbakestilte.ider.map { it.sakId })
+            }
         }
 
     private fun registrerVedtakHendelse(

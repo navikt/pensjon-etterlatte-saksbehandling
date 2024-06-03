@@ -55,15 +55,6 @@ Det må foreligge et tjenestepensjonsforhold og -ytelse i Tjenestepensjonsregist
 | dev   | https://etterlatte-samordning-vedtak.ekstern.dev.nav.no |
 | prod  | https://etterlatte-samordning-vedtak.nav.no             |    
 
-### API Gateway (beta) 
-
-**NB! Denne vil likevel ikke bli standarden, bruk direkte URLer over!**
-
-| Miljø | Ingress                                  | Path               |
-|:------|:-----------------------------------------|--------------------|
-| dev   | https://etterlatte-gw.ekstern.dev.nav.no | /samordning/vedtak |
-| prod  | https://etterlatte-gw.nav.no             | /samordning/vedtak |
-
 ## Feilkoder
 
 | Kode                    | HTTP-statuskode | Beskrivelse                                              |

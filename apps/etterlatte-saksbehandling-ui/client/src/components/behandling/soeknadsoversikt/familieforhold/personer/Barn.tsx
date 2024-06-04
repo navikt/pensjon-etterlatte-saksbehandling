@@ -1,11 +1,9 @@
-import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
-import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { IPdlPerson } from '~shared/types/Person'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 import { differenceInYears } from 'date-fns'
 import { hentAdresserEtterDoedsdato } from '~components/behandling/felles/utils'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
-import { Box } from '@navikt/ds-react'
+import { BodyShort, HStack, Label, VStack } from '@navikt/ds-react'
 
 type Props = {
   person: IPdlPerson
@@ -18,27 +16,26 @@ export const Barn = ({ person, doedsdato }: Props) => {
   const aktivAdresse = bostedsadresse.find((adresse) => adresse.aktiv)
 
   return (
-    <PersonBorder>
-      <PersonHeader>
-        <span className="icon">
-          <ChildEyesIcon />
-        </span>
-        {`${person.fornavn} ${person.etternavn}`}{' '}
-        <span className="personRolle">({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>
-      </PersonHeader>
-      <PersonInfoWrapper>
-        <PersonInfoFnr fnr={person.foedselsnummer} />
-        <PersonInfoAdresse adresser={adresserEtterDoedsdato} visHistorikk={true} adresseDoedstidspunkt={false} />
-        {aktivAdresse && (
-          <Box paddingBlock="2 0">
-            <div>
-              <strong>Aktiv adresse</strong>
-            </div>
-            <div>{aktivAdresse.adresseLinje1}</div>
-            <div>{aktivAdresse.land}</div>
-          </Box>
-        )}
-      </PersonInfoWrapper>
-    </PersonBorder>
+    <HStack gap="16">
+      <HStack gap="2">
+        <ChildEyesIcon aria-hidden />
+        <BodyShort>
+          {person.fornavn} {person.etternavn}
+        </BodyShort>
+        <BodyShort>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</BodyShort>
+      </HStack>
+      <VStack>
+        <Label>Fødselsnummer</Label>
+        <BodyShort>{person.foedselsnummer}</BodyShort>
+      </VStack>
+      <PersonInfoAdresse adresser={adresserEtterDoedsdato} visHistorikk={true} adresseDoedstidspunkt={false} />
+      {aktivAdresse && (
+        <VStack>
+          <Label>Aktiv adresse</Label>
+          <BodyShort>{aktivAdresse.adresseLinje1}</BodyShort>
+          <BodyShort>{aktivAdresse.land}</BodyShort>
+        </VStack>
+      )}
+    </HStack>
   )
 }

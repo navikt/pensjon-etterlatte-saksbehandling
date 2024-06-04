@@ -2,7 +2,7 @@ import { Control, Controller, useFieldArray, UseFormWatch } from 'react-hook-for
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import PeriodeAccordion from '~components/behandling/beregningsgrunnlag/PeriodeAccordion'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
-import { BodyShort, Button, Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { BodyShort, Button, HStack, Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { format } from 'date-fns'
 import { Soesken } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Soesken'
 import React from 'react'
@@ -124,33 +124,35 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
             soeskenFinnes && (
               <li key={item.id}>
                 <SoeskenContainer>
-                  <Soesken person={fnrTilSoesken[item.foedselsnummer]} familieforhold={familieforhold!} />
-                  <Controller
-                    name={`soeskenMedIBeregning.${index}.data.${k}`}
-                    control={control}
-                    render={(soesken) =>
-                      behandles ? (
-                        <RadioGroupRow
-                          legend="Oppdras sammen"
-                          value={soesken.field.value?.skalBrukes ?? null}
-                          onChange={(value) => {
-                            soesken.field.onChange({
-                              foedselsnummer: item.foedselsnummer,
-                              skalBrukes: value,
-                            })
-                          }}
-                        >
-                          <Radio value={true}>Ja</Radio>
-                          <Radio value={false}>Nei</Radio>
-                        </RadioGroupRow>
-                      ) : (
-                        <OppdrasSammenLes>
-                          <strong>Oppdras sammen</strong>
-                          <label>{soesken.field.value?.skalBrukes ? 'Ja' : 'Nei'}</label>
-                        </OppdrasSammenLes>
-                      )
-                    }
-                  />
+                  <HStack gap="16">
+                    <Soesken person={fnrTilSoesken[item.foedselsnummer]} familieforhold={familieforhold!} />
+                    <Controller
+                      name={`soeskenMedIBeregning.${index}.data.${k}`}
+                      control={control}
+                      render={(soesken) =>
+                        behandles ? (
+                          <RadioGroup
+                            legend="Oppdras sammen"
+                            value={soesken.field.value?.skalBrukes ?? null}
+                            onChange={(value) => {
+                              soesken.field.onChange({
+                                foedselsnummer: item.foedselsnummer,
+                                skalBrukes: value,
+                              })
+                            }}
+                          >
+                            <Radio value={true}>Ja</Radio>
+                            <Radio value={false}>Nei</Radio>
+                          </RadioGroup>
+                        ) : (
+                          <OppdrasSammenLes>
+                            <strong>Oppdras sammen</strong>
+                            <label>{soesken.field.value?.skalBrukes ? 'Ja' : 'Nei'}</label>
+                          </OppdrasSammenLes>
+                        )
+                      }
+                    />
+                  </HStack>
                 </SoeskenContainer>
               </li>
             )
@@ -216,20 +218,6 @@ const MaanedvelgerMedUtnulling = styled.div`
   justify-content: flex-start;
   flex-direction: row;
   gap: 1em;
-`
-
-const RadioGroupRow = styled(RadioGroup)`
-  margin-top: 1.2em;
-
-  .navds-radio-buttons {
-    display: flex;
-    flex-direction: row;
-    gap: 12px;
-  }
-
-  legend {
-    padding-top: 9px;
-  }
 `
 
 export default SoeskenjusteringPeriode

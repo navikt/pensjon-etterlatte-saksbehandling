@@ -1,6 +1,6 @@
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
 import { IAdresse } from '~shared/types/IAdresse'
-import { Box, Label, ReadMore } from '@navikt/ds-react'
+import { Box, Label, ReadMore, VStack } from '@navikt/ds-react'
 
 type Props = {
   adresser: Readonly<IAdresse[]> | undefined
@@ -23,7 +23,7 @@ export const PersonInfoAdresse = (props: Props) => {
   }
 
   return (
-    <Box paddingBlock="2 0">
+    <VStack>
       <Label as="p">{props.adresseDoedstidspunkt ? 'Bostedadresse dødsfallstidspunkt' : 'Bostedadresse'}</Label>
       {sisteEllerAktivAdresse ? (
         <span>
@@ -40,6 +40,6 @@ export const PersonInfoAdresse = (props: Props) => {
           </ReadMore>
         </Box>
       )}
-    </Box>
+    </VStack>
   )
 }

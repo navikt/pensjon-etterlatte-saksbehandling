@@ -81,7 +81,7 @@ class BeregningRepository(private val dataSource: DataSource) {
             }
         }
 
-        if (overstyrBeregning.status == OverstyrBeregningStatus.UGYLDIG) {
+        if (overstyrBeregning.status == OverstyrBeregningStatus.IKKE_AKTIV) {
             return null
         }
         return checkNotNull(hentOverstyrBeregning(overstyrBeregning.sakId)) {
@@ -308,7 +308,7 @@ private object Queries {
         SELECT *
         FROM overstyr_beregning 
         WHERE sak_id = :sakId
-        and status = '${OverstyrBeregningStatus.GYLDIG.name}'
+        and status = '${OverstyrBeregningStatus.AKTIV.name}'
         """.trimIndent()
 
     val opprettOverstyrBeregning =
@@ -320,8 +320,8 @@ private object Queries {
 }
 
 enum class OverstyrBeregningStatus {
-    GYLDIG,
-    UGYLDIG,
+    AKTIV,
+    IKKE_AKTIV,
 }
 
 private data class BeregningsperiodeDAO(

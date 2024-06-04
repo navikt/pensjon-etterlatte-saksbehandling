@@ -290,12 +290,12 @@ class AktivitetspliktServiceTest {
                     fom = null,
                     tom = LocalDate.now().plusMonths(6),
                 )
-            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), behandlingId) } returns 1
+            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns null
 
             service.opprettUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
 
-            verify { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), behandlingId) }
+            verify { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) }
             verify { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) }
         }
 

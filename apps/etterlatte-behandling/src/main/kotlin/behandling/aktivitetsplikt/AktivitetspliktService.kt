@@ -153,7 +153,7 @@ class AktivitetspliktService(
             require(
                 aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) == null,
             ) { "Aktivitetsgrad finnes allerede for behandling $behandlingId" }
-            aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, behandlingId)
+            aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, behandlingId = behandlingId)
         }
     }
 
@@ -192,7 +192,7 @@ class AktivitetspliktService(
             require(
                 aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) == null,
             ) { "Unntak finnes allerede for behandling $behandlingId" }
-            aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, behandlingId)
+            aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, behandlingId = behandlingId)
         }
     }
 

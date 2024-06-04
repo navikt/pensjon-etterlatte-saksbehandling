@@ -17,18 +17,24 @@ object GrunnlagVersjonValidering {
         logger.info("Sjekker at grunnlagsversjon er konsekvent på tvers av appene")
 
         if (trygdetider.any { it.opplysningerDifferanse.differanse }) {
-            throw UlikVersjonGrunnlag("Ulik versjon av grunnlag brukt i trygdetid og behandling")
+            throw UlikVersjonGrunnlag(
+                "Ulik versjon av grunnlag brukt i trygdetid og behandling." +
+                    "Gå til trygdetidssiden(må kanskje sette vilkårsvurderingen til innvilget) og trykk deretter " +
+                    "'bruk nytt grunnlag'. ",
+            )
         }
         if (vilkaarsvurdering?.grunnlagVersjon == null || beregningOgAvkorting == null) {
             logger.info("Vilkaar og/eller beregning er null – fortsetter ...")
         } else if (vilkaarsvurdering.grunnlagVersjon != beregningOgAvkorting.beregning.grunnlagMetadata.versjon) {
             logger.error(
                 "Ulik versjon av grunnlag i vilkaarsvurdering (versjon=${vilkaarsvurdering.grunnlagVersjon})" +
-                    " og beregning (versjon=${beregningOgAvkorting.beregning.grunnlagMetadata.versjon})",
+                    " og beregning (versjon=${beregningOgAvkorting.beregning.grunnlagMetadata.versjon}) ",
             )
 
             throw UlikVersjonGrunnlag(
-                "Ulik versjon av grunnlag brukt i vilkårsvurdering og beregning!",
+                "Ulik versjon av grunnlag brukt i vilkårsvurdering og beregning. " +
+                    "Gå tilbake til søknadsoversikten og trykk oppdater grunnlag, deretter må totalvurderingen " +
+                    "i vilkårsvurderingen gjøres på nytt.",
             )
         } else {
             logger.info("Samsvar mellom grunnlagsversjon i vilkårsvurdering og beregning – fortsetter ...")

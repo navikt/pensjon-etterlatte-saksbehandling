@@ -8,7 +8,7 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 
-const beskrivelseFor = (metode: BeregningsMetode) => {
+const beskrivelseFor = (metode: BeregningsMetode | null) => {
   switch (metode) {
     case BeregningsMetode.BEST:
       return 'Den som gir høyest verdi av nasjonal/prorata (EØS/avtale-land, der rettighet er oppfylt etter nasjonale regler)'
@@ -16,11 +16,13 @@ const beskrivelseFor = (metode: BeregningsMetode) => {
       return 'Nasjonal beregning (folketrygdberegning)'
     case BeregningsMetode.PRORATA:
       return 'Prorata (EØS/avtale-land, der rettighet er oppfylt ved sammenlegging)'
+    default:
+      return ''
   }
 }
 
 type BeregningsgrunnlagMetodeForAvdoedOppsummeringProps = {
-  beregningsMetode: BeregningsMetode
+  beregningsMetode: BeregningsMetode | null
   fom: Date | undefined
   tom: Date | undefined
   begrunnelse: string
@@ -72,7 +74,7 @@ type BeregningsgrunnlagMetodeForAvdoedProps = {
 const BeregningsgrunnlagMetodeForAvdoed = (props: BeregningsgrunnlagMetodeForAvdoedProps) => {
   const { ident, grunnlag, onUpdate, navn } = props
 
-  const { register, control, handleSubmit, getValues } = useForm<
+  const { register, control, handleSubmit, getValues, watch } = useForm<
     PeriodisertBeregningsgrunnlag<BeregningsmetodeForAvdoed>
   >({
     defaultValues: {
@@ -155,7 +157,7 @@ const BeregningsgrunnlagMetodeForAvdoed = (props: BeregningsgrunnlagMetodeForAvd
               variant="secondary"
               size="small"
               onClick={handleSubmit(lagre)}
-              disabled={getValues().data.beregningsMetode.beregningsMetode === null || getValues().fom === undefined}
+              disabled={watch().data.beregningsMetode.beregningsMetode === null || watch().fom === undefined}
             >
               Lagre beregningsmetode
             </Button>

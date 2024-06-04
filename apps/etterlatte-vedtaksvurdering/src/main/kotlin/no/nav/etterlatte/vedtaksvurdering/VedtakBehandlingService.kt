@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
-import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
@@ -46,7 +45,7 @@ class VedtakBehandlingService(
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
-    private val samKlient: SamKlient,
+    private val samKlient: SamKlient, // TODO: gi ordentlig navn...
     private val trygdetidKlient: TrygdetidKlient,
 ) {
     private val logger = LoggerFactory.getLogger(VedtakBehandlingService::class.java)
@@ -71,7 +70,8 @@ class VedtakBehandlingService(
         }
         val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetider) =
             hentDataForVedtak(behandlingId, brukerTokenInfo)
-        validerGrunnlagsversjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider)
+
+        validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
@@ -96,8 +96,8 @@ class VedtakBehandlingService(
         verifiserGyldigBehandlingStatus(behandlingKlient.kanFatteVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
-        val (_, vilkaarsvurdering, beregningOgAvkorting, _, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
-        validerGrunnlagsversjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider)
+        val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
+        validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
 
         val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
 
@@ -145,14 +145,6 @@ class VedtakBehandlingService(
                 behandlingId = behandlingId,
             ),
         )
-    }
-
-    private fun validerGrunnlagsversjon(
-        vilkaarsvurdering: VilkaarsvurderingDto?,
-        beregningOgAvkorting: BeregningOgAvkorting?,
-        trygdetider: List<TrygdetidDto>,
-    ) {
-        validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider)
     }
 
     suspend fun attesterVedtak(

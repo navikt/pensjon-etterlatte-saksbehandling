@@ -146,7 +146,10 @@ class BeregnOmstillingsstoenadService(
 
                             val trygdetid =
                                 periodisertResultat.resultat.finnAnvendtTrygdetid(trygdetidBruktRegel)
-                                    ?: throw AnvendtTrygdetidIkkeFunnet()
+                                    ?: throw AnvendtTrygdetidIkkeFunnet(
+                                        periodisertResultat.periode.fraDato,
+                                        periodisertResultat.periode.tilDato,
+                                    )
 
                             val trygdetidGrunnlagForPeriode =
                                 beregningsgrunnlag.avdoed.finnGrunnlagForPeriode(

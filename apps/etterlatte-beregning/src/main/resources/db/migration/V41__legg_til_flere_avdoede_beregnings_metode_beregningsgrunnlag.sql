@@ -1,0 +1,1 @@
+ALTER TABLE beregningsgrunnlag ADD COLUMN beregnings_metode_flere_avdoede JSONB;

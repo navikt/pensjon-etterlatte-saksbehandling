@@ -5,9 +5,11 @@ import io.mockk.clearAllMocks
 import no.nav.etterlatte.beregning.regler.DatabaseExtension
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.BeregningsmetodeForAvdoed
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import org.junit.jupiter.api.AfterEach
@@ -73,6 +75,13 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
                 ),
                 institusjonsoppholdBeregningsgrunnlag,
                 beregningsMetode,
+                listOf(
+                    GrunnlagMedPeriode(
+                        fom = LocalDate.of(2022, 8, 1),
+                        tom = null,
+                        data = BeregningsmetodeForAvdoed(AVDOED_FOEDSELSNUMMER.value, beregningsMetode),
+                    ),
+                ),
                 soeskenMedIBeregning,
             ),
         )
@@ -160,6 +169,13 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
                 ),
                 initialInstitusjonsoppholdBeregningsgrunnlag,
                 initialBeregningsMetode,
+                listOf(
+                    GrunnlagMedPeriode(
+                        fom = LocalDate.of(2022, 8, 1),
+                        tom = null,
+                        data = BeregningsmetodeForAvdoed(AVDOED_FOEDSELSNUMMER.value, initialBeregningsMetode),
+                    ),
+                ),
                 initialSoeskenMedIBeregning,
             ),
         )
@@ -173,6 +189,13 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
                 ),
                 oppdatertInstitusjonsoppholdBeregningsgrunnlag,
                 oppdatertBeregningsMetode,
+                listOf(
+                    GrunnlagMedPeriode(
+                        fom = LocalDate.of(2022, 8, 1),
+                        tom = null,
+                        data = BeregningsmetodeForAvdoed(AVDOED_FOEDSELSNUMMER.value, oppdatertBeregningsMetode),
+                    ),
+                ),
                 oppdatertSoeskenMedIBeregning,
             ),
         )
@@ -262,6 +285,13 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
                 ),
                 emptyList(),
                 BeregningsMetode.BEST.toGrunnlag(),
+                listOf(
+                    GrunnlagMedPeriode(
+                        fom = LocalDate.of(2022, 8, 1),
+                        tom = null,
+                        data = BeregningsmetodeForAvdoed(AVDOED_FOEDSELSNUMMER.value, BeregningsMetode.BEST.toGrunnlag()),
+                    ),
+                ),
                 oppdatertSoeskenMedIBeregning,
             ),
         )

@@ -99,6 +99,7 @@ class BeregningsGrunnlagService(
                             institusjonsoppholdBeregningsgrunnlag =
                                 beregningsGrunnlag.institusjonsopphold ?: emptyList(),
                             beregningsMetode = beregningsGrunnlag.beregningsMetode,
+                            begegningsmetodeFlereAvdoede = beregningsGrunnlag.begegningsmetodeFlereAvdoede ?: emptyList(),
                         ),
                     )
             }
@@ -111,11 +112,7 @@ class BeregningsGrunnlagService(
         barnepensjonBeregningsGrunnlag: LagreBeregningsGrunnlag,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        // TODO Skal vekk..
         val grunnlag = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
-        if (grunnlag.hentAvdoede().size > 1) {
-            throw BPBeregningsgrunnlagMerEnnEnAvdoedException(behandlingId)
-        }
 
         val soeskensFoedselsnummere =
             barnepensjonBeregningsGrunnlag.soeskenMedIBeregning.flatMap { soeskenGrunnlag -> soeskenGrunnlag.data }
@@ -371,11 +368,5 @@ class BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(behandlingId: UUID) :
 class BPBeregningsgrunnlagSoeskenMarkertDoedException(behandlingId: UUID) : UgyldigForespoerselException(
     code = "BP_BEREGNING_SOESKEN_MARKERT_DOED",
     detail = "Barnpensjon beregningsgrunnlag bruker søsken som er døde i beregningen",
-    meta = mapOf("behandlingId" to behandlingId),
-)
-
-class BPBeregningsgrunnlagMerEnnEnAvdoedException(behandlingId: UUID) : UgyldigForespoerselException(
-    code = "BP_BEREGNING_MER_ENN_EN_AVDOED",
-    detail = "Kan maks ha en avdød",
     meta = mapOf("behandlingId" to behandlingId),
 )

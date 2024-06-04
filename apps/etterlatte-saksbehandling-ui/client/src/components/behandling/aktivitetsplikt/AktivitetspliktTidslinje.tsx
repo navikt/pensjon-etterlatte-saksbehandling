@@ -42,7 +42,7 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
   }
 
   return (
-    <TidslinjeWrapper className="min-w-[800px]">
+    <div className="min-w-[800px]">
       {aktiviteter.length === 0 ? (
         <Alert variant="info" inline>
           Ingen aktiviteter er registrert.
@@ -123,7 +123,7 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
         errorMessage: 'En feil oppsto ved henting av aktiviteter',
         apiResult: hentet,
       })}
-    </TidslinjeWrapper>
+    </div>
   )
 }
 
@@ -173,10 +173,6 @@ export const mapAktivitetstypeProps = (type: AktivitetspliktType): Aktivitetstyp
       }
   }
 }
-
-const TidslinjeWrapper = styled.div`
-  margin-bottom: 50px;
-`
 
 const SlettEndreWrapper = styled.div`
   padding-right: 1em;

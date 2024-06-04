@@ -165,13 +165,13 @@ internal fun Route.aktivitetspliktRoutes(
     route("/api/sak/{$SAKID_CALL_PARAMETER}/oppgave/{$OPPGAVEID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {
         get {
             logger.info("Henter aktivitetsplikt vurdering for oppgaveId=$oppgaveId")
-            call.respond(aktivitetspliktService.hentVurdering(oppgaveId) ?: HttpStatusCode.NotFound)
+            call.respond(aktivitetspliktService.hentVurderingForOppgave(oppgaveId) ?: HttpStatusCode.NotFound)
         }
 
         post("/aktivitetsgrad") {
             kunSkrivetilgang {
                 logger.info("Oppretter aktivitetsgrad for sakId=$sakId og oppgaveId=$oppgaveId")
-                aktivitetspliktService.opprettAktivitetsgrad(
+                aktivitetspliktService.opprettAktivitetsgradForOppgave(
                     aktivitetsgrad = call.receive<LagreAktivitetspliktAktivitetsgrad>(),
                     oppgaveId = oppgaveId,
                     sakId = sakId,
@@ -184,9 +184,42 @@ internal fun Route.aktivitetspliktRoutes(
         post("/unntak") {
             kunSkrivetilgang {
                 logger.info("Oppretter unntak for sakId=$sakId og oppgaveId=$oppgaveId")
-                aktivitetspliktService.opprettUnntak(
+                aktivitetspliktService.opprettUnntakForOpppgave(
                     unntak = call.receive<LagreAktivitetspliktUnntak>(),
                     oppgaveId = oppgaveId,
+                    sakId = sakId,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+                call.respond(HttpStatusCode.Created)
+            }
+        }
+    }
+
+    route("/api/sak/{$SAKID_CALL_PARAMETER}/behandling/{$BEHANDLINGID_CALL_PARAMETER}/aktivitetsplikt/vurdering") {
+        get {
+            logger.info("Henter aktivitetsplikt vurdering for behandlingId=$behandlingId")
+            call.respond(aktivitetspliktService.hentVurderingForBehandling(behandlingId) ?: HttpStatusCode.NotFound)
+        }
+
+        post("/aktivitetsgrad") {
+            kunSkrivetilgang {
+                logger.info("Oppretter aktivitetsgrad for sakId=$sakId og behandlingId=$behandlingId")
+                aktivitetspliktService.opprettAktivitetsgradForBehandling(
+                    aktivitetsgrad = call.receive<LagreAktivitetspliktAktivitetsgrad>(),
+                    behandlingId = behandlingId,
+                    sakId = sakId,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+                call.respond(HttpStatusCode.Created)
+            }
+        }
+
+        post("/unntak") {
+            kunSkrivetilgang {
+                logger.info("Oppretter unntak for sakId=$sakId og behandlingId=$behandlingId")
+                aktivitetspliktService.opprettUnntakForBehandling(
+                    unntak = call.receive<LagreAktivitetspliktUnntak>(),
+                    behandlingId = behandlingId,
                     sakId = sakId,
                     brukerTokenInfo = brukerTokenInfo,
                 )

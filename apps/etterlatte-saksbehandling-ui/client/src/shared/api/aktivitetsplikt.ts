@@ -58,3 +58,27 @@ export const opprettAktivitspliktUnntak = async (args: {
   request: IOpprettAktivitetspliktUnntak
 }): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
   apiClient.post(`/sak/${args.sakId}/oppgave/${args.oppgaveId}/aktivitetsplikt/vurdering/unntak`, { ...args.request })
+
+export const hentAktivitspliktVurderingForBehandling = async (args: {
+  sakId: number
+  behandlingId: string
+}): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
+  apiClient.get(`/sak/${args.sakId}/behandling/${args.behandlingId}/aktivitetsplikt/vurdering`)
+
+export const opprettAktivitspliktAktivitetsgradForBehandling = async (args: {
+  sakId: number
+  behandlingId: string
+  request: IOpprettAktivitetspliktAktivitetsgrad
+}): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
+  apiClient.post(`/sak/${args.sakId}/behandling/${args.behandlingId}/aktivitetsplikt/vurdering/aktivitetsgrad`, {
+    ...args.request,
+  })
+
+export const opprettAktivitspliktUnntakForBehandling = async (args: {
+  sakId: number
+  behandlingId: string
+  request: IOpprettAktivitetspliktUnntak
+}): Promise<ApiResponse<IAktivitetspliktVurdering>> =>
+  apiClient.post(`/sak/${args.sakId}/behandling/${args.behandlingId}/aktivitetsplikt/vurdering/unntak`, {
+    ...args.request,
+  })

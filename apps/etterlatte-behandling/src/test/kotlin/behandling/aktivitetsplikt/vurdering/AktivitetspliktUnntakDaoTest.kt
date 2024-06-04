@@ -4,15 +4,20 @@ import io.kotest.assertions.asClue
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakType.GRADERT_UFOERETRYGD
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.revurdering.RevurderingDao
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.lagNyOppgave
+import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -24,9 +29,15 @@ class AktivitetspliktUnntakDaoTest(ds: DataSource) {
     private val dao = AktivitetspliktUnntakDao(ConnectionAutoclosingTest(ds))
     private val sakDao = SakDao(ConnectionAutoclosingTest(ds))
     private val oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(ds))
+    private val behandlingDao =
+        BehandlingDao(
+            KommerBarnetTilGodeDao(ConnectionAutoclosingTest(ds)),
+            RevurderingDao(ConnectionAutoclosingTest(ds)),
+            (ConnectionAutoclosingTest(ds)),
+        )
 
     @Test
-    fun `skal lagre ned og hente opp et nytt unntak`() {
+    fun `skal lagre ned og hente opp et nytt unntak for oppgave`() {
         val behandlingId = null
         val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
         val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
@@ -41,7 +52,7 @@ class AktivitetspliktUnntakDaoTest(ds: DataSource) {
 
         dao.opprettUnntak(unntak, sak.id, kilde, oppgave.id, behandlingId)
 
-        dao.hentUnntak(oppgave.id)!!.asClue {
+        dao.hentUnntakForOppgave(oppgave.id)!!.asClue {
             it.sakId shouldBe sak.id
             it.behandlingId shouldBe behandlingId
             it.oppgaveId shouldBe oppgave.id
@@ -77,6 +88,39 @@ class AktivitetspliktUnntakDaoTest(ds: DataSource) {
             it.tom shouldBe unntak.tom
             it.opprettet shouldBe kilde2
             it.endret shouldBe kilde2
+            it.beskrivelse shouldBe unntak.beskrivelse
+        }
+    }
+
+    @Test
+    fun `skal lagre ned og hente opp et nytt unntak for behandling`() {
+        val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
+        val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak.id,
+            )
+        behandlingDao.opprettBehandling(opprettBehandling)
+        val unntak =
+            LagreAktivitetspliktUnntak(
+                unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
+                beskrivelse = "Beskrivelse",
+                fom = LocalDate.now(),
+                tom = LocalDate.now().plusMonths(6),
+            )
+
+        dao.opprettUnntak(unntak, sak.id, kilde, null, opprettBehandling.id)
+
+        dao.hentUnntakForBehandling(opprettBehandling.id)!!.asClue {
+            it.sakId shouldBe sak.id
+            it.behandlingId shouldBe opprettBehandling.id
+            it.oppgaveId shouldBe null
+            it.unntak shouldBe unntak.unntak
+            it.fom shouldBe unntak.fom
+            it.tom shouldBe unntak.tom
+            it.opprettet shouldBe kilde
+            it.endret shouldBe kilde
             it.beskrivelse shouldBe unntak.beskrivelse
         }
     }

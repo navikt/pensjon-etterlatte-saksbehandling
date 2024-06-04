@@ -124,7 +124,6 @@ class BeregningRepository(private val dataSource: DataSource) {
 
 private fun toOverstyrBeregning(row: Row): OverstyrBeregning =
     with(row) {
-        println(row.underlying.getString("status"))
         OverstyrBeregning(
             sakId = long("sak_id"),
             beskrivelse = string("beskrivelse"),

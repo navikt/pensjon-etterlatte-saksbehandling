@@ -24,6 +24,7 @@ import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDa
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import { Toast } from '~shared/alerts/Toast'
+import { AktivitetspliktVurderingVisning } from '~components/behandling/aktivitetsplikt/AktivitetspliktVurderingVisning'
 
 interface AktivitetspliktVurderingValues {
   aktivitetsplikt: IValgJaNei | null
@@ -87,6 +88,9 @@ export const AktivitetspliktVurdering = ({
         },
         () => {
           resetManglerAktivitetspliktVurdering()
+          hent({ sakId: behandling.sakId, behandlingId: behandling.id }, (result) => {
+            setVurdering(result)
+          })
         }
       )
     } else {
@@ -103,6 +107,9 @@ export const AktivitetspliktVurdering = ({
         },
         () => {
           resetManglerAktivitetspliktVurdering()
+          hent({ sakId: behandling.sakId, behandlingId: behandling.id }, (result) => {
+            setVurdering(result)
+          })
         }
       )
     }
@@ -126,118 +133,119 @@ export const AktivitetspliktVurdering = ({
       <div>
         <HStack gap="12">
           <Spinner label="Henter vurdering av aktivitetsplikt" visible={isPending(hentet)} />
-
-          <VStack gap="4">
-            <ControlledRadioGruppe
-              name="aktivitetsplikt"
-              control={control}
-              errorVedTomInput="Du må velge om bruker har aktivitetsplikt"
-              legend="Har bruker aktivitetsplikt?"
-              radios={
-                <>
-                  <Radio size="small" value={IValgJaNei.JA}>
-                    Ja
-                  </Radio>
-                  <Radio size="small" value={IValgJaNei.NEI}>
-                    {
-                      tekstAktivitetspliktUnntakType[
-                        AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
-                      ]
-                    }
-                  </Radio>
-                </>
-              }
-            />
-
-            <ReadMore header="Dette mener vi med lav inntekt">
-              Med lav inntekt menes det at den gjenlevende ikke har hatt en gjennomsnittlig årlig arbeidsinntekt som
-              overstiger to ganger grunnbeløpet for hvert av de fem siste årene. I tillegg må den årlige inntekten ikke
-              ha oversteget tre ganger grunnbeløpet hvert av de siste to årene før dødsfallet.
-            </ReadMore>
-            {harAktivitetsplikt === IValgJaNei.JA && (
-              <>
-                <ControlledRadioGruppe
-                  name="unntak"
-                  control={control}
-                  errorVedTomInput="Du må velge om bruker har unntak fra aktivitetsplikt"
-                  legend="Er det unntak for bruker?"
-                  radios={
-                    <>
-                      <Radio size="small" value={IValgJaNei.JA}>
-                        Ja
-                      </Radio>
-                      <Radio size="small" value={IValgJaNei.NEI}>
-                        Nei
-                      </Radio>
-                    </>
-                  }
-                />
-                {harUnntak === IValgJaNei.JA && (
+          {!isPending(hentet) && vurdering ? (
+            <AktivitetspliktVurderingVisning vurdering={vurdering} />
+          ) : (
+            <VStack gap="4">
+              <ControlledRadioGruppe
+                name="aktivitetsplikt"
+                control={control}
+                errorVedTomInput="Du må velge om bruker har aktivitetsplikt"
+                legend="Har bruker aktivitetsplikt?"
+                radios={
                   <>
-                    <Select
-                      label="Hvilket midlertidig unntak er det?"
-                      {...register('midlertidigUnntak', {
-                        required: { value: true, message: 'Du må velge midlertidig unntak' },
-                      })}
-                      error={errors.midlertidigUnntak?.message}
-                    >
-                      <option value="">Velg hvilke unntak</option>
-                      {Object.values(AktivitetspliktUnntakType)
-                        .filter(
-                          (unntak) => unntak !== AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
-                        )
-                        .map((type) => (
-                          <option key={type} value={type}>
-                            {tekstAktivitetspliktUnntakType[type]}
-                          </option>
-                        ))}
-                    </Select>
-                    <ControlledDatoVelger
-                      name="sluttdato"
-                      label="Angi sluttdato for unntaksperiode"
-                      description="Du trenger ikke legge til en sluttdato hvis den ikke er tilgjengelig"
-                      control={control}
-                      required={false}
-                    />
+                    <Radio size="small" value={IValgJaNei.JA}>
+                      Ja
+                    </Radio>
+                    <Radio size="small" value={IValgJaNei.NEI}>
+                      {
+                        tekstAktivitetspliktUnntakType[
+                          AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+                        ]
+                      }
+                    </Radio>
                   </>
-                )}
-                {harUnntak === IValgJaNei.NEI && (
-                  <Select
-                    label="Hva er brukers aktivitetsgrad?"
-                    {...register('aktivitetsgrad', {
-                      required: { value: true, message: 'Du må velge aktivitetsgrad' },
-                    })}
-                    error={errors.aktivitetsgrad?.message}
-                  >
-                    <option value="">Velg hvilken grad</option>
-                    {Object.values(AktivitetspliktVurderingType).map((type) => (
-                      <option key={type} value={type}>
-                        {tekstAktivitetspliktVurderingType[type]}
-                      </option>
-                    ))}
-                  </Select>
-                )}
-              </>
-            )}
-            <Textarea
-              label="Vurdering"
-              {...register('beskrivelse', {
-                required: { value: true, message: 'Du må fylle inn vurdering' },
-              })}
-              error={errors.beskrivelse?.message}
-            />
-            <Button
-              loading={isPending(opprettetAktivitetsgrad) || isPending(opprettetUnntak)}
-              variant="primary"
-              type="button"
-              size="small"
-              onClick={handleSubmit(opprettVurdering)}
-            >
-              Lagre vurdering
-            </Button>
-          </VStack>
+                }
+              />
 
-          {vurdering && <>{vurdering.aktivitet?.aktivitetsgrad}</>}
+              <ReadMore header="Dette mener vi med lav inntekt">
+                Med lav inntekt menes det at den gjenlevende ikke har hatt en gjennomsnittlig årlig arbeidsinntekt som
+                overstiger to ganger grunnbeløpet for hvert av de fem siste årene. I tillegg må den årlige inntekten
+                ikke ha oversteget tre ganger grunnbeløpet hvert av de siste to årene før dødsfallet.
+              </ReadMore>
+              {harAktivitetsplikt === IValgJaNei.JA && (
+                <>
+                  <ControlledRadioGruppe
+                    name="unntak"
+                    control={control}
+                    errorVedTomInput="Du må velge om bruker har unntak fra aktivitetsplikt"
+                    legend="Er det unntak for bruker?"
+                    radios={
+                      <>
+                        <Radio size="small" value={IValgJaNei.JA}>
+                          Ja
+                        </Radio>
+                        <Radio size="small" value={IValgJaNei.NEI}>
+                          Nei
+                        </Radio>
+                      </>
+                    }
+                  />
+                  {harUnntak === IValgJaNei.JA && (
+                    <>
+                      <Select
+                        label="Hvilket midlertidig unntak er det?"
+                        {...register('midlertidigUnntak', {
+                          required: { value: true, message: 'Du må velge midlertidig unntak' },
+                        })}
+                        error={errors.midlertidigUnntak?.message}
+                      >
+                        <option value="">Velg hvilke unntak</option>
+                        {Object.values(AktivitetspliktUnntakType)
+                          .filter(
+                            (unntak) => unntak !== AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT
+                          )
+                          .map((type) => (
+                            <option key={type} value={type}>
+                              {tekstAktivitetspliktUnntakType[type]}
+                            </option>
+                          ))}
+                      </Select>
+                      <ControlledDatoVelger
+                        name="sluttdato"
+                        label="Angi sluttdato for unntaksperiode"
+                        description="Du trenger ikke legge til en sluttdato hvis den ikke er tilgjengelig"
+                        control={control}
+                        required={false}
+                      />
+                    </>
+                  )}
+                  {harUnntak === IValgJaNei.NEI && (
+                    <Select
+                      label="Hva er brukers aktivitetsgrad?"
+                      {...register('aktivitetsgrad', {
+                        required: { value: true, message: 'Du må velge aktivitetsgrad' },
+                      })}
+                      error={errors.aktivitetsgrad?.message}
+                    >
+                      <option value="">Velg hvilken grad</option>
+                      {Object.values(AktivitetspliktVurderingType).map((type) => (
+                        <option key={type} value={type}>
+                          {tekstAktivitetspliktVurderingType[type]}
+                        </option>
+                      ))}
+                    </Select>
+                  )}
+                </>
+              )}
+              <Textarea
+                label="Vurdering"
+                {...register('beskrivelse', {
+                  required: { value: true, message: 'Du må fylle inn vurdering' },
+                })}
+                error={errors.beskrivelse?.message}
+              />
+              <Button
+                loading={isPending(opprettetAktivitetsgrad) || isPending(opprettetUnntak)}
+                variant="primary"
+                type="button"
+                size="small"
+                onClick={handleSubmit(opprettVurdering)}
+              >
+                Lagre vurdering
+              </Button>
+            </VStack>
+          )}
         </HStack>
         {mapFailure(opprettetUnntak, (error) => (
           <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved oppretting av unntak'}</ApiErrorAlert>

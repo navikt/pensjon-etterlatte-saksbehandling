@@ -1,5 +1,5 @@
 import { Buildings2Icon, HatSchoolIcon, PencilIcon, PersonIcon, RulerIcon } from '@navikt/aksel-icons'
-import { Alert, Timeline } from '@navikt/ds-react'
+import { Alert, HStack, Timeline, ToggleGroup, VStack } from '@navikt/ds-react'
 import { hentAktiviteter, slettAktivitet } from '~shared/api/aktivitetsplikt'
 import { formaterDato, formaterDatoMedTidspunkt } from '~utils/formattering'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -23,6 +23,7 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
   const [aktiviteter, setAktiviteter] = useState<IAktivitet[]>([])
   const [rediger, setRediger] = useState<IAktivitet | undefined>(undefined)
   const [aktivitetsTypeProps, setAktivitetsTypeProps] = useState<AktivitetstypeProps[]>([])
+  const [sluttdato, setSluttdato] = useState<Date>(addYears(doedsdato, 3))
 
   useEffect(() => {
     hent({ behandlingId: behandling.id }, (aktiviteter) => {
@@ -42,13 +43,13 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
   }
 
   return (
-    <div className="min-w-[800px]">
+    <VStack gap="8" className="min-w-[800px]">
       {aktiviteter.length === 0 ? (
         <Alert variant="info" inline>
           Ingen aktiviteter er registrert.
         </Alert>
       ) : (
-        <Timeline startDate={doedsdato} endDate={addYears(doedsdato, 3)}>
+        <Timeline startDate={doedsdato} endDate={sluttdato}>
           <Timeline.Pin date={doedsdato}>
             <p>Dødsdato: {formaterDato(doedsdato)}</p>
           </Timeline.Pin>
@@ -112,18 +113,33 @@ export const AktivitetspliktTidslinje = (props: { behandling: IDetaljertBehandli
         </Timeline>
       )}
 
-      <NyAktivitet
-        key={rediger?.id}
-        behandling={behandling}
-        oppdaterAktiviteter={oppdaterAktiviteter}
-        redigerAktivitet={rediger}
-      />
+      <HStack align="center" justify="space-between">
+        <NyAktivitet
+          key={rediger?.id}
+          behandling={behandling}
+          oppdaterAktiviteter={oppdaterAktiviteter}
+          redigerAktivitet={rediger}
+        />
+
+        {aktiviteter.length > 0 && (
+          <ToggleGroup
+            defaultValue="3"
+            onChange={(value) => setSluttdato(addYears(doedsdato, Number(value)))}
+            size="small"
+            variant="neutral"
+          >
+            <ToggleGroup.Item value="1">1 år</ToggleGroup.Item>
+            <ToggleGroup.Item value="2">2 år</ToggleGroup.Item>
+            <ToggleGroup.Item value="3">3 år</ToggleGroup.Item>
+          </ToggleGroup>
+        )}
+      </HStack>
 
       {isFailureHandler({
         errorMessage: 'En feil oppsto ved henting av aktiviteter',
         apiResult: hentet,
       })}
-    </div>
+    </VStack>
   )
 }
 

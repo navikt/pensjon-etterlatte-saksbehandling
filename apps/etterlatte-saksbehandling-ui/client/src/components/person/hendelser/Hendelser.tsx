@@ -78,7 +78,7 @@ export const Hendelser = ({ sakResult, fnr }: { sakResult: Result<SakMedBehandli
                 <>
                   <RevurderingInfo>
                     <Alert variant="warning">
-                      Obs! I G-REGULERINGEN vises det nyeste grunnlaget i saken på reguleringstidspunktet, men selve
+                      Obs! I G-reguleringen vises det nyeste grunnlaget i saken på reguleringstidspunktet, men selve
                       beregningen har ikke tatt høyde for eventuelle endringer i grunnlaget. Se derfor på beregningen i
                       den forrige behandlingen ved vurdering av endring i grunnlagsdata.
                     </Alert>

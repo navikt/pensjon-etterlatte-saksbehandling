@@ -108,7 +108,7 @@ fun bestillingTemplateEnd(doedsdato: LocalDateTime) =
             "foedtEtter": null,
             "foedtFoer": null,
             "alder": null,
-            "syntetisk": false,
+            "syntetisk": true,
             "nyttNavn": {
               "hasMellomnavn": false
             },

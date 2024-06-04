@@ -21,9 +21,9 @@ object GrunnlagVersjonValidering {
         if (vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingUtfall.IKKE_OPPFYLT &&
             behandling.boddEllerArbeidetUtlandet?.vurdereAvoededsTrygdeavtale == false
         ) {
-            logger.warn(
+            logger.info(
                 "Behandling ${behandling.id} skal ikke ha trygdetid ved avslag da " +
-                    "avdøeds trygdeavtale ikke skal vurderes(ingen avhuking).",
+                    "avdøeds trygdeavtale ikke skal vurderes(ingen avhuking). Har trygdetid ${trygdetider.isNotEmpty()}",
             )
             // TODO: Vil vi egentlig at vedtak skal slette tt her?
         } else {

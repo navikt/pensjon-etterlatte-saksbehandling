@@ -29,7 +29,7 @@ import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
-import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlientImpl
+import no.nav.etterlatte.vedtaksvurdering.klienter.SamordningsKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.TrygdetidKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.outbox.OutboxJob
@@ -53,7 +53,7 @@ class ApplicationContext {
     val leaderElectionKlient = LeaderElection(env["ELECTOR_PATH"], leaderElectionHttpClient)
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     val samKlient =
-        SamKlientImpl(
+        SamordningsKlientImpl(
             config,
             httpClientClientCredentials(
                 azureAppClientId = config.getString("azure.app.client.id"),
@@ -71,7 +71,7 @@ class ApplicationContext {
             beregningKlient = BeregningKlientImpl(config, httpClient()),
             vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
             behandlingKlient = behandlingKlient,
-            samKlient = samKlient,
+            samordningsKlient = samKlient,
             trygdetidKlient = trygdetidKlient,
         )
     val vedtaksvurderingRapidService = VedtaksvurderingRapidService(publiser = ::publiser)

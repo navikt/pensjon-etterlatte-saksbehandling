@@ -25,7 +25,7 @@ object GrunnlagVersjonValidering {
                 "Behandling ${behandling.id} skal ikke ha trygdetid ved avslag da " +
                     "avdøeds trygdeavtale ikke skal vurderes(ingen avhuking).",
             )
-            // TODO: slett evt trygdetid... skal aldri ha tt
+            // TODO: Vil vi egentlig at vedtak skal slette tt her?
         } else {
             if (trygdetider.any { it.opplysningerDifferanse.differanse }) {
                 throw UlikVersjonGrunnlag(

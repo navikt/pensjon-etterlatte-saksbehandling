@@ -32,7 +32,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.vedtaksvurdering.grunnlag.GrunnlagVersjonValidering.validerVersjon
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
-import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlient
+import no.nav.etterlatte.vedtaksvurdering.klienter.SamordningsKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.TrygdetidKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import org.slf4j.LoggerFactory
@@ -45,7 +45,7 @@ class VedtakBehandlingService(
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
-    private val samKlient: SamKlient, // TODO: gi ordentlig navn...
+    private val samordningsKlient: SamordningsKlient,
     private val trygdetidKlient: TrygdetidKlient,
 ) {
     private val logger = LoggerFactory.getLogger(VedtakBehandlingService::class.java)
@@ -303,7 +303,7 @@ class VedtakBehandlingService(
             return false
         }
 
-        return samKlient.samordneVedtak(
+        return samordningsKlient.samordneVedtak(
             vedtak = vedtak,
             etterbetaling = vedtak.erVedtakMedEtterbetaling(repository),
             brukerTokenInfo = brukerTokenInfo,
@@ -357,14 +357,14 @@ class VedtakBehandlingService(
     suspend fun samordningsinfo(sakId: Long): List<SamordningsvedtakWrapper> {
         val vedtaksliste = repository.hentVedtakForSak(sakId)
         return vedtaksliste.firstOrNull()?.let { vedtak ->
-            return samKlient.hentSamordningsdata(vedtak, alleVedtak = true)
+            return samordningsKlient.hentSamordningsdata(vedtak, alleVedtak = true)
                 .map { supplementSamordningsinfo(it, vedtaksliste) }
         } ?: emptyList()
     }
 
     suspend fun samordningsinfo(behandlingId: UUID): List<SamordningsvedtakWrapper> {
         val vedtak = hentVedtakNonNull(behandlingId)
-        return samKlient.hentSamordningsdata(vedtak, alleVedtak = false)
+        return samordningsKlient.hentSamordningsdata(vedtak, alleVedtak = false)
             .map { supplementSamordningsinfo(it, listOf(vedtak)) }
     }
 

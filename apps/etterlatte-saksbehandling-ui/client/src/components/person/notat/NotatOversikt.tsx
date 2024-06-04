@@ -55,42 +55,43 @@ export default function NotatOversikt({ sakResult }: { sakResult: Result<SakMedB
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {!notater.length && (
+              {!notater.length ? (
                 <Table.Row>
                   <Table.DataCell colSpan={6}>Ingen notater funnet</Table.DataCell>
                 </Table.Row>
-              )}
-              {notater.map((notat) => (
-                <Table.Row key={notat.id}>
-                  <Table.DataCell>{notat.id}</Table.DataCell>
-                  <Table.DataCell>{notat.tittel}</Table.DataCell>
-                  <Table.DataCell>
-                    {!!notat.journalpostId ? (
-                      <Tag variant="success">
-                        <CheckmarkIcon /> Journalført
-                      </Tag>
-                    ) : (
-                      <Tag variant="neutral">Under arbeid</Tag>
-                    )}
-                  </Table.DataCell>
-                  <Table.DataCell>{formaterDatoMedKlokkeslett(notat.opprettet)}</Table.DataCell>
-                  <Table.DataCell>
-                    <HStack gap="4" justify="end">
+              ) : (
+                notater.map((notat) => (
+                  <Table.Row key={notat.id}>
+                    <Table.DataCell>{notat.id}</Table.DataCell>
+                    <Table.DataCell>{notat.tittel}</Table.DataCell>
+                    <Table.DataCell>
                       {!!notat.journalpostId ? (
-                        <NotatVisningModal notat={notat} />
+                        <Tag variant="success">
+                          <CheckmarkIcon /> Journalført
+                        </Tag>
                       ) : (
-                        <>
-                          <SlettNotatModal
-                            notat={notat}
-                            fjernNotat={(id) => setNotater(notater.filter((notat) => notat.id !== id))}
-                          />
-                          <NotatRedigeringModal notat={notat} />
-                        </>
+                        <Tag variant="neutral">Under arbeid</Tag>
                       )}
-                    </HStack>
-                  </Table.DataCell>
-                </Table.Row>
-              ))}
+                    </Table.DataCell>
+                    <Table.DataCell>{formaterDatoMedKlokkeslett(notat.opprettet)}</Table.DataCell>
+                    <Table.DataCell>
+                      <HStack gap="4" justify="end">
+                        {!!notat.journalpostId ? (
+                          <NotatVisningModal notat={notat} />
+                        ) : (
+                          <>
+                            <SlettNotatModal
+                              notat={notat}
+                              fjernNotat={(id) => setNotater(notater.filter((notat) => notat.id !== id))}
+                            />
+                            <NotatRedigeringModal notat={notat} />
+                          </>
+                        )}
+                      </HStack>
+                    </Table.DataCell>
+                  </Table.Row>
+                ))
+              )}
             </Table.Body>
           </Table>
         ),

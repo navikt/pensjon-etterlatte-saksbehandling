@@ -8,7 +8,6 @@ import { formatISO } from 'date-fns'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Alert, Button, Heading, HStack, Select, Textarea, VStack } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
-import styled from 'styled-components'
 import { AktivitetspliktType, IAktivitet, IOpprettAktivitet } from '~shared/types/Aktivitetsplikt'
 import { opprettAktivitet } from '~shared/api/aktivitetsplikt'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
@@ -99,7 +98,7 @@ export const NyAktivitet = ({
   }
 
   return (
-    <AktivitetspliktWrapper>
+    <>
       {visForm && (
         <form onSubmit={handleSubmit(submitAktivitet)}>
           <Heading size="small" level="3" spacing>
@@ -176,10 +175,6 @@ export const NyAktivitet = ({
           </Button>
         </HStack>
       )}
-    </AktivitetspliktWrapper>
+    </>
   )
 }
-
-const AktivitetspliktWrapper = styled.div`
-  margin: 2em 0 1em 0;
-`

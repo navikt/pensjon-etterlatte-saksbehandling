@@ -91,7 +91,7 @@ class AktivitetspliktUnntakDaoTest(ds: DataSource) {
             it.beskrivelse shouldBe unntak.beskrivelse
         }
     }
-    
+
     @Test
     fun `skal lagre ned og hente opp et nytt unntak for behandling`() {
         val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())

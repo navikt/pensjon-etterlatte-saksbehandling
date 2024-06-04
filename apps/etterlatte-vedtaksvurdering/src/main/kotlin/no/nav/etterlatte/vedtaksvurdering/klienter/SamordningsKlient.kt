@@ -24,7 +24,7 @@ import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-interface SamKlient {
+interface SamordningsKlient {
     /**
      * @return true=vente på samordning med tjenestepensjon, false=ikke vente
      */
@@ -43,11 +43,11 @@ interface SamKlient {
     ): List<Samordningsvedtak>
 }
 
-class SamKlientImpl(
+class SamordningsKlientImpl(
     config: Config,
     private val httpClient: HttpClient,
-) : SamKlient {
-    private val logger = LoggerFactory.getLogger(SamKlient::class.java)
+) : SamordningsKlient {
+    private val logger = LoggerFactory.getLogger(SamordningsKlient::class.java)
 
     private val resourceUrl = config.getString("samordnevedtak.resource.url")
 

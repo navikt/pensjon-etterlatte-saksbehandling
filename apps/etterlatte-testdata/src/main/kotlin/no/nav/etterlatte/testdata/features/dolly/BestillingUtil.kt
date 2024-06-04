@@ -180,7 +180,7 @@ private fun soeskenTemplate(
         false -> "$alderSoeskenUnder18"
     }
 },
-    "syntetisk": false,
+    "syntetisk": true,
     "nyttNavn": {
       "hasMellomnavn": false
     },

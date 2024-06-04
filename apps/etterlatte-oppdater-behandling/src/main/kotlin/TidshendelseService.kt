@@ -127,11 +127,11 @@ class TidshendelseService(
 
         return when (response.opprettetRevurdering) {
             true -> {
-                logger.info("Det ble ikke opprettet revurdering for aktivitetsplikt [sak=${hendelse.sakId}]")
+                logger.info("Opprettet revurdering for aktivitetsplikt [sak=${hendelse.sakId}, behandling=$response]")
                 TidshendelseResult.Skipped
             }
             false -> {
-                logger.info("Opprettet revurdering for aktivitetsplikt [sak=${hendelse.sakId}, behandling=$response]")
+                logger.info("Det ble ikke opprettet revurdering for aktivitetsplikt [sak=${hendelse.sakId}]")
                 TidshendelseResult.OpprettRevurderingForAktivitetsplikt(response)
             }
         }

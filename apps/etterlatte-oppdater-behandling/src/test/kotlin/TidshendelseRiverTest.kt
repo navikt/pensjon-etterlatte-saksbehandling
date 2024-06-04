@@ -138,7 +138,7 @@ class TidshendelseRiverTest {
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
-            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "OPPGAVE_OPPRETTET"
+            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "HOPPET_OVER"
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "AO_BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asUUID() shouldBe hendelseId
             field(0, DRYRUN).asBoolean() shouldBe false

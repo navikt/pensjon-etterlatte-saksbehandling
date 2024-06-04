@@ -1,0 +1,351 @@
+[
+  {
+    "type": "heading-three",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "NORDISK VEDLEGG"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "Denne blanketten følger som vedlegg fra"
+      }
+    ]
+  },
+  {
+    "type": "bulleted-list",
+    "children": [
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "type": "paragraph",
+            "text": "Finland "
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "type": "paragraph",
+            "text": "Island "
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "type": "paragraph",
+            "text": "Norge "
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "type": "paragraph",
+            "text": "Sverige"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "heading-three",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "INFORMASJON TIL BRUK FOR Å AVGJØRE OM ARTIKKEL 9 I NORDISK KONVENSJON KOMMER TIL ANVENDELSE"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": ""
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "1. Søkerens navn:"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "Fødselsdato:"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "Identitetsnummer:"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": ""
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "2. Rett til "
+      },
+      {
+        "type": "paragraph",
+        "text": "<STØNAD>",
+        "placeholder": true
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "når det gjelder forutgående medlemstid, foreligger"
+      }
+    ]
+  },
+  {
+    "type": "bulleted-list",
+    "children": [
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "type": "paragraph",
+            "text": "gjennom bruk av artikkel 6 i forordning 883/2004"
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "type": "paragraph",
+            "text": "etter nasjonal lovgivning"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "3. Grunnpensjon:"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "Dersom pensjon blir gitt, vil det da foreligge rett til beregning av framtidig tid?"
+      }
+    ]
+  },
+  {
+    "type": "bulleted-list",
+    "children": [
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "type": "paragraph",
+            "text": "ja, etter nasjonal lovgivning"
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "type": "paragraph",
+            "text": "ja, ved pro rata beregning"
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "type": "paragraph",
+            "text": "nei"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "4. Tilleggspensjon:"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "Dersom pensjon blir gitt, vil det da foreligge rett til beregning av framtidig tid?"
+      }
+    ]
+  },
+  {
+    "type": "bulleted-list",
+    "children": [
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "type": "paragraph",
+            "text": "ja, etter nasjonal lovgivning"
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "type": "paragraph",
+            "text": "ja, ved pro rata beregning"
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "type": "paragraph",
+            "text": "nei"
+          }
+        ]
+      },
+      {
+        "type": "list-item",
+        "children": [
+          {
+            "type": "paragraph",
+            "text": "ennå ikke avklart"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "5. Merknader:"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "Barnepensjon består kun av grunnpensjon dersom barn ikke er foreldreløs. Det gis fremtidig trygdetid til og med det året avdøde ville fylt 66 år"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "6. Navnet på institusjonen som har fylt ut blanketten: NAV Familie- og pensjonsytelser"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "Adresse: Postboks 6600 Etterstad, N-0607 Oslo, Norge"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": ""
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "Saksbehandlerens navn:"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "Telefonnummer:"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "Dato:"
+      }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "type": "paragraph",
+        "text": "Signatur:"
+      }
+    ]
+  }
+]

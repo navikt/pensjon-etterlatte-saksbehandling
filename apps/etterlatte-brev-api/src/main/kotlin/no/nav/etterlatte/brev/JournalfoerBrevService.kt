@@ -8,8 +8,8 @@ import no.nav.etterlatte.brev.dokarkiv.DokumentVariant
 import no.nav.etterlatte.brev.dokarkiv.JournalPostType
 import no.nav.etterlatte.brev.dokarkiv.JournalpostDokument
 import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder
+import no.nav.etterlatte.brev.dokarkiv.JournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.SakService
@@ -100,7 +100,7 @@ class JournalfoerBrevService(
     private fun mapTilJournalpostRequest(
         brev: Brev,
         sak: Sak,
-    ): OpprettJournalpostRequest {
+    ): JournalpostRequest {
         val innhold = requireNotNull(db.hentBrevInnhold(brev.id))
         val pdf = requireNotNull(db.hentPdf(brev.id))
 
@@ -118,7 +118,7 @@ class JournalfoerBrevService(
                 )
             }
 
-        return OpprettJournalpostRequest(
+        return JournalpostRequest(
             tittel = innhold.tittel,
             journalposttype = JournalPostType.UTGAAENDE,
             avsenderMottaker = avsenderMottaker,

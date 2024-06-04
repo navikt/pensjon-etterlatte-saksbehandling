@@ -1,6 +1,5 @@
-import { BodyShort, Button, Heading, Radio, Textarea } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
 import React from 'react'
-import styled from 'styled-components'
 import { BeregningsMetode, BeregningsmetodeForAvdoed } from '~shared/types/Beregning'
 import { PeriodisertBeregningsgrunnlag } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { formaterDato } from '~utils/formattering'
@@ -37,9 +36,11 @@ export const BeregningsgrunnlagMetodeForAvdoedOppsummering = (
   return (
     <>
       {visNavn && (
-        <GyldigHeading size="small" level="3">
-          Trygdetid brukt i beregningen for {navn}
-        </GyldigHeading>
+        <VStack gap="4">
+          <Heading size="small" level="3">
+            Trygdetid brukt i beregningen for {navn}
+          </Heading>
+        </VStack>
       )}
 
       <BodyShort>{beskrivelseFor(beregningsMetode)}</BodyShort>
@@ -77,7 +78,7 @@ const BeregningsgrunnlagMetodeForAvdoed = (props: BeregningsgrunnlagMetodeForAvd
     defaultValues: {
       data: {
         beregningsMetode: {
-          beregningsMetode: grunnlag?.data.beregningsMetode.beregningsMetode,
+          beregningsMetode: grunnlag?.data.beregningsMetode.beregningsMetode ?? null,
           begrunnelse: grunnlag?.data.beregningsMetode.begrunnelse,
         },
         avdoed: ident,
@@ -107,30 +108,28 @@ const BeregningsgrunnlagMetodeForAvdoed = (props: BeregningsgrunnlagMetodeForAvd
   }
 
   return (
-    <BeregningsgrunnlagMetodeWrapper>
-      <form onSubmit={handleSubmit(lagre)}>
-        <ControlledRadioGruppe
-          name="data.beregningsMetode.beregningsMetode"
-          control={control}
-          errorVedTomInput="Du må velge beregningsmetode"
-          legend={`Trygdetid brukt i beregningen for ${navn}`}
-          radios={
-            <>
-              <Radio value={BeregningsMetode.NASJONAL}>{beskrivelseFor(BeregningsMetode.NASJONAL)}</Radio>
-              <Radio value={BeregningsMetode.PRORATA}>{beskrivelseFor(BeregningsMetode.PRORATA)}</Radio>
-              <Radio value={BeregningsMetode.BEST}>{beskrivelseFor(BeregningsMetode.BEST)}</Radio>
-            </>
-          }
-        />
+    <form onSubmit={handleSubmit(lagre)}>
+      <Box paddingBlock="8">
+        <VStack gap="4">
+          <ControlledRadioGruppe
+            name="data.beregningsMetode.beregningsMetode"
+            control={control}
+            errorVedTomInput="Du må velge beregningsmetode"
+            legend={`Trygdetid brukt i beregningen for ${navn}`}
+            radios={
+              <>
+                <Radio value={BeregningsMetode.NASJONAL}>{beskrivelseFor(BeregningsMetode.NASJONAL)}</Radio>
+                <Radio value={BeregningsMetode.PRORATA}>{beskrivelseFor(BeregningsMetode.PRORATA)}</Radio>
+                <Radio value={BeregningsMetode.BEST}>{beskrivelseFor(BeregningsMetode.BEST)}</Radio>
+              </>
+            }
+          />
+          <Heading size="small" level="3">
+            Gyldig for beregning
+          </Heading>
 
-        <GyldigHeading size="small" level="3">
-          Gyldig for beregning
-        </GyldigHeading>
-
-        <DatoWrapper>
           <ControlledMaanedVelger label="Fra og med" name="fom" control={control} validate={validerDatoer} required />
-        </DatoWrapper>
-        <DatoWrapper>
+
           <ControlledMaanedVelger
             label="Til og med"
             name="tom"
@@ -138,51 +137,33 @@ const BeregningsgrunnlagMetodeForAvdoed = (props: BeregningsgrunnlagMetodeForAvd
             validate={validerDatoer}
             required={false}
           />
-        </DatoWrapper>
 
-        <Begrunnelse
-          label="Begrunnelse"
-          disabled={grunnlag === undefined}
-          {...register('data.beregningsMetode.begrunnelse')}
-        />
+          <HStack gap="4">
+            <Textarea
+              label="Begrunnelse"
+              hideLabel={false}
+              placeholder="Valgfritt"
+              minRows={3}
+              autoComplete="off"
+              disabled={grunnlag === undefined}
+              {...register('data.beregningsMetode.begrunnelse')}
+            />
+          </HStack>
 
-        <Button
-          variant="secondary"
-          size="small"
-          onClick={handleSubmit(lagre)}
-          disabled={getValues().data.beregningsMetode.beregningsMetode === null || getValues().fom === undefined}
-        >
-          Lagre beregningsmetode
-        </Button>
-      </form>
-    </BeregningsgrunnlagMetodeWrapper>
+          <HStack gap="4">
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={handleSubmit(lagre)}
+              disabled={getValues().data.beregningsMetode.beregningsMetode === null || getValues().fom === undefined}
+            >
+              Lagre beregningsmetode
+            </Button>
+          </HStack>
+        </VStack>
+      </Box>
+    </form>
   )
 }
-
-const BeregningsgrunnlagMetodeWrapper = styled.div`
-  padding-top: 1em;
-  max-width: 70em;
-  margin-bottom: 1rem;
-`
-
-const Begrunnelse = styled(Textarea).attrs({
-  label: 'Begrunnelse',
-  hideLabel: false,
-  placeholder: 'Valgfritt',
-  minRows: 3,
-  autoComplete: 'off',
-})`
-  margin-bottom: 10px;
-  margin-top: 10px;
-  width: 250px;
-`
-
-const GyldigHeading = styled(Heading)`
-  padding-top: 1em;
-`
-
-const DatoWrapper = styled.div`
-  padding-top: 1em;
-`
 
 export default BeregningsgrunnlagMetodeForAvdoed

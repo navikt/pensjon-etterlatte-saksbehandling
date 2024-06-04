@@ -36,7 +36,7 @@ export enum BeregningsMetode {
 }
 
 export interface BeregningsMetodeBeregningsgrunnlag {
-  beregningsMetode: BeregningsMetode
+  beregningsMetode: BeregningsMetode | null
   begrunnelse?: string | null
 }
 

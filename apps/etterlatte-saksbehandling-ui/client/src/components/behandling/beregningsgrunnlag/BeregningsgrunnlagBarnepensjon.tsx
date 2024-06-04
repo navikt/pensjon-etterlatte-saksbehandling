@@ -182,7 +182,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         {isSuccess(beregningsgrunnlag) && isSuccess(trygdetider) && (
           <>
             {trygdetider.data.length > 1 && (
-              <Box paddingBlock="16" paddingInline="4">
+              <Box paddingBlock="16" paddingInline="16">
                 {redigerbar && (
                   <>
                     <Heading size="medium" level="2">

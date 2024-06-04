@@ -1,10 +1,9 @@
-import { CopyButton, Heading, Link, Table } from '@navikt/ds-react'
+import { CopyButton, Heading, HStack, Link, Table, VStack } from '@navikt/ds-react'
 import { Familieforhold, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
 import { differenceInYears, format, parse } from 'date-fns'
 import { DatoFormat, formaterFnr } from '~utils/formattering'
-import { FlexHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { IconSize } from '~shared/types/Icon'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
 
@@ -20,13 +19,13 @@ export const BarneListe = ({ familieforhold }: Props) => {
   const barneListe = familieforhold.avdoede.flatMap((it) => it.opplysning.avdoedesBarn ?? [])
 
   return (
-    <div>
-      <FlexHeader>
+    <VStack gap="4">
+      <HStack gap="2">
         <ChildEyesIcon fontSize={IconSize.DEFAULT} />
         <Heading size="small" level="3">
           Barn
         </Heading>
-      </FlexHeader>
+      </HStack>
       <Table size="small">
         <Table.Header>
           <Table.Row>
@@ -51,7 +50,7 @@ export const BarneListe = ({ familieforhold }: Props) => {
           )}
         </Table.Body>
       </Table>
-    </div>
+    </VStack>
   )
 }
 

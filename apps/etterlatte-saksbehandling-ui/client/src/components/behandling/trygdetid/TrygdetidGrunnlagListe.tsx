@@ -5,9 +5,8 @@ import {
   ITrygdetidGrunnlagType,
   slettTrygdetidsgrunnlag,
 } from '~shared/api/trygdetid'
-import { FlexHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { IconSize } from '~shared/types/Icon'
-import { BodyShort, Button, Detail, Heading, Table } from '@navikt/ds-react'
+import { BodyShort, Button, Detail, Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
 import { formaterStringDato } from '~utils/formattering'
 import React, { useState } from 'react'
@@ -56,13 +55,13 @@ export const TrygdetidGrunnlagListe = ({
     !(trygdetidGrunnlagType === ITrygdetidGrunnlagType.FREMTIDIG && trygdetidGrunnlagListe.length > 0)
 
   return (
-    <GrunnlagListe>
-      <FlexHeader>
+    <VStack gap="4">
+      <HStack gap="2">
         <CalendarIcon fontSize={IconSize.DEFAULT} />
         <Heading size="small" level="3">
           {grunnlagTypeTekst} trygdetid
         </Heading>
-      </FlexHeader>
+      </HStack>
       {trygdetidGrunnlagType == ITrygdetidGrunnlagType.FAKTISK ? (
         <p>
           Legg til aktuell trygdetid fra aktuelle land (inkludert Norge) fra avdøde var 16 år frem til og med måneden
@@ -134,7 +133,7 @@ export const TrygdetidGrunnlagListe = ({
           </Button>
         )}
       </NyEllerOppdatertPeriode>
-    </GrunnlagListe>
+    </VStack>
   )
 }
 
@@ -242,11 +241,6 @@ const PeriodeRow = ({
 const ExpandableInfo = styled.div`
   display: inline-block;
   margin-right: 50px;
-`
-
-const GrunnlagListe = styled.div`
-  margin-top: 2em;
-  margin-bottom: 2em;
 `
 
 const Datofelt = styled.div`

@@ -15,7 +15,6 @@ import {
 } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { FlexHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import Spinner from '~shared/Spinner'
 import {
   hentAlleTrygdetidAvtaleKriterier,
@@ -150,14 +149,14 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
 
   return (
     <Box paddingBlock="8 0">
-      <FlexHeader>
-        <HandshakeIcon fontSize={IconSize.DEFAULT} />
-        <Heading size="small" level="3">
-          Vurdering av trygdeavtale (Avdød)
-        </Heading>
-      </FlexHeader>
+      <VStack gap="4">
+        <HStack gap="2">
+          <HandshakeIcon fontSize={IconSize.DEFAULT} />
+          <Heading size="small" level="3">
+            Vurdering av trygdeavtale (Avdød)
+          </Heading>
+        </HStack>
 
-      <VStack gap="2">
         {!redigering && avtalerListe && avtaleKriterierListe && (
           <>
             <TrygdeavtaleVisning avtaler={avtalerListe} kriterier={avtaleKriterierListe} trygdeavtale={trygdeavtale} />

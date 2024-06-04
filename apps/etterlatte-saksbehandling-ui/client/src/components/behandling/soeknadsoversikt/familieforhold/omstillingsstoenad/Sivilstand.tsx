@@ -1,16 +1,10 @@
 import { HeartIcon } from '@navikt/aksel-icons'
-import { Heading, Table } from '@navikt/ds-react'
+import { Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { Familieforhold, IPdlPerson } from '~shared/types/Person'
-import { FlexHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { format } from 'date-fns'
 import styled from 'styled-components'
 import { IconSize } from '~shared/types/Icon'
 import { DatoFormat } from '~utils/formattering'
-
-export const SivilstandWrapper = styled.span`
-  min-width: 60%;
-  max-width: 36rem;
-`
 
 type Props = {
   familieforhold: Familieforhold
@@ -21,14 +15,14 @@ export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
   const sivilstand = familieforhold.soeker?.opplysning.sivilstand?.filter((ss) => !ss.historisk)
 
   return (
-    <SivilstandWrapper>
-      <FlexHeader>
+    <VStack gap="2">
+      <HStack gap="2">
         <HeartIcon fontSize={IconSize.DEFAULT} />
         <Heading size="small" level="3">
           Sivilstand (gjenlevende)
         </Heading>
-      </FlexHeader>
-      <Table size="small">
+      </HStack>
+      <SivilstandTable size="small">
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell scope="col">Status</Table.HeaderCell>
@@ -70,7 +64,11 @@ export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
             </Table.Row>
           )}
         </Table.Body>
-      </Table>
-    </SivilstandWrapper>
+      </SivilstandTable>
+    </VStack>
   )
 }
+
+const SivilstandTable = styled(Table)`
+  width: 67%;
+`

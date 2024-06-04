@@ -1,5 +1,4 @@
-import { FlexHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
-import { BodyShort, Box, Button, Heading, TextField } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, HStack, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { ITrygdetid } from '~shared/api/trygdetid'
 import { useEffect, useState } from 'react'
@@ -48,11 +47,11 @@ export const OverstyrtTrygdetid = ({
   return (
     <Overstyrt>
       {(redigerbar || overstyrtNorskPoengaar !== undefined) && (
-        <FlexHeader>
+        <HStack gap="2">
           <Heading size="small" level="4">
             Poengår i Norge - registreres kun ved eksportvurdering
           </Heading>
-        </FlexHeader>
+        </HStack>
       )}
       {!redigerbar && overstyrtNorskPoengaar !== undefined && (
         <>

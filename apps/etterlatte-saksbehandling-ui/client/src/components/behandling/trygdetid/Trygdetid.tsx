@@ -4,7 +4,7 @@ import { hentAlleLand, hentTrygdetider, ILand, ITrygdetid, opprettTrygdetider, s
 import Spinner from '~shared/Spinner'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
-import { BodyShort, ErrorMessage, Heading, Tabs } from '@navikt/ds-react'
+import { BodyShort, Box, ErrorMessage, Heading, Tabs, VStack } from '@navikt/ds-react'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
@@ -24,12 +24,14 @@ import { Personopplysning } from '~shared/types/grunnlag'
 
 const TrygdetidMelding = ({ overskrift, beskrivelse }: { overskrift: string; beskrivelse: string }) => {
   return (
-    <TrygdetidWrapper>
-      <Heading size="small" level="3">
-        {overskrift}
-      </Heading>
-      <BodyShort>{beskrivelse}</BodyShort>
-    </TrygdetidWrapper>
+    <Box paddingInline="16">
+      <VStack gap="2">
+        <Heading size="small" level="3">
+          {overskrift}
+        </Heading>
+        <BodyShort>{beskrivelse}</BodyShort>
+      </VStack>
+    </Box>
   )
 }
 
@@ -147,131 +149,128 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   }
 
   return (
-    <TrygdetidWrapper>
-      {visTrydeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
-      <LovtekstMedLenke
-        tittel="Avdødes trygdetid"
-        hjemler={[
-          {
-            tittel: '§ 3-5 Trygdetid ved beregning av ytelser',
-            lenke: 'https://lovdata.no/pro/lov/1997-02-28-19/§3-5',
-          },
-          {
-            tittel: '§ 3-7 Beregning trygdetid',
-            lenke: 'https://lovdata.no/pro/lov/1997-02-28-19/§3-7',
-          },
-          {
-            tittel: 'EØS-forordning 883/2004 artikkel 52',
-            lenke: 'https://lovdata.no/pro/eu/32004r0883/ARTIKKEL_52',
-          },
-        ]}
-        status={null}
-      >
-        <BodyShort>
-          Faktisk trygdetid kan gis fra avdøde fylte 16 år til dødsfall. Hadde avdøde opptjent pensjonspoeng fra fylte
-          67 år til og med 75 år, gis det også et helt års trygdetid for aktuelle poengår. Fremtidig trygdetid kan gis
-          fra dødsfallet til og med kalenderåret avdøde hadde blitt 66 år. Trygdetiden beregnes med maks 40 år. Avdødes
-          utenlandske trygdetid fra avtaleland skal legges til for alternativ prorata-beregning av ytelsen. Ulike
-          avtaler skal ikke beregnes sammen. Hvis avdøde har uføretrygd, skal som hovedregel trygdetid lagt til grunn i
-          uføretrygden benyttes.
-        </BodyShort>
-      </LovtekstMedLenke>
+    <Box paddingInline="16">
+      <VStack gap="4">
+        {visTrydeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
+        <LovtekstMedLenke
+          tittel="Avdødes trygdetid"
+          hjemler={[
+            {
+              tittel: '§ 3-5 Trygdetid ved beregning av ytelser',
+              lenke: 'https://lovdata.no/pro/lov/1997-02-28-19/§3-5',
+            },
+            {
+              tittel: '§ 3-7 Beregning trygdetid',
+              lenke: 'https://lovdata.no/pro/lov/1997-02-28-19/§3-7',
+            },
+            {
+              tittel: 'EØS-forordning 883/2004 artikkel 52',
+              lenke: 'https://lovdata.no/pro/eu/32004r0883/ARTIKKEL_52',
+            },
+          ]}
+          status={null}
+        >
+          <BodyShort>
+            Faktisk trygdetid kan gis fra avdøde fylte 16 år til dødsfall. Hadde avdøde opptjent pensjonspoeng fra fylte
+            67 år til og med 75 år, gis det også et helt års trygdetid for aktuelle poengår. Fremtidig trygdetid kan gis
+            fra dødsfallet til og med kalenderåret avdøde hadde blitt 66 år. Trygdetiden beregnes med maks 40 år.
+            Avdødes utenlandske trygdetid fra avtaleland skal legges til for alternativ prorata-beregning av ytelsen.
+            Ulike avtaler skal ikke beregnes sammen. Hvis avdøde har uføretrygd, skal som hovedregel trygdetid lagt til
+            grunn i uføretrygden benyttes.
+          </BodyShort>
+        </LovtekstMedLenke>
 
-      {landListe && (
-        <>
-          {(trygdetider.length == 1 || !visFlereTrygdetider) && (
-            <EnkelPersonTrygdetid
-              redigerbar={redigerbar}
-              behandling={behandling}
-              trygdetid={trygdetider[0]}
-              landListe={landListe}
-              virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
-              fetchTrygdetider={fetchTrygdetider}
-            />
-          )}
-          {trygdetider.length > 1 && visFlereTrygdetider && (
-            <>
-              <HeadingWrapper size="medium" level="2">
-                Det finnes flere avdøde - husk å oppdatere begge to
-              </HeadingWrapper>
-
-              <Tabs defaultValue={trygdetider[0].ident}>
-                <Tabs.List>
-                  {trygdetider.map((trygdetid) => (
-                    <Tabs.Tab key={trygdetid.ident} value={trygdetid.ident} label={mapNavn(trygdetid.ident)} />
-                  ))}
-                </Tabs.List>
-                {trygdetider.map((trygdetid) => (
-                  <Tabs.Panel value={trygdetid.ident} key={trygdetid.ident}>
-                    <HeadingWrapper size="small" level="3">
-                      Trygdetid for {mapNavn(trygdetid.ident)}
-                    </HeadingWrapper>
-
-                    <EnkelPersonTrygdetid
-                      redigerbar={redigerbar}
-                      behandling={behandling}
-                      trygdetid={trygdetid}
-                      landListe={landListe}
-                      virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
-                      fetchTrygdetider={fetchTrygdetider}
-                    />
-                  </Tabs.Panel>
-                ))}
-              </Tabs>
-
-              <OppsummeringWrapper>
+        {landListe && (
+          <>
+            {(trygdetider.length == 1 || !visFlereTrygdetider) && (
+              <EnkelPersonTrygdetid
+                redigerbar={redigerbar}
+                behandling={behandling}
+                trygdetid={trygdetider[0]}
+                landListe={landListe}
+                virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
+                fetchTrygdetider={fetchTrygdetider}
+              />
+            )}
+            {trygdetider.length > 1 && visFlereTrygdetider && (
+              <>
                 <HeadingWrapper size="medium" level="2">
-                  Oppsummering av trygdetid for flere avdøde
+                  Det finnes flere avdøde - husk å oppdatere begge to
                 </HeadingWrapper>
 
-                {trygdetider.map((trygdetid) => (
-                  <div key={trygdetid.ident}>
-                    {trygdetid.beregnetTrygdetid?.resultat ? (
-                      <>
-                        <HeadingWrapper size="small" level="3">
-                          Trygdetid for {mapNavn(trygdetid.ident)}
-                        </HeadingWrapper>
-                        <BeregnetSamletTrygdetid beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
-                      </>
-                    ) : (
-                      <BodyShort>Trygdetid for {mapNavn(trygdetid.ident)} mangler</BodyShort>
-                    )}
-                  </div>
-                ))}
-              </OppsummeringWrapper>
-            </>
-          )}
-        </>
-      )}
+                <Tabs defaultValue={trygdetider[0].ident}>
+                  <Tabs.List>
+                    {trygdetider.map((trygdetid) => (
+                      <Tabs.Tab key={trygdetid.ident} value={trygdetid.ident} label={mapNavn(trygdetid.ident)} />
+                    ))}
+                  </Tabs.List>
+                  {trygdetider.map((trygdetid) => (
+                    <Tabs.Panel value={trygdetid.ident} key={trygdetid.ident}>
+                      <HeadingWrapper size="small" level="3">
+                        Trygdetid for {mapNavn(trygdetid.ident)}
+                      </HeadingWrapper>
 
-      {(isPending(hentTrygdetidRequest) || isPending(hentAlleLandRequest)) && (
-        <Spinner visible={true} label="Henter trygdetid" />
-      )}
-      {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label="Oppretter trygdetid" />}
+                      <EnkelPersonTrygdetid
+                        redigerbar={redigerbar}
+                        behandling={behandling}
+                        trygdetid={trygdetid}
+                        landListe={landListe}
+                        virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
+                        fetchTrygdetider={fetchTrygdetider}
+                      />
+                    </Tabs.Panel>
+                  ))}
+                </Tabs>
 
-      {isFailureHandler({
-        apiResult: hentTrygdetidRequest,
-        errorMessage: 'En feil har oppstått ved henting av trygdetid',
-      })}
-      {isFailureHandler({
-        apiResult: opprettTrygdetidRequest,
-        errorMessage: 'En feil har oppstått ved opprettelse av trygdetid',
-      })}
-      {isFailureHandler({
-        apiResult: hentAlleLandRequest,
-        errorMessage: 'Hent feil har oppstått ved henting av landliste',
-      })}
+                <OppsummeringWrapper>
+                  <HeadingWrapper size="medium" level="2">
+                    Oppsummering av trygdetid for flere avdøde
+                  </HeadingWrapper>
 
-      {behandlingsIdMangler && <ErrorMessage>Finner ikke behandling - ID mangler</ErrorMessage>}
-      {trygdetidIdMangler && <ErrorMessage>Finner ikke trygdetid - ID mangler</ErrorMessage>}
-    </TrygdetidWrapper>
+                  {trygdetider.map((trygdetid) => (
+                    <div key={trygdetid.ident}>
+                      {trygdetid.beregnetTrygdetid?.resultat ? (
+                        <>
+                          <HeadingWrapper size="small" level="3">
+                            Trygdetid for {mapNavn(trygdetid.ident)}
+                          </HeadingWrapper>
+                          <BeregnetSamletTrygdetid beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
+                        </>
+                      ) : (
+                        <BodyShort>Trygdetid for {mapNavn(trygdetid.ident)} mangler</BodyShort>
+                      )}
+                    </div>
+                  ))}
+                </OppsummeringWrapper>
+              </>
+            )}
+          </>
+        )}
+
+        {(isPending(hentTrygdetidRequest) || isPending(hentAlleLandRequest)) && (
+          <Spinner visible={true} label="Henter trygdetid" />
+        )}
+        {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label="Oppretter trygdetid" />}
+
+        {isFailureHandler({
+          apiResult: hentTrygdetidRequest,
+          errorMessage: 'En feil har oppstått ved henting av trygdetid',
+        })}
+        {isFailureHandler({
+          apiResult: opprettTrygdetidRequest,
+          errorMessage: 'En feil har oppstått ved opprettelse av trygdetid',
+        })}
+        {isFailureHandler({
+          apiResult: hentAlleLandRequest,
+          errorMessage: 'Hent feil har oppstått ved henting av landliste',
+        })}
+
+        {behandlingsIdMangler && <ErrorMessage>Finner ikke behandling - ID mangler</ErrorMessage>}
+        {trygdetidIdMangler && <ErrorMessage>Finner ikke trygdetid - ID mangler</ErrorMessage>}
+      </VStack>
+    </Box>
   )
 }
-
-const TrygdetidWrapper = styled.div`
-  padding: 0 4em;
-  max-width: 69em;
-`
 
 const HeadingWrapper = styled(Heading)`
   margin-top: 2em;

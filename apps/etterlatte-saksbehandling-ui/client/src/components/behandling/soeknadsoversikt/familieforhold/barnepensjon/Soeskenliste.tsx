@@ -1,11 +1,10 @@
 import { ChildEyesIcon } from '@navikt/aksel-icons'
-import { CopyButton, Heading, Link, Table } from '@navikt/ds-react'
+import { CopyButton, Heading, HStack, Link, Table, VStack } from '@navikt/ds-react'
 import { Familieforhold, hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
 import { differenceInYears, format, parse } from 'date-fns'
 import { DatoFormat, formaterFnr } from '~utils/formattering'
-import { FlexHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { IconSize } from '~shared/types/Icon'
 
 const FnrWrapper = styled.div`
@@ -20,13 +19,13 @@ type Props = {
 export const Soeskenliste = ({ familieforhold, soekerFnr }: Props) => {
   const barneListeIngenDoedeSoesken = hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag(familieforhold.avdoede, soekerFnr)
   return (
-    <div>
-      <FlexHeader>
+    <VStack gap="4">
+      <HStack gap="2">
         <ChildEyesIcon fontSize={IconSize.DEFAULT} />
         <Heading size="small" level="3">
           Avdødes barn (søsken)
         </Heading>
-      </FlexHeader>
+      </HStack>
       <Table size="small">
         <Table.Header>
           <Table.Row>
@@ -51,7 +50,7 @@ export const Soeskenliste = ({ familieforhold, soekerFnr }: Props) => {
           )}
         </Table.Body>
       </Table>
-    </div>
+    </VStack>
   )
 }
 

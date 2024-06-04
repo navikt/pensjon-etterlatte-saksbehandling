@@ -9,7 +9,6 @@ import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_5AAR
 import no.nav.etterlatte.TidshendelseService.TidshendelserJobbType.OMS_DOED_6MND
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto.VurderingVedMaaned
-import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -132,7 +131,7 @@ class TidshendelseService(
             }
             false -> {
                 logger.info("Det ble ikke opprettet revurdering for aktivitetsplikt [sak=${hendelse.sakId}]")
-                TidshendelseResult.OpprettRevurderingForAktivitetsplikt(response)
+                TidshendelseResult.OpprettRevurderingForAktivitetsplikt(response.nyBehandlingId)
             }
         }
     }
@@ -165,9 +164,7 @@ sealed class TidshendelseResult {
 
     data class OpprettetOmregning(val behandlingId: UUID, val forrigeBehandlingId: UUID) : TidshendelseResult()
 
-    data class OpprettRevurderingForAktivitetsplikt(
-        val opprettRevurderingForAktivitetspliktResponse: OpprettRevurderingForAktivitetspliktResponse,
-    ) : TidshendelseResult()
+    data class OpprettRevurderingForAktivitetsplikt(val behandlingId: UUID?, val oppgaveId: UUID? = null) : TidshendelseResult()
 
     data object Skipped : TidshendelseResult()
 }

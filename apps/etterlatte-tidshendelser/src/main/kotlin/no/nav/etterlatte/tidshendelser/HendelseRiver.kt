@@ -59,8 +59,8 @@ class HendelseRiver(
                 val loependeYtelse = packet[HENDELSE_DATA_KEY]["loependeYtelse"].asBoolean()
                 logger.info("Sak $sakId har løpende ytelse? $loependeYtelse")
                 hendelseDao.settHarLoependeYtelse(hendelseIdUUID, loependeYtelse)
-            } else if (steg in listOf("VEDTAK_ATTESTERT", "OPPGAVE_OPPRETTET")) {
-                logger.info("Ferdigstiller hendelse")
+            } else if (steg in listOf("VEDTAK_ATTESTERT", "OPPGAVE_OPPRETTET", "HOPPET_OVER", "AKTIVITETSPLIKT_REVURDERING_OPPRETTET")) {
+                logger.info("Ferdigstiller hendelse $hendelseId for sak $sakId")
                 hendelseDao.oppdaterHendelseStatus(hendelseIdUUID, HendelseStatus.FERDIG)
                 hendelseDao.ferdigstillJobbHvisAlleHendelserErFerdige(hendelseIdUUID)
             }

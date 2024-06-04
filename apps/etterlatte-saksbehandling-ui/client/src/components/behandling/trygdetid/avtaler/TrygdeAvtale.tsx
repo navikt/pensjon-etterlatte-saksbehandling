@@ -15,7 +15,7 @@ import {
 } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { FlexHeader, IconWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
+import { FlexHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import Spinner from '~shared/Spinner'
 import {
   hentAlleTrygdetidAvtaleKriterier,
@@ -151,9 +151,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
   return (
     <Box paddingBlock="8 0">
       <FlexHeader>
-        <IconWrapper>
-          <HandshakeIcon fontSize={IconSize.DEFAULT} />
-        </IconWrapper>
+        <HandshakeIcon fontSize={IconSize.DEFAULT} />
         <Heading size="small" level="3">
           Vurdering av trygdeavtale (Avdød)
         </Heading>

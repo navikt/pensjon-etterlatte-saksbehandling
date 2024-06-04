@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
 import { differenceInYears, format, parse } from 'date-fns'
 import { DatoFormat, formaterFnr } from '~utils/formattering'
-import { FlexHeader, IconWrapper, TableWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
+import { FlexHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { IconSize } from '~shared/types/Icon'
 
 const FnrWrapper = styled.div`
@@ -22,39 +22,35 @@ export const Soeskenliste = ({ familieforhold, soekerFnr }: Props) => {
   return (
     <div>
       <FlexHeader>
-        <IconWrapper>
-          <ChildEyesIcon fontSize={IconSize.DEFAULT} />
-        </IconWrapper>
+        <ChildEyesIcon fontSize={IconSize.DEFAULT} />
         <Heading size="small" level="3">
           Avdødes barn (søsken)
         </Heading>
       </FlexHeader>
-      <TableWrapper>
-        <Table size="small">
-          <Table.Header>
+      <Table size="small">
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell scope="col">Navn</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Bostedsadresse</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Foreldre</Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {barneListeIngenDoedeSoesken.length ? (
+            barneListeIngenDoedeSoesken.map((barn, i) => {
+              return <BarnRow key={i + barn.foedselsnummer} barn={barn} familieforhold={familieforhold} />
+            })
+          ) : (
             <Table.Row>
-              <Table.HeaderCell scope="col">Navn</Table.HeaderCell>
-              <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
-              <Table.HeaderCell scope="col">Bostedsadresse</Table.HeaderCell>
-              <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
-              <Table.HeaderCell scope="col">Foreldre</Table.HeaderCell>
+              <Table.DataCell colSpan={5} aria-colspan={5} align="center">
+                Avdøde har ingen andre barn enn søker
+              </Table.DataCell>
             </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {barneListeIngenDoedeSoesken.length ? (
-              barneListeIngenDoedeSoesken.map((barn, i) => {
-                return <BarnRow key={i + barn.foedselsnummer} barn={barn} familieforhold={familieforhold} />
-              })
-            ) : (
-              <Table.Row>
-                <Table.DataCell colSpan={5} aria-colspan={5} align="center">
-                  Avdøde har ingen andre barn enn søker
-                </Table.DataCell>
-              </Table.Row>
-            )}
-          </Table.Body>
-        </Table>
-      </TableWrapper>
+          )}
+        </Table.Body>
+      </Table>
     </div>
   )
 }

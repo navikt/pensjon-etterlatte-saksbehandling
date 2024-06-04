@@ -5,7 +5,7 @@ import {
   ITrygdetidGrunnlagType,
   slettTrygdetidsgrunnlag,
 } from '~shared/api/trygdetid'
-import { FlexHeader, IconWrapper, TableWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
+import { FlexHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { IconSize } from '~shared/types/Icon'
 import { BodyShort, Button, Detail, Heading, Table } from '@navikt/ds-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
@@ -58,9 +58,7 @@ export const TrygdetidGrunnlagListe = ({
   return (
     <GrunnlagListe>
       <FlexHeader>
-        <IconWrapper>
-          <CalendarIcon fontSize={IconSize.DEFAULT} />
-        </IconWrapper>
+        <CalendarIcon fontSize={IconSize.DEFAULT} />
         <Heading size="small" level="3">
           {grunnlagTypeTekst} trygdetid
         </Heading>
@@ -80,45 +78,43 @@ export const TrygdetidGrunnlagListe = ({
         </p>
       )}
       {trygdetidGrunnlagListe.length > 0 && (
-        <TableWrapper>
-          <Table size="medium">
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell />
-                <Table.HeaderCell scope="col">Land</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Fra dato</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Til dato</Table.HeaderCell>
-                <Table.HeaderCell scope="col">{grunnlagTypeTekst} trygdetid</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Kilde</Table.HeaderCell>
-                {redigerbar && (
-                  <>
-                    <Table.HeaderCell scope="col"> </Table.HeaderCell>
-                    <Table.HeaderCell scope="col"> </Table.HeaderCell>
-                  </>
-                )}
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {trygdetidGrunnlagListe.map((periode) => {
-                return (
-                  <PeriodeRow
-                    trygdetidGrunnlag={periode}
-                    behandlingId={trygdetid.behandlingId}
-                    trygdetidId={trygdetid.id}
-                    setTrygdetid={setTrygdetid}
-                    endrePeriode={(trygdetidGrunnlagId) => {
-                      setEndreModus({ status: true, trygdetidGrunnlagId: trygdetidGrunnlagId })
-                    }}
-                    landListe={landListe}
-                    key={periode.id}
-                    redigerbar={redigerbar}
-                    trygdetidGrunnlagType={trygdetidGrunnlagType}
-                  />
-                )
-              })}
-            </Table.Body>
-          </Table>
-        </TableWrapper>
+        <Table size="medium">
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell />
+              <Table.HeaderCell scope="col">Land</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Fra dato</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Til dato</Table.HeaderCell>
+              <Table.HeaderCell scope="col">{grunnlagTypeTekst} trygdetid</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Kilde</Table.HeaderCell>
+              {redigerbar && (
+                <>
+                  <Table.HeaderCell scope="col"> </Table.HeaderCell>
+                  <Table.HeaderCell scope="col"> </Table.HeaderCell>
+                </>
+              )}
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {trygdetidGrunnlagListe.map((periode) => {
+              return (
+                <PeriodeRow
+                  trygdetidGrunnlag={periode}
+                  behandlingId={trygdetid.behandlingId}
+                  trygdetidId={trygdetid.id}
+                  setTrygdetid={setTrygdetid}
+                  endrePeriode={(trygdetidGrunnlagId) => {
+                    setEndreModus({ status: true, trygdetidGrunnlagId: trygdetidGrunnlagId })
+                  }}
+                  landListe={landListe}
+                  key={periode.id}
+                  redigerbar={redigerbar}
+                  trygdetidGrunnlagType={trygdetidGrunnlagType}
+                />
+              )
+            })}
+          </Table.Body>
+        </Table>
       )}
 
       <NyEllerOppdatertPeriode>

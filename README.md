@@ -17,15 +17,7 @@ fungere.
 
 1. **Hent secrets**
 
-   Kjør scriptet `get-secret.sh` med appnavn.
-    ```shell
-    ./get-secret.sh <app_name>
-    ```
-
-   Eksempel for henting av secrets til frontend:
-    ```shell
-    ./get-secret.sh etterlatte-saksbehandling-ui
-    ```
+   Kjør scriptet `get-secret.sh` og velg applikasjon fra listen
 
 2. **Kjør docker compose**
     ```shell

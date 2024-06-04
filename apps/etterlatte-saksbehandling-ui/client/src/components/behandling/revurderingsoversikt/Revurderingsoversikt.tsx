@@ -120,7 +120,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           <BodyShort spacing>Revurdering på grunn av annen årsak (spesifiseres nedenfor).</BodyShort>
         ) : (
           <BodyShort spacing>
-            Revurdering på grunn av på grunn av <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
+            Revurdering på grunn av <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
           </BodyShort>
         )}
       </Box>

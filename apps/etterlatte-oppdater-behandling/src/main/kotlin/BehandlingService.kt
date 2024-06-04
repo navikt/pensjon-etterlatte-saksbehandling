@@ -265,7 +265,7 @@ class BehandlingServiceImpl(
         vurderingVedMaaned: VurderingVedMaaned,
     ): OpprettRevurderingForAktivitetspliktResponse {
         return runBlocking {
-            behandlingKlient.post("$url/oppgaver/sak/$sakId/opprett") {
+            behandlingKlient.post("$url/api/sak/$sakId/aktivitetsplikt/revurdering") {
                 contentType(ContentType.Application.Json)
                 setBody(
                     OpprettRevurderingForAktivitetspliktDto(

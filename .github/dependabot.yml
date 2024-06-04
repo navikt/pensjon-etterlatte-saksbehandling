@@ -128,3 +128,19 @@ updates:
     schedule:
       interval: "monthly"
       day: "sunday"
+
+
+
+
+  # ==============
+  # Docker
+  # ==============
+
+  - package-ecosystem: "docker"
+    directories:
+      - /docker
+      - /jobs/start-regulering
+      - /apps/etterlatte-saksbehandling-ui
+    schedule:
+      interval: "monthly"
+      day: "sunday"

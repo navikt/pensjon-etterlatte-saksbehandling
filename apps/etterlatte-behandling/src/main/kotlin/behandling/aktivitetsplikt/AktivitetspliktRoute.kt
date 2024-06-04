@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspli
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
@@ -114,8 +115,10 @@ internal fun Route.aktivitetspliktRoutes(
                 logger.info("Sjekker om sak $sakId trenger en ny revurdering etter 6 måneder")
                 val request = call.receive<OpprettRevurderingForAktivitetspliktDto>()
                 val forrigeBehandling =
-                    requireNotNull(behandlingService.hentSisteIverksatte(sakId)) {
-                        "Fant ikke forrige behandling i sak $sakId"
+                    inTransaction {
+                        requireNotNull(behandlingService.hentSisteIverksatte(sakId)) {
+                            "Fant ikke forrige behandling i sak $sakId"
+                        }
                     }
                 val persongalleri =
                     requireNotNull(
@@ -131,24 +134,27 @@ internal fun Route.aktivitetspliktRoutes(
                 val oppfyllerAktivitetsplikt = aktivitetspliktService.oppfyllerAktivitetsplikt(sakId, aktivitetspliktDato)
 
                 if (!oppfyllerAktivitetsplikt) {
-                    automatiskRevurderingService.opprettAutomatiskRevurdering(
-                        sakId = sakId,
-                        forrigeBehandling = forrigeBehandling,
-                        revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
-                        virkningstidspunkt = aktivitetspliktDato,
-                        kilde = Vedtaksloesning.GJENNY,
-                        persongalleri = persongalleri,
-                        frist = request.frist,
-                        begrunnelse = "Vurdering av aktivitetsplikt ved 6mnd",
-                    ).let {
-                        call.respond(
-                            OpprettRevurderingForAktivitetspliktResponse(
-                                opprettetRevurdering = true,
-                                nyBehandlingId = it.revurdering.id,
-                                forrigeBehandlingId = forrigeBehandling.id,
-                            ),
+                    inTransaction {
+                        automatiskRevurderingService.opprettAutomatiskRevurdering(
+                            sakId = sakId,
+                            forrigeBehandling = forrigeBehandling,
+                            revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
+                            virkningstidspunkt = aktivitetspliktDato,
+                            kilde = Vedtaksloesning.GJENNY,
+                            persongalleri = persongalleri,
+                            frist = request.frist,
+                            begrunnelse = "Vurdering av aktivitetsplikt ved 6mnd",
                         )
                     }
+                        .let {
+                            call.respond(
+                                OpprettRevurderingForAktivitetspliktResponse(
+                                    opprettetRevurdering = true,
+                                    nyBehandlingId = it.revurdering.id,
+                                    forrigeBehandlingId = forrigeBehandling.id,
+                                ),
+                            )
+                        }
                 }
 
                 call.respond(

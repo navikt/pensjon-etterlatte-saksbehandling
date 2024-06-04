@@ -342,10 +342,10 @@
     date-fns "^3.0.0"
     react-day-picker "8.10.0"
 
-"@navikt/ds-tokens@^6.8.0", "@navikt/ds-tokens@~6.8.0":
-  version "6.8.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-6.8.0.tgz#01e24b0e8ed89349aeb5d4482dec14b5fb1a5df9"
-  integrity sha512-KK2RMX5yCnw8NdwmX5ZSA5LoFX0hQlkpba9CopUGOPxHdC0vOz0CfYwNqJgUhP/HPy2E2GHN37HOWkonqv7BCw==
+"@navikt/ds-tokens@^6.8.0", "@navikt/ds-tokens@~6.10.0":
+  version "6.10.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-6.10.0.tgz#56ae8412d9973f5a844b7a15d95c2ac3e008b171"
+  integrity sha512-wnTS4mirTcTFoptobIp6PfmO8eEHDmt3FNxWAB+AORLOuwVF7Qrfb/zDnAEKBwN381ySSPuFZuQTudJU7hIcfQ==
 
 "@navikt/navspa@^6.0.1":
   version "6.0.1"

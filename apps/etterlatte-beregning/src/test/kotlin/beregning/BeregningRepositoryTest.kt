@@ -92,6 +92,19 @@ internal class BeregningRepositoryTest(ds: DataSource) {
     }
 
     @Test
+    fun `skal kunne opprette en gyldig overstyr beregning etter en ugyldig`() {
+        beregningRepository.opprettOverstyrBeregning(OverstyrBeregning(10L, "Test", Tidspunkt.now(), OverstyrBeregningStatus.UGYLDIG))
+        beregningRepository.lagreEllerOppdaterBeregning(beregning())
+        assertEquals(null, beregningRepository.hentOverstyrBeregning(10L))
+
+        val overstyrBeregning =
+            beregningRepository.opprettOverstyrBeregning(
+                OverstyrBeregning(10L, "Test", Tidspunkt.now(), OverstyrBeregningStatus.GYLDIG),
+            )
+        assertEquals(overstyrBeregning, beregningRepository.hentOverstyrBeregning(10L))
+    }
+
+    @Test
     fun `skal lagre og hente en overstyr beregning`() {
         val opprettetOverstyrBeregning = beregningRepository.opprettOverstyrBeregning(OverstyrBeregning(1L, "Test", Tidspunkt.now()))
 

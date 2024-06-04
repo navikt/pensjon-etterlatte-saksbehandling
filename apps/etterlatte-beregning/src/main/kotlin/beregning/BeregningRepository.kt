@@ -316,6 +316,7 @@ private object Queries {
         """
         INSERT INTO overstyr_beregning (sak_id, beskrivelse, tidspunkt, status)
         VALUES (:sakId, :beskrivelse, :tidspunkt, :status)
+        ON CONFLICT (sak_id) DO UPDATE SET beskrivelse=:beskrivelse, tidspunkt=:tidspunkt, status=:status
         """.trimIndent()
 }
 

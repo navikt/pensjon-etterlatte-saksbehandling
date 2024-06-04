@@ -14,7 +14,7 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@navikt/aksel-icons": "^6.8.0",
+    "@navikt/aksel-icons": "^6.10.0",
     "@navikt/ds-css": "~6.8.0",
     "@navikt/ds-react": "~6.8.0",
     "@navikt/ds-tokens": "~6.8.0",

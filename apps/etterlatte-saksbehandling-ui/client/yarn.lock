@@ -319,10 +319,10 @@
   resolved "https://registry.yarnpkg.com/@juggle/resize-observer/-/resize-observer-3.4.0.tgz#08d6c5e20cf7e4cc02fd181c4b0c225cd31dbb60"
   integrity sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==
 
-"@navikt/aksel-icons@^6.8.0":
-  version "6.8.0"
-  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-6.8.0.tgz#2644182b35d898d068d9978cf1620a0405770a70"
-  integrity sha512-XiEr0Xb0BDaStrpGCuEPvNgvHalbL4dPh6HAA7jGV7cHnW6Zsb54Hsaq6dLMXIDYEpPQv2T27j25UvoRxVuk8g==
+"@navikt/aksel-icons@^6.10.0", "@navikt/aksel-icons@^6.8.0":
+  version "6.10.0"
+  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-6.10.0.tgz#d832911d79939b408fddfa1b4da7bac3527f6fe4"
+  integrity sha512-MNjjpNc+wahqQBD4oSj/iIKJQCKZn5rGVh3RmKi95tX/Ta/MRskb807LTVZvq4S1+sOKK4VPgFONf8OertJz9g==
 
 "@navikt/ds-css@~6.8.0":
   version "6.8.0"

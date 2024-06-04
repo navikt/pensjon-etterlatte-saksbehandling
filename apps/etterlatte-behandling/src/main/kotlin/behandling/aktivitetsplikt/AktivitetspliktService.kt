@@ -3,6 +3,8 @@ package no.nav.etterlatte.behandling.aktivitetsplikt
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType.AKTIVITET_100
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntak
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
@@ -13,7 +15,9 @@ import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import java.time.LocalDate
 import java.util.UUID
 
 class AktivitetspliktService(
@@ -38,6 +42,28 @@ class AktivitetspliktService(
         }
 
         return hentAktivitetspliktOppfolging(behandlingId)!!
+    }
+
+    fun oppfyllerAktivitetsplikt(
+        sakId: Long,
+        aktivitetspliktDato: LocalDate,
+    ): Boolean {
+        return inTransaction {
+            val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId)
+            if (aktivitetsgrad?.aktivitetsgrad in listOf(AKTIVITET_OVER_50, AKTIVITET_100)) {
+                logger.info("Aktivitetsgrad er over 50% eller 100%, ingen revurdering opprettes for sak $sakId")
+                return@inTransaction true
+            }
+
+            val unntak = aktivitetspliktUnntakDao.hentNyesteUnntak(sakId)
+            if (unntak != null && (unntak.tom == null || unntak.tom.isAfter(aktivitetspliktDato))) {
+                logger.info("Det er unntak for aktivitetsplikt, ingen revurdering opprettes for sak $sakId")
+                return@inTransaction true
+            }
+
+            logger.info("Det er ikke gjort en vurdering av bruker på over 50% aktivitet, og finner ingen unntak for sak $sakId")
+            false
+        }
     }
 
     fun hentAktiviteter(behandlingId: UUID) =
@@ -100,7 +126,7 @@ class AktivitetspliktService(
         aktivitetspliktDao.kopierAktiviteter(fraBehandlingId, tilBehandlingId)
     }
 
-    fun opprettAktivitetsgrad(
+    fun opprettAktivitetsgradForOppgave(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         oppgaveId: UUID,
         sakId: Long,
@@ -109,13 +135,29 @@ class AktivitetspliktService(
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
         inTransaction {
             require(
-                aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId) == null,
+                aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId) == null,
             ) { "Aktivitetsgrad finnes allerede for oppgave $oppgaveId" }
             aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, oppgaveId)
         }
     }
 
-    fun opprettUnntak(
+    fun opprettAktivitetsgradForBehandling(
+        aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
+        behandlingId: UUID,
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
+
+        inTransaction {
+            require(
+                aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) == null,
+            ) { "Aktivitetsgrad finnes allerede for behandling $behandlingId" }
+            aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, behandlingId)
+        }
+    }
+
+    fun opprettUnntakForOpppgave(
         unntak: LagreAktivitetspliktUnntak,
         oppgaveId: UUID,
         sakId: Long,
@@ -128,16 +170,48 @@ class AktivitetspliktService(
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
         inTransaction {
             require(
-                aktivitetspliktUnntakDao.hentUnntak(oppgaveId) == null,
+                aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId) == null,
             ) { "Unntak finnes allerede for oppgave $oppgaveId" }
             aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, oppgaveId)
         }
     }
 
-    fun hentVurdering(oppgaveId: UUID): AktivitetspliktVurdering? =
+    fun opprettUnntakForBehandling(
+        unntak: LagreAktivitetspliktUnntak,
+        behandlingId: UUID,
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        if (unntak.fom != null && unntak.tom != null && unntak.fom > unntak.tom) {
+            throw TomErFoerFomException()
+        }
+
+        val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
+
         inTransaction {
-            val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgrad(oppgaveId)
-            val unntak = aktivitetspliktUnntakDao.hentUnntak(oppgaveId)
+            require(
+                aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) == null,
+            ) { "Unntak finnes allerede for behandling $behandlingId" }
+            aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, behandlingId)
+        }
+    }
+
+    fun hentVurderingForOppgave(oppgaveId: UUID): AktivitetspliktVurdering? =
+        inTransaction {
+            val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForOppgave(oppgaveId)
+            val unntak = aktivitetspliktUnntakDao.hentUnntakForOppgave(oppgaveId)
+
+            if (aktivitetsgrad == null && unntak == null) {
+                return@inTransaction null
+            }
+
+            AktivitetspliktVurdering(aktivitetsgrad, unntak)
+        }
+
+    fun hentVurderingForBehandling(behandlingId: UUID): AktivitetspliktVurdering? =
+        inTransaction {
+            val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
+            val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
 
             if (aktivitetsgrad == null && unntak == null) {
                 return@inTransaction null

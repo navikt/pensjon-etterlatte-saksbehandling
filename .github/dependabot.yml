@@ -60,11 +60,14 @@ updates:
 
 
   # =============
-  # FRONTEND ROOT
+  # FRONTEND
   # =============
 
   - package-ecosystem: "npm"
-    directory: "/apps/etterlatte-saksbehandling-ui/"
+    directories:
+      - "/apps/etterlatte-saksbehandling-ui/"
+      - "/apps/etterlatte-saksbehandling-ui/client"
+      - "/apps/etterlatte-saksbehandling-ui/server"
     schedule:
       interval: "monthly"
       day: "sunday"
@@ -73,33 +76,19 @@ updates:
       eslint:
         patterns:
           - "prettier"
-          - "eslint"
+          - "eslint*"
           - "husky"
           - "lint-staged"
           - "@typescript-eslint/*"
-
-  # ===============
-  # FRONTEND CLIENT
-  # ===============
-
-  - package-ecosystem: "npm"
-    directory: "/apps/etterlatte-saksbehandling-ui/client"
-    schedule:
-      interval: "monthly"
-      day: "sunday"
-    open-pull-requests-limit: 10
-    groups:
+          - "@testing-library*"
+          - "@types/chai"
+          - "@types/mocha"
+          - "chai"
+          - "mocha"
       ds:
         patterns:
           - "@navikt/ds-*"
           - "@navikt/aksel-icons"
-      eslint-og-test:
-        patterns:
-          - "@typescript-eslint/*"
-          - "prettier"
-          - "eslint"
-          - "eslint*"
-          - "@testing-library*"
       diverse:
         patterns:
           - "slate*"
@@ -115,30 +104,6 @@ updates:
           - "@types/react*"
           - "@reduxjs/toolkit"
           - "typescript"
-
-  # ===============
-  # FRONTEND SERVER
-  # ===============
-
-  - package-ecosystem: "npm"
-    directory: "/apps/etterlatte-saksbehandling-ui/server"
-    schedule:
-      interval: "monthly"
-      day: "sunday"
-    open-pull-requests-limit: 10
-    groups:
-      lint-og-test:
-        patterns:
-          - "@typescript-eslint/*"
-          - "prettier"
-          - "eslint"
-          - "eslint*"
-          - "@types/chai"
-          - "@types/mocha"
-          - "chai"
-          - "mocha"
-      prod:
-        patterns:
           - "express"
           - "http-proxy-middleware"
           - "@types/express"
@@ -152,7 +117,6 @@ updates:
           - "@types/request"
           - "prom-client"
           - "unleash-client"
-          - "typescript"
 
 
   # ==============

@@ -37,7 +37,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                     queryOf(
                         statement = query,
                         paramMap =
-                            mapOf<String, Any>(
+                            mapOf<String, Any?>(
                                 "behandlings_id" to beregningsGrunnlag.behandlingId,
                                 "soesken_med_i_beregning" to beregningsGrunnlag.soeskenMedIBeregning.somJsonb(),
                                 "institusjonsopphold" to
@@ -49,6 +49,8 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                                         beregningsGrunnlag.beregningsMetode,
                                     ),
                                 "kilde" to beregningsGrunnlag.kilde.toJson(),
+                                "beregnings_metode_flere_avdoede" to
+                                    beregningsGrunnlag.begegningsmetodeFlereAvdoede.takeIf { it.isNotEmpty() }?.somJsonb(),
                             ),
                     ).asUpdate,
                 )
@@ -109,14 +111,21 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
     companion object {
         val lagreGrunnlagQuery =
             """
-            INSERT INTO beregningsgrunnlag
-                (behandlings_id, soesken_med_i_beregning_perioder, institusjonsopphold, beregningsmetode, kilde)
-            VALUES(
+            INSERT INTO beregningsgrunnlag (
+                behandlings_id,
+                soesken_med_i_beregning_perioder,
+                institusjonsopphold,
+                beregningsmetode,
+                kilde,
+                beregnings_metode_flere_avdoede
+            )
+            VALUES (
                 :behandlings_id,
                 :soesken_med_i_beregning,
                 :institusjonsopphold,
                 :beregningsmetode,
-                :kilde
+                :kilde,
+                :beregnings_metode_flere_avdoede
             )
             """.trimMargin()
 
@@ -127,20 +136,20 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                 soesken_med_i_beregning_perioder = :soesken_med_i_beregning,
                 institusjonsopphold = :institusjonsopphold,
                 beregningsmetode = :beregningsmetode,
-                kilde = :kilde
+                kilde = :kilde,
+                beregnings_metode_flere_avdoede = :beregnings_metode_flere_avdoede
             WHERE behandlings_id = :behandlings_id
             """.trimMargin()
 
         val finnBarnepensjonsGrunnlagForBehandling =
             """
-            SELECT behandlings_id, soesken_med_i_beregning_perioder, institusjonsopphold, beregningsmetode, kilde
-            FROM beregningsgrunnlag
-            WHERE behandlings_id = :behandlings_id
-            """.trimIndent()
-
-        val finnOmstillingstoenadGrunnlagForBehandling =
-            """
-            SELECT behandlings_id, institusjonsopphold, beregningsmetode, kilde
+            SELECT
+                behandlings_id,
+                soesken_med_i_beregning_perioder,
+                institusjonsopphold,
+                beregningsmetode,
+                kilde,
+                beregnings_metode_flere_avdoede
             FROM beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id
             """.trimIndent()
@@ -240,6 +249,10 @@ private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag {
                 )
             },
         kilde = objectMapper.readValue(this.string("kilde")),
+        begegningsmetodeFlereAvdoede =
+            this.stringOrNull("beregnings_metode_flere_avdoede")?.let {
+                objectMapper.readValue(it)
+            } ?: emptyList(),
     )
 }
 

@@ -15,6 +15,9 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
+import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
+import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto.VurderingVedMaaned
+import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
@@ -35,6 +38,7 @@ import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.route.FoedselsnummerDTO
+import java.time.YearMonth
 import java.util.UUID
 
 interface BehandlingService {
@@ -63,6 +67,13 @@ interface BehandlingService {
     ): Saker
 
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
+
+    fun opprettRevurderingAktivitetsplikt(
+        sakId: Long,
+        frist: Tidspunkt,
+        behandlingsmaaned: YearMonth,
+        vurderingVedMaaned: VurderingVedMaaned,
+    ): OpprettRevurderingForAktivitetspliktResponse
 
     fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe
 
@@ -244,6 +255,27 @@ class BehandlingServiceImpl(
             }.body<ObjectNode>().let {
                 UUID.fromString(it["id"].textValue())
             }
+        }
+    }
+
+    override fun opprettRevurderingAktivitetsplikt(
+        sakId: Long,
+        frist: Tidspunkt,
+        behandlingsmaaned: YearMonth,
+        vurderingVedMaaned: VurderingVedMaaned,
+    ): OpprettRevurderingForAktivitetspliktResponse {
+        return runBlocking {
+            behandlingKlient.post("$url/api/sak/$sakId/aktivitetsplikt/revurdering") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    OpprettRevurderingForAktivitetspliktDto(
+                        sakId = sakId,
+                        frist = frist,
+                        behandlingsmaaned = behandlingsmaaned,
+                        vurderingVedMaaned = vurderingVedMaaned,
+                    ),
+                )
+            }.body<OpprettRevurderingForAktivitetspliktResponse>()
         }
     }
 

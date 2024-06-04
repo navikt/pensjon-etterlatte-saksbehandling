@@ -15,7 +15,6 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -50,7 +49,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.vedtaksvurdering.database.DatabaseExtension
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
-import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlient
+import no.nav.etterlatte.vedtaksvurdering.klienter.SamordningsKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.TrygdetidKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import org.junit.jupiter.api.AfterEach
@@ -76,9 +75,8 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
     private val beregningKlientMock = mockk<BeregningKlient>()
     private val vilkaarsvurderingKlientMock = mockk<VilkaarsvurderingKlient>()
     private val behandlingKlientMock = mockk<BehandlingKlient>()
-    private val samKlientMock = mockk<SamKlient>()
+    private val samordningsKlientMock = mockk<SamordningsKlient>()
     private val trygdetidKlientMock = mockk<TrygdetidKlient>()
-    private val featureToggleService = DummyFeatureToggleService()
     private lateinit var service: VedtakBehandlingService
 
     @BeforeAll
@@ -92,7 +90,7 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
                 beregningKlient = beregningKlientMock,
                 vilkaarsvurderingKlient = vilkaarsvurderingKlientMock,
                 behandlingKlient = behandlingKlientMock,
-                samKlient = samKlientMock,
+                samordningsKlient = samordningsKlientMock,
                 trygdetidKlient = trygdetidKlientMock,
             )
     }
@@ -1416,7 +1414,7 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
             oppdatertVedtak.vedtak.status shouldBe VedtakStatus.TIL_SAMORDNING
 
             coVerify(exactly = 1) { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) }
-            coVerify(exactly = 0) { samKlientMock.samordneVedtak(any(), false, attestant) }
+            coVerify(exactly = 0) { samordningsKlientMock.samordneVedtak(any(), false, attestant) }
         }
     }
 
@@ -1427,14 +1425,14 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
 
         val behandlingId = randomUUID()
 
-        coEvery { samKlientMock.samordneVedtak(any(), true, attestant) } returns true
+        coEvery { samordningsKlientMock.samordneVedtak(any(), true, attestant) } returns true
 
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.TIL_SAMORDNING))
 
             service.samordne(behandlingId, attestant) shouldBe true
 
-            coVerify(exactly = 1) { samKlientMock.samordneVedtak(any(), true, attestant) }
+            coVerify(exactly = 1) { samordningsKlientMock.samordneVedtak(any(), true, attestant) }
             coVerify(exactly = 0) { behandlingKlientMock.samordnet(behandlingId, any(), any()) }
         }
 
@@ -1456,7 +1454,7 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
 
             service.samordne(behandlingId, attestant) shouldBe false
 
-            coVerify(exactly = 0) { samKlientMock.samordneVedtak(any(), true, attestant) }
+            coVerify(exactly = 0) { samordningsKlientMock.samordneVedtak(any(), true, attestant) }
         }
     }
 
@@ -1485,7 +1483,7 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
 
             coVerify(exactly = 1) { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) }
             coVerify(exactly = 1) { behandlingKlientMock.samordnet(behandlingId, any(), any()) }
-            coVerify(exactly = 0) { samKlientMock.samordneVedtak(any(), false, attestant) }
+            coVerify(exactly = 0) { samordningsKlientMock.samordneVedtak(any(), false, attestant) }
         }
     }
 

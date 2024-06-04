@@ -41,3 +41,22 @@ fun SubsumsjonsNode<*>.finnAnvendtTrygdetid(trygdetidRegel: Regel<*, *>): Anvend
         accept(this)
         anvendtTrygdetid
     }
+
+class FinnAvdodeForeldre2024Visitor(private val avdodeForeldre2024Regel: Regel<*, *>) : Visitor {
+    var avdodeForeldre: List<String?>? = null
+
+    override fun visit(node: Node<*>) {}
+
+    override fun visit(node: SubsumsjonsNode<*>) {
+        if (node.regel === avdodeForeldre2024Regel && node.verdi is List<*>) {
+            @Suppress("UNCHECKED_CAST")
+            avdodeForeldre = (node.verdi as List<String?>)
+        }
+    }
+}
+
+fun SubsumsjonsNode<*>.finnAvdodeForeldre(avdodeForeldre2024Regel: Regel<*, *>): List<String?>? =
+    with(FinnAvdodeForeldre2024Visitor(avdodeForeldre2024Regel)) {
+        accept(this)
+        avdodeForeldre
+    }

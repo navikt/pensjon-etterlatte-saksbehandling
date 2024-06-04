@@ -50,6 +50,11 @@ enum class JobbType(val beskrivelse: String, val kategori: JobbKategori, val sak
         JobbKategori.OMS_DOEDSDATO,
         SakType.OMSTILLINGSSTOENAD,
     ),
+    OMS_DOED_6MND(
+        "Omstillingsstønad vurdering av aktivitetsplikt 6 mnd etter dødsdato",
+        JobbKategori.OMS_DOEDSDATO,
+        SakType.OMSTILLINGSSTOENAD,
+    ),
 }
 
 enum class JobbKategori {

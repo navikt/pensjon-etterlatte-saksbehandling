@@ -6,6 +6,7 @@ import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelReferanse
@@ -50,12 +51,12 @@ val antallSoeskenIKullet1967 =
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-ANTALL-SOESKEN"),
     ) benytter soeskenIKullet1967 med { soesken -> soesken.size }
 
-val avdodeForeldre2024: Regel<BarnepensjonGrunnlag, List<Folkeregisteridentifikator>> =
+val avdodeForeldre2024: Regel<BarnepensjonGrunnlag, List<String?>> =
     finnFaktumIGrunnlag(
         gjelderFra = BP_2024_DATO,
         beskrivelse = "Finner om søker har to avdøde foreldre",
-        finnFaktum = BarnepensjonGrunnlag::avdoedeForeldre,
-        finnFelt = { it },
+        finnFaktum = BarnepensjonGrunnlag::avdoedesTrygdetid,
+        finnFelt = { anvendtTrygdetider -> anvendtTrygdetider.map { it.ident } },
     )
 
 val harToAvdodeForeldre2024 =
@@ -64,7 +65,7 @@ val harToAvdodeForeldre2024 =
         beskrivelse = "Finner om barnet har to avdøde foreldre",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-HAR-TO-AVDOEDE"),
     ) benytter avdodeForeldre2024 med { avdoedeForeldre ->
-        avdoedeForeldre.size >= 2
+        avdoedeForeldre.all { it == UKJENT_AVDOED || Folkeregisteridentifikator.isValid(it) } && avdoedeForeldre.size >= 2
     }
 
 val prosentsatsFoersteBarnKonstant1967 =

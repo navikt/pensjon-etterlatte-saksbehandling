@@ -41,7 +41,7 @@ class AktivitetspliktAktivitetsgradDao(private val connectionAutoclosing: Connec
         }
     }
 
-    fun hentAktivitetsgrad(oppgaveId: UUID): AktivitetspliktAktivitetsgrad? =
+    fun hentAktivitetsgradForOppgave(oppgaveId: UUID): AktivitetspliktAktivitetsgrad? =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
@@ -53,6 +53,41 @@ class AktivitetspliktAktivitetsgradDao(private val connectionAutoclosing: Connec
                         """.trimMargin(),
                     )
                 stmt.setObject(1, oppgaveId)
+
+                stmt.executeQuery().singleOrNull { toAktivitetsgrad() }
+            }
+        }
+
+    fun hentNyesteAktivitetsgrad(sakId: Long): AktivitetspliktAktivitetsgrad? =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        SELECT id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, opprettet, endret, beskrivelse
+                        FROM aktivitetsplikt_aktivitetsgrad
+                        WHERE sak_id = ?
+                        ORDER BY endret::jsonb->>'tidspunkt' DESC
+                        LIMIT 1
+                        """.trimMargin(),
+                    )
+                stmt.setLong(1, sakId)
+                stmt.executeQuery().singleOrNull { toAktivitetsgrad() }
+            }
+        }
+
+    fun hentAktivitetsgradForBehandling(behandlingId: UUID): AktivitetspliktAktivitetsgrad? =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        SELECT id, sak_id, behandling_id, oppgave_id, aktivitetsgrad, fom, opprettet, endret, beskrivelse
+                        FROM aktivitetsplikt_aktivitetsgrad
+                        WHERE behandling_id = ?
+                        """.trimMargin(),
+                    )
+                stmt.setObject(1, behandlingId)
 
                 stmt.executeQuery().singleOrNull { toAktivitetsgrad() }
             }

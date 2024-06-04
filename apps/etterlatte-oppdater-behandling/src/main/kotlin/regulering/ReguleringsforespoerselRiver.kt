@@ -15,6 +15,7 @@ import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.KJOERING
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.SPESIFIKKE_SAKER
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
+import no.nav.etterlatte.rapidsandrivers.aapneBehandlinger
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.rapidsandrivers.saker
@@ -77,12 +78,12 @@ internal class ReguleringsforespoerselRiver(
                 break
             }
 
-            val tilbakemigrerte =
+            val sakListe =
                 behandlingService.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
                     .also { sakIdListe ->
                         logger.info(
-                            "Tilbakeført ${sakIdListe.ider.size} behandlinger til trygdetid oppdatert:\n" +
-                                sakIdListe.ider.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" },
+                            "Tilbakeført ${sakIdListe.tilbakestileBehandlinger.size} behandlinger til trygdetid oppdatert:\n" +
+                                sakIdListe.tilbakestileBehandlinger.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" },
                         )
                     }
 
@@ -91,7 +92,8 @@ internal class ReguleringsforespoerselRiver(
                 behandlingService.lagreKjoering(it.id, KjoeringStatus.STARTA, kjoering)
                 logger.debug("Ferdig lagra kjøring starta for sak ${it.id}")
                 packet.setEventNameForHendelseType(ReguleringHendelseType.SAK_FUNNET)
-                packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)
+                packet.tilbakestilteBehandlinger = sakListe.tilbakestilteForSak(it.id)
+                packet.aapneBehandlinger = sakListe.aapneBehandlingerForSak(it.id)
                 packet.sakId = it.id
                 logger.debug("Sender til omregning for sak ${it.id}")
                 context.publish(packet.toJson())

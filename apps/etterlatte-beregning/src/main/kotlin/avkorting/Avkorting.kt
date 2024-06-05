@@ -98,13 +98,13 @@ data class Avkorting(
                             ),
                     ),
                 )
+
+        val oppdatertAarsoppjoer =
+            hentAarsoppgjoer().copy(
+                inntektsavkorting = oppdatert,
+            )
         return this.copy(
-            aarsoppgjoer =
-                aarsoppgjoer.map {
-                    it.copy(
-                        inntektsavkorting = oppdatert,
-                    )
-                },
+            aarsoppgjoer = erstattAarsoppgjoer(oppdatertAarsoppjoer),
         )
     }
 
@@ -126,26 +126,25 @@ data class Avkorting(
                 type = FORVENTET_INNTEKT,
             )
 
+        val oppdatertAarsoppgjoer =
+            hentAarsoppgjoer().copy(
+                ytelseFoerAvkorting = ytelseFoerAvkorting,
+                inntektsavkorting =
+                    hentAarsoppgjoer().inntektsavkorting.map { inntektsavkorting ->
+                        inntektsavkorting.copy(
+                            avkortingsperioder = avkortingsperioder,
+                        )
+                    },
+                avkortetYtelseAar =
+                    beregnetAvkortetYtelse.map { avkortetYtelse ->
+                        avkortetYtelse.copy(
+                            id = UUID.randomUUID(),
+                            type = AARSOPPGJOER,
+                        )
+                    },
+            )
         return this.copy(
-            aarsoppgjoer =
-                this.aarsoppgjoer.map {
-                    it.copy(
-                        ytelseFoerAvkorting = ytelseFoerAvkorting,
-                        inntektsavkorting =
-                            it.inntektsavkorting.map { inntektsavkorting ->
-                                inntektsavkorting.copy(
-                                    avkortingsperioder = avkortingsperioder,
-                                )
-                            },
-                        avkortetYtelseAar =
-                            beregnetAvkortetYtelse.map { avkortetYtelse ->
-                                avkortetYtelse.copy(
-                                    id = UUID.randomUUID(),
-                                    type = AARSOPPGJOER,
-                                )
-                            },
-                    )
-                },
+            aarsoppgjoer = erstattAarsoppgjoer(oppdatertAarsoppgjoer),
         )
     }
 
@@ -200,16 +199,14 @@ data class Avkorting(
                 }
             }
 
-        // Oppdater oppgjøret i lista..
+        val oppdatertAarsoppgjoer =
+            hentAarsoppgjoer().copy(
+                ytelseFoerAvkorting = ytelseFoerAvkorting,
+                inntektsavkorting = reberegnetInntektsavkorting,
+                avkortetYtelseAar = avkortetYtelse,
+            )
         return this.copy(
-            aarsoppgjoer =
-                this.aarsoppgjoer.map {
-                    it.copy(
-                        ytelseFoerAvkorting = ytelseFoerAvkorting,
-                        inntektsavkorting = reberegnetInntektsavkorting,
-                        avkortetYtelseAar = avkortetYtelse,
-                    )
-                },
+            aarsoppgjoer = erstattAarsoppgjoer(oppdatertAarsoppgjoer),
         )
     }
 
@@ -261,6 +258,11 @@ data class Avkorting(
         }
         // TODO skal på sikt utlede etterspurt årsoppgjør
         return aarsoppgjoer.single()
+    }
+
+    private fun erstattAarsoppgjoer(nytt: Aarsoppgjoer): List<Aarsoppgjoer> {
+        // TODO Her skal det returneres eksisterend eliste hvor relevant årsoppgjør erstattes basert på året det gjelder
+        return listOf(nytt)
     }
 }
 

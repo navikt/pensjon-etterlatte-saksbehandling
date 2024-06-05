@@ -3,7 +3,6 @@ package no.nav.etterlatte.beregning.regler.avkorting
 import io.kotest.assertions.asClue
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.avkorting.Aarsoppgjoer
 import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
@@ -624,9 +623,7 @@ class BeregnAvkortingTest {
     }
 
     private fun `Avkorting foerstegangsbehandling`() =
-        Avkorting(
-            aarsoppgjoer = listOf(Aarsoppgjoer()),
-        ).beregnAvkortingMedNyttGrunnlag(
+        Avkorting().beregnAvkortingMedNyttGrunnlag(
             nyttGrunnlag =
                 avkortinggrunnlagLagre(
                     aarsinntekt = 300000,

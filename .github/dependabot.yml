@@ -75,11 +75,12 @@ updates:
       eslint:
         patterns:
           - "prettier"
-          - "eslint*"
+          - "eslint"
+          - "eslint-*"
           - "husky"
           - "lint-staged"
           - "@typescript-eslint/*"
-          - "@testing-library*"
+          - "@testing-library/*"
           - "@types/chai"
           - "@types/mocha"
           - "chai"
@@ -90,7 +91,8 @@ updates:
           - "@navikt/aksel-icons"
       diverse:
         patterns:
-          - "slate*"
+          - "slate"
+          - "slate-*"
           - "vite"
           - "vite-tsconfig-paths"
           - "vitest"

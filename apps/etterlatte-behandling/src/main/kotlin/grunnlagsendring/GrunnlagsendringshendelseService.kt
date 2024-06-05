@@ -92,7 +92,8 @@ class GrunnlagsendringshendelseService(
             grunnlagsendringshendelseDao.arkiverGrunnlagsendringStatus(hendelse = hendelse)
             try {
                 val oppgaveForReferanse =
-                    oppgaveService.hentOppgaverForReferanse(hendelse.id.toString()).singleOrNull()
+                    oppgaveService.hentOppgaverForReferanse(hendelse.id.toString())
+                        .singleOrNull { it.erUnderBehandling() }
                         ?: throw BadRequestException("Ugyldig antall oppgaver med referanse: ${hendelse.id}")
 
                 if (oppgaveForReferanse.manglerSaksbehandler()) {

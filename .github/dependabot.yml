@@ -162,4 +162,6 @@ updates:
       interval: "monthly"
       day: "sunday"
     groups:
-      *
+      dockerfilene:
+        patterns:
+          *

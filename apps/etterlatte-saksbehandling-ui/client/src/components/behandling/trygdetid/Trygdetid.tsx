@@ -149,7 +149,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
   }
 
   return (
-    <Box paddingInline="16">
+    <TrygdetidBox paddingInline="16">
       <VStack gap="4">
         {visTrydeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
         <LovtekstMedLenke
@@ -268,7 +268,7 @@ export const Trygdetid = ({ redigerbar, behandling, vedtaksresultat, virkningsti
         {behandlingsIdMangler && <ErrorMessage>Finner ikke behandling - ID mangler</ErrorMessage>}
         {trygdetidIdMangler && <ErrorMessage>Finner ikke trygdetid - ID mangler</ErrorMessage>}
       </VStack>
-    </Box>
+    </TrygdetidBox>
   )
 }
 
@@ -279,4 +279,8 @@ const HeadingWrapper = styled(Heading)`
 
 const OppsummeringWrapper = styled.div`
   margin-bottom: 2em;
+`
+
+const TrygdetidBox = styled(Box)`
+  max-width: 69rem;
 `

@@ -65,11 +65,11 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
           <VisInnstilling innstilling={utfall.innstilling} sakId={sak.id} kanRedigere={kanRedigere} />
         ) : null}
 
-        {utfall?.utfall === 'DELVIS_OMGJOERING' ||
+        {(utfall?.utfall === 'DELVIS_OMGJOERING' ||
           utfall?.utfall === 'OMGJOERING' ||
-          (utfall?.utfall === 'AVVIST_MED_OMGJOERING' && (
-            <VisOmgjoering omgjoering={utfall.omgjoering} kanRedigere={kanRedigere} />
-          ))}
+          utfall?.utfall === 'AVVIST_MED_OMGJOERING') && (
+          <VisOmgjoering omgjoering={utfall.omgjoering} kanRedigere={kanRedigere} />
+        )}
       </Box>
 
       {isFailureHandler({

@@ -123,37 +123,35 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
           return (
             soeskenFinnes && (
               <li key={item.id}>
-                <SoeskenContainer>
-                  <HStack gap="16">
-                    <Soesken person={fnrTilSoesken[item.foedselsnummer]} familieforhold={familieforhold!} />
-                    <Controller
-                      name={`soeskenMedIBeregning.${index}.data.${k}`}
-                      control={control}
-                      render={(soesken) =>
-                        behandles ? (
-                          <RadioGroup
-                            legend="Oppdras sammen"
-                            value={soesken.field.value?.skalBrukes ?? null}
-                            onChange={(value) => {
-                              soesken.field.onChange({
-                                foedselsnummer: item.foedselsnummer,
-                                skalBrukes: value,
-                              })
-                            }}
-                          >
-                            <Radio value={true}>Ja</Radio>
-                            <Radio value={false}>Nei</Radio>
-                          </RadioGroup>
-                        ) : (
-                          <OppdrasSammenLes>
-                            <strong>Oppdras sammen</strong>
-                            <label>{soesken.field.value?.skalBrukes ? 'Ja' : 'Nei'}</label>
-                          </OppdrasSammenLes>
-                        )
-                      }
-                    />
-                  </HStack>
-                </SoeskenContainer>
+                <HStack gap="16">
+                  <Soesken person={fnrTilSoesken[item.foedselsnummer]} familieforhold={familieforhold!} />
+                  <Controller
+                    name={`soeskenMedIBeregning.${index}.data.${k}`}
+                    control={control}
+                    render={(soesken) =>
+                      behandles ? (
+                        <RadioGroup
+                          legend="Oppdras sammen"
+                          value={soesken.field.value?.skalBrukes ?? null}
+                          onChange={(value) => {
+                            soesken.field.onChange({
+                              foedselsnummer: item.foedselsnummer,
+                              skalBrukes: value,
+                            })
+                          }}
+                        >
+                          <Radio value={true}>Ja</Radio>
+                          <Radio value={false}>Nei</Radio>
+                        </RadioGroup>
+                      ) : (
+                        <OppdrasSammenLes>
+                          <strong>Oppdras sammen</strong>
+                          <label>{soesken.field.value?.skalBrukes ? 'Ja' : 'Nei'}</label>
+                        </OppdrasSammenLes>
+                      )
+                    }
+                  />
+                </HStack>
               </li>
             )
           )
@@ -206,11 +204,6 @@ const PeriodeInfo = styled.div`
 const OppdrasSammenLes = styled.div`
   display: flex;
   flex-direction: column;
-`
-
-const SoeskenContainer = styled.div`
-  display: flex;
-  align-items: center;
 `
 
 const MaanedvelgerMedUtnulling = styled.div`

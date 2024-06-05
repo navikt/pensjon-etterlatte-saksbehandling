@@ -144,13 +144,13 @@ internal fun Route.aktivitetspliktRoutes(
                             persongalleri = persongalleri,
                             frist = request.frist,
                             begrunnelse = "Vurdering av aktivitetsplikt ved 6mnd",
-                        )
+                        ).oppdater()
                     }
                         .let {
                             call.respond(
                                 OpprettRevurderingForAktivitetspliktResponse(
                                     opprettetRevurdering = true,
-                                    nyBehandlingId = it.revurdering.id,
+                                    nyBehandlingId = it.id,
                                     forrigeBehandlingId = forrigeBehandling.id,
                                 ),
                             )

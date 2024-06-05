@@ -49,9 +49,7 @@ export const SakStatus = ({ sakId }: { sakId: number }) => {
     if (ytelseErLoependeMedOpphoerFremITid(loependeVedtak)) {
       return (
         <Tag key={VedtakType.INNVILGELSE} variant="success" icon={<RecordFillIcon aria-hidden color="#06893A" />}>
-          Løpende fra{' '}
-          {innvilgelsesVedtak?.virkningstidspunkt && formaterStringDato(innvilgelsesVedtak.virkningstidspunkt)} og
-          opphører {loependeVedtak.opphoerFraOgMed && formaterStringDato(loependeVedtak.opphoerFraOgMed)}
+          Opphør av ytelse {loependeVedtak.opphoerFraOgMed && formaterStringDato(loependeVedtak.opphoerFraOgMed)}
         </Tag>
       )
     }

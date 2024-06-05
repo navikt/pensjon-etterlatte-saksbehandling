@@ -117,6 +117,24 @@ updates:
           - "prom-client"
           - "unleash-client"
 
+  # =============
+  # FRONTEND ROOT
+  # =============
+
+  - package-ecosystem: "npm"
+    directory: "/apps/etterlatte-saksbehandling-ui/"
+    schedule:
+      interval: "monthly"
+      day: "sunday"
+    open-pull-requests-limit: 10
+    groups:
+      eslint:
+        patterns:
+          - "prettier"
+          - "eslint"
+          - "husky"
+          - "lint-staged"
+          - "@typescript-eslint/*"
 
   # ==============
   # GITHUB ACTIONS

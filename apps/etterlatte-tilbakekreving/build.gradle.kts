@@ -50,7 +50,6 @@ dependencies {
     testImplementation(project(":libs:testdata"))
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))
     testImplementation(testFixtures(project(":libs:etterlatte-mq")))
-    evaluationDependsOn(":libs:etterlatte-mq")
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
 
     // Avhengigheter fra patching av sårbarheter i IBM MQ.

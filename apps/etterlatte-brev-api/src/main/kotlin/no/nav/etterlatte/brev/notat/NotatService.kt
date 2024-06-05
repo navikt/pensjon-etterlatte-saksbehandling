@@ -26,6 +26,7 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.notat.StrukturertBrev
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
@@ -34,6 +35,7 @@ import no.nav.pensjon.brevbaker.api.model.Felles
 import org.slf4j.LoggerFactory
 import java.util.Base64
 
+@Deprecated("Denne servicen skal ikke lenger brukes", ReplaceWith("NyNotatService.kt"))
 class NotatService(
     private val brevRepository: BrevRepository,
     private val adresseService: AdresseService,

@@ -13,7 +13,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.GrunnlagService
-import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
@@ -127,7 +127,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
         val grunnlagService = spyk(applicationContext.grunnlagsService)
         val oppgaveService = spyk(applicationContext.oppgaveService)
-        val aktivitetspliktService = spyk(applicationContext.aktivitetspliktService)
+        val aktivitetspliktDao = spyk(applicationContext.aktivitetspliktDao)
 
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
 
@@ -143,7 +143,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     oppgaveService,
                     grunnlagService,
                     hendelser,
-                    aktivitetspliktService,
+                    aktivitetspliktDao,
                 ).opprettManuellRevurderingWrapper(
                     sakId = sak.id,
                     aarsak = Revurderingaarsak.ANNEN,
@@ -168,7 +168,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 oppgaveService.hentOppgaverForSak(sak.id)
             }
         }
-        verify { aktivitetspliktService.kopierAktiviteter(behandling!!.id, revurdering.id) }
+        verify { aktivitetspliktDao.kopierAktiviteter(behandling!!.id, revurdering.id) }
         inTransaction {
             assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering.id))
             verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
@@ -983,7 +983,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         oppgaveService: OppgaveService = applicationContext.oppgaveService,
         grunnlagService: GrunnlagService = applicationContext.grunnlagsService,
         behandlingsHendelser: BehandlingsHendelserKafkaProducerImpl = applicationContext.behandlingsHendelser,
-        aktivitetspliktService: AktivitetspliktService = applicationContext.aktivitetspliktService,
+        aktivitetspliktDao: AktivitetspliktDao = applicationContext.aktivitetspliktDao,
     ) = RevurderingService(
         oppgaveService,
         grunnlagService,
@@ -995,7 +995,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         applicationContext.revurderingDao,
         applicationContext.klageService,
         applicationContext.behandlingService,
-        aktivitetspliktService,
+        aktivitetspliktDao,
     )
 
     private fun behandlingFactory() =

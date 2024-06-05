@@ -163,12 +163,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
         behandlingFactory = applicationContext.behandlingFactory,
     )
-    aktivitetspliktRoutes(
-        aktivitetspliktService = applicationContext.aktivitetspliktService,
-        behandlingService = applicationContext.behandlingService,
-        grunnlagKlient = applicationContext.grunnlagKlientObo,
-        automatiskRevurderingService = applicationContext.automatiskRevurderingService,
-    )
+    aktivitetspliktRoutes(aktivitetspliktService = applicationContext.aktivitetspliktService)
     sjekklisteRoute(sjekklisteService = applicationContext.sjekklisteService)
     statistikkRoutes(behandlingService = applicationContext.behandlingService)
     generellbehandlingRoutes(

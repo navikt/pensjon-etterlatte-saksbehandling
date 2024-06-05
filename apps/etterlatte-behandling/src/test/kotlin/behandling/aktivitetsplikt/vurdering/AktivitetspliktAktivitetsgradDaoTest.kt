@@ -89,7 +89,6 @@ class AktivitetspliktAktivitetsgradDaoTest(ds: DataSource) {
     }
 
     @Test
-
     fun `skal lagre ned og hente opp en ny aktivitetsgrad for behandling`() {
         val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
         val sak = sakDao.opprettSak("Person1", SakType.OMSTILLINGSSTOENAD, "0000")

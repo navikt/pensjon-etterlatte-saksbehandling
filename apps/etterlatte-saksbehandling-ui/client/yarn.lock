@@ -319,33 +319,33 @@
   resolved "https://registry.yarnpkg.com/@juggle/resize-observer/-/resize-observer-3.4.0.tgz#08d6c5e20cf7e4cc02fd181c4b0c225cd31dbb60"
   integrity sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==
 
-"@navikt/aksel-icons@^6.8.0":
-  version "6.8.0"
-  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-6.8.0.tgz#2644182b35d898d068d9978cf1620a0405770a70"
-  integrity sha512-XiEr0Xb0BDaStrpGCuEPvNgvHalbL4dPh6HAA7jGV7cHnW6Zsb54Hsaq6dLMXIDYEpPQv2T27j25UvoRxVuk8g==
+"@navikt/aksel-icons@^6.10.0":
+  version "6.10.0"
+  resolved "https://registry.yarnpkg.com/@navikt/aksel-icons/-/aksel-icons-6.10.0.tgz#d832911d79939b408fddfa1b4da7bac3527f6fe4"
+  integrity sha512-MNjjpNc+wahqQBD4oSj/iIKJQCKZn5rGVh3RmKi95tX/Ta/MRskb807LTVZvq4S1+sOKK4VPgFONf8OertJz9g==
 
-"@navikt/ds-css@~6.8.0":
-  version "6.8.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-6.8.0.tgz#017d4c13ef3140df2509b0c4a6b1e25ad40ee20d"
-  integrity sha512-qHXpJL2TZTv3MELLTY+o16X+iqPsrKzZhVwI2obnDJUIYTMvZfwR7BQCofL7nj9pDm5Y/jvUeTxdvIxzDHnUtg==
+"@navikt/ds-css@~6.10.0":
+  version "6.10.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css/-/ds-css-6.10.0.tgz#cd03b719d06e7993980699c2f6cb31795fa91535"
+  integrity sha512-hpuoPzOVT23oDjZlq1NH9f8K9R/n/j3RhTJwiuT5lkpx8xkB/enZ7uc4A3eeyZszontxktZRTQN2KXNN0vhvBg==
 
-"@navikt/ds-react@~6.8.0":
-  version "6.8.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-6.8.0.tgz#86f903a76ac9f7ee9c3e2aa0c339932fc6dbb063"
-  integrity sha512-FW2NndVzdVUTBselUzRa1vrkqpJDmHF6cG5A9bg5Y3Y4Aq2uQ07KvDUBzLP+rZz0i4bJ/gkrtoFF74nQRtmKkg==
+"@navikt/ds-react@~6.10.0":
+  version "6.10.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-react/-/ds-react-6.10.0.tgz#43abd526e58f1641effd0aa76a255a064068b5dd"
+  integrity sha512-o+/MqUQMX++tp3mXe5Vlnu97CmDd+mdxcr8sT8jeLm9Jf3ms52O1hSdKK6NlJFYVBkOtZMH0Rr306n5n7X+VGA==
   dependencies:
     "@floating-ui/react" "0.25.4"
     "@floating-ui/react-dom" "^2.0.9"
-    "@navikt/aksel-icons" "^6.8.0"
-    "@navikt/ds-tokens" "^6.8.0"
+    "@navikt/aksel-icons" "^6.10.0"
+    "@navikt/ds-tokens" "^6.10.0"
     clsx "^2.1.0"
     date-fns "^3.0.0"
     react-day-picker "8.10.0"
 
-"@navikt/ds-tokens@^6.8.0", "@navikt/ds-tokens@~6.8.0":
-  version "6.8.0"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-6.8.0.tgz#01e24b0e8ed89349aeb5d4482dec14b5fb1a5df9"
-  integrity sha512-KK2RMX5yCnw8NdwmX5ZSA5LoFX0hQlkpba9CopUGOPxHdC0vOz0CfYwNqJgUhP/HPy2E2GHN37HOWkonqv7BCw==
+"@navikt/ds-tokens@^6.10.0", "@navikt/ds-tokens@~6.10.0":
+  version "6.10.0"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-tokens/-/ds-tokens-6.10.0.tgz#56ae8412d9973f5a844b7a15d95c2ac3e008b171"
+  integrity sha512-wnTS4mirTcTFoptobIp6PfmO8eEHDmt3FNxWAB+AORLOuwVF7Qrfb/zDnAEKBwN381ySSPuFZuQTudJU7hIcfQ==
 
 "@navikt/navspa@^6.0.1":
   version "6.0.1"
@@ -3481,16 +3481,7 @@ stop-iteration-iterator@^1.0.0:
   dependencies:
     internal-slot "^1.0.4"
 
-"string-width-cjs@npm:string-width@^4.2.0":
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
-  integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
-  dependencies:
-    emoji-regex "^8.0.0"
-    is-fullwidth-code-point "^3.0.0"
-    strip-ansi "^6.0.1"
-
-string-width@^4.1.0:
+"string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -3554,14 +3545,7 @@ string.prototype.trimstart@^1.0.8:
     define-properties "^1.2.1"
     es-object-atoms "^1.0.0"
 
-"strip-ansi-cjs@npm:strip-ansi@^6.0.1":
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
-  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
-  dependencies:
-    ansi-regex "^5.0.1"
-
-strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.0, strip-ansi@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==

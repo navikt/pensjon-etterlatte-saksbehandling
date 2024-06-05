@@ -1,11 +1,10 @@
 import { ChildEyesIcon } from '@navikt/aksel-icons'
-import { CopyButton, Heading, Link, Table } from '@navikt/ds-react'
+import { CopyButton, Heading, HStack, Link, Table, VStack } from '@navikt/ds-react'
 import { Familieforhold, hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
 import { differenceInYears, format, parse } from 'date-fns'
 import { DatoFormat, formaterFnr } from '~utils/formattering'
-import { FlexHeader, IconWrapper, TableWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { IconSize } from '~shared/types/Icon'
 
 const FnrWrapper = styled.div`
@@ -20,42 +19,38 @@ type Props = {
 export const Soeskenliste = ({ familieforhold, soekerFnr }: Props) => {
   const barneListeIngenDoedeSoesken = hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag(familieforhold.avdoede, soekerFnr)
   return (
-    <div>
-      <FlexHeader>
-        <IconWrapper>
-          <ChildEyesIcon fontSize={IconSize.DEFAULT} />
-        </IconWrapper>
+    <VStack gap="4">
+      <HStack gap="2">
+        <ChildEyesIcon fontSize={IconSize.DEFAULT} />
         <Heading size="small" level="3">
           Avdødes barn (søsken)
         </Heading>
-      </FlexHeader>
-      <TableWrapper>
-        <Table size="small">
-          <Table.Header>
+      </HStack>
+      <Table size="small">
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell scope="col">Navn</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Bostedsadresse</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
+            <Table.HeaderCell scope="col">Foreldre</Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {barneListeIngenDoedeSoesken.length ? (
+            barneListeIngenDoedeSoesken.map((barn, i) => {
+              return <BarnRow key={i + barn.foedselsnummer} barn={barn} familieforhold={familieforhold} />
+            })
+          ) : (
             <Table.Row>
-              <Table.HeaderCell scope="col">Navn</Table.HeaderCell>
-              <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
-              <Table.HeaderCell scope="col">Bostedsadresse</Table.HeaderCell>
-              <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
-              <Table.HeaderCell scope="col">Foreldre</Table.HeaderCell>
+              <Table.DataCell colSpan={5} aria-colspan={5} align="center">
+                Avdøde har ingen andre barn enn søker
+              </Table.DataCell>
             </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {barneListeIngenDoedeSoesken.length ? (
-              barneListeIngenDoedeSoesken.map((barn, i) => {
-                return <BarnRow key={i + barn.foedselsnummer} barn={barn} familieforhold={familieforhold} />
-              })
-            ) : (
-              <Table.Row>
-                <Table.DataCell colSpan={5} aria-colspan={5} align="center">
-                  Avdøde har ingen andre barn enn søker
-                </Table.DataCell>
-              </Table.Row>
-            )}
-          </Table.Body>
-        </Table>
-      </TableWrapper>
-    </div>
+          )}
+        </Table.Body>
+      </Table>
+    </VStack>
   )
 }
 

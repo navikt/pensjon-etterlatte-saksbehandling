@@ -6,10 +6,10 @@ import {
   Utfall,
 } from '~shared/types/Klage'
 import React from 'react'
-import { Heading, Select, Textarea } from '@navikt/ds-react'
+import { ErrorMessage, Heading, Select, Textarea } from '@navikt/ds-react'
 import { FieldOrNull } from '~shared/types/util'
 import { Control, Controller } from 'react-hook-form'
-import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
+import { SmalVStack } from '~components/klage/styled'
 
 export type FilledFormDataVurdering = {
   utfall: Utfall
@@ -46,58 +46,54 @@ export function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) 
   const { control } = props
 
   return (
-    <>
+    <SmalVStack gap="4">
       <Heading level="2" size="medium">
         Omgjøring
       </Heading>
 
-      <VurderingWrapper>
-        <Controller
-          rules={{
-            required: true,
-            minLength: 1,
-          }}
-          name="omgjoering.grunnForOmgjoering"
-          control={control}
-          render={({ field, fieldState }) => {
-            const { value, ...rest } = field
-            return (
-              <>
-                <Select label="Hvorfor skal saken omgjøres?" value={value ?? ''} {...rest}>
-                  <option value="">Velg grunn</option>
-                  {AARSAKER_OMGJOERING.map((aarsak) => (
-                    <option key={aarsak} value={aarsak}>
-                      {TEKSTER_AARSAK_OMGJOERING[aarsak]}
-                    </option>
-                  ))}
-                </Select>
-                {fieldState.error ? <Feilmelding>Du må velge en årsak for omgjøringen.</Feilmelding> : null}
-              </>
-            )
-          }}
-        />
-      </VurderingWrapper>
+      <Controller
+        rules={{
+          required: true,
+          minLength: 1,
+        }}
+        name="omgjoering.grunnForOmgjoering"
+        control={control}
+        render={({ field, fieldState }) => {
+          const { value, ...rest } = field
+          return (
+            <>
+              <Select label="Hvorfor skal saken omgjøres?" value={value ?? ''} {...rest}>
+                <option value="">Velg grunn</option>
+                {AARSAKER_OMGJOERING.map((aarsak) => (
+                  <option key={aarsak} value={aarsak}>
+                    {TEKSTER_AARSAK_OMGJOERING[aarsak]}
+                  </option>
+                ))}
+              </Select>
+              {fieldState.error && <ErrorMessage>Du må velge en årsak for omgjøringen.</ErrorMessage>}
+            </>
+          )
+        }}
+      />
 
-      <VurderingWrapper>
-        <Controller
-          rules={{
-            required: true,
-            minLength: 1,
-          }}
-          name="omgjoering.begrunnelse"
-          control={control}
-          render={({ field, fieldState }) => {
-            const { value, ...rest } = field
-            return (
-              <>
-                <Textarea label="Begrunnelse" value={value ?? ''} {...rest} />
+      <Controller
+        rules={{
+          required: true,
+          minLength: 1,
+        }}
+        name="omgjoering.begrunnelse"
+        control={control}
+        render={({ field, fieldState }) => {
+          const { value, ...rest } = field
+          return (
+            <>
+              <Textarea label="Begrunnelse" value={value ?? ''} {...rest} />
 
-                {fieldState.error ? <Feilmelding>Du må gi en begrunnelse for omgjøringen.</Feilmelding> : null}
-              </>
-            )
-          }}
-        />
-      </VurderingWrapper>
-    </>
+              {fieldState.error && <ErrorMessage>Du må gi en begrunnelse for omgjøringen.</ErrorMessage>}
+            </>
+          )
+        }}
+      />
+    </SmalVStack>
   )
 }

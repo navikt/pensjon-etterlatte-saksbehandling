@@ -10,9 +10,9 @@ import { oppdaterBehandlingsstatus, oppdaterBoddEllerArbeidetUtlandet } from '~s
 import { JaNei } from '~shared/types/ISvar'
 import BoddEllerArbeidetIUtlandetVisning from '~components/behandling/soeknadsoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetIUtlandetVisning'
 import styled from 'styled-components'
-import { Begrunnelse } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
 
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { Begrunnelse } from '~components/behandling/trygdetid/styled'
 
 export const BoddEllerArbeidetUtlandetVurdering = ({
   redigerbar,

@@ -7,7 +7,6 @@ import {
   slettTotalVurdering,
   VilkaarsvurderingResultat,
 } from '~shared/api/vilkaarsvurdering'
-import { VilkaarWrapper } from './styled'
 import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea, Box } from '@navikt/ds-react'
 import { svarTilTotalResultat, totalResultatTilSvar } from './utils'
 import { PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
@@ -99,7 +98,7 @@ export const Resultat = (props: Props) => {
 
   return (
     <>
-      <VilkaarWrapper>
+      <Box paddingBlock="4" paddingInline="8 4">
         <VilkaarsvurderingContent>
           <HeadingWrapper>
             <Heading size="small" level="2">
@@ -208,7 +207,7 @@ export const Resultat = (props: Props) => {
             </>
           )}
         </VilkaarsvurderingContent>
-      </VilkaarWrapper>
+      </Box>
 
       {vilkaarsvurdering.resultat && !virkningstidspunktSamsvarer && (
         <OppdatertGrunnlagAlert variant="warning">

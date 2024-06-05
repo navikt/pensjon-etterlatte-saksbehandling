@@ -5,9 +5,8 @@ import {
   ITrygdetidGrunnlagType,
   slettTrygdetidsgrunnlag,
 } from '~shared/api/trygdetid'
-import { FlexHeader, IconWrapper, TableWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { IconSize } from '~shared/types/Icon'
-import { BodyShort, Button, Detail, Heading, Table } from '@navikt/ds-react'
+import { BodyShort, Button, Detail, Heading, HStack, Table, VStack } from '@navikt/ds-react'
 import { CalendarIcon } from '@navikt/aksel-icons'
 import { formaterStringDato } from '~utils/formattering'
 import React, { useState } from 'react'
@@ -56,69 +55,65 @@ export const TrygdetidGrunnlagListe = ({
     !(trygdetidGrunnlagType === ITrygdetidGrunnlagType.FREMTIDIG && trygdetidGrunnlagListe.length > 0)
 
   return (
-    <GrunnlagListe>
-      <FlexHeader>
-        <IconWrapper>
-          <CalendarIcon fontSize={IconSize.DEFAULT} />
-        </IconWrapper>
+    <VStack gap="4">
+      <HStack gap="2">
+        <CalendarIcon fontSize={IconSize.DEFAULT} />
         <Heading size="small" level="3">
           {grunnlagTypeTekst} trygdetid
         </Heading>
-      </FlexHeader>
+      </HStack>
       {trygdetidGrunnlagType == ITrygdetidGrunnlagType.FAKTISK ? (
-        <p>
+        <BodyShort>
           Legg til aktuell trygdetid fra aktuelle land (inkludert Norge) fra avdøde var 16 år frem til og med måneden
           før hen døde. Hvis trygdetid fra flere land med ulike avtaler, må det foretas beregning innen hver avtale. Huk
           da av for &quot;Ikke med i prorata&quot; for trygdetidsperioder i land som ikke skal med i de ulike
           beregningene. Velg beste alternativ for prorata-beregning.
-        </p>
+        </BodyShort>
       ) : (
-        <p>
+        <BodyShort>
           Det registreres maks fremtidig trygdetid fra dødsdato til og med kalenderåret avdøde hadde blitt 66 år. Denne
           vil automatisk bli justert i beregningen hvis faktisk trygdetid er mindre enn 4/5 av opptjeningstiden. Hvis
           det er annen grunn for reduksjon av fremtidig trygdetid må perioden redigeres.
-        </p>
+        </BodyShort>
       )}
       {trygdetidGrunnlagListe.length > 0 && (
-        <TableWrapper>
-          <Table size="medium">
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell />
-                <Table.HeaderCell scope="col">Land</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Fra dato</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Til dato</Table.HeaderCell>
-                <Table.HeaderCell scope="col">{grunnlagTypeTekst} trygdetid</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Kilde</Table.HeaderCell>
-                {redigerbar && (
-                  <>
-                    <Table.HeaderCell scope="col"> </Table.HeaderCell>
-                    <Table.HeaderCell scope="col"> </Table.HeaderCell>
-                  </>
-                )}
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {trygdetidGrunnlagListe.map((periode) => {
-                return (
-                  <PeriodeRow
-                    trygdetidGrunnlag={periode}
-                    behandlingId={trygdetid.behandlingId}
-                    trygdetidId={trygdetid.id}
-                    setTrygdetid={setTrygdetid}
-                    endrePeriode={(trygdetidGrunnlagId) => {
-                      setEndreModus({ status: true, trygdetidGrunnlagId: trygdetidGrunnlagId })
-                    }}
-                    landListe={landListe}
-                    key={periode.id}
-                    redigerbar={redigerbar}
-                    trygdetidGrunnlagType={trygdetidGrunnlagType}
-                  />
-                )
-              })}
-            </Table.Body>
-          </Table>
-        </TableWrapper>
+        <Table size="medium">
+          <Table.Header>
+            <Table.Row>
+              <Table.HeaderCell />
+              <Table.HeaderCell scope="col">Land</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Fra dato</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Til dato</Table.HeaderCell>
+              <Table.HeaderCell scope="col">{grunnlagTypeTekst} trygdetid</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Kilde</Table.HeaderCell>
+              {redigerbar && (
+                <>
+                  <Table.HeaderCell scope="col"> </Table.HeaderCell>
+                  <Table.HeaderCell scope="col"> </Table.HeaderCell>
+                </>
+              )}
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {trygdetidGrunnlagListe.map((periode) => {
+              return (
+                <PeriodeRow
+                  trygdetidGrunnlag={periode}
+                  behandlingId={trygdetid.behandlingId}
+                  trygdetidId={trygdetid.id}
+                  setTrygdetid={setTrygdetid}
+                  endrePeriode={(trygdetidGrunnlagId) => {
+                    setEndreModus({ status: true, trygdetidGrunnlagId: trygdetidGrunnlagId })
+                  }}
+                  landListe={landListe}
+                  key={periode.id}
+                  redigerbar={redigerbar}
+                  trygdetidGrunnlagType={trygdetidGrunnlagType}
+                />
+              )
+            })}
+          </Table.Body>
+        </Table>
       )}
 
       <NyEllerOppdatertPeriode>
@@ -138,7 +133,7 @@ export const TrygdetidGrunnlagListe = ({
           </Button>
         )}
       </NyEllerOppdatertPeriode>
-    </GrunnlagListe>
+    </VStack>
   )
 }
 
@@ -246,11 +241,6 @@ const PeriodeRow = ({
 const ExpandableInfo = styled.div`
   display: inline-block;
   margin-right: 50px;
-`
-
-const GrunnlagListe = styled.div`
-  margin-top: 2em;
-  margin-bottom: 2em;
 `
 
 const Datofelt = styled.div`

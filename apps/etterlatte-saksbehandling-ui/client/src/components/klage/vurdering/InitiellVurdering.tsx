@@ -1,4 +1,4 @@
-import { Alert, BodyLong, Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Heading, Radio, Textarea } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { IniteltUtfallMedBegrunnelseDto, Klage, teksterKlageutfall, Utfall } from '~shared/types/Klage'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -8,12 +8,13 @@ import { isPending } from '~shared/api/apiUtils'
 import { addKlage } from '~store/reducers/KlageReducer'
 import { useAppDispatch } from '~store/Store'
 import { InitiellVurderingVisningContent } from '~components/klage/vurdering/InitiellVurderingVisning'
-import { BredVurderingWrapper, VurderingWrapper } from '~components/klage/styled'
+import { SmalVStack } from '~components/klage/styled'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { FieldOrNull } from '~shared/types/util'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { ButtonNavigerTilBrev } from '~components/klage/vurdering/KlageVurderingFelles'
+import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 
 const getTextFromutfall = (utfall: Utfall): string => {
   switch (utfall) {
@@ -72,60 +73,50 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
   const stoetterDelvisOmgjoering = useFeatureEnabledMedDefault('pensjon-etterlatte.klage-delvis-omgjoering', false)
 
   return (
-    <>
+    <SmalVStack gap="4">
       <Heading level="2" size="medium" spacing>
         Første vurdering
       </Heading>
       <>
         {redigeres ? (
           <form onSubmit={handleSubmit(lagreInitieltUtfall)}>
-            <Controller
-              name="utfall"
-              control={control}
-              rules={{
-                required: {
-                  value: true,
-                  message: 'Du må velge et initielt utfall.',
-                },
-              }}
-              render={({ field, fieldState }) => {
-                return (
-                  <VurderingWrapper>
-                    <RadioGroup legend="" {...field} error={fieldState.error?.message}>
-                      <Radio value={Utfall.OMGJOERING}>Omgjøring av vedtak</Radio>
-                      {stoetterDelvisOmgjoering && (
-                        <Radio value={Utfall.DELVIS_OMGJOERING}>Delvis omgjøring av vedtak</Radio>
-                      )}
-                      <Radio value={Utfall.STADFESTE_VEDTAK}>Stadfeste vedtaket</Radio>
-                    </RadioGroup>
-                  </VurderingWrapper>
-                )
-              }}
-            />
-            {formUtfall && (
-              <>
-                <BredVurderingWrapper>
+            <SmalVStack gap="4">
+              <ControlledRadioGruppe
+                name="utfall"
+                control={control}
+                legend=""
+                errorVedTomInput="Du må velge et initielt utfall"
+                radios={
+                  <>
+                    <Radio value={Utfall.OMGJOERING}>Omgjøring av vedtak</Radio>
+                    {stoetterDelvisOmgjoering && (
+                      <Radio value={Utfall.DELVIS_OMGJOERING}>Delvis omgjøring av vedtak</Radio>
+                    )}
+                    <Radio value={Utfall.STADFESTE_VEDTAK}>Stadfeste vedtaket</Radio>
+                  </>
+                }
+              />
+              {formUtfall && (
+                <>
                   <Textarea size="medium" label={getTextFromutfall(formUtfall)} {...register('begrunnelse')} />
-                </BredVurderingWrapper>
-
-                <BredVurderingWrapper>
-                  <Button type="submit" variant="primary" loading={isPending(lagreInitiellStatus)}>
-                    Lagre vurdering
-                  </Button>
+                  <div>
+                    <Button type="submit" variant="primary" loading={isPending(lagreInitiellStatus)} size="small">
+                      Lagre vurdering
+                    </Button>
+                  </div>
                   {isFailureHandler({
                     apiResult: lagreInitiellStatus,
                     errorMessage:
                       'Kunne ikke lagre initielt utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
                   })}
-                </BredVurderingWrapper>
-              </>
-            )}
+                </>
+              )}
+            </SmalVStack>
           </form>
         ) : (
-          <>
+          <div>
             <InitiellVurderingVisningContent klage={klage} />
             <Button
-              style={{ marginBottom: '3em' }}
               type="button"
               size="small"
               icon={<PencilIcon />}
@@ -134,23 +125,21 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
             >
               Rediger
             </Button>
-          </>
+          </div>
         )}
         {klage.initieltUtfall?.utfallMedBegrunnelse?.utfall === Utfall.STADFESTE_VEDTAK && !klage.utfall && (
-          <VurderingWrapper>
-            <Alert variant="info">
-              <Heading level="2" size="small">
-                Du må sende brev til klager
-              </Heading>
-              <BodyLong spacing>
-                Siden vurderingen er satt til {teksterKlageutfall[Utfall.STADFESTE_VEDTAK]} må du opprette et manuelt
-                kvitteringsbrev til klager for å opplyse om saksbehandlingstid.
-              </BodyLong>
-              <ButtonNavigerTilBrev klage={klage} />
-            </Alert>
-          </VurderingWrapper>
+          <Alert variant="info">
+            <Heading level="2" size="small">
+              Du må sende brev til klager
+            </Heading>
+            <BodyLong spacing>
+              Siden vurderingen er satt til {teksterKlageutfall[Utfall.STADFESTE_VEDTAK]} må du opprette et manuelt
+              kvitteringsbrev til klager for å opplyse om saksbehandlingstid.
+            </BodyLong>
+            <ButtonNavigerTilBrev klage={klage} />
+          </Alert>
         )}
       </>
-    </>
+    </SmalVStack>
   )
 }

@@ -2,7 +2,7 @@ import { Control, Controller, useFieldArray, UseFormWatch } from 'react-hook-for
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import PeriodeAccordion from '~components/behandling/beregningsgrunnlag/PeriodeAccordion'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
-import { BodyShort, Button, Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { BodyShort, Button, HStack, Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { format } from 'date-fns'
 import { Soesken } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Soesken'
 import React from 'react'
@@ -123,14 +123,14 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
           return (
             soeskenFinnes && (
               <li key={item.id}>
-                <SoeskenContainer>
+                <HStack gap="16">
                   <Soesken person={fnrTilSoesken[item.foedselsnummer]} familieforhold={familieforhold!} />
                   <Controller
                     name={`soeskenMedIBeregning.${index}.data.${k}`}
                     control={control}
                     render={(soesken) =>
                       behandles ? (
-                        <RadioGroupRow
+                        <RadioGroup
                           legend="Oppdras sammen"
                           value={soesken.field.value?.skalBrukes ?? null}
                           onChange={(value) => {
@@ -142,7 +142,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
                         >
                           <Radio value={true}>Ja</Radio>
                           <Radio value={false}>Nei</Radio>
-                        </RadioGroupRow>
+                        </RadioGroup>
                       ) : (
                         <OppdrasSammenLes>
                           <strong>Oppdras sammen</strong>
@@ -151,7 +151,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
                       )
                     }
                   />
-                </SoeskenContainer>
+                </HStack>
               </li>
             )
           )
@@ -206,30 +206,11 @@ const OppdrasSammenLes = styled.div`
   flex-direction: column;
 `
 
-const SoeskenContainer = styled.div`
-  display: flex;
-  align-items: center;
-`
-
 const MaanedvelgerMedUtnulling = styled.div`
   display: flex;
   justify-content: flex-start;
   flex-direction: row;
   gap: 1em;
-`
-
-const RadioGroupRow = styled(RadioGroup)`
-  margin-top: 1.2em;
-
-  .navds-radio-buttons {
-    display: flex;
-    flex-direction: row;
-    gap: 12px;
-  }
-
-  legend {
-    padding-top: 9px;
-  }
 `
 
 export default SoeskenjusteringPeriode

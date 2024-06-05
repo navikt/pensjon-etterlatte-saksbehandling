@@ -2,7 +2,7 @@ import { BodyShort, Heading, Radio, RadioGroup } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
-import { Begrunnelse } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
+import { Begrunnelse } from '~components/behandling/trygdetid/styled'
 
 type BeregningsgrunnlagMetodeProps = {
   redigerbar: boolean

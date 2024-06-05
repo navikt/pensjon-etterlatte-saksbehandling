@@ -1,9 +1,7 @@
-import { FlexHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
-import { BodyShort, Button, Heading, TextField } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, HStack, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { ITrygdetid } from '~shared/api/trygdetid'
 import { useEffect, useState } from 'react'
-import { FormKnapper } from './styled'
 import { SakType } from '~shared/types/sak'
 
 interface Props {
@@ -49,11 +47,11 @@ export const OverstyrtTrygdetid = ({
   return (
     <Overstyrt>
       {(redigerbar || overstyrtNorskPoengaar !== undefined) && (
-        <FlexHeader>
+        <HStack gap="2">
           <Heading size="small" level="4">
             Poengår i Norge - registreres kun ved eksportvurdering
           </Heading>
-        </FlexHeader>
+        </HStack>
       )}
       {!redigerbar && overstyrtNorskPoengaar !== undefined && (
         <>
@@ -73,7 +71,7 @@ export const OverstyrtTrygdetid = ({
             onChange={(e) => setOverstyrtNorskPoengaar(e.target.value === '' ? undefined : Number(e.target.value))}
             onBlur={() => overstyrTrygdetidPoengaar({ ...trygdetid, overstyrtNorskPoengaar: overstyrtNorskPoengaar })}
           />
-          <FormKnapper>
+          <Box paddingBlock="4 0" paddingInline="0 4">
             <Button
               size="small"
               onClick={(event) => {
@@ -85,7 +83,7 @@ export const OverstyrtTrygdetid = ({
             >
               Slett
             </Button>
-          </FormKnapper>
+          </Box>
         </>
       )}
     </Overstyrt>

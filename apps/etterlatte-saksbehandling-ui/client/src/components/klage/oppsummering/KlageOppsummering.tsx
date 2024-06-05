@@ -1,6 +1,5 @@
 import { BodyShort, Box, Button, Heading, HStack } from '@navikt/ds-react'
 import React, { useCallback, useEffect } from 'react'
-import { Innhold } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
 import { useKlage } from '~components/klage/useKlage'
 import Spinner from '~shared/Spinner'
@@ -54,7 +53,7 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
         </Heading>
       </Box>
 
-      <Innhold>
+      <Box paddingBlock="8" paddingInline="16 8">
         <Heading size="medium" level="2">
           Utfall
         </Heading>
@@ -66,12 +65,12 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
           <VisInnstilling innstilling={utfall.innstilling} sakId={sak.id} kanRedigere={kanRedigere} />
         ) : null}
 
-        {utfall?.utfall === 'DELVIS_OMGJOERING' ||
-        utfall?.utfall === 'OMGJOERING' ||
-        utfall?.utfall === 'AVVIST_MED_OMGJOERING' ? (
+        {(utfall?.utfall === 'DELVIS_OMGJOERING' ||
+          utfall?.utfall === 'OMGJOERING' ||
+          utfall?.utfall === 'AVVIST_MED_OMGJOERING') && (
           <VisOmgjoering omgjoering={utfall.omgjoering} kanRedigere={kanRedigere} />
-        ) : null}
-      </Innhold>
+        )}
+      </Box>
 
       {isFailureHandler({
         apiResult: ferdigstillStatus,

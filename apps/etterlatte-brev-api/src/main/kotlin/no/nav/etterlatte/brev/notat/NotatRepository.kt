@@ -20,7 +20,7 @@ class NotatRepository(private val ds: DataSource) {
     fun hent(id: NotatID): Notat =
         using(sessionOf(ds)) {
             it.run(
-                queryOf("SELECT * FROM notat WHERE id = ?", id)
+                queryOf("SELECT id, sak_id, journalpost_id, tittel, opprettet FROM notat WHERE id = ?", id)
                     .map(tilNotat)
                     .asSingle,
             )
@@ -29,7 +29,7 @@ class NotatRepository(private val ds: DataSource) {
     fun hentForSak(sakId: Long): List<Notat> =
         using(sessionOf(ds)) {
             it.run(
-                queryOf("SELECT * FROM notat WHERE sak_id = ?", sakId)
+                queryOf("SELECT id, sak_id, journalpost_id, tittel, opprettet FROM notat WHERE sak_id = ?", sakId)
                     .map(tilNotat)
                     .asList,
             )

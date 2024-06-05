@@ -8,9 +8,9 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
-import java.util.UUID
 
 /**
  * Klient mot ey-pdfgen
@@ -28,7 +28,7 @@ class PdfGeneratorKlient(private val klient: HttpClient, private val apiUrl: Str
         logger.info("Genererer PDF med ey-pdfgen")
 
         return klient.post("$apiUrl/notat/tom_mal") {
-            header("X-Correlation-ID", MDC.get("X-Correlation-ID") ?: UUID.randomUUID().toString())
+            header(CORRELATION_ID, getCorrelationId())
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()

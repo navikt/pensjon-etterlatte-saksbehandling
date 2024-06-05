@@ -108,13 +108,14 @@ class NotatRepository(private val ds: DataSource) {
                 tx.run(
                     queryOf(
                         """
-                        INSERT INTO notat (sak_id, tittel, payload)
-                        VALUES (:sak_id, :tittel, :payload)
+                        INSERT INTO notat (sak_id, tittel, payload, opprettet)
+                        VALUES (:sak_id, :tittel, :payload, :opprettet)
                     """,
                         mapOf(
                             "sak_id" to notat.sakId,
                             "tittel" to notat.tittel,
                             "payload" to notat.payload.toJson(),
+                            "opprettet" to Tidspunkt.now().toTimestamp(),
                         ),
                     ).asUpdateAndReturnGeneratedKey,
                 )

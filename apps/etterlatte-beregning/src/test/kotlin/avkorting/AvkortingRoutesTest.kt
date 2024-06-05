@@ -98,8 +98,10 @@ class AvkortingRoutesTest {
         val avkorting =
             Avkorting(
                 aarsoppgjoer =
-                    aarsoppgjoer(
-                        inntektsavkorting = inntektsavkorting,
+                    listOf(
+                        aarsoppgjoer(
+                            inntektsavkorting = inntektsavkorting,
+                        ),
                     ),
                 avkortetYtelseFraVirkningstidspunkt = avkortetYtelse,
                 avkortetYtelseForrigeVedtak = avkortetYtelse,

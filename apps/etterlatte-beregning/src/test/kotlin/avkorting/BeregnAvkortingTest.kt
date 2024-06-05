@@ -24,7 +24,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Beregner avkortet ytelse for foerstegangsbehandling`() {
         val avkorting = `Avkorting foerstegangsbehandling`()
-        with(avkorting.aarsoppgjoer.avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
             size shouldBe 2
             get(0).shouldBeEqualToIgnoringFields(
                 avkortetYtelse(
@@ -64,7 +64,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering inntektsendring - foerste inntektsendring`() {
         val avkorting = `Avkorting ny inntekt en`()
-        with(avkorting.aarsoppgjoer.avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
             size shouldBe 3
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -146,7 +146,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering inntektsendring - andre inntektsendring`() {
         val avkorting = `Avkorting ny inntekt to`()
-        with(avkorting.aarsoppgjoer.avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
             size shouldBe 4
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -260,7 +260,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering hevet beregnng`() {
         val avkorting = `Avkorting revurdert beregning`()
-        with(avkorting.aarsoppgjoer.avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
             size shouldBe 4
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -374,7 +374,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Revurdering inntektsendring - korrigere siste inntekt`() {
         val avkorting = `Avkorting korrigere siste inntekt`()
-        with(avkorting.aarsoppgjoer.avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
             size shouldBe 4
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -488,7 +488,7 @@ class BeregnAvkortingTest {
     @Test
     fun `Skal kunne reberegne avkorting uten endring for en revurdering med virk i mellom inntektsperioder`() {
         val avkorting = `Revurdering med virk mellom inntektsperioder`()
-        with(avkorting.aarsoppgjoer.avkortetYtelseAar) {
+        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
             size shouldBe 5
             get(0).asClue {
                 it.shouldBeEqualToIgnoringFields(
@@ -623,32 +623,31 @@ class BeregnAvkortingTest {
     }
 
     private fun `Avkorting foerstegangsbehandling`() =
-        Avkorting()
-            .beregnAvkortingMedNyttGrunnlag(
-                nyttGrunnlag =
-                    avkortinggrunnlagLagre(
-                        aarsinntekt = 300000,
-                        fratrekkInnAar = 50000,
-                    ),
-                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
-                virkningstidspunkt = YearMonth.of(2024, Month.MARCH),
-                bruker = bruker,
-                beregning =
-                    beregning(
-                        beregninger =
-                            listOf(
-                                beregningsperiode(
-                                    datoFOM = YearMonth.of(2024, Month.MARCH),
-                                    datoTOM = YearMonth.of(2024, Month.APRIL),
-                                    utbetaltBeloep = 15676,
-                                ),
-                                beregningsperiode(
-                                    datoFOM = YearMonth.of(2024, Month.MAY),
-                                    utbetaltBeloep = 16682,
-                                ),
+        Avkorting().beregnAvkortingMedNyttGrunnlag(
+            nyttGrunnlag =
+                avkortinggrunnlagLagre(
+                    aarsinntekt = 300000,
+                    fratrekkInnAar = 50000,
+                ),
+            behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+            virkningstidspunkt = YearMonth.of(2024, Month.MARCH),
+            bruker = bruker,
+            beregning =
+                beregning(
+                    beregninger =
+                        listOf(
+                            beregningsperiode(
+                                datoFOM = YearMonth.of(2024, Month.MARCH),
+                                datoTOM = YearMonth.of(2024, Month.APRIL),
+                                utbetaltBeloep = 15676,
                             ),
-                    ),
-            )
+                            beregningsperiode(
+                                datoFOM = YearMonth.of(2024, Month.MAY),
+                                utbetaltBeloep = 16682,
+                            ),
+                        ),
+                ),
+        )
 
     private fun `Avkorting ny inntekt en`() =
         `Avkorting foerstegangsbehandling`()
@@ -726,7 +725,7 @@ class BeregnAvkortingTest {
                 it.beregnAvkortingMedNyttGrunnlag(
                     nyttGrunnlag =
                         avkortinggrunnlagLagre(
-                            id = it.aarsoppgjoer.inntektsavkorting.last().grunnlag.id,
+                            id = it.aarsoppgjoer.single().inntektsavkorting.last().grunnlag.id,
                             aarsinntekt = 425000,
                             fratrekkInnAar = 50000,
                         ),

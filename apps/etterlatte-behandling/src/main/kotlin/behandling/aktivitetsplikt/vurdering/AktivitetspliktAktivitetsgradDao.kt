@@ -41,6 +41,32 @@ class AktivitetspliktAktivitetsgradDao(private val connectionAutoclosing: Connec
         }
     }
 
+    fun oppdaterAktivitetsgrad(
+        aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
+        kilde: Grunnlagsopplysning.Kilde,
+        behandlingId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                        UPDATE aktivitetsplikt_aktivitetsgrad
+                        SET  aktivitetsgrad = ?, fom = ?, endret = ?, beskrivelse = ? 
+                        WHERE id = ? AND behandling_id = ?
+                    """.trimMargin(),
+                )
+
+            stmt.setString(1, aktivitetsgrad.aktivitetsgrad.name)
+            stmt.setDate(2, Date.valueOf(aktivitetsgrad.fom))
+            stmt.setString(3, kilde.toJson())
+            stmt.setString(4, aktivitetsgrad.beskrivelse)
+            stmt.setObject(5, requireNotNull(aktivitetsgrad.id))
+            stmt.setObject(6, behandlingId)
+
+            stmt.executeUpdate()
+        }
+    }
+
     fun hentAktivitetsgradForOppgave(oppgaveId: UUID): AktivitetspliktAktivitetsgrad? =
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -92,6 +118,25 @@ class AktivitetspliktAktivitetsgradDao(private val connectionAutoclosing: Connec
                 stmt.executeQuery().singleOrNull { toAktivitetsgrad() }
             }
         }
+
+    fun slettAktivitetsgrad(
+        aktivitetId: UUID,
+        behandlingId: UUID,
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
+                        DELETE FROM aktivitetsplikt_aktivitetsgrad
+                        WHERE id = ? AND behandling_id = ?
+                    """.trimMargin(),
+                )
+            stmt.setObject(1, aktivitetId)
+            stmt.setObject(2, behandlingId)
+
+            stmt.executeUpdate()
+        }
+    }
 
     private fun ResultSet.toAktivitetsgrad() =
         AktivitetspliktAktivitetsgrad(

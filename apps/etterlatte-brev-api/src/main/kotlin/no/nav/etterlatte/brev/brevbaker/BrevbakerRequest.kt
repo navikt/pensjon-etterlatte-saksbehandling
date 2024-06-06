@@ -54,7 +54,7 @@ data class BrevbakerRequest internal constructor(
             return if (erMigrering(brevKode) && harVerge) {
                 soekerOgEventuellVerge.soeker.formaterNavn() + " ved verge"
             } else if (harVerge) {
-                soekerOgEventuellVerge.verge?.navn()
+                soekerOgEventuellVerge.verge?.navn() // TODO: her brukes verge fra grunnlag
                     ?: (soekerOgEventuellVerge.soeker.formaterNavn() + " ved verge")
             } else {
                 null

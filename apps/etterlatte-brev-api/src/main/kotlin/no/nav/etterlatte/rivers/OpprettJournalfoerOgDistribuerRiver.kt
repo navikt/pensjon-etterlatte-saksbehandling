@@ -73,7 +73,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         val brevOgData =
             try {
                 retryOgPakkUt {
-                    brevoppretter.opprettBrev(
+                    brevoppretter.opprettBrevMedPdlDataForPersoner(
                         sakId = sakId,
                         behandlingId = null,
                         bruker = brukerTokenInfo,

@@ -91,7 +91,7 @@ fun Grunnlag.mapVerge(
 ): Verge? =
     with(this) {
         val relevantVerge =
-            hentRelevantVerge(
+            hentRelevantVerge( // Bruker kun søker for å finne verge.., sak uten behandling har bare det hvis det ikke er fra dødsmelding
                 soeker.hentSoekerPdlV1()!!.verdi.vergemaalEllerFremtidsfullmakt,
                 soeker.hentFoedselsnummer()?.verdi,
             )

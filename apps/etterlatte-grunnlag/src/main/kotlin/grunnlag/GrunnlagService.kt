@@ -508,7 +508,7 @@ class RealGrunnlagService(
     override suspend fun opprettGrunnlagForSak(
         sakId: Long,
         opplysningsbehov: Opplysningsbehov,
-    ) {
+    ) { // TODO: refresh av denne for å bruke oppdatert vergeinfo for manuelt brev
         val grunnlag = grunnlagHenter.hentGrunnlagsdata(opplysningsbehov)
 
         grunnlag.personopplysninger.forEach { fnrToOpplysning ->

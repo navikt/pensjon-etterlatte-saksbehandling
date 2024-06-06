@@ -32,13 +32,13 @@ class BrevService(
         return db.hentBrevForSak(sakId)
     }
 
-    suspend fun opprettBrev(
+    suspend fun opprettNyttBrev(
         sakId: Long,
         bruker: BrukerTokenInfo,
         brevkode: EtterlatteBrevKode,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): Brev =
-        brevoppretter.opprettBrev(
+        brevoppretter.opprettBrevMedPdlDataForPersoner(
             sakId = sakId,
             behandlingId = null,
             bruker = bruker,

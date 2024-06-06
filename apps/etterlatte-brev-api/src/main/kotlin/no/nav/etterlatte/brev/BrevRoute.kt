@@ -160,12 +160,12 @@ fun Route.brevRoute(
             }
         }
 
-        post {
+        post { // TODO: sjekk om unused, erstattet med /spesifikk?
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 logger.info("Oppretter nytt brev på sak=$sakId)")
 
                 measureTimedValue {
-                    service.opprettBrev(
+                    service.opprettNyttBrev(
                         sakId,
                         brukerTokenInfo,
                         Brevkoder.TOMT_INFORMASJONSBREV.redigering,
@@ -183,7 +183,7 @@ fun Route.brevRoute(
                 val brevParametre = call.receive<BrevParametre>()
 
                 measureTimedValue {
-                    service.opprettBrev(
+                    service.opprettNyttBrev(
                         sakId,
                         brukerTokenInfo,
                         brevParametre.brevkode,

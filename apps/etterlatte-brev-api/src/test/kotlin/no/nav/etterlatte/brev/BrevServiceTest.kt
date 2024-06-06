@@ -89,9 +89,9 @@ internal class BrevServiceTest {
         fun `Hent brev tilhoerende sak`() {
             every { db.hentBrevForSak(any()) } returns
                 listOf(
-                    opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL),
-                    opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL),
-                    opprettBrev(Status.FERDIGSTILT, BrevProsessType.AUTOMATISK),
+                    opprettNyttBrev(Status.OPPRETTET, BrevProsessType.MANUELL),
+                    opprettNyttBrev(Status.OPPRETTET, BrevProsessType.MANUELL),
+                    opprettNyttBrev(Status.FERDIGSTILT, BrevProsessType.AUTOMATISK),
                 )
 
             val sakId = Random.nextLong()
@@ -108,7 +108,7 @@ internal class BrevServiceTest {
     inner class PayloadManuelleBrev {
         @Test
         fun `Hent payload`() {
-            val brev = opprettBrev(Status.OPPRETTET, mockk())
+            val brev = opprettNyttBrev(Status.OPPRETTET, mockk())
             every { db.hentBrev(any()) } returns brev
 
             val payload = Slate(listOf(Slate.Element(Slate.ElementType.PARAGRAPH)))
@@ -130,7 +130,7 @@ internal class BrevServiceTest {
 
         @Test
         fun `Hent payload - finnes ikke`() {
-            val brev = opprettBrev(Status.OPPRETTET, mockk())
+            val brev = opprettNyttBrev(Status.OPPRETTET, mockk())
             every { db.hentBrevPayload(any()) } returns null
             every { db.hentBrevPayloadVedlegg(any()) } returns null
 
@@ -153,7 +153,7 @@ internal class BrevServiceTest {
         @ParameterizedTest
         @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
         fun `Oppdater tittel - status kan endres`(status: Status) {
-            val brev = opprettBrev(status, BrevProsessType.MANUELL)
+            val brev = opprettNyttBrev(status, BrevProsessType.MANUELL)
 
             every { db.hentBrev(any()) } returns brev
 
@@ -169,7 +169,7 @@ internal class BrevServiceTest {
         @ParameterizedTest
         @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.EXCLUDE)
         fun `Oppdater tittel - kan IKKE endres`(status: Status) {
-            val brev = opprettBrev(status, BrevProsessType.MANUELL)
+            val brev = opprettNyttBrev(status, BrevProsessType.MANUELL)
 
             every { db.hentBrev(any()) } returns brev
 
@@ -188,7 +188,7 @@ internal class BrevServiceTest {
         @ParameterizedTest
         @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
         fun `Sletting av brev som er under arbeid skal virke`(status: Status) {
-            val brev = opprettBrev(status, BrevProsessType.MANUELL)
+            val brev = opprettNyttBrev(status, BrevProsessType.MANUELL)
 
             every { db.hentBrev(any()) } returns brev
 
@@ -203,7 +203,7 @@ internal class BrevServiceTest {
         @ParameterizedTest
         @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.EXCLUDE)
         fun `Brev som ikke lenger er under arbeid skal IKKE kunne slettes`(status: Status) {
-            val brev = opprettBrev(status, BrevProsessType.MANUELL)
+            val brev = opprettNyttBrev(status, BrevProsessType.MANUELL)
 
             every { db.hentBrev(any()) } returns brev
 
@@ -223,7 +223,7 @@ internal class BrevServiceTest {
         @EnumSource(Status::class)
         fun `Skal ikke kunne slette vedtaksbrev, uavhengig av status`(status: Status) {
             val behandlingId = UUID.randomUUID()
-            val brev = opprettBrev(status, BrevProsessType.MANUELL, behandlingId)
+            val brev = opprettNyttBrev(status, BrevProsessType.MANUELL, behandlingId)
 
             every { db.hentBrev(any()) } returns brev
 
@@ -237,7 +237,7 @@ internal class BrevServiceTest {
         }
     }
 
-    private fun opprettBrev(
+    private fun opprettNyttBrev(
         status: Status,
         prosessType: BrevProsessType,
         behandlingId: UUID? = null,

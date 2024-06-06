@@ -249,14 +249,14 @@ class AktivitetspliktService(
             }
 
         val aktivitetspliktDato = request.behandlingsmaaned.atDay(1)
-        return when (oppfyllerAktivitetsplikt(request.sakId, aktivitetspliktDato)) {
-            true -> OpprettRevurderingForAktivitetspliktResponse(forrigeBehandlingId = forrigeBehandling.id)
-            false -> {
-                inTransaction {
-                    when (behandlingService.hentBehandlingerForSak(request.sakId).any { it.status.aapenBehandling() }) {
-                        true -> opprettOppgave(request, forrigeBehandling)
-                        false -> opprettRevurdering(request, forrigeBehandling, aktivitetspliktDato, persongalleri)
-                    }
+        return if (oppfyllerAktivitetsplikt(request.sakId, aktivitetspliktDato)) {
+            OpprettRevurderingForAktivitetspliktResponse(forrigeBehandlingId = forrigeBehandling.id)
+        } else {
+            inTransaction {
+                if (behandlingService.hentBehandlingerForSak(request.sakId).any { it.status.aapenBehandling() }) {
+                    opprettOppgave(request, forrigeBehandling)
+                } else {
+                    opprettRevurdering(request, forrigeBehandling, aktivitetspliktDato, persongalleri)
                 }
             }
         }

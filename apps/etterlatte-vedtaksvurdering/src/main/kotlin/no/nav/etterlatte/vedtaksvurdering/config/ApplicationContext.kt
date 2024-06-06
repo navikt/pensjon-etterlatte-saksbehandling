@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakOgBeregningSammenlignerJob
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
 import no.nav.etterlatte.vedtaksvurdering.AutomatiskBehandlingService
@@ -65,11 +66,13 @@ class ApplicationContext {
             ),
         )
     val trygdetidKlient = TrygdetidKlient(config, httpClient())
+    val repository = VedtaksvurderingRepository.using(dataSource)
     val vedtaksvurderingService =
-        VedtaksvurderingService(repository = VedtaksvurderingRepository.using(dataSource))
+        VedtaksvurderingService(repository = repository)
+    val beregningKlient = BeregningKlientImpl(config, httpClient())
     val vedtakBehandlingService =
         VedtakBehandlingService(
-            repository = VedtaksvurderingRepository.using(dataSource),
+            repository = repository,
             featureToggleService =
                 FeatureToggleService.initialiser(
                     FeatureToggleProperties(
@@ -78,7 +81,7 @@ class ApplicationContext {
                         apiKey = config.getString("funksjonsbrytere.unleash.token"),
                     ),
                 ),
-            beregningKlient = BeregningKlientImpl(config, httpClient()),
+            beregningKlient = beregningKlient,
             vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
             behandlingKlient = behandlingKlient,
             samordningsKlient = samKlient,
@@ -162,6 +165,14 @@ class ApplicationContext {
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(1, ChronoUnit.MINUTES),
+        )
+    }
+
+    val sammenlignerJob: VedtakOgBeregningSammenlignerJob by lazy {
+        VedtakOgBeregningSammenlignerJob(
+            beregningKlient = beregningKlient,
+            vedtaksvurderingRepository = repository,
+            erLeader = { leaderElectionKlient.isLeader() },
         )
     }
 }

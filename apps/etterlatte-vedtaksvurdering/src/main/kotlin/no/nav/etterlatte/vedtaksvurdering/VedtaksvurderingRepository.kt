@@ -509,4 +509,21 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             return@session hentVedtakNonNull(behandlingId, this)
         }
     }
+
+    fun hentAlleLoependeVedtak(tx: TransactionalSession? = null) =
+        tx.session {
+            hentListe(
+                """
+                select behandlingId, saktype from vedtak 
+                where vedtaktype='${VedtakStatus.IVERKSATT.name}'
+                """.trimIndent(),
+            ) { row ->
+                BehandlingOgSaktype(
+                    behandlingId = row.string("behandlingId").let { UUID.fromString(it) },
+                    sakType = SakType.valueOf(row.string("saktype")),
+                )
+            }
+        }
 }
+
+data class BehandlingOgSaktype(val behandlingId: UUID, val sakType: SakType)

@@ -29,6 +29,7 @@ class Server(private val context: ApplicationContext) {
                     listOf(
                         context.metrikkerJob,
                         context.outboxJob,
+                        context.sammenlignerJob,
                     ),
             ) {
                 vedtaksvurderingRoute(

@@ -55,7 +55,7 @@ fun Route.beregning(
                         behandlingId,
                         call.receive<OverstyrBeregningDTO>(),
                         brukerTokenInfo,
-                    ).toDTO()
+                    )!!.toDTO()
 
                 call.respond(overstyrBeregning)
             }

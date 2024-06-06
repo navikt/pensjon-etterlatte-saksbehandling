@@ -134,7 +134,8 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: GosysOppgave }) => {
                         Ferdigstill oppgave
                       </Dropdown.Menu.List.Item>
 
-                      {!!journalpostId && (
+                      {/* Vi støtter foreløpig KUN flytting av journalføringsoppgaver */}
+                      {!!journalpostId && oppgavetype.includes('JFR') && (
                         <Dropdown.Menu.List.Item onClick={() => setToggle({ konverter: true })}>
                           Overfør til Gjenny
                         </Dropdown.Menu.List.Item>

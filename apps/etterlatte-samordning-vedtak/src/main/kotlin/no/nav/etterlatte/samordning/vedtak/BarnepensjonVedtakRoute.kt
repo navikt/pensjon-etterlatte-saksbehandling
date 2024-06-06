@@ -18,22 +18,20 @@ fun Route.barnepensjonVedtakRoute(
     samordningVedtakService: SamordningVedtakService,
     config: Config,
 ) {
-    route("api/barnepensjon/vedtak") {
+    route("api/barnepensjon/har-loepende-bp") {
         install(AuthorizationPlugin) {
             roles = setOf("les-bp-vedtak", config.getString("roller.pensjon-saksbehandler"))
             issuers = setOf("azure")
         }
 
         get {
-            val fomDato = call.dato("fomDato") ?: throw ManglerFomDatoException()
-            val tomDato = call.dato("tomDato")
+            val paaDato = call.dato("paaDato") ?: throw ManglerFomDatoException()
             val fnr = call.fnr
 
-            val vedtakliste =
+            val harLoependeBarnepensjonYtelsePaaDato =
                 try {
-                    samordningVedtakService.hentVedtaksliste(
-                        fomDato = fomDato,
-                        tomDato = tomDato,
+                    samordningVedtakService.harLoependeYtelsePaaDato(
+                        dato = paaDato,
                         fnr = Folkeregisteridentifikator.of(fnr),
                         sakType = SakType.BARNEPENSJON,
                         context = PensjonContext,
@@ -42,7 +40,11 @@ fun Route.barnepensjonVedtakRoute(
                     return@get call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }
 
-            call.respond(vedtakliste)
+            call.respond(
+                mapOf(
+                    "barnepensjon" to harLoependeBarnepensjonYtelsePaaDato,
+                ),
+            )
         }
 
         get("/ping") {

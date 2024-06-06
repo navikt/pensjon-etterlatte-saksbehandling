@@ -67,12 +67,13 @@ class SamordningVedtakService(
             .map { it.mapSamordningsvedtak() }
     }
 
-    suspend fun harLoependeOmstillingsstoenadPaaDato(
+    suspend fun harLoependeYtelsePaaDato(
         dato: LocalDate,
         fnr: Folkeregisteridentifikator,
+        sakType: SakType,
         context: CallerContext,
     ): Boolean {
-        return hentVedtaksliste(fomDato = dato, fnr = fnr, context = context)
+        return hentVedtaksliste(fomDato = dato, fnr = fnr, sakType = sakType, context = context)
             .flatMap { it.perioder }
             .any { dato >= it.fom && (it.tom == null || !it.tom.isBefore(dato)) }
     }

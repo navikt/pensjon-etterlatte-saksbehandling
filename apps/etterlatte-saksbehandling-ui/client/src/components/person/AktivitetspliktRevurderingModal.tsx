@@ -1,4 +1,4 @@
-import { BodyLong, Button, Heading, HStack, Modal } from '@navikt/ds-react'
+import { BodyLong, Button, Heading, Modal, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { ferdigstillOppgave, hentOppgave } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -45,25 +45,23 @@ export const AktivitetspliktRevurderingModal = ({ oppgave }: { oppgave: OppgaveD
       {visModal && (
         <Modal open={visModal} onClose={() => setVisModal(false)} header={{ heading: 'Vurdering av aktivitetsplikt' }}>
           <Modal.Body>
-            <HStack gap="12">
-              <div>
-                <Heading size="small" spacing>
-                  {oppgave.merknad}
-                </Heading>
-                <BodyLong spacing>
-                  Den etterlatte skal være i minst 50% aktivitet 6 måneder etter dødsfallet. Det ser ikke ut til å ha
-                  blitt registrert noe aktivitet over 50% eller unntak på denne brukeren.
-                </BodyLong>
-                <BodyLong spacing>
-                  Sak {oppgave.sakId} har en åpen behandling som forhindret Gjenny fra å opprette en revurdering
-                  automatisk. Vurder om det er nødvendig å opprette en revurdering manuelt.
-                </BodyLong>
+            <VStack gap="4">
+              <Heading size="small">{oppgave.merknad}</Heading>
+              <BodyLong>
+                Den etterlatte skal være i minst 50% aktivitet 6 måneder etter dødsfallet. Det ser ikke ut til å ha
+                blitt registrert noe aktivitet over 50% eller unntak på denne brukeren.
+              </BodyLong>
+              <BodyLong>
+                Sak {oppgave.sakId} har en åpen behandling som forhindret Gjenny fra å opprette en revurdering
+                automatisk. Vurder om det er nødvendig å opprette en revurdering manuelt.{' '}
+              </BodyLong>
 
-                {erFerdigstilt && (
-                  <BodyLong spacing>Oppgaven ble ferdigstilt av {oppgave.saksbehandler?.navn}</BodyLong>
-                )}
-              </div>
-            </HStack>
+              {erFerdigstilt && (
+                <BodyLong>
+                  <i>Oppgaven ble ferdigstilt av {oppgave.saksbehandler?.navn}</i>
+                </BodyLong>
+              )}
+            </VStack>
             {mapFailure(ferdigstillOppgaveStatus, (error) => (
               <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved ferdigstilling av oppgave'}</ApiErrorAlert>
             ))}

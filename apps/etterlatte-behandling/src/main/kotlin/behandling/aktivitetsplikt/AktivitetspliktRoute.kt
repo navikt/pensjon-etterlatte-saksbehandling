@@ -16,7 +16,6 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspli
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
-import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.ktor.route.OPPGAVEID_CALL_PARAMETER
@@ -102,16 +101,8 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
             kunSystembruker {
                 logger.info("Sjekker om sak $sakId trenger en ny revurdering etter 6 måneder")
                 val request = call.receive<OpprettRevurderingForAktivitetspliktDto>()
-                aktivitetspliktService.opprettRevurderingHvisKravIkkeOppfylt(request).let { revurderingOgForrigeBehandling ->
-                    val (revurdering, forrigeBehandling) = revurderingOgForrigeBehandling
-                    call.respond(
-                        OpprettRevurderingForAktivitetspliktResponse(
-                            opprettetRevurdering = revurdering != null,
-                            nyBehandlingId = revurdering?.id,
-                            forrigeBehandlingId = forrigeBehandling,
-                        ),
-                    )
-                }
+
+                call.respond(aktivitetspliktService.opprettRevurderingHvisKravIkkeOppfylt(request))
             }
         }
     }

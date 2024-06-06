@@ -115,13 +115,14 @@ enum class OppgaveType {
     JOURNALFOERING,
     GJENOPPRETTING_ALDERSOVERGANG, // Saker som ble opphørt i Pesys etter 18 år gammel regelverk
     AKTIVITETSPLIKT,
+    AKTIVITETSPLIKT_REVURDERING,
     ;
 
     companion object {
         fun fra(behandlingType: BehandlingType) =
             when (behandlingType) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> OppgaveType.FOERSTEGANGSBEHANDLING
-                BehandlingType.REVURDERING -> OppgaveType.REVURDERING
+                BehandlingType.FØRSTEGANGSBEHANDLING -> FOERSTEGANGSBEHANDLING
+                BehandlingType.REVURDERING -> REVURDERING
             }
     }
 }

@@ -11,6 +11,8 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.sanksjon.Sanksjon
+import no.nav.etterlatte.sanksjon.SanksjonType
 import java.time.YearMonth
 import java.util.UUID
 
@@ -65,10 +67,11 @@ data class Avkorting(
         virkningstidspunkt: YearMonth,
         bruker: BrukerTokenInfo,
         beregning: Beregning,
+        sanksjoner: List<Sanksjon>,
     ) = if (behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
-        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, bruker).beregnAvkortingForstegangs(beregning)
+        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, bruker).beregnAvkortingForstegangs(beregning, sanksjoner)
     } else {
-        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, bruker).beregnAvkortingRevurdering(beregning)
+        oppdaterMedInntektsgrunnlag(nyttGrunnlag, virkningstidspunkt, bruker).beregnAvkortingRevurdering(beregning, sanksjoner)
     }
 
     fun oppdaterMedInntektsgrunnlag(
@@ -107,7 +110,10 @@ data class Avkorting(
         )
     }
 
-    private fun beregnAvkortingForstegangs(beregning: Beregning): Avkorting {
+    private fun beregnAvkortingForstegangs(
+        beregning: Beregning,
+        sanksjoner: List<Sanksjon>,
+    ): Avkorting {
         val ytelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting()
         val grunnlag = hentAarsoppgjoer().inntektsavkorting.first().grunnlag
 
@@ -123,6 +129,7 @@ data class Avkorting(
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
                 avkortingsperioder = avkortingsperioder,
                 type = FORVENTET_INNTEKT,
+                sanksjoner = sanksjoner,
             )
 
         val oppdatertAarsoppgjoer =
@@ -147,7 +154,10 @@ data class Avkorting(
         )
     }
 
-    fun beregnAvkortingRevurdering(beregning: Beregning): Avkorting {
+    fun beregnAvkortingRevurdering(
+        beregning: Beregning,
+        sanksjoner: List<Sanksjon>,
+    ): Avkorting {
         val ytelseFoerAvkorting = hentAarsoppgjoer().ytelseFoerAvkorting.leggTilNyeBeregninger(beregning)
 
         val reberegnetInntektsavkorting =
@@ -161,12 +171,14 @@ data class Avkorting(
                     )
 
                 val avkortetYtelseForventetInntekt =
-                    if (hentAarsoppgjoer().inntektsavkorting.size > 1) {
+                    if (hentAarsoppgjoer().inntektsavkorting.size > 1 || sanksjoner.isNotEmpty()) {
                         AvkortingRegelkjoring.beregnAvkortetYtelse(
                             periode = periode,
                             ytelseFoerAvkorting = ytelseFoerAvkorting,
                             avkortingsperioder = avkortinger,
                             type = FORVENTET_INNTEKT,
+                            restanse = null,
+                            sanksjoner = sanksjoner,
                         )
                     } else {
                         emptyList()
@@ -183,7 +195,7 @@ data class Avkorting(
 
         val avkortetYtelse =
             if (hentAarsoppgjoer().inntektsavkorting.size > 1) {
-                beregnAvkortetYtelseMedRestanse(ytelseFoerAvkorting, reberegnetInntektsavkorting)
+                beregnAvkortetYtelseMedRestanse(ytelseFoerAvkorting, reberegnetInntektsavkorting, sanksjoner)
             } else {
                 reberegnetInntektsavkorting.first().let {
                     AvkortingRegelkjoring.beregnAvkortetYtelse(
@@ -192,6 +204,7 @@ data class Avkorting(
                         avkortingsperioder = it.avkortingsperioder,
                         type = AvkortetYtelseType.AARSOPPGJOER,
                         restanse = null,
+                        sanksjoner = sanksjoner,
                     )
                 }
             }
@@ -216,6 +229,7 @@ data class Avkorting(
     private fun beregnAvkortetYtelseMedRestanse(
         ytelseFoerAvkorting: List<YtelseFoerAvkorting>,
         reberegnetInntektsavkorting: List<Inntektsavkorting>,
+        sanksjoner: List<Sanksjon>,
     ): List<AvkortetYtelse> {
         val avkortetYtelseMedAllForventetInntekt = mutableListOf<AvkortetYtelse>()
         reberegnetInntektsavkorting.forEachIndexed { i, inntektsavkorting ->
@@ -227,6 +241,7 @@ data class Avkorting(
                             this.foersteMaanedDetteAar(),
                             inntektsavkorting,
                             avkortetYtelseMedAllForventetInntekt,
+                            sanksjoner,
                         )
                 }
 
@@ -236,7 +251,8 @@ data class Avkorting(
                     ytelseFoerAvkorting = ytelseFoerAvkorting,
                     avkortingsperioder = inntektsavkorting.avkortingsperioder,
                     type = AvkortetYtelseType.AARSOPPGJOER,
-                    restanse,
+                    restanse = restanse,
+                    sanksjoner = sanksjoner,
                 )
             avkortetYtelseMedAllForventetInntekt.addAll(ytelse)
         }
@@ -382,6 +398,12 @@ data class AvkortetYtelse(
     val regelResultat: JsonNode,
     val kilde: Grunnlagsopplysning.RegelKilde,
     val inntektsgrunnlag: UUID? = null,
+    val sanksjon: SanksjonertYtelse? = null,
+)
+
+data class SanksjonertYtelse(
+    val sanksjonId: UUID,
+    val sanksjonType: SanksjonType,
 )
 
 /**
@@ -418,7 +440,7 @@ private fun List<YtelseFoerAvkorting>.leggTilNyeBeregninger(beregning: Beregning
     val fraOgMedNyYtelse = nyYtelseFoerAvkorting.first().periode.fom
 
     val eksisterendeFremTilNye =
-        filter { it.periode.fom < fraOgMedNyYtelse }
+        this.filter { it.periode.fom < fraOgMedNyYtelse }
             .filter { beregning.beregningId != it.beregningsreferanse }
 
     val eksisterendeAvrundetPerioder =

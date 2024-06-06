@@ -111,6 +111,7 @@ class ApplicationContext {
             behandlingKlient = behandlingKlient,
             avkortingRepository = avkortingRepository,
             beregningService = beregningService,
+            sanksjonService = sanksjonService,
         )
     val ytelseMedGrunnlagService =
         YtelseMedGrunnlagService(

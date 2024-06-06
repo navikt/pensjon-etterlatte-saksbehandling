@@ -7,14 +7,17 @@ import no.nav.etterlatte.avkorting.AvkortetYtelse
 import no.nav.etterlatte.avkorting.AvkortetYtelseType
 import no.nav.etterlatte.avkorting.Avkorting
 import no.nav.etterlatte.avkorting.Restanse
+import no.nav.etterlatte.avkorting.SanksjonertYtelse
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlagLagre
 import no.nav.etterlatte.beregning.regler.beregning
 import no.nav.etterlatte.beregning.regler.beregningsperiode
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.restanse
+import no.nav.etterlatte.beregning.regler.sanksjon
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.sanksjon.SanksjonType
 import org.junit.jupiter.api.Test
 import java.time.Month
 import java.time.YearMonth
@@ -52,6 +55,115 @@ class BeregnAvkortingTest {
                     ytelseFoerAvkorting = 16682,
                     type = AvkortetYtelseType.AARSOPPGJOER,
                     inntektsgrunnlag = null,
+                ),
+                AvkortetYtelse::id,
+                AvkortetYtelse::tidspunkt,
+                AvkortetYtelse::regelResultat,
+                AvkortetYtelse::kilde,
+            )
+        }
+    }
+
+    @Test
+    fun `Revurdering legger inn sanksjon beregner 0 i sanksjonsperioden`() {
+        val avkorting = `Avkorting revurdering med en sanksjon åpen periode`()
+        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+            size shouldBe 2
+            get(0).shouldBeEqualToIgnoringFields(
+                avkortetYtelse(
+                    periode = Periode(fom = YearMonth.of(2024, Month.MARCH), tom = YearMonth.of(2024, Month.APRIL)),
+                    ytelseEtterAvkorting = 6650,
+                    ytelseEtterAvkortingFoerRestanse = 6650,
+                    restanse = null,
+                    avkortingsbeloep = 9026,
+                    ytelseFoerAvkorting = 15676,
+                    type = AvkortetYtelseType.AARSOPPGJOER,
+                    inntektsgrunnlag = null,
+                    sanksjon = null,
+                ),
+                AvkortetYtelse::id,
+                AvkortetYtelse::tidspunkt,
+                AvkortetYtelse::regelResultat,
+                AvkortetYtelse::kilde,
+            )
+            get(1).shouldBeEqualToIgnoringFields(
+                avkortetYtelse(
+                    periode = Periode(fom = YearMonth.of(2024, Month.MAY), tom = null),
+                    ytelseEtterAvkorting = 0,
+                    ytelseEtterAvkortingFoerRestanse = 7758,
+                    restanse = null,
+                    avkortingsbeloep = 8924,
+                    ytelseFoerAvkorting = 16682,
+                    type = AvkortetYtelseType.AARSOPPGJOER,
+                    inntektsgrunnlag = null,
+                    sanksjon =
+                        SanksjonertYtelse(
+                            sanksjonId = get(1).sanksjon?.sanksjonId!!,
+                            sanksjonType = SanksjonType.STANS,
+                        ),
+                ),
+                AvkortetYtelse::id,
+                AvkortetYtelse::tidspunkt,
+                AvkortetYtelse::regelResultat,
+                AvkortetYtelse::kilde,
+            )
+        }
+    }
+
+    @Test
+    fun `Revurdering åpen sanksjonsperiode lukkes`() {
+        val avkorting = `Avkorting revurdering av sanksjon åpen periode lukker sanksjonsperioden`()
+        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+            size shouldBe 3
+            get(0).shouldBeEqualToIgnoringFields(
+                avkortetYtelse(
+                    periode = Periode(fom = YearMonth.of(2024, Month.MARCH), tom = YearMonth.of(2024, Month.APRIL)),
+                    ytelseEtterAvkorting = 6650,
+                    ytelseEtterAvkortingFoerRestanse = 6650,
+                    restanse = null,
+                    avkortingsbeloep = 9026,
+                    ytelseFoerAvkorting = 15676,
+                    type = AvkortetYtelseType.AARSOPPGJOER,
+                    inntektsgrunnlag = null,
+                    sanksjon = null,
+                ),
+                AvkortetYtelse::id,
+                AvkortetYtelse::tidspunkt,
+                AvkortetYtelse::regelResultat,
+                AvkortetYtelse::kilde,
+            )
+            get(1).shouldBeEqualToIgnoringFields(
+                avkortetYtelse(
+                    periode = Periode(fom = YearMonth.of(2024, Month.MAY), tom = YearMonth.of(2024, Month.MAY)),
+                    ytelseEtterAvkorting = 0,
+                    ytelseEtterAvkortingFoerRestanse = 7758,
+                    restanse = null,
+                    avkortingsbeloep = 8924,
+                    ytelseFoerAvkorting = 16682,
+                    type = AvkortetYtelseType.AARSOPPGJOER,
+                    inntektsgrunnlag = null,
+                    sanksjon =
+                        SanksjonertYtelse(
+                            sanksjonId = get(1).sanksjon?.sanksjonId!!,
+                            sanksjonType = SanksjonType.STANS,
+                        ),
+                ),
+                AvkortetYtelse::id,
+                AvkortetYtelse::tidspunkt,
+                AvkortetYtelse::regelResultat,
+                AvkortetYtelse::kilde,
+            )
+            get(2).shouldBeEqualToIgnoringFields(
+                avkortetYtelse(
+                    periode = Periode(fom = YearMonth.of(2024, Month.JUNE), tom = null),
+                    ytelseEtterAvkorting = 7758,
+                    ytelseEtterAvkortingFoerRestanse = 7758,
+                    restanse = null,
+                    avkortingsbeloep = 8924,
+                    ytelseFoerAvkorting = 16682,
+                    type = AvkortetYtelseType.AARSOPPGJOER,
+                    inntektsgrunnlag = null,
+                    sanksjon = null,
                 ),
                 AvkortetYtelse::id,
                 AvkortetYtelse::tidspunkt,
@@ -623,31 +735,64 @@ class BeregnAvkortingTest {
     }
 
     private fun `Avkorting foerstegangsbehandling`() =
-        Avkorting().beregnAvkortingMedNyttGrunnlag(
-            nyttGrunnlag =
-                avkortinggrunnlagLagre(
-                    aarsinntekt = 300000,
-                    fratrekkInnAar = 50000,
-                ),
-            behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
-            virkningstidspunkt = YearMonth.of(2024, Month.MARCH),
-            bruker = bruker,
-            beregning =
-                beregning(
-                    beregninger =
-                        listOf(
-                            beregningsperiode(
-                                datoFOM = YearMonth.of(2024, Month.MARCH),
-                                datoTOM = YearMonth.of(2024, Month.APRIL),
-                                utbetaltBeloep = 15676,
+        Avkorting()
+            .beregnAvkortingMedNyttGrunnlag(
+                nyttGrunnlag =
+                    avkortinggrunnlagLagre(
+                        aarsinntekt = 300000,
+                        fratrekkInnAar = 50000,
+                    ),
+                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+                virkningstidspunkt = YearMonth.of(2024, Month.MARCH),
+                bruker = bruker,
+                beregning =
+                    beregning(
+                        beregninger =
+                            listOf(
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.MARCH),
+                                    datoTOM = YearMonth.of(2024, Month.APRIL),
+                                    utbetaltBeloep = 15676,
+                                ),
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.MAY),
+                                    utbetaltBeloep = 16682,
+                                ),
                             ),
-                            beregningsperiode(
-                                datoFOM = YearMonth.of(2024, Month.MAY),
-                                utbetaltBeloep = 16682,
+                    ),
+                sanksjoner = emptyList(),
+            )
+
+    private fun `Avkorting revurdering med en sanksjon åpen periode`() =
+        `Avkorting foerstegangsbehandling`()
+            .kopierAvkorting()
+            .beregnAvkortingRevurdering(
+                beregning =
+                    beregning(
+                        beregninger =
+                            listOf(
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.MAY),
+                                    utbetaltBeloep = 16682,
+                                ),
                             ),
-                        ),
-                ),
-        )
+                    ),
+                sanksjoner = listOf(sanksjon(fom = YearMonth.of(2024, Month.MAY), tom = null)),
+            )
+
+    private fun `Avkorting revurdering av sanksjon åpen periode lukker sanksjonsperioden`() =
+        `Avkorting revurdering med en sanksjon åpen periode`()
+            .kopierAvkorting()
+            .beregnAvkortingRevurdering(
+                beregning =
+                    beregning(
+                        beregninger =
+                            listOf(
+                                beregningsperiode(datoFOM = YearMonth.of(2024, Month.JUNE), utbetaltBeloep = 16682),
+                            ),
+                    ),
+                sanksjoner = listOf(sanksjon(fom = YearMonth.of(2024, Month.MAY), tom = YearMonth.of(2024, Month.MAY))),
+            )
 
     private fun `Avkorting ny inntekt en`() =
         `Avkorting foerstegangsbehandling`()
@@ -672,6 +817,7 @@ class BeregnAvkortingTest {
                                 ),
                             ),
                     ),
+                sanksjoner = emptyList(),
             )
 
     private fun `Avkorting ny inntekt to`() =
@@ -697,6 +843,7 @@ class BeregnAvkortingTest {
                                 ),
                             ),
                     ),
+                sanksjoner = emptyList(),
             )
 
     private fun `Avkorting revurdert beregning`() =
@@ -717,6 +864,7 @@ class BeregnAvkortingTest {
                             ),
                         ),
                 ),
+                sanksjoner = emptyList(),
             )
 
     private fun `Avkorting korrigere siste inntekt`() =
@@ -741,6 +889,7 @@ class BeregnAvkortingTest {
                                 ),
                             ),
                     ),
+                    sanksjoner = emptyList(),
                 )
             }
 
@@ -762,5 +911,6 @@ class BeregnAvkortingTest {
                             ),
                         ),
                 ),
+                sanksjoner = emptyList(),
             )
 }

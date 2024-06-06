@@ -819,7 +819,26 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
                 YearMonth.now(),
                 behandlingId,
             )
-        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns mockk(relaxed = true)
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
+            mockk<BeregningOgAvkorting>(relaxed = true).also {
+                every { it.beregning } returns
+                    mockk<BeregningDTO>(relaxed = true).also {
+                        every {
+                            it.beregningsperioder
+                        } returns
+                            listOf(
+                                Beregningsperiode(
+                                    datoFOM = YearMonth.of(2023, Month.JANUARY),
+                                    datoTOM = null,
+                                    utbetaltBeloep = 100,
+                                    grunnbelopMnd = 0,
+                                    grunnbelop = 0,
+                                    trygdetid = 40,
+                                ),
+                            )
+                    }
+            }
+
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         runBlocking {
@@ -1104,7 +1123,31 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
                 YearMonth.now(),
                 behandlingId,
             )
-        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns mockk(relaxed = true)
+        coEvery {
+            beregningKlientMock.hentBeregningOgAvkorting(
+                any(),
+                any(),
+                any(),
+            )
+        } returns
+            mockk<BeregningOgAvkorting>(relaxed = true).also {
+                every { it.beregning } returns
+                    mockk<BeregningDTO>(relaxed = true).also {
+                        every {
+                            it.beregningsperioder
+                        } returns
+                            listOf(
+                                Beregningsperiode(
+                                    datoFOM = YearMonth.of(2023, Month.JANUARY),
+                                    datoTOM = null,
+                                    utbetaltBeloep = 100,
+                                    grunnbelopMnd = 0,
+                                    grunnbelop = 0,
+                                    trygdetid = 40,
+                                ),
+                            )
+                    }
+            }
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         runBlocking {

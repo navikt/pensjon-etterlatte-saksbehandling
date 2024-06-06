@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopFeilkont
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopYtelseVedtak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
+import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseType
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsbelopDto
@@ -48,7 +49,11 @@ class TilbakekrevingKlient(
         val request = toTilbakekrevingsvedtakRequest(vedtak)
         val requestAsJson = vedtakObjectMapper.writeValueAsString(request)
 
-        hendelseRepository.lagreTilbakekrevingsvedtakSendt(vedtak.kravgrunnlagId, requestAsJson)
+        hendelseRepository.lagreTilbakekrevingHendelse(
+            sakId = vedtak.sakId,
+            payload = requestAsJson,
+            type = TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_SENDT,
+        )
 
         val response =
             runBlocking {
@@ -61,7 +66,11 @@ class TilbakekrevingKlient(
                 httpResponse.body<TilbakekrevingsvedtakResponse>()
             }
 
-        hendelseRepository.lagreTilbakekrevingsvedtakKvitteringMottatt(vedtak.kravgrunnlagId, response.toJson())
+        hendelseRepository.lagreTilbakekrevingHendelse(
+            sakId = vedtak.sakId,
+            payload = response.toJson(),
+            type = TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING,
+        )
 
         return kontrollerResponse(response)
     }

@@ -445,6 +445,7 @@ class TilbakekrevingService(
         tilbakekreving: TilbakekrevingBehandling,
         vedtak: TilbakekrevingVedtakLagretDto,
     ) = TilbakekrevingVedtak(
+        sakId = tilbakekreving.sak.id,
         vedtakId = tilbakekreving.tilbakekreving.kravgrunnlag.vedtakId.value,
         fattetVedtak =
             FattetVedtak(

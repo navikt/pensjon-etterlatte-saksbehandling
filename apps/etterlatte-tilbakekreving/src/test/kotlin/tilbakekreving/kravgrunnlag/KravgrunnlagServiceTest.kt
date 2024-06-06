@@ -8,10 +8,12 @@ import io.mockk.mockk
 import io.mockk.runs
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagStatus
 import no.nav.etterlatte.tilbakekreving.klienter.BehandlingKlient
+import no.nav.etterlatte.tilbakekreving.kravOgVedtakStatus
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class KravgrunnlagServiceTest {
     private lateinit var kravgrunnlagService: KravgrunnlagService
@@ -42,32 +44,6 @@ class KravgrunnlagServiceTest {
     }
 
     @Test
-    fun `skal avbryte tilbakekreving naar kravgrunnlag har status AVSL`() {
-        val kravgrunnlag = kravgrunnlag(status = KravgrunnlagStatus.AVSL)
-
-        coEvery { behandlingKlient.avbrytTilbakekreving(any()) } just runs
-
-        kravgrunnlagService.haandterKravgrunnlag(kravgrunnlag)
-
-        coVerify(exactly = 1) {
-            behandlingKlient.avbrytTilbakekreving(kravgrunnlag.sakId)
-        }
-    }
-
-    @Test
-    fun `skal sette tilbakekreving paa vent naar kravgrunnlag har status SPER`() {
-        val kravgrunnlag = kravgrunnlag(status = KravgrunnlagStatus.SPER)
-
-        coEvery { behandlingKlient.endreOppgaveStatusForTilbakekreving(any(), any()) } just runs
-
-        kravgrunnlagService.haandterKravgrunnlag(kravgrunnlag)
-
-        coVerify(exactly = 1) {
-            behandlingKlient.endreOppgaveStatusForTilbakekreving(kravgrunnlag.sakId, paaVent = true)
-        }
-    }
-
-    @Test
     fun `skal sette tilbakekreving tilbake fra paa vent naar kravgrunnlag har status ENDR og ingen perioder`() {
         val kravgrunnlag = kravgrunnlag(status = KravgrunnlagStatus.ENDR, perioder = emptyList())
 
@@ -92,6 +68,63 @@ class KravgrunnlagServiceTest {
         coVerify(exactly = 1) {
             behandlingKlient.avbrytTilbakekreving(kravgrunnlag.sakId)
             behandlingKlient.opprettTilbakekreving(kravgrunnlag.sakId, kravgrunnlag)
+        }
+    }
+
+    @Test
+    fun `skal feile naar kravgrunnlag har en status som ikke er forventet`() {
+        val kravgrunnlag = kravgrunnlag(status = KravgrunnlagStatus.SPER)
+
+        assertThrows<KanIkkeHaandtereStatusException> {
+            kravgrunnlagService.haandterKravgrunnlag(kravgrunnlag)
+        }
+    }
+
+    @Test
+    fun `skal avbryte tilbakekreving naar kravOgVedtakstatus har status AVSL`() {
+        val kravOgVedtakstatus = kravOgVedtakStatus(status = KravgrunnlagStatus.AVSL)
+
+        coEvery { behandlingKlient.avbrytTilbakekreving(any()) } just runs
+
+        kravgrunnlagService.haandterKravOgVedtakStatus(kravOgVedtakstatus)
+
+        coVerify(exactly = 1) {
+            behandlingKlient.avbrytTilbakekreving(kravOgVedtakstatus.sakId)
+        }
+    }
+
+    @Test
+    fun `skal sette tilbakekreving paa vent naar kravOgVedtakstatus har status SPER`() {
+        val kravOgVedtakstatus = kravOgVedtakStatus(status = KravgrunnlagStatus.SPER)
+
+        coEvery { behandlingKlient.endreOppgaveStatusForTilbakekreving(any(), any()) } just runs
+
+        kravgrunnlagService.haandterKravOgVedtakStatus(kravOgVedtakstatus)
+
+        coVerify(exactly = 1) {
+            behandlingKlient.endreOppgaveStatusForTilbakekreving(kravOgVedtakstatus.sakId, paaVent = true)
+        }
+    }
+
+    @Test
+    fun `skal sette tilbakekreving tilbake fra paa vent naar kravOgVedtakstatus har status ENDR`() {
+        val kravOgVedtakstatus = kravOgVedtakStatus(status = KravgrunnlagStatus.ENDR)
+
+        coEvery { behandlingKlient.endreOppgaveStatusForTilbakekreving(any(), any()) } just runs
+
+        kravgrunnlagService.haandterKravOgVedtakStatus(kravOgVedtakstatus)
+
+        coVerify(exactly = 1) {
+            behandlingKlient.endreOppgaveStatusForTilbakekreving(kravOgVedtakstatus.sakId, paaVent = false)
+        }
+    }
+
+    @Test
+    fun `skal feile naar kravOgVedtakstatus har en status som ikke er forventet`() {
+        val kravOgVedtakstatus = kravOgVedtakStatus(status = KravgrunnlagStatus.NY)
+
+        assertThrows<KanIkkeHaandtereStatusException> {
+            kravgrunnlagService.haandterKravOgVedtakStatus(kravOgVedtakstatus)
         }
     }
 }

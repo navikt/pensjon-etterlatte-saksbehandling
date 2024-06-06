@@ -9,11 +9,21 @@ import java.math.BigInteger
 internal class KravgunnlagJaxbTest {
     @Test
     fun `skal lese og mappe kravgrunnlag fra tilbakekrevingskomponenten`() {
-        val kravgrunnlagXml = readFile("/kravgrunnlag.xml")
+        val xml = readFile("/kravgrunnlag.xml")
 
-        val kravgrunnlag = KravgrunnlagJaxb.toDetaljertKravgrunnlagDto(kravgrunnlagXml)
+        val kravgrunnlag = KravgrunnlagJaxb.toDetaljertKravgrunnlagDto(xml)
 
         assertNotNull(kravgrunnlag)
         assertEquals(BigInteger.valueOf(302004), kravgrunnlag.kravgrunnlagId)
+    }
+
+    @Test
+    fun `skal lese og mappe kravOgVedtakStatus fra tilbakekrevingskomponenten`() {
+        val xml = readFile("/krav_og_vedtak_status.xml")
+
+        val kravOgVedtakstatus = KravgrunnlagJaxb.toKravOgVedtakstatus(xml)
+
+        assertNotNull(kravOgVedtakstatus)
+        assertEquals("1", kravOgVedtakstatus.fagsystemId)
     }
 }

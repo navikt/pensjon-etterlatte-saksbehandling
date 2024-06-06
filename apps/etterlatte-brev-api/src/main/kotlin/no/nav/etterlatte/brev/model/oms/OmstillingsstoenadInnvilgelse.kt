@@ -81,7 +81,12 @@ data class OmstillingsstoenadInnvilgelse(
                     avdoed.doedsdato
                         .plusMonths(4)
                         .isAfter(avkortingsinfo.virkningsdato),
+
+
                 lavEllerIngenInntekt = brevutfall.lavEllerIngenInntekt == LavEllerIngenInntekt.JA,
+                
+
+
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 etterbetaling =
                     etterbetaling

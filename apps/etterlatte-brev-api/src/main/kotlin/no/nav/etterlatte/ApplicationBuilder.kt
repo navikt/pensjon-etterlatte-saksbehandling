@@ -53,6 +53,7 @@ import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
+import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.requireEnvValue
@@ -113,6 +114,7 @@ class ApplicationBuilder {
     private val beregningKlient = BeregningKlient(config, httpClient())
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
+    private val vilkaarsvurderingKlient = VilkaarsvurderingKlient(config, httpClient())
 
     private val sakService = SakService(behandlingKlient)
 
@@ -130,6 +132,7 @@ class ApplicationBuilder {
             sakService,
             trygdetidKlient,
             adresseService,
+            vilkaarsvurderingKlient
         )
     private val db = BrevRepository(datasource)
 

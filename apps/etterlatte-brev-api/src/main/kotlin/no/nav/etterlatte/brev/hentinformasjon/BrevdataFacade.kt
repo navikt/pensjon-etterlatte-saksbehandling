@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -29,6 +30,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.time.YearMonth
 import java.util.UUID
@@ -42,12 +44,20 @@ class BrevdataFacade(
     private val sakService: SakService,
     private val trygdetidKlient: TrygdetidKlient,
     private val adresseService: AdresseService,
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
 ) {
     suspend fun hentBrevutfall(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevutfallDto? {
         return behandlingKlient.hentBrevutfall(behandlingId, brukerTokenInfo)
+    }
+
+    suspend fun hentVilkaarsvurdering(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): VilkaarsvurderingDto? {
+        return vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo)
     }
 
     suspend fun hentEtterbetaling(

@@ -211,6 +211,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         val trygdetid = async { fetcher.hentTrygdetid() }
         val etterbetaling = async { fetcher.hentEtterbetaling() }
         val brevutfall = async { fetcher.hentBrevutfall() }
+        val vilkaarsvurdering = async { fetcher.hentVilkaarsvurdering() }
 
         OmstillingsstoenadInnvilgelse.fra(
             innholdMedVedlegg,

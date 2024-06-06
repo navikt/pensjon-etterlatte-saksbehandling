@@ -98,14 +98,14 @@ class VedtakBehandlingService(
 
         val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
+
+        val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
+        val virkningstidspunkt = behandling.virkningstidspunkt().dato
         oppdaterVedtak(
             behandling = behandling,
             eksisterendeVedtak = vedtak,
-            vedtakType = vedtak.type,
-            virkningstidspunkt =
-                checkNotNull(behandling.virkningstidspunkt?.dato) {
-                    "Kan ikke fatte vedtak som ikke har et virkningstidspunkt"
-                },
+            vedtakType = vedtakType,
+            virkningstidspunkt = virkningstidspunkt,
             beregningOgAvkorting = beregningOgAvkorting,
             vilkaarsvurdering = vilkaarsvurdering,
         )

@@ -381,6 +381,7 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             grunnlagKlient = grunnlagKlientObo,
             automatiskRevurderingService = automatiskRevurderingService,
+            oppgaveService = oppgaveService,
         )
 
     val gyldighetsproevingService =

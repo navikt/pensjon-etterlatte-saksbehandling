@@ -148,7 +148,7 @@ class AktivitetspliktService(
         }
     }
 
-    fun opprettAktivitetsgradForBehandling(
+    fun upsertAktivitetsgradForBehandling(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         behandlingId: UUID,
         sakId: Long,
@@ -157,10 +157,34 @@ class AktivitetspliktService(
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
 
         inTransaction {
-            require(
-                aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) == null,
-            ) { "Aktivitetsgrad finnes allerede for behandling $behandlingId" }
-            aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, behandlingId = behandlingId)
+            if (aktivitetsgrad.id != null) {
+                aktivitetspliktAktivitetsgradDao.oppdaterAktivitetsgrad(aktivitetsgrad, kilde, behandlingId)
+            } else {
+                require(
+                    aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) == null,
+                ) { "Aktivitetsgrad finnes allerede for behandling $behandlingId" }
+                val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
+                if (unntak != null) {
+                    slettUnntak(unntak.id, behandlingId)
+                }
+                aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, behandlingId = behandlingId)
+            }
+        }
+    }
+
+    fun slettAktivitetsgrad(
+        aktivitetsgradId: UUID,
+        behandlingId: UUID,
+    ) {
+        val behandling =
+            requireNotNull(inTransaction { behandlingService.hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
+
+        if (!behandling.status.kanEndres()) {
+            throw BehandlingKanIkkeEndres()
+        }
+
+        inTransaction {
+            aktivitetspliktAktivitetsgradDao.slettAktivitetsgrad(aktivitetsgradId, behandlingId)
         }
     }
 
@@ -183,7 +207,7 @@ class AktivitetspliktService(
         }
     }
 
-    fun opprettUnntakForBehandling(
+    fun upsertUnntakForBehandling(
         unntak: LagreAktivitetspliktUnntak,
         behandlingId: UUID,
         sakId: Long,
@@ -196,10 +220,35 @@ class AktivitetspliktService(
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
 
         inTransaction {
-            require(
-                aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) == null,
-            ) { "Unntak finnes allerede for behandling $behandlingId" }
-            aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, behandlingId = behandlingId)
+            if (unntak.id != null) {
+                aktivitetspliktUnntakDao.oppdaterUnntak(unntak, kilde, behandlingId)
+            } else {
+                require(
+                    aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) == null,
+                ) { "Unntak finnes allerede for behandling $behandlingId" }
+
+                val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
+                if (aktivitetsgrad != null) {
+                    slettAktivitetsgrad(aktivitetsgrad.id, behandlingId)
+                }
+                aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, behandlingId = behandlingId)
+            }
+        }
+    }
+
+    fun slettUnntak(
+        unntakId: UUID,
+        behandlingId: UUID,
+    ) {
+        val behandling =
+            requireNotNull(inTransaction { behandlingService.hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
+
+        if (!behandling.status.kanEndres()) {
+            throw BehandlingKanIkkeEndres()
+        }
+
+        inTransaction {
+            aktivitetspliktUnntakDao.slettUnntak(unntakId, behandlingId)
         }
     }
 

@@ -17,6 +17,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.aktivitetsplikt.LagreAktivitetspliktAktivitet
 import no.nav.etterlatte.behandling.aktivitetsplikt.SakidTilhoererIkkeBehandlingException
 import no.nav.etterlatte.behandling.aktivitetsplikt.TomErFoerFomException
+import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradType
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
@@ -320,11 +321,67 @@ class AktivitetspliktServiceTest {
                 )
             every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns null
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns null
 
-            service.opprettUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
+            service.upsertUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
 
             verify { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) }
             verify { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) }
+        }
+
+        @Test
+        fun `Skal slette aktivitetsgrad hvis man oppretter et nytt unntak`() {
+            val kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now())
+            val aktivitetsgradId = UUID.randomUUID()
+
+            val aktivitetsgrad =
+                LagreAktivitetspliktAktivitetsgrad(
+                    aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
+                    beskrivelse = "Beskrivelse",
+                )
+
+            val unntak =
+                LagreAktivitetspliktUnntak(
+                    unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
+                    beskrivelse = "Beskrivelse",
+                    fom = null,
+                    tom = LocalDate.now().plusMonths(6),
+                )
+
+            every { behandlingService.hentBehandling(behandlingId) } returns
+                behandling.apply {
+                    every { status } returns BehandlingStatus.VILKAARSVURDERT
+                }
+            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
+            every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns null
+            every {
+                aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(
+                    aktivitetsgrad,
+                    sakId,
+                    any(),
+                    behandlingId = behandlingId,
+                )
+            } returns 1
+            every { aktivitetspliktAktivitetsgradDao.slettAktivitetsgrad(aktivitetsgradId, behandlingId) } returns 1
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns
+                AktivitetspliktAktivitetsgrad(
+                    id = aktivitetsgradId,
+                    sakId = sakId,
+                    behandlingId = behandlingId,
+                    oppgaveId = null,
+                    aktivitetsgrad = AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50,
+                    fom = LocalDate.now(),
+                    opprettet = kilde,
+                    endret = kilde,
+                    beskrivelse = "Beskrivelse",
+                )
+
+            aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, behandlingId = behandlingId)
+            service.upsertUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
+
+            verify { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) }
+            verify { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) }
+            verify { aktivitetspliktAktivitetsgradDao.slettAktivitetsgrad(aktivitetsgradId, behandlingId) }
         }
 
         @Test
@@ -340,7 +397,7 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns mockk()
 
             assertThrows<IllegalArgumentException> {
-                service.opprettUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
+                service.upsertUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
             }
         }
 
@@ -373,6 +430,43 @@ class AktivitetspliktServiceTest {
             vurdering?.unntak shouldNotBe null
 
             verify { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) }
+            verify { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) }
+        }
+    }
+
+    @Nested
+    inner class OppdaterUnntakForBehandling {
+        private val behandlingId = UUID.randomUUID()
+        private val sakId = 1L
+
+        @Test
+        fun `Skal oppdatere unntak hvis id finnes`() {
+            val unntak =
+                LagreAktivitetspliktUnntak(
+                    unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
+                    beskrivelse = "Beskrivelse",
+                    fom = null,
+                    tom = LocalDate.now().plusMonths(6),
+                )
+
+            val unntakMedId =
+                LagreAktivitetspliktUnntak(
+                    id = UUID.randomUUID(),
+                    unntak = AktivitetspliktUnntakType.FOEDT_1963_ELLER_TIDLIGERE_OG_LAV_INNTEKT,
+                    beskrivelse = "Beskrivelse er oppdatert",
+                    fom = null,
+                    tom = LocalDate.now().plusMonths(6),
+                )
+            every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
+            every { aktivitetspliktUnntakDao.oppdaterUnntak(unntakMedId, any(), behandlingId) } returns 1
+            every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns null
+            every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns null
+
+            service.upsertUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
+            service.upsertUnntakForBehandling(unntakMedId, behandlingId, sakId, brukerTokenInfo)
+
+            verify { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) }
+            verify { aktivitetspliktUnntakDao.oppdaterUnntak(unntakMedId, any(), behandlingId) }
             verify { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) }
         }
     }

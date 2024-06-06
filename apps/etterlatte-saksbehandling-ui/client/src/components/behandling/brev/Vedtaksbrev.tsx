@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Alert, Heading, Box } from '@navikt/ds-react'
+import { Alert, Heading, Box, VStack, HStack } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
@@ -161,9 +161,9 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         behandling.kilde === Vedtaksloesning.GJENOPPRETTA && (
           <BrevutfallModal behandling={behandling} onLagre={hentBrevPaaNytt} setVis={setVisBrevutfall} />
         )}
-      <BrevContent>
-        <Sidebar>
-          <Box paddingInline="16" paddingBlock="16 4">
+      <HStack wrap={false}>
+        <SidebarBox paddingInline="16" paddingBlock="16 4">
+          <VStack gap="4">
             <Heading spacing size="large" level="1">
               Vedtaksbrev
             </Heading>
@@ -171,14 +171,14 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
             <br />
             {behandling?.status === IBehandlingStatus.FATTET_VEDTAK && (
-              <AlertMedSpacing variant="warning">Kontroller innholdet nøye før attestering!</AlertMedSpacing>
+              <Alert variant="warning">Kontroller innholdet nøye før attestering!</Alert>
             )}
 
             {visAdvarselBehandlingEndret && (
-              <AlertMedSpacing variant="warning">
+              <Alert variant="warning">
                 Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder om det bør tilbakestilles
                 for å få oppdaterte verdier fra behandlingen.
-              </AlertMedSpacing>
+              </Alert>
             )}
 
             {vedtaksbrev && (
@@ -189,14 +189,13 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                   tittel={vedtaksbrev.tittel}
                   kanRedigeres={redigerbar}
                 />
-                <br />
                 <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
-                <br />
+
                 <BrevMottaker brev={vedtaksbrev} kanRedigeres={redigerbar} />
               </>
             )}
-          </Box>
-        </Sidebar>
+          </VStack>
+        </SidebarBox>
 
         {!!vedtaksbrev &&
           (vedtaksbrev?.prosessType === BrevProsessType.AUTOMATISK ? (
@@ -211,7 +210,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
         {isFailureHandler({ apiResult: hentBrevStatus, errorMessage: 'Feil ved henting av brev' })}
         {isFailureHandler({ apiResult: opprettBrevStatus, errorMessage: 'Kunne ikke opprette brev' })}
-      </BrevContent>
+      </HStack>
 
       <Box paddingBlock="4 0" borderWidth="1 0 0 0" borderColor="border-subtle">
         <SjekklisteValideringErrorSummary />
@@ -230,17 +229,9 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   )
 }
 
-const BrevContent = styled.div`
-  display: flex;
-`
-
-const Sidebar = styled.div`
+const SidebarBox = styled(Box)`
   max-height: fit-content;
   min-width: 40%;
   width: 40%;
-  border-right: 1px solid #c6c2bf;
-`
-
-const AlertMedSpacing = styled(Alert)`
-  margin-bottom: 1em;
+  border-right: 1px solid var(--a-border-subtle);
 `

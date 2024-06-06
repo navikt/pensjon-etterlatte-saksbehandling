@@ -98,6 +98,17 @@ class VedtakBehandlingService(
 
         val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetider) = hentDataForVedtak(behandlingId, brukerTokenInfo)
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetider, behandling)
+        oppdaterVedtak(
+            behandling = behandling,
+            eksisterendeVedtak = vedtak,
+            vedtakType = vedtak.type,
+            virkningstidspunkt =
+                checkNotNull(behandling.virkningstidspunkt?.dato) {
+                    "Kan ikke fatte vedtak som ikke har et virkningstidspunkt"
+                },
+            beregningOgAvkorting = beregningOgAvkorting,
+            vilkaarsvurdering = vilkaarsvurdering,
+        )
 
         val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
 

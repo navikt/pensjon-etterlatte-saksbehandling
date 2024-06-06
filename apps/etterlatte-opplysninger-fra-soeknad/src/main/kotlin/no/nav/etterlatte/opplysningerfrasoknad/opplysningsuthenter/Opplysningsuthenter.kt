@@ -65,8 +65,9 @@ internal fun utbetalingsinformasjonOpplysning(
         betalingsinformasjon?.opplysning?.utenlandskBankAdresse?.svar?.innhold,
         betalingsinformasjon?.opplysning?.iban?.svar?.innhold,
         betalingsinformasjon?.opplysning?.swift?.svar?.innhold,
-        betalingsinformasjon?.opplysning?.skattetrekk?.svar?.verdi,
-        betalingsinformasjon?.opplysning?.skattetrekk?.opplysning?.svar?.innhold,
+        betalingsinformasjon?.opplysning?.skattetrekk?.svar?.svar?.verdi,
+        betalingsinformasjon?.opplysning?.skattetrekk?.trekk?.svar?.innhold,
+        betalingsinformasjon?.opplysning?.skattetrekk?.beskrivelse?.svar?.innhold,
     )
 }
 

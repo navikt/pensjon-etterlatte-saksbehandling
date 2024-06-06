@@ -121,7 +121,8 @@
         "iban": null,
         "swift": null,
         "oenskerSkattetrekk": null,
-        "oensketSkattetrekkProsent": null
+        "oensketSkattetrekk": null,
+        "beskrivelse": null
       },
       "attestering": null
     },

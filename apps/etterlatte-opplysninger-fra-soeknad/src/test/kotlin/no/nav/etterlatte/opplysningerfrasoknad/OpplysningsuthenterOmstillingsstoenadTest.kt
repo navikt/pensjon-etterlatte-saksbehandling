@@ -89,7 +89,8 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
                 Assertions.assertNull(iban)
                 Assertions.assertNull(swift)
                 Assertions.assertNull(oenskerSkattetrekk)
-                Assertions.assertNull(oensketSkattetrekkProsent)
+                Assertions.assertNull(oensketSkattetrekk)
+                Assertions.assertNull(beskrivelse)
             }
     }
 

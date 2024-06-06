@@ -11,7 +11,7 @@ import { mapApiResult } from '~shared/api/apiUtils'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { Box, HStack } from '@navikt/ds-react'
+import { Box, HStack, Label } from '@navikt/ds-react'
 
 export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const dispatch = useAppDispatch()
@@ -78,4 +78,9 @@ export const StegMenyBox = styled(Box)`
   border-left: 0.4rem solid var(--a-border-action);
   border-bottom: 1px solid var(--a-border-subtle);
   background: #f8f8f8;
+`
+
+export const DisabledLabel = styled(Label)`
+  color: var(--a-gray-400);
+  cursor: not-allowed;
 `

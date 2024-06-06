@@ -1,7 +1,7 @@
 import React from 'react'
 import { Label, Link } from '@navikt/ds-react'
-import styled from 'styled-components'
 import { ChevronRightIcon } from '@navikt/aksel-icons'
+import { DisabledLabel } from '~components/behandling/StegMeny/stegmeny'
 
 export const KLAGESTEG = ['formkrav', 'vurdering', 'brev', 'oppsummering'] as const
 
@@ -36,8 +36,3 @@ export function KlageNavLenke({ path, description, enabled, erSisteRoute }: Prop
     </>
   )
 }
-
-const DisabledLabel = styled(Label)`
-  color: var(--a-gray-400);
-  cursor: not-allowed;
-`

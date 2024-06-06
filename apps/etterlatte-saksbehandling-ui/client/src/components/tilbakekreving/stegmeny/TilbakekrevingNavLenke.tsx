@@ -1,7 +1,7 @@
 import React from 'react'
 import { Label, Link } from '@navikt/ds-react'
-import styled from 'styled-components'
 import { ChevronRightIcon } from '@navikt/aksel-icons'
+import { DisabledLabel } from '~components/behandling/StegMeny/stegmeny'
 
 export const TILBAKEKREVINGSTEG = ['vurdering', 'utbetalinger', 'oppsummering', 'brev'] as const
 
@@ -38,8 +38,3 @@ export function TilbakekrevingNavLenke(props: TilbakekrevingNavLenkeProps) {
     </>
   )
 }
-
-const DisabledLabel = styled(Label)`
-  color: var(--a-gray-400);
-  cursor: not-allowed;
-`

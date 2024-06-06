@@ -1,9 +1,9 @@
-import styled from 'styled-components'
 import { ChevronRightIcon } from '@navikt/aksel-icons'
 import { hentGyldigeNavigeringsStatuser } from '~components/behandling/felles/utils'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { BehandlingRouteTypes } from '~components/behandling/BehandlingRoutes'
 import { Label, Link } from '@navikt/ds-react'
+import { DisabledLabel } from '~components/behandling/StegMeny/stegmeny'
 
 export const NavLenke = (props: {
   pathInfo: BehandlingRouteTypes
@@ -37,8 +37,3 @@ export const NavLenke = (props: {
     </>
   )
 }
-
-const DisabledLabel = styled(Label)`
-  color: var(--a-gray-400);
-  cursor: not-allowed;
-`

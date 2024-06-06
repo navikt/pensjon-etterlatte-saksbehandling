@@ -753,7 +753,13 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
                 revurderingsaarsak = Revurderingaarsak.REGULERING,
                 soeker = SOEKER_FOEDSELSNUMMER.value,
                 status = BehandlingStatus.VILKAARSVURDERT,
-                virkningstidspunkt = null,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        dato = virkningstidspunkt.withMonth(Month.MAY.value),
+                        kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                        begrunnelse = "",
+                        kravdato = null,
+                    ),
                 boddEllerArbeidetUtlandet = null,
                 utlandstilknytning = null,
                 prosesstype = Prosesstype.MANUELL,

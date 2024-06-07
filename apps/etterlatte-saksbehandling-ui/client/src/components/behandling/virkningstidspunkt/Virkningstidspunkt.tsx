@@ -1,10 +1,19 @@
-import { BodyShort, ErrorMessage, Heading, HelpText, MonthPicker, useMonthpicker, VStack } from '@navikt/ds-react'
+import {
+  BodyShort,
+  ErrorMessage,
+  Heading,
+  HelpText,
+  HStack,
+  MonthPicker,
+  useMonthpicker,
+  VStack,
+} from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { formaterStringDato } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Vurdering } from '../soeknadsoversikt/styled'
+import { Informasjon, Vurdering } from '../soeknadsoversikt/styled'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears, subYears } from 'date-fns'
@@ -15,7 +24,6 @@ import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversik
 import { hentMinimumsVirkningstidspunkt } from '~components/behandling/virkningstidspunkt/utils'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
-import styled from 'styled-components'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 export interface Hjemmel {
@@ -123,10 +131,10 @@ const Virkningstidspunkt = (props: {
         hjemler={props.hjemler}
         status={Boolean(behandling.virkningstidspunkt) ? 'success' : 'warning'}
       >
-        <div>
-          <Beskrivelse>{props.beskrivelse}</Beskrivelse>
+        <VStack gap="2">
+          <Informasjon>{props.beskrivelse}</Informasjon>
           <div>{props.children?.info}</div>
-        </div>
+        </VStack>
 
         <Vurdering>
           {!vurdert ? (
@@ -139,12 +147,12 @@ const Virkningstidspunkt = (props: {
                   {erBosattUtland && (
                     <div>
                       <Heading size="xsmall">
-                        <HelpTextWrapper>
+                        <HStack gap="1">
                           Kravdato utland
-                          <HelpText strategy="fixed">
+                          <HelpText placement="top">
                             Skriv inn kravdato for søknad i utlandet, som hentes fra SED P2100.
                           </HelpText>
-                        </HelpTextWrapper>
+                        </HStack>
                       </Heading>
                       <BodyShort>
                         {behandling.virkningstidspunkt?.kravdato
@@ -185,12 +193,12 @@ const Virkningstidspunkt = (props: {
                 {erBosattUtland && (
                   <DatoVelger
                     label={
-                      <HelpTextWrapper>
+                      <HStack gap="1">
                         Kravdato utland
-                        <HelpText strategy="fixed">
+                        <HelpText placement="top">
                           Skriv inn kravdato for søknad i utlandet, som hentes fra SED P2100.
                         </HelpText>
-                      </HelpTextWrapper>
+                      </HStack>
                     }
                     onChange={(date) => setKravdato(date ?? null)}
                     value={kravdato ?? undefined}
@@ -220,14 +228,3 @@ const Virkningstidspunkt = (props: {
 }
 
 export default Virkningstidspunkt
-
-const HelpTextWrapper = styled.div`
-  display: flex;
-  gap: 0.3em;
-`
-
-export const Beskrivelse = styled.div`
-  margin: 10px 0;
-  max-width: 41em;
-  white-space: pre-wrap;
-`

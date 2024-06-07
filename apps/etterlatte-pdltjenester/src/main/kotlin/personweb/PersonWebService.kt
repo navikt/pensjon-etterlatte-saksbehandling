@@ -29,13 +29,13 @@ class PersonWebService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun hentPersonNavnFoedselsDatoOgFoedselsnummer(
+    suspend fun hentPersonNavnOgFoedselsAar(
         ident: String,
         bruker: BrukerTokenInfo,
     ): PersonNavnFoedselsaar {
         logger.info("Henter navn, fødselsdato og fødselsnummer for ident=${ident.maskerFnr()} fra PDL")
 
-        return pdlOboKlient.hentPersonNavnFoedselsdatoFoedselsnummer(ident, bruker).let {
+        return pdlOboKlient.hentPersonNavnOgFoedsel(ident, bruker).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.joinToString()
 

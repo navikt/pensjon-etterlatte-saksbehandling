@@ -21,7 +21,7 @@ fun Route.personWebRoute(
             kunSaksbehandler {
                 val request = call.receive<HentPersonDetaljerIdentRequest>()
 
-                val person = service.hentPersonNavnFoedselsDatoOgFoedselsnummer(request.ident, brukerTokenInfo)
+                val person = service.hentPersonNavnOgFoedselsAar(request.ident, brukerTokenInfo)
 
                 sporing.logg(brukerTokenInfo, person.foedselsnummer, call.request.path(), "Hentet navn på person")
 

@@ -70,8 +70,8 @@ data class PdlPersonResponse(
     val errors: List<PdlResponseError>? = null,
 )
 
-data class PdlPersonNavnFoedselsdatoResponse(
-    val data: PdlPersonNavnFoedselsDatoResponseData? = null,
+data class PdlPersonNavnFoedselResponse(
+    val data: PdlPersonNavnFoedselResponseData? = null,
     val errors: List<PdlResponseError>? = null,
 )
 
@@ -136,7 +136,7 @@ data class PdlPersonResponseData(
     val hentPerson: PdlHentPerson? = null,
 )
 
-data class PdlPersonNavnFoedselsDatoResponseData(
+data class PdlPersonNavnFoedselResponseData(
     val hentPerson: PdlHentPersonNavnFoedselsdato? = null,
 )
 

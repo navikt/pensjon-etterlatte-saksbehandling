@@ -17,18 +17,6 @@ fun Route.personWebRoute(
     sporing: SporingService,
 ) {
     route("/person") {
-        post("/navn") {
-            kunSaksbehandler {
-                val request = call.receive<HentPersonDetaljerIdentRequest>()
-
-                val person = service.hentPersonNavn(request.ident, brukerTokenInfo)
-
-                sporing.logg(brukerTokenInfo, person.foedselsnummer, call.request.path(), "Hentet navn på person")
-
-                call.respond(person)
-            }
-        }
-
         post("/navn-foedselsaar") {
             kunSaksbehandler {
                 val request = call.receive<HentPersonDetaljerIdentRequest>()

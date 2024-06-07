@@ -16,7 +16,6 @@ import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
 import no.nav.etterlatte.personweb.familieOpplysninger.FamilieOpplysninger
 import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
 import org.slf4j.LoggerFactory
-import personweb.dto.PersonNavn
 
 class PdlForesporselFeilet(message: String) : ForespoerselException(
     status = 500,
@@ -29,33 +28,6 @@ class PersonWebService(
     private val ppsKlient: ParallelleSannheterKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
-
-    suspend fun hentPersonNavn(
-        ident: String,
-        bruker: BrukerTokenInfo,
-    ): PersonNavn {
-        logger.info("Henter navn for ident=${ident.maskerFnr()} fra PDL")
-
-        return pdlOboKlient.hentPersonNavn(ident, bruker).let {
-            if (it.data?.hentPerson == null) {
-                val pdlFeil = it.errors?.joinToString()
-
-                if (it.errors?.personIkkeFunnet() == true) {
-                    throw FantIkkePersonException("Fant ikke person i PDL")
-                } else {
-                    throw PdlForesporselFeilet(
-                        "Kunne ikke hente person med ident=${ident.maskerFnr()} fra PDL: $pdlFeil",
-                    )
-                }
-            } else {
-                PersonMapper.mapPersonNavn(
-                    ppsKlient = ppsKlient,
-                    ident = ident,
-                    hentPerson = it.data.hentPerson,
-                )
-            }
-        }
-    }
 
     suspend fun hentPersonNavnFoedselsDatoOgFoedselsnummer(
         ident: String,

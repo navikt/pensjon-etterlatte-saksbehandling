@@ -70,11 +70,6 @@ data class PdlPersonResponse(
     val errors: List<PdlResponseError>? = null,
 )
 
-data class PdlPersonNavnResponse(
-    val data: PdlPersonNavnResponseData? = null,
-    val errors: List<PdlResponseError>? = null,
-)
-
 data class PdlPersonNavnFoedselsdatoResponse(
     val data: PdlPersonNavnFoedselsDatoResponseData? = null,
     val errors: List<PdlResponseError>? = null,
@@ -141,10 +136,6 @@ data class PdlPersonResponseData(
     val hentPerson: PdlHentPerson? = null,
 )
 
-data class PdlPersonNavnResponseData(
-    val hentPerson: PdlHentPersonNavn? = null,
-)
-
 data class PdlPersonNavnFoedselsDatoResponseData(
     val hentPerson: PdlHentPersonNavnFoedselsdato? = null,
 )
@@ -161,11 +152,6 @@ data class PdlHentPersonBolkResult(
 
 data class PdlHentPersonAdressebeskyttelse(
     val adressebeskyttelse: List<PdlAdressebeskyttelse>,
-)
-
-data class PdlHentPersonNavn(
-    val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator>,
-    val navn: List<PdlNavn>,
 )
 
 data class PdlHentPersonNavnFoedselsdato(

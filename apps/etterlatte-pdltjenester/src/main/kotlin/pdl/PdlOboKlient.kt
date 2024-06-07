@@ -31,38 +31,6 @@ class PdlOboKlient(private val httpClient: HttpClient, config: Config) {
 
     private val azureAdClient = AzureAdClient(config, AzureAdHttpClient(httpClient))
 
-    suspend fun hentPersonNavn(
-        ident: String,
-        bruker: BrukerTokenInfo,
-    ): PdlPersonNavnResponse {
-        val request =
-            PdlGraphqlRequest(
-                query = getQuery("/pdl/hentPersonNavn.graphql"),
-                variables = PdlVariables(ident),
-            )
-
-        return retry<PdlPersonNavnResponse>(times = 3) {
-            httpClient.post(apiUrl) {
-                bearerAuth(getOboToken(bruker))
-                behandlingsnummer(SakType.entries)
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                setBody(request)
-            }.body()
-        }.let {
-            when (it) {
-                is RetryResult.Success ->
-                    it.content.also { result ->
-                        result.errors?.joinToString()?.let { feil ->
-                            logger.error("Fikk data fra PDL, men også følgende feil: $feil")
-                        }
-                    }
-
-                is RetryResult.Failure -> throw it.samlaExceptions()
-            }
-        }
-    }
-
     suspend fun hentPersonNavnFoedselsdatoFoedselsnummer(
         ident: String,
         bruker: BrukerTokenInfo,

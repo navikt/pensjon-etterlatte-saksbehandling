@@ -10,9 +10,7 @@ import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { differenceInYears, parse } from 'date-fns'
 import { DatoFormat } from '~utils/formattering'
-import { IconSize } from '~shared/types/Icon'
-import { AGray600, AOrange600 } from '@navikt/ds-tokens/dist/tokens'
-import { ExclamationmarkTriangleIcon } from '@navikt/aksel-icons'
+import { AGray600 } from '@navikt/ds-tokens/dist/tokens'
 
 export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
   <StatusBar
@@ -59,7 +57,7 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
           <Label>
             <Link href={`/person/${person.foedselsnummer}`}>{genererNavn(person)}</Link>
           </Label>
-          <VisAlderForPerson foedselsdato={person.foedselsdato} />
+          <VisAlderForPerson foedselsdato={person.foedselsdato} foedselsaar={person.foedselsaar} />
           <BodyShort>|</BodyShort>
           <KopierbarVerdi value={person.foedselsnummer} />
         </HStack>
@@ -68,7 +66,7 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
   )
 }
 
-const VisAlderForPerson = ({ foedselsdato }: { foedselsdato: Date | undefined }) => {
+const VisAlderForPerson = ({ foedselsdato, foedselsaar }: { foedselsdato: Date | undefined; foedselsaar: number }) => {
   if (foedselsdato) {
     const alder = differenceInYears(new Date(), parse(String(foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date()))
     return (
@@ -79,9 +77,9 @@ const VisAlderForPerson = ({ foedselsdato }: { foedselsdato: Date | undefined })
   } else {
     return (
       <>
-        <ExclamationmarkTriangleIcon color={AOrange600} fontSize={IconSize.DEFAULT} />
+        <BodyShort textColor="subtle">Fødselsår: {foedselsaar}</BodyShort>
         <HelpText title="Personen mangler fødselsdato">
-          Vi har ingen fødselsdato på vedkommende og kan derfor ikke vise nøytaktig alder.
+          Vi har ingen fødselsdato på vedkommende og kan derfor ikke vise nøytaktig alder. Fødselsår: {foedselsaar}
         </HelpText>
       </>
     )

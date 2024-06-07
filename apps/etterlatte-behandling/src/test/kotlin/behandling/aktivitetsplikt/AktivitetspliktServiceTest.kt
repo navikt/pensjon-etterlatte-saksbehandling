@@ -322,6 +322,7 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), null, behandlingId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns null
             every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns null
+            every { behandlingService.hentBehandling(behandlingId) } returns behandling
 
             service.upsertUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
 
@@ -385,7 +386,7 @@ class AktivitetspliktServiceTest {
         }
 
         @Test
-        fun `Skal ikke opprette en et nytt unntak hvis det finnes fra foer`() {
+        fun `Skal ikke opprette et nytt unntak hvis det finnes fra foer`() {
             val unntak =
                 LagreAktivitetspliktUnntak(
                     unntak = AktivitetspliktUnntakType.OMSORG_BARN_SYKDOM,
@@ -395,6 +396,10 @@ class AktivitetspliktServiceTest {
                 )
             every { aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, any(), behandlingId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns mockk()
+            every { behandlingService.hentBehandling(behandlingId) } returns
+                behandling.apply {
+                    every { status } returns BehandlingStatus.VILKAARSVURDERT
+                }
 
             assertThrows<IllegalArgumentException> {
                 service.upsertUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
@@ -461,6 +466,7 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.oppdaterUnntak(unntakMedId, any(), behandlingId) } returns 1
             every { aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId) } returns null
             every { aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId) } returns null
+            every { behandlingService.hentBehandling(behandlingId) } returns behandling
 
             service.upsertUnntakForBehandling(unntak, behandlingId, sakId, brukerTokenInfo)
             service.upsertUnntakForBehandling(unntakMedId, behandlingId, sakId, brukerTokenInfo)

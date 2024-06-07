@@ -154,6 +154,13 @@ class AktivitetspliktService(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        val behandling =
+            requireNotNull(inTransaction { behandlingService.hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
+
+        if (!behandling.status.kanEndres()) {
+            throw BehandlingKanIkkeEndres()
+        }
+
         val kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident())
 
         inTransaction {
@@ -165,26 +172,10 @@ class AktivitetspliktService(
                 ) { "Aktivitetsgrad finnes allerede for behandling $behandlingId" }
                 val unntak = aktivitetspliktUnntakDao.hentUnntakForBehandling(behandlingId)
                 if (unntak != null) {
-                    slettUnntak(unntak.id, behandlingId)
+                    aktivitetspliktUnntakDao.slettUnntak(unntak.id, behandlingId)
                 }
                 aktivitetspliktAktivitetsgradDao.opprettAktivitetsgrad(aktivitetsgrad, sakId, kilde, behandlingId = behandlingId)
             }
-        }
-    }
-
-    fun slettAktivitetsgrad(
-        aktivitetsgradId: UUID,
-        behandlingId: UUID,
-    ) {
-        val behandling =
-            requireNotNull(inTransaction { behandlingService.hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
-
-        if (!behandling.status.kanEndres()) {
-            throw BehandlingKanIkkeEndres()
-        }
-
-        inTransaction {
-            aktivitetspliktAktivitetsgradDao.slettAktivitetsgrad(aktivitetsgradId, behandlingId)
         }
     }
 
@@ -213,6 +204,13 @@ class AktivitetspliktService(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+        val behandling =
+            requireNotNull(inTransaction { behandlingService.hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
+
+        if (!behandling.status.kanEndres()) {
+            throw BehandlingKanIkkeEndres()
+        }
+
         if (unntak.fom != null && unntak.tom != null && unntak.fom > unntak.tom) {
             throw TomErFoerFomException()
         }
@@ -229,26 +227,10 @@ class AktivitetspliktService(
 
                 val aktivitetsgrad = aktivitetspliktAktivitetsgradDao.hentAktivitetsgradForBehandling(behandlingId)
                 if (aktivitetsgrad != null) {
-                    slettAktivitetsgrad(aktivitetsgrad.id, behandlingId)
+                    aktivitetspliktAktivitetsgradDao.slettAktivitetsgrad(aktivitetsgrad.id, behandlingId)
                 }
                 aktivitetspliktUnntakDao.opprettUnntak(unntak, sakId, kilde, behandlingId = behandlingId)
             }
-        }
-    }
-
-    fun slettUnntak(
-        unntakId: UUID,
-        behandlingId: UUID,
-    ) {
-        val behandling =
-            requireNotNull(inTransaction { behandlingService.hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
-
-        if (!behandling.status.kanEndres()) {
-            throw BehandlingKanIkkeEndres()
-        }
-
-        inTransaction {
-            aktivitetspliktUnntakDao.slettUnntak(unntakId, behandlingId)
         }
     }
 

@@ -56,6 +56,19 @@ export const AktivitetspliktRevurderingModal = ({ oppgave }: { oppgave: OppgaveD
                 automatisk. Vurder om det er nødvendig å opprette en revurdering manuelt.{' '}
               </BodyLong>
 
+              {!erFerdigstilt && (
+                <div>
+                  <Button
+                    variant="primary"
+                    size="small"
+                    as="a"
+                    href={`/person/${oppgave.fnr?.toString()}`}
+                    target="_blank"
+                  >
+                    Gå til sak
+                  </Button>
+                </div>
+              )}
               {erFerdigstilt && (
                 <BodyLong>
                   <i>Oppgaven ble ferdigstilt av {oppgave.saksbehandler?.navn}</i>

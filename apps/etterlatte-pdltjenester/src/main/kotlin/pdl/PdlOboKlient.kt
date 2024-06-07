@@ -37,7 +37,7 @@ class PdlOboKlient(private val httpClient: HttpClient, config: Config) {
     ): PdlPersonNavnFoedselResponse {
         val request =
             PdlGraphqlRequest(
-                query = getQuery("/pdl/hentPersonNavnFoedselsaar.graphql"),
+                query = getQuery("/pdl/hentPersonNavnFoedsel.graphql"),
                 variables = PdlVariables(ident),
             )
 

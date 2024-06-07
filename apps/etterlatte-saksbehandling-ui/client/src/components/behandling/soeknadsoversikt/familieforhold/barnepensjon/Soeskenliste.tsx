@@ -3,7 +3,7 @@ import { CopyButton, Heading, HStack, Link, Table, VStack } from '@navikt/ds-rea
 import { Familieforhold, hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
-import { format, parse } from 'date-fns'
+import { format } from 'date-fns'
 import { DatoFormat, formaterFnr } from '~utils/formattering'
 import { IconSize } from '~shared/types/Icon'
 import { hentAlderForDato } from '~components/behandling/felles/utils'
@@ -56,8 +56,7 @@ export const Soeskenliste = ({ familieforhold, soekerFnr }: Props) => {
 }
 
 const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: Familieforhold }) => {
-  const foedselsdato = parse(String(barn.foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date())
-  const alder = hentAlderForDato(foedselsdato)
+  const alder = hentAlderForDato(barn.foedselsdato)
 
   const navnMedAlder = `${barn.fornavn} ${barn.etternavn} (${alder} år)`
 

@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../icons/genderIcon'
 import { IPersonResult } from '~components/person/typer'
-import { BodyShort, Box, HStack, Label, Link, Skeleton } from '@navikt/ds-react'
+import { BodyShort, Box, HelpText, HStack, Label, Link, Skeleton } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { IPdlPersonNavnFoedsel } from '~shared/types/Person'
 import { mapApiResult, Result } from '~shared/api/apiUtils'
@@ -45,12 +45,6 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
     return GenderList.male
   }
 
-  const alderForPerson = (foedselsaar: number, foedselsdato: Date | undefined) => {
-    return foedselsdato
-      ? differenceInYears(new Date(), parse(String(foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date()))
-      : new Date().getFullYear() - foedselsaar
-  }
-
   return mapApiResult(
     result,
     <PersonSkeleton />,
@@ -62,13 +56,29 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
           <Label>
             <Link href={`/person/${person.foedselsnummer}`}>{genererNavn(person)}</Link>
           </Label>
-          <BodyShort textColor="subtle">({alderForPerson(person.foedselsaar, person.foedselsdato)} år)</BodyShort>
+          <VisAlderForPerson foedselsdato={person.foedselsdato} foedselsaar={person.foedselsaar} />
           <BodyShort>|</BodyShort>
           <KopierbarVerdi value={person.foedselsnummer} />
         </HStack>
       </StatusbarBox>
     )
   )
+}
+
+const VisAlderForPerson = ({ foedselsdato, foedselsaar }: { foedselsdato: Date | undefined; foedselsaar: number }) => {
+  if (foedselsdato) {
+    const alder = differenceInYears(new Date(), parse(String(foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date()))
+    return <BodyShort textColor="subtle">({alder} år)</BodyShort>
+  } else {
+    return (
+      <>
+        <BodyShort textColor="subtle">Fødselsår: {foedselsaar}</BodyShort>
+        <HelpText title="Personen mangler fødselsdato">
+          Vi har ingen fødselsdato på vedkommende og kan derfor ikke vise nøyaktig alder. Fødselsår: {foedselsaar}
+        </HelpText>
+      </>
+    )
+  }
 }
 
 const PersonSkeleton = () => (

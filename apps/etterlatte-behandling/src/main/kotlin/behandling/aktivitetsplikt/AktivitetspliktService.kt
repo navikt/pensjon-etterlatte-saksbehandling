@@ -11,6 +11,7 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnn
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
@@ -331,11 +332,24 @@ class AktivitetspliktService(
             frist = request.frist,
             begrunnelse = request.jobbType.beskrivelse,
         ).oppdater().let { revurdering ->
+            fjernSaksbehandlerFraRevurderingsOppgave(revurdering)
             OpprettRevurderingForAktivitetspliktResponse(
                 opprettetRevurdering = true,
                 nyBehandlingId = revurdering.id,
                 forrigeBehandlingId = forrigeBehandling.id,
             )
+        }
+    }
+
+    private fun fjernSaksbehandlerFraRevurderingsOppgave(revurdering: Revurdering) {
+        val revurderingsOppgave =
+            oppgaveService.hentOppgaverForReferanse(revurdering.id.toString())
+                .find { it.type == OppgaveType.REVURDERING }
+
+        if (revurderingsOppgave != null) {
+            oppgaveService.fjernSaksbehandler(revurderingsOppgave.id)
+        } else {
+            logger.warn("Fant ikke oppgave for revurdering av aktivitetsplikt for sak ${revurdering.sak.id}")
         }
     }
 }

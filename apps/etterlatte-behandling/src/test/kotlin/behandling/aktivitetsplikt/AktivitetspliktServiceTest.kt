@@ -6,7 +6,9 @@ import io.mockk.Called
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
@@ -582,6 +584,14 @@ class AktivitetspliktServiceTest {
                 )
             } returns
                 mockk { every { oppdater() } returns revurdering }
+            every { oppgaveService.fjernSaksbehandler(any()) } just runs
+            every { oppgaveService.hentOppgaverForReferanse(any()) } returns
+                listOf(
+                    mockk {
+                        every { type } returns OppgaveType.REVURDERING
+                        every { id } returns UUID.randomUUID()
+                    },
+                )
 
             val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request)
 
@@ -592,7 +602,7 @@ class AktivitetspliktServiceTest {
                 nyBehandlingId shouldBe revurdering.id
                 forrigeBehandlingId shouldBe forrigeBehandling.id
             }
-            verify { oppgaveService wasNot Called }
+            verify(exactly = 1) { oppgaveService.fjernSaksbehandler(any()) }
         }
 
         @Test

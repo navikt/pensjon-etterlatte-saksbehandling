@@ -1,5 +1,5 @@
 import { BodyShort, Heading, Label, VStack } from '@navikt/ds-react'
-import { differenceInYears, isAfter, parseISO } from 'date-fns'
+import { isAfter, parseISO } from 'date-fns'
 import styled from 'styled-components'
 import {
   Beregningsperiode,
@@ -8,12 +8,13 @@ import {
   ReduksjonBP,
 } from '~shared/types/Beregning'
 import React from 'react'
+import { hentAlderForDato } from '~components/behandling/felles/utils'
 
 interface BeregningsdetaljerPerson {
   fornavn: string
   etternavn: string
   foedselsnummer: string
-  foedselsdato: string | Date
+  foedselsdato: Date
 }
 
 const SISTE_MAANED_GAMMELT_REGELVERK = new Date(2023, 11, 31, 0, 0, 0, 0)
@@ -47,7 +48,7 @@ const SammendragGammeltRegelverk = (props: {
                     <ListWithoutBullet key={soeskenIFlokken.foedselsnummer}>
                       {`${soeskenIFlokken.fornavn} ${soeskenIFlokken.etternavn} / ${
                         soeskenIFlokken.foedselsnummer
-                      } / ${differenceInYears(new Date(), new Date(soeskenIFlokken.foedselsdato))} år`}
+                      } / ${hentAlderForDato(soeskenIFlokken.foedselsdato)} år`}
                     </ListWithoutBullet>
                   )
                 )
@@ -74,10 +75,7 @@ const SammendragNyttRegelverk = (props: { soeker: BeregningsdetaljerPerson }) =>
       <Label>Beregningen gjelder:</Label>
       <ul>
         <ListWithoutBullet>
-          {`${soeker.fornavn} ${soeker.etternavn} / ${soeker.foedselsnummer} / ${differenceInYears(
-            new Date(),
-            new Date(soeker.foedselsdato)
-          )} år`}
+          {`${soeker.fornavn} ${soeker.etternavn} / ${soeker.foedselsnummer} / ${hentAlderForDato(soeker.foedselsdato)} år`}
         </ListWithoutBullet>
       </ul>
     </div>

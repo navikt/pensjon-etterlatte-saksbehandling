@@ -3,10 +3,15 @@ import { GenderIcon, GenderList } from '../icons/genderIcon'
 import { IPersonResult } from '~components/person/typer'
 import { BodyShort, Box, HStack, Label, Link, Skeleton } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { IPdlPerson, IPdlPersonNavnFoedsel } from '~shared/types/Person'
+import { IPdlPersonNavnFoedsel } from '~shared/types/Person'
 import { mapApiResult, Result } from '~shared/api/apiUtils'
+import { useEffect } from 'react'
+import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { differenceInYears, parse } from 'date-fns'
+import { DatoFormat } from '~utils/formattering'
 
-export const PdlPersonStatusBar = ({ person }: { person: IPdlPerson | IPdlPersonNavnFoedsel }) => (
+export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
   <StatusBar
     result={{
       status: 'success',
@@ -15,18 +20,35 @@ export const PdlPersonStatusBar = ({ person }: { person: IPdlPerson | IPdlPerson
         fornavn: person.fornavn,
         mellomnavn: person.mellomnavn,
         etternavn: person.etternavn,
+        foedselsaar: person.foedselsaar,
+        foedselsdato: person.foedselsdato,
       },
     }}
   />
 )
 
-export const StatusBar = ({ result }: { result: Result<IPersonResult> }) => {
+export const StatusBarPersonHenter = ({ ident }: { ident: string | null | undefined }) => {
+  const [personStatus, hentPerson] = useApiCall(hentPersonNavnogFoedsel)
+  useEffect(() => {
+    ident && hentPerson(ident)
+  }, [ident])
+
+  return <StatusBar result={personStatus} />
+}
+
+export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> }) => {
   const gender = (fnr: string): GenderList => {
     const genderNum = Number(fnr[8])
     if (genderNum % 2 === 0) {
       return GenderList.female
     }
     return GenderList.male
+  }
+
+  const alderForPerson = (foedselsaar: number, foedselsdato: Date | undefined) => {
+    return foedselsdato
+      ? differenceInYears(new Date(), parse(String(foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date()))
+      : new Date().getFullYear() - foedselsaar
   }
 
   return mapApiResult(
@@ -40,6 +62,7 @@ export const StatusBar = ({ result }: { result: Result<IPersonResult> }) => {
           <Label>
             <Link href={`/person/${person.foedselsnummer}`}>{genererNavn(person)}</Link>
           </Label>
+          <BodyShort textColor="subtle">({alderForPerson(person.foedselsaar, person.foedselsdato)} år)</BodyShort>
           <BodyShort>|</BodyShort>
           <KopierbarVerdi value={person.foedselsnummer} />
         </HStack>

@@ -122,7 +122,8 @@ internal class OpplysningsuthenterBarnepensjonTest {
                 assertNull(iban)
                 assertNull(swift)
                 assertNull(oenskerSkattetrekk)
-                assertNull(oensketSkattetrekkProsent)
+                assertNull(oensketSkattetrekk)
+                assertNull(beskrivelse)
             }
     }
 

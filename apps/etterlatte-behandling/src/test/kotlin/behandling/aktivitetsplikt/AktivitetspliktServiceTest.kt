@@ -2,6 +2,8 @@ package behandling.aktivitetsplikt
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.Called
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -22,15 +24,30 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnn
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
+import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto.JobbType
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.nyKontekstMedBruker
+import no.nav.etterlatte.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class AktivitetspliktServiceTest {
@@ -38,8 +55,19 @@ class AktivitetspliktServiceTest {
     private val aktivitetspliktAktivitetsgradDao: AktivitetspliktAktivitetsgradDao = mockk()
     private val aktivitetspliktUnntakDao: AktivitetspliktUnntakDao = mockk()
     private val behandlingService: BehandlingService = mockk()
+    private val grunnlagKlient: GrunnlagKlient = mockk()
+    private val automatiskRevurderingService: AutomatiskRevurderingService = mockk()
+    private val oppgaveService: OppgaveService = mockk()
     private val service =
-        AktivitetspliktService(aktivitetspliktDao, aktivitetspliktAktivitetsgradDao, aktivitetspliktUnntakDao, behandlingService)
+        AktivitetspliktService(
+            aktivitetspliktDao,
+            aktivitetspliktAktivitetsgradDao,
+            aktivitetspliktUnntakDao,
+            behandlingService,
+            grunnlagKlient,
+            automatiskRevurderingService,
+            oppgaveService,
+        )
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val brukerTokenInfo =
         mockk<BrukerTokenInfo> {
@@ -405,6 +433,127 @@ class AktivitetspliktServiceTest {
             val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
 
             result shouldBe false
+        }
+    }
+
+    @Nested
+    inner class OpprettRevurderingHvisKravIkkeOppfylt {
+        private val sakId = 1L
+        private val forrigeBehandling: Behandling =
+            mockk {
+                every { id } returns UUID.randomUUID()
+                every { status } returns BehandlingStatus.IVERKSATT
+            }
+        private val frist = Tidspunkt.now()
+        private val request =
+            OpprettRevurderingForAktivitetspliktDto(
+                sakId = sakId,
+                frist = frist,
+                behandlingsmaaned = YearMonth.now(),
+                jobbType = JobbType.OMS_DOED_6MND,
+            )
+        private val persongalleri: Persongalleri = mockk()
+        private val persongalleriOpplysning =
+            mockk<Grunnlagsopplysning<Persongalleri>> {
+                every { opplysning } returns persongalleri
+            }
+
+        @Test
+        fun `Skal opprette revurdering hvis kravene for aktivitetsplikt ikke er oppfylt`() {
+            val revurdering =
+                mockk<Revurdering> {
+                    every { id } returns UUID.randomUUID()
+                }
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId) } returns null
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns null
+            every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
+            every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling)
+            coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
+            every {
+                automatiskRevurderingService.opprettAutomatiskRevurdering(
+                    sakId = sakId,
+                    forrigeBehandling = forrigeBehandling,
+                    revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
+                    virkningstidspunkt = request.behandlingsmaaned.atDay(1),
+                    kilde = Vedtaksloesning.GJENNY,
+                    persongalleri = persongalleri,
+                    frist = frist,
+                    begrunnelse = request.jobbType.beskrivelse,
+                )
+            } returns
+                mockk { every { oppdater() } returns revurdering }
+
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request)
+
+            with(resultat) {
+                opprettetRevurdering shouldBe true
+                opprettetOppgave shouldBe false
+                oppgaveId shouldBe null
+                nyBehandlingId shouldBe revurdering.id
+                forrigeBehandlingId shouldBe forrigeBehandling.id
+            }
+            verify { oppgaveService wasNot Called }
+        }
+
+        @Test
+        fun `Skal opprette oppgave hvis det finnes en aapen behandling og kravene ikke er oppfylt`() {
+            val oppgave =
+                mockk<OppgaveIntern> {
+                    every { id } returns UUID.randomUUID()
+                }
+            val aapenBehandling =
+                mockk<Behandling> {
+                    every { status } returns BehandlingStatus.VILKAARSVURDERT
+                }
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(sakId) } returns null
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns null
+            every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
+            every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling, aapenBehandling)
+            coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
+            every {
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    sakId = sakId,
+                    referanse = any(),
+                    oppgaveKilde = OppgaveKilde.HENDELSE,
+                    oppgaveType = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
+                    merknad = JobbType.OMS_DOED_6MND.beskrivelse,
+                    frist = frist,
+                )
+            } returns oppgave
+
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request)
+
+            with(resultat) {
+                opprettetRevurdering shouldBe false
+                opprettetOppgave shouldBe true
+                oppgaveId shouldBe oppgave.id
+                nyBehandlingId shouldBe null
+                forrigeBehandlingId shouldBe forrigeBehandling.id // ??
+            }
+            verify { automatiskRevurderingService wasNot Called }
+        }
+
+        @Test
+        fun `Skal ikke opprette revurdering eller oppgave hvis kravene for aktivitetsplikt er oppfylt`() {
+            every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns
+                mockk {
+                    every { aktivitetsgrad } returns AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50
+                }
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns null
+            every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling
+            coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
+
+            val resultat = service.opprettRevurderingHvisKravIkkeOppfylt(request)
+
+            with(resultat) {
+                opprettetRevurdering shouldBe false
+                opprettetOppgave shouldBe false
+                oppgaveId shouldBe null
+                nyBehandlingId shouldBe null
+                forrigeBehandlingId shouldBe forrigeBehandling.id
+            }
+            verify { automatiskRevurderingService wasNot Called }
+            verify { oppgaveService wasNot Called }
         }
     }
 

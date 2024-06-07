@@ -3,11 +3,9 @@ package no.nav.etterlatte
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.standardProducer
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
-import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -45,7 +43,6 @@ fun createRecord(dato: LocalDate) =
             ReguleringEvents.DATO to dato.toString(),
             ReguleringEvents.KJOERING to "Regulering-$year",
             ReguleringEvents.ANTALL to 20,
-            ReguleringEvents.SPESIFIKKE_SAKER to "9455;12789",
-            SAK_TYPE to SakType.BARNEPENSJON.toString(),
+            ReguleringEvents.SPESIFIKKE_SAKER to "2912",
         ),
     ).toJson()

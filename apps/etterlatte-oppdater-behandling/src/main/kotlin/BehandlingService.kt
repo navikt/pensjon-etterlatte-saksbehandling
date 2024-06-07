@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
-import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto.VurderingVedMaaned
+import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto.JobbType
 import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.omregning.OpprettOmregningResponse
@@ -72,7 +72,7 @@ interface BehandlingService {
         sakId: Long,
         frist: Tidspunkt,
         behandlingsmaaned: YearMonth,
-        vurderingVedMaaned: VurderingVedMaaned,
+        jobbType: JobbType,
     ): OpprettRevurderingForAktivitetspliktResponse
 
     fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe
@@ -262,7 +262,7 @@ class BehandlingServiceImpl(
         sakId: Long,
         frist: Tidspunkt,
         behandlingsmaaned: YearMonth,
-        vurderingVedMaaned: VurderingVedMaaned,
+        jobbType: JobbType,
     ): OpprettRevurderingForAktivitetspliktResponse {
         return runBlocking {
             behandlingKlient.post("$url/api/sak/$sakId/aktivitetsplikt/revurdering") {
@@ -272,7 +272,7 @@ class BehandlingServiceImpl(
                         sakId = sakId,
                         frist = frist,
                         behandlingsmaaned = behandlingsmaaned,
-                        vurderingVedMaaned = vurderingVedMaaned,
+                        jobbType = jobbType,
                     ),
                 )
             }.body<OpprettRevurderingForAktivitetspliktResponse>()

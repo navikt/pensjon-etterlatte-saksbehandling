@@ -33,7 +33,7 @@ class YtelseMedGrunnlagService(
                         .maxBy { it.datoFOM }
 
                 val avkortingsgrunnlagIPeriode =
-                    avkorting.aarsoppgjoer.inntektsavkorting
+                    avkorting.aarsoppgjoer.single().inntektsavkorting
                         .filter { it.grunnlag.periode.fom <= avkortetYtelse.periode.fom }
                         .maxBy { it.grunnlag.periode.fom }
 

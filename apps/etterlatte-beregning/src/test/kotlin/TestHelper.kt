@@ -109,10 +109,12 @@ fun avkorting(
     avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) = Avkorting(
     aarsoppgjoer =
-        aarsoppgjoer(
-            ytelseFoerAvkorting,
-            inntektsavkorting,
-            avkortetYtelseAar,
+        listOf(
+            aarsoppgjoer(
+                ytelseFoerAvkorting,
+                inntektsavkorting,
+                avkortetYtelseAar,
+            ),
         ),
 )
 

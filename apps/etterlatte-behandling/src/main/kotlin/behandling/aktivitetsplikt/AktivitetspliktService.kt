@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktAktivitetsgradDao
@@ -9,14 +10,26 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnn
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.AktivitetspliktUnntakDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktAktivitetsgrad
 import no.nav.etterlatte.behandling.aktivitetsplikt.vurdering.LagreAktivitetspliktUnntak
+import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.AktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
+import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktDto
+import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetspliktResponse
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
+import no.nav.etterlatte.libs.ktor.token.Systembruker
+import no.nav.etterlatte.oppgave.OppgaveService
 import java.time.LocalDate
 import java.util.UUID
 
@@ -25,6 +38,9 @@ class AktivitetspliktService(
     private val aktivitetspliktAktivitetsgradDao: AktivitetspliktAktivitetsgradDao,
     private val aktivitetspliktUnntakDao: AktivitetspliktUnntakDao,
     private val behandlingService: BehandlingService,
+    private val grunnlagKlient: GrunnlagKlient,
+    private val automatiskRevurderingService: AutomatiskRevurderingService,
+    private val oppgaveService: OppgaveService,
 ) {
     fun hentAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? {
         return inTransaction {
@@ -115,15 +131,6 @@ class AktivitetspliktService(
         inTransaction {
             aktivitetspliktDao.slettAktivitet(aktivitetId, behandlingId)
         }
-    }
-
-    fun kopierAktiviteter(
-        fraBehandlingId: UUID,
-        tilBehandlingId: UUID,
-    ) {
-        requireNotNull(behandlingService.hentBehandling(tilBehandlingId)) { "Fant ikke behandling $tilBehandlingId" }
-
-        aktivitetspliktDao.kopierAktiviteter(fraBehandlingId, tilBehandlingId)
     }
 
     fun opprettAktivitetsgradForOppgave(
@@ -219,6 +226,87 @@ class AktivitetspliktService(
 
             AktivitetspliktVurdering(aktivitetsgrad, unntak)
         }
+
+    fun opprettRevurderingHvisKravIkkeOppfylt(
+        request: OpprettRevurderingForAktivitetspliktDto,
+    ): OpprettRevurderingForAktivitetspliktResponse {
+        val forrigeBehandling =
+            inTransaction {
+                requireNotNull(behandlingService.hentSisteIverksatte(request.sakId)) {
+                    "Fant ikke forrige behandling i sak ${request.sakId}sakId"
+                }
+            }
+        val persongalleri =
+            runBlocking {
+                requireNotNull(
+                    grunnlagKlient.hentPersongalleri(
+                        forrigeBehandling.id,
+                        Systembruker.automatiskJobb,
+                    )?.opplysning,
+                ) {
+                    "Fant ikke persongalleri for behandling ${forrigeBehandling.id}"
+                }
+            }
+
+        val aktivitetspliktDato = request.behandlingsmaaned.atDay(1)
+        return if (oppfyllerAktivitetsplikt(request.sakId, aktivitetspliktDato)) {
+            OpprettRevurderingForAktivitetspliktResponse(forrigeBehandlingId = forrigeBehandling.id)
+        } else {
+            inTransaction {
+                if (behandlingService.hentBehandlingerForSak(request.sakId).any { it.status.aapenBehandling() }) {
+                    opprettOppgave(request, forrigeBehandling)
+                } else {
+                    opprettRevurdering(request, forrigeBehandling, aktivitetspliktDato, persongalleri)
+                }
+            }
+        }
+    }
+
+    private fun opprettOppgave(
+        request: OpprettRevurderingForAktivitetspliktDto,
+        forrigeBehandling: Behandling,
+    ): OpprettRevurderingForAktivitetspliktResponse {
+        logger.info("Oppretter oppgave for revurdering av aktivitetsplikt for sak ${request.sakId}")
+        return oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            sakId = request.sakId,
+            referanse = forrigeBehandling.id.toString(),
+            oppgaveKilde = OppgaveKilde.HENDELSE,
+            oppgaveType = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
+            merknad = request.jobbType.beskrivelse,
+            frist = request.frist,
+        ).let { oppgave ->
+            OpprettRevurderingForAktivitetspliktResponse(
+                opprettetOppgave = true,
+                oppgaveId = oppgave.id,
+                forrigeBehandlingId = forrigeBehandling.id,
+            )
+        }
+    }
+
+    private fun opprettRevurdering(
+        request: OpprettRevurderingForAktivitetspliktDto,
+        forrigeBehandling: Behandling,
+        aktivitetspliktDato: LocalDate?,
+        persongalleri: Persongalleri,
+    ): OpprettRevurderingForAktivitetspliktResponse {
+        logger.info("Oppretter behandling for revurdering av aktivitetsplikt for sak ${request.sakId}")
+        return automatiskRevurderingService.opprettAutomatiskRevurdering(
+            sakId = request.sakId,
+            forrigeBehandling = forrigeBehandling,
+            revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
+            virkningstidspunkt = aktivitetspliktDato,
+            kilde = Vedtaksloesning.GJENNY,
+            persongalleri = persongalleri,
+            frist = request.frist,
+            begrunnelse = request.jobbType.beskrivelse,
+        ).oppdater().let { revurdering ->
+            OpprettRevurderingForAktivitetspliktResponse(
+                opprettetRevurdering = true,
+                nyBehandlingId = revurdering.id,
+                forrigeBehandlingId = forrigeBehandling.id,
+            )
+        }
+    }
 }
 
 class SakidTilhoererIkkeBehandlingException :

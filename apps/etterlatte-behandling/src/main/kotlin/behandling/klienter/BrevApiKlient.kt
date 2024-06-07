@@ -225,7 +225,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         brukerInfoToken: BrukerTokenInfo,
     ): OpprettJournalpostDto {
         return post(
-            url = "$resourceUrl/api/notat/${klage.sak.id}/journalfoer",
+            url = "$resourceUrl/api/notat/sak/${klage.sak.id}/journalfoer",
             postBody = mapOf("data" to KlageNotatRequest(klage)),
             onSuccess = { response -> deserialize(response.response!!.toJson()) },
             brukerTokenInfo = brukerInfoToken,

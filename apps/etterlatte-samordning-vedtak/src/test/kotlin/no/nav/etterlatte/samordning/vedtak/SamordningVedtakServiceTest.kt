@@ -247,9 +247,10 @@ class SamordningVedtakServiceTest {
             } returns vedtakliste
 
             runBlocking {
-                samordningVedtakService.harLoependeOmstillingsstoenadPaaDato(
+                samordningVedtakService.harLoependeYtelsePaaDato(
                     dato.atStartOfMonth(),
                     Folkeregisteridentifikator.of(FNR),
+                    SakType.OMSTILLINGSSTOENAD,
                     PensjonContext,
                 ) shouldBe false
             }
@@ -286,9 +287,10 @@ class SamordningVedtakServiceTest {
             } returns vedtakliste
 
             runBlocking {
-                samordningVedtakService.harLoependeOmstillingsstoenadPaaDato(
+                samordningVedtakService.harLoependeYtelsePaaDato(
                     dato.atStartOfMonth(),
                     Folkeregisteridentifikator.of(FNR),
+                    SakType.OMSTILLINGSSTOENAD,
                     PensjonContext,
                 ) shouldBe true
             }
@@ -325,9 +327,10 @@ class SamordningVedtakServiceTest {
             } returns vedtakliste
 
             runBlocking {
-                samordningVedtakService.harLoependeOmstillingsstoenadPaaDato(
+                samordningVedtakService.harLoependeYtelsePaaDato(
                     dato.atStartOfMonth(),
                     Folkeregisteridentifikator.of(FNR),
+                    SakType.OMSTILLINGSSTOENAD,
                     PensjonContext,
                 ) shouldBe true
             }
@@ -365,9 +368,10 @@ class SamordningVedtakServiceTest {
             } returns vedtakliste
 
             runBlocking {
-                samordningVedtakService.harLoependeOmstillingsstoenadPaaDato(
+                samordningVedtakService.harLoependeYtelsePaaDato(
                     dato.atStartOfMonth(),
                     Folkeregisteridentifikator.of(FNR),
+                    SakType.OMSTILLINGSSTOENAD,
                     PensjonContext,
                 ) shouldBe false
             }

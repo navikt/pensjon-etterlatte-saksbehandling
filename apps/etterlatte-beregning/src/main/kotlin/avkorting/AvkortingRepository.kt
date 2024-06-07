@@ -68,10 +68,12 @@ class AvkortingRepository(private val dataSource: DataSource) {
 
                 Avkorting(
                     aarsoppgjoer =
-                        Aarsoppgjoer(
-                            ytelseFoerAvkorting = ytelseFoerAvkorting,
-                            inntektsavkorting = inntektsavkorting,
-                            avkortetYtelseAar = avkortetYtelseAar,
+                        listOf(
+                            Aarsoppgjoer(
+                                ytelseFoerAvkorting = ytelseFoerAvkorting,
+                                inntektsavkorting = inntektsavkorting,
+                                avkortetYtelseAar = avkortetYtelseAar,
+                            ),
                         ),
                 )
             }
@@ -83,7 +85,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
     ) {
         dataSource.transaction { tx ->
             slettAvkorting(behandlingId, tx)
-            with(avkorting.aarsoppgjoer) {
+            with(avkorting.aarsoppgjoer.single()) {
                 lagreYtelseFoerAvkorting(behandlingId, ytelseFoerAvkorting, tx)
                 inntektsavkorting.forEach {
                     lagreAvkortingGrunnlag(behandlingId, it.grunnlag, tx)

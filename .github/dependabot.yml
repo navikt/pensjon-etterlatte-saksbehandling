@@ -65,7 +65,6 @@ updates:
 
   - package-ecosystem: "npm"
     directories:
-      - "/apps/etterlatte-saksbehandling-ui"
       - "/apps/etterlatte-saksbehandling-ui/client"
       - "/apps/etterlatte-saksbehandling-ui/server"
     schedule:
@@ -76,11 +75,12 @@ updates:
       eslint:
         patterns:
           - "prettier"
-          - "eslint*"
+          - "eslint"
+          - "eslint-*"
           - "husky"
           - "lint-staged"
           - "@typescript-eslint/*"
-          - "@testing-library*"
+          - "@testing-library/*"
           - "@types/chai"
           - "@types/mocha"
           - "chai"
@@ -91,7 +91,8 @@ updates:
           - "@navikt/aksel-icons"
       diverse:
         patterns:
-          - "slate*"
+          - "slate"
+          - "slate-*"
           - "vite"
           - "vite-tsconfig-paths"
           - "vitest"
@@ -118,6 +119,24 @@ updates:
           - "prom-client"
           - "unleash-client"
 
+  # =============
+  # FRONTEND ROOT
+  # =============
+
+  - package-ecosystem: "npm"
+    directory: "/apps/etterlatte-saksbehandling-ui/"
+    schedule:
+      interval: "monthly"
+      day: "sunday"
+    open-pull-requests-limit: 10
+    groups:
+      eslint:
+        patterns:
+          - "prettier"
+          - "eslint"
+          - "husky"
+          - "lint-staged"
+          - "@typescript-eslint/*"
 
   # ==============
   # GITHUB ACTIONS
@@ -144,3 +163,7 @@ updates:
     schedule:
       interval: "monthly"
       day: "sunday"
+    groups:
+      dockerfilene:
+        patterns:
+          - "*"

@@ -13,48 +13,54 @@ export const AktivitetspliktVurderingVisning = ({
   visForm,
   erRedigerbar,
 }: {
-  vurdering: IAktivitetspliktVurdering
+  vurdering?: IAktivitetspliktVurdering
   visForm: () => void
   erRedigerbar: boolean
 }) => {
   return (
     <VStack gap="4">
       <>
-        {vurdering.unntak && (
+        {vurdering ? (
           <>
-            <Label>Unntak</Label>
-            <BodyShort>{tekstAktivitetspliktUnntakType[vurdering.unntak.unntak]}</BodyShort>
-
-            {vurdering.unntak.tom && (
+            {vurdering.unntak && (
               <>
-                <Label>Sluttdato</Label>
-                <BodyShort>{vurdering.unntak.tom}</BodyShort>
+                <Label>Unntak</Label>
+                <BodyShort>{tekstAktivitetspliktUnntakType[vurdering.unntak.unntak]}</BodyShort>
+
+                {vurdering.unntak.tom && (
+                  <>
+                    <Label>Sluttdato</Label>
+                    <BodyShort>{vurdering.unntak.tom}</BodyShort>
+                  </>
+                )}
+
+                <Label>Vurdering</Label>
+                <BodyShort>{vurdering.unntak.beskrivelse}</BodyShort>
+
+                <Detail>
+                  Vurdering ble utført {formaterStringDato(vurdering.unntak.opprettet.tidspunkt)} av saksbehandler{' '}
+                  {vurdering.unntak.opprettet.ident}
+                </Detail>
               </>
             )}
 
-            <Label>Vurdering</Label>
-            <BodyShort>{vurdering.unntak.beskrivelse}</BodyShort>
+            {vurdering.aktivitet && (
+              <>
+                <Label>Aktivitetsgrad</Label>
+                <BodyShort>{tekstAktivitetspliktVurderingType[vurdering.aktivitet.aktivitetsgrad]}</BodyShort>
 
-            <Detail>
-              Vurdering ble utført {formaterStringDato(vurdering.unntak.opprettet.tidspunkt)} av saksbehandler{' '}
-              {vurdering.unntak.opprettet.ident}
-            </Detail>
+                <Label>Vurdering</Label>
+                <BodyShort>{vurdering.aktivitet.beskrivelse}</BodyShort>
+
+                <Detail>
+                  Vurdering ble utført {formaterStringDato(vurdering.aktivitet.opprettet.tidspunkt)} av saksbehandler{' '}
+                  {vurdering.aktivitet.opprettet.ident}
+                </Detail>
+              </>
+            )}
           </>
-        )}
-
-        {vurdering.aktivitet && (
-          <>
-            <Label>Aktivitetsgrad</Label>
-            <BodyShort>{tekstAktivitetspliktVurderingType[vurdering.aktivitet.aktivitetsgrad]}</BodyShort>
-
-            <Label>Vurdering</Label>
-            <BodyShort>{vurdering.aktivitet.beskrivelse}</BodyShort>
-
-            <Detail>
-              Vurdering ble utført {formaterStringDato(vurdering.aktivitet.opprettet.tidspunkt)} av saksbehandler{' '}
-              {vurdering.aktivitet.opprettet.ident}
-            </Detail>
-          </>
+        ) : (
+          <BodyShort>Ingen vurdering</BodyShort>
         )}
 
         {erRedigerbar && (

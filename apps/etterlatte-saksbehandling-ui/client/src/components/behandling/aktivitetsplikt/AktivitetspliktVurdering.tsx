@@ -181,13 +181,7 @@ export const AktivitetspliktVurdering = ({
         <Toast melding="Vurdering av aktivitetsplikt er lagret" />
       )}
       <Spinner label="Henter vurdering av aktivitetsplikt" visible={isPending(hentet)} />
-      {!isPending(hentet) && vurdering && !visForm ? (
-        <AktivitetspliktVurderingVisning
-          vurdering={vurdering}
-          visForm={() => setVisForm(true)}
-          erRedigerbar={redigerbar}
-        />
-      ) : (
+      {isPending(hentet) && visForm && redigerbar && (
         <VStack gap="4">
           <ControlledRadioGruppe
             name="aktivitetsplikt"
@@ -306,6 +300,13 @@ export const AktivitetspliktVurdering = ({
             </Button>
           </HStack>
         </VStack>
+      )}
+      {!isPending(hentet) && !visForm && (
+        <AktivitetspliktVurderingVisning
+          vurdering={vurdering}
+          visForm={() => setVisForm(true)}
+          erRedigerbar={redigerbar}
+        />
       )}
       {mapFailure(opprettetUnntak, (error) => (
         <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved oppretting av unntak'}</ApiErrorAlert>

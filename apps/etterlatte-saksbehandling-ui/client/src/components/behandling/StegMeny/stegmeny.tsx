@@ -43,30 +43,28 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
           <ApiErrorAlert>Kunne ikke laste stegmeny</ApiErrorAlert>
         ),
         () => (
-          <>
-            <StegMenyBox>
-              <HStack gap="6" align="center">
-                {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-                  soeknadRoutes_.map((pathInfo, index) => (
-                    <NavLenke
-                      key={pathInfo.path}
-                      pathInfo={pathInfo}
-                      behandling={props.behandling}
-                      separator={erSisteRoute(index, soeknadRoutes_)}
-                    />
-                  ))}
-                {behandlingType === IBehandlingsType.REVURDERING &&
-                  revurderingRoutes_.map((pathInfo, index) => (
-                    <NavLenke
-                      key={pathInfo.path}
-                      pathInfo={pathInfo}
-                      behandling={props.behandling}
-                      separator={erSisteRoute(index, revurderingRoutes_)}
-                    />
-                  ))}
-              </HStack>
-            </StegMenyBox>
-          </>
+          <StegMenyBox>
+            <HStack gap="6" align="center">
+              {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+                soeknadRoutes_.map((pathInfo, index) => (
+                  <NavLenke
+                    key={pathInfo.path}
+                    pathInfo={pathInfo}
+                    behandling={props.behandling}
+                    separator={erSisteRoute(index, soeknadRoutes_)}
+                  />
+                ))}
+              {behandlingType === IBehandlingsType.REVURDERING &&
+                revurderingRoutes_.map((pathInfo, index) => (
+                  <NavLenke
+                    key={pathInfo.path}
+                    pathInfo={pathInfo}
+                    behandling={props.behandling}
+                    separator={erSisteRoute(index, revurderingRoutes_)}
+                  />
+                ))}
+            </HStack>
+          </StegMenyBox>
         )
       )}
     </>

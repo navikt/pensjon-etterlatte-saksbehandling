@@ -177,7 +177,6 @@ export const Resultat = (props: Props) => {
               <RadioGroup
                 legend=""
                 size="small"
-                className="radioGroup"
                 value={svar || ''}
                 onChange={(event) => {
                   setSvar(ISvar[event as ISvar])

@@ -101,6 +101,7 @@ export const AktivitetspliktVurdering = ({
           resetManglerAktivitetspliktVurdering()
           hent({ sakId: behandling.sakId, behandlingId: behandling.id }, (result) => {
             setVurdering(result)
+            setVisForm(false)
           })
         }
       )
@@ -120,6 +121,7 @@ export const AktivitetspliktVurdering = ({
           resetManglerAktivitetspliktVurdering()
           hent({ sakId: behandling.sakId, behandlingId: behandling.id }, (result) => {
             setVurdering(result)
+            setVisForm(false)
           })
         }
       )
@@ -181,7 +183,7 @@ export const AktivitetspliktVurdering = ({
         <Toast melding="Vurdering av aktivitetsplikt er lagret" />
       )}
       <Spinner label="Henter vurdering av aktivitetsplikt" visible={isPending(hentet)} />
-      {isPending(hentet) && visForm && redigerbar && (
+      {visForm && redigerbar && (
         <VStack gap="4">
           <ControlledRadioGruppe
             name="aktivitetsplikt"

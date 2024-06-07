@@ -53,8 +53,8 @@ export const AktivitetspliktVurderingVisning = ({
                 <BodyShort>{vurdering.aktivitet.beskrivelse}</BodyShort>
 
                 <Detail>
-                  Vurdering ble utført {formaterStringDato(vurdering.aktivitet.opprettet.tidspunkt)} av saksbehandler{' '}
-                  {vurdering.aktivitet.opprettet.ident}
+                  Vurdering ble utført {formaterStringDato(vurdering.aktivitet.endret.tidspunkt)} av saksbehandler{' '}
+                  {vurdering.aktivitet.endret.ident}
                 </Detail>
               </>
             )}

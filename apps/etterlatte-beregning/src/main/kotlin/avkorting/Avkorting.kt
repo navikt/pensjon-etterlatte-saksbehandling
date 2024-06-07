@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.AARSOPPGJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.ETTEROPPJOER
 import no.nav.etterlatte.avkorting.AvkortetYtelseType.FORVENTET_INNTEKT
+import no.nav.etterlatte.avkorting.regler.virkningstidspunkt
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagLagreDto
@@ -31,8 +32,7 @@ data class Avkorting(
     ): Avkorting =
         this.copy(
             avkortetYtelseFraVirkningstidspunkt =
-                hentAarsoppgjoer()
-                    .avkortetYtelseAar
+                hentAarsoppgjoer(virkningstidspunkt).avkortetYtelseAar
                     .filter { it.periode.tom == null || virkningstidspunkt <= it.periode.tom }
                     .map {
                         if (virkningstidspunkt > it.periode.fom && (it.periode.tom == null || virkningstidspunkt <= it.periode.tom)) {
@@ -78,8 +78,7 @@ data class Avkorting(
         bruker: BrukerTokenInfo,
     ): Avkorting {
         val oppdatert =
-            hentAarsoppgjoer()
-                .inntektsavkorting
+            hentAarsoppgjoer(virkningstidspunkt).inntektsavkorting
                 // Fjerner hvis det finnes fra før for å erstatte/redigere
                 .filter { it.grunnlag.id != nyttGrunnlag.id }
                 .map { it.lukkSisteInntektsperiode(virkningstidspunkt) } +
@@ -91,7 +90,7 @@ data class Avkorting(
                                 periode = Periode(fom = virkningstidspunkt, tom = null),
                                 aarsinntekt = nyttGrunnlag.aarsinntekt,
                                 fratrekkInnAar = nyttGrunnlag.fratrekkInnAar,
-                                relevanteMaanederInnAar = hentAarsoppgjoer().utledRelevanteMaaneder(virkningstidspunkt),
+                                relevanteMaanederInnAar = hentAarsoppgjoer(virkningstidspunkt).utledRelevanteMaaneder(virkningstidspunkt),
                                 inntektUtland = nyttGrunnlag.inntektUtland,
                                 fratrekkInnAarUtland = nyttGrunnlag.fratrekkInnAarUtland,
                                 spesifikasjon = nyttGrunnlag.spesifikasjon,
@@ -101,7 +100,7 @@ data class Avkorting(
                 )
 
         val oppdatertAarsoppjoer =
-            hentAarsoppgjoer().copy(
+            hentAarsoppgjoer(virkningstidspunkt).copy(
                 inntektsavkorting = oppdatert,
             )
         return this.copy(
@@ -111,7 +110,8 @@ data class Avkorting(
 
     private fun beregnAvkortingForstegangs(beregning: Beregning): Avkorting {
         val ytelseFoerAvkorting = beregning.mapTilYtelseFoerAvkorting()
-        val grunnlag = hentAarsoppgjoer().inntektsavkorting.first().grunnlag
+        val fom = ytelseFoerAvkorting.first().periode.fom // TODO bytt med virk..
+        val grunnlag = hentAarsoppgjoer(fom).inntektsavkorting.first().grunnlag
 
         val avkortingsperioder =
             AvkortingRegelkjoring.beregnInntektsavkorting(
@@ -128,10 +128,10 @@ data class Avkorting(
             )
 
         val oppdatertAarsoppgjoer =
-            hentAarsoppgjoer().copy(
+            hentAarsoppgjoer(fom).copy(
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
                 inntektsavkorting =
-                    hentAarsoppgjoer().inntektsavkorting.map { inntektsavkorting ->
+                    hentAarsoppgjoer(fom).inntektsavkorting.map { inntektsavkorting ->
                         inntektsavkorting.copy(
                             avkortingsperioder = avkortingsperioder,
                         )
@@ -150,11 +150,12 @@ data class Avkorting(
     }
 
     fun beregnAvkortingRevurdering(beregning: Beregning): Avkorting {
-        val ytelseFoerAvkorting = hentAarsoppgjoer().ytelseFoerAvkorting.leggTilNyeBeregninger(beregning)
+        val fom = beregning.beregningsperioder.first().datoFOM // TODO bytt med virk
+        val ytelseFoerAvkorting = hentAarsoppgjoer(fom).ytelseFoerAvkorting.leggTilNyeBeregninger(beregning)
 
         val reberegnetInntektsavkorting =
-            hentAarsoppgjoer().inntektsavkorting.map { inntektsavkorting ->
-                val periode = Periode(fom = this.foersteMaanedDetteAar(), tom = inntektsavkorting.grunnlag.periode.tom)
+            hentAarsoppgjoer(fom).inntektsavkorting.map { inntektsavkorting ->
+                val periode = Periode(fom = this.foersteMaanedDetteAar(fom), tom = inntektsavkorting.grunnlag.periode.tom)
 
                 val avkortinger =
                     AvkortingRegelkjoring.beregnInntektsavkorting(
@@ -163,7 +164,7 @@ data class Avkorting(
                     )
 
                 val avkortetYtelseForventetInntekt =
-                    if (hentAarsoppgjoer().inntektsavkorting.size > 1) {
+                    if (hentAarsoppgjoer(fom).inntektsavkorting.size > 1) {
                         AvkortingRegelkjoring.beregnAvkortetYtelse(
                             periode = periode,
                             ytelseFoerAvkorting = ytelseFoerAvkorting,
@@ -184,7 +185,7 @@ data class Avkorting(
             }
 
         val avkortetYtelse =
-            if (hentAarsoppgjoer().inntektsavkorting.size > 1) {
+            if (hentAarsoppgjoer(fom).inntektsavkorting.size > 1) {
                 beregnAvkortetYtelseMedRestanse(ytelseFoerAvkorting, reberegnetInntektsavkorting)
             } else {
                 reberegnetInntektsavkorting.first().let {
@@ -199,7 +200,7 @@ data class Avkorting(
             }
 
         val oppdatertAarsoppgjoer =
-            hentAarsoppgjoer().copy(
+            hentAarsoppgjoer(fom).copy(
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
                 inntektsavkorting = reberegnetInntektsavkorting,
                 avkortetYtelseAar = avkortetYtelse,
@@ -226,7 +227,7 @@ data class Avkorting(
                     0 -> null
                     else ->
                         AvkortingRegelkjoring.beregnRestanse(
-                            this.foersteMaanedDetteAar(),
+                            this.foersteMaanedDetteAar(ytelseFoerAvkorting.first().periode.fom),
                             inntektsavkorting,
                             avkortetYtelseMedAllForventetInntekt,
                         )
@@ -249,23 +250,18 @@ data class Avkorting(
 	 * Det er tilfeller hvor det er nødvendig å vite når første periode i inneværende begynner.
 	 * Ved inngangsår så vil ikke første måned nødvendgivis være januar så det må baseres på fom første periode.
 	 */
-    private fun foersteMaanedDetteAar() =
-        hentAarsoppgjoer()
-            .ytelseFoerAvkorting
-            .first()
-            .periode.fom
+    private fun foersteMaanedDetteAar(fom: YearMonth) = hentAarsoppgjoer(fom).ytelseFoerAvkorting.first().periode.fom
 
-    private fun hentAarsoppgjoer(): Aarsoppgjoer {
-        if (aarsoppgjoer.isEmpty()) {
-            return Aarsoppgjoer()
-        }
-        // TODO skal på sikt utlede etterspurt årsoppgjør
-        return aarsoppgjoer.single()
+    fun hentAarsoppgjoer(fom: YearMonth): Aarsoppgjoer {
+        val funnet = aarsoppgjoer.find { it.aar!! == fom.year }
+        return funnet ?: Aarsoppgjoer(aar = fom.year)
     }
 
     private fun erstattAarsoppgjoer(nytt: Aarsoppgjoer): List<Aarsoppgjoer> {
-        // TODO Her skal det returneres eksisterend eliste hvor relevant årsoppgjør erstattes basert på året det gjelder
-        return listOf(nytt)
+        if (aarsoppgjoer.any { it.aar == nytt.aar }) {
+            return aarsoppgjoer.map { if (it.aar == nytt.aar) nytt else it }
+        }
+        return aarsoppgjoer + listOf(nytt)
     }
 }
 
@@ -285,6 +281,7 @@ data class AvkortingGrunnlag(
 )
 
 data class Aarsoppgjoer(
+    val aar: Int? = null, // TODO fjern nullable
     val ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     val inntektsavkorting: List<Inntektsavkorting> = emptyList(),
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),

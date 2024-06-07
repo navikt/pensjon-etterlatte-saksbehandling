@@ -25,6 +25,7 @@ internal class AvkortingTest {
                 aarsoppgjoer =
                     listOf(
                         Aarsoppgjoer(
+                            aar = 2024,
                             avkortetYtelseAar =
                                 listOf(
                                     avkortetYtelse(
@@ -289,6 +290,54 @@ internal class AvkortingTest {
                         last().grunnlag.relevanteMaanederInnAar shouldBe 12
                     }
                 }
+        }
+
+        @Test
+        fun `Ny inntekt for et aarsoppgjoer som ikke finnes enda skal opprette det nye aaret`() {
+            val nyttGrunnlag = avkortinggrunnlagLagre(aarsinntekt = 150000)
+            val virkningstidspunkt = YearMonth.of(2025, Month.AUGUST)
+
+            val oppdatertAvkorting =
+                avkorting.oppdaterMedInntektsgrunnlag(
+                    nyttGrunnlag,
+                    virkningstidspunkt,
+                    bruker,
+                )
+
+            oppdatertAvkorting.shouldBeEqualToIgnoringFields(avkorting, Avkorting::aarsoppgjoer)
+            with(oppdatertAvkorting.hentAarsoppgjoer(YearMonth.of(2024, 1))) {
+                shouldBeEqualToIgnoringFields(
+                    avkorting.hentAarsoppgjoer(YearMonth.of(2024, 1)),
+                    Aarsoppgjoer::inntektsavkorting,
+                )
+                with(inntektsavkorting) {
+                    size shouldBe 2
+                    get(0).grunnlag shouldBe foersteInntekt
+                    get(1).grunnlag.shouldBeEqualToIgnoringFields(andreInntekt, AvkortingGrunnlag::periode)
+                    get(1).grunnlag.periode shouldBe
+                        Periode(
+                            fom = YearMonth.of(2024, Month.APRIL),
+                            tom = null,
+                            // tom = YearMonth.of(2024, Month.DECEMBER), TODO er dette nødvendig?
+                        )
+                }
+            }
+            with(oppdatertAvkorting.hentAarsoppgjoer(YearMonth.of(2025, 1))) {
+                shouldBeEqualToIgnoringFields(
+                    avkorting.hentAarsoppgjoer(YearMonth.of(2025, 1)),
+                    Aarsoppgjoer::inntektsavkorting,
+                )
+                with(inntektsavkorting) {
+                    size shouldBe 1
+                    with(get(0).grunnlag) {
+                        aarsinntekt shouldBe nyttGrunnlag.aarsinntekt
+                        fratrekkInnAar shouldBe nyttGrunnlag.fratrekkInnAar
+                        inntektUtland shouldBe nyttGrunnlag.inntektUtland
+                        fratrekkInnAarUtland shouldBe nyttGrunnlag.fratrekkInnAarUtland
+                        spesifikasjon shouldBe nyttGrunnlag.spesifikasjon
+                    }
+                }
+            }
         }
     }
 }

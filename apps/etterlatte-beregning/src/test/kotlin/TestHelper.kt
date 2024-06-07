@@ -177,6 +177,7 @@ fun aarsoppgjoer(
     inntektsavkorting: List<Inntektsavkorting> = emptyList(),
     avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) = Aarsoppgjoer(
+    aar = 2024,
     ytelseFoerAvkorting = ytelseFoerAvkorting,
     inntektsavkorting = inntektsavkorting,
     avkortetYtelseAar = avkortetYtelseAar,

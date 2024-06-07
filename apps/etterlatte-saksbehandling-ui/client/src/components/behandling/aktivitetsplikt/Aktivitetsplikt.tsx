@@ -169,7 +169,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
 }
 
 const AktivitetspliktWrapper = styled(VStack)`
-  padding: 0 4rem 2rem 4rem;
+  padding: 0 var(--a-spacing-16) var(--a-spacing-8) var(--a-spacing-16);
   max-width: var(--a-breakpoint-2xl);
 `
 

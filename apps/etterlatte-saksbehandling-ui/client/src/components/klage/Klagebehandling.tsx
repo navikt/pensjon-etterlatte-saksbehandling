@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useAppDispatch } from '~store/Store'
 import { addKlage, resetKlage } from '~store/reducers/KlageReducer'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { StatusBarHenterData } from '~shared/statusbar/Statusbar'
+import { StatusBarPersonHenter } from '~shared/statusbar/Statusbar'
 import Spinner from '~shared/Spinner'
 import { GridContainer, MainContent } from '~shared/styled'
 import { hentKlage } from '~shared/api/klage'
@@ -60,7 +60,7 @@ export function Klagebehandling() {
 
   return (
     <>
-      <StatusBarHenterData ident={klage?.sak.ident} />
+      <StatusBarPersonHenter ident={klage?.sak.ident} />
       <KlageStegmeny />
       {isPending(fetchKlageStatus) && <Spinner visible label="Henter klagebehandling" />}
 

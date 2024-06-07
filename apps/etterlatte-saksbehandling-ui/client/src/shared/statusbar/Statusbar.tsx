@@ -27,7 +27,7 @@ export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }
   />
 )
 
-export const StatusBarHenterData = ({ ident }: { ident: string | null | undefined }) => {
+export const StatusBarPersonHenter = ({ ident }: { ident: string | null | undefined }) => {
   const [personStatus, hentPerson] = useApiCall(hentPersonNavnogFoedsel)
   useEffect(() => {
     ident && hentPerson(ident)

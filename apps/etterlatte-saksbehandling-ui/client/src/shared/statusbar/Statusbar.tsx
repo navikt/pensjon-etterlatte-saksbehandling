@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../icons/genderIcon'
 import { IPersonResult } from '~components/person/typer'
-import { BodyShort, Box, HStack, Label, Link, Skeleton } from '@navikt/ds-react'
+import { BodyShort, Box, HelpText, HStack, Label, Link, Skeleton } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { IPdlPersonNavnFoedsel } from '~shared/types/Person'
 import { mapApiResult, Result } from '~shared/api/apiUtils'
@@ -10,6 +10,9 @@ import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { differenceInYears, parse } from 'date-fns'
 import { DatoFormat } from '~utils/formattering'
+import { IconSize } from '~shared/types/Icon'
+import { AGray600, AOrange600 } from '@navikt/ds-tokens/dist/tokens'
+import { ExclamationmarkTriangleIcon } from '@navikt/aksel-icons'
 
 export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
   <StatusBar
@@ -45,12 +48,6 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
     return GenderList.male
   }
 
-  const alderForPerson = (foedselsaar: number, foedselsdato: Date | undefined) => {
-    return foedselsdato
-      ? differenceInYears(new Date(), parse(String(foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date()))
-      : new Date().getFullYear() - foedselsaar
-  }
-
   return mapApiResult(
     result,
     <PersonSkeleton />,
@@ -62,13 +59,33 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
           <Label>
             <Link href={`/person/${person.foedselsnummer}`}>{genererNavn(person)}</Link>
           </Label>
-          <BodyShort textColor="subtle">({alderForPerson(person.foedselsaar, person.foedselsdato)} år)</BodyShort>
+          <VisAlderForPerson foedselsdato={person.foedselsdato} />
           <BodyShort>|</BodyShort>
           <KopierbarVerdi value={person.foedselsnummer} />
         </HStack>
       </StatusbarBox>
     )
   )
+}
+
+const VisAlderForPerson = ({ foedselsdato }: { foedselsdato: Date | undefined }) => {
+  if (foedselsdato) {
+    const alder = differenceInYears(new Date(), parse(String(foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date()))
+    return (
+      <BodyShort textColor="subtle">
+        <span style={{ color: AGray600 }}>({alder} år)</span>
+      </BodyShort>
+    )
+  } else {
+    return (
+      <>
+        <ExclamationmarkTriangleIcon color={AOrange600} fontSize={IconSize.DEFAULT} />
+        <HelpText title="Personen mangler fødselsdato">
+          Vi har ingen fødselsdato på vedkommende og kan derfor ikke vise nøytaktig alder.
+        </HelpText>
+      </>
+    )
+  }
 }
 
 const PersonSkeleton = () => (

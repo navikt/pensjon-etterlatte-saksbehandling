@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { IPdlPersonNavn, IPdlPersonNavnFoedselsAar } from '~shared/types/Person'
+import { IPdlPersonNavnFoedselsAar } from '~shared/types/Person'
 import { SakType } from '~shared/types/sak'
 import { FamilieOpplysninger } from '~shared/types/familieOpplysninger'
 
@@ -10,8 +10,6 @@ import { FamilieOpplysninger } from '~shared/types/familieOpplysninger'
  * - AktørID
  * - NPID
  **/
-export const hentPersonNavn = async (ident: string): Promise<ApiResponse<IPdlPersonNavn>> =>
-  apiClient.post(`/pdltjenester/person/navn`, { ident })
 
 export const hentPersonNavnFoedselsdatoOgFoedselsnummer = async (
   ident: string

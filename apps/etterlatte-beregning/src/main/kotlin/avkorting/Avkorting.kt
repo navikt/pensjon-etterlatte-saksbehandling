@@ -32,7 +32,7 @@ data class Avkorting(
     ): Avkorting =
         this.copy(
             avkortetYtelseFraVirkningstidspunkt =
-                hentAarsoppgjoer(virkningstidspunkt).avkortetYtelseAar
+                hentAarsoppgjoer(virkningstidspunkt).avkortetYtelseAar // TODO flat map flere oppgjør..
                     .filter { it.periode.tom == null || virkningstidspunkt <= it.periode.tom }
                     .map {
                         if (virkningstidspunkt > it.periode.fom && (it.periode.tom == null || virkningstidspunkt <= it.periode.tom)) {
@@ -155,7 +155,7 @@ data class Avkorting(
 
         val reberegnetInntektsavkorting =
             hentAarsoppgjoer(fom).inntektsavkorting.map { inntektsavkorting ->
-                val periode = Periode(fom = this.foersteMaanedDetteAar(fom), tom = inntektsavkorting.grunnlag.periode.tom)
+                val periode = Periode(fom = hentAarsoppgjoer(fom).foersteMaanedDetteAar(), tom = inntektsavkorting.grunnlag.periode.tom)
 
                 val avkortinger =
                     AvkortingRegelkjoring.beregnInntektsavkorting(
@@ -227,7 +227,7 @@ data class Avkorting(
                     0 -> null
                     else ->
                         AvkortingRegelkjoring.beregnRestanse(
-                            this.foersteMaanedDetteAar(ytelseFoerAvkorting.first().periode.fom),
+                            hentAarsoppgjoer(ytelseFoerAvkorting.first().periode.fom).foersteMaanedDetteAar(),
                             inntektsavkorting,
                             avkortetYtelseMedAllForventetInntekt,
                         )
@@ -301,6 +301,17 @@ data class Aarsoppgjoer(
                 }?.grunnlag
         return aaretsFoersteForventaInntekt?.relevanteMaanederInnAar ?: (12 - virkningstidspunkt.monthValue + 1)
     }
+
+    /*
+     * Det er tilfeller hvor det er nødvendig å vite når første periode i inneværende begynner.
+     * Ved inngangsår så vil ikke første måned nødvendgivis være januar så det må baseres på fom første periode.
+     */
+    fun foersteMaanedDetteAar(): YearMonth =
+        if (ytelseFoerAvkorting.isEmpty()) {
+            YearMonth.of(aar!!, 1)
+        } else {
+            ytelseFoerAvkorting.first().periode.fom
+        }
 }
 
 /**

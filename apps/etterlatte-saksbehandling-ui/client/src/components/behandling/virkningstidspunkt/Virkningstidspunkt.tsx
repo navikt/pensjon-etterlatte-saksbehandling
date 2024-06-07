@@ -1,5 +1,6 @@
 import {
   BodyShort,
+  Button,
   ErrorMessage,
   Heading,
   HelpText,
@@ -18,7 +19,6 @@ import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears, subYears } from 'date-fns'
 import { LovtekstMedLenke } from '../soeknadsoversikt/LovtekstMedLenke'
-import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/LeggTilVurderingButton'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
 import { hentMinimumsVirkningstidspunkt } from '~components/behandling/virkningstidspunkt/utils'
@@ -138,7 +138,9 @@ const Virkningstidspunkt = (props: {
 
         <Vurdering>
           {!vurdert ? (
-            <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
+            <Button variant="secondary" onClick={() => setVurdert(true)}>
+              Legg til vurdering
+            </Button>
           ) : (
             <VurderingsboksWrapper
               tittel="Hva er virkningstidspunkt for behandlingen?"

@@ -56,7 +56,7 @@ export function Tilbakekrevingsbehandling() {
 
   return (
     <>
-      {tilbakekreving?.sak.ident && <StatusBarHenterData ident={tilbakekreving?.sak.ident} />}
+      <StatusBarHenterData ident={tilbakekreving?.sak.ident} />
       <TilbakekrevingStegmeny />
       <Spinner visible={isPending(fetchTilbakekrevingStatus)} label="Henter tilbakekrevingsbehandling" />
 

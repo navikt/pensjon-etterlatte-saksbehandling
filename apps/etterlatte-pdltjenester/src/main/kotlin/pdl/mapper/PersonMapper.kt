@@ -165,7 +165,7 @@ object PersonMapper {
         }
     }
 
-    fun mapPersonNavnFoedselsDato(
+    fun mapPersonNavnFoedsel(
         ppsKlient: ParallelleSannheterKlient,
         ident: String,
         hentPerson: PdlHentPersonNavnFoedselsdato,
@@ -187,6 +187,7 @@ object PersonMapper {
                 mellomnavn = navn.mellomnavn,
                 etternavn = navn.etternavn,
                 foedselsnummer = Folkeregisteridentifikator.of(fnr),
+                foedselsdato = foedsel.foedselsdato,
                 foedselsaar = foedsel.foedselsaar,
             )
         }

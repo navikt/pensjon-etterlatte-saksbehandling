@@ -83,7 +83,7 @@ export default function BehandleJournalfoeringOppgave() {
   return (
     <>
       <StickyToppMeny>
-        {oppgave?.fnr && <StatusBarHenterData ident={oppgave.fnr} />}
+        <StatusBarHenterData ident={oppgave?.fnr} />
         <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
       </StickyToppMeny>
       <GridContainer>

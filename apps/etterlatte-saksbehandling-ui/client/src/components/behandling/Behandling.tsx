@@ -18,7 +18,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapAllApiResult } from '~shared/api/apiUtils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { StickyToppMeny } from '~shared/StickyToppMeny'
-import { IPdlPerson, IPdlPersonNavnFoedselsAar } from '~shared/types/Person'
+import { IPdlPerson, IPdlPersonNavnFoedsel } from '~shared/types/Person'
 
 export const Behandling = () => {
   useSidetittel('Behandling')
@@ -90,12 +90,13 @@ export const Behandling = () => {
   )
 }
 
-const personTilPersonNavnFoedselsAar = (person: IPdlPerson): IPdlPersonNavnFoedselsAar => {
+const personTilPersonNavnFoedselsAar = (person: IPdlPerson): IPdlPersonNavnFoedsel => {
   return {
     foedselsnummer: person.foedselsnummer,
     fornavn: person.fornavn,
     mellomnavn: person.mellomnavn,
     etternavn: person.etternavn,
     foedselsaar: person.foedselsaar,
+    foedselsdato: person.foedselsdato,
   }
 }

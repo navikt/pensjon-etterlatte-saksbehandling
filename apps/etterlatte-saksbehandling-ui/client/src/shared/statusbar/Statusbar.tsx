@@ -1,15 +1,17 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../icons/genderIcon'
-import { Link } from '@navikt/ds-react'
+import { HStack, Link } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { IPdlPersonNavnFoedselsAar } from '~shared/types/Person'
+import { IPdlPersonNavnFoedsel } from '~shared/types/Person'
 import { mapApiResult, Result } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentPersonNavnFoedselsdatoOgFoedselsnummer } from '~shared/api/pdltjenester'
+import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { useEffect } from 'react'
 import { AGray600 } from '@navikt/ds-tokens/dist/tokens'
+import { differenceInYears, parse } from 'date-fns'
+import { DatoFormat } from '~utils/formattering'
 
-export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedselsAar }) => (
+export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
   <StatusBar
     personResultStatus={{
       status: 'success',
@@ -19,21 +21,22 @@ export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedselsA
         mellomnavn: person.mellomnavn,
         etternavn: person.etternavn,
         foedselsaar: person.foedselsaar,
+        foedselsdato: person.foedselsdato,
       },
     }}
   />
 )
 
-export const StatusBarHenterData = ({ ident }: { ident: string }) => {
-  const [personStatus, hentPerson] = useApiCall(hentPersonNavnFoedselsdatoOgFoedselsnummer)
+export const StatusBarHenterData = ({ ident }: { ident: string | null | undefined }) => {
+  const [personStatus, hentPerson] = useApiCall(hentPersonNavnogFoedsel)
   useEffect(() => {
-    hentPerson(ident)
-  }, [])
+    ident && hentPerson(ident)
+  }, [ident])
 
   return <StatusBar personResultStatus={personStatus} />
 }
 
-const StatusBar = ({ personResultStatus }: { personResultStatus: Result<IPdlPersonNavnFoedselsAar> }) => {
+const StatusBar = ({ personResultStatus }: { personResultStatus: Result<IPdlPersonNavnFoedsel> }) => {
   const gender = (fnr: string): GenderList => {
     const genderNum = Number(fnr[8])
     if (genderNum % 2 === 0) {
@@ -50,22 +53,26 @@ const StatusBar = ({ personResultStatus }: { personResultStatus: Result<IPdlPers
       <StatusBarWrapper>
         <UserInfo>
           <GenderIcon gender={gender(person.foedselsnummer)} />
-          <Name>
-            <Link href={`/person/${person.foedselsnummer}`}>{genererNavn(person)}</Link>
-          </Name>
+          <HStack gap="2">
+            <Name>
+              <Link href={`/person/${person.foedselsnummer}`}>{genererNavn(person)}</Link>
+            </Name>
+            <VisAlderForPerson foedselsaar={person.foedselsaar} foedselsdato={person.foedselsdato} />
+          </HStack>
           <Skilletegn>|</Skilletegn>
           <KopierbarVerdi value={person.foedselsnummer} />
-          {VisAlderForPerson(person.foedselsaar)}
         </UserInfo>
       </StatusBarWrapper>
     )
   )
 }
 
-const VisAlderForPerson = (foedselsaar: number): JSX.Element => {
+const VisAlderForPerson = ({ foedselsaar, foedselsdato }: { foedselsaar: number; foedselsdato: Date | undefined }) => {
   const idag = new Date()
-  const aar = idag.getFullYear() - foedselsaar
-  return <span style={{ color: AGray600 }}> {`${aar} år`}</span>
+  const alder = foedselsdato
+    ? differenceInYears(idag, parse(String(foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date()))
+    : idag.getFullYear() - foedselsaar
+  return <span style={{ color: AGray600, whiteSpace: 'pre-wrap' }}>({alder} år)</span>
 }
 
 const PersonSkeleton = () => (
@@ -81,7 +88,7 @@ const PersonSkeleton = () => (
   </StatusBarWrapper>
 )
 
-const genererNavn = (personInfo: IPdlPersonNavnFoedselsAar) => {
+const genererNavn = (personInfo: IPdlPersonNavnFoedsel) => {
   return [personInfo.fornavn, personInfo.mellomnavn, personInfo.etternavn].join(' ')
 }
 

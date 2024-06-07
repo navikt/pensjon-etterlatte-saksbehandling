@@ -41,7 +41,7 @@ export default function NyttBrev() {
 
   return (
     <>
-      {fnr!! && <StatusBarHenterData ident={fnr} />}
+      <StatusBarHenterData ident={fnr} />
       <NavigerTilbakeMeny label="Tilbake til brevoversikt" path={`/person/${fnr}?fane=BREV`} />
 
       {mapApiResult(

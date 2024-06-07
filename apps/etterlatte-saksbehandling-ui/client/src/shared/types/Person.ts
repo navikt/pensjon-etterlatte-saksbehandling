@@ -48,12 +48,13 @@ export interface IPdlPerson {
   vergemaalEllerFremtidsfullmakt?: VergemaalEllerFremtidsfullmakt[]
 }
 
-export interface IPdlPersonNavnFoedselsAar {
+export interface IPdlPersonNavnFoedsel {
   fornavn: string
   mellomnavn?: string
   etternavn: string
   foedselsnummer: string
   foedselsaar: number
+  foedselsdato: Date | undefined
 }
 
 export interface Utland {

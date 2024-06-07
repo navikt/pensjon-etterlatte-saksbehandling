@@ -17,11 +17,11 @@ fun Route.personWebRoute(
     sporing: SporingService,
 ) {
     route("/person") {
-        post("/navn-foedselsaar") {
+        post("/navn-foedsel") {
             kunSaksbehandler {
                 val request = call.receive<HentPersonDetaljerIdentRequest>()
 
-                val person = service.hentPersonNavnOgFoedselsAar(request.ident, brukerTokenInfo)
+                val person = service.hentPersonNavnOgFoedsel(request.ident, brukerTokenInfo)
 
                 sporing.logg(brukerTokenInfo, person.foedselsnummer, call.request.path(), "Hentet navn på person")
 

@@ -29,7 +29,7 @@ class PersonWebService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun hentPersonNavnOgFoedselsAar(
+    suspend fun hentPersonNavnOgFoedsel(
         ident: String,
         bruker: BrukerTokenInfo,
     ): PersonNavnFoedselsaar {
@@ -47,7 +47,7 @@ class PersonWebService(
                     )
                 }
             } else {
-                PersonMapper.mapPersonNavnFoedselsDato(
+                PersonMapper.mapPersonNavnFoedsel(
                     ppsKlient = ppsKlient,
                     ident = ident,
                     hentPerson = it.data.hentPerson,

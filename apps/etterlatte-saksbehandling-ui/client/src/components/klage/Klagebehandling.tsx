@@ -60,7 +60,7 @@ export function Klagebehandling() {
 
   return (
     <>
-      {klage?.sak.ident && <StatusBarHenterData ident={klage?.sak.ident} />}
+      <StatusBarHenterData ident={klage?.sak.ident} />
       <KlageStegmeny />
       {isPending(fetchKlageStatus) && <Spinner visible label="Henter klagebehandling" />}
 

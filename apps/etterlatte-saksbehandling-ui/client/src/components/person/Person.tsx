@@ -21,7 +21,7 @@ import BrevOversikt from '~components/person/brev/BrevOversikt'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
 import { isSuccess, mapAllApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
-import { hentPersonNavnFoedselsdatoOgFoedselsnummer } from '~shared/api/pdltjenester'
+import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { SamordningSak } from '~components/person/SamordningSak'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
@@ -46,7 +46,7 @@ export const Person = () => {
 
   const [search, setSearch] = useSearchParams()
 
-  const [personNavnResult, personNavnFetch] = useApiCall(hentPersonNavnFoedselsdatoOgFoedselsnummer)
+  const [personNavnResult, personNavnFetch] = useApiCall(hentPersonNavnogFoedsel)
   const [sakResult, sakFetch] = useApiCall(hentSakMedBehandlnger)
   const [fane, setFane] = useState(search.get('fane') || PersonOversiktFane.SAKER)
   const skalViseNotater = useFeatureEnabledMedDefault('notater', false)

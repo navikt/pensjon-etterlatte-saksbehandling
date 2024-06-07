@@ -12,10 +12,10 @@ import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlResponseError
 import no.nav.etterlatte.pdl.mapper.PersonMapper
+import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
 import no.nav.etterlatte.personweb.familieOpplysninger.FamilieOpplysninger
 import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
 import org.slf4j.LoggerFactory
-import personweb.dto.PersonNavn
 
 class PdlForesporselFeilet(message: String) : ForespoerselException(
     status = 500,
@@ -29,13 +29,13 @@ class PersonWebService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun hentPersonNavn(
+    suspend fun hentPersonNavnOgFoedsel(
         ident: String,
         bruker: BrukerTokenInfo,
-    ): PersonNavn {
-        logger.info("Henter navn for ident=${ident.maskerFnr()} fra PDL")
+    ): PersonNavnFoedselsaar {
+        logger.info("Henter navn, fødselsdato og fødselsnummer for ident=${ident.maskerFnr()} fra PDL")
 
-        return pdlOboKlient.hentPersonNavn(ident, bruker).let {
+        return pdlOboKlient.hentPersonNavnOgFoedsel(ident, bruker).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.joinToString()
 
@@ -47,7 +47,7 @@ class PersonWebService(
                     )
                 }
             } else {
-                PersonMapper.mapPersonNavn(
+                PersonMapper.mapPersonNavnFoedsel(
                     ppsKlient = ppsKlient,
                     ident = ident,
                     hentPerson = it.data.hentPerson,

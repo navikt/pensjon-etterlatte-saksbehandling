@@ -33,7 +33,7 @@ fun Route.personRoute(
                 }
             }
         }
-
+        // TODO: brukes denne lenger?
         post("/navn") {
             hentNavidentFraToken { navIdent ->
                 try {

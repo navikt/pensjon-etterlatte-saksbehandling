@@ -14,16 +14,16 @@ import no.nav.etterlatte.libs.common.person.Statsborgerskap
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlHentPerson
-import no.nav.etterlatte.pdl.PdlHentPersonNavn
+import no.nav.etterlatte.pdl.PdlHentPersonNavnFoedselsdato
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
+import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
 import no.nav.etterlatte.personweb.familieOpplysninger.Bostedsadresse
 import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
 import no.nav.etterlatte.personweb.familieOpplysninger.Familierelasjon
 import no.nav.etterlatte.personweb.familieOpplysninger.Sivilstand
 import org.slf4j.LoggerFactory
-import personweb.dto.PersonNavn
 
 object PersonMapper {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -165,11 +165,11 @@ object PersonMapper {
         }
     }
 
-    fun mapPersonNavn(
+    fun mapPersonNavnFoedsel(
         ppsKlient: ParallelleSannheterKlient,
         ident: String,
-        hentPerson: PdlHentPersonNavn,
-    ): PersonNavn =
+        hentPerson: PdlHentPersonNavnFoedselsdato,
+    ): PersonNavnFoedselsaar =
         runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
 
@@ -180,12 +180,15 @@ object PersonMapper {
                     ppsKlient.avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
                         .identifikasjonsnummer
                 }
+            val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
 
-            PersonNavn(
+            PersonNavnFoedselsaar(
                 fornavn = navn.fornavn,
                 mellomnavn = navn.mellomnavn,
                 etternavn = navn.etternavn,
                 foedselsnummer = Folkeregisteridentifikator.of(fnr),
+                foedselsdato = foedsel.foedselsdato,
+                foedselsaar = foedsel.foedselsaar,
             )
         }
 

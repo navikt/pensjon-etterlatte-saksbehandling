@@ -31,17 +31,17 @@ class PdlOboKlient(private val httpClient: HttpClient, config: Config) {
 
     private val azureAdClient = AzureAdClient(config, AzureAdHttpClient(httpClient))
 
-    suspend fun hentPersonNavn(
+    suspend fun hentPersonNavnOgFoedsel(
         ident: String,
         bruker: BrukerTokenInfo,
-    ): PdlPersonNavnResponse {
+    ): PdlPersonNavnFoedselResponse {
         val request =
             PdlGraphqlRequest(
-                query = getQuery("/pdl/hentPersonNavn.graphql"),
+                query = getQuery("/pdl/hentPersonNavnFoedsel.graphql"),
                 variables = PdlVariables(ident),
             )
 
-        return retry<PdlPersonNavnResponse>(times = 3) {
+        return retry<PdlPersonNavnFoedselResponse>(times = 3) {
             httpClient.post(apiUrl) {
                 bearerAuth(getOboToken(bruker))
                 behandlingsnummer(SakType.entries)

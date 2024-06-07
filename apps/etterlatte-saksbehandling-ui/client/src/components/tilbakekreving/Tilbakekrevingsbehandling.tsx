@@ -2,8 +2,7 @@ import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
 import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { getPerson } from '~shared/api/grunnlag'
-import { StatusBar } from '~shared/statusbar/Statusbar'
+import { StatusBarPersonHenter } from '~shared/statusbar/Statusbar'
 import Spinner from '~shared/Spinner'
 import { GridContainer, MainContent } from '~shared/styled'
 import { hentTilbakekreving } from '~shared/api/tilbakekreving'
@@ -30,7 +29,6 @@ export function Tilbakekrevingsbehandling() {
   const dispatch = useAppDispatch()
   const { tilbakekrevingId } = useParams()
   const [fetchTilbakekrevingStatus, fetchTilbakekreving] = useApiCall(hentTilbakekreving)
-  const [personStatus, hentPerson] = useApiCall(getPerson)
   const viHarLastetRiktigTilbakekreving = tilbakekrevingId === tilbakekreving?.id.toString()
   const innloggetSaksbehandler = useInnloggetSaksbehandler()
   const [redigerbar, setRedigerbar] = useState(false)
@@ -48,10 +46,6 @@ export function Tilbakekrevingsbehandling() {
   }, [tilbakekrevingId])
 
   useEffect(() => {
-    if (tilbakekreving?.sak.ident) {
-      hentPerson(tilbakekreving.sak.ident)
-    }
-
     if (tilbakekreving?.sak?.enhet) {
       setRedigerbar(
         enhetErSkrivbar(tilbakekreving.sak.enhet, innloggetSaksbehandler.skriveEnheter) &&
@@ -62,7 +56,7 @@ export function Tilbakekrevingsbehandling() {
 
   return (
     <>
-      <StatusBar result={personStatus} />
+      <StatusBarPersonHenter ident={tilbakekreving?.sak.ident} />
       <TilbakekrevingStegmeny />
       <Spinner visible={isPending(fetchTilbakekrevingStatus)} label="Henter tilbakekrevingsbehandling" />
 

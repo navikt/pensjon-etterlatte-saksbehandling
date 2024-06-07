@@ -96,6 +96,6 @@ const personTilPersonNavnFoedselsAar = (person: IPdlPerson): IPdlPersonNavnFoeds
     fornavn: person.fornavn,
     mellomnavn: person.mellomnavn,
     etternavn: person.etternavn,
-    foedselsaar: person.foedselsdato.getFullYear(),
+    foedselsaar: person.foedselsaar,
   }
 }

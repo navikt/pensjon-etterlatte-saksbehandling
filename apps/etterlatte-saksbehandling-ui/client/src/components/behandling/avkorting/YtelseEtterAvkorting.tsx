@@ -1,5 +1,5 @@
 import { IAvkortetYtelse, IAvkorting } from '~shared/types/IAvkorting'
-import { Heading, Table } from '@navikt/ds-react'
+import { Box, Heading, Table } from '@navikt/ds-react'
 import React from 'react'
 import styled from 'styled-components'
 import { formaterDato, formaterStringDato, NOK } from '~utils/formattering'
@@ -29,7 +29,7 @@ export const YtelseEtterAvkorting = (props: {
   return (
     <>
       {ytelser.length > 0 && (
-        <TableWrapper>
+        <TableBox>
           <Heading spacing size="small" level="2">
             Beregning etter avkorting
           </Heading>
@@ -110,21 +110,20 @@ export const YtelseEtterAvkorting = (props: {
               })}
             </Table.Body>
           </Table>
-        </TableWrapper>
+        </TableBox>
       )}
     </>
   )
 }
 
-const TableWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  max-width: 700px;
-`
-const SmalCelle = styled.div`
-  max-width: 150px;
+const TableBox = styled(Box)`
+  max-width: 44rem;
 `
 
-const BredCelle = styled.div`
-  min-width: 225px;
+const SmalCelle = styled(Box)`
+  max-width: 9.35rem;
+`
+
+const BredCelle = styled(Box)`
+  min-width: 14.05rem;
 `

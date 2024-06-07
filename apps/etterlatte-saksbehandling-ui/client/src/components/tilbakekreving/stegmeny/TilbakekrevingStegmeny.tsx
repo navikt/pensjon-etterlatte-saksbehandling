@@ -1,31 +1,34 @@
-import { StegMenyWrapper } from '~components/behandling/StegMeny/stegmeny'
+import { StegMenyBox } from '~components/behandling/StegMeny/stegmeny'
 import React from 'react'
 import { TilbakekrevingNavLenke } from '~components/tilbakekreving/stegmeny/TilbakekrevingNavLenke'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import { TilbakekrevingBehandling, TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
+import { HStack } from '@navikt/ds-react'
 
 export function TilbakekrevingStegmeny() {
   const tilbakekrevingBehandling = useTilbakekreving()
 
   return (
-    <StegMenyWrapper>
-      <TilbakekrevingNavLenke path="vurdering" description="Vurdering" enabled separator />
-      <TilbakekrevingNavLenke path="utbetalinger" description="Utbetalinger" enabled separator />
-      <TilbakekrevingNavLenke
-        path="oppsummering"
-        description="Oppsummering"
-        enabled
-        separator={!!tilbakekrevingBehandling?.sendeBrev}
-      />
-      {tilbakekrevingBehandling?.sendeBrev && (
+    <StegMenyBox>
+      <HStack gap="6" align="center">
+        <TilbakekrevingNavLenke path="vurdering" description="Vurdering" enabled separator />
+        <TilbakekrevingNavLenke path="utbetalinger" description="Utbetalinger" enabled separator />
         <TilbakekrevingNavLenke
-          path="brev"
-          description="Brev"
-          enabled={kanSeBrev(tilbakekrevingBehandling)}
-          separator={false}
+          path="oppsummering"
+          description="Oppsummering"
+          enabled
+          separator={!!tilbakekrevingBehandling?.sendeBrev}
         />
-      )}
-    </StegMenyWrapper>
+        {tilbakekrevingBehandling?.sendeBrev && (
+          <TilbakekrevingNavLenke
+            path="brev"
+            description="Brev"
+            enabled={kanSeBrev(tilbakekrevingBehandling)}
+            separator={false}
+          />
+        )}
+      </HStack>
+    </StegMenyBox>
   )
 }
 

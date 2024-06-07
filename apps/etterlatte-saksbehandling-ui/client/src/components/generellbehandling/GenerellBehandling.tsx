@@ -10,7 +10,6 @@ import { Alert } from '@navikt/ds-react'
 import { Generellbehandling } from '~shared/types/Generellbehandling'
 import { StatusBarPersonHenter } from '~shared/statusbar/Statusbar'
 import { hentSak } from '~shared/api/sak'
-
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useSidetittel } from '~shared/hooks/useSidetittel'

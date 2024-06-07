@@ -69,11 +69,10 @@ En app bygges og deployes automatisk når en endring legges til i `main`.
 
 For å trigge **manuell deploy** kan du gå til `Actions -> (velg workflow) -> Run workflow from <branch>`
 
-## Maven
+## Gradle
 
-Vi bruker personal access token til autentisering for å hente intern pakker til prosjektet.
-Du må derfor sette `export GITHUB_TOKEN='DITT_TOKEN'` som miljøvariabel.
-Dette tokenet må autoriseres mot navikt.
+Vi bruker personal access token (PAT) til autentisering for å hente intern pakker til prosjektet. Se [opprett nytt personlig token](https://github.com/settings/tokens/new).   
+Legg til token i `$HOME/.zshrc` t.d `export GITHUB_TOKEN=<TOKEN>` for å opprette miljøvariabel. NB! Husk å autorisere tokenet mot navikt i Github
 
 ## Lokal bygg/test - docker
 

@@ -66,7 +66,7 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
 }
 
 const VisAlderForPerson = ({ foedselsdato, foedselsaar }: { foedselsdato: Date | undefined; foedselsaar: number }) => {
-  if (!foedselsdato) {
+  if (foedselsdato) {
     const alder = differenceInYears(new Date(), parse(String(foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date()))
     return <BodyShort textColor="subtle">({alder} år)</BodyShort>
   } else {

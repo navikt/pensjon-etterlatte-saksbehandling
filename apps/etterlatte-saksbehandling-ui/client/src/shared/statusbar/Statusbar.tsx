@@ -10,7 +10,6 @@ import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { differenceInYears, parse } from 'date-fns'
 import { DatoFormat } from '~utils/formattering'
-import { AGray600 } from '@navikt/ds-tokens/dist/tokens'
 
 export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
   <StatusBar
@@ -67,19 +66,15 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
 }
 
 const VisAlderForPerson = ({ foedselsdato, foedselsaar }: { foedselsdato: Date | undefined; foedselsaar: number }) => {
-  if (foedselsdato) {
+  if (!foedselsdato) {
     const alder = differenceInYears(new Date(), parse(String(foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date()))
-    return (
-      <BodyShort textColor="subtle">
-        <span style={{ color: AGray600 }}>({alder} år)</span>
-      </BodyShort>
-    )
+    return <BodyShort textColor="subtle">({alder} år)</BodyShort>
   } else {
     return (
       <>
         <BodyShort textColor="subtle">Fødselsår: {foedselsaar}</BodyShort>
         <HelpText title="Personen mangler fødselsdato">
-          Vi har ingen fødselsdato på vedkommende og kan derfor ikke vise nøytaktig alder. Fødselsår: {foedselsaar}
+          Vi har ingen fødselsdato på vedkommende og kan derfor ikke vise nøyaktig alder. Fødselsår: {foedselsaar}
         </HelpText>
       </>
     )

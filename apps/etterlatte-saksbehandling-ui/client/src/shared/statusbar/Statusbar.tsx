@@ -3,11 +3,11 @@ import { GenderIcon, GenderList } from '../icons/genderIcon'
 import { Link } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { IPdlPersonNavnFoedselsAar } from '~shared/types/Person'
-
 import { mapApiResult, Result } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonNavnFoedselsdatoOgFoedselsnummer } from '~shared/api/pdltjenester'
 import { useEffect } from 'react'
+import { AGray600 } from '@navikt/ds-tokens/dist/tokens'
 
 export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedselsAar }) => (
   <StatusBar
@@ -55,17 +55,17 @@ const StatusBar = ({ personResultStatus }: { personResultStatus: Result<IPdlPers
           </Name>
           <Skilletegn>|</Skilletegn>
           <KopierbarVerdi value={person.foedselsnummer} />
-          {hentAlderFraFnr(person.foedselsaar)}
+          {VisAlderForPerson(person.foedselsaar)}
         </UserInfo>
       </StatusBarWrapper>
     )
   )
 }
 
-const hentAlderFraFnr = (foedselsaar: number): string => {
+const VisAlderForPerson = (foedselsaar: number): JSX.Element => {
   const idag = new Date()
   const aar = idag.getFullYear() - foedselsaar
-  return `${aar} år`
+  return <span style={{ color: AGray600 }}> {`${aar} år`}</span>
 }
 
 const PersonSkeleton = () => (

@@ -18,6 +18,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapAllApiResult } from '~shared/api/apiUtils'
 import { useSidetittel } from '~shared/hooks/useSidetittel'
 import { StickyToppMeny } from '~shared/StickyToppMeny'
+import { IPdlPerson, IPdlPersonNavnFoedselsAar } from '~shared/types/Person'
 
 export const Behandling = () => {
   useSidetittel('Behandling')
@@ -67,7 +68,7 @@ export const Behandling = () => {
         return (
           <>
             <StickyToppMeny>
-              {soeker && <PdlPersonStatusBar person={soeker} />}
+              {soeker && <PdlPersonStatusBar person={personTilPersonNavnFoedselsAar(soeker)} />}
               <StegMeny behandling={behandling} />
             </StickyToppMeny>
             <GridContainer>
@@ -87,4 +88,14 @@ export const Behandling = () => {
       return null
     }
   )
+}
+
+const personTilPersonNavnFoedselsAar = (person: IPdlPerson): IPdlPersonNavnFoedselsAar => {
+  return {
+    foedselsnummer: person.foedselsnummer,
+    fornavn: person.fornavn,
+    mellomnavn: person.mellomnavn,
+    etternavn: person.etternavn,
+    foedselsaar: person.foedselsdato.getFullYear(),
+  }
 }

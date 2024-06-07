@@ -54,6 +54,14 @@ export interface IPdlPersonNavn {
   foedselsnummer: string
 }
 
+export interface IPdlPersonNavnFoedselsAar {
+  fornavn: string
+  mellomnavn?: string
+  etternavn: string
+  foedselsnummer: string
+  foedselsaar: number
+}
+
 export interface Utland {
   utflyttingFraNorge?: {
     tilflyttingsland?: string

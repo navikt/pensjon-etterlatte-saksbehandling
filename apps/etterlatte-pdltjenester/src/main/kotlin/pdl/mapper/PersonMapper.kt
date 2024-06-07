@@ -15,9 +15,11 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlHentPersonNavn
+import no.nav.etterlatte.pdl.PdlHentPersonNavnFoedselsdato
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
+import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
 import no.nav.etterlatte.personweb.familieOpplysninger.Bostedsadresse
 import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
 import no.nav.etterlatte.personweb.familieOpplysninger.Familierelasjon
@@ -186,6 +188,32 @@ object PersonMapper {
                 mellomnavn = navn.mellomnavn,
                 etternavn = navn.etternavn,
                 foedselsnummer = Folkeregisteridentifikator.of(fnr),
+            )
+        }
+
+    fun mapPersonNavnFoedselsDato(
+        ppsKlient: ParallelleSannheterKlient,
+        ident: String,
+        hentPerson: PdlHentPersonNavnFoedselsdato,
+    ): PersonNavnFoedselsaar =
+        runBlocking {
+            val navn = ppsKlient.avklarNavn(hentPerson.navn)
+
+            val fnr =
+                if (Folkeregisteridentifikator.isValid(ident)) {
+                    ident
+                } else {
+                    ppsKlient.avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
+                        .identifikasjonsnummer
+                }
+            val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
+
+            PersonNavnFoedselsaar(
+                fornavn = navn.fornavn,
+                mellomnavn = navn.mellomnavn,
+                etternavn = navn.etternavn,
+                foedselsnummer = Folkeregisteridentifikator.of(fnr),
+                foedselsaar = foedsel.foedselsaar,
             )
         }
 

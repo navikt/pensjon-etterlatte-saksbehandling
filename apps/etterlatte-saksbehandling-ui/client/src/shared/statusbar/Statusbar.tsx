@@ -1,27 +1,39 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../icons/genderIcon'
-import { IPersonResult } from '~components/person/typer'
 import { Link } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { IPdlPerson, IPdlPersonNavn } from '~shared/types/Person'
+import { IPdlPersonNavnFoedselsAar } from '~shared/types/Person'
 
 import { mapApiResult, Result } from '~shared/api/apiUtils'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentPersonNavnFoedselsdatoOgFoedselsnummer } from '~shared/api/pdltjenester'
+import { useEffect } from 'react'
 
-export const PdlPersonStatusBar = ({ person }: { person: IPdlPerson | IPdlPersonNavn }) => (
+export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedselsAar }) => (
   <StatusBar
-    result={{
+    personResultStatus={{
       status: 'success',
       data: {
         foedselsnummer: person.foedselsnummer,
         fornavn: person.fornavn,
         mellomnavn: person.mellomnavn,
         etternavn: person.etternavn,
+        foedselsaar: person.foedselsaar,
       },
     }}
   />
 )
 
-export const StatusBar = ({ result }: { result: Result<IPersonResult> }) => {
+export const StatusBarHenterData = ({ ident }: { ident: string }) => {
+  const [personStatus, hentPerson] = useApiCall(hentPersonNavnFoedselsdatoOgFoedselsnummer)
+  useEffect(() => {
+    hentPerson(ident)
+  }, [])
+
+  return <StatusBar personResultStatus={personStatus} />
+}
+
+const StatusBar = ({ personResultStatus }: { personResultStatus: Result<IPdlPersonNavnFoedselsAar> }) => {
   const gender = (fnr: string): GenderList => {
     const genderNum = Number(fnr[8])
     if (genderNum % 2 === 0) {
@@ -31,7 +43,7 @@ export const StatusBar = ({ result }: { result: Result<IPersonResult> }) => {
   }
 
   return mapApiResult(
-    result,
+    personResultStatus,
     <PersonSkeleton />,
     () => null,
     (person) => (
@@ -43,10 +55,17 @@ export const StatusBar = ({ result }: { result: Result<IPersonResult> }) => {
           </Name>
           <Skilletegn>|</Skilletegn>
           <KopierbarVerdi value={person.foedselsnummer} />
+          {hentAlderFraFnr(person.foedselsaar)}
         </UserInfo>
       </StatusBarWrapper>
     )
   )
+}
+
+const hentAlderFraFnr = (foedselsaar: number): string => {
+  const idag = new Date()
+  const aar = idag.getFullYear() - foedselsaar
+  return `${aar} år`
 }
 
 const PersonSkeleton = () => (
@@ -62,7 +81,7 @@ const PersonSkeleton = () => (
   </StatusBarWrapper>
 )
 
-const genererNavn = (personInfo: IPersonResult) => {
+const genererNavn = (personInfo: IPdlPersonNavnFoedselsAar) => {
   return [personInfo.fornavn, personInfo.mellomnavn, personInfo.etternavn].join(' ')
 }
 

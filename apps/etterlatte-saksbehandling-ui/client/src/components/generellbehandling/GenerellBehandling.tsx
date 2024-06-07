@@ -8,8 +8,7 @@ import KravpakkeUtlandBehandling from '~components/generellbehandling/KravpakkeU
 import { KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { Alert } from '@navikt/ds-react'
 import { Generellbehandling } from '~shared/types/Generellbehandling'
-import { StatusBar } from '~shared/statusbar/Statusbar'
-import { getPerson } from '~shared/api/grunnlag'
+import { StatusBarHenterData } from '~shared/statusbar/Statusbar'
 import { hentSak } from '~shared/api/sak'
 
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
@@ -23,7 +22,6 @@ const GenerellBehandling = () => {
   if (!generellbehandlingId) return null
 
   const [fetchGenerellbehandlingStatus, fetchGenerellbehandling] = useApiCall(hentGenerellBehandling)
-  const [personStatus, hentPerson] = useApiCall(getPerson)
   const [hentSakStatus, hentSakApi] = useApiCall(hentSak)
 
   useEffect(() => {
@@ -35,12 +33,6 @@ const GenerellBehandling = () => {
       hentSakApi(fetchGenerellbehandlingStatus.data.sakId)
     }
   }, [fetchGenerellbehandlingStatus])
-
-  useEffect(() => {
-    if (isSuccess(hentSakStatus)) {
-      hentPerson(hentSakStatus.data.ident)
-    }
-  }, [hentSakStatus])
 
   return mapApiResult(
     fetchGenerellbehandlingStatus,
@@ -55,7 +47,7 @@ const GenerellBehandling = () => {
                 apiResult: hentSakStatus,
                 errorMessage: 'Vi klarte ikke å hente sak og derfor vil navn baren være borte',
               })}
-              <StatusBar result={personStatus} />
+              {isSuccess(hentSakStatus) && <StatusBarHenterData ident={hentSakStatus.data.ident} />}
               <KravpakkeUtlandBehandling
                 utlandsBehandling={generellBehandling as Generellbehandling & { innhold: KravpakkeUtland | null }}
               />

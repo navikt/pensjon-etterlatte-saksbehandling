@@ -12,6 +12,7 @@ import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlResponseError
 import no.nav.etterlatte.pdl.mapper.PersonMapper
+import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
 import no.nav.etterlatte.personweb.familieOpplysninger.FamilieOpplysninger
 import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
 import org.slf4j.LoggerFactory
@@ -48,6 +49,33 @@ class PersonWebService(
                 }
             } else {
                 PersonMapper.mapPersonNavn(
+                    ppsKlient = ppsKlient,
+                    ident = ident,
+                    hentPerson = it.data.hentPerson,
+                )
+            }
+        }
+    }
+
+    suspend fun hentPersonNavnFoedselsDatoOgFoedselsnummer(
+        ident: String,
+        bruker: BrukerTokenInfo,
+    ): PersonNavnFoedselsaar {
+        logger.info("Henter navn, fødselsdato og fødselsnummer for ident=${ident.maskerFnr()} fra PDL")
+
+        return pdlOboKlient.hentPersonNavnFoedselsdatoFoedselsnummer(ident, bruker).let {
+            if (it.data?.hentPerson == null) {
+                val pdlFeil = it.errors?.joinToString()
+
+                if (it.errors?.personIkkeFunnet() == true) {
+                    throw FantIkkePersonException("Fant ikke person i PDL")
+                } else {
+                    throw PdlForesporselFeilet(
+                        "Kunne ikke hente person med ident=${ident.maskerFnr()} fra PDL: $pdlFeil",
+                    )
+                }
+            } else {
+                PersonMapper.mapPersonNavnFoedselsDato(
                     ppsKlient = ppsKlient,
                     ident = ident,
                     hentPerson = it.data.hentPerson,

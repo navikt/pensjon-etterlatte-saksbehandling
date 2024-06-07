@@ -63,6 +63,38 @@ class PdlOboKlient(private val httpClient: HttpClient, config: Config) {
         }
     }
 
+    suspend fun hentPersonNavnFoedselsdatoFoedselsnummer(
+        ident: String,
+        bruker: BrukerTokenInfo,
+    ): PdlPersonNavnFoedselsdatoResponse {
+        val request =
+            PdlGraphqlRequest(
+                query = getQuery("/pdl/hentPersonNavnFoedselsdato.graphql"),
+                variables = PdlVariables(ident),
+            )
+
+        return retry<PdlPersonNavnFoedselsdatoResponse>(times = 3) {
+            httpClient.post(apiUrl) {
+                bearerAuth(getOboToken(bruker))
+                behandlingsnummer(SakType.entries)
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                setBody(request)
+            }.body()
+        }.let {
+            when (it) {
+                is RetryResult.Success ->
+                    it.content.also { result ->
+                        result.errors?.joinToString()?.let { feil ->
+                            logger.error("Fikk data fra PDL, men også følgende feil: $feil")
+                        }
+                    }
+
+                is RetryResult.Failure -> throw it.samlaExceptions()
+            }
+        }
+    }
+
     suspend fun hentPerson(
         fnr: Folkeregisteridentifikator,
         rolle: PersonRolle,

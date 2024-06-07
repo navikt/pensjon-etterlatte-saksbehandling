@@ -164,6 +164,7 @@ export enum DatoFormat {
 const norskKroneFormat = new Intl.NumberFormat('NO-nb', {
   currency: 'nok',
 })
+
 export const NOK = (beloep: number | undefined) => (beloep == null ? '' : norskKroneFormat.format(beloep) + ' kr')
 
 export const mapRHFArrayToStringArray = (rhfArray?: Array<{ value: string }>): string[] => {

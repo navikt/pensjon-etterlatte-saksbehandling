@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.common.person.Statsborgerskap
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlHentPerson
-import no.nav.etterlatte.pdl.PdlHentPersonNavn
 import no.nav.etterlatte.pdl.PdlHentPersonNavnFoedselsdato
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
@@ -25,7 +24,6 @@ import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
 import no.nav.etterlatte.personweb.familieOpplysninger.Familierelasjon
 import no.nav.etterlatte.personweb.familieOpplysninger.Sivilstand
 import org.slf4j.LoggerFactory
-import personweb.dto.PersonNavn
 
 object PersonMapper {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -166,30 +164,6 @@ object PersonMapper {
             )
         }
     }
-
-    fun mapPersonNavn(
-        ppsKlient: ParallelleSannheterKlient,
-        ident: String,
-        hentPerson: PdlHentPersonNavn,
-    ): PersonNavn =
-        runBlocking {
-            val navn = ppsKlient.avklarNavn(hentPerson.navn)
-
-            val fnr =
-                if (Folkeregisteridentifikator.isValid(ident)) {
-                    ident
-                } else {
-                    ppsKlient.avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
-                        .identifikasjonsnummer
-                }
-
-            PersonNavn(
-                fornavn = navn.fornavn,
-                mellomnavn = navn.mellomnavn,
-                etternavn = navn.etternavn,
-                foedselsnummer = Folkeregisteridentifikator.of(fnr),
-            )
-        }
 
     fun mapPersonNavnFoedselsDato(
         ppsKlient: ParallelleSannheterKlient,

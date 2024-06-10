@@ -193,27 +193,29 @@ class GrunnlagsendringshendelseService(
         val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
         val manglendeSakider = mutableListOf<Long>()
         inTransaction {
-            val nyesakider =
-                sakIder.filter {
-                    if (sakService.finnSak(it) != null) {
-                        return@filter true
+            val eksisterendeSaker =
+                sakIder.map {
+                    val sak = sakService.finnSak(it)
+                    if (sak != null) {
+                        sak
                     } else {
                         manglendeSakider.add(it)
-                        return@filter false
+                        null
                     }
-                }
+                }.mapNotNull { it }
+
             if (manglendeSakider.isNotEmpty()) {
                 logger.error("Sakider som ikke finnes lenger ${manglendeSakider.map { it }.joinToString { "," }}")
             }
 
-            oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering)
+            oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering, saker = eksisterendeSaker)
 
-            nyesakider.forEach { sakId ->
+            eksisterendeSaker.forEach { sak ->
                 sakService.oppdaterAdressebeskyttelse(
-                    sakId,
+                    sak.id,
                     gradering,
                 )
-                sikkerLogg.info("Oppdaterte adressebeskyttelse for sakId=$sakId med gradering=$gradering")
+                sikkerLogg.info("Oppdaterte adressebeskyttelse for sakId=$sak med gradering=$gradering")
             }
         }
 
@@ -230,10 +232,10 @@ class GrunnlagsendringshendelseService(
     private fun oppdaterEnheterForsaker(
         fnr: String,
         gradering: AdressebeskyttelseGradering,
+        saker: List<Sak>,
     ) {
-        val finnSaker = sakService.finnSaker(fnr)
         val sakerMedNyEnhet =
-            finnSaker.map {
+            saker.map {
                 SakMedEnhet(it.id, finnEnhetFraGradering(fnr, gradering, it.sakType))
             }
         sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)

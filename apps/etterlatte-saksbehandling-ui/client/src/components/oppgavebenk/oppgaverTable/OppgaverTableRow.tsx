@@ -11,6 +11,7 @@ import { Saksbehandler } from '~shared/types/saksbehandler'
 import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
 import { SakTypeTag } from '~components/oppgavebenk/oppgaverTable/tags/SakTypeTag'
 import { OppgavestatusTag } from '~components/oppgavebenk/oppgaverTable/tags/OppgavestatusTag'
+import styled from 'styled-components'
 
 interface Props {
   oppgave: OppgaveDTO
@@ -61,8 +62,12 @@ export const OppgaverTableRow = ({
         // For å trigge unmount og resetting av state når man bytte liste. Se https://react.dev/learn/preserving-and-resetting-state#same-component-at-the-same-position-preserves-state
       />
     </Table.DataCell>
-    <Table.DataCell>
+    <HandlingerDataCell>
       <HandlingerForOppgave oppgave={oppgave} />
-    </Table.DataCell>
+    </HandlingerDataCell>
   </Table.Row>
 )
+
+const HandlingerDataCell = styled(Table.DataCell)`
+  min-width: 13rem;
+`

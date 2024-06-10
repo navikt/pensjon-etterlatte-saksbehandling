@@ -17,6 +17,7 @@ import {
 } from '~components/oppgavebenk/utils/oppgaveHandlinger'
 import { SakTypeTag } from '~components/oppgavebenk/oppgaverTable/tags/SakTypeTag'
 import { OppgavestatusTag } from '~components/oppgavebenk/oppgaverTable/tags/OppgavestatusTag'
+import styled from 'styled-components'
 
 export const ForenkletOppgaverTable = ({
   oppgaver,
@@ -92,9 +93,9 @@ export const ForenkletOppgaverTable = ({
                 oppdaterTildeling={oppdaterSaksbehandlerTildeling}
               />
             </Table.DataCell>
-            <Table.DataCell>
+            <HandlingerDataCell>
               {oppgave.type !== Oppgavetype.VURDER_KONSEKVENS && <HandlingerForOppgave oppgave={oppgave} />}
-            </Table.DataCell>
+            </HandlingerDataCell>
           </Table.Row>
         ))}
       </Table.Body>
@@ -105,3 +106,7 @@ export const ForenkletOppgaverTable = ({
     </Alert>
   )
 }
+
+const HandlingerDataCell = styled(Table.DataCell)`
+  min-width: 13rem;
+`

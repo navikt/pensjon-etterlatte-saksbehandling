@@ -27,32 +27,32 @@ class VilkaarsvurderingKlient(config: Config, httpClient: HttpClient) {
     private val resourceUrl = config.getString("vilkaarsvurdering.resource.url")
 
     suspend fun hentVilkaarsvurdering(
-            behandlingId: UUID,
-            brukerTokenInfo: BrukerTokenInfo,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
     ): VilkaarsvurderingDto {
         logger.info("Henter vilkaarsvurdering med behandlingid $behandlingId")
         return retry<VilkaarsvurderingDto> {
-                downstreamResourceClient
-                        .get(
-                                resource =
-                                        Resource(
-                                                clientId = clientId,
-                                                url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId",
-                                                ),
-                                brukerTokenInfo = brukerTokenInfo,
-                                )
-                        .mapBoth(
-                        success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                        failure = { throwableErrorMessage -> throw throwableErrorMessage },
+            downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId",
+                            ),
+                    brukerTokenInfo = brukerTokenInfo,
                 )
+                .mapBoth(
+                success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                failure = { throwableErrorMessage -> throw throwableErrorMessage },
+            )
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> {
                     throw VilkaarsvurderingKlientException(
-                            "Klarte ikke hente vilkåårsvurdering for behandling med behandlingId=$behandlingId",
-                            it.samlaExceptions(),
-                            )
+                        "Klarte ikke hente vilkåårsvurdering for behandling med behandlingId=$behandlingId",
+                        it.samlaExceptions(),
+                        )
                 }
             }
         }

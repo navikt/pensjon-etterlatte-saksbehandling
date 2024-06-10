@@ -42,10 +42,10 @@ export const OppgaverTableRow = ({
     </Table.DataCell>
     <Table.DataCell>{oppgave.fnr ? <SaksoversiktLenke fnr={oppgave.fnr} /> : 'Mangler'}</Table.DataCell>
     <Table.DataCell>
-      {oppgave.type ? <OppgavetypeTag oppgavetype={oppgave.type} /> : <div>oppgaveid {oppgave.id}</div>}
+      <SakTypeTag sakType={oppgave.sakType} />
     </Table.DataCell>
     <Table.DataCell>
-      <SakTypeTag sakType={oppgave.sakType} />
+      {oppgave.type ? <OppgavetypeTag oppgavetype={oppgave.type} /> : <div>oppgaveid {oppgave.id}</div>}
     </Table.DataCell>
     <Table.DataCell>{oppgave.merknad}</Table.DataCell>
     <Table.DataCell>

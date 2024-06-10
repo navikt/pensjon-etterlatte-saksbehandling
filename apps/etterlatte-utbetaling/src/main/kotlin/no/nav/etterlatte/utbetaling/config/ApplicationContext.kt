@@ -27,6 +27,8 @@ import no.nav.etterlatte.utbetaling.avstemming.GrensesnittsavstemmingService
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingJob
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
 import no.nav.etterlatte.utbetaling.avstemming.avstemmingsdata.AvstemmingsdataSender
+import no.nav.etterlatte.utbetaling.avstemming.regulering.VerifiserReguleringssummer
+import no.nav.etterlatte.utbetaling.avstemming.regulering.VerifiserUtbetalingOgVedtakJob
 import no.nav.etterlatte.utbetaling.common.OppgavetriggerRiver
 import no.nav.etterlatte.utbetaling.common.april
 import no.nav.etterlatte.utbetaling.common.august
@@ -188,6 +190,15 @@ class ApplicationContext(
             periode = Duration.of(4, ChronoUnit.HOURS),
             clock = clock,
             saktype = Saktype.OMSTILLINGSSTOENAD,
+        )
+
+    val verifiserReguleringssummer = VerifiserReguleringssummer(utbetalingDao, vedtaksvurderingKlient)
+    val verifiserUtbetalingOgVedtakJob =
+        VerifiserUtbetalingOgVedtakJob(
+            verifiserer = verifiserReguleringssummer,
+            leaderElection = leaderElection,
+            initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
+            periode = Duration.of(12, ChronoUnit.HOURS),
         )
 
     val rapidsConnection =

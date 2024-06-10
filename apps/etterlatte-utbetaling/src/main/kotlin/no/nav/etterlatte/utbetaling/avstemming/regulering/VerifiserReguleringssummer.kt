@@ -20,7 +20,16 @@ class VerifiserReguleringssummer(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun verifiserAlle() {
-        repository.hentUtbetalinger()
+        repository.hentUtbetalinger().forEach {
+            runBlocking {
+                try {
+                    verifiser(it)
+                } catch (e: Error) {
+                    logger.warn("Klarte ikke å verifisere match mellom utbetaling og vedtak for vedtak $it", e)
+                    logger.debug("Fortsetter med å verifisere neste vedtak")
+                }
+            }
+        }
     }
 
     suspend fun verifiser(vedtakId: Long) {

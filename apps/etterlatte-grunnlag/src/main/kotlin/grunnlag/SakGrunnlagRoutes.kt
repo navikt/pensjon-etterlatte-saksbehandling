@@ -62,10 +62,6 @@ fun Route.sakGrunnlagRoute(
     }
 }
 
-data class PersonerISakDto(
-    val personer: Map<Folkeregisteridentifikator, PersonMedNavn>,
-)
-
 data class PersonMedNavn(
     val fnr: Folkeregisteridentifikator,
     val fornavn: String,

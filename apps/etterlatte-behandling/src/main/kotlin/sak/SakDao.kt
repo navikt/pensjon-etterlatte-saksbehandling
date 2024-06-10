@@ -95,7 +95,9 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                 statement.setString(1, adressebeskyttelseGradering.name)
                 statement.setLong(2, sakId)
                 statement.executeUpdate().also {
-                    logger.info("Oppdaterer adressebeskyttelse med: $adressebeskyttelseGradering for sak med id: $sakId")
+                    logger.info(
+                        "Oppdaterer adressebeskyttelse med: $adressebeskyttelseGradering for sak med id: $sakId, antall oppdatert er $it",
+                    )
                     require(it == 1)
                 }
             }

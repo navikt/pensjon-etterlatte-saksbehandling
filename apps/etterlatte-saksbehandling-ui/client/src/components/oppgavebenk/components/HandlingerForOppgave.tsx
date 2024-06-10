@@ -7,9 +7,12 @@ import { useInnloggetSaksbehandler } from '~components/behandling/useInnloggetSa
 import { AktivitetspliktInfoModal } from '~components/person/AktivitetspliktInfoModal'
 import { OpprettRevurderingModal } from '~components/person/OpprettRevurderingModal'
 import { AktivitetspliktRevurderingModal } from '~components/person/AktivitetspliktRevurderingModal'
+import { useNavigate } from 'react-router-dom'
 
 export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const innloggetsaksbehandler = useInnloggetSaksbehandler()
+
+  const navigate = useNavigate()
 
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
   const erInnloggetSaksbehandlerOppgave = saksbehandler?.ident === innloggetsaksbehandler.ident
@@ -19,7 +22,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
       case Oppgavetype.KRAVPAKKE_UTLAND:
         return (
           erInnloggetSaksbehandlerOppgave && (
-            <Button size="small" as="a" href={`/generellbehandling/${referanse}`}>
+            <Button size="small" onClick={() => navigate(`/generellbehandling/${referanse}`)}>
               Gå til kravpakke utland
             </Button>
           )
@@ -32,7 +35,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
         return (
           erInnloggetSaksbehandlerOppgave &&
           oppgave.merknad !== 'Venter på kravgrunnlag' && (
-            <Button size="small" href={`/tilbakekreving/${referanse}`} as="a">
+            <Button size="small" onClick={() => navigate(`/tilbakekreving/${referanse}`)}>
               Gå til tilbakekreving
             </Button>
           )
@@ -42,14 +45,18 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   switch (type) {
     case Oppgavetype.VURDER_KONSEKVENS:
       return (
-        <Button size="small" icon={<EyeIcon />} href={`/person/${fnr}?fane=HENDELSER&referanse=${referanse}`} as="a">
+        <Button
+          size="small"
+          icon={<EyeIcon />}
+          onClick={() => navigate(`/person/${fnr}?fane=HENDELSER&referanse=${referanse}`)}
+        >
           Se hendelse
         </Button>
       )
     case Oppgavetype.FOERSTEGANGSBEHANDLING:
       return (
         erInnloggetSaksbehandlerOppgave && (
-          <Button size="small" as="a" href={`/behandling/${referanse}`}>
+          <Button size="small" onClick={() => navigate(`/behandling/${referanse}`)}>
             Gå til behandling
           </Button>
         )
@@ -58,7 +65,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
       return (
         <>
           {erInnloggetSaksbehandlerOppgave && referanse && (
-            <Button size="small" href={`/behandling/${referanse}`} as="a">
+            <Button size="small" onClick={() => navigate(`/behandling/${referanse}`)}>
               Gå til revurdering
             </Button>
           )}
@@ -75,7 +82,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
     case Oppgavetype.KLAGE:
       return (
         erInnloggetSaksbehandlerOppgave && (
-          <Button size="small" href={`/klage/${referanse}`} as="a">
+          <Button size="small" onClick={() => navigate(`/klage/${referanse}`)}>
             Gå til klage
           </Button>
         )
@@ -83,7 +90,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
     case Oppgavetype.KRAVPAKKE_UTLAND:
       return (
         erInnloggetSaksbehandlerOppgave && (
-          <Button size="small" href={`/generellbehandling/${referanse}`} as="a">
+          <Button size="small" onClick={() => navigate(`/generellbehandling/${referanse}`)}>
             Gå til utlandssak
           </Button>
         )
@@ -91,7 +98,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
     case Oppgavetype.JOURNALFOERING:
       return (
         erInnloggetSaksbehandlerOppgave && (
-          <Button size="small" href={`/oppgave/${oppgave.id}`} as="a">
+          <Button size="small" onClick={() => navigate(`/oppgave/${oppgave.id}`)}>
             Gå til oppgave
           </Button>
         )
@@ -101,7 +108,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
     case Oppgavetype.GJENOPPRETTING_ALDERSOVERGANG:
       return (
         erInnloggetSaksbehandlerOppgave && (
-          <Button size="small" as="a" href={`/manuellbehandling/${id}`}>
+          <Button size="small" onClick={() => navigate(`/manuellbehandling/${id}`)}>
             Gå til manuell opprettelse
           </Button>
         )

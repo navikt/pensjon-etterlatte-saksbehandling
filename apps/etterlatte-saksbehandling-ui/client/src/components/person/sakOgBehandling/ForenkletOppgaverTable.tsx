@@ -3,8 +3,7 @@ import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler, Oppgavetype } fr
 import { Alert, Table } from '@navikt/ds-react'
 import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
-import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/components/Tags'
-import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import { OppgavetypeTag } from '~components/oppgavebenk/components/Tags'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
 import { HandlingerForOppgave } from '~components/oppgavebenk/components/HandlingerForOppgave'
@@ -16,6 +15,8 @@ import {
   finnOgOppdaterSaksbehandlerTildeling,
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveHandlinger'
+import { SakTypeTag } from '~components/oppgavebenk/oppgaverTable/tags/SakTypeTag'
+import { OppgavestatusTag } from '~components/oppgavebenk/oppgaverTable/tags/OppgavestatusTag'
 
 export const ForenkletOppgaverTable = ({
   oppgaver,
@@ -75,13 +76,15 @@ export const ForenkletOppgaverTable = ({
               <FristWrapper dato={oppgave.frist} />
             </Table.DataCell>
             <Table.DataCell>
-              <SaktypeTag sakType={oppgave.sakType} />
+              <SakTypeTag sakType={oppgave.sakType} />
             </Table.DataCell>
             <Table.DataCell>
               <OppgavetypeTag oppgavetype={oppgave.type} />
             </Table.DataCell>
             <Table.DataCell>{oppgave.merknad}</Table.DataCell>
-            <Table.DataCell>{oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] : 'Ukjent status'}</Table.DataCell>
+            <Table.DataCell>
+              <OppgavestatusTag oppgavestatus={oppgave.status} />
+            </Table.DataCell>
             <Table.DataCell>
               <VelgSaksbehandler
                 saksbehandlereIEnhet={saksbehandlereIEnheter}

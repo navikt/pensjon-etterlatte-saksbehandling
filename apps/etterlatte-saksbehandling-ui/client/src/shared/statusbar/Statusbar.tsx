@@ -8,8 +8,7 @@ import { mapApiResult, Result } from '~shared/api/apiUtils'
 import { useEffect } from 'react'
 import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { differenceInYears, parse } from 'date-fns'
-import { DatoFormat } from '~utils/formattering'
+import { hentAlderForDato } from '~components/behandling/felles/utils'
 
 export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
   <StatusBar
@@ -67,7 +66,7 @@ export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> })
 
 const VisAlderForPerson = ({ foedselsdato, foedselsaar }: { foedselsdato: Date | undefined; foedselsaar: number }) => {
   if (foedselsdato) {
-    const alder = differenceInYears(new Date(), parse(String(foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date()))
+    const alder = hentAlderForDato(foedselsdato)
     return <BodyShort textColor="subtle">({alder} år)</BodyShort>
   } else {
     return (

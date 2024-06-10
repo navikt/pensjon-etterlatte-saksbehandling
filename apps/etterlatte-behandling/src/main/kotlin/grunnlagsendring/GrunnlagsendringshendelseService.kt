@@ -192,18 +192,20 @@ class GrunnlagsendringshendelseService(
         val gradering = adressebeskyttelse.adressebeskyttelseGradering
         val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
         val manglendeSakider = mutableListOf<Long>()
-        val nyesakider =
-            sakIder.filter {
-                if (sakService.finnSak(it) != null) {
-                    return@filter true
-                } else {
-                    manglendeSakider.add(it)
-                    return@filter false
-                }
-            }
-        logger.error("Sakider som ikke finnes lenger ${manglendeSakider.map { it }.joinToString { "," }}")
-
         inTransaction {
+            val nyesakider =
+                sakIder.filter {
+                    if (sakService.finnSak(it) != null) {
+                        return@filter true
+                    } else {
+                        manglendeSakider.add(it)
+                        return@filter false
+                    }
+                }
+            if (manglendeSakider.isNotEmpty()) {
+                logger.error("Sakider som ikke finnes lenger ${manglendeSakider.map { it }.joinToString { "," }}")
+            }
+
             oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering)
 
             nyesakider.forEach { sakId ->

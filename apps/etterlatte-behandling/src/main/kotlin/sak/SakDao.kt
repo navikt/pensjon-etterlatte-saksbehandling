@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import no.nav.etterlatte.libs.ktor.route.logger
 import java.sql.ResultSet
 
 data class SakMedUtlandstilknytning(
@@ -93,7 +94,10 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                 val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
                 statement.setString(1, adressebeskyttelseGradering.toString())
                 statement.setLong(2, sakId)
-                statement.executeUpdate().also { require(it == 1) }
+                statement.executeUpdate().also {
+                    logger.info("Oppdaterer adressebeskyttelse med: $adressebeskyttelseGradering for sak med id: $sakId")
+                    require(it == 1)
+                }
             }
         }
     }

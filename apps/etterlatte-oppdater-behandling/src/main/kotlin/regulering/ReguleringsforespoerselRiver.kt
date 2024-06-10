@@ -133,6 +133,4 @@ private val sakerViIkkeRegulererAutomatiskNaa =
         // Manuelt overstyrt
         3482, // Revurdering med overstyrt beregning åpen behandling
         6323, // Revurdering med overstyrt beregning åpen behandling
-        11606, // Revurdering med overstyrt beregning åpen behandling
-        11848, // Revurdering med overstyrt beregning åpen behandling
     )

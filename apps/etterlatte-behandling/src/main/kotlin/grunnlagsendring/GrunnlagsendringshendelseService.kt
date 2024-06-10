@@ -191,26 +191,21 @@ class GrunnlagsendringshendelseService(
     suspend fun oppdaterAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
         val gradering = adressebeskyttelse.adressebeskyttelseGradering
         val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
-        val manglendeSakider = mutableListOf<Long>()
         inTransaction {
-            val eksisterendeSaker =
-                sakIder.map {
-                    val sak = sakService.finnSak(it)
-                    if (sak != null) {
-                        sak
-                    } else {
-                        manglendeSakider.add(it)
-                        null
-                    }
-                }.mapNotNull { it }
+            val (eksisterendeSaker, manglendeSaker) =
+                sakIder
+                    .map { it to sakService.finnSak(it) }
+                    .partition { it.second != null }
 
-            if (manglendeSakider.isNotEmpty()) {
-                logger.error("Sakider som ikke finnes lenger ${manglendeSakider.map { it }.joinToString { "," }}")
+            val faktiskeSaker = eksisterendeSaker.map { it.second!! }
+
+            if (manglendeSaker.isNotEmpty()) {
+                logger.error("Sakider som ikke finnes lenger ${manglendeSaker.map { it.first }.joinToString { "," }}")
             }
 
-            oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering, saker = eksisterendeSaker)
+            oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering, saker = faktiskeSaker)
 
-            eksisterendeSaker.forEach { sak ->
+            faktiskeSaker.forEach { sak ->
                 sakService.oppdaterAdressebeskyttelse(
                     sak.id,
                     gradering,

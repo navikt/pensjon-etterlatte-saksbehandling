@@ -83,7 +83,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
             logger.info("Henter grunnlag for sak med id=${sak.id}")
 
             return downstreamResourceClient.post(
-                Resource(clientId, "$baseUrl/api/grunnlag/sak/oppdater-grunnlag"),
+                Resource(clientId, "$baseUrl/api/grunnlag/sak/${sak.id}/oppdater-grunnlag"),
                 brukerTokenInfo,
                 OppdaterGrunnlagRequest(sak.id, sak.sakType),
             ).mapBoth(

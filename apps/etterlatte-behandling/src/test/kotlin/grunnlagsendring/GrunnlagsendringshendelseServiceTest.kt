@@ -1021,11 +1021,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery { grunnlagKlient.hentAlleSakIder(any()) } returns sakIder
         every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
         every { sakService.finnSaker(fnr) } returns saker
+        every { sakService.finnSak(any()) } returns saker[0]
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
             brukerService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
+        every { sakService.finnSak(any()) } returns saker[0]
         runBlocking {
             grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
         }
@@ -1071,6 +1073,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             brukerService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
+        every { sakService.finnSak(any()) } returns saker[0]
         runBlocking {
             grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
         }

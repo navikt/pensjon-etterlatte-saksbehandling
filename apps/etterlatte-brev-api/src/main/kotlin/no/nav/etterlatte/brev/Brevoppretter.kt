@@ -53,7 +53,7 @@ class Brevoppretter(
             }
         }
 
-        return opprettBrevMedPdlDataForPersoner(
+        return opprettBrev(
             sakId = sakId,
             behandlingId = behandlingId,
             bruker = brukerTokenInfo,
@@ -74,38 +74,6 @@ class Brevoppretter(
     ): Pair<Brev, GenerellBrevData> =
         with(
             hentInnData(
-                sakId,
-                behandlingId,
-                bruker,
-                brevKode,
-                brevDataMapping,
-            ),
-        ) {
-            val nyttBrev =
-                OpprettNyttBrev(
-                    sakId = sakId,
-                    behandlingId = behandlingId,
-                    prosessType = BrevProsessType.REDIGERBAR,
-                    soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
-                    mottaker = finnMottaker(generellBrevData.sak.sakType, generellBrevData.personerISak),
-                    opprettet = Tidspunkt.now(),
-                    innhold = innhold,
-                    innholdVedlegg = innholdVedlegg,
-                    brevtype = brevtype,
-                )
-            return Pair(db.opprettBrev(nyttBrev), generellBrevData)
-        }
-
-    suspend fun opprettBrevMedPdlDataForPersoner(
-        sakId: Long,
-        behandlingId: UUID?,
-        bruker: BrukerTokenInfo,
-        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
-        brevtype: Brevtype,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
-    ): Pair<Brev, GenerellBrevData> =
-        with(
-            hentInnDataPersonerFraPdl(
                 sakId,
                 behandlingId,
                 bruker,
@@ -173,50 +141,6 @@ class Brevoppretter(
     ): OpprettBrevRequest {
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, overstyrSpraak, bruker) }
-
-        val brevkodeRequest =
-            BrevkodeRequest(
-                generellBrevData.loependeIPesys(),
-                generellBrevData.erForeldreloes(),
-                generellBrevData.sak.sakType,
-                generellBrevData.forenkletVedtak?.type,
-            )
-
-        val kode = brevKode(brevkodeRequest)
-        val tittel = kode.tittel ?: (generellBrevData.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
-        return coroutineScope {
-            val innhold =
-                async {
-                    brevbaker.hentRedigerbarTekstFraBrevbakeren(
-                        RedigerbarTekstRequest(
-                            generellBrevData,
-                            bruker,
-                            kode,
-                            brevDataMapping,
-                        ),
-                    )
-                }
-
-            val innholdVedlegg = async { redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData, kode.brevtype) }
-
-            OpprettBrevRequest(
-                generellBrevData,
-                BrevInnhold(tittel, generellBrevData.spraak, innhold.await()),
-                innholdVedlegg.await(),
-            )
-        }
-    }
-
-    private suspend fun hentInnDataPersonerFraPdl(
-        sakId: Long,
-        behandlingId: UUID?,
-        bruker: BrukerTokenInfo,
-        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
-        overstyrSpraak: Spraak? = null,
-    ): OpprettBrevRequest {
-        val generellBrevData =
-            retryOgPakkUt { brevdataFacade.hentGenerellBrevDataMedPdlPersoner(sakId, behandlingId, overstyrSpraak, bruker) }
 
         val brevkodeRequest =
             BrevkodeRequest(

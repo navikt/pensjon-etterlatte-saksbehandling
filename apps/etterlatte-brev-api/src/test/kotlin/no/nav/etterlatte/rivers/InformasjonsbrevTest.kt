@@ -57,7 +57,7 @@ class InformasjonsbrevTest(private val dataSource: DataSource) {
         val brevoppretter =
             mockk<Brevoppretter>().also {
                 coEvery {
-                    it.opprettBrevMedPdlDataForPersoner(
+                    it.opprettBrev(
                         saksnr,
                         any(),
                         any(),

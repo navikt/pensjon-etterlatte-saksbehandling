@@ -63,7 +63,7 @@ class JournalfoerBrevServiceTest {
 
     @Test
     fun `Journalfoering fungerer som forventet`() {
-        val brev = opprettNyttBrev(Status.FERDIGSTILT, BrevProsessType.MANUELL)
+        val brev = opprettBrev(Status.FERDIGSTILT, BrevProsessType.MANUELL)
         val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, "1234")
         val journalpostResponse = OpprettJournalpostResponse("444", journalpostferdigstilt = true)
 
@@ -100,7 +100,7 @@ class JournalfoerBrevServiceTest {
         names = ["FERDIGSTILT"],
     )
     fun `Journalfoering feiler hvis status er feil`(status: Status) {
-        val brev = opprettNyttBrev(status, BrevProsessType.MANUELL)
+        val brev = opprettBrev(status, BrevProsessType.MANUELL)
         every { db.hentBrev(any()) } returns brev
         coEvery {
             sakService.hentSak(
@@ -328,7 +328,7 @@ class JournalfoerBrevServiceTest {
         }
     }
 
-    private fun opprettNyttBrev(
+    private fun opprettBrev(
         status: Status,
         prosessType: BrevProsessType,
     ) = Brev(

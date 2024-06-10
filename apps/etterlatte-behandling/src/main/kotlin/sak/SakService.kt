@@ -186,7 +186,7 @@ class SakServiceImpl(
         overstyrendeEnhet: String?,
     ): Sak {
         val sak = finnEllerOpprettSak(fnr, type, overstyrendeEnhet)
-        // persongalleri med opplysningsbehov inneholder KUN søker
+
         grunnlagService.leggInnNyttGrunnlagSak(sak, Persongalleri(sak.ident))
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
         val spraak = hentSpraak(sak.ident)

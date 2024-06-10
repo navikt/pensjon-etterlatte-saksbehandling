@@ -31,7 +31,7 @@ internal class VarselbrevService(
         val sakType = behandlingKlient.hentSak(sakId, brukerTokenInfo).sakType
         val brevkode = hentBrevkode(sakType)
 
-        return brevoppretter.opprettBrevMedPdlDataForPersoner(
+        return brevoppretter.opprettBrev(
             sakId = sakId,
             behandlingId = behandlingId,
             bruker = brukerTokenInfo,

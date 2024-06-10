@@ -51,5 +51,6 @@ class EgenAnsattService(
         sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet)
         sakService.markerSakerMedSkjerming(saker.map { it.id }, skjermetHendelse.skjermet)
+        logger.info("Oppdaterte ${sakerMedNyEnhet.size} antall saker med ny enhet(skjerming)")
     }
 }

@@ -91,7 +91,7 @@ class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
         return connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
-                statement.setString(1, adressebeskyttelseGradering.toString())
+                statement.setString(1, adressebeskyttelseGradering.name)
                 statement.setLong(2, sakId)
                 statement.executeUpdate().also { require(it == 1) }
             }

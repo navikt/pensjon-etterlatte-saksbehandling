@@ -25,7 +25,7 @@ class VerifiserReguleringssummer(
             runBlocking {
                 try {
                     verifiser(it)
-                } catch (e: Error) {
+                } catch (e: Exception) {
                     logger.warn("Klarte ikke å verifisere match mellom utbetaling og vedtak for vedtak $it", e)
                     logger.debug("Fortsetter med å verifisere neste vedtak")
                 }

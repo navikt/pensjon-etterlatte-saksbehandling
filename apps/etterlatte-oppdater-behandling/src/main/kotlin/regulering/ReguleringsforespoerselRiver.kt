@@ -128,9 +128,4 @@ enum class ReguleringFeatureToggle(private val key: String) : FeatureToggle {
     override fun key() = key
 }
 
-private val sakerViIkkeRegulererAutomatiskNaa =
-    listOf<Long>(
-        // Manuelt overstyrt
-        3482, // Revurdering med overstyrt beregning åpen behandling
-        6323, // Revurdering med overstyrt beregning åpen behandling
-    )
+private val sakerViIkkeRegulererAutomatiskNaa: List<Long> = emptyList()

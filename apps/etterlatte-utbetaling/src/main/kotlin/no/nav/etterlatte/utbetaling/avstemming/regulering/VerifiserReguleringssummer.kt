@@ -12,6 +12,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingslinjeId
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
 import java.time.YearMonth
 
 class VerifiserReguleringssummer(
@@ -109,7 +110,7 @@ class VerifiserReguleringssummer(
         fraVedtak: Utbetalingsperiode,
         korresponderendeUtbetalingslinje: Utbetalingslinje,
     ) {
-        check(fraVedtak.beloep == korresponderendeUtbetalingslinje.beloep) {
+        check(sammenlignBeloep(fraVedtak, korresponderendeUtbetalingslinje)) {
             "Beløp fra vedtak $vedtakId var ${fraVedtak.beloep}, men i utbetalingslinje ${korresponderendeUtbetalingslinje.beloep}"
         }
         check(fraVedtak.periode.tom == korresponderendeUtbetalingslinje.periode.til?.let { YearMonth.from(it) }) {
@@ -121,5 +122,15 @@ class VerifiserReguleringssummer(
                 }
             }"
         }
+    }
+
+    private fun sammenlignBeloep(
+        fraVedtak: Utbetalingsperiode,
+        korresponderendeUtbetalingslinje: Utbetalingslinje,
+    ): Boolean {
+        if (fraVedtak.beloep == null || korresponderendeUtbetalingslinje.beloep == null) {
+            return false
+        }
+        return fraVedtak.beloep!!.minus(korresponderendeUtbetalingslinje.beloep).abs() < BigDecimal.ONE
     }
 }

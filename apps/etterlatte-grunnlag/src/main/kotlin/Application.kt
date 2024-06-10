@@ -60,16 +60,6 @@ class ApplicationBuilder {
         )
     }
 
-    // TODO: Slette så fort grunnlag er mappet
-    private val behandlingSystemClient: HttpClient by lazy {
-        httpClientClientCredentials(
-            azureAppClientId = config.getString("azure.app.client.id"),
-            azureAppJwk = config.getString("azure.app.jwk"),
-            azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-            azureAppScope = config.getString("behandling.azure.scope"),
-            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
-        )
-    }
     val persondataKlient =
         PersondataKlient(
             httpClient =

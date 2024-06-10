@@ -4,7 +4,6 @@ import {
   Aldersgruppe,
   BrevutfallOgEtterbetaling,
   FeilutbetalingValg,
-  LavEllerIngenInntekt,
 } from '~components/behandling/brevutfall/Brevutfall'
 import { format, parseISO } from 'date-fns'
 import { SakType } from '~shared/types/sak'
@@ -16,17 +15,6 @@ function aldersgruppeToString(aldersgruppe?: Aldersgruppe | null) {
       return 'Over 18 år'
     case Aldersgruppe.UNDER_18:
       return 'Under 18 år'
-    default:
-      return 'Ikke satt'
-  }
-}
-
-function lavEllerIngenInntektToString(lavEllerIngenInntekt?: LavEllerIngenInntekt | null) {
-  switch (lavEllerIngenInntekt) {
-    case LavEllerIngenInntekt.JA:
-      return 'Ja'
-    case LavEllerIngenInntekt.NEI:
-      return 'Nei'
     default:
       return 'Ikke satt'
   }
@@ -84,14 +72,6 @@ export const BrevutfallVisning = (props: {
         <VStack gap="2">
           <Label>Gjelder brevet under eller over 18 år?</Label>
           <BodyShort>{aldersgruppeToString(brevutfallOgEtterbetaling.brevutfall.aldersgruppe)}</BodyShort>
-        </VStack>
-      )}
-      {!behandlingErOpphoer && sakType == SakType.OMSTILLINGSSTOENAD && (
-        <VStack gap="2">
-          <Label>Gi omstillingsstønad til 67 år etter unntaksregel for bruker født tom 1963?</Label>
-          <BodyShort>
-            {lavEllerIngenInntektToString(brevutfallOgEtterbetaling.brevutfall.lavEllerIngenInntekt)}
-          </BodyShort>
         </VStack>
       )}
 

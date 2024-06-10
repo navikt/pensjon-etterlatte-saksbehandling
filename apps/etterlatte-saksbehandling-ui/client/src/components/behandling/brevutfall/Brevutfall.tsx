@@ -24,19 +24,12 @@ export interface BrevutfallOgEtterbetaling {
 
 export interface Brevutfall {
   aldersgruppe?: Aldersgruppe | null
-  lavEllerIngenInntekt?: LavEllerIngenInntekt | null
   feilutbetaling?: Feilutbetaling | null
 }
 
 export enum Aldersgruppe {
   OVER_18 = 'OVER_18',
   UNDER_18 = 'UNDER_18',
-  IKKE_VALGT = 'IKKE_VALGT',
-}
-
-export enum LavEllerIngenInntekt {
-  JA = 'JA',
-  NEI = 'NEI',
   IKKE_VALGT = 'IKKE_VALGT',
 }
 
@@ -67,7 +60,7 @@ const initialBrevutfallOgEtterbetaling = (saktype: SakType, opphoer: boolean) =>
     case SakType.OMSTILLINGSSTOENAD:
       return {
         brevutfall: {
-          lavEllerIngenInntekt: opphoer ? undefined : LavEllerIngenInntekt.IKKE_VALGT,
+          lavEllerIngenInntekt: opphoer ? undefined : Aldersgruppe.IKKE_VALGT, // TODO: remove?
         },
       }
   }

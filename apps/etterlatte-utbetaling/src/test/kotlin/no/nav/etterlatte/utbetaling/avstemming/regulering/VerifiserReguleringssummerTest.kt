@@ -49,13 +49,14 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
 class VerifiserReguleringssummerTest(private val dataSource: DataSource) {
-    val saksbehandler = "Saksbehandler1"
-    val attestant = "Attestant1"
-    val enhet = "Enhet1"
+    private val saksbehandler = "Saksbehandler1"
+    private val attestant = "Attestant1"
+    private val enhet = "Enhet1"
 
-    var teller = 0L
+    private var teller = 0L
+    private var vedtakTeller = 1L
 
-    val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
+    private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
 
     @Test
     fun test() {
@@ -78,11 +79,36 @@ class VerifiserReguleringssummerTest(private val dataSource: DataSource) {
                         fra = YearMonth.of(2024, Month.JANUARY),
                         til = YearMonth.of(2024, Month.APRIL),
                     ),
+                    UtbetalingslinjeRequest(
+                        null,
+                        beloep = BigDecimal(1200),
+                        fra = YearMonth.of(2024, Month.MAY),
+                        til = YearMonth.of(2024, Month.JUNE),
+                    ),
+                ),
+            ).let { dao.opprettUtbetaling(it) }
+        val etterRegulering =
+            opprettUtbetaling(
+                sak,
+                listOf(
+                    UtbetalingslinjeRequest(
+                        foerRegulering.utbetalingslinjer[0].id.value,
+                        beloep = BigDecimal(1500),
+                        fra = YearMonth.of(2024, Month.JANUARY),
+                        til = YearMonth.of(2024, Month.APRIL),
+                    ),
+                    UtbetalingslinjeRequest(
+                        null,
+                        beloep = BigDecimal(1800),
+                        fra = YearMonth.of(2024, Month.MAY),
+                        til = YearMonth.of(2024, Month.JUNE),
+                    ),
                 ),
             ).let { dao.opprettUtbetaling(it) }
 
         val verifiserer = VerifiserReguleringssummer(dao, vedtaksvurderingKlient)
-        verifiserer.verifiser(1L)
+        verifiserer.verifiser(foerRegulering.vedtak.vedtakId)
+        verifiserer.verifiser(etterRegulering.vedtak.vedtakId)
     }
 
     private fun opprettUtbetaling(
@@ -91,13 +117,13 @@ class VerifiserReguleringssummerTest(private val dataSource: DataSource) {
     ): Utbetaling {
         val behandlingId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
-        val foerRegulering =
+        val utbetaling =
             Utbetaling(
                 id = utbetalingId,
                 sakId = SakId(sak.id),
                 sakType = Saktype.BARNEPENSJON,
                 behandlingId = behandlingId.let { BehandlingId(it, UUID30(it.toString())) },
-                vedtakId = VedtakId(1L),
+                vedtakId = VedtakId(vedtakTeller),
                 opprettet = Tidspunkt.now(),
                 endret = Tidspunkt.now(),
                 avstemmingsnoekkel = Tidspunkt.now(),
@@ -107,7 +133,7 @@ class VerifiserReguleringssummerTest(private val dataSource: DataSource) {
                 attestantEnhet = enhet,
                 vedtak =
                     Utbetalingsvedtak(
-                        vedtakId = 1L,
+                        vedtakId = vedtakTeller,
                         sak = sak,
                         behandling =
                             Behandling(
@@ -145,9 +171,9 @@ class VerifiserReguleringssummerTest(private val dataSource: DataSource) {
                         )
                     },
             )
-        coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns
+        coEvery { vedtaksvurderingKlient.hentVedtak(behandlingId, any()) } returns
             VedtakDto(
-                id = 1L,
+                id = vedtakTeller,
                 behandlingId = behandlingId,
                 status = VedtakStatus.IVERKSATT,
                 sak = VedtakSak(ident = sak.ident, id = sak.id, sakType = SakType.valueOf(sak.sakType.name)),
@@ -193,7 +219,8 @@ class VerifiserReguleringssummerTest(private val dataSource: DataSource) {
 //                )
                     ),
             )
-        return foerRegulering
+        vedtakTeller++
+        return utbetaling
     }
 }
 

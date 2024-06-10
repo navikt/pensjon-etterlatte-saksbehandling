@@ -78,7 +78,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
     internal suspend fun oppdaterGrunnlagForSak(
         sak: Sak,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): Boolean {
         try {
             logger.info("Henter grunnlag for sak med id=${sak.id}")
 
@@ -87,7 +87,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
                 brukerTokenInfo,
                 OppdaterGrunnlagRequest(sak.id, sak.sakType),
             ).mapBoth(
-                success = { resource -> resource.response.let { deserialize(it.toString()) } },
+                success = { true },
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
         } catch (e: ResponseException) {

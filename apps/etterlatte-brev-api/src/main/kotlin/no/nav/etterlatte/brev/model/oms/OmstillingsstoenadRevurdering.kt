@@ -19,6 +19,9 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import java.time.LocalDate
 
 data class OmstillingsstoenadRevurdering(
@@ -44,6 +47,7 @@ data class OmstillingsstoenadRevurdering(
             brevutfall: BrevutfallDto,
             revurderingaarsak: Revurderingaarsak?,
             navnAvdoed: String,
+            vilkaarsVurdering: VilkaarsvurderingDto,
         ): OmstillingsstoenadRevurdering {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -66,6 +70,12 @@ data class OmstillingsstoenadRevurdering(
 
             val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
             val sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM }
+
+            val lavEllerIngenInntekt = vilkaarsVurdering.vilkaar.single {
+                it.hovedvilkaar.type in listOf(
+                    VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING
+                )
+            }
 
             return OmstillingsstoenadRevurdering(
                 innhold = innholdMedVedlegg.innhold(),
@@ -101,7 +111,7 @@ data class OmstillingsstoenadRevurdering(
                     },
                 harFlereUtbetalingsperioder = beregningsperioder.size > 1,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                lavEllerIngenInntekt = brevutfall.lavEllerIngenInntekt == LavEllerIngenInntekt.JA,
+                lavEllerIngenInntekt = lavEllerIngenInntekt.hovedvilkaar.resultat == Utfall.OPPFYLT,
                 feilutbetaling = feilutbetaling,
             )
         }

@@ -38,7 +38,7 @@ class BrevService(
         brevkode: EtterlatteBrevKode,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): Brev =
-        brevoppretter.opprettBrevMedPdlDataForPersoner(
+        brevoppretter.opprettBrev(
             sakId = sakId,
             behandlingId = null,
             bruker = bruker,

@@ -241,7 +241,7 @@ internal class GrunnlagServiceTest {
 
             val opplysningsbehov = Opplysningsbehov(sakId, SakType.BARNEPENSJON, galleri)
 
-            runBlocking { grunnlagService.opprettGrunnlagForSak(sakId, opplysningsbehov) }
+            runBlocking { grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov) }
 
             every { opplysningDaoMock.hentAlleGrunnlagForSak(sakId) } returns grunnlagshendelser
             every { opplysningDaoMock.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1) } returns grunnlagshendelser.first()

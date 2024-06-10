@@ -32,7 +32,7 @@ class BrevService(
         return db.hentBrevForSak(sakId)
     }
 
-    suspend fun opprettNyttBrev(
+    suspend fun opprettNyttManueltBrev(
         sakId: Long,
         bruker: BrukerTokenInfo,
         brevkode: EtterlatteBrevKode,

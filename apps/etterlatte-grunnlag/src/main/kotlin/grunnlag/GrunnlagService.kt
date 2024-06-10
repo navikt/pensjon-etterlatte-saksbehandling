@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
@@ -95,7 +96,9 @@ interface GrunnlagService {
         opplysningsbehov: Opplysningsbehov,
     )
 
-    suspend fun opprettGrunnlagForSak(
+    suspend fun oppdaterGrunnlagForSak(oppdaterGrunnlagRequest: OppdaterGrunnlagRequest)
+
+    suspend fun opprettEllerOppdaterGrunnlagForSak(
         sakId: Long,
         opplysningsbehov: Opplysningsbehov,
     )
@@ -505,10 +508,25 @@ class RealGrunnlagService(
         oppdaterGrunnlagForSak(sakId = sakId, nyeOpplysninger = nyeOpplysninger, fnr = null)
     }
 
-    override suspend fun opprettGrunnlagForSak(
+    override suspend fun oppdaterGrunnlagForSak(oppdaterGrunnlagRequest: OppdaterGrunnlagRequest) {
+        val persongalleriJsonNode = opplysningDao.finnNyesteGrunnlagForSak(oppdaterGrunnlagRequest.sakId, PERSONGALLERI_V1)?.opplysning
+
+        if (persongalleriJsonNode == null) {
+            logger.info("Klarte ikke å hente ut grunnlag for sak ${oppdaterGrunnlagRequest.sakId}. Fant ikke persongalleri")
+            throw IllegalStateException("Fant ikke grunnlag for sak ${oppdaterGrunnlagRequest.sakId}. Fant ikke persongalleri")
+        }
+
+        val persongalleri = objectMapper.readValue(persongalleriJsonNode.opplysning.toJson(), Persongalleri::class.java)
+        opprettEllerOppdaterGrunnlagForSak(
+            oppdaterGrunnlagRequest.sakId,
+            Opplysningsbehov(oppdaterGrunnlagRequest.sakId, oppdaterGrunnlagRequest.sakType, persongalleri, persongalleriJsonNode.kilde),
+        )
+    }
+
+    override suspend fun opprettEllerOppdaterGrunnlagForSak(
         sakId: Long,
         opplysningsbehov: Opplysningsbehov,
-    ) { // TODO: refresh av denne for å bruke oppdatert vergeinfo for manuelt brev
+    ) {
         val grunnlag = grunnlagHenter.hentGrunnlagsdata(opplysningsbehov)
 
         grunnlag.personopplysninger.forEach { fnrToOpplysning ->
@@ -541,7 +559,7 @@ class RealGrunnlagService(
             }.maxOrNull()
 
         if (hendelsenummer == null) {
-            logger.error("Hendelsenummer er null – kan ikke oppdatere versjon for behandling (id=$sakId)")
+            logger.error("Hendelsenummer er null – kan ikke oppdatere versjon for sak (id=$sakId)")
         }
     }
 

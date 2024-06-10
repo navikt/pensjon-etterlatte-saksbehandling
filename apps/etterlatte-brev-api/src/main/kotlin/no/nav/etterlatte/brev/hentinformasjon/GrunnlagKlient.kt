@@ -80,7 +80,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         try {
-            logger.info("Henter grunnlag for sak med id=${sak.id}")
+            logger.info("Oppdaterer grunnlag for sak med id=${sak.id}")
 
             return downstreamResourceClient.post(
                 Resource(clientId, "$baseUrl/api/grunnlag/sak/${sak.id}/oppdater-grunnlag"),

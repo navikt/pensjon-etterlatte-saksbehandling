@@ -102,7 +102,7 @@ class SimuleringOsRouteTest {
             )
 
         coEvery { utbetalingDao.hentUtbetalinger(sakId) } returns emptyList()
-        coEvery { vedtaksvurderingKlient.hentVedtak(behandlingId, any()) } returns vedtak
+        coEvery { vedtaksvurderingKlient.hentVedtakSimulering(behandlingId, any()) } returns vedtak
         coEvery {
             behandlingKlient.harTilgangTilBehandling(behandlingId, true, bruker = any())
         } returns true

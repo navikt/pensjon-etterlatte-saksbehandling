@@ -40,7 +40,7 @@ class SimuleringOsService(
         brukerTokenInfo: BrukerTokenInfo,
     ): SimulertBeregning? {
         val vedtak =
-            vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo)
+            vedtaksvurderingKlient.hentVedtakSimulering(behandlingId, brukerTokenInfo)
 
         val innhold = vedtak.innhold
         if (innhold is VedtakInnholdDto.VedtakBehandlingDto) {

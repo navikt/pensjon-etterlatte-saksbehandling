@@ -91,7 +91,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
         } catch (e: ResponseException) {
-            logger.error("Henting av grunnlag for behandling med id=${sak.id} feilet", e)
+            logger.error("Oppdatering av grunnlag for sak med id=${sak.id} feilet", e)
 
             throw ForespoerselException(
                 status = e.response.status.value,

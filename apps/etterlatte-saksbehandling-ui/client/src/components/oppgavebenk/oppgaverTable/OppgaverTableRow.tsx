@@ -3,13 +3,14 @@ import { Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import SaksoversiktLenke from '~components/oppgavebenk/components/SaksoversiktLenke'
-import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/components/Tags'
+import { OppgavetypeTag } from '~components/oppgavebenk/components/Tags'
 import { HandlingerForOppgave } from '~components/oppgavebenk/components/HandlingerForOppgave'
 import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
 import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler } from '~shared/types/oppgave'
+import { SakTypeTag } from '~components/oppgavebenk/oppgaverTable/tags/SakTypeTag'
+import { OppgavestatusTag } from '~components/oppgavebenk/oppgaverTable/tags/OppgavestatusTag'
 
 interface Props {
   oppgave: OppgaveDTO
@@ -43,9 +44,13 @@ export const OppgaverTableRow = ({
     <Table.DataCell>
       {oppgave.type ? <OppgavetypeTag oppgavetype={oppgave.type} /> : <div>oppgaveid {oppgave.id}</div>}
     </Table.DataCell>
-    <Table.DataCell>{oppgave.sakType && <SaktypeTag sakType={oppgave.sakType} />}</Table.DataCell>
+    <Table.DataCell>
+      <SakTypeTag sakType={oppgave.sakType} />
+    </Table.DataCell>
     <Table.DataCell>{oppgave.merknad}</Table.DataCell>
-    <Table.DataCell>{oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] : 'Ukjent'}</Table.DataCell>
+    <Table.DataCell>
+      <OppgavestatusTag oppgavestatus={oppgave.status} />
+    </Table.DataCell>
     <Table.DataCell>{oppgave.enhet}</Table.DataCell>
     <Table.DataCell>
       <VelgSaksbehandler

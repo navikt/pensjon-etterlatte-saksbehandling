@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling.avstemming.regulering
 
 import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.VedtakSak
@@ -107,8 +108,10 @@ class VerifiserReguleringssummerTest(private val dataSource: DataSource) {
             ).let { dao.opprettUtbetaling(it) }
 
         val verifiserer = VerifiserReguleringssummer(dao, vedtaksvurderingKlient)
-        verifiserer.verifiser(foerRegulering.vedtak.vedtakId)
-        verifiserer.verifiser(etterRegulering.vedtak.vedtakId)
+        runBlocking {
+            verifiserer.verifiser(foerRegulering.vedtak.vedtakId)
+            verifiserer.verifiser(etterRegulering.vedtak.vedtakId)
+        }
     }
 
     private fun opprettUtbetaling(

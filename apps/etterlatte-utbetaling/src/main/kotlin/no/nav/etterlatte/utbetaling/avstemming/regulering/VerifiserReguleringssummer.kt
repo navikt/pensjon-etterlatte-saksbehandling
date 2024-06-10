@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.avstemming.regulering
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
@@ -38,7 +39,13 @@ class VerifiserReguleringssummer(
             logger.warn("Ingen utbetaling for vedtak $vedtakId. Returnerer")
             return
         }
-        val vedtak = vedtaksvurderingKlient.hentVedtak(utbetaling.behandlingId.value, Systembruker.automatiskJobb)
+        val vedtak =
+            retryOgPakkUt {
+                vedtaksvurderingKlient.hentVedtak(
+                    utbetaling.behandlingId.value,
+                    Systembruker.automatiskJobb,
+                )
+            }
         sammenlignLinjer(utbetaling, vedtak)
 //        verifiserMotForrigeUtbetaling(utbetaling, vedtak)
     }

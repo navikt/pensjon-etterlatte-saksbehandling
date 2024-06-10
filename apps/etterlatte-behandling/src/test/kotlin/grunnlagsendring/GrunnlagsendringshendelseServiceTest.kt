@@ -1021,13 +1021,14 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery { grunnlagKlient.hentAlleSakIder(any()) } returns sakIder
         every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
         every { sakService.finnSaker(fnr) } returns saker
-        every { sakService.finnSak(any()) } returns saker[0]
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
             brukerService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
-        every { sakService.finnSak(any()) } returns saker[0]
+        saker.forEach {
+            every { sakService.finnSak(it.id) } returns it
+        }
         runBlocking {
             grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
         }
@@ -1046,6 +1047,49 @@ internal class GrunnlagsendringshendelseServiceTest {
             verify(exactly = 1) {
                 oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
             }
+        }
+    }
+
+    @Test
+    fun `Skal ikke gjøre oppdateringer om sakidene ikke finnes`() {
+        val sakIder: Set<Long> = setOf(5, 6)
+        val saker =
+            sakIder.map {
+                Sak(
+                    id = it,
+                    ident = KONTANT_FOT.value,
+                    sakType = SakType.BARNEPENSJON,
+                    enhet = Enheter.PORSGRUNN.enhetNr,
+                )
+            }
+        val fnr = "16508201382"
+        val adressebeskyttelse =
+            Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+
+        coEvery { grunnlagKlient.hentAlleSakIder(any()) } returns sakIder
+        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
+        every { sakService.finnSaker(fnr) } returns saker
+        every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
+        every {
+            brukerService.finnEnhetForPersonOgTema(any(), any(), any())
+        } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
+        every { sakService.oppdaterEnhetForSaker(any()) } just runs
+        every { sakService.finnSak(any()) } returns null
+
+        runBlocking {
+            grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
+        }
+
+        coVerify(exactly = 1) { grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr) }
+        verify(exactly = 2) { sakService.finnSak(any()) }
+
+        every { pdlService.hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
+
+        verify(exactly = 0) {
+            sakService.oppdaterAdressebeskyttelse(
+                any(),
+                adressebeskyttelse.adressebeskyttelseGradering,
+            )
         }
     }
 
@@ -1073,7 +1117,9 @@ internal class GrunnlagsendringshendelseServiceTest {
             brukerService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
-        every { sakService.finnSak(any()) } returns saker[0]
+        saker.forEach {
+            every { sakService.finnSak(it.id) } returns it
+        }
         runBlocking {
             grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
         }

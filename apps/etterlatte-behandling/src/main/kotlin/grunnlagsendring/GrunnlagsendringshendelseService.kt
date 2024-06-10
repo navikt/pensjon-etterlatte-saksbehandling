@@ -191,29 +191,26 @@ class GrunnlagsendringshendelseService(
     suspend fun oppdaterAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
         val gradering = adressebeskyttelse.adressebeskyttelseGradering
         val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
-        val manglendeSakider = mutableListOf<Long>()
         inTransaction {
-            val nyesakider =
-                sakIder.filter {
-                    if (sakService.finnSak(it) != null) {
-                        return@filter true
-                    } else {
-                        manglendeSakider.add(it)
-                        return@filter false
-                    }
-                }
-            if (manglendeSakider.isNotEmpty()) {
-                logger.error("Sakider som ikke finnes lenger ${manglendeSakider.map { it }.joinToString { "," }}")
+            val (eksisterendeSaker, manglendeSaker) =
+                sakIder
+                    .map { it to sakService.finnSak(it) }
+                    .partition { it.second != null }
+
+            val faktiskeSaker = eksisterendeSaker.map { it.second!! }
+
+            if (manglendeSaker.isNotEmpty()) {
+                logger.error("Sakider som ikke finnes lenger ${manglendeSaker.map { it.first }.joinToString { "," }}")
             }
 
-            oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering)
+            oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering, saker = faktiskeSaker)
 
-            nyesakider.forEach { sakId ->
+            faktiskeSaker.forEach { sak ->
                 sakService.oppdaterAdressebeskyttelse(
-                    sakId,
+                    sak.id,
                     gradering,
                 )
-                sikkerLogg.info("Oppdaterte adressebeskyttelse for sakId=$sakId med gradering=$gradering")
+                sikkerLogg.info("Oppdaterte adressebeskyttelse for sakId=$sak med gradering=$gradering")
             }
         }
 
@@ -230,10 +227,10 @@ class GrunnlagsendringshendelseService(
     private fun oppdaterEnheterForsaker(
         fnr: String,
         gradering: AdressebeskyttelseGradering,
+        saker: List<Sak>,
     ) {
-        val finnSaker = sakService.finnSaker(fnr)
         val sakerMedNyEnhet =
-            finnSaker.map {
+            saker.map {
                 SakMedEnhet(it.id, finnEnhetFraGradering(fnr, gradering, it.sakType))
             }
         sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)

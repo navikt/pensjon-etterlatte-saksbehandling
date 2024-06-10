@@ -128,6 +128,9 @@ class VerifiserReguleringssummer(
         fraVedtak: Utbetalingsperiode,
         korresponderendeUtbetalingslinje: Utbetalingslinje,
     ): Boolean {
+        if (fraVedtak.beloep == null && korresponderendeUtbetalingslinje.beloep == null) {
+            return true
+        }
         if (fraVedtak.beloep == null || korresponderendeUtbetalingslinje.beloep == null) {
             return false
         }

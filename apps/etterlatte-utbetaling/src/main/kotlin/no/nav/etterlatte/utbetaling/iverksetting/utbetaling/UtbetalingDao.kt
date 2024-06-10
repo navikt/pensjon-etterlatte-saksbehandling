@@ -301,6 +301,15 @@ class UtbetalingDao(private val dataSource: DataSource) {
             }
         }
 
+    fun hentUtbetalinger(): List<Long> =
+        using(sessionOf(dataSource)) { session ->
+            queryOf(
+                statement = """SELECT vedtak_id FROM utbetaling""",
+                paramMap = mapOf(),
+            )
+                .let { session.run(it.map { row -> row.long("vedtak_id") }.asList) }
+        }
+
     fun oppdaterKvittering(
         oppdragMedKvittering: Oppdrag,
         endret: Tidspunkt,

@@ -20,7 +20,7 @@ class VerifiserReguleringssummer(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun verifiserAlle() {
-//        repository.hentUtbetalinger()
+        repository.hentUtbetalinger()
     }
 
     suspend fun verifiser(vedtakId: Long) {

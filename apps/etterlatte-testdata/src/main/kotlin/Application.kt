@@ -178,8 +178,6 @@ private fun Route.api() {
     }
 }
 
-fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.firstValidTokenClaims()?.get("NAVident")?.toString()
-
 fun PipelineContext<Unit, ApplicationCall>.brukerIdFraToken() = call.firstValidTokenClaims()?.get("oid")?.toString()
 
 fun getDollyAccessToken(): String =

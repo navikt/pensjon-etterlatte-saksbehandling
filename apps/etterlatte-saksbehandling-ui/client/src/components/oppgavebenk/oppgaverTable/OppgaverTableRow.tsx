@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react'
-import { Table } from '@navikt/ds-react'
+import { HStack, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import SaksoversiktLenke from '~components/oppgavebenk/components/SaksoversiktLenke'
@@ -43,7 +43,9 @@ export const OppgaverTableRow = ({
     </Table.DataCell>
     <Table.DataCell>{oppgave.fnr ? <SaksoversiktLenke fnr={oppgave.fnr} /> : 'Mangler'}</Table.DataCell>
     <Table.DataCell>
-      <SakTypeTag sakType={oppgave.sakType} />
+      <HStack align="center">
+        <SakTypeTag sakType={oppgave.sakType} kort />
+      </HStack>
     </Table.DataCell>
     <Table.DataCell>
       {oppgave.type ? <OppgavetypeTag oppgavetype={oppgave.type} /> : <div>oppgaveid {oppgave.id}</div>}

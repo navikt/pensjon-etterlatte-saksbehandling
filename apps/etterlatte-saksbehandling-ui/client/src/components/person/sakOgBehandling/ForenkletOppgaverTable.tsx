@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useState } from 'react'
 import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler, Oppgavetype } from '~shared/types/oppgave'
-import { Alert, Table } from '@navikt/ds-react'
+import { Alert, HStack, Table } from '@navikt/ds-react'
 import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import { OppgavetypeTag } from '~components/oppgavebenk/components/Tags'
@@ -77,7 +77,9 @@ export const ForenkletOppgaverTable = ({
               <FristWrapper dato={oppgave.frist} />
             </Table.DataCell>
             <Table.DataCell>
-              <SakTypeTag sakType={oppgave.sakType} />
+              <HStack align="center">
+                <SakTypeTag sakType={oppgave.sakType} kort />
+              </HStack>
             </Table.DataCell>
             <Table.DataCell>
               <OppgavetypeTag oppgavetype={oppgave.type} />

@@ -3,18 +3,18 @@ import { SakType } from '~shared/types/sak'
 import { Tag } from '@navikt/ds-react'
 import { ChildEyesIcon, PlantIcon } from '@navikt/aksel-icons'
 
-export const SakTypeTag = ({ sakType }: { sakType: SakType }) => {
+export const SakTypeTag = ({ sakType, kort }: { sakType: SakType; kort?: boolean }) => {
   switch (sakType) {
     case SakType.BARNEPENSJON:
       return (
         <Tag variant="alt2-moderate" icon={<ChildEyesIcon aria-hidden />}>
-          BP
+          {kort ? 'BP' : 'Barnepensjon'}
         </Tag>
       )
     case SakType.OMSTILLINGSSTOENAD:
       return (
         <Tag variant="alt1-moderate" icon={<PlantIcon aria-hidden />}>
-          OMS
+          {kort ? 'OMS' : 'Omstillingsstønad'}
         </Tag>
       )
   }

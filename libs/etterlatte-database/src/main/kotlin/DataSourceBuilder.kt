@@ -51,7 +51,7 @@ object DataSourceBuilder {
     }
 }
 
-fun DataSource.migrate(): MigrateResult {
+fun DataSource.migrate(processExiter: () -> Unit = { exitProcess(1) }): MigrateResult {
     val logger = LoggerFactory.getLogger(this::class.java)
     try {
         validateUniqueMigrationVersions(logger)
@@ -74,7 +74,8 @@ fun DataSource.migrate(): MigrateResult {
             .migrate()
     } catch (e: InvalidMigrationScriptVersion) {
         logger.error("Ugyldig versjon på migreringsscript", e)
-        exitProcess(1)
+        processExiter()
+        throw e // Vil berre slå til under test, i prod-kode vil processExiter-kallet gjera exitProcess
     } catch (e: Exception) {
         logger.error("Fikk feil under Flyway-migrering", e)
         throw e

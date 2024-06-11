@@ -38,7 +38,7 @@ open class GenerellDatabaseExtension :
                     jdbcUrl = postgreSQLContainer.jdbcUrl,
                     username = postgreSQLContainer.username,
                     password = postgreSQLContainer.password,
-                ).apply { migrate() }
+                ).apply { migrate(processExiter = { }) }
     }
 
     private val connections = mutableListOf<Connection>()

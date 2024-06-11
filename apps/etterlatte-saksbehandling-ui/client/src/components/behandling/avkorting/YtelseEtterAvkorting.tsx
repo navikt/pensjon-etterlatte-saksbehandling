@@ -1,24 +1,20 @@
-import { IAvkortetYtelse, IAvkorting } from '~shared/types/IAvkorting'
+import { IAvkortetYtelse } from '~shared/types/IAvkorting'
 import { Box, Heading, Table } from '@navikt/ds-react'
 import React from 'react'
 import styled from 'styled-components'
 import { formaterDato, formaterStringDato, NOK } from '~utils/formattering'
 import { YtelseEtterAvkortingDetaljer } from '~components/behandling/avkorting/YtelseEtterAvkortingDetaljer'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { lastDayOfMonth } from 'date-fns'
+import { useAppSelector } from '~store/Store'
 
 const sorterNyligsteFoerstOgBakover = (a: IAvkortetYtelse, b: IAvkortetYtelse) =>
   new Date(b.fom).getTime() - new Date(a.fom).getTime()
 
-export const YtelseEtterAvkorting = (props: {
-  ytelser: IAvkortetYtelse[]
-  tidligereYtelser: IAvkortetYtelse[]
-  behandling: IBehandlingReducer
-  setAvkorting: (avkorting: IAvkorting) => void
-}) => {
-  const ytelser = [...props.ytelser].sort(sorterNyligsteFoerstOgBakover)
-  const tidligereYtelser = [...props.tidligereYtelser].sort(sorterNyligsteFoerstOgBakover)
+export const YtelseEtterAvkorting = () => {
+  const avkorting = useAppSelector((state) => state.behandlingReducer.behandling?.avkorting)
+  const ytelser = [...(avkorting?.avkortetYtelse ?? [])].sort(sorterNyligsteFoerstOgBakover)
+  const tidligereYtelser = [...(avkorting?.tidligereAvkortetYtelse ?? [])].sort(sorterNyligsteFoerstOgBakover)
 
   const finnTidligereTidligereYtelseIPeriode = (ytelse: IAvkortetYtelse) => {
     return tidligereYtelser.find(

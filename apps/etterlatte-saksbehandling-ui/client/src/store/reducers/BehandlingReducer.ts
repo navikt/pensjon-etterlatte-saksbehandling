@@ -18,6 +18,7 @@ import {
 import { RevurderingMedBegrunnelse } from '~shared/types/RevurderingInfo'
 import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
 import { ISendBrev } from '~components/behandling/brevutfall/SkalSendeBrev'
+import { IAvkorting } from '~shared/types/IAvkorting'
 
 export const setBehandling = createAction<IDetaljertBehandling>('behandling/set')
 export const resetBehandling = createAction('behandling/reset')
@@ -38,6 +39,9 @@ export const oppdaterBoddEllerArbeidetUtlandet = createAction<IBoddEllerArbeidet
 )
 export const oppdaterSendeBrev = createAction<ISendBrev>('behandling/sendBrev')
 export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
+export const oppdaterAvkorting = createAction<IAvkorting>('behandling/avkorting')
+export const resetAvkorting = createAction('behandling/avkorting/reset')
+
 export const oppdaterBehandlingsstatus = createAction<IBehandlingStatus>('behandling/status')
 export const oppdaterUtlandstilknytning = createAction<IUtlandstilknytning>('behandling/utlandstilknytning')
 export const oppdaterBeregingsGrunnlag = createAction<BeregningsGrunnlagPostDto>('behandling/beregningsgrunnlag')
@@ -58,6 +62,7 @@ export interface IBehandlingReducer extends IDetaljertBehandling {
   beregning?: Beregning
   vilkaarsvurdering?: IVilkaarsvurdering
   brevutfallOgEtterbetaling?: BrevutfallOgEtterbetaling
+  avkorting?: IAvkorting
 }
 
 const initialState: { behandling: IBehandlingReducer | null } = {
@@ -118,5 +123,11 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(oppdaterRevurderingInfo, (state, action) => {
     state.behandling!!.revurderinginfo = action.payload
+  })
+  builder.addCase(oppdaterAvkorting, (state, action) => {
+    state.behandling!!.avkorting = action.payload
+  })
+  builder.addCase(resetAvkorting, (state) => {
+    state.behandling!!.avkorting = undefined
   })
 })

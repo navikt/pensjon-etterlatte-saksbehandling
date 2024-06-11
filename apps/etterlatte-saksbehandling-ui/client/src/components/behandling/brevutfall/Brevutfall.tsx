@@ -49,7 +49,7 @@ export interface Etterbetaling {
   datoTom?: string | null
 }
 
-const initialBrevutfallOgEtterbetaling = (saktype: SakType, opphoer: boolean) => {
+const initialBrevutfallOgEtterbetaling = (saktype: SakType) => {
   switch (saktype) {
     case SakType.BARNEPENSJON:
       return {
@@ -60,7 +60,7 @@ const initialBrevutfallOgEtterbetaling = (saktype: SakType, opphoer: boolean) =>
     case SakType.OMSTILLINGSSTOENAD:
       return {
         brevutfall: {
-          lavEllerIngenInntekt: opphoer ? undefined : Aldersgruppe.IKKE_VALGT, // TODO: remove?
+          //lavEllerIngenInntekt: opphoer ? undefined : LavEllerIngenInntekt.IKKE_VALGT, // TODO: remove?
         },
       }
   }
@@ -77,7 +77,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
     innloggetSaksbehandler.skriveEnheter
   )
   const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<BrevutfallOgEtterbetaling>(
-    initialBrevutfallOgEtterbetaling(behandling.sakType, behandlingErOpphoer)
+    initialBrevutfallOgEtterbetaling(behandling.sakType)
   )
   const [hentBrevutfallOgEtterbetalingResult, hentBrevutfallOgEtterbetalingRequest] = useApiCall(
     hentBrevutfallOgEtterbetalingApi
@@ -91,7 +91,7 @@ export const Brevutfall = (props: { behandling: IBehandlingReducer; resetBrevutf
         dispatch(updateBrevutfallOgEtterbetaling(brevutfall))
         setVisSkjema(false)
       } else {
-        setBrevutfallOgEtterbetaling(initialBrevutfallOgEtterbetaling(behandling.sakType, behandlingErOpphoer))
+        setBrevutfallOgEtterbetaling(initialBrevutfallOgEtterbetaling(behandling.sakType))
         if (redigerbar) setVisSkjema(true)
       }
     })

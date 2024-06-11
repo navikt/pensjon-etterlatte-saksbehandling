@@ -24,7 +24,9 @@ import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BeregningRepositoryTest(ds: DataSource) {
+internal class BeregningRepositoryTest(
+    ds: DataSource,
+) {
     private val beregningRepository = BeregningRepository(ds)
 
     @Test
@@ -129,7 +131,9 @@ internal class BeregningRepositoryTest(ds: DataSource) {
         behandlingId = behandlingId,
         type = Beregningstype.BP,
         beregnetDato = Tidspunkt.now(),
-        grunnlagMetadata = no.nav.etterlatte.libs.common.grunnlag.Metadata(1, 1),
+        grunnlagMetadata =
+            no.nav.etterlatte.libs.common.grunnlag
+                .Metadata(1, 1),
         beregningsperioder =
             listOf(
                 Beregningsperiode(

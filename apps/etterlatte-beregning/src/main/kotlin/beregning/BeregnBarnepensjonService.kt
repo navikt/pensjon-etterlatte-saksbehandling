@@ -178,8 +178,10 @@ class BeregnBarnepensjonService(
                                 periodisertResultat.periode.fraDato,
                                 periodisertResultat.periode.tilDato,
                                 periodisertResultat.resultat.verdi,
-                                periodisertResultat.resultat.finnAnvendteRegler()
-                                    .map { "${it.regelReferanse.id} (${it.beskrivelse})" }.toSet(),
+                                periodisertResultat.resultat
+                                    .finnAnvendteRegler()
+                                    .map { "${it.regelReferanse.id} (${it.beskrivelse})" }
+                                    .toSet(),
                             )
 
                             val grunnbeloep =
@@ -215,15 +217,18 @@ class BeregnBarnepensjonService(
                                     },
                                 utbetaltBeloep = periodisertResultat.resultat.verdi,
                                 soeskenFlokk =
-                                    beregningsgrunnlag.soeskenKull.finnGrunnlagForPeriode(
-                                        periodisertResultat.periode.fraDato,
-                                    ).verdi.map {
-                                        it.value
-                                    },
+                                    beregningsgrunnlag.soeskenKull
+                                        .finnGrunnlagForPeriode(
+                                            periodisertResultat.periode.fraDato,
+                                        ).verdi
+                                        .map {
+                                            it.value
+                                        },
                                 institusjonsopphold =
-                                    beregningsgrunnlag.institusjonsopphold.finnGrunnlagForPeriode(
-                                        periodisertResultat.periode.fraDato,
-                                    ).verdi,
+                                    beregningsgrunnlag.institusjonsopphold
+                                        .finnGrunnlagForPeriode(
+                                            periodisertResultat.periode.fraDato,
+                                        ).verdi,
                                 grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,
                                 trygdetid = anvendtTrygdetid.trygdetid.toInteger(),
@@ -379,41 +384,43 @@ object AnvendtTrygdetidPerioder {
     }
 
     private fun anvendtPerioder(muligePerioder: List<GrunnlagMedPeriode<SamletTrygdetidMedBeregningsMetode>>) =
-        muligePerioder.map {
-            anvendtTrygdetidRegel.eksekver(
-                KonstantGrunnlag(
-                    TrygdetidGrunnlag(
-                        FaktumNode(it.data, kilde = "Trygdetid", beskrivelse = "Beregnet trygdetid for avdød"),
+        muligePerioder
+            .map {
+                anvendtTrygdetidRegel.eksekver(
+                    KonstantGrunnlag(
+                        TrygdetidGrunnlag(
+                            FaktumNode(it.data, kilde = "Trygdetid", beskrivelse = "Beregnet trygdetid for avdød"),
+                        ),
                     ),
-                ),
-                RegelPeriode(it.fom, it.tom),
-            )
-        }.map {
-            when (it) {
-                is RegelkjoeringResultat.Suksess -> {
-                    val aktueltResultat = it.periodiserteResultater.single()
-                    GrunnlagMedPeriode(
-                        data = aktueltResultat.resultat.verdi,
-                        fom = aktueltResultat.periode.fraDato,
-                        tom = aktueltResultat.periode.tilDato,
+                    RegelPeriode(it.fom, it.tom),
+                )
+            }.map {
+                when (it) {
+                    is RegelkjoeringResultat.Suksess -> {
+                        val aktueltResultat = it.periodiserteResultater.single()
+                        GrunnlagMedPeriode(
+                            data = aktueltResultat.resultat.verdi,
+                            fom = aktueltResultat.periode.fraDato,
+                            tom = aktueltResultat.periode.tilDato,
+                        )
+                    }
+
+                    is RegelkjoeringResultat.UgyldigPeriode -> throw InternfeilException(
+                        "Ugyldig regler for periode: ${it.ugyldigeReglerForPeriode}",
                     )
                 }
-
-                is RegelkjoeringResultat.UgyldigPeriode -> throw InternfeilException(
-                    "Ugyldig regler for periode: ${it.ugyldigeReglerForPeriode}",
-                )
-            }
-        }.kombinerOverlappendePerioder()
+            }.kombinerOverlappendePerioder()
 
     private fun BeregningsGrunnlag.finnMuligeTrygdetidPerioder(trygdetider: List<TrygdetidDto>) =
         begegningsmetodeFlereAvdoede.map { beregningsmetodeForAvdoedPeriode ->
             GrunnlagMedPeriode(
                 data =
-                    trygdetider.finnForAvdoed(
-                        beregningsmetodeForAvdoedPeriode.data.avdoed,
-                    ).toSamlet(
-                        beregningsmetodeForAvdoedPeriode.data.beregningsMetode.beregningsMetode,
-                    ) ?: throw InternfeilException("Kunne ikke samle trygdetid for avdoed").also {
+                    trygdetider
+                        .finnForAvdoed(
+                            beregningsmetodeForAvdoedPeriode.data.avdoed,
+                        ).toSamlet(
+                            beregningsmetodeForAvdoedPeriode.data.beregningsMetode.beregningsMetode,
+                        ) ?: throw InternfeilException("Kunne ikke samle trygdetid for avdoed").also {
                         logger.warn("Kunne ikke samle trygdetid for avdoed - se sikkerlogg")
                         sikkerlogger().warn("Kunne ikke samle trygdetid for avdoed ${beregningsmetodeForAvdoedPeriode.data.avdoed}")
                     },

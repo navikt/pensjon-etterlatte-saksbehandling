@@ -89,7 +89,8 @@ internal class AvkortingTest {
                 it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer.single().avkortetYtelseAar[2]
             }
 
-            avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2024, Month.SEPTEMBER))
+            avkorting
+                .medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2024, Month.SEPTEMBER))
                 .asClue {
                     it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 1
                     with(it.avkortetYtelseFraVirkningstidspunkt[0]) {
@@ -137,8 +138,16 @@ internal class AvkortingTest {
             with(nyAvkorting) {
                 aarsoppgjoer.single().inntektsavkorting.asClue {
                     it.size shouldBe 2
-                    it[0].grunnlag.id shouldNotBe eksisterendeAvkorting.aarsoppgjoer.single().inntektsavkorting[0].grunnlag.id
-                    it[1].grunnlag.id shouldNotBe eksisterendeAvkorting.aarsoppgjoer.single().inntektsavkorting[1].grunnlag.id
+                    it[0].grunnlag.id shouldNotBe
+                        eksisterendeAvkorting.aarsoppgjoer
+                            .single()
+                            .inntektsavkorting[0]
+                            .grunnlag.id
+                    it[1].grunnlag.id shouldNotBe
+                        eksisterendeAvkorting.aarsoppgjoer
+                            .single()
+                            .inntektsavkorting[1]
+                            .grunnlag.id
                 }
             }
         }
@@ -250,13 +259,18 @@ internal class AvkortingTest {
             val inntektDto = avkortinggrunnlagLagre()
             val virkningstidspunkt = YearMonth.of(2024, Month.MARCH)
 
-            avkorting(inntektsavkorting = emptyList()).oppdaterMedInntektsgrunnlag(
-                inntektDto,
-                virkningstidspunkt,
-                bruker,
-            ).let {
-                it.aarsoppgjoer.single().inntektsavkorting.single().grunnlag.relevanteMaanederInnAar shouldBe 10
-            }
+            avkorting(inntektsavkorting = emptyList())
+                .oppdaterMedInntektsgrunnlag(
+                    inntektDto,
+                    virkningstidspunkt,
+                    bruker,
+                ).let {
+                    it.aarsoppgjoer
+                        .single()
+                        .inntektsavkorting
+                        .single()
+                        .grunnlag.relevanteMaanederInnAar shouldBe 10
+                }
         }
 
         @Test
@@ -264,16 +278,17 @@ internal class AvkortingTest {
             val inntektDto = avkortinggrunnlagLagre()
             val virkningstidspunkt = YearMonth.of(2024, Month.AUGUST)
 
-            avkorting.oppdaterMedInntektsgrunnlag(
-                inntektDto,
-                virkningstidspunkt,
-                bruker,
-            ).let {
-                with(it.aarsoppgjoer.single().inntektsavkorting) {
-                    size shouldBe 3
-                    last().grunnlag.relevanteMaanederInnAar shouldBe 12
+            avkorting
+                .oppdaterMedInntektsgrunnlag(
+                    inntektDto,
+                    virkningstidspunkt,
+                    bruker,
+                ).let {
+                    with(it.aarsoppgjoer.single().inntektsavkorting) {
+                        size shouldBe 3
+                        last().grunnlag.relevanteMaanederInnAar shouldBe 12
+                    }
                 }
-            }
         }
     }
 }

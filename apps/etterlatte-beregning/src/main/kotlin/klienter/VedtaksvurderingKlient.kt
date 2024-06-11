@@ -21,10 +21,15 @@ interface VedtaksvurderingKlient {
     ): List<VedtakSammendragDto>
 }
 
-class VedtaksvurderingKlientException(override val message: String, override val cause: Throwable) :
-    Exception(message, cause)
+class VedtaksvurderingKlientException(
+    override val message: String,
+    override val cause: Throwable,
+) : Exception(message, cause)
 
-class VedtaksvurderingKlientImpl(config: Config, httpClient: HttpClient) : VedtaksvurderingKlient {
+class VedtaksvurderingKlientImpl(
+    config: Config,
+    httpClient: HttpClient,
+) : VedtaksvurderingKlient {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingKlientImpl::class.java)
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
@@ -46,8 +51,7 @@ class VedtaksvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vedta
                             url = "$resourceUrl/api/vedtak/sak/$sakId/iverksatte",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> objectMapper.readValue(resource.response.toString()) },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )

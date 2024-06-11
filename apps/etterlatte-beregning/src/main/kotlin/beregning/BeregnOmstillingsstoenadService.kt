@@ -89,11 +89,12 @@ class BeregnOmstillingsstoenadService(
 
             BehandlingType.REVURDERING -> {
                 val vilkaarsvurderingUtfall =
-                    vilkaarsvurderingKlient.hentVilkaarsvurdering(
-                        behandling.id,
-                        brukerTokenInfo,
-                    )
-                        .resultat?.utfall
+                    vilkaarsvurderingKlient
+                        .hentVilkaarsvurdering(
+                            behandling.id,
+                            brukerTokenInfo,
+                        ).resultat
+                        ?.utfall
                         ?: throw Exception("Forventa å ha vilkårsvurderingsresultat for behandlingId=${behandling.id}")
 
                 when (vilkaarsvurderingUtfall) {
@@ -136,8 +137,10 @@ class BeregnOmstillingsstoenadService(
                                 periodisertResultat.periode.fraDato,
                                 periodisertResultat.periode.tilDato,
                                 periodisertResultat.resultat.verdi,
-                                periodisertResultat.resultat.finnAnvendteRegler()
-                                    .map { "${it.regelReferanse.id} (${it.beskrivelse})" }.toSet(),
+                                periodisertResultat.resultat
+                                    .finnAnvendteRegler()
+                                    .map { "${it.regelReferanse.id} (${it.beskrivelse})" }
+                                    .toSet(),
                             )
 
                             val grunnbeloep =
@@ -152,18 +155,20 @@ class BeregnOmstillingsstoenadService(
                                     )
 
                             val trygdetidGrunnlagForPeriode =
-                                beregningsgrunnlag.avdoed.finnGrunnlagForPeriode(
-                                    periodisertResultat.periode.fraDato,
-                                ).verdi.trygdetid
+                                beregningsgrunnlag.avdoed
+                                    .finnGrunnlagForPeriode(
+                                        periodisertResultat.periode.fraDato,
+                                    ).verdi.trygdetid
 
                             Beregningsperiode(
                                 datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
                                 datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
                                 utbetaltBeloep = periodisertResultat.resultat.verdi,
                                 institusjonsopphold =
-                                    beregningsgrunnlag.institusjonsopphold.finnGrunnlagForPeriode(
-                                        periodisertResultat.periode.fraDato,
-                                    ).verdi,
+                                    beregningsgrunnlag.institusjonsopphold
+                                        .finnGrunnlagForPeriode(
+                                            periodisertResultat.periode.fraDato,
+                                        ).verdi,
                                 grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,
                                 trygdetid = trygdetid.trygdetid.toInteger(),

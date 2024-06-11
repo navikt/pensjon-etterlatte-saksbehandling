@@ -3,7 +3,7 @@ import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler, Oppgavetype } fr
 import { Alert, HStack, Table } from '@navikt/ds-react'
 import { formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
-import { OppgavetypeTag } from '~components/oppgavebenk/components/Tags'
+import { OppgavetypeTag } from '~components/oppgavebenk/components/tags/Tags'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
 import { HandlingerForOppgave } from '~components/oppgavebenk/components/HandlingerForOppgave'
@@ -15,8 +15,8 @@ import {
   finnOgOppdaterSaksbehandlerTildeling,
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveHandlinger'
-import { SakTypeTag } from '~components/oppgavebenk/oppgaverTable/tags/SakTypeTag'
-import { OppgavestatusTag } from '~components/oppgavebenk/oppgaverTable/tags/OppgavestatusTag'
+import { SakTypeTag } from '~components/oppgavebenk/components/tags/SakTypeTag'
+import { OppgavestatusTag } from '~components/oppgavebenk/components/tags/OppgavestatusTag'
 import styled from 'styled-components'
 
 export const ForenkletOppgaverTable = ({

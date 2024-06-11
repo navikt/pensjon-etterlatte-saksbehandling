@@ -198,7 +198,7 @@ class ApplicationContext(
             verifiserer = verifiserReguleringssummer,
             leaderElection = leaderElection,
             initialDelay = Duration.of(3, ChronoUnit.MINUTES).toMillis(),
-            periode = Duration.of(12, ChronoUnit.HOURS),
+            periode = Duration.of(12, ChronoUnit.DAYS),
         )
 
     val rapidsConnection =

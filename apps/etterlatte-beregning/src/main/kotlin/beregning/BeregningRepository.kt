@@ -116,6 +116,7 @@ class BeregningRepository(
             "samletTeoretiskTrygdetid" to beregningsperiode.samletTeoretiskTrygdetid,
             "prorataBroekTeller" to beregningsperiode.broek?.teller,
             "prorataBroekNevner" to beregningsperiode.broek?.nevner,
+            "avdoedeForeldre" to beregningsperiode.avdodeForeldre?.toJson(),
             "regelResultat" to beregningsperiode.regelResultat?.toJson(),
             "regelVersjon" to beregningsperiode.regelVersjon,
             "kilde" to beregningsperiode.kilde?.toJson(),
@@ -134,6 +135,7 @@ private fun toOverstyrBeregning(row: Row): OverstyrBeregning =
 private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO =
     with(row) {
         BeregningsperiodeDAO(
+            id = uuid(BeregningsperiodeDatabaseColumns.Id.navn),
             beregningId = uuid(BeregningsperiodeDatabaseColumns.BeregningId.navn),
             behandlingId = uuid(BeregningsperiodeDatabaseColumns.BehandlingId.navn),
             type = string(BeregningsperiodeDatabaseColumns.BeregningType.navn).let { Beregningstype.valueOf(it) },
@@ -169,6 +171,10 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO =
                     intOrNull(BeregningsperiodeDatabaseColumns.ProrataBroekNevner.navn)?.let { nevner ->
                         IntBroek(teller, nevner)
                     }
+                },
+            avdoedeForeldre =
+                stringOrNull(BeregningsperiodeDatabaseColumns.AvdoedeForeldre.navn)?.let {
+                    objectMapper.readValue(it)
                 },
             regelResultat =
                 stringOrNull(BeregningsperiodeDatabaseColumns.RegelResultat.navn)?.let {
@@ -208,6 +214,7 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
         beregningsperioder =
             beregningsperioder.map {
                 Beregningsperiode(
+                    id = it.id,
                     datoFOM = it.datoFOM,
                     datoTOM = it.datoTOM,
                     utbetaltBeloep = it.utbetaltBeloep,
@@ -221,6 +228,7 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
                     samletNorskTrygdetid = it.samletNorskTrygdetid,
                     samletTeoretiskTrygdetid = it.samletTeoretiskTrygdetid,
                     broek = it.broek,
+                    avdodeForeldre = it.avdoedeForeldre,
                     regelResultat = it.regelResultat,
                     regelVersjon = it.regelVersjon,
                     kilde = it.kilde,
@@ -253,6 +261,7 @@ private enum class BeregningsperiodeDatabaseColumns(
     SamletTeoretiskTrygdetid("samlet_teoretisk_trygdetid"),
     ProrataBroekNevner("prorata_broek_nevner"),
     ProrataBroekTeller("prorata_broek_teller"),
+    AvdoedeForeldre("avdoede_foreldre"),
     RegelResultat("regelResultat"),
     RegelVersjon("regelVersjon"),
     Kilde("kilde"),
@@ -288,6 +297,7 @@ private object Queries {
             ${BeregningsperiodeDatabaseColumns.SamletTeoretiskTrygdetid.navn},
             ${BeregningsperiodeDatabaseColumns.ProrataBroekTeller.navn},
             ${BeregningsperiodeDatabaseColumns.ProrataBroekNevner.navn},
+            ${BeregningsperiodeDatabaseColumns.AvdoedeForeldre.navn},
             ${BeregningsperiodeDatabaseColumns.RegelResultat.navn}, 
             ${BeregningsperiodeDatabaseColumns.RegelVersjon.navn},
             ${BeregningsperiodeDatabaseColumns.Kilde.navn},
@@ -296,8 +306,8 @@ private object Queries {
             :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, 
             :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT, :trygdetid::BIGINT, :trygdetidForIdent::TEXT,
             :beregningsMetode::TEXT, :samletNorskTrygdetid::BIGINT, :samletTeoretiskTrygdetid::BIGINT,
-            :prorataBroekTeller::BIGINT, :prorataBroekNevner::BIGINT, :regelResultat::JSONB, :regelVersjon::TEXT, :kilde::TEXT,
-            :institusjonsopphold::JSONB) 
+            :prorataBroekTeller::BIGINT, :prorataBroekNevner::BIGINT, :avdoedeForeldre::JSONB, :regelResultat::JSONB,
+             :regelVersjon::TEXT, :kilde::TEXT, :institusjonsopphold::JSONB) 
     """
 
     val slettBeregning = """
@@ -327,6 +337,7 @@ enum class OverstyrBeregningStatus {
 }
 
 private data class BeregningsperiodeDAO(
+    val id: UUID,
     val beregningId: UUID,
     val behandlingId: UUID,
     val type: Beregningstype,
@@ -345,6 +356,7 @@ private data class BeregningsperiodeDAO(
     val samletNorskTrygdetid: Int? = null,
     val samletTeoretiskTrygdetid: Int? = null,
     val broek: IntBroek? = null,
+    val avdoedeForeldre: List<String?>? = null,
     val regelResultat: JsonNode? = null,
     val regelVersjon: String? = null,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,

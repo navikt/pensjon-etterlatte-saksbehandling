@@ -33,7 +33,8 @@ data class Avkorting(
     ): Avkorting =
         this.copy(
             avkortetYtelseFraVirkningstidspunkt =
-                hentAarsoppgjoer().avkortetYtelseAar
+                hentAarsoppgjoer()
+                    .avkortetYtelseAar
                     .filter { it.periode.tom == null || virkningstidspunkt <= it.periode.tom }
                     .map {
                         if (virkningstidspunkt > it.periode.fom && (it.periode.tom == null || virkningstidspunkt <= it.periode.tom)) {
@@ -80,7 +81,8 @@ data class Avkorting(
         bruker: BrukerTokenInfo,
     ): Avkorting {
         val oppdatert =
-            hentAarsoppgjoer().inntektsavkorting
+            hentAarsoppgjoer()
+                .inntektsavkorting
                 // Fjerner hvis det finnes fra før for å erstatte/redigere
                 .filter { it.grunnlag.id != nyttGrunnlag.id }
                 .map { it.lukkSisteInntektsperiode(virkningstidspunkt) } +
@@ -171,14 +173,14 @@ data class Avkorting(
                     )
 
                 val avkortetYtelseForventetInntekt =
-                    if (hentAarsoppgjoer().inntektsavkorting.size > 1 || sanksjoner.isNotEmpty()) {
+                    if (hentAarsoppgjoer().inntektsavkorting.size > 1) {
                         AvkortingRegelkjoring.beregnAvkortetYtelse(
                             periode = periode,
                             ytelseFoerAvkorting = ytelseFoerAvkorting,
                             avkortingsperioder = avkortinger,
                             type = FORVENTET_INNTEKT,
                             restanse = null,
-                            sanksjoner = sanksjoner,
+                            sanksjoner = emptyList(),
                         )
                     } else {
                         emptyList()
@@ -263,7 +265,11 @@ data class Avkorting(
 	 * Det er tilfeller hvor det er nødvendig å vite når første periode i inneværende begynner.
 	 * Ved inngangsår så vil ikke første måned nødvendgivis være januar så det må baseres på fom første periode.
 	 */
-    private fun foersteMaanedDetteAar() = hentAarsoppgjoer().ytelseFoerAvkorting.first().periode.fom
+    private fun foersteMaanedDetteAar() =
+        hentAarsoppgjoer()
+            .ytelseFoerAvkorting
+            .first()
+            .periode.fom
 
     private fun hentAarsoppgjoer(): Aarsoppgjoer {
         if (aarsoppgjoer.isEmpty()) {
@@ -307,9 +313,11 @@ data class Aarsoppgjoer(
 	 */
     fun utledRelevanteMaaneder(virkningstidspunkt: YearMonth): Int {
         val aaretsFoersteForventaInntekt =
-            inntektsavkorting.sortedBy { it.grunnlag.periode.fom }.firstOrNull {
-                it.grunnlag.periode.fom.year == virkningstidspunkt.year
-            }?.grunnlag
+            inntektsavkorting
+                .sortedBy { it.grunnlag.periode.fom }
+                .firstOrNull {
+                    it.grunnlag.periode.fom.year == virkningstidspunkt.year
+                }?.grunnlag
         return aaretsFoersteForventaInntekt?.relevanteMaanederInnAar ?: (12 - virkningstidspunkt.monthValue + 1)
     }
 }
@@ -440,7 +448,8 @@ private fun List<YtelseFoerAvkorting>.leggTilNyeBeregninger(beregning: Beregning
     val fraOgMedNyYtelse = nyYtelseFoerAvkorting.first().periode.fom
 
     val eksisterendeFremTilNye =
-        this.filter { it.periode.fom < fraOgMedNyYtelse }
+        this
+            .filter { it.periode.fom < fraOgMedNyYtelse }
             .filter { beregning.beregningId != it.beregningsreferanse }
 
     val eksisterendeAvrundetPerioder =

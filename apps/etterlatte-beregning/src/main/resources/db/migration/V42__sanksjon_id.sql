@@ -1,0 +1,1 @@
+alter table avkortet_ytelse add column sanksjon_id uuid;

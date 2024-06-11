@@ -14,7 +14,9 @@ import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
-class AvkortingRepository(private val dataSource: DataSource) {
+class AvkortingRepository(
+    private val dataSource: DataSource,
+) {
     fun hentAvkorting(behandlingId: UUID): Avkorting? =
         dataSource.transaction { tx ->
             val avkortingGrunnlag =
@@ -45,26 +47,54 @@ class AvkortingRepository(private val dataSource: DataSource) {
                                 "SELECT * FROM avkortingsperioder WHERE inntektsgrunnlag = ?",
                                 it.id,
                             ).let { query -> tx.run(query.map { row -> row.toAvkortingsperiode() }.asList) }
-
+                        val sanksjoner =
+                            queryOf(
+                                "SELECT y.sanksjon_id, s.sanksjon_type FROM avkortet_ytelse y INNER JOIN sanksjon s ON y.sanksjon_id = s.id WHERE y.inntektsgrunnlag = ?",
+                                it.id,
+                            ).let { query -> tx.run(query.map { row -> row.toSanksjonerYtelse() }.asList) }
                         val avkortetYtelse =
                             queryOf(
                                 "SELECT * FROM avkortet_ytelse WHERE inntektsgrunnlag = ?",
                                 it.id,
-                            ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse(restanse) }.asList) }
-
+                            ).let { query ->
+                                tx.run(
+                                    query
+                                        .map { row ->
+                                            row.toAvkortetYtelse(
+                                                restanse,
+                                                sanksjoner,
+                                            )
+                                        }.asList,
+                                )
+                            }
                         Inntektsavkorting(
                             grunnlag = it,
                             avkortingsperioder = avkortingsperioder,
                             avkortetYtelseForventetInntekt = avkortetYtelse,
                         )
                     }
-
+                val sanksjonerAvkortetYtelseAar =
+                    queryOf(
+                        "SELECT y.sanksjon_id, s.sanksjon_type FROM avkortet_ytelse y INNER JOIN sanksjon s ON y.sanksjon_id = s.id WHERE y.behandling_id = ? AND y.type = ?",
+                        behandlingId,
+                        AvkortetYtelseType.AARSOPPGJOER.name,
+                    ).let { query -> tx.run(query.map { row -> row.toSanksjonerYtelse() }.asList) }
                 val avkortetYtelseAar =
                     queryOf(
                         "SELECT * FROM avkortet_ytelse WHERE behandling_id = ? AND type = ?",
                         behandlingId,
                         AvkortetYtelseType.AARSOPPGJOER.name,
-                    ).let { query -> tx.run(query.map { row -> row.toAvkortetYtelse(restanse) }.asList) }
+                    ).let { query ->
+                        tx.run(
+                            query
+                                .map { row ->
+                                    row.toAvkortetYtelse(
+                                        restanse,
+                                        sanksjonerAvkortetYtelseAar,
+                                    )
+                                }.asList,
+                        )
+                    }
 
                 Avkorting(
                     aarsoppgjoer =
@@ -262,11 +292,11 @@ class AvkortingRepository(private val dataSource: DataSource) {
                 INSERT INTO avkortet_ytelse(
                     id, behandling_id, type, fom, tom, ytelse_etter_avkorting, avkortingsbeloep, restanse, 
                     ytelse_foer_avkorting, ytelse_etter_avkorting_uten_restanse, tidspunkt, regel_resultat, kilde,
-                    inntektsgrunnlag
+                    inntektsgrunnlag, sanksjon_id
                 ) VALUES (
                     :id, :behandlingId, :type, :fom, :tom,:ytelseEtterAvkorting, :avkortingsbeloep, :restanse,
                     :ytelseFoerAvkorting, :ytelseEtterAvkortingFoerRestanse, :tidspunkt, :regel_resultat, :kilde,
-                    :inntektsgrunnlag
+                    :inntektsgrunnlag, :sanksjon_id
                 )
                 """.trimIndent(),
             paramMap =
@@ -285,6 +315,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
                     "regel_resultat" to it.regelResultat.toJson(),
                     "kilde" to it.kilde.toJson(),
                     "inntektsgrunnlag" to it.inntektsgrunnlag,
+                    "sanksjon_id" to it.sanksjon?.sanksjonId,
                 ),
         ).let { query -> tx.run(query.asUpdate) }
     }
@@ -342,23 +373,32 @@ class AvkortingRepository(private val dataSource: DataSource) {
             kilde = string("kilde").let { objectMapper.readValue(it) },
         )
 
-    private fun Row.toAvkortetYtelse(allRestanse: List<Restanse>) =
-        AvkortetYtelse(
-            id = uuid("id"),
-            type = string("type").let { AvkortetYtelseType.valueOf(it) },
-            periode =
-                Periode(
-                    fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
-                    tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) },
-                ),
-            ytelseEtterAvkorting = int("ytelse_etter_avkorting"),
-            avkortingsbeloep = int("avkortingsbeloep"),
-            restanse = uuidOrNull("restanse").let { restanseUuid -> allRestanse.find { it.id == restanseUuid } },
-            ytelseEtterAvkortingFoerRestanse = int("ytelse_etter_avkorting_uten_restanse"),
-            ytelseFoerAvkorting = int("ytelse_foer_avkorting"),
-            tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
-            regelResultat = objectMapper.readTree(string("regel_resultat")),
-            kilde = string("kilde").let { objectMapper.readValue(it) },
-            inntektsgrunnlag = uuidOrNull("inntektsgrunnlag"),
+    private fun Row.toAvkortetYtelse(
+        allRestanse: List<Restanse>,
+        sanksjonertYtelse: List<SanksjonertYtelse>,
+    ) = AvkortetYtelse(
+        id = uuid("id"),
+        type = string("type").let { AvkortetYtelseType.valueOf(it) },
+        periode =
+            Periode(
+                fom = sqlDate("fom").let { YearMonth.from(it.toLocalDate()) },
+                tom = sqlDateOrNull("tom")?.let { YearMonth.from(it.toLocalDate()) },
+            ),
+        ytelseEtterAvkorting = int("ytelse_etter_avkorting"),
+        avkortingsbeloep = int("avkortingsbeloep"),
+        restanse = uuidOrNull("restanse").let { restanseUuid -> allRestanse.find { it.id == restanseUuid } },
+        ytelseEtterAvkortingFoerRestanse = int("ytelse_etter_avkorting_uten_restanse"),
+        ytelseFoerAvkorting = int("ytelse_foer_avkorting"),
+        tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
+        regelResultat = objectMapper.readTree(string("regel_resultat")),
+        kilde = string("kilde").let { objectMapper.readValue(it) },
+        inntektsgrunnlag = uuidOrNull("inntektsgrunnlag"),
+        sanksjon = uuidOrNull("sanksjon_id").let { sanksjonId -> sanksjonertYtelse.find { it.sanksjonId == sanksjonId } },
+    )
+
+    private fun Row.toSanksjonerYtelse(): SanksjonertYtelse =
+        SanksjonertYtelse(
+            sanksjonId = uuid("sanksjon_id"),
+            sanksjonType = enumValueOf(string("sanksjon_type")),
         )
 }

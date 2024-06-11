@@ -1,6 +1,6 @@
 import React, { ReactNode, useState } from 'react'
-import { Button, Dropdown, Label, UNSAFE_Combobox } from '@navikt/ds-react'
-import { PersonCrossIcon, PersonPencilIcon, PersonPlusIcon } from '@navikt/aksel-icons'
+import { Button, Dropdown, HStack, Label, UNSAFE_Combobox, VStack } from '@navikt/ds-react'
+import { PersonCrossIcon, PersonIcon, PersonPencilIcon, PersonPlusIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { byttSaksbehandlerApi, fjernSaksbehandlerApi } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -106,43 +106,52 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
               : 'Ikke tildelt'}
           </Button>
           <DropdownMeny onClose={() => setOpenDropdown(false)}>
-            <div>
-              <VelgSaksbehandlerCombobox
-                label="Velg saksbehandler"
-                options={saksbehandlereIEnhet.map((behandler) => behandler.navn!)}
-                onToggleSelected={onSaksbehandlerSelect}
-                selectedOptions={!!valgtSaksbehandler ? [valgtSaksbehandler.navn!] : []}
-                isLoading={isPending(byttSaksbehandlerResult)}
-              />
-              {!valgtSaksbehandler?.ident?.includes(innloggetSaksbehandler.ident) && (
-                <ValgButton
-                  variant="tertiary"
-                  size="xsmall"
-                  onClick={onTildelTilMeg}
-                  loading={isPending(byttSaksbehandlerResult)}
-                >
-                  Tildel til meg
-                </ValgButton>
+            <VStack gap="3">
+              <>
+                <VelgSaksbehandlerCombobox
+                  label="Velg saksbehandler"
+                  options={saksbehandlereIEnhet.map((behandler) => behandler.navn!)}
+                  onToggleSelected={onSaksbehandlerSelect}
+                  selectedOptions={!!valgtSaksbehandler ? [valgtSaksbehandler.navn!] : []}
+                  isLoading={isPending(byttSaksbehandlerResult)}
+                />
+                {!valgtSaksbehandler?.ident?.includes(innloggetSaksbehandler.ident) && (
+                  <div>
+                    <Button
+                      variant="tertiary"
+                      size="xsmall"
+                      onClick={onTildelTilMeg}
+                      loading={isPending(byttSaksbehandlerResult)}
+                    >
+                      Tildel til meg
+                    </Button>
+                  </div>
+                )}
+              </>
+              {valgtSaksbehandler?.ident && (
+                <div>
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={onFjernTildeling}
+                    icon={<PersonCrossIcon />}
+                    iconPosition="right"
+                    loading={isPending(fjernSaksbehandlerResult)}
+                  >
+                    Fjern tildeling
+                  </Button>
+                </div>
               )}
-            </div>
-            {valgtSaksbehandler?.ident && (
-              <div>
-                <ValgButton
-                  variant="secondary"
-                  size="small"
-                  onClick={onFjernTildeling}
-                  icon={<PersonCrossIcon />}
-                  iconPosition="right"
-                  loading={isPending(fjernSaksbehandlerResult)}
-                >
-                  Fjern tildeling
-                </ValgButton>
-              </div>
-            )}
+            </VStack>
           </DropdownMeny>
         </Dropdown>
       ) : (
-        <SaksbehandlerWrapper>{saksbehandler ? saksbehandler.navn : 'Navn mangler'}</SaksbehandlerWrapper>
+        <SaksbehandlerNavnHStack gap="2" align="center">
+          <PersonIcon width="1.5rem" height="1.5rem" />
+          <Label size="small" textColor="subtle">
+            {saksbehandler ? saksbehandler.navn : 'Navn mangler'}
+          </Label>
+        </SaksbehandlerNavnHStack>
       )}
     </div>
   )
@@ -155,15 +164,10 @@ const DropdownMeny = styled(Dropdown.Menu)`
   max-width: fit-content;
 `
 
-const ValgButton = styled(Button)`
-  margin-top: 0.75rem;
-`
-
 const VelgSaksbehandlerCombobox = styled(UNSAFE_Combobox)`
   width: 20rem;
 `
 
-const SaksbehandlerWrapper = styled(Label)`
-  padding: 12px 20px;
-  margin-right: 0.5rem;
+const SaksbehandlerNavnHStack = styled(HStack)`
+  padding-left: 0.6rem;
 `

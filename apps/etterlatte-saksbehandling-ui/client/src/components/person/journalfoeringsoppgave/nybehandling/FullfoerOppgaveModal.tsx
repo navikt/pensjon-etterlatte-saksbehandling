@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Alert, BodyLong, BodyShort, Button, Heading, HStack, Modal } from '@navikt/ds-react'
-import { SaktypeTag } from '~components/oppgavebenk/components/Tags'
 import { ferdigstillOppgave } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
@@ -8,6 +7,7 @@ import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
 import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { OppgaveDTO } from '~shared/types/oppgave'
+import { SakTypeTag } from '~components/oppgavebenk/components/tags/SakTypeTag'
 
 interface ModalProps {
   oppgave: OppgaveDTO
@@ -45,7 +45,7 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
             Ferdigstill og opprett ny behandling
           </Heading>
           <BodyShort spacing>
-            <SaktypeTag sakType={oppgave.sakType} />
+            <SakTypeTag sakType={oppgave.sakType} />
           </BodyShort>
 
           <BodyLong spacing>

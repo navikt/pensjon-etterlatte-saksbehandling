@@ -47,25 +47,41 @@ internal class AvkortingTest {
                                     ),
                                 ),
                         ),
+                        Aarsoppgjoer(
+                            aar = 2025,
+                            avkortetYtelseAar =
+                                listOf(
+                                    avkortetYtelse(
+                                        periode =
+                                            Periode(
+                                                fom = YearMonth.of(2025, Month.JANUARY),
+                                                tom = null,
+                                            ),
+                                    ),
+                                ),
+                        ),
                     ),
             )
 
         @Test
         fun `fyller ut avkortet ytelse foer virkningstidspunkt ved aa kutte aarsoppgjoer fra virkningstidspunkt`() {
             avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2024, Month.MAY)).asClue {
-                it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 2
-                it.avkortetYtelseFraVirkningstidspunkt[0] shouldBe avkorting.aarsoppgjoer.single().avkortetYtelseAar[1]
-                it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer.single().avkortetYtelseAar[2]
+                it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 3
+
+                it.avkortetYtelseFraVirkningstidspunkt[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1]
+                it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2]
+
+                it.avkortetYtelseFraVirkningstidspunkt[2] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelseAar[0]
             }
         }
 
         @Test
         fun `kutter periode fra aarsoppgjoer hvis virkningstidspunkt begynner midt i periode `() {
             avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2024, Month.APRIL)).asClue {
-                it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 3
+                it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 4
                 with(it.avkortetYtelseFraVirkningstidspunkt[0]) {
                     shouldBeEqualToIgnoringFields(
-                        avkorting.aarsoppgjoer.single().avkortetYtelseAar[0],
+                        avkorting.aarsoppgjoer[0].avkortetYtelseAar[0],
                         AvkortetYtelse::periode,
                     )
                     periode shouldBe
@@ -74,32 +90,44 @@ internal class AvkortingTest {
                             tom = YearMonth.of(2024, Month.APRIL),
                         )
                 }
-                it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer.single().avkortetYtelseAar[1]
-                it.avkortetYtelseFraVirkningstidspunkt[2] shouldBe avkorting.aarsoppgjoer.single().avkortetYtelseAar[2]
+                it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1]
+                it.avkortetYtelseFraVirkningstidspunkt[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2]
             }
 
             avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2024, Month.JUNE)).asClue {
-                it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 2
+                it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 3
                 with(it.avkortetYtelseFraVirkningstidspunkt[0]) {
                     shouldBeEqualToIgnoringFields(
-                        avkorting.aarsoppgjoer.single().avkortetYtelseAar[1],
+                        avkorting.aarsoppgjoer[0].avkortetYtelseAar[1],
                         AvkortetYtelse::periode,
                     )
                     periode shouldBe Periode(fom = YearMonth.of(2024, Month.JUNE), tom = YearMonth.of(2024, Month.JULY))
                 }
-                it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer.single().avkortetYtelseAar[2]
+                it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2]
             }
 
             avkorting
                 .medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2024, Month.SEPTEMBER))
                 .asClue {
-                    it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 1
+                    it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 2
                     with(it.avkortetYtelseFraVirkningstidspunkt[0]) {
                         shouldBeEqualToIgnoringFields(
-                            avkorting.aarsoppgjoer.single().avkortetYtelseAar[2],
+                            avkorting.aarsoppgjoer[0].avkortetYtelseAar[2],
                             AvkortetYtelse::periode,
                         )
                         periode shouldBe Periode(fom = YearMonth.of(2024, Month.SEPTEMBER), tom = null)
+                    }
+                }
+
+            avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2025, Month.JANUARY))
+                .asClue {
+                    it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 1
+                    with(it.avkortetYtelseFraVirkningstidspunkt[0]) {
+                        shouldBeEqualToIgnoringFields(
+                            avkorting.aarsoppgjoer[1].avkortetYtelseAar[0],
+                            AvkortetYtelse::periode,
+                        )
+                        periode shouldBe Periode(fom = YearMonth.of(2025, Month.JANUARY), tom = null)
                     }
                 }
         }

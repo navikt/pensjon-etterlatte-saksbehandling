@@ -60,7 +60,7 @@ class VerifiserReguleringssummerTest(private val dataSource: DataSource) {
     private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
 
     @Test
-    fun test() {
+    fun `sjekker utbetalingsperioder opp mot vedtak`() {
         val dao = UtbetalingDao(dataSource)
 
         val sak =
@@ -212,14 +212,6 @@ class VerifiserReguleringssummerTest(private val dataSource: DataSource) {
                                     type = UtbetalingsperiodeType.UTBETALING,
                                 )
                             },
-//                listOf(
-//                    Utbetalingsperiode(
-//                        id = 1L,
-//                        periode = Periode(fom = YearMonth.now(), tom = null),
-//                        beloep = BigDecimal(1000),
-//                        type = UtbetalingsperiodeType.UTBETALING
-//                    )
-//                )
                     ),
             )
         vedtakTeller++

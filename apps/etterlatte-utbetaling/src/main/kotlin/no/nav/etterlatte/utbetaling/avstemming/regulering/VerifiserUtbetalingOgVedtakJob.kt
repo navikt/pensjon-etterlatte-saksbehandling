@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.avstemming.regulering
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
@@ -27,7 +28,9 @@ class VerifiserUtbetalingOgVedtakJob(
             loggerInfo = LoggerInfo(logger = logger, sikkerLogg = sikkerLogg, loggTilSikkerLogg = true),
         ) {
             if (leaderElection.isLeader()) {
-                verifiserer.verifiserAlle()
+                runBlocking {
+                    verifiserer.verifiserAlle()
+                }
             }
         }
     }

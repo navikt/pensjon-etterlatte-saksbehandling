@@ -1,6 +1,5 @@
 package no.nav.etterlatte.utbetaling.avstemming.regulering
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
@@ -20,15 +19,13 @@ class VerifiserReguleringssummer(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun verifiserAlle() {
+    suspend fun verifiserAlle() {
         repository.hentUtbetalinger().forEach {
-            runBlocking {
-                try {
-                    verifiser(it)
-                } catch (e: Exception) {
-                    logger.warn("Klarte ikke å verifisere match mellom utbetaling og vedtak for vedtak $it", e)
-                    logger.debug("Fortsetter med å verifisere neste vedtak")
-                }
+            try {
+                verifiser(it)
+            } catch (e: Exception) {
+                logger.warn("Klarte ikke å verifisere match mellom utbetaling og vedtak for vedtak $it", e)
+                logger.debug("Fortsetter med å verifisere neste vedtak")
             }
         }
     }
@@ -53,14 +50,16 @@ class VerifiserReguleringssummer(
         utbetaling: Utbetaling,
         vedtak: VedtakDto,
     ) {
-        (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).utbetalingsperioder.forEach { fraVedtak ->
-            val korresponderendeUtbetalingslinje =
-                utbetaling.utbetalingslinjer
-                    .maxByOrNull { YearMonth.from(it.periode.fra) == fraVedtak.periode.fom }
-                    ?: throw IllegalStateException(
-                        "Mangler korresponderende utbetalingslinje for periode ${fraVedtak.periode} for vedtak ${vedtak.id}",
-                    )
-            verifiserAtStemmerOverens(vedtak.id, fraVedtak, korresponderendeUtbetalingslinje)
+        if (vedtak.innhold is VedtakInnholdDto.VedtakBehandlingDto) {
+            (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).utbetalingsperioder.forEach { fraVedtak ->
+                val korresponderendeUtbetalingslinje =
+                    utbetaling.utbetalingslinjer
+                        .maxByOrNull { YearMonth.from(it.periode.fra) == fraVedtak.periode.fom }
+                        ?: throw IllegalStateException(
+                            "Mangler korresponderende utbetalingslinje for periode ${fraVedtak.periode} for vedtak ${vedtak.id}",
+                        )
+                verifiserAtStemmerOverens(vedtak.id, fraVedtak, korresponderendeUtbetalingslinje)
+            }
         }
     }
 

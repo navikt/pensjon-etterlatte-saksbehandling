@@ -14,7 +14,10 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 
-class BehandlingKlient(val behandlingHttpClient: HttpClient, val url: String) {
+class BehandlingKlient(
+    val behandlingHttpClient: HttpClient,
+    val url: String,
+) {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
 
     fun haandterHendelse(record: ConsumerRecord<String, String>) {

@@ -15,7 +15,6 @@ fun DataSource.insert(
                      VALUES 
                     (${params.keys.joinToString(", ") { ":$it" }})""",
             paramMap = params,
-        )
-            .let { query -> tx.run(query.asUpdate) }
+        ).let { query -> tx.run(query.asUpdate) }
     }
 }

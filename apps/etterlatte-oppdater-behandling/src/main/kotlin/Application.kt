@@ -14,9 +14,11 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 fun main() {
     val rapidEnv = getRapidEnv()
     val appBuilder = AppBuilder(Miljoevariabler(rapidEnv))
-    RapidApplication.create(rapidEnv).also { rapidsConnection ->
-        settOppRivers(rapidsConnection, appBuilder)
-    }.start()
+    RapidApplication
+        .create(rapidEnv)
+        .also { rapidsConnection ->
+            settOppRivers(rapidsConnection, appBuilder)
+        }.start()
 }
 
 private fun settOppRivers(

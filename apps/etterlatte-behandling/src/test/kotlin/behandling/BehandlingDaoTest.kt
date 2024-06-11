@@ -43,7 +43,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class BehandlingDaoTest(val dataSource: DataSource) {
+internal class BehandlingDaoTest(
+    val dataSource: DataSource,
+) {
     private lateinit var sakRepo: SakDao
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var kommerBarnetTilGodeDao: KommerBarnetTilGodeDao

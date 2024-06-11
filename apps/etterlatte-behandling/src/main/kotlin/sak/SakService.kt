@@ -95,8 +95,9 @@ interface SakService {
     fun hentSakerMedIder(sakIder: List<Long>): Map<Long, Sak>
 }
 
-class ManglerTilgangTilEnhet(enheter: List<String>) :
-    UgyldigForespoerselException(
+class ManglerTilgangTilEnhet(
+    enheter: List<String>,
+) : UgyldigForespoerselException(
         code = "MANGLER_TILGANG_TIL_ENHET",
         detail = "Mangler tilgang til enhet $enheter",
     )
@@ -146,12 +147,12 @@ class SakServiceImpl(
         spesifikkeSaker: List<Long>,
         ekskluderteSaker: List<Long>,
         sakType: SakType?,
-    ): List<Sak> {
-        return dao.hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakType)
+    ): List<Sak> =
+        dao
+            .hentSaker(kjoering, antall, spesifikkeSaker, ekskluderteSaker, sakType)
             .also { logger.info("Henta ${it.size} saker før filtrering") }
             .filterForEnheter()
             .also { logger.info("Henta ${it.size} saker etter filtrering") }
-    }
 
     private fun finnSakForPerson(
         person: String,
@@ -169,9 +170,7 @@ class SakServiceImpl(
         sakType: SakType? = null,
     ) = dao.finnSaker(person, sakType)
 
-    override fun finnSaker(person: String): List<Sak> {
-        return finnSakerForPerson(person).filterForEnheter()
-    }
+    override fun finnSaker(person: String): List<Sak> = finnSakerForPerson(person).filterForEnheter()
 
     override fun markerSakerMedSkjerming(
         sakIder: List<Long>,
@@ -204,7 +203,8 @@ class SakServiceImpl(
                 krrKlient.hentDigitalKontaktinformasjon(fnr)
             }
 
-        return kontaktInfo?.spraak
+        return kontaktInfo
+            ?.spraak
             ?.toLowerCasePreservingASCIIRules()
             ?.let {
                 when (it) {
@@ -276,7 +276,8 @@ class SakServiceImpl(
     }
 
     private fun SakMedGraderingOgSkjermet.gradertEnhetsnummerErIkkeAlene() {
-        if (this.enhetNr == Enheter.STRENGT_FORTROLIG.enhetNr && this.adressebeskyttelseGradering !in
+        if (this.enhetNr == Enheter.STRENGT_FORTROLIG.enhetNr &&
+            this.adressebeskyttelseGradering !in
             listOf(
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG,
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
@@ -347,9 +348,7 @@ class SakServiceImpl(
     override fun oppdaterAdressebeskyttelse(
         sakId: Long,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int {
-        return dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
-    }
+    ): Int = dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
 
     private fun sjekkSkjerming(
         fnr: String,
@@ -371,20 +370,14 @@ class SakServiceImpl(
         dao.oppdaterEnheterPaaSaker(saker)
     }
 
-    override fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering> {
-        return dao.finnSakerMedGraderingOgSkjerming(sakIder)
-    }
+    override fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering> = dao.finnSakerMedGraderingOgSkjerming(sakIder)
 
     override fun finnSak(
         person: String,
         type: SakType,
-    ): Sak? {
-        return finnSakForPerson(person, type).sjekkEnhet()
-    }
+    ): Sak? = finnSakForPerson(person, type).sjekkEnhet()
 
-    override fun finnSak(id: Long): Sak? {
-        return dao.hentSak(id).sjekkEnhet()
-    }
+    override fun finnSak(id: Long): Sak? = dao.hentSak(id).sjekkEnhet()
 
     override fun finnFlyktningForSak(id: Long): Flyktning? = dao.hentSak(id).sjekkEnhet()?.let { dao.finnFlyktningForSak(id) }
 
@@ -411,7 +404,5 @@ class SakServiceImpl(
     private fun filterSakerForEnheter(
         enheterSomSkalFiltreres: List<String>,
         saker: List<Sak>,
-    ): List<Sak> {
-        return saker.filter { it.enhet !in enheterSomSkalFiltreres }
-    }
+    ): List<Sak> = saker.filter { it.enhet !in enheterSomSkalFiltreres }
 }

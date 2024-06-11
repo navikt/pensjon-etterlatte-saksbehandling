@@ -54,7 +54,10 @@ internal class SjekkOmOverstyrtBeregningRiverTest {
 
         assertEquals(inspector.inspektør.size, 1)
         assertEquals(
-            inspector.inspektør.message(0).get("@event_name").textValue(),
+            inspector.inspektør
+                .message(0)
+                .get("@event_name")
+                .textValue(),
             ReguleringHendelseType.UTFORT_SJEKK_AAPEN_OVERSTYRT.lagEventnameForType(),
         )
     }
@@ -71,7 +74,10 @@ internal class SjekkOmOverstyrtBeregningRiverTest {
 
         assertEquals(inspector.inspektør.size, 1)
         assertEquals(
-            inspector.inspektør.message(0).get("@event_name").textValue(),
+            inspector.inspektør
+                .message(0)
+                .get("@event_name")
+                .textValue(),
             ReguleringHendelseType.UTFORT_SJEKK_AAPEN_OVERSTYRT.lagEventnameForType(),
         )
     }

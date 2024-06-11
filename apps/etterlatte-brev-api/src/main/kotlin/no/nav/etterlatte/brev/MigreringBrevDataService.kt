@@ -8,7 +8,9 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 
-class MigreringBrevDataService(private val brevdataFacade: BrevdataFacade) {
+class MigreringBrevDataService(
+    private val brevdataFacade: BrevdataFacade,
+) {
     suspend fun opprettMigreringBrevdata(
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,

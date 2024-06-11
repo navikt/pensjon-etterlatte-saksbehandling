@@ -42,9 +42,7 @@ class NyNotatService(
         return notatRepository.hentForSak(sakId)
     }
 
-    fun hentPayload(id: NotatID): Slate {
-        return notatRepository.hentPayload(id)
-    }
+    fun hentPayload(id: NotatID): Slate = notatRepository.hentPayload(id)
 
     fun oppdaterPayload(
         id: NotatID,
@@ -150,7 +148,8 @@ class NyNotatService(
 
         val sak = sakService.hentSak(notat.sakId, bruker)
 
-        return dokarkivService.journalfoer(mapTilJournalpostRequest(sak, notat, pdf))
+        return dokarkivService
+            .journalfoer(mapTilJournalpostRequest(sak, notat, pdf))
             .also {
                 notatRepository.settJournalfoert(id, it, bruker)
             }
@@ -192,12 +191,14 @@ class NyNotatService(
     }
 }
 
-class KanIkkeEndreJournalfoertNotat : UgyldigForespoerselException(
-    code = "KAN_IKKE_ENDRE_JOURNALFOERT_NOTAT",
-    detail = "Notatet er journalført og kan ikke endres!",
-)
+class KanIkkeEndreJournalfoertNotat :
+    UgyldigForespoerselException(
+        code = "KAN_IKKE_ENDRE_JOURNALFOERT_NOTAT",
+        detail = "Notatet er journalført og kan ikke endres!",
+    )
 
-class NotatAlleredeJournalfoert : UgyldigForespoerselException(
-    code = "NOTAT_ALLEREDE_JOURNALFOERT",
-    detail = "Notatet er allerede journalført!",
-)
+class NotatAlleredeJournalfoert :
+    UgyldigForespoerselException(
+        code = "NOTAT_ALLEREDE_JOURNALFOERT",
+        detail = "Notatet er allerede journalført!",
+    )

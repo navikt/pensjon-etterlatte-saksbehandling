@@ -107,7 +107,8 @@ class PDFGenerator(
                 sakType = sak.sakType,
             )
 
-        return brevbakerService.genererPdf(brev.id, brevRequest)
+        return brevbakerService
+            .genererPdf(brev.id, brevRequest)
             .also { lagrePdfHvisVedtakFattet(generellBrevData, brev, it) }
     }
 

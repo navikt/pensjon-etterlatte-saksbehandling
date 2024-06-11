@@ -34,12 +34,13 @@ class VedtaksvurderingRapidService(
         extraParams: Map<String, Any> = emptyMap(),
     ) = publiser(
         behandlingId,
-        JsonMessage.newMessage(
-            mapOf(
-                vedtakhendelse.lagParMedEventNameKey(),
-                "vedtak" to vedtak,
-                TEKNISK_TID_KEY to tekniskTid.toLocalDatetimeUTC(),
-            ) + extraParams,
-        ).toJson(),
+        JsonMessage
+            .newMessage(
+                mapOf(
+                    vedtakhendelse.lagParMedEventNameKey(),
+                    "vedtak" to vedtak,
+                    TEKNISK_TID_KEY to tekniskTid.toLocalDatetimeUTC(),
+                ) + extraParams,
+            ).toJson(),
     )
 }

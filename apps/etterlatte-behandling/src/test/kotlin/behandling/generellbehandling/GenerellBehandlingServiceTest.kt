@@ -64,7 +64,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class GenerellBehandlingServiceTest(val dataSource: DataSource) {
+internal class GenerellBehandlingServiceTest(
+    val dataSource: DataSource,
+) {
     private lateinit var dao: GenerellBehandlingDao
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var hendelseDao: HendelseDao
@@ -173,10 +175,11 @@ internal class GenerellBehandlingServiceTest(val dataSource: DataSource) {
         } returns grunnlagsopplysningMedPersonopplysning
 
         val manueltOpprettetBehandling =
-            GenerellBehandling.opprettFraType(
-                GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND,
-                sak.id,
-            ).copy(tilknyttetBehandling = foerstegangsbehandling.id, status = GenerellBehandling.Status.ATTESTERT)
+            GenerellBehandling
+                .opprettFraType(
+                    GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND,
+                    sak.id,
+                ).copy(tilknyttetBehandling = foerstegangsbehandling.id, status = GenerellBehandling.Status.ATTESTERT)
         val opprettBehandlingGenerell = service.opprettBehandling(manueltOpprettetBehandling, SAKSBEHANDLER)
 
         val kravpakkeMedArbeidetUtlandet = runBlocking { service.hentKravpakkeForSak(sak.id, brukerTokenInfo) }
@@ -574,7 +577,8 @@ internal class GenerellBehandlingServiceTest(val dataSource: DataSource) {
 
         val attestant = ATTESTANT
         val attesteringsOppgave =
-            oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
+            oppgaveService
+                .hentOppgaverForReferanse(opprettBehandling.id.toString())
                 .single(OppgaveIntern::erAttestering)
 
         val trettidagerfrem = Tidspunkt.now().plus(30L, ChronoUnit.DAYS).toNorskLocalDate()
@@ -669,7 +673,8 @@ internal class GenerellBehandlingServiceTest(val dataSource: DataSource) {
         service.sendTilAttestering(behandlingMedKravpakke, SAKSBEHANDLER)
 
         val nyAttesteringsoppgave =
-            oppgaveService.hentOppgaverForReferanse(behandling.id.toString())
+            oppgaveService
+                .hentOppgaverForReferanse(behandling.id.toString())
                 .single(OppgaveIntern::erAttestering)
 
         oppgaveService.tildelSaksbehandler(nyAttesteringsoppgave.id, ATTESTANT.ident)

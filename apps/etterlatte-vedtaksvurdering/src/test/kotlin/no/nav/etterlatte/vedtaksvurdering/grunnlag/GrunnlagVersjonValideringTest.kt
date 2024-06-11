@@ -210,18 +210,16 @@ internal class GrunnlagVersjonValideringTest {
     }
 }
 
-private fun mockTrygdetidDtoUtenDiff(): TrygdetidDto {
-    return mockk<TrygdetidDto> {
+private fun mockTrygdetidDtoUtenDiff(): TrygdetidDto =
+    mockk<TrygdetidDto> {
         every {
             opplysningerDifferanse
         } returns OpplysningerDifferanse(false, mockk<GrunnlagOpplysningerDto>())
     }
-}
 
-private fun mockTrygdetidDtoMedDiff(): TrygdetidDto {
-    return mockk<TrygdetidDto> {
+private fun mockTrygdetidDtoMedDiff(): TrygdetidDto =
+    mockk<TrygdetidDto> {
         every {
             opplysningerDifferanse
         } returns OpplysningerDifferanse(true, mockk<GrunnlagOpplysningerDto>())
     }
-}

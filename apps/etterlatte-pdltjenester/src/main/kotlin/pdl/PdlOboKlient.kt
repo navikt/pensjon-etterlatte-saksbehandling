@@ -23,7 +23,10 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.utils.toPdlVariables
 import org.slf4j.LoggerFactory
 
-class PdlOboKlient(private val httpClient: HttpClient, config: Config) {
+class PdlOboKlient(
+    private val httpClient: HttpClient,
+    config: Config,
+) {
     private val logger = LoggerFactory.getLogger(PdlOboKlient::class.java)
 
     private val apiUrl = config.getString("pdl.url")
@@ -42,13 +45,14 @@ class PdlOboKlient(private val httpClient: HttpClient, config: Config) {
             )
 
         return retry<PdlPersonNavnFoedselResponse>(times = 3) {
-            httpClient.post(apiUrl) {
-                bearerAuth(getOboToken(bruker))
-                behandlingsnummer(SakType.entries)
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                setBody(request)
-            }.body()
+            httpClient
+                .post(apiUrl) {
+                    bearerAuth(getOboToken(bruker))
+                    behandlingsnummer(SakType.entries)
+                    contentType(ContentType.Application.Json)
+                    accept(ContentType.Application.Json)
+                    setBody(request)
+                }.body()
         }.let {
             when (it) {
                 is RetryResult.Success ->
@@ -76,14 +80,15 @@ class PdlOboKlient(private val httpClient: HttpClient, config: Config) {
             )
 
         return retry<PdlPersonResponse>(times = 3) {
-            httpClient.post(apiUrl) {
-                bearerAuth(getOboToken(bruker))
-                behandlingsnummer(sakType)
-                header(PdlKlient.HEADER_TEMA, PdlKlient.HEADER_TEMA_VALUE)
-                accept(ContentType.Application.Json)
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }.body()
+            httpClient
+                .post(apiUrl) {
+                    bearerAuth(getOboToken(bruker))
+                    behandlingsnummer(sakType)
+                    header(PdlKlient.HEADER_TEMA, PdlKlient.HEADER_TEMA_VALUE)
+                    accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }.body()
         }.let {
             when (it) {
                 is RetryResult.Success ->
@@ -98,11 +103,11 @@ class PdlOboKlient(private val httpClient: HttpClient, config: Config) {
         }
     }
 
-    private fun getQuery(name: String): String {
-        return javaClass.getResource(name)!!
+    private fun getQuery(name: String): String =
+        javaClass
+            .getResource(name)!!
             .readText()
             .replace(Regex("[\n\t]"), "")
-    }
 
     private suspend fun getOboToken(bruker: BrukerTokenInfo): String {
         val token =

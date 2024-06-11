@@ -51,32 +51,35 @@ abstract class BehandlingIntegrationTest {
         applicationContext =
             ApplicationContext(
                 env =
-                    System.getenv().toMutableMap().apply {
-                        put("KAFKA_RAPID_TOPIC", "test")
-                        put("DB_HOST", props.host)
-                        put("DB_USERNAME", props.username)
-                        put("DB_PASSWORD", props.password)
-                        put("DB_PORT", props.firstMappedPort.toString())
-                        put("DB_DATABASE", props.databaseName)
-                        put("AZUREAD_ATTESTANT_GROUPID", azureAdAttestantClaim)
-                        put("AZUREAD_ATTESTANT_GJENNY_GROUPID", azureAdAttestantGjennyClaim)
-                        put("AZUREAD_SAKSBEHANDLER_GROUPID", azureAdSaksbehandlerClaim)
-                        put("AZUREAD_STRENGT_FORTROLIG_GROUPID", azureAdStrengtFortroligClaim)
-                        put("AZUREAD_EGEN_ANSATT_GROUPID", azureAdEgenAnsattClaim)
-                        put("AZUREAD_FORTROLIG_GROUPID", azureAdFortroligClaim)
-                        put("AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID", azureAdNasjonUtenLoggClaim)
-                        put("AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID", azureAdNasjonMedLoggClaim)
-                        put("NORG2_URL", "http://localhost")
-                        put("NAVANSATT_URL", "http://localhost")
-                        put("SKJERMING_URL", "http://localhost")
-                        put("OPPGAVE_URL", "http://localhost")
-                        put("PEN_URL", "http://localhost")
-                        put("PEN_CLIENT_ID", "ddd52335-cfe8-4ee9-9e68-416a5ab26efa")
-                        put("ETTERLATTE_KLAGE_API_URL", "http://localhost")
-                        put("ETTERLATTE_TILBAKEKREVING_URL", "http://localhost")
-                        put("ETTERLATTE_MIGRERING_URL", "http://localhost")
-                        put("OPPGAVE_SCOPE", "scope")
-                    }.let { Miljoevariabler(it) },
+                    System
+                        .getenv()
+                        .toMutableMap()
+                        .apply {
+                            put("KAFKA_RAPID_TOPIC", "test")
+                            put("DB_HOST", props.host)
+                            put("DB_USERNAME", props.username)
+                            put("DB_PASSWORD", props.password)
+                            put("DB_PORT", props.firstMappedPort.toString())
+                            put("DB_DATABASE", props.databaseName)
+                            put("AZUREAD_ATTESTANT_GROUPID", azureAdAttestantClaim)
+                            put("AZUREAD_ATTESTANT_GJENNY_GROUPID", azureAdAttestantGjennyClaim)
+                            put("AZUREAD_SAKSBEHANDLER_GROUPID", azureAdSaksbehandlerClaim)
+                            put("AZUREAD_STRENGT_FORTROLIG_GROUPID", azureAdStrengtFortroligClaim)
+                            put("AZUREAD_EGEN_ANSATT_GROUPID", azureAdEgenAnsattClaim)
+                            put("AZUREAD_FORTROLIG_GROUPID", azureAdFortroligClaim)
+                            put("AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID", azureAdNasjonUtenLoggClaim)
+                            put("AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID", azureAdNasjonMedLoggClaim)
+                            put("NORG2_URL", "http://localhost")
+                            put("NAVANSATT_URL", "http://localhost")
+                            put("SKJERMING_URL", "http://localhost")
+                            put("OPPGAVE_URL", "http://localhost")
+                            put("PEN_URL", "http://localhost")
+                            put("PEN_CLIENT_ID", "ddd52335-cfe8-4ee9-9e68-416a5ab26efa")
+                            put("ETTERLATTE_KLAGE_API_URL", "http://localhost")
+                            put("ETTERLATTE_TILBAKEKREVING_URL", "http://localhost")
+                            put("ETTERLATTE_MIGRERING_URL", "http://localhost")
+                            put("OPPGAVE_SCOPE", "scope")
+                        }.let { Miljoevariabler(it) },
                 config =
                     ConfigFactory.parseMap(
                         mapOf(

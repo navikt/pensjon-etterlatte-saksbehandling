@@ -116,7 +116,9 @@ data class AvsenderMottaker(
     val erLikBruker: Boolean?,
 )
 
-enum class Kanal(val beskrivelse: String) {
+enum class Kanal(
+    val beskrivelse: String,
+) {
     ALTINN("Altinn"),
     EESSI("EESSI"),
     EIA("EIA"),

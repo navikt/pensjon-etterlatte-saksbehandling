@@ -23,7 +23,10 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-data class GosysOppgaver(val antallTreffTotalt: Int, val oppgaver: List<GosysApiOppgave>)
+data class GosysOppgaver(
+    val antallTreffTotalt: Int,
+    val oppgaver: List<GosysApiOppgave>,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GosysApiOppgave(
@@ -98,7 +101,10 @@ interface GosysOppgaveKlient {
     ): GosysApiOppgave
 }
 
-class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppgaveKlient {
+class GosysOppgaveKlientImpl(
+    config: Config,
+    httpClient: HttpClient,
+) : GosysOppgaveKlient {
     private val logger = LoggerFactory.getLogger(GosysOppgaveKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
@@ -133,8 +139,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                             url = "$resourceUrl/api/v1/oppgaver?$filters",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },
                 )
@@ -163,8 +168,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                             url = "$resourceUrl/api/v1/oppgaver?$filters",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> objectMapper.readValue(resource.response.toString()) },
                     failure = { errorResponse -> throw errorResponse },
                 )
@@ -189,8 +193,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                             url = "$resourceUrl/api/v1/oppgaver/$id",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> deserialize(resource.response.toString()) },
                     failure = { errorResponse -> throw errorResponse },
                 )
@@ -275,8 +278,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     patchBody = objectMapper.writeValueAsString(body),
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> deserialize(resource.response.toString()) },
                     failure = { errorResponse -> throw errorResponse },
                 )
@@ -303,14 +305,17 @@ data class EndreStatusRequest(
     val beskrivelse: String? = null,
 )
 
-class GosysTimeout : ForespoerselException(
-    status = HttpStatusCode.RequestTimeout.value,
-    code = "GOSYS_TIMEOUT",
-    detail = "Henting av oppgave(er) fra Gosys tok for lang tid. Prøv igjen senere.",
-)
+class GosysTimeout :
+    ForespoerselException(
+        status = HttpStatusCode.RequestTimeout.value,
+        code = "GOSYS_TIMEOUT",
+        detail = "Henting av oppgave(er) fra Gosys tok for lang tid. Prøv igjen senere.",
+    )
 
-class GosysKonfliktException(detail: String) : ForespoerselException(
-    status = HttpStatusCode.Conflict.value,
-    code = "GOSYS_OPTIMISTISK_LAAS",
-    detail = detail,
-)
+class GosysKonfliktException(
+    detail: String,
+) : ForespoerselException(
+        status = HttpStatusCode.Conflict.value,
+        code = "GOSYS_OPTIMISTISK_LAAS",
+        detail = detail,
+    )

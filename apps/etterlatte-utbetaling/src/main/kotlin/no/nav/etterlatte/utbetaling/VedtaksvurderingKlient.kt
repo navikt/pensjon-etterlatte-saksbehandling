@@ -14,7 +14,10 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
+class VedtaksvurderingKlient(
+    config: Config,
+    httpClient: HttpClient,
+) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
@@ -30,14 +33,15 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
         try {
             logger.info("Henter vedtak for behandlingId=$behandlingId")
 
-            return downstreamResourceClient.post(
-                Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId/simulering"),
-                brukerTokenInfo,
-                {},
-            ).mapBoth(
-                success = { resource -> deserialize(resource.response.toString()) },
-                failure = { errorResponse -> throw errorResponse },
-            )
+            return downstreamResourceClient
+                .post(
+                    Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId/simulering"),
+                    brukerTokenInfo,
+                    {},
+                ).mapBoth(
+                    success = { resource -> deserialize(resource.response.toString()) },
+                    failure = { errorResponse -> throw errorResponse },
+                )
         } catch (re: ResponseException) {
             logger.error("Ukjent feil ved henting av vedtak for behandling=$behandlingId", re)
 

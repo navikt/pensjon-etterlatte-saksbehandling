@@ -13,7 +13,9 @@ data class InstitusjonsoppholdBeregningsgrunnlag(
         }
 }
 
-enum class Reduksjon(val verdi: Prosent?) {
+enum class Reduksjon(
+    val verdi: Prosent?,
+) {
     VELG_REDUKSJON(null),
     JA_VANLIG(Prosent(90)),
     JA_FORELDRELOES(Prosent(55)),

@@ -19,17 +19,25 @@ import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk, PersonTilgangsSjekk {
+interface BehandlingKlient :
+    BehandlingTilgangsSjekk,
+    SakTilgangsSjekk,
+    PersonTilgangsSjekk {
     suspend fun hentBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandling
 }
 
-class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
+class BehandlingKlientException(
+    override val message: String,
+    override val cause: Throwable,
+) : Exception(message, cause)
 
-class BehandlingKlientImpl(config: Config, httpClient: HttpClient) :
-    BehandlingKlient {
+class BehandlingKlientImpl(
+    config: Config,
+    httpClient: HttpClient,
+) : BehandlingKlient {
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
@@ -54,8 +62,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) :
                             url = "$resourceUrl/behandlinger/$behandlingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )

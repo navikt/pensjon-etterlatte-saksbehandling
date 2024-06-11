@@ -23,17 +23,14 @@ sealed class BrevParametre {
         val nasjonalEllerUtland: NasjonalEllerUtland,
         override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.OMSTILLINGSSTOENAD_AKTIVITETSPLIKT_INFORMASJON_4MND_INNHOLD,
     ) : BrevParametre() {
-        override fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar {
-            return AktivitetspliktBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland)
-        }
+        override fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar =
+            AktivitetspliktBrevdata(aktivitetsgrad, utbetaling, redusertEtterInntekt, nasjonalEllerUtland)
     }
 
     @JsonTypeName("TOMT_BREV")
-    class TomtBrev() : BrevParametre() {
+    class TomtBrev : BrevParametre() {
         override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.TOM_DELMAL
 
-        override fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar {
-            return ManueltBrevData()
-        }
+        override fun brevDataMapping(req: RedigerbarTekstRequest): BrevDataRedigerbar = ManueltBrevData()
     }
 }

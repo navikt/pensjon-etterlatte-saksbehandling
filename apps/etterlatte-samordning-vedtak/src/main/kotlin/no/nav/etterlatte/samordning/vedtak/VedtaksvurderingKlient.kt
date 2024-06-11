@@ -17,7 +17,10 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-class VedtaksvurderingKlient(config: Config, private val httpClient: HttpClient) {
+class VedtaksvurderingKlient(
+    config: Config,
+    private val httpClient: HttpClient,
+) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingKlient::class.java)
 
     private val vedtaksvurderingUrl = "${config.getString("vedtak.url")}/api/samordning/vedtak"
@@ -29,12 +32,13 @@ class VedtaksvurderingKlient(config: Config, private val httpClient: HttpClient)
         logger.info("Henter vedtaksvurdering med vedtakId=$vedtakId")
 
         return try {
-            httpClient.get {
-                url("$vedtaksvurderingUrl/$vedtakId")
-                if (callerContext is MaskinportenTpContext) {
-                    header("orgnr", callerContext.organisasjonsnr)
-                }
-            }.body()
+            httpClient
+                .get {
+                    url("$vedtaksvurderingUrl/$vedtakId")
+                    if (callerContext is MaskinportenTpContext) {
+                        header("orgnr", callerContext.organisasjonsnr)
+                    }
+                }.body()
         } catch (e: ClientRequestException) {
             logger.error("Det oppstod feil i kall til vedtak API", e)
             when (e.response.status) {
@@ -55,14 +59,15 @@ class VedtaksvurderingKlient(config: Config, private val httpClient: HttpClient)
         logger.info("Henter vedtaksliste, fomDato=$fomDato")
 
         return try {
-            httpClient.get(vedtaksvurderingUrl) {
-                parameter("sakstype", sakType)
-                parameter("fomDato", fomDato)
-                header("fnr", fnr)
-                if (callerContext is MaskinportenTpContext) {
-                    header("orgnr", callerContext.organisasjonsnr)
-                }
-            }.body()
+            httpClient
+                .get(vedtaksvurderingUrl) {
+                    parameter("sakstype", sakType)
+                    parameter("fomDato", fomDato)
+                    header("fnr", fnr)
+                    if (callerContext is MaskinportenTpContext) {
+                        header("orgnr", callerContext.organisasjonsnr)
+                    }
+                }.body()
         } catch (e: ClientRequestException) {
             logger.error("Det oppstod feil i kall til vedtaksliste API", e)
             when (e.response.status) {
@@ -75,20 +80,26 @@ class VedtaksvurderingKlient(config: Config, private val httpClient: HttpClient)
     }
 }
 
-class VedtakvurderingManglendeTilgangException(detail: String) : IkkeTillattException(
-    code = "020-VEDTAK-TILGANG",
-    detail = detail,
-    meta = getMeta(),
-)
+class VedtakvurderingManglendeTilgangException(
+    detail: String,
+) : IkkeTillattException(
+        code = "020-VEDTAK-TILGANG",
+        detail = detail,
+        meta = getMeta(),
+    )
 
-class VedtakvurderingUgyldigForesporselException(detail: String) : UgyldigForespoerselException(
-    code = "020-VEDTAK-FORESPOERSEL",
-    detail = detail,
-    meta = getMeta(),
-)
+class VedtakvurderingUgyldigForesporselException(
+    detail: String,
+) : UgyldigForespoerselException(
+        code = "020-VEDTAK-FORESPOERSEL",
+        detail = detail,
+        meta = getMeta(),
+    )
 
-class VedtakvurderingIkkeFunnetException(detail: String) : IkkeFunnetException(
-    code = "020-VEDTAK-IKKE-FUNNET",
-    detail = detail,
-    meta = getMeta(),
-)
+class VedtakvurderingIkkeFunnetException(
+    detail: String,
+) : IkkeFunnetException(
+        code = "020-VEDTAK-IKKE-FUNNET",
+        detail = detail,
+        meta = getMeta(),
+    )

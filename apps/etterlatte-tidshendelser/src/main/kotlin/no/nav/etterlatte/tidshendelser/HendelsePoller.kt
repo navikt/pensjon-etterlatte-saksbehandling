@@ -44,7 +44,8 @@ class HendelsePoller(
             logger.info("Fant ingen hendelser å behandle")
         } else {
             val jobsById =
-                hendelseDao.hentJobber(hendelser.map { it.jobbId }.distinct())
+                hendelseDao
+                    .hentJobber(hendelser.map { it.jobbId }.distinct())
                     .associateBy { it.id }
 
             hendelser.forEach {

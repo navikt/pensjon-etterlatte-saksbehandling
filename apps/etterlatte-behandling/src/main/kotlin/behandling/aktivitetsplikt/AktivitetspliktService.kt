@@ -44,11 +44,10 @@ class AktivitetspliktService(
     private val automatiskRevurderingService: AutomatiskRevurderingService,
     private val oppgaveService: OppgaveService,
 ) {
-    fun hentAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? {
-        return inTransaction {
+    fun hentAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? =
+        inTransaction {
             aktivitetspliktDao.finnSenesteAktivitetspliktOppfolging(behandlingId)
         }
-    }
 
     fun lagreAktivitetspliktOppfolging(
         behandlingId: UUID,
@@ -290,10 +289,11 @@ class AktivitetspliktService(
         val persongalleri =
             runBlocking {
                 requireNotNull(
-                    grunnlagKlient.hentPersongalleri(
-                        forrigeBehandling.id,
-                        Systembruker.automatiskJobb,
-                    )?.opplysning,
+                    grunnlagKlient
+                        .hentPersongalleri(
+                            forrigeBehandling.id,
+                            Systembruker.automatiskJobb,
+                        )?.opplysning,
                 ) {
                     "Fant ikke persongalleri for behandling ${forrigeBehandling.id}"
                 }
@@ -318,20 +318,21 @@ class AktivitetspliktService(
         forrigeBehandling: Behandling,
     ): OpprettRevurderingForAktivitetspliktResponse {
         logger.info("Oppretter oppgave for revurdering av aktivitetsplikt for sak ${request.sakId}")
-        return oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-            sakId = request.sakId,
-            referanse = forrigeBehandling.id.toString(),
-            oppgaveKilde = OppgaveKilde.HENDELSE,
-            oppgaveType = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
-            merknad = request.jobbType.beskrivelse,
-            frist = request.frist,
-        ).let { oppgave ->
-            OpprettRevurderingForAktivitetspliktResponse(
-                opprettetOppgave = true,
-                oppgaveId = oppgave.id,
-                forrigeBehandlingId = forrigeBehandling.id,
-            )
-        }
+        return oppgaveService
+            .opprettNyOppgaveMedSakOgReferanse(
+                sakId = request.sakId,
+                referanse = forrigeBehandling.id.toString(),
+                oppgaveKilde = OppgaveKilde.HENDELSE,
+                oppgaveType = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
+                merknad = request.jobbType.beskrivelse,
+                frist = request.frist,
+            ).let { oppgave ->
+                OpprettRevurderingForAktivitetspliktResponse(
+                    opprettetOppgave = true,
+                    oppgaveId = oppgave.id,
+                    forrigeBehandlingId = forrigeBehandling.id,
+                )
+            }
     }
 
     private fun opprettRevurdering(
@@ -341,28 +342,31 @@ class AktivitetspliktService(
         persongalleri: Persongalleri,
     ): OpprettRevurderingForAktivitetspliktResponse {
         logger.info("Oppretter behandling for revurdering av aktivitetsplikt for sak ${request.sakId}")
-        return automatiskRevurderingService.opprettAutomatiskRevurdering(
-            sakId = request.sakId,
-            forrigeBehandling = forrigeBehandling,
-            revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
-            virkningstidspunkt = aktivitetspliktDato,
-            kilde = Vedtaksloesning.GJENNY,
-            persongalleri = persongalleri,
-            frist = request.frist,
-            begrunnelse = request.jobbType.beskrivelse,
-        ).oppdater().let { revurdering ->
-            fjernSaksbehandlerFraRevurderingsOppgave(revurdering)
-            OpprettRevurderingForAktivitetspliktResponse(
-                opprettetRevurdering = true,
-                nyBehandlingId = revurdering.id,
-                forrigeBehandlingId = forrigeBehandling.id,
-            )
-        }
+        return automatiskRevurderingService
+            .opprettAutomatiskRevurdering(
+                sakId = request.sakId,
+                forrigeBehandling = forrigeBehandling,
+                revurderingAarsak = Revurderingaarsak.AKTIVITETSPLIKT,
+                virkningstidspunkt = aktivitetspliktDato,
+                kilde = Vedtaksloesning.GJENNY,
+                persongalleri = persongalleri,
+                frist = request.frist,
+                begrunnelse = request.jobbType.beskrivelse,
+            ).oppdater()
+            .let { revurdering ->
+                fjernSaksbehandlerFraRevurderingsOppgave(revurdering)
+                OpprettRevurderingForAktivitetspliktResponse(
+                    opprettetRevurdering = true,
+                    nyBehandlingId = revurdering.id,
+                    forrigeBehandlingId = forrigeBehandling.id,
+                )
+            }
     }
 
     private fun fjernSaksbehandlerFraRevurderingsOppgave(revurdering: Revurdering) {
         val revurderingsOppgave =
-            oppgaveService.hentOppgaverForReferanse(revurdering.id.toString())
+            oppgaveService
+                .hentOppgaverForReferanse(revurdering.id.toString())
                 .find { it.type == OppgaveType.REVURDERING }
 
         if (revurderingsOppgave != null) {
@@ -385,7 +389,10 @@ class TomErFoerFomException :
         detail = "Til og med dato er kan ikke være før fra og med dato",
     )
 
-data class AktivitetspliktVurdering(val aktivitet: AktivitetspliktAktivitetsgrad?, val unntak: AktivitetspliktUnntak?)
+data class AktivitetspliktVurdering(
+    val aktivitet: AktivitetspliktAktivitetsgrad?,
+    val unntak: AktivitetspliktUnntak?,
+)
 
 interface AktivitetspliktVurderingOpprettetDato {
     val opprettet: Grunnlagsopplysning.Kilde

@@ -10,9 +10,11 @@ import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.ResultSet
 import java.util.UUID
 
-class BehandlingInfoDao(private val connectionAutoclosing: ConnectionAutoclosing) {
-    fun lagreBrevutfall(brevutfall: Brevutfall): Brevutfall {
-        return connectionAutoclosing.hentConnection { connection ->
+class BehandlingInfoDao(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) {
+    fun lagreBrevutfall(brevutfall: Brevutfall): Brevutfall =
+        connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 prepareStatement(
                     """
@@ -21,12 +23,10 @@ class BehandlingInfoDao(private val connectionAutoclosing: ConnectionAutoclosing
                     ON CONFLICT (behandling_id) DO 
                     UPDATE SET brevutfall = excluded.brevutfall
                     """.trimIndent(),
-                )
-                    .apply {
-                        setObject(1, brevutfall.behandlingId)
-                        setJsonb(2, brevutfall)
-                    }
-                    .run { executeUpdate() }
+                ).apply {
+                    setObject(1, brevutfall.behandlingId)
+                    setJsonb(2, brevutfall)
+                }.run { executeUpdate() }
                     .also { require(it == 1) }
                     .let {
                         hentBrevutfall(brevutfall.behandlingId)
@@ -34,10 +34,9 @@ class BehandlingInfoDao(private val connectionAutoclosing: ConnectionAutoclosing
                     }
             }
         }
-    }
 
-    fun hentBrevutfall(behandlingId: UUID): Brevutfall? {
-        return connectionAutoclosing.hentConnection {
+    fun hentBrevutfall(behandlingId: UUID): Brevutfall? =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
@@ -45,15 +44,13 @@ class BehandlingInfoDao(private val connectionAutoclosing: ConnectionAutoclosing
                     FROM behandling_info 
                     WHERE behandling_id = ?::UUID
                     """,
-                )
-                    .apply { setObject(1, behandlingId) }
+                ).apply { setObject(1, behandlingId) }
                     .run { executeQuery().singleOrNull { toBrevutfall() } }
             }
         }
-    }
 
-    fun lagreEtterbetaling(etterbetaling: Etterbetaling): Etterbetaling {
-        return connectionAutoclosing.hentConnection { connection ->
+    fun lagreEtterbetaling(etterbetaling: Etterbetaling): Etterbetaling =
+        connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 prepareStatement(
                     """
@@ -62,12 +59,10 @@ class BehandlingInfoDao(private val connectionAutoclosing: ConnectionAutoclosing
                     ON CONFLICT (behandling_id) DO 
                     UPDATE SET etterbetaling = excluded.etterbetaling
                     """.trimIndent(),
-                )
-                    .apply {
-                        setObject(1, etterbetaling.behandlingId)
-                        setJsonb(2, etterbetaling)
-                    }
-                    .run { executeUpdate() }
+                ).apply {
+                    setObject(1, etterbetaling.behandlingId)
+                    setJsonb(2, etterbetaling)
+                }.run { executeUpdate() }
                     .also { require(it == 1) }
                     .let {
                         hentEtterbetaling(etterbetaling.behandlingId)
@@ -75,29 +70,25 @@ class BehandlingInfoDao(private val connectionAutoclosing: ConnectionAutoclosing
                     }
             }
         }
-    }
 
-    fun slettEtterbetaling(behandlingId: UUID): Int {
-        return connectionAutoclosing.hentConnection { connection ->
+    fun slettEtterbetaling(behandlingId: UUID): Int =
+        connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 prepareStatement(
                     """
                     UPDATE behandling_info SET etterbetaling = ?
                     WHERE behandling_id = ?
                     """.trimIndent(),
-                )
-                    .apply {
-                        setJsonb(1, null)
-                        setObject(2, behandlingId)
-                    }
-                    .run { executeUpdate() }
+                ).apply {
+                    setJsonb(1, null)
+                    setObject(2, behandlingId)
+                }.run { executeUpdate() }
                     .also { require(it == 1) }
             }
         }
-    }
 
-    fun hentEtterbetaling(behandlingId: UUID): Etterbetaling? {
-        return connectionAutoclosing.hentConnection {
+    fun hentEtterbetaling(behandlingId: UUID): Etterbetaling? =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
@@ -105,12 +96,10 @@ class BehandlingInfoDao(private val connectionAutoclosing: ConnectionAutoclosing
                     FROM behandling_info 
                     WHERE behandling_id = ?::UUID AND etterbetaling IS NOT NULL
                     """,
-                )
-                    .apply { setObject(1, behandlingId) }
+                ).apply { setObject(1, behandlingId) }
                     .run { executeQuery().singleOrNull { toEtterbetaling() } }
             }
         }
-    }
 
     private fun ResultSet.toBrevutfall(): Brevutfall = this.getString("brevutfall").let { objectMapper.readValue(it) }
 

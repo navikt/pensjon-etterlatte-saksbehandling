@@ -38,7 +38,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class DoedshendelseRouteTest(val dataSource: DataSource) {
+internal class DoedshendelseRouteTest(
+    val dataSource: DataSource,
+) {
     private val mockOAuth2Server = MockOAuth2Server()
     private val pdlTjenesterKlient = spyk<PdltjenesterKlientTest>()
     private val doedshendelseDao: DoedshendelseDao = DoedshendelseDao(ConnectionAutoclosingTest(dataSource))
@@ -88,13 +90,14 @@ internal class DoedshendelseRouteTest(val dataSource: DataSource) {
         doedshendelseDao.oppdaterDoedshendelse(doedshendelseInternal.copy(sakId = sakId))
         val brevId = 12314L
         withTestApplication { client ->
-            client.post("/doedshendelse/brevdistribuert") {
-                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
-                contentType(ContentType.Application.Json)
-                setBody(DoedshendelseBrevDistribuert(sakId, brevId))
-            }.also {
-                Assertions.assertEquals(HttpStatusCode.NotFound, it.status)
-            }
+            client
+                .post("/doedshendelse/brevdistribuert") {
+                    header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+                    contentType(ContentType.Application.Json)
+                    setBody(DoedshendelseBrevDistribuert(sakId, brevId))
+                }.also {
+                    Assertions.assertEquals(HttpStatusCode.NotFound, it.status)
+                }
         }
         val hentDoedshendelserForPerson = doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr)
         hentDoedshendelserForPerson.size shouldBe 1
@@ -118,13 +121,14 @@ internal class DoedshendelseRouteTest(val dataSource: DataSource) {
         doedshendelseDao.oppdaterDoedshendelse(doedshendelseInternal.copy(sakId = sakId))
         val brevId = 12314L
         withTestApplication { client ->
-            client.post("/doedshendelse/brevdistribuert") {
-                header(HttpHeaders.Authorization, "Bearer $systemBruker")
-                contentType(ContentType.Application.Json)
-                setBody(DoedshendelseBrevDistribuert(sakId, brevId))
-            }.also {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-            }
+            client
+                .post("/doedshendelse/brevdistribuert") {
+                    header(HttpHeaders.Authorization, "Bearer $systemBruker")
+                    contentType(ContentType.Application.Json)
+                    setBody(DoedshendelseBrevDistribuert(sakId, brevId))
+                }.also {
+                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                }
         }
         val hentDoedshendelserForPerson = doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr)
         hentDoedshendelserForPerson.size shouldBe 1

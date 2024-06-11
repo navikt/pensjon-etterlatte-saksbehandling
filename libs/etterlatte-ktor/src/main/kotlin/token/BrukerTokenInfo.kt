@@ -27,8 +27,8 @@ sealed class BrukerTokenInfo {
             oid: String?,
             sub: String?,
             claims: JwtTokenClaims?,
-        ): BrukerTokenInfo {
-            return if (erSystembruker(oid = oid, sub = sub)) {
+        ): BrukerTokenInfo =
+            if (erSystembruker(oid = oid, sub = sub)) {
                 Systembruker(oid!!, sub!!, ident = claims?.getStringClaim("azp_name"), claims)
             } else if (saksbehandler != null) {
                 Saksbehandler(accessToken, ident = saksbehandler, claims)
@@ -37,7 +37,6 @@ sealed class BrukerTokenInfo {
                     "Er ikke systembruker, og Navident er null i token, sannsynligvis manglende claim NAVident",
                 )
             }
-        }
     }
 }
 
@@ -102,7 +101,9 @@ enum class Claims {
     sub,
 }
 
-enum class Systembrukere(val oid: String) {
+enum class Systembrukere(
+    val oid: String,
+) {
     BREV("brev"),
     MIGRERING("migrering"),
     DOEDSHENDELSE("doedshendelse"),

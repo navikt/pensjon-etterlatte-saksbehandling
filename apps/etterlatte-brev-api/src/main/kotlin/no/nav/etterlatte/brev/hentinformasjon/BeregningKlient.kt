@@ -18,7 +18,10 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class BeregningKlient(config: Config, httpClient: HttpClient) {
+class BeregningKlient(
+    config: Config,
+    httpClient: HttpClient,
+) {
     private val logger = LoggerFactory.getLogger(BeregningKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
@@ -34,13 +37,14 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
         try {
             logger.info("Henter beregning (behandlingId: $behandlingId)")
 
-            return downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/api/beregning/$behandlingId"),
-                brukerTokenInfo,
-            ).mapBoth(
-                success = { resource -> deserialize(resource.response.toString()) },
-                failure = { errorResponse -> throw errorResponse },
-            )
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$resourceUrl/api/beregning/$behandlingId"),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> deserialize(resource.response.toString()) },
+                    failure = { errorResponse -> throw errorResponse },
+                )
         } catch (e: Exception) {
             logger.error(
                 "Henting av beregning for behandling med behandlingId=$behandlingId feilet",
@@ -63,13 +67,14 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
                     SakType.BARNEPENSJON -> "barnepensjon"
                     SakType.OMSTILLINGSSTOENAD -> "omstillingstoenad"
                 }
-            return downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/api/beregning/beregningsgrunnlag/$behandlingId/$endepunkt"),
-                brukerTokenInfo,
-            ).mapBoth(
-                success = { resource -> deserialize(resource.response.toString()) },
-                failure = { errorResponse -> throw errorResponse },
-            )
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$resourceUrl/api/beregning/beregningsgrunnlag/$behandlingId/$endepunkt"),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> deserialize(resource.response.toString()) },
+                    failure = { errorResponse -> throw errorResponse },
+                )
         } catch (e: Exception) {
             logger.error(
                 "Henting av beregningsgrunnlag for behandling med behandlingId=$behandlingId feilet",
@@ -86,13 +91,14 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
         try {
             logger.info("Henter utregnet ytelse med grunnlag for behandlingId=$behandlingId")
 
-            return downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/api/beregning/ytelse-med-grunnlag/$behandlingId"),
-                brukerTokenInfo,
-            ).mapBoth(
-                success = { resource -> deserialize(resource.response.toString()) },
-                failure = { errorResponse -> throw errorResponse },
-            )
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$resourceUrl/api/beregning/ytelse-med-grunnlag/$behandlingId"),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> deserialize(resource.response.toString()) },
+                    failure = { errorResponse -> throw errorResponse },
+                )
         } catch (re: ResponseException) {
             logger.error("Henting av utregnet ytelse med grunnlag for behandling med behandlingId=$behandlingId feilet", re)
 
@@ -108,13 +114,14 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
         try {
             logger.info("Henter gjeldende grunnbeløp")
 
-            return downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/api/beregning/grunnbeloep"),
-                brukerTokenInfo,
-            ).mapBoth(
-                success = { resource -> deserialize(resource.response.toString()) },
-                failure = { errorResponse -> throw errorResponse },
-            )
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$resourceUrl/api/beregning/grunnbeloep"),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> deserialize(resource.response.toString()) },
+                    failure = { errorResponse -> throw errorResponse },
+                )
         } catch (re: ResponseException) {
             logger.error("Henting av grunnbeløp feilet", re)
 

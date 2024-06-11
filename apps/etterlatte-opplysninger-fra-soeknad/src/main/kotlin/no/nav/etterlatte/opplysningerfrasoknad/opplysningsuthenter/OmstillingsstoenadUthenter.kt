@@ -42,12 +42,11 @@ internal object OmstillingsstoenadUthenter {
         return lagOpplysning(Opplysningstype.SOEKNAD_MOTTATT_DATO, kilde(soknad), opplysning, null)
     }
 
-    private fun kilde(soknad: Omstillingsstoenad): Grunnlagsopplysning.Kilde {
-        return Grunnlagsopplysning.Privatperson(
+    private fun kilde(soknad: Omstillingsstoenad): Grunnlagsopplysning.Kilde =
+        Grunnlagsopplysning.Privatperson(
             soknad.innsender.foedselsnummer.svar.value,
             soknad.mottattDato.toTidspunkt(),
         )
-    }
 
     private fun avdoed(soknad: Omstillingsstoenad): Grunnlagsopplysning<AvdoedSoeknad> {
         val opplysning = avdoedOpplysning(soknad.avdoed)
@@ -76,7 +75,8 @@ internal object OmstillingsstoenadUthenter {
                 PersonType.INNSENDER,
                 soknad.innsender.fornavn.svar,
                 soknad.innsender.etternavn.svar,
-                soknad.innsender.foedselsnummer.svar.toFolkeregisteridentifikator(),
+                soknad.innsender.foedselsnummer.svar
+                    .toFolkeregisteridentifikator(),
             )
         return lagOpplysning(Opplysningstype.INNSENDER_SOEKNAD_V1, kilde(soknad), opplysning, null)
     }
@@ -91,11 +91,9 @@ internal object OmstillingsstoenadUthenter {
         return lagOpplysning(Opplysningstype.SAMTYKKE, kilde(soknad), opplysning, null)
     }
 
-    private fun spraak(soknad: Omstillingsstoenad): Grunnlagsopplysning<Spraak> {
-        return lagOpplysning(Opplysningstype.SPRAAK, kilde(soknad), soknad.spraak, null)
-    }
+    private fun spraak(soknad: Omstillingsstoenad): Grunnlagsopplysning<Spraak> =
+        lagOpplysning(Opplysningstype.SPRAAK, kilde(soknad), soknad.spraak, null)
 
-    private fun soeknadsType(soknad: Omstillingsstoenad): Grunnlagsopplysning<SoeknadstypeOpplysning> {
-        return lagOpplysning(Opplysningstype.SOEKNADSTYPE_V1, kilde(soknad), SoeknadstypeOpplysning(soknad.type), null)
-    }
+    private fun soeknadsType(soknad: Omstillingsstoenad): Grunnlagsopplysning<SoeknadstypeOpplysning> =
+        lagOpplysning(Opplysningstype.SOEKNADSTYPE_V1, kilde(soknad), SoeknadstypeOpplysning(soknad.type), null)
 }

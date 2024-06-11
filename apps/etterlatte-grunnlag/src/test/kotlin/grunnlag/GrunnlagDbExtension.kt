@@ -10,7 +10,9 @@ import org.junit.jupiter.api.extension.ExtensionContext
 TRUNCATE grunnlagshendelse
 """,
 )
-class GrunnlagDbExtension : GenerellDatabaseExtension(), AfterEachCallback {
+class GrunnlagDbExtension :
+    GenerellDatabaseExtension(),
+    AfterEachCallback {
     override fun afterEach(context: ExtensionContext?) {
         resetDb()
     }

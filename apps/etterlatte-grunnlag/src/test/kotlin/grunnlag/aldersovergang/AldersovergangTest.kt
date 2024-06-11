@@ -37,7 +37,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(GrunnlagDbExtension::class)
-class AldersovergangTest(private val dataSource: DataSource) {
+class AldersovergangTest(
+    private val dataSource: DataSource,
+) {
     private val server = MockOAuth2Server()
 
     @BeforeAll

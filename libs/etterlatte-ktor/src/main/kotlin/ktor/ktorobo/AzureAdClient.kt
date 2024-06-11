@@ -65,7 +65,9 @@ interface IAzureAdHttpClient {
     ): HttpResponse
 }
 
-class AzureAdHttpClient(val httpClient: HttpClient) : IAzureAdHttpClient {
+class AzureAdHttpClient(
+    val httpClient: HttpClient,
+) : IAzureAdHttpClient {
     override suspend fun doGet(url: String) = httpClient.get(url)
 
     override suspend fun submitForm(
@@ -88,10 +90,11 @@ class AzureAdClient(
 
     private suspend inline fun fetchAccessToken(formParameters: Parameters): AccessToken =
         try {
-            httpClient.submitForm(
-                openIdConfiguration.tokenEndpoint,
-                formParameters,
-            ).body()
+            httpClient
+                .submitForm(
+                    openIdConfiguration.tokenEndpoint,
+                    formParameters,
+                ).body()
         } catch (ex: Throwable) {
             val responseBody: String? =
                 when (ex) {
@@ -142,13 +145,14 @@ class AzureAdClient(
                 }
             }
 
-        return value.handle { token, exception ->
-            if (exception != null) {
-                Err(ThrowableErrorMessage("Henting av token feilet", exception))
-            } else {
-                Ok(token)
-            }
-        }.asDeferred()
+        return value
+            .handle { token, exception ->
+                if (exception != null) {
+                    Err(ThrowableErrorMessage("Henting av token feilet", exception))
+                } else {
+                    Ok(token)
+                }
+            }.asDeferred()
             .await()
     }
 
@@ -195,16 +199,12 @@ class TokenBasedExpiration : Expiry<TokenRequest, AccessToken> {
         value: AccessToken?,
         currentTime: Long,
         currentDuration: Long,
-    ): Long {
-        return currentDuration
-    }
+    ): Long = currentDuration
 
     override fun expireAfterRead(
         key: TokenRequest?,
         value: AccessToken?,
         currentTime: Long,
         currentDuration: Long,
-    ): Long {
-        return currentDuration
-    }
+    ): Long = currentDuration
 }

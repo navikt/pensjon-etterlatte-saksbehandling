@@ -64,9 +64,10 @@ class TilgangServiceImpl(
         if (finnSakerMedGradering.isEmpty()) {
             return true
         }
-        return finnSakerMedGradering.map {
-            harTilgangSjekker(it, saksbehandlerMedRoller)
-        }.all { it }
+        return finnSakerMedGradering
+            .map {
+                harTilgangSjekker(it, saksbehandlerMedRoller)
+            }.all { it }
     }
 
     override fun harTilgangTilOppgave(
@@ -125,32 +126,29 @@ class TilgangServiceImpl(
     private fun harTilgangSjekker(
         sak: SakMedGraderingOgSkjermet,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
-    ): Boolean {
-        return kanBehandleEgenAnsatt(sak, saksbehandlerMedRoller) &&
+    ): Boolean =
+        kanBehandleEgenAnsatt(sak, saksbehandlerMedRoller) &&
             kanBehandleAdressebeskyttelse(sak, saksbehandlerMedRoller)
-    }
 
     private fun kanBehandleEgenAnsatt(
         sak: SakMedGraderingOgSkjermet,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
-    ): Boolean {
-        return when (sak.erSkjermet) {
+    ): Boolean =
+        when (sak.erSkjermet) {
             true -> saksbehandlerMedRoller.harRolleEgenAnsatt()
             false -> true
             null -> true
         }
-    }
 
     private fun kanBehandleAdressebeskyttelse(
         sak: SakMedGraderingOgSkjermet,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
-    ): Boolean {
-        return when (sak.adressebeskyttelseGradering) {
+    ): Boolean =
+        when (sak.adressebeskyttelseGradering) {
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> saksbehandlerMedRoller.harRolleStrengtFortrolig()
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> saksbehandlerMedRoller.harRolleStrengtFortrolig()
             AdressebeskyttelseGradering.FORTROLIG -> saksbehandlerMedRoller.harRolleFortrolig()
             AdressebeskyttelseGradering.UGRADERT -> true
             else -> true
         }
-    }
 }

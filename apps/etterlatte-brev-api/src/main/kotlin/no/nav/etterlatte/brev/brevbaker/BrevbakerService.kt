@@ -12,7 +12,10 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.Base64
 
-class BrevbakerService(private val brevbakerKlient: BrevbakerKlient, private val adresseService: AdresseService) {
+class BrevbakerService(
+    private val brevbakerKlient: BrevbakerKlient,
+    private val adresseService: AdresseService,
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun genererPdf(
@@ -21,7 +24,9 @@ class BrevbakerService(private val brevbakerKlient: BrevbakerKlient, private val
     ): Pdf {
         val brevbakerResponse = retryOgPakkUt { brevbakerKlient.genererPdf(brevRequest) }
 
-        return Base64.getDecoder().decode(brevbakerResponse.base64pdf)
+        return Base64
+            .getDecoder()
+            .decode(brevbakerResponse.base64pdf)
             .let { Pdf(it) }
             .also { logger.info("Generert brev (id=$brevID) med størrelse: ${it.bytes.size}") }
     }

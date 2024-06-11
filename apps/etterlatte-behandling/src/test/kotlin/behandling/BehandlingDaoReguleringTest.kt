@@ -25,7 +25,9 @@ import org.junit.jupiter.params.provider.MethodSource
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BehandlingDaoReguleringTest(val dataSource: DataSource) {
+internal class BehandlingDaoReguleringTest(
+    val dataSource: DataSource,
+) {
     companion object {
         @RegisterExtension
         private val dbExtension = DatabaseExtension()

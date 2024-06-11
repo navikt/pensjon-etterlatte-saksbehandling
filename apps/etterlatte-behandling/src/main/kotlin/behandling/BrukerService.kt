@@ -119,8 +119,12 @@ class BrukerServiceImpl(
             ?: throw IngenEnhetFunnetException(arbeidsFordelingRequest)
 }
 
-open class EnhetException(override val message: String) : Exception(message)
+open class EnhetException(
+    override val message: String,
+) : Exception(message)
 
-class IngenEnhetFunnetException(val arbeidsFordelingRequest: ArbeidsFordelingRequest) : EnhetException(
-    message = "Ingen enheter funnet for tema ${arbeidsFordelingRequest.tema} og omraade ${arbeidsFordelingRequest.geografiskOmraade}",
-)
+class IngenEnhetFunnetException(
+    val arbeidsFordelingRequest: ArbeidsFordelingRequest,
+) : EnhetException(
+        message = "Ingen enheter funnet for tema ${arbeidsFordelingRequest.tema} og omraade ${arbeidsFordelingRequest.geografiskOmraade}",
+    )

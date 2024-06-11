@@ -11,17 +11,15 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
-class AppBuilder(props: Miljoevariabler) {
+class AppBuilder(
+    props: Miljoevariabler,
+) {
     private val vedtakUrl = requireNotNull(props["ETTERLATTE_VEDTAK_URL"]) { "Mangler vedtak url " }
     private val env = System.getenv()
 
-    fun lagVedtakKlient(): VedtakServiceImpl {
-        return VedtakServiceImpl(vedtakHttpKlient, vedtakUrl)
-    }
+    fun lagVedtakKlient(): VedtakServiceImpl = VedtakServiceImpl(vedtakHttpKlient, vedtakUrl)
 
-    fun lagFeatureToggleService(): FeatureToggleService {
-        return FeatureToggleService.initialiser(featureToggleProperties)
-    }
+    fun lagFeatureToggleService(): FeatureToggleService = FeatureToggleService.initialiser(featureToggleProperties)
 
     private val vedtakHttpKlient: HttpClient by lazy {
         httpClientClientCredentials(

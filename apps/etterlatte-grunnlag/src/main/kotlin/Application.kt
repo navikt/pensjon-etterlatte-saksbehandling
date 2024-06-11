@@ -84,7 +84,8 @@ class ApplicationBuilder {
     private val aldersovergangService = AldersovergangService(aldersovergangDao)
 
     private val rapidsConnection =
-        RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)))
+        RapidApplication
+            .Builder(RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)))
             .withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     route("grunnlag") {
@@ -94,8 +95,8 @@ class ApplicationBuilder {
                         aldersovergangRoutes(aldersovergangService)
                     }
                 }
-            }
-            .build().apply {
+            }.build()
+            .apply {
                 GrunnlagsversjoneringRiver(this, grunnlagService)
                 GrunnlagHendelserRiver(this, grunnlagService)
             }

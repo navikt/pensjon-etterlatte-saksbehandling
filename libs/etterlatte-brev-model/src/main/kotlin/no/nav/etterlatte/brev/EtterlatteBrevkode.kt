@@ -1,6 +1,9 @@
 package no.nav.etterlatte.brev
 
-enum class EtterlatteBrevKode(val brevtype: Brevtype, val tittel: String? = null) {
+enum class EtterlatteBrevKode(
+    val brevtype: Brevtype,
+    val tittel: String? = null,
+) {
     BARNEPENSJON_AVSLAG(Brevtype.VEDTAK, "Vedtak om avslått barnepensjon"),
     BARNEPENSJON_AVSLAG_UTFALL(Brevtype.VEDTAK, "Vedtak om avslått barnepensjon"),
     BARNEPENSJON_INNVILGELSE(Brevtype.VEDTAK, "Vedtak om innvilget barnepensjon"),
@@ -62,7 +65,5 @@ enum class Brevtype {
     SLETTET_VARSEL,
     ;
 
-    fun erKobletTilEnBehandling(): Boolean {
-        return this in listOf(VEDTAK, VARSEL, VEDLEGG)
-    }
+    fun erKobletTilEnBehandling(): Boolean = this in listOf(VEDTAK, VARSEL, VEDLEGG)
 }

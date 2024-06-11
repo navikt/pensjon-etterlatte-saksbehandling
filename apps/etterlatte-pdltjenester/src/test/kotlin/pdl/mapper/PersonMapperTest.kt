@@ -135,9 +135,7 @@ class PersonMapperTest {
     }
 }
 
-fun pdlmetadata(): PdlMetadata {
-    return PdlMetadata(endringer = listOf(), historisk = false, master = "", opplysningsId = "")
-}
+fun pdlmetadata(): PdlMetadata = PdlMetadata(endringer = listOf(), historisk = false, master = "", opplysningsId = "")
 
 fun pdlHentPerson(
     navn: List<PdlNavn> = listOf(PdlNavn("fornavn", null, "etternavn", metadata = pdlmetadata())),

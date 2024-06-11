@@ -12,7 +12,9 @@ import no.nav.etterlatte.joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
-class ApplicationContext(env: Map<String, String> = System.getenv()) {
+class ApplicationContext(
+    env: Map<String, String> = System.getenv(),
+) {
     private val config: Config = ConfigFactory.load()
 
     private val behandlingKlient =

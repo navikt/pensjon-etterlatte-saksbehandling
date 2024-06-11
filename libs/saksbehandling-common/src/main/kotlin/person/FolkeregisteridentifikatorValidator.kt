@@ -12,12 +12,11 @@ class FolkeregisteridentifikatorValidator {
          * It does not have a BigInteger value of 0.
          * Control digits are valid.
          */
-        fun isValid(value: String): Boolean {
-            return !Regex("0{11}").matches(value) &&
+        fun isValid(value: String): Boolean =
+            !Regex("0{11}").matches(value) &&
                 value.length == 11 &&
                 value.toBigIntegerOrNull() != null &&
                 validateControlDigits(value)
-        }
 
         /**
          * Validate control digits.
@@ -47,7 +46,8 @@ class FolkeregisteridentifikatorValidator {
             value: String,
         ): Int {
             val sum =
-                arr.withIndex()
+                arr
+                    .withIndex()
                     .sumOf { (i, m) -> m * Character.getNumericValue(value[i]) }
 
             val result = 11 - (sum % 11)

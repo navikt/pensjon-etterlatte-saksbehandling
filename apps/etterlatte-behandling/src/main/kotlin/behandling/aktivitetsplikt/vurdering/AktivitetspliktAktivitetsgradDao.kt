@@ -12,7 +12,9 @@ import java.sql.ResultSet
 import java.time.LocalDate
 import java.util.UUID
 
-class AktivitetspliktAktivitetsgradDao(private val connectionAutoclosing: ConnectionAutoclosing) {
+class AktivitetspliktAktivitetsgradDao(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) {
     fun opprettAktivitetsgrad(
         aktivitetsgrad: LagreAktivitetspliktAktivitetsgrad,
         sakId: Long,

@@ -38,9 +38,10 @@ class OmstillingsstoenadAktivitetspliktTest {
         val jobb = hendelserJobb(JobbType.OMS_DOED_4MND, behandlingsmaaned)
         val sakIder: List<Long> = listOf(65, 22, 15)
         val saker =
-            sakIder.map {
-                sak(it, SakType.OMSTILLINGSSTOENAD)
-            }.associateBy { it.id }
+            sakIder
+                .map {
+                    sak(it, SakType.OMSTILLINGSSTOENAD)
+                }.associateBy { it.id }
 
         every { grunnlagKlient.hentSakerForDoedsfall(behandlingsmaaned.minusMonths(4)) } returns sakIder
         every { behandlingKlient.hentSaker(sakIder) } returns saker

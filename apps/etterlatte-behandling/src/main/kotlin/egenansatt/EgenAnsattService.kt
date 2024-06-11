@@ -40,11 +40,12 @@ class EgenAnsattService(
                     if (skjermetHendelse.skjermet) {
                         Enheter.EGNE_ANSATTE.enhetNr
                     } else {
-                        brukerService.finnEnhetForPersonOgTema(
-                            skjermetHendelse.fnr,
-                            it.sakType.tema,
-                            it.sakType,
-                        ).enhetNr
+                        brukerService
+                            .finnEnhetForPersonOgTema(
+                                skjermetHendelse.fnr,
+                                it.sakType.tema,
+                                it.sakType,
+                            ).enhetNr
                     },
                 )
             }

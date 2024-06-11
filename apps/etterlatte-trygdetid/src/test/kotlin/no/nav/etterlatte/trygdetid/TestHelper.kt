@@ -50,7 +50,11 @@ fun behandling(
 fun trygdetid(
     behandlingId: UUID = randomUUID(),
     sakId: Long = 1,
-    ident: String = GrunnlagTestData().avdoede.first().foedselsnummer.value,
+    ident: String =
+        GrunnlagTestData()
+            .avdoede
+            .first()
+            .foedselsnummer.value,
     beregnetTrygdetid: DetaljertBeregnetTrygdetid? = null,
     trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
     opplysninger: List<Opplysningsgrunnlag> = standardOpplysningsgrunnlag(),
@@ -80,14 +84,13 @@ private fun opplysningsgrunnlag(
     doedsdato: LocalDate,
     seksten: LocalDate,
     seksti: LocalDate,
-): List<Opplysningsgrunnlag> {
-    return listOf(
+): List<Opplysningsgrunnlag> =
+    listOf(
         Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FOEDSELSDATO, pdlKilde, foedselsdato),
         Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, pdlKilde, doedsdato),
         Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLT_16, regelKilde, seksten),
         Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLLER_66, regelKilde, seksti),
     )
-}
 
 fun trygdetidGrunnlag(
     beregnetTrygdetidGrunnlag: BeregnetTrygdetidGrunnlag? = beregnetTrygdetidGrunnlag(),

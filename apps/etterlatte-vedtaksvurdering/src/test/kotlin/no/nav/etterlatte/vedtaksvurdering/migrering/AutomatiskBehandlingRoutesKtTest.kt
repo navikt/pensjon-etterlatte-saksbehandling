@@ -126,13 +126,14 @@ internal class AutomatiskBehandlingRoutesKtTest {
             }
 
             val respons =
-                client.post("/api/vedtak/1/$behandlingId/automatisk") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }.let {
-                    it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakOgRapid>(it.bodyAsText())
-                }
+                client
+                    .post("/api/vedtak/1/$behandlingId/automatisk") {
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        header(HttpHeaders.Authorization, "Bearer $token")
+                    }.let {
+                        it.status shouldBe HttpStatusCode.OK
+                        deserialize<VedtakOgRapid>(it.bodyAsText())
+                    }
 
             assertEquals(respons.vedtak.id, opprettetVedtak.id)
             assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseHendelseType.FATTET)
@@ -202,14 +203,15 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 }
 
                 val respons =
-                    client.post("/api/vedtak/1/$behandlingId/automatisk/stegvis") {
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer $token")
-                        setBody(MigreringKjoringVariant.FULL_KJORING.toJson())
-                    }.let {
-                        it.status shouldBe HttpStatusCode.OK
-                        deserialize<VedtakOgRapid>(it.bodyAsText())
-                    }
+                    client
+                        .post("/api/vedtak/1/$behandlingId/automatisk/stegvis") {
+                            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                            header(HttpHeaders.Authorization, "Bearer $token")
+                            setBody(MigreringKjoringVariant.FULL_KJORING.toJson())
+                        }.let {
+                            it.status shouldBe HttpStatusCode.OK
+                            deserialize<VedtakOgRapid>(it.bodyAsText())
+                        }
 
                 assertEquals(respons.vedtak.id, opprettetVedtak.id)
                 assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseHendelseType.FATTET)
@@ -257,14 +259,15 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 }
 
                 val respons =
-                    client.post("/api/vedtak/1/$behandlingId/automatisk/stegvis") {
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer $token")
-                        setBody(MigreringKjoringVariant.MED_PAUSE.toJson())
-                    }.let {
-                        it.status shouldBe HttpStatusCode.OK
-                        deserialize<VedtakOgRapid>(it.bodyAsText())
-                    }
+                    client
+                        .post("/api/vedtak/1/$behandlingId/automatisk/stegvis") {
+                            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                            header(HttpHeaders.Authorization, "Bearer $token")
+                            setBody(MigreringKjoringVariant.MED_PAUSE.toJson())
+                        }.let {
+                            it.status shouldBe HttpStatusCode.OK
+                            deserialize<VedtakOgRapid>(it.bodyAsText())
+                        }
 
                 assertEquals(respons.vedtak.id, opprettetVedtak.id)
 
@@ -313,14 +316,15 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 }
 
                 val respons =
-                    client.post("/api/vedtak/1/$behandlingId/automatisk/stegvis") {
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        header(HttpHeaders.Authorization, "Bearer $token")
-                        setBody(MigreringKjoringVariant.FORTSETT_ETTER_PAUSE.toJson())
-                    }.let {
-                        it.status shouldBe HttpStatusCode.OK
-                        deserialize<VedtakOgRapid>(it.bodyAsText())
-                    }
+                    client
+                        .post("/api/vedtak/1/$behandlingId/automatisk/stegvis") {
+                            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                            header(HttpHeaders.Authorization, "Bearer $token")
+                            setBody(MigreringKjoringVariant.FORTSETT_ETTER_PAUSE.toJson())
+                        }.let {
+                            it.status shouldBe HttpStatusCode.OK
+                            deserialize<VedtakOgRapid>(it.bodyAsText())
+                        }
 
                 assertEquals(respons.vedtak.id, opprettetVedtak.id)
 

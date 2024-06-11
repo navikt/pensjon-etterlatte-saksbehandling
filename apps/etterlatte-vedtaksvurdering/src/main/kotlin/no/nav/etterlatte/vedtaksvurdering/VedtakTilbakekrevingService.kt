@@ -62,15 +62,16 @@ class VedtakTilbakekrevingService(
     ): Long {
         logger.info("Fatter vedtak for tilbakekreving=${tilbakekrevingVedtakData.tilbakekrevingId}")
         verifiserGyldigVedtakStatus(tilbakekrevingVedtakData.tilbakekrevingId, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
-        return repository.fattVedtak(
-            tilbakekrevingVedtakData.tilbakekrevingId,
-            VedtakFattet(
-                ansvarligSaksbehandler = brukerTokenInfo.ident(),
-                ansvarligEnhet = tilbakekrevingVedtakData.enhet,
-                // Blir ikke brukt fordi egen now() brukes i db..
-                tidspunkt = Tidspunkt.now(),
-            ),
-        ).id
+        return repository
+            .fattVedtak(
+                tilbakekrevingVedtakData.tilbakekrevingId,
+                VedtakFattet(
+                    ansvarligSaksbehandler = brukerTokenInfo.ident(),
+                    ansvarligEnhet = tilbakekrevingVedtakData.enhet,
+                    // Blir ikke brukt fordi egen now() brukes i db..
+                    tidspunkt = Tidspunkt.now(),
+                ),
+            ).id
     }
 
     fun attesterVedtak(

@@ -131,4 +131,6 @@ data class TilbakekrevingBeloeperData(
     val sumNettoRenter: Kroner,
 )
 
-class BrevDataTilbakerevingHarManglerException(message: String) : RuntimeException(message)
+class BrevDataTilbakerevingHarManglerException(
+    message: String,
+) : RuntimeException(message)

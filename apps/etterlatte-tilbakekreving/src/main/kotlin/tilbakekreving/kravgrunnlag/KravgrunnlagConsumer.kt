@@ -23,11 +23,12 @@ class KravgrunnlagConsumer(
     private val sikkerLogg: Logger = sikkerlogger()
 
     fun start() =
-        connectionFactory.start(
-            listener = exceptionListener(),
-            queue = queue,
-            messageListener = this,
-        ).also { logger.info("Lytter på kravgrunnlag fra tilbakekrevingskomponenten") }
+        connectionFactory
+            .start(
+                listener = exceptionListener(),
+                queue = queue,
+                messageListener = this,
+            ).also { logger.info("Lytter på kravgrunnlag fra tilbakekrevingskomponenten") }
 
     override fun onMessage(message: Message) =
         withLogContext {

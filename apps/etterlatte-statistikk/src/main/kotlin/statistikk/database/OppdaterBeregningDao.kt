@@ -16,13 +16,11 @@ class OppdaterBeregningDao(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     companion object {
-        fun using(datasource: DataSource): OppdaterBeregningDao {
-            return OppdaterBeregningDao(datasource)
-        }
+        fun using(datasource: DataSource): OppdaterBeregningDao = OppdaterBeregningDao(datasource)
     }
 
-    fun hentBehandlingerUtenOppdatertBeregning(limit: Int): List<UUID> {
-        return datasource.connection.use { connection ->
+    fun hentBehandlingerUtenOppdatertBeregning(limit: Int): List<UUID> =
+        datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
                     """
@@ -40,13 +38,12 @@ class OppdaterBeregningDao(
                 this.getObject("behandling_id", UUID::class.java)
             }
         }
-    }
 
     fun lagreBeregning(
         behandlingId: UUID,
         beregning: Beregning?,
-    ): Boolean {
-        return datasource.connection.use { connection ->
+    ): Boolean =
+        datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
                     """
@@ -64,7 +61,6 @@ class OppdaterBeregningDao(
             statement.setObject(3, behandlingId)
             statement.executeUpdate() == 1
         }
-    }
 
     fun lagrePatchetStatus(
         behandlingId: UUID,
@@ -99,8 +95,8 @@ class OppdaterBeregningDao(
         return withConnection.let(oppdatering)
     }
 
-    fun hentBehandlingerSomIkkeErOppdatert(sakerAvGangen: Int): List<Pair<UUID, Beregning?>> {
-        return datasource.connection.use { connection ->
+    fun hentBehandlingerSomIkkeErOppdatert(sakerAvGangen: Int): List<Pair<UUID, Beregning?>> =
+        datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
                     """
@@ -120,10 +116,9 @@ class OppdaterBeregningDao(
                 behandlingId to utlandstilknytning
             }
         }
-    }
 
-    fun hentBehandlingerForOppdateringAnvendtSats(sakerAvGangen: Int): List<BehandlingMedStatistikkShitSomSkalFiksesI> {
-        return datasource.connection.use { connection ->
+    fun hentBehandlingerForOppdateringAnvendtSats(sakerAvGangen: Int): List<BehandlingMedStatistikkShitSomSkalFiksesI> =
+        datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
                     """
@@ -147,7 +142,6 @@ class OppdaterBeregningDao(
                 )
             }
         }
-    }
 
     private fun hentAktuelleStatistikkmaanederOgAvdoedForBehandling(
         behandlingId: UUID,
@@ -199,35 +193,33 @@ class OppdaterBeregningDao(
     fun patchRaderForBehandling(
         behandlingId: UUID,
         beregning: Beregning,
-    ) {
-        return datasource.connection.use { connection ->
-            val sakerOppdatering =
-                connection.prepareStatement(
-                    """
-                    UPDATE sak SET beregning = ? WHERE behandling_id = ?
-                    """.trimIndent(),
-                )
-            sakerOppdatering.setJsonb(1, beregning)
-            sakerOppdatering.setObject(2, behandlingId)
-            val antallSakerOppdatert = sakerOppdatering.executeUpdate()
-
-            val stoenadOppdatering =
-                connection.prepareStatement(
-                    """
-                    UPDATE stoenad SET beregning = ? WHERE behandlingid = ?
-                    """.trimIndent(),
-                )
-            stoenadOppdatering.setJsonb(1, beregning)
-            stoenadOppdatering.setObject(2, behandlingId)
-            val antallStoenadOppdatert = stoenadOppdatering.executeUpdate()
-
-            lagrePatchetStatus(
-                behandlingId,
-                antallStoenadOppdatert,
-                antallSakerOppdatert,
-                connection,
+    ) = datasource.connection.use { connection ->
+        val sakerOppdatering =
+            connection.prepareStatement(
+                """
+                UPDATE sak SET beregning = ? WHERE behandling_id = ?
+                """.trimIndent(),
             )
-        }
+        sakerOppdatering.setJsonb(1, beregning)
+        sakerOppdatering.setObject(2, behandlingId)
+        val antallSakerOppdatert = sakerOppdatering.executeUpdate()
+
+        val stoenadOppdatering =
+            connection.prepareStatement(
+                """
+                UPDATE stoenad SET beregning = ? WHERE behandlingid = ?
+                """.trimIndent(),
+            )
+        stoenadOppdatering.setJsonb(1, beregning)
+        stoenadOppdatering.setObject(2, behandlingId)
+        val antallStoenadOppdatert = stoenadOppdatering.executeUpdate()
+
+        lagrePatchetStatus(
+            behandlingId,
+            antallStoenadOppdatert,
+            antallSakerOppdatert,
+            connection,
+        )
     }
 }
 

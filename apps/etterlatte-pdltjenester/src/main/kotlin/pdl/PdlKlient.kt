@@ -22,7 +22,10 @@ import no.nav.etterlatte.libs.ktor.behandlingsnummer
 import no.nav.etterlatte.utils.toPdlVariables
 import org.slf4j.LoggerFactory
 
-class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) {
+class PdlKlient(
+    private val httpClient: HttpClient,
+    private val apiUrl: String,
+) {
     private val logger = LoggerFactory.getLogger(PdlKlient::class.java)
 
     suspend fun hentPerson(hentPersonRequest: HentPersonRequest): PdlPersonResponse {
@@ -33,13 +36,14 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             )
 
         return retry<PdlPersonResponse>(times = 3) {
-            httpClient.post(apiUrl) {
-                behandlingsnummer(hentPersonRequest.saktyper)
-                header(HEADER_TEMA, HEADER_TEMA_VALUE)
-                accept(Json)
-                contentType(Json)
-                setBody(request)
-            }.body()
+            httpClient
+                .post(apiUrl) {
+                    behandlingsnummer(hentPersonRequest.saktyper)
+                    header(HEADER_TEMA, HEADER_TEMA_VALUE)
+                    accept(Json)
+                    contentType(Json)
+                    setBody(request)
+                }.body()
         }.let {
             when (it) {
                 is RetryResult.Success ->
@@ -62,13 +66,14 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             )
 
         return retry<PdlAdressebeskyttelseResponse>(times = 3) {
-            httpClient.post(apiUrl) {
-                behandlingsnummer(hentAdressebeskyttelseRequest.saktype)
-                header(HEADER_TEMA, HEADER_TEMA_VALUE)
-                accept(Json)
-                contentType(Json)
-                setBody(request)
-            }.body()
+            httpClient
+                .post(apiUrl) {
+                    behandlingsnummer(hentAdressebeskyttelseRequest.saktype)
+                    header(HEADER_TEMA, HEADER_TEMA_VALUE)
+                    accept(Json)
+                    contentType(Json)
+                    setBody(request)
+                }.body()
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
@@ -88,13 +93,14 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             )
 
         return retry<PdlHentForeldreansvarHistorikkResponse>(times = 3) {
-            httpClient.post(apiUrl) {
-                behandlingsnummer(SakType.BARNEPENSJON)
-                header(HEADER_TEMA, HEADER_TEMA_VALUE)
-                accept(Json)
-                contentType(Json)
-                setBody(request)
-            }.body()
+            httpClient
+                .post(apiUrl) {
+                    behandlingsnummer(SakType.BARNEPENSJON)
+                    header(HEADER_TEMA, HEADER_TEMA_VALUE)
+                    accept(Json)
+                    contentType(Json)
+                    setBody(request)
+                }.body()
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
@@ -129,13 +135,14 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
 
         logger.info("Bolkhenter personer med fnr=$fnr fra PDL")
         return retry<PdlPersonResponseBolk> {
-            httpClient.post(apiUrl) {
-                behandlingsnummer(saktyper)
-                header(HEADER_TEMA, HEADER_TEMA_VALUE)
-                accept(Json)
-                contentType(Json)
-                setBody(request)
-            }.body()
+            httpClient
+                .post(apiUrl) {
+                    behandlingsnummer(saktyper)
+                    header(HEADER_TEMA, HEADER_TEMA_VALUE)
+                    accept(Json)
+                    contentType(Json)
+                    setBody(request)
+                }.body()
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
@@ -157,11 +164,12 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             )
         logger.info("Henter PdlIdentifikator for ident = ${request.ident} fra PDL")
         return retry<PdlIdentResponse> {
-            httpClient.post(apiUrl) {
-                accept(Json)
-                contentType(Json)
-                setBody(graphqlRequest)
-            }.body()
+            httpClient
+                .post(apiUrl) {
+                    accept(Json)
+                    contentType(Json)
+                    setBody(graphqlRequest)
+                }.body()
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
@@ -172,38 +180,40 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
 
     suspend fun hentFolkeregisterIdenterForAktoerIdBolk(
         request: HentFolkeregisterIdenterForAktoerIdBolkRequest,
-    ): List<HentIdenterBolkResult> {
-        return request.aktoerIds.chunked(PDL_BULK_SIZE).map { identerChunk ->
-            val graphqlBolkRequest =
-                PdlFoedselsnumreFraAktoerIdRequest(
-                    query = getQuery("/pdl/hentFolkeregisterIdenterBolk.graphql"),
-                    variables =
-                        IdenterBolkVariables(
-                            identer = identerChunk,
-                            grupper = setOf(IdentGruppe.FOLKEREGISTERIDENT),
-                        ),
-                )
+    ): List<HentIdenterBolkResult> =
+        request.aktoerIds
+            .chunked(PDL_BULK_SIZE)
+            .map { identerChunk ->
+                val graphqlBolkRequest =
+                    PdlFoedselsnumreFraAktoerIdRequest(
+                        query = getQuery("/pdl/hentFolkeregisterIdenterBolk.graphql"),
+                        variables =
+                            IdenterBolkVariables(
+                                identer = identerChunk,
+                                grupper = setOf(IdentGruppe.FOLKEREGISTERIDENT),
+                            ),
+                    )
 
-            logger.info("Henter folkeregisterident for ${request.aktoerIds.size} aktørIds fra PDL")
+                logger.info("Henter folkeregisterident for ${request.aktoerIds.size} aktørIds fra PDL")
 
-            val response =
-                retry<PdlFoedselsnumreFraAktoerIdResponse> {
-                    httpClient.post(apiUrl) {
-                        behandlingsnummer(SakType.entries)
-                        header(HEADER_TEMA, HEADER_TEMA_VALUE)
-                        accept(Json)
-                        contentType(Json)
-                        setBody(graphqlBolkRequest)
-                    }.body()
-                }.let {
-                    when (it) {
-                        is RetryResult.Success -> it.content
-                        is RetryResult.Failure -> throw it.samlaExceptions()
+                val response =
+                    retry<PdlFoedselsnumreFraAktoerIdResponse> {
+                        httpClient
+                            .post(apiUrl) {
+                                behandlingsnummer(SakType.entries)
+                                header(HEADER_TEMA, HEADER_TEMA_VALUE)
+                                accept(Json)
+                                contentType(Json)
+                                setBody(graphqlBolkRequest)
+                            }.body()
+                    }.let {
+                        when (it) {
+                            is RetryResult.Success -> it.content
+                            is RetryResult.Failure -> throw it.samlaExceptions()
+                        }
                     }
-                }
-            response.data
-        }.flatMap { it.hentIdenterBolk }
-    }
+                response.data
+            }.flatMap { it.hentIdenterBolk }
 
     suspend fun hentGeografiskTilknytning(request: HentGeografiskTilknytningRequest): PdlGeografiskTilknytningResponse {
         val graphqlRequest =
@@ -217,13 +227,14 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
 
         logger.info("Henter geografisk tilknytning for fnr = ${request.foedselsnummer} fra PDL")
         return retry<PdlGeografiskTilknytningResponse> {
-            httpClient.post(apiUrl) {
-                behandlingsnummer(SakType.BARNEPENSJON)
-                header(HEADER_TEMA, HEADER_TEMA_VALUE)
-                accept(Json)
-                contentType(Json)
-                setBody(graphqlRequest)
-            }.body()
+            httpClient
+                .post(apiUrl) {
+                    behandlingsnummer(SakType.BARNEPENSJON)
+                    header(HEADER_TEMA, HEADER_TEMA_VALUE)
+                    accept(Json)
+                    contentType(Json)
+                    setBody(graphqlRequest)
+                }.body()
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
@@ -232,11 +243,11 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         }
     }
 
-    private fun getQuery(name: String): String {
-        return javaClass.getResource(name)!!
+    private fun getQuery(name: String): String =
+        javaClass
+            .getResource(name)!!
             .readText()
             .replace(Regex("[\n\t]"), "")
-    }
 
     companion object {
         const val HEADER_TEMA = "Tema"

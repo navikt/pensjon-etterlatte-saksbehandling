@@ -29,13 +29,14 @@ class OpprettBrevRiverTest {
             }
         val testRapid = TestRapid().apply { OpprettBrevRiver(this, behandlingService, featureToggleService()) }
         testRapid.sendTestMessage(
-            JsonMessage.newMessage(
-                mapOf(
-                    BrevRequestHendelseType.OPPRETT_BREV.lagParMedEventNameKey(),
-                    FNR_KEY to "123",
-                    SAK_TYPE_KEY to SakType.BARNEPENSJON.name,
-                ),
-            ).toJson(),
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        BrevRequestHendelseType.OPPRETT_BREV.lagParMedEventNameKey(),
+                        FNR_KEY to "123",
+                        SAK_TYPE_KEY to SakType.BARNEPENSJON.name,
+                    ),
+                ).toJson(),
         )
         assertEquals(1, testRapid.inspektør.size)
         with(testRapid.inspektør.message(0)) {
@@ -53,13 +54,14 @@ class OpprettBrevRiverTest {
         val testRapid = TestRapid().apply { OpprettBrevRiver(this, behandlingService, featureToggleService()) }
         val behandlingId = UUID.randomUUID()
         testRapid.sendTestMessage(
-            JsonMessage.newMessage(
-                mapOf(
-                    BrevRequestHendelseType.OPPRETT_BREV.lagParMedEventNameKey(),
-                    BEHANDLING_ID_KEY to behandlingId,
-                    SAK_TYPE_KEY to SakType.BARNEPENSJON.name,
-                ),
-            ).toJson(),
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        BrevRequestHendelseType.OPPRETT_BREV.lagParMedEventNameKey(),
+                        BEHANDLING_ID_KEY to behandlingId,
+                        SAK_TYPE_KEY to SakType.BARNEPENSJON.name,
+                    ),
+                ).toJson(),
         )
         assertEquals(1, testRapid.inspektør.size)
         with(testRapid.inspektør.message(0)) {

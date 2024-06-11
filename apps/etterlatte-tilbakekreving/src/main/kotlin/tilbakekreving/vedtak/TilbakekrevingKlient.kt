@@ -66,8 +66,8 @@ class TilbakekrevingKlient(
         return kontrollerResponse(response)
     }
 
-    private fun toTilbakekrevingsvedtakRequest(vedtak: TilbakekrevingVedtak): TilbakekrevingsvedtakRequest {
-        return TilbakekrevingsvedtakRequest().apply {
+    private fun toTilbakekrevingsvedtakRequest(vedtak: TilbakekrevingVedtak): TilbakekrevingsvedtakRequest =
+        TilbakekrevingsvedtakRequest().apply {
             tilbakekrevingsvedtak =
                 TilbakekrevingsvedtakDto().apply {
                     kodeAksjon = KodeAksjon.FATTE_VEDTAK.kode
@@ -110,7 +110,6 @@ class TilbakekrevingKlient(
                     )
                 }
         }
-    }
 
     private fun TilbakekrevingsbelopYtelseVedtak.toTilbakekreivngsbelopYtelse(aarsak: TilbakekrevingAarsak) =
         TilbakekrevingsbelopDto().apply {
@@ -124,12 +123,11 @@ class TilbakekrevingKlient(
             kodeSkyld = skyld.name
         }
 
-    private fun mapFraTilbakekrevingAarsak(aarsak: TilbakekrevingAarsak): String {
-        return when (aarsak) {
+    private fun mapFraTilbakekrevingAarsak(aarsak: TilbakekrevingAarsak): String =
+        when (aarsak) {
             TilbakekrevingAarsak.UTBFEILMOT -> aarsak.name
             else -> TilbakekrevingAarsak.ANNET.name
         }
-    }
 
     private fun TilbakekrevingsbelopFeilkontoVedtak.toTilbakekreivngsbelopFeilkonto() =
         TilbakekrevingsbelopDto().apply {
@@ -140,8 +138,8 @@ class TilbakekrevingKlient(
             belopTilbakekreves = bruttoTilbakekreving.medToDesimaler()
         }
 
-    private fun kontrollerResponse(response: TilbakekrevingsvedtakResponse) {
-        return when (val alvorlighetsgrad = Alvorlighetsgrad.fromString(response.mmel.alvorlighetsgrad)) {
+    private fun kontrollerResponse(response: TilbakekrevingsvedtakResponse) =
+        when (val alvorlighetsgrad = Alvorlighetsgrad.fromString(response.mmel.alvorlighetsgrad)) {
             Alvorlighetsgrad.OK,
             Alvorlighetsgrad.OK_MED_VARSEL,
             -> Unit
@@ -154,9 +152,10 @@ class TilbakekrevingKlient(
                 throw Exception(err)
             }
         }
-    }
 
-    enum class Alvorlighetsgrad(val value: String) {
+    enum class Alvorlighetsgrad(
+        val value: String,
+    ) {
         OK("00"),
 
         /** En varselmelding følger med */
@@ -170,17 +169,19 @@ class TilbakekrevingKlient(
         override fun toString() = value
 
         companion object {
-            fun fromString(string: String): Alvorlighetsgrad {
-                return enumValues<Alvorlighetsgrad>().first { it.value == string }
-            }
+            fun fromString(string: String): Alvorlighetsgrad = enumValues<Alvorlighetsgrad>().first { it.value == string }
         }
     }
 
-    private enum class KodeAksjon(val kode: String) {
+    private enum class KodeAksjon(
+        val kode: String,
+    ) {
         FATTE_VEDTAK("8"),
     }
 
-    private enum class RenterBeregnes(val kode: String) {
+    private enum class RenterBeregnes(
+        val kode: String,
+    ) {
         NEI("N"),
     }
 
@@ -188,9 +189,7 @@ class TilbakekrevingKlient(
         const val ANSVARLIG_ENHET = "4819"
     }
 
-    private fun LocalDate.toXMLDate(): XMLGregorianCalendar {
-        return DatatypeFactory.newInstance().newXMLGregorianCalendar(toString())
-    }
+    private fun LocalDate.toXMLDate(): XMLGregorianCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(toString())
 
     private fun Int.medToDesimaler() = this.toBigDecimal().setScale(2)
 }
@@ -206,7 +205,13 @@ private class CustomXMLGregorianCalendarModule : SimpleModule() {
                     ser: SerializerProvider?,
                 ) {
                     if (value != null) {
-                        gen?.writeString(value.toGregorianCalendar().toZonedDateTime().toLocalDate().toString())
+                        gen?.writeString(
+                            value
+                                .toGregorianCalendar()
+                                .toZonedDateTime()
+                                .toLocalDate()
+                                .toString(),
+                        )
                     }
                 }
             },

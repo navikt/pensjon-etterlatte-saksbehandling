@@ -282,13 +282,9 @@ internal class BehandlingServiceImplTest {
         nyKontekstMedBrukerOgDatabaseContext(
             mockSaksbehandler("ident"),
             object : DatabaseKontekst {
-                override fun activeTx(): Connection {
-                    throw IllegalArgumentException()
-                }
+                override fun activeTx(): Connection = throw IllegalArgumentException()
 
-                override fun harIntransaction(): Boolean {
-                    throw NotImplementedException("not implemented")
-                }
+                override fun harIntransaction(): Boolean = throw NotImplementedException("not implemented")
 
                 override fun <T> inTransaction(block: () -> T): T {
                     try {

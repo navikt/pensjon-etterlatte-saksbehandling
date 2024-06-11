@@ -86,26 +86,23 @@ sealed class Behandling {
 
     open fun begrunnelse(): String? = null
 
-    open fun oppdaterVirkningstidspunkt(virkningstidspunkt: Virkningstidspunkt): Behandling {
+    open fun oppdaterVirkningstidspunkt(virkningstidspunkt: Virkningstidspunkt): Behandling =
         throw NotImplementedError(
             "Kan ikke oppdatere virkningstidspunkt på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av virkningstidspunkt.",
         )
-    }
 
-    open fun oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet): Behandling {
+    open fun oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet): Behandling =
         throw NotImplementedError(
             "Kan ikke oppdatere bodd eller arbeidet utlandet på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av bodd eller arbeidet utlandet.",
         )
-    }
 
-    open fun oppdaterUtlandstilknytning(utlandstilknytning: Utlandstilknytning): Behandling {
+    open fun oppdaterUtlandstilknytning(utlandstilknytning: Utlandstilknytning): Behandling =
         throw NotImplementedError(
             "Kan ikke oppdatere utlandstilknytning på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av utlandstilknyting.",
         )
-    }
 
     protected fun <T : Behandling> hvisRedigerbar(block: () -> T): T {
         if (kanRedigeres) {
@@ -148,53 +145,29 @@ sealed class Behandling {
         }
     }
 
-    open fun tilOpprettet(): Behandling {
-        throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
-    }
+    open fun tilOpprettet(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
 
-    open fun tilVilkaarsvurdert(): Behandling {
-        throw BehandlingStoetterIkkeStatusEndringException(VILKAARSVURDERT)
-    }
+    open fun tilVilkaarsvurdert(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(VILKAARSVURDERT)
 
-    open fun tilTrygdetidOppdatert(): Behandling {
-        throw BehandlingStoetterIkkeStatusEndringException(TRYGDETID_OPPDATERT)
-    }
+    open fun tilTrygdetidOppdatert(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(TRYGDETID_OPPDATERT)
 
-    open fun tilBeregnet(): Behandling {
-        throw BehandlingStoetterIkkeStatusEndringException(BEREGNET)
-    }
+    open fun tilBeregnet(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(BEREGNET)
 
-    open fun tilAvkortet(): Behandling {
-        throw BehandlingStoetterIkkeStatusEndringException(AVKORTET)
-    }
+    open fun tilAvkortet(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(AVKORTET)
 
-    open fun tilFattetVedtak(): Behandling {
-        throw BehandlingStoetterIkkeStatusEndringException(FATTET_VEDTAK)
-    }
+    open fun tilFattetVedtak(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(FATTET_VEDTAK)
 
-    open fun tilAttestert(): Behandling {
-        throw BehandlingStoetterIkkeStatusEndringException(ATTESTERT)
-    }
+    open fun tilAttestert(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(ATTESTERT)
 
-    open fun tilAvslag(): Behandling {
-        throw BehandlingStoetterIkkeStatusEndringException(AVSLAG)
-    }
+    open fun tilAvslag(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(AVSLAG)
 
-    open fun tilReturnert(): Behandling {
-        throw BehandlingStoetterIkkeStatusEndringException(RETURNERT)
-    }
+    open fun tilReturnert(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(RETURNERT)
 
-    open fun tilTilSamordning(): Behandling {
-        throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
-    }
+    open fun tilTilSamordning(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
 
-    open fun tilSamordnet(): Behandling {
-        throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
-    }
+    open fun tilSamordnet(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
 
-    open fun tilIverksatt(): Behandling {
-        throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
-    }
+    open fun tilIverksatt(): Behandling = throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
 
     class BehandlingStoetterIkkeStatusEndringException(
         behandlingStatus: BehandlingStatus,
@@ -205,8 +178,8 @@ sealed class Behandling {
 internal fun Behandling.toStatistikkBehandling(
     persongalleri: Persongalleri,
     pesysId: Long? = null,
-): StatistikkBehandling {
-    return StatistikkBehandling(
+): StatistikkBehandling =
+    StatistikkBehandling(
         id = id,
         sak = sak,
         sistEndret = sistEndret,
@@ -230,10 +203,9 @@ internal fun Behandling.toStatistikkBehandling(
         relatertBehandlingId = relatertBehandlingId,
         utlandstilknytning = utlandstilknytning,
     )
-}
 
-internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Persongalleri): DetaljertBehandling {
-    return DetaljertBehandling(
+internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Persongalleri): DetaljertBehandling =
+    DetaljertBehandling(
         id = id,
         sak = sak.id,
         sakType = sak.sakType,
@@ -250,7 +222,6 @@ internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Pe
         sendeBrev = sendeBrev,
         opphoerFraOgMed = opphoerFraOgMed,
     )
-}
 
 fun Behandling.toBehandlingSammendrag() =
     BehandlingSammendrag(
@@ -272,6 +243,7 @@ fun Behandling.toBehandlingSammendrag() =
     )
 
 internal fun List<Behandling>.hentUtlandstilknytning(): Utlandstilknytning? =
-    this.filter { it.status != BehandlingStatus.AVBRUTT }
+    this
+        .filter { it.status != BehandlingStatus.AVBRUTT }
         .maxByOrNull { it.behandlingOpprettet }
         ?.utlandstilknytning

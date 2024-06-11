@@ -188,8 +188,10 @@ class BeregnOverstyrBeregningService(
                                 periodisertResultat.periode.fraDato,
                                 periodisertResultat.periode.tilDato,
                                 periodisertResultat.resultat.verdi,
-                                periodisertResultat.resultat.finnAnvendteRegler()
-                                    .map { "${it.regelReferanse.id} (${it.beskrivelse})" }.toSet(),
+                                periodisertResultat.resultat
+                                    .finnAnvendteRegler()
+                                    .map { "${it.regelReferanse.id} (${it.beskrivelse})" }
+                                    .toSet(),
                             )
 
                             val grunnbeloep =
@@ -200,8 +202,10 @@ class BeregnOverstyrBeregningService(
                             val broek =
                                 IntBroek.fra(
                                     Pair(
-                                        periodisertResultat.resultat.verdi.prorataBroekTeller?.toInt(),
-                                        periodisertResultat.resultat.verdi.prorataBroekNevner?.toInt(),
+                                        periodisertResultat.resultat.verdi.prorataBroekTeller
+                                            ?.toInt(),
+                                        periodisertResultat.resultat.verdi.prorataBroekNevner
+                                            ?.toInt(),
                                     ),
                                 )
 
@@ -212,7 +216,9 @@ class BeregnOverstyrBeregningService(
                             Beregningsperiode(
                                 datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
                                 datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
-                                utbetaltBeloep = periodisertResultat.resultat.verdi.utbetaltBeloep.toInt(),
+                                utbetaltBeloep =
+                                    periodisertResultat.resultat.verdi.utbetaltBeloep
+                                        .toInt(),
                                 institusjonsopphold = null,
                                 grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,
@@ -224,10 +230,12 @@ class BeregnOverstyrBeregningService(
                                         else -> BeregningsMetode.PRORATA
                                     },
                                 samletNorskTrygdetid =
-                                    periodisertResultat.resultat.verdi.trygdetid.takeIf { broek == null }
+                                    periodisertResultat.resultat.verdi.trygdetid
+                                        .takeIf { broek == null }
                                         ?.toInt(),
                                 samletTeoretiskTrygdetid =
-                                    periodisertResultat.resultat.verdi.trygdetid.takeIf { broek != null }
+                                    periodisertResultat.resultat.verdi.trygdetid
+                                        .takeIf { broek != null }
                                         ?.toInt(),
                                 broek = broek,
                                 regelResultat = objectMapper.valueToTree(periodisertResultat),

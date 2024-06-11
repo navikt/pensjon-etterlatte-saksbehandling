@@ -227,12 +227,13 @@ internal class BeregningsGrunnlagRoutesTest {
                 beregningsGrunnlag(service, behandlingKlient)
             }
 
-            client.get("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let {
-                it.status shouldBe HttpStatusCode.NotFound
-            }
+            client
+                .get("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let {
+                    it.status shouldBe HttpStatusCode.NotFound
+                }
         }
     }
 
@@ -246,18 +247,19 @@ internal class BeregningsGrunnlagRoutesTest {
                     beregningsGrunnlag(service, behandlingKlient)
                 }
 
-            client.post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(
-                    LagreBeregningsGrunnlag(
-                        emptyList(),
-                        emptyList(),
-                    ),
-                )
-            }.let {
-                it.status shouldBe HttpStatusCode.NotFound
-            }
+            client
+                .post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(
+                        LagreBeregningsGrunnlag(
+                            emptyList(),
+                            emptyList(),
+                        ),
+                    )
+                }.let {
+                    it.status shouldBe HttpStatusCode.NotFound
+                }
         }
     }
 
@@ -303,18 +305,19 @@ internal class BeregningsGrunnlagRoutesTest {
                     beregningsGrunnlag(service, behandlingKlient)
                 }
 
-            client.post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(
-                    LagreBeregningsGrunnlag(
-                        emptyList(),
-                        emptyList(),
-                    ),
-                )
-            }.let {
-                it.status shouldBe HttpStatusCode.NoContent
-            }
+            client
+                .post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(
+                        LagreBeregningsGrunnlag(
+                            emptyList(),
+                            emptyList(),
+                        ),
+                    )
+                }.let {
+                    it.status shouldBe HttpStatusCode.NoContent
+                }
         }
     }
 
@@ -371,18 +374,19 @@ internal class BeregningsGrunnlagRoutesTest {
                             ),
                     ),
                 )
-            client.post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(
-                    LagreBeregningsGrunnlag(
-                        soeskenMedIBeregning,
-                        emptyList(),
-                    ),
-                )
-            }.let {
-                it.status shouldBe HttpStatusCode.Conflict
-            }
+            client
+                .post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(
+                        LagreBeregningsGrunnlag(
+                            soeskenMedIBeregning,
+                            emptyList(),
+                        ),
+                    )
+                }.let {
+                    it.status shouldBe HttpStatusCode.Conflict
+                }
         }
     }
 
@@ -410,12 +414,13 @@ internal class BeregningsGrunnlagRoutesTest {
                 beregningsGrunnlag(service, behandlingKlient)
             }
 
-            client.post("/api/beregning/beregningsgrunnlag/$nye/fra/$forrige") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let {
-                it.status shouldBe HttpStatusCode.NoContent
-            }
+            client
+                .post("/api/beregning/beregningsgrunnlag/$nye/fra/$forrige") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let {
+                    it.status shouldBe HttpStatusCode.NoContent
+                }
         }
     }
 
@@ -443,12 +448,13 @@ internal class BeregningsGrunnlagRoutesTest {
                 beregningsGrunnlag(service, behandlingKlient)
             }
 
-            client.post("/api/beregning/beregningsgrunnlag/$nye/fra/$forrige") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $systemToken")
-            }.let {
-                it.status shouldBe HttpStatusCode.NoContent
-            }
+            client
+                .post("/api/beregning/beregningsgrunnlag/$nye/fra/$forrige") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $systemToken")
+                }.let {
+                    it.status shouldBe HttpStatusCode.NoContent
+                }
         }
     }
 
@@ -467,12 +473,13 @@ internal class BeregningsGrunnlagRoutesTest {
                 beregningsGrunnlag(service, behandlingKlient)
             }
 
-            client.post("/api/beregning/beregningsgrunnlag/$nye/fra/$forrige") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $systemToken")
-            }.let {
-                it.status shouldBe HttpStatusCode.InternalServerError
-            }
+            client
+                .post("/api/beregning/beregningsgrunnlag/$nye/fra/$forrige") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $systemToken")
+                }.let {
+                    it.status shouldBe HttpStatusCode.InternalServerError
+                }
         }
     }
 
@@ -506,12 +513,13 @@ internal class BeregningsGrunnlagRoutesTest {
                 beregningsGrunnlag(service, behandlingKlient)
             }
 
-            client.post("/api/beregning/beregningsgrunnlag/$nye/fra/$forrige") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $systemToken")
-            }.let {
-                it.status shouldBe HttpStatusCode.InternalServerError
-            }
+            client
+                .post("/api/beregning/beregningsgrunnlag/$nye/fra/$forrige") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $systemToken")
+                }.let {
+                    it.status shouldBe HttpStatusCode.InternalServerError
+                }
         }
     }
 
@@ -569,30 +577,31 @@ internal class BeregningsGrunnlagRoutesTest {
                     beregningsGrunnlag(service, behandlingKlient)
                 }
 
-            client.get("/api/beregning/beregningsgrunnlag/$behandlingId/overstyr") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }.let { response ->
-                response.status shouldBe HttpStatusCode.OK
+            client
+                .get("/api/beregning/beregningsgrunnlag/$behandlingId/overstyr") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let { response ->
+                    response.status shouldBe HttpStatusCode.OK
 
-                val grunnlag = objectMapper.readValue(response.bodyAsText(), OverstyrBeregningGrunnlagDTO::class.java)
+                    val grunnlag = objectMapper.readValue(response.bodyAsText(), OverstyrBeregningGrunnlagDTO::class.java)
 
-                grunnlag.perioder.let { perioder ->
-                    perioder.size shouldBe 2
-                    perioder.minBy { it.fom }.let { periode ->
-                        periode.fom shouldBe LocalDate.now().minusYears(12L)
-                        periode.tom shouldBe LocalDate.now().minusYears(6L)
-                        periode.data.utbetaltBeloep shouldBe 123L
-                        periode.data.trygdetid shouldBe 10L
-                    }
-                    perioder.maxBy { it.fom }.let { periode ->
-                        periode.fom shouldBe LocalDate.now().minusYears(6L)
-                        periode.tom shouldBe null
-                        periode.data.utbetaltBeloep shouldBe 456L
-                        periode.data.trygdetid shouldBe 20L
+                    grunnlag.perioder.let { perioder ->
+                        perioder.size shouldBe 2
+                        perioder.minBy { it.fom }.let { periode ->
+                            periode.fom shouldBe LocalDate.now().minusYears(12L)
+                            periode.tom shouldBe LocalDate.now().minusYears(6L)
+                            periode.data.utbetaltBeloep shouldBe 123L
+                            periode.data.trygdetid shouldBe 10L
+                        }
+                        perioder.maxBy { it.fom }.let { periode ->
+                            periode.fom shouldBe LocalDate.now().minusYears(6L)
+                            periode.tom shouldBe null
+                            periode.data.utbetaltBeloep shouldBe 456L
+                            periode.data.trygdetid shouldBe 20L
+                        }
                     }
                 }
-            }
         }
     }
 
@@ -672,89 +681,90 @@ internal class BeregningsGrunnlagRoutesTest {
                     beregningsGrunnlag(service, behandlingKlient)
                 }
 
-            client.post("/api/beregning/beregningsgrunnlag/$behandlingId/overstyr") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(
-                    OverstyrBeregningGrunnlag(
-                        perioder =
-                            listOf(
-                                GrunnlagMedPeriode(
-                                    data =
-                                        OverstyrBeregningGrunnlagData(
-                                            utbetaltBeloep = 123L,
-                                            trygdetid = 10L,
-                                            trygdetidForIdent = null,
-                                            prorataBroekTeller = null,
-                                            prorataBroekNevner = null,
-                                            beskrivelse = "test periode 1",
-                                            aarsak = "ANNET",
-                                        ),
-                                    fom = LocalDate.now().minusYears(12L),
-                                    tom = LocalDate.now().minusYears(6L),
+            client
+                .post("/api/beregning/beregningsgrunnlag/$behandlingId/overstyr") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(
+                        OverstyrBeregningGrunnlag(
+                            perioder =
+                                listOf(
+                                    GrunnlagMedPeriode(
+                                        data =
+                                            OverstyrBeregningGrunnlagData(
+                                                utbetaltBeloep = 123L,
+                                                trygdetid = 10L,
+                                                trygdetidForIdent = null,
+                                                prorataBroekTeller = null,
+                                                prorataBroekNevner = null,
+                                                beskrivelse = "test periode 1",
+                                                aarsak = "ANNET",
+                                            ),
+                                        fom = LocalDate.now().minusYears(12L),
+                                        tom = LocalDate.now().minusYears(6L),
+                                    ),
+                                    GrunnlagMedPeriode(
+                                        data =
+                                            OverstyrBeregningGrunnlagData(
+                                                utbetaltBeloep = 456L,
+                                                trygdetid = 20L,
+                                                trygdetidForIdent = null,
+                                                prorataBroekTeller = null,
+                                                prorataBroekNevner = null,
+                                                beskrivelse = "test periode 2",
+                                                aarsak = "ANNET",
+                                            ),
+                                        fom = LocalDate.now().minusYears(6L),
+                                        tom = null,
+                                    ),
                                 ),
-                                GrunnlagMedPeriode(
-                                    data =
-                                        OverstyrBeregningGrunnlagData(
-                                            utbetaltBeloep = 456L,
-                                            trygdetid = 20L,
-                                            trygdetidForIdent = null,
-                                            prorataBroekTeller = null,
-                                            prorataBroekNevner = null,
-                                            beskrivelse = "test periode 2",
-                                            aarsak = "ANNET",
-                                        ),
-                                    fom = LocalDate.now().minusYears(6L),
-                                    tom = null,
+                            kilde =
+                                Grunnlagsopplysning.Saksbehandler(
+                                    ident = "Z123456",
+                                    Tidspunkt.now(),
                                 ),
-                            ),
-                        kilde =
-                            Grunnlagsopplysning.Saksbehandler(
-                                ident = "Z123456",
-                                Tidspunkt.now(),
-                            ),
-                    ),
-                )
-            }.let { response ->
-                response.status shouldBe HttpStatusCode.OK
+                        ),
+                    )
+                }.let { response ->
+                    response.status shouldBe HttpStatusCode.OK
 
-                val grunnlag = objectMapper.readValue(response.bodyAsText(), OverstyrBeregningGrunnlag::class.java)
+                    val grunnlag = objectMapper.readValue(response.bodyAsText(), OverstyrBeregningGrunnlag::class.java)
 
-                grunnlag.perioder.let { perioder ->
-                    perioder.size shouldBe 2
-                    perioder.minBy { it.fom }.let { periode ->
-                        periode.fom shouldBe LocalDate.now().minusYears(12L)
-                        periode.tom shouldBe LocalDate.now().minusYears(6L)
-                        periode.data.utbetaltBeloep shouldBe 123L
-                        periode.data.trygdetid shouldBe 10L
+                    grunnlag.perioder.let { perioder ->
+                        perioder.size shouldBe 2
+                        perioder.minBy { it.fom }.let { periode ->
+                            periode.fom shouldBe LocalDate.now().minusYears(12L)
+                            periode.tom shouldBe LocalDate.now().minusYears(6L)
+                            periode.data.utbetaltBeloep shouldBe 123L
+                            periode.data.trygdetid shouldBe 10L
+                        }
+                        perioder.maxBy { it.fom }.let { periode ->
+                            periode.fom shouldBe LocalDate.now().minusYears(6L)
+                            periode.tom shouldBe null
+                            periode.data.utbetaltBeloep shouldBe 456L
+                            periode.data.trygdetid shouldBe 20L
+                        }
                     }
-                    perioder.maxBy { it.fom }.let { periode ->
-                        periode.fom shouldBe LocalDate.now().minusYears(6L)
-                        periode.tom shouldBe null
-                        periode.data.utbetaltBeloep shouldBe 456L
-                        periode.data.trygdetid shouldBe 20L
+
+                    slot.captured.let { daoList ->
+                        daoList.size shouldBe 2
+
+                        daoList.minBy { it.datoFOM }.let { dao ->
+                            dao.datoFOM shouldBe LocalDate.now().minusYears(12L)
+                            dao.datoTOM shouldBe LocalDate.now().minusYears(6L)
+                            dao.utbetaltBeloep shouldBe 123L
+                            dao.trygdetid shouldBe 10L
+                            dao.sakId shouldBe 222L
+                        }
+                        daoList.maxBy { it.datoFOM }.let { dao ->
+                            dao.datoFOM shouldBe LocalDate.now().minusYears(6L)
+                            dao.datoTOM shouldBe null
+                            dao.utbetaltBeloep shouldBe 456L
+                            dao.trygdetid shouldBe 20L
+                            dao.sakId shouldBe 222L
+                        }
                     }
                 }
-
-                slot.captured.let { daoList ->
-                    daoList.size shouldBe 2
-
-                    daoList.minBy { it.datoFOM }.let { dao ->
-                        dao.datoFOM shouldBe LocalDate.now().minusYears(12L)
-                        dao.datoTOM shouldBe LocalDate.now().minusYears(6L)
-                        dao.utbetaltBeloep shouldBe 123L
-                        dao.trygdetid shouldBe 10L
-                        dao.sakId shouldBe 222L
-                    }
-                    daoList.maxBy { it.datoFOM }.let { dao ->
-                        dao.datoFOM shouldBe LocalDate.now().minusYears(6L)
-                        dao.datoTOM shouldBe null
-                        dao.utbetaltBeloep shouldBe 456L
-                        dao.trygdetid shouldBe 20L
-                        dao.sakId shouldBe 222L
-                    }
-                }
-            }
         }
     }
 

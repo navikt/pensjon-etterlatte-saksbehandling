@@ -12,7 +12,9 @@ import org.postgresql.util.PGobject
 import java.util.UUID
 import javax.sql.DataSource
 
-class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
+class BeregningsGrunnlagRepository(
+    private val dataSource: DataSource,
+) {
     fun finnBeregningsGrunnlag(id: UUID): BeregningsGrunnlag? =
         using(sessionOf(dataSource)) { session ->
             session.run(
@@ -229,8 +231,8 @@ inline fun <reified T> T.somJsonb(): PGobject {
     return jsonObject
 }
 
-private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag {
-    return BeregningsGrunnlag(
+private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag =
+    BeregningsGrunnlag(
         behandlingId = this.uuid("behandlings_id"),
         soeskenMedIBeregning =
             this.stringOrNull("soesken_med_i_beregning_perioder")?.let {
@@ -254,10 +256,9 @@ private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag {
                 objectMapper.readValue(it)
             } ?: emptyList(),
     )
-}
 
-private fun Row.asOverstyrBeregningGrunnlag(): OverstyrBeregningGrunnlagDao {
-    return OverstyrBeregningGrunnlagDao(
+private fun Row.asOverstyrBeregningGrunnlag(): OverstyrBeregningGrunnlagDao =
+    OverstyrBeregningGrunnlagDao(
         id = this.uuid("id"),
         behandlingId = this.uuid("behandlings_id"),
         datoFOM = this.sqlDate("dato_fra_og_med").toLocalDate(),
@@ -273,4 +274,3 @@ private fun Row.asOverstyrBeregningGrunnlag(): OverstyrBeregningGrunnlagDao {
         kilde = objectMapper.readValue(this.string("kilde")),
         reguleringRegelresultat = this.stringOrNull("regulering_regelresultat")?.let { objectMapper.readValue(it) },
     )
-}

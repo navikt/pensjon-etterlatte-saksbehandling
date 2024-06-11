@@ -10,7 +10,6 @@ import no.nav.etterlatte.utbetaling.VedtaksvurderingKlient
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingslinjeId
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -48,46 +47,6 @@ class VerifiserReguleringssummer(
                 )
             }
         sammenlignLinjer(utbetaling, vedtak)
-//        verifiserMotForrigeUtbetaling(utbetaling, vedtak)
-    }
-
-    private fun verifiserMotForrigeUtbetaling(
-        utbetaling: Utbetaling,
-        vedtak: VedtakDto,
-    ) {
-        val linjer = utbetaling.utbetalingslinjer.sortedBy { it.opprettet }
-
-        val map = mutableMapOf<UtbetalingslinjeId, MutableList<Utbetalingslinje>>()
-        val utbetalingslinjeNull = UtbetalingslinjeId(-1)
-        linjer.forEach {
-            val key = it.erstatterId ?: utbetalingslinjeNull
-            map.putIfAbsent(key, mutableListOf())
-            map[key]!!.add(it)
-        }
-
-        map.values.filter { it.isNotEmpty() }.forEach {
-            runBlocking {
-                sammenlignLinjer(vedtak = vedtak, it)
-            }
-        }
-    }
-
-    private fun sammenlignLinjer(
-        vedtak: VedtakDto,
-        utbetalingslinjer: MutableList<Utbetalingslinje>,
-    ) {
-        (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).utbetalingsperioder.forEach { fraVedtak ->
-            val korresponderendeUtbetalingslinje =
-                utbetalingslinjer
-                    .filter { YearMonth.from(it.periode.fra) == fraVedtak.periode.fom }
-                    .maxByOrNull { it.opprettet }
-            if (korresponderendeUtbetalingslinje == null) {
-                throw IllegalStateException(
-                    "Mangler korresponderende utbetalingslinje for periode ${fraVedtak.periode} for vedtak ${vedtak.id}",
-                )
-            }
-            verifiserAtStemmerOverens(vedtak.id, fraVedtak, korresponderendeUtbetalingslinje)
-        }
     }
 
     private fun sammenlignLinjer(

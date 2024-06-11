@@ -5,7 +5,6 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.LOPENDE
-import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.OPPRETTET
 import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.TIL_BEHANDLING
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.safeYearsBetween
@@ -39,7 +38,7 @@ internal class DoedshendelseKontrollpunktOMSService(
             val kryssendeYtelser =
                 pesysKlient.hentSaker(hendelse.beroertFnr)
                     .filter {
-                        it.sakStatus in listOf(OPPRETTET, TIL_BEHANDLING, LOPENDE)
+                        it.sakStatus in listOf(TIL_BEHANDLING, LOPENDE)
                     }
                     .filter { it.sakType in listOf(SakSammendragResponse.UFORE_SAKTYPE, SakSammendragResponse.ALDER_SAKTYPE) }
                     .filter { it.fomDato == null || it.fomDato.isBefore(hendelse.avdoedDoedsdato) }

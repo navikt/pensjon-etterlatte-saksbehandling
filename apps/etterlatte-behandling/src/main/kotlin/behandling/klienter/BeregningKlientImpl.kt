@@ -17,7 +17,10 @@ interface BeregningKlient {
     )
 }
 
-class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKlient {
+class BeregningKlientImpl(
+    config: Config,
+    httpClient: HttpClient,
+) : BeregningKlient {
     private val logger = LoggerFactory.getLogger(BeregningKlientImpl::class.java)
 
     private val azureAdClient = AzureAdClient(config)
@@ -31,10 +34,11 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         logger.info("Sletter avkorting for behandling id=$behandlingId")
-        downstreamResourceClient.delete(
-            resource = Resource(clientId = clientId, url = "$resourceUrl/api/beregning/avkorting/$behandlingId"),
-            brukerTokenInfo = brukerTokenInfo,
-            postBody = "",
-        ).mapError { error -> throw error }
+        downstreamResourceClient
+            .delete(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/api/beregning/avkorting/$behandlingId"),
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = "",
+            ).mapError { error -> throw error }
     }
 }

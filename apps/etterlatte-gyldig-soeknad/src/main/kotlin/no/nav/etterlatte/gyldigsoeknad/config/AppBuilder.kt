@@ -9,7 +9,9 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.ktor.clientCredential
 
-class AppBuilder(private val env: Miljoevariabler) {
+class AppBuilder(
+    private val env: Miljoevariabler,
+) {
     val behandlingKlient: BehandlingClient by lazy {
         BehandlingClient(
             httpClient("BEHANDLING_AZURE_SCOPE"),
@@ -33,7 +35,8 @@ class AppBuilder(private val env: Miljoevariabler) {
                 it.install(Auth) {
                     clientCredential {
                         config =
-                            env.props.toMutableMap()
+                            env.props
+                                .toMutableMap()
                                 .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
                     }
                 }

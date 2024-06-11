@@ -93,9 +93,7 @@ class Folkeregisteridentifikator private constructor(
         return firesifretAarstallFraTosifret(year, individnummer)
     }
 
-    fun getAge(): Int {
-        return ChronoUnit.YEARS.between(getBirthDate(), LocalDate.now()).toInt()
-    }
+    fun getAge(): Int = ChronoUnit.YEARS.between(getBirthDate(), LocalDate.now()).toInt()
 
     /**
      * Sjekker om fødselsnummeret er av typen "Hjelpenummer".
@@ -136,8 +134,8 @@ class Folkeregisteridentifikator private constructor(
 internal fun firesifretAarstallFraTosifret(
     year: Int,
     individnummer: Int,
-): Int {
-    return if (individnummer < 500) {
+): Int =
+    if (individnummer < 500) {
         (year + 1900)
     } else if ((individnummer < 750) && (54 < year)) {
         (year + 1800)
@@ -148,9 +146,10 @@ internal fun firesifretAarstallFraTosifret(
     } else {
         throw IllegalArgumentException("Ingen gyldig årstall funnet for individnummer $individnummer")
     }
-}
 
-class InvalidFoedselsnummerException(details: String) : UgyldigForespoerselException(
-    code = "UGYLDIG_FNR",
-    detail = details,
-)
+class InvalidFoedselsnummerException(
+    details: String,
+) : UgyldigForespoerselException(
+        code = "UGYLDIG_FNR",
+        detail = details,
+    )

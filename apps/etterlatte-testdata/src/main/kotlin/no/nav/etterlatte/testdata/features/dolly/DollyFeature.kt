@@ -21,7 +21,9 @@ import no.nav.etterlatte.testdata.dolly.DollyService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
+class DollyFeature(
+    private val dollyService: DollyService,
+) : TestDataFeature {
     private val logger: Logger = LoggerFactory.getLogger(DollyFeature::class.java)
     override val beskrivelse: String
         get() = "Opprett søknad automatisk via Dolly"
@@ -86,7 +88,8 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                                 1,
                             )
 
-                        dollyService.opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
+                        dollyService
+                            .opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
                             .also { bestilling ->
                                 logger.info("Bestilling med id ${bestilling.id} har status ${bestilling.ferdig}")
                                 call.respond(bestilling.toJson())

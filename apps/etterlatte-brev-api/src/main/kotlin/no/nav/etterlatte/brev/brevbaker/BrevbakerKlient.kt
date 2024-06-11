@@ -18,22 +18,26 @@ import java.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
-class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String) {
+class BrevbakerKlient(
+    private val client: HttpClient,
+    private val apiUrl: String,
+) {
     private val logger = LoggerFactory.getLogger(BrevbakerKlient::class.java)
     private val sikkerlogg = sikkerlogger()
 
     suspend fun genererPdf(brevRequest: BrevbakerRequest): BrevbakerPdfResponse =
         try {
             measureTimedValue {
-                client.post("$apiUrl/etterlatte/pdf") {
-                    contentType(ContentType.Application.Json)
-                    setBody(brevRequest)
-                    timeout {
-                        socketTimeoutMillis = Duration.ofMinutes(3).toMillis()
-                        requestTimeoutMillis = Duration.ofMinutes(4).toMillis()
-                        connectTimeoutMillis = Duration.ofMinutes(1).toMillis()
-                    }
-                }.body<BrevbakerPdfResponse>()
+                client
+                    .post("$apiUrl/etterlatte/pdf") {
+                        contentType(ContentType.Application.Json)
+                        setBody(brevRequest)
+                        timeout {
+                            socketTimeoutMillis = Duration.ofMinutes(3).toMillis()
+                            requestTimeoutMillis = Duration.ofMinutes(4).toMillis()
+                            connectTimeoutMillis = Duration.ofMinutes(1).toMillis()
+                        }
+                    }.body<BrevbakerPdfResponse>()
             }.let { (result, duration) ->
                 logger.info("Fullført brevbaker pdf OK (${duration.toString(DurationUnit.SECONDS, 2)})")
                 result
@@ -46,10 +50,11 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
     suspend fun genererHTML(brevRequest: BrevbakerRequest): BrevbakerHTMLResponse =
         try {
             measureTimedValue {
-                client.post("$apiUrl/etterlatte/html") {
-                    contentType(ContentType.Application.Json)
-                    setBody(brevRequest.toJsonNode())
-                }.body<BrevbakerHTMLResponse>()
+                client
+                    .post("$apiUrl/etterlatte/html") {
+                        contentType(ContentType.Application.Json)
+                        setBody(brevRequest.toJsonNode())
+                    }.body<BrevbakerHTMLResponse>()
             }.let { (result, duration) ->
                 logger.info("Fullført brevbaker HTML OK (${duration.toString(DurationUnit.SECONDS, 2)})")
                 result
@@ -62,10 +67,11 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
     suspend fun genererJSON(brevRequest: BrevbakerRequest): LetterMarkup =
         try {
             measureTimedValue {
-                client.post("$apiUrl/etterlatte/json") {
-                    contentType(ContentType.Application.Json)
-                    setBody(brevRequest.toJsonNode())
-                }.body<LetterMarkup>()
+                client
+                    .post("$apiUrl/etterlatte/json") {
+                        contentType(ContentType.Application.Json)
+                        setBody(brevRequest.toJsonNode())
+                    }.body<LetterMarkup>()
             }.let { (result, duration) ->
                 logger.info("Fullført brevbaker JSON OK (${duration.toString(DurationUnit.SECONDS, 2)})")
                 result
@@ -76,10 +82,19 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
         }
 }
 
-class BrevbakerException(msg: String, cause: Throwable) : Exception(msg, cause)
+class BrevbakerException(
+    msg: String,
+    cause: Throwable,
+) : Exception(msg, cause)
 
-class BrevbakerPdfResponse(val base64pdf: String, val letterMetadata: LetterMetadata)
+class BrevbakerPdfResponse(
+    val base64pdf: String,
+    val letterMetadata: LetterMetadata,
+)
 
-class BrevbakerHTMLResponse(val html: Map<String, String>, val letterMetadata: LetterMetadata)
+class BrevbakerHTMLResponse(
+    val html: Map<String, String>,
+    val letterMetadata: LetterMetadata,
+)
 
 private fun BrevbakerRequest.toJsonNode(): JsonNode = objectMapper.readTree(toJson())

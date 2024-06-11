@@ -43,7 +43,12 @@ class Behandler(
         val sak = behandlingService.hentSak(sakId)
         logger.info("Henta sak $sakId")
 
-        val doedsdato = grunnlagService.hentGrunnlagForBehandling(behandling).hentAvdoede().first().hentDoedsdato()
+        val doedsdato =
+            grunnlagService
+                .hentGrunnlagForBehandling(behandling)
+                .hentAvdoede()
+                .first()
+                .hentDoedsdato()
 
         behandlingService.settKommerBarnetTilGode(behandling)
         behandlingService.lagreGyldighetsproeving(behandling)

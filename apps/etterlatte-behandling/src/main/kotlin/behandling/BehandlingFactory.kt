@@ -112,14 +112,15 @@ class BehandlingFactory(
                     request = hentDataForOpprettBehandling(sak.id),
                 ).also {
                     if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
-                        oppgaveService.hentOppgaverForSak(sak.id)
-                            .find { it.type == OppgaveType.GJENOPPRETTING_ALDERSOVERGANG && !it.erAvsluttet() }?.let {
+                        oppgaveService
+                            .hentOppgaverForSak(sak.id)
+                            .find { it.type == OppgaveType.GJENOPPRETTING_ALDERSOVERGANG && !it.erAvsluttet() }
+                            ?.let {
                                 oppgaveService.ferdigstillOppgave(it.id, brukerTokenInfo)
                             }
                     }
                 } ?: throw IllegalStateException("Kunne ikke opprette behandling")
-            }
-                .also { it.sendMeldingForHendelse() }
+            }.also { it.sendMeldingForHendelse() }
                 .behandling
 
         val gyldighetsvurdering =
@@ -175,14 +176,16 @@ class BehandlingFactory(
                 throw ManuellMigreringHarEksisterendeIverksattBehandling()
             }
             val forrigeBehandling = request.iverksatteEllerAttesterteBehandlinger.maxBy { it.behandlingOpprettet }
-            revurderingService.opprettAutomatiskRevurdering(
-                sakId = sakId,
-                persongalleri = persongalleri,
-                forrigeBehandling = forrigeBehandling,
-                mottattDato = mottattDato,
-                kilde = kilde,
-                revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
-            ).oppdater().let { BehandlingOgOppgave(it, null) }
+            revurderingService
+                .opprettAutomatiskRevurdering(
+                    sakId = sakId,
+                    persongalleri = persongalleri,
+                    forrigeBehandling = forrigeBehandling,
+                    mottattDato = mottattDato,
+                    kilde = kilde,
+                    revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
+                ).oppdater()
+                .let { BehandlingOgOppgave(it, null) }
         } else {
             val harBehandlingUnderbehandling =
                 request.alleBehandlingerISak.filter { behandling ->
@@ -269,17 +272,23 @@ class BehandlingFactory(
     }
 }
 
-data class BehandlingOgOppgave(val behandling: Behandling, val oppgave: OppgaveIntern?, val sendMeldingForHendelse: () -> Unit = {})
-
-class ManuellMigreringHarEksisterendeIverksattBehandling : UgyldigForespoerselException(
-    code = "MANUELL_MIGRERING_EKSISTERENDE_IVERKSATT",
-    detail = "Det eksisterer allerede en sak med en iverksatt behandling for angitt søker",
+data class BehandlingOgOppgave(
+    val behandling: Behandling,
+    val oppgave: OppgaveIntern?,
+    val sendMeldingForHendelse: () -> Unit = {},
 )
 
-class UgyldigEnhetException : UgyldigForespoerselException(
-    code = "UGYLDIG-ENHET",
-    detail = "Enhet brukt i form er matcher ingen gyldig enhet",
-)
+class ManuellMigreringHarEksisterendeIverksattBehandling :
+    UgyldigForespoerselException(
+        code = "MANUELL_MIGRERING_EKSISTERENDE_IVERKSATT",
+        detail = "Det eksisterer allerede en sak med en iverksatt behandling for angitt søker",
+    )
+
+class UgyldigEnhetException :
+    UgyldigForespoerselException(
+        code = "UGYLDIG-ENHET",
+        detail = "Enhet brukt i form er matcher ingen gyldig enhet",
+    )
 
 fun Vedtaksloesning.foerstOpprettaIPesys() = this == Vedtaksloesning.PESYS || this == Vedtaksloesning.GJENOPPRETTA
 

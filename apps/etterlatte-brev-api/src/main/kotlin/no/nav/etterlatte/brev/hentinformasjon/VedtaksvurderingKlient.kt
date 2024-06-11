@@ -15,7 +15,10 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
+class VedtaksvurderingKlient(
+    config: Config,
+    httpClient: HttpClient,
+) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
@@ -31,13 +34,14 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
         try {
             logger.info("Henter vedtaksvurdering behandling med behandlingId=$behandlingId")
 
-            return downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId"),
-                brukerTokenInfo,
-            ).mapBoth(
-                success = { resource -> deserialize(resource.response.toString()) },
-                failure = { errorResponse -> throw errorResponse },
-            )
+            return downstreamResourceClient
+                .get(
+                    Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId"),
+                    brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> deserialize(resource.response.toString()) },
+                    failure = { errorResponse -> throw errorResponse },
+                )
         } catch (re: ResponseException) {
             if (re.response.status == HttpStatusCode.NotFound) {
                 logger.info("Fant ikke vedtak for behandling $behandlingId. Dette er forventa hvis det f.eks. er et varselbrev.")

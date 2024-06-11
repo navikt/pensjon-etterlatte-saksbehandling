@@ -236,9 +236,7 @@ data class PdlMetadata(
     val master: String,
     val opplysningsId: String,
 ) {
-    fun sisteRegistrertDato(): LocalDateTime {
-        return endringer.maxByOrNull { it.registrert }?.registrert!!
-    }
+    fun sisteRegistrertDato(): LocalDateTime = endringer.maxByOrNull { it.registrert }?.registrert!!
 }
 
 data class PdlEndring(

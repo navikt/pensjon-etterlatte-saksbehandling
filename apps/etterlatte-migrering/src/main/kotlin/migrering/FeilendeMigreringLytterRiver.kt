@@ -25,8 +25,10 @@ import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, private val repository: PesysRepository) :
-    ListenerMedLogging() {
+internal class FeilendeMigreringLytterRiver(
+    rapidsConnection: RapidsConnection,
+    private val repository: PesysRepository,
+) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
@@ -93,7 +95,8 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
             repository.hentPesysId(packet.behandlingId)!!.let { Pair(it.pesysId, it.behandlingId) }
         } else if (packet.harVerdi("vedtak.behandlingId")) {
             val id = packet["vedtak.behandlingId"].asText().toUUID()
-            repository.hentPesysId(id)
+            repository
+                .hentPesysId(id)
                 ?.let { Pair(it.pesysId, it.behandlingId) }
                 ?: Pair(null, id).also { logger.warn("Mangler pesys-identifikator for behandling $id") }
         } else {

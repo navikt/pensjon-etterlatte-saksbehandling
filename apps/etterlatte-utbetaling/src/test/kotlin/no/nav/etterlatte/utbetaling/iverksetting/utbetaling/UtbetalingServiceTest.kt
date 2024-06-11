@@ -96,7 +96,11 @@ internal class UtbetalingServiceTest {
                         kodeStatusLinje == null &&
                             refDelytelseId == null &&
                             refFagsystemId == null &&
-                            datoVedtakFom == vedtak.pensjonTilUtbetaling.first().periode.fom.toXmlDate() &&
+                            datoVedtakFom ==
+                            vedtak.pensjonTilUtbetaling
+                                .first()
+                                .periode.fom
+                                .toXmlDate() &&
                             sats == vedtak.pensjonTilUtbetaling.first().beloep
                     }
                 },
@@ -139,9 +143,17 @@ internal class UtbetalingServiceTest {
                 match {
                     with(it.oppdrag110.oppdragsLinje150.first()) {
                         kodeStatusLinje == null &&
-                            refDelytelseId == eksisterendeUtbetaling.utbetalingslinjer.first().id.value.toString() &&
+                            refDelytelseId ==
+                            eksisterendeUtbetaling.utbetalingslinjer
+                                .first()
+                                .id.value
+                                .toString() &&
                             refFagsystemId == eksisterendeUtbetaling.sakId.value.toString() &&
-                            datoVedtakFom == vedtak.pensjonTilUtbetaling.first().periode.fom.toXmlDate() &&
+                            datoVedtakFom ==
+                            vedtak.pensjonTilUtbetaling
+                                .first()
+                                .periode.fom
+                                .toXmlDate() &&
                             sats == vedtak.pensjonTilUtbetaling.first().beloep
                     }
                 },
@@ -183,9 +195,17 @@ internal class UtbetalingServiceTest {
                 match {
                     with(it.oppdrag110.oppdragsLinje150.first()) {
                         kodeStatusLinje == TkodeStatusLinje.OPPH &&
-                            refDelytelseId == eksisterendeUtbetaling.utbetalingslinjer.first().id.value.toString() &&
+                            refDelytelseId ==
+                            eksisterendeUtbetaling.utbetalingslinjer
+                                .first()
+                                .id.value
+                                .toString() &&
                             refFagsystemId == eksisterendeUtbetaling.sakId.value.toString() &&
-                            datoVedtakFom == vedtak.pensjonTilUtbetaling.first().periode.fom.toXmlDate() &&
+                            datoVedtakFom ==
+                            vedtak.pensjonTilUtbetaling
+                                .first()
+                                .periode.fom
+                                .toXmlDate() &&
                             sats == null
                     }
                 },
@@ -233,21 +253,39 @@ internal class UtbetalingServiceTest {
                         kodeEndring = "ENDR"
                     }
                     with(it.oppdrag110.oppdragsLinje150.first()) {
-                        refDelytelseId == eksisterendeUtbetaling.utbetalingslinjer.first().id.value.toString() &&
+                        refDelytelseId ==
+                            eksisterendeUtbetaling.utbetalingslinjer
+                                .first()
+                                .id.value
+                                .toString() &&
                             refFagsystemId == eksisterendeUtbetaling.sakId.value.toString() &&
-                            datoVedtakFom == vedtak.pensjonTilUtbetaling.first().periode.fom.toXmlDate() &&
+                            datoVedtakFom ==
+                            vedtak.pensjonTilUtbetaling
+                                .first()
+                                .periode.fom
+                                .toXmlDate() &&
                             sats == vedtak.pensjonTilUtbetaling.first().beloep
                     }
                     with(it.oppdrag110.oppdragsLinje150[1]) {
-                        refDelytelseId == vedtak.pensjonTilUtbetaling.first().id.toString() &&
+                        refDelytelseId ==
+                            vedtak.pensjonTilUtbetaling
+                                .first()
+                                .id
+                                .toString() &&
                             refFagsystemId == eksisterendeUtbetaling.sakId.value.toString() &&
-                            datoVedtakFom == vedtak.pensjonTilUtbetaling[1].periode.fom.toXmlDate() &&
+                            datoVedtakFom ==
+                            vedtak.pensjonTilUtbetaling[1]
+                                .periode.fom
+                                .toXmlDate() &&
                             sats == vedtak.pensjonTilUtbetaling[1].beloep
                     }
                     with(it.oppdrag110.oppdragsLinje150[2]) {
                         refDelytelseId == vedtak.pensjonTilUtbetaling[1].id.toString() &&
                             refFagsystemId == eksisterendeUtbetaling.sakId.value.toString() &&
-                            datoVedtakFom == vedtak.pensjonTilUtbetaling[2].periode.fom.toXmlDate() &&
+                            datoVedtakFom ==
+                            vedtak.pensjonTilUtbetaling[2]
+                                .periode.fom
+                                .toXmlDate() &&
                             sats == vedtak.pensjonTilUtbetaling[2].beloep
                     }
                 },
@@ -280,16 +318,31 @@ internal class UtbetalingServiceTest {
                         kodeEndring = "ENDR"
                     }
                     with(it.oppdrag110.oppdragsLinje150.first()) {
-                        refDelytelseId == eksisterendeUtbetaling.utbetalingslinjer.first().id.value.toString() &&
+                        refDelytelseId ==
+                            eksisterendeUtbetaling.utbetalingslinjer
+                                .first()
+                                .id.value
+                                .toString() &&
                             refFagsystemId == eksisterendeUtbetaling.sakId.value.toString() &&
-                            datoVedtakFom == vedtak.pensjonTilUtbetaling.first().periode.fom.toXmlDate() &&
+                            datoVedtakFom ==
+                            vedtak.pensjonTilUtbetaling
+                                .first()
+                                .periode.fom
+                                .toXmlDate() &&
                             sats == vedtak.pensjonTilUtbetaling.first().beloep
                     }
                     with(it.oppdrag110.oppdragsLinje150[1]) {
                         kodeStatusLinje == TkodeStatusLinje.OPPH &&
-                            refDelytelseId == vedtak.pensjonTilUtbetaling.first().id.toString() &&
+                            refDelytelseId ==
+                            vedtak.pensjonTilUtbetaling
+                                .first()
+                                .id
+                                .toString() &&
                             refFagsystemId == eksisterendeUtbetaling.sakId.value.toString() &&
-                            datoVedtakFom == vedtak.pensjonTilUtbetaling[1].periode.fom.toXmlDate() &&
+                            datoVedtakFom ==
+                            vedtak.pensjonTilUtbetaling[1]
+                                .periode.fom
+                                .toXmlDate() &&
                             sats == vedtak.pensjonTilUtbetaling[1].beloep
                     }
                 },

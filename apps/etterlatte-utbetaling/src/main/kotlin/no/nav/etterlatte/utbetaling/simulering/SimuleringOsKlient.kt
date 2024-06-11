@@ -28,10 +28,15 @@ private typealias RequestWrapper = no.nav.system.os.tjenester.simulerfpservice.s
 private typealias ResponseWrapper = no.nav.system.os.tjenester.simulerfpservice.simulerfpservicegrensesnitt.SimulerBeregningResponse
 
 fun simuleringObjectMapper(): ObjectMapper =
-    objectMapper.copy()
+    objectMapper
+        .copy()
         .registerModule(StringTrimModule())
 
-class SimuleringOsKlient(config: Config, private val client: HttpClient, private val objectMapper: ObjectMapper) {
+class SimuleringOsKlient(
+    config: Config,
+    private val client: HttpClient,
+    private val objectMapper: ObjectMapper,
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val url = config.getString("etterlatteproxy.url")
@@ -62,16 +67,19 @@ class SimuleringOsKlient(config: Config, private val client: HttpClient, private
     }
 }
 
-class SimuleringOsKlientException(statusCode: HttpStatusCode, override val message: String) : ForespoerselException(
-    status = statusCode.value,
-    code = "SIMULERING_OPPDRAG_FEIL",
-    detail = message,
-    meta =
-        mapOf(
-            "correlation-id" to getCorrelationId(),
-            "tidspunkt" to Tidspunkt.now(),
-        ),
-)
+class SimuleringOsKlientException(
+    statusCode: HttpStatusCode,
+    override val message: String,
+) : ForespoerselException(
+        status = statusCode.value,
+        code = "SIMULERING_OPPDRAG_FEIL",
+        detail = message,
+        meta =
+            mapOf(
+                "correlation-id" to getCorrelationId(),
+                "tidspunkt" to Tidspunkt.now(),
+            ),
+    )
 
 internal class StringTrimModule : SimpleModule("string-trim-module") {
     init {
@@ -84,9 +92,7 @@ internal class StringTrimModule : SimpleModule("string-trim-module") {
                 override fun deserialize(
                     jsonParser: JsonParser,
                     ctx: DeserializationContext,
-                ): String {
-                    return jsonParser.valueAsString.trim { it <= ' ' }
-                }
+                ): String = jsonParser.valueAsString.trim { it <= ' ' }
             },
         )
     }

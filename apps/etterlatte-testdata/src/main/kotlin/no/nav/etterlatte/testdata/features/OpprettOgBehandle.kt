@@ -22,8 +22,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.concurrent.thread
 
-class OpprettOgBehandle(private val dollyService: DollyService, private val familieoppretter: Familieoppretter) :
-    TestDataFeature {
+class OpprettOgBehandle(
+    private val dollyService: DollyService,
+    private val familieoppretter: Familieoppretter,
+) : TestDataFeature {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
     override val beskrivelse: String
         get() = "Opprett og behandle søknad(er)"

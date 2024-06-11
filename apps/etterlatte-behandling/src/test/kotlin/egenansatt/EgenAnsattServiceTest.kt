@@ -46,7 +46,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class EgenAnsattServiceTest(val dataSource: DataSource) {
+internal class EgenAnsattServiceTest(
+    val dataSource: DataSource,
+) {
     private val sikkerLogg: Logger = sikkerlogger()
 
     private lateinit var sakRepo: SakDao

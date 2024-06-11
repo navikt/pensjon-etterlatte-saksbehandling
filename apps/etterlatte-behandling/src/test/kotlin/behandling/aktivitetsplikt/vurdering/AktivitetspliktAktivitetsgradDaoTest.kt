@@ -27,7 +27,9 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
-class AktivitetspliktAktivitetsgradDaoTest(ds: DataSource) {
+class AktivitetspliktAktivitetsgradDaoTest(
+    ds: DataSource,
+) {
     private val dao = AktivitetspliktAktivitetsgradDao(ConnectionAutoclosingTest(ds))
     private val sakDao = SakDao(ConnectionAutoclosingTest(ds))
     private val oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(ds))

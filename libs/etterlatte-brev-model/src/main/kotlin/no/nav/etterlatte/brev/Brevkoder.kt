@@ -1,6 +1,9 @@
 package no.nav.etterlatte.brev
 
-enum class Brevkoder(val redigering: EtterlatteBrevKode, val ferdigstilling: EtterlatteBrevKode = redigering) {
+enum class Brevkoder(
+    val redigering: EtterlatteBrevKode,
+    val ferdigstilling: EtterlatteBrevKode = redigering,
+) {
     OMREGNING(
         EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING,
         EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING_FERDIG,

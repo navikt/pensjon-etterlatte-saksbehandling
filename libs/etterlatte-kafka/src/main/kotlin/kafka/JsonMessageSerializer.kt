@@ -3,7 +3,9 @@ package no.nav.etterlatte.kafka
 import org.apache.kafka.common.serialization.Serializer
 
 class JsonMessageSerializer : Serializer<JsonMessage> {
-    private val stringSerializer = org.apache.kafka.common.serialization.StringSerializer()
+    private val stringSerializer =
+        org.apache.kafka.common.serialization
+            .StringSerializer()
 
     override fun configure(
         configs: Map<String?, *>,
@@ -15,7 +17,5 @@ class JsonMessageSerializer : Serializer<JsonMessage> {
     override fun serialize(
         topic: String,
         data: JsonMessage,
-    ): ByteArray {
-        return stringSerializer.serialize(topic, data.toJson())
-    }
+    ): ByteArray = stringSerializer.serialize(topic, data.toJson())
 }

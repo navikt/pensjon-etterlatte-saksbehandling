@@ -10,7 +10,9 @@ import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.YearMonth
 
-class TidshendelsePacket(packet: JsonMessage) {
+class TidshendelsePacket(
+    packet: JsonMessage,
+) {
     val sakId = packet.sakId
     val behandlingsmaaned: YearMonth = packet.dato.let { YearMonth.of(it.year, it.month) }
     val harLoependeYtelse = packet[HENDELSE_DATA_KEY]["loependeYtelse"]?.asBoolean() == true

@@ -116,9 +116,24 @@ internal class TrygdetidServiceTest {
             }
 
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val forventetFoedselsdato = grunnlag.hentAvdoede().first().hentFoedselsdato()!!.verdi
-        val forventetDoedsdato = grunnlag.hentAvdoede().first().hentDoedsdato()!!.verdi
-        val forventetIdent = grunnlag.hentAvdoede().first().hentFoedselsnummer()!!.verdi
+        val forventetFoedselsdato =
+            grunnlag
+                .hentAvdoede()
+                .first()
+                .hentFoedselsdato()!!
+                .verdi
+        val forventetDoedsdato =
+            grunnlag
+                .hentAvdoede()
+                .first()
+                .hentDoedsdato()!!
+                .verdi
+        val forventetIdent =
+            grunnlag
+                .hentAvdoede()
+                .first()
+                .hentFoedselsnummer()!!
+                .verdi
         val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
 
         every { repository.hentTrygdetiderForBehandling(any()) } returns emptyList() andThen listOf(trygdetid)
@@ -270,7 +285,12 @@ internal class TrygdetidServiceTest {
             }
         val forrigeBehandlingId = randomUUID()
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val forventetIdent = grunnlag.hentAvdoede().first().hentFoedselsnummer()!!.verdi
+        val forventetIdent =
+            grunnlag
+                .hentAvdoede()
+                .first()
+                .hentFoedselsnummer()!!
+                .verdi
         val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
@@ -389,7 +409,12 @@ internal class TrygdetidServiceTest {
             }
         val forrigeBehandlingId = randomUUID()
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val forventetIdent = grunnlag.hentAvdoede().first().hentFoedselsnummer()!!.verdi
+        val forventetIdent =
+            grunnlag
+                .hentAvdoede()
+                .first()
+                .hentFoedselsnummer()!!
+                .verdi
         val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
@@ -992,7 +1017,12 @@ internal class TrygdetidServiceTest {
 
         val behandling = behandling(behandlingId)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val forventetIdent = grunnlag.hentAvdoede().first().hentFoedselsnummer()!!.verdi
+        val forventetIdent =
+            grunnlag
+                .hentAvdoede()
+                .first()
+                .hentFoedselsnummer()!!
+                .verdi
 
         val beregnetTrygdetid =
             DetaljertBeregnetTrygdetid(
@@ -1081,7 +1111,12 @@ internal class TrygdetidServiceTest {
 
         val behandling = behandling(behandlingId)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val forventetIdent = grunnlag.hentAvdoede().first().hentFoedselsnummer()!!.verdi
+        val forventetIdent =
+            grunnlag
+                .hentAvdoede()
+                .first()
+                .hentFoedselsnummer()!!
+                .verdi
 
         val beregnetTrygdetid =
             DetaljertBeregnetTrygdetid(
@@ -1243,9 +1278,24 @@ internal class TrygdetidServiceTest {
             }
         val grunnlag =
             GrunnlagTestData(opplysningsmapAvdoedOverrides = eldreAvdoedTestopplysningerMap).hentOpplysningsgrunnlag()
-        val forventetFoedselsdato = grunnlag.hentAvdoede().first().hentFoedselsdato()!!.verdi
-        val forventetDoedsdato = grunnlag.hentAvdoede().first().hentDoedsdato()!!.verdi
-        val forventetIdent = grunnlag.hentAvdoede().first().hentFoedselsnummer()!!.verdi
+        val forventetFoedselsdato =
+            grunnlag
+                .hentAvdoede()
+                .first()
+                .hentFoedselsdato()!!
+                .verdi
+        val forventetDoedsdato =
+            grunnlag
+                .hentAvdoede()
+                .first()
+                .hentDoedsdato()!!
+                .verdi
+        val forventetIdent =
+            grunnlag
+                .hentAvdoede()
+                .first()
+                .hentFoedselsnummer()!!
+                .verdi
         val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
 
         every { repository.hentTrygdetiderForBehandling(any()) } returns emptyList() andThen listOf(trygdetid)

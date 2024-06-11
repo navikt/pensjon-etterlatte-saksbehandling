@@ -105,8 +105,8 @@ class NotatService(
         notatData: StrukturertBrev,
         notatId: BrevID?,
         bruker: BrukerTokenInfo,
-    ): Pdf {
-        return brevbakerService.genererPdf(
+    ): Pdf =
+        brevbakerService.genererPdf(
             notatId,
             brevRequest =
                 BrevbakerRequest.fraStrukturertBrev(
@@ -114,7 +114,6 @@ class NotatService(
                     felles = mapFelles(notatData.sak.id, notatData.sak.enhet, bruker),
                 ),
         )
-    }
 
     private suspend fun journalfoerInterntNotat(
         notat: Brev,
@@ -186,13 +185,10 @@ class NotatService(
     suspend fun forhaandsvisNotat(
         notatData: StrukturertBrev,
         bruker: BrukerTokenInfo,
-    ): Pdf {
-        return genererPdfBrevbaker(notatData, null, bruker)
-    }
+    ): Pdf = genererPdfBrevbaker(notatData, null, bruker)
 
-    fun hentPdf(notatId: BrevID): Pdf {
-        return checkNotNull(brevRepository.hentPdf(notatId)) {
+    fun hentPdf(notatId: BrevID): Pdf =
+        checkNotNull(brevRepository.hentPdf(notatId)) {
             "Fant ikke generert pdf for notat med id=$notatId"
         }
-    }
 }

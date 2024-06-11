@@ -120,15 +120,14 @@ internal class JournalfoerVedtaksbrevRiverTest {
         verify { vedtaksbrevService wasNot Called }
     }
 
-    private fun opprettMelding(vedtak: VedtakDto): JsonMessage {
-        return JsonMessage.newMessage(
+    private fun opprettMelding(vedtak: VedtakDto): JsonMessage =
+        JsonMessage.newMessage(
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
                 VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
                 "vedtak" to vedtak,
             ),
         )
-    }
 
     private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): VedtakDto {
         val behandlingId = UUID.randomUUID()

@@ -11,29 +11,31 @@ fun MockOAuth2Server.issueSaksbehandlerToken(
     navIdent: String = "Saksbehandler01",
     groups: List<String> = listOf(),
 ): String =
-    this.issueToken(
-        issuerId = AZURE_ISSUER,
-        audience = CLIENT_ID,
-        claims =
-            mapOf(
-                "navn" to navn,
-                "NAVident" to navIdent,
-                "groups" to groups,
-            ),
-    ).serialize()
+    this
+        .issueToken(
+            issuerId = AZURE_ISSUER,
+            audience = CLIENT_ID,
+            claims =
+                mapOf(
+                    "navn" to navn,
+                    "NAVident" to navIdent,
+                    "groups" to groups,
+                ),
+        ).serialize()
 
 fun MockOAuth2Server.issueSystembrukerToken(
     mittsystem: String = UUID.randomUUID().toString(),
     roles: List<String> = listOf(),
 ): String =
-    this.issueToken(
-        issuerId = AZURE_ISSUER,
-        audience = CLIENT_ID,
-        claims =
-            mapOf(
-                "sub" to mittsystem,
-                "oid" to mittsystem,
-                "azp_name" to mittsystem,
-                "roles" to roles,
-            ),
-    ).serialize()
+    this
+        .issueToken(
+            issuerId = AZURE_ISSUER,
+            audience = CLIENT_ID,
+            claims =
+                mapOf(
+                    "sub" to mittsystem,
+                    "oid" to mittsystem,
+                    "azp_name" to mittsystem,
+                    "roles" to roles,
+                ),
+        ).serialize()

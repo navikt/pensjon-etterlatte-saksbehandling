@@ -1,6 +1,9 @@
 package no.nav.etterlatte.trygdetid
 
-enum class LandNormalisert(val isoCode: String, val beskrivelse: String) {
+enum class LandNormalisert(
+    val isoCode: String,
+    val beskrivelse: String,
+) {
     // Sorted by ISO 3166-1 alpha-3 code:
     ARUBA("ABW", "Aruba"),
     AFGHANISTAN("AFG", "Afghanistan"),
@@ -277,8 +280,6 @@ enum class LandNormalisert(val isoCode: String, val beskrivelse: String) {
     companion object {
         private val mapAvLandkodeOgBeskrivelse = entries.associate { it.isoCode to it.beskrivelse }
 
-        fun hentBeskrivelse(isoCode: String): String? {
-            return mapAvLandkodeOgBeskrivelse[isoCode]
-        }
+        fun hentBeskrivelse(isoCode: String): String? = mapAvLandkodeOgBeskrivelse[isoCode]
     }
 }

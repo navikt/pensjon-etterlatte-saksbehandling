@@ -25,40 +25,38 @@ class BehandlingClient(
         sak: Long,
         mottattDato: LocalDateTime,
         persongalleri: Persongalleri,
-    ): UUID {
-        return runBlocking {
-            sakOgBehandlingApp.post("$url/behandlinger/opprettbehandling") {
-                contentType(ContentType.Application.Json)
-                setBody(BehandlingsBehov(sak, persongalleri, mottattDato.toString()))
-            }
-                .also { require(it.status.isSuccess()) }
+    ): UUID =
+        runBlocking {
+            sakOgBehandlingApp
+                .post("$url/behandlinger/opprettbehandling") {
+                    contentType(ContentType.Application.Json)
+                    setBody(BehandlingsBehov(sak, persongalleri, mottattDato.toString()))
+                }.also { require(it.status.isSuccess()) }
                 .body<String>()
         }.let {
             UUID.fromString(it)
         }
-    }
 
     fun finnEllerOpprettSak(
         fnr: String,
         saktype: SakType,
-    ): Sak {
-        return runBlocking {
-            sakOgBehandlingApp.post("$url/personer/saker/$saktype") {
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(fnr))
-            }.body()
+    ): Sak =
+        runBlocking {
+            sakOgBehandlingApp
+                .post("$url/personer/saker/$saktype") {
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO(fnr))
+                }.body()
         }
-    }
 
     fun lagreGyldighetsVurdering(
         behandlingId: UUID,
         gyldighet: GyldighetsResultat,
-    ) {
-        return runBlocking {
-            sakOgBehandlingApp.post("$url/behandlinger/$behandlingId/gyldigfremsatt") {
+    ) = runBlocking {
+        sakOgBehandlingApp
+            .post("$url/behandlinger/$behandlingId/gyldigfremsatt") {
                 contentType(ContentType.Application.Json)
                 setBody(gyldighet)
             }.body<String>()
-        }
     }
 }

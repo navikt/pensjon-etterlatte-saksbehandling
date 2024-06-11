@@ -61,7 +61,9 @@ internal class OpprettBrevRiver(
     }
 }
 
-enum class InformasjonsbrevFeatureToggle(private val key: String) : FeatureToggle {
+enum class InformasjonsbrevFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
     SendInformasjonsbrev("send-informasjonsbrev"),
     ;
 

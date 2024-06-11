@@ -20,7 +20,9 @@ data class GyldighetsResultat(
     val vurdertDato: LocalDateTime,
 )
 
-enum class VurderingsResultat(val prioritet: Int) {
+enum class VurderingsResultat(
+    val prioritet: Int,
+) {
     OPPFYLT(1),
     KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING(2),
     IKKE_OPPFYLT(3),

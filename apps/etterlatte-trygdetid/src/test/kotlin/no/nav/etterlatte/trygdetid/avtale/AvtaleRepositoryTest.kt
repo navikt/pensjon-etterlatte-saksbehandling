@@ -15,7 +15,9 @@ import java.util.UUID.randomUUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class AvtaleRepositoryTest(dataSource: DataSource) {
+internal class AvtaleRepositoryTest(
+    dataSource: DataSource,
+) {
     companion object {
         @RegisterExtension
         val dbExtension = DatabaseExtension()

@@ -8,35 +8,35 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.util.UUID
 
-class InstitusjonsoppholdDao(private val connectionAutoclosing: ConnectionAutoclosing) {
+class InstitusjonsoppholdDao(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) {
     fun lagreInstitusjonsopphold(
         sakId: Long,
         saksbehandler: Grunnlagsopplysning.Saksbehandler,
         institusjonoppholdBegrunnelse: InstitusjonsoppholdBegrunnelse,
-    ) {
-        return connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        "INSERT INTO institusjonsoppholdhendelse(id, sak_id, kanGiReduksjon, kanGiReduksjonTekst," +
-                            "merEnnTreMaaneder, merEnnTreMaanederTekst, saksbehandler, grunnlagsendringshendelse_id) " +
-                            "VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?::UUID)",
-                    )
-                statement.setString(1, UUID.randomUUID().toString())
-                statement.setLong(2, sakId)
-                statement.setString(3, institusjonoppholdBegrunnelse.kanGiReduksjonAvYtelse.name)
-                statement.setString(4, institusjonoppholdBegrunnelse.kanGiReduksjonAvYtelseBegrunnelse)
-                statement.setString(5, institusjonoppholdBegrunnelse.forventetVarighetMerEnn3Maaneder.name)
-                statement.setString(6, institusjonoppholdBegrunnelse.forventetVarighetMerEnn3MaanederBegrunnelse)
-                statement.setString(7, saksbehandler.toJson())
-                statement.setString(8, institusjonoppholdBegrunnelse.grunnlagsEndringshendelseId)
-                statement.executeUpdate()
-            }
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val statement =
+                prepareStatement(
+                    "INSERT INTO institusjonsoppholdhendelse(id, sak_id, kanGiReduksjon, kanGiReduksjonTekst," +
+                        "merEnnTreMaaneder, merEnnTreMaanederTekst, saksbehandler, grunnlagsendringshendelse_id) " +
+                        "VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?::UUID)",
+                )
+            statement.setString(1, UUID.randomUUID().toString())
+            statement.setLong(2, sakId)
+            statement.setString(3, institusjonoppholdBegrunnelse.kanGiReduksjonAvYtelse.name)
+            statement.setString(4, institusjonoppholdBegrunnelse.kanGiReduksjonAvYtelseBegrunnelse)
+            statement.setString(5, institusjonoppholdBegrunnelse.forventetVarighetMerEnn3Maaneder.name)
+            statement.setString(6, institusjonoppholdBegrunnelse.forventetVarighetMerEnn3MaanederBegrunnelse)
+            statement.setString(7, saksbehandler.toJson())
+            statement.setString(8, institusjonoppholdBegrunnelse.grunnlagsEndringshendelseId)
+            statement.executeUpdate()
         }
     }
 
-    fun hentBegrunnelse(grunnlagsEndringshendelseId: String): InstitusjonsoppholdBegrunnelseMedSaksbehandler? {
-        return connectionAutoclosing.hentConnection {
+    fun hentBegrunnelse(grunnlagsEndringshendelseId: String): InstitusjonsoppholdBegrunnelseMedSaksbehandler? =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -56,5 +56,4 @@ class InstitusjonsoppholdDao(private val connectionAutoclosing: ConnectionAutocl
                 }
             }
         }
-    }
 }

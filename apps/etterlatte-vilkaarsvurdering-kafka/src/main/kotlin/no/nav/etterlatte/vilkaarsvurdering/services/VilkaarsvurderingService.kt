@@ -30,8 +30,10 @@ interface VilkaarsvurderingService {
     fun harRettUtenTidsbegrensning(behandlingId: String): Boolean
 }
 
-class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: HttpClient, private val url: String) :
-    VilkaarsvurderingService {
+class VilkaarsvurderingServiceImpl(
+    private val vilkaarsvurderingKlient: HttpClient,
+    private val url: String,
+) : VilkaarsvurderingService {
     override fun kopierForrigeVilkaarsvurdering(
         behandlingId: UUID,
         behandlingViOmregnerFra: UUID,
@@ -60,13 +62,15 @@ class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: HttpClie
 
     override fun harMigrertYrkesskadefordel(behandlingId: String): Boolean =
         runBlocking {
-            vilkaarsvurderingKlient.get("$url/api/vilkaarsvurdering/$behandlingId/migrert-yrkesskadefordel")
+            vilkaarsvurderingKlient
+                .get("$url/api/vilkaarsvurdering/$behandlingId/migrert-yrkesskadefordel")
                 .body<Map<String, Any>>()["migrertYrkesskadefordel"] as Boolean
         }
 
     override fun harRettUtenTidsbegrensning(behandlingId: String): Boolean =
         runBlocking {
-            vilkaarsvurderingKlient.get("$url/api/vilkaarsvurdering/$behandlingId/rett-uten-tidsbegrensning")
+            vilkaarsvurderingKlient
+                .get("$url/api/vilkaarsvurdering/$behandlingId/rett-uten-tidsbegrensning")
                 .body<Map<String, Any>>()["rettUtenTidsbegrensning"] as Boolean
         }
 }

@@ -76,9 +76,15 @@ class SimuleringOsService(
                     brukerTokenInfo,
                 )
 
-            return simuleringOsKlient.simuler(request).also {
-                it.infomelding?.beskrMelding?.trim().let { melding -> logger.info(melding) }
-            }.simulering?.tilSimulertBeregning()
+            return simuleringOsKlient
+                .simuler(request)
+                .also {
+                    it.infomelding
+                        ?.beskrMelding
+                        ?.trim()
+                        .let { melding -> logger.info(melding) }
+                }.simulering
+                ?.tilSimulertBeregning()
         } else {
             throw IkkeStoettetSimulering(behandlingId)
         }
@@ -103,7 +109,12 @@ class SimuleringOsService(
         utbetalingsperioder: List<Utbetalingslinje>,
     ) = SimulerBeregningRequest.SimuleringsPeriode().apply {
         datoSimulerFom = vedtakVirkFom.atDay(1).toOppdragDate()
-        datoSimulerTom = utbetalingsperioder.lastOrNull()?.periode?.til?.toOppdragDate()
+        datoSimulerTom =
+            utbetalingsperioder
+                .lastOrNull()
+                ?.periode
+                ?.til
+                ?.toOppdragDate()
     }
 
     private fun tilOppdrag(
@@ -111,8 +122,8 @@ class SimuleringOsService(
         erFoersteUtbetalingPaaSak: Boolean,
         vedtakVirkFom: YearMonth,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Oppdrag {
-        return Oppdrag().apply {
+    ): Oppdrag =
+        Oppdrag().apply {
             fagsystemId = utbetaling.sakId.value.toString()
             oppdragGjelderId = utbetaling.stoenadsmottaker.value
             saksbehId = brukerTokenInfo.ident()
@@ -139,7 +150,6 @@ class SimuleringOsService(
                 },
             )
         }
-    }
 
     private fun tilOppdragsLinje(
         utbetaling: Utbetaling,
@@ -175,11 +185,15 @@ class SimuleringOsService(
 }
 
 private fun LocalDate.toOppdragDate(): String =
-    DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        .withZone(norskTidssone).format(this)
+    DateTimeFormatter
+        .ofPattern("yyyy-MM-dd")
+        .withZone(norskTidssone)
+        .format(this)
 
-class IkkeStoettetSimulering(behandlingId: UUID) : UgyldigForespoerselException(
-    code = "SIMULERING_IKKE_STOETTET",
-    detail = "Kan ikke simulere for behandlingId=$behandlingId",
-    meta = mapOf("behandlingId" to behandlingId),
-)
+class IkkeStoettetSimulering(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "SIMULERING_IKKE_STOETTET",
+        detail = "Kan ikke simulere for behandlingId=$behandlingId",
+        meta = mapOf("behandlingId" to behandlingId),
+    )

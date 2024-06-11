@@ -8,21 +8,22 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.util.UUID
 
-class KommerBarnetTilGodeDao(private val connectionAutoclosing: ConnectionAutoclosing) {
+class KommerBarnetTilGodeDao(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) {
     fun lagreKommerBarnetTilGode(kommerBarnetTilGode: KommerBarnetTilgode) {
         if (kommerBarnetTilGode.behandlingId?.let { hentKommerBarnetTilGode(it) } != null) {
             connectionAutoclosing.hentConnection { connection ->
                 with(connection) {
                     prepareStatement(
                         "UPDATE kommerbarnettilgode SET svar = ?, begrunnelse = ?, kilde = ? WHERE behandling_id = ?",
-                    )
-                        .also {
-                            it.setString(1, kommerBarnetTilGode.svar.name)
-                            it.setString(2, kommerBarnetTilGode.begrunnelse)
-                            it.setObject(3, kommerBarnetTilGode.kilde.toJson())
-                            it.setObject(4, kommerBarnetTilGode.behandlingId)
-                            it.executeUpdate()
-                        }
+                    ).also {
+                        it.setString(1, kommerBarnetTilGode.svar.name)
+                        it.setString(2, kommerBarnetTilGode.begrunnelse)
+                        it.setObject(3, kommerBarnetTilGode.kilde.toJson())
+                        it.setObject(4, kommerBarnetTilGode.behandlingId)
+                        it.executeUpdate()
+                    }
                 }
             }
         } else {
@@ -42,8 +43,8 @@ class KommerBarnetTilGodeDao(private val connectionAutoclosing: ConnectionAutocl
         }
     }
 
-    fun hentKommerBarnetTilGode(behandlingId: UUID): KommerBarnetTilgode? {
-        return connectionAutoclosing.hentConnection {
+    fun hentKommerBarnetTilGode(behandlingId: UUID): KommerBarnetTilgode? =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
@@ -63,5 +64,4 @@ class KommerBarnetTilGodeDao(private val connectionAutoclosing: ConnectionAutocl
                 }
             }
         }
-    }
 }

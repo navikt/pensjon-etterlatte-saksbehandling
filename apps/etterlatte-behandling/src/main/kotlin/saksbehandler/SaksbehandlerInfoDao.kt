@@ -9,9 +9,11 @@ import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 
-class SaksbehandlerInfoDao(private val connectionAutoclosing: ConnectionAutoclosing) {
-    fun hentSaksbehandlerNavn(ident: String): String? {
-        return connectionAutoclosing.hentConnection {
+class SaksbehandlerInfoDao(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) {
+    fun hentSaksbehandlerNavn(ident: String): String? =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -26,10 +28,9 @@ class SaksbehandlerInfoDao(private val connectionAutoclosing: ConnectionAutoclos
                 }
             }
         }
-    }
 
-    fun hentSaksbehandlereForEnhet(enhet: String): List<SaksbehandlerInfo> {
-        return connectionAutoclosing.hentConnection {
+    fun hentSaksbehandlereForEnhet(enhet: String): List<SaksbehandlerInfo> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -47,10 +48,9 @@ class SaksbehandlerInfoDao(private val connectionAutoclosing: ConnectionAutoclos
                 }
             }
         }
-    }
 
-    fun hentSaksbehandlerEnheter(ident: String): List<SaksbehandlerEnhet>? {
-        return connectionAutoclosing.hentConnection { connection ->
+    fun hentSaksbehandlerEnheter(ident: String): List<SaksbehandlerEnhet>? =
+        connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 val statement =
                     prepareStatement(
@@ -65,10 +65,9 @@ class SaksbehandlerInfoDao(private val connectionAutoclosing: ConnectionAutoclos
                 }
             }
         }
-    }
 
-    fun hentalleSaksbehandlere(): List<String> {
-        return connectionAutoclosing.hentConnection {
+    fun hentalleSaksbehandlere(): List<String> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     it.prepareStatement(
@@ -76,12 +75,13 @@ class SaksbehandlerInfoDao(private val connectionAutoclosing: ConnectionAutoclos
                         select distinct saksbehandler from oppgave;
                         """.trimIndent(),
                     )
-                statement.executeQuery().toList {
-                    getString("saksbehandler")
-                }.filterNotNull()
+                statement
+                    .executeQuery()
+                    .toList {
+                        getString("saksbehandler")
+                    }.filterNotNull()
             }
         }
-    }
 
     fun upsertSaksbehandlerNavn(saksbehandler: SaksbehandlerInfo) {
         connectionAutoclosing.hentConnection {

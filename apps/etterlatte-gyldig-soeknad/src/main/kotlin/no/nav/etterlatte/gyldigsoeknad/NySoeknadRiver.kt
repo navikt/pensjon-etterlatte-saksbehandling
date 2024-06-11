@@ -93,8 +93,8 @@ internal class NySoeknadRiver(
     private fun finnEllerOpprettSak(
         fnr: String,
         sakType: SakType,
-    ): Sak? {
-        return try {
+    ): Sak? =
+        try {
             logger.info("Henter/oppretter sak ($sakType) i Gjenny")
 
             runBlocking {
@@ -106,7 +106,6 @@ internal class NySoeknadRiver(
             // Svelg slik at Innsendt søknad vil retrye
             null
         }
-    }
 
     private fun JsonMessage.oppdaterMed(
         sakId: Long,

@@ -16,9 +16,7 @@ data class Grunnlagsendringshendelse(
     val samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag? = null,
     val kommentar: String? = null,
 ) {
-    fun beskrivelse(): String {
-        return listOfNotNull(type.beskrivelse(), kommentar).joinToString(separator = ": ")
-    }
+    fun beskrivelse(): String = listOfNotNull(type.beskrivelse(), kommentar).joinToString(separator = ": ")
 }
 
 enum class GrunnlagsendringsType {
@@ -32,8 +30,8 @@ enum class GrunnlagsendringsType {
     BOSTED,
     ;
 
-    fun beskrivelse(): String {
-        return when (this) {
+    fun beskrivelse(): String =
+        when (this) {
             DOEDSFALL -> "Dødsfall"
             UTFLYTTING -> "Utflytting fra Norge"
             FORELDER_BARN_RELASJON -> "Forelder- / barn-relasjon"
@@ -43,7 +41,6 @@ enum class GrunnlagsendringsType {
             INSTITUSJONSOPPHOLD -> "Institusjonsopphold"
             BOSTED -> "Bostedsadresse"
         }
-    }
 }
 
 // TODO: kanskje rename disse

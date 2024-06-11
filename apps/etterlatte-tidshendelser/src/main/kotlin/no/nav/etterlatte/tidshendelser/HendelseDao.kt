@@ -12,7 +12,9 @@ import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
-class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao> {
+class HendelseDao(
+    private val datasource: DataSource,
+) : Transactions<HendelseDao> {
     private val logger = LoggerFactory.getLogger(HendelseDao::class.java)
 
     override fun <R> inTransaction(block: HendelseDao.(TransactionalSession) -> R): R =
@@ -20,16 +22,15 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
             this.block(it)
         }
 
-    fun hentJobb(id: Int): HendelserJobb {
-        return datasource.transaction { tx ->
+    fun hentJobb(id: Int): HendelserJobb =
+        datasource.transaction { tx ->
             queryOf("SELECT * FROM jobb WHERE id = :id", mapOf("id" to id))
                 .let { query -> tx.run(query.map { row -> row.toHendelserJobb() }.asSingle) }
                 ?: throw NoSuchElementException("Fant ikke jobb med id $id")
         }
-    }
 
-    fun finnAktuellJobb(): List<HendelserJobb> {
-        return datasource.transaction { tx ->
+    fun finnAktuellJobb(): List<HendelserJobb> =
+        datasource.transaction { tx ->
             queryOf(
                 """
                 SELECT * FROM jobb 
@@ -39,22 +40,18 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
                 LIMIT 1
                 """.trimIndent(),
                 mapOf("status" to JobbStatus.NY.name),
-            )
-                .let { query -> tx.run(query.map { row -> row.toHendelserJobb() }.asList) }
+            ).let { query -> tx.run(query.map { row -> row.toHendelserJobb() }.asList) }
         }
-    }
 
-    fun hentJobber(jobbIDs: List<Int>): List<HendelserJobb> {
-        return datasource.transaction { tx ->
+    fun hentJobber(jobbIDs: List<Int>): List<HendelserJobb> =
+        datasource.transaction { tx ->
             queryOf(
                 """
                 SELECT * FROM jobb WHERE id = ANY(?)
                 """.trimIndent(),
                 jobbIDs.toTypedArray(),
-            )
-                .let { query -> tx.run(query.map { row -> row.toHendelserJobb() }.asList) }
+            ).let { query -> tx.run(query.map { row -> row.toHendelserJobb() }.asList) }
         }
-    }
 
     fun oppdaterJobbstatusStartet(hendelserJobb: HendelserJobb) {
         oppdaterJobbstatus(hendelserJobb, JobbStatus.STARTET)
@@ -83,8 +80,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
                     "id" to hendelserJobb.id,
                     "versjon" to hendelserJobb.versjon,
                 ),
-            )
-                .let { query -> it.run(query.asUpdate) }
+            ).let { query -> it.run(query.asUpdate) }
                 .also {
                     if (it == 0) {
                         throw ConcurrentModificationException(
@@ -113,8 +109,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
                 mapOf(
                     "hendelseId" to hendelseId,
                 ),
-            )
-                .let { query -> it.run(query.asUpdate) }
+            ).let { query -> it.run(query.asUpdate) }
         }
     }
 
@@ -145,18 +140,16 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
         }
     }
 
-    fun hentHendelserForJobb(jobbId: Int): List<Hendelse> {
-        return datasource.transaction {
+    fun hentHendelserForJobb(jobbId: Int): List<Hendelse> =
+        datasource.transaction {
             queryOf(
                 """
                 SELECT * FROM hendelse WHERE jobb_id = :jobbId
                 """.trimIndent(),
                 mapOf("jobbId" to jobbId),
-            )
-                .let { query -> it.run(query.map { row -> row.toHendelse() }.asList) }
+            ).let { query -> it.run(query.map { row -> row.toHendelse() }.asList) }
                 .sortedBy { it.sakId }
         }
-    }
 
     fun oppdaterHendelseStatus(
         hendelseId: UUID,
@@ -172,8 +165,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
                 WHERE id = :id
                 """.trimIndent(),
                 mapOf("status" to status.name, "id" to hendelseId),
-            )
-                .let { query -> it.run(query.asUpdate) }
+            ).let { query -> it.run(query.asUpdate) }
         }
     }
 
@@ -197,8 +189,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
                     "ny_info" to info,
                     "steg" to steg,
                 ),
-            )
-                .let { query -> it.run(query.asUpdate) }
+            ).let { query -> it.run(query.asUpdate) }
         }
     }
 
@@ -219,13 +210,12 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
                     "id" to hendelseId,
                     "loependeYtelse" to loependeYtelse,
                 ),
-            )
-                .let { query -> it.run(query.asUpdate) }
+            ).let { query -> it.run(query.asUpdate) }
         }
     }
 
-    fun pollHendelser(limit: Int = 5): List<Hendelse> {
-        return datasource.transaction {
+    fun pollHendelser(limit: Int = 5): List<Hendelse> =
+        datasource.transaction {
             queryOf(
                 """
                 SELECT * FROM hendelse 
@@ -237,10 +227,8 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
                 ORDER BY opprettet asc
                 LIMIT $limit
                 """.trimIndent(),
-            )
-                .let { query -> it.run(query.map { row -> row.toHendelse() }.asList) }
+            ).let { query -> it.run(query.map { row -> row.toHendelse() }.asList) }
         }
-    }
 
     private fun Row.toHendelse() =
         Hendelse(

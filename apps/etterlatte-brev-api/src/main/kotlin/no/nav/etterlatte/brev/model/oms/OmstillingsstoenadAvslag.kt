@@ -22,12 +22,16 @@ data class OmstillingsstoenadAvslag(
     }
 }
 
-data class OmstillingsstoenadAvslagRedigerbartUtfall(val avdoedNavn: String) : BrevDataRedigerbar {
+data class OmstillingsstoenadAvslagRedigerbartUtfall(
+    val avdoedNavn: String,
+) : BrevDataRedigerbar {
     companion object {
         fun fra(generellBrevData: GenerellBrevData) =
             OmstillingsstoenadAvslagRedigerbartUtfall(
                 avdoedNavn =
-                    generellBrevData.personerISak.avdoede.firstOrNull()?.navn
+                    generellBrevData.personerISak.avdoede
+                        .firstOrNull()
+                        ?.navn
                         ?: "<Klarte ikke å finne navn automatisk, du må sette inn her>",
             )
     }

@@ -118,7 +118,8 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
     }
 
     private inline fun <reified T> consumeSingle(opplysningType: Opplysningstype) =
-        opplysninger.filter { it.opplysningType == opplysningType }
+        opplysninger
+            .filter { it.opplysningType == opplysningType }
             .also { assertEquals(1, it.size) }
             .first()
             .let {

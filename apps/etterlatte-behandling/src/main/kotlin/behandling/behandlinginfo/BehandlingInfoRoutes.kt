@@ -146,7 +146,9 @@ private fun Etterbetaling.toDto() =
         kilde = kilde,
     )
 
-class OpphoerIkkeSatt(behandlingId: UUID) : UgyldigForespoerselException(
-    code = "OPPHOER_IKKE_SATT",
-    detail = "Behandling $behandlingId har ikke angitt om det er opphoer.",
-)
+class OpphoerIkkeSatt(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "OPPHOER_IKKE_SATT",
+        detail = "Behandling $behandlingId har ikke angitt om det er opphoer.",
+    )

@@ -71,7 +71,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
+internal class VedtakBehandlingServiceTest(
+    private val dataSource: DataSource,
+) {
     private lateinit var repository: VedtaksvurderingRepository
 
     private val beregningKlientMock = mockk<BeregningKlient>()
@@ -1255,7 +1257,8 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
         val behandlingId = randomUUID()
         runBlocking {
             val oppretta =
-                repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
+                repository
+                    .opprettVedtak(opprettVedtak(behandlingId = behandlingId))
                     .let { repository.fattVedtak(behandlingId, VedtakFattet(SAKSBEHANDLER_1, "0001", Tidspunkt.now())) }
             Assertions.assertEquals(oppretta.status, VedtakStatus.FATTET_VEDTAK)
             val tilbakestilt = service.tilbakestillIkkeIverksatteVedtak(behandlingId)

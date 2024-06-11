@@ -42,7 +42,12 @@ data class GenerellBrevData(
     // Tidligere erMigrering - Vil si saker som er løpende i Pesys når det vedtas i Gjenny og opphøres etter vedtaket.
     fun loependeIPesys() = systemkilde == Vedtaksloesning.PESYS && behandlingId != null && revurderingsaarsak == null
 
-    fun vedtakstype() = forenkletVedtak?.type?.name?.lowercase()?.replace("_", " ")
+    fun vedtakstype() =
+        forenkletVedtak
+            ?.type
+            ?.name
+            ?.lowercase()
+            ?.replace("_", " ")
 
     fun erForeldreloes() =
         with(personerISak) {

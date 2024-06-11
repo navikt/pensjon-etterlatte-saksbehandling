@@ -5,7 +5,9 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import java.time.LocalDate
 import java.time.YearMonth
 
-class AldersovergangService(private val dao: AldersovergangDao) {
+class AldersovergangService(
+    private val dao: AldersovergangDao,
+) {
     fun hentSoekereFoedtIEnGittMaaned(maaned: YearMonth) = dao.hentSoekereFoedtIEnGittMaaned(maaned)
 
     fun hentSakerHvorDoedsfallForekomIGittMaaned(behandlingsmaaned: YearMonth) =

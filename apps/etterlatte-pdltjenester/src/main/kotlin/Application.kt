@@ -18,7 +18,9 @@ fun main() {
     Server(ApplicationContext(System.getenv())).run()
 }
 
-class Server(applicationContext: ApplicationContext) {
+class Server(
+    applicationContext: ApplicationContext,
+) {
     init {
         sikkerLoggOppstartOgAvslutning("etterlatte-pdltjenester")
     }

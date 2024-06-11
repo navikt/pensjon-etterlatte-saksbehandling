@@ -40,9 +40,7 @@ private fun PersonDTO.alleAdresser(): List<Adresse> =
         kontaktadresse + bostedsadresse + oppholdsadresse
     }
 
-private fun borIUtlandet(adresse: Adresse): Boolean {
-    return adresse.land == null || adresse.land?.uppercase() != "NOR"
-}
+private fun borIUtlandet(adresse: Adresse): Boolean = adresse.land == null || adresse.land?.uppercase() != "NOR"
 
 fun harFellesBarn(
     avdoed: PersonDTO,
@@ -105,7 +103,8 @@ fun finnEktefelleSafe(person: PersonDTO): String? =
                     Sivilstatus.SEPARERT,
                     Sivilstatus.REGISTRERT_PARTNER,
                     Sivilstatus.SEPARERT_PARTNER,
-                ) && !harSkiltSivilstandUtenGyldigFomDato(person)
+                ) &&
+                !harSkiltSivilstandUtenGyldigFomDato(person)
             ) {
                 return it.relatertVedSiviltilstand?.value
             }
@@ -128,8 +127,7 @@ fun finnAntallAarGiftVedDoedsfall(
                     Sivilstatus.REGISTRERT_PARTNER,
                     Sivilstatus.SEPARERT_PARTNER,
                 )
-        }
-        ?.sortedBy { it.gyldigFraOgMed }
+        }?.sortedBy { it.gyldigFraOgMed }
         ?.firstOrNull()
         ?.let {
             if (it.gyldigFraOgMed != null) {

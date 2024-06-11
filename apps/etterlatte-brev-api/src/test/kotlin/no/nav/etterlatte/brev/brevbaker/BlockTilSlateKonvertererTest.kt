@@ -24,7 +24,8 @@ class BlockTilSlateKonvertererTest {
     fun `skal konvertere title1, title2 og paragraph til HEADING_TWO, HEADING_THREE og PARAGRAPH`() {
         val originalJson =
             this.javaClass
-                .getResource("/brevbaker/brevbaker_payload_med_title1_title2_og_paragraf.json")!!.readText()
+                .getResource("/brevbaker/brevbaker_payload_med_title1_title2_og_paragraf.json")!!
+                .readText()
         objectMapper.addMixIn(LetterMarkup.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
         objectMapper.addMixIn(LetterMarkup.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)
         val letterMarkup = deserialize<LetterMarkup>(originalJson)

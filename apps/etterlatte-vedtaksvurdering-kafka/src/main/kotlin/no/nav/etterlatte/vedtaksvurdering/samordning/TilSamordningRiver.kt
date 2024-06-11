@@ -58,13 +58,12 @@ internal class TilSamordningRiver(
         }
     }
 
-    private fun createLogMarker(vedtak: VedtakDto): LogstashMarker {
-        return Markers.appendEntries(
+    private fun createLogMarker(vedtak: VedtakDto): LogstashMarker =
+        Markers.appendEntries(
             mapOf<String, Any?>(
                 "vedtakId" to vedtak.id,
                 "behandlingId" to vedtak.behandlingId,
                 "sakId" to vedtak.sak.id,
             ),
         )
-    }
 }

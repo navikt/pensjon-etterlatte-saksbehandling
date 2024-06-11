@@ -13,7 +13,9 @@ import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
 
-class HendelsePublisher(private val rapidsPublisher: (UUID, String) -> Unit) {
+class HendelsePublisher(
+    private val rapidsPublisher: (UUID, String) -> Unit,
+) {
     fun publish(
         hendelse: Hendelse,
         jobb: HendelserJobb,

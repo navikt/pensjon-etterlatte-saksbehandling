@@ -13,7 +13,10 @@ interface KabalKlient {
     suspend fun sendTilKabal(kabalOversendelse: KabalOversendelse)
 }
 
-class KabalKlientImpl(private val client: HttpClient, private val kabalUrl: String) : KabalKlient {
+class KabalKlientImpl(
+    private val client: HttpClient,
+    private val kabalUrl: String,
+) : KabalKlient {
     override suspend fun sendTilKabal(kabalOversendelse: KabalOversendelse) {
         try {
             client.post("$kabalUrl/api/oversendelse/v3/sak") {
@@ -31,8 +34,7 @@ class KabalKlientException(
     kabalOversendelse: KabalOversendelse,
     responseBody: String,
     override val cause: ResponseException,
-) :
-    Exception(
-            "Fikk en feil mot Kabal-api i oversending av klage med id: ${kabalOversendelse.fagsak.fagsakId}. " +
-                "Oversendelse hadde feil: $responseBody",
-        )
+) : Exception(
+        "Fikk en feil mot Kabal-api i oversending av klage med id: ${kabalOversendelse.fagsak.fagsakId}. " +
+            "Oversendelse hadde feil: $responseBody",
+    )

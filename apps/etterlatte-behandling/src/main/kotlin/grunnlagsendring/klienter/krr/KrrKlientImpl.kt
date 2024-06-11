@@ -16,7 +16,10 @@ interface KrrKlient {
     suspend fun hentDigitalKontaktinformasjon(fnr: String): DigitalKontaktinformasjon?
 }
 
-class KrrKlientImpl(private val client: HttpClient, private val url: String) : KrrKlient {
+class KrrKlientImpl(
+    private val client: HttpClient,
+    private val url: String,
+) : KrrKlient {
     private val logger: Logger = LoggerFactory.getLogger(KrrKlientImpl::class.java)
 
     override suspend fun hentDigitalKontaktinformasjon(fnr: String): DigitalKontaktinformasjon? {
@@ -31,7 +34,8 @@ class KrrKlientImpl(private val client: HttpClient, private val url: String) : K
                 }
 
             if (response.status.isSuccess()) {
-                response.body<DigitalKontaktinformasjon?>()
+                response
+                    .body<DigitalKontaktinformasjon?>()
                     .also { logger.info("Hentet kontaktinformasjon fra KRR. Var null? ${it != null}") }
             } else {
                 throw ClientRequestException(response, response.toString())

@@ -31,8 +31,8 @@ open class Grunnlagsopplysning<T>(
             fnr: Folkeregisteridentifikator,
             fom: YearMonth?,
             tom: YearMonth? = null,
-        ): Grunnlagsopplysning<out Any?> {
-            return Grunnlagsopplysning(
+        ): Grunnlagsopplysning<out Any?> =
+            Grunnlagsopplysning(
                 id = UUID.randomUUID(),
                 kilde = kilde,
                 opplysningType = opplysningType,
@@ -42,14 +42,11 @@ open class Grunnlagsopplysning<T>(
                 fnr = fnr,
                 periode = fom?.let { Periode(it, tom) },
             )
-        }
 
         val automatiskSaksbehandler = Saksbehandler.create(ident = "Gjenny")
     }
 
-    override fun toString(): String {
-        return "Opplysning om ${opplysningType.name}: oppgitt av $kilde til å være: $opplysning. Id: $id"
-    }
+    override fun toString(): String = "Opplysning om ${opplysningType.name}: oppgitt av $kilde til å være: $opplysning. Id: $id"
 
     @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -67,51 +64,58 @@ open class Grunnlagsopplysning<T>(
         JsonSubTypes.Type(value = UkjentInnsender::class, name = "ukjentinnsender"),
         JsonSubTypes.Type(value = Gjenny::class, name = "gjenny"),
     )
-    sealed class Kilde(val type: String) {
+    sealed class Kilde(
+        val type: String,
+    ) {
         fun toJson() = objectMapperKilde.writeValueAsString(this)
     }
 
-    data class Saksbehandler(val ident: String, val tidspunkt: Tidspunkt) : Kilde("saksbehandler") {
+    data class Saksbehandler(
+        val ident: String,
+        val tidspunkt: Tidspunkt,
+    ) : Kilde("saksbehandler") {
         companion object {
             fun create(ident: String) = Saksbehandler(ident, Tidspunkt.now())
         }
 
-        override fun toString(): String {
-            return "saksbehandler $ident"
-        }
+        override fun toString(): String = "saksbehandler $ident"
     }
 
-    data class Gjenny(val ident: String, val tidspunkt: Tidspunkt) : Kilde("gjenny") {
+    data class Gjenny(
+        val ident: String,
+        val tidspunkt: Tidspunkt,
+    ) : Kilde("gjenny") {
         companion object {
             fun create(ident: String) = Saksbehandler(ident, Tidspunkt.now())
         }
 
-        override fun toString(): String {
-            return "gjenny $ident"
-        }
+        override fun toString(): String = "gjenny $ident"
     }
 
-    data class Pesys(val tidspunkt: Tidspunkt) : Kilde("pesys") {
+    data class Pesys(
+        val tidspunkt: Tidspunkt,
+    ) : Kilde("pesys") {
         companion object {
             fun create() = Pesys(Tidspunkt.now())
         }
 
-        override fun toString(): String {
-            return "pesys"
-        }
+        override fun toString(): String = "pesys"
     }
 
-    data class Gjenoppretting(val tidspunkt: Tidspunkt) : Kilde("gjenoppretting") {
+    data class Gjenoppretting(
+        val tidspunkt: Tidspunkt,
+    ) : Kilde("gjenoppretting") {
         companion object {
             fun create() = Gjenoppretting(Tidspunkt.now())
         }
 
-        override fun toString(): String {
-            return "gjenoppretting"
-        }
+        override fun toString(): String = "gjenoppretting"
     }
 
-    data class Privatperson(val fnr: String, val mottatDato: Tidspunkt) : Kilde("privatperson")
+    data class Privatperson(
+        val fnr: String,
+        val mottatDato: Tidspunkt,
+    ) : Kilde("privatperson")
 
     data class Pdl(
         val tidspunktForInnhenting: Tidspunkt,
@@ -120,9 +124,7 @@ open class Grunnlagsopplysning<T>(
     ) : Kilde("pdl") {
         val navn = "pdl"
 
-        override fun toString(): String {
-            return navn
-        }
+        override fun toString(): String = navn
     }
 
     data class Persondata(
@@ -132,18 +134,20 @@ open class Grunnlagsopplysning<T>(
     ) : Kilde("persondata") {
         val navn = "persondata"
 
-        override fun toString(): String {
-            return navn
-        }
+        override fun toString(): String = navn
     }
 
-    data class RegelKilde(val navn: String, val ts: Tidspunkt, val versjon: String) : Kilde("regel") {
-        override fun toString(): String {
-            return "beregningsregel  $navn"
-        }
+    data class RegelKilde(
+        val navn: String,
+        val ts: Tidspunkt,
+        val versjon: String,
+    ) : Kilde("regel") {
+        override fun toString(): String = "beregningsregel  $navn"
     }
 
-    data class UkjentInnsender(val tidspunkt: Tidspunkt) : Kilde("ukjentinnsender") {
+    data class UkjentInnsender(
+        val tidspunkt: Tidspunkt,
+    ) : Kilde("ukjentinnsender") {
         companion object {
             fun create() = UkjentInnsender(Tidspunkt.now())
         }
@@ -162,8 +166,8 @@ fun <T : Any> lagOpplysning(
     kilde: Grunnlagsopplysning.Kilde,
     opplysning: T,
     periode: Periode? = null,
-): Grunnlagsopplysning<T> {
-    return Grunnlagsopplysning(
+): Grunnlagsopplysning<T> =
+    Grunnlagsopplysning(
         id = UUID.randomUUID(),
         kilde = kilde,
         opplysningType = opplysningsType,
@@ -171,4 +175,3 @@ fun <T : Any> lagOpplysning(
         opplysning = opplysning,
         periode = periode,
     )
-}

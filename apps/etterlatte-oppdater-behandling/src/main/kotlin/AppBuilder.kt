@@ -9,7 +9,9 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
-class AppBuilder(props: Miljoevariabler) {
+class AppBuilder(
+    props: Miljoevariabler,
+) {
     val behandlingService: BehandlingService by lazy {
         BehandlingServiceImpl(
             behandlingApp,

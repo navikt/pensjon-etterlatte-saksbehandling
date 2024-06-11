@@ -14,7 +14,10 @@ import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import org.slf4j.LoggerFactory
 
-class DokarkivKlient(private val client: HttpClient, private val url: String) {
+class DokarkivKlient(
+    private val client: HttpClient,
+    private val url: String,
+) {
     private val logger = LoggerFactory.getLogger(DokarkivKlient::class.java)
 
     internal suspend fun opprettJournalpost(request: OpprettJournalpostRequest): OpprettJournalpostResponse {
@@ -26,14 +29,16 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
             }
 
         return if (response.status.isSuccess()) {
-            response.body<OpprettJournalpostResponse>()
+            response
+                .body<OpprettJournalpostResponse>()
                 .also {
                     logger.info(
                         "Journalpost opprettet (journalpostId=${it.journalpostId}, ferdigstilt=${it.journalpostferdigstilt})",
                     )
                 }
         } else if (response.status == HttpStatusCode.Conflict) {
-            response.body<OpprettJournalpostResponse>()
+            response
+                .body<OpprettJournalpostResponse>()
                 .also { logger.warn("Konflikt ved lagring av journalpost ${it.journalpostId}") }
         } else {
             logger.error("Feil oppsto på opprett journalpost: ${response.bodyAsText()}")
@@ -95,19 +100,25 @@ sealed class DokumentVariant {
 }
 
 @Suppress("unused")
-data class JournalpostSak(val fagsakId: String) {
+data class JournalpostSak(
+    val fagsakId: String,
+) {
     val sakstype: String = "FAGSAK"
     val fagsaksystem: String = "EY"
 }
 
 @Suppress("unused")
-data class AvsenderMottaker(val id: String) {
+data class AvsenderMottaker(
+    val id: String,
+) {
     val navn: String = ""
     val idType: String = "FNR"
 }
 
 @Suppress("unused")
-data class Bruker(val id: String) {
+data class Bruker(
+    val id: String,
+) {
     val idType = "FNR"
 }
 

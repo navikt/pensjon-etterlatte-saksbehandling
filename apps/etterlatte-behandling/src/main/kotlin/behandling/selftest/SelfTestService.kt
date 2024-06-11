@@ -27,13 +27,12 @@ class SelfTestService(
         )
     }
 
-    private suspend fun performSelfTest(): List<PingResult> {
-        return coroutineScope {
+    private suspend fun performSelfTest(): List<PingResult> =
+        coroutineScope {
             externalServices
                 .map { async { it.ping() } }
                 .map { it.await() }
         }
-    }
 
     private companion object {
         private const val APPLICATION_NAME = "etterlatte-behandling"

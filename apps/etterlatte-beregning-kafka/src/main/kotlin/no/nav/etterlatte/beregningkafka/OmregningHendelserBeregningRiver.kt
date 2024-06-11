@@ -88,7 +88,8 @@ internal class OmregningHendelserBeregningRiver(
 
         return if (sakType == SakType.OMSTILLINGSSTOENAD) {
             val avkorting =
-                beregningService.regulerAvkorting(behandlingId, behandlingViOmregnerFra)
+                beregningService
+                    .regulerAvkorting(behandlingId, behandlingViOmregnerFra)
                     .body<AvkortingDto>()
             Pair(beregning, avkorting)
         } else {
@@ -102,7 +103,11 @@ internal class OmregningHendelserBeregningRiver(
         g: Grunnbeloep,
         behandlingId: UUID,
     ) {
-        val dato = ny.beregningsperioder.first().datoFOM.atDay(1)
+        val dato =
+            ny.beregningsperioder
+                .first()
+                .datoFOM
+                .atDay(1)
         val sistePeriodeNy = requireNotNull(ny.beregningsperioder.paaDato(dato))
         val nyttBeloep = sistePeriodeNy.utbetaltBeloep
         val sistePeriodeGammel = gammel.beregningsperioder.paaDato(dato)
@@ -152,17 +157,28 @@ internal class OmregningHendelserBeregningRiver(
 
     private fun List<Beregningsperiode>.paaDato(dato: LocalDate) =
         filter { it.datoFOM.atDay(1) <= dato }
-            .firstOrNull { it.datoTOM == null || it.datoTOM?.plusMonths(1)?.atDay(1)?.isAfter(dato) == true }
+            .firstOrNull {
+                it.datoTOM == null ||
+                    it.datoTOM
+                        ?.plusMonths(1)
+                        ?.atDay(1)
+                        ?.isAfter(dato) == true
+            }
 }
 
-class MindreEnnForrigeBehandling(behandlingId: UUID) : ForespoerselException(
-    code = "OMREGNING_UTENFOR_TOLERANSEGRENSE_MINDRE",
-    detail = "Ny beregning for behandling $behandlingId gir lavere sum enn forrige beregning. Skal ikke skje under omregning.",
-    status = HttpStatusCode.ExpectationFailed.value,
-)
+class MindreEnnForrigeBehandling(
+    behandlingId: UUID,
+) : ForespoerselException(
+        code = "OMREGNING_UTENFOR_TOLERANSEGRENSE_MINDRE",
+        detail = "Ny beregning for behandling $behandlingId gir lavere sum enn forrige beregning. Skal ikke skje under omregning.",
+        status = HttpStatusCode.ExpectationFailed.value,
+    )
 
-class ForStorOekning(behandlingId: UUID, endring: BigDecimal) : ForespoerselException(
-    code = "OMREGNING_UTENFOR_TOLERANSEGRENSE_FOR_STOR_OEKNING",
-    detail = "Ny beregning for behandling $behandlingId gir for stor økning fra forrige omregning. Endringa var $endring",
-    status = HttpStatusCode.ExpectationFailed.value,
-)
+class ForStorOekning(
+    behandlingId: UUID,
+    endring: BigDecimal,
+) : ForespoerselException(
+        code = "OMREGNING_UTENFOR_TOLERANSEGRENSE_FOR_STOR_OEKNING",
+        detail = "Ny beregning for behandling $behandlingId gir for stor økning fra forrige omregning. Endringa var $endring",
+        status = HttpStatusCode.ExpectationFailed.value,
+    )

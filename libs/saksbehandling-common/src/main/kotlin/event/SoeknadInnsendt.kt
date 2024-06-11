@@ -13,7 +13,9 @@ interface ISoeknadInnsendt {
 
 object SoeknadInnsendt : ISoeknadInnsendt
 
-enum class SoeknadInnsendtHendelseType(val eventname: String) : EventnameHendelseType {
+enum class SoeknadInnsendtHendelseType(
+    val eventname: String,
+) : EventnameHendelseType {
     EVENT_NAME_INNSENDT("soeknad_innsendt"),
     EVENT_NAME_BEHANDLINGBEHOV("trenger_behandling"),
     ;

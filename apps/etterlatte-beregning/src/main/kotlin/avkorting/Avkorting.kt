@@ -131,8 +131,21 @@ data class Avkorting(
                 ytelseFoerAvkorting = ytelseFoerAvkorting,
                 avkortingsperioder = avkortingsperioder,
                 type = FORVENTET_INNTEKT,
-                sanksjoner = sanksjoner,
+                sanksjoner = emptyList(),
             )
+
+        val avkortetYtelseMedSanksjon =
+            when (sanksjoner.isNotEmpty()) {
+                true ->
+                    AvkortingRegelkjoring.beregnAvkortetYtelse(
+                        periode = grunnlag.periode,
+                        ytelseFoerAvkorting = ytelseFoerAvkorting,
+                        avkortingsperioder = avkortingsperioder,
+                        type = AARSOPPGJOER,
+                        sanksjoner = sanksjoner,
+                    )
+                false -> null
+            }
 
         val oppdatertAarsoppgjoer =
             hentAarsoppgjoer().copy(
@@ -144,7 +157,7 @@ data class Avkorting(
                         )
                     },
                 avkortetYtelseAar =
-                    beregnetAvkortetYtelse.map { avkortetYtelse ->
+                    avkortetYtelseMedSanksjon ?: beregnetAvkortetYtelse.map { avkortetYtelse ->
                         avkortetYtelse.copy(
                             id = UUID.randomUUID(),
                             type = AARSOPPGJOER,

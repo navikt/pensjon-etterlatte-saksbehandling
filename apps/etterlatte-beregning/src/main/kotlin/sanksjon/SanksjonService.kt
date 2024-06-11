@@ -77,10 +77,14 @@ class SanksjonService(
 
         if (sanksjon.id === null) {
             logger.info("Oppretter sanksjon med behandlingID=$behandlingId")
+            // Setter også behandlingen til status "beregnet", slik at avkorting fanger opp at den må regnes ut på nytt
+            behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, true)
             return sanksjonRepository.opprettSanksjon(behandlingId, behandling.sak, brukerTokenInfo.ident(), sanksjon)
         }
 
         logger.info("Oppdaterer sanksjon med behandlingID=$behandlingId")
+        // Setter også behandlingen til status "beregnet", slik at avkorting fanger opp at den må regnes ut på nytt
+        behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, true)
         return sanksjonRepository.oppdaterSanksjon(sanksjon, brukerTokenInfo.ident())
     }
 
@@ -93,6 +97,8 @@ class SanksjonService(
 
         if (!behandling.status.kanEndres()) throw BehandlingKanIkkeEndres()
 
+        // Setter behandlingen sin status til "beregnet", slik at avkorting fanger opp at den må regnes ut på nytt
+        behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, true)
         logger.info("Sletter sanksjon med sanksjonID=$sanksjonId")
         sanksjonRepository.slettSanksjon(sanksjonId)
     }

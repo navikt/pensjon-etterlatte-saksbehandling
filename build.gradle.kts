@@ -9,7 +9,7 @@ fun hentAntallKjerner(): Int {
     if (isGithubWorkflow != null) {
         return Runtime.getRuntime().availableProcessors()
     }
-    return Runtime.getRuntime().availableProcessors() / 2
+    return (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
 }
 plugins {
     alias(libs.plugins.license) apply true
@@ -41,6 +41,7 @@ fun Project.setupTestLogging() {
         sub.plugins.apply(libs.plugins.versions.get().pluginId)
         sub.tasks.withType<Test> {
             maxParallelForks = hentAntallKjerner()
+            forkEvery = 100
             testLogging {
                 exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
             }

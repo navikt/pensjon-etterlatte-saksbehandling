@@ -262,7 +262,7 @@ internal class VedtakstidslinjeTest {
 
     /**
      *   Jan  Feb  Mar  Apr  Mai   Jun  Jul  Aug  Sep  Okt  Nov  Dec
-     * |----|----|----|----|--*--|----|----|----|----|----|----|----|
+     * |----|----|----|----|-----|--*-|----|----|----|----|----|----|
      * |------------Innvilget----------|
      *                           |---Opphør----------------------|
      *                     |-----| Revurdert

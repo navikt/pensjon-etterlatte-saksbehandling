@@ -25,6 +25,7 @@ internal class AvkortingTest {
                 aarsoppgjoer =
                     listOf(
                         Aarsoppgjoer(
+                            id = UUID.randomUUID(),
                             aar = 2024,
                             avkortetYtelseAar =
                                 listOf(
@@ -48,6 +49,7 @@ internal class AvkortingTest {
                                 ),
                         ),
                         Aarsoppgjoer(
+                            id = UUID.randomUUID(),
                             aar = 2025,
                             avkortetYtelseAar =
                                 listOf(
@@ -143,6 +145,8 @@ internal class AvkortingTest {
                 aarsoppgjoer =
                     listOf(
                         Aarsoppgjoer(
+                            id = UUID.randomUUID(),
+                            aar = 2024,
                             ytelseFoerAvkorting =
                                 listOf(
                                     YtelseFoerAvkorting(
@@ -337,6 +341,7 @@ internal class AvkortingTest {
                 shouldBeEqualToIgnoringFields(
                     avkorting.hentAarsoppgjoer(YearMonth.of(2024, 1)),
                     Aarsoppgjoer::inntektsavkorting,
+                    Aarsoppgjoer::id,
                 )
                 with(inntektsavkorting) {
                     size shouldBe 2
@@ -354,6 +359,7 @@ internal class AvkortingTest {
                 shouldBeEqualToIgnoringFields(
                     avkorting.hentAarsoppgjoer(YearMonth.of(2025, 1)),
                     Aarsoppgjoer::inntektsavkorting,
+                    Aarsoppgjoer::id,
                 )
                 with(inntektsavkorting) {
                     size shouldBe 1

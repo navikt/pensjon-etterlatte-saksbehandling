@@ -268,7 +268,7 @@ data class Avkorting(
 
     fun hentAarsoppgjoer(fom: YearMonth): Aarsoppgjoer {
         val funnet = aarsoppgjoer.find { it.aar!! == fom.year }
-        return funnet ?: Aarsoppgjoer(aar = fom.year)
+        return funnet ?: Aarsoppgjoer(UUID.randomUUID(), aar = fom.year)
     }
 
     private fun erstattAarsoppgjoer(nytt: Aarsoppgjoer): List<Aarsoppgjoer> {
@@ -295,7 +295,8 @@ data class AvkortingGrunnlag(
 )
 
 data class Aarsoppgjoer(
-    val aar: Int? = null, // TODO fjern nullable
+    val id: UUID,
+    val aar: Int,
     val ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     val inntektsavkorting: List<Inntektsavkorting> = emptyList(),
     val avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),

@@ -21,7 +21,10 @@ import javax.sql.DataSource
  * <p>
  * Benytt @ResetDatabaseStatement i en subklasse for å angi SQL for å tømme databasen.
  */
-open class GenerellDatabaseExtension : AfterAllCallback, ExtensionContext.Store.CloseableResource, ParameterResolver {
+open class GenerellDatabaseExtension :
+    AfterAllCallback,
+    ExtensionContext.Store.CloseableResource,
+    ParameterResolver {
     companion object {
         val logger: org.slf4j.Logger = LoggerFactory.getLogger(this::class.java)
         private val postgreSQLContainer =
@@ -30,11 +33,12 @@ open class GenerellDatabaseExtension : AfterAllCallback, ExtensionContext.Store.
                 .also { it.start() }
 
         private val ds: DataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).apply { migrate() }
+            DataSourceBuilder
+                .createDataSource(
+                    jdbcUrl = postgreSQLContainer.jdbcUrl,
+                    username = postgreSQLContainer.username,
+                    password = postgreSQLContainer.password,
+                ).apply { migrate(processExiter = { }) }
     }
 
     private val connections = mutableListOf<Connection>()
@@ -69,13 +73,12 @@ open class GenerellDatabaseExtension : AfterAllCallback, ExtensionContext.Store.
         (
             this::class.java.annotations
                 .find { it.annotationClass == ResetDatabaseStatement::class } as? ResetDatabaseStatement
-        )
-            ?.let { annotation ->
-                ds.connection.use {
-                    logger.info("Resetting database...")
-                    it.createStatement().execute(annotation.statement)
-                }
+        )?.let { annotation ->
+            ds.connection.use {
+                logger.info("Resetting database...")
+                it.createStatement().execute(annotation.statement)
             }
+        }
             ?: {
                 logger.info("Skipper reset av database, @ResetDatabaseStatement ikke funnet.")
             }
@@ -93,7 +96,10 @@ open class GenerellDatabaseExtension : AfterAllCallback, ExtensionContext.Store.
     /**
      * Wrappe slik at når konsument ber om ny connection så kan den tas vare på mtp eviction
      */
-    private class DataSourceWrapper(val datasource: DataSource, val collector: (Connection) -> Unit) : DataSource {
+    private class DataSourceWrapper(
+        val datasource: DataSource,
+        val collector: (Connection) -> Unit,
+    ) : DataSource {
         override fun getLogWriter(): PrintWriter = datasource.logWriter
 
         override fun setLogWriter(out: PrintWriter?) {
@@ -123,22 +129,21 @@ open class GenerellDatabaseExtension : AfterAllCallback, ExtensionContext.Store.
     override fun supportsParameter(
         parameterContext: ParameterContext,
         extensionContext: ExtensionContext,
-    ): Boolean {
-        return parameterContext.parameter?.type == DataSource::class.java
-    }
+    ): Boolean = parameterContext.parameter?.type == DataSource::class.java
 
     override fun resolveParameter(
         parameterContext: ParameterContext,
         extensionContext: ExtensionContext,
-    ): Any {
-        return if (parameterContext.parameter?.type == DataSource::class.java) {
+    ): Any =
+        if (parameterContext.parameter?.type == DataSource::class.java) {
             dataSource
         } else {
             throw IllegalArgumentException("Kan ikke resolve parameter av type ${parameterContext.parameter?.type}")
         }
-    }
 }
 
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
-annotation class ResetDatabaseStatement(val statement: String)
+annotation class ResetDatabaseStatement(
+    val statement: String,
+)

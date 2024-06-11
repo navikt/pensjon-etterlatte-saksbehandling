@@ -6,7 +6,9 @@ import java.nio.ByteBuffer
 import java.util.Base64
 import java.util.UUID
 
-data class UUIDBase64(val value: String = encodeUUIDBase64(UUID.randomUUID())) {
+data class UUIDBase64(
+    val value: String = encodeUUIDBase64(UUID.randomUUID()),
+) {
     companion object {
         private fun encodeUUIDBase64(uuid: UUID): String {
             val bb = ByteBuffer.wrap(ByteArray(16))

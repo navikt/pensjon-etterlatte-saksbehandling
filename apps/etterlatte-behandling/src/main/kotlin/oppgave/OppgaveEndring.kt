@@ -30,18 +30,17 @@ data class GenerellEndringshendelse(
 )
 
 object EndringMapper {
-    fun mapOppgaveEndringer(endringer: List<OppgaveEndring>): List<GenerellEndringshendelse> {
-        return endringer.map {
+    fun mapOppgaveEndringer(endringer: List<OppgaveEndring>): List<GenerellEndringshendelse> =
+        endringer.map {
             GenerellEndringshendelse(
                 tidspunkt = it.tidspunkt,
                 saksbehandler = null, // Ingen logging på HVEM som har gjort en endring på oppgave. Må fikses
                 endringer = tilEndringLinjer(it.oppgaveFoer, it.oppgaveEtter),
             )
         }
-    }
 
-    fun mapBehandlingHendelse(hendelse: LagretHendelse): String {
-        return when (hendelse.hendelse) {
+    fun mapBehandlingHendelse(hendelse: LagretHendelse): String =
+        when (hendelse.hendelse) {
             "BEHANDLING:AVBRUTT" -> "Behandling avbrutt"
             "BEHANDLING:AVKORTET" -> "Behandling avkortet"
             "BEHANDLING:BEREGNET" -> "Behandling beregnet"
@@ -65,7 +64,6 @@ object EndringMapper {
             "VEDTAK:UNDERKJENT" -> "Vedtak underkjent"
             else -> hendelse.hendelse
         }
-    }
 
     private fun tilEndringLinjer(
         foer: OppgaveIntern,

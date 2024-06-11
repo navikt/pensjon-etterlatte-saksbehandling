@@ -54,7 +54,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class OppgaveServiceTest(val dataSource: DataSource) {
+internal class OppgaveServiceTest(
+    val dataSource: DataSource,
+) {
     private val sakDao: SakDao = SakDao(ConnectionAutoclosingTest(dataSource))
     private val oppgaveDao: OppgaveDao = spyk(OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource)))
     private val hendelser: BehandlingHendelserKafkaProducer = mockk()
@@ -472,7 +474,12 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
                 null,
             )
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
-        val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(4L).toTidspunkt()
+        val nyFrist =
+            Tidspunkt
+                .now()
+                .toLocalDatetimeUTC()
+                .plusMonths(4L)
+                .toTidspunkt()
         oppgaveService.redigerFrist(nyOppgave.id, nyFrist)
         val oppgaveMedNyFrist = oppgaveService.hentOppgave(nyOppgave.id)
         assertEquals(nyFrist, oppgaveMedNyFrist.frist)
@@ -549,7 +556,12 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
                 null,
             )
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
-        val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().minusMonths(1L).toTidspunkt()
+        val nyFrist =
+            Tidspunkt
+                .now()
+                .toLocalDatetimeUTC()
+                .minusMonths(1L)
+                .toTidspunkt()
 
         assertThrows<FristTilbakeITid> {
             oppgaveService.redigerFrist(nyOppgave.id, nyFrist)
@@ -572,7 +584,12 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         assertThrows<OppgaveKanIkkeEndres> {
             oppgaveService.redigerFrist(
                 oppgaveId = nyOppgave.id,
-                frist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(1L).toTidspunkt(),
+                frist =
+                    Tidspunkt
+                        .now()
+                        .toLocalDatetimeUTC()
+                        .plusMonths(1L)
+                        .toTidspunkt(),
             )
         }
         val lagretOppgave = oppgaveService.hentOppgave(nyOppgave.id)

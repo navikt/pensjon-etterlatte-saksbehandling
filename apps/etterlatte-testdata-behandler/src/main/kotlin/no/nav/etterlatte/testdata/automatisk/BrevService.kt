@@ -8,7 +8,11 @@ import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.readValue
 import java.util.UUID
 
-class BrevService(private val klient: DownstreamResourceClient, private val url: String, private val clientId: String) {
+class BrevService(
+    private val klient: DownstreamResourceClient,
+    private val url: String,
+    private val clientId: String,
+) {
     suspend fun opprettOgDistribuerVedtaksbrev(
         sakId: Long,
         behandlingId: UUID,
@@ -22,7 +26,8 @@ class BrevService(private val klient: DownstreamResourceClient, private val url:
         behandlingId: UUID,
         sakId: Long,
     ): Brev =
-        klient.post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak?sakId=$sakId"), Systembruker.testdata) {}
+        klient
+            .post(Resource(clientId, "$url/api/brev/behandling/$behandlingId/vedtak?sakId=$sakId"), Systembruker.testdata) {}
             .mapBoth(
                 success = { readValue(it) },
                 failure = { throw it },

@@ -63,6 +63,9 @@ internal class LeaderElectionTest {
     }
 }
 
-class LeaderElectionLocalhost(electorPath: String, httpClient: HttpClient) : LeaderElection(electorPath, httpClient) {
+class LeaderElectionLocalhost(
+    electorPath: String,
+    httpClient: HttpClient,
+) : LeaderElection(electorPath, httpClient) {
     override fun hostName() = "localhost"
 }

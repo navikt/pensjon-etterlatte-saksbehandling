@@ -38,7 +38,9 @@ import java.time.LocalDate
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class SakDaoTest(val dataSource: DataSource) {
+internal class SakDaoTest(
+    val dataSource: DataSource,
+) {
     private lateinit var sakRepo: SakDao
     private lateinit var tilgangService: TilgangService
     private lateinit var behandlingRepo: BehandlingDao
@@ -84,47 +86,53 @@ internal class SakDaoTest(val dataSource: DataSource) {
 
         // setter opprettet dato fra behandling
         dataSource.connection.use {
-            it.prepareStatement(
-                """
-                UPDATE sak as s
-                SET opprettet = (select behandling_opprettet from behandling as b where b.sak_id = s.id);
-                """.trimIndent(),
-            ).executeUpdate()
+            it
+                .prepareStatement(
+                    """
+                    UPDATE sak as s
+                    SET opprettet = (select behandling_opprettet from behandling as b where b.sak_id = s.id);
+                    """.trimIndent(),
+                ).executeUpdate()
         }
 
         val saker =
             dataSource.connection.use {
-                it.prepareStatement(
-                    """
-                    select fnr, opprettet from sak;    
-                    """.trimIndent(),
-                ).executeQuery().toList {
-                    Pair(getString("fnr"), getTidspunktOrNull("opprettet"))
-                }
+                it
+                    .prepareStatement(
+                        """
+                        select fnr, opprettet from sak;    
+                        """.trimIndent(),
+                    ).executeQuery()
+                    .toList {
+                        Pair(getString("fnr"), getTidspunktOrNull("opprettet"))
+                    }
             }
         val sakmedTidligereDato = saker.find { it.first === fnrMedBehandling }
 
         sakmedTidligereDato?.second?.toLocalDate()?.shouldBeToday()
 
         dataSource.connection.use {
-            it.prepareStatement(
-                """
-                UPDATE sak
-                SET opprettet = 'yesterday'::TIMESTAMP
-                WHERE sak.opprettet IS NULL;
-                """.trimIndent(),
-            ).executeUpdate()
+            it
+                .prepareStatement(
+                    """
+                    UPDATE sak
+                    SET opprettet = 'yesterday'::TIMESTAMP
+                    WHERE sak.opprettet IS NULL;
+                    """.trimIndent(),
+                ).executeUpdate()
         }
 
         val beggesakerMedDato =
             dataSource.connection.use {
-                it.prepareStatement(
-                    """
-                    select fnr, opprettet from sak;    
-                    """.trimIndent(),
-                ).executeQuery().toList {
-                    Pair(getString("fnr"), getTidspunktOrNull("opprettet"))
-                }
+                it
+                    .prepareStatement(
+                        """
+                        select fnr, opprettet from sak;    
+                        """.trimIndent(),
+                    ).executeQuery()
+                    .toList {
+                        Pair(getString("fnr"), getTidspunktOrNull("opprettet"))
+                    }
             }
 
         val sakmedBehandlingsdato = beggesakerMedDato.find { it.first === fnrMedBehandling }
@@ -329,10 +337,12 @@ internal class SakDaoTest(val dataSource: DataSource) {
             sakRepo.opprettSak("fnr3", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
             sakRepo.opprettSak("fnr4", SakType.OMSTILLINGSSTOENAD, Enheter.PORSGRUNN.enhetNr)
 
-            sakRepo.hentSaker("", 100, emptyList(), emptyList(), SakType.BARNEPENSJON)
+            sakRepo
+                .hentSaker("", 100, emptyList(), emptyList(), SakType.BARNEPENSJON)
                 .map { it.ident } shouldContainExactlyInAnyOrder listOf("fnr1", "fnr2", "fnr3")
 
-            sakRepo.hentSaker("", 100, emptyList(), emptyList(), SakType.OMSTILLINGSSTOENAD)
+            sakRepo
+                .hentSaker("", 100, emptyList(), emptyList(), SakType.OMSTILLINGSSTOENAD)
                 .map { it.ident } shouldBe listOf("fnr4")
 
             val saker = sakRepo.hentSaker("", 2, emptyList(), emptyList(), SakType.BARNEPENSJON)

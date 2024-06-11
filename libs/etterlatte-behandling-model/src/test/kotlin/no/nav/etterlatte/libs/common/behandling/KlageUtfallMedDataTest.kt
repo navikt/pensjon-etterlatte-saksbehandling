@@ -14,10 +14,11 @@ class KlageUtfallMedDataTest {
 
     @Test
     fun toJson() {
-        KlageUtfallMedData.Omgjoering(
-            KlageOmgjoering(GrunnForOmgjoering.FEIL_LOVANVENDELSE, "abc"),
-            Grunnlagsopplysning.Saksbehandler("UB40", tidspunkt),
-        ).toJson() shouldBeEqual
+        KlageUtfallMedData
+            .Omgjoering(
+                KlageOmgjoering(GrunnForOmgjoering.FEIL_LOVANVENDELSE, "abc"),
+                Grunnlagsopplysning.Saksbehandler("UB40", tidspunkt),
+            ).toJson() shouldBeEqual
             """                    
             {"utfall":"OMGJOERING","omgjoering":{"grunnForOmgjoering":"FEIL_LOVANVENDELSE","begrunnelse":"abc"},
             "saksbehandler":{"ident":"UB40","tidspunkt":"2024-04-05T17:45:00Z","type":"saksbehandler"}}

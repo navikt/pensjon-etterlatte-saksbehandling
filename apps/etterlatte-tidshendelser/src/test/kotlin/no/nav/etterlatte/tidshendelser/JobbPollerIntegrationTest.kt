@@ -16,7 +16,9 @@ import java.time.YearMonth
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class JobbPollerIntegrationTest(dataSource: DataSource) {
+class JobbPollerIntegrationTest(
+    dataSource: DataSource,
+) {
     companion object {
         @RegisterExtension
         private val dbExtension = DatabaseExtension()

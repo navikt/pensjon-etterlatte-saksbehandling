@@ -22,7 +22,9 @@ import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
-class BeregningRepository(private val dataSource: DataSource) {
+class BeregningRepository(
+    private val dataSource: DataSource,
+) {
     fun hent(behandlingId: UUID): Beregning? =
         dataSource.transaction { tx ->
             val beregningsperioder =
@@ -54,8 +56,8 @@ class BeregningRepository(private val dataSource: DataSource) {
         return hent(beregning.behandlingId)!!
     }
 
-    fun hentOverstyrBeregning(sakId: Long): OverstyrBeregning? {
-        return dataSource.transaction { tx ->
+    fun hentOverstyrBeregning(sakId: Long): OverstyrBeregning? =
+        dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.hentOverstyrBeregning,
                 paramMap = mapOf("sakId" to sakId),
@@ -63,7 +65,6 @@ class BeregningRepository(private val dataSource: DataSource) {
                 tx.run(query.map { toOverstyrBeregning(it) }.asSingle)
             }
         }
-    }
 
     fun opprettOverstyrBeregning(overstyrBeregning: OverstyrBeregning): OverstyrBeregning? {
         dataSource.transaction { tx ->
@@ -92,8 +93,8 @@ class BeregningRepository(private val dataSource: DataSource) {
     private fun createMapFromBeregningsperiode(
         beregningsperiode: Beregningsperiode,
         beregning: Beregning,
-    ): Map<String, Serializable?> {
-        return mapOf(
+    ): Map<String, Serializable?> =
+        mapOf(
             "id" to UUID.randomUUID(),
             "beregningId" to beregning.beregningId,
             "behandlingId" to beregning.behandlingId,
@@ -119,7 +120,6 @@ class BeregningRepository(private val dataSource: DataSource) {
             "regelVersjon" to beregningsperiode.regelVersjon,
             "kilde" to beregningsperiode.kilde?.toJson(),
         )
-    }
 }
 
 private fun toOverstyrBeregning(row: Row): OverstyrBeregning =
@@ -230,7 +230,9 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
     )
 }
 
-private enum class BeregningsperiodeDatabaseColumns(val navn: String) {
+private enum class BeregningsperiodeDatabaseColumns(
+    val navn: String,
+) {
     Id("id"),
     BeregningId("beregningId"),
     BehandlingId("behandlingId"),

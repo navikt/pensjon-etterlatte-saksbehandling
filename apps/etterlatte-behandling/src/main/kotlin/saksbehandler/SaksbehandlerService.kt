@@ -81,8 +81,7 @@ class SaksbehandlerServiceImpl(
         }
     }
 
-    private fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet> {
-        return dao.hentSaksbehandlerEnheter(ident)
+    private fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet> =
+        dao.hentSaksbehandlerEnheter(ident)
             ?: runBlocking { axsysKlient.hentEnheterForIdent(ident) }
-    }
 }

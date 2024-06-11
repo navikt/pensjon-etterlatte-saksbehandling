@@ -19,7 +19,10 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 
-class PDFService(private val db: BrevRepository, private val virusScanService: VirusScanService) {
+class PDFService(
+    private val db: BrevRepository,
+    private val virusScanService: VirusScanService,
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun lagreOpplastaPDF(
@@ -29,7 +32,8 @@ class PDFService(private val db: BrevRepository, private val virusScanService: V
         val request =
             multiPart
                 .first { it is PartData.FormItem }
-                .let { it as PartData.FormItem }.value
+                .let { it as PartData.FormItem }
+                .value
                 .let { objectMapper.readValue<BrevFraOpplastningRequest>(it) }
 
         val fil: ByteArray =

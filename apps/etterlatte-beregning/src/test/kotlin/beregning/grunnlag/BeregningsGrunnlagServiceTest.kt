@@ -957,15 +957,14 @@ internal class BeregningsGrunnlagServiceTest {
         institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
             emptyList(),
         kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler("test", Tidspunkt.now()),
-    ): BeregningsGrunnlag {
-        return BeregningsGrunnlag(
+    ): BeregningsGrunnlag =
+        BeregningsGrunnlag(
             behandlingId = behandlingId,
             kilde = kilde,
             soeskenMedIBeregning = soeskenMedIBeregning,
             institusjonsoppholdBeregningsgrunnlag = institusjonsoppholdBeregningsgrunnlag,
             beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
         )
-    }
 
     private fun mockVedtak(
         behandlingId: UUID,

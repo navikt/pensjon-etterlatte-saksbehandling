@@ -46,24 +46,20 @@ class BrevdataFacade(
     suspend fun hentBrevutfall(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BrevutfallDto? {
-        return behandlingKlient.hentBrevutfall(behandlingId, brukerTokenInfo)
-    }
+    ): BrevutfallDto? = behandlingKlient.hentBrevutfall(behandlingId, brukerTokenInfo)
 
     suspend fun hentEtterbetaling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): EtterbetalingDTO? {
-        return behandlingKlient.hentEtterbetaling(behandlingId, brukerTokenInfo)
-    }
+    ): EtterbetalingDTO? = behandlingKlient.hentEtterbetaling(behandlingId, brukerTokenInfo)
 
     suspend fun hentGenerellBrevData(
         sakId: Long,
         behandlingId: UUID?,
         overstyrSpraak: Spraak? = null,
         brukerTokenInfo: BrukerTokenInfo,
-    ): GenerellBrevData {
-        return coroutineScope {
+    ): GenerellBrevData =
+        coroutineScope {
             val sakDeferred = async { sakService.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = behandlingId?.let { async { vedtaksvurderingKlient.hentVedtak(it, brukerTokenInfo) } }
             val brevutfallDeferred = behandlingId?.let { async { hentBrevutfall(it, brukerTokenInfo) } }
@@ -99,14 +95,16 @@ class BrevdataFacade(
                 vedtak?.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
 
             val behandling =
-                if (behandlingId != null && (
+                if (behandlingId != null &&
+                    (
                         vedtak?.type in
                             listOf(
                                 VedtakType.INNVILGELSE,
                                 VedtakType.AVSLAG,
                                 VedtakType.OPPHOER,
                                 VedtakType.ENDRING,
-                            ) || vedtak == null
+                            ) ||
+                            vedtak == null
                     )
                 ) {
                     behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
@@ -204,7 +202,6 @@ class BrevdataFacade(
                     )
             }
         }
-    }
 
     suspend fun hentKlage(
         klageId: UUID,
@@ -239,15 +236,14 @@ class BrevdataFacade(
         virkningstidspunkt: YearMonth,
         vedtakType: VedtakType,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Avkortingsinfo {
-        return beregningService.finnAvkortingsinfo(
+    ): Avkortingsinfo =
+        beregningService.finnAvkortingsinfo(
             behandlingId,
             sakType,
             virkningstidspunkt,
             vedtakType,
             brukerTokenInfo,
         )
-    }
 
     suspend fun finnForrigeAvkortingsinfo(
         sakId: Long,
@@ -277,8 +273,8 @@ class BrevdataFacade(
     ) = behandlingKlient.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
 }
 
-fun hentBenyttetTrygdetidOgProratabroek(beregningsperiode: CommonBeregningsperiode): Pair<Int, IntBroek?> {
-    return when (beregningsperiode.beregningsMetode) {
+fun hentBenyttetTrygdetidOgProratabroek(beregningsperiode: CommonBeregningsperiode): Pair<Int, IntBroek?> =
+    when (beregningsperiode.beregningsMetode) {
         BeregningsMetode.NASJONAL ->
             Pair(
                 beregningsperiode.samletNorskTrygdetid ?: throw SamletTeoretiskTrygdetidMangler(),
@@ -295,21 +291,23 @@ fun hentBenyttetTrygdetidOgProratabroek(beregningsperiode: CommonBeregningsperio
         BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
         null -> beregningsperiode.trygdetid to null
     }
-}
 
-class UgyldigBeregningsMetode : UgyldigForespoerselException(
-    code = "UGYLDIG_BEREGNINGS_METODE",
-    detail =
-        "Kan ikke ha brukt beregningsmetode 'BEST' i en faktisk beregning, " +
-            "siden best velger mellom nasjonal eller prorata når det beregnes.",
-)
+class UgyldigBeregningsMetode :
+    UgyldigForespoerselException(
+        code = "UGYLDIG_BEREGNINGS_METODE",
+        detail =
+            "Kan ikke ha brukt beregningsmetode 'BEST' i en faktisk beregning, " +
+                "siden best velger mellom nasjonal eller prorata når det beregnes.",
+    )
 
-class SamletTeoretiskTrygdetidMangler : UgyldigForespoerselException(
-    code = "SAMLET_TEORETISK_TRYGDETID_MANGLER",
-    detail = "Samlet teoretisk trygdetid mangler i beregningen",
-)
+class SamletTeoretiskTrygdetidMangler :
+    UgyldigForespoerselException(
+        code = "SAMLET_TEORETISK_TRYGDETID_MANGLER",
+        detail = "Samlet teoretisk trygdetid mangler i beregningen",
+    )
 
-class BeregningsperiodeBroekMangler : UgyldigForespoerselException(
-    code = "BEREGNINGSPERIODE_BROEK_MANGLER",
-    detail = "Beregningsperioden mangler brøk",
-)
+class BeregningsperiodeBroekMangler :
+    UgyldigForespoerselException(
+        code = "BEREGNINGSPERIODE_BROEK_MANGLER",
+        detail = "Beregningsperioden mangler brøk",
+    )

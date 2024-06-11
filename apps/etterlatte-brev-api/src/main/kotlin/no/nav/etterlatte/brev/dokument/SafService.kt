@@ -112,25 +112,30 @@ class SafService(
     }
 }
 
-class JournalpostIkkeFunnet(journalpostId: String) : IkkeFunnetException(
-    code = "JOURNALPOST_IKKE_FUNNET",
-    detail = "Journalpost med journalpostId=$journalpostId ikke funnet i Joark",
-)
+class JournalpostIkkeFunnet(
+    journalpostId: String,
+) : IkkeFunnetException(
+        code = "JOURNALPOST_IKKE_FUNNET",
+        detail = "Journalpost med journalpostId=$journalpostId ikke funnet i Joark",
+    )
 
-class IkkeTilgangTilJournalpost : ForespoerselException(
-    status = HttpStatusCode.Forbidden.value,
-    code = "IKKE_TILGANG_JOURNALPOST",
-    detail = "Ikke tilgang til å se journalposten",
-)
+class IkkeTilgangTilJournalpost :
+    ForespoerselException(
+        status = HttpStatusCode.Forbidden.value,
+        code = "IKKE_TILGANG_JOURNALPOST",
+        detail = "Ikke tilgang til å se journalposten",
+    )
 
-class SafServerError : ForespoerselException(
-    status = HttpStatusCode.InternalServerError.value,
-    code = "SAF_SERVER_ERROR",
-    detail = "Teknisk feil i Saf. Prøv igjen om litt",
-)
+class SafServerError :
+    ForespoerselException(
+        status = HttpStatusCode.InternalServerError.value,
+        code = "SAF_SERVER_ERROR",
+        detail = "Teknisk feil i Saf. Prøv igjen om litt",
+    )
 
-class UkjentFeilSaf : ForespoerselException(
-    status = HttpStatusCode.InternalServerError.value,
-    code = "UKJENT_FEIL_SAF",
-    detail = "Ukjent feil oppsto",
-)
+class UkjentFeilSaf :
+    ForespoerselException(
+        status = HttpStatusCode.InternalServerError.value,
+        code = "UKJENT_FEIL_SAF",
+        detail = "Ukjent feil oppsto",
+    )

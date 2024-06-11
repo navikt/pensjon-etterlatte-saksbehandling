@@ -26,7 +26,9 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSource) {
+internal class BeregningsGrunnlagRepositoryIntegrationTest(
+    dataSource: DataSource,
+) {
     companion object {
         @RegisterExtension
         val dbExtension = DatabaseExtension()
@@ -479,13 +481,12 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
     private fun List<SoeskenMedIBeregning>.somPeriodisertGrunnlag(
         periodeFra: LocalDate = foerstePeriodeFra,
         periodeTil: LocalDate? = null,
-    ): List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> {
-        return listOf(
+    ): List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> =
+        listOf(
             GrunnlagMedPeriode(
                 fom = periodeFra,
                 tom = periodeTil,
                 data = this,
             ),
         )
-    }
 }

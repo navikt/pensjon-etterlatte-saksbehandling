@@ -7,7 +7,7 @@ import {
   slettTotalVurdering,
   VilkaarsvurderingResultat,
 } from '~shared/api/vilkaarsvurdering'
-import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea, Box } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea, Box, HStack, VStack } from '@navikt/ds-react'
 import { svarTilTotalResultat, totalResultatTilSvar } from './utils'
 import { PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
@@ -19,7 +19,6 @@ import { oppdaterBehandlingsstatus, updateVilkaarsvurdering } from '~store/reduc
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
-
 import { isPending } from '~shared/api/apiUtils'
 import { OppdatertGrunnlagAlert } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 
@@ -98,22 +97,22 @@ export const Resultat = (props: Props) => {
 
   return (
     <>
-      <Box paddingBlock="4" paddingInline="8 4">
-        <VilkaarsvurderingContent>
-          <HeadingWrapper>
-            <Heading size="small" level="2">
-              {erRevurdering
-                ? 'Utfall etter revurdering'
-                : `Er vilkårene for ${formaterSakstype(sakstype).toLowerCase()} oppfylt?`}
-            </Heading>
-          </HeadingWrapper>
-          {vilkaarsvurdering.resultat && (
-            <ContentWrapper>
-              <TekstWrapper>
-                <StatusIcon status={status} /> {`${resultatTekst()}`}
-              </TekstWrapper>
+      <Box paddingBlock="12 4" paddingInline="16 14">
+        <Heading size="small" level="2">
+          {erRevurdering
+            ? 'Utfall etter revurdering'
+            : `Er vilkårene for ${formaterSakstype(sakstype).toLowerCase()} oppfylt?`}
+        </Heading>
+
+        {vilkaarsvurdering.resultat && (
+          <VStack gap="2">
+            <Box>
+              <HStack gap="2" align="center">
+                <StatusIcon status={status} />
+                <BodyShort textColor="subtle">{`${resultatTekst()}`}</BodyShort>
+              </HStack>
               {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
-                <BodyShort>
+                <BodyShort textColor="subtle">
                   {erRevurdering
                     ? null
                     : `${formaterSakstype(sakstype)} er innvilget f.o.m ${formaterStringDato(
@@ -121,14 +120,16 @@ export const Resultat = (props: Props) => {
                       )}`}
                 </BodyShort>
               )}
-              {vilkaarsvurdering?.resultat?.kommentar && (
-                <Kommentar>
-                  <Heading size="xsmall" level="3">
-                    Begrunnelse
-                  </Heading>
-                  <ResultatKommentar>{vilkaarsvurdering.resultat.kommentar}</ResultatKommentar>
-                </Kommentar>
-              )}
+            </Box>
+            {vilkaarsvurdering?.resultat?.kommentar && (
+              <Box>
+                <Heading size="xsmall" level="3">
+                  Begrunnelse
+                </Heading>
+                <ResultatKommentar>{vilkaarsvurdering.resultat.kommentar}</ResultatKommentar>
+              </Box>
+            )}
+            <HStack gap="4">
               {redigerbar && (
                 <Button
                   loading={isPending(slettVurderingStatus)}
@@ -137,6 +138,7 @@ export const Resultat = (props: Props) => {
                     setRedigerTotalvurdering(false)
                   }}
                   variant="tertiary"
+                  size="small"
                   icon={<TrashIcon />}
                 >
                   Slett vurdering
@@ -144,7 +146,6 @@ export const Resultat = (props: Props) => {
               )}
               {redigerbar && (
                 <Button
-                  style={{ marginLeft: '1rem' }}
                   onClick={() => {
                     setKommentar(vilkaarsvurdering?.resultat?.kommentar || '')
                     if (vilkaarsvurdering.resultat?.utfall) {
@@ -155,40 +156,39 @@ export const Resultat = (props: Props) => {
                     dispatch(updateVilkaarsvurdering(vilkaarsvurderingUtenResultat))
                   }}
                   variant="tertiary"
+                  size="small"
                   icon={<PencilWritingIcon />}
                   loading={isPending(totalVurderingStatus)}
                 >
                   Rediger totalvurdering
                 </Button>
               )}
-            </ContentWrapper>
-          )}
+            </HStack>
+          </VStack>
+        )}
 
-          {!vilkaarsvurdering.resultat && !alleVilkaarErVurdert && (
-            <TekstWrapper>Alle vilkår må vurderes før man kan gå videre</TekstWrapper>
-          )}
+        {!vilkaarsvurdering.resultat && !alleVilkaarErVurdert && (
+          <BodyShort>Alle vilkår må vurderes før man kan gå videre</BodyShort>
+        )}
 
-          {!vilkaarsvurdering.resultat && alleVilkaarErVurdert && (
-            <>
-              <RadioGroupWrapper>
-                <RadioGroup
-                  legend=""
-                  size="small"
-                  className="radioGroup"
-                  value={svar || ''}
-                  onChange={(event) => {
-                    setSvar(ISvar[event as ISvar])
-                    setRadioError(undefined)
-                  }}
-                  error={radioError ? radioError : false}
-                >
-                  <Radio value={ISvar.JA}>{erRevurdering ? 'Fortsatt oppfylt' : 'Ja, vilkår er oppfylt'}</Radio>
-                  <Radio value={ISvar.NEI}>{erRevurdering ? 'Opphør av ytelse' : 'Nei, vilkår er ikke oppfylt'}</Radio>
-                </RadioGroup>
-              </RadioGroupWrapper>
+        {!vilkaarsvurdering.resultat && alleVilkaarErVurdert && (
+          <VurderAlleVilkaarBox>
+            <VStack gap="4">
+              <RadioGroup
+                legend=""
+                size="small"
+                value={svar || ''}
+                onChange={(event) => {
+                  setSvar(ISvar[event as ISvar])
+                  setRadioError(undefined)
+                }}
+                error={radioError ? radioError : false}
+              >
+                <Radio value={ISvar.JA}>{erRevurdering ? 'Fortsatt oppfylt' : 'Ja, vilkår er oppfylt'}</Radio>
+                <Radio value={ISvar.NEI}>{erRevurdering ? 'Opphør av ytelse' : 'Nei, vilkår er ikke oppfylt'}</Radio>
+              </RadioGroup>
               <Textarea
                 label="Begrunnelse"
-                hideLabel={false}
                 placeholder="Valgfritt"
                 value={kommentar}
                 onChange={(e) => setKommentar(e.target.value)}
@@ -196,17 +196,19 @@ export const Resultat = (props: Props) => {
                 size="medium"
                 autoComplete="off"
               />
-              <Button
-                variant="primary"
-                size="small"
-                onClick={lagreVilkaarsvurderingResultat}
-                loading={isPending(totalVurderingStatus)}
-              >
-                Lagre
-              </Button>
-            </>
-          )}
-        </VilkaarsvurderingContent>
+              <Box>
+                <Button
+                  variant="primary"
+                  size="small"
+                  onClick={lagreVilkaarsvurderingResultat}
+                  loading={isPending(totalVurderingStatus)}
+                >
+                  Lagre
+                </Button>
+              </Box>
+            </VStack>
+          </VurderAlleVilkaarBox>
+        )}
       </Box>
 
       {vilkaarsvurdering.resultat && !virkningstidspunktSamsvarer && (
@@ -237,45 +239,10 @@ export const Resultat = (props: Props) => {
   )
 }
 
-export const RadioGroupWrapper = styled.div`
-  margin-top: 1em;
-  margin-bottom: 2em;
-  display: flex;
-
-  .flex {
-    display: flex;
-    gap: 20px;
-  }
-`
-
-const VilkaarsvurderingContent = styled.div`
-  padding-left: 36px;
-  padding-right: 36px;
-
-  button {
-    margin-top: 10px;
-  }
-`
-
-const TekstWrapper = styled.div`
-  margin-top: 20px;
-  margin-bottom: 10px;
-  display: flex;
-  font-weight: bold;
-`
-
-const Kommentar = styled.div`
-  margin-top: 20px;
+const VurderAlleVilkaarBox = styled(Box)`
+  width: 20rem;
 `
 
 const ResultatKommentar = styled(BodyShort)`
   white-space: pre-wrap;
-`
-
-const HeadingWrapper = styled.div`
-  margin-top: 2em;
-`
-
-const ContentWrapper = styled.div`
-  color: var(--a-gray-700);
 `

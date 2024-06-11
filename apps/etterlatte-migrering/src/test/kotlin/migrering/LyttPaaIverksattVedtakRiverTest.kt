@@ -25,7 +25,9 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
-class LyttPaaIverksattVedtakRiverTest(private val datasource: DataSource) {
+class LyttPaaIverksattVedtakRiverTest(
+    private val datasource: DataSource,
+) {
     @Test
     fun `sender opphoersmelding til PEN ved godkjent utbetaling`() {
         testApplication {
@@ -52,16 +54,17 @@ class LyttPaaIverksattVedtakRiverTest(private val datasource: DataSource) {
                         featureToggleService = featureToggleService,
                     )
                 }.sendTestMessage(
-                    JsonMessage.newMessage(
-                        mapOf(
-                            UtbetalinghendelseType.OPPDATERT.lagParMedEventNameKey(),
-                            UTBETALING_RESPONSE to
-                                UtbetalingResponseDto(
-                                    status = UtbetalingStatusDto.GODKJENT,
-                                    behandlingId = behandlingId,
-                                ),
-                        ),
-                    ).toJson(),
+                    JsonMessage
+                        .newMessage(
+                            mapOf(
+                                UtbetalinghendelseType.OPPDATERT.lagParMedEventNameKey(),
+                                UTBETALING_RESPONSE to
+                                    UtbetalingResponseDto(
+                                        status = UtbetalingStatusDto.GODKJENT,
+                                        behandlingId = behandlingId,
+                                    ),
+                            ),
+                        ).toJson(),
                 )
 
             verify { runBlocking { penKlient.opphoerSak(pesysid) } }
@@ -94,16 +97,17 @@ class LyttPaaIverksattVedtakRiverTest(private val datasource: DataSource) {
                         featureToggleService,
                     )
                 }.sendTestMessage(
-                    JsonMessage.newMessage(
-                        mapOf(
-                            UtbetalinghendelseType.OPPDATERT.lagParMedEventNameKey(),
-                            UTBETALING_RESPONSE to
-                                UtbetalingResponseDto(
-                                    status = UtbetalingStatusDto.AVVIST,
-                                    behandlingId = behandlingId,
-                                ),
-                        ),
-                    ).toJson(),
+                    JsonMessage
+                        .newMessage(
+                            mapOf(
+                                UtbetalinghendelseType.OPPDATERT.lagParMedEventNameKey(),
+                                UTBETALING_RESPONSE to
+                                    UtbetalingResponseDto(
+                                        status = UtbetalingStatusDto.AVVIST,
+                                        behandlingId = behandlingId,
+                                    ),
+                            ),
+                        ).toJson(),
                 )
 
             verify(exactly = 0) { runBlocking { penKlient.opphoerSak(any()) } }

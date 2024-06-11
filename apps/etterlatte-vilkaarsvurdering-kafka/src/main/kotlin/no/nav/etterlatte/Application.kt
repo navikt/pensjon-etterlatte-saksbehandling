@@ -9,9 +9,11 @@ import no.nav.helse.rapids_rivers.RapidApplication
 
 fun main() {
     val rapidEnv = getRapidEnv()
-    RapidApplication.create(rapidEnv).also { rapidsConnection ->
-        val vilkaarsvurderingService = AppBuilder(Miljoevariabler(rapidEnv)).lagVilkaarsvurderingKlient()
-        VilkaarsvurderingRiver(rapidsConnection, vilkaarsvurderingService)
-        TidshendelseRiver(rapidsConnection, vilkaarsvurderingService)
-    }.start()
+    RapidApplication
+        .create(rapidEnv)
+        .also { rapidsConnection ->
+            val vilkaarsvurderingService = AppBuilder(Miljoevariabler(rapidEnv)).lagVilkaarsvurderingKlient()
+            VilkaarsvurderingRiver(rapidsConnection, vilkaarsvurderingService)
+            TidshendelseRiver(rapidsConnection, vilkaarsvurderingService)
+        }.start()
 }

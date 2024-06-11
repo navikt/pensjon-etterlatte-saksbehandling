@@ -5,7 +5,9 @@ import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 import javax.sql.DataSource
 
-class VedtakMetrikkerDao(private val dataSource: DataSource) {
+class VedtakMetrikkerDao(
+    private val dataSource: DataSource,
+) {
     companion object {
         fun using(datasource: DataSource): VedtakMetrikkerDao = VedtakMetrikkerDao(datasource)
     }

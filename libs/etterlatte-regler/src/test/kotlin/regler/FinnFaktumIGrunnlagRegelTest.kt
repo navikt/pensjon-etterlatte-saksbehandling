@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class FinnFaktumIGrunnlagRegelTest {
-    data class Grunnlag(val testVerdi2021: FaktumNode<Int>)
+    data class Grunnlag(
+        val testVerdi2021: FaktumNode<Int>,
+    )
 
     private val grunnlag =
         Grunnlag(

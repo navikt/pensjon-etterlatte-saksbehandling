@@ -16,7 +16,9 @@ import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class AvkortingRepositoryTest(ds: DataSource) {
+internal class AvkortingRepositoryTest(
+    ds: DataSource,
+) {
     private val avkortingRepository = AvkortingRepository(ds)
 
     @Test

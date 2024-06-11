@@ -96,7 +96,10 @@ internal class LoependeYtelserforespoerselRiverTest {
         inspector.sendTestMessage(melding.toJson())
         Assertions.assertEquals(1, inspector.inspektør.size)
         Assertions.assertEquals(
-            inspector.inspektør.message(0).get(EVENT_NAME_KEY).asText(),
+            inspector.inspektør
+                .message(0)
+                .get(EVENT_NAME_KEY)
+                .asText(),
             ReguleringHendelseType.YTELSE_IKKE_LOEPENDE.lagEventnameForType(),
         )
     }
@@ -141,7 +144,11 @@ internal class LoependeYtelserforespoerselRiverTest {
         inspector.sendTestMessage(melding.toJson())
         Assertions.assertEquals(1, inspector.inspektør.size)
         Assertions.assertTrue(
-            "SakErUnderSamordning" in inspector.inspektør.message(0).get(FEILMELDING_KEY).textValue(),
+            "SakErUnderSamordning" in
+                inspector.inspektør
+                    .message(0)
+                    .get(FEILMELDING_KEY)
+                    .textValue(),
         )
     }
 }

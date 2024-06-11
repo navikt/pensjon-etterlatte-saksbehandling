@@ -31,7 +31,9 @@ import no.nav.etterlatte.pdl.mapper.PersonMapper
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
-class PdlForesporselFeilet(message: String) : RuntimeException(message)
+class PdlForesporselFeilet(
+    message: String,
+) : RuntimeException(message)
 
 class PersonService(
     private val pdlKlient: PdlKlient,
@@ -121,7 +123,8 @@ class PersonService(
         }
         val fnr = hentPersonRequest.foedselsnummer
 
-        return pdlKlient.hentPersonHistorikkForeldreansvar(fnr)
+        return pdlKlient
+            .hentPersonHistorikkForeldreansvar(fnr)
             .let {
                 if (it.data?.hentPerson == null) {
                     val pdlFeil = it.errors?.asFormatertFeil()
@@ -157,7 +160,8 @@ class PersonService(
                     val folkeregisterIdent: String? =
                         identResponse.data.hentIdenter.identer
                             .filter { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
-                            .firstOrNull { !it.historisk }?.ident
+                            .firstOrNull { !it.historisk }
+                            ?.ident
                     if (folkeregisterIdent != null) {
                         PdlIdentifikator.FolkeregisterIdent(
                             folkeregisterident =
@@ -169,7 +173,8 @@ class PersonService(
                         val npid: String =
                             identResponse.data.hentIdenter.identer
                                 .filter { it.gruppe == PDLIdentGruppeTyper.NPID.navn }
-                                .first { !it.historisk }.ident
+                                .first { !it.historisk }
+                                .ident
                         PdlIdentifikator.Npid(NavPersonIdent(npid))
                     }
                 } catch (e: Exception) {
@@ -229,11 +234,13 @@ class PersonService(
         val soesken = avdoede.flatMap { it.avdoedesBarn ?: emptyList() }
 
         val alleTilknyttedePersonerUtenIdent =
-            mottaker.familieRelasjon?.personerUtenIdent?.plus(
-                avdoede.flatMap {
-                    it.familieRelasjon?.personerUtenIdent ?: emptyList()
-                },
-            )?.plus(gjenlevende.flatMap { it.familieRelasjon?.personerUtenIdent ?: emptyList() })
+            mottaker.familieRelasjon
+                ?.personerUtenIdent
+                ?.plus(
+                    avdoede.flatMap {
+                        it.familieRelasjon?.personerUtenIdent ?: emptyList()
+                    },
+                )?.plus(gjenlevende.flatMap { it.familieRelasjon?.personerUtenIdent ?: emptyList() })
 
         return Persongalleri(
             soeker = mottakerAvYtelsen.value,
@@ -259,24 +266,26 @@ class PersonService(
             )
 
         val partnerVedSivilstand =
-            mottaker.sivilstand?.filter {
-                listOf(
-                    Sivilstatus.GIFT,
-                    Sivilstatus.GJENLEVENDE_PARTNER,
-                    Sivilstatus.ENKE_ELLER_ENKEMANN,
-                ).contains(it.sivilstatus)
-            }?.mapNotNull { it.relatertVedSiviltilstand } ?: emptyList()
+            mottaker.sivilstand
+                ?.filter {
+                    listOf(
+                        Sivilstatus.GIFT,
+                        Sivilstatus.GJENLEVENDE_PARTNER,
+                        Sivilstatus.ENKE_ELLER_ENKEMANN,
+                    ).contains(it.sivilstatus)
+                }?.mapNotNull { it.relatertVedSiviltilstand } ?: emptyList()
 
         val (avdoede, levende) =
-            partnerVedSivilstand.map {
-                hentPerson(
-                    HentPersonRequest(
-                        foedselsnummer = it,
-                        rolle = PersonRolle.GJENLEVENDE,
-                        saktyper = listOf(SakType.OMSTILLINGSSTOENAD),
-                    ),
-                )
-            }.partition { it.doedsdato != null }
+            partnerVedSivilstand
+                .map {
+                    hentPerson(
+                        HentPersonRequest(
+                            foedselsnummer = it,
+                            rolle = PersonRolle.GJENLEVENDE,
+                            saktyper = listOf(SakType.OMSTILLINGSSTOENAD),
+                        ),
+                    )
+                }.partition { it.doedsdato != null }
 
         // TODO: håndter tilfellet med felles barn med avdød riktig -- da gjelder det for samboer også
         val personerUtenIdent =

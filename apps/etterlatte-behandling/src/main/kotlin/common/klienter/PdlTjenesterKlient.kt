@@ -54,7 +54,10 @@ interface PdlTjenesterKlient : Pingable {
     suspend fun hentAdressebeskyttelseForPerson(hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest): AdressebeskyttelseGradering
 }
 
-class PdlTjenesterKlientImpl(config: Config, private val client: HttpClient) : PdlTjenesterKlient {
+class PdlTjenesterKlientImpl(
+    config: Config,
+    private val client: HttpClient,
+) : PdlTjenesterKlient {
     private val url = config.getString("pdltjenester.url")
 
     companion object {
@@ -65,11 +68,12 @@ class PdlTjenesterKlientImpl(config: Config, private val client: HttpClient) : P
         hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest,
     ): AdressebeskyttelseGradering {
         logger.info("Henter person med ${hentAdressebeskyttelseRequest.ident.value.maskerFnr()} fra pdltjenester")
-        return client.post("$url/person/adressebeskyttelse") {
-            accept(ContentType.Application.Json)
-            contentType(ContentType.Application.Json)
-            setBody(hentAdressebeskyttelseRequest)
-        }.body<AdressebeskyttelseGradering>()
+        return client
+            .post("$url/person/adressebeskyttelse") {
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(hentAdressebeskyttelseRequest)
+            }.body<AdressebeskyttelseGradering>()
     }
 
     override val serviceName: String
@@ -79,14 +83,13 @@ class PdlTjenesterKlientImpl(config: Config, private val client: HttpClient) : P
     override val endpoint: String
         get() = this.url
 
-    override suspend fun ping(konsument: String?): PingResult {
-        return client.ping(
+    override suspend fun ping(konsument: String?): PingResult =
+        client.ping(
             pingUrl = url.plus("/health/isready"),
             logger = logger,
             serviceName = serviceName,
             beskrivelse = beskrivelse,
         )
-    }
 
     override fun hentPdlModellFlereSaktyper(
         foedselsnummer: String,
@@ -97,10 +100,11 @@ class PdlTjenesterKlientImpl(config: Config, private val client: HttpClient) : P
         val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, saktyper)
         val response =
             runBlocking {
-                client.post("$url/person/v2") {
-                    contentType(ContentType.Application.Json)
-                    setBody(personRequest)
-                }.body<PersonDTO>()
+                client
+                    .post("$url/person/v2") {
+                        contentType(ContentType.Application.Json)
+                        setBody(personRequest)
+                    }.body<PersonDTO>()
             }
         return response
     }
@@ -114,10 +118,11 @@ class PdlTjenesterKlientImpl(config: Config, private val client: HttpClient) : P
         val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, listOf(saktype))
         val response =
             runBlocking {
-                client.post("$url/person/v2") {
-                    contentType(ContentType.Application.Json)
-                    setBody(personRequest)
-                }.body<PersonDTO>()
+                client
+                    .post("$url/person/v2") {
+                        contentType(ContentType.Application.Json)
+                        setBody(personRequest)
+                    }.body<PersonDTO>()
             }
         return response
     }
@@ -129,10 +134,11 @@ class PdlTjenesterKlientImpl(config: Config, private val client: HttpClient) : P
         val request = HentGeografiskTilknytningRequest(Folkeregisteridentifikator.of(foedselsnummer), saktype)
         val response =
             runBlocking {
-                client.post("$url/geografisktilknytning") {
-                    contentType(ContentType.Application.Json)
-                    setBody(request)
-                }.body<GeografiskTilknytning>()
+                client
+                    .post("$url/geografisktilknytning") {
+                        contentType(ContentType.Application.Json)
+                        setBody(request)
+                    }.body<GeografiskTilknytning>()
             }
 
         return response
@@ -142,10 +148,11 @@ class PdlTjenesterKlientImpl(config: Config, private val client: HttpClient) : P
         val request = HentFolkeregisterIdenterForAktoerIdBolkRequest(aktoerIds)
         val response =
             runBlocking {
-                client.post("$url/folkeregisteridenter") {
-                    contentType(ContentType.Application.Json)
-                    setBody(request)
-                }.body<Map<String, String?>>()
+                client
+                    .post("$url/folkeregisteridenter") {
+                        contentType(ContentType.Application.Json)
+                        setBody(request)
+                    }.body<Map<String, String?>>()
             }
         return response
     }

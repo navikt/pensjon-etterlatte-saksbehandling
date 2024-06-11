@@ -17,7 +17,9 @@ import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class AvstemmingDaoIntegrationTest(dataSource: DataSource) {
+internal class AvstemmingDaoIntegrationTest(
+    dataSource: DataSource,
+) {
     companion object {
         @RegisterExtension
         val dbExtension = DatabaseExtension()

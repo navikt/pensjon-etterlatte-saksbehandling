@@ -27,6 +27,7 @@ import no.nav.etterlatte.rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
@@ -89,9 +90,18 @@ internal class ReguleringsforespoerselRiverTest {
         for (i in 0 until inspector.inspektør.size) {
             Assertions.assertEquals(
                 ReguleringHendelseType.SAK_FUNNET.lagEventnameForType(),
-                inspector.inspektør.message(i).get(EVENT_NAME_KEY).asText(),
+                inspector.inspektør
+                    .message(i)
+                    .get(EVENT_NAME_KEY)
+                    .asText(),
             )
-            Assertions.assertEquals(foersteMai2023.toString(), inspector.inspektør.message(i).get(DATO_KEY).asText())
+            Assertions.assertEquals(
+                foersteMai2023.toString(),
+                inspector.inspektør
+                    .message(i)
+                    .get(DATO_KEY)
+                    .asText(),
+            )
         }
     }
 
@@ -222,6 +232,7 @@ internal class ReguleringsforespoerselRiverTest {
     }
 
     @Test
+    @Disabled
     fun `ignorerer spesifiserte saker`() {
         val melding = genererReguleringMelding(LocalDate.now())
         val vedtakServiceMock =

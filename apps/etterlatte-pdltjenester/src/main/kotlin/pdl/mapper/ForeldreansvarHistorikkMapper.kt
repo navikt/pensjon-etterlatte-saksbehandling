@@ -9,10 +9,10 @@ import no.nav.etterlatte.pdl.PdlHistorikkForeldreansvar
 object ForeldreansvarHistorikkMapper {
     fun mapForeldreAnsvar(pdlData: PdlHistorikkForeldreansvar): HistorikkForeldreansvar {
         val foreldreansvar =
-            pdlData.foreldreansvar.filter {
-                it.ansvarlig != null
-            }
-                .map {
+            pdlData.foreldreansvar
+                .filter {
+                    it.ansvarlig != null
+                }.map {
                     val fraDato = it.folkeregistermetadata?.gyldighetstidspunkt
                     val tilDato = it.folkeregistermetadata?.opphoerstidspunkt
                     ForeldreansvarPeriode(

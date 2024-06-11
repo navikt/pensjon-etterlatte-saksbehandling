@@ -11,7 +11,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const FristWrapper = styled.span<{ $fristHarPassert: boolean; $utenKnapp?: boolean }>`
   color: ${(p) => p.$fristHarPassert && 'var(--a-text-danger)'};
-  padding: ${(p) => p.$utenKnapp && '12px 20px'};
+  padding: ${(p) => p.$utenKnapp && '0 12px'};
 `
 
 export const FristHandlinger = (props: {
@@ -117,7 +117,7 @@ export const FristHandlinger = (props: {
               size="small"
               variant="tertiary"
               iconPosition="right"
-              icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+              icon={<PencilIcon title="a11y-title" />}
               onClick={() => setOpen(!open)}
             >
               <FristWrapper $fristHarPassert={isBefore(new Date(frist), new Date())}>
@@ -126,7 +126,7 @@ export const FristHandlinger = (props: {
             </Button>
           ) : (
             <FristWrapper $fristHarPassert={isBefore(new Date(frist), new Date())} $utenKnapp>
-              <Label>{formaterStringDato(frist)}</Label>
+              <Label size="small">{formaterStringDato(frist)}</Label>
             </FristWrapper>
           )}
         </>

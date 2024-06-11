@@ -1,4 +1,4 @@
-import { Heading, Table } from '@navikt/ds-react'
+import { Box, Heading, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { compareDesc, lastDayOfMonth } from 'date-fns'
 import { formaterDato, formaterStringDato, NOK } from '~utils/formattering'
@@ -16,7 +16,7 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
   )
 
   return (
-    <TableWrapper>
+    <TableBox>
       <Heading spacing size="small" level="2">
         Beregning før avkorting
       </Heading>
@@ -62,23 +62,10 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
           ))}
         </Table.Body>
       </Table>
-    </TableWrapper>
+    </TableBox>
   )
 }
 
-export const TableWrapper = styled.div<{
-  marginBottom?: string
-}>`
-  display: flex;
-  flex-wrap: wrap;
-  max-width: 1000px;
-  margin-bottom: ${(props) => props.marginBottom ?? '5em'};
-
-  .table {
-    max-width: 1000px;
-
-    .tableCell {
-      max-width: 100px;
-    }
-  }
+export const TableBox = styled(Box)`
+  max-width: 63rem;
 `

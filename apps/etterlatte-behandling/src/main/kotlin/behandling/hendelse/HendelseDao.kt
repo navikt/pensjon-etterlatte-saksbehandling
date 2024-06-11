@@ -19,7 +19,9 @@ import java.sql.ResultSet
 import java.sql.Types
 import java.util.UUID
 
-class HendelseDao(private val connectionAutoclosing: ConnectionAutoclosing) {
+class HendelseDao(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) {
     companion object {
         val logger: Logger = LoggerFactory.getLogger(HendelseDao::class.java)
     }
@@ -193,8 +195,8 @@ class HendelseDao(private val connectionAutoclosing: ConnectionAutoclosing) {
         ),
     )
 
-    fun hentHendelserISak(sakId: Long): List<LagretHendelse> {
-        return connectionAutoclosing.hentConnection {
+    fun hentHendelserISak(sakId: Long): List<LagretHendelse> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -211,10 +213,9 @@ class HendelseDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                 }
             }
         }
-    }
 
-    fun finnHendelserIBehandling(behandling: UUID): List<LagretHendelse> {
-        return connectionAutoclosing.hentConnection {
+    fun finnHendelserIBehandling(behandling: UUID): List<LagretHendelse> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
@@ -230,7 +231,6 @@ class HendelseDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                 }
             }
         }
-    }
 
     private fun ResultSet.asHendelse(): LagretHendelse =
         LagretHendelse(
@@ -247,8 +247,8 @@ class HendelseDao(private val connectionAutoclosing: ConnectionAutoclosing) {
             getString("valgtBegrunnelse"),
         )
 
-    private fun lagreHendelse(hendelse: UlagretHendelse) {
-        return connectionAutoclosing.hentConnection {
+    private fun lagreHendelse(hendelse: UlagretHendelse) =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
@@ -272,7 +272,6 @@ class HendelseDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                 logger.info("lagret hendelse: $hendelse")
             }
         }
-    }
 }
 
 fun PreparedStatement.setLong(

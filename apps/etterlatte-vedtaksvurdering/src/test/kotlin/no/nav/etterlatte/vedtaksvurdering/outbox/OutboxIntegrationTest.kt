@@ -25,7 +25,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-class OutboxIntegrationTest(private val dataSource: DataSource) {
+class OutboxIntegrationTest(
+    private val dataSource: DataSource,
+) {
     private val testProdusent = TestProdusent<UUID, String>()
     private val vedtaksvurderingRepository = VedtaksvurderingRepository(dataSource)
     private val vedtaksvurderingService = VedtaksvurderingService(vedtaksvurderingRepository)
@@ -105,7 +107,8 @@ class OutboxIntegrationTest(private val dataSource: DataSource) {
         // Verifiser at hendelsene er merket som publisert
         dataSource.connection.use { conn ->
             conn.createStatement().use { stmt ->
-                stmt.executeQuery("SELECT COUNT(1) FROM outbox_vedtakshendelse WHERE publisert = false")
+                stmt
+                    .executeQuery("SELECT COUNT(1) FROM outbox_vedtakshendelse WHERE publisert = false")
                     .single { getLong(1) } shouldBe 0
             }
         }

@@ -47,7 +47,9 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import java.util.UUID
 import javax.sql.DataSource
 
-class BrevRepository(private val ds: DataSource) {
+class BrevRepository(
+    private val ds: DataSource,
+) {
     fun hentBrev(id: BrevID): Brev =
         using(sessionOf(ds)) {
             it.run(queryOf(HENT_BREV_QUERY, id).map(tilBrev).asSingle)
@@ -90,18 +92,20 @@ class BrevRepository(private val ds: DataSource) {
         id: BrevID,
         payload: Slate,
     ) = ds.transaction { tx ->
-        tx.run(
-            queryOf(
-                OPPDATER_INNHOLD_PAYLOAD,
-                mapOf(
-                    "brev_id" to id,
-                    "spraak" to Spraak.NB.name,
-                    "payload" to payload.toJson(),
-                ),
-            ).asUpdate,
-        ).also { require(it == 1) }
+        tx
+            .run(
+                queryOf(
+                    OPPDATER_INNHOLD_PAYLOAD,
+                    mapOf(
+                        "brev_id" to id,
+                        "spraak" to Spraak.NB.name,
+                        "payload" to payload.toJson(),
+                    ),
+                ).asUpdate,
+            ).also { require(it == 1) }
 
-        tx.lagreHendelse(id, Status.OPPDATERT, payload.toJson())
+        tx
+            .lagreHendelse(id, Status.OPPDATERT, payload.toJson())
             .also { require(it == 1) }
     }
 
@@ -109,18 +113,20 @@ class BrevRepository(private val ds: DataSource) {
         id: BrevID,
         payload: List<BrevInnholdVedlegg>,
     ) = ds.transaction { tx ->
-        tx.run(
-            queryOf(
-                OPPDATER_INNHOLD_PAYLOAD_VEDLEGG,
-                mapOf(
-                    "brev_id" to id,
-                    "spraak" to Spraak.NB.name,
-                    "payload_vedlegg" to payload.toJson(),
-                ),
-            ).asUpdate,
-        ).also { require(it == 1) }
+        tx
+            .run(
+                queryOf(
+                    OPPDATER_INNHOLD_PAYLOAD_VEDLEGG,
+                    mapOf(
+                        "brev_id" to id,
+                        "spraak" to Spraak.NB.name,
+                        "payload_vedlegg" to payload.toJson(),
+                    ),
+                ).asUpdate,
+            ).also { require(it == 1) }
 
-        tx.lagreHendelse(id, Status.OPPDATERT, payload.toJson())
+        tx
+            .lagreHendelse(id, Status.OPPDATERT, payload.toJson())
             .also { require(it == 1) }
     }
 
@@ -128,27 +134,29 @@ class BrevRepository(private val ds: DataSource) {
         id: BrevID,
         mottaker: Mottaker,
     ) = ds.transaction { tx ->
-        tx.run(
-            queryOf(
-                OPPDATER_MOTTAKER_QUERY,
-                mapOf(
-                    "brev_id" to id,
-                    "foedselsnummer" to mottaker.foedselsnummer?.value?.let { it.ifBlank { null } },
-                    "orgnummer" to mottaker.orgnummer?.let { it.ifBlank { null } },
-                    "navn" to mottaker.navn,
-                    "adressetype" to mottaker.adresse.adresseType,
-                    "adresselinje1" to mottaker.adresse.adresselinje1,
-                    "adresselinje2" to mottaker.adresse.adresselinje2,
-                    "adresselinje3" to mottaker.adresse.adresselinje3,
-                    "postnummer" to mottaker.adresse.postnummer,
-                    "poststed" to mottaker.adresse.poststed,
-                    "landkode" to mottaker.adresse.landkode,
-                    "land" to mottaker.adresse.land,
-                ),
-            ).asUpdate,
-        ).also { require(it == 1) }
+        tx
+            .run(
+                queryOf(
+                    OPPDATER_MOTTAKER_QUERY,
+                    mapOf(
+                        "brev_id" to id,
+                        "foedselsnummer" to mottaker.foedselsnummer?.value?.let { it.ifBlank { null } },
+                        "orgnummer" to mottaker.orgnummer?.let { it.ifBlank { null } },
+                        "navn" to mottaker.navn,
+                        "adressetype" to mottaker.adresse.adresseType,
+                        "adresselinje1" to mottaker.adresse.adresselinje1,
+                        "adresselinje2" to mottaker.adresse.adresselinje2,
+                        "adresselinje3" to mottaker.adresse.adresselinje3,
+                        "postnummer" to mottaker.adresse.postnummer,
+                        "poststed" to mottaker.adresse.poststed,
+                        "landkode" to mottaker.adresse.landkode,
+                        "land" to mottaker.adresse.land,
+                    ),
+                ).asUpdate,
+            ).also { require(it == 1) }
 
-        tx.lagreHendelse(id, Status.OPPDATERT, mottaker.toJson())
+        tx
+            .lagreHendelse(id, Status.OPPDATERT, mottaker.toJson())
             .also { require(it == 1) }
     }
 
@@ -156,17 +164,19 @@ class BrevRepository(private val ds: DataSource) {
         id: BrevID,
         tittel: String,
     ) = ds.transaction { tx ->
-        tx.run(
-            queryOf(
-                OPPDATER_TITTEL_QUERY,
-                mapOf(
-                    "brev_id" to id,
-                    "tittel" to tittel,
-                ),
-            ).asUpdate,
-        ).also { require(it == 1) }
+        tx
+            .run(
+                queryOf(
+                    OPPDATER_TITTEL_QUERY,
+                    mapOf(
+                        "brev_id" to id,
+                        "tittel" to tittel,
+                    ),
+                ).asUpdate,
+            ).also { require(it == 1) }
 
-        tx.lagreHendelse(id, Status.OPPDATERT, tittel.toJson())
+        tx
+            .lagreHendelse(id, Status.OPPDATERT, tittel.toJson())
             .also { require(it == 1) }
     }
 
@@ -174,17 +184,19 @@ class BrevRepository(private val ds: DataSource) {
         id: BrevID,
         spraak: Spraak,
     ) = ds.transaction { tx ->
-        tx.run(
-            queryOf(
-                OPPDATER_SPRAAK_QUERY,
-                mapOf(
-                    "brev_id" to id,
-                    "spraak" to spraak.name,
-                ),
-            ).asUpdate,
-        ).also { require(it == 1) }
+        tx
+            .run(
+                queryOf(
+                    OPPDATER_SPRAAK_QUERY,
+                    mapOf(
+                        "brev_id" to id,
+                        "spraak" to spraak.name,
+                    ),
+                ).asUpdate,
+            ).also { require(it == 1) }
 
-        tx.lagreHendelse(id, Status.OPPDATERT, spraak.toJson())
+        tx
+            .lagreHendelse(id, Status.OPPDATERT, spraak.toJson())
             .also { require(it == 1) }
     }
 
@@ -193,15 +205,16 @@ class BrevRepository(private val ds: DataSource) {
         pdf: Pdf,
     ) {
         ds.transaction { tx ->
-            tx.run(
-                queryOf(
-                    OPPRETT_PDF_QUERY,
-                    mapOf(
-                        "brev_id" to id,
-                        "bytes" to pdf.bytes,
-                    ),
-                ).asUpdate,
-            ).also { oppdatert -> require(oppdatert == 1) }
+            tx
+                .run(
+                    queryOf(
+                        OPPRETT_PDF_QUERY,
+                        mapOf(
+                            "brev_id" to id,
+                            "bytes" to pdf.bytes,
+                        ),
+                    ).asUpdate,
+                ).also { oppdatert -> require(oppdatert == 1) }
 
             tx.lagreHendelse(id, Status.FERDIGSTILT)
         }
@@ -212,15 +225,16 @@ class BrevRepository(private val ds: DataSource) {
         pdf: Pdf,
     ) {
         using(sessionOf(ds)) {
-            it.run(
-                queryOf(
-                    OPPRETT_ELLER_OPPDATER_PDF_QUERY,
-                    mapOf(
-                        "brev_id" to id,
-                        "bytes" to pdf.bytes,
-                    ),
-                ).asUpdate,
-            ).also { oppdatert -> require(oppdatert == 1) }
+            it
+                .run(
+                    queryOf(
+                        OPPRETT_ELLER_OPPDATER_PDF_QUERY,
+                        mapOf(
+                            "brev_id" to id,
+                            "bytes" to pdf.bytes,
+                        ),
+                    ).asUpdate,
+                ).also { oppdatert -> require(oppdatert == 1) }
         }
     }
 
@@ -257,40 +271,43 @@ class BrevRepository(private val ds: DataSource) {
 
             requireNotNull(id) { "Brev ikke opprettet!" }
 
-            tx.run(
-                queryOf(
-                    OPPRETT_MOTTAKER_QUERY,
-                    mapOf(
-                        "brev_id" to id,
-                        "foedselsnummer" to ulagretBrev.mottaker.foedselsnummer?.value,
-                        "orgnummer" to ulagretBrev.mottaker.orgnummer,
-                        "navn" to ulagretBrev.mottaker.navn,
-                        "adressetype" to ulagretBrev.mottaker.adresse.adresseType,
-                        "adresselinje1" to ulagretBrev.mottaker.adresse.adresselinje1,
-                        "adresselinje2" to ulagretBrev.mottaker.adresse.adresselinje2,
-                        "adresselinje3" to ulagretBrev.mottaker.adresse.adresselinje3,
-                        "postnummer" to ulagretBrev.mottaker.adresse.postnummer,
-                        "poststed" to ulagretBrev.mottaker.adresse.poststed,
-                        "landkode" to ulagretBrev.mottaker.adresse.landkode,
-                        "land" to ulagretBrev.mottaker.adresse.land,
-                    ),
-                ).asUpdate,
-            ).also { opprettet -> require(opprettet == 1) }
+            tx
+                .run(
+                    queryOf(
+                        OPPRETT_MOTTAKER_QUERY,
+                        mapOf(
+                            "brev_id" to id,
+                            "foedselsnummer" to ulagretBrev.mottaker.foedselsnummer?.value,
+                            "orgnummer" to ulagretBrev.mottaker.orgnummer,
+                            "navn" to ulagretBrev.mottaker.navn,
+                            "adressetype" to ulagretBrev.mottaker.adresse.adresseType,
+                            "adresselinje1" to ulagretBrev.mottaker.adresse.adresselinje1,
+                            "adresselinje2" to ulagretBrev.mottaker.adresse.adresselinje2,
+                            "adresselinje3" to ulagretBrev.mottaker.adresse.adresselinje3,
+                            "postnummer" to ulagretBrev.mottaker.adresse.postnummer,
+                            "poststed" to ulagretBrev.mottaker.adresse.poststed,
+                            "landkode" to ulagretBrev.mottaker.adresse.landkode,
+                            "land" to ulagretBrev.mottaker.adresse.land,
+                        ),
+                    ).asUpdate,
+                ).also { opprettet -> require(opprettet == 1) }
 
-            tx.run(
-                queryOf(
-                    OPPRETT_INNHOLD_QUERY,
-                    mapOf(
-                        "brev_id" to id,
-                        "tittel" to ulagretBrev.innhold.tittel,
-                        "spraak" to ulagretBrev.innhold.spraak.name,
-                        "payload" to ulagretBrev.innhold.payload?.toJson(),
-                        "payload_vedlegg" to ulagretBrev.innholdVedlegg?.toJson(),
-                    ),
-                ).asUpdate,
-            ).also { opprettet -> require(opprettet == 1) }
+            tx
+                .run(
+                    queryOf(
+                        OPPRETT_INNHOLD_QUERY,
+                        mapOf(
+                            "brev_id" to id,
+                            "tittel" to ulagretBrev.innhold.tittel,
+                            "spraak" to ulagretBrev.innhold.spraak.name,
+                            "payload" to ulagretBrev.innhold.payload?.toJson(),
+                            "payload_vedlegg" to ulagretBrev.innholdVedlegg?.toJson(),
+                        ),
+                    ).asUpdate,
+                ).also { opprettet -> require(opprettet == 1) }
 
-            tx.lagreHendelse(id, Status.OPPRETTET, ulagretBrev.opprettet)
+            tx
+                .lagreHendelse(id, Status.OPPRETTET, ulagretBrev.opprettet)
                 .also { oppdatert -> require(oppdatert == 1) }
 
             opprettBrevFra(id, ulagretBrev)
@@ -301,13 +318,14 @@ class BrevRepository(private val ds: DataSource) {
         journalpostResponse: OpprettJournalpostResponse,
     ): Boolean =
         ds.transaction { tx ->
-            tx.run(
-                queryOf(
-                    "UPDATE brev SET journalpost_id = ? WHERE id = ?",
-                    journalpostResponse.journalpostId,
-                    brevId,
-                ).asUpdate,
-            ).also { oppdatert -> require(oppdatert == 1) }
+            tx
+                .run(
+                    queryOf(
+                        "UPDATE brev SET journalpost_id = ? WHERE id = ?",
+                        journalpostResponse.journalpostId,
+                        brevId,
+                    ).asUpdate,
+                ).also { oppdatert -> require(oppdatert == 1) }
 
             tx.lagreHendelse(brevId, Status.JOURNALFOERT, journalpostResponse.toJson()) > 0
         }
@@ -316,7 +334,8 @@ class BrevRepository(private val ds: DataSource) {
         using(sessionOf(ds)) {
             it.run(
                 queryOf("SELECT journalpost_id FROM brev WHERE id = ?", brevId)
-                    .map { row -> row.string("journalpost_id") }.asSingle,
+                    .map { row -> row.string("journalpost_id") }
+                    .asSingle,
             )
         }
 
@@ -325,13 +344,14 @@ class BrevRepository(private val ds: DataSource) {
         distResponse: DistribuerJournalpostResponse,
     ): Boolean =
         ds.transaction { tx ->
-            tx.run(
-                queryOf(
-                    "UPDATE brev SET bestilling_id = ? WHERE id = ?",
-                    distResponse.bestillingsId,
-                    brevId,
-                ).asUpdate,
-            ).also { oppdatert -> require(oppdatert == 1) }
+            tx
+                .run(
+                    queryOf(
+                        "UPDATE brev SET bestilling_id = ? WHERE id = ?",
+                        distResponse.bestillingsId,
+                        brevId,
+                    ).asUpdate,
+                ).also { oppdatert -> require(oppdatert == 1) }
 
             tx.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson()) > 0
         }

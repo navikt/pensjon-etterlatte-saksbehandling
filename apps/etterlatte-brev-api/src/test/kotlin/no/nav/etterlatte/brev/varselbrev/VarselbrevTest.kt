@@ -36,7 +36,9 @@ import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class VarselbrevTest(datasource: DataSource) {
+class VarselbrevTest(
+    datasource: DataSource,
+) {
     private lateinit var service: VarselbrevService
 
     private val brevRepository = BrevRepository(datasource)

@@ -126,4 +126,7 @@ data class OpprettRevurderingRequest(
     val fritekstAarsak: String? = null,
 )
 
-data class RevurderingInfoDto(val begrunnelse: String?, val info: RevurderingInfo)
+data class RevurderingInfoDto(
+    val begrunnelse: String?,
+    val info: RevurderingInfo,
+)

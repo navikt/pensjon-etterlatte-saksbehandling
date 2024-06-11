@@ -21,17 +21,18 @@ class BehandlingKlient(
         }
 
         return runBlocking {
-            behandlingHttpClient.post("$behandlingUrl/saker/hent") {
-                accept(ContentType.Application.Json)
-                contentType(ContentType.Application.Json)
-                setBody(
-                    HentSakerRequest(
-                        spesifikkeSaker = sakIder,
-                        ekskluderteSaker = emptyList(),
-                        sakType = null,
-                    ),
-                )
-            }.body<SakerDto>()
+            behandlingHttpClient
+                .post("$behandlingUrl/saker/hent") {
+                    accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        HentSakerRequest(
+                            spesifikkeSaker = sakIder,
+                            ekskluderteSaker = emptyList(),
+                            sakType = null,
+                        ),
+                    )
+                }.body<SakerDto>()
         }.saker
     }
 }

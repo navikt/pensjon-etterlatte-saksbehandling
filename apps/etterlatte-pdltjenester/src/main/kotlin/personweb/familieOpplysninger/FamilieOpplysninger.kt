@@ -46,5 +46,6 @@ data class Sivilstand(
 
 data class Familierelasjon(
     val ansvarligeForeldre: List<Folkeregisteridentifikator>?,
+    val foreldre: List<Folkeregisteridentifikator>?,
     val barn: List<Folkeregisteridentifikator>?,
 )

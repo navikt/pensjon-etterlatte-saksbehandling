@@ -12,7 +12,9 @@ data class OboTokenRequest(
     val accessToken: String,
 ) : TokenRequest(scopes)
 
-data class ClientCredentialsTokenRequest(override val scopes: List<String>) : TokenRequest(scopes)
+data class ClientCredentialsTokenRequest(
+    override val scopes: List<String>,
+) : TokenRequest(scopes)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class AccessToken(

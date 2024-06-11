@@ -22,13 +22,12 @@ fun <A> DataSource.transaction(
 interface Transactions<T> {
     fun <R> inTransaction(block: T.(TransactionalSession) -> R): R
 
-    fun <R> TransactionalSession?.session(block: TransactionalSession.() -> R): R {
-        return if (this == null) {
+    fun <R> TransactionalSession?.session(block: TransactionalSession.() -> R): R =
+        if (this == null) {
             inTransaction { it.run(block) }
         } else {
             this.block()
         }
-    }
 }
 
 fun TransactionalSession.opprett(
@@ -39,8 +38,7 @@ fun TransactionalSession.opprett(
     queryOf(
         statement = query,
         paramMap = params,
-    )
-        .also { logger.info(loggtekst) }
+    ).also { logger.info(loggtekst) }
         .let { tx.run(it.asExecute) }
 }
 
@@ -69,7 +67,8 @@ fun <T> TransactionalSession.hentListe(
     queryOf(statement = queryString, paramMap = params.invoke())
         .let { query ->
             this.run(
-                query.map { row -> converter.invoke(row) }
+                query
+                    .map { row -> converter.invoke(row) }
                     .asList,
             )
         }

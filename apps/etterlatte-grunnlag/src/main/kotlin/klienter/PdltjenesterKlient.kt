@@ -46,7 +46,10 @@ interface PdlTjenesterKlient {
     ): Persongalleri?
 }
 
-class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: String) : PdlTjenesterKlient {
+class PdlTjenesterKlientImpl(
+    private val pdl: HttpClient,
+    private val url: String,
+) : PdlTjenesterKlient {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun hentPerson(
@@ -57,10 +60,11 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
         val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, listOf(sakType))
         val response =
             runBlocking {
-                pdl.post("$url/person") {
-                    contentType(ContentType.Application.Json)
-                    setBody(personRequest)
-                }.body<Person>()
+                pdl
+                    .post("$url/person") {
+                        contentType(ContentType.Application.Json)
+                        setBody(personRequest)
+                    }.body<Person>()
             }
         return response
     }
@@ -69,8 +73,8 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
         foedselsnummer: String,
         sakType: SakType,
         innsender: String?,
-    ): Persongalleri? {
-        return try {
+    ): Persongalleri? =
+        try {
             val persongalleriRequest =
                 HentPersongalleriRequest(
                     mottakerAvYtelsen = Folkeregisteridentifikator.of(foedselsnummer),
@@ -80,10 +84,11 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
                             ?.takeIf { Folkeregisteridentifikator.isValid(it) }
                             ?.let { Folkeregisteridentifikator.of(it) },
                 )
-            pdl.post("$url/galleri") {
-                contentType(ContentType.Application.Json)
-                setBody(persongalleriRequest)
-            }.body<Persongalleri>()
+            pdl
+                .post("$url/galleri") {
+                    contentType(ContentType.Application.Json)
+                    setBody(persongalleriRequest)
+                }.body<Persongalleri>()
         } catch (e: Exception) {
             logger.warn(
                 "Kunne ikke hente persongalleriet fra PDL, på grunn av feil. " +
@@ -97,7 +102,6 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
             )
             null
         }
-    }
 
     override fun hentOpplysningsperson(
         foedselsnummer: String,
@@ -107,10 +111,11 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
         val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, listOf(sakType))
         val response =
             runBlocking {
-                pdl.post("$url/person/v2") {
-                    contentType(ContentType.Application.Json)
-                    setBody(personRequest)
-                }.body<PersonDTO>()
+                pdl
+                    .post("$url/person/v2") {
+                        contentType(ContentType.Application.Json)
+                        setBody(personRequest)
+                    }.body<PersonDTO>()
             }
         return response
     }
@@ -122,10 +127,11 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
     ): HistorikkForeldreansvar {
         val personRequest = HentPersonHistorikkForeldreAnsvarRequest(fnr, rolle, sakType)
         return runBlocking {
-            pdl.post("$url/foreldreansvar") {
-                contentType(ContentType.Application.Json)
-                setBody(personRequest)
-            }.body<HistorikkForeldreansvar>()
+            pdl
+                .post("$url/foreldreansvar") {
+                    contentType(ContentType.Application.Json)
+                    setBody(personRequest)
+                }.body<HistorikkForeldreansvar>()
         }
     }
 }

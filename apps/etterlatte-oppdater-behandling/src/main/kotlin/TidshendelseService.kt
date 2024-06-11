@@ -25,7 +25,9 @@ class TidshendelseService(
 ) {
     private val logger = LoggerFactory.getLogger(TidshendelseService::class.java)
 
-    enum class TidshendelserJobbType(val beskrivelse: String) {
+    enum class TidshendelserJobbType(
+        val beskrivelse: String,
+    ) {
         AO_BP20("Aldersovergang v/20 år"),
         AO_BP21("Aldersovergang v/21 år"),
         AO_OMS67("Aldersovergang v/67 år"),
@@ -165,11 +167,18 @@ class TidshendelseService(
 }
 
 sealed class TidshendelseResult {
-    data class OpprettetOppgave(val opprettetOppgaveId: UUID) : TidshendelseResult()
+    data class OpprettetOppgave(
+        val opprettetOppgaveId: UUID,
+    ) : TidshendelseResult()
 
-    data class OpprettetOmregning(val behandlingId: UUID, val forrigeBehandlingId: UUID) : TidshendelseResult()
+    data class OpprettetOmregning(
+        val behandlingId: UUID,
+        val forrigeBehandlingId: UUID,
+    ) : TidshendelseResult()
 
-    data class OpprettRevurderingForAktivitetsplikt(val behandlingId: UUID) : TidshendelseResult()
+    data class OpprettRevurderingForAktivitetsplikt(
+        val behandlingId: UUID,
+    ) : TidshendelseResult()
 
     data object Skipped : TidshendelseResult()
 }

@@ -81,42 +81,45 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             } returns GeografiskTilknytning(kommune = "0301")
 
             val sak: Sak =
-                client.post("personer/saker/${SakType.BARNEPENSJON}") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                }.let {
-                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                    it.body()
-                }
+                client
+                    .post("personer/saker/${SakType.BARNEPENSJON}") {
+                        addAuthToken(tokenSaksbehandler)
+                        contentType(ContentType.Application.Json)
+                        setBody(FoedselsnummerDTO(fnr))
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    }.let {
+                        Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                        it.body()
+                    }
             Assertions.assertNotNull(sak.id)
             Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, sak.enhet)
 
-            client.post("egenansatt") {
-                addAuthToken(this@EgenAnsattRouteTest.systemBruker)
-                contentType(ContentType.Application.Json)
-                setBody(
-                    EgenAnsattSkjermet(
-                        fnr = fnr,
-                        inntruffet = Tidspunkt.now(),
-                        skjermet = true,
-                    ),
-                )
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-            }
-
-            val saketterSkjerming: Sak =
-                client.post("personer/saker/${SakType.BARNEPENSJON}") {
+            client
+                .post("egenansatt") {
                     addAuthToken(this@EgenAnsattRouteTest.systemBruker)
                     contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        EgenAnsattSkjermet(
+                            fnr = fnr,
+                            inntruffet = Tidspunkt.now(),
+                            skjermet = true,
+                        ),
+                    )
                 }.let {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                    it.body()
                 }
+
+            val saketterSkjerming: Sak =
+                client
+                    .post("personer/saker/${SakType.BARNEPENSJON}") {
+                        addAuthToken(this@EgenAnsattRouteTest.systemBruker)
+                        contentType(ContentType.Application.Json)
+                        setBody(FoedselsnummerDTO(fnr))
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    }.let {
+                        Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                        it.body()
+                    }
 
             Assertions.assertEquals(sak.id, saketterSkjerming.id)
             // Denne skal alltid settes hvis noen blir skjermet hvis de ikke er adressebeskyttet(se test under)
@@ -124,30 +127,32 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
 
             val steinkjer = ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
             coEvery { norg2Klient.hentArbeidsfordelingForOmraadeOgTema(any()) } returns listOf(steinkjer)
-            client.post("egenansatt") {
-                addAuthToken(this@EgenAnsattRouteTest.systemBruker)
-                contentType(ContentType.Application.Json)
-                setBody(
-                    EgenAnsattSkjermet(
-                        fnr = fnr,
-                        inntruffet = Tidspunkt.now(),
-                        skjermet = false,
-                    ),
-                )
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-            }
-
-            val sakUtenSkjermingIgjen: Sak =
-                client.post("personer/saker/${SakType.BARNEPENSJON}") {
+            client
+                .post("egenansatt") {
                     addAuthToken(this@EgenAnsattRouteTest.systemBruker)
                     contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        EgenAnsattSkjermet(
+                            fnr = fnr,
+                            inntruffet = Tidspunkt.now(),
+                            skjermet = false,
+                        ),
+                    )
                 }.let {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                    it.body()
                 }
+
+            val sakUtenSkjermingIgjen: Sak =
+                client
+                    .post("personer/saker/${SakType.BARNEPENSJON}") {
+                        addAuthToken(this@EgenAnsattRouteTest.systemBruker)
+                        contentType(ContentType.Application.Json)
+                        setBody(FoedselsnummerDTO(fnr))
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    }.let {
+                        Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                        it.body()
+                    }
 
             Assertions.assertEquals(sak.id, sakUtenSkjermingIgjen.id)
             Assertions.assertEquals(steinkjer.enhetNr, sakUtenSkjermingIgjen.enhet)
@@ -179,33 +184,35 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
             } returns GeografiskTilknytning(kommune = "0301")
 
             val sak: Sak =
-                client.post("personer/saker/${SakType.BARNEPENSJON}") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                }.let {
-                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                    it.body()
-                }
+                client
+                    .post("personer/saker/${SakType.BARNEPENSJON}") {
+                        addAuthToken(tokenSaksbehandler)
+                        contentType(ContentType.Application.Json)
+                        setBody(FoedselsnummerDTO(fnr))
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    }.let {
+                        Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                        it.body()
+                    }
             Assertions.assertNotNull(sak.id)
             Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, sak.enhet)
 
             val behandlingId =
-                client.post("/behandlinger/opprettbehandling") {
-                    addAuthToken(tokenSaksbehandler)
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody(
-                        BehandlingsBehov(
-                            sak.id,
-                            Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
-                            Tidspunkt.now().toLocalDatetimeUTC().toString(),
-                        ),
-                    )
-                }.let {
-                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                    UUID.fromString(it.body())
-                }
+                client
+                    .post("/behandlinger/opprettbehandling") {
+                        addAuthToken(tokenSaksbehandler)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(
+                            BehandlingsBehov(
+                                sak.id,
+                                Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
+                                Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                            ),
+                        )
+                    }.let {
+                        Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                        UUID.fromString(it.body())
+                    }
 
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(this@EgenAnsattRouteTest.systemBruker)
@@ -220,36 +227,39 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
                 )
             }
 
-            client.get("/behandlinger/$behandlingId") {
-                addAuthToken(this@EgenAnsattRouteTest.systemBruker)
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-            }
-
-            client.post("egenansatt") {
-                addAuthToken(this@EgenAnsattRouteTest.systemBruker)
-                contentType(ContentType.Application.Json)
-                setBody(
-                    EgenAnsattSkjermet(
-                        fnr = fnr,
-                        inntruffet = Tidspunkt.now(),
-                        skjermet = true,
-                    ),
-                )
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-            }
-
-            val adressebeskyttetUtenSkjerming: Sak =
-                client.post("personer/saker/${SakType.BARNEPENSJON}") {
+            client
+                .get("/behandlinger/$behandlingId") {
                     addAuthToken(this@EgenAnsattRouteTest.systemBruker)
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 }.let {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                    it.body()
                 }
+
+            client
+                .post("egenansatt") {
+                    addAuthToken(this@EgenAnsattRouteTest.systemBruker)
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        EgenAnsattSkjermet(
+                            fnr = fnr,
+                            inntruffet = Tidspunkt.now(),
+                            skjermet = true,
+                        ),
+                    )
+                }.let {
+                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                }
+
+            val adressebeskyttetUtenSkjerming: Sak =
+                client
+                    .post("personer/saker/${SakType.BARNEPENSJON}") {
+                        addAuthToken(this@EgenAnsattRouteTest.systemBruker)
+                        contentType(ContentType.Application.Json)
+                        setBody(FoedselsnummerDTO(fnr))
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    }.let {
+                        Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                        it.body()
+                    }
 
             Assertions.assertNotNull(adressebeskyttetUtenSkjerming.id)
             Assertions.assertEquals(Enheter.STRENGT_FORTROLIG.enhetNr, adressebeskyttetUtenSkjerming.enhet)

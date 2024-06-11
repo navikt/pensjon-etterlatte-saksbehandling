@@ -35,21 +35,22 @@ class BeregningService(
                 SakType.OMSTILLINGSSTOENAD -> "omstillingstoenad"
                 SakType.BARNEPENSJON -> sakType.name.lowercase()
             }
-        klient.post(
-            Resource(clientId, "$url/api/beregning/beregningsgrunnlag/$behandlingId/$sakTypeArg"),
-            Systembruker.testdata,
-            LagreBeregningsGrunnlag(
-                soeskenMedIBeregning = listOf(),
-                institusjonsopphold = listOf(),
-                beregningsMetode =
-                    BeregningsMetodeBeregningsgrunnlag(
-                        beregningsMetode = BeregningsMetode.NASJONAL,
-                        begrunnelse = BEGRUNNELSE,
-                    ),
-            ),
-        ).mapBoth(
-            success = {},
-            failure = { throw it },
-        )
+        klient
+            .post(
+                Resource(clientId, "$url/api/beregning/beregningsgrunnlag/$behandlingId/$sakTypeArg"),
+                Systembruker.testdata,
+                LagreBeregningsGrunnlag(
+                    soeskenMedIBeregning = listOf(),
+                    institusjonsopphold = listOf(),
+                    beregningsMetode =
+                        BeregningsMetodeBeregningsgrunnlag(
+                            beregningsMetode = BeregningsMetode.NASJONAL,
+                            begrunnelse = BEGRUNNELSE,
+                        ),
+                ),
+            ).mapBoth(
+                success = {},
+                failure = { throw it },
+            )
     }
 }

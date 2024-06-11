@@ -40,7 +40,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class VedtaksbehandlingDaoTest(val dataSource: DataSource) {
+internal class VedtaksbehandlingDaoTest(
+    val dataSource: DataSource,
+) {
     private lateinit var sakRepo: SakDao
     private lateinit var vedtaksbehandlingDao: VedtaksbehandlingDao
     private lateinit var behandlingDao: BehandlingDao
@@ -88,7 +90,8 @@ internal class VedtaksbehandlingDaoTest(val dataSource: DataSource) {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
 
         val klage =
-            Klage.ny(sak1, InnkommendeKlage(LocalDate.now(), "JP-24601", "Jean"))
+            Klage
+                .ny(sak1, InnkommendeKlage(LocalDate.now(), "JP-24601", "Jean"))
                 .copy(status = KlageStatus.UTFALL_VURDERT)
 
         klageDao.lagreKlage(klage)

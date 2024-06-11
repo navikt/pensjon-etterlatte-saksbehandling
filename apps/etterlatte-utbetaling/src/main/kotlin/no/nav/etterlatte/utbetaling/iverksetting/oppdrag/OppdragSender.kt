@@ -21,12 +21,13 @@ class OppdragSender(
         )
 
         val xml = OppdragJaxb.toXml(oppdrag)
-        jmsConnectionFactory.sendMedSvar(
-            xml = xml,
-            queue = queue,
-            replyQueue = replyQueue,
-            prioritet = prioritet,
-        ).also { logger.info("Utbetaling overført til oppdrag") }
+        jmsConnectionFactory
+            .sendMedSvar(
+                xml = xml,
+                queue = queue,
+                replyQueue = replyQueue,
+                prioritet = prioritet,
+            ).also { logger.info("Utbetaling overført til oppdrag") }
         return xml
     }
 

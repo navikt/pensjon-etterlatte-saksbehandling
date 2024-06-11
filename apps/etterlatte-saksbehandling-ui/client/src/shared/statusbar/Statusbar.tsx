@@ -1,13 +1,16 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../icons/genderIcon'
 import { IPersonResult } from '~components/person/typer'
-import { Link } from '@navikt/ds-react'
+import { BodyShort, Box, HelpText, HStack, Label, Link, Skeleton } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { IPdlPerson, IPdlPersonNavn } from '~shared/types/Person'
-
+import { IPdlPersonNavnFoedsel } from '~shared/types/Person'
 import { mapApiResult, Result } from '~shared/api/apiUtils'
+import { useEffect } from 'react'
+import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentAlderForDato } from '~components/behandling/felles/utils'
 
-export const PdlPersonStatusBar = ({ person }: { person: IPdlPerson | IPdlPersonNavn }) => (
+export const PdlPersonStatusBar = ({ person }: { person: IPdlPersonNavnFoedsel }) => (
   <StatusBar
     result={{
       status: 'success',
@@ -16,12 +19,23 @@ export const PdlPersonStatusBar = ({ person }: { person: IPdlPerson | IPdlPerson
         fornavn: person.fornavn,
         mellomnavn: person.mellomnavn,
         etternavn: person.etternavn,
+        foedselsaar: person.foedselsaar,
+        foedselsdato: person.foedselsdato,
       },
     }}
   />
 )
 
-export const StatusBar = ({ result }: { result: Result<IPersonResult> }) => {
+export const StatusBarPersonHenter = ({ ident }: { ident: string | null | undefined }) => {
+  const [personStatus, hentPerson] = useApiCall(hentPersonNavnogFoedsel)
+  useEffect(() => {
+    ident && hentPerson(ident)
+  }, [ident])
+
+  return <StatusBar result={personStatus} />
+}
+
+export const StatusBar = ({ result }: { result: Result<IPdlPersonNavnFoedsel> }) => {
   const gender = (fnr: string): GenderList => {
     const genderNum = Number(fnr[8])
     if (genderNum % 2 === 0) {
@@ -35,76 +49,54 @@ export const StatusBar = ({ result }: { result: Result<IPersonResult> }) => {
     <PersonSkeleton />,
     () => null,
     (person) => (
-      <StatusBarWrapper>
-        <UserInfo>
+      <StatusbarBox>
+        <HStack gap="2" align="center" justify="start">
           <GenderIcon gender={gender(person.foedselsnummer)} />
-          <Name>
+          <Label>
             <Link href={`/person/${person.foedselsnummer}`}>{genererNavn(person)}</Link>
-          </Name>
-          <Skilletegn>|</Skilletegn>
+          </Label>
+          <VisAlderForPerson foedselsdato={person.foedselsdato} foedselsaar={person.foedselsaar} />
+          <BodyShort>|</BodyShort>
           <KopierbarVerdi value={person.foedselsnummer} />
-        </UserInfo>
-      </StatusBarWrapper>
+        </HStack>
+      </StatusbarBox>
     )
   )
 }
 
+const VisAlderForPerson = ({ foedselsdato, foedselsaar }: { foedselsdato: Date | undefined; foedselsaar: number }) => {
+  if (foedselsdato) {
+    const alder = hentAlderForDato(foedselsdato)
+    return <BodyShort textColor="subtle">({alder} år)</BodyShort>
+  } else {
+    return (
+      <>
+        <BodyShort textColor="subtle">Fødselsår: {foedselsaar}</BodyShort>
+        <HelpText title="Personen mangler fødselsdato">
+          Vi har ingen fødselsdato på vedkommende og kan derfor ikke vise nøyaktig alder. Fødselsår: {foedselsaar}
+        </HelpText>
+      </>
+    )
+  }
+}
+
 const PersonSkeleton = () => (
-  <StatusBarWrapper>
-    <UserInfo>
-      <SkeletonGenderIcon />
-      <Name>
-        <Skeleton />
-      </Name>
-      <Skilletegn>|</Skilletegn>
-      <Skeleton />
-    </UserInfo>
-  </StatusBarWrapper>
+  <StatusbarBox>
+    <HStack gap="4">
+      <Skeleton variant="circle" width="30px" height="30px" />
+      <Skeleton variant="rounded" width="10rem" height="1rem" />
+      <BodyShort>|</BodyShort>
+      <Skeleton variant="rounded" width="10rem" height="1rem" />
+    </HStack>
+  </StatusbarBox>
 )
 
 const genererNavn = (personInfo: IPersonResult) => {
   return [personInfo.fornavn, personInfo.mellomnavn, personInfo.etternavn].join(' ')
 }
 
-const StatusBarWrapper = styled.div`
-  background-color: #f8f8f8;
-  padding: 0.6em 0;
-  line-height: 2rem;
-  border-bottom: 1px solid #c6c2bf;
-`
-
-const UserInfo = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  width: fit-content;
-  margin-left: 1em;
-`
-
-const Skilletegn = styled.div`
-  margin-left: 1em;
-`
-
-const Name = styled.div`
-  font-weight: 600;
-  margin-right: auto;
-  margin-left: 0.5em;
-`
-
-const Skeleton = styled.div`
-  background: linear-gradient(-45deg, #bebebe 40%, #d3d3d3 60%, #bebebe 80%);
-  border-radius: 1rem;
-  width: 10rem;
-  height: 1rem;
-  margin-left: 1rem;
-`
-
-const SkeletonGenderIcon = styled.div`
-  line-height: 30px;
-  background-color: gray;
-  padding: 3px;
-  width: 30px;
-  height: 30px;
-  border-radius: 100%;
+const StatusbarBox = styled(Box)`
+  padding: var(--a-spacing-3) 0 var(--a-spacing-3) var(--a-spacing-5);
+  border-bottom: 1px solid var(--a-border-subtle);
+  background: #f8f8f8;
 `

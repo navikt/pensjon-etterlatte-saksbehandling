@@ -45,10 +45,11 @@ class SafKlient(
         bruker: BrukerTokenInfo,
     ): ByteArray =
         try {
-            httpClient.get("$baseUrl/rest/hentdokument/$journalpostId/$dokumentInfoId/ARKIV") {
-                bearerAuth(getOboToken(bruker))
-                contentType(ContentType.Application.Json)
-            }.body()
+            httpClient
+                .get("$baseUrl/rest/hentdokument/$journalpostId/$dokumentInfoId/ARKIV") {
+                    bearerAuth(getOboToken(bruker))
+                    contentType(ContentType.Application.Json)
+                }.body()
         } catch (re: ResponseException) {
             logger.error("Feil i kall mot Saf: ${re.response.bodyAsText()}")
 
@@ -166,11 +167,11 @@ class SafKlient(
         }
     }
 
-    private fun getQuery(name: String): String {
-        return javaClass.getResource(name)!!
+    private fun getQuery(name: String): String =
+        javaClass
+            .getResource(name)!!
             .readText()
             .replace(Regex("[\n\t]"), "")
-    }
 
     private suspend fun getOboToken(bruker: BrukerTokenInfo): String {
         val token =

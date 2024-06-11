@@ -134,6 +134,7 @@ class ApplicationBuilder {
             trygdetidKlient,
             adresseService,
         )
+
     private val db = BrevRepository(datasource)
 
     private val brevgenereringRepository = StartBrevgenereringRepository(datasource)
@@ -223,20 +224,19 @@ class ApplicationBuilder {
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 
     private val rapidsConnection: RapidsConnection =
-        RapidApplication.Builder(
-            RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
-        )
-            .withKtorModule {
+        RapidApplication
+            .Builder(
+                RapidApplication.RapidApplicationConfig.fromEnv(env, configFromEnvironment(env)),
+            ).withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker)
+                    brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker, grunnlagKlient, behandlingKlient)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
                     dokumentRoute(safService, dokarkivService, tilgangssjekker)
                     varselbrevRoute(varselbrevService, tilgangssjekker)
                     notatRoute(notatService, nyNotatService, tilgangssjekker)
                     oversendelseBrevRoute(oversendelseBrevService, tilgangssjekker)
                 }
-            }
-            .build()
+            }.build()
             .apply {
                 val brevgenerering =
                     StartInformasjonsbrevgenereringRiver(
@@ -285,7 +285,8 @@ class ApplicationBuilder {
                 it.install(Auth) {
                     clientCredential {
                         config =
-                            env.toMutableMap()
+                            env
+                                .toMutableMap()
                                 .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get(scope))) }
                     }
                 }

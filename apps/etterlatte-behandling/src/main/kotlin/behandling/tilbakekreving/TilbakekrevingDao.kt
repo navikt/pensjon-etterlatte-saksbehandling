@@ -25,9 +25,11 @@ import java.sql.Types
 import java.time.YearMonth
 import java.util.UUID
 
-class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing) {
-    fun hentTilbakekrevinger(sakId: Long): List<TilbakekrevingBehandling> {
-        return connectionAutoclosing.hentConnection {
+class TilbakekrevingDao(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) {
+    fun hentTilbakekrevinger(sakId: Long): List<TilbakekrevingBehandling> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val tilbakekrevinger = selectTilbakekrevinger(this, sakId)
                 tilbakekrevinger.map { tilbakekreving ->
@@ -40,7 +42,6 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
                 }
             }
         }
-    }
 
     private fun selectTilbakekrevinger(
         connection: Connection,
@@ -59,8 +60,8 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
             statement.executeQuery().toList { toTilbakekreving() }
         }
 
-    fun hentTilbakekreving(tilbakekrevingId: UUID): TilbakekrevingBehandling {
-        return connectionAutoclosing.hentConnection {
+    fun hentTilbakekreving(tilbakekrevingId: UUID): TilbakekrevingBehandling =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val tilbakekreving = selectTilbakekreving(this, tilbakekrevingId)
                 tilbakekreving?.copy(
@@ -71,10 +72,9 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
                 ) ?: throw TilbakekrevingFinnesIkkeException("Tilbakekreving med id=$tilbakekrevingId finnes ikke")
             }
         }
-    }
 
-    fun hentNyesteTilbakekreving(sakId: Long): TilbakekrevingBehandling {
-        return connectionAutoclosing.hentConnection {
+    fun hentNyesteTilbakekreving(sakId: Long): TilbakekrevingBehandling =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val tilbakekreving = hentNyesteTilbakekrevingForSak(this, sakId)
                 tilbakekreving?.copy(
@@ -85,7 +85,6 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
                 ) ?: throw TilbakekrevingFinnesIkkeException("Tilbakekreving for sakId=$sakId finnes ikke")
             }
         }
-    }
 
     private fun hentNyesteTilbakekrevingForSak(
         connection: Connection,
@@ -149,15 +148,14 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
             }
         }
 
-    fun lagreTilbakekreving(tilbakekrevingBehandling: TilbakekrevingBehandling): TilbakekrevingBehandling {
-        return connectionAutoclosing.hentConnection { connection ->
+    fun lagreTilbakekreving(tilbakekrevingBehandling: TilbakekrevingBehandling): TilbakekrevingBehandling =
+        connectionAutoclosing.hentConnection { connection ->
             with(connection) {
                 insertTilbakekreving(this, tilbakekrevingBehandling)
                 insertTilbakekrevingsperioder(this, tilbakekrevingBehandling)
             }
             hentTilbakekreving(tilbakekrevingBehandling.id)
         }
-    }
 
     private fun insertTilbakekreving(
         connection: Connection,
@@ -277,8 +275,8 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
             sendeBrev = getBoolean("sende_brev"),
         )
 
-    private fun ResultSet.toTilbakekrevingsperiode(): Pair<YearMonth, Tilbakekrevingsbelop> {
-        return Pair(
+    private fun ResultSet.toTilbakekrevingsperiode(): Pair<YearMonth, Tilbakekrevingsbelop> =
+        Pair(
             YearMonth.parse(getString("maaned")),
             Tilbakekrevingsbelop(
                 id = getUUID("id"),
@@ -297,7 +295,6 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
                 rentetillegg = getIntOrNull("rentetillegg"),
             ),
         )
-    }
 }
 
 fun PreparedStatement.setInt(

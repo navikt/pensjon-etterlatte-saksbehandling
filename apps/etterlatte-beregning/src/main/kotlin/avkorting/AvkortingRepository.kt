@@ -14,7 +14,9 @@ import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
-class AvkortingRepository(private val dataSource: DataSource) {
+class AvkortingRepository(
+    private val dataSource: DataSource,
+) {
     fun hentAvkorting(behandlingId: UUID): Avkorting? =
         dataSource.transaction { tx ->
             val avkortingGrunnlag =

@@ -109,8 +109,8 @@ object PersonMapper {
         sakType: SakType,
         brukerTokenInfo: BrukerTokenInfo,
         personRolle: PersonRolle,
-    ): Familiemedlem {
-        return runBlocking {
+    ): Familiemedlem =
+        runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
             val (statsborgerskap, pdlStatsborgerskap) =
                 kanskjeAvklarStatsborgerskap(
@@ -155,15 +155,19 @@ object PersonMapper {
                         )
                     },
                 familierelasjon =
-                    FamilieRelasjonMapper.mapFamilieRelasjon(
-                        hentPerson,
-                        personRolle,
-                    ).let {
-                        Familierelasjon(it.ansvarligeForeldre, it.barn)
-                    },
+                    FamilieRelasjonMapper
+                        .mapFamilieRelasjon(
+                            hentPerson,
+                            personRolle,
+                        ).let {
+                            Familierelasjon(
+                                ansvarligeForeldre = it.ansvarligeForeldre,
+                                foreldre = it.foreldre,
+                                barn = it.barn,
+                            )
+                        },
             )
         }
-    }
 
     fun mapPersonNavnFoedsel(
         ppsKlient: ParallelleSannheterKlient,
@@ -177,7 +181,8 @@ object PersonMapper {
                 if (Folkeregisteridentifikator.isValid(ident)) {
                     ident
                 } else {
-                    ppsKlient.avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
+                    ppsKlient
+                        .avklarFolkeregisteridentifikator(hentPerson.folkeregisteridentifikator)
                         .identifikasjonsnummer
                 }
             val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
@@ -239,17 +244,21 @@ object PersonMapper {
                     } ?: OpplysningDTO(AdressebeskyttelseGradering.UGRADERT, null),
                 // Finn ut hva opplysningsid:n er for data fra pps
                 bostedsadresse =
-                    hentPerson.bostedsadresse?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) }
+                    hentPerson.bostedsadresse
+                        ?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) }
                         ?.map { OpplysningDTO(it, null) },
                 oppholdsadresse =
-                    hentPerson.oppholdsadresse?.let { AdresseMapper.mapOppholdsadresse(ppsKlient, it) }
+                    hentPerson.oppholdsadresse
+                        ?.let { AdresseMapper.mapOppholdsadresse(ppsKlient, it) }
                         ?.map { OpplysningDTO(it, null) },
                 deltBostedsadresse =
-                    hentPerson.deltBostedsadresse?.let {
-                        AdresseMapper.mapDeltBostedsadresse(ppsKlient, it)
-                    }?.map { OpplysningDTO(it, null) },
+                    hentPerson.deltBostedsadresse
+                        ?.let {
+                            AdresseMapper.mapDeltBostedsadresse(ppsKlient, it)
+                        }?.map { OpplysningDTO(it, null) },
                 kontaktadresse =
-                    hentPerson.kontaktadresse?.let { AdresseMapper.mapKontaktadresse(ppsKlient, it) }
+                    hentPerson.kontaktadresse
+                        ?.let { AdresseMapper.mapKontaktadresse(ppsKlient, it) }
                         ?.map { OpplysningDTO(it, null) },
                 statsborgerskap = statsborgerskap?.let { OpplysningDTO(it.land, it.metadata.opplysningsId) },
                 pdlStatsborgerskap = statsborgerskapPdl?.let { OpplysningDTO(it, null) },
@@ -261,7 +270,8 @@ object PersonMapper {
                         )
                     },
                 sivilstand =
-                    hentPerson.sivilstand?.let { SivilstandMapper.mapSivilstand(it) }
+                    hentPerson.sivilstand
+                        ?.let { SivilstandMapper.mapSivilstand(it) }
                         ?.map { OpplysningDTO(it, null) },
                 utland = OpplysningDTO(UtlandMapper.mapUtland(hentPerson), null),
                 // TODO ai: tre opplysninger i en
@@ -272,7 +282,8 @@ object PersonMapper {
                     ),
                 avdoedesBarn = barnekull?.barn,
                 vergemaalEllerFremtidsfullmakt =
-                    hentPerson.vergemaalEllerFremtidsfullmakt?.let { VergeMapper.mapVerge(it) }
+                    hentPerson.vergemaalEllerFremtidsfullmakt
+                        ?.let { VergeMapper.mapVerge(it) }
                         ?.map { OpplysningDTO(it, null) },
             )
         }
@@ -293,10 +304,9 @@ object PersonMapper {
     }
 }
 
-fun PdlStatsborgerskap.tilStatsborgerskap(): Statsborgerskap {
-    return Statsborgerskap(
+fun PdlStatsborgerskap.tilStatsborgerskap(): Statsborgerskap =
+    Statsborgerskap(
         land = this.land,
         gyldigFraOgMed = this.gyldigFraOgMed,
         gyldigTilOgMed = this.gyldigTilOgMed,
     )
-}

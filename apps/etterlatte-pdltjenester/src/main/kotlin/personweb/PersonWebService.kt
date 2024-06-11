@@ -17,11 +17,13 @@ import no.nav.etterlatte.personweb.familieOpplysninger.FamilieOpplysninger
 import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
 import org.slf4j.LoggerFactory
 
-class PdlForesporselFeilet(message: String) : ForespoerselException(
-    status = 500,
-    code = "UKJENT_FEIL_PDL",
-    detail = message,
-)
+class PdlForesporselFeilet(
+    message: String,
+) : ForespoerselException(
+        status = 500,
+        code = "UKJENT_FEIL_PDL",
+        detail = message,
+    )
 
 class PersonWebService(
     private val pdlOboKlient: PdlOboKlient,
@@ -82,7 +84,7 @@ class PersonWebService(
             )
 
         val foreldre =
-            mottaker.familierelasjon?.ansvarligeForeldre?.map {
+            mottaker.familierelasjon?.foreldre?.map {
                 hentFamiliemedlem(
                     fnr = it,
                     rolle = PersonRolle.AVDOED,
@@ -113,23 +115,25 @@ class PersonWebService(
             )
 
         val partnerVedSivilstand =
-            mottaker.sivilstand?.filter {
-                listOf(
-                    Sivilstatus.GIFT,
-                    Sivilstatus.GJENLEVENDE_PARTNER,
-                    Sivilstatus.ENKE_ELLER_ENKEMANN,
-                ).contains(it.sivilstatus)
-            }?.mapNotNull { it.relatertVedSivilstand } ?: emptyList()
+            mottaker.sivilstand
+                ?.filter {
+                    listOf(
+                        Sivilstatus.GIFT,
+                        Sivilstatus.GJENLEVENDE_PARTNER,
+                        Sivilstatus.ENKE_ELLER_ENKEMANN,
+                    ).contains(it.sivilstatus)
+                }?.mapNotNull { it.relatertVedSivilstand } ?: emptyList()
 
         val (avdoede, levende) =
-            partnerVedSivilstand.map {
-                hentFamiliemedlem(
-                    fnr = it,
-                    rolle = PersonRolle.AVDOED,
-                    sakType = SakType.OMSTILLINGSSTOENAD,
-                    bruker,
-                )
-            }.partition { it.doedsdato != null }
+            partnerVedSivilstand
+                .map {
+                    hentFamiliemedlem(
+                        fnr = it,
+                        rolle = PersonRolle.AVDOED,
+                        sakType = SakType.OMSTILLINGSSTOENAD,
+                        bruker,
+                    )
+                }.partition { it.doedsdato != null }
 
         return FamilieOpplysninger(
             soeker = mottaker,

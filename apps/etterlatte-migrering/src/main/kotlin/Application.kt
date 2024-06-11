@@ -39,7 +39,7 @@ internal class Server(
                     }
                 }.build()
                 .also { rapidsConnection ->
-                    LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository, penklient, featureToggleService)
+                    LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository)
                     LyttPaaDistribuerBrevRiver(rapidsConnection, pesysRepository)
                     FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)
                 }.start()

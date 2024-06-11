@@ -18,7 +18,6 @@ import { ControlledMaanedVelger } from '~shared/components/maanedVelger/Controll
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { EtterbetalingHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/EtterbetalingHjelpeTekst'
 import { AldersgruppeHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/AldersgruppeHjelpeTekst'
-import { LavEllerIngenInntektHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/LavEllerIngenInntektHjelpeTekst'
 import { FeilutbetalingHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/FeilutbetalingHjelpeTekst'
 import { feilutbetalingToString } from '~components/behandling/brevutfall/BrevutfallVisning'
 

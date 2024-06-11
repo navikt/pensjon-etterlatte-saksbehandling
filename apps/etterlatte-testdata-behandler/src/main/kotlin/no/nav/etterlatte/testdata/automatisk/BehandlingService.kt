@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
-import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -145,7 +144,6 @@ class BehandlingService(private val klient: DownstreamResourceClient, private va
                         BrevutfallDto(
                             behandlingId = behandling,
                             aldersgruppe = if (sakType == SakType.BARNEPENSJON) Aldersgruppe.UNDER_18 else null,
-                            lavEllerIngenInntekt = if (sakType == SakType.OMSTILLINGSSTOENAD) LavEllerIngenInntekt.NEI else null,
                             feilutbetaling = null,
                             kilde = null,
                         ),

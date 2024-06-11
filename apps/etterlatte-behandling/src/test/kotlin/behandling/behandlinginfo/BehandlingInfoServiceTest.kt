@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
-import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -188,7 +187,7 @@ internal class BehandlingInfoServiceTest {
             behandlingId = behandlingId,
             brukerTokenInfo = bruker,
             opphoer = true,
-            brevutfall = brevutfall(behandlingId).copy(aldersgruppe = null, lavEllerIngenInntekt = null),
+            brevutfall = brevutfall(behandlingId).copy(aldersgruppe = null),
             etterbetaling = null,
         )
 
@@ -218,7 +217,7 @@ internal class BehandlingInfoServiceTest {
             behandlingId = behandlingId,
             brukerTokenInfo = bruker,
             opphoer = true,
-            brevutfall = brevutfall(behandlingId).copy(lavEllerIngenInntekt = null),
+            brevutfall = brevutfall(behandlingId).copy(),
             etterbetaling = null,
         )
 
@@ -256,7 +255,6 @@ internal class BehandlingInfoServiceTest {
         Brevutfall(
             behandlingId = behandlingId,
             aldersgruppe = Aldersgruppe.UNDER_18,
-            lavEllerIngenInntekt = LavEllerIngenInntekt.NEI,
             feilutbetaling = Feilutbetaling(FeilutbetalingValg.NEI, null),
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )

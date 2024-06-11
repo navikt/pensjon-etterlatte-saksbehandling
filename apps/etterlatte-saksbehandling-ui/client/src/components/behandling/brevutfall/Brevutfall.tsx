@@ -59,9 +59,7 @@ const initialBrevutfallOgEtterbetaling = (saktype: SakType) => {
       }
     case SakType.OMSTILLINGSSTOENAD:
       return {
-        brevutfall: {
-          //lavEllerIngenInntekt: opphoer ? undefined : LavEllerIngenInntekt.IKKE_VALGT, // TODO: remove?
-        },
+        brevutfall: {},
       }
   }
 }

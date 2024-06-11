@@ -486,7 +486,10 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns
                 mockk {
                     every { aktivitetsgrad } returns AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50
+                    every { opprettet } returns Grunnlagsopplysning.Saksbehandler.create("Z123455")
+                    every { sakId } returns aktivitet.sakId
                 }
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns null
 
             val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
 
@@ -499,6 +502,7 @@ class AktivitetspliktServiceTest {
                 mockk {
                     every { aktivitetsgrad } returns AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50
                     every { fom } returns aktivitet.fom.minusMonths(1)
+                    every { sakId } returns aktivitet.sakId
                 }
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns null
 
@@ -508,20 +512,26 @@ class AktivitetspliktServiceTest {
         }
 
         @Test
-        fun `Skal returnere true hvis aktivitetsplikt ikke er oppfylt, men det finnes unntak`() {
+        fun `Skal returnere false hvis aktivitetsplikt ikke er oppfylt, selv om det finnes eldre unntak`() {
+            val foerst = Grunnlagsopplysning.Saksbehandler.create("Z123455")
+            val sist = Grunnlagsopplysning.Saksbehandler.create("Z123455")
+            every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns
+                mockk {
+                    every { tom } returns null
+                    every { opprettet } returns foerst
+                    every { sakId } returns aktivitet.sakId
+                }
             every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns
                 mockk {
                     every { aktivitetsgrad } returns AktivitetspliktAktivitetsgradType.AKTIVITET_UNDER_50
                     every { fom } returns aktivitet.fom.minusMonths(1)
-                }
-            every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns
-                mockk {
-                    every { tom } returns null
+                    every { opprettet } returns sist
+                    every { sakId } returns aktivitet.sakId
                 }
 
             val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
 
-            result shouldBe true
+            result shouldBe false
         }
 
         @Test
@@ -530,6 +540,8 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(aktivitet.sakId) } returns
                 mockk {
                     every { tom } returns LocalDate.now().minusYears(1)
+                    every { opprettet } returns Grunnlagsopplysning.Saksbehandler.create("Z123455")
+                    every { sakId } returns aktivitet.sakId
                 }
 
             val result = service.oppfyllerAktivitetsplikt(aktivitet.sakId, aktivitet.fom)
@@ -648,6 +660,8 @@ class AktivitetspliktServiceTest {
             every { aktivitetspliktAktivitetsgradDao.hentNyesteAktivitetsgrad(aktivitet.sakId) } returns
                 mockk {
                     every { aktivitetsgrad } returns AktivitetspliktAktivitetsgradType.AKTIVITET_OVER_50
+                    every { opprettet } returns Grunnlagsopplysning.Saksbehandler.create("Z123455")
+                    every { sakId } returns aktivitet.sakId
                 }
             every { aktivitetspliktUnntakDao.hentNyesteUnntak(sakId) } returns null
             every { behandlingService.hentSisteIverksatte(sakId) } returns forrigeBehandling

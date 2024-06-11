@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.aktivitetsplikt.vurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktVurderingOpprettetDato
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
@@ -159,10 +160,10 @@ data class AktivitetspliktAktivitetsgrad(
     val oppgaveId: UUID? = null,
     val aktivitetsgrad: AktivitetspliktAktivitetsgradType,
     val fom: LocalDate,
-    val opprettet: Grunnlagsopplysning.Kilde,
+    override val opprettet: Grunnlagsopplysning.Kilde,
     val endret: Grunnlagsopplysning.Kilde?,
     val beskrivelse: String,
-)
+) : AktivitetspliktVurderingOpprettetDato
 
 data class LagreAktivitetspliktAktivitetsgrad(
     val id: UUID? = null,

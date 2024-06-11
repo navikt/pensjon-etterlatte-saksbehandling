@@ -1,5 +1,7 @@
 package no.nav.etterlatte.sanksjon
 
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -8,13 +10,26 @@ import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.util.UUID
 
+enum class SanksjonToggles(
+    val value: String,
+) : FeatureToggle {
+    SANKSJON("sanksjon"),
+    ;
+
+    override fun key(): String = this.value
+}
+
 class SanksjonService(
     private val behandlingKlient: BehandlingKlient,
     private val sanksjonRepository: SanksjonRepository,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(SanksjonService::class.java)
 
     fun hentSanksjon(behandlingId: UUID): List<Sanksjon>? {
+        if (featureToggleService.isEnabled(SanksjonToggles.SANKSJON, defaultValue = false)) {
+            return null
+        }
         logger.info("Henter sanksjoner med behandlingID=$behandlingId")
         return sanksjonRepository.hentSanksjon(behandlingId)?.sortedBy { it.fom }
     }
@@ -50,10 +65,11 @@ class SanksjonService(
 
         if (behandling.virkningstidspunkt == null) throw ManglerVirkningstidspunktException()
         if (sanksjon.sakId != behandling.sak) throw SakidTilhoererIkkeBehandlingException()
-        if (YearMonth.of(
-                sanksjon.fom.year,
-                sanksjon.fom.month,
-            ).isBefore(behandling.virkningstidspunkt?.dato)
+        if (YearMonth
+                .of(
+                    sanksjon.fom.year,
+                    sanksjon.fom.month,
+                ).isBefore(behandling.virkningstidspunkt?.dato)
         ) {
             throw FomErFoerVirkningstidpunktException()
         }

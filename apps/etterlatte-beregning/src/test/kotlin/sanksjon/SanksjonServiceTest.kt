@@ -9,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.regler.behandling
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.lagreSanksjon
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -27,7 +28,13 @@ import java.util.UUID
 internal class SanksjonServiceTest {
     private val sanksjonRepository: SanksjonRepository = mockk()
     private val behandlingKlient: BehandlingKlient = mockk()
-    private val service = SanksjonService(sanksjonRepository = sanksjonRepository, behandlingKlient = behandlingKlient)
+    private val featureToggleService: FeatureToggleService = mockk(relaxed = true)
+    private val service =
+        SanksjonService(
+            sanksjonRepository = sanksjonRepository,
+            behandlingKlient = behandlingKlient,
+            featureToggleService = featureToggleService,
+        )
     private val sakId = 123L
 
     @Nested

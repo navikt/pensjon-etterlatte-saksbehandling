@@ -18,9 +18,11 @@ import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
 import java.util.UUID
 
-class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclosing) {
-    fun opprettGrunnlagsendringshendelse(hendelse: Grunnlagsendringshendelse): Grunnlagsendringshendelse {
-        return connectionAutoclosing.hentConnection {
+class GrunnlagsendringshendelseDao(
+    val connectionAutoclosing: ConnectionAutoclosing,
+) {
+    fun opprettGrunnlagsendringshendelse(hendelse: Grunnlagsendringshendelse): Grunnlagsendringshendelse =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
@@ -46,10 +48,9 @@ class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclos
                     ?: throw Exception("Kunne ikke hente nettopp lagret Grunnlagsendringshendelse med id: ${hendelse.id}")
             }
         }
-    }
 
-    fun hentGrunnlagsendringshendelse(id: UUID): Grunnlagsendringshendelse? {
-        return connectionAutoclosing.hentConnection {
+    fun hentGrunnlagsendringshendelse(id: UUID): Grunnlagsendringshendelse? =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
@@ -64,7 +65,6 @@ class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclos
                 stmt.executeQuery().singleOrNull { asGrunnlagsendringshendelse() }
             }
         }
-    }
 
     fun oppdaterGrunnlagsendringStatusOgSamsvar(
         hendelseId: UUID,
@@ -176,8 +176,8 @@ class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclos
         }
     }
 
-    fun hentAlleGrunnlagsendringshendelser(): List<Grunnlagsendringshendelse> {
-        return connectionAutoclosing.hentConnection {
+    fun hentAlleGrunnlagsendringshendelser(): List<Grunnlagsendringshendelse> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
@@ -190,13 +190,12 @@ class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclos
                 stmt.executeQuery().toList { asGrunnlagsendringshendelse() }
             }
         }
-    }
 
     fun hentGrunnlagsendringshendelserMedStatuserISak(
         sakId: Long,
         statuser: List<GrunnlagsendringStatus>,
-    ): List<Grunnlagsendringshendelse> {
-        return connectionAutoclosing.hentConnection {
+    ): List<Grunnlagsendringshendelse> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
@@ -214,14 +213,13 @@ class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclos
                 }
             }
         }
-    }
 
     fun hentGrunnlagsendringshendelserMedStatuserISakAvType(
         sakId: Long,
         statuser: List<GrunnlagsendringStatus>,
         type: GrunnlagsendringsType,
-    ): List<Grunnlagsendringshendelse> {
-        return connectionAutoclosing.hentConnection {
+    ): List<Grunnlagsendringshendelse> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
@@ -241,7 +239,6 @@ class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclos
                 }
             }
         }
-    }
 
     fun hentGrunnlagsendringshendelserSomErSjekketAvJobb(sakId: Long): List<Grunnlagsendringshendelse> =
         hentGrunnlagsendringshendelserMedStatuserISak(
@@ -249,8 +246,8 @@ class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclos
             listOf(GrunnlagsendringStatus.SJEKKET_AV_JOBB),
         )
 
-    private fun ResultSet.asGrunnlagsendringshendelse(): Grunnlagsendringshendelse {
-        return Grunnlagsendringshendelse(
+    private fun ResultSet.asGrunnlagsendringshendelse(): Grunnlagsendringshendelse =
+        Grunnlagsendringshendelse(
             id = getObject("id") as UUID,
             sakId = getLong("sak_id"),
             type = GrunnlagsendringsType.valueOf(getString("type")),
@@ -265,10 +262,9 @@ class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclos
                 ),
             kommentar = getString("kommentar"),
         )
-    }
 
-    fun hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId: UUID): List<Grunnlagsendringshendelse> {
-        return connectionAutoclosing.hentConnection {
+    fun hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId: UUID): List<Grunnlagsendringshendelse> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
@@ -277,13 +273,12 @@ class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclos
                         FROM grunnlagsendringshendelse
                         WHERE behandling_id = ?
                     """.trimIndent(),
-                )
-                    .apply {
-                        setObject(1, behandlingId)
-                    }.executeQuery().toList {
+                ).apply {
+                    setObject(1, behandlingId)
+                }.executeQuery()
+                    .toList {
                         asGrunnlagsendringshendelse()
                     }
             }
         }
-    }
 }

@@ -6,7 +6,9 @@ import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagStatus
 import no.nav.etterlatte.tilbakekreving.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
 
-class KravgrunnlagService(private val behandlingKlient: BehandlingKlient) {
+class KravgrunnlagService(
+    private val behandlingKlient: BehandlingKlient,
+) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun haandterKravgrunnlag(kravgrunnlag: Kravgrunnlag) {

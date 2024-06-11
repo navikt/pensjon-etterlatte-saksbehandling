@@ -88,7 +88,10 @@ internal class OmregningsHendelserTest {
         Assertions.assertEquals(2, inspector.inspektør.size)
         Assertions.assertEquals(
             beregningDTO.toJson(),
-            inspector.inspektør.message(1).get(BEREGNING_KEY).toJson(),
+            inspector.inspektør
+                .message(1)
+                .get(BEREGNING_KEY)
+                .toJson(),
         )
     }
 

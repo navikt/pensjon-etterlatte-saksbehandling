@@ -6,4 +6,6 @@ enum class MigreringKjoringVariant {
     FORTSETT_ETTER_PAUSE,
 }
 
-data class PesysId(val id: Long)
+data class PesysId(
+    val id: Long,
+)

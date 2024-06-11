@@ -100,17 +100,11 @@ fun lagContext(
     testUser: User,
     databaseContext: DatabaseKontekst =
         object : DatabaseKontekst {
-            override fun activeTx(): Connection {
-                throw IllegalArgumentException()
-            }
+            override fun activeTx(): Connection = throw IllegalArgumentException()
 
-            override fun harIntransaction(): Boolean {
-                throw NotImplementedException("not implemented")
-            }
+            override fun harIntransaction(): Boolean = throw NotImplementedException("not implemented")
 
-            override fun <T> inTransaction(block: () -> T): T {
-                return block()
-            }
+            override fun <T> inTransaction(block: () -> T): T = block()
         },
     sakTilgangDao: SakTilgangDao = mockedSakTilgangDao(),
 ) = Context(
@@ -160,8 +154,8 @@ fun mockSaksbehandler(
     harRolleStrengtFortrolig: Boolean = false,
     harRolleEgenAnsatt: Boolean = false,
     enheter: List<String> = listOf(Enheter.defaultEnhet.enhetNr),
-): SaksbehandlerMedEnheterOgRoller {
-    return mockk<SaksbehandlerMedEnheterOgRoller> {
+): SaksbehandlerMedEnheterOgRoller =
+    mockk<SaksbehandlerMedEnheterOgRoller> {
         every { saksbehandlerMedRoller } returns
             mockk<SaksbehandlerMedRoller> {
                 every { saksbehandler } returns Saksbehandler("accessToken", ident, null)
@@ -172,7 +166,6 @@ fun mockSaksbehandler(
         every { name() } returns ident
         every { enheter() } returns enheter
     }
-}
 
 fun opprettBehandling(
     type: BehandlingType,

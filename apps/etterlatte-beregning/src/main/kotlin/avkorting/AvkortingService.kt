@@ -189,17 +189,23 @@ class AvkortingService(
     }
 }
 
-class AvkortingFinnesIkkeException(behandlingId: UUID) : IkkeFunnetException(
-    code = "AVKORTING_IKKE_FUNNET",
-    detail = "Uthenting av avkorting for behandling $behandlingId finnes ikke",
-)
+class AvkortingFinnesIkkeException(
+    behandlingId: UUID,
+) : IkkeFunnetException(
+        code = "AVKORTING_IKKE_FUNNET",
+        detail = "Uthenting av avkorting for behandling $behandlingId finnes ikke",
+    )
 
-class TidligereAvkortingFinnesIkkeException(behandlingId: UUID) : IkkeFunnetException(
-    code = "TIDLIGERE_AVKORTING_IKKE_FUNNET",
-    detail = "Fant ikke avkorting for tidligere behandling $behandlingId",
-)
+class TidligereAvkortingFinnesIkkeException(
+    behandlingId: UUID,
+) : IkkeFunnetException(
+        code = "TIDLIGERE_AVKORTING_IKKE_FUNNET",
+        detail = "Fant ikke avkorting for tidligere behandling $behandlingId",
+    )
 
-class AvkortingBehandlingFeilStatus(behandlingId: UUID) : IkkeTillattException(
-    code = "BEHANDLING_FEIL_STATUS_FOR_AVKORTING",
-    detail = "Kan ikke avkorte da behandling med id=$behandlingId har feil status",
-)
+class AvkortingBehandlingFeilStatus(
+    behandlingId: UUID,
+) : IkkeTillattException(
+        code = "BEHANDLING_FEIL_STATUS_FOR_AVKORTING",
+        detail = "Kan ikke avkorte da behandling med id=$behandlingId har feil status",
+    )

@@ -41,7 +41,9 @@ import javax.sql.DataSource
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BrevRepositoryIntegrationTest(private val dataSource: DataSource) {
+internal class BrevRepositoryIntegrationTest(
+    private val dataSource: DataSource,
+) {
     private val db = BrevRepository(dataSource)
 
     @AfterEach
@@ -416,8 +418,15 @@ internal class BrevRepositoryIntegrationTest(private val dataSource: DataSource)
             )
 
             val vedleggPayload = db.hentBrevPayloadVedlegg(opprettetBrev.id)!!
-            vedleggPayload.first().payload!!.elements.size shouldBeExactly 1
-            vedleggPayload.first().payload!!.elements[0].type shouldBe Slate.ElementType.HEADING_TWO
+            vedleggPayload
+                .first()
+                .payload!!
+                .elements.size shouldBeExactly 1
+            vedleggPayload
+                .first()
+                .payload!!
+                .elements[0]
+                .type shouldBe Slate.ElementType.HEADING_TWO
         }
     }
 

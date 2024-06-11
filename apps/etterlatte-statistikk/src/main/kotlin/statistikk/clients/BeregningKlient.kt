@@ -22,9 +22,10 @@ class BeregningKlientImpl(
 ) : BeregningKlient {
     val logger = LoggerFactory.getLogger(this.javaClass)
 
-    override suspend fun hentBeregningForBehandling(behandlingId: UUID): Beregning? {
-        return try {
-            beregningHttpClient.get("$beregningUrl/api/beregning/$behandlingId")
+    override suspend fun hentBeregningForBehandling(behandlingId: UUID): Beregning? =
+        try {
+            beregningHttpClient
+                .get("$beregningUrl/api/beregning/$behandlingId")
                 .body<BeregningDTO>()
                 .let { Beregning.fraBeregningDTO(it) }
         } catch (e: Exception) {
@@ -34,11 +35,11 @@ class BeregningKlientImpl(
             )
             null
         }
-    }
 
-    override suspend fun hentAvkortingForBehandling(behandlingId: UUID): Avkorting? {
-        return try {
-            beregningHttpClient.get("$beregningUrl/api/beregning/avkorting/$behandlingId")
+    override suspend fun hentAvkortingForBehandling(behandlingId: UUID): Avkorting? =
+        try {
+            beregningHttpClient
+                .get("$beregningUrl/api/beregning/avkorting/$behandlingId")
                 .body<AvkortingDto>()
                 .let { Avkorting.fraDTO(it) }
         } catch (e: Exception) {
@@ -48,5 +49,4 @@ class BeregningKlientImpl(
             )
             null
         }
-    }
 }

@@ -10,7 +10,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.isSuccess
 import org.slf4j.LoggerFactory
 
-class BrregKlient(private val httpClient: HttpClient, private val host: String) {
+class BrregKlient(
+    private val httpClient: HttpClient,
+    private val host: String,
+) {
     private val logger = LoggerFactory.getLogger(BrregService::class.java)
 
     suspend fun hentEnheter(): List<Enhet> {
@@ -40,8 +43,12 @@ class BrregKlient(private val httpClient: HttpClient, private val host: String) 
     }
 }
 
-class ResponseWrapper(val _embedded: Embedded?) {
-    class Embedded(val enheter: List<Enhet>)
+class ResponseWrapper(
+    val _embedded: Embedded?,
+) {
+    class Embedded(
+        val enheter: List<Enhet>,
+    )
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -29,7 +29,9 @@ const val KLAGEID_CALL_PARAMETER = "klageId"
 const val GENERELLBEHANDLINGID_CALL_PARAMETER = "generellBehandlingId"
 const val TILBAKEKREVINGID_CALL_PARAMETER = "tilbakekrevingId"
 
-enum class CallParamAuthId(val value: String) {
+enum class CallParamAuthId(
+    val value: String,
+) {
     BEHANDLINGID(BEHANDLINGID_CALL_PARAMETER),
     SAKID(SAKID_CALL_PARAMETER),
     OPPGAVEID(OPPGAVEID_CALL_PARAMETER),
@@ -235,10 +237,11 @@ fun ApplicationCall.uuid(param: String) =
         "$param er ikke i path params",
     )
 
-class UgyldigDatoFormatException : UgyldigForespoerselException(
-    code = "UGYLDIG-DATOFORMAT",
-    detail = "Forventet format YYYY-MM-DD (ISO-8601)",
-)
+class UgyldigDatoFormatException :
+    UgyldigForespoerselException(
+        code = "UGYLDIG-DATOFORMAT",
+        detail = "Forventet format YYYY-MM-DD (ISO-8601)",
+    )
 
 fun ApplicationCall.dato(param: String) =
     this.parameters[param]?.let {
@@ -258,11 +261,12 @@ suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
     }
 }
 
-class FeatureIkkeStoettetException : ForespoerselException(
-    code = "NOT_IMPLEMENTED",
-    status = HttpStatusCode.NotImplemented.value,
-    detail = "Funksjonaliteten er ikke tilgjengelig enda.",
-)
+class FeatureIkkeStoettetException :
+    ForespoerselException(
+        code = "NOT_IMPLEMENTED",
+        status = HttpStatusCode.NotImplemented.value,
+        detail = "Funksjonaliteten er ikke tilgjengelig enda.",
+    )
 
 fun BrukerTokenInfo.lagGrunnlagsopplysning() =
     if (this is Saksbehandler) {

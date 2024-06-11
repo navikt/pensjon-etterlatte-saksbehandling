@@ -8,18 +8,19 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.SakType
 import java.time.LocalDate
 
-data class AvvistKlageFerdigData(override val innhold: List<Slate.Element>, val data: AvvistKlageInnholdBrevData) :
-    BrevDataFerdigstilling {
+data class AvvistKlageFerdigData(
+    override val innhold: List<Slate.Element>,
+    val data: AvvistKlageInnholdBrevData,
+) : BrevDataFerdigstilling {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,
             innholdMedVedlegg: InnholdMedVedlegg,
-        ): AvvistKlageFerdigData {
-            return AvvistKlageFerdigData(
+        ): AvvistKlageFerdigData =
+            AvvistKlageFerdigData(
                 innhold = innholdMedVedlegg.innhold(),
                 data = AvvistKlageInnholdBrevData.fra(generellBrevData),
             )
-        }
     }
 }
 
@@ -34,7 +35,12 @@ data class AvvistKlageInnholdBrevData(
             return AvvistKlageInnholdBrevData(
                 sakType = klage.sak.sakType,
                 klageDato = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
-                datoForVedtaketKlagenGjelder = klage.formkrav?.formkrav?.vedtaketKlagenGjelder?.datoAttestert?.toLocalDate(),
+                datoForVedtaketKlagenGjelder =
+                    klage.formkrav
+                        ?.formkrav
+                        ?.vedtaketKlagenGjelder
+                        ?.datoAttestert
+                        ?.toLocalDate(),
             )
         }
     }

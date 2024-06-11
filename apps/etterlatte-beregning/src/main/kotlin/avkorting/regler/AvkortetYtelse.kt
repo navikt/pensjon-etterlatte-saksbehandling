@@ -21,21 +21,19 @@ data class PeriodisertAvkortetYtelseGrunnlag(
     val fordeltRestanse: PeriodisertGrunnlag<FaktumNode<Int>>,
     val sanksjonsperioder: PeriodisertGrunnlag<FaktumNode<Sanksjon?>>,
 ) : PeriodisertGrunnlag<AvkortetYtelseGrunnlag> {
-    override fun finnAlleKnekkpunkter(): Set<LocalDate> {
-        return beregningsperioder.finnAlleKnekkpunkter() +
+    override fun finnAlleKnekkpunkter(): Set<LocalDate> =
+        beregningsperioder.finnAlleKnekkpunkter() +
             avkortingsperioder.finnAlleKnekkpunkter() +
             fordeltRestanse.finnAlleKnekkpunkter() +
             sanksjonsperioder.finnAlleKnekkpunkter()
-    }
 
-    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): AvkortetYtelseGrunnlag {
-        return AvkortetYtelseGrunnlag(
+    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): AvkortetYtelseGrunnlag =
+        AvkortetYtelseGrunnlag(
             beregning = beregningsperioder.finnGrunnlagForPeriode(datoIPeriode),
             avkorting = avkortingsperioder.finnGrunnlagForPeriode(datoIPeriode),
             fordeltRestanse = fordeltRestanse.finnGrunnlagForPeriode(datoIPeriode),
             sanksjon = sanksjonsperioder.finnGrunnlagForPeriode(datoIPeriode),
         )
-    }
 }
 
 data class AvkortetYtelseGrunnlag(
@@ -92,7 +90,8 @@ val avkortetYtelseMedRestanse =
         beskrivelse = "Legger til restanse fra endret avkorting til tidligere måneder",
         regelReferanse = RegelReferanse(id = "REGEL-AVKORTET-YTELSE-MED-RESTANSE"),
     ) benytter avkorteYtelse og fordeltRestanseGrunnlag med { avkorteYtelse, fordeltRestanse ->
-        avkorteYtelse.minus(Beregningstall(fordeltRestanse))
+        avkorteYtelse
+            .minus(Beregningstall(fordeltRestanse))
             .toInteger()
             .let { max(it, 0) }
     }

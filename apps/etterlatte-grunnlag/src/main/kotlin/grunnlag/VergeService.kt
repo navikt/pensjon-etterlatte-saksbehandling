@@ -15,7 +15,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class VergeService(private val persondataKlient: PersondataKlient) {
+class VergeService(
+    private val persondataKlient: PersondataKlient,
+) {
     private val logger = LoggerFactory.getLogger(VergeService::class.java)
 
     private val sikkerLogg: Logger = sikkerlogger()

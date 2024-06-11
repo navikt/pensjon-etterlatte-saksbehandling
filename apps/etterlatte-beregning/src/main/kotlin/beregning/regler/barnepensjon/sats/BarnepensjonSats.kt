@@ -97,8 +97,7 @@ val beloepHvertBarnEnForelderAvdoed2024 =
         gjelderFra = BP_2024_DATO,
         beskrivelse = "Prosentsats benyttet for hvert barn når en forelder er død",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-BELOEP-EN-FORELDER-AVDOED"),
-    ) benytter prosentsatsHvertBarnEnForelderAvdoed2024 og grunnbeloep med {
-            sats, grunnbeloep ->
+    ) benytter prosentsatsHvertBarnEnForelderAvdoed2024 og grunnbeloep med { sats, grunnbeloep ->
         sats.multiply(grunnbeloep.grunnbeloepPerMaaned)
     }
 
@@ -107,8 +106,7 @@ val beloepHvertBarnToForeldreAvdoed2024 =
         gjelderFra = BP_2024_DATO,
         beskrivelse = "Prosentsats benyttet for hvert barn når to foreldre er døde",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-BELOEP-TO-FORELDRE-AVDOED"),
-    ) benytter prosentsatsHvertBarnToForeldreAvdoed2024 og grunnbeloep med {
-            sats, grunnbeloep ->
+    ) benytter prosentsatsHvertBarnToForeldreAvdoed2024 og grunnbeloep med { sats, grunnbeloep ->
         sats.multiply(grunnbeloep.grunnbeloepPerMaaned)
     }
 
@@ -144,7 +142,10 @@ val barnepensjonSatsRegel1967 =
         beskrivelse = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-UAVKORTET"),
     ) benytter belopForFoersteBarn1967 og belopForEtterfoelgendeBarn1967 og antallSoeskenIKullet1967 med {
-            foerstebarnSats, etterfoelgendeBarnSats, antallSoesken ->
+            foerstebarnSats,
+            etterfoelgendeBarnSats,
+            antallSoesken,
+        ->
         foerstebarnSats
             .plus(etterfoelgendeBarnSats.multiply(antallSoesken))
             .divide(antallSoesken.plus(1))
@@ -156,7 +157,10 @@ val barnepensjonSatsRegel2024 =
         beskrivelse = "Beregn barnepensjon etter 2024-regelverk",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-UAVKORTET"),
     ) benytter harToAvdodeForeldre2024 og beloepHvertBarnEnForelderAvdoed2024 og beloepHvertBarnToForeldreAvdoed2024 med {
-            harToAvdodeForeldre2024, beloepEnAvdoedForelder, beloepToAvdoedeForeldre ->
+            harToAvdodeForeldre2024,
+            beloepEnAvdoedForelder,
+            beloepToAvdoedeForeldre,
+        ->
         if (harToAvdodeForeldre2024) {
             beloepToAvdoedeForeldre
         } else {

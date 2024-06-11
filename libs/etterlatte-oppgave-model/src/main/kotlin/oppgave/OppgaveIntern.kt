@@ -30,9 +30,7 @@ data class OppgaveIntern(
     val fnr: String? = null,
     val frist: Tidspunkt?,
 ) {
-    fun manglerSaksbehandler(): Boolean {
-        return saksbehandler == null
-    }
+    fun manglerSaksbehandler(): Boolean = saksbehandler == null
 
     fun erAvsluttet(): Boolean = status.erAvsluttet()
 
@@ -51,7 +49,10 @@ data class OppgaveIntern(
             )
 }
 
-data class OppgavebenkStats(val antallOppgavelistaOppgaver: Long, val antallMinOppgavelisteOppgaver: Long)
+data class OppgavebenkStats(
+    val antallOppgavelistaOppgaver: Long,
+    val antallMinOppgavelisteOppgaver: Long,
+)
 
 enum class Status {
     NY,
@@ -64,8 +65,8 @@ enum class Status {
     AVBRUTT,
     ;
 
-    fun erAvsluttet(): Boolean {
-        return when (this) {
+    fun erAvsluttet(): Boolean =
+        when (this) {
             NY,
             UNDER_BEHANDLING,
             PAA_VENT,
@@ -78,7 +79,6 @@ enum class Status {
             AVBRUTT,
             -> true
         }
-    }
 
     // TODO: Gå gjennom navngiving her. Gir det mening med "under behandling" som status OG samlebegrep...?
     fun erUnderBehandling(): Boolean = this in listOf(UNDER_BEHANDLING, PAA_VENT, ATTESTERING, UNDERKJENT)
@@ -177,8 +177,8 @@ fun opprettNyOppgaveMedReferanseOgSak(
     oppgaveType: OppgaveType,
     merknad: String?,
     frist: Tidspunkt? = null,
-): OppgaveIntern {
-    return OppgaveIntern(
+): OppgaveIntern =
+    OppgaveIntern(
         id = UUID.randomUUID(),
         status = Status.NY,
         enhet = sak.enhet,
@@ -193,4 +193,3 @@ fun opprettNyOppgaveMedReferanseOgSak(
         frist = frist,
         type = oppgaveType,
     )
-}

@@ -426,7 +426,7 @@ object OmstillingstoenadVilkaar {
     private fun aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt() =
         Delvilkaar(
             type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND_UNNTAK_GJENLEVENDE_OVER_55_AAR_OG_LAV_INNTEKT,
-            tittel = "Ja, gjenlevende er over 55 år ved dødsfall og har hatt lav inntekt",
+            tittel = "Ja, gjenlevende er født i 1963 eller tidligere og har hatt lav inntekt",
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-7",

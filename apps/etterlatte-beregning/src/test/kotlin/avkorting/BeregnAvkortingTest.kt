@@ -869,11 +869,17 @@ class BeregnAvkortingTest {
 
     private fun `Avkorting korrigere siste inntekt`() =
         `Avkorting revurdert beregning`()
-            .kopierAvkorting().let {
+            .kopierAvkorting()
+            .let {
                 it.beregnAvkortingMedNyttGrunnlag(
                     nyttGrunnlag =
                         avkortinggrunnlagLagre(
-                            id = it.aarsoppgjoer.single().inntektsavkorting.last().grunnlag.id,
+                            id =
+                                it.aarsoppgjoer
+                                    .single()
+                                    .inntektsavkorting
+                                    .last()
+                                    .grunnlag.id,
                             aarsinntekt = 425000,
                             fratrekkInnAar = 50000,
                         ),

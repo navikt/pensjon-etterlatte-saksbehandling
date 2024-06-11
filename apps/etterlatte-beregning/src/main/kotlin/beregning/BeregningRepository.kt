@@ -22,7 +22,9 @@ import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
-class BeregningRepository(private val dataSource: DataSource) {
+class BeregningRepository(
+    private val dataSource: DataSource,
+) {
     fun hent(behandlingId: UUID): Beregning? =
         dataSource.transaction { tx ->
             val beregningsperioder =
@@ -54,8 +56,8 @@ class BeregningRepository(private val dataSource: DataSource) {
         return hent(beregning.behandlingId)!!
     }
 
-    fun hentOverstyrBeregning(sakId: Long): OverstyrBeregning? {
-        return dataSource.transaction { tx ->
+    fun hentOverstyrBeregning(sakId: Long): OverstyrBeregning? =
+        dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.hentOverstyrBeregning,
                 paramMap = mapOf("sakId" to sakId),
@@ -63,9 +65,8 @@ class BeregningRepository(private val dataSource: DataSource) {
                 tx.run(query.map { toOverstyrBeregning(it) }.asSingle)
             }
         }
-    }
 
-    fun opprettOverstyrBeregning(overstyrBeregning: OverstyrBeregning): OverstyrBeregning {
+    fun opprettOverstyrBeregning(overstyrBeregning: OverstyrBeregning): OverstyrBeregning? {
         dataSource.transaction { tx ->
             queryOf(
                 statement = Queries.opprettOverstyrBeregning,
@@ -74,12 +75,16 @@ class BeregningRepository(private val dataSource: DataSource) {
                         "sakId" to overstyrBeregning.sakId,
                         "beskrivelse" to overstyrBeregning.beskrivelse,
                         "tidspunkt" to overstyrBeregning.tidspunkt.toTimestamp(),
+                        "status" to overstyrBeregning.status.name,
                     ),
             ).let { query ->
                 tx.run(query.asUpdate)
             }
         }
 
+        if (overstyrBeregning.status == OverstyrBeregningStatus.IKKE_AKTIV) {
+            return null
+        }
         return checkNotNull(hentOverstyrBeregning(overstyrBeregning.sakId)) {
             "Vi opprettet en overstyrt beregning på sakId=${overstyrBeregning.sakId} akkurat nå men den finnes ikke >:("
         }
@@ -88,8 +93,8 @@ class BeregningRepository(private val dataSource: DataSource) {
     private fun createMapFromBeregningsperiode(
         beregningsperiode: Beregningsperiode,
         beregning: Beregning,
-    ): Map<String, Serializable?> {
-        return mapOf(
+    ): Map<String, Serializable?> =
+        mapOf(
             "id" to UUID.randomUUID(),
             "beregningId" to beregning.beregningId,
             "behandlingId" to beregning.behandlingId,
@@ -115,7 +120,6 @@ class BeregningRepository(private val dataSource: DataSource) {
             "regelVersjon" to beregningsperiode.regelVersjon,
             "kilde" to beregningsperiode.kilde?.toJson(),
         )
-    }
 }
 
 private fun toOverstyrBeregning(row: Row): OverstyrBeregning =
@@ -226,7 +230,9 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
     )
 }
 
-private enum class BeregningsperiodeDatabaseColumns(val navn: String) {
+private enum class BeregningsperiodeDatabaseColumns(
+    val navn: String,
+) {
     Id("id"),
     BeregningId("beregningId"),
     BehandlingId("behandlingId"),
@@ -304,13 +310,20 @@ private object Queries {
         SELECT *
         FROM overstyr_beregning 
         WHERE sak_id = :sakId
+        and status = '${OverstyrBeregningStatus.AKTIV.name}'
         """.trimIndent()
 
     val opprettOverstyrBeregning =
         """
-        INSERT INTO overstyr_beregning (sak_id, beskrivelse, tidspunkt)
-        VALUES (:sakId, :beskrivelse, :tidspunkt)
+        INSERT INTO overstyr_beregning (sak_id, beskrivelse, tidspunkt, status)
+        VALUES (:sakId, :beskrivelse, :tidspunkt, :status)
+        ON CONFLICT (sak_id) DO UPDATE SET beskrivelse=:beskrivelse, tidspunkt=:tidspunkt, status=:status
         """.trimIndent()
+}
+
+enum class OverstyrBeregningStatus {
+    AKTIV,
+    IKKE_AKTIV,
 }
 
 private data class BeregningsperiodeDAO(

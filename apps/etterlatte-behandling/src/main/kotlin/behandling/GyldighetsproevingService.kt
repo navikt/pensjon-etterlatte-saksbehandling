@@ -42,8 +42,8 @@ class GyldighetsproevingServiceImpl(
         behandlingId: UUID,
         svar: JaNeiMedBegrunnelse,
         kilde: Grunnlagsopplysning.Saksbehandler,
-    ): GyldighetsResultat? {
-        return hentFoerstegangsbehandling(behandlingId)?.let { behandling ->
+    ): GyldighetsResultat? =
+        hentFoerstegangsbehandling(behandlingId)?.let { behandling ->
             val resultat =
                 if (svar.erJa()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT
             val gyldighetsResultat =
@@ -68,7 +68,6 @@ class GyldighetsproevingServiceImpl(
 
             gyldighetsResultat
         }
-    }
 
     override fun lagreGyldighetsproeving(
         behandlingId: UUID,
@@ -80,7 +79,8 @@ class GyldighetsproevingServiceImpl(
     }
 
     private fun Foerstegangsbehandling.lagreGyldighetsproeving(gyldighetsproeving: GyldighetsResultat) {
-        this.oppdaterGyldighetsproeving(gyldighetsproeving)
+        this
+            .oppdaterGyldighetsproeving(gyldighetsproeving)
             .also {
                 behandlingDao.lagreGyldighetsproving(it)
                 logger.info("behandling ${it.id} i sak: ${it.sak.id} er gyldighetsprøvd. Saktype: ${it.sak.sakType}")

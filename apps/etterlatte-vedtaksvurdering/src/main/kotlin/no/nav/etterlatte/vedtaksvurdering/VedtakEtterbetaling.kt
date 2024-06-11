@@ -21,7 +21,8 @@ internal fun Vedtak.erVedtakMedEtterbetaling(
 
             if (innhold.virkningstidspunkt < now) {
                 val ferdigstilteVedtak =
-                    vedtaksvurderingRepository.hentFerdigstilteVedtak(this.soeker, this.sakType)
+                    vedtaksvurderingRepository
+                        .hentFerdigstilteVedtak(this.soeker, this.sakType)
                         .filter { it.id != this.id }
                 val tidligereVedtakTidslinje = Vedtakstidslinje(ferdigstilteVedtak).sammenstill(OMS_START_YTELSE)
                 val tidligereUtbetalingsperioder =
@@ -46,14 +47,13 @@ internal fun Vedtak.erVedtakMedEtterbetaling(
 
 internal fun Utbetalingsperiode.beloepErMindreEnn(that: Utbetalingsperiode) = this.beloep?.compareTo(that.beloep) == -1
 
-internal fun Utbetalingsperiode.overlapper(other: Utbetalingsperiode): Boolean {
-    return periode.overlapper(other.periode)
-}
+internal fun Utbetalingsperiode.overlapper(other: Utbetalingsperiode): Boolean = periode.overlapper(other.periode)
 
 internal fun Periode.overlapper(other: Periode): Boolean {
     val thisTomSafe = this.tom ?: WAY_INTO_THE_FUTURE
     val thatTomSafe = other.tom ?: WAY_INTO_THE_FUTURE
     return this.fom == other.fom ||
         this.tom == other.tom ||
-        other.fom.isBefore(thisTomSafe) && thatTomSafe.isAfter(this.fom)
+        other.fom.isBefore(thisTomSafe) &&
+        thatTomSafe.isAfter(this.fom)
 }

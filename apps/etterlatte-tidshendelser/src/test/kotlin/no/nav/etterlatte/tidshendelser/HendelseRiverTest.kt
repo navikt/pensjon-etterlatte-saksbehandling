@@ -19,7 +19,9 @@ import kotlin.random.Random
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class HendelseRiverTest(dataSource: DataSource) {
+class HendelseRiverTest(
+    dataSource: DataSource,
+) {
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
 

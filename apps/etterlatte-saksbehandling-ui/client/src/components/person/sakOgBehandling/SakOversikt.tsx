@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import Spinner from '~shared/Spinner'
-import { Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
+import { Box, Heading, HStack, ToggleGroup, VStack } from '@navikt/ds-react'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { isSuccess, mapResult, Result } from '~shared/api/apiUtils'
 import React, { useEffect, useState } from 'react'
@@ -47,7 +47,9 @@ export const SakOversikt = ({ sakResult, fnr }: { sakResult: Result<SakMedBehand
             </SakHeaderWrapper>
             <VStack gap="8">
               <VStack gap="4">
-                <Heading size="medium">Oppgaver</Heading>
+                <Box paddingBlock="8 0">
+                  <Heading size="medium">Oppgaver</Heading>
+                </Box>
                 <ToggleGroup
                   defaultValue={OppgaveValg.AKTIVE}
                   onChange={(val) => setOppgaveValg(val as OppgaveValg)}

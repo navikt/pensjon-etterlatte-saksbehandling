@@ -37,7 +37,10 @@ data class MaanedStoenadRad(
     val sakYtelsesgruppe: SakYtelsesgruppe?,
 )
 
-class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
+class MaanedStatistikk(
+    val maaned: YearMonth,
+    stoenadRader: List<StoenadRad>,
+) {
     val rader: List<MaanedStoenadRad>
 
     init {

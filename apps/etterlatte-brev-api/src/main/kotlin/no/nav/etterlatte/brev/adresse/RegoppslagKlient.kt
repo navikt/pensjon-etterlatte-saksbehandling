@@ -25,7 +25,8 @@ class RegoppslagKlient(
     private val logger = LoggerFactory.getLogger(RegoppslagKlient::class.java)
 
     private val cache =
-        Caffeine.newBuilder()
+        Caffeine
+            .newBuilder()
             .expireAfterWrite(Duration.ofMinutes(15))
             .build<String, RegoppslagResponseDTO>()
 
@@ -42,12 +43,12 @@ class RegoppslagKlient(
             } else {
                 logger.info("Ingen cachet mottakeradresse funnet. Henter fra regoppslag")
 
-                client.post("$url/rest/postadresse") {
-                    behandlingsnummer(sakType)
-                    contentType(ContentType.Application.Json)
-                    setBody(RegoppslagRequest(ident))
-                }
-                    .body<RegoppslagResponseDTO>()
+                client
+                    .post("$url/rest/postadresse") {
+                        behandlingsnummer(sakType)
+                        contentType(ContentType.Application.Json)
+                        setBody(RegoppslagRequest(ident))
+                    }.body<RegoppslagResponseDTO>()
                     .also {
                         sikkerLogg.info("Respons fra regoppslag: $it")
                         cache.put(ident, it)

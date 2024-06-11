@@ -15,14 +15,16 @@ import no.nav.helse.rapids_rivers.RapidApplication
 fun main() {
     val rapidEnv = getRapidEnv()
     val appBuilder = AppBuilder(Miljoevariabler(rapidEnv))
-    RapidApplication.create(rapidEnv).also { rapidsConnection ->
-        val vedtakKlient = appBuilder.lagVedtakKlient()
-        LoependeYtelserforespoerselRiver(rapidsConnection, vedtakKlient)
-        OpprettVedtakforespoerselRiver(rapidsConnection, vedtakKlient, appBuilder.lagFeatureToggleService())
-        LagreIverksattVedtakRiver(rapidsConnection, vedtakKlient)
-        AttestertVedtakRiver(rapidsConnection, vedtakKlient)
-        SamordningMottattRiver(rapidsConnection, vedtakKlient)
-        TilSamordningRiver(rapidsConnection, vedtakKlient)
-        TidshendelseRiver(rapidsConnection, vedtakKlient)
-    }.start()
+    RapidApplication
+        .create(rapidEnv)
+        .also { rapidsConnection ->
+            val vedtakKlient = appBuilder.lagVedtakKlient()
+            LoependeYtelserforespoerselRiver(rapidsConnection, vedtakKlient)
+            OpprettVedtakforespoerselRiver(rapidsConnection, vedtakKlient, appBuilder.lagFeatureToggleService())
+            LagreIverksattVedtakRiver(rapidsConnection, vedtakKlient)
+            AttestertVedtakRiver(rapidsConnection, vedtakKlient)
+            SamordningMottattRiver(rapidsConnection, vedtakKlient)
+            TilSamordningRiver(rapidsConnection, vedtakKlient)
+            TidshendelseRiver(rapidsConnection, vedtakKlient)
+        }.start()
 }

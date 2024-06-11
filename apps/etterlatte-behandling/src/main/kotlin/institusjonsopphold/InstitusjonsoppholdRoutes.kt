@@ -45,4 +45,6 @@ internal fun Route.institusjonsoppholdRoute(institusjonsoppholdService: Institus
     }
 }
 
-data class InstitusjonsoppholdBegrunnelseWrapper(val institusjonsopphold: InstitusjonsoppholdBegrunnelse)
+data class InstitusjonsoppholdBegrunnelseWrapper(
+    val institusjonsopphold: InstitusjonsoppholdBegrunnelse,
+)

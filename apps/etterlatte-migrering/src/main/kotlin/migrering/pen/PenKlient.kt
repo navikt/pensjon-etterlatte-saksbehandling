@@ -10,7 +10,10 @@ import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import org.slf4j.LoggerFactory
 
-class PenKlient(config: Config, pen: HttpClient) {
+class PenKlient(
+    config: Config,
+    pen: HttpClient,
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, pen)
@@ -29,8 +32,7 @@ class PenKlient(config: Config, pen: HttpClient) {
                     ),
                 brukerTokenInfo = Systembruker.migrering,
                 postBody = {},
-            )
-            .mapBoth(
+            ).mapBoth(
                 success = { logger.info("Opphørte sak $pesysId mot PEN") },
                 failure = { errorResponse -> throw errorResponse },
             )

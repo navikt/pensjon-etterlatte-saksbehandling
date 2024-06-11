@@ -770,8 +770,8 @@ private fun lagVedtak(
     vedtakFattetDato: Tidspunkt = Tidspunkt.now(),
     utbetalingsperioder: List<Utbetalingsperiode> = emptyList(),
     opphoerFraOgMed: YearMonth? = null,
-): Vedtak {
-    return Vedtak(
+): Vedtak =
+    Vedtak(
         id = id,
         sakId = 1L,
         sakType = SakType.BARNEPENSJON,
@@ -807,7 +807,6 @@ private fun lagVedtak(
                     },
             ),
     )
-}
 
 private fun lagStandardVedtakMedEnAapenUtbetalingsperiode(
     id: Long,

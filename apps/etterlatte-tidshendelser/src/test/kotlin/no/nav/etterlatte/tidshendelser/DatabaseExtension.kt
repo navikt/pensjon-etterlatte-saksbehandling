@@ -11,7 +11,9 @@ import org.junit.jupiter.api.extension.ExtensionContext
     TRUNCATE jobb CASCADE;
 """,
 )
-class DatabaseExtension : GenerellDatabaseExtension(), AfterEachCallback {
+class DatabaseExtension :
+    GenerellDatabaseExtension(),
+    AfterEachCallback {
     override fun afterEach(context: ExtensionContext) {
         resetDb()
     }

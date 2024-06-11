@@ -62,4 +62,7 @@ data class PersonDTO(
         )
 }
 
-open class OpplysningDTO<T>(val verdi: T, val opplysningsid: String?)
+open class OpplysningDTO<T>(
+    val verdi: T,
+    val opplysningsid: String?,
+)

@@ -220,8 +220,7 @@ internal val avdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
                         personTestData(soekerTestopplysningerMap),
                         personTestData(soeskenTestopplysningerMap),
                     ),
-                )
-                    .toJsonNode(),
+                ).toJsonNode(),
             ),
         FAMILIERELASJON to
             Opplysning.Konstant(
@@ -236,12 +235,14 @@ internal val avdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
     )
 
 val eldreAvdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> =
-    avdoedTestopplysningerMap.toMutableMap().let { map ->
-        map[DOEDSDATO] =
-            Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.getBirthDate().plusYears(67).toJsonNode())
+    avdoedTestopplysningerMap
+        .toMutableMap()
+        .let { map ->
+            map[DOEDSDATO] =
+                Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.getBirthDate().plusYears(67).toJsonNode())
 
-        map
-    }.toMap()
+            map
+        }.toMap()
 
 internal val gjenlevendeTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> =
     mapOf(
@@ -287,8 +288,8 @@ internal val gjenlevendeTestopplysningerMap: Map<Opplysningstype, Opplysning<Jso
             ),
     )
 
-fun soeker(): Person {
-    return Person(
+fun soeker(): Person =
+    Person(
         randomUUID().toString(),
         null,
         randomUUID().toString(),
@@ -312,4 +313,3 @@ fun soeker(): Person {
         null,
         null,
     )
-}

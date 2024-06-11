@@ -27,7 +27,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class BehandlingMetricsTest(private val ds: DataSource) {
+internal class BehandlingMetricsTest(
+    private val ds: DataSource,
+) {
     private lateinit var behandlingMetrikkerDao: BehandlingMetrikkerDao
     private lateinit var oppgaveDao: OppgaveMetrikkerDao
     private lateinit var behandlingRepo: BehandlingDao
@@ -59,7 +61,11 @@ internal class BehandlingMetricsTest(private val ds: DataSource) {
 
     @Test
     fun `Metrikker for behandlinger skal ha labels i riktig rekkefoelge`() {
-        val metrikker = behandlingMetrics.behandlinger.collect().first().samples
+        val metrikker =
+            behandlingMetrics.behandlinger
+                .collect()
+                .first()
+                .samples
         metrikker.first().labelNames shouldContainExactly
             listOf(
                 "saktype",
@@ -73,48 +79,76 @@ internal class BehandlingMetricsTest(private val ds: DataSource) {
 
     @Test
     fun `Henter riktig antall totalt`() {
-        val metrikker = behandlingMetrics.behandlinger.collect().first().samples
+        val metrikker =
+            behandlingMetrics.behandlinger
+                .collect()
+                .first()
+                .samples
         metrikker.size shouldBe 5
     }
 
     @Test
     fun `Henter riktig antall for saktype`() {
-        val metrikker = behandlingMetrics.behandlinger.collect().first().samples
+        val metrikker =
+            behandlingMetrics.behandlinger
+                .collect()
+                .first()
+                .samples
         metrikker.filter { it.labelValues[0] == SakType.BARNEPENSJON.name }.size shouldBe 4
         metrikker.filter { it.labelValues[0] == SakType.OMSTILLINGSSTOENAD.name }.size shouldBe 1
     }
 
     @Test
     fun `Henter riktig antall for behandlingstyper`() {
-        val metrikker = behandlingMetrics.behandlinger.collect().first().samples
+        val metrikker =
+            behandlingMetrics.behandlinger
+                .collect()
+                .first()
+                .samples
         metrikker.filter { it.labelValues[1] == BehandlingType.FØRSTEGANGSBEHANDLING.name }.size shouldBe 4
         metrikker.filter { it.labelValues[1] == BehandlingType.REVURDERING.name }.size shouldBe 1
     }
 
     @Test
     fun `Henter riktig antall for status`() {
-        val metrikker = behandlingMetrics.behandlinger.collect().first().samples
+        val metrikker =
+            behandlingMetrics.behandlinger
+                .collect()
+                .first()
+                .samples
         metrikker.filter { it.labelValues[2] == BehandlingStatus.IVERKSATT.name }.size shouldBe 2
         metrikker.filter { it.labelValues[2] == BehandlingStatus.OPPRETTET.name }.size shouldBe 3
     }
 
     @Test
     fun `Henter riktig antall for revuderingsaarsak`() {
-        val metrikker = behandlingMetrics.behandlinger.collect().first().samples
+        val metrikker =
+            behandlingMetrics.behandlinger
+                .collect()
+                .first()
+                .samples
         metrikker.filter { it.labelValues[3] == "null" }.size shouldBe 4 // Førstegangsbehandling
         metrikker.filter { it.labelValues[3] == Revurderingaarsak.REGULERING.name }.size shouldBe 1
     }
 
     @Test
     fun `Henter riktig antall for kilde`() {
-        val metrikker = behandlingMetrics.behandlinger.collect().first().samples
+        val metrikker =
+            behandlingMetrics.behandlinger
+                .collect()
+                .first()
+                .samples
         metrikker.filter { it.labelValues[4] == Vedtaksloesning.GJENNY.name }.size shouldBe 3
         metrikker.filter { it.labelValues[4] == Vedtaksloesning.PESYS.name }.size shouldBe 2
     }
 
     @Test
     fun `Henter riktig antall for automatiskMigrert`() {
-        val metrikker = behandlingMetrics.behandlinger.collect().first().samples
+        val metrikker =
+            behandlingMetrics.behandlinger
+                .collect()
+                .first()
+                .samples
         metrikker.filter { it.labelValues[5] == "true" }.size shouldBe 1
         metrikker.filter { it.labelValues[5] == "false" }.size shouldBe 4
     }

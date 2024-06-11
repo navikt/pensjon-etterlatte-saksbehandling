@@ -100,11 +100,12 @@ private fun opprettSoeknadJson(
             SoeknadType.BARNEPENSJON
         }
 
-    return SoeknadMapper.opprettJsonMessage(
-        soeknadType,
-        gjenlevendeFnr,
-        avdoedFnr,
-        listOf(barnFnr),
-        behandlingssteg,
-    ).toJson()
+    return SoeknadMapper
+        .opprettJsonMessage(
+            soeknadType,
+            gjenlevendeFnr,
+            avdoedFnr,
+            listOf(barnFnr),
+            behandlingssteg,
+        ).toJson()
 }

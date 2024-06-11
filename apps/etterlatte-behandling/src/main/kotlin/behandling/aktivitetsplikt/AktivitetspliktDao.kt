@@ -14,9 +14,11 @@ import java.sql.ResultSet
 import java.time.LocalDate
 import java.util.UUID
 
-class AktivitetspliktDao(private val connectionAutoclosing: ConnectionAutoclosing) {
-    fun finnSenesteAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? {
-        return connectionAutoclosing.hentConnection {
+class AktivitetspliktDao(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) {
+    fun finnSenesteAktivitetspliktOppfolging(behandlingId: UUID): AktivitetspliktOppfolging? =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val stmt =
                     prepareStatement(
@@ -33,38 +35,37 @@ class AktivitetspliktDao(private val connectionAutoclosing: ConnectionAutoclosin
                         """.trimMargin(),
                     )
                 stmt.setObject(1, behandlingId)
-                stmt.executeQuery().toList {
-                    AktivitetspliktOppfolging(
-                        behandlingId = getUUID("behandling_id"),
-                        aktivitet = getString("aktivitet"),
-                        opprettet = getTidspunkt("opprettet"),
-                        opprettetAv = getString("opprettet_av"),
-                    )
-                }.firstOrNull()
+                stmt
+                    .executeQuery()
+                    .toList {
+                        AktivitetspliktOppfolging(
+                            behandlingId = getUUID("behandling_id"),
+                            aktivitet = getString("aktivitet"),
+                            opprettet = getTidspunkt("opprettet"),
+                            opprettetAv = getString("opprettet_av"),
+                        )
+                    }.firstOrNull()
             }
         }
-    }
 
     fun lagre(
         behandlingId: UUID,
         nyOppfolging: OpprettAktivitetspliktOppfolging,
         navIdent: String,
-    ) {
-        return connectionAutoclosing.hentConnection {
-            with(it) {
-                val stmt =
-                    prepareStatement(
-                        """
+    ) = connectionAutoclosing.hentConnection {
+        with(it) {
+            val stmt =
+                prepareStatement(
+                    """
             |INSERT INTO aktivitetsplikt_oppfolging(behandling_id, aktivitet, opprettet_av) 
             |VALUES (?, ?, ?)
-                        """.trimMargin(),
-                    )
-                stmt.setObject(1, behandlingId)
-                stmt.setString(2, nyOppfolging.aktivitet)
-                stmt.setString(3, navIdent)
+                    """.trimMargin(),
+                )
+            stmt.setObject(1, behandlingId)
+            stmt.setString(2, nyOppfolging.aktivitet)
+            stmt.setString(3, navIdent)
 
-                stmt.executeUpdate()
-            }
+            stmt.executeUpdate()
         }
     }
 

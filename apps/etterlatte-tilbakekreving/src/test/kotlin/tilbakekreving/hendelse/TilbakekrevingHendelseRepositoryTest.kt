@@ -11,7 +11,9 @@ import tilbakekreving.DatabaseExtension
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class TilbakekrevingHendelseRepositoryTest(private val dataSource: DataSource) {
+internal class TilbakekrevingHendelseRepositoryTest(
+    private val dataSource: DataSource,
+) {
     companion object {
         @RegisterExtension
         val dbExtension = DatabaseExtension()
@@ -81,7 +83,8 @@ internal class TilbakekrevingHendelseRepositoryTest(private val dataSource: Data
     ): TilbakekrevingHendelse? {
         dataSource.connection.use {
             val stmt =
-                it.prepareStatement("SELECT * FROM tilbakekreving_hendelse WHERE kravgrunnlag_id = ? AND type = ?")
+                it
+                    .prepareStatement("SELECT * FROM tilbakekreving_hendelse WHERE kravgrunnlag_id = ? AND type = ?")
                     .apply {
                         setString(1, kravgrunnlagId)
                         setString(2, type.name)

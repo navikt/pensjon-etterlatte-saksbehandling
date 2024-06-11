@@ -10,12 +10,12 @@ import javax.sql.DataSource
     Har vi flyter som kun bruker daoer som en vanlig sb flyt så bruker man DatabaseContext.kt i testen sin Kontekst.set
  */
 
-class DatabaseContextTest(private val ds: DataSource) : DatabaseKontekst {
+class DatabaseContextTest(
+    private val ds: DataSource,
+) : DatabaseKontekst {
     override fun activeTx(): Connection = ds.connection
 
-    override fun harIntransaction(): Boolean {
-        return true
-    }
+    override fun harIntransaction(): Boolean = true
 
     override fun <T> inTransaction(block: () -> T): T {
         // NOOPP
@@ -23,9 +23,11 @@ class DatabaseContextTest(private val ds: DataSource) : DatabaseKontekst {
     }
 }
 
-class ConnectionAutoclosingTest(val dataSource: DataSource) : ConnectionAutoclosing() {
-    override fun <T> hentConnection(block: (connection: Connection) -> T): T {
-        return if (manglerKontekst()) {
+class ConnectionAutoclosingTest(
+    val dataSource: DataSource,
+) : ConnectionAutoclosing() {
+    override fun <T> hentConnection(block: (connection: Connection) -> T): T =
+        if (manglerKontekst()) {
             dataSource.connection.use {
                 block(it)
             }
@@ -33,5 +35,4 @@ class ConnectionAutoclosingTest(val dataSource: DataSource) : ConnectionAutoclos
             val activeTx = DatabaseContextTest(dataSource).activeTx()
             block(activeTx).also { activeTx.close() }
         }
-    }
 }

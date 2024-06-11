@@ -41,7 +41,9 @@ import java.time.ZoneId
 import javax.sql.DataSource
 
 @ExtendWith(GenerellDatabaseExtension::class)
-class NotatServiceTest(dataSource: DataSource) {
+class NotatServiceTest(
+    dataSource: DataSource,
+) {
     private val brevRepository: BrevRepository = BrevRepository(dataSource)
     private val adresseService: AdresseService = mockk()
     private val brevbakerService: BrevbakerService = mockk()
@@ -141,51 +143,51 @@ class NotatServiceTest(dataSource: DataSource) {
     }
 }
 
-private fun klageForInnstilling(sakId: Long): Klage {
-    return Klage.ny(
-        sak =
-            Sak(
-                ident = SOEKER_FOEDSELSNUMMER.value,
-                sakType = SakType.BARNEPENSJON,
-                id = sakId,
-                enhet = "4808",
-            ),
-        innkommendeDokument = null,
-    ).copy(
-        utfall =
-            KlageUtfallMedData.StadfesteVedtak(
-                innstilling =
-                    InnstillingTilKabal(
-                        lovhjemmel = KabalHjemmel.FTRL_18_4,
-                        internKommentar = null,
-                        brev = KlageOversendelsebrev(brevId = 123L),
-                        innstillingTekst = "Hello",
-                    ),
-                saksbehandler =
-                    Grunnlagsopplysning.Saksbehandler(
-                        ident = "",
-                        tidspunkt = Tidspunkt.now(),
-                    ),
-            ),
-        formkrav =
-            FormkravMedBeslutter(
-                formkrav =
-                    Formkrav(
-                        vedtaketKlagenGjelder =
-                            VedtaketKlagenGjelder(
-                                id = "",
-                                behandlingId = "",
-                                datoAttestert = LocalDate.now().atStartOfDay(ZoneId.systemDefault()),
-                                vedtakType = VedtakType.INNVILGELSE,
-                            ),
-                        erKlagerPartISaken = JaNei.JA,
-                        erKlagenSignert = JaNei.JA,
-                        gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
-                        erKlagenFramsattInnenFrist = JaNei.JA,
-                        erFormkraveneOppfylt = JaNei.JA,
-                        begrunnelse = null,
-                    ),
-                saksbehandler = Grunnlagsopplysning.automatiskSaksbehandler,
-            ),
-    )
-}
+private fun klageForInnstilling(sakId: Long): Klage =
+    Klage
+        .ny(
+            sak =
+                Sak(
+                    ident = SOEKER_FOEDSELSNUMMER.value,
+                    sakType = SakType.BARNEPENSJON,
+                    id = sakId,
+                    enhet = "4808",
+                ),
+            innkommendeDokument = null,
+        ).copy(
+            utfall =
+                KlageUtfallMedData.StadfesteVedtak(
+                    innstilling =
+                        InnstillingTilKabal(
+                            lovhjemmel = KabalHjemmel.FTRL_18_4,
+                            internKommentar = null,
+                            brev = KlageOversendelsebrev(brevId = 123L),
+                            innstillingTekst = "Hello",
+                        ),
+                    saksbehandler =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "",
+                            tidspunkt = Tidspunkt.now(),
+                        ),
+                ),
+            formkrav =
+                FormkravMedBeslutter(
+                    formkrav =
+                        Formkrav(
+                            vedtaketKlagenGjelder =
+                                VedtaketKlagenGjelder(
+                                    id = "",
+                                    behandlingId = "",
+                                    datoAttestert = LocalDate.now().atStartOfDay(ZoneId.systemDefault()),
+                                    vedtakType = VedtakType.INNVILGELSE,
+                                ),
+                            erKlagerPartISaken = JaNei.JA,
+                            erKlagenSignert = JaNei.JA,
+                            gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
+                            erKlagenFramsattInnenFrist = JaNei.JA,
+                            erFormkraveneOppfylt = JaNei.JA,
+                            begrunnelse = null,
+                        ),
+                    saksbehandler = Grunnlagsopplysning.automatiskSaksbehandler,
+                ),
+        )

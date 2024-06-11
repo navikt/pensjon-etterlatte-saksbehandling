@@ -10,7 +10,9 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import java.time.LocalDate
 
-class AutomatiskRevurderingService(private val revurderingService: RevurderingService) {
+class AutomatiskRevurderingService(
+    private val revurderingService: RevurderingService,
+) {
     fun opprettAutomatiskRevurdering(
         sakId: Long,
         forrigeBehandling: Behandling,

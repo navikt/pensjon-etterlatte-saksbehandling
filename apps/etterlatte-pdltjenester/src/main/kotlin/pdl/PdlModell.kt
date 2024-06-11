@@ -70,8 +70,8 @@ data class PdlPersonResponse(
     val errors: List<PdlResponseError>? = null,
 )
 
-data class PdlPersonNavnResponse(
-    val data: PdlPersonNavnResponseData? = null,
+data class PdlPersonNavnFoedselResponse(
+    val data: PdlPersonNavnFoedselResponseData? = null,
     val errors: List<PdlResponseError>? = null,
 )
 
@@ -136,8 +136,8 @@ data class PdlPersonResponseData(
     val hentPerson: PdlHentPerson? = null,
 )
 
-data class PdlPersonNavnResponseData(
-    val hentPerson: PdlHentPersonNavn? = null,
+data class PdlPersonNavnFoedselResponseData(
+    val hentPerson: PdlHentPersonNavnFoedselsdato? = null,
 )
 
 data class PdlPersonResponseBulkData(
@@ -154,9 +154,10 @@ data class PdlHentPersonAdressebeskyttelse(
     val adressebeskyttelse: List<PdlAdressebeskyttelse>,
 )
 
-data class PdlHentPersonNavn(
+data class PdlHentPersonNavnFoedselsdato(
     val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator>,
     val navn: List<PdlNavn>,
+    val foedsel: List<PdlFoedsel>,
 )
 
 data class PdlHentPerson(
@@ -235,9 +236,7 @@ data class PdlMetadata(
     val master: String,
     val opplysningsId: String,
 ) {
-    fun sisteRegistrertDato(): LocalDateTime {
-        return endringer.maxByOrNull { it.registrert }?.registrert!!
-    }
+    fun sisteRegistrertDato(): LocalDateTime = endringer.maxByOrNull { it.registrert }?.registrert!!
 }
 
 data class PdlEndring(

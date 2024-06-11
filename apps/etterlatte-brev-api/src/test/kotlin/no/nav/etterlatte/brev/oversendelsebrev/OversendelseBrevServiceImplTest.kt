@@ -44,7 +44,9 @@ import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OversendelseBrevServiceImplTest(dataSource: DataSource) {
+class OversendelseBrevServiceImplTest(
+    dataSource: DataSource,
+) {
     val sakId = 148L
     private val behandlingId = UUID.randomUUID()
     private val saksbehandler = BrukerTokenInfo.of("token", "saksbehandler", null, null, null)
@@ -80,8 +82,8 @@ class OversendelseBrevServiceImplTest(dataSource: DataSource) {
         verify { brevRepository.settBrevSlettet(oversendelsesbrev.id, any()) }
     }
 
-    private fun klage(): Klage {
-        return Klage(
+    private fun klage(): Klage =
+        Klage(
             behandlingId,
             Sak("ident", SakType.BARNEPENSJON, sakId, "einheit"),
             Tidspunkt.now(),
@@ -95,7 +97,6 @@ class OversendelseBrevServiceImplTest(dataSource: DataSource) {
             aarsakTilAvbrytelse = null,
             initieltUtfall = null,
         )
-    }
 
     private fun brevData() =
         GenerellBrevData(

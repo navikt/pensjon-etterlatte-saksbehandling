@@ -149,7 +149,7 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
         post("/aktivitetsgrad") {
             kunSkrivetilgang {
                 logger.info("Oppretter aktivitetsgrad for sakId=$sakId og behandlingId=$behandlingId")
-                aktivitetspliktService.opprettAktivitetsgradForBehandling(
+                aktivitetspliktService.upsertAktivitetsgradForBehandling(
                     aktivitetsgrad = call.receive<LagreAktivitetspliktAktivitetsgrad>(),
                     behandlingId = behandlingId,
                     sakId = sakId,
@@ -162,7 +162,7 @@ internal fun Route.aktivitetspliktRoutes(aktivitetspliktService: Aktivitetsplikt
         post("/unntak") {
             kunSkrivetilgang {
                 logger.info("Oppretter unntak for sakId=$sakId og behandlingId=$behandlingId")
-                aktivitetspliktService.opprettUnntakForBehandling(
+                aktivitetspliktService.upsertUnntakForBehandling(
                     unntak = call.receive<LagreAktivitetspliktUnntak>(),
                     behandlingId = behandlingId,
                     sakId = sakId,

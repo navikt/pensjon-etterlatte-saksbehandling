@@ -31,21 +31,22 @@ internal class VarselbrevService(
         val sakType = behandlingKlient.hentSak(sakId, brukerTokenInfo).sakType
         val brevkode = hentBrevkode(sakType)
 
-        return brevoppretter.opprettBrev(
-            sakId = sakId,
-            behandlingId = behandlingId,
-            bruker = brukerTokenInfo,
-            brevKode = { brevkode.redigering },
-            brevtype = Brevtype.VARSEL,
-        ) {
-            BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
-                sakType,
-                brukerTokenInfo,
-                it.generellBrevData.utlandstilknytning,
-            )
-        }.let {
-            VarselbrevResponse(it.first, it.second, brevkode)
-        }
+        return brevoppretter
+            .opprettBrev(
+                sakId = sakId,
+                behandlingId = behandlingId,
+                bruker = brukerTokenInfo,
+                brevKode = { brevkode.redigering },
+                brevtype = Brevtype.VARSEL,
+            ) {
+                BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
+                    sakType,
+                    brukerTokenInfo,
+                    it.generellBrevData.utlandstilknytning,
+                )
+            }.let {
+                VarselbrevResponse(it.first, it.second, brevkode)
+            }
     }
 
     private fun hentBrevkode(sakType: SakType) =
@@ -82,4 +83,8 @@ internal class VarselbrevService(
     )
 }
 
-data class VarselbrevResponse(val brev: Brev, val generellBrevData: GenerellBrevData, val brevkoder: Brevkoder)
+data class VarselbrevResponse(
+    val brev: Brev,
+    val generellBrevData: GenerellBrevData,
+    val brevkoder: Brevkoder,
+)

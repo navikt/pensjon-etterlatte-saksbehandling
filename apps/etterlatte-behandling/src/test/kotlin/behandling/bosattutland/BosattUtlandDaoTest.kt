@@ -15,7 +15,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class BosattUtlandDaoTest(val dataSource: DataSource) {
+internal class BosattUtlandDaoTest(
+    val dataSource: DataSource,
+) {
     private lateinit var bosattUtlandDao: BosattUtlandDao
 
     @BeforeAll

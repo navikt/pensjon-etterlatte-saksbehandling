@@ -15,9 +15,12 @@ export const LovtekstMedLenke = (props: LovtekstMedLenkeProps) => {
   return (
     <VurderingWrapper>
       <VStack gap="2">
-        <HeadingMedIkon size="medium" level="2">
-          {props.status && <StatusIcon status={props.status} />} {props.tittel}
-        </HeadingMedIkon>
+        <HStack gap="6" align="center">
+          {props.status && <StatusIcon status={props.status} />}
+          <Heading size="medium" level="2">
+            {props.tittel}
+          </Heading>
+        </HStack>
         <HStack gap="4">
           {props.hjemler.map((hjemmel, idx) => (
             <HjemmelLenke key={`hjemmel-${idx}`} {...hjemmel} />
@@ -31,11 +34,6 @@ export const LovtekstMedLenke = (props: LovtekstMedLenkeProps) => {
     </VurderingWrapper>
   )
 }
-
-const HeadingMedIkon = styled(Heading)`
-  display: flex;
-  gap: 12px;
-`
 
 const VurderingWrapper = styled.div`
   margin-top: 3em;

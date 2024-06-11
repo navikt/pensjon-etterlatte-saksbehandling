@@ -14,7 +14,9 @@ import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class SanksjonRepositoryTest(ds: DataSource) {
+internal class SanksjonRepositoryTest(
+    ds: DataSource,
+) {
     private val sanksjonRepository = SanksjonRepository(ds)
     private val sakId = 123L
 

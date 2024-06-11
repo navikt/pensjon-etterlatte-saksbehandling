@@ -1,7 +1,7 @@
-import { NavLink } from 'react-router-dom'
-import { Separator } from '~components/behandling/StegMeny/NavLenke'
 import React from 'react'
-import classNames from 'classnames'
+import { Label, Link } from '@navikt/ds-react'
+import { ChevronRightIcon } from '@navikt/aksel-icons'
+import { DisabledLabel } from '~components/behandling/StegMeny/stegmeny'
 
 export const TILBAKEKREVINGSTEG = ['vurdering', 'utbetalinger', 'oppsummering', 'brev'] as const
 
@@ -18,9 +18,23 @@ export function TilbakekrevingNavLenke(props: TilbakekrevingNavLenkeProps) {
   const { path, description, enabled, separator } = props
 
   return (
-    <li className={classNames({ disabled: !enabled })}>
-      <NavLink to={path}>{description}</NavLink>
-      {separator && <Separator aria-hidden="true" />}
-    </li>
+    <>
+      {!enabled ? (
+        <DisabledLabel>{description}</DisabledLabel>
+      ) : (
+        <>
+          {location.pathname.split('/')[3] === path ? (
+            <Label>{description}</Label>
+          ) : (
+            <Label>
+              <Link href={path} underline={false}>
+                {description}
+              </Link>
+            </Label>
+          )}
+        </>
+      )}
+      {separator && <ChevronRightIcon aria-hidden />}
+    </>
   )
 }

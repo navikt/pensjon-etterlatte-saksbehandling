@@ -18,7 +18,9 @@ import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 
-class BeregningService(private val beregningKlient: BeregningKlient) {
+class BeregningService(
+    private val beregningKlient: BeregningKlient,
+) {
     suspend fun hentGrunnbeloep(bruker: BrukerTokenInfo) = beregningKlient.hentGrunnbeloep(bruker)
 
     suspend fun hentBeregning(

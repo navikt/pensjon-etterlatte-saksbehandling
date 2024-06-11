@@ -1,7 +1,6 @@
-import { Button, Heading, HStack, Modal, Select, TextField, ToggleGroup } from '@navikt/ds-react'
+import { Button, Heading, HGrid, HStack, Modal, Select, TextField, ToggleGroup, VStack } from '@navikt/ds-react'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { AdresseType, IBrev, Mottaker } from '~shared/types/Brev'
-import styled, { css } from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterMottaker } from '~shared/api/brev'
 import { isPending, Result } from '~shared/api/apiUtils'
@@ -74,18 +73,17 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
       <form onSubmit={handleSubmit((data) => lagre(data))}>
         <Modal open={isOpen} onClose={avbryt} width="medium" aria-label="Endre mottaker">
           <Modal.Body>
-            <Heading size="large" spacing>
-              Endre mottaker
-            </Heading>
+            <VStack gap="4">
+              <Heading size="large" spacing>
+                Endre mottaker
+              </Heading>
 
-            <VergeadressePanel vergeadresseResult={vergeadresse} />
+              <VergeadressePanel vergeadresseResult={vergeadresse} />
 
-            <SkjemaGruppe>
               <ToggleGroup
                 defaultValue={mottakerType}
                 onChange={(value) => setMottakerType(value as MottakerType)}
                 size="small"
-                style={{ marginBottom: '1rem' }}
               >
                 <ToggleGroup.Item value={MottakerType.PRIVATPERSON}>Privatperson</ToggleGroup.Item>
                 <ToggleGroup.Item value={MottakerType.BEDRIFT}>Bedrift</ToggleGroup.Item>
@@ -123,9 +121,7 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
                   error={errors?.foedselsnummer?.value?.message}
                 />
               )}
-            </SkjemaGruppe>
 
-            <SkjemaGruppe>
               <TextField
                 {...register('navn', {
                   required: {
@@ -136,9 +132,7 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
                 label="Navn"
                 error={errors?.navn?.message}
               />
-            </SkjemaGruppe>
 
-            <SkjemaGruppe>
               <Controller
                 control={control}
                 name="adresse.adresseType"
@@ -156,9 +150,7 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
                   </Select>
                 )}
               />
-            </SkjemaGruppe>
 
-            <SkjemaGruppe>
               <TextField
                 {...register('adresse.adresselinje1', {
                   required: {
@@ -171,99 +163,77 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
               />
               <TextField {...register('adresse.adresselinje2')} label="Adresselinje 2" />
               <TextField {...register('adresse.adresselinje3')} label="Adresselinje 3" />
-            </SkjemaGruppe>
 
-            <SkjemaGruppe $inline>
-              <TextField
-                {...register('adresse.postnummer', {
-                  required: {
-                    value: erNorskAdresse,
-                    message: 'Postnummer må være satt på norsk adresse',
-                  },
-                  pattern: erNorskAdresse
-                    ? {
-                        value: /^\d{4}$/,
-                        message: 'Ugyldig tegn i postnummeret. Norske postnummer kan kun bestå av fire siffer.',
-                      }
-                    : undefined,
-                })}
-                label="Postnummer"
-                error={errors?.adresse?.postnummer?.message}
-              />
-              <TextField
-                {...register('adresse.poststed', {
-                  required: {
-                    value: erNorskAdresse,
-                    message: 'Poststed må være satt på norsk adresse',
-                  },
-                })}
-                label="Poststed"
-                error={errors?.adresse?.poststed?.message}
-              />
-            </SkjemaGruppe>
+              <HGrid columns={2} gap="4 4">
+                <TextField
+                  {...register('adresse.postnummer', {
+                    required: {
+                      value: erNorskAdresse,
+                      message: 'Postnummer må være satt på norsk adresse',
+                    },
+                    pattern: erNorskAdresse
+                      ? {
+                          value: /^\d{4}$/,
+                          message: 'Ugyldig tegn i postnummeret. Norske postnummer kan kun bestå av fire siffer.',
+                        }
+                      : undefined,
+                  })}
+                  label="Postnummer"
+                  error={errors?.adresse?.postnummer?.message}
+                />
+                <TextField
+                  {...register('adresse.poststed', {
+                    required: {
+                      value: erNorskAdresse,
+                      message: 'Poststed må være satt på norsk adresse',
+                    },
+                  })}
+                  label="Poststed"
+                  error={errors?.adresse?.poststed?.message}
+                />
 
-            <SkjemaGruppe $inline>
-              <TextField
-                {...register('adresse.landkode', {
-                  required: {
-                    value: true,
-                    message: 'Landkode må være satt (2 tegn)',
-                  },
-                  pattern: {
-                    value: /^[A-Z]{2}$/,
-                    message: 'Ugyldig tegn i landkoden. Landkode skal kun bestå av 2 store bokstaver (eks. NO)',
-                  },
-                })}
-                label="Landkode"
-                error={errors?.adresse?.landkode?.message}
-              />
-              <TextField
-                {...register('adresse.land', {
-                  required: {
-                    value: true,
-                    message: 'Land må være satt',
-                  },
-                })}
-                label="Land"
-                error={errors?.adresse?.land?.message}
-              />
-            </SkjemaGruppe>
+                <TextField
+                  {...register('adresse.landkode', {
+                    required: {
+                      value: true,
+                      message: 'Landkode må være satt (2 tegn)',
+                    },
+                    pattern: {
+                      value: /^[A-Z]{2}$/,
+                      message: 'Ugyldig tegn i landkoden. Landkode skal kun bestå av 2 store bokstaver (eks. NO)',
+                    },
+                  })}
+                  label="Landkode"
+                  error={errors?.adresse?.landkode?.message}
+                />
+                <TextField
+                  {...register('adresse.land', {
+                    required: {
+                      value: true,
+                      message: 'Land må være satt',
+                    },
+                  })}
+                  label="Land"
+                  error={errors?.adresse?.land?.message}
+                />
+              </HGrid>
+              {isFailureHandler({
+                apiResult: mottakerStatus,
+                errorMessage: 'Kunne ikke oppdatere mottaker.',
+              })}
 
-            {isFailureHandler({
-              apiResult: mottakerStatus,
-              errorMessage: 'Kunne ikke oppdatere mottaker.',
-            })}
-
-            <HStack gap="4" justify="end">
-              <Button variant="secondary" type="button" disabled={isPending(mottakerStatus)} onClick={avbryt}>
-                Avbryt
-              </Button>
-              <Button variant="primary" type="submit" loading={isPending(mottakerStatus)}>
-                Lagre
-              </Button>
-            </HStack>
+              <HStack gap="4" justify="end">
+                <Button variant="secondary" type="button" disabled={isPending(mottakerStatus)} onClick={avbryt}>
+                  Avbryt
+                </Button>
+                <Button variant="primary" type="submit" loading={isPending(mottakerStatus)}>
+                  Lagre
+                </Button>
+              </HStack>
+            </VStack>
           </Modal.Body>
         </Modal>
       </form>
     </>
   )
 }
-
-const SkjemaGruppe = styled.div<{ $inline?: boolean }>`
-  & > * {
-    margin-bottom: 1rem;
-  }
-
-  ${(props) => {
-    if (props.$inline)
-      return css`
-        display: flex;
-        flex-direction: row;
-        gap: 1rem;
-
-        & > * {
-          flex: 1;
-        }
-      `
-  }};
-`

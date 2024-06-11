@@ -17,7 +17,8 @@ class Norg2Klient(
     private val logger = LoggerFactory.getLogger(Norg2Klient::class.java)
 
     private val cache =
-        Caffeine.newBuilder()
+        Caffeine
+            .newBuilder()
             .expireAfterWrite(Duration.ofDays(1))
             .build<String, Norg2Enhet>()
 
@@ -35,7 +36,8 @@ class Norg2Klient(
             if (response.status.isSuccess()) {
                 logger.info("Hentet enhet fra Norg2 for enhet $enhet")
 
-                response.body<Norg2Enhet>()
+                response
+                    .body<Norg2Enhet>()
                     .apply { kontaktinfo = hentKontaktinformasjon(enhet) }
                     .also { cache.put(enhet, it) }
             } else {

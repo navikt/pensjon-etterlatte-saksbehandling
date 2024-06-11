@@ -45,21 +45,20 @@ data class DoedshendelseInternal internal constructor(
     fun tilOppdatert(
         avdoedDoedsdato: LocalDate,
         endringstype: Endringstype,
-    ): DoedshendelseInternal {
-        return copy(
+    ): DoedshendelseInternal =
+        copy(
             avdoedDoedsdato = avdoedDoedsdato,
             status = Status.OPPDATERT,
             endret = endret,
             endringstype = endringstype,
         )
-    }
 
     fun tilAvbrutt(
         sakId: Long? = null,
         oppgaveId: UUID? = null,
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
-    ): DoedshendelseInternal {
-        return copy(
+    ): DoedshendelseInternal =
+        copy(
             sakId = sakId,
             oppgaveId = oppgaveId,
             kontrollpunkter = kontrollpunkter,
@@ -67,17 +66,15 @@ data class DoedshendelseInternal internal constructor(
             utfall = Utfall.AVBRUTT,
             endret = Tidspunkt.now(),
         )
-    }
 
-    fun tilAnnulert(): DoedshendelseInternal {
-        return copy(
+    fun tilAnnulert(): DoedshendelseInternal =
+        copy(
             status = Status.FERDIG,
             utfall = Utfall.AVBRUTT,
             endret = Tidspunkt.now(),
             endringstype = Endringstype.ANNULLERT,
             kontrollpunkter = listOf(DoedshendelseKontrollpunkt.DoedshendelseErAnnullert),
         )
-    }
 
     fun tilBehandlet(
         utfall: Utfall,
@@ -85,8 +82,8 @@ data class DoedshendelseInternal internal constructor(
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
         oppgaveId: UUID? = null,
         brevId: Long? = null,
-    ): DoedshendelseInternal {
-        return copy(
+    ): DoedshendelseInternal =
+        copy(
             status = Status.FERDIG,
             utfall = utfall,
             sakId = sakId,
@@ -95,7 +92,6 @@ data class DoedshendelseInternal internal constructor(
             brevId = brevId,
             endret = Tidspunkt.now(),
         )
-    }
 
     fun sakTypeForEpsEllerBarn(): SakType =
         when (relasjon) {

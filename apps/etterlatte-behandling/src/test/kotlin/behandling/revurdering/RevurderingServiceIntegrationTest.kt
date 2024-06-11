@@ -799,7 +799,8 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     saksbehandler = saksbehandler,
                 )
                 applicationContext.klageService.ferdigstillKlage(klageId = klage.id, saksbehandler = saksbehandler)
-                applicationContext.oppgaveService.hentOppgaverForSak(sak.id)
+                applicationContext.oppgaveService
+                    .hentOppgaverForSak(sak.id)
                     .first { it.type == OppgaveType.OMGJOERING }
             }
         inTransaction {

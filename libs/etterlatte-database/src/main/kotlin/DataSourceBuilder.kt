@@ -51,11 +51,12 @@ object DataSourceBuilder {
     }
 }
 
-fun DataSource.migrate(): MigrateResult {
+fun DataSource.migrate(processExiter: () -> Unit = { exitProcess(1) }): MigrateResult {
     val logger = LoggerFactory.getLogger(this::class.java)
     try {
         validateUniqueMigrationVersions(logger)
-        return Flyway.configure()
+        return Flyway
+            .configure()
             .dataSource(this)
             .apply {
                 val dblocationsMiljoe = mutableListOf("db/migration")
@@ -69,12 +70,12 @@ fun DataSource.migrate(): MigrateResult {
                     dblocationsMiljoe.add("db/prod")
                 }
                 locations(*dblocationsMiljoe.toTypedArray())
-            }
-            .load()
+            }.load()
             .migrate()
     } catch (e: InvalidMigrationScriptVersion) {
         logger.error("Ugyldig versjon på migreringsscript", e)
-        exitProcess(1)
+        processExiter()
+        throw e // Vil berre slå til under test, i prod-kode vil processExiter-kallet gjera exitProcess
     } catch (e: Exception) {
         logger.error("Fikk feil under Flyway-migrering", e)
         throw e
@@ -138,9 +139,10 @@ private fun readResources(logger: Logger): List<String> {
         val files =
             File(resourceFolderURL.file).listFiles()
                 ?: throw RuntimeException("Fant ingen filer i $resourceFolderURL listfiles er null")
-        files.map { dir ->
-            dir.listFiles()?.toList()?.map { it.path } ?: emptyList()
-        }.flatten()
+        files
+            .map { dir ->
+                dir.listFiles()?.toList()?.map { it.path } ?: emptyList()
+            }.flatten()
     }
 }
 
@@ -171,6 +173,9 @@ fun jdbcUrl(
     databaseName: String,
 ): String = "jdbc:postgresql://$host:$port/$databaseName"
 
-class InvalidMigrationScriptVersion(versjon: String, antall: Int) : RuntimeException(
-    "Kan ikke ha flere migreringer med samme versjon! Sjekk alle mapper under /resources/db. Versjon: $versjon, Antall: $antall",
-)
+class InvalidMigrationScriptVersion(
+    versjon: String,
+    antall: Int,
+) : RuntimeException(
+        "Kan ikke ha flere migreringer med samme versjon! Sjekk alle mapper under /resources/db. Versjon: $versjon, Antall: $antall",
+    )

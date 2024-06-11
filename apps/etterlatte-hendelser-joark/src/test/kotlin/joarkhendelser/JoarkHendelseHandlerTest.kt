@@ -454,8 +454,8 @@ internal class JoarkHendelseHandlerTest {
         hendelsesType: String = HendelseType.JOURNALPOST_MOTTATT,
         journalpostStatus: String = JournalpostStatus.MOTTATT,
         temaGammelt: String? = null,
-    ): JournalfoeringHendelseRecord {
-        return JournalfoeringHendelseRecord(
+    ): JournalfoeringHendelseRecord =
+        JournalfoeringHendelseRecord(
             UUID.randomUUID().toString(),
             1,
             hendelsesType,
@@ -467,7 +467,6 @@ internal class JoarkHendelseHandlerTest {
             "kanalReferanseId",
             "behandlingstema",
         )
-    }
 
     private fun opprettJournalpost(
         journalpostId: Long,

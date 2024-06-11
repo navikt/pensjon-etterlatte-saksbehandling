@@ -35,8 +35,7 @@ object BarnekullMapper {
                 ?.filter {
                     it.relatertPersonsRolle == PdlForelderBarnRelasjonRolle.BARN &&
                         it.relatertPersonsIdent != null
-                }
-                ?.map { it.relatertPersonsIdent }
+                }?.map { it.relatertPersonsIdent }
                 ?.distinct()
                 ?.map { Folkeregisteridentifikator.of(it) }
 
@@ -45,8 +44,7 @@ object BarnekullMapper {
                 ?.filter {
                     it.relatertPersonsRolle == PdlForelderBarnRelasjonRolle.BARN &&
                         it.relatertPersonUtenFolkeregisteridentifikator != null
-                }
-                ?.map {
+                }?.map {
                     PersonUtenIdent(
                         RelativPersonrolle.BARN,
                         it.relatertPersonUtenFolkeregisteridentifikator!!.tilRelatertPerson(),
@@ -82,30 +80,32 @@ object BarnekullMapper {
                 ?.filter {
                     it.relatertPersonsRolle == PdlForelderBarnRelasjonRolle.BARN &&
                         it.relatertPersonsIdent != null
-                }
-                ?.map { it.relatertPersonsIdent }
+                }?.map { it.relatertPersonsIdent }
                 ?.distinct()
                 ?.map { Folkeregisteridentifikator.of(it) }
 
         val personer =
             barnFnr?.let { fnr ->
                 fnr.map { ident ->
-                    pdlOboKlient.hentPerson(
-                        ident,
-                        PersonRolle.TILKNYTTET_BARN,
-                        bruker = brukerTokenInfo,
-                        sakType = sakType,
-                    ).data?.hentPerson?.let {
-                        PersonMapper.mapFamiliemedlem(
-                            ppsKlient,
-                            pdlOboKlient,
-                            it,
+                    pdlOboKlient
+                        .hentPerson(
                             ident,
-                            sakType,
-                            brukerTokenInfo = brukerTokenInfo,
                             PersonRolle.TILKNYTTET_BARN,
-                        )
-                    }
+                            bruker = brukerTokenInfo,
+                            sakType = sakType,
+                        ).data
+                        ?.hentPerson
+                        ?.let {
+                            PersonMapper.mapFamiliemedlem(
+                                ppsKlient,
+                                pdlOboKlient,
+                                it,
+                                ident,
+                                sakType,
+                                brukerTokenInfo = brukerTokenInfo,
+                                PersonRolle.TILKNYTTET_BARN,
+                            )
+                        }
                 }
             }
 

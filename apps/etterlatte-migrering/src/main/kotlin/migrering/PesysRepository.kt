@@ -20,12 +20,13 @@ data class Pesyskopling(
     val sakId: Long,
 )
 
-internal class PesysRepository(private val dataSource: DataSource) : Transactions<PesysRepository> {
-    override fun <R> inTransaction(block: PesysRepository.(TransactionalSession) -> R): R {
-        return dataSource.transaction {
+internal class PesysRepository(
+    private val dataSource: DataSource,
+) : Transactions<PesysRepository> {
+    override fun <R> inTransaction(block: PesysRepository.(TransactionalSession) -> R): R =
+        dataSource.transaction {
             this.block(it)
         }
-    }
 
     fun lagreManuellMigrering(
         pesysId: Long,

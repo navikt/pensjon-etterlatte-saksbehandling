@@ -39,7 +39,7 @@ class Vedtakstidslinje(
 
     private fun hentSenesteVedtakSomKanLoepePaaDato(dato: LocalDate): Vedtak? =
         iverksatteVedtak
-            .filter { it.type.kanLoepe }
+            .filter { it.type.vanligBehandling }
             .filter {
                 it.virkningstidspunkt
                     .atDay(1)
@@ -47,10 +47,10 @@ class Vedtakstidslinje(
                     .not()
             }.maxByOrNull { it.attestasjon?.tidspunkt!! }
             ?.let { senesteVedtak ->
-                return if (senesteVedtak.opphoerFraOgMed != null && senesteVedtak.opphoerFraOgMed!!.atDay(1) >= dato) {
-                    null
-                } else {
+                return if (senesteVedtak.opphoerFraOgMed == null || senesteVedtak.opphoerFraOgMed!!.atDay(1) > dato) {
                     senesteVedtak
+                } else {
+                    null
                 }
             }
 

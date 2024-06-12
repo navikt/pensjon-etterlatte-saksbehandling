@@ -31,7 +31,9 @@ object VedtakOgBeregningSammenligner {
     ) {
         val innhold = vedtak.innhold as VedtakInnhold.Behandling
         val perioder = innhold.utbetalingsperioder
-        check(perioder.size == beregning.beregning.beregningsperioder.size)
+        check(perioder.size == beregning.beregning.beregningsperioder.size) {
+            "Forventa like mange perioder i vedtak som i beregning for vedtak ${vedtak.id} i sak ${vedtak.sakId}"
+        }
         for (i in perioder.indices) {
             val periode = perioder[i]
             val beregningsperiode = beregning.beregning.beregningsperioder[i]

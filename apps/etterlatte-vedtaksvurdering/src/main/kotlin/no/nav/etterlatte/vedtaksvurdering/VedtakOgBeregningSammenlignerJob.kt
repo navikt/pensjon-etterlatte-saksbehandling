@@ -71,11 +71,13 @@ class VedtakOgBeregningSammenlignerJob(
                 logger.warn(
                     "Mismatch mellom perioder for utbetaling og beregning " +
                         "for vedtak ${vedtak.id} i sak ${vedtak.sakId}",
+                    e,
                 )
             } catch (e: Exception) {
                 logger.error(
                     "Klarte ikke å sjekke match mellom perioder for utbetaling og beregning " +
                         "for vedtak ${vedtak.id} i sak ${vedtak.sakId}",
+                    e,
                 )
             }
         }

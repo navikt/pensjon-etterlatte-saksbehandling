@@ -169,7 +169,9 @@ internal class AvkortingTest {
         @Test
         fun `Skal kopiere tidligere inntekt men erstatte id`() {
             with(nyAvkorting) {
-                aarsoppgjoer.single().inntektsavkorting.asClue {
+                val aarsoppgjoer = aarsoppgjoer.single()
+                aarsoppgjoer.id shouldNotBe eksisterendeAvkorting.aarsoppgjoer.single().id
+                aarsoppgjoer.inntektsavkorting.asClue {
                     it.size shouldBe 2
                     it[0].grunnlag.id shouldNotBe
                         eksisterendeAvkorting.aarsoppgjoer

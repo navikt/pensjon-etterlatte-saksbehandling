@@ -45,7 +45,6 @@ data class Avkorting(
             avkortetYtelseForrigeVedtak =
                 forrigeAvkorting?.aarsoppgjoer?.single()?.avkortetYtelseAar
                     ?: emptyList(),
-            // TODO
         )
 
 	/*
@@ -56,6 +55,7 @@ data class Avkorting(
             aarsoppgjoer =
                 aarsoppgjoer.map {
                     it.copy(
+                        id = UUID.randomUUID(),
                         inntektsavkorting =
                             it.inntektsavkorting.map { inntektsavkorting ->
                                 inntektsavkorting.copy(grunnlag = inntektsavkorting.grunnlag.copy(id = UUID.randomUUID()))

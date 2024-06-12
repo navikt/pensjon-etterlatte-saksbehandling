@@ -105,7 +105,9 @@ interface OppgaveDao {
     ): List<OppgaveIntern>
 }
 
-class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) : OppgaveDao {
+class OppgaveDaoImpl(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) : OppgaveDao {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun opprettOppgave(oppgaveIntern: OppgaveIntern) {
@@ -137,8 +139,8 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
         }
     }
 
-    override fun hentOppgave(oppgaveId: UUID): OppgaveIntern? {
-        return connectionAutoclosing.hentConnection {
+    override fun hentOppgave(oppgaveId: UUID): OppgaveIntern? =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -154,10 +156,9 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 }
             }
         }
-    }
 
-    override fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> {
-        return connectionAutoclosing.hentConnection {
+    override fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -168,17 +169,18 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                         """.trimIndent(),
                     )
                 statement.setString(1, referanse)
-                statement.executeQuery().toList {
-                    asOppgave()
-                }.also { oppgaver ->
-                    logger.info("Hentet ${oppgaver.size} oppgave(r) for referanse: $referanse")
-                }
+                statement
+                    .executeQuery()
+                    .toList {
+                        asOppgave()
+                    }.also { oppgaver ->
+                        logger.info("Hentet ${oppgaver.size} oppgave(r) for referanse: $referanse")
+                    }
             }
         }
-    }
 
-    override fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> {
-        return connectionAutoclosing.hentConnection {
+    override fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -189,21 +191,22 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                         """.trimIndent(),
                     )
                 statement.setLong(1, sakId)
-                statement.executeQuery().toList {
-                    asOppgave()
-                }.also { oppgaveliste ->
-                    logger.info("Hentet antall nye oppgaver for sak: ${oppgaveliste.size} sak: $sakId")
-                }
+                statement
+                    .executeQuery()
+                    .toList {
+                        asOppgave()
+                    }.also { oppgaveliste ->
+                        logger.info("Hentet antall nye oppgaver for sak: ${oppgaveliste.size} sak: $sakId")
+                    }
             }
         }
-    }
 
     override fun hentOppgaver(
         enheter: List<String>,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String?,
-    ): List<OppgaveIntern> {
-        return connectionAutoclosing.hentConnection {
+    ): List<OppgaveIntern> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -228,20 +231,21 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setBoolean(6, minOppgavelisteIdentFilter == null)
                 statement.setString(7, minOppgavelisteIdentFilter)
 
-                statement.executeQuery().toList {
-                    asOppgave()
-                }.also { oppgaveliste ->
-                    logger.info("Hentet antall nye oppgaver: ${oppgaveliste.size}")
-                }
+                statement
+                    .executeQuery()
+                    .toList {
+                        asOppgave()
+                    }.also { oppgaveliste ->
+                        logger.info("Hentet antall nye oppgaver: ${oppgaveliste.size}")
+                    }
             }
         }
-    }
 
     override fun hentOppgaverTilSaker(
         saker: List<Long>,
         oppgaveStatuser: List<String>,
-    ): List<OppgaveIntern> {
-        return connectionAutoclosing.hentConnection {
+    ): List<OppgaveIntern> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -257,17 +261,18 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setArray(2, createArrayOf("text", oppgaveStatuser.toTypedArray()))
                 statement.setArray(3, createArrayOf("bigint", saker.toTypedArray()))
 
-                statement.executeQuery().toList {
-                    asOppgave()
-                }.also { oppgaveliste ->
-                    logger.info("Hentet antall nye oppgaver: ${oppgaveliste.size}")
-                }
+                statement
+                    .executeQuery()
+                    .toList {
+                        asOppgave()
+                    }.also { oppgaveliste ->
+                        logger.info("Hentet antall nye oppgaver: ${oppgaveliste.size}")
+                    }
             }
         }
-    }
 
-    override fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats {
-        return connectionAutoclosing.hentConnection {
+    override fun hentAntallOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -281,17 +286,19 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
 
                 statement.setString(1, innloggetSaksbehandlerIdent)
 
-                statement.executeQuery().singleOrNull {
-                    OppgavebenkStats(getLong("antallOppgavelistaOppgaver"), getLong("antallMinOppgavelisteOppgaver"))
-                }!!.also {
-                    logger.info("Henter antall oppgaver")
-                }
+                statement
+                    .executeQuery()
+                    .singleOrNull {
+                        OppgavebenkStats(getLong("antallOppgavelistaOppgaver"), getLong("antallMinOppgavelisteOppgaver"))
+                    }!!
+                    .also {
+                        logger.info("Henter antall oppgaver")
+                    }
             }
         }
-    }
 
-    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(): List<OppgaveIntern> {
-        return connectionAutoclosing.hentConnection {
+    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(): List<OppgaveIntern> =
+        connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
@@ -304,14 +311,15 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setString(1, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
                 statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
 
-                statement.executeQuery().toList {
-                    asOppgave()
-                }.also { oppgaveliste ->
-                    logger.info("Hentet antall nye oppgaver: ${oppgaveliste.size}")
-                }
+                statement
+                    .executeQuery()
+                    .toList {
+                        asOppgave()
+                    }.also { oppgaveliste ->
+                        logger.info("Hentet antall nye oppgaver: ${oppgaveliste.size}")
+                    }
             }
         }
-    }
 
     override fun settNySaksbehandler(
         oppgaveId: UUID,
@@ -578,22 +586,24 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setArray(2, createArrayOf("text", type.map { i -> i.name }.toTypedArray()))
                 statement.setArray(3, createArrayOf("text", kilde.map { i -> i.name }.toTypedArray()))
                 statement.setInt(4, grense)
-                statement.executeQuery().toList {
-                    VentefristGaarUt(
-                        oppgaveId = getUUID("id"),
-                        sakId = getLong("sak_id"),
-                        referanse = getString("referanse"),
-                        oppgavekilde = OppgaveKilde.valueOf(getString("kilde")),
-                        merknad = getString("merknad"),
-                    )
-                }.also { utgaatte ->
-                    logger.info("Hentet ${utgaatte.size} oppgaver der fristen går ut for dato $dato og type $type")
-                }.filter { oppgave -> oppgaver.isEmpty() || oppgaver.contains(oppgave.oppgaveId) }
+                statement
+                    .executeQuery()
+                    .toList {
+                        VentefristGaarUt(
+                            oppgaveId = getUUID("id"),
+                            sakId = getLong("sak_id"),
+                            referanse = getString("referanse"),
+                            oppgavekilde = OppgaveKilde.valueOf(getString("kilde")),
+                            merknad = getString("merknad"),
+                        )
+                    }.also { utgaatte ->
+                        logger.info("Hentet ${utgaatte.size} oppgaver der fristen går ut for dato $dato og type $type")
+                    }.filter { oppgave -> oppgaver.isEmpty() || oppgaver.contains(oppgave.oppgaveId) }
             }
         }
 
-    private fun ResultSet.asOppgave(): OppgaveIntern {
-        return OppgaveIntern(
+    private fun ResultSet.asOppgave(): OppgaveIntern =
+        OppgaveIntern(
             id = getObject("id") as UUID,
             status = Status.valueOf(getString("status")),
             enhet = getString("enhet"),
@@ -612,5 +622,4 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 },
             forrigeSaksbehandlerIdent = getString("forrige_saksbehandler"),
         )
-    }
 }

@@ -292,7 +292,9 @@ fun Route.vilkaarsvurdering(
     }
 }
 
-data class StatusOppdatertDto(val statusOppdatert: Boolean)
+data class StatusOppdatertDto(
+    val statusOppdatert: Boolean,
+)
 
 private fun VurdertVilkaarDto.toVurdertVilkaar(saksbehandler: String) =
     VurdertVilkaar(
@@ -337,8 +339,8 @@ fun toDto(
 private suspend fun PipelineContext<Unit, ApplicationCall>.behandlingGrunnlagVersjon(
     vilkaarsvurderingService: VilkaarsvurderingService,
     behandlingId: UUID,
-): Long {
-    return vilkaarsvurderingService.hentBehandlingensGrunnlag(behandlingId, brukerTokenInfo)
+): Long =
+    vilkaarsvurderingService
+        .hentBehandlingensGrunnlag(behandlingId, brukerTokenInfo)
         .metadata
         .versjon
-}

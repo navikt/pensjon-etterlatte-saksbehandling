@@ -14,36 +14,42 @@ class BehandlingMetrics(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     val oppgaver by lazy {
-        Gauge.build("etterlatte_oppgaver", "Antall oppgaver")
+        Gauge
+            .build("etterlatte_oppgaver", "Antall oppgaver")
             .labelNames("status", "enhet", "saktype")
             .register(registry)
     }
 
     val saksbehandler by lazy {
-        Gauge.build("etterlatte_oppgaver_saksbehandler", "Antall saksbehandlere per enhet")
+        Gauge
+            .build("etterlatte_oppgaver_saksbehandler", "Antall saksbehandlere per enhet")
             .labelNames("enhet")
             .register(registry)
     }
 
     val behandlinger by lazy {
-        Gauge.build("etterlatte_behandlinger", "Antall behandlinger")
+        Gauge
+            .build("etterlatte_behandlinger", "Antall behandlinger")
             .labelNames("saktype", "behandlingstype", "status", "revurdering_aarsak", "kilde", "automatiskMigrering")
             .register(registry)
     }
 
     val gjenopprettinger by lazy {
-        Gauge.build("etterlatte_gjenopprettinger", "Antall gjenopprettinger")
+        Gauge
+            .build("etterlatte_gjenopprettinger", "Antall gjenopprettinger")
             .labelNames("automatisk", "status", "type", "enhet")
             .register(registry)
     }
 
     val avbruttGrunnetSoeknad by lazy {
-        Gauge.build("etterlatte_gjenopprettinger_soeknad", "Antall gjenopprettinger avbrutt på grunn av søknad")
+        Gauge
+            .build("etterlatte_gjenopprettinger_soeknad", "Antall gjenopprettinger avbrutt på grunn av søknad")
             .register(registry)
     }
 
     val iverksattUtenOpphoerOver20 by lazy {
-        Gauge.build("etterlatte_gjenopprettinger_over_20", "Alle iverksatte saker med søker over 20 uten opphør")
+        Gauge
+            .build("etterlatte_gjenopprettinger_over_20", "Alle iverksatte saker med søker over 20 uten opphør")
             .register(registry)
     }
 
@@ -58,14 +64,15 @@ class BehandlingMetrics(
         }
 
         behandlingerMetrikkerDao.hent().forEach {
-            behandlinger.labels(
-                it.saktype.name,
-                it.behandlingstype.name,
-                it.status.name,
-                it.revurderingsaarsak?.name ?: "null",
-                it.kilde.name,
-                it.automatiskMigrering,
-            ).set(it.antall.toDouble())
+            behandlinger
+                .labels(
+                    it.saktype.name,
+                    it.behandlingstype.name,
+                    it.status.name,
+                    it.revurderingsaarsak?.name ?: "null",
+                    it.kilde.name,
+                    it.automatiskMigrering,
+                ).set(it.antall.toDouble())
         }
 
         gjenopprettingDao.gjenopprettinger().forEach {

@@ -12,7 +12,9 @@ import java.sql.ResultSet
 import java.time.LocalDate
 import java.util.UUID
 
-class AktivitetspliktUnntakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
+class AktivitetspliktUnntakDao(
+    private val connectionAutoclosing: ConnectionAutoclosing,
+) {
     fun opprettUnntak(
         unntak: LagreAktivitetspliktUnntak,
         sakId: Long,

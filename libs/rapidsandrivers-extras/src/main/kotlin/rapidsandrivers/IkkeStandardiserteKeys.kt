@@ -59,7 +59,10 @@ var JsonMessage.oppgaveId: UUID
 
 var JsonMessage.tilbakestilteBehandlinger: List<UUID>
     get() =
-        this[TILBAKESTILTE_BEHANDLINGER_KEY].asText().trim().split(";")
+        this[TILBAKESTILTE_BEHANDLINGER_KEY]
+            .asText()
+            .trim()
+            .split(";")
             .filter { it.isNotEmpty() }
             .map { UUID.fromString(it) }
     set(name) {
@@ -68,7 +71,10 @@ var JsonMessage.tilbakestilteBehandlinger: List<UUID>
 
 var JsonMessage.aapneBehandlinger: List<UUID>
     get() =
-        this[AAPNE_BEHANDLINGER_KEY].asText().trim().split(";")
+        this[AAPNE_BEHANDLINGER_KEY]
+            .asText()
+            .trim()
+            .split(";")
             .filter { it.isNotEmpty() }
             .map { UUID.fromString(it) }
     set(name) {

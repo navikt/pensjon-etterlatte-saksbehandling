@@ -4,19 +4,34 @@ import no.nav.etterlatte.libs.common.UUID30
 import java.math.BigDecimal
 import java.time.YearMonth
 
-data class KravgrunnlagId(val value: Long)
+data class KravgrunnlagId(
+    val value: Long,
+)
 
-data class SakId(val value: Long)
+data class SakId(
+    val value: Long,
+)
 
-data class VedtakId(val value: Long)
+data class VedtakId(
+    val value: Long,
+)
 
-data class Kontrollfelt(val value: String)
+data class Kontrollfelt(
+    val value: String,
+)
 
-data class NavIdent(val value: String)
+data class NavIdent(
+    val value: String,
+)
 
-data class KlasseKode(val value: String)
+data class KlasseKode(
+    val value: String,
+)
 
-data class Periode(val fraOgMed: YearMonth, val tilOgMed: YearMonth)
+data class Periode(
+    val fraOgMed: YearMonth,
+    val tilOgMed: YearMonth,
+)
 
 enum class KravgrunnlagStatus { ANNU, ANOM, AVSL, BEHA, ENDR, FEIL, MANU, NY, SPER }
 

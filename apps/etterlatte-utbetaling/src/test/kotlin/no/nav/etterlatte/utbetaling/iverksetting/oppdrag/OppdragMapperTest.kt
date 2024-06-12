@@ -21,7 +21,12 @@ internal class OppdragMapperTest {
                 erGRegulering = false,
             )
         assertEquals(oppdrag.oppdrag110.kodeFagomraade, "BARNEPE")
-        assertEquals(oppdrag.oppdrag110.oppdragsLinje150.first().kodeKlassifik, "BARNEPENSJON-OPTP")
+        assertEquals(
+            oppdrag.oppdrag110.oppdragsLinje150
+                .first()
+                .kodeKlassifik,
+            "BARNEPENSJON-OPTP",
+        )
     }
 
     @Test
@@ -33,7 +38,12 @@ internal class OppdragMapperTest {
                 erGRegulering = false,
             )
         assertEquals(oppdrag.oppdrag110.kodeFagomraade, "OMSTILL")
-        assertEquals(oppdrag.oppdrag110.oppdragsLinje150.first().kodeKlassifik, "OMSTILLINGOR")
+        assertEquals(
+            oppdrag.oppdrag110.oppdragsLinje150
+                .first()
+                .kodeKlassifik,
+            "OMSTILLINGOR",
+        )
     }
 
     @Nested

@@ -57,7 +57,9 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class VilkaarsvurderingServiceTest(private val ds: DataSource) {
+internal class VilkaarsvurderingServiceTest(
+    private val ds: DataSource,
+) {
     companion object {
         @RegisterExtension
         val dbExtension = DatabaseExtension()
@@ -140,7 +142,8 @@ internal class VilkaarsvurderingServiceTest(private val ds: DataSource) {
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 every { soeker } returns "10095512345"
                 every { virkningstidspunkt } returns
-                    VirkningstidspunktTestData.virkningstidsunkt()
+                    VirkningstidspunktTestData
+                        .virkningstidsunkt()
                         .copy(dato = YearMonth.of(2024, 1))
                 every { revurderingsaarsak } returns null
             }
@@ -763,8 +766,9 @@ internal class VilkaarsvurderingServiceTest(private val ds: DataSource) {
         )
     }
 
-    private fun ikkeGjeldendeVilkaar(): List<Vilkaar> {
-        return BarnepensjonVilkaar2024.inngangsvilkaar()
+    private fun ikkeGjeldendeVilkaar(): List<Vilkaar> =
+        BarnepensjonVilkaar2024
+            .inngangsvilkaar()
             .subList(0, 2) // Reduserer til de 3 første vilkårene
             .toMutableList()
             .apply {
@@ -785,7 +789,6 @@ internal class VilkaarsvurderingServiceTest(private val ds: DataSource) {
                     ),
                 )
             }
-    }
 
     private fun grunnlag() = GrunnlagTestData().hentOpplysningsgrunnlag()
 
@@ -829,9 +832,7 @@ internal class VilkaarsvurderingServiceTest(private val ds: DataSource) {
         }
     }
 
-    private suspend fun opprettVilkaarsvurdering(): Vilkaarsvurdering {
-        return service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
-    }
+    private suspend fun opprettVilkaarsvurdering(): Vilkaarsvurdering = service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
 
     private fun vilkaarsVurderingData() = VilkaarVurderingData("en kommentar", Tidspunkt.now().toLocalDatetimeUTC(), "saksbehandler")
 

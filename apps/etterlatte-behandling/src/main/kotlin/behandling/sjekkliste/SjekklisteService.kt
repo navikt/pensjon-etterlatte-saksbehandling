@@ -18,11 +18,10 @@ class SjekklisteService(
     private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
 ) {
-    fun hentSjekkliste(id: UUID): Sjekkliste? {
-        return inTransaction {
+    fun hentSjekkliste(id: UUID): Sjekkliste? =
+        inTransaction {
             dao.hentSjekkliste(id)
         }
-    }
 
     fun opprettSjekkliste(behandlingId: UUID): Sjekkliste {
         val behandling =
@@ -63,8 +62,8 @@ class SjekklisteService(
     fun oppdaterSjekkliste(
         behandlingId: UUID,
         oppdaterSjekkliste: OppdatertSjekkliste,
-    ): Sjekkliste {
-        return inTransaction {
+    ): Sjekkliste =
+        inTransaction {
             val behandling = requireNotNull(behandlingService.hentBehandling(behandlingId))
 
             if (!(kanEndres(behandling) && behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler())) {
@@ -77,14 +76,13 @@ class SjekklisteService(
             dao.oppdaterSjekkliste(behandlingId, oppdaterSjekkliste)
             dao.hentSjekkliste(behandlingId)!!
         }
-    }
 
     fun oppdaterSjekklisteItem(
         behandlingId: UUID,
         itemId: Long,
         oppdatering: OppdaterSjekklisteItem,
-    ): SjekklisteItem {
-        return inTransaction {
+    ): SjekklisteItem =
+        inTransaction {
             val behandling = requireNotNull(behandlingService.hentBehandling(behandlingId))
 
             if (!(kanEndres(behandling) && behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler())) {
@@ -97,26 +95,31 @@ class SjekklisteService(
             dao.oppdaterSjekklisteItem(itemId, oppdatering)
             dao.hentSjekklisteItem(itemId)
         }
-    }
 
-    private fun kanEndres(behandling: Behandling): Boolean {
-        return BehandlingStatus.underBehandling().contains(behandling.status) &&
+    private fun kanEndres(behandling: Behandling): Boolean =
+        BehandlingStatus.underBehandling().contains(behandling.status) &&
             behandling is Foerstegangsbehandling
-    }
 
-    private fun Behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler(): Boolean {
-        return Kontekst.get().AppUser.name() ==
-            oppgaveService.hentOppgaveUnderBehandling(this.id.toString())
-                ?.saksbehandler?.ident
-    }
+    private fun Behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler(): Boolean =
+        Kontekst.get().AppUser.name() ==
+            oppgaveService
+                .hentOppgaveUnderBehandling(this.id.toString())
+                ?.saksbehandler
+                ?.ident
 }
 
-internal class SjekklisteUgyldigForespoerselException(kode: String, detail: String) : UgyldigForespoerselException(
-    code = kode,
-    detail = detail,
-)
+internal class SjekklisteUgyldigForespoerselException(
+    kode: String,
+    detail: String,
+) : UgyldigForespoerselException(
+        code = kode,
+        detail = detail,
+    )
 
-internal class SjekklisteIkkeTillattException(kode: String, detail: String) : IkkeTillattException(
-    code = kode,
-    detail = detail,
-)
+internal class SjekklisteIkkeTillattException(
+    kode: String,
+    detail: String,
+) : IkkeTillattException(
+        code = kode,
+        detail = detail,
+    )

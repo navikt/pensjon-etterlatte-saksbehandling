@@ -12,7 +12,9 @@ import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.person.PersonService
 import no.nav.etterlatte.personweb.PersonWebService
 
-class ApplicationContext(env: Map<String, String>) {
+class ApplicationContext(
+    env: Map<String, String>,
+) {
     val config: Config = ConfigFactory.load()
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
 

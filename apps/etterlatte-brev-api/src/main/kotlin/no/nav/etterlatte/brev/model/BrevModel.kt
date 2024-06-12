@@ -57,7 +57,9 @@ fun opprettBrevFra(
     brevtype = opprettNyttBrev.brevtype,
 )
 
-class Pdf(val bytes: ByteArray)
+class Pdf(
+    val bytes: ByteArray,
+)
 
 data class BrevInnhold(
     val tittel: String,

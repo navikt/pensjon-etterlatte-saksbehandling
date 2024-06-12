@@ -28,9 +28,10 @@ class KombinerOverlappendePerioderTest {
         assertEquals(3, kombinert.size)
         assertEquals(
             setOf(g1.fom, g1.tom, g2.fom, g2.fom, g2.fom.minusDays(1), g2.tom, g2.tom?.plusDays(1)),
-            kombinert.flatMap {
-                listOf(it.fom, it.tom)
-            }.toSet(),
+            kombinert
+                .flatMap {
+                    listOf(it.fom, it.tom)
+                }.toSet(),
         )
     }
 

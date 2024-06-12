@@ -8,7 +8,9 @@ import no.nav.etterlatte.samordning.vedtak.SamordningVedtakService
 import no.nav.etterlatte.samordning.vedtak.TjenestepensjonKlient
 import no.nav.etterlatte.samordning.vedtak.VedtaksvurderingKlient
 
-class ApplicationContext(env: Miljoevariabler) {
+class ApplicationContext(
+    env: Miljoevariabler,
+) {
     val config: Config = ConfigFactory.load()
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
 

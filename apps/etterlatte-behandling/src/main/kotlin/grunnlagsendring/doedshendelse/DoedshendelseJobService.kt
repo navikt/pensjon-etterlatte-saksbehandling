@@ -184,7 +184,8 @@ class DoedshendelseJobService(
                 krrKlient.hentDigitalKontaktinformasjon(doedshendelse.avdoedFnr)
             }
 
-        return kontaktInfo?.spraak
+        return kontaktInfo
+            ?.spraak
             ?.toLowerCasePreservingASCIIRules()
             ?.let {
                 when (it) {
@@ -196,15 +197,17 @@ class DoedshendelseJobService(
             } ?: Spraak.NB
     }
 
-    private fun hentAnnenForelder(doedshendelse: DoedshendelseInternal): String? {
-        return pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-            foedselsnummer = doedshendelse.beroertFnr,
-            rolle = PersonRolle.BARN,
-            saktype = SakType.BARNEPENSJON,
-        ).familieRelasjon?.verdi?.foreldre
+    private fun hentAnnenForelder(doedshendelse: DoedshendelseInternal): String? =
+        pdlTjenesterKlient
+            .hentPdlModellFlereSaktyper(
+                foedselsnummer = doedshendelse.beroertFnr,
+                rolle = PersonRolle.BARN,
+                saktype = SakType.BARNEPENSJON,
+            ).familieRelasjon
+            ?.verdi
+            ?.foreldre
             ?.map { it.value }
             ?.firstOrNull { it != doedshendelse.avdoedFnr }
-    }
 
     private fun sendBrevHvisKravOppfylles(
         doedshendelse: DoedshendelseInternal,
@@ -309,9 +312,10 @@ class DoedshendelseJobService(
         val idag = LocalDateTime.now()
 
         val avdoedHendelser = hendelser.filter { it.relasjon == Relasjon.AVDOED }
-        return hendelser.filter {
-            Duration.between(it.endret, idag.toTidspunkt()).toDays() >= dagerGamleHendelserSomSkalKjoeres
-        }.distinctBy { it.avdoedFnr } + avdoedHendelser.also { logger.info("Antall gyldige dødsmeldinger ${it.size}") }
+        return hendelser
+            .filter {
+                Duration.between(it.endret, idag.toTidspunkt()).toDays() >= dagerGamleHendelserSomSkalKjoeres
+            }.distinctBy { it.avdoedFnr } + avdoedHendelser.also { logger.info("Antall gyldige dødsmeldinger ${it.size}") }
     }
 
     private fun hentAlleNyeDoedsmeldinger() = doedshendelseDao.hentDoedshendelserMedStatus(listOf(Status.NY, Status.OPPDATERT))

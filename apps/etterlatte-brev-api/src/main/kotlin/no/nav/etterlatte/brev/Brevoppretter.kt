@@ -198,8 +198,10 @@ private data class OpprettBrevRequest(
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
 )
 
-class KanIkkeOppretteVedtaksbrev(behandlingId: UUID) : UgyldigForespoerselException(
-    code = "KAN_IKKE_ENDRE_VEDTAKSBREV",
-    detail = "Statusen til behandlingen tillater ikke at det opprettes vedtaksbrev",
-    meta = mapOf("behandlingId" to behandlingId),
-)
+class KanIkkeOppretteVedtaksbrev(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "KAN_IKKE_ENDRE_VEDTAKSBREV",
+        detail = "Statusen til behandlingen tillater ikke at det opprettes vedtaksbrev",
+        meta = mapOf("behandlingId" to behandlingId),
+    )

@@ -7,7 +7,9 @@ import no.nav.etterlatte.libs.common.trygdetid.avtale.TrygdetidAvtale
 import no.nav.etterlatte.libs.common.trygdetid.avtale.TrygdetidAvtaleKriteria
 import java.util.UUID
 
-class AvtaleService(val avtaleRepository: AvtaleRepository) {
+class AvtaleService(
+    val avtaleRepository: AvtaleRepository,
+) {
     private var avtaler: List<TrygdetidAvtale>
     private var kriterier: List<TrygdetidAvtaleKriteria>
 

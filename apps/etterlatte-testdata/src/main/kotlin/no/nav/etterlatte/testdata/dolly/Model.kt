@@ -3,10 +3,19 @@ package no.nav.etterlatte.testdata.dolly
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Bruker(val brukerId: String?, val brukertype: String?, val navIdent: String?, val epost: String?)
+data class Bruker(
+    val brukerId: String?,
+    val brukertype: String?,
+    val navIdent: String?,
+    val epost: String?,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Gruppe(val id: Long, val navn: String, val hensikt: String)
+data class Gruppe(
+    val id: Long,
+    val navn: String,
+    val hensikt: String,
+)
 
 data class HentGruppeResponse(
     val antallPages: Int,
@@ -16,22 +25,41 @@ data class HentGruppeResponse(
     val contents: List<Gruppe>,
 )
 
-data class OpprettGruppeRequest(val navn: String, val hensikt: String)
+data class OpprettGruppeRequest(
+    val navn: String,
+    val hensikt: String,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class DollyIBrukResponse(val ident: String, val ibruk: Boolean, val gruppeId: Long)
+data class DollyIBrukResponse(
+    val ident: String,
+    val ibruk: Boolean,
+    val gruppeId: Long,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class BestillingStatus(val id: Long, val ferdig: Boolean)
+data class BestillingStatus(
+    val id: Long,
+    val ferdig: Boolean,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class TestGruppeBestillinger(val identer: List<TestGruppeBestilling>)
+data class TestGruppeBestillinger(
+    val identer: List<TestGruppeBestilling>,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class TestGruppeBestilling(val ident: String, val bestillingId: List<Long>, val ibruk: Boolean)
+data class TestGruppeBestilling(
+    val ident: String,
+    val bestillingId: List<Long>,
+    val ibruk: Boolean,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class DollyPersonResponse(val ident: String, val person: DollyPerson)
+data class DollyPersonResponse(
+    val ident: String,
+    val person: DollyPerson,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class DollyPerson(
@@ -47,16 +75,27 @@ data class ForelderBarnRelasjon(
     val relatertPersonsRolle: String,
 )
 
-data class Sivilstand(val type: String, val relatertVedSivilstand: String?)
+data class Sivilstand(
+    val type: String,
+    val relatertVedSivilstand: String?,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Doedsfall(val doedsdato: String)
+data class Doedsfall(
+    val doedsdato: String,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Foedsel(val foedselsdato: String, val foedselsaar: Int)
+data class Foedsel(
+    val foedselsdato: String,
+    val foedselsaar: Int,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Navn(val fornavn: String, val etternavn: String)
+data class Navn(
+    val fornavn: String,
+    val etternavn: String,
+)
 
 data class ForenkletFamilieModell(
     val ibruk: Boolean,

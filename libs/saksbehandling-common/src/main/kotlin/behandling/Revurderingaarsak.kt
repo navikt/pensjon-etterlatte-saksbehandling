@@ -103,7 +103,9 @@ enum class Revurderingaarsak(
     fun erStoettaRevurdering(sakType: SakType) = kanBrukesIMiljo() && gyldigForSakType(sakType) && this != NY_SOEKNAD
 }
 
-enum class GcpEnv(val env: String) {
+enum class GcpEnv(
+    val env: String,
+) {
     PROD("prod-gcp"),
     DEV("dev-gcp"),
 }

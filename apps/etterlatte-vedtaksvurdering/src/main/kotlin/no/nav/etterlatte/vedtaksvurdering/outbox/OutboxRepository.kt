@@ -6,9 +6,11 @@ import no.nav.etterlatte.libs.database.transaction
 import java.util.UUID
 import javax.sql.DataSource
 
-class OutboxRepository(private val datasource: DataSource) {
-    fun hentUpubliserte(): List<OutboxItem> {
-        return datasource.transaction { tx ->
+class OutboxRepository(
+    private val datasource: DataSource,
+) {
+    fun hentUpubliserte(): List<OutboxItem> =
+        datasource.transaction { tx ->
             queryOf(
                 """
                 SELECT * FROM outbox_vedtakshendelse 
@@ -17,7 +19,6 @@ class OutboxRepository(private val datasource: DataSource) {
                 """.trimIndent(),
             ).let { query -> tx.run(query.map { row -> row.toOutboxItem() }.asList) }
         }
-    }
 
     fun merkSomPublisert(id: UUID) {
         datasource.transaction { tx ->

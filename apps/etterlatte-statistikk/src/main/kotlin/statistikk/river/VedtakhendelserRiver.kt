@@ -46,12 +46,12 @@ class VedtakhendelserRiver(
     ) = try {
         val vedtakshendelse = enumValueOf<VedtakKafkaHendelseHendelseType>(packet[EVENT_NAME_KEY].textValue().split(":")[1])
         val tekniskTid = parseTekniskTid(packet, logger)
-        service.registrerStatistikkForVedtak(
-            objectMapper.treeToValue(packet["vedtak"]),
-            vedtakshendelse,
-            tekniskTid,
-        )
-            .also { (sakRad, stoenadRad) ->
+        service
+            .registrerStatistikkForVedtak(
+                objectMapper.treeToValue(packet["vedtak"]),
+                vedtakshendelse,
+                tekniskTid,
+            ).also { (sakRad, stoenadRad) ->
                 if (sakRad == null && stoenadRad == null) {
                     logger.info(
                         "Ingen statistikk registrert for pakken med korrelasjonsid ${packet.correlationId}",

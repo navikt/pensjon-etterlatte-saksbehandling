@@ -107,13 +107,12 @@ data class BarnepensjonRevurderingRedigerbartUtfall(
             etterbetaling: EtterbetalingDTO?,
             utbetalingsinfo: Utbetalingsinfo,
             brevutfall: BrevutfallDto,
-        ): BarnepensjonRevurderingRedigerbartUtfall {
-            return BarnepensjonRevurderingRedigerbartUtfall(
+        ): BarnepensjonRevurderingRedigerbartUtfall =
+            BarnepensjonRevurderingRedigerbartUtfall(
                 erEtterbetaling = etterbetaling != null,
                 harUtbetaling = utbetalingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
                 brukerUnder18Aar = requireNotNull(brevutfall.aldersgruppe) == Aldersgruppe.UNDER_18,
             )
-        }
     }
 }

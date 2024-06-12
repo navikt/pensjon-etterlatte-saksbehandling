@@ -44,17 +44,25 @@ fun forsteDagIMaaneden(yearMonth: YearMonth) = yearMonth.atDay(1)
 
 fun sisteDagIMaaneden(yearMonth: YearMonth) = yearMonth.atEndOfMonth()
 
-fun LocalDate.toXMLDate(): XMLGregorianCalendar {
-    return DatatypeFactory.newInstance().newXMLGregorianCalendar(
-        LocalDateTime.of(this, LocalTime.MIDNIGHT).format(tidsstempleMilliOppdrag),
-    ).apply {
-        timezone = DatatypeConstants.FIELD_UNDEFINED
-    }
-}
+fun LocalDate.toXMLDate(): XMLGregorianCalendar =
+    DatatypeFactory
+        .newInstance()
+        .newXMLGregorianCalendar(
+            LocalDateTime.of(this, LocalTime.MIDNIGHT).format(tidsstempleMilliOppdrag),
+        ).apply {
+            timezone = DatatypeConstants.FIELD_UNDEFINED
+        }
 
-fun UUID.toUUID30() = this.toString().replace("-", "").substring(0, 30).let { UUID30(it) }
+fun UUID.toUUID30() =
+    this
+        .toString()
+        .replace("-", "")
+        .substring(0, 30)
+        .let { UUID30(it) }
 
-data class UUID30(val value: String)
+data class UUID30(
+    val value: String,
+)
 
 const val ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG = 30
 

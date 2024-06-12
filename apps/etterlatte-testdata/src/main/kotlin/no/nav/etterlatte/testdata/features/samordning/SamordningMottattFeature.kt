@@ -45,20 +45,22 @@ object SamordningMottattFeature : TestDataFeature {
                     val (partisjon, offset) =
                         call.receiveParameters().let {
                             val vedtakID = requireNotNull(it["vedtakIdInput"])
-                            producer.publiser(
-                                requireNotNull(it["key"]),
-                                JsonMessage.newMessage(
-                                    mapOf(
-                                        VedtakKafkaHendelseHendelseType.SAMORDNING_MOTTATT.lagParMedEventNameKey(),
-                                        "vedtakId" to vedtakID,
-                                    ),
-                                ).toJson(),
-                                mapOf("NavIdent" to navIdent.toByteArray()),
-                            ).also { (partisjon, offset) ->
-                                logger.info(
-                                    "Publiserer samordningsmelding for vedtakID=$vedtakID med partisjon: $partisjon offset: $offset",
-                                )
-                            }
+                            producer
+                                .publiser(
+                                    requireNotNull(it["key"]),
+                                    JsonMessage
+                                        .newMessage(
+                                            mapOf(
+                                                VedtakKafkaHendelseHendelseType.SAMORDNING_MOTTATT.lagParMedEventNameKey(),
+                                                "vedtakId" to vedtakID,
+                                            ),
+                                        ).toJson(),
+                                    mapOf("NavIdent" to navIdent.toByteArray()),
+                                ).also { (partisjon, offset) ->
+                                    logger.info(
+                                        "Publiserer samordningsmelding for vedtakID=$vedtakID med partisjon: $partisjon offset: $offset",
+                                    )
+                                }
                         }
 
                     call.respondRedirect("/$path/sendt?partisjon=$partisjon&offset=$offset")

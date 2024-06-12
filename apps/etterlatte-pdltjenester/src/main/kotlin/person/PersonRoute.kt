@@ -71,9 +71,10 @@ fun Route.personRoute(service: PersonService) {
         post {
             val personIdenterForAktoerIdRequest = call.receive<HentFolkeregisterIdenterForAktoerIdBolkRequest>()
 
-            service.hentFolkeregisterIdenterForAktoerIdBolk(
-                personIdenterForAktoerIdRequest,
-            ).let { call.respond(it) }
+            service
+                .hentFolkeregisterIdenterForAktoerIdBolk(
+                    personIdenterForAktoerIdRequest,
+                ).let { call.respond(it) }
         }
     }
 

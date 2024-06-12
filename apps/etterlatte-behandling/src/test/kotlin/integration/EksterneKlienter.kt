@@ -70,8 +70,8 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun hentPersongalleri(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlagsopplysning<Persongalleri> {
-        return Grunnlagsopplysning(
+    ): Grunnlagsopplysning<Persongalleri> =
+        Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
             meta = emptyMap<String, String>().toObjectNode(),
@@ -85,7 +85,6 @@ class GrunnlagKlientTest : GrunnlagKlient {
                     listOf("gjenlevende"),
                 ),
         )
-    }
 }
 
 class BeregningKlientTest : BeregningKlient {
@@ -100,81 +99,68 @@ class VedtakKlientTest : VedtakKlient {
         tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
-    ): Long {
-        return 123L
-    }
+    ): Long = 123L
 
     override suspend fun fattVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
-    ): Long {
-        return 123L
-    }
+    ): Long = 123L
 
     override suspend fun attesterVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
-    ): TilbakekrevingVedtakLagretDto {
-        return TilbakekrevingVedtakLagretDto(
+    ): TilbakekrevingVedtakLagretDto =
+        TilbakekrevingVedtakLagretDto(
             id = 123L,
             fattetAv = "saksbehandler",
             enhet = "enhet",
             dato = LocalDate.now(),
         )
-    }
 
     override suspend fun underkjennVedtakTilbakekreving(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long {
-        return 123L
-    }
+    ): Long = 123L
 
     override suspend fun lagreVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
-    ): VedtakDto {
-        return mockk<VedtakDto> {
+    ): VedtakDto =
+        mockk<VedtakDto> {
             every { id } returns 123L
         }
-    }
 
     override suspend fun fattVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
-    ): VedtakDto {
-        return mockk<VedtakDto> {
+    ): VedtakDto =
+        mockk<VedtakDto> {
             every { id } returns 123L
         }
-    }
 
     override suspend fun attesterVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
-    ): VedtakDto {
-        return mockk<VedtakDto> {
+    ): VedtakDto =
+        mockk<VedtakDto> {
             every { id } returns 123L
         }
-    }
 
     override suspend fun underkjennVedtakKlage(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): VedtakDto {
-        return mockk<VedtakDto> {
+    ): VedtakDto =
+        mockk<VedtakDto> {
             every { id } returns 123L
         }
-    }
 
     override suspend fun sakHarLopendeVedtakPaaDato(
         sakId: Long,
         dato: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
-    ): LoependeYtelseDTO {
-        return LoependeYtelseDTO(true, false, LocalDate.now())
-    }
+    ): LoependeYtelseDTO = LoependeYtelseDTO(true, false, LocalDate.now())
 }
 
 class TilbakekrevingKlientTest : TilbakekrevingKlient {
@@ -192,9 +178,7 @@ class TilbakekrevingKlientTest : TilbakekrevingKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    override suspend fun ping(konsument: String?): PingResult {
-        return PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
-    }
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
 }
 
 class BrevApiKlientTest : BrevApiKlient {
@@ -203,17 +187,13 @@ class BrevApiKlientTest : BrevApiKlient {
     override suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto {
-        return opprettetBrevDto(brevId++)
-    }
+    ): OpprettetBrevDto = opprettetBrevDto(brevId++)
 
     override suspend fun opprettVedtaksbrev(
         behandlingId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto {
-        return opprettetBrevDto(brevId++)
-    }
+    ): OpprettetBrevDto = opprettetBrevDto(brevId++)
 
     override suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
@@ -233,25 +213,19 @@ class BrevApiKlientTest : BrevApiKlient {
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): JournalpostIdDto {
-        return JournalpostIdDto(UUID.randomUUID().toString())
-    }
+    ): JournalpostIdDto = JournalpostIdDto(UUID.randomUUID().toString())
 
     override suspend fun distribuerBrev(
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BestillingsIdDto {
-        return BestillingsIdDto(UUID.randomUUID().toString())
-    }
+    ): BestillingsIdDto = BestillingsIdDto(UUID.randomUUID().toString())
 
     override suspend fun hentBrev(
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto {
-        return opprettetBrevDto(brevId)
-    }
+    ): OpprettetBrevDto = opprettetBrevDto(brevId)
 
     override suspend fun slettVedtaksbrev(
         klageId: UUID,
@@ -262,9 +236,7 @@ class BrevApiKlientTest : BrevApiKlient {
     override suspend fun journalfoerNotatKa(
         klage: Klage,
         brukerInfoToken: BrukerTokenInfo,
-    ): OpprettJournalpostDto {
-        return OpprettJournalpostDto(UUID.randomUUID().toString())
-    }
+    ): OpprettJournalpostDto = OpprettJournalpostDto(UUID.randomUUID().toString())
 
     override suspend fun slettOversendelsesbrev(
         klageId: UUID,
@@ -275,16 +247,12 @@ class BrevApiKlientTest : BrevApiKlient {
     override suspend fun hentVedtaksbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto {
-        return opprettetBrevDto(brevId)
-    }
+    ): OpprettetBrevDto = opprettetBrevDto(brevId)
 
     override suspend fun hentOversendelsesbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpprettetBrevDto {
-        return opprettetBrevDto(brevId)
-    }
+    ): OpprettetBrevDto = opprettetBrevDto(brevId)
 
     private fun opprettetBrevDto(brevId: Long) =
         OpprettetBrevDto(
@@ -308,42 +276,32 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         enhetsnr: String?,
         harTildeling: Boolean?,
         brukerTokenInfo: BrukerTokenInfo,
-    ): GosysOppgaver {
-        return GosysOppgaver(0, emptyList())
-    }
+    ): GosysOppgaver = GosysOppgaver(0, emptyList())
 
     override suspend fun hentJournalfoeringsoppgave(
         journalpostId: String,
         brukerTokenInfo: BrukerTokenInfo,
-    ): GosysOppgaver {
-        return GosysOppgaver(0, emptyList())
-    }
+    ): GosysOppgaver = GosysOppgaver(0, emptyList())
 
     override suspend fun hentOppgave(
         id: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): GosysApiOppgave {
-        return gosysApiOppgave()
-    }
+    ): GosysApiOppgave = gosysApiOppgave()
 
     override suspend fun ferdigstill(
         id: String,
         oppgaveVersjon: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): GosysApiOppgave {
-        return gosysApiOppgave()
-    }
+    ): GosysApiOppgave = gosysApiOppgave()
 
     override suspend fun feilregistrer(
         id: String,
         request: EndreStatusRequest,
         brukerTokenInfo: BrukerTokenInfo,
-    ): GosysApiOppgave {
-        return gosysApiOppgave()
-    }
+    ): GosysApiOppgave = gosysApiOppgave()
 
-    private fun gosysApiOppgave(): GosysApiOppgave {
-        return GosysApiOppgave(
+    private fun gosysApiOppgave(): GosysApiOppgave =
+        GosysApiOppgave(
             1,
             2,
             "EYB",
@@ -358,41 +316,31 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
             LocalDate.now(),
             bruker = null,
         )
-    }
 
     override suspend fun tildelOppgaveTilSaksbehandler(
         oppgaveId: String,
         oppgaveVersjon: Long,
         tildeles: String,
         brukerTokenInfo: BrukerTokenInfo,
-    ): GosysApiOppgave {
-        return gosysApiOppgave()
-    }
+    ): GosysApiOppgave = gosysApiOppgave()
 
     override suspend fun endreFrist(
         oppgaveId: String,
         oppgaveVersjon: Long,
         nyFrist: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
-    ): GosysApiOppgave {
-        return gosysApiOppgave()
-    }
+    ): GosysApiOppgave = gosysApiOppgave()
 }
 
 class Norg2KlientTest : Norg2Klient {
-    override fun hentArbeidsfordelingForOmraadeOgTema(request: ArbeidsFordelingRequest): List<ArbeidsFordelingEnhet> {
-        return listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
-    }
+    override fun hentArbeidsfordelingForOmraadeOgTema(request: ArbeidsFordelingRequest): List<ArbeidsFordelingEnhet> =
+        listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
 
-    override suspend fun hentNavkontorForOmraade(omraade: String): Navkontor {
-        return Navkontor("1202 NAV BERGEN SØR", "4808")
-    }
+    override suspend fun hentNavkontorForOmraade(omraade: String): Navkontor = Navkontor("1202 NAV BERGEN SØR", "4808")
 }
 
 class NavAnsattKlientTest : NavAnsattKlient {
-    override suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo? {
-        return SaksbehandlerInfo("ident", "Max Manus")
-    }
+    override suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo? = SaksbehandlerInfo("ident", "Max Manus")
 
     override val serviceName: String
         get() = "Navansatt"
@@ -401,20 +349,16 @@ class NavAnsattKlientTest : NavAnsattKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    override suspend fun ping(konsument: String?): PingResult {
-        return PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
-    }
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
 }
 
 class PesysKlientTest : PesysKlient {
-    override suspend fun hentSaker(fnr: String): List<SakSammendragResponse> {
-        return emptyList()
-    }
+    override suspend fun hentSaker(fnr: String): List<SakSammendragResponse> = emptyList()
 }
 
 class KrrklientTest : KrrKlient {
-    override suspend fun hentDigitalKontaktinformasjon(fnr: String): DigitalKontaktinformasjon? {
-        return DigitalKontaktinformasjon(
+    override suspend fun hentDigitalKontaktinformasjon(fnr: String): DigitalKontaktinformasjon? =
+        DigitalKontaktinformasjon(
             personident = "",
             aktiv = true,
             kanVarsles = true,
@@ -424,16 +368,14 @@ class KrrklientTest : KrrKlient {
             mobiltelefonnummer = null,
             sikkerDigitalPostkasse = null,
         )
-    }
 }
 
 class AxsysKlientTest : AxsysKlient {
-    override suspend fun hentEnheterForIdent(ident: String): List<SaksbehandlerEnhet> {
-        return listOf(
+    override suspend fun hentEnheterForIdent(ident: String): List<SaksbehandlerEnhet> =
+        listOf(
             SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
             SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
         )
-    }
 
     override val serviceName: String
         get() = "Axsys"
@@ -442,9 +384,7 @@ class AxsysKlientTest : AxsysKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    override suspend fun ping(konsument: String?): PingResult {
-        return PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
-    }
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
 }
 
 class PdltjenesterKlientTest : PdlTjenesterKlient {
@@ -452,34 +392,24 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
         foedselsnummer: String,
         rolle: PersonRolle,
         saktype: SakType,
-    ): PersonDTO {
-        return mockPerson()
-    }
+    ): PersonDTO = mockPerson()
 
     override fun hentPdlModellFlereSaktyper(
         foedselsnummer: String,
         rolle: PersonRolle,
         saktyper: List<SakType>,
-    ): PersonDTO {
-        return mockPerson()
-    }
+    ): PersonDTO = mockPerson()
 
     override fun hentGeografiskTilknytning(
         foedselsnummer: String,
         saktype: SakType,
-    ): GeografiskTilknytning {
-        return GeografiskTilknytning(kommune = "0301")
-    }
+    ): GeografiskTilknytning = GeografiskTilknytning(kommune = "0301")
 
-    override fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?> {
-        return emptyMap<String, String>()
-    }
+    override fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?> = emptyMap<String, String>()
 
     override suspend fun hentAdressebeskyttelseForPerson(
         hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest,
-    ): AdressebeskyttelseGradering {
-        return AdressebeskyttelseGradering.UGRADERT
-    }
+    ): AdressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT
 
     override val serviceName: String
         get() = "Pdl tjenester"
@@ -488,7 +418,5 @@ class PdltjenesterKlientTest : PdlTjenesterKlient {
     override val endpoint: String
         get() = "endpoint"
 
-    override suspend fun ping(konsument: String?): PingResult {
-        return PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
-    }
+    override suspend fun ping(konsument: String?): PingResult = PingResultUp(serviceName, ServiceStatus.UP, "endpoint", serviceName)
 }

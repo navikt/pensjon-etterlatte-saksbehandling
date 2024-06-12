@@ -184,17 +184,20 @@ fun PipelineContext<Unit, ApplicationCall>.brukerIdFraToken() = call.firstValidT
 
 fun getDollyAccessToken(): String =
     runBlocking {
-        azureAdClient.hentTokenFraAD(
-            Systembruker.testdata,
-            listOf("api://${config.getString("dolly.client.id")}/.default"),
-        )
-            .get()!!.accessToken
+        azureAdClient
+            .hentTokenFraAD(
+                Systembruker.testdata,
+                listOf("api://${config.getString("dolly.client.id")}/.default"),
+            ).get()!!
+            .accessToken
     }
 
 fun getTestnavAccessToken(): String =
     runBlocking {
-        azureAdClient.hentTokenFraAD(
-            Systembruker.testdata,
-            listOf("api://${config.getString("testnav.client.id")}/.default"),
-        ).get()!!.accessToken
+        azureAdClient
+            .hentTokenFraAD(
+                Systembruker.testdata,
+                listOf("api://${config.getString("testnav.client.id")}/.default"),
+            ).get()!!
+            .accessToken
     }

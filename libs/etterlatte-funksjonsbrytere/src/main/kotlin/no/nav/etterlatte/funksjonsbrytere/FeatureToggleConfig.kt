@@ -6,7 +6,9 @@ interface FeatureToggle {
     fun key(): String
 }
 
-enum class FellesFeatureToggle(private val key: String) : FeatureToggle {
+enum class FellesFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
     NoOperationToggle("pensjon-etterlatte.no-operation-toggle"),
     ;
 

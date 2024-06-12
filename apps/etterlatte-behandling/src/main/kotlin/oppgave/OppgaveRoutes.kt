@@ -32,8 +32,9 @@ import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
-class ManglerReferanseException(msg: String) :
-    UgyldigForespoerselException(
+class ManglerReferanseException(
+    msg: String,
+) : UgyldigForespoerselException(
         code = "MÅ_HA_REFERANSE",
         detail = msg,
     )
@@ -46,10 +47,10 @@ inline val PipelineContext<*, ApplicationCall>.referanse: String
 
 const val VISALLE = "VISALLE"
 
-fun filtrerGyldigeStatuser(statuser: List<String>?): List<String> {
-    return statuser?.map { i -> i.uppercase() }
+fun filtrerGyldigeStatuser(statuser: List<String>?): List<String> =
+    statuser
+        ?.map { i -> i.uppercase() }
         ?.filter { i -> Status.entries.map { it.name }.contains(i) || i == VISALLE } ?: emptyList()
-}
 
 inline val PipelineContext<*, ApplicationCall>.minOppgavelisteidentQueryParam: String?
     get() {
@@ -276,4 +277,6 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
     }
 }
 
-internal data class GosysOppgaveversjon(val versjon: Long)
+internal data class GosysOppgaveversjon(
+    val versjon: Long,
+)

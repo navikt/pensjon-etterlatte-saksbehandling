@@ -8,9 +8,14 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import java.time.LocalDate
 
-class KunSystembrukerException(msg: String) : Exception(msg)
+class KunSystembrukerException(
+    msg: String,
+) : Exception(msg)
 
-class GrunnlagsendringsHendelseFilter(val vedtakKlient: VedtakKlient, val behandlingService: BehandlingService) {
+class GrunnlagsendringsHendelseFilter(
+    val vedtakKlient: VedtakKlient,
+    val behandlingService: BehandlingService,
+) {
     fun hendelseErRelevantForSak(
         sakId: Long,
         grunnlagendringType: GrunnlagsendringsType,

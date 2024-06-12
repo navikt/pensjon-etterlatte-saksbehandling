@@ -41,8 +41,8 @@ object SoeknadMapper {
         avdoedFnr: String,
         barn: List<String> = emptyList(),
         behandlingssteg: Behandlingssteg,
-    ): JsonMessage {
-        return when (type) {
+    ): JsonMessage =
+        when (type) {
             SoeknadType.OMSTILLINGSSTOENAD ->
                 JsonMessage.newMessage(
                     mutableMapOf(
@@ -84,7 +84,6 @@ object SoeknadMapper {
                 throw Exception("Ukjent soknad type: '$type'")
             }
         }
-    }
 
     private fun opprettBarnepensjonSoeknad(
         gjenlevendeFnr: String,

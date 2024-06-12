@@ -34,7 +34,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(GrunnlagDbExtension::class)
-internal class RapidTest(private val dataSource: DataSource) {
+internal class RapidTest(
+    private val dataSource: DataSource,
+) {
     private lateinit var opplysningRepo: OpplysningDao
     private lateinit var grunnlagService: RealGrunnlagService
     private lateinit var inspector: TestRapid
@@ -67,15 +69,16 @@ internal class RapidTest(private val dataSource: DataSource) {
     @Nested
     inner class NyOpplysning {
         private val melding =
-            JsonMessage.newMessage(
-                mapOf(
-                    EventNames.NY_OPPLYSNING.lagParMedEventNameKey(),
-                    OPPLYSNING_KEY to listOf(nyOpplysning),
-                    FNR_KEY to fnr,
-                    SAK_ID_KEY to 1,
-                    BEHANDLING_ID_KEY to UUID.randomUUID(),
-                ),
-            ).toJson()
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        EventNames.NY_OPPLYSNING.lagParMedEventNameKey(),
+                        OPPLYSNING_KEY to listOf(nyOpplysning),
+                        FNR_KEY to fnr,
+                        SAK_ID_KEY to 1,
+                        BEHANDLING_ID_KEY to UUID.randomUUID(),
+                    ),
+                ).toJson()
 
         @Test
         fun `ny enkeltopplysning lagres i databasen med riktige verdier`() {
@@ -86,15 +89,16 @@ internal class RapidTest(private val dataSource: DataSource) {
     @Nested
     inner class Opplysningsbehov {
         private val melding =
-            JsonMessage.newMessage(
-                mapOf(
-                    BEHOV_NAME_KEY to Opplysningstype.SOEKER_PDL_V1,
-                    OPPLYSNING_KEY to listOf(nyOpplysning),
-                    FNR_KEY to fnr,
-                    SAK_ID_KEY to 1,
-                    BEHANDLING_ID_KEY to UUID.randomUUID(),
-                ),
-            ).toJson()
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        BEHOV_NAME_KEY to Opplysningstype.SOEKER_PDL_V1,
+                        OPPLYSNING_KEY to listOf(nyOpplysning),
+                        FNR_KEY to fnr,
+                        SAK_ID_KEY to 1,
+                        BEHANDLING_ID_KEY to UUID.randomUUID(),
+                    ),
+                ).toJson()
 
         @Test
         fun `ny enkeltopplysning lagres i databasen med riktige verdier`() {

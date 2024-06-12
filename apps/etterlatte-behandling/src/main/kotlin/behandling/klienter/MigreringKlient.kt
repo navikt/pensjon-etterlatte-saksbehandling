@@ -14,7 +14,10 @@ import no.nav.etterlatte.libs.ktor.ping
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class MigreringKlient(private val client: HttpClient, private val url: String) : Pingable {
+class MigreringKlient(
+    private val client: HttpClient,
+    private val url: String,
+) : Pingable {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun opprettManuellMigrering(
@@ -47,15 +50,16 @@ class MigreringKlient(private val client: HttpClient, private val url: String) :
     override val endpoint: String
         get() = this.url
 
-    override suspend fun ping(konsument: String?): PingResult {
-        return client.ping(
+    override suspend fun ping(konsument: String?): PingResult =
+        client.ping(
             pingUrl = url.plus("/internal/isready"),
             logger = logger,
             serviceName = serviceName,
             beskrivelse = beskrivelse,
         )
-    }
 }
 
-class MigreringKlientException(override val detail: String, override val cause: Throwable?) :
-    InternfeilException(detail, cause)
+class MigreringKlientException(
+    override val detail: String,
+    override val cause: Throwable?,
+) : InternfeilException(detail, cause)

@@ -10,20 +10,25 @@ import no.nav.etterlatte.readValue
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import java.util.UUID
 
-class VedtaksvurderingService(private val klient: DownstreamResourceClient, private val url: String, private val clientId: String) {
+class VedtaksvurderingService(
+    private val klient: DownstreamResourceClient,
+    private val url: String,
+    private val clientId: String,
+) {
     suspend fun fattVedtak(
         sakId: Long,
         behandlingId: UUID,
     ): VedtakOgRapid =
         retryOgPakkUt {
-            klient.post(
-                Resource(clientId, "$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis"),
-                Systembruker.testdata,
-                MigreringKjoringVariant.MED_PAUSE,
-            ).mapBoth(
-                success = { readValue(it) },
-                failure = { throw it },
-            )
+            klient
+                .post(
+                    Resource(clientId, "$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis"),
+                    Systembruker.testdata,
+                    MigreringKjoringVariant.MED_PAUSE,
+                ).mapBoth(
+                    success = { readValue(it) },
+                    failure = { throw it },
+                )
         }
 
     suspend fun attesterOgIverksettVedtak(
@@ -31,13 +36,14 @@ class VedtaksvurderingService(private val klient: DownstreamResourceClient, priv
         behandlingId: UUID,
     ): VedtakOgRapid =
         retryOgPakkUt {
-            klient.post(
-                Resource(clientId, "$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis"),
-                Systembruker.testdata,
-                MigreringKjoringVariant.FORTSETT_ETTER_PAUSE,
-            ).mapBoth(
-                success = { readValue(it) },
-                failure = { throw it },
-            )
+            klient
+                .post(
+                    Resource(clientId, "$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis"),
+                    Systembruker.testdata,
+                    MigreringKjoringVariant.FORTSETT_ETTER_PAUSE,
+                ).mapBoth(
+                    success = { readValue(it) },
+                    failure = { throw it },
+                )
         }
 }

@@ -49,7 +49,8 @@ class AvbruttOpprettetBehandlinghendelseRiver(
         val hendelse: BehandlingHendelseType = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
         val tekniskTid = parseTekniskTid(packet, logger)
 
-        service.registrerStatistikkForBehandlinghendelse(behandling, hendelse, tekniskTid)
+        service
+            .registrerStatistikkForBehandlinghendelse(behandling, hendelse, tekniskTid)
             ?.also {
                 context.publish(
                     mapOf(

@@ -49,9 +49,7 @@ sealed class StrukturertBrev {
         override val soekerFnr: String = klage.sak.ident
         override val behandlingId = klage.id
 
-        override fun tilLetterdata(): BrevbakerBlankettDTO {
-            return klage.tilBrevbakerBlankett()
-        }
+        override fun tilLetterdata(): BrevbakerBlankettDTO = klage.tilBrevbakerBlankett()
     }
 }
 

@@ -38,9 +38,8 @@ data class Beregning(
     // TODO: Sett denne som non-nullable etter at vi har refreshet hentede beregninger
     val overstyrtBeregning: Boolean? = null,
 ) {
-    fun beregningForMaaned(maaned: YearMonth): Beregningsperiode? {
-        return beregningsperioder.find { it.datoFOM <= maaned && (it.datoTOM ?: maaned) >= maaned }
-    }
+    fun beregningForMaaned(maaned: YearMonth): Beregningsperiode? =
+        beregningsperioder.find { it.datoFOM <= maaned && (it.datoTOM ?: maaned) >= maaned }
 
     companion object {
         fun fraBeregningDTO(dto: CommonBeregningDTO) =
@@ -59,11 +58,10 @@ data class InstitusjonsoppholdStatistikk(
     val sats: BigDecimal,
 ) {
     companion object {
-        fun fra(dto: InstitusjonsoppholdBeregningsgrunnlag): InstitusjonsoppholdStatistikk {
-            return InstitusjonsoppholdStatistikk(
+        fun fra(dto: InstitusjonsoppholdBeregningsgrunnlag): InstitusjonsoppholdStatistikk =
+            InstitusjonsoppholdStatistikk(
                 sats = dto.prosentEtterReduksjon().verdi.toBigDecimal() / 100.toBigDecimal(),
             )
-        }
     }
 }
 

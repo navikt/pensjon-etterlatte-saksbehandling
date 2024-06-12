@@ -21,15 +21,20 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
 
-data class UtbetalingNotFoundException(override val message: String) : RuntimeException(message)
+data class UtbetalingNotFoundException(
+    override val message: String,
+) : RuntimeException(message)
 
-class UtbetalingDao(private val dataSource: DataSource) {
+class UtbetalingDao(
+    private val dataSource: DataSource,
+) {
     fun opprettUtbetaling(utbetaling: Utbetaling) =
-        dataSource.transaction { tx ->
-            logger.info("Oppretter utbetaling for vedtakId=${utbetaling.vedtakId.value}")
+        dataSource
+            .transaction { tx ->
+                logger.info("Oppretter utbetaling for vedtakId=${utbetaling.vedtakId.value}")
 
-            queryOf(
-                statement = """
+                queryOf(
+                    statement = """
                         INSERT INTO utbetaling(id, vedtak_id, behandling_id, behandling_id_til_oppdrag, sak_id, oppdrag, 
                             vedtak, opprettet, avstemmingsnoekkel, endret, stoenadsmottaker, saksbehandler, 
                             saksbehandler_enhet, attestant, attestant_enhet, saktype)
@@ -37,37 +42,39 @@ class UtbetalingDao(private val dataSource: DataSource) {
                             :vedtak, :opprettet, :avstemmingsnoekkel, :endret, :stoenadsmottaker, :saksbehandler, 
                             :saksbehandlerEnhet, :attestant, :attestantEnhet, :saktype)
                         """,
-                paramMap =
-                    mapOf(
-                        "id" to utbetaling.id.param(),
-                        "vedtakId" to utbetaling.vedtakId.value.param(),
-                        "behandlingId" to utbetaling.behandlingId.value.param(),
-                        "behandlingIdTilOppdrag" to utbetaling.behandlingId.shortValue.value.param(),
-                        "sakId" to utbetaling.sakId.value.param(),
-                        "vedtak" to utbetaling.vedtak.toJson().param(),
-                        "opprettet" to utbetaling.opprettet.toTimestamp().param(),
-                        "avstemmingsnoekkel" to utbetaling.avstemmingsnoekkel.toTimestamp().param(),
-                        "endret" to utbetaling.endret.toTimestamp().param(),
-                        "stoenadsmottaker" to utbetaling.stoenadsmottaker.value.param(),
-                        "saksbehandler" to utbetaling.saksbehandler.value.param(),
-                        "saksbehandlerEnhet" to utbetaling.saksbehandlerEnhet.param(),
-                        "attestant" to utbetaling.attestant.value.param(),
-                        "attestantEnhet" to utbetaling.attestantEnhet.param(),
-                        "oppdrag" to utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) }.param(),
-                        "saktype" to utbetaling.sakType.name.param(),
-                    ),
-            ).let { tx.run(it.asUpdate) }
+                    paramMap =
+                        mapOf(
+                            "id" to utbetaling.id.param(),
+                            "vedtakId" to utbetaling.vedtakId.value.param(),
+                            "behandlingId" to utbetaling.behandlingId.value.param(),
+                            "behandlingIdTilOppdrag" to
+                                utbetaling.behandlingId.shortValue.value
+                                    .param(),
+                            "sakId" to utbetaling.sakId.value.param(),
+                            "vedtak" to utbetaling.vedtak.toJson().param(),
+                            "opprettet" to utbetaling.opprettet.toTimestamp().param(),
+                            "avstemmingsnoekkel" to utbetaling.avstemmingsnoekkel.toTimestamp().param(),
+                            "endret" to utbetaling.endret.toTimestamp().param(),
+                            "stoenadsmottaker" to utbetaling.stoenadsmottaker.value.param(),
+                            "saksbehandler" to utbetaling.saksbehandler.value.param(),
+                            "saksbehandlerEnhet" to utbetaling.saksbehandlerEnhet.param(),
+                            "attestant" to utbetaling.attestant.value.param(),
+                            "attestantEnhet" to utbetaling.attestantEnhet.param(),
+                            "oppdrag" to utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) }.param(),
+                            "saktype" to utbetaling.sakType.name.param(),
+                        ),
+                ).let { tx.run(it.asUpdate) }
 
-            utbetaling.utbetalingslinjer.forEach { utbetalingslinje ->
-                opprettUtbetalingslinje(utbetalingslinje, tx)
-            }
-            utbetaling.utbetalingshendelser.forEach { utbetalingshendelse ->
-                opprettUtbetalingshendelse(
-                    utbetalingshendelse,
-                    tx,
-                )
-            }
-        }.let { hentUtbetalingNonNull(utbetaling.vedtakId.value) }
+                utbetaling.utbetalingslinjer.forEach { utbetalingslinje ->
+                    opprettUtbetalingslinje(utbetalingslinje, tx)
+                }
+                utbetaling.utbetalingshendelser.forEach { utbetalingshendelse ->
+                    opprettUtbetalingshendelse(
+                        utbetalingshendelse,
+                        tx,
+                    )
+                }
+            }.let { hentUtbetalingNonNull(utbetaling.vedtakId.value) }
 
     private fun opprettUtbetalingslinje(
         utbetalingslinje: Utbetalingslinje,
@@ -101,11 +108,12 @@ class UtbetalingDao(private val dataSource: DataSource) {
         vedtakId: Long,
         utbetalingshendelse: Utbetalingshendelse,
     ): Utbetaling =
-        dataSource.transaction { tx ->
-            opprettUtbetalingshendelse(utbetalingshendelse, tx)
-        }.let {
-            hentUtbetalingNonNull(vedtakId = vedtakId)
-        }
+        dataSource
+            .transaction { tx ->
+                opprettUtbetalingshendelse(utbetalingshendelse, tx)
+            }.let {
+                hentUtbetalingNonNull(vedtakId = vedtakId)
+            }
 
     private fun opprettUtbetalingshendelse(
         utbetalingshendelse: Utbetalingshendelse,
@@ -140,11 +148,12 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 paramMap = mapOf("vedtakId" to vedtakId.param()),
             ).let {
                 session.run(
-                    it.map { row ->
-                        val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
-                        val utbetalingshendelser = hentUtbetalingsHendelserForUtbetaling(row.uuid("id"))
-                        toUtbetaling(row, utbetalingslinjer, utbetalingshendelser)
-                    }.asSingle,
+                    it
+                        .map { row ->
+                            val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
+                            val utbetalingshendelser = hentUtbetalingsHendelserForUtbetaling(row.uuid("id"))
+                            toUtbetaling(row, utbetalingslinjer, utbetalingshendelser)
+                        }.asSingle,
                 )
             }
         }
@@ -233,11 +242,12 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     ),
             ).let {
                 session.run(
-                    it.map { row ->
-                        val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
-                        val utbetalingshendelser = hentUtbetalingsHendelserForUtbetaling(row.uuid("id"))
-                        toUtbetalingKonsistensavstemming(row, utbetalingslinjer, utbetalingshendelser)
-                    }.asList,
+                    it
+                        .map { row ->
+                            val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
+                            val utbetalingshendelser = hentUtbetalingsHendelserForUtbetaling(row.uuid("id"))
+                            toUtbetalingKonsistensavstemming(row, utbetalingslinjer, utbetalingshendelser)
+                        }.asList,
                 )
             }
         }
@@ -266,11 +276,12 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     ),
             ).let {
                 session.run(
-                    it.map { row ->
-                        val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
-                        val utbetalingshendelser = hentUtbetalingsHendelserForUtbetaling(row.uuid("id"))
-                        toUtbetaling(row, utbetalingslinjer, utbetalingshendelser)
-                    }.asList,
+                    it
+                        .map { row ->
+                            val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
+                            val utbetalingshendelser = hentUtbetalingsHendelserForUtbetaling(row.uuid("id"))
+                            toUtbetaling(row, utbetalingslinjer, utbetalingshendelser)
+                        }.asList,
                 )
             }
         }
@@ -292,11 +303,12 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     ),
             ).let {
                 session.run(
-                    it.map { row ->
-                        val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
-                        val utbetalingshendelser = hentUtbetalingsHendelserForUtbetaling(row.uuid("id"))
-                        toUtbetaling(row, utbetalingslinjer, utbetalingshendelser)
-                    }.asList,
+                    it
+                        .map { row ->
+                            val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
+                            val utbetalingshendelser = hentUtbetalingsHendelserForUtbetaling(row.uuid("id"))
+                            toUtbetaling(row, utbetalingslinjer, utbetalingshendelser)
+                        }.asList,
                 )
             }
         }
@@ -305,39 +317,40 @@ class UtbetalingDao(private val dataSource: DataSource) {
         oppdragMedKvittering: Oppdrag,
         endret: Tidspunkt,
         utbetalingId: UUID,
-    ) = dataSource.transaction { tx ->
-        logger.info("Oppdaterer kvittering i utbetaling for vedtakId=${oppdragMedKvittering.vedtakId()}")
+    ) = dataSource
+        .transaction { tx ->
+            logger.info("Oppdaterer kvittering i utbetaling for vedtakId=${oppdragMedKvittering.vedtakId()}")
 
-        queryOf(
-            statement = """
+            queryOf(
+                statement = """
                     UPDATE utbetaling 
                     SET kvittering = :kvittering, kvittering_beskrivelse = :beskrivelse, 
                         kvittering_alvorlighetsgrad = :alvorlighetsgrad, kvittering_kode = :kode, 
                         endret = :endret 
                     WHERE vedtak_id = :vedtakId
                     """,
-            paramMap =
-                mapOf(
-                    "kvittering" to OppdragJaxb.toXml(oppdragMedKvittering).param(),
-                    "beskrivelse" to oppdragMedKvittering.mmel.beskrMelding.param(),
-                    "alvorlighetsgrad" to oppdragMedKvittering.mmel.alvorlighetsgrad.param(),
-                    "kode" to oppdragMedKvittering.mmel.kodeMelding.param(),
-                    "endret" to endret.toTimestamp().param(),
-                    "vedtakId" to oppdragMedKvittering.vedtakId().param(),
-                ),
-        ).let { tx.run(it.asUpdate) }
-            .also { require(it == 1) { "Kunne ikke oppdatere kvittering i utbetaling" } }
+                paramMap =
+                    mapOf(
+                        "kvittering" to OppdragJaxb.toXml(oppdragMedKvittering).param(),
+                        "beskrivelse" to oppdragMedKvittering.mmel.beskrMelding.param(),
+                        "alvorlighetsgrad" to oppdragMedKvittering.mmel.alvorlighetsgrad.param(),
+                        "kode" to oppdragMedKvittering.mmel.kodeMelding.param(),
+                        "endret" to endret.toTimestamp().param(),
+                        "vedtakId" to oppdragMedKvittering.vedtakId().param(),
+                    ),
+            ).let { tx.run(it.asUpdate) }
+                .also { require(it == 1) { "Kunne ikke oppdatere kvittering i utbetaling" } }
 
-        opprettUtbetalingshendelse(
-            Utbetalingshendelse(
-                UUID.randomUUID(),
-                utbetalingId,
-                endret,
-                statusFraKvittering(oppdragMedKvittering.mmel.alvorlighetsgrad),
-            ),
-            tx,
-        )
-    }.let { hentUtbetalingNonNull(oppdragMedKvittering.vedtakId()) }
+            opprettUtbetalingshendelse(
+                Utbetalingshendelse(
+                    UUID.randomUUID(),
+                    utbetalingId,
+                    endret,
+                    statusFraKvittering(oppdragMedKvittering.mmel.alvorlighetsgrad),
+                ),
+                tx,
+            )
+        }.let { hentUtbetalingNonNull(oppdragMedKvittering.vedtakId()) }
 
     private fun hentUtbetalingNonNull(vedtakId: Long): Utbetaling =
         hentUtbetaling(vedtakId)

@@ -33,11 +33,14 @@ data class Trygdetid(
     fun leggTilEllerOppdaterTrygdetidGrunnlag(nyttTrygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid {
         val normalisertNyttTrygdetidGrunnlag = listOf(nyttTrygdetidGrunnlag).normaliser().first()
 
-        trygdetidGrunnlag.normaliser().filter {
-            it.id != normalisertNyttTrygdetidGrunnlag.id
-        }.find { it.periode.overlapperMed(normalisertNyttTrygdetidGrunnlag.periode) }?.let {
-            throw OverlappendePeriodeException("Trygdetidsperioder kan ikke være overlappende")
-        }
+        trygdetidGrunnlag
+            .normaliser()
+            .filter {
+                it.id != normalisertNyttTrygdetidGrunnlag.id
+            }.find { it.periode.overlapperMed(normalisertNyttTrygdetidGrunnlag.periode) }
+            ?.let {
+                throw OverlappendePeriodeException("Trygdetidsperioder kan ikke være overlappende")
+            }
 
         val oppdatertGrunnlagListe =
             trygdetidGrunnlag.toMutableList().apply {
@@ -54,13 +57,10 @@ data class Trygdetid(
             trygdetidGrunnlag = this.trygdetidGrunnlag.filter { it.id != trygdetidGrunnlagId },
         )
 
-    fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: DetaljertBeregnetTrygdetid): Trygdetid {
-        return this.copy(beregnetTrygdetid = beregnetTrygdetid)
-    }
+    fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: DetaljertBeregnetTrygdetid): Trygdetid =
+        this.copy(beregnetTrygdetid = beregnetTrygdetid)
 
-    fun nullstillBeregnetTrygdetid(): Trygdetid {
-        return this.copy(beregnetTrygdetid = null)
-    }
+    fun nullstillBeregnetTrygdetid(): Trygdetid = this.copy(beregnetTrygdetid = null)
 }
 
 data class DetaljertBeregnetTrygdetid(
@@ -109,14 +109,17 @@ data class TrygdetidGrunnlag(
     val poengUtAar: Boolean,
     val prorata: Boolean,
 ) {
-    fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: BeregnetTrygdetidGrunnlag?): TrygdetidGrunnlag {
-        return this.copy(beregnetTrygdetid = beregnetTrygdetid)
-    }
+    fun oppdaterBeregnetTrygdetid(beregnetTrygdetid: BeregnetTrygdetidGrunnlag?): TrygdetidGrunnlag =
+        this.copy(beregnetTrygdetid = beregnetTrygdetid)
 
     fun erNasjonal() = this.bosted == LandNormalisert.NORGE.isoCode
 }
 
-data class BeregnetTrygdetidGrunnlag(val verdi: Period, val tidspunkt: Tidspunkt, val regelResultat: JsonNode)
+data class BeregnetTrygdetidGrunnlag(
+    val verdi: Period,
+    val tidspunkt: Tidspunkt,
+    val regelResultat: JsonNode,
+)
 
 data class TrygdetidPeriode(
     val fra: LocalDate,
@@ -131,9 +134,7 @@ data class TrygdetidPeriode(
         }
     }
 
-    fun overlapperMed(other: TrygdetidPeriode): Boolean {
-        return this.fra.isBefore(other.til) && other.fra.isBefore(this.til)
-    }
+    fun overlapperMed(other: TrygdetidPeriode): Boolean = this.fra.isBefore(other.til) && other.fra.isBefore(this.til)
 }
 
 fun List<TrygdetidGrunnlag>.normaliser() =
@@ -170,11 +171,13 @@ fun List<TrygdetidGrunnlag>.normaliser() =
         trygdetidGrunnlag.copy(periode = TrygdetidPeriode(fra = fra, til = til.plusDays(1)))
     }
 
-class OverlappendePeriodeException(message: String) : ForespoerselException(
-    status = HttpStatusCode.Conflict.value,
-    code = "OVERLAPPENDE_PERIODE_TRYGDETID",
-    detail = message,
-)
+class OverlappendePeriodeException(
+    message: String,
+) : ForespoerselException(
+        status = HttpStatusCode.Conflict.value,
+        code = "OVERLAPPENDE_PERIODE_TRYGDETID",
+        detail = message,
+    )
 
 fun List<Opplysningsgrunnlag>.toDto(): GrunnlagOpplysningerDto =
     GrunnlagOpplysningerDto(

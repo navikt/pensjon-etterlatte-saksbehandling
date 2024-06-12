@@ -444,7 +444,8 @@ val avrundetBroek =
         beskrivelse = "Avrunder trygdetid basert på måneder",
         regelReferanse = RegelReferanse(id = "REGEL-TOTAL-TRYGDETID-AVRUNDING"),
     ) benytter beregnetFaktiskTrygdetid med { faktisk ->
-        if (faktisk.nasjonal?.antallMaaneder != null && faktisk.teoretisk?.antallMaaneder != null &&
+        if (faktisk.nasjonal?.antallMaaneder != null &&
+            faktisk.teoretisk?.antallMaaneder != null &&
             faktisk.nasjonal.antallMaaneder != faktisk.teoretisk.antallMaaneder
         ) {
             IntBroek.fra(
@@ -514,11 +515,11 @@ private fun FremtidigTrygdetid?.verdiOrZero() = this?.periode ?: Period.ZERO
 private fun FaktiskTrygdetid?.verdiOrZero() = this?.periode ?: Period.ZERO
 
 private fun List<TrygdetidGrunnlag>.summer(antallDagerEnMaanedTrygdetid: Int) =
-    this.map { Period.between(it.periode.fra, it.periode.til) }
+    this
+        .map { Period.between(it.periode.fra, it.periode.til) }
         .reduce { acc, period ->
             acc.plus(period)
-        }
-        .let {
+        }.let {
             val dagerResterende = it.days.mod(antallDagerEnMaanedTrygdetid)
             val maanederOppjustert = it.months + (it.days - dagerResterende).div(antallDagerEnMaanedTrygdetid)
             Period.of(it.years, maanederOppjustert, dagerResterende).normalized()
@@ -527,15 +528,16 @@ private fun List<TrygdetidGrunnlag>.summer(antallDagerEnMaanedTrygdetid: Int) =
 private fun Period.justertForOpptjeningstiden(
     opptjening: Long,
     mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
-) = Period.ofMonths(
-    if (mindreEnnFireFemtedelerAvOpptjeningstiden) {
-        val months = Period.ofYears(40).toTotalMonths() - round(opptjening * 0.8).toLong()
+) = Period
+    .ofMonths(
+        if (mindreEnnFireFemtedelerAvOpptjeningstiden) {
+            val months = Period.ofYears(40).toTotalMonths() - round(opptjening * 0.8).toLong()
 
-        Period.ofMonths(months.toInt()).normalized()
-    } else {
-        this
-    }.oppjustertMaaneder().toInt(),
-).normalized()
+            Period.ofMonths(months.toInt()).normalized()
+        } else {
+            this
+        }.oppjustertMaaneder().toInt(),
+    ).normalized()
 
 private fun Period.oppjustertMaaneder() =
     when (this.days) {

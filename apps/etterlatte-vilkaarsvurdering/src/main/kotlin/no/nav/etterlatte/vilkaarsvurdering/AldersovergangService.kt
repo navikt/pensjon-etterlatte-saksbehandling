@@ -60,15 +60,16 @@ class AldersovergangService(
         )
 
         // Resultat på hele vurderingen => ikke oppfylt
-        return vilkaarsvurderingService.oppdaterTotalVurdering(
-            behandlingId,
-            brukerTokenInfo,
-            VilkaarsvurderingResultat(
-                utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
-                kommentar = "Automatisk aldersovergang",
-                tidspunkt = tidspunkt(),
-                saksbehandler = Fagsaksystem.EY.navn,
-            ),
-        )
+        return vilkaarsvurderingService
+            .oppdaterTotalVurdering(
+                behandlingId,
+                brukerTokenInfo,
+                VilkaarsvurderingResultat(
+                    utfall = VilkaarsvurderingUtfall.IKKE_OPPFYLT,
+                    kommentar = "Automatisk aldersovergang",
+                    tidspunkt = tidspunkt(),
+                    saksbehandler = Fagsaksystem.EY.navn,
+                ),
+            ).vilkaarsvurdering
     }
 }

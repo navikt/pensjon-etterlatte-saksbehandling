@@ -242,7 +242,7 @@ fun Route.vilkaarsvurdering(
 
                     logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
                     try {
-                        val vilkaarsvurdering =
+                        val (vilkaarsvurdering, behandlingGrunnlagversjon) =
                             vilkaarsvurderingService.oppdaterTotalVurdering(
                                 behandlingId,
                                 brukerTokenInfo,
@@ -251,7 +251,7 @@ fun Route.vilkaarsvurdering(
                         call.respond(
                             toDto(
                                 vilkaarsvurdering,
-                                behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
+                                behandlingGrunnlagversjon,
                             ),
                         )
                     } catch (e: BehandlingstilstandException) {

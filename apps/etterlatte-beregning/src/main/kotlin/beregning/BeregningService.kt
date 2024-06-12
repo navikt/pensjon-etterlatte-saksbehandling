@@ -2,6 +2,7 @@ package no.nav.etterlatte.beregning
 
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -39,7 +40,7 @@ class BeregningService(
         if (kanBeregneYtelse) {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-            val overstyrBeregning = hentOverstyrBeregning(behandlingId, brukerTokenInfo)
+            val overstyrBeregning = hentOverstyrBeregning(behandling)
 
             val beregning =
                 if (overstyrBeregning != null) {
@@ -68,7 +69,10 @@ class BeregningService(
         }
     }
 
-    suspend fun hentOverstyrBeregning(
+    fun hentOverstyrBeregning(behandling: DetaljertBehandling): OverstyrBeregning? =
+        beregningRepository.hentOverstyrBeregning(behandling.sak)
+
+    suspend fun hentOverstyrBeregningPaaBehandlingId(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): OverstyrBeregning? {
@@ -84,7 +88,7 @@ class BeregningService(
     ): OverstyrBeregning? {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-        return hentOverstyrBeregning(behandlingId, brukerTokenInfo).takeIf { it != null }
+        return hentOverstyrBeregning(behandling).takeIf { it != null }
             ?: beregningRepository.opprettOverstyrBeregning(
                 OverstyrBeregning(
                     behandling.sak,
@@ -101,7 +105,7 @@ class BeregningService(
     }
 
     private suspend fun Beregning?.berikMedOverstyrBeregning(brukerTokenInfo: BrukerTokenInfo) =
-        this?.copy(overstyrBeregning = hentOverstyrBeregning(behandlingId, brukerTokenInfo))
+        this?.copy(overstyrBeregning = hentOverstyrBeregningPaaBehandlingId(behandlingId, brukerTokenInfo))
 }
 
 class TrygdetidMangler(

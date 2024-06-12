@@ -37,7 +37,7 @@ fun Route.beregning(
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter overstyrBeregning med behandlingId=$it")
 
-                val overstyrBeregning = beregningService.hentOverstyrBeregning(behandlingId, brukerTokenInfo)?.toDTO()
+                val overstyrBeregning = beregningService.hentOverstyrBeregningPaaBehandlingId(behandlingId, brukerTokenInfo)?.toDTO()
 
                 when (overstyrBeregning) {
                     null -> call.response.status(HttpStatusCode.NoContent)

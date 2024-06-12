@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
@@ -330,11 +331,10 @@ class VilkaarsvurderingService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
+            val behandling = oppdaterGrunnlagsversjon(behandlingId, brukerTokenInfo)
             val vilkaarsvurdering =
                 vilkaarsvurderingRepository.hent(behandlingId)
                     ?: throw VilkaarsvurderingIkkeFunnet()
-
-            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
             val virkningstidspunktFraBehandling =
                 behandling.virkningstidspunkt?.dato
@@ -357,15 +357,16 @@ class VilkaarsvurderingService(
             }
         }
 
-    suspend fun oppdaterGrunnlagsversjon(
+    private suspend fun oppdaterGrunnlagsversjon(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        val grunnlag = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo).second
+    ): DetaljertBehandling {
+        val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
         vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(
             behandlingId = behandlingId,
             grunnlagVersjon = grunnlag.metadata.versjon,
         )
+        return behandling
     }
 
     private suspend fun <T> tilstandssjekkFoerKjoering(

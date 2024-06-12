@@ -161,8 +161,10 @@ internal class TrygdetidServiceTest {
         coVerify {
             grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
         }
-        coVerify(exactly = 2) {
+        coVerify(exactly = 1) {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
+        }
+        coVerify(exactly = 2) {
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
         }
 
@@ -311,9 +313,11 @@ internal class TrygdetidServiceTest {
         runBlocking {
             service.opprettTrygdetiderForBehandling(behandlingId, saksbehandler)
         }
+        coVerify(exactly = 1) {
+            behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
+        }
 
         coVerify(exactly = 2) {
-            behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
         }
 
@@ -436,8 +440,11 @@ internal class TrygdetidServiceTest {
             service.opprettTrygdetiderForBehandling(behandlingId, saksbehandler)
         }
 
-        coVerify(exactly = 2) {
+        coVerify(exactly = 1) {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
+        }
+
+        coVerify(exactly = 2) {
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
         }
 
@@ -567,9 +574,10 @@ internal class TrygdetidServiceTest {
             beregningService.beregnTrygdetidGrunnlag(any())
             beregningService.beregnTrygdetid(any(), any(), any(), any(), any())
         }
-
-        coVerify(exactly = 2) {
+        coVerify(exactly = 1) {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
+        }
+        coVerify(exactly = 2) {
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
         }
 
@@ -638,7 +646,7 @@ internal class TrygdetidServiceTest {
 
         val trygdetid =
             runBlocking {
-                service.lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
+                service.lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandlingMedSjekk(
                     behandlingId,
                     eksisterendeTrygdetid.id,
                     trygdetidGrunnlag,
@@ -687,7 +695,7 @@ internal class TrygdetidServiceTest {
 
         val trygdetid =
             runBlocking {
-                service.lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
+                service.lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandlingMedSjekk(
                     behandlingId,
                     eksisterendeTrygdetid.id,
                     trygdetidGrunnlag,
@@ -764,7 +772,7 @@ internal class TrygdetidServiceTest {
 
         val trygdetid =
             runBlocking {
-                service.lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
+                service.lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandlingMedSjekk(
                     behandlingId,
                     eksisterendeTrygdetid.id,
                     endretTrygdetidGrunnlag,
@@ -965,7 +973,7 @@ internal class TrygdetidServiceTest {
 
         runBlocking {
             assertThrows<Exception> {
-                service.lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
+                service.lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandlingMedSjekk(
                     behandlingId,
                     eksisterendeTrygdetid.id,
                     trygdetidGrunnlag,

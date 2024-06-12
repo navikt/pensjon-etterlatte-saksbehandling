@@ -148,7 +148,7 @@ fun Route.trygdetid(
                     logger.info("Legger til trygdetidsgrunnlag for behandling $behandlingId")
                     val trygdetidgrunnlagDto = call.receive<TrygdetidGrunnlagDto>()
 
-                    trygdetidService.lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
+                    trygdetidService.lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandlingMedSjekk(
                         behandlingId,
                         trygdetidId(),
                         trygdetidgrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo),

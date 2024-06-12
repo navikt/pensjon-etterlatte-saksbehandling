@@ -75,7 +75,7 @@ fun Route.vilkaarsvurdering(
                             ?: true
 
                     logger.info("Oppretter vilkårsvurdering for $behandlingId")
-                    val vilkaarsvurdering =
+                    val (vilkaarsvurdering, behandlingGrunnlagsversjon) =
                         vilkaarsvurderingService.opprettVilkaarsvurdering(
                             behandlingId,
                             brukerTokenInfo,
@@ -85,7 +85,7 @@ fun Route.vilkaarsvurdering(
                     call.respond(
                         toDto(
                             vilkaarsvurdering,
-                            behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
+                            behandlingGrunnlagsversjon,
                         ),
                     )
                 } catch (e: VirkningstidspunktIkkeSattException) {

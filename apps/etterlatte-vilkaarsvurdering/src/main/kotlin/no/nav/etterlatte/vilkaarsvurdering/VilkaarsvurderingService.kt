@@ -223,7 +223,7 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         kopierVedRevurdering: Boolean = true,
-    ): Vilkaarsvurdering =
+    ): VilkaarsvuderingMedBehandlingGrunnlagsversjon =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
             vilkaarsvurderingRepository.hent(behandlingId)?.let {
                 throw IllegalArgumentException("Vilkårsvurdering finnes allerede for behandling $behandlingId")
@@ -242,7 +242,10 @@ class VilkaarsvurderingService(
 
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId)
+                    VilkaarsvuderingMedBehandlingGrunnlagsversjon(
+                        opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId),
+                        grunnlag.metadata.versjon,
+                    )
                 }
 
                 BehandlingType.REVURDERING -> {
@@ -253,9 +256,15 @@ class VilkaarsvurderingService(
                                 behandling.sak,
                                 brukerTokenInfo,
                             )
-                        kopierVilkaarsvurdering(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo)
+                        VilkaarsvuderingMedBehandlingGrunnlagsversjon(
+                            kopierVilkaarsvurdering(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo),
+                            grunnlag.metadata.versjon,
+                        )
                     } else {
-                        opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId)
+                        VilkaarsvuderingMedBehandlingGrunnlagsversjon(
+                            opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId),
+                            grunnlag.metadata.versjon,
+                        )
                     }
                 }
             }

@@ -133,6 +133,22 @@ internal class AvkortingTest {
                     }
                 }
         }
+
+        @Test
+        fun `fyller ut avkortetYtelseForrigeVedtak`() {
+            avkorting.medYtelseFraOgMedVirkningstidspunkt(
+                virkningstidspunkt = YearMonth.of(2024, Month.MAY),
+                forrigeAvkorting = avkorting,
+            ).asClue {
+                it.avkortetYtelseForrigeVedtak.size shouldBe 4
+
+                it.avkortetYtelseForrigeVedtak[0] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[0]
+                it.avkortetYtelseForrigeVedtak[1] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[1]
+                it.avkortetYtelseForrigeVedtak[2] shouldBe avkorting.aarsoppgjoer[0].avkortetYtelseAar[2]
+
+                it.avkortetYtelseForrigeVedtak[3] shouldBe avkorting.aarsoppgjoer[1].avkortetYtelseAar[0]
+            }
+        }
     }
 
     @Nested

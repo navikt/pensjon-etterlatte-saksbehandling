@@ -31,7 +31,7 @@ data class Avkorting(
     ): Avkorting =
         this.copy(
             avkortetYtelseFraVirkningstidspunkt =
-                aarsoppgjoer.filter { virkningstidspunkt.year <= it.aar!! }.flatMap { aarsoppgjoer ->
+                aarsoppgjoer.filter { virkningstidspunkt.year <= it.aar }.flatMap { aarsoppgjoer ->
                     aarsoppgjoer.avkortetYtelseAar
                         .filter { it.periode.tom == null || virkningstidspunkt <= it.periode.tom }
                         .map {
@@ -43,8 +43,9 @@ data class Avkorting(
                         }
                 },
             avkortetYtelseForrigeVedtak =
-                forrigeAvkorting?.aarsoppgjoer?.single()?.avkortetYtelseAar
-                    ?: emptyList(),
+                forrigeAvkorting?.aarsoppgjoer?.flatMap {
+                    it.avkortetYtelseAar
+                } ?: emptyList(),
         )
 
 	/*
@@ -163,7 +164,7 @@ data class Avkorting(
             this.aarsoppgjoer.map { aarsoppgjoer ->
 
                 val ytelseFoerAvkorting =
-                    if (aarsoppgjoer.aar!! >= virkningstidspunktAar) {
+                    if (aarsoppgjoer.aar >= virkningstidspunktAar) {
                         aarsoppgjoer.ytelseFoerAvkorting.leggTilNyeBeregninger(beregning)
                     } else {
                         aarsoppgjoer.ytelseFoerAvkorting
@@ -267,7 +268,7 @@ data class Avkorting(
     }
 
     fun hentAarsoppgjoer(fom: YearMonth): Aarsoppgjoer {
-        val funnet = aarsoppgjoer.find { it.aar!! == fom.year }
+        val funnet = aarsoppgjoer.find { it.aar == fom.year }
         return funnet ?: Aarsoppgjoer(UUID.randomUUID(), aar = fom.year)
     }
 
@@ -323,7 +324,7 @@ data class Aarsoppgjoer(
 	 */
     fun foersteMaanedDetteAar(): YearMonth =
         if (ytelseFoerAvkorting.isEmpty()) {
-            YearMonth.of(aar!!, 1)
+            YearMonth.of(aar, 1)
         } else {
             ytelseFoerAvkorting.first().periode.fom
         }

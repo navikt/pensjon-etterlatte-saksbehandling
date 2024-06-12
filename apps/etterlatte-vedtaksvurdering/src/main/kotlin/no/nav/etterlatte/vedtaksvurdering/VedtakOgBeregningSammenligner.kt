@@ -31,12 +31,14 @@ object VedtakOgBeregningSammenligner {
     ) {
         val innhold = vedtak.innhold as VedtakInnhold.Behandling
         val perioder = innhold.utbetalingsperioder
-        check(perioder.size == beregning.beregning.beregningsperioder.size) {
-            "Forventa like mange perioder i vedtak som i beregning for vedtak ${vedtak.id} i sak ${vedtak.sakId}"
+        val beregningsperioder = beregning.beregning.beregningsperioder
+        check(perioder.size == beregningsperioder.size) {
+            "Forventa like mange perioder i vedtak som i beregning for vedtak ${vedtak.id} i sak ${vedtak.sakId}. " +
+                "Vedtak hadde ${perioder.size}, mens beregning hadde ${beregningsperioder.size}"
         }
         for (i in perioder.indices) {
             val periode = perioder[i]
-            val beregningsperiode = beregning.beregning.beregningsperioder[i]
+            val beregningsperiode = beregningsperioder[i]
             val avkorting =
                 beregning.avkorting?.avkortetYtelse?.firstOrNull {
                     it.fom == beregningsperiode.datoFOM && it.tom == beregningsperiode.datoTOM

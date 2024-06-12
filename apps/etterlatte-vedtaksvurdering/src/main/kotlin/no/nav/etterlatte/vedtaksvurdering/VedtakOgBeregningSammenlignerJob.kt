@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.TimerJob
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.token.Systembruker
 import no.nav.etterlatte.vedtaksvurdering.BehandlingOgSaktype
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
@@ -56,12 +57,14 @@ class VedtakOgBeregningSammenlignerJob(
 
     private suspend fun start(behandling: BehandlingOgSaktype) {
         val beregning =
-            beregningKlient.hentBeregningOgAvkorting(
-                behandlingId = behandling.behandlingId,
-                brukerTokenInfo = Systembruker.automatiskJobb,
-                saktype = behandling.sakType,
-            )
-        val vedtak = vedtaksvurderingRepository.hentVedtak(behandling.behandlingId)
+            retryOgPakkUt {
+                beregningKlient.hentBeregningOgAvkorting(
+                    behandlingId = behandling.behandlingId,
+                    brukerTokenInfo = Systembruker.automatiskJobb,
+                    saktype = behandling.sakType,
+                )
+            }
+        val vedtak = retryOgPakkUt { vedtaksvurderingRepository.hentVedtak(behandling.behandlingId) }
         vedtak?.let {
             logger.debug("Sjekker perioder og beregning for vedtak ${vedtak.id} i sak ${vedtak.sakId}")
             try {

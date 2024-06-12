@@ -77,14 +77,13 @@ class SanksjonService(
 
         if (sanksjon.id === null) {
             logger.info("Oppretter sanksjon med behandlingID=$behandlingId")
-            // Setter også behandlingen til status "beregnet", slik at avkorting fanger opp at den må regnes ut på nytt
-            behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, true)
+            settBehandlingTilBeregnetStatus(behandlingId, brukerTokenInfo)
             return sanksjonRepository.opprettSanksjon(behandlingId, behandling.sak, brukerTokenInfo.ident(), sanksjon)
         }
 
         logger.info("Oppdaterer sanksjon med behandlingID=$behandlingId")
-        // Setter også behandlingen til status "beregnet", slik at avkorting fanger opp at den må regnes ut på nytt
-        behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, true)
+        // TODO: vi vil kanskje ikke tvinge noen avkortings-reberegning her hvis det er kun beskrivelse som endrer seg
+        settBehandlingTilBeregnetStatus(behandlingId, brukerTokenInfo)
         return sanksjonRepository.oppdaterSanksjon(sanksjon, brukerTokenInfo.ident())
     }
 
@@ -97,10 +96,19 @@ class SanksjonService(
 
         if (!behandling.status.kanEndres()) throw BehandlingKanIkkeEndres()
 
-        // Setter behandlingen sin status til "beregnet", slik at avkorting fanger opp at den må regnes ut på nytt
-        behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, true)
+        settBehandlingTilBeregnetStatus(behandlingId, brukerTokenInfo)
         logger.info("Sletter sanksjon med sanksjonID=$sanksjonId")
         sanksjonRepository.slettSanksjon(sanksjonId)
+    }
+
+    private suspend fun settBehandlingTilBeregnetStatus(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        // Setter behandlingen til status "beregnet", slik at avkorting fanger opp at den må regnes ut på nytt
+        if (!behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, true)) {
+            throw BehandlingKanIkkeEndres()
+        }
     }
 }
 

@@ -35,7 +35,7 @@ class HendelseRiverTest(
 
         val melding =
             JsonMessage.newMessage(
-                EventNames.ALDERSOVERGANG.name,
+                EventNames.TIDSHENDELSE.name,
                 mapOf(
                     TIDSHENDELSE_STEG_KEY to "VURDERT_LOEPENDE_YTELSE",
                     TIDSHENDELSE_TYPE_KEY to "BP20",
@@ -62,7 +62,7 @@ class HendelseRiverTest(
 
         val melding =
             JsonMessage.newMessage(
-                EventNames.ALDERSOVERGANG.name,
+                EventNames.TIDSHENDELSE.name,
                 mapOf(
                     TIDSHENDELSE_STEG_KEY to "OPPGAVE_OPPRETTET",
                     TIDSHENDELSE_TYPE_KEY to "BP20",

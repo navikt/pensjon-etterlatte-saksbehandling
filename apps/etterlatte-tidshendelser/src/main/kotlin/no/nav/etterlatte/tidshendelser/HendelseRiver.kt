@@ -23,7 +23,7 @@ class HendelseRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, EventNames.ALDERSOVERGANG) {
+        initialiserRiver(rapidsConnection, EventNames.TIDSHENDELSE) {
             validate { it.requireKey(TIDSHENDELSE_STEG_KEY) }
             validate { it.requireKey(TIDSHENDELSE_TYPE_KEY) }
             validate { it.requireKey(TIDSHENDELSE_ID_KEY) }

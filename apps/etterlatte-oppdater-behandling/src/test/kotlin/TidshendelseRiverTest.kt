@@ -57,7 +57,7 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
             field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "OPPGAVE_OPPRETTET"
             field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "AO_BP20"
             field(0, TIDSHENDELSE_ID_KEY).asUUID() shouldBe hendelseId
@@ -99,7 +99,7 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
             field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "BEHANDLING_OPPRETTET"
             field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "OMS_DOED_5AAR"
             field(0, TIDSHENDELSE_ID_KEY).asUUID() shouldBe hendelseId
@@ -137,7 +137,7 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
             field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "HOPPET_OVER"
             field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "AO_BP20"
             field(0, TIDSHENDELSE_ID_KEY).asUUID() shouldBe hendelseId
@@ -170,7 +170,7 @@ fun lagMeldingForVurdertLoependeYtelse(
 ): JsonMessage {
     val newMessage =
         JsonMessage.newMessage(
-            EventNames.ALDERSOVERGANG.lagEventnameForType(),
+            EventNames.TIDSHENDELSE.lagEventnameForType(),
             emptyMap(),
         )
 

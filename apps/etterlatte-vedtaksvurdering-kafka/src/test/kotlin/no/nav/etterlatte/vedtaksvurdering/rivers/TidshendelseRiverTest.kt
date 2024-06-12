@@ -55,7 +55,7 @@ class TidshendelseRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                EventNames.ALDERSOVERGANG.name,
+                EventNames.TIDSHENDELSE.name,
                 mapOf(
                     TIDSHENDELSE_STEG_KEY to VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name,
                     TIDSHENDELSE_TYPE_KEY to "AO_BP20",
@@ -68,7 +68,7 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
             field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
             field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "AO_BP20"
             field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe "123-123-123"
@@ -88,7 +88,7 @@ class TidshendelseRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                EventNames.ALDERSOVERGANG.name,
+                EventNames.TIDSHENDELSE.name,
                 mapOf(
                     TIDSHENDELSE_STEG_KEY to VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name,
                     TIDSHENDELSE_TYPE_KEY to "AO_BP20",
@@ -101,7 +101,7 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
             field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
             field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "AO_BP20"
             field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe "432-987-234"
@@ -118,7 +118,7 @@ class TidshendelseRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                EventNames.ALDERSOVERGANG.name,
+                EventNames.TIDSHENDELSE.name,
                 mapOf(
                     TIDSHENDELSE_STEG_KEY to VedtakAldersovergangStepEvents.VILKAARSVURDERT.name,
                     TIDSHENDELSE_TYPE_KEY to "AO_BP20",
@@ -132,7 +132,7 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 3 // 1 for vedtak fattet, 1 for attestert, 1 for original melding (med nytt steg)
-            field(2, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(2, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
             field(2, TIDSHENDELSE_STEG_KEY).asText() shouldBe VedtakAldersovergangStepEvents.VEDTAK_ATTESTERT.name
         }
 

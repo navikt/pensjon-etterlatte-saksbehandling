@@ -22,7 +22,7 @@ class TidshendelseRiver(
     private val tidshendelseService: TidshendelseService,
 ) : ListenerMedLogging() {
     init {
-        initialiserRiver(rapidsConnection, EventNames.ALDERSOVERGANG) {
+        initialiserRiver(rapidsConnection, EventNames.TIDSHENDELSE) {
             validate { it.requireValue(TIDSHENDELSE_STEG_KEY, "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR") }
             validate { it.requireKey(TIDSHENDELSE_TYPE_KEY) }
             validate { it.requireKey(TIDSHENDELSE_ID_KEY) }

@@ -47,7 +47,7 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
             field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
             field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "BP20"
             field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe hendelseId.toString()
@@ -69,7 +69,7 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
             field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
             field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "BP20"
             field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe hendelseId.toString()
@@ -104,7 +104,7 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
             field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
             field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "OMS_DOED_3AAR"
             field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe hendelseId.toString()
@@ -138,7 +138,7 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
             field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "VILKAARSVURDERT"
             field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "BP20"
             field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe hendelseId.toString()
@@ -160,7 +160,7 @@ class TidshendelseRiverTest {
         }
 
         return JsonMessage.newMessage(
-            EventNames.ALDERSOVERGANG.lagEventnameForType(),
+            EventNames.TIDSHENDELSE.lagEventnameForType(),
             mapOf(
                 TIDSHENDELSE_STEG_KEY to steg,
                 TIDSHENDELSE_TYPE_KEY to "BP20",

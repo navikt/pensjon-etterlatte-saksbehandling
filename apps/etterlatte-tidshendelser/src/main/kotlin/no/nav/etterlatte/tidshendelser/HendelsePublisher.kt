@@ -23,7 +23,7 @@ class HendelsePublisher(
         val message =
             JsonMessage.newMessage(
                 mapOf(
-                    EventNames.ALDERSOVERGANG.lagParMedEventNameKey(),
+                    EventNames.TIDSHENDELSE.lagParMedEventNameKey(),
                     SAK_ID_KEY to hendelse.sakId,
                     TIDSHENDELSE_ID_KEY to hendelse.id,
                     TIDSHENDELSE_STEG_KEY to hendelse.steg,

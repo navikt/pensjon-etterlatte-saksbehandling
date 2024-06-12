@@ -82,7 +82,7 @@ internal class SanksjonServiceTest {
 
             every { sanksjonRepository.opprettSanksjon(behandlingId, sakId, bruker.ident, sanksjon) } returns Unit
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
-            coEvery { behandlingKlient.kanBeregnes(behandlingId, bruker, true) } returns true
+            coEvery { behandlingKlient.kanBeregnes(behandlingId, any(), any()) } returns true
 
             runBlocking {
                 service.opprettEllerOppdaterSanksjon(behandlingId, sanksjon, bruker) shouldBe Unit
@@ -107,7 +107,7 @@ internal class SanksjonServiceTest {
 
             every { sanksjonRepository.oppdaterSanksjon(sanksjon, bruker.ident) } returns Unit
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
-            coEvery { behandlingKlient.kanBeregnes(behandlingId, bruker, true) } returns true
+            coEvery { behandlingKlient.kanBeregnes(behandlingId, any(), any()) } returns true
 
             runBlocking {
                 service.opprettEllerOppdaterSanksjon(behandlingId, sanksjon, bruker) shouldBe Unit
@@ -229,7 +229,7 @@ internal class SanksjonServiceTest {
 
             every { sanksjonRepository.slettSanksjon(sanksjonId) } returns 1
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
-            coEvery { behandlingKlient.kanBeregnes(behandlingId, bruker, true) } returns true
+            coEvery { behandlingKlient.kanBeregnes(behandlingId, any(), any()) } returns true
 
             runBlocking {
                 service.slettSanksjon(behandlingId, sanksjonId, bruker) shouldBe Unit
@@ -267,7 +267,7 @@ internal class SanksjonServiceTest {
             every { sanksjonRepository.hentSanksjon(behandlingId) } returns listOf(sanksjoner)
             every { sanksjonRepository.hentSanksjon(forrigeBehandlingId) } returns null
             every { sanksjonRepository.opprettSanksjon(forrigeBehandlingId, sakId, bruker.ident, sanksjon) } returns Unit
-            coEvery { behandlingKlient.kanBeregnes(behandlingId, bruker, any()) } returns true
+            coEvery { behandlingKlient.kanBeregnes(forrigeBehandlingId, any(), any()) } returns true
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
             coEvery { behandlingKlient.hentBehandling(forrigeBehandlingId, bruker) } returns forrigeBehandling
             coEvery {

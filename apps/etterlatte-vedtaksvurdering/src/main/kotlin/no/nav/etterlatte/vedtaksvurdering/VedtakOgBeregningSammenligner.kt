@@ -53,7 +53,9 @@ object VedtakOgBeregningSammenligner {
                     "og behandling ${vedtak.behandlingId} i vedtak, men ${Periode(
                         beregningsperiode.datoFOM,
                         beregningsperiode.datoTOM,
-                    )} fra beregning"
+                    )} fra beregning. Alle perioder fra vedtak:" +
+                    "${perioder.map { it.periode }}. " +
+                    "Alle perioder fra beregning: ${beregningsperioder.map { "${it.datoFOM}-${it.datoTOM}" } }"
             }
         }
     }

@@ -7,7 +7,7 @@ changedKotlinFiles=$(git diff --name-only --cached | grep '\.kt[s"]\?$' || true)
 if [ -n "${changedKotlinFiles-unset}" ]; then
     kotlinversion=$(ktlint -v)
     expectedVersion="ktlint version 1.3.0"
-    if [[ "$kotlinversion" != "$expectedVersion" ]]; then
+    if [ "$kotlinversion" != "$expectedVersion" ]; then
       echo "Running version $kotlinversion needs to be $expectedVersion"
       exit 1
     fi

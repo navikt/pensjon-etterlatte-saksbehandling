@@ -319,11 +319,11 @@ class AktivitetspliktService(
     ): OpprettRevurderingForAktivitetspliktResponse {
         logger.info("Oppretter oppgave for revurdering av aktivitetsplikt for sak ${request.sakId}")
         return oppgaveService
-            .opprettNyOppgaveMedSakOgReferanse(
+            .opprettOppgave(
                 sakId = request.sakId,
                 referanse = forrigeBehandling.id.toString(),
-                oppgaveKilde = OppgaveKilde.HENDELSE,
-                oppgaveType = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
+                kilde = OppgaveKilde.HENDELSE,
+                type = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
                 merknad = request.jobbType.beskrivelse,
                 frist = request.frist,
             ).let { oppgave ->

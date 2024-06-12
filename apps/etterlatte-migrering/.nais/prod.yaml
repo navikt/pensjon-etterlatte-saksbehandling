@@ -72,10 +72,6 @@ spec:
     - name: KAFKA_RESET_POLICY
       #sette tilbake til none senere
       value: earliest
-    - name: PEN_URL
-      value: https://pensjon-pen.prod-fss-pub.nais.io/pen/springapi
-    - name: PEN_CLIENT_ID
-      value: 53eaf67f-d7b2-46e9-8ffe-3da7cf0ac955
     - name: ETTERLATTE_PDLTJENESTER_URL
       value: http://etterlatte-pdltjenester
     - name: PDLTJENESTER_AZURE_SCOPE
@@ -88,7 +84,6 @@ spec:
         - application: etterlatte-pdltjenester
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
-        - host: pensjon-pen.prod-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-behandling

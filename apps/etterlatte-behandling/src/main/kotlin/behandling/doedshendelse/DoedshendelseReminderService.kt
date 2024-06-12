@@ -45,11 +45,11 @@ class DoedshendelseReminderService(
         if (!harSoekt) {
             val oppgaver = oppgaveService.hentOppgaverForSak(hendelse.sakId)
             if (oppgaver.none { it.type == OppgaveType.VURDER_KONSEKVENS }) {
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                oppgaveService.opprettOppgave(
                     referanse = hendelse.id.toString(),
                     sakId = hendelse.sakId,
-                    oppgaveKilde = OppgaveKilde.HENDELSE,
-                    oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                    kilde = OppgaveKilde.HENDELSE,
+                    type = OppgaveType.VURDER_KONSEKVENS,
                     merknad = "${hendelse.beroertFnr} Har ikke søkt om Barnepensjon 2 måneder etter utsendt brev",
                     frist = Tidspunkt.now().plus(30L, ChronoUnit.DAYS),
                 )

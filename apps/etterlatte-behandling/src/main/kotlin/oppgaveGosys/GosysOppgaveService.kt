@@ -197,11 +197,11 @@ class GosysOppgaveServiceImpl(
         }
 
         val nyOppgave =
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            oppgaveService.opprettOppgave(
                 referanse = gosysOppgave.journalpostId,
                 sakId = sakId,
-                oppgaveKilde = OppgaveKilde.SAKSBEHANDLER,
-                oppgaveType = OppgaveType.JOURNALFOERING,
+                kilde = OppgaveKilde.SAKSBEHANDLER,
+                type = OppgaveType.JOURNALFOERING,
                 merknad = gosysOppgave.beskrivelse,
                 frist = gosysOppgave.frist,
                 saksbehandler = brukerTokenInfo.ident(),

@@ -266,11 +266,11 @@ internal class BehandlingServiceImpl(
             oppgaveService.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
 
             hendelserKnyttetTilBehandling.forEach { hendelse ->
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                oppgaveService.opprettOppgave(
                     referanse = hendelse.id.toString(),
                     sakId = behandling.sak.id,
-                    oppgaveKilde = OppgaveKilde.HENDELSE,
-                    oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                    kilde = OppgaveKilde.HENDELSE,
+                    type = OppgaveType.VURDER_KONSEKVENS,
                     merknad = hendelse.beskrivelse(),
                 )
             }
@@ -284,11 +284,11 @@ internal class BehandlingServiceImpl(
                             "Kunne ikke finne en omgjøringsoppgave i sak=${behandling.sak.id}, " +
                                 "så vi får ikke gjenopprettet omgjøringen hvis denne behandlingen avbrytes!",
                         )
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                oppgaveService.opprettOppgave(
                     referanse = omgjoeringsoppgaveForKlage.referanse,
                     sakId = omgjoeringsoppgaveForKlage.sakId,
-                    oppgaveKilde = omgjoeringsoppgaveForKlage.kilde,
-                    oppgaveType = omgjoeringsoppgaveForKlage.type,
+                    kilde = omgjoeringsoppgaveForKlage.kilde,
+                    type = omgjoeringsoppgaveForKlage.type,
                     merknad = omgjoeringsoppgaveForKlage.merknad,
                     frist = omgjoeringsoppgaveForKlage.frist,
                 )

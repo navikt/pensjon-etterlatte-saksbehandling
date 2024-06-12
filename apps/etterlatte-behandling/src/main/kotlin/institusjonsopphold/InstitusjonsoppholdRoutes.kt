@@ -9,8 +9,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.ktor.route.hentNavidentFraToken
 import no.nav.etterlatte.libs.ktor.route.sakId
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
@@ -18,15 +18,13 @@ internal fun Route.institusjonsoppholdRoute(institusjonsoppholdService: Institus
     route("/api/institusjonsoppholdbegrunnelse/{$SAKID_CALL_PARAMETER}") {
         post {
             kunSkrivetilgang {
-                hentNavidentFraToken { navIdent ->
-                    val institusjonsoppholdBegrunnelse = call.receive<InstitusjonsoppholdBegrunnelseWrapper>()
-                    institusjonsoppholdService.leggInnInstitusjonsoppholdBegrunnelse(
-                        sakId,
-                        Grunnlagsopplysning.Saksbehandler.create(navIdent),
-                        institusjonsoppholdBegrunnelse.institusjonsopphold,
-                    )
-                    call.respond(HttpStatusCode.OK)
-                }
+                val institusjonsoppholdBegrunnelse = call.receive<InstitusjonsoppholdBegrunnelseWrapper>()
+                institusjonsoppholdService.leggInnInstitusjonsoppholdBegrunnelse(
+                    sakId,
+                    Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
+                    institusjonsoppholdBegrunnelse.institusjonsopphold,
+                )
+                call.respond(HttpStatusCode.OK)
             }
         }
     }
@@ -45,4 +43,6 @@ internal fun Route.institusjonsoppholdRoute(institusjonsoppholdService: Institus
     }
 }
 
-data class InstitusjonsoppholdBegrunnelseWrapper(val institusjonsopphold: InstitusjonsoppholdBegrunnelse)
+data class InstitusjonsoppholdBegrunnelseWrapper(
+    val institusjonsopphold: InstitusjonsoppholdBegrunnelse,
+)

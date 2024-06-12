@@ -26,7 +26,13 @@ internal class UtlandMapperTest {
         val utland = UtlandMapper.mapUtland(hentPerson)
 
         assertEquals("FRA", utland.utflyttingFraNorge?.first()?.tilflyttingsland)
-        assertEquals("2021-07-01", utland.utflyttingFraNorge?.first()?.dato.toString())
+        assertEquals(
+            "2021-07-01",
+            utland.utflyttingFraNorge
+                ?.first()
+                ?.dato
+                .toString(),
+        )
     }
 
     @Test
@@ -49,6 +55,12 @@ internal class UtlandMapperTest {
         val utland = UtlandMapper.mapUtland(hentPerson)
 
         assertEquals("FRA", utland.innflyttingTilNorge?.first()?.fraflyttingsland)
-        assertEquals("2021-07-01", utland.innflyttingTilNorge?.first()?.dato.toString())
+        assertEquals(
+            "2021-07-01",
+            utland.innflyttingTilNorge
+                ?.first()
+                ?.dato
+                .toString(),
+        )
     }
 }

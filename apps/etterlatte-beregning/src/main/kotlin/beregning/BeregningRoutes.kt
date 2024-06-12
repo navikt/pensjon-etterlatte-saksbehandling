@@ -51,11 +51,13 @@ fun Route.beregning(
                 logger.info("Oppretter overstyrBeregning med behandlingId=$it")
 
                 val overstyrBeregning =
-                    beregningService.opprettOverstyrBeregning(
-                        behandlingId,
-                        call.receive<OverstyrBeregningDTO>(),
-                        brukerTokenInfo,
-                    ).toDTO()
+                    beregningService
+                        .opprettOverstyrBeregning(
+                            behandlingId,
+                            call.receive<OverstyrBeregningDTO>(),
+                            brukerTokenInfo,
+                        )!!
+                        .toDTO()
 
                 call.respond(overstyrBeregning)
             }

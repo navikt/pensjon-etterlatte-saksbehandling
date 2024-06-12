@@ -8,7 +8,9 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
 import java.time.YearMonth
 
-class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
+class Vedtakstidslinje(
+    private val vedtak: List<Vedtak>,
+) {
     private val iverksatteVedtak = hentIverksatteVedtak()
 
     fun harLoependeVedtakPaaEllerEtter(dato: LocalDate): LoependeYtelse {
@@ -27,7 +29,8 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
                 if (erLoepende) {
                     sammenstill(YearMonth.from(dato))
                         .filter { it.type != VedtakType.OPPHOER }
-                        .maxByOrNull { it.attestasjon?.tidspunkt!! }?.behandlingId
+                        .maxByOrNull { it.attestasjon?.tidspunkt!! }
+                        ?.behandlingId
                 } else {
                     null
                 },
@@ -36,14 +39,18 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
 
     private fun hentSenesteVedtakSomKanLoepePaaDato(dato: LocalDate): Vedtak? =
         iverksatteVedtak
-            .filter { it.type.kanLoepe }
+            .filter { it.type.vanligBehandling }
             .filter {
-                it.virkningstidspunkt.atDay(1).isAfter(foersteMuligeVedtaksdag(dato)).not()
-            }.maxByOrNull { it.attestasjon?.tidspunkt!! }?.let { senesteVedtak ->
-                return if (senesteVedtak.opphoerFraOgMed != null && senesteVedtak.opphoerFraOgMed!!.atDay(1) >= dato) {
-                    null
-                } else {
+                it.virkningstidspunkt
+                    .atDay(1)
+                    .isAfter(foersteMuligeVedtaksdag(dato))
+                    .not()
+            }.maxByOrNull { it.attestasjon?.tidspunkt!! }
+            ?.let { senesteVedtak ->
+                return if (senesteVedtak.opphoerFraOgMed == null || senesteVedtak.opphoerFraOgMed!!.atDay(1) > dato) {
                     senesteVedtak
+                } else {
+                    null
                 }
             }
 
@@ -52,7 +59,8 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
     private fun foersteMuligeVedtaksdag(fraDato: LocalDate): LocalDate {
         val foersteVirkningsdato =
             (iverksatteVedtak.minBy { it.virkningstidspunkt }.innhold as VedtakInnhold.Behandling)
-                .virkningstidspunkt.atDay(1)
+                .virkningstidspunkt
+                .atDay(1)
         return maxOf(foersteVirkningsdato, fraDato)
     }
 
@@ -82,8 +90,8 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
     }
 
     // Opprette kopier av data class-struktur, med (potensielt) endret liste med utbetalingsperioder
-    private fun Vedtak.kopier(gyldighetsperiode: Periode): Vedtak {
-        return copy(
+    private fun Vedtak.kopier(gyldighetsperiode: Periode): Vedtak =
+        copy(
             id = id,
             soeker = soeker,
             sakId = sakId,
@@ -102,10 +110,9 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
                     )
                 },
         )
-    }
 
-    private fun VedtakInnhold.Behandling.kopier(gyldighetsperiode: Periode): VedtakInnhold.Behandling {
-        return copy(
+    private fun VedtakInnhold.Behandling.kopier(gyldighetsperiode: Periode): VedtakInnhold.Behandling =
+        copy(
             behandlingType = behandlingType,
             revurderingAarsak = revurderingAarsak,
             virkningstidspunkt = virkningstidspunkt,
@@ -115,19 +122,17 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
             utbetalingsperioder = filtrerUtbetalingsperioder(gyldighetsperiode),
             revurderingInfo = revurderingInfo,
         )
-    }
 
     /**
      * 2 oppgaver:
      * - fjerne perioder som er utenfor vedtakets tidsrom (kan være endret pga revurdering tilbake i tid osv)
      * - lukke siste perioder dersom vedtakets gyldighetsperiode også er lukket, dvs det finnes vedtak med senere virkningstidspunkt
      */
-    private fun VedtakInnhold.Behandling.filtrerUtbetalingsperioder(gyldighetsperiode: Periode): List<Utbetalingsperiode> {
-        return utbetalingsperioder
+    private fun VedtakInnhold.Behandling.filtrerUtbetalingsperioder(gyldighetsperiode: Periode): List<Utbetalingsperiode> =
+        utbetalingsperioder
             .filter {
                 gyldighetsperiode.tom?.let { tom -> !it.periode.fom.isAfter(tom) } ?: true
-            }
-            .map {
+            }.map {
                 if (it.periode.tom == null || gyldighetsperiode.tom?.isBefore(it.periode.tom) == true) {
                     it.copy(
                         id = it.id,
@@ -139,7 +144,6 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
                     it
                 }
             }
-    }
 
     private val Vedtak.virkningstidspunkt: YearMonth
         get() = (this.innhold as VedtakInnhold.Behandling).virkningstidspunkt

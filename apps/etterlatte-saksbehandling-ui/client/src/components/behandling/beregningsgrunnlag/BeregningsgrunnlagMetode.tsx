@@ -2,7 +2,7 @@ import { BodyShort, Heading, Radio, RadioGroup } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
-import { Begrunnelse } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
+import { Begrunnelse } from '~components/behandling/trygdetid/styled'
 
 type BeregningsgrunnlagMetodeProps = {
   redigerbar: boolean
@@ -13,7 +13,7 @@ type BeregningsgrunnlagMetodeProps = {
 const BeregningsgrunnlagMetode = (props: BeregningsgrunnlagMetodeProps) => {
   const { redigerbar, grunnlag, onUpdate } = props
 
-  const beskrivelseFor = (metode: BeregningsMetode) => {
+  const beskrivelseFor = (metode: BeregningsMetode | null) => {
     switch (metode) {
       case BeregningsMetode.BEST:
         return 'Den som gir høyest verdi av nasjonal/prorata (EØS/avtale-land, der rettighet er oppfylt etter nasjonale regler)'
@@ -21,6 +21,8 @@ const BeregningsgrunnlagMetode = (props: BeregningsgrunnlagMetodeProps) => {
         return 'Nasjonal beregning (folketrygdberegning)'
       case BeregningsMetode.PRORATA:
         return 'Prorata (EØS/avtale-land, der rettighet er oppfylt ved sammenlegging)'
+      default:
+        return ''
     }
   }
 

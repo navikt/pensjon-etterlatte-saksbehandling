@@ -14,7 +14,9 @@ import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
-class AvkortingRepository(private val dataSource: DataSource) {
+class AvkortingRepository(
+    private val dataSource: DataSource,
+) {
     fun hentAvkorting(behandlingId: UUID): Avkorting? =
         dataSource.transaction { tx ->
             val avkortingGrunnlag =
@@ -68,10 +70,12 @@ class AvkortingRepository(private val dataSource: DataSource) {
 
                 Avkorting(
                     aarsoppgjoer =
-                        Aarsoppgjoer(
-                            ytelseFoerAvkorting = ytelseFoerAvkorting,
-                            inntektsavkorting = inntektsavkorting,
-                            avkortetYtelseAar = avkortetYtelseAar,
+                        listOf(
+                            Aarsoppgjoer(
+                                ytelseFoerAvkorting = ytelseFoerAvkorting,
+                                inntektsavkorting = inntektsavkorting,
+                                avkortetYtelseAar = avkortetYtelseAar,
+                            ),
                         ),
                 )
             }
@@ -83,7 +87,7 @@ class AvkortingRepository(private val dataSource: DataSource) {
     ) {
         dataSource.transaction { tx ->
             slettAvkorting(behandlingId, tx)
-            with(avkorting.aarsoppgjoer) {
+            with(avkorting.aarsoppgjoer.single()) {
                 lagreYtelseFoerAvkorting(behandlingId, ytelseFoerAvkorting, tx)
                 inntektsavkorting.forEach {
                     lagreAvkortingGrunnlag(behandlingId, it.grunnlag, tx)

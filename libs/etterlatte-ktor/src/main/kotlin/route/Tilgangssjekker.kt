@@ -19,7 +19,9 @@ import java.util.UUID
 class Tilgangssjekker(
     config: Config,
     httpClient: HttpClient,
-) : BehandlingTilgangsSjekk, SakTilgangsSjekk, PersonTilgangsSjekk {
+) : BehandlingTilgangsSjekk,
+    SakTilgangsSjekk,
+    PersonTilgangsSjekk {
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
@@ -27,7 +29,8 @@ class Tilgangssjekker(
     private val resourceUrl = config.getString("behandling.resource.url")
 
     private val tilgangscache =
-        Caffeine.newBuilder()
+        Caffeine
+            .newBuilder()
             .expireAfterWrite(Duration.ofMinutes(1))
             .build<Tilgangsrequest, Boolean>()
 
@@ -55,10 +58,10 @@ class Tilgangssjekker(
                             url = "$resourceUrl/tilgang/behandling/$behandlingId?skrivetilgang=$skrivetilgang",
                         ),
                     brukerTokenInfo = bruker,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource ->
-                        resource.response.let { objectMapper.readValue<Boolean>(it.toString()) }
+                        resource.response
+                            .let { objectMapper.readValue<Boolean>(it.toString()) }
                             .also { tilgangscache.put(tilgangsrequest, it) }
                     },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
@@ -90,10 +93,10 @@ class Tilgangssjekker(
                         ),
                     brukerTokenInfo = bruker,
                     postBody = foedselsnummer.value,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource ->
-                        resource.response.let { objectMapper.readValue<Boolean>(it.toString()) }
+                        resource.response
+                            .let { objectMapper.readValue<Boolean>(it.toString()) }
                             .also { tilgangscache.put(tilgangsrequest, it) }
                     },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
@@ -124,8 +127,7 @@ class Tilgangssjekker(
                             url = "$resourceUrl/tilgang/sak/$sakId?skrivetilgang=$skrivetilgang",
                         ),
                     brukerTokenInfo = bruker,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = {
                         deserialize<Boolean>(it.response.toString())
                             .also { resultat -> tilgangscache.put(tilgangsrequest, resultat) }
@@ -138,8 +140,10 @@ class Tilgangssjekker(
     }
 }
 
-class TilgangssjekkException(override val message: String, override val cause: Throwable? = null) :
-    Exception(message, cause)
+class TilgangssjekkException(
+    override val message: String,
+    override val cause: Throwable? = null,
+) : Exception(message, cause)
 
 data class Tilgangsrequest(
     val id: Any,

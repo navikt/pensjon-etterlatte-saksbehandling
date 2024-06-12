@@ -15,14 +15,16 @@ import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class KlageBrevService(private val brevApiKlient: BrevApiKlient) {
+class KlageBrevService(
+    private val brevApiKlient: BrevApiKlient,
+) {
     private val logger: org.slf4j.Logger = LoggerFactory.getLogger(this::class.java)
 
     fun oversendelsesbrev(
         klage: Klage,
         saksbehandler: Saksbehandler,
-    ): KlageOversendelsebrev {
-        return when (val utfall = klage.utfall) {
+    ): KlageOversendelsebrev =
+        when (val utfall = klage.utfall) {
             is KlageUtfallMedData.DelvisOmgjoering -> utfall.innstilling.brev
             is KlageUtfallMedData.StadfesteVedtak -> utfall.innstilling.brev
             else -> {
@@ -37,7 +39,6 @@ class KlageBrevService(private val brevApiKlient: BrevApiKlient) {
                 KlageOversendelsebrev(brev.id)
             }
         }
-    }
 
     fun vedtaksbrev(
         klage: Klage,

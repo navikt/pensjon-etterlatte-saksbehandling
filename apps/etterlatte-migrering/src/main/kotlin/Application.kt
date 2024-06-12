@@ -16,7 +16,9 @@ import no.nav.helse.rapids_rivers.RapidApplication
 
 fun main() = ApplicationContext().let { Server(it).run() }
 
-internal class Server(private val context: ApplicationContext) {
+internal class Server(
+    private val context: ApplicationContext,
+) {
     init {
         sikkerLoggOppstartOgAvslutning("etterlatte-migrering")
     }
@@ -26,7 +28,8 @@ internal class Server(private val context: ApplicationContext) {
             dataSource.migrate()
             val rapidEnv = getRapidEnv()
 
-            RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(rapidEnv))
+            RapidApplication
+                .Builder(RapidApplication.RapidApplicationConfig.fromEnv(rapidEnv))
                 .withKtorModule {
                     restModule(
                         sikkerLogg = sikkerlogger(),
@@ -34,10 +37,9 @@ internal class Server(private val context: ApplicationContext) {
                     ) {
                         migreringRoute(pesysRepository)
                     }
-                }
-                .build()
+                }.build()
                 .also { rapidsConnection ->
-                    LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository, penklient, featureToggleService)
+                    LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository)
                     LyttPaaDistribuerBrevRiver(rapidsConnection, pesysRepository)
                     FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)
                 }.start()

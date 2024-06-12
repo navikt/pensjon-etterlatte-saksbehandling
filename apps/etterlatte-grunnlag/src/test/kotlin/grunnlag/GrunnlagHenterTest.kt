@@ -46,7 +46,8 @@ class GrunnlagHenterTest {
 
     private val objectMapper: ObjectMapper
         get() {
-            return jacksonObjectMapper().registerModule(JavaTimeModule())
+            return jacksonObjectMapper()
+                .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         }
 
@@ -126,8 +127,8 @@ class GrunnlagHenterTest {
                 ).toJsonNode(),
             )
 
-    private fun soekersVerge(): List<OpplysningDTO<VergemaalEllerFremtidsfullmakt>> {
-        return listOf(
+    private fun soekersVerge(): List<OpplysningDTO<VergemaalEllerFremtidsfullmakt>> =
+        listOf(
             OpplysningDTO(
                 VergemaalEllerFremtidsfullmakt(
                     "",
@@ -142,7 +143,6 @@ class GrunnlagHenterTest {
                 "",
             ),
         )
-    }
 
     private fun sampleVergeAdresse() =
         BrevMottaker(
@@ -164,18 +164,19 @@ class GrunnlagHenterTest {
             jsonNode,
         )
 
-    private fun grunnlagsopplysningVergesAdresse(): Grunnlagsopplysning<BrevMottaker> {
-        return Grunnlagsopplysning(
+    private fun grunnlagsopplysningVergesAdresse(): Grunnlagsopplysning<BrevMottaker> =
+        Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde = kilde,
             opplysningType = Opplysningstype.VERGES_ADRESSE,
-            meta = no.nav.etterlatte.libs.common.objectMapper.createObjectNode(),
+            meta =
+                no.nav.etterlatte.libs.common.objectMapper
+                    .createObjectNode(),
             opplysning = sampleVergeAdresse(),
             attestering = null,
             fnr = SOEKER_FOEDSELSNUMMER,
             periode = null,
         )
-    }
 
     @Suppress("SameParameterValue")
     private fun vergemaal(

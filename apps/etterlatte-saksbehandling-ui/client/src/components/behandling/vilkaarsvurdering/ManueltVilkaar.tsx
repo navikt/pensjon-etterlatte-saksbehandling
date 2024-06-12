@@ -1,19 +1,10 @@
-import {
-  Title,
-  VilkaarBeskrivelse,
-  VilkaarColumn,
-  VilkaarInfobokser,
-  VilkaarlisteTitle,
-  VilkaarVurderingColumn,
-  VilkaarVurderingContainer,
-  VilkaarWrapper,
-} from './styled'
 import { IVilkaarsvurdering, Vilkaar, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
 import { Vurdering } from './Vurdering'
 import { StatusIcon, StatusIconProps } from '~shared/icons/statusIcon'
-import { Box, Link } from '@navikt/ds-react'
+import { Box, Heading, HStack, Link, VStack } from '@navikt/ds-react'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { formatertLovreferanse } from '~components/behandling/vilkaarsvurdering/utils'
+import { Informasjon } from '~components/behandling/soeknadsoversikt/styled'
 
 export interface VilkaarProps {
   vilkaar: Vilkaar
@@ -53,38 +44,32 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
 
   return (
     <>
-      <Box paddingInline="8" borderWidth="1 0 0 0" borderColor="border-subtle">
-        <VilkaarWrapper>
-          <VilkaarInfobokser>
-            <VilkaarColumn>
-              <Title>
-                <StatusIcon status={status()} />
+      <Box paddingInline="16 4" paddingBlock="4" borderWidth="1 0 0 0" borderColor="border-subtle">
+        <HStack justify="space-between">
+          <VStack gap="1">
+            <HStack align="center" gap="4">
+              <StatusIcon status={status()} aria-hidden />
+              <Heading size="small" level="3">
                 {vilkaar.hovedvilkaar.tittel}
-              </Title>
-              {vilkaar.hovedvilkaar.lovreferanse.lenke ? (
-                <Link href={vilkaar.hovedvilkaar.lovreferanse.lenke} target="_blank" rel="noopener noreferrer">
-                  {`${paragrafType(vilkaar)} ${formatertLovreferanse(vilkaar.hovedvilkaar.lovreferanse)}`}
-                  <ExternalLinkIcon title={vilkaar.hovedvilkaar.tittel} />
-                </Link>
-              ) : (
-                <>{`${paragrafType(vilkaar)} ${vilkaar.hovedvilkaar.lovreferanse.paragraf}`}</>
-              )}
-              <VilkaarBeskrivelse>{vilkaar.hovedvilkaar.beskrivelse}</VilkaarBeskrivelse>
-            </VilkaarColumn>
-          </VilkaarInfobokser>
-          <VilkaarVurderingColumn>
-            <VilkaarVurderingContainer>
-              <VilkaarlisteTitle>
-                <Vurdering
-                  vilkaar={vilkaar}
-                  oppdaterVilkaar={props.oppdaterVilkaar}
-                  behandlingId={props.behandlingId}
-                  redigerbar={props.redigerbar}
-                />
-              </VilkaarlisteTitle>
-            </VilkaarVurderingContainer>
-          </VilkaarVurderingColumn>
-        </VilkaarWrapper>
+              </Heading>
+            </HStack>
+            {vilkaar.hovedvilkaar.lovreferanse.lenke ? (
+              <Link href={vilkaar.hovedvilkaar.lovreferanse.lenke} target="_blank" rel="noopener noreferrer">
+                {`${paragrafType(vilkaar)} ${formatertLovreferanse(vilkaar.hovedvilkaar.lovreferanse)}`}
+                <ExternalLinkIcon title={vilkaar.hovedvilkaar.tittel} />
+              </Link>
+            ) : (
+              <>{`${paragrafType(vilkaar)} ${vilkaar.hovedvilkaar.lovreferanse.paragraf}`}</>
+            )}
+            <Informasjon>{vilkaar.hovedvilkaar.beskrivelse}</Informasjon>
+          </VStack>
+          <Vurdering
+            vilkaar={vilkaar}
+            oppdaterVilkaar={props.oppdaterVilkaar}
+            behandlingId={props.behandlingId}
+            redigerbar={props.redigerbar}
+          />
+        </HStack>
       </Box>
     </>
   )

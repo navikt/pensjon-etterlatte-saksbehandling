@@ -129,11 +129,11 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
         val oppgaveFraBehandlingMedFeilutbetaling =
             inTransaction {
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                oppgaveService.opprettOppgave(
                     referanse = sak.id.toString(),
                     sakId = sak.id,
-                    oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
-                    oppgaveType = OppgaveType.TILBAKEKREVING,
+                    kilde = OppgaveKilde.TILBAKEKREVING,
+                    type = OppgaveType.TILBAKEKREVING,
                     merknad = "Venter på kravgrunnlag",
                 )
             }
@@ -453,19 +453,18 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
     private fun tilbakekrevingsvedtak(
         saksbehandler: Saksbehandler,
         enhet: String,
-    ): TilbakekrevingVedtakLagretDto {
-        return TilbakekrevingVedtakLagretDto(
+    ): TilbakekrevingVedtakLagretDto =
+        TilbakekrevingVedtakLagretDto(
             id = 1L,
             fattetAv = saksbehandler.ident,
             enhet = enhet,
             dato = LocalDate.now(),
         )
-    }
 
     private fun tilbakekrevingPerioder(tilbakekreving: TilbakekrevingBehandling) = listOf(oppdatertPeriode(tilbakekreving))
 
-    private fun oppdatertPeriode(tilbakekreving: TilbakekrevingBehandling): TilbakekrevingPeriode {
-        return tilbakekreving.tilbakekreving.perioder.first().let {
+    private fun oppdatertPeriode(tilbakekreving: TilbakekrevingBehandling): TilbakekrevingPeriode =
+        tilbakekreving.tilbakekreving.perioder.first().let {
             it.copy(
                 ytelse =
                     it.ytelse.copy(
@@ -480,7 +479,6 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
                     ),
             )
         }
-    }
 
     private fun opprettetBrevDto(brevId: Long) =
         OpprettetBrevDto(

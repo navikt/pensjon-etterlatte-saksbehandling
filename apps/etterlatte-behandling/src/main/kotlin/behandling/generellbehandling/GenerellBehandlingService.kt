@@ -28,45 +28,56 @@ import org.slf4j.LoggerFactory
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-class DokumentManglerDatoException(message: String) :
-    UgyldigForespoerselException(
+class DokumentManglerDatoException(
+    message: String,
+) : UgyldigForespoerselException(
         code = "DOKUMENT_MANGLER_DATO",
         detail = message,
     )
 
-class DokumentErIkkeMarkertSomSendt(message: String) :
-    UgyldigForespoerselException(
+class DokumentErIkkeMarkertSomSendt(
+    message: String,
+) : UgyldigForespoerselException(
         code = "DOKUMENT_MÅ_VÆRE_SENDT",
         detail = message,
     )
 
-class UgyldigLandkodeIsokode3(message: String) :
-    UgyldigForespoerselException(
+class UgyldigLandkodeIsokode3(
+    message: String,
+) : UgyldigForespoerselException(
         code = "UGYLDIG_LANDKODE",
         detail = message,
     )
 
-class ManglerLandkodeException(message: String) :
-    UgyldigForespoerselException(
+class ManglerLandkodeException(
+    message: String,
+) : UgyldigForespoerselException(
         code = "MANGLER_LANDKODE",
         detail = message,
     )
 
-class ManglerRinanummerException(message: String) :
-    UgyldigForespoerselException(
+class ManglerRinanummerException(
+    message: String,
+) : UgyldigForespoerselException(
         code = "MANGLER_RINANUMMER",
         detail = message,
     )
 
-class KanIkkeEndreGenerellBehandling(message: String) : Exception(message)
+class KanIkkeEndreGenerellBehandling(
+    message: String,
+) : Exception(message)
 
-class UgyldigAttesteringsForespoersel(message: String, code: String) :
-    UgyldigForespoerselException(
+class UgyldigAttesteringsForespoersel(
+    message: String,
+    code: String,
+) : UgyldigForespoerselException(
         code = code,
         detail = message,
     )
 
-data class Kommentar(val begrunnelse: String)
+data class Kommentar(
+    val begrunnelse: String,
+)
 
 class GenerellBehandlingService(
     private val generellBehandlingDao: GenerellBehandlingDao,
@@ -84,7 +95,7 @@ class GenerellBehandlingService(
     ): GenerellBehandling {
         val opprettetbehandling = generellBehandlingDao.opprettGenerellbehandling(generellBehandling)
         val oppgaveForGenerellBehandling =
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            oppgaveService.opprettOppgave(
                 opprettetbehandling.id.toString(),
                 opprettetbehandling.sakId,
                 OppgaveKilde.GENERELL_BEHANDLING,
@@ -102,7 +113,8 @@ class GenerellBehandlingService(
     ) {
         if (generellBehandling.tilknyttetBehandling !== null) {
             val kanskjeOppgaveMedSaksbehandler =
-                oppgaveService.hentOppgaverForReferanse(generellBehandling.tilknyttetBehandling!!.toString())
+                oppgaveService
+                    .hentOppgaverForReferanse(generellBehandling.tilknyttetBehandling!!.toString())
                     .filter { it.type == OppgaveType.FOERSTEGANGSBEHANDLING }
                     .maxByOrNull { it.opprettet }
 
@@ -306,21 +318,15 @@ class GenerellBehandlingService(
         }
     }
 
-    private fun oppdaterBehandling(generellBehandling: GenerellBehandling): GenerellBehandling {
-        return generellBehandlingDao.oppdaterGenerellBehandling(generellBehandling)
-    }
+    private fun oppdaterBehandling(generellBehandling: GenerellBehandling): GenerellBehandling =
+        generellBehandlingDao.oppdaterGenerellBehandling(generellBehandling)
 
-    fun hentBehandlingMedId(id: UUID): GenerellBehandling? {
-        return generellBehandlingDao.hentGenerellBehandlingMedId(id)
-    }
+    fun hentBehandlingMedId(id: UUID): GenerellBehandling? = generellBehandlingDao.hentGenerellBehandlingMedId(id)
 
-    fun hentBehandlingerForSak(sakId: Long): List<GenerellBehandling> {
-        return generellBehandlingDao.hentGenerellBehandlingForSak(sakId)
-    }
+    fun hentBehandlingerForSak(sakId: Long): List<GenerellBehandling> = generellBehandlingDao.hentGenerellBehandlingForSak(sakId)
 
-    private fun hentGenerellbehandlingSinTilknyttetedeBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? {
-        return generellBehandlingDao.hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId)
-    }
+    private fun hentGenerellbehandlingSinTilknyttetedeBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? =
+        generellBehandlingDao.hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId)
 
     suspend fun hentKravpakkeForSak(
         sakId: Long,
@@ -358,20 +364,23 @@ class GenerellBehandlingService(
     }
 }
 
-class FantIkkeAvdoedException(msg: String) :
-    UgyldigForespoerselException(
+class FantIkkeAvdoedException(
+    msg: String,
+) : UgyldigForespoerselException(
         code = "FANT_IKKE_AVDOED",
         detail = msg,
     )
 
-class FantIkkeFoerstegangsbehandlingForKravpakkeOgSak(msg: String) :
-    UgyldigForespoerselException(
+class FantIkkeFoerstegangsbehandlingForKravpakkeOgSak(
+    msg: String,
+) : UgyldigForespoerselException(
         code = "FANT_IKKE_FOERSTEGANGSBEHANDLING_FOR_KRAVPAKKE",
         detail = msg,
     )
 
-class FantIkkeKravpakkeForFoerstegangsbehandling(msg: String) :
-    UgyldigForespoerselException(
+class FantIkkeKravpakkeForFoerstegangsbehandling(
+    msg: String,
+) : UgyldigForespoerselException(
         code = "FANT_IKKE_KRAVPAKKE_FOR_FOERSTEGANGSBEHANDLING",
         detail = msg,
     )

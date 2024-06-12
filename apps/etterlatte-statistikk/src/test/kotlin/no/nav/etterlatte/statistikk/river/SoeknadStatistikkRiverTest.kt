@@ -46,16 +46,17 @@ internal class SoeknadStatistikkRiverTest {
         } returns soeknadStatistikk
 
         val message =
-            JsonMessage.newMessage(
-                mapOf(
-                    EventNames.FORDELER_STATISTIKK.lagParMedEventNameKey(),
-                    CORRELATION_ID_KEY to UUID.randomUUID(),
-                    SOEKNAD_ID_KEY to soeknadId,
-                    SAK_TYPE_KEY to sakType,
-                    GYLDIG_FOR_BEHANDLING_KEY to gyldigForBehandling,
-                    FEILENDE_KRITERIER_KEY to feilendeKriterier,
-                ),
-            ).toJson()
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        EventNames.FORDELER_STATISTIKK.lagParMedEventNameKey(),
+                        CORRELATION_ID_KEY to UUID.randomUUID(),
+                        SOEKNAD_ID_KEY to soeknadId,
+                        SAK_TYPE_KEY to sakType,
+                        GYLDIG_FOR_BEHANDLING_KEY to gyldigForBehandling,
+                        FEILENDE_KRITERIER_KEY to feilendeKriterier,
+                    ),
+                ).toJson()
 
         val inspector = testRapid.apply { sendTestMessage(message) }.inspektør
 
@@ -87,15 +88,16 @@ internal class SoeknadStatistikkRiverTest {
         } returns soeknadStatistikk
 
         val message =
-            JsonMessage.newMessage(
-                mapOf(
-                    EventNames.FORDELER_STATISTIKK.lagParMedEventNameKey(),
-                    CORRELATION_ID_KEY to UUID.randomUUID(),
-                    SOEKNAD_ID_KEY to soeknadId,
-                    SAK_TYPE_KEY to sakType,
-                    GYLDIG_FOR_BEHANDLING_KEY to gyldigForBehandling,
-                ),
-            ).toJson()
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        EventNames.FORDELER_STATISTIKK.lagParMedEventNameKey(),
+                        CORRELATION_ID_KEY to UUID.randomUUID(),
+                        SOEKNAD_ID_KEY to soeknadId,
+                        SAK_TYPE_KEY to sakType,
+                        GYLDIG_FOR_BEHANDLING_KEY to gyldigForBehandling,
+                    ),
+                ).toJson()
 
         val inspector = testRapid.apply { sendTestMessage(message) }.inspektør
 

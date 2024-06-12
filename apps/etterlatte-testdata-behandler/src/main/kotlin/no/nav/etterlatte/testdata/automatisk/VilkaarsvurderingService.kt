@@ -11,7 +11,11 @@ import no.nav.etterlatte.testdata.BEGRUNNELSE
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class VilkaarsvurderingService(private val klient: DownstreamResourceClient, private val url: String, private val clientId: String) {
+class VilkaarsvurderingService(
+    private val klient: DownstreamResourceClient,
+    private val url: String,
+    private val clientId: String,
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun vilkaarsvurder(behandlingId: UUID) {
@@ -24,31 +28,33 @@ class VilkaarsvurderingService(private val klient: DownstreamResourceClient, pri
     }
 
     private suspend fun opprettVilkaarsvurdering(behandlingId: UUID) =
-        klient.post(
-            Resource(
-                clientId = clientId,
-                url = "$url/api/vilkaarsvurdering/$behandlingId/opprett",
-            ),
-            Systembruker.testdata,
-            {},
-        ).mapBoth(
-            success = {},
-            failure = { throw it },
-        )
+        klient
+            .post(
+                Resource(
+                    clientId = clientId,
+                    url = "$url/api/vilkaarsvurdering/$behandlingId/opprett",
+                ),
+                Systembruker.testdata,
+                {},
+            ).mapBoth(
+                success = {},
+                failure = { throw it },
+            )
 
     private suspend fun settVilkaarsvurderingaSomHelhetSomOppfylt(behandlingId: UUID) =
-        klient.post(
-            Resource(
-                clientId = clientId,
-                url = "$url/api/vilkaarsvurdering/resultat/$behandlingId",
-            ),
-            Systembruker.testdata,
-            VurdertVilkaarsvurderingResultatDto(
-                resultat = VilkaarsvurderingUtfall.OPPFYLT,
-                kommentar = BEGRUNNELSE,
-            ),
-        ).mapBoth(
-            success = {},
-            failure = { throw it },
-        )
+        klient
+            .post(
+                Resource(
+                    clientId = clientId,
+                    url = "$url/api/vilkaarsvurdering/resultat/$behandlingId",
+                ),
+                Systembruker.testdata,
+                VurdertVilkaarsvurderingResultatDto(
+                    resultat = VilkaarsvurderingUtfall.OPPFYLT,
+                    kommentar = BEGRUNNELSE,
+                ),
+            ).mapBoth(
+                success = {},
+                failure = { throw it },
+            )
 }

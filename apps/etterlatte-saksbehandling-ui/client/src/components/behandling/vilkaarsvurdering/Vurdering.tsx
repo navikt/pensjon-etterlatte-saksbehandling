@@ -11,6 +11,7 @@ import styled from 'styled-components'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { formaterVurderingsResultat } from '~components/behandling/vilkaarsvurdering/utils'
+import { Vurdering as VurderingWrapper } from '~/components/behandling/soeknadsoversikt/styled'
 
 const MIN_KOMMENTAR_LENGDE = 1
 const INGEN_VILKAAR_OPPFYLT = 'ingen_vilkaar_oppfylt'
@@ -143,7 +144,7 @@ export const Vurdering = ({
   )
 
   return (
-    <div>
+    <VurderingWrapper>
       {!vilkaar.vurdering && !aktivVurdering ? (
         <IkkeVurdert>
           <Heading size="small">Vilkåret er ikke vurdert</Heading>
@@ -259,7 +260,7 @@ export const Vurdering = ({
           </>
         </VurderingsboksWrapper>
       )}
-    </div>
+    </VurderingWrapper>
   )
 }
 

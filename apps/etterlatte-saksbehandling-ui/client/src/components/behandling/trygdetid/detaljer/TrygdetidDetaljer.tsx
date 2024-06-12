@@ -2,10 +2,9 @@ import React from 'react'
 import { IDetaljertBeregnetTrygdetidResultat } from '~shared/api/trygdetid'
 import { BeregnetFaktiskTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetFaktiskTrygdetid'
 import { BeregnetFremtidigTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetFremtidigTrygdetid'
-import { FlexHeader, IconWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { CalendarIcon, ExclamationmarkTriangleIcon } from '@navikt/aksel-icons'
 import { IconSize } from '~shared/types/Icon'
-import { BodyShort, Heading } from '@navikt/ds-react'
+import { BodyShort, Heading, HStack } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { BeregnetSamletTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetSamletTrygdetid'
 
@@ -16,24 +15,20 @@ type Props = {
 export const TrygdetidDetaljer = ({ beregnetTrygdetid }: Props) => {
   return (
     <TrygdetidBeregnet>
-      <FlexHeader>
-        <IconWrapper>
-          <CalendarIcon fontSize={IconSize.DEFAULT} />
-        </IconWrapper>
+      <HStack gap="2">
+        <CalendarIcon fontSize={IconSize.DEFAULT} />
         <Heading size="small" level="3">
           Beregnet trygdetid
         </Heading>
-      </FlexHeader>
+      </HStack>
       {beregnetTrygdetid.overstyrt && (
-        <FlexHeader>
-          <IconWrapper>
-            <ExclamationmarkTriangleIcon fontSize={IconSize.DEFAULT} />
-          </IconWrapper>
+        <HStack gap="2">
+          <ExclamationmarkTriangleIcon fontSize={IconSize.DEFAULT} />
           <BodyShort>
             Beregnet trygdetid har blitt overstyrt ved migrering på grunn av manglende eller inkonsistent grunnlag i
             Pesys. Slå opp saken i Pesys for å se grunnlaget til tidligere vedtak.
           </BodyShort>
-        </FlexHeader>
+        </HStack>
       )}
       <BeregnetFaktiskTrygdetid beregnetTrygdetid={beregnetTrygdetid} />
       <BeregnetFremtidigTrygdetid beregnetTrygdetid={beregnetTrygdetid} />

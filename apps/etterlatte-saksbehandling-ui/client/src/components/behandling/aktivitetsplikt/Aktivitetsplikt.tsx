@@ -18,6 +18,7 @@ import { hentAktivitetspliktOppfolging } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { isPending } from '~shared/api/apiUtils'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { isValid } from 'date-fns'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -41,7 +42,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
   }, [])
 
   const erFerdigUtfylt = () => {
-    if (manglerAktivitetspliktVurdering === undefined) {
+    if (manglerAktivitetspliktVurdering === undefined || manglerAktivitetspliktVurdering) {
       setManglerAktivitetspliktVurdering(true)
       return
     }
@@ -78,7 +79,9 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           </BodyLong>
         </TekstWrapper>
 
-        {visTidslinje && <AktivitetspliktTidslinje behandling={behandling} doedsdato={new Date(avdoedesDoedsdato!!)} />}
+        {visTidslinje && isValid(new Date(avdoedesDoedsdato!!)) && (
+          <AktivitetspliktTidslinje behandling={behandling} doedsdato={new Date(avdoedesDoedsdato!!)} />
+        )}
         {visTidslinje && (
           <AktivitetspliktVurdering
             behandling={behandling}
@@ -169,7 +172,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
 }
 
 const AktivitetspliktWrapper = styled(VStack)`
-  padding: 0 4rem 2rem 4rem;
+  padding: 0 var(--a-spacing-16) var(--a-spacing-8) var(--a-spacing-16);
   max-width: var(--a-breakpoint-2xl);
 `
 

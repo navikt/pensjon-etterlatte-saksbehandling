@@ -12,7 +12,7 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
-import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
+import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
@@ -70,7 +70,7 @@ class BehandlingFactoryTest {
     private val behandlingService = mockk<BehandlingService>()
     private val sakServiceMock = mockk<SakService>()
     private val klageService = mockk<KlageService>()
-    private val aktivitetspliktService = mockk<AktivitetspliktService>()
+    private val aktivitetspliktDao = mockk<AktivitetspliktDao>()
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>(relaxUnitFun = true)
     private val pdlTjenesterKlientMock = mockk<PdlTjenesterKlient>()
     private val mockOppgave =
@@ -99,7 +99,7 @@ class BehandlingFactoryTest {
                 revurderingDao,
                 klageService,
                 behandlingService,
-                aktivitetspliktService,
+                aktivitetspliktDao,
             ),
         )
     private val behandlingFactory =
@@ -198,13 +198,16 @@ class BehandlingFactoryTest {
         } returns mockOppgave
 
         val resultat =
-            behandlingFactory.opprettBehandling(
-                1,
-                persongalleri,
-                datoNaa.toString(),
-                Vedtaksloesning.GJENNY,
-                behandlingFactory.hentDataForOpprettBehandling(1),
-            )!!.also { it.sendMeldingForHendelse() }.behandling
+            behandlingFactory
+                .opprettBehandling(
+                    1,
+                    persongalleri,
+                    datoNaa.toString(),
+                    Vedtaksloesning.GJENNY,
+                    behandlingFactory.hentDataForOpprettBehandling(1),
+                )!!
+                .also { it.sendMeldingForHendelse() }
+                .behandling
 
         Assertions.assertEquals(opprettetBehandling, resultat)
         Assertions.assertEquals(opprettetBehandling.sak, resultat.sak)
@@ -289,13 +292,16 @@ class BehandlingFactoryTest {
         } returns mockOppgave
 
         val foerstegangsbehandling =
-            behandlingFactory.opprettBehandling(
-                1,
-                persongalleri,
-                datoNaa.toString(),
-                Vedtaksloesning.GJENNY,
-                behandlingFactory.hentDataForOpprettBehandling(1),
-            )!!.also { it.sendMeldingForHendelse() }.behandling
+            behandlingFactory
+                .opprettBehandling(
+                    1,
+                    persongalleri,
+                    datoNaa.toString(),
+                    Vedtaksloesning.GJENNY,
+                    behandlingFactory.hentDataForOpprettBehandling(1),
+                )!!
+                .also { it.sendMeldingForHendelse() }
+                .behandling
 
         Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
 
@@ -378,13 +384,16 @@ class BehandlingFactoryTest {
         } just runs
 
         val foerstegangsbehandling =
-            behandlingFactory.opprettBehandling(
-                1,
-                persongalleri,
-                datoNaa.toString(),
-                Vedtaksloesning.GJENNY,
-                behandlingFactory.hentDataForOpprettBehandling(1),
-            )!!.also { it.sendMeldingForHendelse() }.behandling
+            behandlingFactory
+                .opprettBehandling(
+                    1,
+                    persongalleri,
+                    datoNaa.toString(),
+                    Vedtaksloesning.GJENNY,
+                    behandlingFactory.hentDataForOpprettBehandling(1),
+                )!!
+                .also { it.sendMeldingForHendelse() }
+                .behandling
 
         Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
 
@@ -393,13 +402,14 @@ class BehandlingFactoryTest {
         } returns listOf(underArbeidBehandling)
 
         val nyfoerstegangsbehandling =
-            behandlingFactory.opprettBehandling(
-                1,
-                persongalleri,
-                datoNaa.toString(),
-                Vedtaksloesning.GJENNY,
-                behandlingFactory.hentDataForOpprettBehandling(1),
-            )?.also { it.sendMeldingForHendelse() }
+            behandlingFactory
+                .opprettBehandling(
+                    1,
+                    persongalleri,
+                    datoNaa.toString(),
+                    Vedtaksloesning.GJENNY,
+                    behandlingFactory.hentDataForOpprettBehandling(1),
+                )?.also { it.sendMeldingForHendelse() }
                 ?.behandling
         Assertions.assertTrue(nyfoerstegangsbehandling is Foerstegangsbehandling)
 
@@ -482,20 +492,23 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         } returns mockOppgave
         every {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         } returns mockOppgave
         every {
             oppgaveService.tildelSaksbehandler(any(), any())
         } just runs
 
         val foerstegangsbehandling =
-            behandlingFactory.opprettBehandling(
-                1,
-                persongalleri,
-                datoNaa.toString(),
-                Vedtaksloesning.GJENNY,
-                behandlingFactory.hentDataForOpprettBehandling(1),
-            )!!.also { it.sendMeldingForHendelse() }.behandling
+            behandlingFactory
+                .opprettBehandling(
+                    1,
+                    persongalleri,
+                    datoNaa.toString(),
+                    Vedtaksloesning.GJENNY,
+                    behandlingFactory.hentDataForOpprettBehandling(1),
+                )!!
+                .also { it.sendMeldingForHendelse() }
+                .behandling
 
         Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
 
@@ -537,7 +550,7 @@ class BehandlingFactoryTest {
         every {
             behandlingDaoMock.alleBehandlingerISak(any())
         } returns listOf(iverksattBehandling)
-        every { aktivitetspliktService.kopierAktiviteter(any(), any()) } returns Unit
+        every { aktivitetspliktDao.kopierAktiviteter(any(), any()) } returns 1
 
         every { behandlingDaoMock.hentBehandling(any()) } returns
             revurdering(
@@ -547,18 +560,20 @@ class BehandlingFactoryTest {
             )
 
         val revurderingsBehandling =
-            behandlingFactory.opprettBehandling(
-                1,
-                persongalleri,
-                datoNaa.toString(),
-                Vedtaksloesning.GJENNY,
-                behandlingFactory.hentDataForOpprettBehandling(1),
-            )?.also { it.sendMeldingForHendelse() }?.behandling
+            behandlingFactory
+                .opprettBehandling(
+                    1,
+                    persongalleri,
+                    datoNaa.toString(),
+                    Vedtaksloesning.GJENNY,
+                    behandlingFactory.hentDataForOpprettBehandling(1),
+                )?.also { it.sendMeldingForHendelse() }
+                ?.behandling
         Assertions.assertTrue(revurderingsBehandling is Revurdering)
         verify {
             grunnlagService.leggInnNyttGrunnlag(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any())
         }
         verify(exactly = 2) {
             sakServiceMock.finnSak(any())

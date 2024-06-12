@@ -16,7 +16,9 @@ import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class AvkortingRepositoryTest(ds: DataSource) {
+internal class AvkortingRepositoryTest(
+    ds: DataSource,
+) {
     private val avkortingRepository = AvkortingRepository(ds)
 
     @Test
@@ -51,7 +53,7 @@ internal class AvkortingRepositoryTest(ds: DataSource) {
         avkortingRepository.lagreAvkorting(
             behandlingId,
             Avkorting(
-                aarsoppgjoer = aarsoppgjoer,
+                aarsoppgjoer = listOf(aarsoppgjoer),
             ),
         )
         val endretGrunnlag = aarsoppgjoer.inntektsavkorting[0].grunnlag.copy(spesifikasjon = "Endret")
@@ -75,16 +77,18 @@ internal class AvkortingRepositoryTest(ds: DataSource) {
             behandlingId,
             Avkorting(
                 aarsoppgjoer =
-                    aarsoppgjoer(
-                        ytelseFoerAvkorting = endretYtelseFoerAvkorting,
-                        inntektsavkorting = endretInntektsavkorting,
-                        avkortetYtelseAar = endretAvkortetYtelseAar,
+                    listOf(
+                        aarsoppgjoer(
+                            ytelseFoerAvkorting = endretYtelseFoerAvkorting,
+                            inntektsavkorting = endretInntektsavkorting,
+                            avkortetYtelseAar = endretAvkortetYtelseAar,
+                        ),
                     ),
             ),
         )
         val avkorting = avkortingRepository.hentAvkorting(behandlingId)
 
-        with(avkorting!!.aarsoppgjoer) {
+        with(avkorting!!.aarsoppgjoer.single()) {
             ytelseFoerAvkorting.asClue {
                 it.size shouldBe 1
                 it shouldBe endretYtelseFoerAvkorting

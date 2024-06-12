@@ -81,7 +81,8 @@ class GosysOppgaveServiceImpl(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val cache =
-        Caffeine.newBuilder()
+        Caffeine
+            .newBuilder()
             .expireAfterWrite(Duration.ofMinutes(5))
             .build<Long, GosysOppgave>()
 
@@ -122,19 +123,20 @@ class GosysOppgaveServiceImpl(
 
         val alleGosysOppgaver =
             coroutineScope {
-                enheterSomSkalSoekesEtter.map {
-                    async {
-                        gosysOppgaveKlient.hentOppgaver(
-                            saksbehandler = saksbehandler,
-                            tema = temaListe,
-                            enhetsnr = it,
-                            harTildeling = harTildeling,
-                            brukerTokenInfo = brukerTokenInfo,
-                        )
-                    }
-                }.map {
-                    it.await()
-                }.flatMap { it.oppgaver }
+                enheterSomSkalSoekesEtter
+                    .map {
+                        async {
+                            gosysOppgaveKlient.hentOppgaver(
+                                saksbehandler = saksbehandler,
+                                tema = temaListe,
+                                enhetsnr = it,
+                                harTildeling = harTildeling,
+                                brukerTokenInfo = brukerTokenInfo,
+                            )
+                        }
+                    }.map {
+                        it.await()
+                    }.flatMap { it.oppgaver }
             }
         val gosysOppgaver = GosysOppgaver(alleGosysOppgaver.size, alleGosysOppgaver)
 
@@ -170,11 +172,11 @@ class GosysOppgaveServiceImpl(
     override suspend fun hentOppgave(
         id: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): GosysOppgave {
-        return cache.getIfPresent(id) ?: gosysOppgaveKlient.hentOppgave(id, brukerTokenInfo)
+    ): GosysOppgave =
+        cache.getIfPresent(id) ?: gosysOppgaveKlient
+            .hentOppgave(id, brukerTokenInfo)
             .let { it.tilGosysOppgave() }
             .also { cache.put(id, it) }
-    }
 
     override suspend fun flyttTilGjenny(
         oppgaveId: Long,
@@ -195,11 +197,11 @@ class GosysOppgaveServiceImpl(
         }
 
         val nyOppgave =
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            oppgaveService.opprettOppgave(
                 referanse = gosysOppgave.journalpostId,
                 sakId = sakId,
-                oppgaveKilde = OppgaveKilde.SAKSBEHANDLER,
-                oppgaveType = OppgaveType.JOURNALFOERING,
+                kilde = OppgaveKilde.SAKSBEHANDLER,
+                type = OppgaveType.JOURNALFOERING,
                 merknad = gosysOppgave.beskrivelse,
                 frist = gosysOppgave.frist,
                 saksbehandler = brukerTokenInfo.ident(),
@@ -225,32 +227,30 @@ class GosysOppgaveServiceImpl(
         oppgaveVersjon: Long,
         tilordnes: String,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long {
-        return gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(
-            oppgaveId,
-            oppgaveVersjon,
-            tilordnes,
-            brukerTokenInfo,
-        ).versjon
-    }
+    ): Long =
+        gosysOppgaveKlient
+            .tildelOppgaveTilSaksbehandler(
+                oppgaveId,
+                oppgaveVersjon,
+                tilordnes,
+                brukerTokenInfo,
+            ).versjon
 
     override suspend fun endreFrist(
         oppgaveId: String,
         oppgaveVersjon: Long,
         nyFrist: Tidspunkt,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long {
-        return gosysOppgaveKlient.endreFrist(oppgaveId, oppgaveVersjon, nyFrist.toLocalDate(), brukerTokenInfo).versjon
-    }
+    ): Long = gosysOppgaveKlient.endreFrist(oppgaveId, oppgaveVersjon, nyFrist.toLocalDate(), brukerTokenInfo).versjon
 
     override suspend fun ferdigstill(
         oppgaveId: String,
         oppgaveVersjon: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): GosysOppgave {
-        return gosysOppgaveKlient.ferdigstill(oppgaveId, oppgaveVersjon, brukerTokenInfo)
+    ): GosysOppgave =
+        gosysOppgaveKlient
+            .ferdigstill(oppgaveId, oppgaveVersjon, brukerTokenInfo)
             .let { it.tilGosysOppgave() }
-    }
 
     override suspend fun feilregistrer(
         oppgaveId: String,
@@ -268,8 +268,8 @@ class GosysOppgaveServiceImpl(
     }
 
     companion object {
-        private fun GosysApiOppgave.tilGosysOppgave(): GosysOppgave {
-            return GosysOppgave(
+        private fun GosysApiOppgave.tilGosysOppgave(): GosysOppgave =
+            GosysOppgave(
                 id = this.id,
                 versjon = this.versjon,
                 status = this.status,
@@ -286,11 +286,11 @@ class GosysOppgaveServiceImpl(
                 journalpostId = this.journalpostId,
                 bruker = this.bruker,
             )
-        }
     }
 }
 
-class StoetterKunFlyttingAvJournalfoeringsoppgave : UgyldigForespoerselException(
-    code = "UGYLDIG_OPPGAVETYPE_FOR_FLYTTING",
-    detail = "Støtter foreløpig kun flytting av journalføringsoppgaver",
-)
+class StoetterKunFlyttingAvJournalfoeringsoppgave :
+    UgyldigForespoerselException(
+        code = "UGYLDIG_OPPGAVETYPE_FOR_FLYTTING",
+        detail = "Støtter foreløpig kun flytting av journalføringsoppgaver",
+    )

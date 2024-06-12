@@ -276,7 +276,7 @@ class GosysOppgaveServiceImplTest {
         coEvery { gosysOppgaveKlient.hentOppgave(any(), any()) } returns gosysOppgave
         coEvery { gosysOppgaveKlient.feilregistrer(any(), any(), any()) } returns gosysOppgave
         coEvery {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any(), any(), any())
+            oppgaveService.opprettOppgave(any(), any(), any(), any(), any(), any(), any())
         } returns mockk()
 
         runBlocking {
@@ -284,7 +284,7 @@ class GosysOppgaveServiceImplTest {
         }
 
         verify(exactly = 1) {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            oppgaveService.opprettOppgave(
                 gosysOppgave.journalpostId!!,
                 sakId,
                 OppgaveKilde.SAKSBEHANDLER,

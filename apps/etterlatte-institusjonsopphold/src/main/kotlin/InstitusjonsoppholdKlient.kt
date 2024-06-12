@@ -17,10 +17,11 @@ class InstitusjonsoppholdKlient(
 ) {
     suspend fun hentDataForHendelse(oppholdId: Long) =
         retry<Institusjonsopphold> {
-            httpKlient.get("$url/api/v1/person/institusjonsopphold/$oppholdId?Med-Institusjonsinformasjon=true") {
-                contentType(ContentType.Application.Json)
-                navConsumerId("etterlatte-institusjonsopphold")
-            }.body()
+            httpKlient
+                .get("$url/api/v1/person/institusjonsopphold/$oppholdId?Med-Institusjonsinformasjon=true") {
+                    contentType(ContentType.Application.Json)
+                    navConsumerId("etterlatte-institusjonsopphold")
+                }.body()
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content

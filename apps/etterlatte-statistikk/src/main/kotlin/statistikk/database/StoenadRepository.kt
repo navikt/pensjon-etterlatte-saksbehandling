@@ -23,108 +23,111 @@ import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
-class StoenadRepository(private val datasource: DataSource) {
+class StoenadRepository(
+    private val datasource: DataSource,
+) {
     private val connection get() = datasource.connection
 
     companion object {
-        fun using(datasource: DataSource): StoenadRepository {
-            return StoenadRepository(datasource)
-        }
+        fun using(datasource: DataSource): StoenadRepository = StoenadRepository(datasource)
     }
 
-    fun hentStoenadRader(): List<StoenadRad> {
-        return connection.use {
-            it.prepareStatement(
-                """
-                SELECT id, fnrSoeker, fnrForeldre, 
-                    fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, behandlingId, sakId, 
-                    sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, vedtakLoependeFom, 
-                    vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland, virkningstidspunkt, utbetalingsdato,
-                    kilde, pesysid, sakYtelsesgruppe 
-                FROM stoenad
-                """.trimIndent(),
-            ).executeQuery().toList {
-                asStoenadRad()
-            }
+    fun hentStoenadRader(): List<StoenadRad> =
+        connection.use {
+            it
+                .prepareStatement(
+                    """
+                    SELECT id, fnrSoeker, fnrForeldre, 
+                        fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, behandlingId, sakId, 
+                        sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, vedtakLoependeFom, 
+                        vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland, virkningstidspunkt, utbetalingsdato,
+                        kilde, pesysid, sakYtelsesgruppe 
+                    FROM stoenad
+                    """.trimIndent(),
+                ).executeQuery()
+                .toList {
+                    asStoenadRad()
+                }
         }
-    }
 
-    fun hentStoenadRaderInnenforMaaned(maaned: YearMonth): List<StoenadRad> {
-        return connection.use { conn ->
-            conn.prepareStatement(
-                """
-                SELECT * FROM stoenad 
-                WHERE vedtakLoependeFom <= ? AND COALESCE(vedtakLoependeTom, ?) >= ? 
-                    AND tekniskTid <= ?
-                """.trimIndent(),
-            ).apply {
-                setDate(1, Date.valueOf(maaned.atEndOfMonth()))
-                setDate(2, Date.valueOf(maaned.atEndOfMonth()))
-                setDate(3, Date.valueOf(maaned.atEndOfMonth()))
-                setTidspunkt(4, maaned.atEndOfMonth().atTime(LocalTime.MAX).toNorskTidspunkt())
-            }.executeQuery().toList { asStoenadRad() }
+    fun hentStoenadRaderInnenforMaaned(maaned: YearMonth): List<StoenadRad> =
+        connection.use { conn ->
+            conn
+                .prepareStatement(
+                    """
+                    SELECT * FROM stoenad 
+                    WHERE vedtakLoependeFom <= ? AND COALESCE(vedtakLoependeTom, ?) >= ? 
+                        AND tekniskTid <= ?
+                    """.trimIndent(),
+                ).apply {
+                    setDate(1, Date.valueOf(maaned.atEndOfMonth()))
+                    setDate(2, Date.valueOf(maaned.atEndOfMonth()))
+                    setDate(3, Date.valueOf(maaned.atEndOfMonth()))
+                    setTidspunkt(4, maaned.atEndOfMonth().atTime(LocalTime.MAX).toNorskTidspunkt())
+                }.executeQuery()
+                .toList { asStoenadRad() }
         }
-    }
 
-    fun lagreMaanedStatistikkRad(maanedStatistikkRad: MaanedStoenadRad) {
-        return connection.use { conn ->
-            conn.prepareStatement(
-                """
-                INSERT INTO maaned_stoenad(
-                    fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
-                    behandlingId, sakId, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
-                    vedtakLoependeFom, vedtakLoependeTom, statistikkMaaned, sak_utland,
-                    virkningstidspunkt, utbetalingsdato, avkortingsbeloep, aarsinntekt, kilde, pesysid, sakYtelsesgruppe 
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """.trimIndent(),
-            ).apply {
-                setString(1, maanedStatistikkRad.fnrSoeker)
-                setJsonb(2, maanedStatistikkRad.fnrForeldre)
-                setJsonb(3, maanedStatistikkRad.fnrSoesken)
-                setString(4, maanedStatistikkRad.anvendtTrygdetid)
-                setString(5, maanedStatistikkRad.nettoYtelse)
-                setString(6, maanedStatistikkRad.beregningType)
-                setString(7, maanedStatistikkRad.anvendtSats)
-                setObject(8, maanedStatistikkRad.behandlingId)
-                setLong(9, maanedStatistikkRad.sakId)
-                setTidspunkt(10, maanedStatistikkRad.tekniskTid)
-                setString(11, maanedStatistikkRad.sakYtelse)
-                setString(12, maanedStatistikkRad.versjon)
-                setString(13, maanedStatistikkRad.saksbehandler)
-                setString(14, maanedStatistikkRad.attestant)
-                setDate(15, Date.valueOf(maanedStatistikkRad.vedtakLoependeFom))
-                setDate(16, maanedStatistikkRad.vedtakLoependeTom?.let { Date.valueOf(it) })
-                setString(17, maanedStatistikkRad.statistikkMaaned.toString())
-                setString(18, maanedStatistikkRad.sakUtland.toString())
-                setDate(19, maanedStatistikkRad.virkningstidspunkt?.let { Date.valueOf(it.atDay(1)) })
-                setDate(20, maanedStatistikkRad.utbetalingsdato?.let { Date.valueOf(it) })
-                setString(21, maanedStatistikkRad.avkortingsbeloep)
-                setString(22, maanedStatistikkRad.aarsinntekt)
-                setString(23, maanedStatistikkRad.kilde.name)
-                maanedStatistikkRad.pesysId?.let { setLong(24, it) } ?: setNull(24, Types.BIGINT)
-                setString(25, maanedStatistikkRad.sakYtelsesgruppe?.name)
-            }.executeUpdate()
+    fun lagreMaanedStatistikkRad(maanedStatistikkRad: MaanedStoenadRad) =
+        connection.use { conn ->
+            conn
+                .prepareStatement(
+                    """
+                    INSERT INTO maaned_stoenad(
+                        fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
+                        behandlingId, sakId, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
+                        vedtakLoependeFom, vedtakLoependeTom, statistikkMaaned, sak_utland,
+                        virkningstidspunkt, utbetalingsdato, avkortingsbeloep, aarsinntekt, kilde, pesysid, sakYtelsesgruppe 
+                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """.trimIndent(),
+                ).apply {
+                    setString(1, maanedStatistikkRad.fnrSoeker)
+                    setJsonb(2, maanedStatistikkRad.fnrForeldre)
+                    setJsonb(3, maanedStatistikkRad.fnrSoesken)
+                    setString(4, maanedStatistikkRad.anvendtTrygdetid)
+                    setString(5, maanedStatistikkRad.nettoYtelse)
+                    setString(6, maanedStatistikkRad.beregningType)
+                    setString(7, maanedStatistikkRad.anvendtSats)
+                    setObject(8, maanedStatistikkRad.behandlingId)
+                    setLong(9, maanedStatistikkRad.sakId)
+                    setTidspunkt(10, maanedStatistikkRad.tekniskTid)
+                    setString(11, maanedStatistikkRad.sakYtelse)
+                    setString(12, maanedStatistikkRad.versjon)
+                    setString(13, maanedStatistikkRad.saksbehandler)
+                    setString(14, maanedStatistikkRad.attestant)
+                    setDate(15, Date.valueOf(maanedStatistikkRad.vedtakLoependeFom))
+                    setDate(16, maanedStatistikkRad.vedtakLoependeTom?.let { Date.valueOf(it) })
+                    setString(17, maanedStatistikkRad.statistikkMaaned.toString())
+                    setString(18, maanedStatistikkRad.sakUtland.toString())
+                    setDate(19, maanedStatistikkRad.virkningstidspunkt?.let { Date.valueOf(it.atDay(1)) })
+                    setDate(20, maanedStatistikkRad.utbetalingsdato?.let { Date.valueOf(it) })
+                    setString(21, maanedStatistikkRad.avkortingsbeloep)
+                    setString(22, maanedStatistikkRad.aarsinntekt)
+                    setString(23, maanedStatistikkRad.kilde.name)
+                    maanedStatistikkRad.pesysId?.let { setLong(24, it) } ?: setNull(24, Types.BIGINT)
+                    setString(25, maanedStatistikkRad.sakYtelsesgruppe?.name)
+                }.executeUpdate()
         }
-    }
 
     fun lagreStoenadsrad(stoenadsrad: StoenadRad): StoenadRad? {
         connection.use { conn ->
             val (statement, insertedRows) =
-                conn.prepareStatement(
-                    """
-                    INSERT INTO stoenad(
-                        fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
-                        behandlingId, sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
-                        vedtakLoependeFom, vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland,
-                         virkningstidspunkt, utbetalingsdato, kilde, pesysid, sakYtelsesgruppe 
-                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """.trimIndent(),
-                    Statement.RETURN_GENERATED_KEYS,
-                ).apply {
-                    setStoenadRad(stoenadsrad)
-                }.let {
-                    it to it.executeUpdate()
-                }
+                conn
+                    .prepareStatement(
+                        """
+                        INSERT INTO stoenad(
+                            fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
+                            behandlingId, sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
+                            vedtakLoependeFom, vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland,
+                             virkningstidspunkt, utbetalingsdato, kilde, pesysid, sakYtelsesgruppe 
+                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """.trimIndent(),
+                        Statement.RETURN_GENERATED_KEYS,
+                    ).apply {
+                        setStoenadRad(stoenadsrad)
+                    }.let {
+                        it to it.executeUpdate()
+                    }
             if (insertedRows == 0) {
                 return null
             }
@@ -137,19 +140,19 @@ class StoenadRepository(private val datasource: DataSource) {
         }
     }
 
-    fun kjoertStatusForMaanedsstatistikk(maaned: YearMonth): KjoertStatus {
-        return connection.use { conn ->
-            conn.prepareStatement(
-                """
-                SELECT id, statistikkMaaned, kjoertStatus, raderRegistrert, raderMedFeil 
-                FROM maanedsstatistikk_job 
-                WHERE statistikkMaaned = ?
-                """.trimIndent(),
-            )
-                .apply {
+    fun kjoertStatusForMaanedsstatistikk(maaned: YearMonth): KjoertStatus =
+        connection.use { conn ->
+            conn
+                .prepareStatement(
+                    """
+                    SELECT id, statistikkMaaned, kjoertStatus, raderRegistrert, raderMedFeil 
+                    FROM maanedsstatistikk_job 
+                    WHERE statistikkMaaned = ?
+                    """.trimIndent(),
+                ).apply {
                     setString(1, maaned.toString())
-                }
-                .executeQuery().toList {
+                }.executeQuery()
+                .toList {
                     MaanedstatistikkJobExecution(
                         id = getLong("id"),
                         statistikkMaaned = YearMonth.parse(getString("statistikkMaaned")),
@@ -157,7 +160,8 @@ class StoenadRepository(private val datasource: DataSource) {
                         raderRegistrert = getLong("raderRegistrert"),
                         raderMedFeil = getLong("raderMedFeil"),
                     )
-                }.map { it.kjoertStatus }.toSet()
+                }.map { it.kjoertStatus }
+                .toSet()
                 .let {
                     if (it.contains(KjoertStatus.INGEN_FEIL)) {
                         KjoertStatus.INGEN_FEIL
@@ -168,7 +172,6 @@ class StoenadRepository(private val datasource: DataSource) {
                     }
                 }
         }
-    }
 
     fun lagreMaanedJobUtfoert(
         maaned: YearMonth,
@@ -181,14 +184,14 @@ class StoenadRepository(private val datasource: DataSource) {
                 else -> KjoertStatus.FEIL
             }
         connection.use {
-            it.prepareStatement(
-                """
-                INSERT INTO maanedsstatistikk_job (
-                    statistikkMaaned, kjoertStatus, raderRegistrert, raderMedFeil
-                ) VALUES (?, ?, ?, ?)
-                """.trimIndent(),
-            )
-                .apply {
+            it
+                .prepareStatement(
+                    """
+                    INSERT INTO maanedsstatistikk_job (
+                        statistikkMaaned, kjoertStatus, raderRegistrert, raderMedFeil
+                    ) VALUES (?, ?, ?, ?)
+                    """.trimIndent(),
+                ).apply {
                     setString(1, maaned.toString())
                     setString(2, kjoertStatus.toString())
                     setLong(3, raderRegistrert)

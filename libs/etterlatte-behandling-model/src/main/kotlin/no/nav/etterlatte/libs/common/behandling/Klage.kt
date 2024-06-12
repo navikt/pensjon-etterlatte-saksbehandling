@@ -41,33 +41,19 @@ enum class KlageStatus {
     ;
 
     companion object {
-        fun kanOppdatereFormkrav(status: KlageStatus): Boolean {
-            return status !== FERDIGSTILT
-        }
+        fun kanOppdatereFormkrav(status: KlageStatus): Boolean = status !== FERDIGSTILT
 
-        fun kanOppdatereUtfall(status: KlageStatus): Boolean {
-            return status in listOf(FORMKRAV_IKKE_OPPFYLT, FORMKRAV_OPPFYLT, UTFALL_VURDERT)
-        }
+        fun kanOppdatereUtfall(status: KlageStatus): Boolean = status in listOf(FORMKRAV_IKKE_OPPFYLT, FORMKRAV_OPPFYLT, UTFALL_VURDERT)
 
-        fun kanAvbryte(status: KlageStatus): Boolean {
-            return status !in listOf(FERDIGSTILT, AVBRUTT)
-        }
+        fun kanAvbryte(status: KlageStatus): Boolean = status !in listOf(FERDIGSTILT, AVBRUTT)
 
-        fun kanEndres(status: KlageStatus): Boolean {
-            return status in listOf(OPPRETTET, FORMKRAV_OPPFYLT, UTFALL_VURDERT)
-        }
+        fun kanEndres(status: KlageStatus): Boolean = status in listOf(OPPRETTET, FORMKRAV_OPPFYLT, UTFALL_VURDERT)
 
-        fun kanFatteVedtak(status: KlageStatus): Boolean {
-            return status in listOf(UTFALL_VURDERT, RETURNERT)
-        }
+        fun kanFatteVedtak(status: KlageStatus): Boolean = status in listOf(UTFALL_VURDERT, RETURNERT)
 
-        fun kanAttestereVedtak(status: KlageStatus): Boolean {
-            return status == FATTET_VEDTAK
-        }
+        fun kanAttestereVedtak(status: KlageStatus): Boolean = status == FATTET_VEDTAK
 
-        fun kanUnderkjenneVedtak(status: KlageStatus): Boolean {
-            return status == FATTET_VEDTAK
-        }
+        fun kanUnderkjenneVedtak(status: KlageStatus): Boolean = status == FATTET_VEDTAK
     }
 }
 
@@ -257,31 +243,24 @@ data class Klage(
         )
     }
 
-    private fun kanOppdatereFormkrav(): Boolean {
-        return KlageStatus.kanOppdatereFormkrav(this.status)
-    }
+    private fun kanOppdatereFormkrav(): Boolean = KlageStatus.kanOppdatereFormkrav(this.status)
 
-    private fun kanOppdatereUtfall(): Boolean {
-        return KlageStatus.kanOppdatereUtfall(this.status)
-    }
+    private fun kanOppdatereUtfall(): Boolean = KlageStatus.kanOppdatereUtfall(this.status)
 
-    fun kanFerdigstille(): Boolean {
-        return when (this.status) {
+    fun kanFerdigstille(): Boolean =
+        when (this.status) {
             KlageStatus.UTFALL_VURDERT -> {
                 this.utfall != null
             }
 
             else -> false
         }
-    }
 
     private fun erFormkraveneOppfylt() = this.formkrav?.formkrav?.erFormkraveneOppfylt
 
     private fun erKlagenFramsattInnenFrist() = this.formkrav?.formkrav?.erKlagenFramsattInnenFrist
 
-    fun kanAvbryte(): Boolean {
-        return KlageStatus.kanAvbryte(this.status)
-    }
+    fun kanAvbryte(): Boolean = KlageStatus.kanAvbryte(this.status)
 
     fun tilBrevbakerBlankett(): BrevbakerBlankettDTO {
         if (this.utfall !is KlageUtfallMedData.StadfesteVedtak) {
@@ -351,8 +330,8 @@ data class Klage(
         fun ny(
             sak: Sak,
             innkommendeDokument: InnkommendeKlage?,
-        ): Klage {
-            return Klage(
+        ): Klage =
+            Klage(
                 id = UUID.randomUUID(),
                 sak = sak,
                 opprettet = Tidspunkt.now(),
@@ -366,7 +345,6 @@ data class Klage(
                 aarsakTilAvbrytelse = null,
                 initieltUtfall = null,
             )
-        }
     }
 }
 
@@ -445,37 +423,34 @@ sealed class KlageUtfallMedData {
         override fun harSammeUtfall(other: KlageUtfallUtenBrev): Boolean = other is KlageUtfallUtenBrev.AvvistMedOmgjoering
     }
 
-    fun innstilling(): InnstillingTilKabal? {
-        return when (this) {
+    fun innstilling(): InnstillingTilKabal? =
+        when (this) {
             is StadfesteVedtak -> innstilling
             is DelvisOmgjoering -> innstilling
             is Omgjoering -> null
             is Avvist -> null
             is AvvistMedOmgjoering -> null
         }
-    }
 
-    fun omgjoering(): KlageOmgjoering? {
-        return when (this) {
+    fun omgjoering(): KlageOmgjoering? =
+        when (this) {
             is StadfesteVedtak -> null
             is DelvisOmgjoering -> omgjoering
             is Omgjoering -> omgjoering
             is Avvist -> null
             is AvvistMedOmgjoering -> omgjoering
         }
-    }
 }
 
 sealed class GyldigForYtelse {
     abstract val gyldigForBarnepensjon: Boolean
     abstract val gyldigForOmstillingsstoenad: Boolean
 
-    fun gyldigForSaktype(sakType: SakType): Boolean {
-        return when (sakType) {
+    fun gyldigForSaktype(sakType: SakType): Boolean =
+        when (sakType) {
             SakType.BARNEPENSJON -> gyldigForBarnepensjon
             SakType.OMSTILLINGSSTOENAD -> gyldigForOmstillingsstoenad
         }
-    }
 
     data object OmsOgBp : GyldigForYtelse() {
         override val gyldigForBarnepensjon = true
@@ -493,7 +468,10 @@ sealed class GyldigForYtelse {
     }
 }
 
-enum class KabalHjemmel(private val gyldigForYtelse: GyldigForYtelse, private val leseligTekst: String) {
+enum class KabalHjemmel(
+    private val gyldigForYtelse: GyldigForYtelse,
+    private val leseligTekst: String,
+) {
     FTRL_1_3(GyldigForYtelse.OmsOgBp, "Ftrl. § 1-3"),
     FTRL_1_3_A(GyldigForYtelse.OmsOgBp, "Ftrl. § 1-3-A"),
     FTRL_1_3_B(GyldigForYtelse.OmsOgBp, "Ftrl. § 1-3-B"),
@@ -596,13 +574,9 @@ enum class KabalHjemmel(private val gyldigForYtelse: GyldigForYtelse, private va
     FTRL_17_A_8(GyldigForYtelse.KunOms, "Ftrl. § 17 A-8"),
     ;
 
-    fun kanBrukesForSaktype(sakType: SakType): Boolean {
-        return this.gyldigForYtelse.gyldigForSaktype(sakType)
-    }
+    fun kanBrukesForSaktype(sakType: SakType): Boolean = this.gyldigForYtelse.gyldigForSaktype(sakType)
 
-    fun lesbarTekst(): String {
-        return this.leseligTekst
-    }
+    fun lesbarTekst(): String = this.leseligTekst
 }
 
 enum class GrunnForOmgjoering {
@@ -614,7 +588,10 @@ enum class GrunnForOmgjoering {
     ANNET,
 }
 
-data class KlageOmgjoering(val grunnForOmgjoering: GrunnForOmgjoering, val begrunnelse: String)
+data class KlageOmgjoering(
+    val grunnForOmgjoering: GrunnForOmgjoering,
+    val begrunnelse: String,
+)
 
 class InnstillingTilKabal(
     val lovhjemmel: KabalHjemmel,
@@ -623,16 +600,26 @@ class InnstillingTilKabal(
     val brev: KlageOversendelsebrev,
 )
 
-class InnstillingTilKabalUtenBrev(val lovhjemmel: String, internKommentar: String?, val innstillingTekst: String) {
+class InnstillingTilKabalUtenBrev(
+    val lovhjemmel: String,
+    internKommentar: String?,
+    val innstillingTekst: String,
+) {
     val internKommentar: String? = internKommentar
         get() = if (field.isNullOrBlank()) null else field
 }
 
-data class KlageOversendelsebrev(val brevId: Long)
+data class KlageOversendelsebrev(
+    val brevId: Long,
+)
 
-data class KlageVedtaksbrev(val brevId: Long)
+data class KlageVedtaksbrev(
+    val brevId: Long,
+)
 
-data class KlageVedtak(val vedtakId: Long)
+data class KlageVedtak(
+    val vedtakId: Long,
+)
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "utfall")
 sealed class KlageUtfallUtenBrev {
@@ -653,7 +640,7 @@ sealed class KlageUtfallUtenBrev {
     ) : KlageUtfallUtenBrev()
 
     @JsonTypeName("AVVIST")
-    class Avvist() : KlageUtfallUtenBrev()
+    class Avvist : KlageUtfallUtenBrev()
 
     @JsonTypeName("AVVIST_MED_OMGJOERING")
     data class AvvistMedOmgjoering(
@@ -700,7 +687,10 @@ data class FormkravMedBeslutter(
     val saksbehandler: Grunnlagsopplysning.Saksbehandler,
 )
 
-data class KlageOversendelseDto(val klage: Klage, val ekstraData: EkstradataInnstilling)
+data class KlageOversendelseDto(
+    val klage: Klage,
+    val ekstraData: EkstradataInnstilling,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Mottaker(

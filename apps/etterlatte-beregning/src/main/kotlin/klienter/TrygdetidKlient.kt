@@ -15,10 +15,15 @@ import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class TrygdetidKlientException(override val message: String, override val cause: Throwable) :
-    Exception(message, cause)
+class TrygdetidKlientException(
+    override val message: String,
+    override val cause: Throwable,
+) : Exception(message, cause)
 
-class TrygdetidKlient(config: Config, httpClient: HttpClient) {
+class TrygdetidKlient(
+    config: Config,
+    httpClient: HttpClient,
+) {
     private val logger = LoggerFactory.getLogger(TrygdetidKlient::class.java)
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
@@ -40,8 +45,7 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
                             url = "$resourceUrl/api/trygdetid_v2/$behandlingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
+                ).mapBoth(
                     success = { resource ->
                         resource.response?.let { objectMapper.readValue(it.toString()) } ?: emptyList()
                     },

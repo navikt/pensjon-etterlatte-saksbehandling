@@ -62,7 +62,8 @@ class KlageTest {
         val sak = Sak(ident = "bruker", sakType = SakType.BARNEPENSJON, id = 1, enhet = "1337")
         val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("en saksbehandler")
         val klage =
-            Klage.ny(sak, null)
+            Klage
+                .ny(sak, null)
                 .copy(
                     utfall =
                         KlageUtfallMedData.Omgjoering(
@@ -123,8 +124,8 @@ class KlageTest {
     private fun formkrav(
         erFormkraveneOppfylt: JaNei = JaNei.NEI,
         erKlagenFramsattInnenFrist: JaNei = JaNei.NEI,
-    ): Formkrav {
-        return Formkrav(
+    ): Formkrav =
+        Formkrav(
             vedtaketKlagenGjelder = null,
             erKlagerPartISaken = JaNei.NEI,
             erKlagenSignert = JaNei.NEI,
@@ -132,10 +133,9 @@ class KlageTest {
             erKlagenFramsattInnenFrist = erKlagenFramsattInnenFrist,
             erFormkraveneOppfylt = erFormkraveneOppfylt,
         )
-    }
 
-    private fun alleFormkravOppfylt(): Formkrav {
-        return Formkrav(
+    private fun alleFormkravOppfylt(): Formkrav =
+        Formkrav(
             vedtaketKlagenGjelder =
                 VedtaketKlagenGjelder(
                     id = "",
@@ -149,5 +149,4 @@ class KlageTest {
             erKlagenFramsattInnenFrist = JaNei.JA,
             erFormkraveneOppfylt = JaNei.JA,
         )
-    }
 }

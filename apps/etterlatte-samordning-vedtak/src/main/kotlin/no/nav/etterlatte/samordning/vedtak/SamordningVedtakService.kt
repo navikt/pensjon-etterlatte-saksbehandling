@@ -57,25 +57,25 @@ class SamordningVedtakService(
 
         val tilOgMed = tomDato?.let { YearMonth.of(tomDato.year, tomDato.month) }
 
-        return vedtaksvurderingKlient.hentVedtaksliste(
-            sakType = sakType,
-            fomDato = fomDato,
-            fnr = fnr.value,
-            callerContext = context,
-        )
-            .filter { tilOgMed?.let { t -> it.virkningstidspunkt <= t } ?: true }
+        return vedtaksvurderingKlient
+            .hentVedtaksliste(
+                sakType = sakType,
+                fomDato = fomDato,
+                fnr = fnr.value,
+                callerContext = context,
+            ).filter { tilOgMed?.let { t -> it.virkningstidspunkt <= t } ?: true }
             .map { it.mapSamordningsvedtak() }
     }
 
-    suspend fun harLoependeOmstillingsstoenadPaaDato(
+    suspend fun harLoependeYtelsePaaDato(
         dato: LocalDate,
         fnr: Folkeregisteridentifikator,
+        sakType: SakType,
         context: CallerContext,
-    ): Boolean {
-        return hentVedtaksliste(fomDato = dato, fnr = fnr, context = context)
+    ): Boolean =
+        hentVedtaksliste(fomDato = dato, fnr = fnr, sakType = sakType, context = context)
             .flatMap { it.perioder }
             .any { dato >= it.fom && (it.tom == null || !it.tom.isBefore(dato)) }
-    }
 
     private fun VedtakSamordningDto.mapSamordningsvedtak(): SamordningVedtakDto {
         val beregning = beregning?.let { deserialize<BeregningDTO>(it.toString()) }
@@ -95,8 +95,8 @@ class SamordningVedtakService(
         )
     }
 
-    private fun VedtakType.toSamordningsvedtakType(): SamordningVedtakType {
-        return when (this) {
+    private fun VedtakType.toSamordningsvedtakType(): SamordningVedtakType =
+        when (this) {
             VedtakType.INNVILGELSE -> SamordningVedtakType.START
             VedtakType.OPPHOER -> SamordningVedtakType.OPPHOER
             VedtakType.ENDRING -> SamordningVedtakType.ENDRING
@@ -104,23 +104,20 @@ class SamordningVedtakService(
             VedtakType.TILBAKEKREVING -> throw IllegalArgumentException("Ikke relevant")
             VedtakType.AVVIST_KLAGE -> throw IllegalArgumentException("Skal ikke ha noe med samordning å gjøre")
         }
-    }
 
-    private fun Revurderingaarsak.toSamordningsvedtakAarsak(): String {
-        return when (this) {
+    private fun Revurderingaarsak.toSamordningsvedtakAarsak(): String =
+        when (this) {
             Revurderingaarsak.INNTEKTSENDRING -> SamordningVedtakAarsak.INNTEKT
             Revurderingaarsak.DOEDSFALL -> SamordningVedtakAarsak.DOEDSFALL
             Revurderingaarsak.REGULERING -> SamordningVedtakAarsak.REGULERING
             else -> SamordningVedtakAarsak.ANNET
         }.name
-    }
 
-    private fun VedtakSamordningPeriode.toSamordningVedtakPeriode(): SamordningVedtakPeriode {
-        return SamordningVedtakPeriode(
+    private fun VedtakSamordningPeriode.toSamordningVedtakPeriode(): SamordningVedtakPeriode =
+        SamordningVedtakPeriode(
             fom = fom.atStartOfMonth(),
             tom = tom?.atEndOfMonth(),
             omstillingsstoenadBrutto = ytelseFoerAvkorting,
             omstillingsstoenadNetto = ytelseEtterAvkorting,
         )
-    }
 }

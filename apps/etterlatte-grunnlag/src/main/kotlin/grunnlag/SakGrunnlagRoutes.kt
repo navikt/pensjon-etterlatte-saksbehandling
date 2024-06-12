@@ -10,6 +10,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
+import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.route.SAKID_CALL_PARAMETER
@@ -34,9 +35,17 @@ fun Route.sakGrunnlagRoute(
             kunSystembruker {
                 withSakId(behandlingKlient, skrivetilgang = true) { sakId ->
                     val opplysningsbehov = call.receive<Opplysningsbehov>()
-                    grunnlagService.opprettGrunnlagForSak(sakId, opplysningsbehov)
+                    grunnlagService.opprettEllerOppdaterGrunnlagForSak(sakId, opplysningsbehov)
                     call.respond(HttpStatusCode.OK)
                 }
+            }
+        }
+
+        post("oppdater-grunnlag") {
+            withSakId(behandlingKlient, skrivetilgang = true) {
+                val request = call.receive<OppdaterGrunnlagRequest>()
+                grunnlagService.oppdaterGrunnlagForSak(request)
+                call.respond(HttpStatusCode.OK)
             }
         }
 
@@ -52,10 +61,6 @@ fun Route.sakGrunnlagRoute(
         }
     }
 }
-
-data class PersonerISakDto(
-    val personer: Map<Folkeregisteridentifikator, PersonMedNavn>,
-)
 
 data class PersonMedNavn(
     val fnr: Folkeregisteridentifikator,

@@ -13,7 +13,9 @@ enum class TilbakekrevingHendelseType {
     TILBAKEKREVINGSVEDTAK_KVITTERING,
 }
 
-class TilbakekrevingHendelseRepository(private val dataSource: DataSource) {
+class TilbakekrevingHendelseRepository(
+    private val dataSource: DataSource,
+) {
     fun lagreTilbakekrevingHendelse(
         sakId: Long,
         payload: String,

@@ -6,9 +6,9 @@ import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.helse.rapids_rivers.RapidApplication
 
 fun main() {
-    RapidApplication.create(getRapidEnv())
+    RapidApplication
+        .create(getRapidEnv())
         .also { rapidsConnection ->
             StartUthentingFraSoeknadRiver(rapidsConnection, Opplysningsuthenter())
-        }
-        .start()
+        }.start()
 }

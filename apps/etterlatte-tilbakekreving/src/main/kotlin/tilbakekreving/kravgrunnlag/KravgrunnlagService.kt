@@ -7,9 +7,13 @@ import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagStatus
 import no.nav.etterlatte.tilbakekreving.klienter.BehandlingKlient
 import org.slf4j.LoggerFactory
 
-class KanIkkeHaandtereStatusException(message: String) : Exception(message)
+class KanIkkeHaandtereStatusException(
+    message: String,
+) : Exception(message)
 
-class KravgrunnlagService(private val behandlingKlient: BehandlingKlient) {
+class KravgrunnlagService(
+    private val behandlingKlient: BehandlingKlient,
+) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun haandterKravgrunnlag(kravgrunnlag: Kravgrunnlag) {

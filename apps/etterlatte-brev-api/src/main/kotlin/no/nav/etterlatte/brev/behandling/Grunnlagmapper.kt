@@ -130,7 +130,11 @@ private fun Grunnlag.hentForelderVerge(): ForelderVerge? {
 }
 
 private fun Grunnlag.erAnsvarligForelder(gjenlevende: Grunnlagsdata<JsonNode>): Boolean {
-    val soekersAnsvarligeForeldre = this.soeker.hentFamilierelasjon()?.verdi?.ansvarligeForeldre ?: emptyList()
+    val soekersAnsvarligeForeldre =
+        this.soeker
+            .hentFamilierelasjon()
+            ?.verdi
+            ?.ansvarligeForeldre ?: emptyList()
 
     return soekersAnsvarligeForeldre.contains(gjenlevende.hentFoedselsnummer()?.verdi)
 }

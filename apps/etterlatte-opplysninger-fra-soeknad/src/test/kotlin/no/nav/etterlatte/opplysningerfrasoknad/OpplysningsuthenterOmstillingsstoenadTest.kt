@@ -89,7 +89,8 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
                 Assertions.assertNull(iban)
                 Assertions.assertNull(swift)
                 Assertions.assertNull(oenskerSkattetrekk)
-                Assertions.assertNull(oensketSkattetrekkProsent)
+                Assertions.assertNull(oensketSkattetrekk)
+                Assertions.assertNull(beskrivelse)
             }
     }
 
@@ -117,7 +118,8 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
     }
 
     private inline fun <reified T> consumeSingle(opplysningType: Opplysningstype) =
-        opplysninger.filter { it.opplysningType == opplysningType }
+        opplysninger
+            .filter { it.opplysningType == opplysningType }
             .also { assertEquals(1, it.size) }
             .first()
             .let {

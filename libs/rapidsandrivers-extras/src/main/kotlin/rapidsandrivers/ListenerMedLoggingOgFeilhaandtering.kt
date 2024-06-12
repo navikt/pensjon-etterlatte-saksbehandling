@@ -46,10 +46,11 @@ abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
         block: River.() -> Unit = {},
     ) {
         logger.info("Initialiserer river for ${this.javaClass.simpleName}")
-        River(rapidsConnection).apply {
-            eventName(hendelsestype.lagEventnameForType())
-            correlationId()
-            block()
-        }.register(this)
+        River(rapidsConnection)
+            .apply {
+                eventName(hendelsestype.lagEventnameForType())
+                correlationId()
+                block()
+            }.register(this)
     }
 }

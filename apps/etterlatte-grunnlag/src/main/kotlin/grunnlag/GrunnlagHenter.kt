@@ -27,8 +27,8 @@ class GrunnlagHenter(
     private val pdltjenesterKlient: PdlTjenesterKlientImpl,
     private val vergeService: VergeService,
 ) {
-    suspend fun hentGrunnlagsdata(opplysningsbehov: Opplysningsbehov): HentetGrunnlag {
-        return coroutineScope {
+    suspend fun hentGrunnlagsdata(opplysningsbehov: Opplysningsbehov): HentetGrunnlag =
+        coroutineScope {
             val persongalleri = opplysningsbehov.persongalleri
             val persongalleriFraPdl =
                 pdltjenesterKlient.hentPersongalleri(
@@ -101,7 +101,6 @@ class GrunnlagHenter(
 
             HentetGrunnlag(personopplysninger, saksopplysninger)
         }
-    }
 
     private suspend fun personopplysning(
         person: Deferred<Person>,
@@ -159,8 +158,8 @@ class GrunnlagHenter(
 
     private fun Persongalleri.tilGrunnlagsopplysningFraSoeknad(
         overstyrtKilde: Grunnlagsopplysning.Kilde? = null,
-    ): Grunnlagsopplysning<JsonNode> {
-        return Grunnlagsopplysning(
+    ): Grunnlagsopplysning<JsonNode> =
+        Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde =
                 overstyrtKilde
@@ -185,10 +184,9 @@ class GrunnlagHenter(
             fnr = null,
             periode = null,
         )
-    }
 
-    private fun Persongalleri.tilGrunnlagsopplysningFraPdl(): Grunnlagsopplysning<JsonNode> {
-        return Grunnlagsopplysning(
+    private fun Persongalleri.tilGrunnlagsopplysningFraPdl(): Grunnlagsopplysning<JsonNode> =
+        Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
             opplysningType = Opplysningstype.PERSONGALLERI_PDL_V1,
@@ -198,5 +196,4 @@ class GrunnlagHenter(
             fnr = null,
             periode = null,
         )
-    }
 }

@@ -4,9 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
@@ -44,7 +42,7 @@ internal class OpprettBehandlingRiverTest {
             behandlingClientMock.finnEllerOpprettSak(any(), any())
         } returns Sak(soeker, SakType.OMSTILLINGSSTOENAD, sakId, "4808")
         every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns behandlingId
-        every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } just runs
+        every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } returns ""
 
         val inspector = testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/omstillingsstoenad.json")) }.inspektør
         val message = inspector.message(0)
@@ -71,7 +69,7 @@ internal class OpprettBehandlingRiverTest {
             behandlingClientMock.finnEllerOpprettSak(any(), any())
         } returns Sak(soeker, SakType.BARNEPENSJON, sakId, "4808")
         every { behandlingClientMock.opprettBehandling(any(), any(), any()) } returns behandlingId
-        every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } just runs
+        every { behandlingClientMock.lagreGyldighetsVurdering(any(), any()) } returns ""
 
         val inspector = testRapid().apply { sendTestMessage(getJson("/behandlingsbehov/barnepensjon.json")) }.inspektør
         val message = inspector.message(0)

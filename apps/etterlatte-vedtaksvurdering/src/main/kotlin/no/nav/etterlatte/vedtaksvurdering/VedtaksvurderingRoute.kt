@@ -241,7 +241,8 @@ fun Route.vedtaksvurderingRoute(
                     call.respond(HttpStatusCode.NotFound)
                 }
 
-                vedtakBehandlingService.samordnetVedtak(vedtak!!.behandlingId, brukerTokenInfo)
+                vedtakBehandlingService
+                    .samordnetVedtak(vedtak!!.behandlingId, brukerTokenInfo)
                     ?.let { samordnetVedtak ->
                         rapidService.sendToRapid(samordnetVedtak)
                         call.respond(HttpStatusCode.OK, samordnetVedtak.rapidInfo1.vedtak)
@@ -404,10 +405,15 @@ private fun LoependeYtelse.toDto() =
         sisteLoependeBehandlingId = sisteLoependeBehandlingId,
     )
 
-data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: String)
-
-private class MismatchingIdException(message: String) : ForespoerselException(
-    HttpStatusCode.BadRequest.value,
-    "ID_MISMATCH_MELLOM_PATH_OG_BODY",
-    message,
+data class UnderkjennVedtakDto(
+    val kommentar: String,
+    val valgtBegrunnelse: String,
 )
+
+private class MismatchingIdException(
+    message: String,
+) : ForespoerselException(
+        HttpStatusCode.BadRequest.value,
+        "ID_MISMATCH_MELLOM_PATH_OG_BODY",
+        message,
+    )

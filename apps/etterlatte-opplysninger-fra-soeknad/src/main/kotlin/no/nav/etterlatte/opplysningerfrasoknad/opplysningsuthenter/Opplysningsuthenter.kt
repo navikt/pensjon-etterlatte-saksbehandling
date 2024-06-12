@@ -20,17 +20,16 @@ class Opplysningsuthenter {
     fun lagOpplysningsListe(
         jsonNode: JsonNode,
         type: SoeknadType,
-    ): List<Grunnlagsopplysning<out Any?>> {
-        return when (type) {
+    ): List<Grunnlagsopplysning<out Any?>> =
+        when (type) {
             SoeknadType.BARNEPENSJON -> BarnepensjonUthenter.lagOpplysningsListe(jsonNode)
             SoeknadType.OMSTILLINGSSTOENAD -> OmstillingsstoenadUthenter.lagOpplysningsListe(jsonNode)
             else -> throw Exception("Ugyldig SoeknadType")
         }
-    }
 }
 
-internal fun avdoedOpplysning(avdoed: Avdoed): AvdoedSoeknad {
-    return AvdoedSoeknad(
+internal fun avdoedOpplysning(avdoed: Avdoed): AvdoedSoeknad =
+    AvdoedSoeknad(
         type = PersonType.AVDOED,
         fornavn = avdoed.fornavn.svar,
         etternavn = avdoed.etternavn.svar,
@@ -53,23 +52,55 @@ internal fun avdoedOpplysning(avdoed: Avdoed): AvdoedSoeknad {
             ),
         doedsaarsakSkyldesYrkesskadeEllerYrkessykdom = avdoed.doedsaarsakSkyldesYrkesskadeEllerYrkessykdom.svar.verdi,
     )
-}
 
 internal fun utbetalingsinformasjonOpplysning(
     betalingsinformasjon: BetingetOpplysning<EnumSvar<BankkontoType>, UtbetalingsInformasjon>?,
-): Utbetalingsinformasjon {
-    return Utbetalingsinformasjon(
+): Utbetalingsinformasjon =
+    Utbetalingsinformasjon(
         betalingsinformasjon?.svar?.verdi,
-        betalingsinformasjon?.opplysning?.kontonummer?.svar?.innhold,
-        betalingsinformasjon?.opplysning?.utenlandskBankNavn?.svar?.innhold,
-        betalingsinformasjon?.opplysning?.utenlandskBankAdresse?.svar?.innhold,
-        betalingsinformasjon?.opplysning?.iban?.svar?.innhold,
-        betalingsinformasjon?.opplysning?.swift?.svar?.innhold,
-        betalingsinformasjon?.opplysning?.skattetrekk?.svar?.verdi,
-        betalingsinformasjon?.opplysning?.skattetrekk?.opplysning?.svar?.innhold,
+        betalingsinformasjon
+            ?.opplysning
+            ?.kontonummer
+            ?.svar
+            ?.innhold,
+        betalingsinformasjon
+            ?.opplysning
+            ?.utenlandskBankNavn
+            ?.svar
+            ?.innhold,
+        betalingsinformasjon
+            ?.opplysning
+            ?.utenlandskBankAdresse
+            ?.svar
+            ?.innhold,
+        betalingsinformasjon
+            ?.opplysning
+            ?.iban
+            ?.svar
+            ?.innhold,
+        betalingsinformasjon
+            ?.opplysning
+            ?.swift
+            ?.svar
+            ?.innhold,
+        betalingsinformasjon
+            ?.opplysning
+            ?.skattetrekk
+            ?.svar
+            ?.svar
+            ?.verdi,
+        betalingsinformasjon
+            ?.opplysning
+            ?.skattetrekk
+            ?.trekk
+            ?.svar
+            ?.innhold,
+        betalingsinformasjon
+            ?.opplysning
+            ?.skattetrekk
+            ?.beskrivelse
+            ?.svar
+            ?.innhold,
     )
-}
 
-internal fun Foedselsnummer.toFolkeregisteridentifikator(): Folkeregisteridentifikator {
-    return Folkeregisteridentifikator.of(this.value)
-}
+internal fun Foedselsnummer.toFolkeregisteridentifikator(): Folkeregisteridentifikator = Folkeregisteridentifikator.of(this.value)

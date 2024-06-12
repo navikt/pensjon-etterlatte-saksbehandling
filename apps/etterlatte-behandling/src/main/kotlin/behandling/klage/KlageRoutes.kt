@@ -32,7 +32,9 @@ import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
-enum class KlageFeatureToggle(private val key: String) : FeatureToggle {
+enum class KlageFeatureToggle(
+    private val key: String,
+) : FeatureToggle {
     KanFerdigstilleKlageToggle("pensjon-etterlatte.kan-ferdigstille-klage"),
     KanOppretteVedtakAvvisningToggle("pensjon-etterlatte.kan-opprette-vedtak-avvist-klage"),
     StoetterUtfallDelvisOmgjoering("pensjon-etterlatte.klage-delvis-omgjoering"),
@@ -224,16 +226,21 @@ data class InnkommendeKlageDto(
     val journalpostId: String,
     val innsender: String?,
 ) {
-    fun parseMottattDato(): LocalDate {
-        return Tidspunkt(OffsetDateTime.parse(mottattDato).toInstant()).toNorskLocalDate()
-    }
+    fun parseMottattDato(): LocalDate = Tidspunkt(OffsetDateTime.parse(mottattDato).toInstant()).toNorskLocalDate()
 }
 
-data class VurdereFormkravDto(val formkrav: Formkrav)
+data class VurdereFormkravDto(
+    val formkrav: Formkrav,
+)
 
-data class VurdertUtfallDto(val utfall: KlageUtfallUtenBrev)
+data class VurdertUtfallDto(
+    val utfall: KlageUtfallUtenBrev,
+)
 
-data class AvbrytKlageDto(val aarsakTilAvbrytelse: AarsakTilAvbrytelse, val kommentar: String)
+data class AvbrytKlageDto(
+    val aarsakTilAvbrytelse: AarsakTilAvbrytelse,
+    val kommentar: String,
+)
 
 data class KlageAttesterRequest(
     val kommentar: String,

@@ -7,7 +7,10 @@ import no.nav.etterlatte.libs.ktor.route.Tilgangssjekker
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import java.util.UUID
 
-class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilgangsSjekk {
+class BehandlingKlient(
+    config: Config,
+    httpClient: HttpClient,
+) : BehandlingTilgangsSjekk {
     private val tilgangssjekker = Tilgangssjekker(config, httpClient)
 
     override suspend fun harTilgangTilBehandling(

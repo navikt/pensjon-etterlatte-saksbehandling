@@ -52,83 +52,89 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                 }
 
             val sak: Sak =
-                client.post("personer/saker/${SakType.BARNEPENSJON}") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                }.let {
-                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                    it.body()
-                }
+                client
+                    .post("personer/saker/${SakType.BARNEPENSJON}") {
+                        addAuthToken(tokenSaksbehandler)
+                        contentType(ContentType.Application.Json)
+                        setBody(FoedselsnummerDTO(fnr))
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    }.let {
+                        Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                        it.body()
+                    }
             Assertions.assertNotNull(sak.id)
 
             val behandlingId =
-                client.post("/behandlinger/opprettbehandling") {
-                    addAuthToken(tokenSaksbehandler)
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody(
-                        BehandlingsBehov(
-                            sak.id,
-                            Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
-                            Tidspunkt.now().toLocalDatetimeUTC().toString(),
-                        ),
-                    )
+                client
+                    .post("/behandlinger/opprettbehandling") {
+                        addAuthToken(tokenSaksbehandler)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(
+                            BehandlingsBehov(
+                                sak.id,
+                                Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
+                                Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                            ),
+                        )
+                    }.let {
+                        Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                        UUID.fromString(it.body())
+                    }
+
+            client
+                .get("/behandlinger/$behandlingId") {
+                    addAuthToken(this@GrunnlagsendringshendelseRouteTest.systemBruker)
                 }.let {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                    UUID.fromString(it.body())
                 }
 
-            client.get("/behandlinger/$behandlingId") {
-                addAuthToken(this@GrunnlagsendringshendelseRouteTest.systemBruker)
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-            }
+            client
+                .post("/grunnlagsendringshendelse/adressebeskyttelse") {
+                    addAuthToken(this@GrunnlagsendringshendelseRouteTest.systemBruker)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        Adressebeskyttelse(
+                            hendelseId = "1",
+                            fnr = fnr,
+                            adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                            endringstype = Endringstype.OPPRETTET,
+                        ),
+                    )
+                }.also {
+                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(this@GrunnlagsendringshendelseRouteTest.systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    Adressebeskyttelse(
-                        hendelseId = "1",
-                        fnr = fnr,
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
-                        endringstype = Endringstype.OPPRETTET,
-                    ),
-                )
-            }.also {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-            }
+            client
+                .post("/grunnlagsendringshendelse/adressebeskyttelse") {
+                    addAuthToken(this@GrunnlagsendringshendelseRouteTest.systemBruker)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        Adressebeskyttelse(
+                            hendelseId = "1",
+                            fnr = fnr,
+                            adressebeskyttelseGradering = AdressebeskyttelseGradering.FORTROLIG,
+                            endringstype = Endringstype.OPPRETTET,
+                        ),
+                    )
+                }.also {
+                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                }
 
-            client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(this@GrunnlagsendringshendelseRouteTest.systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    Adressebeskyttelse(
-                        hendelseId = "1",
-                        fnr = fnr,
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.FORTROLIG,
-                        endringstype = Endringstype.OPPRETTET,
-                    ),
-                )
-            }.also {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-            }
-
-            client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(this@GrunnlagsendringshendelseRouteTest.systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    Adressebeskyttelse(
-                        hendelseId = "1",
-                        fnr = fnr,
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT,
-                        endringstype = Endringstype.OPPRETTET,
-                    ),
-                )
-            }.also {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-            }
+            client
+                .post("/grunnlagsendringshendelse/adressebeskyttelse") {
+                    addAuthToken(this@GrunnlagsendringshendelseRouteTest.systemBruker)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        Adressebeskyttelse(
+                            hendelseId = "1",
+                            fnr = fnr,
+                            adressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT,
+                            endringstype = Endringstype.OPPRETTET,
+                        ),
+                    )
+                }.also {
+                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                }
         }
     }
 }

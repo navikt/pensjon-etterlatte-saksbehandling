@@ -77,11 +77,10 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
 fun harTilgangBrukertypeSjekk(
     brukerTokenInfo: BrukerTokenInfo,
     harTilgang: (saksbehandler: Saksbehandler) -> Boolean,
-): Boolean {
-    return when (brukerTokenInfo) {
+): Boolean =
+    when (brukerTokenInfo) {
         is Saksbehandler -> {
             harTilgang(brukerTokenInfo)
         }
         is Systembruker -> true
     }
-}

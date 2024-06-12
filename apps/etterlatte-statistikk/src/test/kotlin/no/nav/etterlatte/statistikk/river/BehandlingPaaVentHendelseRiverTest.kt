@@ -36,15 +36,16 @@ internal class BehandlingPaaVentHendelseRiverTest {
         val behandlingId = UUID.randomUUID()
         val tekniskTid = LocalDateTime.now()
         val message =
-            JsonMessage.newMessage(
-                mapOf(
-                    BehandlingHendelseType.PAA_VENT.lagParMedEventNameKey(),
-                    CORRELATION_ID_KEY to UUID.randomUUID(),
-                    TEKNISK_TID_KEY to tekniskTid,
-                    BEHANDLING_ID_PAA_VENT_RIVER_KEY to behandlingId,
-                    PAA_VENT_AARSAK_KEY to PaaVentAarsak.OPPLYSNING_FRA_ANDRE.name,
-                ),
-            ).toJson()
+            JsonMessage
+                .newMessage(
+                    mapOf(
+                        BehandlingHendelseType.PAA_VENT.lagParMedEventNameKey(),
+                        CORRELATION_ID_KEY to UUID.randomUUID(),
+                        TEKNISK_TID_KEY to tekniskTid,
+                        BEHANDLING_ID_PAA_VENT_RIVER_KEY to behandlingId,
+                        PAA_VENT_AARSAK_KEY to PaaVentAarsak.OPPLYSNING_FRA_ANDRE.name,
+                    ),
+                ).toJson()
         val inspector = testRapid.apply { sendTestMessage(message) }.inspektør
         Assertions.assertEquals(0, inspector.size)
 

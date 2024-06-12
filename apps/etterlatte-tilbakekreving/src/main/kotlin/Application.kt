@@ -13,7 +13,9 @@ fun main() {
     ApplicationContext().let { Server(it).run() }
 }
 
-class Server(private val context: ApplicationContext) {
+class Server(
+    private val context: ApplicationContext,
+) {
     init {
         sikkerLoggOppstartOgAvslutning("etterlatte-tilbakekreving")
     }

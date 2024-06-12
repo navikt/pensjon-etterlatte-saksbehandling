@@ -38,9 +38,8 @@ data class Beregning(
     // TODO: Sett denne som non-nullable etter at vi har refreshet hentede beregninger
     val overstyrtBeregning: Boolean? = null,
 ) {
-    fun beregningForMaaned(maaned: YearMonth): Beregningsperiode? {
-        return beregningsperioder.find { it.datoFOM <= maaned && (it.datoTOM ?: maaned) >= maaned }
-    }
+    fun beregningForMaaned(maaned: YearMonth): Beregningsperiode? =
+        beregningsperioder.find { it.datoFOM <= maaned && (it.datoTOM ?: maaned) >= maaned }
 
     companion object {
         fun fraBeregningDTO(dto: CommonBeregningDTO) =
@@ -59,11 +58,10 @@ data class InstitusjonsoppholdStatistikk(
     val sats: BigDecimal,
 ) {
     companion object {
-        fun fra(dto: InstitusjonsoppholdBeregningsgrunnlag): InstitusjonsoppholdStatistikk {
-            return InstitusjonsoppholdStatistikk(
+        fun fra(dto: InstitusjonsoppholdBeregningsgrunnlag): InstitusjonsoppholdStatistikk =
+            InstitusjonsoppholdStatistikk(
                 sats = dto.prosentEtterReduksjon().verdi.toBigDecimal() / 100.toBigDecimal(),
             )
-        }
     }
 }
 
@@ -80,6 +78,7 @@ data class Beregningsperiode(
     val samletNorskTrygdetid: Int? = null,
     val samletTeoretiskTrygdetid: Int? = null,
     val broek: IntBroek? = null,
+    val anvendteAvdoede: List<String?>? = null,
 ) {
     fun anvendtSats(
         beregningstype: Beregningstype,
@@ -98,7 +97,9 @@ data class Beregningsperiode(
         if (datoFOM < YearMonth.of(2024, Month.JANUARY)) {
             return "SOESKENJUSTERING"
         }
-        return when (erForeldreloes) {
+        val foreldreloesIPeriode = anvendteAvdoede?.size?.let { it == 2 } ?: erForeldreloes
+
+        return when (foreldreloesIPeriode) {
             true -> "2.25 G"
             false -> "1 G"
         }
@@ -119,6 +120,7 @@ data class Beregningsperiode(
                 samletNorskTrygdetid = dto.samletNorskTrygdetid,
                 samletTeoretiskTrygdetid = dto.samletTeoretiskTrygdetid,
                 broek = dto.broek,
+                anvendteAvdoede = dto.avdodeForeldre,
             )
     }
 }

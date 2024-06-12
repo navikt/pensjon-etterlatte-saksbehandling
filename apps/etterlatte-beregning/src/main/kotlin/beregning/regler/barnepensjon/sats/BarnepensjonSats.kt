@@ -6,6 +6,7 @@ import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
 import no.nav.etterlatte.libs.regler.RegelReferanse
@@ -50,12 +51,12 @@ val antallSoeskenIKullet1967 =
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-ANTALL-SOESKEN"),
     ) benytter soeskenIKullet1967 med { soesken -> soesken.size }
 
-val avdodeForeldre2024: Regel<BarnepensjonGrunnlag, List<Folkeregisteridentifikator>> =
+val avdodeForeldre2024: Regel<BarnepensjonGrunnlag, List<String?>> =
     finnFaktumIGrunnlag(
         gjelderFra = BP_2024_DATO,
         beskrivelse = "Finner om søker har to avdøde foreldre",
-        finnFaktum = BarnepensjonGrunnlag::avdoedeForeldre,
-        finnFelt = { it },
+        finnFaktum = BarnepensjonGrunnlag::avdoedesTrygdetid,
+        finnFelt = { anvendtTrygdetider -> anvendtTrygdetider.map { it.ident } },
     )
 
 val harToAvdodeForeldre2024 =
@@ -64,7 +65,7 @@ val harToAvdodeForeldre2024 =
         beskrivelse = "Finner om barnet har to avdøde foreldre",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-HAR-TO-AVDOEDE"),
     ) benytter avdodeForeldre2024 med { avdoedeForeldre ->
-        avdoedeForeldre.size >= 2
+        avdoedeForeldre.all { it == UKJENT_AVDOED || Folkeregisteridentifikator.isValid(it) } && avdoedeForeldre.size >= 2
     }
 
 val prosentsatsFoersteBarnKonstant1967 =
@@ -96,8 +97,7 @@ val beloepHvertBarnEnForelderAvdoed2024 =
         gjelderFra = BP_2024_DATO,
         beskrivelse = "Prosentsats benyttet for hvert barn når en forelder er død",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-BELOEP-EN-FORELDER-AVDOED"),
-    ) benytter prosentsatsHvertBarnEnForelderAvdoed2024 og grunnbeloep med {
-            sats, grunnbeloep ->
+    ) benytter prosentsatsHvertBarnEnForelderAvdoed2024 og grunnbeloep med { sats, grunnbeloep ->
         sats.multiply(grunnbeloep.grunnbeloepPerMaaned)
     }
 
@@ -106,8 +106,7 @@ val beloepHvertBarnToForeldreAvdoed2024 =
         gjelderFra = BP_2024_DATO,
         beskrivelse = "Prosentsats benyttet for hvert barn når to foreldre er døde",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-BELOEP-TO-FORELDRE-AVDOED"),
-    ) benytter prosentsatsHvertBarnToForeldreAvdoed2024 og grunnbeloep med {
-            sats, grunnbeloep ->
+    ) benytter prosentsatsHvertBarnToForeldreAvdoed2024 og grunnbeloep med { sats, grunnbeloep ->
         sats.multiply(grunnbeloep.grunnbeloepPerMaaned)
     }
 
@@ -143,7 +142,10 @@ val barnepensjonSatsRegel1967 =
         beskrivelse = "Beregn uavkortet barnepensjon basert på størrelsen på barnekullet",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-UAVKORTET"),
     ) benytter belopForFoersteBarn1967 og belopForEtterfoelgendeBarn1967 og antallSoeskenIKullet1967 med {
-            foerstebarnSats, etterfoelgendeBarnSats, antallSoesken ->
+            foerstebarnSats,
+            etterfoelgendeBarnSats,
+            antallSoesken,
+        ->
         foerstebarnSats
             .plus(etterfoelgendeBarnSats.multiply(antallSoesken))
             .divide(antallSoesken.plus(1))
@@ -155,7 +157,10 @@ val barnepensjonSatsRegel2024 =
         beskrivelse = "Beregn barnepensjon etter 2024-regelverk",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-2024-UAVKORTET"),
     ) benytter harToAvdodeForeldre2024 og beloepHvertBarnEnForelderAvdoed2024 og beloepHvertBarnToForeldreAvdoed2024 med {
-            harToAvdodeForeldre2024, beloepEnAvdoedForelder, beloepToAvdoedeForeldre ->
+            harToAvdodeForeldre2024,
+            beloepEnAvdoedForelder,
+            beloepToAvdoedeForeldre,
+        ->
         if (harToAvdodeForeldre2024) {
             beloepToAvdoedeForeldre
         } else {

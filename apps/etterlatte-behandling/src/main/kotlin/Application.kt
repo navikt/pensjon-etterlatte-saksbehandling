@@ -59,7 +59,9 @@ fun main() {
     Server(ApplicationContext()).run()
 }
 
-private class Server(private val context: ApplicationContext) {
+private class Server(
+    private val context: ApplicationContext,
+) {
     init {
         sikkerLoggOppstartOgAvslutning("etterlatte-behandling")
     }
@@ -163,12 +165,7 @@ private fun Route.settOppRoutes(applicationContext: ApplicationContext) {
         kommerBarnetTilGodeService = applicationContext.kommerBarnetTilGodeService,
         behandlingFactory = applicationContext.behandlingFactory,
     )
-    aktivitetspliktRoutes(
-        aktivitetspliktService = applicationContext.aktivitetspliktService,
-        behandlingService = applicationContext.behandlingService,
-        grunnlagKlient = applicationContext.grunnlagKlientObo,
-        automatiskRevurderingService = applicationContext.automatiskRevurderingService,
-    )
+    aktivitetspliktRoutes(aktivitetspliktService = applicationContext.aktivitetspliktService)
     sjekklisteRoute(sjekklisteService = applicationContext.sjekklisteService)
     statistikkRoutes(behandlingService = applicationContext.behandlingService)
     generellbehandlingRoutes(

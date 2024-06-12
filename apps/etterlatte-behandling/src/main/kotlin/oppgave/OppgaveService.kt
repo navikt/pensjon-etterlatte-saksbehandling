@@ -24,8 +24,6 @@ import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Fagsaksystem
 import no.nav.etterlatte.sak.SakDao
@@ -45,21 +43,20 @@ class OppgaveService(
         bruker: SaksbehandlerMedEnheterOgRoller,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String? = null,
-    ): List<OppgaveIntern> {
-        return if (bruker.saksbehandlerMedRoller.harRolleStrengtFortrolig()) {
+    ): List<OppgaveIntern> =
+        if (bruker.saksbehandlerMedRoller.harRolleStrengtFortrolig()) {
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland()
         } else {
-            oppgaveDao.hentOppgaver(
-                bruker.enheter(),
-                oppgaveStatuser,
-                minOppgavelisteIdentFilter,
-            ).sortedByDescending { it.opprettet }
+            oppgaveDao
+                .hentOppgaver(
+                    bruker.enheter(),
+                    oppgaveStatuser,
+                    minOppgavelisteIdentFilter,
+                ).sortedByDescending { it.opprettet }
         }
-    }
 
-    fun genererStatsForOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats {
-        return oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)
-    }
+    fun genererStatsForOppgaver(innloggetSaksbehandlerIdent: String): OppgavebenkStats =
+        oppgaveDao.hentAntallOppgaver(innloggetSaksbehandlerIdent)
 
     private fun sjekkOmkanTildeleAttestantOppgave(): Boolean {
         val appUser = Kontekst.get().AppUser
@@ -310,11 +307,13 @@ class OppgaveService(
 
     // TODO: hentEndringerForOppgave Kan fjernes over tid
     fun saksbehandlerSomFattetVedtak(oppgave: OppgaveIntern): String? =
-        oppgave.forrigeSaksbehandlerIdent ?: oppgaveDao.hentEndringerForOppgave(oppgave.id)
+        oppgave.forrigeSaksbehandlerIdent ?: oppgaveDao
+            .hentEndringerForOppgave(oppgave.id)
             .sortedByDescending { it.tidspunkt }
             .firstOrNull(OppgaveEndring::sendtTilAttestering)
             ?.oppgaveFoer
-            ?.saksbehandler?.ident
+            ?.saksbehandler
+            ?.ident
 
     // TODO: Slå sammen med de 3 andre "ferdigstill"-funksjonene
     fun ferdigStillOppgaveUnderBehandling(
@@ -388,7 +387,8 @@ class OppgaveService(
 
         val behandlingHendelser =
             if (oppgave.kilde == OppgaveKilde.BEHANDLING) {
-                hendelseDao.finnHendelserIBehandling(UUID.fromString(oppgave.referanse))
+                hendelseDao
+                    .finnHendelserIBehandling(UUID.fromString(oppgave.referanse))
                     .map {
                         val hendelse = EndringMapper.mapBehandlingHendelse(it)
                         GenerellEndringshendelse(
@@ -464,18 +464,15 @@ class OppgaveService(
         }
     }
 
-    fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> {
-        return oppgaveDao.hentOppgaverForSak(sakId)
-    }
+    fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> = oppgaveDao.hentOppgaverForSak(sakId)
 
-    fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> {
-        return oppgaveDao.hentOppgaverForReferanse(referanse)
-    }
+    fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> = oppgaveDao.hentOppgaverForReferanse(referanse)
 
     fun hentForrigeStatus(oppgaveId: UUID): Status {
         val oppgave = hentOppgave(oppgaveId)
 
-        return oppgaveDao.hentEndringerForOppgave(oppgaveId)
+        return oppgaveDao
+            .hentEndringerForOppgave(oppgaveId)
             .sortedByDescending { it.tidspunkt }
             .first { it.oppgaveEtter.status != oppgave.status }
             .oppgaveEtter.status
@@ -511,7 +508,8 @@ class OppgaveService(
     }
 
     fun hentOppgaveUnderBehandling(referanse: String) =
-        oppgaveDao.hentOppgaverForReferanse(referanse)
+        oppgaveDao
+            .hentOppgaverForReferanse(referanse)
             .singleOrNull(OppgaveIntern::erUnderBehandling)
             .also {
                 if (it == null) {
@@ -531,55 +529,47 @@ class OppgaveService(
             oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
         }
 
-        return opprettNyOppgaveMedSakOgReferanse(
+        return opprettOppgave(
             referanse = referanse,
             sakId = sakId,
-            oppgaveKilde = oppgaveKilde,
-            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+            kilde = oppgaveKilde,
+            type = OppgaveType.FOERSTEGANGSBEHANDLING,
             merknad = merknad,
         )
     }
 
-    fun opprettNyOppgaveMedSakOgReferanse(
+    fun opprettOppgave(
         referanse: String,
         sakId: Long,
-        oppgaveKilde: OppgaveKilde?,
-        oppgaveType: OppgaveType,
+        kilde: OppgaveKilde?,
+        type: OppgaveType,
         merknad: String?,
         frist: Tidspunkt? = null,
         saksbehandler: String? = null,
     ): OppgaveIntern {
         val sak = sakDao.hentSak(sakId)!!
-        return opprettOppgave(
+
+        val oppgave =
             opprettNyOppgaveMedReferanseOgSak(
                 referanse = referanse,
                 sak = sak,
-                oppgaveKilde = oppgaveKilde,
-                oppgaveType = oppgaveType,
+                kilde = kilde,
+                type = type,
                 merknad = merknad,
                 frist = frist,
-            ),
-        ).also {
-            if (saksbehandler != null) {
-                tildelSaksbehandler(it.id, saksbehandler)
-            }
+            )
+        oppgaveDao.opprettOppgave(oppgave)
+
+        if (saksbehandler != null) {
+            tildelSaksbehandler(oppgave.id, saksbehandler)
         }
+
+        return hentOppgave(oppgave.id)
     }
 
-    private fun opprettOppgave(oppgaveIntern: OppgaveIntern): OppgaveIntern {
-        var oppgaveLagres = oppgaveIntern
-        if (oppgaveIntern.frist === null) {
-            val enMaanedFrem = oppgaveIntern.opprettet.toLocalDatetimeUTC().plusMonths(1L).toTidspunkt()
-            oppgaveLagres = oppgaveIntern.copy(frist = enMaanedFrem)
-        }
-        oppgaveDao.opprettOppgave(oppgaveLagres)
-        return oppgaveDao.hentOppgave(oppgaveLagres.id)!!
-    }
-
-    fun hentOppgave(oppgaveId: UUID): OppgaveIntern {
-        return oppgaveDao.hentOppgave(oppgaveId)
+    fun hentOppgave(oppgaveId: UUID): OppgaveIntern =
+        oppgaveDao.hentOppgave(oppgaveId)
             ?: throw InternfeilException("Oppgave med id=$oppgaveId ikke funnet!")
-    }
 
     /**
      * Skal kun brukes til:
@@ -589,7 +579,8 @@ class OppgaveService(
     fun avbrytAapneOppgaverMedReferanse(referanse: String) {
         logger.info("Avbryter åpne oppgaver med referanse=$referanse")
 
-        oppgaveDao.hentOppgaverForReferanse(referanse)
+        oppgaveDao
+            .hentOppgaverForReferanse(referanse)
             .filterNot(OppgaveIntern::erAvsluttet)
             .forEach { oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT) }
     }
@@ -612,54 +603,74 @@ class OppgaveService(
     }
 }
 
-class BrukerManglerAttestantRolleException(ident: String) : UgyldigForespoerselException(
-    code = "BRUKER_ER_IKKE_ATTESTANT",
-    detail = "Bruker $ident mangler attestant rolle for tildeling",
-)
+class BrukerManglerAttestantRolleException(
+    ident: String,
+) : UgyldigForespoerselException(
+        code = "BRUKER_ER_IKKE_ATTESTANT",
+        detail = "Bruker $ident mangler attestant rolle for tildeling",
+    )
 
-class ManglerOppgaveUnderBehandling(msg: String) : UgyldigForespoerselException(
-    code = "MANGLER_OPPGAVE_UNDER_BEHANDLING",
-    detail = msg,
-)
+class ManglerOppgaveUnderBehandling(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "MANGLER_OPPGAVE_UNDER_BEHANDLING",
+        detail = msg,
+    )
 
-class ForMangeOppgaverUnderBehandling(msg: String) : UgyldigForespoerselException(
-    code = "FOR_MANGE_OPPGAVER_UNDER_BEHANDLING",
-    detail = msg,
-)
+class ForMangeOppgaverUnderBehandling(
+    msg: String,
+) : UgyldigForespoerselException(
+        code = "FOR_MANGE_OPPGAVER_UNDER_BEHANDLING",
+        detail = msg,
+    )
 
-class OppgaveTilhoererAnnenSaksbehandler(oppgaveId: UUID) : UgyldigForespoerselException(
-    code = "OPPGAVE_TILHOERER_ANNEN_SAKSBEHANDLER",
-    detail = "Kan ikke lukke oppgave som tilhører en annen saksbehandler",
-    meta = mapOf("oppgaveId" to oppgaveId),
-)
+class OppgaveTilhoererAnnenSaksbehandler(
+    oppgaveId: UUID,
+) : UgyldigForespoerselException(
+        code = "OPPGAVE_TILHOERER_ANNEN_SAKSBEHANDLER",
+        detail = "Kan ikke lukke oppgave som tilhører en annen saksbehandler",
+        meta = mapOf("oppgaveId" to oppgaveId),
+    )
 
-class OppgaveIkkeTildeltSaksbehandler(oppgaveId: UUID) : UgyldigForespoerselException(
-    code = "OPPGAVE_IKKE_TILDELT_SAKSBEHANDLER",
-    detail = "Oppgaven er ikke tildelt en saksbehandler",
-    meta = mapOf("oppgaveId" to oppgaveId),
-)
+class OppgaveIkkeTildeltSaksbehandler(
+    oppgaveId: UUID,
+) : UgyldigForespoerselException(
+        code = "OPPGAVE_IKKE_TILDELT_SAKSBEHANDLER",
+        detail = "Oppgaven er ikke tildelt en saksbehandler",
+        meta = mapOf("oppgaveId" to oppgaveId),
+    )
 
-class OppgaveKanIkkeEndres(oppgaveId: UUID, status: Status) : UgyldigForespoerselException(
-    code = "OPPGAVE_KAN_IKKE_ENDRES",
-    detail = "Oppgaven kan ikke endres siden den har status $status",
-    meta = mapOf("oppgaveId" to oppgaveId),
-)
+class OppgaveKanIkkeEndres(
+    oppgaveId: UUID,
+    status: Status,
+) : UgyldigForespoerselException(
+        code = "OPPGAVE_KAN_IKKE_ENDRES",
+        detail = "Oppgaven kan ikke endres siden den har status $status",
+        meta = mapOf("oppgaveId" to oppgaveId),
+    )
 
-class FristTilbakeITid(oppgaveId: UUID) : UgyldigForespoerselException(
-    code = "FRIST_TILBAKE_I_TID",
-    detail = "Frist kan ikke settes tilbake i tid",
-    meta = mapOf("oppgaveId" to oppgaveId),
-)
+class FristTilbakeITid(
+    oppgaveId: UUID,
+) : UgyldigForespoerselException(
+        code = "FRIST_TILBAKE_I_TID",
+        detail = "Frist kan ikke settes tilbake i tid",
+        meta = mapOf("oppgaveId" to oppgaveId),
+    )
 
-class OppgaveAlleredeTildeltSaksbehandler(oppgaveId: UUID, saksbehandler: String?) : ForespoerselException(
-    status = HttpStatusCode.Conflict.value,
-    code = "OPPGAVE_ALLEREDE_TILDELT_SAKSBEHANDLER",
-    detail = "Oppgaven er allerede tildelt saksbehandler $saksbehandler",
-    meta = mapOf("oppgaveId" to oppgaveId),
-)
+class OppgaveAlleredeTildeltSaksbehandler(
+    oppgaveId: UUID,
+    saksbehandler: String?,
+) : ForespoerselException(
+        status = HttpStatusCode.Conflict.value,
+        code = "OPPGAVE_ALLEREDE_TILDELT_SAKSBEHANDLER",
+        detail = "Oppgaven er allerede tildelt saksbehandler $saksbehandler",
+        meta = mapOf("oppgaveId" to oppgaveId),
+    )
 
-class OppgaveIkkeFunnet(oppgaveId: UUID) : IkkeFunnetException(
-    code = "OPPGAVE_IKKE_FUNNET",
-    detail = "Oppgaven finnes ikke",
-    meta = mapOf("oppgaveId" to oppgaveId),
-)
+class OppgaveIkkeFunnet(
+    oppgaveId: UUID,
+) : IkkeFunnetException(
+        code = "OPPGAVE_IKKE_FUNNET",
+        detail = "Oppgaven finnes ikke",
+        meta = mapOf("oppgaveId" to oppgaveId),
+    )

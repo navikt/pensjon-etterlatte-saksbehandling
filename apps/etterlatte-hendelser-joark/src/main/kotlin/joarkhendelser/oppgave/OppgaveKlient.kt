@@ -24,10 +24,11 @@ class OppgaveKlient(
         logger.info("Oppretter manuell journalføringsoppgave")
 
         val response =
-            httpClient.post("$url/api/v1/oppgaver") {
-                contentType(ContentType.Application.Json)
-                setBody(OpprettOppgaveRequest(journalpostId.toString(), tema))
-            }.body<JsonNode>()
+            httpClient
+                .post("$url/api/v1/oppgaver") {
+                    contentType(ContentType.Application.Json)
+                    setBody(OpprettOppgaveRequest(journalpostId.toString(), tema))
+                }.body<JsonNode>()
 
         logger.info("Opprettet oppgave (id=${response["id"]}, status=${response["status"]}, tema=${response["tema"]})")
         sikkerlogger().info("Opprettet oppgave med respons: \n$response")

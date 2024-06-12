@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.sanksjon.SanksjonService
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.UUID
 
 class BeregningService(
@@ -26,9 +27,8 @@ class BeregningService(
         brukerTokenInfo: BrukerTokenInfo,
     ) = hentBeregning(behandlingId).berikMedOverstyrBeregning(brukerTokenInfo)
 
-    fun hentBeregningNonnull(behandlingId: UUID): Beregning {
-        return hentBeregning(behandlingId) ?: throw Exception("Mangler beregning for behandlingId=$behandlingId")
-    }
+    fun hentBeregningNonnull(behandlingId: UUID): Beregning =
+        hentBeregning(behandlingId) ?: throw Exception("Mangler beregning for behandlingId=$behandlingId")
 
     suspend fun opprettBeregning(
         behandlingId: UUID,
@@ -81,7 +81,7 @@ class BeregningService(
         behandlingId: UUID,
         overstyrBeregning: OverstyrBeregningDTO,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OverstyrBeregning {
+    ): OverstyrBeregning? {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
         return hentOverstyrBeregning(behandlingId, brukerTokenInfo).takeIf { it != null }
@@ -104,27 +104,49 @@ class BeregningService(
         this?.copy(overstyrBeregning = hentOverstyrBeregning(behandlingId, brukerTokenInfo))
 }
 
-class TrygdetidMangler(behandlingId: UUID) : UgyldigForespoerselException(
-    code = "TRYGDETID_MANGLER",
-    detail = "Trygdetid ikke satt for behandling $behandlingId",
-)
+class TrygdetidMangler(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "TRYGDETID_MANGLER",
+        detail = "Trygdetid ikke satt for behandling $behandlingId",
+    )
 
-class ForeldreloesTrygdetid(behandlingId: UUID) : UgyldigForespoerselException(
-    code = "FORELDRELOES_TRYGDETID",
-    detail = "Flere avdødes trygdetid er ikke støttet for behandling $behandlingId",
-)
+class ForeldreloesTrygdetid(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "FORELDRELOES_TRYGDETID",
+        detail = "Flere avdødes trygdetid er ikke støttet for behandling $behandlingId",
+    )
 
-class BeregningsgrunnlagMangler(behandlingId: UUID) : UgyldigForespoerselException(
-    code = "BEREGNINGSGRUNNLAG_MANGLER",
-    detail = "Behandling med id: $behandlingId mangler beregningsgrunnlag oms",
-)
+class BeregningsgrunnlagMangler(
+    behandlingId: UUID,
+) : UgyldigForespoerselException(
+        code = "BEREGNINGSGRUNNLAG_MANGLER",
+        detail = "Behandling med id: $behandlingId mangler beregningsgrunnlag oms",
+    )
 
-class AnvendtGrunnbeloepIkkeFunnet : UgyldigForespoerselException(
-    code = "ANVENDT_GRUNNBELOEP_IKKE_FUNNET",
-    detail = "Anvendt grunnbeløp ikke funnet for perioden",
-)
+class AnvendtGrunnbeloepIkkeFunnet :
+    UgyldigForespoerselException(
+        code = "ANVENDT_GRUNNBELOEP_IKKE_FUNNET",
+        detail = "Anvendt grunnbeløp ikke funnet for perioden",
+    )
 
-class AnvendtTrygdetidIkkeFunnet : UgyldigForespoerselException(
-    code = "ANVENDT_TRYGDETID_IKKE_FUNNET",
-    detail = "Anvendt trygdetid ikke funnet for perioden",
-)
+class AnvendtTrygdetidIkkeFunnet(
+    fom: LocalDate,
+    tom: LocalDate?,
+) : UgyldigForespoerselException(
+        code = "ANVENDT_TRYGDETID_IKKE_FUNNET",
+        detail = "Anvendt trygdetid ikke funnet for perioden $fom - $tom",
+    )
+
+class AnvendtTrygdetidIdentIkkeFunnet :
+    UgyldigForespoerselException(
+        code = "ANVENDT_TRYGDETID_IDENT_IKKE_FUNNET",
+        detail = "Anvendt trygdetid ikke funnet for avdøde",
+    )
+
+class TrygdetidIkkeOpprettet :
+    UgyldigForespoerselException(
+        code = "MÅ_FASTSETTE_TRYGDETID",
+        detail = "Mangler trygdetid, gå tilbake til trygdetidsiden for å opprette dette",
+    )

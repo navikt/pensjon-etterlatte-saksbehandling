@@ -1,5 +1,4 @@
-import { FlexHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
-import { BodyShort, Checkbox, Heading } from '@navikt/ds-react'
+import { BodyShort, Checkbox, Heading, HStack, VStack } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { ITrygdetid } from '~shared/api/trygdetid'
 import { useState } from 'react'
@@ -16,14 +15,14 @@ export const YrkesskadeTrygdetid = ({ redigerbar, trygdetid, oppdaterYrkesskade 
   )
 
   return (
-    <Yrkesskade>
-      <FlexHeader>
+    <VStack gap="4">
+      <HStack gap="2">
         <Heading size="small" level="4">
           {redigerbar
             ? 'Kryss av her hvis dødsfallet skyldtes en godkjent yrkesskade/sykdom. Dette gir automatisk 40 års trygdetid.'
             : 'Hvis dødsfallet skyldtes en godkjent yrkesskade/sykdom gir dette automatisk 40 års trygdetid.'}
         </Heading>
-      </FlexHeader>
+      </HStack>
       {!redigerbar && <YrkesskadeVerdi>{yrkesskade ? 'Yrkesskade' : 'Ikke yrkesskade'}</YrkesskadeVerdi>}
       {redigerbar && (
         <YrkesskadeFelt
@@ -38,13 +37,9 @@ export const YrkesskadeTrygdetid = ({ redigerbar, trygdetid, oppdaterYrkesskade 
           Godkjent yrkesskade/sykdom
         </YrkesskadeFelt>
       )}
-    </Yrkesskade>
+    </VStack>
   )
 }
-
-const Yrkesskade = styled.div`
-  padding: 2em 0 0 0;
-`
 
 const YrkesskadeVerdi = styled(BodyShort)`
   padding: 1em 0 0 0;

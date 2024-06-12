@@ -15,7 +15,8 @@ class NavansattKlient(
     private val logger = LoggerFactory.getLogger(NavansattKlient::class.java)
 
     private val cache =
-        Caffeine.newBuilder()
+        Caffeine
+            .newBuilder()
             .expireAfterWrite(Duration.ofMinutes(15))
             .build<String, SaksbehandlerInfo>()
 

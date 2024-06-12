@@ -26,7 +26,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-class DoedshendelseDaoTest(val dataSource: DataSource) {
+class DoedshendelseDaoTest(
+    val dataSource: DataSource,
+) {
     private lateinit var doedshendelseDao: DoedshendelseDao
 
     @BeforeAll
@@ -45,13 +47,14 @@ class DoedshendelseDaoTest(val dataSource: DataSource) {
     fun `Kan hente ferdige doedshendelser med status og relasjon BARN `() {
         val avdoedFnr = "12345678902"
         val doedshendelseInternal =
-            DoedshendelseInternal.nyHendelse(
-                avdoedFnr = avdoedFnr,
-                avdoedDoedsdato = LocalDate.now(),
-                beroertFnr = "12345678901",
-                relasjon = Relasjon.BARN,
-                endringstype = Endringstype.OPPRETTET,
-            ).copy(utfall = Utfall.BREV, status = FERDIG)
+            DoedshendelseInternal
+                .nyHendelse(
+                    avdoedFnr = avdoedFnr,
+                    avdoedDoedsdato = LocalDate.now(),
+                    beroertFnr = "12345678901",
+                    relasjon = Relasjon.BARN,
+                    endringstype = Endringstype.OPPRETTET,
+                ).copy(utfall = Utfall.BREV, status = FERDIG)
 
         val result =
             DoedshendelseReminder(

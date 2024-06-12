@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
 import no.nav.etterlatte.libs.ktor.token.BrukerTokenInfo
 import no.nav.etterlatte.libs.ktor.token.Saksbehandler
 import no.nav.etterlatte.libs.ktor.token.Systembruker
@@ -29,7 +28,9 @@ const val KLAGEID_CALL_PARAMETER = "klageId"
 const val GENERELLBEHANDLINGID_CALL_PARAMETER = "generellBehandlingId"
 const val TILBAKEKREVINGID_CALL_PARAMETER = "tilbakekrevingId"
 
-enum class CallParamAuthId(val value: String) {
+enum class CallParamAuthId(
+    val value: String,
+) {
     BEHANDLINGID(BEHANDLINGID_CALL_PARAMETER),
     SAKID(SAKID_CALL_PARAMETER),
     OPPGAVEID(OPPGAVEID_CALL_PARAMETER),
@@ -209,25 +210,6 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withParam(
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.hentNavidentFraToken(onSuccess: (navident: String) -> Unit) {
-    val navident = call.firstValidTokenClaims()?.get("NAVident")?.toString()
-    if (navident.isNullOrEmpty()) {
-        val bruker = call.brukerTokenInfo
-        if (bruker is Systembruker && bruker.ident != null) {
-            logger.debug("Er systembruker, så fortsetter med ident fra brukerTokenInfo")
-            onSuccess(bruker.ident)
-        }
-
-        logger.warn("Kunne ikke hente ut navident fra token, avviser forespørselen")
-        call.respond(
-            HttpStatusCode.Unauthorized,
-            "Kunne ikke hente ut navident ",
-        )
-    } else {
-        onSuccess(navident)
-    }
-}
-
 fun ApplicationCall.uuid(param: String) =
     this.parameters[param]?.let {
         UUID.fromString(it)
@@ -235,10 +217,11 @@ fun ApplicationCall.uuid(param: String) =
         "$param er ikke i path params",
     )
 
-class UgyldigDatoFormatException : UgyldigForespoerselException(
-    code = "UGYLDIG-DATOFORMAT",
-    detail = "Forventet format YYYY-MM-DD (ISO-8601)",
-)
+class UgyldigDatoFormatException :
+    UgyldigForespoerselException(
+        code = "UGYLDIG-DATOFORMAT",
+        detail = "Forventet format YYYY-MM-DD (ISO-8601)",
+    )
 
 fun ApplicationCall.dato(param: String) =
     this.parameters[param]?.let {
@@ -258,11 +241,12 @@ suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
     }
 }
 
-class FeatureIkkeStoettetException : ForespoerselException(
-    code = "NOT_IMPLEMENTED",
-    status = HttpStatusCode.NotImplemented.value,
-    detail = "Funksjonaliteten er ikke tilgjengelig enda.",
-)
+class FeatureIkkeStoettetException :
+    ForespoerselException(
+        code = "NOT_IMPLEMENTED",
+        status = HttpStatusCode.NotImplemented.value,
+        detail = "Funksjonaliteten er ikke tilgjengelig enda.",
+    )
 
 fun BrukerTokenInfo.lagGrunnlagsopplysning() =
     if (this is Saksbehandler) {

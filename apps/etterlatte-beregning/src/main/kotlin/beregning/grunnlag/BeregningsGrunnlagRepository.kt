@@ -12,7 +12,9 @@ import org.postgresql.util.PGobject
 import java.util.UUID
 import javax.sql.DataSource
 
-class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
+class BeregningsGrunnlagRepository(
+    private val dataSource: DataSource,
+) {
     fun finnBeregningsGrunnlag(id: UUID): BeregningsGrunnlag? =
         using(sessionOf(dataSource)) { session ->
             session.run(
@@ -37,7 +39,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                     queryOf(
                         statement = query,
                         paramMap =
-                            mapOf<String, Any>(
+                            mapOf<String, Any?>(
                                 "behandlings_id" to beregningsGrunnlag.behandlingId,
                                 "soesken_med_i_beregning" to beregningsGrunnlag.soeskenMedIBeregning.somJsonb(),
                                 "institusjonsopphold" to
@@ -49,6 +51,8 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                                         beregningsGrunnlag.beregningsMetode,
                                     ),
                                 "kilde" to beregningsGrunnlag.kilde.toJson(),
+                                "beregnings_metode_flere_avdoede" to
+                                    beregningsGrunnlag.begegningsmetodeFlereAvdoede.takeIf { it.isNotEmpty() }?.somJsonb(),
                             ),
                     ).asUpdate,
                 )
@@ -109,14 +113,21 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
     companion object {
         val lagreGrunnlagQuery =
             """
-            INSERT INTO beregningsgrunnlag
-                (behandlings_id, soesken_med_i_beregning_perioder, institusjonsopphold, beregningsmetode, kilde)
-            VALUES(
+            INSERT INTO beregningsgrunnlag (
+                behandlings_id,
+                soesken_med_i_beregning_perioder,
+                institusjonsopphold,
+                beregningsmetode,
+                kilde,
+                beregnings_metode_flere_avdoede
+            )
+            VALUES (
                 :behandlings_id,
                 :soesken_med_i_beregning,
                 :institusjonsopphold,
                 :beregningsmetode,
-                :kilde
+                :kilde,
+                :beregnings_metode_flere_avdoede
             )
             """.trimMargin()
 
@@ -127,20 +138,20 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                 soesken_med_i_beregning_perioder = :soesken_med_i_beregning,
                 institusjonsopphold = :institusjonsopphold,
                 beregningsmetode = :beregningsmetode,
-                kilde = :kilde
+                kilde = :kilde,
+                beregnings_metode_flere_avdoede = :beregnings_metode_flere_avdoede
             WHERE behandlings_id = :behandlings_id
             """.trimMargin()
 
         val finnBarnepensjonsGrunnlagForBehandling =
             """
-            SELECT behandlings_id, soesken_med_i_beregning_perioder, institusjonsopphold, beregningsmetode, kilde
-            FROM beregningsgrunnlag
-            WHERE behandlings_id = :behandlings_id
-            """.trimIndent()
-
-        val finnOmstillingstoenadGrunnlagForBehandling =
-            """
-            SELECT behandlings_id, institusjonsopphold, beregningsmetode, kilde
+            SELECT
+                behandlings_id,
+                soesken_med_i_beregning_perioder,
+                institusjonsopphold,
+                beregningsmetode,
+                kilde,
+                beregnings_metode_flere_avdoede
             FROM beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id
             """.trimIndent()
@@ -220,8 +231,8 @@ inline fun <reified T> T.somJsonb(): PGobject {
     return jsonObject
 }
 
-private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag {
-    return BeregningsGrunnlag(
+private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag =
+    BeregningsGrunnlag(
         behandlingId = this.uuid("behandlings_id"),
         soeskenMedIBeregning =
             this.stringOrNull("soesken_med_i_beregning_perioder")?.let {
@@ -240,11 +251,14 @@ private fun Row.asBeregningsGrunnlag(): BeregningsGrunnlag {
                 )
             },
         kilde = objectMapper.readValue(this.string("kilde")),
+        begegningsmetodeFlereAvdoede =
+            this.stringOrNull("beregnings_metode_flere_avdoede")?.let {
+                objectMapper.readValue(it)
+            } ?: emptyList(),
     )
-}
 
-private fun Row.asOverstyrBeregningGrunnlag(): OverstyrBeregningGrunnlagDao {
-    return OverstyrBeregningGrunnlagDao(
+private fun Row.asOverstyrBeregningGrunnlag(): OverstyrBeregningGrunnlagDao =
+    OverstyrBeregningGrunnlagDao(
         id = this.uuid("id"),
         behandlingId = this.uuid("behandlings_id"),
         datoFOM = this.sqlDate("dato_fra_og_med").toLocalDate(),
@@ -260,4 +274,3 @@ private fun Row.asOverstyrBeregningGrunnlag(): OverstyrBeregningGrunnlagDao {
         kilde = objectMapper.readValue(this.string("kilde")),
         reguleringRegelresultat = this.stringOrNull("regulering_regelresultat")?.let { objectMapper.readValue(it) },
     )
-}

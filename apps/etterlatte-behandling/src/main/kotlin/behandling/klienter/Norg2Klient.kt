@@ -24,11 +24,16 @@ interface Norg2Klient {
     suspend fun hentNavkontorForOmraade(omraade: String): Navkontor
 }
 
-class Norg2KlientImpl(private val client: HttpClient, private val url: String) : Norg2Klient {
+class Norg2KlientImpl(
+    private val client: HttpClient,
+    private val url: String,
+) : Norg2Klient {
     private val logger = LoggerFactory.getLogger(Norg2KlientImpl::class.java)
 
     private val cacheNavkontor =
-        Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(15))
+        Caffeine
+            .newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(15))
             .build<String, Navkontor>()
 
     override suspend fun hentNavkontorForOmraade(omraade: String): Navkontor {

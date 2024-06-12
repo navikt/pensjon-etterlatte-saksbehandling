@@ -5,9 +5,11 @@ import io.mockk.clearAllMocks
 import no.nav.etterlatte.beregning.regler.DatabaseExtension
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.BeregningsmetodeForAvdoed
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import org.junit.jupiter.api.AfterEach
@@ -24,7 +26,9 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSource) {
+internal class BeregningsGrunnlagRepositoryIntegrationTest(
+    dataSource: DataSource,
+) {
     companion object {
         @RegisterExtension
         val dbExtension = DatabaseExtension()
@@ -73,6 +77,13 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
                 ),
                 institusjonsoppholdBeregningsgrunnlag,
                 beregningsMetode,
+                listOf(
+                    GrunnlagMedPeriode(
+                        fom = LocalDate.of(2022, 8, 1),
+                        tom = null,
+                        data = BeregningsmetodeForAvdoed(AVDOED_FOEDSELSNUMMER.value, beregningsMetode),
+                    ),
+                ),
                 soeskenMedIBeregning,
             ),
         )
@@ -160,6 +171,13 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
                 ),
                 initialInstitusjonsoppholdBeregningsgrunnlag,
                 initialBeregningsMetode,
+                listOf(
+                    GrunnlagMedPeriode(
+                        fom = LocalDate.of(2022, 8, 1),
+                        tom = null,
+                        data = BeregningsmetodeForAvdoed(AVDOED_FOEDSELSNUMMER.value, initialBeregningsMetode),
+                    ),
+                ),
                 initialSoeskenMedIBeregning,
             ),
         )
@@ -173,6 +191,13 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
                 ),
                 oppdatertInstitusjonsoppholdBeregningsgrunnlag,
                 oppdatertBeregningsMetode,
+                listOf(
+                    GrunnlagMedPeriode(
+                        fom = LocalDate.of(2022, 8, 1),
+                        tom = null,
+                        data = BeregningsmetodeForAvdoed(AVDOED_FOEDSELSNUMMER.value, oppdatertBeregningsMetode),
+                    ),
+                ),
                 oppdatertSoeskenMedIBeregning,
             ),
         )
@@ -262,6 +287,13 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
                 ),
                 emptyList(),
                 BeregningsMetode.BEST.toGrunnlag(),
+                listOf(
+                    GrunnlagMedPeriode(
+                        fom = LocalDate.of(2022, 8, 1),
+                        tom = null,
+                        data = BeregningsmetodeForAvdoed(AVDOED_FOEDSELSNUMMER.value, BeregningsMetode.BEST.toGrunnlag()),
+                    ),
+                ),
                 oppdatertSoeskenMedIBeregning,
             ),
         )
@@ -449,13 +481,12 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest(dataSource: DataSourc
     private fun List<SoeskenMedIBeregning>.somPeriodisertGrunnlag(
         periodeFra: LocalDate = foerstePeriodeFra,
         periodeTil: LocalDate? = null,
-    ): List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> {
-        return listOf(
+    ): List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> =
+        listOf(
             GrunnlagMedPeriode(
                 fom = periodeFra,
                 tom = periodeTil,
                 data = this,
             ),
         )
-    }
 }

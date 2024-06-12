@@ -1,0 +1,2 @@
+INSERT INTO omregningskjoering (kjoering, status, sak_id) VALUES ('Regulering-2024', 'FERDIGSTILT', 9455);
+INSERT INTO omregningskjoering (kjoering, status, sak_id) VALUES ('Regulering-2024', 'FERDIGSTILT', 12789);

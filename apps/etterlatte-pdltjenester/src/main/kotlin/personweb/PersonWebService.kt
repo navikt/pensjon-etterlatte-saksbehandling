@@ -12,16 +12,18 @@ import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlResponseError
 import no.nav.etterlatte.pdl.mapper.PersonMapper
+import no.nav.etterlatte.personweb.dto.PersonNavnFoedselsaar
 import no.nav.etterlatte.personweb.familieOpplysninger.FamilieOpplysninger
 import no.nav.etterlatte.personweb.familieOpplysninger.Familiemedlem
 import org.slf4j.LoggerFactory
-import personweb.dto.PersonNavn
 
-class PdlForesporselFeilet(message: String) : ForespoerselException(
-    status = 500,
-    code = "UKJENT_FEIL_PDL",
-    detail = message,
-)
+class PdlForesporselFeilet(
+    message: String,
+) : ForespoerselException(
+        status = 500,
+        code = "UKJENT_FEIL_PDL",
+        detail = message,
+    )
 
 class PersonWebService(
     private val pdlOboKlient: PdlOboKlient,
@@ -29,13 +31,13 @@ class PersonWebService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun hentPersonNavn(
+    suspend fun hentPersonNavnOgFoedsel(
         ident: String,
         bruker: BrukerTokenInfo,
-    ): PersonNavn {
-        logger.info("Henter navn for ident=${ident.maskerFnr()} fra PDL")
+    ): PersonNavnFoedselsaar {
+        logger.info("Henter navn, fødselsdato og fødselsnummer for ident=${ident.maskerFnr()} fra PDL")
 
-        return pdlOboKlient.hentPersonNavn(ident, bruker).let {
+        return pdlOboKlient.hentPersonNavnOgFoedsel(ident, bruker).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.joinToString()
 
@@ -47,7 +49,7 @@ class PersonWebService(
                     )
                 }
             } else {
-                PersonMapper.mapPersonNavn(
+                PersonMapper.mapPersonNavnFoedsel(
                     ppsKlient = ppsKlient,
                     ident = ident,
                     hentPerson = it.data.hentPerson,
@@ -82,7 +84,7 @@ class PersonWebService(
             )
 
         val foreldre =
-            mottaker.familierelasjon?.ansvarligeForeldre?.map {
+            mottaker.familierelasjon?.foreldre?.map {
                 hentFamiliemedlem(
                     fnr = it,
                     rolle = PersonRolle.AVDOED,
@@ -113,23 +115,25 @@ class PersonWebService(
             )
 
         val partnerVedSivilstand =
-            mottaker.sivilstand?.filter {
-                listOf(
-                    Sivilstatus.GIFT,
-                    Sivilstatus.GJENLEVENDE_PARTNER,
-                    Sivilstatus.ENKE_ELLER_ENKEMANN,
-                ).contains(it.sivilstatus)
-            }?.mapNotNull { it.relatertVedSivilstand } ?: emptyList()
+            mottaker.sivilstand
+                ?.filter {
+                    listOf(
+                        Sivilstatus.GIFT,
+                        Sivilstatus.GJENLEVENDE_PARTNER,
+                        Sivilstatus.ENKE_ELLER_ENKEMANN,
+                    ).contains(it.sivilstatus)
+                }?.mapNotNull { it.relatertVedSivilstand } ?: emptyList()
 
         val (avdoede, levende) =
-            partnerVedSivilstand.map {
-                hentFamiliemedlem(
-                    fnr = it,
-                    rolle = PersonRolle.AVDOED,
-                    sakType = SakType.OMSTILLINGSSTOENAD,
-                    bruker,
-                )
-            }.partition { it.doedsdato != null }
+            partnerVedSivilstand
+                .map {
+                    hentFamiliemedlem(
+                        fnr = it,
+                        rolle = PersonRolle.AVDOED,
+                        sakType = SakType.OMSTILLINGSSTOENAD,
+                        bruker,
+                    )
+                }.partition { it.doedsdato != null }
 
         return FamilieOpplysninger(
             soeker = mottaker,

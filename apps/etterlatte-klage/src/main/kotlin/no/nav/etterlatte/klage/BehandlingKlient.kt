@@ -18,7 +18,10 @@ import no.nav.klage.kodeverk.Fagsystem
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 
-class BehandlingKlient(private val behandlingHttpClient: HttpClient, private val resourceUrl: String) {
+class BehandlingKlient(
+    private val behandlingHttpClient: HttpClient,
+    private val resourceUrl: String,
+) {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
 
     fun haandterHendelse(record: ConsumerRecord<String, String>) {

@@ -127,4 +127,6 @@ internal fun Route.grunnlagsendringshendelseRoute(
     }
 }
 
-data class GrunnlagsendringsListe(val hendelser: List<Grunnlagsendringshendelse>)
+data class GrunnlagsendringsListe(
+    val hendelser: List<Grunnlagsendringshendelse>,
+)

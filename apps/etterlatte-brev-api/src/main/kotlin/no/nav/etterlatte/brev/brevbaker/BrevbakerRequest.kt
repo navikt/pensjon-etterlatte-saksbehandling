@@ -1,12 +1,12 @@
 package no.nav.etterlatte.brev.brevbaker
 
 import no.nav.etterlatte.brev.EtterlatteBrevKode
-import no.nav.etterlatte.brev.StrukturertBrev
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers.mapFelles
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.notat.StrukturertBrev
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.pensjon.brevbaker.api.model.Felles
@@ -101,14 +101,16 @@ enum class LanguageCode {
     ;
 
     companion object {
-        fun spraakToLanguageCode(spraak: Spraak): LanguageCode {
-            return when (spraak) {
+        fun spraakToLanguageCode(spraak: Spraak): LanguageCode =
+            when (spraak) {
                 Spraak.EN -> ENGLISH
                 Spraak.NB -> BOKMAL
                 Spraak.NN -> NYNORSK
             }
-        }
     }
 }
 
-data class SoekerOgEventuellVerge(val soeker: Soeker, val verge: Verge?)
+data class SoekerOgEventuellVerge(
+    val soeker: Soeker,
+    val verge: Verge?,
+)

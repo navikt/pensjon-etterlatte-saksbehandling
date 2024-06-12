@@ -11,7 +11,9 @@ import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import java.util.UUID
 import javax.sql.DataSource
 
-class AvtaleRepository(private val dataSource: DataSource) {
+class AvtaleRepository(
+    private val dataSource: DataSource,
+) {
     fun hentAvtale(behandlingId: UUID): Trygdeavtale? =
         using(sessionOf(dataSource)) { session ->
             queryOf(
@@ -24,9 +26,10 @@ class AvtaleRepository(private val dataSource: DataSource) {
                 paramMap = mapOf("behandlingId" to behandlingId),
             ).let { query ->
                 session.run(
-                    query.map { row ->
-                        row.toTrygdeavtale()
-                    }.asSingle,
+                    query
+                        .map { row ->
+                            row.toTrygdeavtale()
+                        }.asSingle,
                 )
             }
         }

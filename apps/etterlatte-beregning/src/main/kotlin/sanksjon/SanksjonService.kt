@@ -50,10 +50,11 @@ class SanksjonService(
 
         if (behandling.virkningstidspunkt == null) throw ManglerVirkningstidspunktException()
         if (sanksjon.sakId != behandling.sak) throw SakidTilhoererIkkeBehandlingException()
-        if (YearMonth.of(
-                sanksjon.fom.year,
-                sanksjon.fom.month,
-            ).isBefore(behandling.virkningstidspunkt?.dato)
+        if (YearMonth
+                .of(
+                    sanksjon.fom.year,
+                    sanksjon.fom.month,
+                ).isBefore(behandling.virkningstidspunkt?.dato)
         ) {
             throw FomErFoerVirkningstidpunktException()
         }

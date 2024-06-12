@@ -13,7 +13,7 @@ import java.time.Month.MAY
 import java.time.Month.NOVEMBER
 import java.time.YearMonth.of
 
-class SamKlientTest {
+class SamordningsKlientTest {
     @Test
     fun `skal sette siste dato fra utbetalingsperioder som vedtakets tom-dato`() {
         val vedtak =

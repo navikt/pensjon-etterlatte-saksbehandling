@@ -16,7 +16,7 @@ import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.JournalPostType
 import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostRequest
+import no.nav.etterlatte.brev.dokarkiv.JournalpostRequest
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.Sakstype
 import no.nav.etterlatte.brev.hentinformasjon.SakService
@@ -224,7 +224,7 @@ class JournalfoerBrevServiceTest {
             db.settBrevJournalfoert(forventetBrev.id, journalpostResponse)
         }
 
-        val requestSlot = slot<OpprettJournalpostRequest>()
+        val requestSlot = slot<JournalpostRequest>()
         coVerify(exactly = 1) {
             vedtaksbrevService.hentVedtaksbrev(forventetBrev.behandlingId!!)
             sakService.hentSak(forventetBrev.sakId, Systembruker.brev)
@@ -299,7 +299,7 @@ class JournalfoerBrevServiceTest {
             db.settBrevJournalfoert(forventetBrev.id, journalpostResponse)
         }
 
-        val requestSlot = slot<OpprettJournalpostRequest>()
+        val requestSlot = slot<JournalpostRequest>()
         coVerify {
             sakService.hentSak(forventetBrev.sakId, bruker)
             dokarkivService.journalfoer(capture(requestSlot))

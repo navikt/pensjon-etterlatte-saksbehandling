@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 
-class VedtakSamordningService(private val repository: VedtaksvurderingRepository) {
+class VedtakSamordningService(
+    private val repository: VedtaksvurderingRepository,
+) {
     private val logger = LoggerFactory.getLogger(VedtakSamordningService::class.java)
 
     fun hentVedtak(vedtakId: Long): VedtakSamordningDto? {
@@ -58,7 +60,8 @@ private fun Vedtak.toSamordningsvedtakDto(): VedtakSamordningDto {
         virkningstidspunkt = innhold.virkningstidspunkt,
         beregning = innhold.beregning,
         perioder =
-            avkorting?.avkortetYtelse
+            avkorting
+                ?.avkortetYtelse
                 ?.map { it.toSamordningVedtakPeriode(innhold.utbetalingsperioder) }
                 ?: emptyList(),
     )

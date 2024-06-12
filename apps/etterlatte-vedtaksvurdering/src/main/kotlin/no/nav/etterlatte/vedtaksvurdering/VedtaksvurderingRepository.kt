@@ -514,7 +514,7 @@ class VedtaksvurderingRepository(
             hentListe(
                 """
                 select behandlingId, saktype from vedtak 
-                where type='${VedtakStatus.IVERKSATT.name}'
+                where vedtakstatus='${VedtakStatus.IVERKSATT.name}'
                 """.trimIndent(),
             ) { row ->
                 BehandlingOgSaktype(

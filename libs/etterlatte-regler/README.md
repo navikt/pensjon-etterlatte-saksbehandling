@@ -82,7 +82,7 @@ Resultattreet som produseres når en regel eksekveres dokumenterer følgende som
 - Versjon av rammeverket som er brukt ved kjøring
 
 ## Versjonering
-Vi versjonerer regler som et løpende tall som starter med 1 eller 1.1.
+Vi versjonerer regler som et løpende tall som starter med 1 eller 1.0
 
 ### Major versjon
 Første siffer står for en regelspesifisering. <br>

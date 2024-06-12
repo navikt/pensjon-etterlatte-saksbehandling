@@ -74,7 +74,7 @@ val maanedsinntekt =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Inntekt for relevant periode nedrundet til nærmeste tusen oppdelt i relevante måneder",
-        regelReferanse = RegelReferanse(id = "REGEL-NEDRUNDET-MÅNEDSINNTEKT"),
+        regelReferanse = RegelReferanse(id = "REGEL-NEDRUNDET-MÅNEDSINNTEKT", versjon = "1.1"),
     ) benytter inntektavkortingsgrunnlag med { inntektavkortingsgrunnlag ->
         val (inntekt, fratrekkInnAar, inntektutland, fratrekkInnAarUtland, relevanteMaaneder) = inntektavkortingsgrunnlag
         inntekt

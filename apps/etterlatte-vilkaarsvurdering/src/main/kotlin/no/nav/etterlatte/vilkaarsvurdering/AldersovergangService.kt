@@ -21,12 +21,13 @@ class AldersovergangService(
     ): Vilkaarsvurdering {
         val vilkaarsvurdering =
             vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
-                ?: vilkaarsvurderingService.kopierVilkaarsvurdering(
-                    behandlingId = behandlingId,
-                    kopierFraBehandling = loependeBehandlingId,
-                    brukerTokenInfo = brukerTokenInfo,
-                    kopierResultat = false,
-                )
+                ?: vilkaarsvurderingService
+                    .kopierVilkaarsvurdering(
+                        behandlingId = behandlingId,
+                        kopierFraBehandling = loependeBehandlingId,
+                        brukerTokenInfo = brukerTokenInfo,
+                        kopierResultat = false,
+                    ).vilkaarsvurdering
 
         val aldersvilkaar =
             vilkaarsvurdering.vilkaar.single {

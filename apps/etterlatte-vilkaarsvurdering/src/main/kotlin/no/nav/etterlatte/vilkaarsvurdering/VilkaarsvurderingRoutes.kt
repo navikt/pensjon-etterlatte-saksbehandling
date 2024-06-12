@@ -107,7 +107,7 @@ fun Route.vilkaarsvurdering(
 
                 try {
                     logger.info("Kopierer vilkårsvurdering for $behandlingId fra $forrigeBehandling")
-                    val vilkaarsvurdering =
+                    val (vilkaarsvurdering, behandlingGrunnversjon) =
                         vilkaarsvurderingService.kopierVilkaarsvurdering(
                             behandlingId = behandlingId,
                             kopierFraBehandling = forrigeBehandling,
@@ -117,7 +117,7 @@ fun Route.vilkaarsvurdering(
                     call.respond(
                         toDto(
                             vilkaarsvurdering,
-                            behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId),
+                            behandlingGrunnversjon,
                         ),
                     )
                 } catch (e: VirkningstidspunktIkkeSattException) {

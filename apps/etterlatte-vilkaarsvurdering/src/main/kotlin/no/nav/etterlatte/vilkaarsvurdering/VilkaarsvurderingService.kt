@@ -137,9 +137,9 @@ class VilkaarsvurderingService(
         kopierFraBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         kopierResultat: Boolean = true,
-    ): Vilkaarsvurdering {
-        logger.info("Oppretter og kopierer vilkårsvurdering for $behandlingId fra $kopierFraBehandling")
-        return tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
+    ): VilkaarsvuderingMedBehandlingGrunnlagsversjon =
+        tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
+            logger.info("Oppretter og kopierer vilkårsvurdering for $behandlingId fra $kopierFraBehandling")
             val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
             val tidligereVilkaarsvurdering =
                 vilkaarsvurderingRepository.hent(kopierFraBehandling)
@@ -180,13 +180,15 @@ class VilkaarsvurderingService(
                         nyVilkaarsvurdering.vilkaar.any { v -> v.vurdering == null }
                 )
             ) {
-                vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId)
+                VilkaarsvuderingMedBehandlingGrunnlagsversjon(
+                    vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId),
+                    grunnlag.metadata.versjon,
+                )
             } else {
                 behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
-                nyVilkaarsvurdering
+                VilkaarsvuderingMedBehandlingGrunnlagsversjon(nyVilkaarsvurdering, grunnlag.metadata.versjon)
             }
         }
-    }
 
     // Her legges det til nye vilkår og det filtreres bort vilkår som ikke lenger er aktuelle.
     // Oppdatering av vilkår med endringer er ennå ikke støttet.
@@ -257,7 +259,7 @@ class VilkaarsvurderingService(
                                 brukerTokenInfo,
                             )
                         VilkaarsvuderingMedBehandlingGrunnlagsversjon(
-                            kopierVilkaarsvurdering(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo),
+                            kopierVilkaarsvurdering(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo).vilkaarsvurdering,
                             grunnlag.metadata.versjon,
                         )
                     } else {

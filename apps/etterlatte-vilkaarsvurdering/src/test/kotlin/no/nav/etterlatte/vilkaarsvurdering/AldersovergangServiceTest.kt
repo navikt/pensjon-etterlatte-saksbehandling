@@ -94,7 +94,7 @@ class AldersovergangServiceTest {
                 brukerTokenInfo,
                 false,
             )
-        } returns vilkaarsvurdering
+        } returns VilkaarsvuderingMedBehandlingGrunnlagsversjon(vilkaarsvurdering, 1L)
         coEvery {
             vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(behandlingId, brukerTokenInfo, ikkeOppfyltVilkaar)
         } returns vilkaarsvurdering

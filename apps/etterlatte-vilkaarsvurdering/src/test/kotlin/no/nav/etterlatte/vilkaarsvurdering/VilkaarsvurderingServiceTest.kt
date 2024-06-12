@@ -391,7 +391,7 @@ internal class VilkaarsvurderingServiceTest(
         }
 
         val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)!!
-        val kopiertVilkaarsvurdering =
+        val (kopiertVilkaarsvurdering) =
             runBlocking {
                 service.kopierVilkaarsvurdering(
                     nyBehandlingId,
@@ -538,7 +538,7 @@ internal class VilkaarsvurderingServiceTest(
             vilkaar = ikkeGjeldendeVilkaar(),
         )
 
-        val vilkaarsvurderingMedKopierteOppdaterteVilkaar =
+        val (vilkaarsvurderingMedKopierteOppdaterteVilkaar) =
             runBlocking {
                 service.kopierVilkaarsvurdering(nyBehandlingId, opprinneligBehandlingId, brukerTokenInfo)
             }
@@ -580,7 +580,7 @@ internal class VilkaarsvurderingServiceTest(
                 },
         )
 
-        val vilkaarsvurderingMedKopierteOppdaterteVilkaar =
+        val (vilkaarsvurderingMedKopierteOppdaterteVilkaar) =
             runBlocking {
                 service.kopierVilkaarsvurdering(nyBehandlingId, opprinneligBehandlingId, brukerTokenInfo)
             }
@@ -615,7 +615,7 @@ internal class VilkaarsvurderingServiceTest(
                 },
         )
 
-        val vilkaarsvurderingMedKopierteOppdaterteVilkaar =
+        val (vilkaarsvurderingMedKopierteOppdaterteVilkaar) =
             runBlocking {
                 service.kopierVilkaarsvurdering(nyBehandlingId, opprinneligBehandlingId, brukerTokenInfo)
             }

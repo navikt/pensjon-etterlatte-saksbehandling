@@ -256,6 +256,422 @@ class BeregnAvkortingTest {
     }
 
     @Test
+    fun `Revurdering legger inn sanksjon etter inntektsendring`() {
+        val avkorting = `Sanksjon etter inntektsendring legges inn`()
+        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+            size shouldBe 4
+            get(0).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.MARCH),
+                                tom = YearMonth.of(2024, Month.APRIL),
+                            ),
+                        ytelseEtterAvkorting = 6650,
+                        ytelseEtterAvkortingFoerRestanse = 6650,
+                        avkortingsbeloep = 9026,
+                        ytelseFoerAvkorting = 15676,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                )
+                it.restanse shouldBe null
+            }
+            get(1).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.MAY),
+                                tom = YearMonth.of(2024, Month.JUNE),
+                            ),
+                        ytelseEtterAvkorting = 7758,
+                        ytelseEtterAvkortingFoerRestanse = 7758,
+                        avkortingsbeloep = 8924,
+                        ytelseFoerAvkorting = 16682,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                )
+                it.restanse shouldBe null
+            }
+            get(2).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode = Periode(fom = YearMonth.of(2024, Month.JULY), tom = YearMonth.of(2024, Month.JULY)),
+                        ytelseEtterAvkorting = 258,
+                        ytelseEtterAvkortingFoerRestanse = 3258,
+                        avkortingsbeloep = 13424,
+                        ytelseFoerAvkorting = 16682,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                )
+                it.restanse!!.shouldBeEqualToIgnoringFields(
+                    restanse(
+                        totalRestanse = 18000,
+                        fordeltRestanse = 3000,
+                    ),
+                    Restanse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                )
+            }
+            get(3).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.AUGUST),
+                                tom = null,
+                            ),
+                        ytelseEtterAvkorting = 0,
+                        ytelseEtterAvkortingFoerRestanse = 3258,
+                        avkortingsbeloep = 13424,
+                        ytelseFoerAvkorting = 16682,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                    AvkortetYtelse::sanksjon,
+                )
+                it.restanse!!.shouldBeEqualToIgnoringFields(
+                    restanse(
+                        totalRestanse = 18000,
+                        fordeltRestanse = 18000,
+                    ),
+                    Restanse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                )
+                it.sanksjon!!.sanksjonType shouldBe SanksjonType.STANS
+            }
+        }
+    }
+
+    @Test
+    fun `Revurdering lukker sanksjon etter inntektsendring`() {
+        val avkorting = `Sanksjon etter inntektsendring lukkes`()
+        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+            size shouldBe 5
+            get(0).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.MARCH),
+                                tom = YearMonth.of(2024, Month.APRIL),
+                            ),
+                        ytelseEtterAvkorting = 6650,
+                        ytelseEtterAvkortingFoerRestanse = 6650,
+                        avkortingsbeloep = 9026,
+                        ytelseFoerAvkorting = 15676,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                )
+                it.restanse shouldBe null
+            }
+            get(1).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.MAY),
+                                tom = YearMonth.of(2024, Month.JUNE),
+                            ),
+                        ytelseEtterAvkorting = 7758,
+                        ytelseEtterAvkortingFoerRestanse = 7758,
+                        avkortingsbeloep = 8924,
+                        ytelseFoerAvkorting = 16682,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                )
+                it.restanse shouldBe null
+            }
+            get(2).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode = Periode(fom = YearMonth.of(2024, Month.JULY), tom = YearMonth.of(2024, Month.JULY)),
+                        ytelseEtterAvkorting = 258,
+                        ytelseEtterAvkortingFoerRestanse = 3258,
+                        avkortingsbeloep = 13424,
+                        ytelseFoerAvkorting = 16682,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                )
+                it.restanse!!.shouldBeEqualToIgnoringFields(
+                    restanse(
+                        totalRestanse = 18000,
+                        fordeltRestanse = 3000,
+                    ),
+                    Restanse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                )
+            }
+            get(3).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.AUGUST),
+                                tom = YearMonth.of(2024, Month.AUGUST),
+                            ),
+                        ytelseEtterAvkorting = 0,
+                        ytelseEtterAvkortingFoerRestanse = 3258,
+                        avkortingsbeloep = 13424,
+                        ytelseFoerAvkorting = 16682,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                    AvkortetYtelse::sanksjon,
+                )
+                it.restanse!!.shouldBeEqualToIgnoringFields(
+                    restanse(
+                        totalRestanse = 18000,
+                        fordeltRestanse = 3600,
+                    ),
+                    Restanse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                )
+                it.sanksjon!!.sanksjonType shouldBe SanksjonType.STANS
+            }
+            get(4).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.SEPTEMBER),
+                                tom = null,
+                            ),
+                        ytelseEtterAvkorting = 0,
+                        ytelseEtterAvkortingFoerRestanse = 3258,
+                        avkortingsbeloep = 13424,
+                        ytelseFoerAvkorting = 16682,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                    AvkortetYtelse::sanksjon,
+                )
+                it.restanse!!.shouldBeEqualToIgnoringFields(
+                    restanse(
+                        totalRestanse = 18000,
+                        fordeltRestanse = 3600,
+                    ),
+                    Restanse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                )
+                it.sanksjon shouldBe null
+            }
+        }
+    }
+
+    @Test
+    fun `Revurdering inntektsendring - andre inntektsendring etter sanksjon`() {
+        val avkorting = `Avkorting ny lavere inntekt to etter sanksjon`()
+        with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
+            size shouldBe 5
+            get(0).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.MARCH),
+                                tom = YearMonth.of(2024, Month.APRIL),
+                            ),
+                        ytelseEtterAvkorting = 6650,
+                        ytelseEtterAvkortingFoerRestanse = 6650,
+                        avkortingsbeloep = 9026,
+                        ytelseFoerAvkorting = 15676,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                )
+                it.restanse shouldBe null
+            }
+            get(1).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.MAY),
+                                tom = YearMonth.of(2024, Month.JUNE),
+                            ),
+                        ytelseEtterAvkorting = 7758,
+                        ytelseEtterAvkortingFoerRestanse = 7758,
+                        avkortingsbeloep = 8924,
+                        ytelseFoerAvkorting = 16682,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                )
+                it.restanse shouldBe null
+            }
+            get(2).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode = Periode(fom = YearMonth.of(2024, Month.JULY), tom = YearMonth.of(2024, Month.JULY)),
+                        ytelseEtterAvkorting = 258,
+                        ytelseEtterAvkortingFoerRestanse = 3258,
+                        avkortingsbeloep = 13424,
+                        ytelseFoerAvkorting = 16682,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                )
+                it.restanse!!.shouldBeEqualToIgnoringFields(
+                    restanse(
+                        totalRestanse = 18000,
+                        fordeltRestanse = 3000,
+                    ),
+                    Restanse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                )
+            }
+            get(3).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.AUGUST),
+                                tom = YearMonth.of(2024, Month.AUGUST),
+                            ),
+                        ytelseEtterAvkorting = 0,
+                        ytelseEtterAvkortingFoerRestanse = 7758,
+                        avkortingsbeloep = 8924,
+                        ytelseFoerAvkorting = 16682,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                    AvkortetYtelse::sanksjon,
+                )
+                it.restanse!!.shouldBeEqualToIgnoringFields(
+                    restanse(
+                        totalRestanse = -15000,
+                        fordeltRestanse = -3750,
+                    ),
+                    Restanse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                )
+                it.sanksjon!!.sanksjonType shouldBe SanksjonType.STANS
+            }
+            get(4).asClue {
+                it.shouldBeEqualToIgnoringFields(
+                    avkortetYtelse(
+                        type = AvkortetYtelseType.AARSOPPGJOER,
+                        periode =
+                            Periode(
+                                fom = YearMonth.of(2024, Month.SEPTEMBER),
+                                tom = null,
+                            ),
+                        ytelseEtterAvkorting = 11508,
+                        ytelseEtterAvkortingFoerRestanse = 7758,
+                        avkortingsbeloep = 8924,
+                        ytelseFoerAvkorting = 16682,
+                        inntektsgrunnlag = null,
+                    ),
+                    AvkortetYtelse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                    AvkortetYtelse::restanse,
+                    AvkortetYtelse::sanksjon,
+                )
+                it.restanse!!.shouldBeEqualToIgnoringFields(
+                    restanse(
+                        totalRestanse = -15000,
+                        fordeltRestanse = -3750,
+                    ),
+                    Restanse::id,
+                    AvkortetYtelse::tidspunkt,
+                    AvkortetYtelse::regelResultat,
+                    AvkortetYtelse::kilde,
+                )
+                it.sanksjon shouldBe null
+            }
+        }
+    }
+
+    @Test
     fun `Revurdering inntektsendring - andre inntektsendring`() {
         val avkorting = `Avkorting ny inntekt to`()
         with(avkorting.aarsoppgjoer.single().avkortetYtelseAar) {
@@ -818,6 +1234,70 @@ class BeregnAvkortingTest {
                             ),
                     ),
                 sanksjoner = emptyList(),
+            )
+
+    private fun `Sanksjon etter inntektsendring legges inn`() =
+        `Avkorting ny inntekt en`()
+            .kopierAvkorting()
+            .beregnAvkortingRevurdering(
+                beregning(
+                    beregninger =
+                        listOf(
+                            beregningsperiode(
+                                datoFOM = YearMonth.of(2024, Month.AUGUST),
+                                datoTOM = null,
+                                utbetaltBeloep = 16682,
+                            ),
+                        ),
+                ),
+                sanksjoner =
+                    listOf(
+                        sanksjon(fom = YearMonth.of(2024, Month.AUGUST), tom = null),
+                    ),
+            )
+
+    private fun `Sanksjon etter inntektsendring lukkes`() =
+        `Sanksjon etter inntektsendring legges inn`()
+            .kopierAvkorting()
+            .beregnAvkortingRevurdering(
+                beregning =
+                    beregning(
+                        beregninger =
+                            listOf(
+                                beregningsperiode(datoFOM = YearMonth.of(2024, Month.SEPTEMBER), utbetaltBeloep = 16682),
+                            ),
+                    ),
+                sanksjoner =
+                    listOf(
+                        sanksjon(fom = YearMonth.of(2024, Month.AUGUST), tom = YearMonth.of(2024, Month.AUGUST)),
+                    ),
+            )
+
+    private fun `Avkorting ny lavere inntekt to etter sanksjon`() =
+        `Sanksjon etter inntektsendring lukkes`()
+            .kopierAvkorting()
+            .beregnAvkortingMedNyttGrunnlag(
+                nyttGrunnlag =
+                    avkortinggrunnlagLagre(
+                        id = UUID.randomUUID(),
+                        aarsinntekt = 300000,
+                        fratrekkInnAar = 50000,
+                    ),
+                behandlingstype = BehandlingType.REVURDERING,
+                virkningstidspunkt = YearMonth.of(2024, Month.SEPTEMBER),
+                bruker = bruker,
+                beregning =
+                    beregning(
+                        beregninger =
+                            listOf(
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2024, Month.SEPTEMBER),
+                                    datoTOM = null,
+                                    utbetaltBeloep = 16682,
+                                ),
+                            ),
+                    ),
+                sanksjoner = listOf(sanksjon(fom = YearMonth.of(2024, Month.AUGUST), tom = YearMonth.of(2024, Month.AUGUST))),
             )
 
     private fun `Avkorting ny inntekt to`() =

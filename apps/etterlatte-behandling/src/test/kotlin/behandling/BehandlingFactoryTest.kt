@@ -491,9 +491,7 @@ class BehandlingFactoryTest {
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         } returns mockOppgave
-        every {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
-        } returns mockOppgave
+        every { oppgaveService.opprett(any()) } returns mockOppgave
         every {
             oppgaveService.tildelSaksbehandler(any(), any())
         } just runs
@@ -573,7 +571,7 @@ class BehandlingFactoryTest {
         verify {
             grunnlagService.leggInnNyttGrunnlag(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+            oppgaveService.opprett(any())
         }
         verify(exactly = 2) {
             sakServiceMock.finnSak(any())

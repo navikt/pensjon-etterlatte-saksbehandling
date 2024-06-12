@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -145,12 +146,13 @@ class KlageServiceImpl(
 
         klageDao.lagreKlage(klage)
 
-        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-            referanse = klage.id.toString(),
-            sakId = sakId,
-            oppgaveKilde = OppgaveKilde.EKSTERN,
-            oppgaveType = OppgaveType.KLAGE,
-            merknad = null,
+        oppgaveService.opprett(
+            NyOppgaveDto(
+                referanse = klage.id.toString(),
+                sakId = sakId,
+                kilde = OppgaveKilde.EKSTERN,
+                type = OppgaveType.KLAGE,
+            ),
         )
 
         opprettKlageHendelse(klage, KlageHendelseType.OPPRETTET, saksbehandler)
@@ -336,7 +338,13 @@ class KlageServiceImpl(
         opprettKlageHendelse(klageMedResultat, KlageHendelseType.FERDIGSTILT, saksbehandler)
         val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(klage.sak.id)?.type
         klageHendelser.sendKlageHendelseRapids(
-            StatistikkKlage(klageMedResultat.id, klageMedResultat, Tidspunkt.now(), utlandstilknytningType, saksbehandler.ident),
+            StatistikkKlage(
+                klageMedResultat.id,
+                klageMedResultat,
+                Tidspunkt.now(),
+                utlandstilknytningType,
+                saksbehandler.ident,
+            ),
             KlageHendelseType.FERDIGSTILT,
         )
         klageBrevService.slettUferdigeBrev(klageMedResultat.id, saksbehandler)
@@ -374,7 +382,13 @@ class KlageServiceImpl(
         val utlandstilknytningType = behandlingService.hentUtlandstilknytningForSak(avbruttKlage.sak.id)?.type
 
         klageHendelser.sendKlageHendelseRapids(
-            StatistikkKlage(avbruttKlage.id, avbruttKlage, Tidspunkt.now(), utlandstilknytningType, saksbehandler.ident),
+            StatistikkKlage(
+                avbruttKlage.id,
+                avbruttKlage,
+                Tidspunkt.now(),
+                utlandstilknytningType,
+                saksbehandler.ident,
+            ),
             KlageHendelseType.AVBRUTT,
         )
     }
@@ -615,16 +629,18 @@ class KlageServiceImpl(
         val vedtaketKlagenGjelder =
             klage.formkrav?.formkrav?.vedtaketKlagenGjelder ?: throw OmgjoeringMaaGjeldeEtVedtakException(klage)
 
-        return oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-            referanse = klage.id.toString(),
-            sakId = klage.sak.id,
-            oppgaveKilde = OppgaveKilde.BEHANDLING,
-            oppgaveType = OppgaveType.OMGJOERING,
-            merknad = "Vedtak om ${vedtaketKlagenGjelder.vedtakType?.toString()?.lowercase()} (${
-                vedtaketKlagenGjelder.datoAttestert?.format(
-                    DateTimeFormatter.ISO_LOCAL_DATE,
-                )
-            }) skal omgjøres",
+        val merknad = "Vedtak om ${vedtaketKlagenGjelder.vedtakType?.toString()?.lowercase()} (${
+            vedtaketKlagenGjelder.datoAttestert?.format(DateTimeFormatter.ISO_LOCAL_DATE)
+        }) skal omgjøres"
+
+        return oppgaveService.opprett(
+            NyOppgaveDto(
+                referanse = klage.id.toString(),
+                sakId = klage.sak.id,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.OMGJOERING,
+                merknad = merknad,
+            ),
         )
     }
 

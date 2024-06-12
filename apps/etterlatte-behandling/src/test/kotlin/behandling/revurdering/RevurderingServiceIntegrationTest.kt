@@ -45,6 +45,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -156,12 +157,13 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         verify { grunnlagService.leggInnNyttGrunnlag(revurdering, any()) }
         coVerify { grunnlagService.hentPersongalleri(any()) }
         verify {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                revurdering.id.toString(),
-                sak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.REVURDERING,
-                null,
+            oppgaveService.opprett(
+                NyOppgaveDto(
+                    referanse = revurdering.id.toString(),
+                    sakId = sak.id,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.REVURDERING,
+                ),
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             inTransaction {
@@ -263,12 +265,13 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             verify { oppgaveService.hentOppgaverForSak(sak.id) }
             coVerify { grunnlagService.hentPersongalleri(any()) }
             verify {
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    revurdering.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    OppgaveType.REVURDERING,
-                    null,
+                oppgaveService.opprett(
+                    NyOppgaveDto(
+                        referanse = revurdering.id.toString(),
+                        sakId = sak.id,
+                        kilde = OppgaveKilde.BEHANDLING,
+                        type = OppgaveType.REVURDERING,
+                    ),
                 )
                 oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             }
@@ -329,12 +332,13 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
 
         val oppgave =
             inTransaction {
-                applicationContext.oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = hendelse.id.toString(),
-                    sakId = sak.id,
-                    oppgaveKilde = OppgaveKilde.HENDELSE,
-                    oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-                    merknad = null,
+                applicationContext.oppgaveService.opprett(
+                    NyOppgaveDto(
+                        referanse = hendelse.id.toString(),
+                        sakId = sak.id,
+                        kilde = OppgaveKilde.HENDELSE,
+                        type = OppgaveType.VURDER_KONSEKVENS,
+                    ),
                 )
             }
         inTransaction {
@@ -368,12 +372,13 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             verify { oppgaveService.hentOppgaverForSak(sak.id) }
             verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
             verify {
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    behandling!!.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    OppgaveType.FOERSTEGANGSBEHANDLING,
-                    null,
+                oppgaveService.opprett(
+                    NyOppgaveDto(
+                        referanse = behandling!!.id.toString(),
+                        sakId = sak.id,
+                        kilde = OppgaveKilde.BEHANDLING,
+                        type = OppgaveType.FOERSTEGANGSBEHANDLING,
+                    ),
                 )
             }
             verify {
@@ -384,12 +389,13 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 oppgaveService.tildelSaksbehandler(any(), saksbehandler.ident)
             }
             verify {
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    revurdering.id.toString(),
-                    sak.id,
-                    OppgaveKilde.BEHANDLING,
-                    OppgaveType.REVURDERING,
-                    null,
+                oppgaveService.opprett(
+                    NyOppgaveDto(
+                        referanse = revurdering.id.toString(),
+                        sakId = sak.id,
+                        kilde = OppgaveKilde.BEHANDLING,
+                        type = OppgaveType.REVURDERING,
+                    ),
                 )
             }
             verify { oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any(), any()) }
@@ -453,12 +459,13 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         verify { grunnlagService.leggInnNyttGrunnlag(revurdering, any()) }
         coVerify { grunnlagService.hentPersongalleri(any()) }
         verify {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                revurdering.id.toString(),
-                sak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.REVURDERING,
-                null,
+            oppgaveService.opprett(
+                NyOppgaveDto(
+                    referanse = revurdering.id.toString(),
+                    sakId = sak.id,
+                    kilde = OppgaveKilde.BEHANDLING,
+                    type = OppgaveType.REVURDERING,
+                ),
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             inTransaction {
@@ -875,12 +882,13 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
 
         val utlandsoppgaveref =
             inTransaction {
-                applicationContext.oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    nonNullBehandling.id.toString(),
-                    sak.id,
-                    OppgaveKilde.GENERELL_BEHANDLING,
-                    OppgaveType.KRAVPAKKE_UTLAND,
-                    merknad = null,
+                applicationContext.oppgaveService.opprett(
+                    NyOppgaveDto(
+                        referanse = nonNullBehandling.id.toString(),
+                        sakId = sak.id,
+                        kilde = OppgaveKilde.GENERELL_BEHANDLING,
+                        type = OppgaveType.KRAVPAKKE_UTLAND,
+                    ),
                 )
             }
         inTransaction {
@@ -916,13 +924,15 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         // Opprett en revurderingsoppgave som gjelder en hendelse
         val oppgaveHendelse =
             inTransaction {
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = "",
-                    sakId = sak.id,
-                    oppgaveKilde = OppgaveKilde.HENDELSE,
-                    oppgaveType = OppgaveType.REVURDERING,
-                    merknad = "Aldersovergang v/20 år",
-                    frist = Tidspunkt.now(),
+                oppgaveService.opprett(
+                    NyOppgaveDto(
+                        referanse = "",
+                        sakId = sak.id,
+                        kilde = OppgaveKilde.HENDELSE,
+                        type = OppgaveType.REVURDERING,
+                        merknad = "Aldersovergang v/20 år",
+                        frist = Tidspunkt.now(),
+                    ),
                 )
             }
 

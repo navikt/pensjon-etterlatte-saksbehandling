@@ -244,15 +244,16 @@ class BehandlingServiceImpl(
     ): UUID =
         runBlocking {
             behandlingKlient
-                .post("$url/oppgaver/sak/$sakId/opprett") {
+                .post("$url/oppgaver") {
                     contentType(ContentType.Application.Json)
                     setBody(
                         NyOppgaveDto(
-                            OppgaveKilde.HENDELSE,
-                            oppgaveType,
-                            merknad,
-                            referanse,
-                            frist,
+                            sakId = sakId,
+                            kilde = OppgaveKilde.HENDELSE,
+                            type = oppgaveType,
+                            merknad = merknad,
+                            referanse = referanse,
+                            frist = frist,
                         ),
                     )
                 }.body<ObjectNode>()

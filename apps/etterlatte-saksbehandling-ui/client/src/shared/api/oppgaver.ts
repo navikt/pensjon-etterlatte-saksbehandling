@@ -41,10 +41,8 @@ export const hentOppgaverTilknyttetSak = async (sakId: number): Promise<ApiRespo
   return apiClient.get(`/oppgaver/sak/${sakId}/oppgaver`)
 }
 
-export const opprettOppgave = async (args: {
-  sakId: number
-  request: NyOppgaveDto
-}): Promise<ApiResponse<OppgaveDTO>> => apiClient.post(`/oppgaver/sak/${args.sakId}/opprett`, { ...args.request })
+export const opprettOppgave = async (args: { request: NyOppgaveDto }): Promise<ApiResponse<OppgaveDTO>> =>
+  apiClient.post(`/oppgaver`, { ...args.request })
 
 export const ferdigstillOppgave = async (id: string): Promise<ApiResponse<any>> => ferdigstillOppgaveMedMerknad({ id })
 

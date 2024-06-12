@@ -14,6 +14,7 @@ import no.nav.etterlatte.azureAdAttestantClaim
 import no.nav.etterlatte.azureAdSaksbehandlerClaim
 import no.nav.etterlatte.azureAdStrengtFortroligClaim
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -276,7 +277,7 @@ class GosysOppgaveServiceImplTest {
         coEvery { gosysOppgaveKlient.hentOppgave(any(), any()) } returns gosysOppgave
         coEvery { gosysOppgaveKlient.feilregistrer(any(), any(), any()) } returns gosysOppgave
         coEvery {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any(), any(), any())
+            oppgaveService.opprett(any())
         } returns mockk()
 
         runBlocking {
@@ -284,14 +285,16 @@ class GosysOppgaveServiceImplTest {
         }
 
         verify(exactly = 1) {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                gosysOppgave.journalpostId!!,
-                sakId,
-                OppgaveKilde.SAKSBEHANDLER,
-                OppgaveType.JOURNALFOERING,
-                gosysOppgave.beskrivelse,
-                Tidspunkt.ofNorskTidssone(gosysOppgave.fristFerdigstillelse!!, LocalTime.MIDNIGHT),
-                brukerTokenInfo.ident(),
+            oppgaveService.opprett(
+                NyOppgaveDto(
+                    referanse = gosysOppgave.journalpostId!!,
+                    sakId = sakId,
+                    kilde = OppgaveKilde.SAKSBEHANDLER,
+                    type = OppgaveType.JOURNALFOERING,
+                    merknad = gosysOppgave.beskrivelse,
+                    frist = Tidspunkt.ofNorskTidssone(gosysOppgave.fristFerdigstillelse!!, LocalTime.MIDNIGHT),
+                    saksbehandler = brukerTokenInfo.ident(),
+                ),
             )
         }
         coVerify(exactly = 1) {

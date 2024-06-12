@@ -42,6 +42,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -266,12 +267,14 @@ internal class BehandlingServiceImpl(
             oppgaveService.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
 
             hendelserKnyttetTilBehandling.forEach { hendelse ->
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = hendelse.id.toString(),
-                    sakId = behandling.sak.id,
-                    oppgaveKilde = OppgaveKilde.HENDELSE,
-                    oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-                    merknad = hendelse.beskrivelse(),
+                oppgaveService.opprett(
+                    NyOppgaveDto(
+                        referanse = hendelse.id.toString(),
+                        sakId = behandling.sak.id,
+                        kilde = OppgaveKilde.HENDELSE,
+                        type = OppgaveType.VURDER_KONSEKVENS,
+                        merknad = hendelse.beskrivelse(),
+                    ),
                 )
             }
 
@@ -284,13 +287,15 @@ internal class BehandlingServiceImpl(
                             "Kunne ikke finne en omgjøringsoppgave i sak=${behandling.sak.id}, " +
                                 "så vi får ikke gjenopprettet omgjøringen hvis denne behandlingen avbrytes!",
                         )
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = omgjoeringsoppgaveForKlage.referanse,
-                    sakId = omgjoeringsoppgaveForKlage.sakId,
-                    oppgaveKilde = omgjoeringsoppgaveForKlage.kilde,
-                    oppgaveType = omgjoeringsoppgaveForKlage.type,
-                    merknad = omgjoeringsoppgaveForKlage.merknad,
-                    frist = omgjoeringsoppgaveForKlage.frist,
+                oppgaveService.opprett(
+                    NyOppgaveDto(
+                        referanse = omgjoeringsoppgaveForKlage.referanse,
+                        sakId = checkNotNull(omgjoeringsoppgaveForKlage.sakId),
+                        kilde = omgjoeringsoppgaveForKlage.kilde,
+                        type = omgjoeringsoppgaveForKlage.type,
+                        merknad = omgjoeringsoppgaveForKlage.merknad,
+                        frist = omgjoeringsoppgaveForKlage.frist,
+                    ),
                 )
             }
 

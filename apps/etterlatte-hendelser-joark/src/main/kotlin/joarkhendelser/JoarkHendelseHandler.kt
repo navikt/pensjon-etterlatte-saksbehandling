@@ -77,15 +77,20 @@ class JoarkHendelseHandler(
         }
 
         try {
+            val sakType = hendelse.temaTilSakType()
+
             if (journalpost.bruker == null) {
                 logger.warn("Bruker mangler på journalpost id=$journalpost")
-                oppgaveKlient.opprettManuellJournalfoeringsoppgave(journalpostId, temaNytt)
+
+                behandlingService.opprettOppgaveUtenSak(
+                    sakType = sakType,
+                    merknad = hendelse.lagMerknadFraStatus(journalpost.kanal),
+                    journalpostId = journalpostId.toString(),
+                )
                 return
             }
 
             val ident = hentFolkeregisterIdent(journalpostId, journalpost.bruker)
-
-            val sakType = hendelse.temaTilSakType()
 
             when (val type = hendelse.hendelsesType) {
                 HendelseType.JOURNALPOST_MOTTATT -> {

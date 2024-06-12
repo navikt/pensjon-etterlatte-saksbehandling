@@ -8,6 +8,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseFeatureToggle
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -45,13 +46,15 @@ class DoedshendelseReminderService(
         if (!harSoekt) {
             val oppgaver = oppgaveService.hentOppgaverForSak(hendelse.sakId)
             if (oppgaver.none { it.type == OppgaveType.VURDER_KONSEKVENS }) {
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = hendelse.id.toString(),
-                    sakId = hendelse.sakId,
-                    oppgaveKilde = OppgaveKilde.HENDELSE,
-                    oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-                    merknad = "${hendelse.beroertFnr} Har ikke søkt om Barnepensjon 2 måneder etter utsendt brev",
-                    frist = Tidspunkt.now().plus(30L, ChronoUnit.DAYS),
+                oppgaveService.opprett(
+                    NyOppgaveDto(
+                        referanse = hendelse.id.toString(),
+                        sakId = hendelse.sakId,
+                        kilde = OppgaveKilde.HENDELSE,
+                        type = OppgaveType.VURDER_KONSEKVENS,
+                        merknad = "${hendelse.beroertFnr} Har ikke søkt om Barnepensjon 2 måneder etter utsendt brev",
+                        frist = Tidspunkt.now().plus(30L, ChronoUnit.DAYS),
+                    ),
                 )
             }
         }

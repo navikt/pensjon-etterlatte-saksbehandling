@@ -98,7 +98,7 @@ internal class JoarkHendelseHandlerTest {
                 safKlientMock.hentJournalpost(journalpostId)
                 pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
                 behandlingKlientMock.hentEllerOpprettSak(ident, sakType)
-                behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
+                behandlingKlientMock.opprettOppgave(any(), any(), any(), journalpostId.toString())
             }
         }
 
@@ -131,7 +131,7 @@ internal class JoarkHendelseHandlerTest {
                 safKlientMock.hentJournalpost(journalpostId)
                 pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
                 behandlingKlientMock.hentEllerOpprettSak(ident, sakType)
-                behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
+                behandlingKlientMock.opprettOppgave(any(), any(), any(), journalpostId.toString())
             }
         }
 
@@ -167,7 +167,7 @@ internal class JoarkHendelseHandlerTest {
                 pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
                 behandlingKlientMock.hentSak(ident, sakType)
                 behandlingKlientMock.hentEllerOpprettSak(ident, sakType)
-                behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
+                behandlingKlientMock.opprettOppgave(any(), any(), any(), journalpostId.toString())
             }
         }
 

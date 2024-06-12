@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandlingHendelseType
 import no.nav.etterlatte.libs.common.generellbehandling.Innhold
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -95,12 +96,13 @@ class GenerellBehandlingService(
     ): GenerellBehandling {
         val opprettetbehandling = generellBehandlingDao.opprettGenerellbehandling(generellBehandling)
         val oppgaveForGenerellBehandling =
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                opprettetbehandling.id.toString(),
-                opprettetbehandling.sakId,
-                OppgaveKilde.GENERELL_BEHANDLING,
-                OppgaveType.KRAVPAKKE_UTLAND,
-                null,
+            oppgaveService.opprett(
+                NyOppgaveDto(
+                    referanse = opprettetbehandling.id.toString(),
+                    sakId = opprettetbehandling.sakId,
+                    kilde = OppgaveKilde.GENERELL_BEHANDLING,
+                    type = OppgaveType.KRAVPAKKE_UTLAND,
+                ),
             )
         tildelSaksbehandlerTilNyOppgaveHvisFinnes(oppgaveForGenerellBehandling, opprettetbehandling)
         opprettHendelse(GenerellBehandlingHendelseType.OPPRETTET, opprettetbehandling, saksbehandler)

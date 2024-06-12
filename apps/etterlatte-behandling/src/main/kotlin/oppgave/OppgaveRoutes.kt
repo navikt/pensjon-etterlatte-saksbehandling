@@ -81,6 +81,16 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             }
         }
 
+        post {
+            kunSaksbehandlerMedSkrivetilgang {
+                val nyOppgaveDto = call.receive<NyOppgaveDto>()
+
+                val nyOppgave = inTransaction { service.opprett(nyOppgaveDto) }
+
+                call.respond(nyOppgave)
+            }
+        }
+
         get("/referanse/{referanse}") {
             kunSaksbehandler {
                 call.respond(
@@ -114,33 +124,9 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
             }
         }
 
-        route("/sak/{$SAKID_CALL_PARAMETER}") {
-            get("/oppgaver") {
-                kunSaksbehandler {
-                    call.respond(inTransaction { service.hentOppgaverForSak(sakId) })
-                }
-            }
-
-            // TODO: Standardisere opprettelse av oppgave
-            post("/opprett") {
-                kunSaksbehandlerMedSkrivetilgang {
-                    val nyOppgaveDto = call.receive<NyOppgaveDto>()
-
-                    val nyOppgave =
-                        inTransaction {
-                            service.opprettNyOppgaveMedSakOgReferanse(
-                                referanse = nyOppgaveDto.referanse ?: "",
-                                sakId = sakId,
-                                oppgaveKilde = nyOppgaveDto.oppgaveKilde,
-                                oppgaveType = nyOppgaveDto.oppgaveType,
-                                merknad = nyOppgaveDto.merknad,
-                                frist = null,
-                                saksbehandler = nyOppgaveDto.saksbehandler,
-                            )
-                        }
-
-                    call.respond(nyOppgave)
-                }
+        get("/sak/{$SAKID_CALL_PARAMETER}/oppgaver") {
+            kunSaksbehandler {
+                call.respond(inTransaction { service.hentOppgaverForSak(sakId) })
             }
         }
 
@@ -222,27 +208,18 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
     }
 
     route("/oppgaver") {
-        get("/sak/{$SAKID_CALL_PARAMETER}/oppgaver") {
+        post {
             kunSystembruker {
-                call.respond(inTransaction { service.hentOppgaverForSak(sakId) })
+                val nyOppgaveDto = call.receive<NyOppgaveDto>()
+                val oppgave = inTransaction { service.opprett(nyOppgaveDto) }
+
+                call.respond(oppgave)
             }
         }
 
-        post("/sak/{$SAKID_CALL_PARAMETER}/opprett") {
+        get("/sak/{$SAKID_CALL_PARAMETER}/oppgaver") {
             kunSystembruker {
-                val nyOppgaveDto = call.receive<NyOppgaveDto>()
-                call.respond(
-                    inTransaction {
-                        service.opprettNyOppgaveMedSakOgReferanse(
-                            nyOppgaveDto.referanse ?: "",
-                            sakId,
-                            nyOppgaveDto.oppgaveKilde,
-                            nyOppgaveDto.oppgaveType,
-                            nyOppgaveDto.merknad,
-                            nyOppgaveDto.frist,
-                        )
-                    },
-                )
+                call.respond(inTransaction { service.hentOppgaverForSak(sakId) })
             }
         }
 

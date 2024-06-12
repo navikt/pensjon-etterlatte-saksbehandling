@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -287,12 +288,14 @@ class GrunnlagsendringshendelseService(
                             gjelderPerson = fnr,
                             samsvarMellomKildeOgGrunnlag = samsvar,
                         )
-                    oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                        referanse = hendelseId.toString(),
-                        sakId = rolleOgSak.sakId,
-                        oppgaveKilde = OppgaveKilde.HENDELSE,
-                        oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-                        merknad = hendelse.beskrivelse(),
+                    oppgaveService.opprett(
+                        NyOppgaveDto(
+                            referanse = hendelseId.toString(),
+                            sakId = rolleOgSak.sakId,
+                            kilde = OppgaveKilde.HENDELSE,
+                            type = OppgaveType.VURDER_KONSEKVENS,
+                            merknad = hendelse.beskrivelse(),
+                        ),
                     )
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
                 }
@@ -433,12 +436,14 @@ class GrunnlagsendringshendelseService(
 
     private fun opprettOppgave(hendelse: Grunnlagsendringshendelse): OppgaveIntern =
         oppgaveService
-            .opprettNyOppgaveMedSakOgReferanse(
-                referanse = hendelse.id.toString(),
-                sakId = hendelse.sakId,
-                oppgaveKilde = OppgaveKilde.HENDELSE,
-                oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-                merknad = hendelse.beskrivelse(),
+            .opprett(
+                NyOppgaveDto(
+                    referanse = hendelse.id.toString(),
+                    sakId = hendelse.sakId,
+                    kilde = OppgaveKilde.HENDELSE,
+                    type = OppgaveType.VURDER_KONSEKVENS,
+                    merknad = hendelse.beskrivelse(),
+                ),
             ).also {
                 logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
             }

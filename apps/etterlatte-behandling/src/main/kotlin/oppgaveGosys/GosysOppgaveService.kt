@@ -9,6 +9,7 @@ import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
@@ -197,14 +198,16 @@ class GosysOppgaveServiceImpl(
         }
 
         val nyOppgave =
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = gosysOppgave.journalpostId,
-                sakId = sakId,
-                oppgaveKilde = OppgaveKilde.SAKSBEHANDLER,
-                oppgaveType = OppgaveType.JOURNALFOERING,
-                merknad = gosysOppgave.beskrivelse,
-                frist = gosysOppgave.frist,
-                saksbehandler = brukerTokenInfo.ident(),
+            oppgaveService.opprett(
+                NyOppgaveDto(
+                    referanse = gosysOppgave.journalpostId,
+                    sakId = sakId,
+                    kilde = OppgaveKilde.SAKSBEHANDLER,
+                    type = OppgaveType.JOURNALFOERING,
+                    merknad = gosysOppgave.beskrivelse,
+                    frist = gosysOppgave.frist,
+                    saksbehandler = brukerTokenInfo.ident(),
+                ),
             )
 
         val feilregistrertOppgaveId =

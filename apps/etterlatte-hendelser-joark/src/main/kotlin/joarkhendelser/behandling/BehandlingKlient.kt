@@ -52,19 +52,22 @@ class BehandlingKlient(
             .longValue()
 
     suspend fun opprettOppgave(
-        sakId: Long,
+        sakId: Long? = null,
+        sakType: SakType? = null,
         merknad: String,
         referanse: String,
     ): UUID =
         httpClient
-            .post("$url/oppgaver/sak/$sakId/opprett") {
+            .post("$url/oppgaver") {
                 contentType(ContentType.Application.Json)
                 setBody(
                     NyOppgaveDto(
-                        OppgaveKilde.HENDELSE,
-                        OppgaveType.JOURNALFOERING,
-                        merknad,
-                        referanse,
+                        kilde = OppgaveKilde.HENDELSE,
+                        sakId = sakId,
+                        sakType = sakType,
+                        type = OppgaveType.JOURNALFOERING,
+                        merknad = merknad,
+                        referanse = referanse,
                     ),
                 )
             }.body<ObjectNode>()

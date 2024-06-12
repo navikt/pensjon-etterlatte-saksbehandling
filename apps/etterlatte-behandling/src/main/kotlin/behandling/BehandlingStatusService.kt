@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
@@ -322,12 +323,14 @@ class BehandlingStatusServiceImpl(
                     ),
                 )
             } else {
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = behandling.sak.id.toString(),
-                    sakId = behandling.sak.id,
-                    oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
-                    oppgaveType = OppgaveType.TILBAKEKREVING,
-                    merknad = "Venter på kravgrunnlag",
+                oppgaveService.opprett(
+                    NyOppgaveDto(
+                        referanse = behandling.sak.id.toString(),
+                        sakId = behandling.sak.id,
+                        kilde = OppgaveKilde.TILBAKEKREVING,
+                        type = OppgaveType.TILBAKEKREVING,
+                        merknad = "Venter på kravgrunnlag",
+                    ),
                 )
             }
         } else {

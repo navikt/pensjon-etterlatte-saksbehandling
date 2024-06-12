@@ -33,8 +33,10 @@ export interface OppgaveSaksbehandler {
 }
 
 export interface NyOppgaveDto {
-  oppgaveKilde?: OppgaveKilde
-  oppgaveType: Oppgavetype
+  sakId?: number
+  sakType?: SakType
+  kilde?: OppgaveKilde
+  type: Oppgavetype
   merknad?: string
   referanse?: string
   saksbehandler?: string

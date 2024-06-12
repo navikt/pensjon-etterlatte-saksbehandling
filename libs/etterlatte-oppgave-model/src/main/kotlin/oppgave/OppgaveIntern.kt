@@ -4,6 +4,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import java.time.YearMonth
@@ -18,7 +20,7 @@ data class OppgaveIntern(
     val id: UUID,
     val status: Status,
     val enhet: String,
-    val sakId: Long,
+    val sakId: Long? = null,
     val kilde: OppgaveKilde? = null,
     val type: OppgaveType,
     val saksbehandler: OppgaveSaksbehandler? = null,
@@ -82,15 +84,6 @@ enum class Status {
 
     // TODO: Gå gjennom navngiving her. Gir det mening med "under behandling" som status OG samlebegrep...?
     fun erUnderBehandling(): Boolean = this in listOf(UNDER_BEHANDLING, PAA_VENT, ATTESTERING, UNDERKJENT)
-
-    fun erFerdigstilt(): Boolean = this == FERDIGSTILT
-
-    companion object {
-        fun skalOmregnesVedGRegulering() =
-            listOf(
-                ATTESTERING,
-            )
-    }
 }
 
 enum class OppgaveKilde {
@@ -162,13 +155,50 @@ data class VedtakEndringDTO(
 )
 
 data class NyOppgaveDto(
-    val oppgaveKilde: OppgaveKilde?,
-    val oppgaveType: OppgaveType,
-    val merknad: String?,
+    val kilde: OppgaveKilde?,
+    val sakId: Long? = null,
+    val sakType: SakType? = null,
+    val type: OppgaveType,
+    val merknad: String? = null,
     val referanse: String? = null,
     val frist: Tidspunkt? = null,
     val saksbehandler: String? = null,
-)
+) {
+    init {
+        require(sakId != null || sakType != null) {
+            "SakID eller SakType må være satt"
+        }
+    }
+
+    fun tilNyInternOppgave(enhet: String) = tilInternOppgave(enhet = enhet)
+
+    fun tilNyInternOppgave(sak: Sak) = tilInternOppgave(sak.ident, sak.id, sak.sakType, sak.enhet)
+
+    private fun tilInternOppgave(
+        ident: String? = null,
+        sakId: Long? = null,
+        sakType: SakType? = null,
+        enhet: String,
+    ) = OppgaveIntern(
+        id = UUID.randomUUID(),
+        status = Status.NY,
+        enhet = enhet,
+        kilde = kilde,
+        frist =
+            frist ?: Tidspunkt
+                .now()
+                .toLocalDatetimeUTC()
+                .plusMonths(1L)
+                .toTidspunkt(),
+        saksbehandler = saksbehandler?.let { OppgaveSaksbehandler(ident = it) },
+        referanse = referanse ?: "",
+        opprettet = Tidspunkt.now(),
+        sakId = sakId,
+        sakType = sakType ?: this.sakType!!,
+        fnr = ident,
+        type = type,
+    )
+}
 
 fun opprettNyOppgaveMedReferanseOgSak(
     referanse: String,

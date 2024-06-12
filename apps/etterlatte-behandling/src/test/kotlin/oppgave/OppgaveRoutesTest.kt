@@ -70,9 +70,16 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
             val referanse = UUID.randomUUID().toString()
             val oppgave =
                 client
-                    .post("/oppgaver/sak/${sak.id}/opprett") {
+                    .post("/oppgaver") {
                         val dto =
-                            NyOppgaveDto(OppgaveKilde.EKSTERN, OppgaveType.JOURNALFOERING, "Mottatt journalpost", referanse)
+                            NyOppgaveDto(
+                                kilde = OppgaveKilde.EKSTERN,
+                                sakId = sak.id,
+                                sakType = sak.sakType,
+                                type = OppgaveType.JOURNALFOERING,
+                                merknad = "Mottatt journalpost",
+                                referanse = referanse,
+                            )
 
                         addAuthToken(this@OppgaveRoutesTest.systemBruker)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())

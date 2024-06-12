@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -350,7 +351,7 @@ internal class BehandlingStatusServiceTest {
                 oppgave(UUID.randomUUID(), sakId, Status.FEILREGISTRERT),
                 oppgave(UUID.randomUUID(), sakId, Status.AVBRUTT),
             )
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), sakId, any(), any(), any()) } returns mockk()
+        every { oppgaveService.opprett(any()) } returns mockk()
         every { grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId) } just runs
 
         inTransaction {
@@ -363,12 +364,14 @@ internal class BehandlingStatusServiceTest {
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
             oppgaveService.hentOppgaverForSak(sakId)
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = sakId.toString(),
-                sakId = sakId,
-                oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
-                oppgaveType = OppgaveType.TILBAKEKREVING,
-                merknad = "Venter på kravgrunnlag",
+            oppgaveService.opprett(
+                NyOppgaveDto(
+                    referanse = sakId.toString(),
+                    sakId = sakId,
+                    kilde = OppgaveKilde.TILBAKEKREVING,
+                    type = OppgaveType.TILBAKEKREVING,
+                    merknad = "Venter på kravgrunnlag",
+                ),
             )
             grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
         }

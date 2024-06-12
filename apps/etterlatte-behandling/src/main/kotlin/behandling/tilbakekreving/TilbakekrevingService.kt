@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.PaaVentAarsak
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -90,12 +91,14 @@ class TilbakekrevingService(
                 )
             } else {
                 logger.info("Fant ingen tilbakekrevingsoppgave, oppretter ny")
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = tilbakekreving.id.toString(),
-                    sakId = tilbakekreving.sak.id,
-                    oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
-                    oppgaveType = OppgaveType.TILBAKEKREVING,
-                    merknad = "Kravgrunnlag mottatt",
+                oppgaveService.opprett(
+                    NyOppgaveDto(
+                        referanse = tilbakekreving.id.toString(),
+                        sakId = tilbakekreving.sak.id,
+                        kilde = OppgaveKilde.TILBAKEKREVING,
+                        type = OppgaveType.TILBAKEKREVING,
+                        merknad = "Kravgrunnlag mottatt",
+                    ),
                 )
             }
 

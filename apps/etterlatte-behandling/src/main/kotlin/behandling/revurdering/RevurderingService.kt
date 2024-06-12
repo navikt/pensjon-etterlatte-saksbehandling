@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -370,13 +371,15 @@ class RevurderingService(
                         )
                     } else {
                         val oppgave =
-                            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                                referanse = it.id.toString(),
-                                sakId = sakId,
-                                oppgaveKilde = OppgaveKilde.BEHANDLING,
-                                oppgaveType = OppgaveType.REVURDERING,
-                                merknad = begrunnelse,
-                                frist = frist,
+                            oppgaveService.opprett(
+                                NyOppgaveDto(
+                                    referanse = it.id.toString(),
+                                    sakId = sakId,
+                                    kilde = OppgaveKilde.BEHANDLING,
+                                    type = OppgaveType.REVURDERING,
+                                    merknad = begrunnelse,
+                                    frist = frist,
+                                ),
                             )
                         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
                     }

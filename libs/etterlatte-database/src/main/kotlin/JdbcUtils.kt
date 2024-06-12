@@ -4,16 +4,16 @@ import no.nav.etterlatte.libs.common.objectMapper
 import org.postgresql.util.PGobject
 import java.sql.PreparedStatement
 import java.sql.ResultSet
+import java.sql.Types
 
-fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
-    return if (next()) {
+fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? =
+    if (next()) {
         block().also {
             require(!next()) { "Skal være unik" }
         }
     } else {
         null
     }
-}
 
 fun <T> ResultSet.single(block: ResultSet.() -> T): T {
     require(next()) {
@@ -24,13 +24,12 @@ fun <T> ResultSet.single(block: ResultSet.() -> T): T {
     }
 }
 
-fun <T> ResultSet.firstOrNull(block: ResultSet.() -> T): T? {
-    return if (next()) {
+fun <T> ResultSet.firstOrNull(block: ResultSet.() -> T): T? =
+    if (next()) {
         block()
     } else {
         null
     }
-}
 
 fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
     val list = ArrayList<T>()
@@ -61,3 +60,8 @@ inline fun <reified T : Any> PreparedStatement.setJsonb(
     this.setObject(parameterIndex, jsonObject)
     return this
 }
+
+fun PreparedStatement.setNullableLong(
+    index: Int,
+    value: Long?,
+) = if (value == null) setNull(index, Types.BIGINT) else setLong(index, value)

@@ -38,6 +38,7 @@ import no.nav.etterlatte.libs.common.behandling.OpprettRevurderingForAktivitetsp
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -633,13 +634,15 @@ class AktivitetspliktServiceTest {
             every { behandlingService.hentBehandlingerForSak(sakId) } returns listOf(forrigeBehandling, aapenBehandling)
             coEvery { grunnlagKlient.hentPersongalleri(forrigeBehandling.id, any()) } returns persongalleriOpplysning
             every {
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    sakId = sakId,
-                    referanse = any(),
-                    oppgaveKilde = OppgaveKilde.HENDELSE,
-                    oppgaveType = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
-                    merknad = JobbType.OMS_DOED_6MND.beskrivelse,
-                    frist = frist,
+                oppgaveService.opprett(
+                    NyOppgaveDto(
+                        sakId = sakId,
+                        referanse = any(),
+                        kilde = OppgaveKilde.HENDELSE,
+                        type = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
+                        merknad = JobbType.OMS_DOED_6MND.beskrivelse,
+                        frist = frist,
+                    ),
                 )
             } returns oppgave
 

@@ -9,12 +9,14 @@ import no.nav.etterlatte.Self
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.SakMedEnhet
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -22,7 +24,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgavebenkStats
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
-import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -531,39 +532,33 @@ class OppgaveService(
             oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
         }
 
-        return opprettNyOppgaveMedSakOgReferanse(
-            referanse = referanse,
-            sakId = sakId,
-            oppgaveKilde = oppgaveKilde,
-            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-            merknad = merknad,
+        return opprett(
+            NyOppgaveDto(
+                referanse = referanse,
+                sakId = sakId,
+                kilde = oppgaveKilde,
+                type = OppgaveType.FOERSTEGANGSBEHANDLING,
+                merknad = merknad,
+            ),
         )
     }
 
-    fun opprettNyOppgaveMedSakOgReferanse(
-        referanse: String,
-        sakId: Long,
-        oppgaveKilde: OppgaveKilde?,
-        oppgaveType: OppgaveType,
-        merknad: String?,
-        frist: Tidspunkt? = null,
-        saksbehandler: String? = null,
-    ): OppgaveIntern {
-        val sak = sakDao.hentSak(sakId)!!
-        return opprettOppgave(
-            opprettNyOppgaveMedReferanseOgSak(
-                referanse = referanse,
-                sak = sak,
-                oppgaveKilde = oppgaveKilde,
-                oppgaveType = oppgaveType,
-                merknad = merknad,
-                frist = frist,
-            ),
-        ).also {
-            if (saksbehandler != null) {
-                tildelSaksbehandler(it.id, saksbehandler)
+    fun opprett(oppgave: NyOppgaveDto): OppgaveIntern {
+        val sak = oppgave.sakId?.let { sakDao.hentSak(it) }
+
+        val nyOppgave =
+            if (sak == null) {
+                oppgave.tilNyInternOppgave(Enheter.defaultEnhet.enhetNr)
+            } else {
+                oppgave.tilNyInternOppgave(sak)
             }
-        }
+
+        return opprettOppgave(nyOppgave)
+            .also {
+                if (oppgave.saksbehandler != null) {
+                    tildelSaksbehandler(it.id, oppgave.saksbehandler!!)
+                }
+            }
     }
 
     private fun opprettOppgave(oppgaveIntern: OppgaveIntern): OppgaveIntern {

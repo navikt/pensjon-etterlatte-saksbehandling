@@ -60,9 +60,9 @@ export const OppgaveFraJournalpostModal = ({
 
       apiOpprettOppgave(
         {
-          sakId: sakStatus.data.sak.id,
           request: {
-            oppgaveType,
+            oppgaveType: oppgaveType,
+            sakId: sakStatus.data.sak.id,
             referanse: journalpost.journalpostId,
             merknad: 'Manuell redigering av journalpost',
             oppgaveKilde: OppgaveKilde.SAKSBEHANDLER,

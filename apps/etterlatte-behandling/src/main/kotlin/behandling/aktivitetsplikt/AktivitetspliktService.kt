@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -319,13 +320,15 @@ class AktivitetspliktService(
     ): OpprettRevurderingForAktivitetspliktResponse {
         logger.info("Oppretter oppgave for revurdering av aktivitetsplikt for sak ${request.sakId}")
         return oppgaveService
-            .opprettNyOppgaveMedSakOgReferanse(
-                sakId = request.sakId,
-                referanse = forrigeBehandling.id.toString(),
-                oppgaveKilde = OppgaveKilde.HENDELSE,
-                oppgaveType = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
-                merknad = request.jobbType.beskrivelse,
-                frist = request.frist,
+            .opprett(
+                NyOppgaveDto(
+                    sakId = request.sakId,
+                    referanse = forrigeBehandling.id.toString(),
+                    kilde = OppgaveKilde.HENDELSE,
+                    type = OppgaveType.AKTIVITETSPLIKT_REVURDERING,
+                    merknad = request.jobbType.beskrivelse,
+                    frist = request.frist,
+                ),
             ).let { oppgave ->
                 OpprettRevurderingForAktivitetspliktResponse(
                     opprettetOppgave = true,

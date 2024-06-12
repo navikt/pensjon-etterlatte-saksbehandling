@@ -29,9 +29,23 @@ class BehandlingService(
         logger.info("Oppretter journalføringsoppgave for sak=$sakId")
 
         return behandlingKlient
-            .opprettOppgave(sakId, merknad, referanse = journalpostId)
+            .opprettOppgave(sakId, sakType, merknad, referanse = journalpostId)
             .also { oppgaveId ->
                 logger.info("Opprettet oppgave=$oppgaveId med sakId=$sakId for journalpost=$journalpostId")
+            }
+    }
+
+    suspend fun opprettOppgaveUtenSak(
+        sakType: SakType,
+        merknad: String,
+        journalpostId: String,
+    ): UUID {
+        logger.info("Oppretter journalføringsoppgave for journalpostId=$journalpostId")
+
+        return behandlingKlient
+            .opprettOppgave(null, sakType, merknad, referanse = journalpostId)
+            .also { oppgaveId ->
+                logger.info("Opprettet oppgave=$oppgaveId for journalpost=$journalpostId")
             }
     }
 

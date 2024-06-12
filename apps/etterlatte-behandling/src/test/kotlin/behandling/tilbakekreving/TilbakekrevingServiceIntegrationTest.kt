@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -129,12 +130,14 @@ internal class TilbakekrevingServiceIntegrationTest : BehandlingIntegrationTest(
 
         val oppgaveFraBehandlingMedFeilutbetaling =
             inTransaction {
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = sak.id.toString(),
-                    sakId = sak.id,
-                    oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
-                    oppgaveType = OppgaveType.TILBAKEKREVING,
-                    merknad = "Venter på kravgrunnlag",
+                oppgaveService.opprett(
+                    NyOppgaveDto(
+                        referanse = sak.id.toString(),
+                        sakId = sak.id,
+                        kilde = OppgaveKilde.TILBAKEKREVING,
+                        type = OppgaveType.TILBAKEKREVING,
+                        merknad = "Venter på kravgrunnlag",
+                    ),
                 )
             }
 

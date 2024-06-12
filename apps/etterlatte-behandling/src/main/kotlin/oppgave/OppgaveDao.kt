@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.database.setNullableLong
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.LoggerFactory
@@ -123,7 +124,7 @@ class OppgaveDaoImpl(
                 statement.setObject(1, oppgaveIntern.id)
                 statement.setString(2, oppgaveIntern.status.name)
                 statement.setString(3, oppgaveIntern.enhet)
-                statement.setLong(4, oppgaveIntern.sakId)
+                statement.setNullableLong(4, oppgaveIntern.sakId)
                 statement.setString(5, oppgaveIntern.type.name)
                 statement.setString(6, oppgaveIntern.saksbehandler?.ident)
                 statement.setString(7, oppgaveIntern.referanse)

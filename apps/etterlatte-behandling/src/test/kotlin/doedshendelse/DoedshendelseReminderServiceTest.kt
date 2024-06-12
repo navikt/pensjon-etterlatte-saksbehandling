@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -55,7 +56,7 @@ class DoedshendelseReminderServiceTest {
             )
         every { dao.hentDoedshendelserMedStatusFerdigOgUtFallBrevBp() } returns listOf(doedshendelseBP2mndGammel)
         every { behandlingService.hentBehandlingerForSak(sakId) } returns emptyList()
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any(), any()) } returns mockOppgave
+        every { oppgaveService.opprett(any()) } returns mockOppgave
         every { oppgaveService.hentOppgaverForSak(sakId) } returns emptyList()
 
         val service =
@@ -69,7 +70,7 @@ class DoedshendelseReminderServiceTest {
 
         verify { behandlingService.hentBehandlingerForSak(sakId) }
         verify { oppgaveService.hentOppgaverForSak(sakId) }
-        verify { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any(), any()) }
+        verify { oppgaveService.opprett(any()) }
     }
 
     @Test
@@ -104,7 +105,9 @@ class DoedshendelseReminderServiceTest {
             )
         service.setupKontekstAndRun(kontekst)
 
-        verify { behandlingService.hentBehandlingerForSak(sakId) }
-        verify(exactly = 0) { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any(), any()) }
+        verify {
+            behandlingService.hentBehandlingerForSak(sakId)
+            oppgaveService wasNot Called
+        }
     }
 }

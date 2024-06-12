@@ -164,9 +164,8 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 null,
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
-            inTransaction {
-                oppgaveService.hentOppgaverForSak(sak.id)
-            }
+            oppgaveService.hentOppgaverForSak(sak.id)
+            oppgaveService.hentOppgave(any())
         }
         verify { aktivitetspliktDao.kopierAktiviteter(behandling!!.id, revurdering.id) }
         inTransaction {
@@ -261,6 +260,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
             verify { grunnlagService.leggInnNyttGrunnlag(any(), any()) }
             verify { oppgaveService.hentOppgaverForSak(sak.id) }
+            verify { oppgaveService.hentOppgave(any()) }
             coVerify { grunnlagService.hentPersongalleri(any()) }
             verify {
                 oppgaveService.opprettOppgave(
@@ -366,6 +366,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             verify { grunnlagService.leggInnNyttGrunnlag(behandling as Behandling, any()) }
             verify { grunnlagService.laasTilGrunnlagIBehandling(revurdering, behandling!!.id) }
             verify { oppgaveService.hentOppgaverForSak(sak.id) }
+            verify { oppgaveService.hentOppgave(any()) }
             verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
             verify {
                 oppgaveService.opprettOppgave(
@@ -461,9 +462,8 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 null,
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
-            inTransaction {
-                oppgaveService.hentOppgaverForSak(sak.id)
-            }
+            oppgaveService.hentOppgaverForSak(sak.id)
+            oppgaveService.hentOppgave(any())
         }
         inTransaction {
             assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering.id))

@@ -51,9 +51,10 @@
         "svar": "PYSJAMASBUKSE",
         "spoersmaal": "Etternavn"
       },
-      "foedselsnummer": {
-        "svar": "24111258054",
-        "spoersmaal": "Barnets fødselsnummer / d-nummer"
+      "foedselsnummer": null,
+      "foedselsdato": {
+        "svar": "2012-01-01",
+        "spoersmaal": "Fødselsdato"
       },
       "statsborgerskap": {
         "svar": "Norge",
@@ -92,9 +93,10 @@
             "svar": "fe",
             "spoersmaal": "Etternavn"
           },
-          "foedselsnummer": {
-            "svar": "08498224343",
-            "spoersmaal": "Fødselsnummer"
+          "foedselsnummer": null,
+          "foedselsdato": {
+            "svar": "1982-09-08",
+            "spoersmaal": "Fødselsnummer / d-nummer"
           },
           "type": "FORELDER"
         }
@@ -151,8 +153,9 @@
           "svar": "fe",
           "spoersmaal": "Etternavn"
         },
-        "foedselsnummer": {
-          "svar": "08498224343",
+        "foedselsnummer": null,
+        "foedselsdato": {
+          "svar": "1982-09-08",
           "spoersmaal": "Fødselsnummer / d-nummer"
         },
         "datoForDoedsfallet": {
@@ -209,7 +212,7 @@
   },
   "@lagret_soeknad_id": 621,
   "@template": "soeknad",
-  "@fnr_soeker": "25478323363",
+  "@fnr_soeker": "1234567890",
   "@hendelse_gyldig_til": "2023-02-10T10:23:30.808950460Z",
   "system_read_count": 2,
   "system_participating_services": [

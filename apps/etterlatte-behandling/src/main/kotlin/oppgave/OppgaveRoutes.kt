@@ -128,11 +128,11 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
 
                     val nyOppgave =
                         inTransaction {
-                            service.opprettNyOppgaveMedSakOgReferanse(
+                            service.opprettOppgave(
                                 referanse = nyOppgaveDto.referanse ?: "",
                                 sakId = sakId,
-                                oppgaveKilde = nyOppgaveDto.oppgaveKilde,
-                                oppgaveType = nyOppgaveDto.oppgaveType,
+                                kilde = nyOppgaveDto.oppgaveKilde,
+                                type = nyOppgaveDto.oppgaveType,
                                 merknad = nyOppgaveDto.merknad,
                                 frist = null,
                                 saksbehandler = nyOppgaveDto.saksbehandler,
@@ -233,7 +233,7 @@ internal fun Route.oppgaveRoutes(service: OppgaveService) {
                 val nyOppgaveDto = call.receive<NyOppgaveDto>()
                 call.respond(
                     inTransaction {
-                        service.opprettNyOppgaveMedSakOgReferanse(
+                        service.opprettOppgave(
                             nyOppgaveDto.referanse ?: "",
                             sakId,
                             nyOppgaveDto.oppgaveKilde,

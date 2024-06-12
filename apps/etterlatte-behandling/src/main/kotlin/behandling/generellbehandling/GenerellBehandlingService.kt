@@ -95,7 +95,7 @@ class GenerellBehandlingService(
     ): GenerellBehandling {
         val opprettetbehandling = generellBehandlingDao.opprettGenerellbehandling(generellBehandling)
         val oppgaveForGenerellBehandling =
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            oppgaveService.opprettOppgave(
                 opprettetbehandling.id.toString(),
                 opprettetbehandling.sakId,
                 OppgaveKilde.GENERELL_BEHANDLING,

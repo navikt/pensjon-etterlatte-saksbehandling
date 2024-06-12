@@ -41,6 +41,8 @@ import no.nav.etterlatte.libs.testdata.grunnlag.eldreAvdoedTestopplysningerMap
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -840,7 +842,12 @@ internal class TrygdetidServiceTest {
 
         val trygdetid =
             runBlocking {
-                service.slettTrygdetidGrunnlagForTrygdetid(behandlingId, eksisterendeTrygdetid.id, trygdetidGrunnlag.id, saksbehandler)
+                service.slettTrygdetidGrunnlagForTrygdetid(
+                    behandlingId,
+                    eksisterendeTrygdetid.id,
+                    trygdetidGrunnlag.id,
+                    saksbehandler,
+                )
             }
 
         trygdetid.trygdetidGrunnlag shouldNotContain trygdetidGrunnlag
@@ -979,7 +986,7 @@ internal class TrygdetidServiceTest {
         val forrigeTrygdetidOpplysninger = standardOpplysningsgrunnlag()
         val forrigeTrygdetid =
             trygdetid(
-                behandlingId,
+                forrigeBehandlingId,
                 trygdetidGrunnlag = listOf(forrigeTrygdetidGrunnlag),
                 opplysninger = forrigeTrygdetidOpplysninger,
             )
@@ -991,16 +998,23 @@ internal class TrygdetidServiceTest {
             }
 
         coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns regulering
+        every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
         every { repository.hentTrygdetiderForBehandling(forrigeBehandlingId) } returns listOf(forrigeTrygdetid)
         every { repository.opprettTrygdetid(any()) } answers { firstArg() }
-        coEvery { grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery {
+            grunnlagKlient.hentGrunnlag(
+                forrigeBehandlingId,
+                saksbehandler,
+            )
+        } returns GrunnlagTestData().hentOpplysningsgrunnlag()
 
         runBlocking {
             service.kopierSisteTrygdetidberegninger(behandlingId, forrigeBehandlingId, saksbehandler)
         }
 
         coVerify(exactly = 1) {
-            grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
+            grunnlagKlient.hentGrunnlag(forrigeBehandlingId, saksbehandler)
+            repository.hentTrygdetiderForBehandling(behandlingId)
             repository.hentTrygdetiderForBehandling(forrigeBehandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             repository.opprettTrygdetid(match { it.behandlingId == behandlingId })
@@ -1008,6 +1022,83 @@ internal class TrygdetidServiceTest {
         verify {
             regulering.id
             regulering.sak
+        }
+    }
+
+    @Test
+    fun `skal opprette manglende trygdetid av kopi fra forrige behandling`() {
+        val sakId = 123L
+        val behandlingId = randomUUID()
+        val forrigeBehandlingId = randomUUID()
+        val forrigeTrygdetidGrunnlag = trygdetidGrunnlag(begrunnelse = "Forrige")
+        val forrigeTrygdetidOpplysninger = standardOpplysningsgrunnlag()
+        val trygdetidGrunnlag = trygdetidGrunnlag(begrunnelse = "Eksisterende")
+        val trygdetidOpplysninger = standardOpplysningsgrunnlag()
+        val forrigeTrygdetid =
+            trygdetid(
+                forrigeBehandlingId,
+                trygdetidGrunnlag = listOf(forrigeTrygdetidGrunnlag),
+                opplysninger = forrigeTrygdetidOpplysninger,
+                ident = AVDOED2_FOEDSELSNUMMER.value,
+            )
+
+        val eksisterendeTrygdetid =
+            trygdetid(
+                behandlingId,
+                trygdetidGrunnlag = listOf(trygdetidGrunnlag),
+                opplysninger = trygdetidOpplysninger,
+            )
+
+        val revurdering =
+            mockk<DetaljertBehandling>().apply {
+                every { id } returns behandlingId
+                every { sak } returns sakId
+            }
+
+        val doedsdato = LocalDate.of(2023, 11, 12)
+        val foedselsdato = doedsdato.minusYears(30)
+
+        val nyligAvdoedFoedselsnummer = AVDOED2_FOEDSELSNUMMER
+        val nyligAvdoed: Grunnlagsdata<JsonNode> =
+            mapOf(
+                Opplysningstype.DOEDSDATO to konstantOpplysning(doedsdato),
+                Opplysningstype.PERSONROLLE to konstantOpplysning(PersonRolle.AVDOED),
+                Opplysningstype.FOEDSELSNUMMER to konstantOpplysning(nyligAvdoedFoedselsnummer),
+                Opplysningstype.FOEDSELSDATO to konstantOpplysning(foedselsdato),
+            )
+
+        coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns revurdering
+        every { repository.hentTrygdetiderForBehandling(behandlingId) } returns listOf(eksisterendeTrygdetid)
+        every { repository.hentTrygdetiderForBehandling(forrigeBehandlingId) } returns listOf(forrigeTrygdetid)
+        every { repository.opprettTrygdetid(any()) } answers { firstArg() }
+        coEvery {
+            grunnlagKlient.hentGrunnlag(
+                behandlingId,
+                saksbehandler,
+            )
+        } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(forrigeBehandlingId, saksbehandler) } returns
+            GrunnlagTestData(opplysningsmapAvdoedOverrides = nyligAvdoed).hentOpplysningsgrunnlag()
+
+        runBlocking {
+            val trygdetider = service.kopierSisteTrygdetidberegninger(behandlingId, forrigeBehandlingId, saksbehandler)
+
+            assertEquals(2, trygdetider.size)
+            assertTrue(trygdetider.any { it.ident == AVDOED_FOEDSELSNUMMER.value })
+            assertTrue(trygdetider.any { it.ident == AVDOED2_FOEDSELSNUMMER.value })
+        }
+
+        coVerify(exactly = 1) {
+            grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
+            grunnlagKlient.hentGrunnlag(forrigeBehandlingId, saksbehandler)
+            repository.hentTrygdetiderForBehandling(behandlingId)
+            repository.hentTrygdetiderForBehandling(forrigeBehandlingId)
+            behandlingKlient.hentBehandling(behandlingId, saksbehandler)
+            repository.opprettTrygdetid(match { it.behandlingId == behandlingId })
+        }
+        verify {
+            revurdering.id
+            revurdering.sak
         }
     }
 

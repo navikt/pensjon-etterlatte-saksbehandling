@@ -66,7 +66,8 @@ val maanederMedSanksjonEtterVirk =
         regelReferanse = RegelReferanse("MAANEDER-MED-SANKSJON-ETTER-VIRK"),
     ) benytter virkningstidspunkt og perioderMedSanksjonGrunnlag med { virkningstidspunkt, perioder ->
         perioder
-            .filter { it.first >= virkningstidspunkt }.count { it.second }
+            .filter { it.first >= virkningstidspunkt }
+            .count { it.second }
     }
 
 val gjenvaerendeMaaneder =
@@ -87,7 +88,11 @@ val fordeltRestanse =
         beskrivelse = "Fordeler oppsummert restanse over gjenværende måneder av gjeldende år",
         regelReferanse = RegelReferanse("FORDELT-RESTANSE-INNTEKTSENDRING"),
     ) benytter totalRestanse og gjenvaerendeMaaneder med { sumRestanse, gjenvaerendeMaaneder ->
-        Beregningstall(sumRestanse).divide(gjenvaerendeMaaneder).toInteger() // TODO: skal denne være en round?
+        if (gjenvaerendeMaaneder.toInteger() == 0) {
+            sumRestanse
+        } else {
+            Beregningstall(sumRestanse).divide(gjenvaerendeMaaneder).toInteger() // TODO: skal denne være en round?
+        }
     }
 
 val restanse =

@@ -14,7 +14,6 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.logger
-import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.testdata.JsonMessage
 
@@ -43,7 +42,7 @@ object EgendefinertMeldingFeature : TestDataFeature {
                 kunEtterlatteUtvikling {
                     try {
                         val navIdent =
-                            requireNotNull(navIdentFraToken()) {
+                            requireNotNull(brukerTokenInfo.ident()) {
                                 "Nav ident mangler. Du må være innlogget for å sende søknad."
                             }
 

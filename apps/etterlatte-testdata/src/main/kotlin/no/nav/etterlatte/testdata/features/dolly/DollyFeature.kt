@@ -13,7 +13,7 @@ import no.nav.etterlatte.brukerIdFraToken
 import no.nav.etterlatte.getDollyAccessToken
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.navIdentFraToken
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.rapidsandrivers.Behandlingssteg
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
@@ -119,8 +119,7 @@ class DollyFeature(
                             )
                         }
 
-                    val navIdent = navIdentFraToken()
-                    val noekkel = dollyService.sendSoeknad(request, navIdent, Behandlingssteg.BEHANDLING_OPPRETTA)
+                    val noekkel = dollyService.sendSoeknad(request, brukerTokenInfo.ident(), Behandlingssteg.BEHANDLING_OPPRETTA)
 
                     call.respond(SoeknadResponse(200, noekkel).toJson())
                 } catch (e: Exception) {

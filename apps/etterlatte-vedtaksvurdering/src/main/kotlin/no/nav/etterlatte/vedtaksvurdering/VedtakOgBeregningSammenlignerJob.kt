@@ -49,8 +49,8 @@ class VedtakOgBeregningSammenlignerJob(
                     logger.warn("Kunne ikke sjekke kopling mellom beregning og vedtak for ${it.behandlingId}. Fortsetter med neste", e)
                 }
             }
-            logger.info("Ferdig med å sjekke 100 vedtak for samsvar med beregning. Venter fem sekunder før neste runde.")
-            Thread.sleep(Duration.ofSeconds(5))
+            logger.info("Ferdig med å sjekke 100 vedtak for samsvar med beregning. Venter ett sekund før neste runde.")
+            Thread.sleep(Duration.ofSeconds(1))
         }
     }
 

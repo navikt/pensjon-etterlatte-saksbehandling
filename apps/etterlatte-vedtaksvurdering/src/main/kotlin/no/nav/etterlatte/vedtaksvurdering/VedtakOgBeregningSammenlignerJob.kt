@@ -39,11 +39,17 @@ class VedtakOgBeregningSammenlignerJob(
     }
 
     private fun sjekkAlle() {
+        logger.info("Starter å sjekke samsvar mellom vedtak og beregning")
         val alleLoependeVedtak = vedtaksvurderingRepository.hentAlleLoependeVedtak()
         alleLoependeVedtak.chunked(100).forEach { chunk ->
             chunk.forEach {
-                runBlocking { start(it) }
+                try {
+                    runBlocking { start(it) }
+                } catch (e: Exception) {
+                    logger.warn("Kunne ikke sjekke kopling mellom beregning og vedtak for ${it.behandlingId}. Fortsetter med neste", e)
+                }
             }
+            logger.info("Ferdig med å sjekke 100 vedtak for samsvar med beregning. Venter fem sekunder før neste runde.")
             Thread.sleep(Duration.ofSeconds(5))
         }
     }

@@ -6,8 +6,9 @@ import kotliquery.using
 import java.util.UUID
 import javax.sql.DataSource
 
-internal enum class TilbakekrevingHendelseType {
+enum class TilbakekrevingHendelseType {
     KRAVGRUNNLAG_MOTTATT,
+    KRAV_VEDTAK_STATUS_MOTTATT,
     TILBAKEKREVINGSVEDTAK_SENDT,
     TILBAKEKREVINGSVEDTAK_KVITTERING,
 }
@@ -15,47 +16,28 @@ internal enum class TilbakekrevingHendelseType {
 class TilbakekrevingHendelseRepository(
     private val dataSource: DataSource,
 ) {
-    fun lagreMottattKravgrunnlag(
-        kravgrunnlagId: String,
-        payload: String,
-    ) = lagreTilbakekrevingHendelse(kravgrunnlagId, payload, TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT)
-
-    fun lagreTilbakekrevingsvedtakSendt(
-        kravgrunnlagId: String,
-        payload: String,
-    ) = lagreTilbakekrevingHendelse(kravgrunnlagId, payload, TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_SENDT)
-
-    fun lagreTilbakekrevingsvedtakKvitteringMottatt(
-        kravgrunnlagId: String,
-        payload: String,
-    ) = lagreTilbakekrevingHendelse(
-        kravgrunnlagId,
-        payload,
-        TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING,
-    )
-
-    private fun lagreTilbakekrevingHendelse(
-        kravgrunnlagId: String,
+    fun lagreTilbakekrevingHendelse(
+        sakId: Long,
         payload: String,
         type: TilbakekrevingHendelseType,
     ) = using(sessionOf(dataSource)) { session ->
         queryOf(
             statement =
                 """
-                INSERT INTO tilbakekreving_hendelse(id, opprettet, kravgrunnlag_id, payload, type)
-                VALUES(:id, now(), :kravgrunnlagId, :payload, :type)
+                INSERT INTO tilbakekreving_hendelse(id, opprettet, sak_id, payload, type)
+                VALUES(:id, now(), :sakId, :payload, :type)
                 """.trimIndent(),
             paramMap =
                 mapOf(
                     "id" to UUID.randomUUID(),
-                    "kravgrunnlagId" to kravgrunnlagId,
+                    "sakId" to sakId,
                     "payload" to payload,
                     "type" to type.name,
                 ),
         ).let { query ->
             session.update(query).also {
                 require(it == 1) {
-                    "Feil under lagring av hendelse for kravgrunnlag $kravgrunnlagId"
+                    "Feil under lagring av hendelse for sak $sakId"
                 }
             }
         }

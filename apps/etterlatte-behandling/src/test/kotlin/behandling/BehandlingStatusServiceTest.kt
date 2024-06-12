@@ -350,7 +350,7 @@ internal class BehandlingStatusServiceTest {
                 oppgave(UUID.randomUUID(), sakId, Status.FEILREGISTRERT),
                 oppgave(UUID.randomUUID(), sakId, Status.AVBRUTT),
             )
-        every { oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), sakId, any(), any(), any()) } returns mockk()
+        every { oppgaveService.opprettOppgave(any(), sakId, any(), any(), any()) } returns mockk()
         every { grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId) } just runs
 
         inTransaction {
@@ -363,11 +363,11 @@ internal class BehandlingStatusServiceTest {
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             behandlingInfoDao.hentBrevutfall(behandlingId)
             oppgaveService.hentOppgaverForSak(sakId)
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            oppgaveService.opprettOppgave(
                 referanse = sakId.toString(),
                 sakId = sakId,
-                oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
-                oppgaveType = OppgaveType.TILBAKEKREVING,
+                kilde = OppgaveKilde.TILBAKEKREVING,
+                type = OppgaveType.TILBAKEKREVING,
                 merknad = "Venter på kravgrunnlag",
             )
             grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)

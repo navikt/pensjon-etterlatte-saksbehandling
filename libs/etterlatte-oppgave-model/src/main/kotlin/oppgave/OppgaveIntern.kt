@@ -4,6 +4,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import java.time.YearMonth
@@ -173,23 +175,33 @@ data class NyOppgaveDto(
 fun opprettNyOppgaveMedReferanseOgSak(
     referanse: String,
     sak: Sak,
-    oppgaveKilde: OppgaveKilde?,
-    oppgaveType: OppgaveType,
+    kilde: OppgaveKilde?,
+    type: OppgaveType,
     merknad: String?,
     frist: Tidspunkt? = null,
-): OppgaveIntern =
-    OppgaveIntern(
+    saksbehandler: String? = null,
+): OppgaveIntern {
+    val opprettet = Tidspunkt.now()
+
+    val oppgaveFrist =
+        frist ?: opprettet
+            .toLocalDatetimeUTC()
+            .plusMonths(1L)
+            .toTidspunkt()
+
+    return OppgaveIntern(
         id = UUID.randomUUID(),
         status = Status.NY,
         enhet = sak.enhet,
         sakId = sak.id,
-        kilde = oppgaveKilde,
-        saksbehandler = null,
+        kilde = kilde,
+        saksbehandler = saksbehandler?.let { OppgaveSaksbehandler(ident = it) },
         referanse = referanse,
         merknad = merknad,
-        opprettet = Tidspunkt.now(),
+        opprettet = opprettet,
         sakType = sak.sakType,
         fnr = sak.ident,
-        frist = frist,
-        type = oppgaveType,
+        frist = oppgaveFrist,
+        type = type,
     )
+}

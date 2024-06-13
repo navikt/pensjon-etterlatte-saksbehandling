@@ -94,7 +94,14 @@ class AvkortingRepository(
                             }
                         val sanksjonerAvkortetYtelseAar =
                             queryOf(
-                                "SELECT y.sanksjon_id, s.sanksjon_type FROM avkortet_ytelse y INNER JOIN sanksjon s ON y.sanksjon_id = s.id WHERE y.aaroppgjoer_id = ? AND y.type = ?",
+                                """
+                                SELECT y.sanksjon_id, s.sanksjon_type 
+                                FROM avkortet_ytelse y 
+                                INNER JOIN sanksjon s 
+                                ON y.sanksjon_id = s.id 
+                                WHERE y.aarsoppgjoer_id = ? 
+                                AND y.type = ?
+                                """.trimIndent(),
                                 aarsoppgjoer.id,
                                 AvkortetYtelseType.AARSOPPGJOER.name,
                             ).let { query -> tx.run(query.map { row -> row.toSanksjonerYtelse() }.asList) }

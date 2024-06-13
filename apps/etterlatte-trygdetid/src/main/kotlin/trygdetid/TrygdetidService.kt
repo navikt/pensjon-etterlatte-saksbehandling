@@ -143,7 +143,7 @@ class TrygdetidServiceImpl(
     override suspend fun opprettTrygdetiderForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = kanOppdatereTrygdetid( // TODO: dette kallet gjøres også nedover i chainen, why?
+    ) = kanOppdatereTrygdetid(
         behandlingId,
         brukerTokenInfo,
     ) {

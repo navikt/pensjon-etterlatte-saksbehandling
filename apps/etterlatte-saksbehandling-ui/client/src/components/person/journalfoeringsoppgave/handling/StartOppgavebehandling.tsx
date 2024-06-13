@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Alert, Button, Heading, HStack, Link, Radio, RadioGroup, Tag, VStack } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
@@ -12,11 +12,18 @@ import { FormWrapper } from '../BehandleJournalfoeringOppgave'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
 import { OppgaveDTO, erOppgaveRedigerbar } from '~shared/types/oppgave'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentPersonNavnogFoedsel } from '~shared/api/pdltjenester'
+import { isSuccess } from '~shared/api/apiUtils'
 
-export default function StartOppgavebehandling({ antallBehandlinger }: { antallBehandlinger: number }) {
-  const { oppgave, journalpost, oppgaveHandling } = useJournalfoeringOppgave()
+export default function StartOppgavebehandling() {
+  const { oppgave, journalpost, oppgaveHandling, sakMedBehandlinger } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const antallBehandlinger = sakMedBehandlinger?.behandlinger.length || 0
+  const [tilhoererBruker, settTilhoererBruker] = useState(false)
+
+  const [personResult, hentPerson] = useApiCall(hentPersonNavnogFoedsel)
 
   const neste = () => {
     switch (oppgaveHandling) {
@@ -28,6 +35,16 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
         return navigate('oppretteklage', { relative: 'path' })
     }
   }
+
+  useEffect(() => {
+    if (journalpost?.bruker?.id) {
+      hentPerson(journalpost?.bruker?.id, ({ foedselsnummer }) => {
+        settTilhoererBruker(oppgave?.fnr === foedselsnummer)
+      })
+    } else {
+      throw Error('Journalposten mangler bruker')
+    }
+  }, [])
 
   if (!oppgave) return null
   else if (!erOppgaveRedigerbar(oppgave.status))
@@ -55,6 +72,10 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
         <Alert variant="warning">Kan ikke behandle oppgaven uten journalpost</Alert>
       )}
 
+      {isSuccess(personResult) && !tilhoererBruker && (
+        <Alert variant="error">Journalposten tilhører ikke bruker som oppgaven er tilknyttet</Alert>
+      )}
+
       <RadioGroup
         legend="Velg handling"
         size="small"
@@ -63,7 +84,11 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
         }}
         value={oppgaveHandling || ''}
       >
-        <Radio value={OppgaveHandling.NY_BEHANDLING} description="Oppretter en ny behandling" disabled={!journalpost}>
+        <Radio
+          value={OppgaveHandling.NY_BEHANDLING}
+          description="Oppretter en ny behandling"
+          disabled={!journalpost || !tilhoererBruker}
+        >
           Opprett behandling
         </Radio>
         <Radio value={OppgaveHandling.NY_KLAGE} description="Opprett ny klagebehandling" disabled={!journalpost}>

@@ -69,6 +69,7 @@ internal class NySoeknadRiver(
             if (!Folkeregisteridentifikator.isValid(soekerFnr)) {
                 logger.info("Søkeren på søknad=$soeknadId har ugyldig fødselsnummer – sendes til manuell behandling")
                 journalfoerSoeknadService.opprettJournalpostForUkjent(soeknadId, sakType, soeknad)?.also {
+                    logger.info("Journalførte søknaden på ukjent bruker (journalpostId=${it.journalpostId})")
                     context.publish(packet.oppdaterMed(null, it).toJson())
                 }
                 return

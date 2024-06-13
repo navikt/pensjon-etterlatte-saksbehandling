@@ -21,9 +21,7 @@ internal class ClientCallLogging private constructor() {
     companion object : HttpClientPlugin<Any, ClientCallLogging> {
         override val key: AttributeKey<ClientCallLogging> = AttributeKey("ClientCallLogging")
 
-        override fun prepare(block: Any.() -> Unit): ClientCallLogging {
-            return ClientCallLogging()
-        }
+        override fun prepare(block: Any.() -> Unit): ClientCallLogging = ClientCallLogging()
 
         override fun install(
             plugin: ClientCallLogging,

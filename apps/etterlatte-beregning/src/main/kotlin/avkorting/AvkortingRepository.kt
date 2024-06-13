@@ -25,12 +25,13 @@ class AvkortingRepository(
                     behandlingId,
                 ).let { query ->
                     tx.run(
-                        query.map { row ->
-                            Aarsoppgjoer(
-                                id = row.uuid("id"),
-                                aar = row.int("aar"),
-                            )
-                        }.asList,
+                        query
+                            .map { row ->
+                                Aarsoppgjoer(
+                                    id = row.uuid("id"),
+                                    aar = row.int("aar"),
+                                )
+                            }.asList,
                     )
                 }
 

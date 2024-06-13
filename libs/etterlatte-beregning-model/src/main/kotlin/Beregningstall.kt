@@ -82,13 +82,12 @@ class Beregningstall : Comparable<Beregningstall> {
         value.subtract(BigDecimal(subtrahend)).setScale(decimals, roundingMode),
     )
 
-    fun zeroIfNegative(): Beregningstall {
-        return if (this.value < BigDecimal.ZERO) {
+    fun zeroIfNegative(): Beregningstall =
+        if (this.value < BigDecimal.ZERO) {
             Beregningstall(BigDecimal.ZERO)
         } else {
             this
         }
-    }
 
     fun setScale(
         decimals: Int,
@@ -102,24 +101,17 @@ class Beregningstall : Comparable<Beregningstall> {
 
     fun toInteger() = value.toInt()
 
-    override fun toString(): String {
-        return value.toString()
-    }
+    override fun toString(): String = value.toString()
 
-    override fun compareTo(other: Beregningstall): Int {
-        return this.value.compareTo(other.value)
-    }
+    override fun compareTo(other: Beregningstall): Int = this.value.compareTo(other.value)
 
-    override fun equals(other: Any?): Boolean {
-        return when (other) {
+    override fun equals(other: Any?): Boolean =
+        when (other) {
             is Beregningstall -> this.value == other.value
             else -> false
         }
-    }
 
-    override fun hashCode(): Int {
-        return value.hashCode()
-    }
+    override fun hashCode(): Int = value.hashCode()
 
     companion object {
         fun somBroek(verdi: Prosent) = Beregningstall(verdi.verdi).divide(100)

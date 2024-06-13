@@ -7,14 +7,13 @@ open class ForespoerselException(
     open val meta: Map<String, Any>? = null,
     override val cause: Throwable? = null,
 ) : Exception(detail, cause) {
-    fun somExceptionResponse(): ExceptionResponse {
-        return ExceptionResponse(
+    fun somExceptionResponse(): ExceptionResponse =
+        ExceptionResponse(
             status = status,
             detail = detail,
             code = code,
             meta = meta,
         )
-    }
 }
 
 open class UgyldigForespoerselException(

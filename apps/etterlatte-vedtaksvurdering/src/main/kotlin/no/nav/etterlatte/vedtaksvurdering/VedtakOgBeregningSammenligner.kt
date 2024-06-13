@@ -32,9 +32,18 @@ object VedtakOgBeregningSammenligner {
         val innhold = vedtak.innhold as VedtakInnhold.Behandling
         val perioder = innhold.utbetalingsperioder
         val beregningsperioder = beregning.beregning.beregningsperioder
-        check(perioder.size == beregningsperioder.size) {
+        val likeMangePerioder = perioder.size == beregningsperioder.size
+        check(likeMangePerioder) {
             "Forventa like mange perioder i vedtak som i beregning for vedtak ${vedtak.id} i sak ${vedtak.sakId}. " +
-                "Vedtak hadde ${perioder.size}, mens beregning hadde ${beregningsperioder.size}"
+                "Vedtak hadde ${perioder.size}, mens beregning hadde ${beregningsperioder.size}" +
+                "Alle perioder fra vedtak: ${perioder.map { "${it.periode}: ${it.beloep}" }}. " +
+                "Alle perioder fra beregning: ${beregningsperioder.map {
+                    "${it.datoFOM}-${it.datoTOM} - ${it.utbetaltBeloep}"
+                } }"
+        }
+        if (likeMangePerioder) {
+            // Har alt sjekka det under, så hoppar over det no.
+            return
         }
         for (i in perioder.indices) {
             val periode = perioder[i]

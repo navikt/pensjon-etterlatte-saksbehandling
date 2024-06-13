@@ -238,7 +238,7 @@ internal class VilkaarsvurderingRoutesTest(
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
-            val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
+            val (vilkaarsvurdering) = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
             val vurdertVilkaarDto =
                 VurdertVilkaarDto(
@@ -284,7 +284,7 @@ internal class VilkaarsvurderingRoutesTest(
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
-            val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
+            val (vilkaarsvurdering) = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
             val vurdertVilkaarDto =
                 VurdertVilkaarDto(
@@ -370,7 +370,7 @@ internal class VilkaarsvurderingRoutesTest(
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
-            val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
+            val (vilkaarsvurdering) = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
             val vurdertVilkaarDto =
                 VurdertVilkaarDto(
@@ -473,7 +473,7 @@ internal class VilkaarsvurderingRoutesTest(
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
-            val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
+            val (vilkaarsvurdering) = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
             val resultat =
                 VurdertVilkaarsvurderingResultatDto(
                     resultat = VilkaarsvurderingUtfall.OPPFYLT,
@@ -727,7 +727,7 @@ internal class VilkaarsvurderingRoutesTest(
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
-            val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
+            val (vilkaarsvurdering) = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
             val vurdertVilkaarDto =
                 VurdertVilkaarDto(
@@ -787,7 +787,9 @@ internal class VilkaarsvurderingRoutesTest(
         }
     }
 
-    private fun opprettVilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService): Vilkaarsvurdering =
+    private fun opprettVilkaarsvurdering(
+        vilkaarsvurderingService: VilkaarsvurderingService,
+    ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         runBlocking {
             vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, oboToken)
         }

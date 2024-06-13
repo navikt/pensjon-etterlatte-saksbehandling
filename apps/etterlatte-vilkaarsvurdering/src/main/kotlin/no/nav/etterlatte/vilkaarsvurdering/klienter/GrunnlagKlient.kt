@@ -17,8 +17,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 interface GrunnlagKlient {
-    suspend fun hentGrunnlag(
-        sakId: Long,
+    suspend fun hentGrunnlagForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag
@@ -41,8 +40,7 @@ class GrunnlagKlientImpl(
     private val clientId = config.getString("grunnlag.client.id")
     private val resourceUrl = config.getString("grunnlag.resource.url")
 
-    override suspend fun hentGrunnlag(
-        sakId: Long,
+    override suspend fun hentGrunnlagForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag {

@@ -86,7 +86,7 @@ internal class VilkaarsvurderingRoutesTest(
         coEvery { behandlingKlient.settBehandlingStatusOpprettet(any(), any(), any()) } returns true
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         val grunnlagMock = grunnlagMedVersjon(grunnlagVersjon)
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlagMock
+        coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlagMock
     }
 
     @AfterEach
@@ -148,7 +148,7 @@ internal class VilkaarsvurderingRoutesTest(
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
-            coEvery { grunnlagKlient.hentGrunnlag(any(), behandlingId, any()) } returns
+            coEvery { grunnlagKlient.hentGrunnlagForBehandling(behandlingId, any()) } returns
                 grunnlagMedVersjon(nyGrunnlagVersjon)
 
             val response =

@@ -102,9 +102,11 @@ internal class AvkortingServiceTest {
         @Test
         fun `Foerstegangsbehandling skal reberegne avkorting hvis beregning er beregnet paa nytt`() {
             val behandlingId = UUID.randomUUID()
+            val sakId = 123L
             val behandling =
                 behandling(
                     id = behandlingId,
+                    sak = sakId,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     status = BehandlingStatus.BEREGNET,
                 )
@@ -117,7 +119,7 @@ internal class AvkortingServiceTest {
             every { avkortingRepository.hentAvkorting(behandlingId) } returns eksisterendeAvkorting andThen lagretAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { eksisterendeAvkorting.beregnAvkortingRevurdering(any()) } returns reberegnetAvkorting
-            every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
+            every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
             every { lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(any(), any()) } returns lagretAvkorting
 
@@ -129,7 +131,7 @@ internal class AvkortingServiceTest {
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 beregningService.hentBeregningNonnull(behandlingId)
                 eksisterendeAvkorting.beregnAvkortingRevurdering(beregning)
-                avkortingRepository.lagreAvkorting(behandlingId, reberegnetAvkorting)
+                avkortingRepository.lagreAvkorting(behandlingId, sakId, reberegnetAvkorting)
                 behandlingKlient.avkort(behandlingId, bruker, true)
                 lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 1))
             }
@@ -217,11 +219,12 @@ internal class AvkortingServiceTest {
         @Test
         fun `Revurdering skal opprette ny avkorting ved aa kopiere tidligere hvis avkorting ikke finnes fra foer`() {
             val behandlingId = UUID.randomUUID()
+            val sakId = 123L
             val behandling =
                 behandling(
                     id = behandlingId,
+                    sak = sakId,
                     behandlingType = BehandlingType.REVURDERING,
-                    sak = 123L,
                     virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
                 )
             val forrigeBehandlingId = UUID.randomUUID()
@@ -241,7 +244,7 @@ internal class AvkortingServiceTest {
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { forrigeAvkorting.kopierAvkorting() } returns kopiertAvkorting
             every { kopiertAvkorting.beregnAvkortingRevurdering(any()) } returns beregnetAvkorting
-            every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
+            every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
             every { lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(any(), any()) } returns lagretAvkorting
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
 
@@ -257,7 +260,7 @@ internal class AvkortingServiceTest {
                 beregningService.hentBeregningNonnull(behandlingId)
                 forrigeAvkorting.kopierAvkorting()
                 kopiertAvkorting.beregnAvkortingRevurdering(beregning)
-                avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
+                avkortingRepository.lagreAvkorting(behandlingId, sakId, beregnetAvkorting)
                 lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 1), forrigeAvkorting)
                 behandlingKlient.avkort(behandlingId, bruker, true)
             }
@@ -269,13 +272,14 @@ internal class AvkortingServiceTest {
         @Test
         fun `Revurdering skal reberegne avkorting hvis beregning er beregnet paa nytt`() {
             val behandlingId = UUID.randomUUID()
+            val sakId = 123L
             val behandlingBeregnetStatus = BehandlingStatus.BEREGNET
             val behandling =
                 behandling(
                     id = behandlingId,
+                    sak = sakId,
                     status = behandlingBeregnetStatus,
                     behandlingType = BehandlingType.REVURDERING,
-                    sak = 123L,
                     virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
                 )
             val forrigeBehandlingId = UUID.randomUUID()
@@ -294,7 +298,7 @@ internal class AvkortingServiceTest {
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { eksisterendeAvkorting.beregnAvkortingRevurdering(any()) } returns reberegnetAvkorting
-            every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
+            every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
             every { lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(any(), any()) } returns lagretAvkorting
 
@@ -309,7 +313,7 @@ internal class AvkortingServiceTest {
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
                 beregningService.hentBeregningNonnull(behandlingId)
                 eksisterendeAvkorting.beregnAvkortingRevurdering(beregning)
-                avkortingRepository.lagreAvkorting(behandlingId, reberegnetAvkorting)
+                avkortingRepository.lagreAvkorting(behandlingId, sakId, reberegnetAvkorting)
                 behandlingKlient.avkort(behandlingId, bruker, true)
                 lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 1), forrigeAvkorting)
             }
@@ -331,9 +335,11 @@ internal class AvkortingServiceTest {
         @Test
         fun `Skal beregne og lagre avkorting for førstegangsbehandling`() {
             val behandlingId = UUID.randomUUID()
+            val sakId = 123L
             val behandling =
                 behandling(
                     id = behandlingId,
+                    sak = sakId,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
                 )
@@ -344,7 +350,7 @@ internal class AvkortingServiceTest {
             every {
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any(), any())
             } returns beregnetAvkorting
-            every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
+            every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
             every { lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(any()) } returns lagretAvkorting
 
@@ -363,7 +369,7 @@ internal class AvkortingServiceTest {
                     bruker,
                     beregning,
                 )
-                avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
+                avkortingRepository.lagreAvkorting(behandlingId, sakId, beregnetAvkorting)
                 lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 1))
                 behandlingKlient.avkort(behandlingId, bruker, true)
             }
@@ -379,8 +385,8 @@ internal class AvkortingServiceTest {
             val revurdering =
                 behandling(
                     id = revurderingId,
-                    behandlingType = BehandlingType.REVURDERING,
                     sak = sakId,
+                    behandlingType = BehandlingType.REVURDERING,
                     virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 3)),
                 )
             val forrigeBehandling = UUID.randomUUID()
@@ -392,7 +398,7 @@ internal class AvkortingServiceTest {
             every {
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any(), any(), any())
             } returns beregnetAvkorting
-            every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
+            every { avkortingRepository.lagreAvkorting(any(), any(), any()) } returns Unit
             coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
                 SisteIverksatteBehandling(
                     forrigeBehandling,
@@ -416,7 +422,7 @@ internal class AvkortingServiceTest {
                     bruker,
                     beregning,
                 )
-                avkortingRepository.lagreAvkorting(revurderingId, beregnetAvkorting)
+                avkortingRepository.lagreAvkorting(revurderingId, sakId, beregnetAvkorting)
                 behandlingKlient.hentSisteIverksatteBehandling(sakId, bruker)
                 avkortingRepository.hentAvkorting(forrigeBehandling)
                 lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 3), forrigeAvkorting)

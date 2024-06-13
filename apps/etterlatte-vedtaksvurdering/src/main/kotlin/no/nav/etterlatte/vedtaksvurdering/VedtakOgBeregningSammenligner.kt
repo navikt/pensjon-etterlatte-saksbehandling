@@ -1,6 +1,7 @@
 package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering
 
 import no.nav.etterlatte.libs.common.vedtak.Periode
+import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.vedtaksvurdering.BeregningOgAvkorting
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
@@ -30,11 +31,15 @@ object VedtakOgBeregningSammenligner {
         vedtak: Vedtak,
     ) {
         val innhold = vedtak.innhold as VedtakInnhold.Behandling
-        val perioder = innhold.utbetalingsperioder
-        val beregningsperioder = beregning.beregning.beregningsperioder
+        val perioder = innhold.utbetalingsperioder.sortedBy { it.periode.fom }.filter { it.type == UtbetalingsperiodeType.UTBETALING }
+        val beregningsperioder = beregning.beregning.beregningsperioder.sortedBy { it.datoFOM }
         check(perioder.size == beregningsperioder.size) {
             "Forventa like mange perioder i vedtak som i beregning for vedtak ${vedtak.id} i sak ${vedtak.sakId}. " +
-                "Vedtak hadde ${perioder.size}, mens beregning hadde ${beregningsperioder.size}"
+                "Vedtak hadde ${perioder.size}, mens beregning hadde ${beregningsperioder.size}" +
+                "Alle perioder fra vedtak: ${perioder.map { "${it.periode}: ${it.beloep}" }}. " +
+                "Alle perioder fra beregning: ${beregningsperioder.map {
+                    "${it.datoFOM}-${it.datoTOM} - ${it.utbetaltBeloep}"
+                } }"
         }
         for (i in perioder.indices) {
             val periode = perioder[i]

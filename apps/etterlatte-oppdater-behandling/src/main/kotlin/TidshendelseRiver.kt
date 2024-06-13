@@ -2,9 +2,6 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
@@ -13,6 +10,9 @@ import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_STEG_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -22,10 +22,10 @@ class TidshendelseRiver(
     private val tidshendelseService: TidshendelseService,
 ) : ListenerMedLogging() {
     init {
-        initialiserRiver(rapidsConnection, EventNames.ALDERSOVERGANG) {
-            validate { it.requireValue(ALDERSOVERGANG_STEG_KEY, "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR") }
-            validate { it.requireKey(ALDERSOVERGANG_TYPE_KEY) }
-            validate { it.requireKey(ALDERSOVERGANG_ID_KEY) }
+        initialiserRiver(rapidsConnection, EventNames.TIDSHENDELSE) {
+            validate { it.requireValue(TIDSHENDELSE_STEG_KEY, "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR") }
+            validate { it.requireKey(TIDSHENDELSE_TYPE_KEY) }
+            validate { it.requireKey(TIDSHENDELSE_ID_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(DATO_KEY) }
             validate { it.requireKey(DRYRUN) }
@@ -58,12 +58,12 @@ class TidshendelseRiver(
 
     private fun haandterHendelse(hendelse: TidshendelsePacket): MutableMap<String, Any> {
         val packetUpdates = mutableMapOf<String, Any>()
-        packetUpdates[ALDERSOVERGANG_STEG_KEY] = "OPPGAVE_OPPRETTET"
+        packetUpdates[TIDSHENDELSE_STEG_KEY] = "OPPGAVE_OPPRETTET"
         packetUpdates[HENDELSE_DATA_KEY] = emptyMap<String, Any>()
 
         when (val result = tidshendelseService.haandterHendelse(hendelse)) {
             is TidshendelseResult.OpprettetOmregning -> {
-                packetUpdates[ALDERSOVERGANG_STEG_KEY] = "BEHANDLING_OPPRETTET"
+                packetUpdates[TIDSHENDELSE_STEG_KEY] = "BEHANDLING_OPPRETTET"
                 packetUpdates[BEHANDLING_ID_KEY] = result.behandlingId
                 packetUpdates[BEHANDLING_VI_OMREGNER_FRA_KEY] = result.forrigeBehandlingId
             }
@@ -73,12 +73,12 @@ class TidshendelseRiver(
             }
 
             is TidshendelseResult.OpprettRevurderingForAktivitetsplikt -> {
-                packetUpdates[ALDERSOVERGANG_STEG_KEY] = "AKTIVITETSPLIKT_REVURDERING_OPPRETTET"
+                packetUpdates[TIDSHENDELSE_STEG_KEY] = "AKTIVITETSPLIKT_REVURDERING_OPPRETTET"
                 packetUpdates[BEHANDLING_ID_KEY] = result.behandlingId
             }
 
             is TidshendelseResult.Skipped -> {
-                packetUpdates[ALDERSOVERGANG_STEG_KEY] = "HOPPET_OVER"
+                packetUpdates[TIDSHENDELSE_STEG_KEY] = "HOPPET_OVER"
             }
         }
         return packetUpdates

@@ -2,9 +2,9 @@ import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.TidshendelsePacket
 import no.nav.etterlatte.TidshendelseService
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import org.junit.jupiter.api.Test
@@ -18,7 +18,7 @@ class TidshendelsePacketTest {
             JsonMessage(
                 mapOf(
                     "dato" to "2018-02-25",
-                    ALDERSOVERGANG_TYPE_KEY to TidshendelseService.TidshendelserJobbType.AO_BP21,
+                    TIDSHENDELSE_TYPE_KEY to TidshendelseService.TidshendelserJobbType.AO_BP21,
                 ).toJson(),
                 MessageProblems(""),
             )
@@ -81,8 +81,8 @@ class TidshendelsePacketTest {
             "hendelseId",
             "jobbtype",
             HENDELSE_DATA_KEY,
-            ALDERSOVERGANG_TYPE_KEY,
-            ALDERSOVERGANG_ID_KEY,
+            TIDSHENDELSE_TYPE_KEY,
+            TIDSHENDELSE_ID_KEY,
             "yrkesskadefordel_pre_20240101",
             "oms_rett_uten_tidsbegrensning",
         )

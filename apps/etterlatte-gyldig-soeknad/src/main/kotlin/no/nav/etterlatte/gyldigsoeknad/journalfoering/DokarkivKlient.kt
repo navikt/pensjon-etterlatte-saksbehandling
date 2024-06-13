@@ -20,9 +20,12 @@ class DokarkivKlient(
 ) {
     private val logger = LoggerFactory.getLogger(DokarkivKlient::class.java)
 
-    internal suspend fun opprettJournalpost(request: OpprettJournalpostRequest): OpprettJournalpostResponse {
+    internal suspend fun opprettJournalpost(
+        request: OpprettJournalpostRequest,
+        forsoekFerdistill: Boolean = true,
+    ): OpprettJournalpostResponse {
         val response =
-            client.post("$url?forsoekFerdigstill=true") {
+            client.post("$url?forsoekFerdigstill=$forsoekFerdistill") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(request)
@@ -56,11 +59,11 @@ class DokarkivKlient(
 data class OpprettJournalpostRequest(
     val tittel: String,
     val tema: String,
-    val journalfoerendeEnhet: String,
-    val avsenderMottaker: AvsenderMottaker,
-    val bruker: Bruker,
+    val journalfoerendeEnhet: String?,
+    val avsenderMottaker: AvsenderMottaker?,
+    val bruker: Bruker?,
     val eksternReferanseId: String,
-    val sak: JournalpostSak,
+    val sak: JournalpostSak?,
     var dokumenter: List<JournalpostDokument>,
 ) {
     val journalpostType: String = "INNGAAENDE"

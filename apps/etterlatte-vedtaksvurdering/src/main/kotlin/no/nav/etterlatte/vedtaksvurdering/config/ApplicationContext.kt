@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.route.logger
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
-import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakOgBeregningSammenlignerJob
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
 import no.nav.etterlatte.vedtaksvurdering.AutomatiskBehandlingService
@@ -165,14 +164,6 @@ class ApplicationContext {
             erLeader = { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(1, ChronoUnit.MINUTES),
-        )
-    }
-
-    val sammenlignerJob: VedtakOgBeregningSammenlignerJob by lazy {
-        VedtakOgBeregningSammenlignerJob(
-            beregningKlient = beregningKlient,
-            vedtaksvurderingRepository = repository,
-            erLeader = { leaderElectionKlient.isLeader() },
         )
     }
 }

@@ -12,22 +12,20 @@ data class Persongalleri(
     val gjenlevende: List<String> = emptyList(),
     val personerUtenIdent: List<PersonUtenIdent>? = null,
 ) {
-    override fun toString(): String {
-        return "Persongalleri(soeker=${soeker.maskerFnr()}," +
+    override fun toString(): String =
+        "Persongalleri(soeker=${soeker.maskerFnr()}," +
             "innsender=${innsender?.maskerFnr()}," +
             "soesken=${soesken.map { it.maskerFnr() }}," +
             "avdoed=${avdoed.map { it.maskerFnr() }}," +
             "gjenlevende=${gjenlevende.map { it.maskerFnr() }}," +
             "personerUtenIdent=${personerUtenIdent?.map { it.person.foedselsdato.toString() }})"
-    }
 
-    fun validerFoedselesnummere(): Boolean {
-        return validateFnrSimple(soeker) &&
+    fun validerFoedselesnummere(): Boolean =
+        validateFnrSimple(soeker) &&
             validateFnrSimple(innsender) &&
             soesken.all { validateFnrSimple(it) } &&
             avdoed.all { validateFnrSimple(it) } &&
             gjenlevende.all { validateFnrSimple(it) }
-    }
 }
 
 fun validateFnrSimple(fnr: String?): Boolean {

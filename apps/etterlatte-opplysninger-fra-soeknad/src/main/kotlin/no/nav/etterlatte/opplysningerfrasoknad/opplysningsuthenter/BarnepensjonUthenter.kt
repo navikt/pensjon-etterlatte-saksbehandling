@@ -174,8 +174,10 @@ internal object BarnepensjonUthenter {
                 fornavn = barnepensjon.soeker.fornavn.svar,
                 etternavn = barnepensjon.soeker.etternavn.svar,
                 foedselsnummer =
-                    barnepensjon.soeker.foedselsnummer.svar
-                        .toFolkeregisteridentifikator(),
+                    barnepensjon.soeker.foedselsnummer
+                        ?.svar
+                        ?.toFolkeregisteridentifikator(),
+                foedselsdato = barnepensjon.soeker.foedselsdato?.svar,
                 statsborgerskap = barnepensjon.soeker.statsborgerskap.svar,
                 utenlandsadresse =
                     UtenlandsadresseBarn(
@@ -197,28 +199,23 @@ internal object BarnepensjonUthenter {
                             it.type,
                             it.fornavn.svar,
                             it.etternavn.svar,
-                            it.foedselsnummer.svar.toFolkeregisteridentifikator(),
+                            it.foedselsnummer?.svar?.toFolkeregisteridentifikator(),
+                            it.foedselsdato?.svar,
                         )
                     },
                 verge =
-                    Verge(
-                        barnepensjon.soeker.verge
-                            ?.svar
-                            ?.verdi,
-                        barnepensjon.soeker.verge
-                            ?.opplysning
-                            ?.fornavn
-                            ?.svar,
-                        barnepensjon.soeker.verge
-                            ?.opplysning
-                            ?.etternavn
-                            ?.svar,
-                        barnepensjon.soeker.verge
-                            ?.opplysning
-                            ?.foedselsnummer
-                            ?.svar
-                            ?.toFolkeregisteridentifikator(),
-                    ),
+                    barnepensjon.soeker.verge.let {
+                        Verge(
+                            it?.svar?.verdi,
+                            it?.opplysning?.fornavn?.svar,
+                            it?.opplysning?.etternavn?.svar,
+                            it
+                                ?.opplysning
+                                ?.foedselsnummer
+                                ?.svar
+                                ?.toFolkeregisteridentifikator(),
+                        )
+                    },
                 omsorgPerson =
                     barnepensjon.soeker.dagligOmsorg
                         ?.svar

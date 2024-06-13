@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.InnsendtSoeknad
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
@@ -65,6 +66,15 @@ internal class NySoeknadRiver(
                     SoeknadType.OMSTILLINGSSTOENAD -> SakType.OMSTILLINGSSTOENAD
                 }
 
+            if (!Folkeregisteridentifikator.isValid(soekerFnr)) {
+                logger.info("Søkeren på søknad=$soeknadId har ugyldig fødselsnummer – sendes til manuell behandling")
+                journalfoerSoeknadService.opprettJournalpostForUkjent(soeknadId, sakType, soeknad)?.also {
+                    logger.info("Journalførte søknaden på ukjent bruker (journalpostId=${it.journalpostId})")
+                    context.publish(packet.oppdaterMed(null, it).toJson())
+                }
+                return
+            }
+
             val sak = finnEllerOpprettSak(soekerFnr, sakType)
 
             if (sak == null) {
@@ -108,13 +118,17 @@ internal class NySoeknadRiver(
         }
 
     private fun JsonMessage.oppdaterMed(
-        sakId: Long,
+        sakId: Long?,
         journalpostResponse: OpprettJournalpostResponse,
     ): JsonMessage =
         this.apply {
             correlationId = getCorrelationId()
-            this[FordelerFordelt.soeknadFordeltKey] = true
-            this[GyldigSoeknadVurdert.sakIdKey] = sakId
+
+            if (sakId != null) {
+                this[GyldigSoeknadVurdert.sakIdKey] = sakId
+            }
+
+            this[FordelerFordelt.soeknadFordeltKey] = sakId != null
             this[GyldigSoeknadVurdert.dokarkivReturKey] = journalpostResponse
         }
 

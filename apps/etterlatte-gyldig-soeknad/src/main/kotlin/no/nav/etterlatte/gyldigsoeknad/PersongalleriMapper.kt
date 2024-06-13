@@ -19,7 +19,7 @@ object PersongalleriMapper {
             is Barnepensjon -> opprettPersongalleriBP(soeknad)
             else -> {
                 sikkerlogger().error(
-                    "Kunne ikke opprette persongalleri for søknad tilhørende fnr=${soeknad.soeker.foedselsnummer.svar.value}",
+                    "Kunne ikke opprette persongalleri for søknad tilhørende fnr=${soeknad.soeker.foedselsnummer?.svar?.value}",
                 )
                 throw Exception("Ukjent type søknad ${soeknad.type}")
             }
@@ -30,22 +30,36 @@ object PersongalleriMapper {
         Persongalleri(
             soeker = soeknad.soeker.foedselsnummer.svar.value,
             innsender = soeknad.innsender.foedselsnummer.svar.value,
-            avdoed = listOf(soeknad.avdoed.foedselsnummer.svar.value),
-            soesken = soeknad.barn.map { it.foedselsnummer.svar.value },
+            avdoed =
+                listOfNotNull(
+                    soeknad.avdoed.foedselsnummer
+                        ?.svar
+                        ?.value,
+                ),
+            soesken = soeknad.barn.mapNotNull { it.foedselsnummer?.svar?.value },
         )
 
     private fun opprettPersongalleriBP(soeknad: Barnepensjon): Persongalleri {
         logger.info("Hent persongalleri fra søknad")
 
+        val soekerFnr =
+            checkNotNull(
+                soeknad.soeker.foedselsnummer
+                    ?.svar
+                    ?.value,
+            ) {
+                "Kan ikke opprette persongalleri når søker sitt fnr. mangler!"
+            }
+
         return Persongalleri(
-            soeker = soeknad.soeker.foedselsnummer.svar.value,
+            soeker = soekerFnr,
             innsender = soeknad.innsender.foedselsnummer.svar.value,
-            soesken = soeknad.soesken.map { it.foedselsnummer.svar.value },
-            avdoed = soeknad.foreldre.filter { it.type == PersonType.AVDOED }.map { it.foedselsnummer.svar.value },
+            soesken = soeknad.soesken.mapNotNull { it.foedselsnummer?.svar?.value },
+            avdoed = soeknad.foreldre.filter { it.type == PersonType.AVDOED }.mapNotNull { it.foedselsnummer?.svar?.value },
             gjenlevende =
                 soeknad.foreldre
                     .filter { it.type == PersonType.GJENLEVENDE_FORELDER }
-                    .map { it.foedselsnummer.svar.value },
+                    .mapNotNull { it.foedselsnummer?.svar?.value },
         )
     }
 }

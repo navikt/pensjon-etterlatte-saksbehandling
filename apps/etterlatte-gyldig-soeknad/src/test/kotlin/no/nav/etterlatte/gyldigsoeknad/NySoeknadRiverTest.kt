@@ -27,6 +27,10 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import kotlin.random.Random
@@ -39,10 +43,14 @@ internal class NySoeknadRiverTest {
 
     private val journalfoerSoeknadService = JournalfoerSoeknadService(dokarkivKlientMock, pdfgenKlient)
 
+    @BeforeEach
+    fun beforeEach() {
+        clearAllMocks()
+    }
+
     @AfterEach
     fun afterEach() {
         confirmVerified(behandlingKlientMock, dokarkivKlientMock, pdfgenKlient)
-        clearAllMocks()
     }
 
     @Test
@@ -64,7 +72,7 @@ internal class NySoeknadRiverTest {
             melding.get(EVENT_NAME_KEY).asText(),
         )
         assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).longValue())
-        assertEquals("true", melding.get(FordelerFordelt.soeknadFordeltKey).asText())
+        assertTrue(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean())
 
         val request = slot<OpprettJournalpostRequest>()
 
@@ -104,7 +112,7 @@ internal class NySoeknadRiverTest {
             melding.get(EVENT_NAME_KEY).asText(),
         )
         assertEquals(sak.id, melding.get(GyldigSoeknadVurdert.sakIdKey).longValue())
-        assertEquals("true", melding.get(FordelerFordelt.soeknadFordeltKey).asText())
+        assertTrue(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean())
 
         val request = slot<OpprettJournalpostRequest>()
 
@@ -203,6 +211,33 @@ internal class NySoeknadRiverTest {
         }
     }
 
+    @Test
+    fun `soeker mangler eller har ugyldig fnr - skal journalfoere uten sak`() {
+        coEvery { pdfgenKlient.genererPdf(any(), any()) } returns "".toByteArray()
+        coEvery { dokarkivKlientMock.opprettJournalpost(any(), any()) } returns OpprettJournalpostResponse("123", false)
+
+        val inspector =
+            testRapid {
+                sendTestMessage(UGYLDIG_FNR_SOEKNAD)
+            }
+
+        assertEquals(1, inspector.size)
+
+        val melding = inspector.message(0)
+        assertEquals(
+            SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
+            melding.get(EVENT_NAME_KEY).asText(),
+        )
+        assertNull(melding.get(GyldigSoeknadVurdert.sakIdKey))
+        assertFalse(melding.get(FordelerFordelt.soeknadFordeltKey).asBoolean())
+
+        coVerify {
+            dokarkivKlientMock.opprettJournalpost(any(), false)
+            pdfgenKlient.genererPdf(any(), any())
+            behandlingKlientMock wasNot Called
+        }
+    }
+
     private fun testRapid(block: TestRapid.() -> Unit) =
         TestRapid()
             .apply {
@@ -213,6 +248,7 @@ internal class NySoeknadRiverTest {
     companion object {
         val BARNEPENSJON_SOEKNAD = readFile("/innsendtsoeknad/barnepensjon.json")
         val OMSTILLINGSSTOENAD_SOEKNAD = readFile("/innsendtsoeknad/omstillingsstoenad.json")
+        val UGYLDIG_FNR_SOEKNAD = readFile("/innsendtsoeknad/ugyldig_fnr.json")
 
         private fun readFile(file: String) = NySoeknadRiverTest::class.java.getResource(file)!!.readText()
     }

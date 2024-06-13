@@ -23,8 +23,8 @@ data class ThrowableErrorMessage(
     val response: HttpResponse? = null,
 ) : InternfeilException(message, cause)
 
-internal fun Throwable.toErr(url: String): Result<JsonNode, Throwable> {
-    return if (this is ResponseException) {
+internal fun Throwable.toErr(url: String): Result<JsonNode, Throwable> =
+    if (this is ResponseException) {
         Err(this)
     } else {
         Err(
@@ -34,13 +34,11 @@ internal fun Throwable.toErr(url: String): Result<JsonNode, Throwable> {
             ),
         )
     }
-}
 
-internal suspend fun HttpResponse.toResponseException(): Result<JsonNode, ResponseException> {
-    return Err(
+internal suspend fun HttpResponse.toResponseException(): Result<JsonNode, ResponseException> =
+    Err(
         ResponseException(
             this,
             "Received response with status ${status.value} from downstream api with error: ${this.body<String>()}",
         ),
     )
-}

@@ -74,7 +74,7 @@ val gjenvaerendeMaaneder =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Beregner hvor mange måneder som gjenstår i gjeldende år fra nytt virkningstidspunkt, ekskludert sanksjoner",
-        regelReferanse = RegelReferanse("GJENVAERENDE-MAANEDER-FOR-FORDELT-RESTANSE"),
+        regelReferanse = RegelReferanse(id = "GJENVAERENDE-MAANEDER-FOR-FORDELT-RESTANSE", versjon = "2"),
     ) benytter virkningstidspunkt og maanederMedSanksjonEtterVirk med { virkningstidspunkt, maaneder ->
         Beregningstall(12)
             .minus(Beregningstall(virkningstidspunkt.monthValue))
@@ -86,7 +86,7 @@ val fordeltRestanse =
     RegelMeta(
         gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Fordeler oppsummert restanse over gjenværende måneder av gjeldende år",
-        regelReferanse = RegelReferanse("FORDELT-RESTANSE-INNTEKTSENDRING"),
+        regelReferanse = RegelReferanse("FORDELT-RESTANSE-INNTEKTSENDRING", versjon = "2"),
     ) benytter totalRestanse og gjenvaerendeMaaneder med { sumRestanse, gjenvaerendeMaaneder ->
         if (gjenvaerendeMaaneder.toInteger() == 0) {
             sumRestanse

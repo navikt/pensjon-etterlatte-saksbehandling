@@ -66,7 +66,7 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         resultat: VilkaarsvurderingResultat,
-    ): VilkaarsvuderingMedBehandlingGrunnlagsversjon =
+    ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
             val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
             val virkningstidspunkt =
@@ -82,7 +82,7 @@ class VilkaarsvurderingService(
                 vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(behandlingId, grunnlag.metadata.versjon)
             }
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
-            VilkaarsvuderingMedBehandlingGrunnlagsversjon(vilkaarsvurdering, grunnlag.metadata.versjon)
+            VilkaarsvurderingMedBehandlingGrunnlagsversjon(vilkaarsvurdering, grunnlag.metadata.versjon)
         }
 
     suspend fun slettTotalVurdering(
@@ -137,7 +137,7 @@ class VilkaarsvurderingService(
         kopierFraBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         kopierResultat: Boolean = true,
-    ): VilkaarsvuderingMedBehandlingGrunnlagsversjon =
+    ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
             logger.info("Oppretter og kopierer vilkårsvurdering for $behandlingId fra $kopierFraBehandling")
             val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
@@ -180,13 +180,13 @@ class VilkaarsvurderingService(
                         nyVilkaarsvurdering.vilkaar.any { v -> v.vurdering == null }
                 )
             ) {
-                VilkaarsvuderingMedBehandlingGrunnlagsversjon(
+                VilkaarsvurderingMedBehandlingGrunnlagsversjon(
                     vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId),
                     grunnlag.metadata.versjon,
                 )
             } else {
                 behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
-                VilkaarsvuderingMedBehandlingGrunnlagsversjon(nyVilkaarsvurdering, grunnlag.metadata.versjon)
+                VilkaarsvurderingMedBehandlingGrunnlagsversjon(nyVilkaarsvurdering, grunnlag.metadata.versjon)
             }
         }
 
@@ -225,7 +225,7 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         kopierVedRevurdering: Boolean = true,
-    ): VilkaarsvuderingMedBehandlingGrunnlagsversjon =
+    ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
             vilkaarsvurderingRepository.hent(behandlingId)?.let {
                 throw IllegalArgumentException("Vilkårsvurdering finnes allerede for behandling $behandlingId")
@@ -244,7 +244,7 @@ class VilkaarsvurderingService(
 
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    VilkaarsvuderingMedBehandlingGrunnlagsversjon(
+                    VilkaarsvurderingMedBehandlingGrunnlagsversjon(
                         opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId),
                         grunnlag.metadata.versjon,
                     )
@@ -258,12 +258,12 @@ class VilkaarsvurderingService(
                                 behandling.sak,
                                 brukerTokenInfo,
                             )
-                        VilkaarsvuderingMedBehandlingGrunnlagsversjon(
+                        VilkaarsvurderingMedBehandlingGrunnlagsversjon(
                             kopierVilkaarsvurdering(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo).vilkaarsvurdering,
                             grunnlag.metadata.versjon,
                         )
                     } else {
-                        VilkaarsvuderingMedBehandlingGrunnlagsversjon(
+                        VilkaarsvurderingMedBehandlingGrunnlagsversjon(
                             opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId),
                             grunnlag.metadata.versjon,
                         )

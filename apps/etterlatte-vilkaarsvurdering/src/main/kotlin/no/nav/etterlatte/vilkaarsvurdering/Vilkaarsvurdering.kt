@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import java.time.YearMonth
 import java.util.UUID
 
-data class VilkaarsvuderingMedBehandlingGrunnlagsversjon(
+data class VilkaarsvurderingMedBehandlingGrunnlagsversjon(
     val vilkaarsvurdering: Vilkaarsvurdering,
     val behandlingGrunnlagVersjon: Long,
 )

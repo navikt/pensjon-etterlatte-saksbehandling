@@ -789,7 +789,7 @@ internal class VilkaarsvurderingRoutesTest(
 
     private fun opprettVilkaarsvurdering(
         vilkaarsvurderingService: VilkaarsvurderingService,
-    ): VilkaarsvuderingMedBehandlingGrunnlagsversjon =
+    ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         runBlocking {
             vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, oboToken)
         }

@@ -7,9 +7,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents.IDENT
 import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents.VEDTAK_ATTESTERT
 import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents.VILKAARSVURDERT
 import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents.VURDERT_LOEPENDE_YTELSE
-import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_STEG_KEY
-import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.DRYRUN
@@ -17,6 +14,9 @@ import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_STEG_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.sakId

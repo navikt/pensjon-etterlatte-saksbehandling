@@ -158,7 +158,10 @@ data class Avkorting(
     }
 
     fun beregnAvkortingRevurdering(beregning: Beregning): Avkorting {
-        val virkningstidspunktAar = beregning.beregningsperioder.first().datoFOM.year
+        val virkningstidspunktAar =
+            beregning.beregningsperioder
+                .first()
+                .datoFOM.year
 
         val oppdaterteOppgjoer =
             this.aarsoppgjoer.map { aarsoppgjoer ->

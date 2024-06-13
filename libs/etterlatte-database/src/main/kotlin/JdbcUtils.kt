@@ -5,15 +5,14 @@ import org.postgresql.util.PGobject
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 
-fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
-    return if (next()) {
+fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? =
+    if (next()) {
         block().also {
             require(!next()) { "Skal være unik" }
         }
     } else {
         null
     }
-}
 
 fun <T> ResultSet.single(block: ResultSet.() -> T): T {
     require(next()) {
@@ -24,13 +23,12 @@ fun <T> ResultSet.single(block: ResultSet.() -> T): T {
     }
 }
 
-fun <T> ResultSet.firstOrNull(block: ResultSet.() -> T): T? {
-    return if (next()) {
+fun <T> ResultSet.firstOrNull(block: ResultSet.() -> T): T? =
+    if (next()) {
         block()
     } else {
         null
     }
-}
 
 fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
     val list = ArrayList<T>()

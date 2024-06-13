@@ -171,8 +171,8 @@ object AvkortingRegelkjoring {
             return KonstantGrunnlag(
                 FaktumNode(
                     null,
-                    "Ingen sanksjoner i saken",
-                    "Ingen sanksjoner i saken",
+                    "Ingen sanksjoner innenfor årsoppgjør",
+                    "Ingen sanksjoner innenfor årsoppgjør",
                 ),
             )
         }
@@ -279,8 +279,8 @@ object AvkortingRegelkjoring {
                 maanederOgSanksjon =
                     FaktumNode(
                         verdi = maanederMedSanksjonIAar,
-                        kilde = "",
-                        beskrivelse = "",
+                        kilde = sanksjoner.joinToString(prefix = "[", postfix = "]") { it.id.toString() },
+                        beskrivelse = "Måneder i året og om det er en sanksjon for den måneden",
                     ),
             )
 

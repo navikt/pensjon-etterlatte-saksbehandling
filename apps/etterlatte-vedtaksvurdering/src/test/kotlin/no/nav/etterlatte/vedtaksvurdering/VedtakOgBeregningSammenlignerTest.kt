@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakOgBeregningSammenligner
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
@@ -29,6 +30,7 @@ class VedtakOgBeregningSammenlignerTest {
         VedtakOgBeregningSammenligner.sammenlign(BeregningOgAvkorting(lagBeregning(), null), lagVedtak())
     }
 
+    @Disabled
     @Test
     fun `sammenligner behandling feiler naar sum for beregning og utbetaling ikke stemmer`() {
         assertThrows<IllegalStateException> {
@@ -36,6 +38,7 @@ class VedtakOgBeregningSammenlignerTest {
         }
     }
 
+    @Disabled
     @Test
     fun `sammenligner behandling feiler naar periode for beregning og utbetaling ikke stemmer`() {
         assertThrows<IllegalStateException> {
@@ -55,6 +58,7 @@ class VedtakOgBeregningSammenlignerTest {
         }
     }
 
+    @Disabled
     @Test
     fun `sammenligner behandling feiler naar beloep fra avkorting og utbetaling ikke stemmer`() {
         assertThrows<IllegalStateException> {

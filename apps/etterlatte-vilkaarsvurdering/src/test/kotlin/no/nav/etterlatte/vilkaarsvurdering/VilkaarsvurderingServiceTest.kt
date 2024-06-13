@@ -112,7 +112,7 @@ internal class VilkaarsvurderingServiceTest(
 
     @Test
     fun `Skal opprette vilkaarsvurdering for foerstegangsbehandling barnepensjon med grunnlagsopplysninger`() {
-        val vilkaarsvurdering =
+        val (vilkaarsvurdering) =
             runBlocking {
                 service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
             }
@@ -148,7 +148,7 @@ internal class VilkaarsvurderingServiceTest(
                 every { revurderingsaarsak } returns null
             }
 
-        val vilkaarsvurdering =
+        val (vilkaarsvurdering) =
             runBlocking {
                 service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
             }
@@ -205,7 +205,7 @@ internal class VilkaarsvurderingServiceTest(
 
         coEvery { grunnlagKlient.hentGrunnlagForBehandling(any(), any()) } returns grunnlag
 
-        val vilkaarsvurdering =
+        val (vilkaarsvurdering) =
             runBlocking {
                 service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
             }
@@ -391,7 +391,7 @@ internal class VilkaarsvurderingServiceTest(
         }
 
         val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)!!
-        val kopiertVilkaarsvurdering =
+        val (kopiertVilkaarsvurdering) =
             runBlocking {
                 service.kopierVilkaarsvurdering(
                     nyBehandlingId,
@@ -458,7 +458,7 @@ internal class VilkaarsvurderingServiceTest(
                 service.hentVilkaarsvurdering(uuid)!!
             }
 
-        val revurderingsvilkaar = runBlocking { service.opprettVilkaarsvurdering(revurderingId, brukerTokenInfo) }
+        val (revurderingsvilkaar) = runBlocking { service.opprettVilkaarsvurdering(revurderingId, brukerTokenInfo) }
         assertIsSimilar(foerstegangsvilkaar, revurderingsvilkaar)
         coVerify(exactly = 1) { behandlingKlient.settBehandlingStatusVilkaarsvurdert(revurderingId, brukerTokenInfo) }
     }
@@ -512,7 +512,7 @@ internal class VilkaarsvurderingServiceTest(
             service.hentVilkaarsvurdering(uuid)!!
         }
 
-        val nyeVilkaar = runBlocking { service.opprettVilkaarsvurdering(revurderingId, brukerTokenInfo, false) }
+        val (nyeVilkaar) = runBlocking { service.opprettVilkaarsvurdering(revurderingId, brukerTokenInfo, false) }
 
         nyeVilkaar.resultat shouldBe null
         nyeVilkaar.vilkaar.forEach { it.vurdering shouldBe null }
@@ -538,7 +538,7 @@ internal class VilkaarsvurderingServiceTest(
             vilkaar = ikkeGjeldendeVilkaar(),
         )
 
-        val vilkaarsvurderingMedKopierteOppdaterteVilkaar =
+        val (vilkaarsvurderingMedKopierteOppdaterteVilkaar) =
             runBlocking {
                 service.kopierVilkaarsvurdering(nyBehandlingId, opprinneligBehandlingId, brukerTokenInfo)
             }
@@ -580,7 +580,7 @@ internal class VilkaarsvurderingServiceTest(
                 },
         )
 
-        val vilkaarsvurderingMedKopierteOppdaterteVilkaar =
+        val (vilkaarsvurderingMedKopierteOppdaterteVilkaar) =
             runBlocking {
                 service.kopierVilkaarsvurdering(nyBehandlingId, opprinneligBehandlingId, brukerTokenInfo)
             }
@@ -615,7 +615,7 @@ internal class VilkaarsvurderingServiceTest(
                 },
         )
 
-        val vilkaarsvurderingMedKopierteOppdaterteVilkaar =
+        val (vilkaarsvurderingMedKopierteOppdaterteVilkaar) =
             runBlocking {
                 service.kopierVilkaarsvurdering(nyBehandlingId, opprinneligBehandlingId, brukerTokenInfo)
             }
@@ -629,7 +629,7 @@ internal class VilkaarsvurderingServiceTest(
 
     @Test
     fun `Er ikke yrkesskade hvis ikke det er en yrkesskade oppfylt delvilkaar`() {
-        val vilkaarsvurdering =
+        val (vilkaarsvurdering) =
             runBlocking {
                 service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
             }
@@ -641,7 +641,7 @@ internal class VilkaarsvurderingServiceTest(
 
     @Test
     fun `Er yrkesskade hvis det er en yrkesskade oppfylt delvilkaar`() {
-        val vilkaarsvurdering =
+        val (vilkaarsvurdering) =
             runBlocking {
                 service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
             }
@@ -832,7 +832,8 @@ internal class VilkaarsvurderingServiceTest(
         }
     }
 
-    private suspend fun opprettVilkaarsvurdering(): Vilkaarsvurdering = service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+    private suspend fun opprettVilkaarsvurdering(): Vilkaarsvurdering =
+        service.opprettVilkaarsvurdering(uuid, brukerTokenInfo).vilkaarsvurdering
 
     private fun vilkaarsVurderingData() = VilkaarVurderingData("en kommentar", Tidspunkt.now().toLocalDatetimeUTC(), "saksbehandler")
 

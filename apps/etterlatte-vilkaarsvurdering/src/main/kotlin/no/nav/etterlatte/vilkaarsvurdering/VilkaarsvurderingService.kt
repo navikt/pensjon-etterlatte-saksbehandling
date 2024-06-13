@@ -2,7 +2,6 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -68,7 +67,7 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         resultat: VilkaarsvurderingResultat,
-    ): Vilkaarsvurdering =
+    ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
             val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
             val virkningstidspunkt =
@@ -84,7 +83,7 @@ class VilkaarsvurderingService(
                 vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(behandlingId, grunnlag.metadata.versjon)
             }
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
-            vilkaarsvurdering
+            VilkaarsvurderingMedBehandlingGrunnlagsversjon(vilkaarsvurdering, grunnlag.metadata.versjon)
         }
 
     suspend fun slettTotalVurdering(
@@ -139,9 +138,9 @@ class VilkaarsvurderingService(
         kopierFraBehandling: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         kopierResultat: Boolean = true,
-    ): Vilkaarsvurdering {
-        logger.info("Oppretter og kopierer vilkårsvurdering for $behandlingId fra $kopierFraBehandling")
-        return tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
+    ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
+        tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
+            logger.info("Oppretter og kopierer vilkårsvurdering for $behandlingId fra $kopierFraBehandling")
             val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
             val tidligereVilkaarsvurdering =
                 vilkaarsvurderingRepository.hent(kopierFraBehandling)
@@ -182,13 +181,15 @@ class VilkaarsvurderingService(
                         nyVilkaarsvurdering.vilkaar.any { v -> v.vurdering == null }
                 )
             ) {
-                vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId)
+                VilkaarsvurderingMedBehandlingGrunnlagsversjon(
+                    vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId),
+                    grunnlag.metadata.versjon,
+                )
             } else {
-                runBlocking { behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo) }
-                nyVilkaarsvurdering
+                behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
+                VilkaarsvurderingMedBehandlingGrunnlagsversjon(nyVilkaarsvurdering, grunnlag.metadata.versjon)
             }
         }
-    }
 
     // Her legges det til nye vilkår og det filtreres bort vilkår som ikke lenger er aktuelle.
     // Oppdatering av vilkår med endringer er ennå ikke støttet.
@@ -225,7 +226,7 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         kopierVedRevurdering: Boolean = true,
-    ): Vilkaarsvurdering =
+    ): VilkaarsvurderingMedBehandlingGrunnlagsversjon =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
             vilkaarsvurderingRepository.hent(behandlingId)?.let {
                 throw IllegalArgumentException("Vilkårsvurdering finnes allerede for behandling $behandlingId")
@@ -244,7 +245,10 @@ class VilkaarsvurderingService(
 
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId)
+                    VilkaarsvurderingMedBehandlingGrunnlagsversjon(
+                        opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId),
+                        grunnlag.metadata.versjon,
+                    )
                 }
 
                 BehandlingType.REVURDERING -> {
@@ -255,9 +259,15 @@ class VilkaarsvurderingService(
                                 behandling.sak,
                                 brukerTokenInfo,
                             )
-                        kopierVilkaarsvurdering(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo)
+                        VilkaarsvurderingMedBehandlingGrunnlagsversjon(
+                            kopierVilkaarsvurdering(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo).vilkaarsvurdering,
+                            grunnlag.metadata.versjon,
+                        )
                     } else {
-                        opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId)
+                        VilkaarsvurderingMedBehandlingGrunnlagsversjon(
+                            opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId),
+                            grunnlag.metadata.versjon,
+                        )
                     }
                 }
             }

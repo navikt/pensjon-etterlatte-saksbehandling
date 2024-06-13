@@ -70,9 +70,8 @@ class PingResultDown(
     override val description: String,
     val errorMessage: String?,
 ) : PingResult() {
-    fun toStringServiceDown(): String {
-        return "Servicename: $serviceName endpoint: $endpoint beskrivelse $description errorMessage: $errorMessage "
-    }
+    fun toStringServiceDown(): String =
+        "Servicename: $serviceName endpoint: $endpoint beskrivelse $description errorMessage: $errorMessage "
 }
 
 enum class ServiceStatus(
@@ -85,9 +84,7 @@ enum class ServiceStatus(
     /**
      * 0 = OK, 1 = ERROR, ref. https://confluence.adeo.no/display/AURA/Selftest
      */
-    fun code(): Int {
-        return code
-    }
+    fun code(): Int = code
 
     fun codeToColour(): String =
         when (code) {

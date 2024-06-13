@@ -38,7 +38,11 @@ fun Project.setupRepositories() {
 
 fun Project.setupTestLogging() {
     for (sub in subprojects) {
-        sub.plugins.apply(libs.plugins.versions.get().pluginId)
+        sub.plugins.apply(
+            libs.plugins.versions
+                .get()
+                .pluginId,
+        )
         sub.tasks.withType<Test> {
             maxParallelForks = hentAntallKjerner()
             testLogging {

@@ -7,9 +7,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_STEG_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
@@ -47,10 +47,10 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
-            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
-            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
-            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
+            field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
+            field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "BP20"
+            field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe hendelseId.toString()
             field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 1
             field(0, "yrkesskadefordel_pre_20240101").asBoolean() shouldBe true
@@ -69,10 +69,10 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
-            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
-            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
-            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
+            field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
+            field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "BP20"
+            field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe hendelseId.toString()
             field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
             assertThrows<IllegalArgumentException> { field(0, "yrkesskadefordel_pre_20240101") }
@@ -93,7 +93,7 @@ class TidshendelseRiverTest {
                 sakId,
                 behandlingsmaaned,
             )
-        melding[ALDERSOVERGANG_TYPE_KEY] = "OMS_DOED_3AAR"
+        melding[TIDSHENDELSE_TYPE_KEY] = "OMS_DOED_3AAR"
         melding[HENDELSE_DATA_KEY] =
             mapOf(
                 "loependeYtelse" to true,
@@ -104,10 +104,10 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
-            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
-            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "OMS_DOED_3AAR"
-            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
+            field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"
+            field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "OMS_DOED_3AAR"
+            field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe hendelseId.toString()
             field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 2
             field(0, "oms_rett_uten_tidsbegrensning").asBoolean() shouldBe true
@@ -138,10 +138,10 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
-            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "VILKAARSVURDERT"
-            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
-            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
+            field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe "VILKAARSVURDERT"
+            field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "BP20"
+            field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe hendelseId.toString()
         }
 
         verify { vilkaarsvurderingService.opphoerAldersovergang(behandlingId, behandlingIdLoepende) }
@@ -160,11 +160,11 @@ class TidshendelseRiverTest {
         }
 
         return JsonMessage.newMessage(
-            EventNames.ALDERSOVERGANG.lagEventnameForType(),
+            EventNames.TIDSHENDELSE.lagEventnameForType(),
             mapOf(
-                ALDERSOVERGANG_STEG_KEY to steg,
-                ALDERSOVERGANG_TYPE_KEY to "BP20",
-                ALDERSOVERGANG_ID_KEY to hendelseId,
+                TIDSHENDELSE_STEG_KEY to steg,
+                TIDSHENDELSE_TYPE_KEY to "BP20",
+                TIDSHENDELSE_ID_KEY to hendelseId,
                 SAK_ID_KEY to sakId,
                 DATO_KEY to behandlingsmaaned.atDay(1),
                 DRYRUN to false,

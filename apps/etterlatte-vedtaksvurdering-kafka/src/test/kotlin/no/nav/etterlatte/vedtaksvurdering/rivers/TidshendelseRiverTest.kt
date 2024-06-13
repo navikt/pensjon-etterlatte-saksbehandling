@@ -9,9 +9,9 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents
 import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents.VURDERT_LOEPENDE_YTELSE
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_STEG_KEY
+import no.nav.etterlatte.rapidsandrivers.TIDSHENDELSE_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.DRYRUN
@@ -55,11 +55,11 @@ class TidshendelseRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                EventNames.ALDERSOVERGANG.name,
+                EventNames.TIDSHENDELSE.name,
                 mapOf(
-                    ALDERSOVERGANG_STEG_KEY to VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name,
-                    ALDERSOVERGANG_TYPE_KEY to "AO_BP20",
-                    ALDERSOVERGANG_ID_KEY to "123-123-123",
+                    TIDSHENDELSE_STEG_KEY to VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name,
+                    TIDSHENDELSE_TYPE_KEY to "AO_BP20",
+                    TIDSHENDELSE_ID_KEY to "123-123-123",
                     SAK_ID_KEY to sakId,
                     DATO_KEY to datoFom,
                     DRYRUN to false,
@@ -68,10 +68,10 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
-            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
-            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "AO_BP20"
-            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "123-123-123"
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
+            field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
+            field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "AO_BP20"
+            field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe "123-123-123"
             field(0, HENDELSE_DATA_KEY)["loependeYtelse"].asBoolean() shouldBe true
             field(0, HENDELSE_DATA_KEY)["loependeYtelse_januar2024_behandlingId"].asText() shouldBe behandlingId.toString()
             field(0, DRYRUN).asBoolean() shouldBe false
@@ -88,11 +88,11 @@ class TidshendelseRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                EventNames.ALDERSOVERGANG.name,
+                EventNames.TIDSHENDELSE.name,
                 mapOf(
-                    ALDERSOVERGANG_STEG_KEY to VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name,
-                    ALDERSOVERGANG_TYPE_KEY to "AO_BP20",
-                    ALDERSOVERGANG_ID_KEY to "432-987-234",
+                    TIDSHENDELSE_STEG_KEY to VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name,
+                    TIDSHENDELSE_TYPE_KEY to "AO_BP20",
+                    TIDSHENDELSE_ID_KEY to "432-987-234",
                     SAK_ID_KEY to sakId,
                     DATO_KEY to datoFom,
                     DRYRUN to true,
@@ -101,10 +101,10 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
-            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
-            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "AO_BP20"
-            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "432-987-234"
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
+            field(0, TIDSHENDELSE_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
+            field(0, TIDSHENDELSE_TYPE_KEY).asText() shouldBe "AO_BP20"
+            field(0, TIDSHENDELSE_ID_KEY).asText() shouldBe "432-987-234"
             field(0, HENDELSE_DATA_KEY)["loependeYtelse"].asBoolean() shouldBe false
             field(0, DRYRUN).asBoolean() shouldBe true
         }
@@ -118,11 +118,11 @@ class TidshendelseRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                EventNames.ALDERSOVERGANG.name,
+                EventNames.TIDSHENDELSE.name,
                 mapOf(
-                    ALDERSOVERGANG_STEG_KEY to VedtakAldersovergangStepEvents.VILKAARSVURDERT.name,
-                    ALDERSOVERGANG_TYPE_KEY to "AO_BP20",
-                    ALDERSOVERGANG_ID_KEY to UUID.randomUUID().toString(),
+                    TIDSHENDELSE_STEG_KEY to VedtakAldersovergangStepEvents.VILKAARSVURDERT.name,
+                    TIDSHENDELSE_TYPE_KEY to "AO_BP20",
+                    TIDSHENDELSE_ID_KEY to UUID.randomUUID().toString(),
                     SAK_ID_KEY to sakId,
                     DATO_KEY to datoFom,
                     DRYRUN to false,
@@ -132,8 +132,8 @@ class TidshendelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 3 // 1 for vedtak fattet, 1 for attestert, 1 for original melding (med nytt steg)
-            field(2, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
-            field(2, ALDERSOVERGANG_STEG_KEY).asText() shouldBe VedtakAldersovergangStepEvents.VEDTAK_ATTESTERT.name
+            field(2, EVENT_NAME_KEY).asText() shouldBe EventNames.TIDSHENDELSE.name
+            field(2, TIDSHENDELSE_STEG_KEY).asText() shouldBe VedtakAldersovergangStepEvents.VEDTAK_ATTESTERT.name
         }
 
         verify { vedtakService.opprettVedtakFattOgAttester(sakId, behandlingId) }
